@@ -1,0 +1,876 @@
+{
+  "timestamp": "2025-09-15T22:35:34.575938",
+  "total_logs": 300,
+  "issues_by_severity": {
+    "ERROR": {
+      "websocket": 25,
+      "database": 12,
+      "timeout": 12,
+      "connection": 10,
+      "auth": 6,
+      "startup": 6
+    },
+    "WARNING": {},
+    "NOTICE": {},
+    "INFO": {}
+  },
+  "top_errors": [],
+  "recurring_patterns": [
+    {
+      "message": "The request failed because the instance could not start successfully.",
+      "count": 43
+    },
+    {
+      "message": "Container called exit(3).",
+      "count": 34
+    },
+    {
+      "message": "Sentry SDK not available - install sentry-sdk[fastapi] to enable error tracking",
+      "count": 33
+    },
+    {
+      "message": "SERVICE_ID contained whitespace - sanitized from 'netra-backend\\n' to 'netra-backend'",
+      "count": 32
+    },
+    {
+      "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/websocket_core/__init__.py\", line 117, in <module>\n    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocke",
+      "count": 10
+    },
+    {
+      "message": "The request failed because either the HTTP response was malformed or connection to the instance had an error. Additional troubleshooting documentation can be found at: https://cloud.google.com/run/doc",
+      "count": 10
+    },
+    {
+      "message": "AuthServiceClient initialized - Service ID: netra-backend, Service Secret=REDACTED True",
+      "count": 7
+    },
+    {
+      "message": "TracingManager initialized",
+      "count": 7
+    },
+    {
+      "message": "AuthCircuitBreakerManager initialized with UnifiedCircuitBreaker",
+      "count": 7
+    },
+    {
+      "message": "AuthClientCache initialized with default TTL: 300s and user isolation",
+      "count": 7
+    }
+  ],
+  "service_issues": {
+    "netra-backend-staging": [
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:35:24.085973+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:35:24.085907+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:35:24.085850+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:35:24.084140+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:35:24.080899+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:35:17.964889+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:35:17.964827+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:35:17.964773+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:35:17.963115+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:35:17.961733+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:35:11.654810+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:35:11.654742+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:35:11.654663+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:35:11.653068+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:35:11.650068+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:35:11.626754+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:35:11.626685+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:35:11.626625+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:35:11.625022+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:35:11.621865+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:35:01.883945+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:35:01.883881+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:35:01.883821+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:35:01.883722+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:35:01.877494+00:00",
+        "severity": "ERROR"
+      }
+    ],
+    "netra-auth-service": [
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:35:18.046248+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:35:18.046248+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:35:18.046248+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:35:18.046248+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:35:18.046248+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:35:18.046232+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:35:18.046232+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:35:18.046232+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:35:18.046232+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:35:18.046232+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:35:18.046220+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:35:18.046220+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:35:18.046220+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T05:35:18.046203+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T05:35:18.046203+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:35:18.036202+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:35:18.036202+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:35:18.036202+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:35:18.036202+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:35:18.036202+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:35:18.036090+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:35:18.036090+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:35:18.036090+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:34:55.810507+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:34:55.810507+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:34:55.810507+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:34:55.810507+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:34:55.810507+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:34:55.810484+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:34:55.810484+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:34:55.810484+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:34:55.810484+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:34:55.810484+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:34:55.810467+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:34:55.810467+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:34:55.810467+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T05:34:55.810418+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T05:34:55.810418+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:34:55.798567+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:34:55.798567+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:34:55.798567+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:34:55.798567+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:34:55.798567+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:34:55.798422+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:34:55.798422+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:34:55.798422+00:00",
+        "severity": "ERROR"
+      }
+    ]
+  },
+  "http_errors": [
+    {
+      "status": 503,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:24.026213+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 503,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:18.790141+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 503,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:17.716114+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 503,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:12.469601+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 503,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:10.367407+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 503,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:05.114595+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 503,
+      "url": "https://api.staging.netrasystems.ai/api/conversations/test-thread-123",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:04.931009+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/threads/test-thread-123/messages",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:04.856664+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:04.798663+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/threads/test-thread-123",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:04.778303+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/threads",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:04.702634+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:04.427243+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/sessions",
+      "method": "POST",
+      "timestamp": "2025-09-16T05:35:04.234088+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/sessions",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:04.165085+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:04.113360+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/chat/threads",
+      "method": "POST",
+      "timestamp": "2025-09-16T05:35:04.090095+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/chat/threads",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:04.016186+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/conversations",
+      "method": "POST",
+      "timestamp": "2025-09-16T05:35:03.939901+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/conversations",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:03.865256+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:03.806716+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/threads",
+      "method": "POST",
+      "timestamp": "2025-09-16T05:35:03.794810+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/threads",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:03.719665+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:03.448690+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/conversations",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:03.390091+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/history",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:03.318670+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/chat/messages",
+      "method": "POST",
+      "timestamp": "2025-09-16T05:35:03.245124+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/chat/messages",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:03.174181+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:03.126106+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/messages",
+      "method": "POST",
+      "timestamp": "2025-09-16T05:35:03.103309+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/messages",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:03.027675+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:02.807778+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:02.644198+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 503,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:35:01.437148+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 503,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:56.202133+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:55.911851+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 503,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:55.827351+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:55.688309+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:55.607777+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:55.556729+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:55.432092+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:55.313466+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:55.310153+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:55.182843+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:55.044213+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:55.015046+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:54.889750+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:54.753813+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:54.720264+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/execute/tool",
+      "method": "POST",
+      "timestamp": "2025-09-16T05:34:54.415427+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:54.380630+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/execute/tool",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:54.341830+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/mcp/tools",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:54.268882+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 500,
+      "url": "https://api.staging.netrasystems.ai/api/tools/list",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:34:54.186144+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 405,
+      "url": "https://34.54.41.44/",
+      "method": "PROPFIND",
+      "timestamp": "2025-09-16T05:33:12.804900+00:00",
+      "service": "netra-frontend-staging"
+    }
+  ],
+  "connection_issues": [],
+  "database_issues": [],
+  "websocket_issues": [],
+  "auth_issues": []
+}
