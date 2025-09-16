@@ -2,8 +2,13 @@
   "metadata": {
     "version": "3.0.0",
     "category": "critical_domain_development",
-    "generated_at": "2025-09-15T04:25:33.042917",
-    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
+<<<<<<< HEAD
+    "generated_at": "2025-09-15T23:16:28.198769",
+    "root_directory": "C:\\netra-apex",
+=======
+    "generated_at": "2025-09-15T20:02:51.433809",
+    "root_directory": "C:\\GitHub\\netra-apex",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "total_literals": 4
   },
   "literals": {
@@ -47,7 +52,11 @@
         "scripts/scan_string_literals.py:100",
         "scripts/verify_cold_start.py:173",
         "scripts/verify_cold_start.py:272",
-        "shared/security_origins_config.py:163"
+<<<<<<< HEAD
+        "shared/security_origins_config.py:177"
+=======
+        "shared/security_origins_config.py:161"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ],
       "environment": "development",
       "warning": "CRITICAL DOMAIN for development - verify before changing!"

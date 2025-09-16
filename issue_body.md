@@ -1,38 +1,43 @@
-## Problem Summary
-The unit test `test_agent_death_detection_prevents_silent_failures` is failing, indicating that agent death detection validation is broken.
+## Problem
+ClickHouse integration tests are failing due to missing required positional arguments for dependency injection.
 
-## Business Impact
-This is **P0 Critical** because:
-- Affects core business functionality (agent reliability)
-- Impacts chat functionality which delivers 90% of platform value
-- Can lead to silent failures and hung agent scenarios
-- Affects user feedback and business metrics collection
+## Error Details
+Multiple test methods are failing with TypeError:
+- missing 1 required positional argument: 'clickhouse_client'
+- missing 1 required positional argument: 'schema_manager'
 
-## Test Location
-- **File**: `netra_backend/tests/unit/agents/supervisor/test_agent_execution_core_business_logic_comprehensive.py`
-- **Test**: `test_agent_death_detection_prevents_silent_failures`
+## Affected Tests
+**Files:**
+- netra_backend/tests/clickhouse/test_clickhouse_exception_specificity.py
+- netra_backend/tests/clickhouse/test_clickhouse_schema_exception_types.py
 
-## Current Status
-- Test is currently failing when running unit tests
-- Issue is documented in internal worklog files as P0 Critical
-- Agent death detection implementation exists but validation is broken
-
-## Related Documentation
-- Documented in `/reports/test_failures_list.md`
-- Comprehensive implementation details in `SPEC/learnings/agent_death_detection_critical.xml`
-- Tracked in `FAILING-TEST-GARDENER-WORKLOG-agents-20250914_0619.md`
+**Failing Test Methods:**
+- test_bulk_insert_errors_not_classified_by_cause
+- test_cache_operations_lack_error_specificity
+- test_invalid_query_lacks_specific_error_type
+- test_performance_errors_not_classified_properly
+- test_query_execution_lacks_connection_error_classification
+- test_query_retry_logic_using_retryable_classification
+- test_schema_operations_lack_diagnostic_context
+- test_column_modification_uses_specific_error_types
+- test_constraint_violation_provides_constraint_context
+- test_engine_configuration_error_provides_engine_context
 
 ## Expected Behavior
-Agent death detection should properly validate and prevent silent failures
+Tests should properly inject required dependencies (clickhouse_client, schema_manager) via fixtures or dependency injection patterns.
 
-## Actual Behavior
-Unit test is failing, indicating validation is not working correctly
+## Impact
+- Critical integration tests are failing
+- Database functionality testing is compromised
+- CI/CD pipeline may be affected
 
-## Priority Justification
-**Business Impact**: Chat functionality delivers 90% of platform value. Agent reliability is core to delivering substantive AI responses to users.
+## Environment
+- Python 3.13.7
+- Test framework: pytest
+- Platform: Windows
 
-**System Impact**: Silent failures in agent execution can lead to:
-- Poor user experience with hung agents
-- Loss of business metrics and feedback
-- Degraded system reliability
-- Customer churn due to unreliable AI responses
+## Priority
+This is a critical issue affecting database testing infrastructure and should be addressed promptly to maintain system stability and test coverage.
+
+## Suggested Fix
+Review dependency injection patterns in ClickHouse test suite and ensure proper fixture configuration for required parameters.

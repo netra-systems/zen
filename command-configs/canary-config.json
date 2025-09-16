@@ -1,0 +1,16 @@
+{
+  "instances": [
+    {
+      "command": "/canary",
+      "name": "canary",
+      "description": "Canary deployment and testing workflows",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": ["/clear"]
+    }
+  ]
+}

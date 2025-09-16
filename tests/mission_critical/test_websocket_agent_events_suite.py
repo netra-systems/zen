@@ -1,3 +1,14 @@
+# CRITICAL: Import path configuration for direct test execution
+# Ensures tests work both directly and through unified_test_runner.py
+import sys
+import os
+from pathlib import Path
+
+# Get project root (two levels up from tests/mission_critical/)
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 # PERFORMANCE: Lazy loading for mission critical tests
 
 _lazy_imports = {}
@@ -14,7 +25,7 @@ def lazy_import(module_path: str, component: str = None):
         except ImportError as e:
             print(f"Warning: Failed to lazy load {module_path}: {e}")
             _lazy_imports[module_path] = None
-    
+
     return _lazy_imports[module_path]
 
 """
@@ -71,6 +82,92 @@ from tests.mission_critical.websocket_real_test_base import RealWebSocketTestBas
 WebSocketTestBase = RealWebSocketTestBase
 from test_framework.test_context import WebSocketContext, create_test_context
 from test_framework.websocket_helpers import WebSocketTestHelpers
+
+
+class MissionCriticalEventValidator:
+    """Validates WebSocket events with extreme rigor - MOCKED WEBSOCKET CONNECTIONS."""
+
+    REQUIRED_EVENTS = {
+        "agent_started",
+        "agent_thinking",
+        "tool_executing",
+        "tool_completed",
+        "agent_completed"
+    }
+
+    # Additional events that may be sent in real scenarios
+    OPTIONAL_EVENTS = {
+        "agent_fallback",
+        "final_report",
+        "partial_result",
+        "tool_error"
+    }
+
+    def __init__(self, strict_mode: bool = True):
+        self.strict_mode = strict_mode
+        self.events: List[Dict] = []
+        self.event_timeline: List[tuple] = []  # (timestamp, event_type, data)
+        self.event_counts: Dict[str, int] = {}
+        self.errors: List[str] = []
+        self.warnings: List[str] = []
+        self.start_time = time.time()
+
+    def record(self, event: Dict) -> None:
+        """Record an event with detailed tracking."""
+        timestamp = time.time() - self.start_time
+        event_type = event.get("type", "unknown")
+
+        self.events.append(event)
+        self.event_timeline.append((timestamp, event_type, event))
+        self.event_counts[event_type] = self.event_counts.get(event_type, 0) + 1
+
+    def validate_critical_requirements(self) -> tuple[bool, List[str]]:
+        """Validate that ALL critical requirements are met."""
+        failures = []
+
+        # 1. Check for required events
+        missing = self.REQUIRED_EVENTS - set(self.event_counts.keys())
+        if missing:
+            failures.append(f"CRITICAL: Missing required events: {missing}")
+
+        # 2. Validate event ordering
+        if not self._validate_event_order():
+            failures.append("CRITICAL: Invalid event order")
+
+        # 3. Check for paired events
+        if not self._validate_paired_events():
+            failures.append("CRITICAL: Unpaired tool events")
+
+        return len(failures) == 0, failures
+
+    def _validate_event_order(self) -> bool:
+        """Ensure events follow logical order."""
+        if not self.event_timeline:
+            return False
+
+        # First event must be agent_started
+        if self.event_timeline[0][1] != "agent_started":
+            self.errors.append(f"First event was {self.event_timeline[0][1]}, not agent_started")
+            return False
+
+        # Last event should be completion
+        last_event = self.event_timeline[-1][1]
+        if last_event not in ["agent_completed", "final_report"]:
+            # Accept any completion event for now
+            self.warnings.append(f"Last event was {last_event}, expected completion event")
+
+        return True
+
+    def _validate_paired_events(self) -> bool:
+        """Ensure tool events are properly paired."""
+        tool_starts = self.event_counts.get("tool_executing", 0)
+        tool_ends = self.event_counts.get("tool_completed", 0)
+
+        if tool_starts != tool_ends:
+            self.errors.append(f"Tool event mismatch: {tool_starts} starts, {tool_ends} completions")
+            return False
+
+        return True
 
 
 class PipelineExecutorComprehensiveGoldenPathTests(SSotAsyncTestCase):

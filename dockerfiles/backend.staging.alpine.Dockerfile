@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY netra_backend/ ./netra_backend/
 COPY shared/ ./shared/
+COPY auth_service/ ./auth_service/
 
 # Explicitly ensure monitoring module is included (Fix for staging outage - Issue #1278)
 COPY netra_backend/app/services/monitoring/ ./netra_backend/app/services/monitoring/

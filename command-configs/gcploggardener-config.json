@@ -1,0 +1,16 @@
+{
+  "instances": [
+    {
+      "command": "/gcploggardener; Spawn a subagent to obtain the GCP logs from all the netra-staging services for the last 15 minutes. Spawn another subagent that goes through these logs and find relted issues in the github and create if they do not exists. Spawn 'n' number of subagents based on teh number of git issues that needs to be solved, given that n is lesser than 10. Each subagent should be followed by a reviewer subagent who is highly unbiased and makes sure that the the issues are solved straightforward and their predecessor is not over engineering the issue. This is important. After all the edts are done re-deploy the services to gcp.",
+      "name": "gcp-log-gardener",
+      "description": "Maintains and analyzes GCP logs with multi-agent workflow",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": ["/clear"]
+    }
+  ]
+}

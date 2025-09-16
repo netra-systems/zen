@@ -30,6 +30,17 @@ from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
 
 # SSOT Test Framework - Mission Critical
+# CRITICAL: Import path configuration for direct test execution
+# Ensures tests work both directly and through unified_test_runner.py
+import sys
+import os
+from pathlib import Path
+
+# Get project root (two levels up from tests/mission_critical/)
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Core imports

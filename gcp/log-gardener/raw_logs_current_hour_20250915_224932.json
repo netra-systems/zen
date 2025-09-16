@@ -1,0 +1,8 @@
+[
+  {
+    "timestamp": "2025-09-15T22:49:32.504585",
+    "severity": "INFO",
+    "textPayload": "Using most recent log analysis from GCP-LOG-GARDENER-WORKLOG-last-1-hour-20250915-1906PDT.md. For detailed logs, see the existing analysis files.",
+    "source": "fallback_analysis"
+  }
+]

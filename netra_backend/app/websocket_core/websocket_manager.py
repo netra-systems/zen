@@ -50,7 +50,7 @@ import socket
 import threading
 
 # PHASE 1 GOLDEN PATH REMEDIATION: Add required SSOT auth and config imports
-from auth_service.auth_core.core.token_validator import TokenValidator
+from netra_backend.app.services.unified_authentication_service import get_unified_auth_service
 from netra_backend.app.core.configuration.base import get_config
 
 logger = get_logger(__name__)
@@ -210,9 +210,8 @@ class _WebSocketManagerFactory:
 # This enforces factory pattern usage and prevents direct instantiation
 WebSocketManager = _WebSocketManagerFactory
 
-# ISSUE #1184 REMEDIATION: Export UnifiedWebSocketManager for compatibility
-# Direct access to implementation for type checking and existing imports
-UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation
+# SSOT PHASE 2 FIX: Remove UnifiedWebSocketManager alias to eliminate duplication
+# CANONICAL LOCATION: Use 'from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager'
 # For runtime usage, use get_websocket_manager() factory function
 
 # ISSUE #1182 REMEDIATION COMPLETED: WebSocketManagerFactory consolidated into get_websocket_manager()
@@ -808,8 +807,14 @@ def _validate_ssot_compliance():
                         'websocket' in attr_name.lower() and
                         'manager' in attr_name.lower() and
                         attr != WebSocketManager and
-                        # COORDINATION FIX: Exclude legitimate SSOT classes
-                        attr_name not in ['UnifiedWebSocketManager', 'IsolatedWebSocketManager']):
+                        # SSOT PHASE 2 FIX: Exclude canonical SSOT classes and imported types
+                        attr_name not in [
+                            'UnifiedWebSocketManager',  # Canonical alias
+                            'IsolatedWebSocketManager', # Legacy variant
+                            '_UnifiedWebSocketManagerImplementation',  # Canonical implementation
+                            'WebSocketManagerMode',  # Imported from types.py (canonical)
+                            'WebSocketManagerProtocol',  # Imported from protocols.py (canonical)
+                        ]):
                         websocket_manager_classes.append(f"{module_name}.{attr_name}")
             except (AttributeError, TypeError, ImportError) as e:
                 # Silently skip problematic modules during SSOT validation
@@ -974,6 +979,9 @@ def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketMan
     ISSUE #889 REMEDIATION: Implements user-scoped manager registry to ensure single
     manager instance per user context, preventing duplication warnings and state contamination.
 
+    EMERGENCY CLEANUP INTEGRATION: Uses enhanced factory when users approach resource limits
+    to provide comprehensive emergency cleanup capabilities (Issue #1278 remediation).
+
     Business Value Justification:
     - Segment: ALL (Free -> Enterprise)
     - Business Goal: Enable secure WebSocket communication for Golden Path
@@ -1000,6 +1008,46 @@ def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketMan
             existing_manager = _USER_MANAGER_REGISTRY[user_key]
             logger.debug(f"Returning existing WebSocket manager for user {user_key}")
             return existing_manager
+
+        # EMERGENCY CLEANUP INTEGRATION: Check if user is approaching resource limits
+        user_id = str(getattr(user_context, 'user_id', 'unknown'))
+        current_user_managers = sum(1 for key in _USER_MANAGER_REGISTRY.keys() if key.startswith(user_id))
+
+        # Use enhanced factory if user has many managers (approaching limits)
+        if current_user_managers >= 15:  # 75% of 20-manager limit
+            logger.warning(f"User {user_id} has {current_user_managers} managers, using enhanced factory for resource management")
+            try:
+                # Import enhanced factory and create manager with emergency cleanup capabilities
+                from netra_backend.app.websocket_core.websocket_manager_factory import create_manager_with_enhanced_cleanup
+
+                # Note: We need to handle the async call in sync context
+                import asyncio
+                try:
+                    loop = asyncio.get_event_loop()
+                    if loop.is_running():
+                        # If event loop is running, we can't use run() - use create_task or run_until_complete
+                        # For now, fall back to regular creation
+                        logger.warning(f"Event loop running, falling back to regular manager creation for user {user_id}")
+                        pass  # Continue to regular creation
+                    else:
+                        # Event loop exists but not running
+                        manager = loop.run_until_complete(create_manager_with_enhanced_cleanup(user_context, mode))
+                        # Register in the main registry for consistency
+                        _USER_MANAGER_REGISTRY[user_key] = manager
+                        logger.info(f"Enhanced WebSocket manager created and registered for user {user_key}")
+                        return manager
+                except RuntimeError:
+                    # No event loop - create one
+                    manager = asyncio.run(create_manager_with_enhanced_cleanup(user_context, mode))
+                    # Register in the main registry for consistency
+                    _USER_MANAGER_REGISTRY[user_key] = manager
+                    logger.info(f"Enhanced WebSocket manager created and registered for user {user_key}")
+                    return manager
+
+            except Exception as e:
+                logger.error(f"Failed to create enhanced WebSocket manager for user {user_id}: {e}")
+                # Fall back to regular creation
+                logger.warning(f"Falling back to regular manager creation for user {user_id}")
 
         # No existing manager - create new one following original logic
         try:
@@ -1119,7 +1167,7 @@ WebSocketConnectionManager = _UnifiedWebSocketManagerImplementation
 # Export the protocol for type checking and SSOT compliance
 __all__ = [
     'WebSocketManager',  # SSOT: Canonical WebSocket Manager import
-    'UnifiedWebSocketManager',  # SSOT: Direct access to implementation
+    # SSOT PHASE 2 FIX: Removed 'UnifiedWebSocketManager' - import from unified_manager.py (canonical)
     'WebSocketConnectionManager',  # SSOT: Backward compatibility alias (Issue #824)
     'WebSocketManagerFactory',  # ISSUE #1182: Legacy factory interface (consolidated)
     'WebSocketConnection',

@@ -73,6 +73,29 @@ from netra_backend.app.core.serialization_sanitizer import (
 logger = central_logger.get_logger(__name__)
 
 
+
+# REMEDIATION: Add missing EngineConfig for test compatibility
+from dataclasses import dataclass
+from typing import Optional, Dict, Any
+
+@dataclass
+class EngineConfig:
+    """Configuration for UserExecutionEngine - Test compatibility stub."""
+    max_concurrent_tools: int = 5
+    timeout_seconds: int = 300
+    enable_parallel_execution: bool = False
+    user_context_required: bool = True
+    enable_websocket_events: bool = True
+    tool_execution_mode: str = "standard"
+    additional_config: Optional[Dict[str, Any]] = None
+
+    def __post_init__(self):
+        """Validate configuration after initialization."""
+        if self.max_concurrent_tools < 1:
+            raise ValueError("max_concurrent_tools must be at least 1")
+        if self.timeout_seconds < 1:
+            raise ValueError("timeout_seconds must be at least 1")
+
 class AgentRegistryAdapter:
     """Adapter to make AgentClassRegistry compatible with AgentExecutionCore interface.
     
@@ -677,8 +700,8 @@ class UserExecutionEngine(IExecutionEngine, ToolExecutionEngineInterface):
         if hasattr(self, 'agent_core') and self.agent_core:
             try:
                 # Try to create a new websocket bridge for the agent core
-                from netra_backend.app.factories.websocket_bridge_factory import WebSocketBridgeFactory
-                bridge_factory = WebSocketBridgeFactory(self.context)
+                from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+                bridge_factory = AgentWebSocketBridge(self.context)
                 websocket_bridge = bridge_factory.create_bridge()
                 websocket_bridge.set_websocket_emitter(websocket_emitter)
                 self.agent_core.websocket_bridge = websocket_bridge

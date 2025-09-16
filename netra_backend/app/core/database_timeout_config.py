@@ -263,12 +263,13 @@ def get_database_timeout_config(environment: str) -> Dict[str, float]:
             # Cloud SQL resource constraints: 25s delay under concurrent connection pressure
             # Network latency amplification: 10s additional delay during infrastructure stress
             # Safety margin for cascading failures: 15s buffer
-            # Issue #1278 Remediation: Extended timeouts per remediation plan
-            "initialization_timeout": 90.0,    # CRITICAL: Issue #1278 remediation - increased from 75.0s to 90s
-            "table_setup_timeout": 30.0,       # Extended for schema operations under load (increased from 25.0)
-            "connection_timeout": 45.0,        # Issue #1278 remediation - increased from 35.0s to 45s
-            "pool_timeout": 50.0,              # Extended for connection pool exhaustion + VPC delays (increased from 45.0)
-            "health_check_timeout": 25.0,      # Extended for compound infrastructure health checks (increased from 20.0)
+            # Issue #1278 Remediation: Comprehensive timeout configuration based on infrastructure evidence
+            # CRITICAL: Combines all remediation efforts with proven values from testing
+            "initialization_timeout": 95.0,    # CRITICAL: Extended to handle compound VPC+CloudSQL delays (Issue #1278 Phase 1 evidence)
+            "table_setup_timeout": 35.0,       # Extended for schema operations under load (auth service alignment)  
+            "connection_timeout": 50.0,        # Extended for VPC connector peak scaling delays (Issue #1278 remediation)
+            "pool_timeout": 60.0,              # Extended for connection pool exhaustion + VPC delays (increased from 45.0)
+            "health_check_timeout": 30.0,      # Extended for compound infrastructure health checks (increased from 20.0)
         },
         "production": {
             # CRITICAL: Production needs maximum reliability
@@ -318,10 +319,10 @@ def get_cloud_sql_optimized_config(environment: str) -> Dict[str, any]:
             },
             # Pool configuration for Cloud SQL with capacity constraints (Issue #1278)
             "pool_config": {
-                "pool_size": 12,              # Issue #1278 remediation - slightly increased for better throughput balance
-                "max_overflow": 18,           # Issue #1278 remediation - increased to handle peak load with safety margin
-                "pool_timeout": 90.0,         # Extended for VPC connector + Cloud SQL delays (increased from 60.0)
-                "pool_recycle": 1800,         # Issue #1278 remediation - reduced from 3600s to 1800s for faster refresh
+                "pool_size": 10,              # Balanced for Cloud SQL connection limits (Issue #1278 remediation)
+                "max_overflow": 15,           # Conservative to stay within Cloud SQL capacity limits
+                "pool_timeout": 90.0,         # Extended for VPC connector + Cloud SQL delays (Issue #1278 proven value)
+                "pool_recycle": 1800,         # Issue #1278 remediation - faster refresh for better connection health
                 "pool_pre_ping": True,        # Always verify connections
                 "pool_reset_on_return": "rollback",  # Safe connection resets
                 # New: VPC connector capacity awareness

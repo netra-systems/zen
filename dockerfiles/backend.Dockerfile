@@ -43,6 +43,7 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 # Copy application code
 COPY --chown=netra:netra netra_backend/ ./netra_backend/
 COPY --chown=netra:netra shared/ ./shared/
+COPY --chown=netra:netra auth_service/ ./auth_service/
 # test_framework is excluded in .dockerignore for production builds
 # It's not needed in production containers - only for testing
 # CRITICAL: Never copy entire scripts/ folder - see SPEC/learnings/docker_scripts_prohibition_critical.xml

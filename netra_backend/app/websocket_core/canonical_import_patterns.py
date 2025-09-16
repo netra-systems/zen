@@ -355,6 +355,78 @@ def validate_import_pattern_usage() -> Dict[str, Any]:
     }
 
 
+def check_websocket_service_available() -> bool:
+    """
+    Check if WebSocket service is available and properly configured.
+
+    Used by test infrastructure and validation modules to verify
+    WebSocket service availability before running tests or operations.
+
+    Returns:
+        bool: True if WebSocket service is available, False otherwise
+
+    Example:
+        from netra_backend.app.websocket_core.canonical_import_patterns import check_websocket_service_available
+
+        if check_websocket_service_available():
+            # Proceed with WebSocket operations
+            manager = get_websocket_manager(user_context=ctx)
+        else:
+            # Handle WebSocket service unavailable
+            logging.warning("WebSocket service not available")
+    """
+    _log_import_usage("Service Availability Check", "canonical_import_patterns.check_websocket_service_available")
+
+    try:
+        # Check if we can create a manager instance (basic availability test)
+        test_manager = get_websocket_manager()
+
+        # Check if core components are accessible
+        has_connection_interface = hasattr(test_manager, '_connection_manager')
+        has_event_emitter = hasattr(test_manager, '_event_emitter') or hasattr(test_manager, 'emit_event')
+        has_auth_integration = hasattr(test_manager, '_auth_integration')
+
+        # Log service availability check
+        from shared.logging.unified_logging_ssot import get_logger
+        logger = get_logger(__name__)
+        logger.debug(f"WebSocket service availability check: connection={has_connection_interface}, events={has_event_emitter}, auth={has_auth_integration}")
+
+        return has_connection_interface and has_event_emitter
+
+    except Exception as e:
+        # Log availability check failure
+        from shared.logging.unified_logging_ssot import get_logger
+        logger = get_logger(__name__)
+        logger.warning(f"WebSocket service availability check failed: {e}")
+        return False
+
+
+async def check_websocket_service_available_async() -> bool:
+    """
+    Async version of WebSocket service availability check.
+
+    Returns:
+        bool: True if WebSocket service is available, False otherwise
+    """
+    _log_import_usage("Async Service Availability Check", "canonical_import_patterns.check_websocket_service_available_async")
+
+    try:
+        # Create async manager and test availability
+        manager = await create_websocket_manager_async()
+
+        # Check if core async components are accessible
+        has_connection_interface = hasattr(manager, '_connection_manager')
+        has_event_emitter = hasattr(manager, '_event_emitter') or hasattr(manager, 'emit_event')
+
+        return has_connection_interface and has_event_emitter
+
+    except Exception as e:
+        from shared.logging.unified_logging_ssot import get_logger
+        logger = get_logger(__name__)
+        logger.warning(f"Async WebSocket service availability check failed: {e}")
+        return False
+
+
 # Export all canonical imports for easy access
 __all__ = [
     # Pattern 1: Factory Functions
@@ -400,5 +472,7 @@ __all__ = [
     # Utilities
     'get_migration_guide',
     'validate_import_pattern_usage',
+    'check_websocket_service_available',
+    'check_websocket_service_available_async',
     'MIGRATION_GUIDE'
 ]

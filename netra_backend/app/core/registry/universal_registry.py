@@ -20,7 +20,7 @@ Architecture:
 """
 
 import threading
-from typing import TypeVar, Generic, Callable, Dict, Optional, List, Any, Set, Union
+from typing import TypeVar, Generic, Callable, Dict, Optional, List, Any, Set, Union, TYPE_CHECKING
 from datetime import datetime, timezone
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
@@ -41,6 +41,9 @@ except ImportError:
         return decorator
 
 logger = get_logger(__name__)
+
+if TYPE_CHECKING:
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 # Type variable for generic registry
 T = TypeVar('T')
@@ -664,10 +667,11 @@ class AgentRegistry(UniversalRegistry['BaseAgent']):
             # If BaseAgent not available, skip validation
             return True
     
-    def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
+    def set_websocket_manager(self, manager: 'AgentWebSocketBridge') -> None:
         """Set WebSocket manager for agent events.
-        
+
         CRITICAL: This enables real-time chat notifications.
+        SSOT COMPLIANCE: Updated to use AgentWebSocketBridge for consistency with supervisor registry.
         """
         self.websocket_manager = manager
         logger.info(f"WebSocket manager set on {self.name}")

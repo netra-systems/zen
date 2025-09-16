@@ -182,10 +182,10 @@ TEST_CONFIG = {
     "frontend_url": "http://localhost:3000",
     "websocket_url": "ws://localhost:8000/ws",
     
-    # Staging URLs (for staging environment)
-    "staging_auth_url": "https://auth.netrasystems.ai",
-    "staging_backend_url": "https://api-staging.netrasystems.ai",
-    "staging_frontend_url": "https://app-staging.netrasystems.ai",
+    # Staging URLs (for staging environment) - Issue #1278 domain fix
+    "staging_auth_url": "https://staging.netrasystems.ai",
+    "staging_backend_url": "https://staging.netrasystems.ai",
+    "staging_frontend_url": "https://staging.netrasystems.ai",
     "staging_websocket_url": "wss://api-staging.netrasystems.ai/ws",
     
     # Database URLs

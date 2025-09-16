@@ -39,8 +39,8 @@ async def get_reconnection_handler(user_id: str = None) -> WebSocketRecoveryMana
         # BACKWARD COMPATIBILITY: Default context for legacy callers
         # TODO: All callers should provide user_id for security
         # SECURITY FIX: Log warning and return None to encourage proper usage
-        import logging
-        logger = logging.getLogger(__name__)
+        from shared.logging.unified_logging_ssot import get_logger
+        logger = get_logger(__name__)
         logger.warning(
             "ReconnectionHandler called without user_id - this is a security risk. "
             "Please provide user_id for proper isolation."

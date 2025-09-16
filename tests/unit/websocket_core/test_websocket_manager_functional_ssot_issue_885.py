@@ -698,8 +698,8 @@ class TestWebSocketManagerArchitecturalPatterns(SSotBaseTestCase):
             }
 
         # Check for WebSocket manager factory (connection management)
-        if self._has_websocket_manager_factory():
-            patterns['websocket_manager_factory'] = {
+        if self._has_websocket_manager():
+            patterns['websocket_manager'] = {
                 'business_requirement': 'connection_lifecycle_management',
                 'value_proposition': 'manages WebSocket connection states per user'
             }
@@ -716,7 +716,7 @@ class TestWebSocketManagerArchitecturalPatterns(SSotBaseTestCase):
         except Exception:
             return False
 
-    def _has_websocket_manager_factory(self) -> bool:
+    def _has_websocket_manager(self) -> bool:
         """Check if WebSocket manager factory pattern exists"""
         try:
             # Check for factory-like creation functions

@@ -159,6 +159,10 @@ class GCPDeployer:
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
                     "GCP_PROJECT_ID": self.project_id,  # CRITICAL: Required for secret loading logic
                     "SKIP_OAUTH_VALIDATION": "true",  # TEMPORARY: Skip OAuth validation for E2E testing
+                    # Auth Database Timeout Configuration (Issue #1229 Fix)
+                    "AUTH_DB_URL_TIMEOUT": "90.0",
+                    "AUTH_DB_ENGINE_TIMEOUT": "90.0",
+                    "AUTH_DB_VALIDATION_TIMEOUT": "90.0",
                 }
             ),
             ServiceConfig(
@@ -1077,9 +1081,10 @@ CMD ["npm", "start"]
         # Add VPC connector and network annotations for all services (Infrastructure Remediation #395)
         if service.name in ["backend", "auth"]:
             # CRITICAL: VPC connector required for Redis, Cloud SQL, and service-to-service connectivity
-            vpc_connector_name = f"projects/{self.project_id}/locations/{self.region}/connectors/staging-connector"
+            # ISSUE #1177 FIX: Use updated VPC connector with proper CIDR range for Redis connectivity
+            vpc_connector_name = f"projects/{self.project_id}/locations/{self.region}/connectors/staging-connector-v2"
             cmd.extend([
-                "--vpc-connector", "staging-connector",
+                "--vpc-connector", "staging-connector-v2",
                 "--vpc-egress", "all-traffic"  # Route all traffic through VPC to fix ClickHouse connectivity
             ])
             

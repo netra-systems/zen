@@ -1186,6 +1186,8 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
             self._test_context = None
         if not hasattr(self, '_original_env_state'):
             self._original_env_state = None
+        if not hasattr(self, '_metrics'):
+            self._metrics = SsotTestMetrics()
         super().teardown_method(method)
 
     async def asyncSetUp(self):
@@ -1193,6 +1195,18 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
         # DO NOT call super().setUp() here - it would create infinite recursion
         # The setUp() method already calls setup_method() and then this asyncSetUp()
         # This allows subclasses to override asyncSetUp for additional async initialization
+        pass
+
+    async def _initialize_async_state(self):
+        """
+        Helper method to initialize async-specific state.
+
+        This method provides proper async state initialization without creating
+        circular dependencies with the sync setUp method. It ensures that
+        async test infrastructure is properly configured.
+        """
+        # Initialize any async-specific attributes here
+        # This replaces the problematic super().setUp() call
         pass
 
     async def asyncTearDown(self):

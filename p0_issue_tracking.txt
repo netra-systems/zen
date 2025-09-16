@@ -1,0 +1,7 @@
+P0 ISSUE IDENTIFIED: WebSocket Import Dependency Failure
+Session: agent-session-20250915_223600
+Status: actively-being-worked-on
+Priority: P0 Critical - Complete Platform Outage
+Business Impact: $500K+ ARR at risk - entire platform offline
+Created: 2025-09-15T22:36:00Z
+Agent: Claude Code Issue Analysis Agent

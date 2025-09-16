@@ -29,7 +29,7 @@ from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import WebSocketMessage
 # SECURITY FIX: Use factory pattern instead of singleton
-from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 logger = central_logger.get_logger(__name__)
 
@@ -68,7 +68,7 @@ class ExampleMessageHandler:
     
     def __init__(self):
         # SECURITY FIX: Use factory pattern for per-user WebSocket isolation
-        self.websocket_factory = WebSocketBridgeFactory()
+        self.websocket_factory = AgentWebSocketBridge()
         self.supervisor = get_example_message_supervisor()
         self.active_sessions: Dict[str, Dict[str, Any]] = {}
         # Cache for user emitters (cleared on session end)

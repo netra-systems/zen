@@ -1,11 +1,11 @@
-"""WebSocket Manager Factory - Enterprise Resource Management
+"""WebSocket Manager Factory - Enhanced Emergency Cleanup System
 
 This module provides enterprise-grade WebSocket manager factory with:
 - 20-manager hard limit enforcement
-- Graduated emergency cleanup (Conservative → Moderate → Aggressive → Force)
-- Zombie manager detection and removal
-- Enterprise user priority protection
-- Real-time resource monitoring
+- Enhanced emergency cleanup with zombie detection
+- Graduated cleanup levels (Conservative → Moderate → Aggressive → Force)
+- Circuit breaker protection for failed cleanups
+- Real-time resource monitoring and health checks
 
 Business Value Justification (BVJ):
 - Segment: Enterprise (protects $500K+ ARR)
@@ -15,19 +15,20 @@ Business Value Justification (BVJ):
 
 CRITICAL FEATURES:
 - Resource exhaustion recovery mechanisms
-- Health-based cleanup validation
-- Multi-level emergency response
-- Comprehensive monitoring and alerting
+- Zombie manager detection and removal
+- Multi-level emergency response with health validation
+- Comprehensive monitoring and circuit breaker protection
 """
 
 import asyncio
 import time
 import weakref
+import gc
+import threading
 from enum import Enum
 from typing import Dict, Optional, Set, Any, List, Union, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime, timezone, timedelta
-import threading
 
 from shared.logging.unified_logging_ssot import get_logger
 from shared.types.core_types import UserID, ensure_user_id
@@ -36,10 +37,6 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 # Import WebSocket manager types
 from netra_backend.app.websocket_core.types import WebSocketManagerMode
 from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
-
-# Business metrics imports
-import gc
-import psutil
 
 logger = get_logger(__name__)
 
@@ -98,101 +95,206 @@ class FactoryMetrics:
     managers_by_user: Dict[str, int] = field(default_factory=dict)
     cleanup_events: int = 0
     emergency_cleanups: int = 0
-    zombie_detections: int = 0
-    forced_removals: int = 0
-    last_cleanup_time: Optional[datetime] = None
-    average_cleanup_duration: float = 0.0
+    failed_cleanups: int = 0
+    circuit_breaker_activations: int = 0
+    zombie_managers_detected: int = 0
+    aggressive_cleanups_triggered: int = 0
+    revenue_protection_events: int = 0
 
-    # Business protection metrics
-    golden_path_protections: int = 0
-    enterprise_users_protected: int = 0
-    revenue_preserving_cleanups: int = 0
-    session_continuity_events: int = 0
-
-    def record_cleanup(self, duration: float, managers_cleaned: int, cleanup_level: CleanupLevel):
-        """Record cleanup metrics"""
-        self.cleanup_events += 1
-        if cleanup_level != CleanupLevel.CONSERVATIVE:
-            self.emergency_cleanups += 1
-
-        # Update average duration
-        if self.average_cleanup_duration == 0.0:
-            self.average_cleanup_duration = duration
-        else:
-            self.average_cleanup_duration = (self.average_cleanup_duration + duration) / 2
-
-        self.last_cleanup_time = datetime.now(timezone.utc)
-        logger.info(f"Cleanup metrics updated: {managers_cleaned} managers cleaned in {duration:.2f}s at {cleanup_level.value} level")
-
-    def record_business_protection(self, protection_type: str, user_count: int = 1):
-        """Record business protection metrics"""
-        if protection_type == "golden_path":
-            self.golden_path_protections += user_count
-        elif protection_type == "enterprise":
-            self.enterprise_users_protected += user_count
-        elif protection_type == "revenue_preserving":
-            self.revenue_preserving_cleanups += 1
-        elif protection_type == "session_continuity":
-            self.session_continuity_events += user_count
-
-        logger.info(f"Business protection recorded: {protection_type}, users: {user_count}")
+    def record_business_protection(self, event_type: str):
+        """Record business protection event"""
+        self.revenue_protection_events += 1
+        logger.info(f"Business protection event recorded: {event_type}")
 
 
-class WebSocketManagerFactory:
+@dataclass
+class CircuitBreakerState:
+    """Circuit breaker state for failed cleanup protection"""
+    is_open: bool = False
+    failure_count: int = 0
+    last_failure_time: Optional[datetime] = None
+    success_count: int = 0
+    next_attempt_time: Optional[datetime] = None
+
+    def should_attempt_cleanup(self) -> bool:
+        """Check if cleanup should be attempted based on circuit breaker state"""
+        if not self.is_open:
+            return True
+
+        if self.next_attempt_time and datetime.now(timezone.utc) >= self.next_attempt_time:
+            return True
+
+        return False
+
+    def record_success(self):
+        """Record successful cleanup"""
+        self.success_count += 1
+        if self.success_count >= 3:  # Reset circuit breaker after 3 successes
+            self.is_open = False
+            self.failure_count = 0
+            self.success_count = 0
+            self.next_attempt_time = None
+
+    def record_failure(self):
+        """Record failed cleanup"""
+        self.failure_count += 1
+        self.last_failure_time = datetime.now(timezone.utc)
+
+        if self.failure_count >= 5:  # Open circuit breaker after 5 failures
+            self.is_open = True
+            self.next_attempt_time = datetime.now(timezone.utc) + timedelta(minutes=5)
+
+
+class ZombieDetectionEngine:
+    """Engine for detecting and analyzing zombie WebSocket managers"""
+
+    def __init__(self):
+        self.detection_threshold = 300  # 5 minutes without activity
+        self.response_timeout = 10  # 10 seconds for health check response
+
+    async def detect_zombie_managers(self, managers: Dict[str, Any], health_data: Dict[str, ManagerHealth]) -> List[str]:
+        """
+        Detect zombie managers using multiple detection methods
+
+        Args:
+            managers: Dictionary of active managers
+            health_data: Current health data for managers
+
+        Returns:
+            List of manager keys identified as zombies
+        """
+        zombie_keys = []
+        now = datetime.now(timezone.utc)
+
+        for manager_key, manager in managers.items():
+            health = health_data.get(manager_key)
+            if not health:
+                continue
+
+            # Method 1: Activity-based detection
+            if self._is_activity_zombie(health, now):
+                zombie_keys.append(manager_key)
+                continue
+
+            # Method 2: Connection responsiveness detection
+            if await self._is_connection_zombie(manager, health):
+                zombie_keys.append(manager_key)
+                continue
+
+            # Method 3: Memory leak detection
+            if self._is_memory_leak_zombie(manager, health):
+                zombie_keys.append(manager_key)
+                continue
+
+        if zombie_keys:
+            logger.warning(f"Zombie detection engine identified {len(zombie_keys)} zombie managers: {zombie_keys}")
+
+        return zombie_keys
+
+    def _is_activity_zombie(self, health: ManagerHealth, now: datetime) -> bool:
+        """Check if manager is zombie based on activity"""
+        if health.last_activity:
+            inactivity_seconds = (now - health.last_activity).total_seconds()
+            return inactivity_seconds > self.detection_threshold
+        return False
+
+    async def _is_connection_zombie(self, manager: Any, health: ManagerHealth) -> bool:
+        """Check if manager has zombie connections"""
+        try:
+            # Check if manager has connections but none are responsive
+            if hasattr(manager, '_connections') and manager._connections:
+                total_connections = len(manager._connections)
+                if total_connections > 0 and health.responsive_connections == 0:
+                    # Try a quick health check on connections
+                    responsive_count = 0
+                    for conn in list(manager._connections.values()):
+                        if await self._is_connection_responsive(conn):
+                            responsive_count += 1
+
+                    # Update health data with real-time check
+                    health.responsive_connections = responsive_count
+                    health.connection_count = total_connections
+
+                    return responsive_count == 0 and total_connections > 0
+
+        except Exception as e:
+            logger.warning(f"Error checking connection responsiveness: {e}")
+
+        return False
+
+    async def _is_connection_responsive(self, connection: Any) -> bool:
+        """Check if individual connection is responsive"""
+        try:
+            if hasattr(connection, 'websocket') and connection.websocket:
+                # Quick ping check with timeout
+                await asyncio.wait_for(
+                    connection.websocket.ping(),
+                    timeout=self.response_timeout
+                )
+                return True
+        except (asyncio.TimeoutError, Exception):
+            return False
+        return False
+
+    def _is_memory_leak_zombie(self, manager: Any, health: ManagerHealth) -> bool:
+        """Check if manager has memory leak characteristics"""
+        try:
+            # Check for excessive reference counts or memory usage patterns
+            if hasattr(manager, '__dict__'):
+                # Count references and check for circular references
+                ref_count = len(manager.__dict__)
+                if ref_count > 100:  # Arbitrary threshold for excessive references
+                    logger.warning(f"Manager has excessive references: {ref_count}")
+                    return True
+
+        except Exception as e:
+            logger.debug(f"Error checking memory leak characteristics: {e}")
+
+        return False
+
+
+class EnhancedWebSocketManagerFactory:
     """
-    Enterprise WebSocket Manager Factory with Resource Management
+    Enhanced WebSocket Manager Factory with comprehensive emergency cleanup
 
-    Provides:
-    - 20-manager hard limit per user (configurable for enterprise)
-    - Graduated emergency cleanup strategies
-    - Zombie manager detection and removal
-    - Resource exhaustion recovery
-    - Enterprise user priority protection
+    CRITICAL REMEDIATION: This factory addresses the P0 issue where emergency
+    cleanup fails when users hit the 20/20 manager limit, causing permanent
+    chat blocking for affected users.
     """
 
-    def __init__(self, max_managers_per_user: int = 20, enable_monitoring: bool = True):
+    def __init__(self, max_managers_per_user: int = 20):
+        """Initialize enhanced factory with resource management"""
         self.max_managers_per_user = max_managers_per_user
-        self.enable_monitoring = enable_monitoring
+        self.id_manager = UnifiedIDManager()
 
-        # Core registry and state management
+        # Registry and tracking
         self._active_managers: Dict[str, _UnifiedWebSocketManagerImplementation] = {}
-        self._manager_health: Dict[str, ManagerHealth] = {}
-        self._user_manager_keys: Dict[str, Set[str]] = {}  # user_id -> set of manager keys
+        self._user_manager_keys: Dict[str, Set[str]] = {}
         self._creation_times: Dict[str, datetime] = {}
+        self._manager_health: Dict[str, ManagerHealth] = {}
 
-        # Thread safety
-        self._registry_lock = threading.RLock()
+        # Cleanup configuration
+        self._proactive_threshold = 0.8  # Start cleanup at 80% of limit
+        self._moderate_threshold = 0.85  # Moderate cleanup at 85%
+        self._aggressive_threshold = 0.9  # Aggressive cleanup at 90%
 
         # Metrics and monitoring
         self._metrics = FactoryMetrics()
-        self._id_manager = UnifiedIDManager()
+        self._registry_lock = threading.Lock()
 
-        # Emergency cleanup thresholds (percentages of max_managers_per_user)
-        self._proactive_threshold = 0.7  # 70% - start proactive cleanup
-        self._moderate_threshold = 0.85  # 85% - moderate cleanup
-        self._aggressive_threshold = 0.95  # 95% - aggressive cleanup
+        # Enhanced systems
+        self.zombie_detector = ZombieDetectionEngine()
+        self.circuit_breaker = CircuitBreakerState()
 
-        logger.info(f"WebSocketManagerFactory initialized: max_managers_per_user={max_managers_per_user}, monitoring={enable_monitoring}")
+        # Health monitoring
+        self._last_health_check = datetime.now(timezone.utc)
+        self._health_check_interval = 60  # 1 minute
 
-    def get_user_manager_count(self, user_id: str) -> int:
-        """Get current manager count for a user"""
-        with self._registry_lock:
-            return len(self._user_manager_keys.get(user_id, set()))
-
-    def _generate_manager_key(self, user_context: Any) -> str:
-        """Generate unique manager key for user context"""
-        user_id = str(getattr(user_context, 'user_id', 'unknown'))
-        thread_id = str(getattr(user_context, 'thread_id', 'unknown'))
-        request_id = str(getattr(user_context, 'request_id', 'unknown'))
-
-        # Create deterministic but unique key
-        key_base = f"{user_id}:{thread_id}:{request_id}"
-        unique_id = self._id_manager.generate_id(IDType.WEBSOCKET, prefix="mgr")
-        return f"wsm_{unique_id}_{hash(key_base) % 1000000}"
+        logger.info(f"Enhanced WebSocket Manager Factory initialized with {max_managers_per_user}-manager limit")
 
     async def create_manager(self, user_context: Any, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED) -> _UnifiedWebSocketManagerImplementation:
         """
-        Create WebSocket manager with resource management and emergency cleanup
+        Create WebSocket manager with enhanced emergency cleanup
 
         Args:
             user_context: User execution context
@@ -202,87 +304,335 @@ class WebSocketManagerFactory:
             WebSocket manager instance
 
         Raises:
-            RuntimeError: If resource limits exceeded and cleanup fails
+            RuntimeError: If resource limits exceeded and all cleanup attempts fail
         """
         user_id = str(getattr(user_context, 'user_id', 'unknown'))
 
         with self._registry_lock:
             current_count = self.get_user_manager_count(user_id)
 
-            # Check if we need cleanup before creating new manager
+            # Proactive cleanup before hitting limits
             if current_count >= self.max_managers_per_user * self._proactive_threshold:
-                logger.warning(f"User {user_id} approaching manager limit ({current_count}/{self.max_managers_per_user}), initiating proactive cleanup")
+                logger.warning(f"User {user_id} approaching limit ({current_count}/{self.max_managers_per_user}), starting proactive cleanup")
 
-                # Determine cleanup level based on current count
                 cleanup_level = self._determine_cleanup_level(current_count)
-                cleaned_count = await self._emergency_cleanup_user_managers(user_id, cleanup_level)
-
-                logger.info(f"Proactive cleanup completed for user {user_id}: {cleaned_count} managers removed at {cleanup_level.value} level")
-
-                # Update current count after cleanup
+                await self._enhanced_emergency_cleanup(user_id, cleanup_level)
                 current_count = self.get_user_manager_count(user_id)
 
-            # Hard limit check after cleanup
+            # Hard limit enforcement with graduated emergency cleanup
             if current_count >= self.max_managers_per_user:
-                # Final emergency cleanup attempt with most aggressive level
-                logger.critical(f"HARD LIMIT: User {user_id} still over limit after cleanup ({current_count}/{self.max_managers_per_user})")
+                logger.critical(f"HARD LIMIT: User {user_id} over limit ({current_count}/{self.max_managers_per_user}) - attempting enhanced emergency cleanup")
 
-                # Try force cleanup as last resort
-                cleaned_count = await self._emergency_cleanup_user_managers(user_id, CleanupLevel.FORCE)
-                current_count = self.get_user_manager_count(user_id)
-
-                if current_count >= self.max_managers_per_user:
+                success = await self._graduated_emergency_cleanup(user_id)
+                if not success:
                     error_msg = (
-                        f"User {user_id} has reached the maximum number of WebSocket managers ({self.max_managers_per_user}). "
-                        f"Emergency cleanup attempted but limit still exceeded. "
-                        f"This may indicate a resource leak or extremely high connection rate. "
-                        f"Current count: {current_count}"
+                        f"CRITICAL: Emergency cleanup FAILED for user {user_id}. "
+                        f"User has reached maximum WebSocket managers ({self.max_managers_per_user}) "
+                        f"and all cleanup attempts have been exhausted. This indicates "
+                        f"zombie managers or resource leaks requiring immediate investigation."
                     )
                     logger.critical(error_msg)
+
+                    self._metrics.failed_cleanups += 1
+                    self.circuit_breaker.record_failure()
+
                     raise RuntimeError(error_msg)
 
+                current_count = self.get_user_manager_count(user_id)
+                logger.info(f"SUCCESS: Enhanced emergency cleanup freed space for user {user_id}")
+
+                self.circuit_breaker.record_success()
+                self._metrics.record_business_protection("emergency_cleanup_success")
+
             # Create the manager
-            manager_key = self._generate_manager_key(user_context)
+            return await self._create_manager_instance(user_context, mode, user_id)
 
+    async def _graduated_emergency_cleanup(self, user_id: str) -> bool:
+        """
+        Graduated emergency cleanup with all enhancement levels
+
+        Args:
+            user_id: User ID to clean up managers for
+
+        Returns:
+            bool: True if cleanup succeeded, False if failed
+        """
+        if not self.circuit_breaker.should_attempt_cleanup():
+            logger.error(f"Circuit breaker OPEN - skipping cleanup attempt for user {user_id}")
+            self._metrics.circuit_breaker_activations += 1
+            return False
+
+        cleanup_levels = [CleanupLevel.CONSERVATIVE, CleanupLevel.MODERATE, CleanupLevel.AGGRESSIVE, CleanupLevel.FORCE]
+        total_cleaned = 0
+
+        for level in cleanup_levels:
+            current_count = self.get_user_manager_count(user_id)
+            if current_count < self.max_managers_per_user:
+                logger.info(f"Graduated cleanup SUCCESS at {level.value} level for user {user_id}")
+                return True
+
+            logger.warning(f"Escalating to {level.value} cleanup for user {user_id}")
+            cleaned = await self._enhanced_emergency_cleanup(user_id, level)
+            total_cleaned += cleaned
+
+            logger.info(f"Level {level.value} cleaned {cleaned} managers for user {user_id}")
+
+        # Final check
+        final_count = self.get_user_manager_count(user_id)
+        success = final_count < self.max_managers_per_user
+
+        if success:
+            logger.info(f"Graduated cleanup FINAL SUCCESS: User {user_id} now at {final_count}/{self.max_managers_per_user} (cleaned {total_cleaned})")
+        else:
+            logger.critical(f"Graduated cleanup FINAL FAILURE: User {user_id} still at {final_count}/{self.max_managers_per_user} after cleaning {total_cleaned}")
+
+        return success
+
+    async def _enhanced_emergency_cleanup(self, user_id: str, cleanup_level: CleanupLevel) -> int:
+        """
+        Enhanced emergency cleanup with zombie detection and health validation
+
+        Args:
+            user_id: User ID to clean up managers for
+            cleanup_level: Cleanup aggressiveness level
+
+        Returns:
+            Number of managers cleaned up
+        """
+        start_time = time.time()
+        cleaned_count = 0
+
+        logger.warning(f"Starting enhanced emergency cleanup for user {user_id} at level {cleanup_level.value}")
+
+        user_manager_keys = self._user_manager_keys.get(user_id, set()).copy()
+        if not user_manager_keys:
+            logger.warning(f"No managers found for user {user_id}")
+            return 0
+
+        # Update health data for all managers
+        await self._update_manager_health(user_manager_keys)
+
+        # Detect zombie managers
+        zombie_managers = await self.zombie_detector.detect_zombie_managers(
+            {key: self._active_managers[key] for key in user_manager_keys if key in self._active_managers},
+            {key: self._manager_health[key] for key in user_manager_keys if key in self._manager_health}
+        )
+
+        if zombie_managers:
+            self._metrics.zombie_managers_detected += len(zombie_managers)
+            logger.warning(f"Detected {len(zombie_managers)} zombie managers for user {user_id}")
+
+        # Determine cleanup targets based on level
+        cleanup_targets = []
+
+        if cleanup_level == CleanupLevel.CONSERVATIVE:
+            # Only remove clearly inactive managers
+            cleanup_targets = [key for key in user_manager_keys
+                             if self._manager_health.get(key, ManagerHealth(ManagerHealthStatus.UNKNOWN)).status == ManagerHealthStatus.INACTIVE]
+
+        elif cleanup_level == CleanupLevel.MODERATE:
+            # Remove inactive + old idle managers
+            cleanup_targets = [key for key in user_manager_keys
+                             if self._manager_health.get(key, ManagerHealth(ManagerHealthStatus.UNKNOWN)).status in
+                             [ManagerHealthStatus.INACTIVE, ManagerHealthStatus.IDLE] and
+                             self._manager_health.get(key, ManagerHealth(ManagerHealthStatus.UNKNOWN)).age_seconds > 300]
+
+        elif cleanup_level == CleanupLevel.AGGRESSIVE:
+            # Remove inactive + idle + zombie managers
+            cleanup_targets = [key for key in user_manager_keys
+                             if (self._manager_health.get(key, ManagerHealth(ManagerHealthStatus.UNKNOWN)).status in
+                                 [ManagerHealthStatus.INACTIVE, ManagerHealthStatus.IDLE, ManagerHealthStatus.ZOMBIE] or
+                                 key in zombie_managers)]
+            self._metrics.aggressive_cleanups_triggered += 1
+
+        elif cleanup_level == CleanupLevel.FORCE:
+            # Force remove oldest managers (nuclear option)
+            sorted_by_age = sorted(user_manager_keys,
+                                 key=lambda k: self._creation_times.get(k, datetime.now(timezone.utc)))
+            cleanup_targets = sorted_by_age[:len(user_manager_keys)//2]  # Remove oldest 50%
+            logger.critical(f"FORCE cleanup targeting {len(cleanup_targets)} oldest managers for user {user_id}")
+
+        # Perform cleanup
+        for manager_key in cleanup_targets:
             try:
-                # Import here to avoid circular imports
-                from netra_backend.app.websocket_core.types import create_isolated_mode
-                import secrets
+                if await self._cleanup_manager(manager_key, user_id):
+                    cleaned_count += 1
+                    logger.debug(f"Cleaned up manager {manager_key} for user {user_id}")
+                else:
+                    logger.warning(f"Failed to cleanup manager {manager_key} for user {user_id}")
+            except Exception as e:
+                logger.error(f"Error cleaning up manager {manager_key} for user {user_id}: {e}")
 
-                # Create isolated manager instance
-                isolated_mode = create_isolated_mode(mode.value)
-                manager = _UnifiedWebSocketManagerImplementation(
-                    mode=isolated_mode,
-                    user_context=user_context,
-                    _ssot_authorization_token=secrets.token_urlsafe(32)
-                )
+        cleanup_duration = time.time() - start_time
 
-                # Register manager
-                self._active_managers[manager_key] = manager
-                self._creation_times[manager_key] = datetime.now(timezone.utc)
+        # Update metrics
+        self._metrics.cleanup_events += 1
+        if cleanup_level != CleanupLevel.CONSERVATIVE:
+            self._metrics.emergency_cleanups += 1
 
-                # Update user manager tracking
-                if user_id not in self._user_manager_keys:
-                    self._user_manager_keys[user_id] = set()
-                self._user_manager_keys[user_id].add(manager_key)
+        logger.info(f"Enhanced emergency cleanup completed: level={cleanup_level.value}, "
+                   f"user={user_id}, cleaned={cleaned_count}, targets={len(cleanup_targets)}, "
+                   f"duration={cleanup_duration:.2f}s")
 
-                # Initialize health tracking
-                self._manager_health[manager_key] = ManagerHealth(
-                    status=ManagerHealthStatus.HEALTHY,
-                    last_activity=datetime.now(timezone.utc),
-                    creation_time=datetime.now(timezone.utc)
-                )
+        return cleaned_count
 
-                # Update metrics
-                self._metrics.total_managers = len(self._active_managers)
-                self._metrics.managers_by_user[user_id] = len(self._user_manager_keys[user_id])
+    async def _update_manager_health(self, manager_keys: Set[str]):
+        """Update health data for all managers"""
+        now = datetime.now(timezone.utc)
 
-                logger.info(f"WebSocket manager created: key={manager_key}, user={user_id}, total_managers={self._metrics.total_managers}")
-                return manager
+        for key in manager_keys:
+            if key not in self._active_managers:
+                continue
+
+            manager = self._active_managers[key]
+            health = self._manager_health.get(key, ManagerHealth(ManagerHealthStatus.UNKNOWN))
+
+            # Update basic health metrics
+            try:
+                # Check connection count
+                connection_count = 0
+                responsive_connections = 0
+
+                if hasattr(manager, '_connections') and manager._connections:
+                    connection_count = len(manager._connections)
+
+                    # Quick responsiveness check for some connections
+                    sample_connections = list(manager._connections.values())[:3]  # Check up to 3 connections
+                    for conn in sample_connections:
+                        if await self._quick_connection_check(conn):
+                            responsive_connections += 1
+
+                # Determine health status
+                if connection_count == 0:
+                    status = ManagerHealthStatus.IDLE
+                elif responsive_connections == 0 and connection_count > 0:
+                    status = ManagerHealthStatus.ZOMBIE
+                elif responsive_connections > 0:
+                    status = ManagerHealthStatus.HEALTHY
+                else:
+                    status = ManagerHealthStatus.UNKNOWN
+
+                # Calculate health score
+                if connection_count > 0:
+                    health_score = responsive_connections / connection_count
+                else:
+                    health_score = 0.5  # Neutral score for idle managers
+
+                # Update health data
+                health.status = status
+                health.connection_count = connection_count
+                health.responsive_connections = responsive_connections
+                health.health_score = health_score
+                health.last_health_check = now
+
+                self._manager_health[key] = health
 
             except Exception as e:
-                logger.error(f"Failed to create WebSocket manager for user {user_id}: {e}")
-                raise
+                logger.debug(f"Error updating health for manager {key}: {e}")
+                health.status = ManagerHealthStatus.UNKNOWN
+                self._manager_health[key] = health
+
+    async def _quick_connection_check(self, connection: Any) -> bool:
+        """Quick health check for a connection"""
+        try:
+            if hasattr(connection, 'websocket') and connection.websocket:
+                # Very quick ping with short timeout
+                await asyncio.wait_for(connection.websocket.ping(), timeout=2.0)
+                return True
+        except Exception:
+            pass
+        return False
+
+    async def _cleanup_manager(self, manager_key: str, user_id: str) -> bool:
+        """Cleanup individual manager with proper resource handling"""
+        try:
+            manager = self._active_managers.get(manager_key)
+            if not manager:
+                return True  # Already cleaned up
+
+            # Graceful shutdown of manager
+            if hasattr(manager, 'shutdown'):
+                try:
+                    await asyncio.wait_for(manager.shutdown(), timeout=5.0)
+                except asyncio.TimeoutError:
+                    logger.warning(f"Manager {manager_key} shutdown timed out")
+
+            # Close connections
+            if hasattr(manager, '_connections') and manager._connections:
+                for conn in list(manager._connections.values()):
+                    try:
+                        if hasattr(conn, 'websocket') and conn.websocket:
+                            await conn.websocket.close()
+                    except Exception as e:
+                        logger.debug(f"Error closing connection: {e}")
+
+            # Remove from registries
+            if manager_key in self._active_managers:
+                del self._active_managers[manager_key]
+            if manager_key in self._creation_times:
+                del self._creation_times[manager_key]
+            if manager_key in self._manager_health:
+                del self._manager_health[manager_key]
+
+            # Update user tracking
+            if user_id in self._user_manager_keys:
+                self._user_manager_keys[user_id].discard(manager_key)
+                if not self._user_manager_keys[user_id]:
+                    del self._user_manager_keys[user_id]
+
+            # Force garbage collection for the manager
+            del manager
+            gc.collect()
+
+            return True
+
+        except Exception as e:
+            logger.error(f"Error cleaning up manager {manager_key}: {e}")
+            return False
+
+    async def _create_manager_instance(self, user_context: Any, mode: WebSocketManagerMode, user_id: str) -> _UnifiedWebSocketManagerImplementation:
+        """Create and register new manager instance"""
+        manager_key = self._generate_manager_key(user_context)
+
+        try:
+            # Import here to avoid circular imports
+            from netra_backend.app.websocket_core.types import create_isolated_mode
+            import secrets
+
+            # Create isolated manager instance
+            isolated_mode = create_isolated_mode(mode.value)
+            manager = _UnifiedWebSocketManagerImplementation(
+                mode=isolated_mode,
+                user_context=user_context,
+                _ssot_authorization_token=secrets.token_urlsafe(32)
+            )
+
+            # Register manager
+            self._active_managers[manager_key] = manager
+            self._creation_times[manager_key] = datetime.now(timezone.utc)
+
+            # Update user manager tracking
+            if user_id not in self._user_manager_keys:
+                self._user_manager_keys[user_id] = set()
+            self._user_manager_keys[user_id].add(manager_key)
+
+            # Initialize health tracking
+            self._manager_health[manager_key] = ManagerHealth(
+                status=ManagerHealthStatus.HEALTHY,
+                last_activity=datetime.now(timezone.utc),
+                creation_time=datetime.now(timezone.utc)
+            )
+
+            # Update metrics
+            self._metrics.total_managers = len(self._active_managers)
+            self._metrics.managers_by_user[user_id] = len(self._user_manager_keys[user_id])
+
+            logger.info(f"Enhanced WebSocket manager created: key={manager_key}, user={user_id}, total={self._metrics.total_managers}")
+            return manager
+
+        except Exception as e:
+            logger.error(f"Failed to create WebSocket manager for user {user_id}: {e}")
+            raise
 
     def _determine_cleanup_level(self, current_count: int) -> CleanupLevel:
         """Determine appropriate cleanup level based on resource pressure"""
@@ -295,708 +645,77 @@ class WebSocketManagerFactory:
         else:
             return CleanupLevel.CONSERVATIVE
 
-    async def _emergency_cleanup_user_managers(self, user_id: str, cleanup_level: CleanupLevel = CleanupLevel.CONSERVATIVE) -> int:
-        """
-        Emergency cleanup of user managers with graduated response levels
+    def _generate_manager_key(self, user_context: Any) -> str:
+        """Generate unique manager key"""
+        user_id = str(getattr(user_context, 'user_id', 'unknown'))
+        unique_id = self.id_manager.generate_id(IDType.REQUEST, prefix="mgr")
+        return f"{user_id}_{unique_id}"
 
-        Args:
-            user_id: User ID to clean up managers for
-            cleanup_level: Cleanup aggressiveness level
-
-        Returns:
-            Number of managers cleaned up
-        """
-        start_time = time.time()
-        cleaned_count = 0
-
-        logger.warning(f"Starting emergency cleanup for user {user_id} at level {cleanup_level.value}")
-
-        user_manager_keys = self._user_manager_keys.get(user_id, set()).copy()
-
-        # Step 1: Assess health of all user managers
-        manager_assessments = []
-        for manager_key in user_manager_keys:
-            if manager_key in self._active_managers:
-                manager = self._active_managers[manager_key]
-                health = await self._assess_manager_health(manager_key, manager)
-                manager_assessments.append((manager_key, manager, health))
-
-        # Step 2: Apply cleanup strategy based on level
-        if cleanup_level == CleanupLevel.CONSERVATIVE:
-            cleaned_count = await self._conservative_cleanup(manager_assessments)
-        elif cleanup_level == CleanupLevel.MODERATE:
-            cleaned_count = await self._moderate_cleanup(manager_assessments)
-        elif cleanup_level == CleanupLevel.AGGRESSIVE:
-            cleaned_count = await self._aggressive_cleanup(manager_assessments)
-        elif cleanup_level == CleanupLevel.FORCE:
-            cleaned_count = await self._force_cleanup(manager_assessments, user_id)
-
-        # Update metrics
-        duration = time.time() - start_time
-        self._metrics.record_cleanup(duration, cleaned_count, cleanup_level)
-
-        logger.warning(f"Emergency cleanup completed for user {user_id}: {cleaned_count} managers removed in {duration:.2f}s at {cleanup_level.value} level")
-        return cleaned_count
-
-    async def _assess_manager_health(self, manager_key: str, manager: _UnifiedWebSocketManagerImplementation) -> ManagerHealth:
-        """
-        Assess health of a WebSocket manager for cleanup decisions
-
-        Args:
-            manager_key: Manager registry key
-            manager: Manager instance
-
-        Returns:
-            ManagerHealth assessment
-        """
-        health = self._manager_health.get(manager_key, ManagerHealth(status=ManagerHealthStatus.UNKNOWN))
-
-        try:
-            # Update basic metrics
-            health.last_health_check = datetime.now(timezone.utc)
-
-            # Check if manager appears active
-            is_active = getattr(manager, '_is_active', True)
-            if not is_active:
-                health.status = ManagerHealthStatus.INACTIVE
-                health.health_score = 0.0
-                return health
-
-            # Check connection count
-            connections = getattr(manager, '_connections', {})
-            health.connection_count = len(connections) if connections else 0
-
-            # Test connection responsiveness (zombie detection)
-            responsive_count = 0
-            if health.connection_count > 0:
-                responsive_count = await self._test_connection_responsiveness(connections)
-            health.responsive_connections = responsive_count
-
-            # Check last activity
-            if hasattr(manager, '_metrics') and hasattr(manager._metrics, 'last_activity'):
-                health.last_activity = manager._metrics.last_activity
-
-            # Calculate health score
-            health.health_score = self._calculate_health_score(health)
-
-            # Determine status
-            if health.connection_count == 0 and health.age_seconds > 300:  # 5 minutes with no connections
-                health.status = ManagerHealthStatus.IDLE
-            elif health.connection_count > 0 and responsive_count == 0:
-                health.status = ManagerHealthStatus.ZOMBIE
-                self._metrics.zombie_detections += 1
-            elif health.health_score >= 0.7:
-                health.status = ManagerHealthStatus.HEALTHY
-            elif health.health_score >= 0.3:
-                health.status = ManagerHealthStatus.IDLE
-            else:
-                health.status = ManagerHealthStatus.ZOMBIE
-                self._metrics.zombie_detections += 1
-
-        except Exception as e:
-            logger.error(f"Error assessing manager health for {manager_key}: {e}")
-            health.status = ManagerHealthStatus.UNKNOWN
-            health.health_score = 0.1  # Low score for unknown state
-            health.failure_count += 1
-
-        # Update health tracking
-        self._manager_health[manager_key] = health
-        return health
-
-    async def _test_connection_responsiveness(self, connections: Dict) -> int:
-        """Test how many connections are actually responsive"""
-        responsive_count = 0
-
-        for conn_id, connection in connections.items():
-            try:
-                # Quick responsiveness test
-                if hasattr(connection, 'ping'):
-                    await asyncio.wait_for(connection.ping(), timeout=1.0)
-                    responsive_count += 1
-                elif hasattr(connection, 'send'):
-                    # Alternative test - try to send a ping message
-                    await asyncio.wait_for(connection.send('{"type":"ping"}'), timeout=1.0)
-                    responsive_count += 1
-                else:
-                    # If no ping method, assume responsive for now
-                    responsive_count += 1
-            except (asyncio.TimeoutError, Exception):
-                # Connection not responsive
-                pass
-
-        return responsive_count
-
-    def _calculate_health_score(self, health: ManagerHealth) -> float:
-        """Calculate health score (0.0 to 1.0) for manager"""
-        score = 0.0
-
-        # Connection health component (40% of score)
-        if health.connection_count > 0:
-            connection_ratio = health.responsive_connections / health.connection_count
-            score += 0.4 * connection_ratio
-
-        # Activity component (30% of score)
-        if health.last_activity:
-            activity_age = (datetime.now(timezone.utc) - health.last_activity).total_seconds()
-            if activity_age < 60:  # Very recent activity
-                score += 0.3
-            elif activity_age < 300:  # Recent activity (5 minutes)
-                score += 0.2
-            elif activity_age < 900:  # Moderate activity (15 minutes)
-                score += 0.1
-
-        # Age component (20% of score) - newer managers get higher scores
-        age_penalty = min(health.age_seconds / 3600, 1.0)  # 1 hour = full penalty
-        score += 0.2 * (1.0 - age_penalty)
-
-        # Failure component (10% of score) - penalize frequent failures
-        failure_penalty = min(health.failure_count * 0.1, 0.1)
-        score = max(0.0, score - failure_penalty)
-
-        return min(1.0, score)
-
-    async def _conservative_cleanup(self, assessments: List[Tuple[str, Any, ManagerHealth]]) -> int:
-        """Conservative cleanup - only clearly inactive managers"""
-        cleaned_count = 0
-
-        for manager_key, manager, health in assessments:
-            if health.status == ManagerHealthStatus.INACTIVE:
-                await self._remove_manager(manager_key)
-                cleaned_count += 1
-                logger.debug(f"Conservative cleanup removed inactive manager: {manager_key}")
-
-        return cleaned_count
-
-    async def _moderate_cleanup(self, assessments: List[Tuple[str, Any, ManagerHealth]]) -> int:
-        """Moderate cleanup - inactive + old idle managers with business protection"""
-        cleaned_count = 0
-
-        for manager_key, manager, health in assessments:
-            # Check for business protection before removal
-            user_context = getattr(manager, 'user_context', None)
-            if user_context and (self._is_golden_path_user(user_context) or self._is_enterprise_user(user_context)):
-                # Skip cleanup for protected users
-                continue
-
-            should_remove = (
-                health.status == ManagerHealthStatus.INACTIVE or
-                (health.status == ManagerHealthStatus.IDLE and health.age_seconds > 600)  # 10 minutes idle
-            )
-
-            if should_remove:
-                await self._remove_manager(manager_key)
-                cleaned_count += 1
-                logger.debug(f"Moderate cleanup removed manager: {manager_key} (status: {health.status.value})")
-
-        return cleaned_count
-
-    async def _aggressive_cleanup(self, assessments: List[Tuple[str, Any, ManagerHealth]]) -> int:
-        """Aggressive cleanup - inactive + idle + zombie managers"""
-        cleaned_count = 0
-
-        for manager_key, manager, health in assessments:
-            should_remove = (
-                health.status == ManagerHealthStatus.INACTIVE or
-                health.status == ManagerHealthStatus.IDLE or
-                health.status == ManagerHealthStatus.ZOMBIE or
-                health.health_score < 0.3
-            )
-
-            if should_remove:
-                await self._remove_manager(manager_key)
-                cleaned_count += 1
-                logger.warning(f"Aggressive cleanup removed manager: {manager_key} (status: {health.status.value}, score: {health.health_score:.2f})")
-
-        return cleaned_count
-
-    async def _force_cleanup(self, assessments: List[Tuple[str, Any, ManagerHealth]], user_id: str) -> int:
-        """Force cleanup - remove oldest managers regardless of health (nuclear option)"""
-        cleaned_count = 0
-
-        # First, try to remove unhealthy managers
-        for manager_key, manager, health in assessments:
-            if health.status != ManagerHealthStatus.HEALTHY:
-                await self._remove_manager(manager_key)
-                cleaned_count += 1
-                logger.warning(f"Force cleanup removed unhealthy manager: {manager_key}")
-
-        # If still need more space, remove oldest healthy managers
-        current_count = self.get_user_manager_count(user_id)
-        if current_count >= self.max_managers_per_user:
-            # Sort remaining by age (oldest first)
-            remaining_assessments = [
-                (key, mgr, health) for key, mgr, health in assessments
-                if key in self._active_managers and health.status == ManagerHealthStatus.HEALTHY
-            ]
-            remaining_assessments.sort(key=lambda x: x[2].creation_time)
-
-            # Remove oldest healthy managers until under limit
-            needed_removals = current_count - self.max_managers_per_user + 1
-            for i in range(min(needed_removals, len(remaining_assessments))):
-                manager_key, manager, health = remaining_assessments[i]
-                await self._remove_manager(manager_key)
-                cleaned_count += 1
-                self._metrics.forced_removals += 1
-                logger.critical(f"FORCE cleanup removed healthy manager: {manager_key} (oldest, age: {health.age_seconds:.0f}s)")
-
-        return cleaned_count
-
-    async def _remove_manager(self, manager_key: str):
-        """Remove manager from registry and clean up resources"""
-        if manager_key not in self._active_managers:
-            return
-
-        manager = self._active_managers[manager_key]
-
-        try:
-            # Graceful shutdown if possible
-            if hasattr(manager, 'shutdown'):
-                await asyncio.wait_for(manager.shutdown(), timeout=2.0)
-        except Exception as e:
-            logger.warning(f"Failed to gracefully shutdown manager {manager_key}: {e}")
-
-        # Remove from registries
-        del self._active_managers[manager_key]
-
-        if manager_key in self._manager_health:
-            del self._manager_health[manager_key]
-
-        if manager_key in self._creation_times:
-            del self._creation_times[manager_key]
-
-        # Update user tracking
-        user_id = str(getattr(manager.user_context, 'user_id', 'unknown'))
-        if user_id in self._user_manager_keys:
-            self._user_manager_keys[user_id].discard(manager_key)
-            if not self._user_manager_keys[user_id]:
-                del self._user_manager_keys[user_id]
-
-        # Update metrics
-        self._metrics.total_managers = len(self._active_managers)
-        self._metrics.managers_by_user[user_id] = len(self._user_manager_keys.get(user_id, set()))
+    def get_user_manager_count(self, user_id: str) -> int:
+        """Get current manager count for user"""
+        return len(self._user_manager_keys.get(user_id, set()))
 
     def get_factory_status(self) -> Dict[str, Any]:
-        """Get current factory status for monitoring"""
-        with self._registry_lock:
-            status = {
-                'total_managers': len(self._active_managers),
-                'max_managers_per_user': self.max_managers_per_user,
-                'users_count': len(self._user_manager_keys),
-                'managers_by_user': dict(self._metrics.managers_by_user),
-                'cleanup_metrics': {
-                    'total_cleanups': self._metrics.cleanup_events,
-                    'emergency_cleanups': self._metrics.emergency_cleanups,
-                    'zombie_detections': self._metrics.zombie_detections,
-                    'forced_removals': self._metrics.forced_removals,
-                    'last_cleanup': self._metrics.last_cleanup_time.isoformat() if self._metrics.last_cleanup_time else None,
-                    'average_cleanup_duration': self._metrics.average_cleanup_duration
-                },
-                'thresholds': {
-                    'proactive': int(self.max_managers_per_user * self._proactive_threshold),
-                    'moderate': int(self.max_managers_per_user * self._moderate_threshold),
-                    'aggressive': int(self.max_managers_per_user * self._aggressive_threshold)
-                }
-            }
-            return status
-
-    async def health_check_all_managers(self) -> Dict[str, Any]:
-        """Comprehensive health check of all managers"""
-        health_report = {
-            'total_managers': len(self._active_managers),
-            'healthy_managers': 0,
-            'idle_managers': 0,
-            'zombie_managers': 0,
-            'inactive_managers': 0,
-            'unknown_managers': 0,
-            'overall_health_score': 0.0,
-            'managers_by_status': {}
-        }
-
-        total_score = 0.0
-        status_counts = {}
-
-        for manager_key, manager in self._active_managers.items():
-            health = await self._assess_manager_health(manager_key, manager)
-
-            # Count by status
-            status_counts[health.status.value] = status_counts.get(health.status.value, 0) + 1
-
-            if health.status == ManagerHealthStatus.HEALTHY:
-                health_report['healthy_managers'] += 1
-            elif health.status == ManagerHealthStatus.IDLE:
-                health_report['idle_managers'] += 1
-            elif health.status == ManagerHealthStatus.ZOMBIE:
-                health_report['zombie_managers'] += 1
-            elif health.status == ManagerHealthStatus.INACTIVE:
-                health_report['inactive_managers'] += 1
-            else:
-                health_report['unknown_managers'] += 1
-
-            total_score += health.health_score
-
-        # Calculate overall health
-        if len(self._active_managers) > 0:
-            health_report['overall_health_score'] = total_score / len(self._active_managers)
-
-        health_report['managers_by_status'] = status_counts
-
-        return health_report
-
-    # Business Protection Methods (Mission Critical Implementation)
-
-    def _is_golden_path_user(self, user_context: Any) -> bool:
-        """Determine if user is a Golden Path user (business critical)"""
-        user_id = str(getattr(user_context, 'user_id', 'unknown'))
-
-        # Golden Path indicators
-        golden_path_indicators = [
-            user_id == "golden_path_user",
-            getattr(user_context, 'is_premium', False) is True,
-            getattr(user_context, 'tier', 'free') in ['enterprise', 'premium'],
-            getattr(user_context, 'business_priority', None) == 'enterprise'
-        ]
-
-        return any(golden_path_indicators)
-
-    def _is_enterprise_user(self, user_context: Any) -> bool:
-        """Determine if user is enterprise tier (revenue protection)"""
-        tier = getattr(user_context, 'tier', 'free')
-        is_premium = getattr(user_context, 'is_premium', False)
-
-        return tier in ['enterprise', 'premium'] or is_premium
-
-    async def _verify_golden_path_protection(self) -> Dict[str, Any]:
-        """
-        Verify Golden Path user protection during resource exhaustion.
-        MISSION CRITICAL: Validates system protects revenue-generating flows.
-        """
-        protection_status = {
-            'golden_path_protected': True,
-            'manager_active': True,
-            'connections_maintained': True,
-            'cleanup_priority_preserved': True,
-            'enterprise_users_count': 0,
-            'golden_path_users_count': 0
-        }
-
-        with self._registry_lock:
-            # Count protected users
-            for user_id, manager_keys in self._user_manager_keys.items():
-                for manager_key in manager_keys:
-                    if manager_key in self._active_managers:
-                        manager = self._active_managers[manager_key]
-                        user_context = getattr(manager, 'user_context', None)
-
-                        if user_context:
-                            if self._is_golden_path_user(user_context):
-                                protection_status['golden_path_users_count'] += 1
-                            if self._is_enterprise_user(user_context):
-                                protection_status['enterprise_users_count'] += 1
-
-            # Record protection metrics
-            if protection_status['golden_path_users_count'] > 0:
-                self._metrics.record_business_protection("golden_path", protection_status['golden_path_users_count'])
-
-            if protection_status['enterprise_users_count'] > 0:
-                self._metrics.record_business_protection("enterprise", protection_status['enterprise_users_count'])
-
-        logger.info(f"Golden Path protection verified: {protection_status}")
-        return protection_status
-
-    async def _monitor_automatic_recovery_triggers(self) -> Dict[str, Any]:
-        """
-        Monitor and trigger automatic recovery mechanisms.
-        MISSION CRITICAL: System must self-recover from resource exhaustion.
-        """
-        recovery_status = {
-            'recovery_triggered': True,
-            'trigger_condition': 'resource_pressure_detected',
-            'recovery_level': 'conservative',
-            'critical_functions_preserved': True,
-            'system_stable': True
-        }
-
-        # Check if recovery should trigger
-        total_managers = len(self._active_managers)
-        memory_usage = psutil.Process().memory_info().rss / 1024 / 1024  # MB
-
-        if total_managers > 50 or memory_usage > 500:  # Thresholds for recovery
-            recovery_status['trigger_condition'] = f'managers:{total_managers}, memory:{memory_usage:.1f}MB'
-
-            if total_managers > 100:
-                recovery_status['recovery_level'] = 'aggressive'
-            elif total_managers > 75:
-                recovery_status['recovery_level'] = 'moderate'
-
-            # Trigger lightweight recovery
-            await self._lightweight_automatic_recovery()
-
-        logger.info(f"Automatic recovery monitoring: {recovery_status}")
-        return recovery_status
-
-    async def _test_session_continuity_during_recovery(self, sessions: List[Dict]) -> Dict[str, Any]:
-        """
-        Test user session continuity during resource recovery.
-        MISSION CRITICAL: Minimize user disruption during recovery.
-        """
-        start_time = time.time()
-
-        continuity_result = {
-            'preserved_sessions': len(sessions),  # Assume all preserved for now
-            'session_data_intact': True,
-            'connection_states_preserved': True,
-            'recovery_time_seconds': 0.0,
-            'business_impact_minimal': True
-        }
-
-        # Track active sessions before recovery
-        active_sessions_before = 0
-        for session in sessions:
-            manager = session.get('manager')
-            if manager and hasattr(manager, '_connections'):
-                active_sessions_before += len(getattr(manager, '_connections', {}))
-
-        # Simulate session continuity validation
-        await asyncio.sleep(0.1)  # Simulate recovery operation
-
-        # Track sessions after
-        active_sessions_after = 0
-        for session in sessions:
-            manager = session.get('manager')
-            if manager and hasattr(manager, '_connections'):
-                active_sessions_after += len(getattr(manager, '_connections', {}))
-
-        # Calculate preservation rate
-        if active_sessions_before > 0:
-            preservation_rate = active_sessions_after / active_sessions_before
-            continuity_result['preserved_sessions'] = int(len(sessions) * preservation_rate)
-
-        continuity_result['recovery_time_seconds'] = time.time() - start_time
-
-        # Record session continuity metrics
-        self._metrics.record_business_protection("session_continuity", continuity_result['preserved_sessions'])
-
-        logger.info(f"Session continuity tested: {continuity_result}")
-        return continuity_result
-
-    async def _trigger_test_recovery(self) -> Dict[str, Any]:
-        """
-        Trigger test recovery operations.
-        MISSION CRITICAL: Validate recovery mechanisms work correctly.
-        """
-        recovery_result = {
-            'recovery_initiated': True,
-            'cleanup_level': 'conservative',
-            'managers_cleaned': 0,
-            'system_stable_after': True
-        }
-
-        # Perform lightweight cleanup
-        cleaned_count = 0
-
-        with self._registry_lock:
-            # Clean up any clearly inactive managers
-            inactive_keys = []
-            for manager_key, manager in self._active_managers.items():
-                health = self._manager_health.get(manager_key)
-                if health and health.status == ManagerHealthStatus.INACTIVE:
-                    inactive_keys.append(manager_key)
-
-            for key in inactive_keys[:5]:  # Limit to 5 for test
-                await self._remove_manager(key)
-                cleaned_count += 1
-
-        recovery_result['managers_cleaned'] = cleaned_count
-
-        # Record recovery metrics
-        self._metrics.record_business_protection("revenue_preserving")
-
-        logger.info(f"Test recovery triggered: {recovery_result}")
-        return recovery_result
-
-    async def _validate_post_recovery_stability(self) -> Dict[str, Any]:
-        """
-        Validate system stability after recovery operations.
-        MISSION CRITICAL: System must be stable and performant after recovery.
-        """
-        stability_result = {
-            'system_stable': True,
-            'memory_usage_normal': True,
-            'response_times_normal': True,
-            'new_requests_handled': True,
-            'performance_metrics': {
-                'avg_response_time_ms': 45,  # Simulated good performance
-                'memory_usage_mb': psutil.Process().memory_info().rss / 1024 / 1024,
-                'active_managers': len(self._active_managers),
-                'healthy_managers': 0
-            }
-        }
-
-        # Count healthy managers
-        healthy_count = 0
-        for manager_key in self._active_managers:
-            health = self._manager_health.get(manager_key)
-            if health and health.is_healthy:
-                healthy_count += 1
-
-        stability_result['performance_metrics']['healthy_managers'] = healthy_count
-
-        # Force garbage collection for memory stability
-        gc.collect()
-
-        logger.info(f"Post-recovery stability validated: {stability_result}")
-        return stability_result
-
-    async def _test_recovery_failure_escalation(self) -> Dict[str, Any]:
-        """
-        Test recovery failure escalation mechanisms.
-        MISSION CRITICAL: System must escalate recovery when initial attempts fail.
-        """
-        escalation_result = {
-            'escalation_levels_attempted': ['conservative', 'moderate', 'aggressive', 'force'],
-            'escalation_successful': True,
-            'safe_failure_mode': True,
-            'critical_functions_preserved': True,
-            'final_level_reached': 'moderate'
-        }
-
-        # Simulate escalation through recovery levels
-        for level in ['conservative', 'moderate', 'aggressive']:
-            try:
-                # Simulate escalation attempt
-                await asyncio.sleep(0.05)  # Simulate recovery work
-
-                # Most escalations succeed at moderate level
-                if level == 'moderate':
-                    escalation_result['final_level_reached'] = level
-                    break
-
-            except Exception as e:
-                logger.debug(f"Escalation level {level} failed: {e}")
-                continue
-
-        logger.info(f"Recovery failure escalation tested: {escalation_result}")
-        return escalation_result
-
-    async def _monitor_business_metrics_during_recovery(self) -> Dict[str, Any]:
-        """
-        Monitor business metrics during recovery operations.
-        MISSION CRITICAL: Maintain business KPIs during recovery.
-        """
-        metrics_result = {
-            'recovery_metrics': {
-                'avg_response_time_ms': 65,  # Slight increase during recovery
-                'requests_per_second': 85,   # Slight decrease during recovery
-                'error_rate': 0.02,          # Small increase in errors
-                'active_connections': len(self._active_managers)
+        """Get comprehensive factory status"""
+        return {
+            "total_managers": self._metrics.total_managers,
+            "managers_by_user": dict(self._metrics.managers_by_user),
+            "max_per_user": self.max_managers_per_user,
+            "cleanup_events": self._metrics.cleanup_events,
+            "emergency_cleanups": self._metrics.emergency_cleanups,
+            "failed_cleanups": self._metrics.failed_cleanups,
+            "zombie_managers_detected": self._metrics.zombie_managers_detected,
+            "circuit_breaker": {
+                "is_open": self.circuit_breaker.is_open,
+                "failure_count": self.circuit_breaker.failure_count,
+                "activations": self._metrics.circuit_breaker_activations
             },
-            'business_impact': 'minimal',
-            'kpi_degradation': 'acceptable'
+            "health_check": {
+                "last_check": self._last_health_check.isoformat(),
+                "interval_seconds": self._health_check_interval
+            }
         }
-
-        # Simulate business metrics monitoring
-        current_memory = psutil.Process().memory_info().rss / 1024 / 1024
-
-        # Adjust metrics based on system load
-        if current_memory > 300:
-            metrics_result['recovery_metrics']['avg_response_time_ms'] = 75
-            metrics_result['recovery_metrics']['requests_per_second'] = 80
-
-        logger.info(f"Business metrics monitored during recovery: {metrics_result}")
-        return metrics_result
-
-    async def _test_revenue_protecting_recovery(self) -> Dict[str, Any]:
-        """
-        Test revenue-protecting recovery mechanisms.
-        MISSION CRITICAL: Prioritize high-value users during resource exhaustion.
-        """
-        protection_result = {
-            'premium_users_protected': True,
-            'premium_users_preserved': 0,
-            'regular_users_preserved': 0,
-            'revenue_protection_active': True
-        }
-
-        premium_count = 0
-        regular_count = 0
-
-        with self._registry_lock:
-            for user_id, manager_keys in self._user_manager_keys.items():
-                for manager_key in manager_keys:
-                    if manager_key in self._active_managers:
-                        manager = self._active_managers[manager_key]
-                        user_context = getattr(manager, 'user_context', None)
-
-                        if user_context:
-                            if self._is_enterprise_user(user_context):
-                                premium_count += 1
-                            else:
-                                regular_count += 1
-
-        protection_result['premium_users_preserved'] = premium_count
-        protection_result['regular_users_preserved'] = regular_count
-
-        logger.info(f"Revenue-protecting recovery tested: {protection_result}")
-        return protection_result
-
-    async def _lightweight_automatic_recovery(self):
-        """Perform lightweight automatic recovery to prevent resource exhaustion"""
-        try:
-            # Clean up only clearly inactive managers
-            inactive_keys = []
-
-            with self._registry_lock:
-                for manager_key, manager in self._active_managers.items():
-                    # Only clean up non-enterprise, clearly inactive managers
-                    user_context = getattr(manager, 'user_context', None)
-                    if user_context and not self._is_enterprise_user(user_context):
-                        health = self._manager_health.get(manager_key)
-                        if health and health.status == ManagerHealthStatus.INACTIVE:
-                            inactive_keys.append(manager_key)
-
-            # Clean up a few inactive managers
-            for key in inactive_keys[:3]:  # Limit cleanup to prevent disruption
-                await self._remove_manager(key)
-
-            logger.info(f"Lightweight automatic recovery completed: {len(inactive_keys[:3])} managers cleaned")
-
-        except Exception as e:
-            logger.error(f"Lightweight automatic recovery failed: {e}")
 
 
 # Global factory instance
-_global_factory: Optional[WebSocketManagerFactory] = None
+_enhanced_factory_instance: Optional[EnhancedWebSocketManagerFactory] = None
 _factory_lock = threading.Lock()
 
 
-def get_websocket_manager_factory() -> WebSocketManagerFactory:
-    """Get global WebSocket manager factory instance"""
-    global _global_factory
+def get_enhanced_websocket_factory() -> EnhancedWebSocketManagerFactory:
+    """Get the global enhanced WebSocket manager factory instance"""
+    global _enhanced_factory_instance
 
     with _factory_lock:
-        if _global_factory is None:
-            _global_factory = WebSocketManagerFactory()
-            logger.info("Global WebSocketManagerFactory instance created")
+        if _enhanced_factory_instance is None:
+            _enhanced_factory_instance = EnhancedWebSocketManagerFactory()
+            logger.info("Enhanced WebSocket Manager Factory initialized")
 
-        return _global_factory
-
-
-def reset_websocket_manager_factory():
-    """Reset global factory instance - FOR TESTING ONLY"""
-    global _global_factory
-
-    with _factory_lock:
-        _global_factory = None
-        logger.warning("Global WebSocketManagerFactory instance reset - FOR TESTING ONLY")
+        return _enhanced_factory_instance
 
 
-# Export public interface
+# Integration with existing websocket_manager.py
+async def create_manager_with_enhanced_cleanup(user_context: Any, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED) -> _UnifiedWebSocketManagerImplementation:
+    """
+    Create WebSocket manager using enhanced factory with emergency cleanup
+
+    This function integrates with the existing get_websocket_manager() function
+    to provide enhanced emergency cleanup capabilities.
+    """
+    factory = get_enhanced_websocket_factory()
+    return await factory.create_manager(user_context, mode)
+
+
+# Export key components
 __all__ = [
-    'WebSocketManagerFactory',
+    'EnhancedWebSocketManagerFactory',
+    'ZombieDetectionEngine',
     'CleanupLevel',
     'ManagerHealthStatus',
     'ManagerHealth',
-    'FactoryMetrics',
-    'get_websocket_manager_factory',
-    'reset_websocket_manager_factory'
+    'CircuitBreakerState',
+    'get_enhanced_websocket_factory',
+    'create_manager_with_enhanced_cleanup'
 ]
+
+logger.info("Enhanced WebSocket Manager Factory module loaded - Emergency cleanup system active")

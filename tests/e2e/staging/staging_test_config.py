@@ -21,14 +21,14 @@ from shared.isolated_environment import get_env
 class StagingConfig:
     """Staging environment configuration for E2E coordination tests."""
 
-    # Primary service endpoints (canonical URLs)
-    BASE_URL: str = "https://api.staging.netrasystems.ai"
-    AUTH_URL: str = "https://auth.staging.netrasystems.ai"
+    # Primary service endpoints (canonical URLs) - Issue #1278 domain fix
+    BASE_URL: str = "https://staging.netrasystems.ai"
+    AUTH_URL: str = "https://staging.netrasystems.ai"
     FRONTEND_URL: str = "https://staging.netrasystems.ai"
 
     # WebSocket coordination endpoints
-    WEBSOCKET_URL: str = "wss://api.staging.netrasystems.ai/ws"
-    WEBSOCKET_HTTP_URL: str = "https://api.staging.netrasystems.ai"
+    WEBSOCKET_URL: str = "wss://api-staging.netrasystems.ai/ws"
+    WEBSOCKET_HTTP_URL: str = "https://api-staging.netrasystems.ai"
 
     # Service coordination timeouts (Issue #1176 coordination gap mitigation)
     SERVICE_DISCOVERY_TIMEOUT: int = 30

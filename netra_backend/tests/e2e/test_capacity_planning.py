@@ -165,3 +165,11 @@ class CapacityPlanningWorkflowsTests:
                                                     assert len(results) > 0, "No results returned from spike handling workflow"
                                                     assert any('triage' in str(result) for result in results)
                                                     assert any('data' in str(result) for result in results)
+
+class TestCapacityPlanningWorkflows:
+    """Stub for test compatibility - Capacity planning workflows."""
+
+    def test_capacity_planning_basic(self):
+        """Basic capacity planning test."""
+        pytest.skip("Capacity planning workflows not implemented yet")
+

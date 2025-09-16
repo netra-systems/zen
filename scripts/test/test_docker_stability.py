@@ -31,7 +31,8 @@ def test_postgres():
 def test_redis():
     """Test Redis connectivity."""
     try:
-        r = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6380, db=0)
+        import redis
+        r = redis.Redis(host='localhost', port=6380, db=0)  # FIXED: Removed await from non-async function
         r.ping()
         return True, "Redis is accessible"
     except Exception as e:

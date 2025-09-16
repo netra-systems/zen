@@ -28,7 +28,16 @@ import asyncio
 import gc
 import pytest
 import psutil
-import resource
+# Platform-specific resource import (Unix vs Windows)
+try:
+    import resource  # Unix/Linux only
+except ImportError:
+    # Windows fallback - provide stub implementation
+    class MockResource:
+        RUSAGE_SELF = 0
+        def getrusage(self, who):
+            return type('Usage', (), {'ru_maxrss': 0, 'ru_utime': 0, 'ru_stime': 0})()
+    resource = MockResource()
 import time
 import uuid
 import weakref

@@ -1,6 +1,14 @@
 # Staging E2E Test Report - Pytest Results
 
+<<<<<<< HEAD
 **Generated:** 2025-09-15 23:34:57
+=======
+<<<<<<< HEAD
+**Generated:** 2025-09-15 23:50:24
+=======
+**Generated:** 2025-09-16 03:22:23
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
+>>>>>>> 05c6be3dfb1dc6976637367390a12e4d2c3f76d2
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,8 +18,17 @@
 - **Passed:** 7 (100.0%)
 - **Failed:** 0 (0.0%)
 - **Skipped:** 0
+<<<<<<< HEAD
 - **Duration:** 0.29 seconds
 - **Pass Rate:** 100.0%
+=======
+<<<<<<< HEAD
+- **Duration:** 267.16 seconds
+=======
+- **Duration:** 34.94 seconds
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
+- **Pass Rate:** 0.0%
+>>>>>>> 05c6be3dfb1dc6976637367390a12e4d2c3f76d2
 
 ## Test Results by Priority
 
@@ -39,7 +56,15 @@ test_golden_path_end_to_end_staging_validation.py::test_golden_path_websocket_ev
 test_golden_path_end_to_end_staging_validation.py::test_staging_environment_health_check PASSED
 
 ==================================================
+<<<<<<< HEAD
 7 passed, 0 failed in 0.29s
+=======
+<<<<<<< HEAD
+0 passed, 0 failed in 267.16s
+=======
+0 passed, 0 failed in 34.94s
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
+>>>>>>> 05c6be3dfb1dc6976637367390a12e4d2c3f76d2
 ```
 
 ## Test Coverage Matrix

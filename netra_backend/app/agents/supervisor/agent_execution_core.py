@@ -617,23 +617,24 @@ class AgentExecutionCore:
                         f"Possible_causes: Agent stuck, complex processing, external API delays. "
                         f"Recommendation: {'Upgrade to Enterprise tier for 300s timeout' if selected_tier.value != 'ENTERPRISE' else 'Contact support for investigation'}."
                     )
-                    
+
                     # Transition to timeout phase
                     await self.agent_tracker.transition_state(
-                        state_exec_id, 
+                        state_exec_id,
                         AgentExecutionPhase.TIMEOUT,
                         metadata={'error': str(e), 'error_type': 'timeout'},
                         websocket_manager=self.websocket_bridge
                     )
-                    
+
                     # CRITICAL FIX: Send WebSocket error notification for timeout (Issue #463 remediation)
-                    if self.websocket_bridge and hasattr(self.websocket_bridge, 'notify_agent_error'):
+                    if self.websocket_bridge:
                         try:
                             await self.websocket_bridge.notify_agent_error(
                                 context.run_id,
                                 context.agent_name,
                                 f"Agent '{context.agent_name}' timed out after {execution_timeout}s "
-                                f"(tier: {selected_tier.value})"
+                                f"(tier: {selected_tier.value}). "
+                                f"The agent took longer than expected to process your request."
                             )
                         except Exception as notify_error:
                             # Don't let notification failures break agent execution flow

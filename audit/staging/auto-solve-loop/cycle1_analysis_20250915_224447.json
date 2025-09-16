@@ -1,0 +1,721 @@
+{
+  "timestamp": "2025-09-15T22:44:47.676474",
+  "total_logs": 337,
+  "issues_by_severity": {
+    "ERROR": {
+      "websocket": 63,
+      "database": 6,
+      "timeout": 6,
+      "connection": 5,
+      "auth": 3,
+      "startup": 3
+    },
+    "WARNING": {},
+    "NOTICE": {},
+    "INFO": {}
+  },
+  "top_errors": [],
+  "recurring_patterns": [
+    {
+      "message": "{\"@type\": \"type.googleapis.com/google.cloud.audit.AuditLog\", \"authenticationInfo\": {\"principalEmail\": \"github-staging-deployer@netra-staging.iam.gserviceaccount.com\", \"serviceAccountKeyName\": \"//iam.g",
+      "count": 37
+    },
+    {
+      "message": "Sentry SDK not available - install sentry-sdk[fastapi] to enable error tracking",
+      "count": 30
+    },
+    {
+      "message": "SERVICE_ID contained whitespace - sanitized from 'netra-backend\\n' to 'netra-backend'",
+      "count": 30
+    },
+    {
+      "message": "Container called exit(3).",
+      "count": 27
+    },
+    {
+      "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/websocket_core/__init__.py\", line 117, in <module>\n    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocke",
+      "count": 25
+    },
+    {
+      "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+      "count": 13
+    },
+    {
+      "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+      "count": 13
+    },
+    {
+      "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+      "count": 13
+    },
+    {
+      "message": "No message content",
+      "count": 13
+    },
+    {
+      "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+      "count": 12
+    }
+  ],
+  "service_issues": {
+    "netra-backend-staging": [
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:44:39.400192+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:44:39.400154+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:44:39.400118+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:39.399058+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:39.396781+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:44:36.849737+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:44:36.849668+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:44:36.849608+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:36.848062+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:36.845117+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:44:36.661552+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:44:36.661497+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:44:36.661449+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:36.659617+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:36.656047+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:44:34.978795+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:44:34.976953+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:44:34.976879+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:34.975002+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:34.971728+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:44:33.451071+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:44:33.451045+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:44:33.451021+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:33.449847+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:33.447697+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:44:30.807127+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:44:30.807084+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:44:30.807047+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:30.805443+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:30.802133+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:44:28.277315+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:44:28.277290+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:44:28.277267+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:28.276053+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:28.274161+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:44:26.103169+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:44:26.103077+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:44:26.103012+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:26.101308+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:26.098192+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:44:23.325783+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:44:23.325703+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:44:23.325631+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:23.323805+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:23.320421+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:44:22.379873+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:44:22.379835+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:44:22.379800+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:22.379733+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:22.379725+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:44:21.672738+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:44:21.672687+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:44:21.672638+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:21.670957+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:21.667755+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:44:17.535403+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:44:17.535335+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:44:17.535266+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:17.533191+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:44:17.529830+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:44:16.506025+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:44:16.505988+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:44:16.505957+00:00",
+        "severity": "ERROR"
+      }
+    ],
+    "netra-auth-service": [
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:44:30.854089+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:44:30.854089+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:44:30.854089+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:44:30.854089+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:44:30.854089+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:44:30.854056+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:44:30.854056+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:44:30.854056+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:44:30.854056+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:44:30.854056+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:44:30.854029+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:44:30.854029+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:44:30.854029+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T05:44:30.853999+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T05:44:30.853999+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:44:30.842454+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:44:30.842454+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:44:30.842454+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:44:30.842454+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:44:30.842454+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:44:30.842429+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:44:30.842429+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:44:30.842429+00:00",
+        "severity": "ERROR"
+      }
+    ]
+  },
+  "http_errors": [
+    {
+      "status": 503,
+      "url": "https://auth.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:44:29.043647+00:00",
+      "service": "netra-auth-service"
+    },
+    {
+      "status": 503,
+      "url": "https://auth.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:44:29.041065+00:00",
+      "service": "netra-auth-service"
+    },
+    {
+      "status": 503,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:44:29.041014+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 503,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:44:29.038391+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 503,
+      "url": "https://auth.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:44:29.020738+00:00",
+      "service": "netra-auth-service"
+    },
+    {
+      "status": 503,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:44:29.015729+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 404,
+      "url": "https://staging.netrasystems.ai/health/backend",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:44:28.999710+00:00",
+      "service": "netra-frontend-staging"
+    },
+    {
+      "status": 404,
+      "url": "https://staging.netrasystems.ai/health/backend",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:44:28.937326+00:00",
+      "service": "netra-frontend-staging"
+    },
+    {
+      "status": 404,
+      "url": "https://staging.netrasystems.ai/health/startup",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:44:28.933166+00:00",
+      "service": "netra-frontend-staging"
+    },
+    {
+      "status": 404,
+      "url": "https://staging.netrasystems.ai/health/startup",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:44:28.931910+00:00",
+      "service": "netra-frontend-staging"
+    },
+    {
+      "status": 404,
+      "url": "https://staging.netrasystems.ai/health/ready",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:44:28.931428+00:00",
+      "service": "netra-frontend-staging"
+    },
+    {
+      "status": 404,
+      "url": "https://staging.netrasystems.ai/health/ready",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:44:28.931193+00:00",
+      "service": "netra-frontend-staging"
+    },
+    {
+      "status": 404,
+      "url": "https://staging.netrasystems.ai/health/startup",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:44:28.930809+00:00",
+      "service": "netra-frontend-staging"
+    },
+    {
+      "status": 404,
+      "url": "https://staging.netrasystems.ai/health/backend",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:44:28.929482+00:00",
+      "service": "netra-frontend-staging"
+    },
+    {
+      "status": 404,
+      "url": "https://staging.netrasystems.ai/health/ready",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:44:28.923462+00:00",
+      "service": "netra-frontend-staging"
+    },
+    {
+      "status": 405,
+      "url": "https://staging.netrasystems.ai/login",
+      "method": "POST",
+      "timestamp": "2025-09-16T05:43:47.168742+00:00",
+      "service": "netra-frontend-staging"
+    },
+    {
+      "status": 404,
+      "url": "https://staging.netrasystems.ai/auth/login",
+      "method": "POST",
+      "timestamp": "2025-09-16T05:43:47.066556+00:00",
+      "service": "netra-frontend-staging"
+    },
+    {
+      "status": 404,
+      "url": "https://staging.netrasystems.ai/api/v1/auth/login",
+      "method": "POST",
+      "timestamp": "2025-09-16T05:43:46.921271+00:00",
+      "service": "netra-frontend-staging"
+    },
+    {
+      "status": 404,
+      "url": "https://staging.netrasystems.ai/api/auth/login",
+      "method": "POST",
+      "timestamp": "2025-09-16T05:43:46.818722+00:00",
+      "service": "netra-frontend-staging"
+    }
+  ],
+  "connection_issues": [],
+  "database_issues": [],
+  "websocket_issues": [],
+  "auth_issues": []
+}

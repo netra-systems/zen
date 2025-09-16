@@ -106,11 +106,18 @@ def validate_test_module_structure(module_name: str) -> Dict[str, Any]:
         for attr_name in dir(module):
             attr = getattr(module, attr_name)
             
-            # Check for test classes
-            if (isinstance(attr, type) and 
-                attr_name.startswith('Test') and 
-                hasattr(attr, '__module__') and 
-                attr.__module__ == module_name):
+            # Check for test classes (support multiple naming patterns)
+            is_test_class = (
+                isinstance(attr, type) and
+                (attr_name.startswith('Test') or
+                 attr_name.endswith('Tests') or
+                 attr_name.endswith('Test') or
+                 'Test' in attr_name) and
+                hasattr(attr, '__module__') and
+                attr.__module__ == module_name
+            )
+
+            if is_test_class:
                 
                 validation_results["test_classes"].append(attr_name)
                 

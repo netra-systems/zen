@@ -18,13 +18,21 @@ EXPECTED AFTER REMEDIATION: These tests will PASS, proving SSOT compliance.
 Business Impact: Protects $500K+ ARR Golden Path functionality by ensuring real services.
 """
 
+# CRITICAL: Import path configuration for direct test execution
+# Ensures tests work both directly and through unified_test_runner.py
+import sys
+import os
+from pathlib import Path
+
+# Get project root (two levels up from tests/mission_critical/)
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 import ast
 import importlib
 import inspect
-import os
-import sys
 import types
-from pathlib import Path
 from typing import Dict, List, Set, Tuple, Any
 import unittest
 from unittest.mock import MagicMock, AsyncMock
