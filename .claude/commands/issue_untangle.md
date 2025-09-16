@@ -41,10 +41,14 @@ md_file_name = ISSUE_UNTANGLE_{ISSUE NUMBER}_{datetime}_{your name}.md
 Save output to a .md file with md_file_name format.
 
 SNST B:
-    Load content from @md_file_name
+    
+    1. Load content from @md_file_name
 
-    Make a new "Master plan"
+    2. Make a new "Master plan"
     Deeply think and plan out what to do based on the content of the issue.
-    Make a new git issue (or set of issues) and output relevant plan elements and links to new md files there
-    Link the old ISSUE
-    Close the old ISSUE.
+    save it.
+
+    3. Make a new git issue (or set of issues) and output relevant plan elements and links from md files to git issues. for each newly created issue (if any)
+        Link the old ISSUE
+        Link associated new issues
+        Close the old ISSUE.
