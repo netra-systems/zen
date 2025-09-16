@@ -1,0 +1,1 @@
+"""Issue #824 Phase 1 SSOT WebSocket Manager tests."""

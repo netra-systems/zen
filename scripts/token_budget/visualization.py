@@ -8,7 +8,8 @@ def render_progress_bar(used: int, total: int, width: int = 20) -> str:
     percentage = min(used / total, 1.0)
     filled_width = int(percentage * width)
 
-    bar = '█' * filled_width + '░' * (width - filled_width)
+    # Use ASCII characters for Windows compatibility
+    bar = '#' * filled_width + '-' * (width - filled_width)
 
     # Color coding (ANSI escape codes)
     color_start = '\033[92m'  # Green

@@ -159,6 +159,63 @@ class DatabaseManager:
             logger.error(f"Database initialization error: {type(e).__name__}: {str(e)}")
             raise classified_error
 
+    async def _test_connection_with_retry(self, engine: AsyncEngine, max_retries: int = 3) -> bool:
+        """Test database connection with enhanced retry logic for Issue #1278 infrastructure resilience."""
+        # Get infrastructure-aware configuration
+        env = get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
+        
+        # Issue #1278: Infrastructure-aware retry configuration
+        if environment in ["staging", "production"]:
+            # Cloud environments need more retries and longer timeouts due to VPC/infrastructure delays
+            max_retries = max(max_retries, 5)  # Minimum 5 retries for cloud
+            base_timeout = 10.0  # 10 second base timeout for infrastructure delays
+            retry_backoff = 2.0  # 2 second exponential backoff
+        else:
+            base_timeout = 5.0
+            retry_backoff = 1.0
+        
+        # Try to get infrastructure-aware timeout if monitoring is available
+        try:
+            from netra_backend.app.infrastructure.vpc_connector_monitoring import get_capacity_aware_database_timeout
+            infrastructure_timeout = get_capacity_aware_database_timeout(environment, "connection_test") 
+            connection_timeout = max(base_timeout, infrastructure_timeout)
+            logger.info(f"Using infrastructure-aware connection timeout: {connection_timeout}s for {environment}")
+        except Exception:
+            connection_timeout = base_timeout
+            logger.debug(f"Using default connection timeout: {connection_timeout}s")
+        
+        for attempt in range(max_retries):
+            try:
+                # Issue #1278: Use asyncio.wait_for for timeout control
+                async def test_connection():
+                    async with engine.begin() as conn:
+                        await conn.execute(text("SELECT 1"))
+                
+                await asyncio.wait_for(test_connection(), timeout=connection_timeout)
+                logger.info(f"✅ Database connection test successful on attempt {attempt + 1}/{max_retries} ({environment} environment)")
+                return True
+                
+            except asyncio.TimeoutError:
+                logger.warning(f"⏰ Database connection test timed out after {connection_timeout}s on attempt {attempt + 1}/{max_retries}")
+                if attempt < max_retries - 1:
+                    # Issue #1278: Exponential backoff for infrastructure recovery
+                    wait_time = retry_backoff * (2 ** attempt)
+                    logger.info(f"Waiting {wait_time}s before retry (infrastructure recovery time)")
+                    await asyncio.sleep(wait_time)
+                
+            except Exception as e:
+                error_type = type(e).__name__
+                logger.warning(f"❌ Database connection test failed on attempt {attempt + 1}/{max_retries}: {error_type}: {e}")
+                if attempt < max_retries - 1:
+                    wait_time = retry_backoff * (2 ** attempt)
+                    await asyncio.sleep(wait_time)
+                else:
+                    logger.error(f"🚨 Database connection test failed after all {max_retries} retry attempts in {environment} environment")
+                    return False
+        
+        return False
+    
     def get_engine(self, name: str = 'primary') -> AsyncEngine:
         """Get database engine by name with auto-initialization safety."""
         if not self._initialized:
@@ -193,6 +250,14 @@ class DatabaseManager:
     async def get_session(self, engine_name: str = 'primary', user_context: Optional[Any] = None, operation_type: str = "unknown"):
         """Get async database session with enhanced exception handling and user isolation."""
         session_start_time = time.time()
+
+        # Circuit breaker protection for database operations
+        try:
+            from netra_backend.app.resilience.circuit_breaker import get_circuit_breaker
+            database_circuit_breaker = get_circuit_breaker("database")
+        except ImportError:
+            # Circuit breaker not available during startup, proceed normally
+            database_circuit_breaker = None
 
         # Extract user information from context for proper isolation
         user_id = None
@@ -245,6 +310,11 @@ class DatabaseManager:
         self._pool_stats['active_sessions_count'] += 1
 
         engine = self.get_engine(engine_name)
+
+        # Circuit breaker monitoring for database operations
+        circuit_breaker_start_time = time.time()
+        session_success = False
+
         async with AsyncSession(engine) as session:
             original_exception = None
             transaction_start_time = time.time()
@@ -261,6 +331,9 @@ class DatabaseManager:
 
                 logger.info(f"✅ Session {session_id} committed successfully - Operation: {operation_type}, "
                            f"User: {user_id or 'system'}, Duration: {session_duration:.3f}s, Commit: {commit_duration:.3f}s")
+
+                # Record successful operation for circuit breaker
+                session_success = True
 
             except (DeadlockError, ConnectionError) as e:
                 # Handle specific transaction errors with enhanced context
@@ -306,6 +379,22 @@ class DatabaseManager:
 
             finally:
                 close_start_time = time.time()
+
+                # Record circuit breaker metrics
+                if database_circuit_breaker:
+                    try:
+                        operation_duration = time.time() - circuit_breaker_start_time
+                        if session_success:
+                            await database_circuit_breaker._record_success(operation_duration)
+                        else:
+                            from netra_backend.app.resilience.circuit_breaker import FailureType
+                            if original_exception:
+                                failure_type = database_circuit_breaker._classify_failure(original_exception)
+                            else:
+                                failure_type = FailureType.UNKNOWN_ERROR
+                            await database_circuit_breaker._record_failure(failure_type, str(original_exception) if original_exception else "Unknown failure")
+                    except Exception as cb_error:
+                        logger.warning(f"Circuit breaker recording failed: {cb_error}")
 
                 # Enhanced session cleanup and tracking
                 try:

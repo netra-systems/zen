@@ -271,7 +271,7 @@ class WebSocketAuthenticationHealthCheck:
             # Check authentication configuration
             auth_service_url = self.env.get("AUTH_SERVICE_URL")
             internal_auth_url = self.env.get("AUTH_SERVICE_INTERNAL_URL")
-            jwt_secret = self.env.get("JWT_SECRET_KEY") or self.env.get("JWT_SECRET")
+            jwt_secret = self.env.get("JWT_SECRET_KEY")
             
             issues = []
             

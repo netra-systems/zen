@@ -79,6 +79,10 @@ class TimeoutConfig:
 class CloudNativeTimeoutManager:
     """SSOT manager for cloud-native timeout configurations.
     
+    **SSOT COMPLIANCE**: This class has been consolidated to delegate execution tracking
+    to the AgentExecutionTracker SSOT implementation. TimeoutManager functionality is
+    provided by the unified agent_execution_tracker.py module.
+    
     **CRITICAL BUSINESS REQUIREMENT**: Timeout hierarchy must ensure:
     - WebSocket timeouts > Agent execution timeouts (coordination)
     - Cloud Run environments get longer timeouts (cold starts)

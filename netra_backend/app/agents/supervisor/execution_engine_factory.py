@@ -50,6 +50,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
 )
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker  # SSOT execution tracking
 from shared.logging.unified_logging_ssot import get_logger
 
 logger = get_logger(__name__)
@@ -58,17 +59,19 @@ logger = get_logger(__name__)
 ssot_logger = get_logger(f"{__name__}.ssot")
 
 
-class ExecutionEngineFactoryError(Exception):
+class UserExecutionEngineError(Exception):
     """Raised when execution engine factory operations fail."""
     pass
 
+# Compatibility alias for expected import name
+ExecutionEngineFactoryError = UserExecutionEngineError
 
-class SSOTValidationError(ExecutionEngineFactoryError):
+class SSOTValidationError(UserExecutionEngineError):
     """Raised when SSOT validation fails in execution engine factory."""
     pass
 
 
-class UserIsolationError(ExecutionEngineFactoryError):
+class UserIsolationError(UserExecutionEngineError):
     """Raised when user isolation validation fails."""
     pass
 
@@ -123,6 +126,10 @@ class ExecutionEngineFactory:
         # Store infrastructure managers (optional - for tests and infrastructure validation)
         self._database_session_manager = database_session_manager
         self._redis_manager = redis_manager
+        
+        # SSOT INTEGRATION: Agent execution tracking
+        self._execution_tracker = AgentExecutionTracker()
+        ssot_logger.info("✅ SSOT COMPLIANT: AgentExecutionTracker integrated for execution state management")
         
         # Active engines registry for lifecycle management
         self._active_engines: Dict[str, UserExecutionEngine] = {}
@@ -216,7 +223,7 @@ class ExecutionEngineFactory:
             validated_context = validate_user_context(context)
         except (TypeError, InvalidContextError) as e:
             logger.error(f"Invalid user context for engine creation: {e}")
-            raise ExecutionEngineFactoryError(f"Invalid user context: {e}")
+            raise UserExecutionEngineError(f"Invalid user context: {e}")
         
         start_time = time.time()
         engine_key = f"{validated_context.user_id}_{validated_context.run_id}_{int(time.time() * 1000)}"
@@ -232,7 +239,7 @@ class ExecutionEngineFactory:
                 agent_factory = create_agent_instance_factory(validated_context)
                 
                 if not agent_factory:
-                    raise ExecutionEngineFactoryError("AgentInstanceFactory creation failed")
+                    raise UserExecutionEngineError("AgentInstanceFactory creation failed")
                 
                 # Create user WebSocket emitter via factory
                 websocket_emitter = await self._create_user_websocket_emitter(
@@ -287,7 +294,7 @@ class ExecutionEngineFactory:
         except Exception as e:
             self._factory_metrics['creation_errors'] += 1
             logger.error(f"Failed to create UserExecutionEngine for user {validated_context.user_id}: {e}")
-            raise ExecutionEngineFactoryError(f"Engine creation failed: {e}")
+            raise UserExecutionEngineError(f"Engine creation failed: {e}")
     
     async def _enforce_user_engine_limits(self, user_id: str) -> None:
         """Enforce per-user engine limits to prevent resource exhaustion.
@@ -306,7 +313,7 @@ class ExecutionEngineFactory:
         
         if user_engine_count >= self._max_engines_per_user:
             self._factory_metrics['user_limit_rejections'] += 1
-            raise ExecutionEngineFactoryError(
+            raise UserExecutionEngineError(
                 f"User {user_id} has reached maximum engine limit "
                 f"({user_engine_count}/{self._max_engines_per_user})"
             )
@@ -365,7 +372,7 @@ class ExecutionEngineFactory:
 
         except Exception as e:
             logger.error(f"Failed to create UnifiedWebSocketEmitter: {e}")
-            raise ExecutionEngineFactoryError(f"WebSocket emitter creation failed: {e}")
+            raise UserExecutionEngineError(f"WebSocket emitter creation failed: {e}")
     
     @asynccontextmanager
     async def user_execution_scope(self, context: UserExecutionContext) -> AsyncGenerator[UserExecutionEngine, None]:
@@ -869,7 +876,7 @@ class ExecutionEngineFactory:
 # ISSUE #1116 REMEDIATION: Phase 1 Singleton to User-Scoped Factory Migration
 # Replace global singleton with user-scoped factory for multi-user safety
 
-class ExecutionEngineFactoryManager:
+class UserExecutionEngineManager:
     """User-scoped ExecutionEngineFactory manager for multi-user isolation.
 
     CRITICAL SECURITY: Prevents cross-user data contamination by ensuring
@@ -913,14 +920,14 @@ class ExecutionEngineFactoryManager:
                         )
                         self._user_factories[user_context] = user_factory
                     else:
-                        raise ExecutionEngineFactoryError(
+                        raise UserExecutionEngineError(
                             "ExecutionEngineFactory not configured during startup. "
                             "The factory requires a WebSocket bridge for proper agent execution. "
                             "Check system initialization in smd.py - ensure ExecutionEngineFactory "
                             "is created with websocket_bridge parameter during startup."
                         )
                 except (ImportError, AttributeError) as e:
-                    raise ExecutionEngineFactoryError(
+                    raise UserExecutionEngineError(
                         f"ExecutionEngineFactory not configured during startup: {e}"
                     )
 
@@ -936,7 +943,7 @@ class ExecutionEngineFactoryManager:
                     await factory.cleanup()
 
 # Factory manager instance for creating user-scoped factories
-_factory_manager = ExecutionEngineFactoryManager()
+_factory_manager = UserExecutionEngineManager()
 # SINGLETON ELIMINATION (Issue #1186 Phase 3): Removed global factory instance
 # Factory instances are now managed per-user to prevent isolation violations
 
@@ -992,7 +999,7 @@ async def configure_execution_engine_factory(
 
 
 # COMPATIBILITY ALIASES for legacy import patterns
-class RequestScopedExecutionEngineFactory(ExecutionEngineFactory):
+class UserScopedEngineFactory(ExecutionEngineFactory):
     """Legacy alias for ExecutionEngineFactory - backward compatibility only."""
     pass
 

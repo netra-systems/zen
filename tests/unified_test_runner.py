@@ -508,7 +508,7 @@ class JsonVerbosityController:
             }
             # Include failure information if present
             if not details.get("success", True):
-                filtered[name]["error"] = details.get("error", "Unknown error")
+                filtered[name]["error"] = details.get("errors", "Unknown error")
         return filtered
 
     def _filter_detailed_results(self, detailed_results: List) -> List:
@@ -1334,16 +1334,51 @@ class UnifiedTestRunner:
             # This prevents false failures when dependencies fail but requested categories pass
             if self.execution_plan and hasattr(self.execution_plan, 'requested_categories'):
                 requested_results = {
-                    cat: results[cat] for cat in self.execution_plan.requested_categories 
+                    cat: results[cat] for cat in self.execution_plan.requested_categories
                     if cat in results
                 }
-                return 0 if all(r["success"] for r in requested_results.values()) else 1
+
+                # CRITICAL FIX: Require actual test execution, not just zero failures
+                # Extract total tests run across all requested categories
+                total_tests_run = 0
+                for cat_name, result in requested_results.items():
+                    test_counts = self._extract_test_counts_from_result(result)
+                    total_tests_run += test_counts.get("total", 0)
+
+                # Exit code 0 only if ALL conditions met:
+                # 1. All categories succeeded
+                # 2. At least one test was actually executed
+                all_succeeded = all(r["success"] for r in requested_results.values())
+                if not all_succeeded:
+                    return 1  # Test failures
+                elif total_tests_run == 0:
+                    print("\n❌ FAILURE: No tests were executed - this indicates infrastructure failure")
+                    print("   Check import issues, test collection failures, or configuration problems")
+                    return 1  # No tests run is a failure
+                else:
+                    return 0  # Success with actual test execution
+
             else:
                 # Fallback to original behavior if execution plan doesn't have requested_categories
-                # Handle empty results case - no categories found is considered success
+                # CRITICAL FIX: Also require tests to be run in fallback mode
                 if not results:
-                    return 0
-                return 0 if all(r["success"] for r in results.values()) else 1
+                    print("\n❌ FAILURE: No test categories were executed")
+                    return 1
+
+                # Check if any tests were actually run
+                total_tests_run = 0
+                for result in results.values():
+                    test_counts = self._extract_test_counts_from_result(result)
+                    total_tests_run += test_counts.get("total", 0)
+
+                all_succeeded = all(r["success"] for r in results.values())
+                if not all_succeeded:
+                    return 1  # Test failures
+                elif total_tests_run == 0:
+                    print("\n❌ FAILURE: No tests were executed - this indicates infrastructure failure")
+                    return 1  # No tests run is a failure
+                else:
+                    return 0  # Success with actual test execution
         
         finally:
             # CRITICAL: Always cleanup test environment after tests complete
@@ -2447,13 +2482,17 @@ class UnifiedTestRunner:
         # Filter categories that exist in the system - enhanced for combined categories (Issue #1270)
         def is_valid_category(category: str) -> bool:
             """Check if a category (simple or combined) is valid."""
-            if '+' in category:
-                # Combined category: validate each part separately
-                parts = [part.strip() for part in category.split('+')]
-                return all(part in self.category_system.categories for part in parts)
-            else:
-                # Simple category: direct validation
-                return category in self.category_system.categories
+            try:
+                if '+' in category:
+                    # Combined category: validate each part separately
+                    parts = [part.strip() for part in category.split('+')]
+                    return all(self.category_system.get_category(part) is not None for part in parts)
+                else:
+                    # Simple category: direct validation
+                    return self.category_system.get_category(category) is not None
+            except Exception as e:
+                logger.warning(f"Category validation error for '{category}': {e}")
+                return False
 
         valid_categories = [cat for cat in categories if is_valid_category(cat)]
         if valid_categories != categories:
@@ -2974,7 +3013,11 @@ class UnifiedTestRunner:
                 result.stdout = result.stdout.encode('utf-8', errors='replace').decode('utf-8', errors='replace')
             if result.stderr:
                 result.stderr = result.stderr.encode('utf-8', errors='replace').decode('utf-8', errors='replace')
-            success = result.returncode == 0
+            # ISSUE #1176 PHASE 2 FIX: Validate test collection before claiming success
+            initial_success = result.returncode == 0
+            success = self._validate_test_execution_success(
+                initial_success, result.stdout, result.stderr, service, category_name
+            )
         except subprocess.TimeoutExpired:
             print(f"[ERROR] {service} tests timed out after {timeout_seconds} seconds")
             print(f"[ERROR] Command: {cmd}")
@@ -3480,7 +3523,83 @@ class UnifiedTestRunner:
         test_counts["total"] = test_counts["passed"] + test_counts["failed"]
         
         return test_counts
-    
+
+    def _validate_test_execution_success(
+        self, initial_success: bool, stdout: str, stderr: str, service: str, category_name: str
+    ) -> bool:
+        """
+        Validate that test execution success is legitimate.
+
+        ISSUE #1176 PHASE 2 FIX: Prevent false success when 0 tests are collected.
+        This addresses the "0 tests executed but claiming success" pattern.
+        """
+        if not initial_success:
+            return False  # If pytest failed, definitely not successful
+
+        # Parse stdout for collection and execution information
+        import re
+
+        # Check for import failures that prevent test collection
+        if "ImportError" in stderr or "ModuleNotFoundError" in stderr:
+            print(f"[ERROR] {service}:{category_name} - Import failures detected in test collection")
+            print(f"[ERROR] stderr: {stderr[:500]}...")
+            return False
+
+        # Check for test collection patterns
+        collected_pattern = r'(\d+) tests? collected'
+        collected_match = re.search(collected_pattern, stdout)
+
+        # Check for "no tests ran" patterns
+        no_tests_patterns = [
+            r'no tests ran',
+            r'0 passed',
+            r'collected 0 items',
+            r'= warnings summary =$',  # Often indicates no tests were collected
+        ]
+
+        # Look for execution patterns that indicate tests actually ran
+        execution_patterns = [
+            r'(\d+) passed',
+            r'(\d+) failed',
+            r'(\d+) skipped',
+            r'test session starts',
+            r'::',  # Test path indicator
+        ]
+
+        collected_count = 0
+        if collected_match:
+            collected_count = int(collected_match.group(1))
+
+        # Check if no tests pattern matches
+        no_tests_detected = any(re.search(pattern, stdout, re.IGNORECASE) for pattern in no_tests_patterns)
+
+        # Check if execution patterns are present
+        execution_detected = any(re.search(pattern, stdout, re.IGNORECASE) for pattern in execution_patterns)
+
+        # CRITICAL VALIDATION: Fail if 0 tests collected but claiming success
+        if collected_count == 0 and no_tests_detected and not execution_detected:
+            print(f"[ERROR] {service}:{category_name} - 0 tests executed but claiming success")
+            print(f"[ERROR] This indicates import failures or missing test modules")
+            print(f"[ERROR] stdout sample: {stdout[:300]}...")
+            return False
+
+        # Additional validation: Check for specific warning signs
+        warning_signs = [
+            "cannot import name",
+            "No module named",
+            "ImportError:",
+            "ModuleNotFoundError:",
+            "collection failed",
+        ]
+
+        for warning in warning_signs:
+            if warning in stdout or warning in stderr:
+                print(f"[ERROR] {service}:{category_name} - Collection issue detected: {warning}")
+                return False
+
+        # If we get here, success appears legitimate
+        return True
+
     def _validate_e2e_test_timing(self, category_name: str, result: Dict) -> bool:
         """Validate that e2e tests have non-zero execution time.
         

@@ -20,7 +20,8 @@ from functools import wraps
 # Import the actual implementation
 from netra_backend.app.websocket_core.unified_manager import (
     _UnifiedWebSocketManagerImplementation,
-    RegistryCompat
+    RegistryCompat,
+    MAX_CONNECTIONS_PER_USER
 )
 from netra_backend.app.websocket_core.types import (
     WebSocketManagerMode,
@@ -172,6 +173,33 @@ class UnifiedWebSocketManager(_UnifiedWebSocketManagerImplementation):
     def __init__(self, *args, **kwargs):
         _log_import_usage("Class Import", "canonical_import_patterns.UnifiedWebSocketManager")
         super().__init__(*args, **kwargs)
+
+
+class WebSocketManagerFactory:
+    """
+    CANONICAL PATTERN 2a: Factory Class Pattern
+    
+    Factory class for creating WebSocket manager instances.
+    Provides backwards compatibility with factory-based patterns.
+    
+    Example:
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerFactory
+        
+        factory = WebSocketManagerFactory()
+        manager = factory.create_manager(user_context=ctx)
+    """
+    
+    @staticmethod
+    def create_manager(user_context: Optional[Any] = None, **kwargs) -> _UnifiedWebSocketManagerImplementation:
+        """Create a WebSocket manager instance with user context."""
+        _log_import_usage("Factory Class", "canonical_import_patterns.WebSocketManagerFactory.create_manager")
+        return get_websocket_manager(user_context=user_context, **kwargs)
+    
+    @staticmethod
+    def get_manager(user_context: Optional[Any] = None, **kwargs) -> _UnifiedWebSocketManagerImplementation:
+        """Alias for create_manager for backwards compatibility."""
+        _log_import_usage("Factory Class", "canonical_import_patterns.WebSocketManagerFactory.get_manager")
+        return get_websocket_manager(user_context=user_context, **kwargs)
 
 
 # Type alias for backwards compatibility
@@ -437,8 +465,10 @@ __all__ = [
     # Pattern 2: Class Imports
     'UnifiedWebSocketManager',
     'WebSocketManager',
+    'WebSocketManagerFactory',
     'WebSocketConnection',
     'RegistryCompat',
+    'MAX_CONNECTIONS_PER_USER',
     '_serialize_message_safely',
     '_get_enum_key_representation',
     'create_server_message',

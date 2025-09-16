@@ -1,0 +1,1 @@
+# WebSocket Event Structure Tests Package

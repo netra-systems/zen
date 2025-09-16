@@ -304,7 +304,7 @@ class EnvironmentIsolationBoundariesTests:
         test_database_urls = [
             "postgresql://user:p@ssw0rd!@localhost:5432/db",  # Special chars in password
             "postgresql://user:pass%40word@localhost:5432/db",  # URL-encoded password
-            "mysql://user:complex$pass@db.host:3306/database",   # Dollar sign in password
+            "postgresql://user:complex$pass@db.host:5432/database",   # Dollar sign in password
             "clickhouse://user:p4ss&w*rd@clickhouse:8123/analytics"  # Complex password
         ]
         

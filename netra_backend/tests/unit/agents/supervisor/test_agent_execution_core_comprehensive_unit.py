@@ -124,9 +124,15 @@ class AgentExecutionCoreUnitTests(SSotBaseTestCase):
     def sample_state(self):
         """Real UserExecutionContext for security-compliant testing.
 
+<<<<<<< HEAD
+        CRITICAL: Uses UserExecutionContext instead of deprecated DeepAgentState
+        to pass security validation. DeepAgentState is forbidden due to user
+        isolation risks. See Issue #271 remediation plan.
+=======
         CRITICAL: Uses real UserExecutionContext instead of deprecated DeepAgentState
         to pass security validation. Mock objects fail isinstance() checks
         which are required for Issue #159 security compliance.
+>>>>>>> 05c6be3dfb1dc6976637367390a12e4d2c3f76d2
         """
         from netra_backend.app.services.user_execution_context import UserExecutionContext
 
@@ -137,7 +143,8 @@ class AgentExecutionCoreUnitTests(SSotBaseTestCase):
             agent_context={
                 "user_request": "test_request",
                 "chat_thread_id": "test-thread-123"
-            }
+            },
+            audit_metadata={"test": True}
         )
         return state
 

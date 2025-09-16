@@ -22,4 +22,15 @@ if str(test_framework_path) not in sys.path:
     sys.path.insert(0, str(test_framework_path))
 
 # Import the test-specific configuration
-from tests.conftest import *  # noqa: F401, F403
+# Use absolute path to avoid module resolution issues
+tests_conftest_path = project_root / "tests" / "conftest.py"
+if tests_conftest_path.exists():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("tests.conftest", tests_conftest_path)
+    if spec and spec.loader:
+        tests_conftest = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(tests_conftest)
+        # Import all public symbols from tests.conftest
+        for name in dir(tests_conftest):
+            if not name.startswith('_'):
+                globals()[name] = getattr(tests_conftest, name)

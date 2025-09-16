@@ -1,0 +1,264 @@
+"""
+E2E Test: Complete Authenticated Chat Workflow - MISSION CRITICAL Revenue Protection
+
+BUSINESS IMPACT: Tests the complete chat workflow that generates 90% of platform revenue.
+This E2E test validates the end-to-end golden path from user authentication to agent response.
+
+Business Value Justification (BVJ):
+- Segment: Enterprise/Platform - Complete Chat Infrastructure  
+- Business Goal: Revenue Protection - Ensure golden path delivers $500K+ ARR
+- Value Impact: Validates complete authenticated chat workflow customers depend on
+- Strategic Impact: Tests the PRIMARY VALUE-GENERATING FLOW of the entire platform
+
+CRITICAL SUCCESS METRICS:
+ PASS:  User authenticates successfully with JWT/OAuth
+ PASS:  WebSocket connection established with auth headers  
+ PASS:  Agent execution triggered with real LLM integration
+ PASS:  All 5 critical WebSocket events delivered (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)
+ PASS:  Real agent response with business value delivered to user
+ PASS:  End-to-end timing < 30 seconds for good UX
+
+COMPLIANCE:
+@compliance CLAUDE.md - E2E AUTH MANDATORY (Section 7.3) 
+@compliance CLAUDE.md - WebSocket events enable substantive chat (Section 6)
+@compliance CLAUDE.md - NO MOCKS in E2E tests
+@compliance CLAUDE.md - Real services, real LLM for E2E
+"""
+import asyncio
+import json
+import pytest
+import time
+import uuid
+import websockets
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
+from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, create_authenticated_user_context
+from test_framework.ssot.websocket_golden_path_helpers import WebSocketGoldenPathHelper, GoldenPathTestConfig, assert_golden_path_success
+from netra_backend.app.websocket_core.event_validator import AgentEventValidator, CriticalAgentEventType, assert_critical_events_received
+from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
+from shared.types.execution_types import StronglyTypedUserExecutionContext
+from test_framework.ssot.base_test_case import SSotBaseTestCase
+
+@pytest.mark.e2e
+@pytest.mark.staging_compatible
+class TestCompleteAuthenticatedChatWorkflowE2E(SSotBaseTestCase):
+    """
+    MISSION CRITICAL E2E Tests for Complete Authenticated Chat Workflow.
+    
+    These tests validate the complete golden path that customers experience
+    when using the platform for AI-powered chat interactions.
+    
+    REVENUE PROTECTION: If these tests fail, the core business value is broken.
+    """
+
+    def setup_method(self):
+        """Set up E2E test environment."""
+        super().setup_method()
+        self.environment = self.get_test_environment()
+        self.ws_auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
+        self.golden_path_helper = WebSocketGoldenPathHelper(environment=self.environment)
+        self.config = GoldenPathTestConfig.for_environment(self.environment)
+        self.test_start_time = time.time()
+        self.business_value_delivered = False
+        print(f'\n[U+1F680] MISSION CRITICAL E2E TEST STARTING - Environment: {self.environment}')
+        print(f' CHART:  Target: Complete authenticated chat workflow with real services')
+        print(f'[U+1F4B0] Business Impact: Validates $500K+ ARR revenue-generating flow')
+
+    def teardown_method(self):
+        """Clean up E2E test resources."""
+        test_duration = time.time() - self.test_start_time
+        if self.business_value_delivered:
+            print(f' PASS:  MISSION CRITICAL E2E TEST PASSED - Duration: {test_duration:.2f}s')
+            print(f'[U+1F4B0] Revenue-generating chat workflow validated successfully')
+        else:
+            print(f' FAIL:  MISSION CRITICAL E2E TEST FAILED - Duration: {test_duration:.2f}s')
+            print(f' ALERT:  REVENUE IMPACT: Core chat workflow is broken!')
+        super().teardown_method()
+
+    @pytest.mark.asyncio
+    async def test_complete_authenticated_chat_workflow_golden_path(self):
+        """
+        MISSION CRITICAL: Complete authenticated chat workflow E2E test.
+        
+        Tests the complete golden path from authentication to agent response
+        that generates 90% of platform revenue through chat interactions.
+        
+        BUSINESS IMPACT: If this test fails, customers cannot access core value.
+        """
+        print('\n[U+1F9EA] MISSION CRITICAL: Testing complete authenticated chat workflow...')
+        workflow_start = time.time()
+        print('[U+1F510] STEP 1: Authenticating user with JWT/OAuth...')
+        user_context = await create_authenticated_user_context(user_email=f'golden_path_e2e_{uuid.uuid4().hex[:8]}@example.com', environment=self.environment, permissions=['read', 'write', 'chat', 'agent_execution', 'websocket'], websocket_enabled=True)
+        assert user_context.user_id is not None, 'User ID must be present'
+        assert user_context.websocket_client_id is not None, 'WebSocket client ID required'
+        assert 'jwt_token' in user_context.agent_context, 'JWT token required for auth'
+        jwt_token = user_context.agent_context['jwt_token']
+        assert len(jwt_token) > 50, 'JWT token should be substantial'
+        auth_time = time.time() - workflow_start
+        print(f' PASS:  User authenticated successfully in {auth_time:.2f}s')
+        print(f'[U+1F464] User ID: {user_context.user_id}')
+        print(f'[U+1F517] Thread ID: {user_context.thread_id}')
+        print('[U+1F50C] STEP 2: Establishing authenticated WebSocket connection...')
+        connection_start = time.time()
+        ws_headers = self.ws_auth_helper.get_websocket_headers(jwt_token)
+        ws_headers.update({'X-User-ID': str(user_context.user_id), 'X-Thread-ID': str(user_context.thread_id), 'X-Request-ID': str(user_context.request_id), 'X-WebSocket-Client-ID': str(user_context.websocket_client_id)})
+        websocket_url = self.ws_auth_helper.config.websocket_url
+        try:
+            websocket = await asyncio.wait_for(websockets.connect(websocket_url, additional_headers=ws_headers, ping_interval=30, ping_timeout=15, close_timeout=10), timeout=self.config.connection_timeout)
+            connection_time = time.time() - connection_start
+            print(f' PASS:  WebSocket connected successfully in {connection_time:.2f}s')
+            print(f'[U+1F310] Connected to: {websocket_url}')
+        except Exception as e:
+            pytest.fail(f'CRITICAL FAILURE: WebSocket connection failed: {e}')
+        try:
+            print('[U+1F4AC] STEP 3: Sending authenticated chat request...')
+            chat_request = {'type': 'chat_message', 'content': 'Please analyze sample business data and provide strategic insights with actionable recommendations for improving customer retention and revenue growth', 'user_id': str(user_context.user_id), 'thread_id': str(user_context.thread_id), 'request_id': str(user_context.request_id), 'timestamp': datetime.now(timezone.utc).isoformat(), 'message_id': f'golden_path_msg_{uuid.uuid4().hex[:8]}', 'business_context': 'E2E test validating revenue-generating chat workflow'}
+            await websocket.send(json.dumps(chat_request))
+            request_time = time.time() - workflow_start
+            print(f'[U+1F4E4] Chat request sent at {request_time:.2f}s')
+            print(f'[U+1F4DD] Request: Business data analysis with strategic insights')
+            print(' CHART:  STEP 4: Monitoring critical agent events...')
+            event_validator = AgentEventValidator(user_context=user_context, strict_mode=True, timeout_seconds=self.config.event_timeout)
+            required_events = {CriticalAgentEventType.AGENT_STARTED.value, CriticalAgentEventType.AGENT_THINKING.value, CriticalAgentEventType.TOOL_EXECUTING.value, CriticalAgentEventType.TOOL_COMPLETED.value, CriticalAgentEventType.AGENT_COMPLETED.value}
+            received_events = []
+            received_event_types = set()
+            event_monitoring_start = time.time()
+            print(f' SEARCH:  Monitoring for {len(required_events)} critical events (timeout: {self.config.event_timeout}s)')
+            while time.time() - event_monitoring_start < self.config.event_timeout:
+                try:
+                    message = await asyncio.wait_for(websocket.recv(), timeout=2.0)
+                    message_data = json.loads(message)
+                    if message_data.get('type') in required_events:
+                        event_type = message_data['type']
+                        received_events.append(message_data)
+                        received_event_types.add(event_type)
+                        event_time = time.time() - workflow_start
+                        print(f'[U+1F4E8] Received: {event_type} at {event_time:.2f}s')
+                        from netra_backend.app.websocket_core.event_validator import WebSocketEventMessage
+                        event = WebSocketEventMessage.from_dict(message_data)
+                        event_validator.record_event(event)
+                        if required_events.issubset(received_event_types):
+                            print(' PASS:  All critical agent events received!')
+                            break
+                    elif message_data.get('type'):
+                        event_time = time.time() - workflow_start
+                        print(f"[U+1F4E5] Other event: {message_data['type']} at {event_time:.2f}s")
+                except asyncio.TimeoutError:
+                    continue
+                except json.JSONDecodeError:
+                    continue
+                except Exception as e:
+                    print(f'Warning: Event processing error: {e}')
+                    continue
+            print(' PASS:  STEP 5: Validating critical business events...')
+            validation_result = event_validator.perform_full_validation()
+            assert validation_result.is_valid, f'Event validation failed: {validation_result.error_message}'
+            assert len(validation_result.missing_critical_events) == 0, f'Missing critical events: {validation_result.missing_critical_events}'
+            assert validation_result.business_value_score >= 75.0, f'Business value score too low: {validation_result.business_value_score}'
+            events_time = time.time() - workflow_start
+            print(f' PASS:  Critical events validated in {events_time:.2f}s')
+            print(f' CHART:  Business Value Score: {validation_result.business_value_score:.1f}%')
+            print(f' TARGET:  Events Received: {len(received_events)}/{len(required_events)}')
+            print(' TARGET:  STEP 6: Validating agent response quality...')
+            agent_response = None
+            for event in received_events:
+                if event.get('type') == 'agent_completed':
+                    agent_response = event.get('response') or event.get('message')
+                    break
+            if agent_response:
+                assert len(agent_response) > 50, 'Agent response should be substantial'
+                business_keywords = ['insights', 'recommendations', 'analysis', 'strategy', 'improve', 'growth', 'revenue']
+                found_keywords = [kw for kw in business_keywords if kw.lower() in agent_response.lower()]
+                assert len(found_keywords) >= 2, f'Response should contain business value language: {found_keywords}'
+                print(f' IDEA:  Agent Response: {agent_response[:100]}...')
+                print(f' TARGET:  Business Keywords Found: {found_keywords}')
+                self.business_value_delivered = True
+            else:
+                print(' WARNING: [U+FE0F] No agent response found in events')
+            total_workflow_time = time.time() - workflow_start
+            print(f'[U+23F1][U+FE0F] STEP 7: Performance validation...')
+            print(f' CHART:  Total Workflow Time: {total_workflow_time:.2f}s')
+            assert total_workflow_time < 45.0, f'Workflow too slow for good UX: {total_workflow_time:.2f}s'
+            assert auth_time < 5.0, f'Authentication too slow: {auth_time:.2f}s'
+            assert connection_time < 10.0, f'WebSocket connection too slow: {connection_time:.2f}s'
+            print('[U+1F4B0] STEP 8: Revenue impact assessment...')
+            if self.business_value_delivered and total_workflow_time < 30.0 and (len(received_events) >= 4):
+                revenue_impact = 'NO_IMPACT'
+                print(' CELEBRATION:  EXCELLENT: Golden path delivers optimal customer experience')
+            elif self.business_value_delivered and total_workflow_time < 45.0:
+                revenue_impact = 'LOW_IMPACT'
+                print(' PASS:  GOOD: Golden path delivers acceptable customer experience')
+            else:
+                revenue_impact = 'HIGH_IMPACT'
+                print(' WARNING: [U+FE0F] WARNING: Golden path performance may impact customer satisfaction')
+            print(f'[U+1F4C8] Revenue Impact Assessment: {revenue_impact}')
+            assert self.business_value_delivered, 'CRITICAL: No business value delivered to user'
+            assert len(received_events) >= 3, f'Insufficient agent events for good UX: {len(received_events)}'
+        finally:
+            if websocket and (not websocket.closed):
+                await websocket.close()
+        print(' CELEBRATION:  MISSION CRITICAL E2E TEST COMPLETED SUCCESSFULLY!')
+        print(f' PASS:  Complete authenticated chat workflow validated')
+        print(f'[U+1F4B0] Revenue-generating golden path is working correctly')
+
+    @pytest.mark.asyncio
+    async def test_authenticated_chat_workflow_with_real_llm_integration(self):
+        """
+        CRITICAL: Authenticated chat workflow with real LLM integration.
+        
+        Tests that the complete workflow works with actual LLM integration
+        to deliver real AI-powered responses to authenticated users.
+        
+        BUSINESS IMPACT: Validates the AI value proposition customers pay for.
+        """
+        print('\n[U+1F9EA] CRITICAL: Testing authenticated chat with real LLM integration...')
+        user_context = await create_authenticated_user_context(user_email=f'llm_integration_e2e_{uuid.uuid4().hex[:8]}@example.com', environment=self.environment, permissions=['read', 'write', 'chat', 'llm_access', 'agent_execution'], websocket_enabled=True)
+        async with self.golden_path_helper.authenticated_websocket_connection(user_context):
+            business_request = 'Please analyze the following business scenario and provide strategic recommendations: A SaaS company has 1000 customers, $100K MRR, 5% monthly churn rate, and wants to expand into enterprise market. What are the top 3 strategic priorities and implementation steps for the next 6 months?'
+            result = await self.golden_path_helper.execute_golden_path_flow(user_message=business_request, user_context=user_context, timeout=60.0)
+            assert result.success, f'Golden path execution failed: {result.errors_encountered}'
+            assert result.validation_result.is_valid, 'Event validation failed'
+            assert result.execution_metrics.business_value_score >= 70.0, 'Insufficient business value'
+            events_with_responses = [event for event in result.events_received if event.event_type == 'agent_completed' and hasattr(event, 'data') and ('response' in event.data or 'message' in event.data)]
+            assert len(events_with_responses) > 0, 'No agent response found'
+            response_event = events_with_responses[0]
+            response_text = response_event.data.get('response') or response_event.data.get('message', '')
+            assert len(response_text) > 100, 'LLM response should be substantial'
+            assert any((keyword in response_text.lower() for keyword in ['strategy', 'priority', 'recommend', 'implement'])), 'Response should contain strategic business language'
+            self.business_value_delivered = True
+            print(f' PASS:  Real LLM integration successful')
+            print(f' CHART:  Business Value Score: {result.execution_metrics.business_value_score:.1f}%')
+            print(f'[U+1F916] LLM Response Length: {len(response_text)} characters')
+
+    @pytest.mark.asyncio
+    async def test_chat_workflow_error_recovery_patterns(self):
+        """
+        CRITICAL: Chat workflow error recovery and resilience.
+        
+        Tests that the authenticated chat workflow can recover gracefully
+        from common error scenarios while maintaining business value delivery.
+        
+        BUSINESS IMPACT: Ensures customer experience remains positive during edge cases.
+        """
+        print('\n[U+1F9EA] CRITICAL: Testing chat workflow error recovery...')
+        user_context = await create_authenticated_user_context(user_email=f'error_recovery_e2e_{uuid.uuid4().hex[:8]}@example.com', environment=self.environment, permissions=['read', 'write', 'chat', 'error_recovery_test'], websocket_enabled=True)
+        challenging_request = "Please analyze a dataset that doesn't exist and provide insights on quantum computing applications for medieval agriculture while calculating the ROI of unicorn investments"
+        async with self.golden_path_helper.authenticated_websocket_connection(user_context):
+            result = await self.golden_path_helper.execute_golden_path_flow(user_message=challenging_request, user_context=user_context, timeout=45.0)
+            if result.success:
+                assert result.validation_result.is_valid
+                self.business_value_delivered = True
+                print(' PASS:  System handled challenging request successfully')
+            else:
+                assert len(result.errors_encountered) > 0, 'Should have recorded error details'
+                assert len(result.events_received) > 0, 'Should have received some events even on failure'
+                event_types = [event.event_type for event in result.events_received]
+                assert 'agent_started' in event_types, 'Should get agent_started even on failure'
+                print(' PASS:  System failed gracefully with proper error handling')
+                print(f' CHART:  Events received during failure: {len(result.events_received)}')
+                print(f' SEARCH:  Error details: {result.errors_encountered[:2]}')
+            assert result.execution_metrics.total_execution_time < 60.0, 'Error handling should not cause excessive delays'
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

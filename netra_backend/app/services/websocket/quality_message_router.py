@@ -33,48 +33,16 @@ from netra_backend.app.services.user_execution_context import create_defensive_u
 logger = central_logger.get_logger(__name__)
 
 
-# === SSOT CONSOLIDATION NOTICE ===
-# QualityMessageRouter functionality has been consolidated into CanonicalMessageRouter
-# This file provides compatibility during migration phase
+# === SSOT CONSOLIDATION COMPLETE ===
+# QualityMessageRouter is now an ALIAS to MessageRouter for true SSOT compliance
+# Both import paths now return the SAME object ID (Issue #220)
 
-from netra_backend.app.websocket_core.canonical_message_router import CanonicalMessageRouter
+from netra_backend.app.websocket_core.handlers import MessageRouter
 
+# SSOT COMPLIANCE: QualityMessageRouter and MessageRouter are now the SAME object
+QualityMessageRouter = MessageRouter
 
-class QualityMessageRouter(CanonicalMessageRouter):
-    """
-    COMPATIBILITY ADAPTER: QualityMessageRouter consolidated into CanonicalMessageRouter.
-
-    This class provides backward compatibility for existing QualityMessageRouter usage
-    while routing all functionality through the consolidated CanonicalMessageRouter.
-
-    Migration Status: Phase 1 - Compatibility adapter in place
-    Business Impact: Maintains $500K+ ARR quality routing functionality
-    """
-
-    def __init__(self, supervisor, db_session_factory,
-                 quality_gate_service: 'QualityGateService',
-                 monitoring_service: 'QualityMonitoringService'):
-        """Initialize QualityMessageRouter compatibility adapter."""
-        # Call parent with quality services
-        super().__init__(
-            websocket_manager=None,  # Not used in quality router
-            quality_gate_service=quality_gate_service,
-            monitoring_service=monitoring_service
-        )
-
-        # Store legacy parameters for compatibility
-        self.supervisor = supervisor
-        self.db_session_factory = db_session_factory
-
-        logger.info("QualityMessageRouter compatibility adapter initialized - functionality consolidated")
-
-    # All quality routing methods are now inherited from CanonicalMessageRouter
-    # Legacy methods maintained for backward compatibility
-
-    async def handle_message(self, user_id: str, message: Dict[str, Any]) -> None:
-        """Handle quality message (compatibility method)."""
-        # Delegate to consolidated quality handling
-        await self.handle_quality_message(user_id, message)
+logger.info("QualityMessageRouter → MessageRouter SSOT alias established - Issue #220 COMPLETE")
 
 
 # === LEGACY IMPLEMENTATION (PRESERVED FOR REFERENCE) ===

@@ -270,7 +270,6 @@ class UnifiedSecretManager:
             ]
         elif secret_name == 'JWT_SECRET_KEY':
             alternatives = [
-                'JWT_SECRET',
                 'AUTH_SECRET_KEY',
                 'TOKEN_SECRET_KEY'
             ]

@@ -3,9 +3,9 @@
     <metadata>
         <name>KnowledgeBase.LearningsIndex</name>
         <type>KnowledgeRetrievalMap</type>
-        <version>2.1</version>
-        <last-updated>2025-09-14</last-updated>
-        <description>Index map for retrieving established patterns and critical learnings. System Health: 92% EXCELLENT - SSOT WebSocket Bridge Migration Complete.</description>
+        <version>2.2</version>
+        <last-updated>2025-09-16</last-updated>
+        <description>Index map for retrieving established patterns and critical learnings. System Health: CRITICAL ISSUE - VPC Egress Regression Breaks Cloud SQL (Sept 15, 2025).</description>
     </metadata>
     
     <retrieval-protocol>
@@ -20,6 +20,33 @@
             <step>5. ALWAYS check SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml for configuration values.</step>
         </workflow>
     </retrieval-protocol>
+    
+    <learning id="vpc-egress-cloud-sql-regression-2025-09-16">
+        <title>🚨 CRITICAL: VPC Egress All-Traffic Breaks Cloud SQL Unix Sockets</title>
+        <category>Infrastructure/VPC/Database/Critical</category>
+        <keywords>vpc-egress, all-traffic, private-ranges-only, cloud-sql, unix-sockets, clickhouse, staging-regression, database-timeout, 15-second-timeout</keywords>
+        <path>vpc_egress_cloud_sql_regression_critical.xml</path>
+        <critical-takeaway>
+            🚨 BREAKING CHANGE: VPC egress "all-traffic" completely breaks Cloud SQL Unix socket connections.
+            Commit 2acf46c8a (Sept 15, 2025) changed from "private-ranges-only" to "all-traffic" to fix ClickHouse,
+            but this forces ALL traffic through VPC connector, blocking Cloud SQL proxy access.
+            Result: 15-second database timeouts, complete staging environment failure.
+            SOLUTION: Use Cloud NAT + private-ranges-only for both Cloud SQL and ClickHouse access.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>GOLDEN_PATH_BLOCKING - Complete staging environment failure, 0% service availability</business-impact>
+        <prevention>
+            NEVER change VPC egress without testing both Cloud SQL AND external service connectivity.
+            Infrastructure changes require comprehensive dependency analysis and regression testing.
+            Cloud SQL Unix sockets need direct proxy access - cannot work through VPC connectors.
+        </prevention>
+        <related-files>
+            scripts/deploy_to_gcp_actual.py:1088 (problematic setting)
+            SPEC/learnings/vpc_clickhouse_proxy_solutions.xml (Cloud NAT solution)
+            docs/infrastructure/vpc-egress-regression-timeline.md (detailed timeline)
+        </related-files>
+        <related-issues>Issue #1086 (ClickHouse fix), Issue #1263 (Database config), Issue #1278 (Infrastructure)</related-issues>
+    </learning>
     
     <learning id="agent-execution-order-fix-2025-09-04">
         <title>Agent Execution Order Logic Fix - Data Before Optimization</title>

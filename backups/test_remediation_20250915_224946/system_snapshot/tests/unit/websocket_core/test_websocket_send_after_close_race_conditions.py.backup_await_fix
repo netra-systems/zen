@@ -1,0 +1,328 @@
+"""
+Unit Tests for Issue #335: WebSocket "send after close" Race Conditions
+
+Purpose: Reproduce race conditions where messages are sent to WebSocket connections
+after they have been closed, causing runtime errors.
+
+Test Strategy:
+1. Connection lifecycle race conditions (close during send)
+2. Concurrent close operations during message sending
+3. Service shutdown during active send operations
+4. User disconnection during agent event delivery
+5. Network interruption simulation during send
+
+Business Value Justification:
+- Segment: ALL (Free -> Enterprise)
+- Business Goal: Prevent WebSocket errors that disrupt chat functionality
+- Value Impact: Ensures reliable real-time communication in Golden Path
+- Revenue Impact: Protects $500K+ ARR from connection instability
+
+These tests are designed to INITIALLY FAIL to reproduce the race condition,
+then pass after the fix is implemented.
+"""
+import asyncio
+import pytest
+import json
+from unittest.mock import AsyncMock, MagicMock, patch
+from typing import Dict, Any
+from datetime import datetime
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, WebSocketManagerMode
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection, _serialize_message_safely
+from shared.types.core_types import UserID, ThreadID, ConnectionID
+from shared.logging.unified_logging_ssot import get_logger
+logger = get_logger(__name__)
+
+@pytest.mark.unit
+class TestWebSocketSendAfterCloseRaceConditions(SSotAsyncTestCase):
+    """Unit tests for WebSocket send after close race conditions."""
+
+    def setup_method(self):
+        """Set up test fixtures for WebSocket race condition testing."""
+        super().setup_method()
+        self.mock_user_context = MagicMock()
+        self.mock_user_context.user_id = UserID('test_user_123')
+        self.mock_user_context.session_id = 'test_session_123'
+        self.mock_user_context.request_id = 'test_request_123'
+        self.mock_user_context.is_test = True
+        self.test_message = {'type': 'test_message', 'content': 'test content', 'timestamp': datetime.now().isoformat()}
+
+    async def test_race_condition_close_during_send_operation(self):
+        """
+        Test Race Condition 1: Connection closed during send operation
+
+        This test reproduces the race condition where a WebSocket connection
+        is closed while a send operation is in progress on another task.
+        """
+        logger.info('🧪 Testing race condition: close during send operation')
+        websocket_manager = await get_websocket_manager(user_context=self.mock_user_context, mode=WebSocketManagerMode.UNIFIED)
+        mock_websocket = AsyncMock()
+        mock_connection = WebSocketConnection(connection_id='test_conn_001', user_id=str(self.mock_user_context.user_id), websocket=mock_websocket, connected_at=datetime.now())
+        await websocket_manager.add_connection(mock_connection)
+        send_started = asyncio.Event()
+        send_can_proceed = asyncio.Event()
+        close_completed = asyncio.Event()
+        original_send_json = mock_websocket.send_json
+
+        async def slow_send_json(message):
+            """Simulate slow send operation that can be interrupted by close"""
+            send_started.set()
+            await send_can_proceed.wait()
+            return await original_send_json(message)
+        mock_websocket.send_json = slow_send_json
+
+        async def close_connection():
+            """Close connection while send is in progress"""
+            await send_started.wait()
+            mock_websocket.closed = True
+            mock_websocket.send_json = AsyncMock(side_effect=RuntimeError('send after close'))
+            close_completed.set()
+            send_can_proceed.set()
+        send_task = asyncio.create_task(websocket_manager.send_message(mock_connection.connection_id, self.test_message))
+        close_task = asyncio.create_task(close_connection())
+        await asyncio.gather(close_task, return_exceptions=True)
+        with pytest.raises((RuntimeError, ConnectionError, OSError)) as exc_info:
+            result = await send_task
+            if result:
+                raise RuntimeError('Expected send after close error, but send succeeded')
+        assert 'send after close' in str(exc_info.value) or 'closed' in str(exc_info.value).lower()
+        logger.error(f'🔥 RACE CONDITION REPRODUCED: {exc_info.value}')
+        await websocket_manager.remove_connection(mock_connection.connection_id)
+
+    async def test_race_condition_multiple_concurrent_closes(self):
+        """
+        Test Race Condition 2: Multiple concurrent close operations
+
+        This test reproduces race conditions when multiple tasks try to
+        close the same connection simultaneously.
+        """
+        logger.info('🧪 Testing race condition: multiple concurrent closes')
+        mock_websocket = AsyncMock()
+        mock_connection = WebSocketConnection(connection_id='test_conn_002', user_id=str(self.mock_user_context.user_id), websocket=mock_websocket, connected_at=datetime.now())
+        connection_id = 'test_conn_race_002'
+        await self.websocket_manager.add_connection(connection_id, mock_connection)
+        close_count = 0
+        close_errors = []
+
+        async def attempt_send_and_close(task_id: int):
+            """Attempt to send message and close connection concurrently"""
+            nonlocal close_count
+            try:
+                await self.websocket_manager.send_message(connection_id, {'task_id': task_id, **self.test_message})
+                if hasattr(mock_websocket, 'close'):
+                    await mock_websocket.close()
+                    close_count += 1
+            except Exception as e:
+                close_errors.append(f'Task {task_id}: {e}')
+                logger.error(f'Task {task_id} error: {e}')
+        tasks = []
+        for i in range(5):
+            task = asyncio.create_task(attempt_send_and_close(i))
+            tasks.append(task)
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        exceptions_found = [r for r in results if isinstance(r, Exception)]
+        assert len(exceptions_found) > 0 or len(close_errors) > 0, f'Expected race condition exceptions but found none. Exceptions: {len(exceptions_found)}, Close errors: {len(close_errors)}'
+        logger.error(f'🔥 CONCURRENT CLOSE RACE CONDITIONS REPRODUCED: {len(exceptions_found)} exceptions, {len(close_errors)} errors')
+        try:
+            await self.websocket_manager.remove_connection(connection_id)
+        except Exception as cleanup_error:
+            logger.warning(f'Cleanup error (expected): {cleanup_error}')
+
+    async def test_race_condition_service_shutdown_during_send(self):
+        """
+        Test Race Condition 3: Service shutdown during message send
+
+        This test reproduces race conditions that occur when the service
+        is shutting down while WebSocket messages are being sent.
+        """
+        logger.info('🧪 Testing race condition: service shutdown during send')
+        connections = {}
+        for i in range(3):
+            mock_websocket = AsyncMock()
+            mock_connection = WebSocketConnection(connection_id=f'conn_{i}', user_id=f'user_{i}', websocket=mock_websocket, connected_at=datetime.now())
+            connection_id = f'shutdown_test_conn_{i}'
+            connections[connection_id] = mock_connection
+            await self.websocket_manager.add_connection(connection_id, mock_connection)
+        shutdown_started = asyncio.Event()
+        send_operations_active = asyncio.Event()
+
+        async def simulate_shutdown():
+            """Simulate service shutdown affecting connections"""
+            await send_operations_active.wait()
+            shutdown_started.set()
+            for conn_id, connection in connections.items():
+                connection.websocket.send_json = AsyncMock(side_effect=RuntimeError('Connection lost during shutdown'))
+
+        async def send_messages_continuously():
+            """Send messages continuously until shutdown"""
+            send_operations_active.set()
+            errors = []
+            while not shutdown_started.is_set():
+                for conn_id in connections.keys():
+                    try:
+                        await self.websocket_manager.send_message(conn_id, {'shutdown_test': True, 'timestamp': datetime.now().isoformat()})
+                        await asyncio.sleep(0.01)
+                    except Exception as e:
+                        errors.append(f'Send to {conn_id}: {e}')
+            return errors
+        shutdown_task = asyncio.create_task(simulate_shutdown())
+        send_task = asyncio.create_task(send_messages_continuously())
+        await asyncio.sleep(0.1)
+        await shutdown_task
+        send_errors = await send_task
+        assert len(send_errors) > 0, f'Expected shutdown race condition errors but found none. Send errors: {send_errors}'
+        logger.error(f'🔥 SHUTDOWN RACE CONDITIONS REPRODUCED: {len(send_errors)} errors')
+        for conn_id in connections.keys():
+            try:
+                await self.websocket_manager.remove_connection(conn_id)
+            except Exception as cleanup_error:
+                logger.warning(f'Cleanup error (expected): {cleanup_error}')
+
+    async def test_race_condition_agent_event_during_disconnect(self):
+        """
+        Test Race Condition 4: Agent events sent during user disconnect
+
+        This test reproduces race conditions that occur during Golden Path
+        agent execution when users disconnect while agent events are being sent.
+        """
+        logger.info('🧪 Testing race condition: agent event during disconnect')
+        mock_websocket = AsyncMock()
+        mock_connection = WebSocketConnection(connection_id='agent_event_conn', user_id=str(self.mock_user_context.user_id), websocket=mock_websocket, connected_at=datetime.now())
+        connection_id = 'agent_event_race_conn'
+        await self.websocket_manager.add_connection(connection_id, mock_connection)
+        agent_events = [{'type': 'agent_started', 'agent': 'supervisor', 'timestamp': datetime.now().isoformat()}, {'type': 'agent_thinking', 'content': 'Analyzing request...', 'timestamp': datetime.now().isoformat()}, {'type': 'tool_executing', 'tool': 'data_analyzer', 'timestamp': datetime.now().isoformat()}, {'type': 'tool_completed', 'tool': 'data_analyzer', 'result': 'success', 'timestamp': datetime.now().isoformat()}, {'type': 'agent_completed', 'agent': 'supervisor', 'result': 'completed', 'timestamp': datetime.now().isoformat()}]
+        disconnect_after_event = 2
+        event_send_errors = []
+        events_sent_successfully = 0
+
+        async def send_agent_events():
+            """Send Golden Path agent events"""
+            nonlocal events_sent_successfully
+            for i, event in enumerate(agent_events):
+                try:
+                    if i == disconnect_after_event:
+                        mock_connection.websocket.send_json = AsyncMock(side_effect=ConnectionError('WebSocket connection closed by user'))
+                    success = await self.websocket_manager.send_message(connection_id, event)
+                    if success:
+                        events_sent_successfully += 1
+                    await asyncio.sleep(0.02)
+                except Exception as e:
+                    event_send_errors.append(f"Event {i} ({event['type']}): {e}")
+                    logger.error(f'Agent event send error: {e}')
+        await send_agent_events()
+        assert len(event_send_errors) > 0, f'Expected agent event race condition errors but found none. Events sent successfully: {events_sent_successfully}, Send errors: {event_send_errors}'
+        critical_events_affected = any(('agent_started' in error or 'agent_completed' in error for error in event_send_errors))
+        assert critical_events_affected, f'Expected critical Golden Path events to be affected by race condition. Errors: {event_send_errors}'
+        logger.error(f'🔥 AGENT EVENT RACE CONDITIONS REPRODUCED: {len(event_send_errors)} errors affecting Golden Path')
+        try:
+            await self.websocket_manager.remove_connection(connection_id)
+        except Exception as cleanup_error:
+            logger.warning(f'Cleanup error (expected): {cleanup_error}')
+
+    async def test_race_condition_network_interruption_during_send(self):
+        """
+        Test Race Condition 5: Network interruption during message send
+
+        This test reproduces race conditions that occur when network
+        connectivity is lost during WebSocket message transmission.
+        """
+        logger.info('🧪 Testing race condition: network interruption during send')
+        mock_websocket = AsyncMock()
+        mock_connection = WebSocketConnection(connection_id='network_test_conn', user_id=str(self.mock_user_context.user_id), websocket=mock_websocket, connected_at=datetime.now())
+        connection_id = 'network_race_conn'
+        await self.websocket_manager.add_connection(connection_id, mock_connection)
+        network_stable = True
+        network_errors = []
+        messages_sent = 0
+
+        async def simulate_network_instability():
+            """Simulate network becoming unstable during sends"""
+            nonlocal network_stable
+            await asyncio.sleep(0.05)
+            network_stable = False
+            mock_connection.websocket.send_json = AsyncMock(side_effect=OSError('Network is unreachable'))
+
+        async def send_messages_with_network_check():
+            """Send messages while checking network stability"""
+            nonlocal messages_sent
+            for i in range(10):
+                try:
+                    if not network_stable:
+                        pass
+                    success = await self.websocket_manager.send_message(connection_id, {'message_id': i, 'content': f'Network test message {i}', 'timestamp': datetime.now().isoformat()})
+                    if success:
+                        messages_sent += 1
+                    await asyncio.sleep(0.02)
+                except Exception as e:
+                    network_errors.append(f'Message {i}: {e}')
+                    logger.error(f'Network send error: {e}')
+        network_task = asyncio.create_task(simulate_network_instability())
+        send_task = asyncio.create_task(send_messages_with_network_check())
+        await asyncio.gather(network_task, send_task, return_exceptions=True)
+        assert len(network_errors) > 0, f'Expected network race condition errors but found none. Messages sent: {messages_sent}, Network errors: {network_errors}'
+        network_related_errors = [error for error in network_errors if 'network' in error.lower() or 'unreachable' in error.lower()]
+        assert len(network_related_errors) > 0, f'Expected network-related errors but found: {network_errors}'
+        logger.error(f'🔥 NETWORK RACE CONDITIONS REPRODUCED: {len(network_errors)} errors')
+        try:
+            await self.websocket_manager.remove_connection(connection_id)
+        except Exception as cleanup_error:
+            logger.warning(f'Cleanup error (expected): {cleanup_error}')
+
+    async def test_message_serialization_during_close(self):
+        """
+        Test Race Condition 6: Message serialization when connection is closing
+
+        This test reproduces race conditions in message serialization
+        when connections are in the process of being closed.
+        """
+        logger.info('🧪 Testing race condition: message serialization during close')
+        mock_websocket = AsyncMock()
+        mock_connection = WebSocketConnection(connection_id='serialization_conn', user_id=str(self.mock_user_context.user_id), websocket=mock_websocket, connected_at=datetime.now())
+        connection_id = 'serialization_race_conn'
+        await self.websocket_manager.add_connection(connection_id, mock_connection)
+        complex_message = {'type': 'complex_data', 'large_array': list(range(1000)), 'nested_data': {f'key_{i}': {'value': f'data_{i}', 'timestamp': datetime.now(), 'metadata': {'nested': True, 'index': i}} for i in range(100)}, 'datetime': datetime.now()}
+        serialization_started = asyncio.Event()
+        serialization_errors = []
+        close_during_serialization = False
+        original_serialize = _serialize_message_safely
+
+        def slow_serialize(message):
+            """Simulate slow serialization that can be interrupted"""
+            nonlocal close_during_serialization
+            serialization_started.set()
+            if close_during_serialization:
+                raise RuntimeError('Connection closed during serialization')
+            return original_serialize(message)
+
+        async def close_during_message_processing():
+            """Close connection during message serialization"""
+            nonlocal close_during_serialization
+            await serialization_started.wait()
+            close_during_serialization = True
+            mock_connection.websocket.send_json = AsyncMock(side_effect=ConnectionError('send on closed connection'))
+        with patch('netra_backend.app.websocket_core.unified_manager._serialize_message_safely', slow_serialize):
+            close_task = asyncio.create_task(close_during_message_processing())
+            try:
+                send_result = await self.websocket_manager.send_message(connection_id, complex_message)
+            except Exception as e:
+                serialization_errors.append(str(e))
+            await close_task
+        assert len(serialization_errors) > 0 or close_during_serialization, f'Expected serialization race condition but found none. Close during serialization: {close_during_serialization}, Serialization errors: {serialization_errors}'
+        logger.error(f'🔥 SERIALIZATION RACE CONDITIONS REPRODUCED: {serialization_errors}')
+        try:
+            await self.websocket_manager.remove_connection(connection_id)
+        except Exception as cleanup_error:
+            logger.warning(f'Cleanup error (expected): {cleanup_error}')
+
+    def teardown_method(self):
+        """Clean up test fixtures."""
+        try:
+            if hasattr(self, 'websocket_manager'):
+                pass
+        except Exception as e:
+            logger.warning(f'Test cleanup error: {e}')
+        super().teardown_method()
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

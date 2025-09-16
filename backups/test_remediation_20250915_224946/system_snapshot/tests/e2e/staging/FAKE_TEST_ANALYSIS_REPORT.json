@@ -1,0 +1,1475 @@
+{
+  "timestamp": 1757118534.8619142,
+  "summary": {
+    "total_files": 24,
+    "fake_files": 19,
+    "fake_patterns": 197,
+    "real_patterns": 28
+  },
+  "files": [
+    {
+      "file": "test_10_critical_path_staging.py",
+      "fake_patterns": [
+        {
+          "line": 77,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        },
+        {
+          "line": 23,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 64,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 96,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 136,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 20,
+          "pattern": "Async test with no await",
+          "code": "async def test_basic_functionality(self):\n        "
+        },
+        {
+          "line": 26,
+          "pattern": "Async test with no await",
+          "code": "async def test_critical_api_endpoints(self):\n     "
+        },
+        {
+          "line": 44,
+          "pattern": "Async test with no await",
+          "code": "async def test_end_to_end_message_flow(self):\n    "
+        },
+        {
+          "line": 67,
+          "pattern": "Async test with no await",
+          "code": "async def test_critical_performance_targets(self):"
+        },
+        {
+          "line": 99,
+          "pattern": "Async test with no await",
+          "code": "async def test_critical_error_handling(self):\n    "
+        },
+        {
+          "line": 117,
+          "pattern": "Async test with no await",
+          "code": "async def test_business_critical_features(self):\n "
+        }
+      ],
+      "real_patterns": [
+        "Awaiting response",
+        "HTTP status check"
+      ],
+      "test_count": 6,
+      "test_methods": [
+        "test_basic_functionality",
+        "test_critical_api_endpoints",
+        "test_end_to_end_message_flow",
+        "test_critical_performance_targets",
+        "test_critical_error_handling",
+        "test_business_critical_features"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 11,
+      "real_score": 2
+    },
+    {
+      "file": "test_1_websocket_events_staging.py",
+      "fake_patterns": [
+        {
+          "line": 73,
+          "pattern": "Local data structure check",
+          "code": "assert \"services\" in data"
+        },
+        {
+          "line": 87,
+          "pattern": "Local data structure check",
+          "code": "assert \"data\" in data"
+        },
+        {
+          "line": 131,
+          "pattern": "Structure validation comment",
+          "code": "# Validate event structure"
+        },
+        {
+          "line": 39,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 74,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 81,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 88,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 137,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 159,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 35,
+          "pattern": "Async test with no await",
+          "code": "async def test_health_check(self):\n        \"\"\"Test"
+        },
+        {
+          "line": 42,
+          "pattern": "Async test with no await",
+          "code": "async def test_websocket_connection(self):\n       "
+        },
+        {
+          "line": 66,
+          "pattern": "Async test with no await",
+          "code": "async def test_api_endpoints_for_agents(self):\n   "
+        },
+        {
+          "line": 91,
+          "pattern": "Async test with no await",
+          "code": "async def test_websocket_event_simulation(self):\n "
+        },
+        {
+          "line": 140,
+          "pattern": "Async test with no await",
+          "code": "async def test_concurrent_connections(self):\n     "
+        }
+      ],
+      "real_patterns": [
+        "Awaiting response",
+        "HTTP status check"
+      ],
+      "test_count": 5,
+      "test_methods": [
+        "test_health_check",
+        "test_websocket_connection",
+        "test_api_endpoints_for_agents",
+        "test_websocket_event_simulation",
+        "test_concurrent_connections"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 14,
+      "real_score": 2
+    },
+    {
+      "file": "test_2_message_flow_staging.py",
+      "fake_patterns": [
+        {
+          "line": 69,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        },
+        {
+          "line": 60,
+          "pattern": "Structure validation comment",
+          "code": "# Validate structure"
+        },
+        {
+          "line": 83,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 99,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 20,
+          "pattern": "Async test with no await",
+          "code": "async def test_message_endpoints(self):\n        \"\""
+        },
+        {
+          "line": 35,
+          "pattern": "Async test with no await",
+          "code": "async def test_message_structure_validation(self):"
+        },
+        {
+          "line": 66,
+          "pattern": "Async test with no await",
+          "code": "async def test_message_flow_simulation(self):\n    "
+        },
+        {
+          "line": 86,
+          "pattern": "Async test with no await",
+          "code": "async def test_thread_management(self):\n        \"\""
+        },
+        {
+          "line": 102,
+          "pattern": "Async test with no await",
+          "code": "async def test_error_message_handling(self):\n     "
+        }
+      ],
+      "real_patterns": [
+        "Awaiting response",
+        "HTTP status check"
+      ],
+      "test_count": 5,
+      "test_methods": [
+        "test_message_endpoints",
+        "test_message_structure_validation",
+        "test_message_flow_simulation",
+        "test_thread_management",
+        "test_error_message_handling"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 9,
+      "real_score": 2
+    },
+    {
+      "file": "test_3_agent_pipeline_staging.py",
+      "fake_patterns": [
+        {
+          "line": 129,
+          "pattern": "Structure validation comment",
+          "code": "# Validate metrics structure"
+        },
+        {
+          "line": 35,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 51,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 69,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 88,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 134,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 20,
+          "pattern": "Async test with no await",
+          "code": "async def test_agent_discovery(self):\n        \"\"\"T"
+        },
+        {
+          "line": 38,
+          "pattern": "Async test with no await",
+          "code": "async def test_agent_configuration(self):\n        "
+        },
+        {
+          "line": 54,
+          "pattern": "Async test with no await",
+          "code": "async def test_pipeline_stages(self):\n        \"\"\"T"
+        },
+        {
+          "line": 72,
+          "pattern": "Async test with no await",
+          "code": "async def test_agent_lifecycle(self):\n        \"\"\"T"
+        },
+        {
+          "line": 91,
+          "pattern": "Async test with no await",
+          "code": "async def test_pipeline_error_handling(self):\n    "
+        },
+        {
+          "line": 116,
+          "pattern": "Async test with no await",
+          "code": "async def test_pipeline_metrics(self):\n        \"\"\""
+        }
+      ],
+      "real_patterns": [
+        "Awaiting response",
+        "HTTP status check"
+      ],
+      "test_count": 6,
+      "test_methods": [
+        "test_agent_discovery",
+        "test_agent_configuration",
+        "test_pipeline_stages",
+        "test_agent_lifecycle",
+        "test_pipeline_error_handling",
+        "test_pipeline_metrics"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 12,
+      "real_score": 2
+    },
+    {
+      "file": "test_4_agent_orchestration_staging.py",
+      "fake_patterns": [
+        {
+          "line": 80,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        },
+        {
+          "line": 24,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 42,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 64,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 134,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 20,
+          "pattern": "Async test with no await",
+          "code": "async def test_basic_functionality(self):\n        "
+        },
+        {
+          "line": 27,
+          "pattern": "Async test with no await",
+          "code": "async def test_agent_discovery_and_listing(self):\n"
+        },
+        {
+          "line": 45,
+          "pattern": "Async test with no await",
+          "code": "async def test_orchestration_workflow_states(self)"
+        },
+        {
+          "line": 67,
+          "pattern": "Async test with no await",
+          "code": "async def test_agent_communication_patterns(self):"
+        },
+        {
+          "line": 92,
+          "pattern": "Async test with no await",
+          "code": "async def test_orchestration_error_scenarios(self)"
+        },
+        {
+          "line": 116,
+          "pattern": "Async test with no await",
+          "code": "async def test_multi_agent_coordination_metrics(se"
+        }
+      ],
+      "real_patterns": [
+        "Awaiting response",
+        "HTTP status check"
+      ],
+      "test_count": 6,
+      "test_methods": [
+        "test_basic_functionality",
+        "test_agent_discovery_and_listing",
+        "test_orchestration_workflow_states",
+        "test_agent_communication_patterns",
+        "test_orchestration_error_scenarios",
+        "test_multi_agent_coordination_metrics"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 11,
+      "real_score": 2
+    },
+    {
+      "file": "test_5_response_streaming_staging.py",
+      "fake_patterns": [
+        {
+          "line": 36,
+          "pattern": "Local dict validation instead of API call",
+          "code": "assert \"protocol\" in config"
+        },
+        {
+          "line": 23,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 76,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 20,
+          "pattern": "Async test with no await",
+          "code": "async def test_basic_functionality(self):\n        "
+        },
+        {
+          "line": 26,
+          "pattern": "Async test with no await",
+          "code": "async def test_streaming_protocols(self):\n        "
+        },
+        {
+          "line": 42,
+          "pattern": "Async test with no await",
+          "code": "async def test_chunk_handling(self):\n        \"\"\"Te"
+        },
+        {
+          "line": 58,
+          "pattern": "Async test with no await",
+          "code": "async def test_streaming_performance_metrics(self)"
+        },
+        {
+          "line": 79,
+          "pattern": "Async test with no await",
+          "code": "async def test_backpressure_handling(self):\n      "
+        },
+        {
+          "line": 99,
+          "pattern": "Async test with no await",
+          "code": "async def test_stream_recovery(self):\n        \"\"\"T"
+        }
+      ],
+      "real_patterns": [],
+      "test_count": 6,
+      "test_methods": [
+        "test_basic_functionality",
+        "test_streaming_protocols",
+        "test_chunk_handling",
+        "test_streaming_performance_metrics",
+        "test_backpressure_handling",
+        "test_stream_recovery"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 9,
+      "real_score": 0
+    },
+    {
+      "file": "test_6_failure_recovery_staging.py",
+      "fake_patterns": [
+        {
+          "line": 57,
+          "pattern": "Local dict validation instead of API call",
+          "code": "assert \"delay\" in config or \"initial_delay\" in con"
+        },
+        {
+          "line": 75,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        },
+        {
+          "line": 22,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 81,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 117,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 19,
+          "pattern": "Async test with no await",
+          "code": "async def test_basic_functionality(self):\n        "
+        },
+        {
+          "line": 25,
+          "pattern": "Async test with no await",
+          "code": "async def test_failure_detection(self):\n        \"\""
+        },
+        {
+          "line": 47,
+          "pattern": "Async test with no await",
+          "code": "async def test_retry_strategies(self):\n        \"\"\""
+        },
+        {
+          "line": 63,
+          "pattern": "Async test with no await",
+          "code": "async def test_circuit_breaker(self):\n        \"\"\"T"
+        },
+        {
+          "line": 84,
+          "pattern": "Async test with no await",
+          "code": "async def test_graceful_degradation(self):\n       "
+        },
+        {
+          "line": 101,
+          "pattern": "Async test with no await",
+          "code": "async def test_recovery_metrics(self):\n        \"\"\""
+        }
+      ],
+      "real_patterns": [],
+      "test_count": 6,
+      "test_methods": [
+        "test_basic_functionality",
+        "test_failure_detection",
+        "test_retry_strategies",
+        "test_circuit_breaker",
+        "test_graceful_degradation",
+        "test_recovery_metrics"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 11,
+      "real_score": 0
+    },
+    {
+      "file": "test_7_startup_resilience_staging.py",
+      "fake_patterns": [
+        {
+          "line": 115,
+          "pattern": "Local data structure check",
+          "code": "assert \"service\" in data"
+        },
+        {
+          "line": 116,
+          "pattern": "Local data structure check",
+          "code": "assert \"version\" in data"
+        },
+        {
+          "line": 75,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        },
+        {
+          "line": 22,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 63,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 89,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 121,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 19,
+          "pattern": "Async test with no await",
+          "code": "async def test_basic_functionality(self):\n        "
+        },
+        {
+          "line": 25,
+          "pattern": "Async test with no await",
+          "code": "async def test_startup_sequence(self):\n        \"\"\""
+        },
+        {
+          "line": 43,
+          "pattern": "Async test with no await",
+          "code": "async def test_dependency_validation(self):\n      "
+        },
+        {
+          "line": 66,
+          "pattern": "Async test with no await",
+          "code": "async def test_cold_start_performance(self):\n     "
+        },
+        {
+          "line": 92,
+          "pattern": "Async test with no await",
+          "code": "async def test_startup_failure_handling(self):\n   "
+        },
+        {
+          "line": 108,
+          "pattern": "Async test with no await",
+          "code": "async def test_health_check_endpoints(self):\n     "
+        }
+      ],
+      "real_patterns": [
+        "Awaiting response"
+      ],
+      "test_count": 6,
+      "test_methods": [
+        "test_basic_functionality",
+        "test_startup_sequence",
+        "test_dependency_validation",
+        "test_cold_start_performance",
+        "test_startup_failure_handling",
+        "test_health_check_endpoints"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 13,
+      "real_score": 1
+    },
+    {
+      "file": "test_8_lifecycle_events_staging.py",
+      "fake_patterns": [
+        {
+          "line": 23,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 90,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 124,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 20,
+          "pattern": "Async test with no await",
+          "code": "async def test_basic_functionality(self):\n        "
+        },
+        {
+          "line": 26,
+          "pattern": "Async test with no await",
+          "code": "async def test_event_types(self):\n        \"\"\"Test "
+        },
+        {
+          "line": 52,
+          "pattern": "Async test with no await",
+          "code": "async def test_event_sequencing(self):\n        \"\"\""
+        },
+        {
+          "line": 68,
+          "pattern": "Async test with no await",
+          "code": "async def test_event_metadata(self):\n        \"\"\"Te"
+        },
+        {
+          "line": 93,
+          "pattern": "Async test with no await",
+          "code": "async def test_event_filtering(self):\n        \"\"\"T"
+        },
+        {
+          "line": 109,
+          "pattern": "Async test with no await",
+          "code": "async def test_event_persistence(self):\n        \"\""
+        }
+      ],
+      "real_patterns": [],
+      "test_count": 6,
+      "test_methods": [
+        "test_basic_functionality",
+        "test_event_types",
+        "test_event_sequencing",
+        "test_event_metadata",
+        "test_event_filtering",
+        "test_event_persistence"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 9,
+      "real_score": 0
+    },
+    {
+      "file": "test_9_coordination_staging.py",
+      "fake_patterns": [
+        {
+          "line": 22,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 114,
+          "pattern": "Print PASS without testing",
+          "code": "print(\"[PASS]"
+        },
+        {
+          "line": 19,
+          "pattern": "Async test with no await",
+          "code": "async def test_basic_functionality(self):\n        "
+        },
+        {
+          "line": 25,
+          "pattern": "Async test with no await",
+          "code": "async def test_coordination_patterns(self):\n      "
+        },
+        {
+          "line": 47,
+          "pattern": "Async test with no await",
+          "code": "async def test_task_distribution(self):\n        \"\""
+        },
+        {
+          "line": 64,
+          "pattern": "Async test with no await",
+          "code": "async def test_synchronization_primitives(self):\n "
+        },
+        {
+          "line": 81,
+          "pattern": "Async test with no await",
+          "code": "async def test_consensus_mechanisms(self):\n       "
+        },
+        {
+          "line": 97,
+          "pattern": "Async test with no await",
+          "code": "async def test_coordination_metrics(self):\n       "
+        }
+      ],
+      "real_patterns": [],
+      "test_count": 6,
+      "test_methods": [
+        "test_basic_functionality",
+        "test_coordination_patterns",
+        "test_task_distribution",
+        "test_synchronization_primitives",
+        "test_consensus_mechanisms",
+        "test_coordination_metrics"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 8,
+      "real_score": 0
+    },
+    {
+      "file": "test_auth_routes.py",
+      "fake_patterns": [],
+      "real_patterns": [],
+      "test_count": 4,
+      "test_methods": [
+        "test_auth_google_login_route_returns_404",
+        "test_multiple_oauth_routes_missing_404_pattern",
+        "test_auth_service_route_mapping_configuration_error",
+        "test_oauth_route_handler_import_or_dependency_missing"
+      ],
+      "is_likely_fake": false,
+      "fake_score": 0,
+      "real_score": 0
+    },
+    {
+      "file": "test_environment_configuration.py",
+      "fake_patterns": [],
+      "real_patterns": [],
+      "test_count": 0,
+      "test_methods": [],
+      "is_likely_fake": false,
+      "fake_score": 0,
+      "real_score": 0
+    },
+    {
+      "file": "test_frontend_backend_connection.py",
+      "fake_patterns": [
+        {
+          "line": 40,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        },
+        {
+          "line": 56,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        },
+        {
+          "line": 219,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        }
+      ],
+      "real_patterns": [
+        "HTTP status check"
+      ],
+      "test_count": 3,
+      "test_methods": [
+        "test_frontend_cannot_connect_to_backend_api_proxy_failure",
+        "test_backend_service_not_listening_on_expected_ports",
+        "test_multiple_backend_connection_attempts_all_fail"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 3,
+      "real_score": 1
+    },
+    {
+      "file": "test_network_connectivity_variations.py",
+      "fake_patterns": [],
+      "real_patterns": [],
+      "test_count": 3,
+      "test_methods": [
+        "test_backend_port_sequence_all_unavailable",
+        "test_intermittent_connection_failures_pattern",
+        "test_websocket_connection_also_fails"
+      ],
+      "is_likely_fake": false,
+      "fake_score": 0,
+      "real_score": 0
+    },
+    {
+      "file": "test_oauth_configuration.py",
+      "fake_patterns": [
+        {
+          "line": 192,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        },
+        {
+          "line": 272,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        },
+        {
+          "line": 292,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        }
+      ],
+      "real_patterns": [],
+      "test_count": 2,
+      "test_methods": [
+        "test_oauth_google_authorization_url_construction_fails",
+        "test_oauth_token_exchange_endpoint_unreachable"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 3,
+      "real_score": 0
+    },
+    {
+      "file": "test_priority1_critical.py",
+      "fake_patterns": [
+        {
+          "line": 222,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        },
+        {
+          "line": 63,
+          "pattern": "Structure validation comment",
+          "code": "# Validate message structure"
+        },
+        {
+          "line": 37,
+          "pattern": "Async test with no await",
+          "code": "async def test_002_websocket_authentication(self):"
+        },
+        {
+          "line": 54,
+          "pattern": "Async test with no await",
+          "code": "async def test_003_websocket_message_send(self):\n "
+        },
+        {
+          "line": 69,
+          "pattern": "Async test with no await",
+          "code": "async def test_004_websocket_message_receive(self)"
+        },
+        {
+          "line": 96,
+          "pattern": "Async test with no await",
+          "code": "async def test_006_agent_execution(self):\n        "
+        },
+        {
+          "line": 112,
+          "pattern": "Async test with no await",
+          "code": "async def test_007_agent_response(self):\n        \""
+        },
+        {
+          "line": 127,
+          "pattern": "Async test with no await",
+          "code": "async def test_008_agent_streaming(self):\n        "
+        },
+        {
+          "line": 139,
+          "pattern": "Async test with no await",
+          "code": "async def test_009_agent_completion(self):\n       "
+        },
+        {
+          "line": 151,
+          "pattern": "Async test with no await",
+          "code": "async def test_010_tool_execution(self):\n        \""
+        },
+        {
+          "line": 163,
+          "pattern": "Async test with no await",
+          "code": "async def test_011_tool_results(self):\n        \"\"\""
+        },
+        {
+          "line": 178,
+          "pattern": "Async test with no await",
+          "code": "async def test_012_message_persistence(self):\n    "
+        },
+        {
+          "line": 191,
+          "pattern": "Async test with no await",
+          "code": "async def test_013_thread_creation(self):\n        "
+        },
+        {
+          "line": 205,
+          "pattern": "Async test with no await",
+          "code": "async def test_014_thread_switching(self):\n       "
+        },
+        {
+          "line": 234,
+          "pattern": "Async test with no await",
+          "code": "async def test_016_user_context_isolation(self):\n "
+        },
+        {
+          "line": 246,
+          "pattern": "Async test with no await",
+          "code": "async def test_017_concurrent_users(self):\n       "
+        },
+        {
+          "line": 268,
+          "pattern": "Async test with no await",
+          "code": "async def test_019_error_messages(self):\n        \""
+        },
+        {
+          "line": 281,
+          "pattern": "Async test with no await",
+          "code": "async def test_020_reconnection(self):\n        \"\"\""
+        },
+        {
+          "line": 294,
+          "pattern": "Async test with no await",
+          "code": "async def test_021_session_persistence(self):\n    "
+        },
+        {
+          "line": 310,
+          "pattern": "Async test with no await",
+          "code": "async def test_022_agent_cancellation(self):\n     "
+        },
+        {
+          "line": 321,
+          "pattern": "Async test with no await",
+          "code": "async def test_023_partial_results(self):\n        "
+        },
+        {
+          "line": 333,
+          "pattern": "Async test with no await",
+          "code": "async def test_024_message_ordering(self):\n       "
+        }
+      ],
+      "real_patterns": [
+        "HTTP client call",
+        "Awaiting response",
+        "HTTP status check"
+      ],
+      "test_count": 25,
+      "test_methods": [
+        "test_001_websocket_connection",
+        "test_002_websocket_authentication",
+        "test_003_websocket_message_send",
+        "test_004_websocket_message_receive",
+        "test_005_agent_startup",
+        "test_006_agent_execution",
+        "test_007_agent_response",
+        "test_008_agent_streaming",
+        "test_009_agent_completion",
+        "test_010_tool_execution",
+        "test_011_tool_results",
+        "test_012_message_persistence",
+        "test_013_thread_creation",
+        "test_014_thread_switching",
+        "test_015_thread_history",
+        "test_016_user_context_isolation",
+        "test_017_concurrent_users",
+        "test_018_rate_limiting",
+        "test_019_error_messages",
+        "test_020_reconnection",
+        "test_021_session_persistence",
+        "test_022_agent_cancellation",
+        "test_023_partial_results",
+        "test_024_message_ordering",
+        "test_025_event_delivery"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 22,
+      "real_score": 3
+    },
+    {
+      "file": "test_priority2_high.py",
+      "fake_patterns": [
+        {
+          "line": 74,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        },
+        {
+          "line": 65,
+          "pattern": "Async test with no await",
+          "code": "async def test_028_token_refresh(self):\n        \"\""
+        },
+        {
+          "line": 89,
+          "pattern": "Async test with no await",
+          "code": "async def test_029_token_expiry(self):\n        \"\"\""
+        },
+        {
+          "line": 128,
+          "pattern": "Async test with no await",
+          "code": "async def test_031_session_security(self):\n       "
+        },
+        {
+          "line": 183,
+          "pattern": "Async test with no await",
+          "code": "async def test_034_permission_checks(self):\n      "
+        },
+        {
+          "line": 198,
+          "pattern": "Async test with no await",
+          "code": "async def test_035_data_encryption(self):\n        "
+        },
+        {
+          "line": 215,
+          "pattern": "Async test with no await",
+          "code": "async def test_036_secure_websocket(self):\n       "
+        },
+        {
+          "line": 234,
+          "pattern": "Async test with no await",
+          "code": "async def test_037_input_sanitization(self):\n     "
+        },
+        {
+          "line": 251,
+          "pattern": "Async test with no await",
+          "code": "async def test_038_sql_injection_prevention(self):"
+        },
+        {
+          "line": 287,
+          "pattern": "Async test with no await",
+          "code": "async def test_040_audit_logging(self):\n        \"\""
+        }
+      ],
+      "real_patterns": [
+        "HTTP client call",
+        "Awaiting response",
+        "HTTP status check"
+      ],
+      "test_count": 15,
+      "test_methods": [
+        "test_026_jwt_authentication",
+        "test_027_oauth_google_login",
+        "test_028_token_refresh",
+        "test_029_token_expiry",
+        "test_030_logout_flow",
+        "test_031_session_security",
+        "test_032_cors_configuration",
+        "test_033_api_authentication",
+        "test_034_permission_checks",
+        "test_035_data_encryption",
+        "test_036_secure_websocket",
+        "test_037_input_sanitization",
+        "test_038_sql_injection_prevention",
+        "test_039_rate_limit_security",
+        "test_040_audit_logging"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 10,
+      "real_score": 3
+    },
+    {
+      "file": "test_priority3_medium_high.py",
+      "fake_patterns": [
+        {
+          "line": 44,
+          "pattern": "Async test with no await",
+          "code": "async def test_042_agent_handoff(self):\n        \"\""
+        },
+        {
+          "line": 63,
+          "pattern": "Async test with no await",
+          "code": "async def test_043_parallel_agent_execution(self):"
+        },
+        {
+          "line": 82,
+          "pattern": "Async test with no await",
+          "code": "async def test_044_sequential_agent_chain(self):\n "
+        },
+        {
+          "line": 104,
+          "pattern": "Async test with no await",
+          "code": "async def test_045_agent_dependencies(self):\n     "
+        },
+        {
+          "line": 132,
+          "pattern": "Async test with no await",
+          "code": "async def test_046_agent_communication(self):\n    "
+        },
+        {
+          "line": 149,
+          "pattern": "Async test with no await",
+          "code": "async def test_047_workflow_branching(self):\n     "
+        },
+        {
+          "line": 173,
+          "pattern": "Async test with no await",
+          "code": "async def test_048_workflow_loops(self):\n        \""
+        },
+        {
+          "line": 192,
+          "pattern": "Async test with no await",
+          "code": "async def test_049_agent_timeout(self):\n        \"\""
+        },
+        {
+          "line": 213,
+          "pattern": "Async test with no await",
+          "code": "async def test_050_agent_retry(self):\n        \"\"\"T"
+        },
+        {
+          "line": 240,
+          "pattern": "Async test with no await",
+          "code": "async def test_051_agent_fallback(self):\n        \""
+        },
+        {
+          "line": 255,
+          "pattern": "Async test with no await",
+          "code": "async def test_052_resource_allocation(self):\n    "
+        },
+        {
+          "line": 278,
+          "pattern": "Async test with no await",
+          "code": "async def test_053_priority_scheduling(self):\n    "
+        },
+        {
+          "line": 298,
+          "pattern": "Async test with no await",
+          "code": "async def test_054_load_balancing(self):\n        \""
+        }
+      ],
+      "real_patterns": [
+        "HTTP client call",
+        "Awaiting response",
+        "HTTP status check"
+      ],
+      "test_count": 15,
+      "test_methods": [
+        "test_041_multi_agent_workflow",
+        "test_042_agent_handoff",
+        "test_043_parallel_agent_execution",
+        "test_044_sequential_agent_chain",
+        "test_045_agent_dependencies",
+        "test_046_agent_communication",
+        "test_047_workflow_branching",
+        "test_048_workflow_loops",
+        "test_049_agent_timeout",
+        "test_050_agent_retry",
+        "test_051_agent_fallback",
+        "test_052_resource_allocation",
+        "test_053_priority_scheduling",
+        "test_054_load_balancing",
+        "test_055_agent_monitoring"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 13,
+      "real_score": 3
+    },
+    {
+      "file": "test_priority4_medium.py",
+      "fake_patterns": [
+        {
+          "line": 26,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        },
+        {
+          "line": 49,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        },
+        {
+          "line": 71,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        },
+        {
+          "line": 89,
+          "pattern": "Async test with no await",
+          "code": "async def test_059_throughput(self):\n        \"\"\"Te"
+        },
+        {
+          "line": 110,
+          "pattern": "Async test with no await",
+          "code": "async def test_060_concurrent_connections(self):\n "
+        },
+        {
+          "line": 137,
+          "pattern": "Async test with no await",
+          "code": "async def test_061_memory_usage(self):\n        \"\"\""
+        },
+        {
+          "line": 157,
+          "pattern": "Async test with no await",
+          "code": "async def test_062_cpu_usage(self):\n        \"\"\"Tes"
+        },
+        {
+          "line": 176,
+          "pattern": "Async test with no await",
+          "code": "async def test_063_database_connection_pool(self):"
+        },
+        {
+          "line": 199,
+          "pattern": "Async test with no await",
+          "code": "async def test_064_cache_hit_rate(self):\n        \""
+        },
+        {
+          "line": 271,
+          "pattern": "Async test with no await",
+          "code": "async def test_067_graceful_shutdown(self):\n      "
+        },
+        {
+          "line": 293,
+          "pattern": "Async test with no await",
+          "code": "async def test_068_circuit_breaker(self):\n        "
+        },
+        {
+          "line": 320,
+          "pattern": "Async test with no await",
+          "code": "async def test_069_retry_backoff(self):\n        \"\""
+        },
+        {
+          "line": 346,
+          "pattern": "Async test with no await",
+          "code": "async def test_070_connection_pooling(self):\n     "
+        }
+      ],
+      "real_patterns": [
+        "HTTP client call",
+        "Awaiting response",
+        "HTTP status check",
+        "Duration measurement"
+      ],
+      "test_count": 15,
+      "test_methods": [
+        "test_056_response_time_p50",
+        "test_057_response_time_p95",
+        "test_058_response_time_p99",
+        "test_059_throughput",
+        "test_060_concurrent_connections",
+        "test_061_memory_usage",
+        "test_062_cpu_usage",
+        "test_063_database_connection_pool",
+        "test_064_cache_hit_rate",
+        "test_065_cold_start",
+        "test_066_warm_start",
+        "test_067_graceful_shutdown",
+        "test_068_circuit_breaker",
+        "test_069_retry_backoff",
+        "test_070_connection_pooling"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 13,
+      "real_score": 4
+    },
+    {
+      "file": "test_priority5_medium_low.py",
+      "fake_patterns": [
+        {
+          "line": 26,
+          "pattern": "Async test with no await",
+          "code": "async def test_071_message_storage(self):\n        "
+        },
+        {
+          "line": 47,
+          "pattern": "Async test with no await",
+          "code": "async def test_072_thread_storage(self):\n        \""
+        },
+        {
+          "line": 68,
+          "pattern": "Async test with no await",
+          "code": "async def test_073_user_profile_storage(self):\n   "
+        },
+        {
+          "line": 92,
+          "pattern": "Async test with no await",
+          "code": "async def test_074_file_upload(self):\n        \"\"\"T"
+        },
+        {
+          "line": 113,
+          "pattern": "Async test with no await",
+          "code": "async def test_075_file_retrieval(self):\n        \""
+        },
+        {
+          "line": 140,
+          "pattern": "Async test with no await",
+          "code": "async def test_076_data_export(self):\n        \"\"\"T"
+        },
+        {
+          "line": 159,
+          "pattern": "Async test with no await",
+          "code": "async def test_077_data_import(self):\n        \"\"\"T"
+        },
+        {
+          "line": 183,
+          "pattern": "Async test with no await",
+          "code": "async def test_078_backup_creation(self):\n        "
+        },
+        {
+          "line": 203,
+          "pattern": "Async test with no await",
+          "code": "async def test_079_backup_restoration(self):\n     "
+        },
+        {
+          "line": 226,
+          "pattern": "Async test with no await",
+          "code": "async def test_080_data_retention(self):\n        \""
+        },
+        {
+          "line": 263,
+          "pattern": "Async test with no await",
+          "code": "async def test_081_data_deletion(self):\n        \"\""
+        },
+        {
+          "line": 287,
+          "pattern": "Async test with no await",
+          "code": "async def test_082_search_functionality(self):\n   "
+        },
+        {
+          "line": 316,
+          "pattern": "Async test with no await",
+          "code": "async def test_083_filtering(self):\n        \"\"\"Tes"
+        },
+        {
+          "line": 342,
+          "pattern": "Async test with no await",
+          "code": "async def test_084_pagination(self):\n        \"\"\"Te"
+        },
+        {
+          "line": 363,
+          "pattern": "Async test with no await",
+          "code": "async def test_085_sorting(self):\n        \"\"\"Test "
+        }
+      ],
+      "real_patterns": [],
+      "test_count": 15,
+      "test_methods": [
+        "test_071_message_storage",
+        "test_072_thread_storage",
+        "test_073_user_profile_storage",
+        "test_074_file_upload",
+        "test_075_file_retrieval",
+        "test_076_data_export",
+        "test_077_data_import",
+        "test_078_backup_creation",
+        "test_079_backup_restoration",
+        "test_080_data_retention",
+        "test_081_data_deletion",
+        "test_082_search_functionality",
+        "test_083_filtering",
+        "test_084_pagination",
+        "test_085_sorting"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 15,
+      "real_score": 0
+    },
+    {
+      "file": "test_priority6_low.py",
+      "fake_patterns": [
+        {
+          "line": 80,
+          "pattern": "Async test with no await",
+          "code": "async def test_088_logging_pipeline(self):\n       "
+        },
+        {
+          "line": 99,
+          "pattern": "Async test with no await",
+          "code": "async def test_089_distributed_tracing(self):\n    "
+        },
+        {
+          "line": 123,
+          "pattern": "Async test with no await",
+          "code": "async def test_090_error_tracking(self):\n        \""
+        },
+        {
+          "line": 148,
+          "pattern": "Async test with no await",
+          "code": "async def test_091_performance_monitoring(self):\n "
+        },
+        {
+          "line": 170,
+          "pattern": "Async test with no await",
+          "code": "async def test_092_alerting(self):\n        \"\"\"Test"
+        },
+        {
+          "line": 207,
+          "pattern": "Async test with no await",
+          "code": "async def test_093_dashboard_data(self):\n        \""
+        },
+        {
+          "line": 286,
+          "pattern": "Async test with no await",
+          "code": "async def test_096_feature_flags(self):\n        \"\""
+        },
+        {
+          "line": 312,
+          "pattern": "Async test with no await",
+          "code": "async def test_097_a_b_testing(self):\n        \"\"\"T"
+        },
+        {
+          "line": 342,
+          "pattern": "Async test with no await",
+          "code": "async def test_098_analytics_events(self):\n       "
+        },
+        {
+          "line": 376,
+          "pattern": "Async test with no await",
+          "code": "async def test_099_compliance_reporting(self):\n   "
+        }
+      ],
+      "real_patterns": [
+        "HTTP client call",
+        "Awaiting response",
+        "HTTP status check"
+      ],
+      "test_count": 15,
+      "test_methods": [
+        "test_086_health_endpoint",
+        "test_087_metrics_endpoint",
+        "test_088_logging_pipeline",
+        "test_089_distributed_tracing",
+        "test_090_error_tracking",
+        "test_091_performance_monitoring",
+        "test_092_alerting",
+        "test_093_dashboard_data",
+        "test_094_api_documentation",
+        "test_095_version_endpoint",
+        "test_096_feature_flags",
+        "test_097_a_b_testing",
+        "test_098_analytics_events",
+        "test_099_compliance_reporting",
+        "test_100_system_diagnostics"
+      ],
+      "is_likely_fake": true,
+      "fake_score": 10,
+      "real_score": 3
+    },
+    {
+      "file": "test_secret_key_validation.py",
+      "fake_patterns": [
+        {
+          "line": 66,
+          "pattern": "Simulation comment found",
+          "code": "# Simulate"
+        }
+      ],
+      "real_patterns": [],
+      "test_count": 0,
+      "test_methods": [],
+      "is_likely_fake": true,
+      "fake_score": 1,
+      "real_score": 0
+    },
+    {
+      "file": "test_security_config_variations.py",
+      "fake_patterns": [],
+      "real_patterns": [],
+      "test_count": 0,
+      "test_methods": [],
+      "is_likely_fake": false,
+      "fake_score": 0,
+      "real_score": 0
+    }
+  ]
+}
