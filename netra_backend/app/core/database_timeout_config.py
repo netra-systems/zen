@@ -256,17 +256,19 @@ def get_database_timeout_config(environment: str) -> Dict[str, float]:
         },
         "staging": {
             # CRITICAL FIX Issue #1278: VPC Connector Capacity Constraints - Further extended timeout configuration
-            # Root cause analysis: Previous 45.0s still insufficient for compound infrastructure failures
+            # Issue #1278 Remediation Plan Implementation: Extended timeout configuration for infrastructure reliability
+            # Root cause analysis: Previous timeouts insufficient for compound infrastructure failures
             # New evidence from Issue #1278: VPC connector scaling + Cloud SQL capacity pressure creates compound delays
             # VPC connector capacity pressure: 30s delay during peak scaling events
             # Cloud SQL resource constraints: 25s delay under concurrent connection pressure
             # Network latency amplification: 10s additional delay during infrastructure stress
             # Safety margin for cascading failures: 15s buffer
-            "initialization_timeout": 75.0,    # CRITICAL: Extended to handle compound VPC+CloudSQL delays (increased from 45.0)
-            "table_setup_timeout": 25.0,       # Extended for schema operations under load (increased from 15.0)
-            "connection_timeout": 35.0,        # Extended for VPC connector peak scaling delays (increased from 25.0)
-            "pool_timeout": 45.0,              # Extended for connection pool exhaustion + VPC delays (increased from 30.0)
-            "health_check_timeout": 20.0,      # Extended for compound infrastructure health checks (increased from 15.0)
+            # Issue #1278 Remediation: Extended timeouts per remediation plan
+            "initialization_timeout": 90.0,    # CRITICAL: Issue #1278 remediation - increased from 75.0s to 90s
+            "table_setup_timeout": 30.0,       # Extended for schema operations under load (increased from 25.0)
+            "connection_timeout": 45.0,        # Issue #1278 remediation - increased from 35.0s to 45s
+            "pool_timeout": 50.0,              # Extended for connection pool exhaustion + VPC delays (increased from 45.0)
+            "health_check_timeout": 25.0,      # Extended for compound infrastructure health checks (increased from 20.0)
         },
         "production": {
             # CRITICAL: Production needs maximum reliability
@@ -316,16 +318,16 @@ def get_cloud_sql_optimized_config(environment: str) -> Dict[str, any]:
             },
             # Pool configuration for Cloud SQL with capacity constraints (Issue #1278)
             "pool_config": {
-                "pool_size": 10,              # Reduced to respect Cloud SQL connection limits (reduced from 15)
-                "max_overflow": 15,           # Reduced to stay within 80% of Cloud SQL capacity (reduced from 25)
+                "pool_size": 12,              # Issue #1278 remediation - slightly increased for better throughput balance
+                "max_overflow": 18,           # Issue #1278 remediation - increased to handle peak load with safety margin
                 "pool_timeout": 90.0,         # Extended for VPC connector + Cloud SQL delays (increased from 60.0)
-                "pool_recycle": 3600,         # 1 hour recycle for stability
+                "pool_recycle": 1800,         # Issue #1278 remediation - reduced from 3600s to 1800s for faster refresh
                 "pool_pre_ping": True,        # Always verify connections
                 "pool_reset_on_return": "rollback",  # Safe connection resets
                 # New: VPC connector capacity awareness
                 "vpc_connector_capacity_buffer": 5,   # Reserve connections for VPC connector scaling
                 "cloud_sql_capacity_limit": 100,     # Track Cloud SQL instance connection limit
-                "capacity_safety_margin": 0.8,       # Use only 80% of available connections
+                "capacity_safety_margin": 0.75,      # Issue #1278 remediation - reduced from 0.8 to 0.75 for more aggressive usage
             }
         }
     else:
