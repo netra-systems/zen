@@ -457,12 +457,20 @@ class SSotBaseTestCase:
             
             # Create event loop if none exists and we're not in pytest-asyncio context
             try:
-                loop = asyncio.get_event_loop()
-                if loop.is_closed():
-                    raise RuntimeError("Event loop is closed")
+                # Use get_running_loop() to avoid deprecation warning in Python 3.13+
+                loop = asyncio.get_running_loop()
+                # If we get here, there's already a running loop, which shouldn't happen
+                # if we properly detected pytest-asyncio context
+                logger.warning(f"Found unexpected running event loop in {self.__class__.__name__}")
             except RuntimeError:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
+                # No running loop, create one
+                try:
+                    loop = asyncio.get_event_loop()
+                    if loop.is_closed():
+                        raise RuntimeError("Event loop is closed")
+                except RuntimeError:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
             
             # Run asyncSetUp safely to avoid nested event loop issues (only if not in pytest-asyncio context)
             try:
@@ -1337,12 +1345,20 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
             
             # Create event loop if none exists and we're not in pytest-asyncio context
             try:
-                loop = asyncio.get_event_loop()
-                if loop.is_closed():
-                    raise RuntimeError("Event loop is closed")
+                # Use get_running_loop() to avoid deprecation warning in Python 3.13+
+                loop = asyncio.get_running_loop()
+                # If we get here, there's already a running loop, which shouldn't happen
+                # if we properly detected pytest-asyncio context
+                logger.warning(f"Found unexpected running event loop in {self.__class__.__name__}")
             except RuntimeError:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
+                # No running loop, create one
+                try:
+                    loop = asyncio.get_event_loop()
+                    if loop.is_closed():
+                        raise RuntimeError("Event loop is closed")
+                except RuntimeError:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
             
             # Run asyncSetUp safely to avoid nested event loop issues (only if not in pytest-asyncio context)
             try:
