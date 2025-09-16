@@ -93,7 +93,7 @@ class SystemUserAuthFailureReproductionTests:
         After Fix: This test should PASS when the configuration is added
         """
         import yaml
-        staging_compose_path = '/Users/anthony/Documents/GitHub/netra-apex/docker-compose.staging.yml'
+        staging_compose_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'docker-compose.staging.yml')
         with open(staging_compose_path, 'r') as f:
             compose_config = yaml.safe_load(f)
         backend_env = compose_config['services']['backend']['environment']

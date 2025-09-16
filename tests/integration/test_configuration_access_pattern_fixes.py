@@ -65,7 +65,7 @@
         # REMOVED_SYNTAX_ERROR: result = subprocess.run([ ))
         # REMOVED_SYNTAX_ERROR: 'docker-compose', '-f', 'docker-compose.minimal.yml', 'up', '-d'
         # REMOVED_SYNTAX_ERROR: ],
-        # REMOVED_SYNTAX_ERROR: cwd='/Users/anthony/Documents/GitHub/netra-apex',
+        # REMOVED_SYNTAX_ERROR: cwd=project_root,
         # REMOVED_SYNTAX_ERROR: capture_output=True, text=True, timeout=60)
 
         # REMOVED_SYNTAX_ERROR: if result.returncode == 0:

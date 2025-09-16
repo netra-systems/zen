@@ -15,7 +15,7 @@ Business Value:
 - Stops "modelmetaclass already registered" errors at the source
 - Validates proper tool interface contracts
 
-See: /Users/anthony/Documents/GitHub/netra-apex/audit/staging/auto-solve-loop/toolregistry-duplicate-registration-20250109.md
+See: audit/staging/auto-solve-loop/toolregistry-duplicate-registration-20250109.md
 """
 
 import pytest
