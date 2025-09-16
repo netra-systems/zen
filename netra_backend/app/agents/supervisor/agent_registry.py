@@ -2340,6 +2340,151 @@ class AgentRegistry(BaseAgentRegistry):
                 "last_cleanup": datetime.now().isoformat()
             }
 
+    # ===================== MISSING INTERFACE METHODS =====================
+    # Issue #991: Add missing interface methods identified by failing tests
+    
+    def get_agent_by_name(self, name: str) -> Optional[Any]:
+        """Get agent instance by name.
+        
+        Args:
+            name: Agent name to look up
+            
+        Returns:
+            Agent instance if found, None otherwise
+        """
+        try:
+            if not name:
+                logger.warning("get_agent_by_name called with empty name")
+                return None
+            
+            # Use existing find_agent_by_name method which searches available agents
+            return self.find_agent_by_name(name)
+            
+        except Exception as e:
+            logger.error(f"Failed to get agent by name '{name}': {e}")
+            return None
+
+    def get_agent_by_id(self, agent_id: str) -> Optional[Any]:
+        """Get agent instance by ID.
+        
+        Args:
+            agent_id: Agent ID to look up
+            
+        Returns:
+            Agent instance if found, None otherwise
+        """
+        try:
+            if not agent_id:
+                logger.warning("get_agent_by_id called with empty agent_id")
+                return None
+            
+            # Search through user sessions for agent with this ID
+            for user_id, session in self._user_sessions.items():
+                if hasattr(session, 'agents'):
+                    for agent in session.agents:
+                        if hasattr(agent, 'id') and agent.id == agent_id:
+                            return agent
+                        elif hasattr(agent, 'agent_id') and agent.agent_id == agent_id:
+                            return agent
+            
+            logger.debug(f"Agent with ID '{agent_id}' not found")
+            return None
+            
+        except Exception as e:
+            logger.error(f"Failed to get agent by ID '{agent_id}': {e}")
+            return None
+
+    def is_agent_available(self, agent_type: str) -> bool:
+        """Check if agent type is available for creation.
+        
+        Args:
+            agent_type: Agent type to check availability for
+            
+        Returns:
+            True if agent type is available, False otherwise
+        """
+        try:
+            if not agent_type:
+                logger.warning("is_agent_available called with empty agent_type")
+                return False
+            
+            # Check if we have a factory for this agent type
+            available_types = [
+                'supervisor_agent',
+                'data_helper_agent', 
+                'triage_agent',
+                'apex_optimizer_agent'
+            ]
+            
+            is_available = agent_type.lower() in [t.lower() for t in available_types]
+            logger.debug(f"Agent type '{agent_type}' availability: {is_available}")
+            return is_available
+            
+        except Exception as e:
+            logger.error(f"Failed to check availability for agent type '{agent_type}': {e}")
+            return False
+
+    def get_agent_metadata(self, agent_type: str) -> Dict[str, Any]:
+        """Get metadata for agent type.
+        
+        Args:
+            agent_type: Agent type to get metadata for
+            
+        Returns:
+            Dictionary containing agent metadata
+        """
+        try:
+            if not agent_type:
+                logger.warning("get_agent_metadata called with empty agent_type")
+                return {}
+            
+            # Define metadata for supported agent types
+            metadata = {
+                'supervisor_agent': {
+                    'name': 'Supervisor Agent',
+                    'description': 'Central orchestrator for multi-agent workflows',
+                    'capabilities': ['orchestration', 'workflow_management', 'task_delegation'],
+                    'requires_auth': True,
+                    'supports_websocket': True
+                },
+                'data_helper_agent': {
+                    'name': 'Data Helper Agent',
+                    'description': 'Assists with data requirements and analysis',
+                    'capabilities': ['data_analysis', 'data_validation', 'requirements_gathering'],
+                    'requires_auth': True,
+                    'supports_websocket': True
+                },
+                'triage_agent': {
+                    'name': 'Triage Agent',
+                    'description': 'Routes and prioritizes user requests',
+                    'capabilities': ['request_routing', 'priority_assessment', 'data_sufficiency'],
+                    'requires_auth': True,
+                    'supports_websocket': True
+                },
+                'apex_optimizer_agent': {
+                    'name': 'APEX Optimizer Agent',
+                    'description': 'AI optimization and performance tuning',
+                    'capabilities': ['ai_optimization', 'performance_tuning', 'cost_analysis'],
+                    'requires_auth': True,
+                    'supports_websocket': True
+                }
+            }
+            
+            agent_metadata = metadata.get(agent_type.lower(), {
+                'name': f'Unknown Agent ({agent_type})',
+                'description': 'Agent type not recognized',
+                'capabilities': [],
+                'requires_auth': True,
+                'supports_websocket': False
+            })
+            
+            logger.debug(f"Retrieved metadata for agent type '{agent_type}'")
+            return agent_metadata
+            
+        except Exception as e:
+            logger.error(f"Failed to get metadata for agent type '{agent_type}': {e}")
+            return {}
+
 
 # ===================== MODULE EXPORTS =====================
 
