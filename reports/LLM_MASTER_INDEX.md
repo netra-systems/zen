@@ -27,12 +27,13 @@
 |------|-------|-----------|
 | **User flow analysis** | [`docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md`](docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md) | **MISSION CRITICAL: Complete user journey** |
 | **WebSocket/Chat issues** | [`docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md`](docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md) | **Race conditions, missing events, $500K+ ARR** |
+| **Secret loading issues** | [`docs/SECRET_VALUE_LOADING_FLOW.md`](docs/SECRET_VALUE_LOADING_FLOW.md) | **🚨 CRITICAL: Silent failures, service account access** |
 | **Review changes** | [`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) | Module-specific checklists |
 | **Fix a bug** | [`SPEC/learnings/index.xml`](SPEC/learnings/index.xml) | Check learnings first |
 | **Add new feature** | [`SPEC/core.xml`](SPEC/core.xml) | Architecture patterns |
 | **Agent implementation** | [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) | **Complete agent patterns & migration** |
 | **Fix tests** | [`SPEC/test_infrastructure_ssot.xml`](SPEC/test_infrastructure_ssot.xml) | **SSOT test infrastructure (94.5% compliance)** |
-| **Deploy changes** | [`scripts/deploy_to_gcp.py`](scripts/deploy_to_gcp.py) | Official deploy script |
+| **Deploy changes** | [`scripts/deploy_to_gcp_actual.py`](scripts/deploy_to_gcp_actual.py) | **Official deploy script (WITH SECRET VALIDATION)** |
 | **Check compliance** | [`scripts/check_architecture_compliance.py`](scripts/check_architecture_compliance.py) | Architecture validator |
 | **WebSocket issues** | [`SPEC/learnings/websocket_agent_integration_critical.xml`](SPEC/learnings/websocket_agent_integration_critical.xml) | Critical fixes |
 | **Auth problems** | [`SPEC/learnings/auth_race_conditions_critical.xml`](SPEC/learnings/auth_race_conditions_critical.xml) | Auth learnings |
