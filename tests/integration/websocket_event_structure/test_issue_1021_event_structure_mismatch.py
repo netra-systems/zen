@@ -42,7 +42,6 @@ from test_framework.ssot.websocket_connection_test_utility import SSotWebSocketC
 # Backend WebSocket components
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.websocket_core.types import create_server_message, MessageType
-from netra_backend.app.agents.base_agent import BaseAgent
 from shared.isolated_environment import IsolatedEnvironment
 
 
@@ -56,9 +55,9 @@ class TestIssue1021WebSocketEventStructureMismatch(SSotAsyncTestCase):
     Expected Result: TEST SHOULD FAIL - proving the issue exists
     """
 
-    def setup_method(self):
+    def setup_method(self, method):
         """Set up test environment with WebSocket infrastructure."""
-        super().setup_method()
+        super().setup_method(method)
 
         # Set up mock WebSocket infrastructure
         self.mock_websocket = MagicMock()

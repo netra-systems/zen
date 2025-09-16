@@ -1,0 +1,56 @@
+{
+  "compliant": false,
+  "score": 70.0,
+  "required_events": [],
+  "critical_events": [],
+  "validations": {
+    "WebSocketNotifier": {
+      "valid": false,
+      "score": 80,
+      "issues": [
+        "WebSocketNotifier file not found"
+      ]
+    },
+    "AgentRegistry": {
+      "valid": true,
+      "score": 100,
+      "issues": []
+    },
+    "ExecutionEngine": {
+      "valid": false,
+      "score": 0,
+      "issues": [
+        "WebSocketNotifier not imported",
+        "WebSocketNotifier not initialized",
+        "Missing critical event call: send_agent_started",
+        "Missing critical event call: send_agent_thinking",
+        "Missing critical event call: send_agent_completed"
+      ]
+    },
+    "EnhancedToolExecution": {
+      "valid": true,
+      "score": 100,
+      "issues": []
+    },
+    "FrontendProvider": {
+      "valid": true,
+      "score": 100,
+      "issues": []
+    },
+    "TestCoverage": {
+      "valid": false,
+      "score": 40,
+      "issues": [
+        "Missing validation: validate_critical_requirements",
+        "Missing validation: validate_event_ordering",
+        "Missing validation: validate_all_events_sent"
+      ]
+    }
+  },
+  "summary": {
+    "total_validations": 6,
+    "passed": 3,
+    "failed": 3,
+    "total_issues": 9
+  }
+}

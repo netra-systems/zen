@@ -1597,22 +1597,24 @@ class _UnifiedWebSocketManagerImplementation:
     def _process_business_event(self, event_type: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
         Process business events to ensure proper field structure for Golden Path validation.
-        
+
         This method transforms generic WebSocket events into business-specific events
         with the required fields expected by mission-critical tests and client applications.
-        
+
+        ISSUE #1021 FIX: Wraps business event data in 'payload' object instead of spreading
+        to root level to match frontend expectations.
+
         Args:
             event_type: Type of event ('tool_executing', 'tool_completed', 'agent_started', etc.)
             data: Raw event data
-            
+
         Returns:
             Dict with proper business event structure, or None if processing fails
         """
         try:
             # Handle tool_executing events
             if event_type == "tool_executing":
-                return {
-                    "type": event_type,
+                payload = {
                     "tool_name": data.get("tool_name", data.get("name", "unknown_tool")),
                     "parameters": data.get("parameters", data.get("params", {})),
                     "timestamp": data.get("timestamp", time.time()),
@@ -1621,11 +1623,14 @@ class _UnifiedWebSocketManagerImplementation:
                     # Preserve additional fields
                     **{k: v for k, v in data.items() if k not in ["tool_name", "parameters", "timestamp"]}
                 }
+                return {
+                    "type": event_type,
+                    "payload": payload
+                }
             
             # Handle tool_completed events
             elif event_type == "tool_completed":
-                return {
-                    "type": event_type,
+                payload = {
                     "tool_name": data.get("tool_name", data.get("name", "unknown_tool")),
                     "results": data.get("results", data.get("result", data.get("output", {}))),
                     "duration": data.get("duration", data.get("duration_ms", data.get("elapsed_time", 0))),
@@ -1636,11 +1641,14 @@ class _UnifiedWebSocketManagerImplementation:
                     # Preserve additional fields
                     **{k: v for k, v in data.items() if k not in ["tool_name", "results", "duration", "timestamp", "success"]}
                 }
+                return {
+                    "type": event_type,
+                    "payload": payload
+                }
             
             # Handle agent_started events
             elif event_type == "agent_started":
-                return {
-                    "type": event_type,
+                payload = {
                     "user_id": data.get("user_id"),
                     "thread_id": data.get("thread_id"),
                     "timestamp": data.get("timestamp", time.time()),
@@ -1649,11 +1657,14 @@ class _UnifiedWebSocketManagerImplementation:
                     # Preserve additional fields
                     **{k: v for k, v in data.items() if k not in ["user_id", "thread_id", "timestamp", "agent_name", "task_description"]}
                 }
+                return {
+                    "type": event_type,
+                    "payload": payload
+                }
             
             # Handle agent_thinking events
             elif event_type == "agent_thinking":
-                return {
-                    "type": event_type,
+                payload = {
                     "reasoning": data.get("reasoning", data.get("thought", data.get("thinking", "Agent is processing..."))),
                     "timestamp": data.get("timestamp", time.time()),
                     "user_id": data.get("user_id"),
@@ -1661,11 +1672,14 @@ class _UnifiedWebSocketManagerImplementation:
                     # Preserve additional fields
                     **{k: v for k, v in data.items() if k not in ["reasoning", "timestamp"]}
                 }
+                return {
+                    "type": event_type,
+                    "payload": payload
+                }
             
             # Handle agent_completed events
             elif event_type == "agent_completed":
-                return {
-                    "type": event_type,
+                payload = {
                     "status": data.get("status", "completed"),
                     "final_response": data.get("final_response", data.get("response", data.get("result", "Task completed"))),
                     "timestamp": data.get("timestamp", time.time()),
@@ -1674,23 +1688,33 @@ class _UnifiedWebSocketManagerImplementation:
                     # Preserve additional fields
                     **{k: v for k, v in data.items() if k not in ["status", "final_response", "timestamp"]}
                 }
+                return {
+                    "type": event_type,
+                    "payload": payload
+                }
             
-            # For other event types, return data as-is with type field
+            # For other event types, wrap data in payload object
             else:
-                processed_data = data.copy()
-                processed_data["type"] = event_type
-                if "timestamp" not in processed_data:
-                    processed_data["timestamp"] = time.time()
-                return processed_data
+                # Ensure timestamp is included
+                if "timestamp" not in data:
+                    data = data.copy()
+                    data["timestamp"] = time.time()
+
+                return {
+                    "type": event_type,
+                    "payload": data
+                }
                 
         except Exception as e:
             logger.error(f"Failed to process business event {event_type}: {e}")
-            # Return fallback structure
+            # Return fallback structure with payload wrapper
             return {
                 "type": event_type,
-                "timestamp": time.time(),
-                "error": f"Processing failed: {e}",
-                **data
+                "payload": {
+                    "timestamp": time.time(),
+                    "error": f"Processing failed: {e}",
+                    **data
+                }
             }
     
     def is_connection_active(self, user_id: Union[str, UserID]) -> bool:

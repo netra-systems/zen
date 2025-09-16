@@ -13,7 +13,7 @@ CRITICAL INFRASTRUCTURE UPDATE (Issue #1278):
 Always use the current staging domains (*.netrasystems.ai):
 - Backend/Auth: https://staging.netrasystems.ai
 - Frontend: https://staging.netrasystems.ai
-- WebSocket: wss://api-staging.netrasystems.ai
+- WebSocket: wss://staging.netrasystems.ai
 
 DEPRECATED - DO NOT USE: *.staging.netrasystems.ai URLs (causes SSL certificate failures)
 NEVER USE: Direct Cloud Run URLs (bypasses load balancer and SSL)
@@ -59,12 +59,12 @@ STAGING_DOMAINS = {
     "BACKEND_URL": "https://staging.netrasystems.ai",
     "AUTH_SERVICE_URL": "https://staging.netrasystems.ai",
 
-    # API-specific domains
-    "API_BASE_URL": "https://api-staging.netrasystems.ai",
+    # API-specific domains (using main staging domain - api-staging.netrasystems.ai DNS not configured)
+    "API_BASE_URL": "https://staging.netrasystems.ai",
 
-    # WebSocket domains
-    "WEBSOCKET_URL": "wss://api-staging.netrasystems.ai",
-    "WEBSOCKET_BASE": "wss://api-staging.netrasystems.ai/ws",
+    # WebSocket domains (using main staging domain - api-staging.netrasystems.ai DNS not configured)
+    "WEBSOCKET_URL": "wss://staging.netrasystems.ai",
+    "WEBSOCKET_BASE": "wss://staging.netrasystems.ai/ws",
 
     # Load balancer endpoints (preferred over direct Cloud Run)
     "LOAD_BALANCER_FRONTEND": "https://staging.netrasystems.ai",
@@ -100,7 +100,7 @@ STAGING_SERVICE_DOMAINS = {
 # Domain validation patterns
 VALID_STAGING_PATTERNS = [
     "*.netrasystems.ai",  # Correct format
-    "api-staging.netrasystems.ai",  # API subdomain format
+    "staging.netrasystems.ai",  # Main staging domain
 ]
 
 INVALID_STAGING_PATTERNS = [
@@ -239,6 +239,7 @@ LEGACY_DOMAIN_MAPPING = {
     "https://api.staging.netrasystems.ai": STAGING_DOMAINS["API_BASE_URL"],
     "https://auth.staging.netrasystems.ai": STAGING_DOMAINS["AUTH_SERVICE_URL"],
     "wss://api.staging.netrasystems.ai": STAGING_DOMAINS["WEBSOCKET_URL"],
+    "wss://api-staging.netrasystems.ai": STAGING_DOMAINS["WEBSOCKET_URL"],
 }
 
 
