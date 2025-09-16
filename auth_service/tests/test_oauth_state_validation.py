@@ -162,7 +162,7 @@ pytestmark = pytest.mark.skip(reason="oauth_security module has been removed/ref
 
                                 # Should succeed and redirect to frontend
                                 # REMOVED_SYNTAX_ERROR: assert response.status_code == 302
-                                # REMOVED_SYNTAX_ERROR: assert "app.staging.netra.ai" in response.headers.get("location", "")
+                                # REMOVED_SYNTAX_ERROR: assert "app.staging.netrasystems.ai" in response.headers.get("location", "")
 
                                 # REMOVED_SYNTAX_ERROR: @pytest.fixture
 # REMOVED_SYNTAX_ERROR: def test_oauth_callback_rejects_invalid_state(self, client, oauth_security):

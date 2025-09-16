@@ -187,8 +187,8 @@ class TestOAuthFlows:
         
         # Test redirect URI validation with common URIs
         test_uris = [
-            "https://app.netra.ai/auth/callback",
-            "https://app.staging.netra.ai/auth/callback", 
+            "https://app.netrasystems.ai/auth/callback",
+            "https://app.staging.netrasystems.ai/auth/callback", 
             "http://localhost:3000/auth/callback",
             "https://malicious.com/callback"  # Should be rejected
         ]

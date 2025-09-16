@@ -560,14 +560,14 @@ class OAuthFlowsEnhancedTests(SSotBaseTestCase):
         # Valid redirect URIs for different environments
         valid_redirect_uris = [
             "http://localhost:8081/auth/oauth/google/callback",  # Local development
-            "https://staging.netra.ai/auth/oauth/google/callback",  # Staging
-            "https://app.netra.ai/auth/oauth/google/callback"  # Production
+            "https://staging.netrasystems.ai/auth/oauth/google/callback",  # Staging
+            "https://app.netrasystems.ai/auth/oauth/google/callback"  # Production
         ]
         
         # Potentially dangerous redirect URIs
         dangerous_redirect_uris = [
             "http://evil.com/callback",  # External domain
-            "https://app.netra.ai.evil.com/callback",  # Subdomain attack
+            "https://app.netrasystems.ai.evil.com/callback",  # Subdomain attack
             "javascript:alert('xss')",  # JavaScript injection
             "data:text/html,<script>alert('xss')</script>",  # Data URI attack
         ]

@@ -222,7 +222,7 @@ class CriticalServiceAuthenticationTests(SSotBaseTestCase):
         # Test 2: SERVICE_ID with timestamp should FAIL (prevent regression)
         await self._test_service_id_authentication(
             auth_manager,
-            service_id="netra-auth-staging-20250907120000",  # With timestamp - BAD
+            service_id="netra-auth-20250907120000",  # With timestamp - BAD
             service_secret=service_secret,
             should_succeed=False,
             test_name="timestamp_service_id_regression"
