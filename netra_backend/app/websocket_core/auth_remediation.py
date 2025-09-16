@@ -14,12 +14,12 @@ with the existing WebSocket infrastructure to fix handshake timing issues.
 """
 
 import asyncio
-import logging
 from typing import Optional
 from dataclasses import dataclass
 
 # SSOT imports
 from shared.isolated_environment import get_env
+from shared.logging.unified_logging_ssot import get_logger
 from shared.types.core_types import UserID, ConnectionID
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
@@ -53,7 +53,7 @@ class WebSocketAuthIntegration:
     """Integration layer for WebSocket authentication remediation."""
     
     def __init__(self, config: Optional[WebSocketAuthConfig] = None):
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
         self.config = config or self._load_config_from_environment()
         
         # Initialize remediation manager if available
@@ -213,7 +213,7 @@ async def authenticate_websocket_with_remediation(
     )
     
     import logging
-    logger = logging.getLogger(__name__)
+    logger = get_logger(__name__)
     logger.warning(
         f"DEPRECATION: authenticate_websocket_with_remediation() called for connection {connection_id}. "
         "Migrate to authenticate_websocket_ssot() - this function will be removed."
