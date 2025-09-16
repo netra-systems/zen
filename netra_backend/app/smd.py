@@ -2067,10 +2067,8 @@ class StartupOrchestrator:
     async def _initialize_factory_patterns(self) -> None:
         """Initialize factory patterns for singleton removal - CRITICAL."""
         from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, get_websocket_bridge_factory
-        from netra_backend.app.agents.supervisor.agent_instance_factory import (
-            get_agent_instance_factory,
-            configure_agent_instance_factory
-        )
+        # PHASE 2A MIGRATION: Removed deprecated get_agent_instance_factory and configure_agent_instance_factory imports
+        # These are no longer needed as we use create_agent_instance_factory(user_context) pattern per-request
         from netra_backend.app.services.factory_adapter import FactoryAdapter, AdapterConfig
         # ISSUE #1144 FIX: Use canonical SSOT import path instead of deprecated module import
         from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
