@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY netra_backend/ ./netra_backend/
 COPY shared/ ./shared/
+COPY auth_service/ ./auth_service/
 
 # Set environment variables
 ENV PYTHONPATH=/app

@@ -18,11 +18,20 @@ REGRESSION SCENARIOS PREVENTED:
 4. Configuration inconsistencies between test and production environments
 """
 
+# CRITICAL: Import path configuration for direct test execution
+# Ensures tests work both directly and through unified_test_runner.py
+import sys
 import os
+from pathlib import Path
+
+# Get project root (two levels up from tests/mission_critical/)
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 import ast
 import importlib
 import inspect
-from pathlib import Path
 from typing import List, Dict, Set, Any
 import unittest
 from unittest.mock import patch

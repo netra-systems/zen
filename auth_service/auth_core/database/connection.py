@@ -44,34 +44,51 @@ class AuthDatabaseConnection:
         if self._initialized:
             logger.info("Database already initialized, skipping re-initialization")
             return
-        
+
+        # SSOT Environment-based timeout configuration (Issue #1229 fix)
+        env = get_env()
+
+        # Configure timeouts based on environment and SSOT patterns
+        if self.is_cloud_run or self.environment in ["staging", "production"]:
+            # Cloud environments need longer timeouts for VPC connectivity
+            url_timeout = float(env.get("AUTH_DB_URL_TIMEOUT", "10.0"))
+            engine_timeout = float(env.get("AUTH_DB_ENGINE_TIMEOUT", "30.0"))
+            validation_timeout = float(env.get("AUTH_DB_VALIDATION_TIMEOUT", "60.0"))  # Increased from 15s
+        else:
+            # Development environment with faster timeouts
+            url_timeout = float(env.get("AUTH_DB_URL_TIMEOUT", "5.0"))
+            engine_timeout = float(env.get("AUTH_DB_ENGINE_TIMEOUT", "15.0"))
+            validation_timeout = float(env.get("AUTH_DB_VALIDATION_TIMEOUT", "15.0"))
+
+        logger.info(f"Auth service database timeouts: URL={url_timeout}s, Engine={engine_timeout}s, Validation={validation_timeout}s")
+
         # Use AuthDatabaseManager as SSOT for engine creation with timeout handling
         try:
-            # Get database URL from config with timeout
+            # Get database URL from config with environment-appropriate timeout
             from auth_service.auth_core.config import AuthConfig
             import asyncio
-            
+
             database_url = await asyncio.wait_for(
                 self._get_database_url_async(AuthConfig),
-                timeout=5.0
+                timeout=url_timeout
             )
-            
-            # Create engine with timeout-optimized settings
+
+            # Create engine with environment-appropriate timeout
             self.engine = await asyncio.wait_for(
                 self._create_async_engine_with_timeout(database_url),
-                timeout=15.0
+                timeout=engine_timeout
             )
-            
-            # Test connection early to catch authentication issues with timeout
+
+            # Test connection early to catch authentication issues with environment-appropriate timeout
             try:
                 await asyncio.wait_for(
                     self._validate_initial_connection(),
-                    timeout=15.0
+                    timeout=validation_timeout
                 )
             except asyncio.TimeoutError:
                 raise RuntimeError(
-                    f"Database connection validation timeout exceeded (15s). "
-                    f"This may indicate network connectivity issues or database overload."
+                    f"Database connection validation timeout exceeded ({validation_timeout}s). "
+                    f"This may indicate network connectivity issues or database overload in {self.environment} environment."
                 )
             except Exception as e:
                 # Enhanced error message for authentication failures

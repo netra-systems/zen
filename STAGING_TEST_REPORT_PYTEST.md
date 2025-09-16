@@ -1,81 +1,56 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-15 22:48:26
+**Generated:** 2025-09-15 23:07:36
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 4
-- **Passed:** 0 (0.0%)
-- **Failed:** 4 (100.0%)
+- **Total Tests:** 8
+- **Passed:** 8 (100.0%)
+- **Failed:** 0 (0.0%)
 - **Skipped:** 0
-- **Duration:** 60.71 seconds
-- **Pass Rate:** 0.0%
+- **Duration:** 13.41 seconds
+- **Pass Rate:** 100.0%
 
 ## Test Results by Priority
 
-### CRITICAL Priority Tests
+### NORMAL Priority Tests
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_001_http_connectivity | FAIL failed | 8.188s | test_staging_connectivity_validation.py |
-| test_002_websocket_connectivity | FAIL failed | 5.999s | test_staging_connectivity_validation.py |
-| test_003_agent_request_pipeline | FAIL failed | 6.612s | test_staging_connectivity_validation.py |
-| test_004_generate_connectivity_report | FAIL failed | 25.635s | test_staging_connectivity_validation.py |
-
-## Failed Tests Details
-
-### FAILED: test_001_http_connectivity
-- **File:** C:\netra-apex\tests\e2e\staging\test_staging_connectivity_validation.py
-- **Duration:** 8.188s
-- **Error:** tests\e2e\staging\test_staging_connectivity_validation.py:318: in test_001_http_connectivity
-    assert result["health_status"] == 200, f"Health endpoint unhealthy: {result['health_status']}"
-E   AssertionError: Health endpoint unhealthy: 503
-E   assert 503 == 200...
-
-### FAILED: test_002_websocket_connectivity
-- **File:** C:\netra-apex\tests\e2e\staging\test_staging_connectivity_validation.py
-- **Duration:** 5.999s
-- **Error:** tests\e2e\staging\test_staging_connectivity_validation.py:331: in test_002_websocket_connectivity
-    assert result["success"], f"WebSocket connectivity failed: {result.get('error', 'Unknown error')}"
-E   AssertionError: WebSocket connectivity failed: server rejected WebSocket connection: HTTP 503
-E   assert False...
-
-### FAILED: test_003_agent_request_pipeline
-- **File:** C:\netra-apex\tests\e2e\staging\test_staging_connectivity_validation.py
-- **Duration:** 6.612s
-- **Error:** tests\e2e\staging\test_staging_connectivity_validation.py:346: in test_003_agent_request_pipeline
-    assert result["success"], f"Agent pipeline test failed: {result.get('error', 'Unknown error')}"
-E   AssertionError: Agent pipeline test failed: server rejected WebSocket connection: HTTP 503
-E   assert False...
-
-### FAILED: test_004_generate_connectivity_report
-- **File:** C:\netra-apex\tests\e2e\staging\test_staging_connectivity_validation.py
-- **Duration:** 25.635s
-- **Error:** tests\e2e\staging\test_staging_connectivity_validation.py:410: in test_004_generate_connectivity_report
-    assert success_rate >= 100.0, f"All connectivity tests should pass for staging validation"
-E   AssertionError: All connectivity tests should pass for staging validation
-E   assert 33.33333333333333 >= 100.0...
+| test_ai_agent_response_quality_staging | PASS passed | 0.001s | test_websocket_ssot_golden_path.py |
+| test_complete_golden_path_staging_environment | PASS passed | 0.020s | test_websocket_ssot_golden_path.py |
+| test_multi_user_staging_scenarios | PASS passed | 0.001s | test_websocket_ssot_golden_path.py |
+| test_staging_deployment_confidence_validation | PASS passed | 0.001s | test_websocket_ssot_golden_path.py |
+| test_staging_performance_regression | PASS passed | 0.001s | test_websocket_ssot_golden_path.py |
+| test_websocket_connection_staging_reliability | PASS passed | 0.001s | test_websocket_ssot_golden_path.py |
+| test_concurrent_user_load_staging | PASS passed | 0.001s | test_websocket_ssot_golden_path.py |
+| test_memory_usage_staging_validation | PASS passed | 0.001s | test_websocket_ssot_golden_path.py |
 
 ## Pytest Output Format
 
 ```
-test_staging_connectivity_validation.py::test_001_http_connectivity FAILED
-test_staging_connectivity_validation.py::test_002_websocket_connectivity FAILED
-test_staging_connectivity_validation.py::test_003_agent_request_pipeline FAILED
-test_staging_connectivity_validation.py::test_004_generate_connectivity_report FAILED
+test_websocket_ssot_golden_path.py::test_ai_agent_response_quality_staging PASSED
+test_websocket_ssot_golden_path.py::test_complete_golden_path_staging_environment PASSED
+test_websocket_ssot_golden_path.py::test_multi_user_staging_scenarios PASSED
+test_websocket_ssot_golden_path.py::test_staging_deployment_confidence_validation PASSED
+test_websocket_ssot_golden_path.py::test_staging_performance_regression PASSED
+test_websocket_ssot_golden_path.py::test_websocket_connection_staging_reliability PASSED
+test_websocket_ssot_golden_path.py::test_concurrent_user_load_staging PASSED
+test_websocket_ssot_golden_path.py::test_memory_usage_staging_validation PASSED
 
 ==================================================
-0 passed, 4 failed in 60.71s
+8 passed, 0 failed in 13.41s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| WebSocket | 1 | 0 | 1 | 0.0% |
-| Agent | 1 | 0 | 1 | 0.0% |
+| WebSocket | 1 | 1 | 0 | 100.0% |
+| Agent | 1 | 1 | 0 | 100.0% |
+| Performance | 1 | 1 | 0 | 100.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*

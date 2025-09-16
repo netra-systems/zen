@@ -28,6 +28,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy application code
 COPY netra_backend/ ./netra_backend/
 COPY shared/ ./shared/
+COPY auth_service/ ./auth_service/
 COPY alembic/ ./alembic/
 COPY alembic.ini ./
 
