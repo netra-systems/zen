@@ -623,7 +623,13 @@ class CentralConfigurationValidator:
             
             try:
                 # LEVEL 1 FIX: Wait for environment readiness before validation
-                if not self._wait_for_environment_readiness(timeout_seconds=10.0):
+                # CLOUD RUN FIX: Reduce timeout for staging to prevent startup timeout
+                try:
+                    env = self.get_environment()
+                    timeout = 3.0 if env == "staging" else 10.0
+                except:
+                    timeout = 3.0  # Default to shorter timeout if environment detection fails
+                if not self._wait_for_environment_readiness(timeout_seconds=timeout):
                     timing_issue = self._detect_timing_issue()
                     if timing_issue:
                         self._readiness_state = "failed"
