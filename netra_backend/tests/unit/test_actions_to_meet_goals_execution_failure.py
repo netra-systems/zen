@@ -158,7 +158,7 @@ class ActionsToMeetGoalsExecutionFailuresTests(SSotAsyncTestCase):
 
     async def _create_complete_execution_context(self) -> UserExecutionContext:
         """Helper to create complete execution context with all dependencies."""
-        return UserExecutionContext.from_request_supervisor(user_id='test_user_complete', thread_id='test_thread_complete', run_id='test_run_complete', metadata={'user_request': 'Test complete execution context', 'optimizations_result': OptimizationsResult(optimization_type='performance', recommendations=['Add caching layer', 'Implement monitoring'], confidence_score=0.85), 'data_result': DataAnalysisResponse(query='optimization analysis', results=[{'metric': 'response_time', 'value': 120}], insights={'performance': 'good'}, metadata={'source': 'test'}, recommendations=['Continue monitoring'])})
+        return UserExecutionContext.from_request_supervisor(user_id='test_user_complete', thread_id='test_thread_complete', run_id='test_run_complete', metadata={'user_request': 'Test complete execution context', 'optimizations_result': OptimizationsResult(optimization_type='performance', recommendations=['Add caching layer', 'Implement monitoring'], confidence_score=0.85), 'data_result': DataAnalysisResponse(analysis_id='test-optimization-analysis', status='completed', results={'metric': 'response_time', 'value': 120, 'performance': 'good'}, metrics=PerformanceMetrics(duration_ms=500.0, memory_usage_mb=32.0, throughput=10.0), created_at=time.time())})
 
     def teardown_method(self, method):
         """Cleanup after test execution."""
