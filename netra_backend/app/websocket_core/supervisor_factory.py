@@ -389,12 +389,12 @@ def get_websocket_supervisor_health() -> dict:
         }
         
         try:
-            # SECURITY FIX: Test factory pattern instead of unsafe singleton
-            # Health check should verify the secure factory pattern is working
-            from netra_backend.app.websocket_core.canonical_imports import WebSocketManagerFactory
-            
-            # Test that factory pattern is available (doesn't require user context for health check)
-            factory_available = WebSocketManagerFactory is not None
+            # SECURITY FIX: Test SSOT pattern instead of unsafe singleton
+            # Health check should verify the secure SSOT function is working
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+
+            # Test that SSOT function is available (doesn't require user context for health check)
+            factory_available = get_websocket_manager is not None
             websocket_health["websocket_factory_available"] = factory_available
             websocket_health["websocket_manager_available"] = factory_available  # Legacy compatibility
             
