@@ -1334,16 +1334,51 @@ class UnifiedTestRunner:
             # This prevents false failures when dependencies fail but requested categories pass
             if self.execution_plan and hasattr(self.execution_plan, 'requested_categories'):
                 requested_results = {
-                    cat: results[cat] for cat in self.execution_plan.requested_categories 
+                    cat: results[cat] for cat in self.execution_plan.requested_categories
                     if cat in results
                 }
-                return 0 if all(r["success"] for r in requested_results.values()) else 1
+
+                # CRITICAL FIX: Require actual test execution, not just zero failures
+                # Extract total tests run across all requested categories
+                total_tests_run = 0
+                for cat_name, result in requested_results.items():
+                    test_counts = self._extract_test_counts_from_result(result)
+                    total_tests_run += test_counts.get("total", 0)
+
+                # Exit code 0 only if ALL conditions met:
+                # 1. All categories succeeded
+                # 2. At least one test was actually executed
+                all_succeeded = all(r["success"] for r in requested_results.values())
+                if not all_succeeded:
+                    return 1  # Test failures
+                elif total_tests_run == 0:
+                    print("\n❌ FAILURE: No tests were executed - this indicates infrastructure failure")
+                    print("   Check import issues, test collection failures, or configuration problems")
+                    return 1  # No tests run is a failure
+                else:
+                    return 0  # Success with actual test execution
+
             else:
                 # Fallback to original behavior if execution plan doesn't have requested_categories
-                # Handle empty results case - no categories found is considered success
+                # CRITICAL FIX: Also require tests to be run in fallback mode
                 if not results:
-                    return 0
-                return 0 if all(r["success"] for r in results.values()) else 1
+                    print("\n❌ FAILURE: No test categories were executed")
+                    return 1
+
+                # Check if any tests were actually run
+                total_tests_run = 0
+                for result in results.values():
+                    test_counts = self._extract_test_counts_from_result(result)
+                    total_tests_run += test_counts.get("total", 0)
+
+                all_succeeded = all(r["success"] for r in results.values())
+                if not all_succeeded:
+                    return 1  # Test failures
+                elif total_tests_run == 0:
+                    print("\n❌ FAILURE: No tests were executed - this indicates infrastructure failure")
+                    return 1  # No tests run is a failure
+                else:
+                    return 0  # Success with actual test execution
         
         finally:
             # CRITICAL: Always cleanup test environment after tests complete
