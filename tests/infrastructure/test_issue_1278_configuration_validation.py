@@ -20,7 +20,7 @@ from unittest.mock import Mock, patch
 # Test infrastructure imports
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.configuration.base import get_config
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 # Database imports
 from netra_backend.app.db.database_manager import DatabaseManager
@@ -40,7 +40,8 @@ class TestIssue1278ConfigurationValidation(SSotBaseTestCase):
     def setUpClass(cls):
         """Set up test class with isolated environment"""
         super().setUpClass()
-        cls.env = IsolatedEnvironment("staging")
+        cls.env = IsolatedEnvironment()
+        cls.env.set("ENVIRONMENT", "staging", "test_setup")
         cls.config = get_config()
         
     def setUp(self):
