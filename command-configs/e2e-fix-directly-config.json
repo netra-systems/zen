@@ -1,0 +1,16 @@
+{
+  "instances": [
+    {
+      "command": "/e2e-fix-directly",
+      "name": "e2e-fix-directly",
+      "description": "Direct end-to-end test fixes",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": ["/clear"]
+    }
+  ]
+}
