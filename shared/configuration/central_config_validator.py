@@ -182,7 +182,7 @@ def _is_backend_service(env_getter: Callable[[str, str], Optional[str]]) -> bool
     Auth service doesn't need AI/LLM capabilities (GEMINI_API_KEY).
     Only backend service requires it for agent operations.
     """
-    # Check K_SERVICE (Cloud Run service name)
+    # Check K_SERVICE (Cloud Run service name) - this is most reliable
     k_service = env_getter("K_SERVICE", "")
     if k_service:
         # Service names in Cloud Run
@@ -191,17 +191,33 @@ def _is_backend_service(env_getter: Callable[[str, str], Optional[str]]) -> bool
         if "backend" in k_service.lower():
             return True
 
-    # Check SERVICE_ID
+    # Check import context - if auth_service module is imported, it's auth service
+    import sys
+    if 'auth_service' in sys.modules or 'auth_service.main' in sys.modules:
+        return False
+    if 'netra_backend' in sys.modules or 'netra_backend.app' in sys.modules:
+        return True
+
+    # Check working directory
+    import os
+    cwd = os.getcwd()
+    if 'auth_service' in cwd:
+        return False
+    if 'netra_backend' in cwd:
+        return True
+
+    # Check SERVICE_ID as last resort (currently both services share same ID - bug)
     service_id = env_getter("SERVICE_ID", "")
     if service_id:
-        if "auth" in service_id.lower():
+        # Currently both use "netra-backend" so this is unreliable
+        # Only use if it explicitly says "auth"
+        if "auth" in service_id.lower() and "backend" not in service_id.lower():
             return False
-        if "backend" in service_id.lower():
-            return True
 
-    # Default to True (require GEMINI_API_KEY) for safety
-    # Better to fail validation than to miss required config
-    return True
+    # Default to False for auth service safety
+    # Auth service doesn't need GEMINI_API_KEY, so safer to not require it
+    # Backend will have K_SERVICE set properly
+    return k_service != "" and "backend" in k_service.lower()
 
 
 class CentralConfigurationValidator:
