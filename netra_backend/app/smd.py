@@ -35,7 +35,7 @@ def get_env(key: str, default: str = '') -> str:
 from netra_backend.app.core.project_utils import get_project_root as _get_project_root
 from netra_backend.app.config import get_config, settings
 from netra_backend.app.services.backend_health_config import setup_backend_health_service
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
 
 class StartupPhase(Enum):
@@ -163,7 +163,7 @@ class StartupOrchestrator:
     
     def __init__(self, app: FastAPI):
         self.app = app
-        self.logger = central_logger.get_logger(__name__)
+        self.logger = get_logger(__name__)
         self.start_time = time.time()
         
         # ISSUE #601 FIX: Initialize thread cleanup management with test environment detection
