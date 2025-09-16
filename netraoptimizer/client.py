@@ -260,7 +260,10 @@ class NetraOptimizerClient:
                 usage = data['usage']
                 record.input_tokens = usage.get('input_tokens', 0)
                 record.output_tokens = usage.get('output_tokens', 0)
-                record.cached_tokens = usage.get('cache_read_input_tokens', 0)
+                record.cached_tokens = (
+                    usage.get('cache_read_input_tokens', 0) +
+                    usage.get('cache_creation_input_tokens', 0)
+                )
 
                 # Calculate total tokens
                 record.total_tokens = (

@@ -1,0 +1,74 @@
+{
+  "instances": [
+    {
+      "command": "/tdd",
+      "name": "tdd",
+      "description": "Test-driven development workflow",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/agent-test",
+      "name": "agent-test",
+      "description": "Tests agent functionality and behavior",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/e2e-fix-directly",
+      "name": "e2e-fix-directly",
+      "description": "Direct end-to-end test fixes",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/scope-work",
+      "name": "scope-work",
+      "description": "Defines and scopes development work",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/action",
+      "name": "action",
+      "description": "Executes specific development actions",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "instances": [
+    {
+      "command": "/runtests",
+      "name": "run-tests",
+      "description": "Executes various test suites",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/test-real",
+      "name": "test-real",
+      "description": "Runs tests with real services",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/testgardener",
+      "name": "test-gardener",
+      "description": "Maintains and improves test infrastructure",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/failingtestsgardener",
+      "name": "failing-tests-gardener",
+      "description": "Identifies and fixes failing tests",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/createtestsv2",
+      "name": "create-tests-v2",
+      "description": "Creates comprehensive test coverage",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/test-create-integration",
+      "name": "test-create-integration",
+      "description": "Creates integration tests",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/test-create-unit-coverage",
+      "name": "test-create-unit-coverage",
+      "description": "Creates unit tests for coverage",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/test-update-e2e-fix-fakes",
+      "name": "test-update-e2e-fix-fakes",
+      "description": "Updates E2E tests and fixes mock issues",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/websocket-test",
+      "name": "websocket-test",
+      "description": "Tests WebSocket functionality",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/run-unit-frontend-tests",
+      "name": "run-unit-frontend-tests",
+      "description": "Runs frontend unit tests",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/priority-test-create",
+      "name": "priority-test-create",
+      "description": "Creates high-priority tests",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    }
+  ]
+}

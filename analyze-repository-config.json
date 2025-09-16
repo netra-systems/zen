@@ -1,0 +1,18 @@
+{
+  "instances": [
+    {
+      "command": "/analyze-repository audit 5; Read the TOKEN_BUDGET_IMPLEMENTATION_PLAN.md. Spawn an expert AI Engineer subagent to find the gaps in the process of this implementation. This subagent should make temporary notes which is available for a second sub agent. The second subagent is the first subagent. It reviews the notes prepared by the first subagent and verifies if the arguments are valid. The validity of the argument is based on - 1. The first subagent DOES NOT increase the complexity of the code for unnecessary situations. The code logic should be as simple as possible, nothing fancy. 2. The gap explained by the first subagent is practical and is absolutely necessary to integrate the system into the main codebase and get it running. If it is an unnecessary addition, straightaway REJECT. Now, spawn a third subagent that goes through the notes made by teh first two subagents. The third subagent has no idea which note belongs to whom. It is unbiased reviewer who follows all the rules and conditions STRICTLY. The third subagent after managing the disputes between the two agents, edits the TOKEN_BUDGET_IMPLEMENTATION_PLAN.md file finalizing the implementation logic. The third subagent is also responsible for scoring both first and second subagents, and pointing out the errors so that the sub agents do not commit the same mistakes again. Spawn the second subagent after 30s of deploying the first subagent. Spawn the third agent 45s after deploying the second subagent.",
+      "name": "repository-audit-5-agents",
+      "description": "Repository audit using 5 parallel agents",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    }
+  ]
+}
