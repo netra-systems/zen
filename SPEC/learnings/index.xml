@@ -21,6 +21,33 @@
         </workflow>
     </retrieval-protocol>
     
+    <learning id="secret-loading-validation-critical-2025-09-16">
+        <title>🚨 CRITICAL: Secret Loading Silent Failures - Service Account Access</title>
+        <category>Deployment/Secrets/Validation/Critical</category>
+        <keywords>secret-manager, service-account, silent-failure, jwt-secret, fernet-key, deployment-validation, runtime-failure, environment-variables</keywords>
+        <path>secret_loading_validation_critical_issue_1294.xml</path>
+        <critical-takeaway>
+            🚨 SILENT FAILURE: Services deploy "successfully" but fail at runtime when service account lacks Secret Manager access.
+            Root cause: netra-staging-deploy@netra-staging.iam.gserviceaccount.com lacked access to secrets.
+            Cloud Run silently fails to load secrets, leaving environment variables undefined.
+            Deployment script was NOT validating service account access, only secret existence.
+            SOLUTION: Validate service account has secretAccessor role BEFORE deployment.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>GOLDEN_PATH_BLOCKING - Services appear healthy but cannot access required secrets, auth failures</business-impact>
+        <prevention>
+            ALWAYS validate service account access to secrets at deployment time, not runtime.
+            Deployment success does not mean runtime success - secrets load at container startup.
+            Check three layers: secret exists, service account has access, value is valid.
+        </prevention>
+        <related-files>
+            scripts/deploy_to_gcp_actual.py:1635 (_check_secret_access method)
+            docs/SECRET_VALUE_LOADING_FLOW.md (complete flow documentation)
+            shared/configuration/central_config_validator.py:1343 (JWT_SECRET handling)
+        </related-files>
+        <related-issues>Issue #1294 (Secret loading), Issue #1293 (JWT_SECRET), PR #1293 (Initial JWT fix)</related-issues>
+    </learning>
+
     <learning id="vpc-egress-cloud-sql-regression-2025-09-16">
         <title>🚨 CRITICAL: VPC Egress All-Traffic Breaks Cloud SQL Unix Sockets</title>
         <category>Infrastructure/VPC/Database/Critical</category>

@@ -6,11 +6,6 @@
       "output_format": "stream-json"
     },
     {
-      "command": "/gitissueprogressorv4 1297",
-      "permission_mode": "acceptEdits",
-      "output_format": "stream-json"
-    },
-    {
       "command": "/gitissueprogressorv4 1296",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"

@@ -21,7 +21,7 @@
 
   <cross_references>
     <!-- Top 10 Critical Locations -->
-    <reference priority="1">scripts/deploy_to_gcp.py - Deployment configuration</reference>
+    <reference priority="1">scripts/deploy_to_gcp_actual.py - Deployment configuration (SECRET ACCESS VALIDATION)</reference>
     <reference priority="2">frontend/.env.staging - Frontend staging environment</reference>
     <reference priority="3">frontend/.env.production - Frontend production environment</reference>
     <reference priority="4">netra_backend/app/routes/discovery.py - Service discovery endpoint</reference>
@@ -31,9 +31,14 @@
     <reference priority="8">docker-compose.yml - Local development services</reference>
     <reference priority="9">tests/mission_critical/test_frontend_deployment_env_regression.py - Deployment tests</reference>
     <reference priority="10">netra_backend/app/websocket_core/agent_handler.py - WebSocket endpoints</reference>
-    
+
     <!-- SSOT Index Reference -->
     <reference priority="11">SSOT_INDEX.md - Master index of all SSOT components</reference>
+
+    <!-- Secret Loading Critical References -->
+    <reference priority="12">docs/SECRET_VALUE_LOADING_FLOW.md - Complete secret loading timeline</reference>
+    <reference priority="13">SPEC/learnings/secret_loading_validation_critical_issue_1294.xml - Service account access issue</reference>
+    <reference priority="14">shared/configuration/central_config_validator.py - Runtime validation</reference>
   </cross_references>
 
   <!-- SECTION 1: ENVIRONMENT VARIABLE NAMES -->

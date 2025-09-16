@@ -2,6 +2,85 @@
 
 **CRITICAL UNDERSTANDING:** Secrets go through multiple stages, and failures can occur silently at each stage.
 
+## Visual Flow Diagram
+
+```mermaid
+flowchart TD
+    Start([Secret Creation]) --> SM[Secret Manager Storage]
+    SM --> IAM[Grant IAM Access]
+    IAM --> Deploy[Deployment Configuration]
+    Deploy --> CloudRun[Cloud Run Service YAML]
+
+    CloudRun --> Startup{Container Startup}
+    Startup -->|Service Account Has Access| LoadSuccess[Secret Loaded as Env Var]
+    Startup -->|Service Account Lacks Access| LoadFail[SILENT FAILURE:<br/>Env Var = undefined]
+
+    LoadSuccess --> AppStart[Application Startup]
+    LoadFail --> AppStart
+
+    AppStart --> Validate{Validation Check}
+    Validate -->|Env Var Exists| AppRun[Application Runs]
+    Validate -->|Env Var Missing| AppCrash[Application Crashes:<br/>'Required variable missing']
+
+    style LoadFail fill:#ff6666,stroke:#ff0000,stroke-width:3px
+    style AppCrash fill:#ff6666,stroke:#ff0000,stroke-width:3px
+    style LoadSuccess fill:#66ff66,stroke:#00ff00,stroke-width:2px
+    style AppRun fill:#66ff66,stroke:#00ff00,stroke-width:2px
+
+    subgraph "Critical Silent Failure Point"
+        LoadFail
+    end
+
+    subgraph "Where Actual Values Exist"
+        SM
+        LoadSuccess
+        AppRun
+    end
+
+    subgraph "Only References (No Values)"
+        CloudRun
+        Deploy
+    end
+```
+
+## Deployment vs Runtime Flow
+
+```mermaid
+sequenceDiagram
+    participant Dev as Developer
+    participant Script as Deploy Script
+    participant GCP as Cloud Run
+    participant SM as Secret Manager
+    participant App as Application
+
+    Dev->>Script: Deploy service
+    Script->>SM: Check secret exists ✓
+    Note over Script: ❌ MISSING: Check service<br/>account access!
+    Script->>GCP: Deploy with secret refs
+    GCP-->>Script: Deployment SUCCESS
+    Script-->>Dev: ✅ Deployed successfully
+
+    Note over Dev,App: --- Container Startup (Later) ---
+
+    GCP->>GCP: Start new container
+    GCP->>SM: Request secret value<br/>(using service account)
+
+    alt Service Account Has Access
+        SM-->>GCP: Return secret value
+        GCP->>GCP: Set ENV VAR = value
+        GCP->>App: Start application
+        App->>App: Read ENV VAR ✓
+        App-->>Dev: ✅ Running
+    else Service Account Lacks Access
+        SM-->>GCP: ❌ Access Denied
+        GCP->>GCP: SILENT: ENV VAR = undefined
+        GCP->>App: Start application
+        App->>App: Read ENV VAR (undefined)
+        App-->>Dev: ❌ CRASH: Missing required variable
+        Note over Dev: Confused: "But deployment succeeded!"
+    end
+```
+
 ## Timeline of Secret Loading
 
 ### Stage 1: Secret Creation (One-time setup)
