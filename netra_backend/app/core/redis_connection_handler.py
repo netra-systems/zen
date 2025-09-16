@@ -134,16 +134,22 @@ class RedisConnectionHandler:
             import redis
             
             # Create Redis client directly with connection info
-            client = redis.Redis(
-                host=self._connection_info["host"],
-                port=self._connection_info["port"],
-                db=self._connection_info["db"],
-                socket_timeout=self._connection_info["socket_timeout"],
-                socket_connect_timeout=self._connection_info["socket_connect_timeout"],
-                retry_on_timeout=self._connection_info["retry_on_timeout"],
-                health_check_interval=self._connection_info["health_check_interval"],
-                decode_responses=True
-            )
+            client_config = {
+                "host": self._connection_info["host"],
+                "port": self._connection_info["port"],
+                "db": self._connection_info["db"],
+                "socket_timeout": self._connection_info["socket_timeout"],
+                "socket_connect_timeout": self._connection_info["socket_connect_timeout"],
+                "retry_on_timeout": self._connection_info["retry_on_timeout"],
+                "health_check_interval": self._connection_info["health_check_interval"],
+                "decode_responses": True
+            }
+            
+            # Add password if provided
+            if self._connection_info.get("password"):
+                client_config["password"] = self._connection_info["password"]
+                
+            client = redis.Redis(**client_config)
             
             # Test connection
             client.ping()
