@@ -124,6 +124,9 @@ try:
 
     # ISSUE #1286 FIX: Add missing get_websocket_manager export for test compatibility
     from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+
+    # ISSUE #1286 FIX: Add missing create_test_user_context export for test compatibility
+    from netra_backend.app.websocket_core.canonical_import_patterns import create_test_user_context
 except ImportError as e:
     # FAIL FAST: Critical WebSocket components must be available
     raise ImportError(
@@ -265,6 +268,9 @@ __all__ = [
 
     # ISSUE #1286 FIX: Add missing get_websocket_manager export for test compatibility
     "get_websocket_manager",      # CANONICAL: canonical_import_patterns.py
+
+    # ISSUE #1286 FIX: Add missing create_test_user_context export for test compatibility
+    "create_test_user_context",   # CANONICAL: canonical_import_patterns.py
 
     # Backward compatibility only - prefer direct imports
     "create_websocket_manager",
