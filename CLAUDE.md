@@ -359,8 +359,21 @@ SEE GIT ISSUES, GIT PRs.
 - ONLY use safe opreations, never filter branch etc.
 
 ### Deploy and staging
-Always must use https://auth.staging.netrasystems.ai
-and the other canonical *.staging.netrasystems.ai URLS. NEVER the cloud run urls.
+**CRITICAL DOMAIN CONFIGURATION UPDATE (Issue #1278):**
+Always must use the current staging domains (*.netrasystems.ai):
+- Backend/Auth: https://staging.netrasystems.ai
+- Frontend: https://staging.netrasystems.ai  
+- WebSocket: wss://api-staging.netrasystems.ai
+
+**DEPRECATED - DO NOT USE:** *.staging.netrasystems.ai URLs (causes SSL certificate failures)
+**NEVER USE:** Direct Cloud Run URLs (bypasses load balancer and SSL)
+
+**INFRASTRUCTURE REQUIREMENTS:**
+- VPC Connector: staging-connector with all-traffic egress
+- Database Timeout: 600s (addresses Issues #1263, #1278)
+- SSL Certificates: Must be valid for *.netrasystems.ai domains
+- Load Balancer: Health checks configured for extended startup times
+- Monitoring: GCP error reporter exports validated (P0 fix)
 
 **FINAL REMINDER:** 
 - **GOLDEN PATH PRIORITY:** Users login → get AI responses

@@ -19,7 +19,9 @@ from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
-sys.path.insert(0, '/Users/anthony/Documents/GitHub/netra-apex')
+import os
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
