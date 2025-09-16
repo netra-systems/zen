@@ -66,7 +66,7 @@ if [[ "${1:-staging}" == "staging" ]]; then
     !echo "Backend Health:"
     !curl -s https://backend-staging-[hash].run.app/health | head -1 || echo "Check URL"
     !echo "\nAuth Health:"
-    !curl -s https://auth-staging-[hash].run.app/health | head -1 || echo "Check URL"
+    !curl -s https://auth-[hash].run.app/health | head -1 || echo "Check URL"
 fi
 
 ### 10. Post-Deployment Logs
