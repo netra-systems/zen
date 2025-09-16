@@ -12,11 +12,11 @@ Following CLAUDE.md SSOT principles by creating proper aliases rather than dupli
 """
 
 from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Dict, Any, Optional
 from datetime import datetime, timezone
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class ConnectionInfo:
