@@ -25,12 +25,9 @@ class RedisService:
     def __init__(self, test_mode: bool = False):
         """Initialize Redis service."""
         self.test_mode = test_mode
-        # Use shared redis_manager with test_mode if needed
-        if test_mode:
-            from netra_backend.app.redis_manager import RedisManager
-            self._manager = RedisManager(test_mode=True)
-        else:
-            self._manager = redis_manager
+        # Use SSOT Redis manager for all modes
+        from netra_backend.app.redis_manager import redis_manager
+        self._manager = redis_manager
     
     def _namespace_key(self, user_id: Optional[str], key: str) -> str:
         """Namespace Redis key by user for isolation.

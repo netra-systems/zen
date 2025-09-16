@@ -412,8 +412,8 @@ class StartupFixesIntegration:
                 from netra_backend.app.redis_manager import RedisManager
                 status["redis_manager_available"] = True
                 
-                # Check if the Redis manager has local fallback capability
-                redis_manager = RedisManager()
+                # Use SSOT Redis manager instance
+                from netra_backend.app.redis_manager import redis_manager
                 
                 # Check for fallback methods
                 fallback_methods = [
