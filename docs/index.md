@@ -93,6 +93,20 @@
 - [Agent Performance Real Issues](./AGENT_PERFORMANCE_REAL_ISSUES.md)
 - [Alpine Containers Guide](./alpine_containers.md) - Container optimization
 
+### 🤖 Services & Automation
+
+#### Orchestration Services
+- **[Netra Orchestrator Client](../netra_orchestrator_client/INDEX.md)** 🎛️ - **STANDALONE SERVICE**: Multi-instance Claude Code orchestration with scheduling, monitoring, and metrics collection
+- **[Orchestrator Documentation Hub](../netra_orchestrator_client/README.md)** 📖 - Service overview, quick start, and usage patterns
+- **[Orchestrator Test Suite](../netra_orchestrator_client/tests/)** 🧪 - Complete test infrastructure for orchestration validation
+- **[CloudSQL Integration Guide](../scripts/ORCHESTRATOR_CLOUDSQL_INTEGRATION.md)** 💾 - Database persistence and metrics tracking
+
+#### Main System Services
+- **[Main Backend](../netra_backend/)** 🏗️ - Core Netra system with agent execution and WebSocket management
+- **[Auth Service](../auth_service/)** 🔐 - Authentication and authorization service
+- **[Frontend](../frontend/)** 🌐 - User interface and client application
+- **[Shared Libraries](../shared/)** 📚 - Common utilities and cross-service components
+
 ### 📋 Quick References
 
 - [Agent Quick Reference](./agent_quick_reference.md) - Common agent operations

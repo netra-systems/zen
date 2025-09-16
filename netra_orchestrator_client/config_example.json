@@ -1,0 +1,25 @@
+{
+  "instances": [
+    {
+      "name": "test-creator",
+      "command": "/createtestsv2 unit",
+      "description": "Create unit tests for the project",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "name": "ssot-gardener", 
+      "command": "/ssotgardener",
+      "description": "SSOT maintenance and cleanup",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "name": "test-runner",
+      "command": "/test-real integration",
+      "description": "Run integration tests with real services",
+      "permission_mode": "acceptEdits", 
+      "output_format": "stream-json"
+    }
+  ]
+}
