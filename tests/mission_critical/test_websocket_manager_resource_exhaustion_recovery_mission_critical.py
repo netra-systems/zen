@@ -447,44 +447,44 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
 
     async def _verify_golden_path_protection(self) -> Dict:
         """Call factory Golden Path protection verification."""
-        from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
-        factory = get_websocket_manager_factory()
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        factory = get_websocket_manager()
         return await factory._verify_golden_path_protection()
 
     async def _monitor_automatic_recovery_triggers(self) -> Dict:
         """Call factory automatic recovery trigger monitoring."""
-        from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
-        factory = get_websocket_manager_factory()
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        factory = get_websocket_manager()
         return await factory._monitor_automatic_recovery_triggers()
 
     async def _test_session_continuity_during_recovery(self, sessions: List[Dict]) -> Dict:
         """Call factory session continuity testing."""
-        from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
-        factory = get_websocket_manager_factory()
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        factory = get_websocket_manager()
         return await factory._test_session_continuity_during_recovery(sessions)
 
     async def _trigger_test_recovery(self) -> Dict:
         """Call factory test recovery triggering."""
-        from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
-        factory = get_websocket_manager_factory()
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        factory = get_websocket_manager()
         return await factory._trigger_test_recovery()
 
     async def _validate_post_recovery_stability(self) -> Dict:
         """Call factory post-recovery stability validation."""
-        from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
-        factory = get_websocket_manager_factory()
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        factory = get_websocket_manager()
         return await factory._validate_post_recovery_stability()
 
     async def _test_recovery_failure_escalation(self) -> Dict:
         """Call factory recovery failure escalation testing."""
-        from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
-        factory = get_websocket_manager_factory()
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        factory = get_websocket_manager()
         return await factory._test_recovery_failure_escalation()
 
     async def _monitor_business_metrics_during_recovery(self) -> Dict:
         """Call factory business metrics monitoring during recovery."""
-        from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
-        factory = get_websocket_manager_factory()
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        factory = get_websocket_manager()
         return await factory._monitor_business_metrics_during_recovery()
 
 
@@ -566,8 +566,8 @@ class TestWebSocketResourceExhaustionBusinessImpact(SSotAsyncTestCase):
 
     async def _test_revenue_protecting_recovery(self) -> Dict:
         """Call factory revenue-protecting recovery testing."""
-        from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
-        factory = get_websocket_manager_factory()
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        factory = get_websocket_manager()
         return await factory._test_revenue_protecting_recovery()
 
 

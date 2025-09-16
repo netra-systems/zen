@@ -116,7 +116,7 @@ class TestSingletonBridgeRemovalValidation(SSotBaseTestCase):
             f"Bridge cannot be removed safely until these are migrated."
         )
 
-    def test_websocket_manager_factory_works_without_bridge(self):
+    def test_websocket_manager_works_without_bridge(self):
         """
         CRITICAL: Test that WebSocket manager creation works without the bridge.
 
@@ -124,10 +124,10 @@ class TestSingletonBridgeRemovalValidation(SSotBaseTestCase):
         """
         # This test should pass if factory patterns are working correctly
         try:
-            from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             from netra_backend.app.websocket_core.types import WebSocketManagerMode
 
-            factory = get_websocket_manager_factory()
+            factory = get_websocket_manager()
             self.assertIsNotNone(factory, "WebSocket manager factory should be available")
 
             # Test factory can create manager without bridge
@@ -377,11 +377,11 @@ class TestFactoryPatternCompleteness(SSotBaseTestCase):
             request_id="factory_test_request"
         )
 
-    def test_websocket_manager_factory_is_complete(self):
+    def test_websocket_manager_is_complete(self):
         """Test that WebSocket manager factory is fully implemented."""
-        from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
-        factory = WebSocketManagerFactory(max_managers_per_user=5)
+        factory = WebSocketManager(max_managers_per_user=5)
 
         # Test factory has all required methods
         required_methods = [

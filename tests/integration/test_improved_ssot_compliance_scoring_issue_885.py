@@ -123,7 +123,7 @@ class TestImprovedSSOTComplianceScoring(SSotBaseTestCase):
             {'file': 'websocket_core/types.py', 'type': 'type_duplication', 'false_positive': True},
             {'file': 'websocket_core/canonical_imports.py', 'type': 'import_duplication', 'false_positive': True},
             {'file': 'services/agent_websocket_bridge.py', 'type': 'bridge_duplication', 'false_positive': True},
-            {'file': 'services/websocket_bridge_factory.py', 'type': 'factory_duplication', 'false_positive': True},
+            {'file': 'services/agent_websocket_bridge.py', 'type': 'factory_duplication', 'false_positive': True},
             {'file': 'core/supervisor_factory.py', 'type': 'factory_duplication', 'false_positive': True},
             # ... many more false positives that old validation would find
         ]
