@@ -448,7 +448,14 @@ class SSotBaseTestCase:
         
         # Call asyncSetUp if it exists and we're in an async test
         if hasattr(self, 'asyncSetUp') and asyncio.iscoroutinefunction(self.asyncSetUp):
-            # Create event loop if none exists
+            # Check if we're in pytest-asyncio context
+            if _detect_async_test_context():
+                logger.debug(f"Detected pytest-asyncio context in {self.__class__.__name__} - skipping asyncSetUp to avoid event loop conflicts")
+                # In pytest-asyncio context, the event loop is already managed
+                # We should not call asyncSetUp here as it will be handled by pytest-asyncio
+                return
+            
+            # Create event loop if none exists and we're not in pytest-asyncio context
             try:
                 loop = asyncio.get_event_loop()
                 if loop.is_closed():
@@ -457,7 +464,7 @@ class SSotBaseTestCase:
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
             
-            # Run asyncSetUp safely to avoid nested event loop issues
+            # Run asyncSetUp safely to avoid nested event loop issues (only if not in pytest-asyncio context)
             try:
                 self.safe_run_async(self.asyncSetUp())
             except Exception as e:
@@ -1321,7 +1328,14 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
         
         # Call asyncSetUp if it exists and we're in an async test
         if hasattr(self, 'asyncSetUp') and asyncio.iscoroutinefunction(self.asyncSetUp):
-            # Create event loop if none exists
+            # Check if we're in pytest-asyncio context
+            if _detect_async_test_context():
+                logger.debug(f"Detected pytest-asyncio context in {self.__class__.__name__} - skipping asyncSetUp to avoid event loop conflicts")
+                # In pytest-asyncio context, the event loop is already managed
+                # We should not call asyncSetUp here as it will be handled by pytest-asyncio
+                return
+            
+            # Create event loop if none exists and we're not in pytest-asyncio context
             try:
                 loop = asyncio.get_event_loop()
                 if loop.is_closed():
@@ -1330,7 +1344,7 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
             
-            # Run asyncSetUp safely to avoid nested event loop issues
+            # Run asyncSetUp safely to avoid nested event loop issues (only if not in pytest-asyncio context)
             try:
                 self.safe_run_async(self.asyncSetUp())
             except Exception as e:
