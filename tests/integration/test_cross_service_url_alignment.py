@@ -106,7 +106,7 @@
 
     # REMOVED_SYNTAX_ERROR: expected_urls = { )
     # REMOVED_SYNTAX_ERROR: 'development': 'http://localhost:8000',
-    # REMOVED_SYNTAX_ERROR: 'staging': 'https://backend.staging.netrasystems.ai',
+    # REMOVED_SYNTAX_ERROR: 'staging': 'https://api.staging.netrasystems.ai',
     # REMOVED_SYNTAX_ERROR: 'production': 'https://backend.netrasystems.ai'
     
 

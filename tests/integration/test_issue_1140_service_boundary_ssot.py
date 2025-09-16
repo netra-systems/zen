@@ -166,7 +166,7 @@ class Issue1140ServiceBoundarySSotTests(BaseE2ETest):
         
         # Service URLs
         self.frontend_url = "https://app.staging.netrasystems.ai"
-        self.backend_url = "https://backend.staging.netrasystems.ai"
+        self.backend_url = "https://api.staging.netrasystems.ai"
         
         # Test configuration
         self.test_timeout = 30.0

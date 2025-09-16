@@ -292,7 +292,7 @@ class Issue1199DeploymentValidationTests(SSotAsyncTestCase):
         try:
             async with aiohttp.ClientSession() as session:
                 # Replace with actual staging health endpoint
-                async with session.get("https://backend.staging.netrasystems.ai/health", timeout=10) as response:
+                async with session.get("https://api.staging.netrasystems.ai/health", timeout=10) as response:
                     self.assertEqual(response.status, 200)
                     data = await response.json()
                     self.assertIn("status", data)
@@ -309,7 +309,7 @@ class Issue1199DeploymentValidationTests(SSotAsyncTestCase):
 
         try:
             # Replace with actual staging WebSocket endpoint
-            async with websockets.connect("wss://backend.staging.netrasystems.ai/ws", timeout=10) as websocket:
+            async with websockets.connect("wss://api.staging.netrasystems.ai/ws", timeout=10) as websocket:
                 await websocket.ping()
         except Exception as e:
             self.fail(f"Staging WebSocket endpoint not reachable: {e}")

@@ -215,7 +215,7 @@ class Issue1264StagingValidator:
             import aiohttp
 
             # Staging health endpoint URL
-            health_url = "https://backend.staging.netrasystems.ai/health"
+            health_url = "https://api.staging.netrasystems.ai/health"
             timeout = aiohttp.ClientTimeout(total=30.0)
 
             async with aiohttp.ClientSession(timeout=timeout) as session:
@@ -296,7 +296,7 @@ class Issue1264StagingValidator:
             import ssl
 
             # Staging WebSocket endpoint
-            ws_url = "wss://backend.staging.netrasystems.ai/ws"
+            ws_url = "wss://api.staging.netrasystems.ai/ws"
 
             # Create SSL context for staging
             ssl_context = ssl.create_default_context()
