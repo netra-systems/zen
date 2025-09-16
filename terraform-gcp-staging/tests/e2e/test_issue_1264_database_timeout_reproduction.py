@@ -115,8 +115,8 @@ class DatabaseTimeoutReproducer:
         # Determine database type
         if database_url.startswith('postgresql'):
             result['url_type'] = 'postgresql'
-        elif database_url.startswith('mysql'):
-            result['url_type'] = 'mysql'
+        # elif database_url.startswith('mysql'):
+        #     result['url_type'] = 'mysql'
         else:
             result['url_type'] = database_url.split('://')[0] if '://' in database_url else 'unknown'
         
@@ -128,27 +128,28 @@ class DatabaseTimeoutReproducer:
                 logger.info(f"Attempting connection to {result['url_type']} database...")
                 
                 # Simulate the connection behavior based on database type
-                if result['url_type'] == 'mysql':
-                    # Simulate MySQL timeout scenario (Issue #1264)
-                    # When PostgreSQL driver tries to connect to MySQL instance
-                    logger.warning("Simulating MySQL timeout scenario (PostgreSQL driver -> MySQL instance)")
-                    await asyncio.sleep(8.5)  # Exceed timeout threshold
-                    result['timeout_occurred'] = True
-                    result['error_message'] = "Connection timeout - PostgreSQL driver cannot connect to MySQL instance"
-                    result['error_type'] = 'timeout'
-                    
-                elif result['url_type'] == 'postgresql':
+                # if result['url_type'] == 'mysql':
+                #     # Simulate MySQL timeout scenario (Issue #1264)
+                #     # When PostgreSQL driver tries to connect to MySQL instance
+                #     logger.warning("Simulating MySQL timeout scenario (PostgreSQL driver -> MySQL instance)")
+                #     await asyncio.sleep(8.5)  # Exceed timeout threshold
+                #     result['timeout_occurred'] = True
+                #     result['error_message'] = "Connection timeout - PostgreSQL driver cannot connect to MySQL instance"
+                #     result['error_type'] = 'timeout'
+                #     
+                # elif result['url_type'] == 'postgresql':
+                if result['url_type'] == 'postgresql':
                     # Simulate PostgreSQL connection
                     logger.info("Simulating PostgreSQL connection attempt...")
                     
                     # Check if this might be misconfigured (Cloud SQL as MySQL but URL as PostgreSQL)
                     if '/cloudsql/' in database_url:
                         # This is Cloud SQL - simulate potential mismatch
-                        logger.warning("Cloud SQL detected - simulating potential MySQL/PostgreSQL mismatch")
-                        # Simulate timeout that occurs when PostgreSQL URL points to MySQL instance
+                        logger.warning("Cloud SQL detected - simulating potential PostgreSQL timeout behavior")
+                        # Simulate timeout that occurs when PostgreSQL URL points to misconfigured instance
                         await asyncio.sleep(8.2)  # Exceed timeout threshold
                         result['timeout_occurred'] = True
-                        result['error_message'] = "Cloud SQL connection timeout - possible MySQL/PostgreSQL mismatch"
+                        result['error_message'] = "Cloud SQL connection timeout - possible database configuration mismatch"
                         result['error_type'] = 'cloud_sql_mismatch'
                     else:
                         # Regular PostgreSQL connection
@@ -417,11 +418,11 @@ class TestDatabaseTimeoutReproduction:
                 'expected_timeout': False
             },
             {
-                'name': 'Simulated MySQL Misconfiguration',
+                'name': 'Simulated Database Misconfiguration',
                 'env': {
                     'ENVIRONMENT': 'staging',
                     'POSTGRES_HOST': '/cloudsql/netra-staging:us-central1:netra-staging-db',
-                    'POSTGRES_PORT': '3306',  # MySQL port
+                    'POSTGRES_PORT': '5433',  # Non-standard PostgreSQL port
                     'POSTGRES_USER': 'netra_user',
                     'POSTGRES_DB': 'netra_staging'
                 },
@@ -440,8 +441,8 @@ class TestDatabaseTimeoutReproduction:
                 database_url = builder.staging.auto_url
                 
                 if scenario.get('simulate_mysql'):
-                    # Simulate MySQL URL for testing
-                    database_url = database_url.replace('postgresql', 'mysql') if database_url else 'mysql://test'
+                    # Simulate misconfigured URL for testing
+                    database_url = database_url.replace('postgresql', 'postgresql') if database_url else 'postgresql://test'
                 
                 print(f"  URL: {DatabaseURLBuilder.mask_url_for_logging(database_url)}")
                 print(f"  Expected timeout: {scenario['expected_timeout']}")

@@ -455,7 +455,7 @@ class DatabaseConnectionStringValidationTests(BaseIntegrationTest):
         """
         with self.isolated_test_env() as env:
             env.set('ENVIRONMENT', 'testing', 'test')
-            invalid_postgres_urls = ['postgresql://', 'postgresql://host', 'postgresql://user@host', 'postgresql://user:pass@', 'postgresql://:pass@host:5432/db', 'mysql://user:pass@host:5432/db', 'http://user:pass@host:5432/db', 'redis://user:pass@host:5432/db', 'postgresql://user:pass@host:99999/db', 'postgresql://user:pass@host:abc/db', 'postgresql://user:pass@host:-1/db', 'postgresql://user with spaces:pass@host:5432/db', 'postgresql://user:pass with spaces@host:5432/db', 'postgresql://user:pass@host with spaces:5432/db', 'postgresql://user:pass@host:5432/db with spaces', "postgresql://user'; DROP TABLE users; --:pass@host:5432/db", "postgresql://user:pass@host:5432/db'; DROP DATABASE test; --"]
+            invalid_postgres_urls = ['postgresql://', 'postgresql://host', 'postgresql://user@host', 'postgresql://user:pass@', 'postgresql://:pass@host:5432/db', 'redis://user:pass@host:5432/db', 'http://user:pass@host:5432/db', 'ftp://user:pass@host:5432/db', 'postgresql://user:pass@host:99999/db', 'postgresql://user:pass@host:abc/db', 'postgresql://user:pass@host:-1/db', 'postgresql://user with spaces:pass@host:5432/db', 'postgresql://user:pass with spaces@host:5432/db', 'postgresql://user:pass@host with spaces:5432/db', 'postgresql://user:pass@host:5432/db with spaces', "postgresql://user'; DROP TABLE users; --:pass@host:5432/db", "postgresql://user:pass@host:5432/db'; DROP DATABASE test; --"]
             validator = ConfigurationValidator()
             for invalid_url in invalid_postgres_urls:
                 env.set('DATABASE_URL', invalid_url, 'test')
