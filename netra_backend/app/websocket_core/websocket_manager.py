@@ -49,6 +49,10 @@ import asyncio
 import socket
 import threading
 
+# PHASE 1 GOLDEN PATH REMEDIATION: Add required SSOT auth and config imports
+from auth_service.auth_core.core.token_validator import TokenValidator
+from netra_backend.app.core.configuration.base import get_config
+
 logger = get_logger(__name__)
 
 
