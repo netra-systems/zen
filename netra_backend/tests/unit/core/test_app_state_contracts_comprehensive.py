@@ -34,7 +34,7 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import IsolatedEnvironment, get_env
-from netra_backend.app.core.app_state_contracts import AppStateContractValidator, AppStateContractViolation, ContractPhase, AppStateContract, ValidationResult, AppStateValidator, WebSocketBridgeValidator, ExecutionEngineFactoryValidator, WebSocketConnectionPoolValidator, validate_app_state_contracts, enforce_app_state_contracts, create_app_state_contract_report
+from netra_backend.app.core.app_state_contracts import AppStateContractValidator, AppStateContractViolation, ContractPhase, AppStateContract, ValidationResult, AppStateValidator, WebSocketBridgeValidator, UserExecutionEngineValidator, WebSocketConnectionPoolValidator, validate_app_state_contracts, enforce_app_state_contracts, create_app_state_contract_report
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
@@ -264,8 +264,8 @@ class ValidatorClassesTests(BaseIntegrationTest):
         assert any(('missing expected method: emit_event' in warning for warning in result.warnings))
 
     def test_execution_engine_factory_validator_success(self):
-        """Test ExecutionEngineFactoryValidator with properly configured factory."""
-        validator = ExecutionEngineFactoryValidator()
+        """Test UserExecutionEngineValidator with properly configured factory."""
+        validator = UserExecutionEngineValidator()
         mock_app_state = Mock()
         mock_bridge = Mock(spec=AgentWebSocketBridge)
         mock_factory = Mock(spec=ExecutionEngineFactory)
@@ -279,8 +279,8 @@ class ValidatorClassesTests(BaseIntegrationTest):
         assert len(result.errors) == 0
 
     def test_execution_engine_factory_validator_missing_websocket_bridge(self):
-        """Test ExecutionEngineFactoryValidator detects missing websocket bridge (CRITICAL BUG PREVENTION)."""
-        validator = ExecutionEngineFactoryValidator()
+        """Test UserExecutionEngineValidator detects missing websocket bridge (CRITICAL BUG PREVENTION)."""
+        validator = UserExecutionEngineValidator()
         mock_app_state = Mock()
         mock_factory = Mock(spec=ExecutionEngineFactory)
         mock_factory._websocket_bridge = None
