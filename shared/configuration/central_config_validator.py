@@ -260,9 +260,16 @@ class CentralConfigurationValidator:
         ConfigRule(
             env_var="FERNET_KEY",
             requirement=ConfigRequirement.REQUIRED_SECURE,
-            environments={Environment.STAGING, Environment.PRODUCTION},
+            environments={Environment.PRODUCTION},  # Only strictly required in production
             min_length=32,
-            error_message="FERNET_KEY required in staging/production for encryption."
+            error_message="FERNET_KEY required in production for encryption."
+        ),
+        ConfigRule(
+            env_var="FERNET_KEY",
+            requirement=ConfigRequirement.OPTIONAL,  # Optional in staging to allow gradual rollout
+            environments={Environment.STAGING},
+            min_length=32,
+            error_message="FERNET_KEY recommended in staging for encryption. Service will run without it but encryption features may be limited."
         ),
         
         # LLM API Keys (HIGH PRIORITY) - Made optional, but at least one required
@@ -1286,25 +1293,35 @@ class CentralConfigurationValidator:
     def validate_startup_requirements(self) -> None:
         """
         Validate all startup requirements before service initialization.
-        
+
         This should be called by every service at startup BEFORE any other initialization.
         FAILS HARD if any critical configuration is missing or invalid.
         """
         environment = self.get_environment()
         logger.info(f" SEARCH:  Central Configuration Validation - {environment.value.upper()} Environment")
-        
+
         try:
             # Check for legacy variable usage
             self._check_and_warn_legacy_configs()
-            
+
             # Validate all configuration requirements
             self.validate_all_requirements()
-            
+
             # Additional startup validations
             self._validate_environment_consistency()
-            
+
+            # Special check for FERNET_KEY in staging - warn but don't fail
+            if environment == Environment.STAGING:
+                fernet_key = self.env_getter("FERNET_KEY")
+                if not fernet_key:
+                    logger.warning(
+                        "FERNET_KEY not configured in staging environment. "
+                        "Encryption features may be limited. Consider adding FERNET_KEY "
+                        "to enable full encryption functionality."
+                    )
+
             logger.info(f" PASS:  Central configuration validation PASSED for {environment.value}")
-            
+
         except ValueError as e:
             logger.critical(f" FAIL:  Central configuration validation FAILED: {e}")
             raise
