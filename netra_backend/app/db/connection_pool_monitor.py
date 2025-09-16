@@ -1,312 +1,617 @@
-"""Database Connection Pool Monitoring
+"""
+Enhanced Connection Pool Monitor for Issue #1278
 
-Provides real-time monitoring and health checks for database connection pools.
-Helps prevent 500 errors by detecting pool exhaustion and connection issues early.
+CRITICAL PURPOSE: Monitor database connection pool health and performance
+to detect infrastructure issues early and support circuit breaker decisions.
+
+Business Impact: Prevents connection pool exhaustion and provides early
+warning of infrastructure degradation affecting $500K+ ARR platform.
+
+Issue #1278 Focus:
+- VPC connector capacity monitoring
+- Cloud SQL connection timeout tracking
+- Connection pool exhaustion prevention
+- Infrastructure failure correlation
 """
 
 import asyncio
 import time
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List
+from datetime import datetime, timezone, timedelta
+from typing import Dict, Any, Optional, List, Union, Callable
 from dataclasses import dataclass, field
+from enum import Enum
+import statistics
+from collections import deque
 
-from sqlalchemy import create_engine, pool, event
+from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import AsyncEngine
-from sqlalchemy.pool import Pool
+from sqlalchemy.pool import Pool, QueuePool, NullPool, StaticPool
+from sqlalchemy import text
 
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
 
+class PoolHealthStatus(Enum):
+    """Connection pool health status."""
+    HEALTHY = "healthy"
+    DEGRADED = "degraded"
+    CRITICAL = "critical"
+    FAILED = "failed"
+
+
+class ConnectionIssueType(Enum):
+    """Types of connection issues for Issue #1278."""
+    POOL_EXHAUSTION = "pool_exhaustion"
+    VPC_CONNECTIVITY = "vpc_connectivity"
+    CLOUD_SQL_TIMEOUT = "cloud_sql_timeout"
+    CONNECTION_LEAK = "connection_leak"
+    SLOW_CONNECTIONS = "slow_connections"
+    SSL_HANDSHAKE_FAILURE = "ssl_handshake_failure"
+    AUTHENTICATION_FAILURE = "authentication_failure"
+
+
 @dataclass
 class PoolMetrics:
-    """Metrics for database connection pool monitoring."""
-    total_connections: int = 0
-    active_connections: int = 0
-    idle_connections: int = 0
-    overflow_connections: int = 0
+    """Comprehensive connection pool metrics."""
+    # Basic pool metrics
+    pool_size: int = 0
     checked_out_connections: int = 0
-    checked_in_connections: int = 0
-    connection_errors: int = 0
-    pool_timeouts: int = 0
-    last_error: Optional[str] = None
-    last_error_time: Optional[datetime] = None
-    health_status: str = "healthy"
-    warnings: List[str] = field(default_factory=list)
+    overflow_connections: int = 0
+    invalidated_connections: int = 0
     
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert metrics to dictionary for logging/monitoring."""
-        return {
-            "total_connections": self.total_connections,
-            "active_connections": self.active_connections,
-            "idle_connections": self.idle_connections,
-            "overflow_connections": self.overflow_connections,
-            "checked_out_connections": self.checked_out_connections,
-            "checked_in_connections": self.checked_in_connections,
-            "connection_errors": self.connection_errors,
-            "pool_timeouts": self.pool_timeouts,
-            "last_error": self.last_error,
-            "last_error_time": self.last_error_time.isoformat() if self.last_error_time else None,
-            "health_status": self.health_status,
-            "warnings": self.warnings
-        }
+    # Performance metrics
+    connection_acquisition_times: deque = field(default_factory=lambda: deque(maxlen=100))
+    query_execution_times: deque = field(default_factory=lambda: deque(maxlen=100))
+    
+    # Health tracking
+    successful_connections: int = 0
+    failed_connections: int = 0
+    connection_timeouts: int = 0
+    
+    # Infrastructure-specific metrics (Issue #1278)
+    vpc_connector_failures: int = 0
+    cloud_sql_timeouts: int = 0
+    ssl_handshake_failures: int = 0
+    
+    # Timing
+    last_health_check: Optional[datetime] = None
+    last_connection_success: Optional[datetime] = None
+    last_connection_failure: Optional[datetime] = None
+    
+    # Trend analysis
+    connection_failure_rate_5m: float = 0.0
+    avg_connection_time_5m: float = 0.0
+    
+    def add_connection_time(self, duration_ms: float):
+        """Add connection acquisition time."""
+        self.connection_acquisition_times.append(duration_ms)
+    
+    def add_query_time(self, duration_ms: float):
+        """Add query execution time."""
+        self.query_execution_times.append(duration_ms)
+    
+    def get_avg_connection_time(self) -> float:
+        """Get average connection acquisition time."""
+        return statistics.mean(self.connection_acquisition_times) if self.connection_acquisition_times else 0.0
+    
+    def get_avg_query_time(self) -> float:
+        """Get average query execution time."""
+        return statistics.mean(self.query_execution_times) if self.query_execution_times else 0.0
+    
+    def get_connection_failure_rate(self) -> float:
+        """Get connection failure rate percentage."""
+        total = self.successful_connections + self.failed_connections
+        return (self.failed_connections / total * 100) if total > 0 else 0.0
+
+
+@dataclass
+class PoolConfiguration:
+    """Connection pool configuration tracking."""
+    pool_type: str
+    pool_size: int
+    max_overflow: int
+    pool_timeout: float
+    pool_recycle: int
+    pool_pre_ping: bool
+    
+    # Issue #1278 specific configuration
+    vpc_connector_timeout: float = 600.0
+    cloud_sql_timeout: float = 600.0
+    ssl_timeout: float = 30.0
 
 
 class ConnectionPoolMonitor:
-    """
-    Monitors database connection pool health and performance.
+    """Enhanced connection pool monitor with Issue #1278 infrastructure awareness."""
     
-    Features:
-    - Real-time pool metrics tracking
-    - Automatic health checks
-    - Early warning system for pool exhaustion
-    - Connection leak detection
-    - Performance metrics collection
-    """
-    
-    def __init__(self, pool_name: str = "main"):
-        """
-        Initialize connection pool monitor.
-        
-        Args:
-            pool_name: Name identifier for this pool
-        """
-        self.pool_name = pool_name
+    def __init__(self, name: str, engine: Union[Engine, AsyncEngine]):
+        """Initialize connection pool monitor."""
+        self.name = name
+        self.engine = engine
+        self.pool = engine.pool if hasattr(engine, 'pool') else None
         self.metrics = PoolMetrics()
-        self._monitored_pools: Dict[str, Pool] = {}
+        self.config = self._extract_pool_config()
+        
+        # Health thresholds
+        self.high_utilization_threshold = 0.8  # 80% pool utilization
+        self.critical_utilization_threshold = 0.95  # 95% pool utilization
+        self.slow_connection_threshold = 5000.0  # 5 seconds
+        self.critical_connection_threshold = 30000.0  # 30 seconds
+        
+        # Monitoring state
+        self.monitoring_active = False
         self._monitoring_task: Optional[asyncio.Task] = None
-        self._is_monitoring = False
-        self._check_interval = 30  # seconds
         
-        # Thresholds for health warnings
-        self.warning_threshold = 0.75  # 75% pool usage triggers warning
-        self.critical_threshold = 0.90  # 90% pool usage is critical
+        # Issue tracking
+        self.recent_issues: deque = deque(maxlen=50)
+
+    def _extract_pool_config(self) -> PoolConfiguration:
+        """Extract current pool configuration."""
+        if not self.pool:
+            return PoolConfiguration(
+                pool_type="unknown",
+                pool_size=0,
+                max_overflow=0,
+                pool_timeout=30.0,
+                pool_recycle=-1,
+                pool_pre_ping=False
+            )
         
-        logger.info(f"ConnectionPoolMonitor initialized for pool: {pool_name}")
-    
-    def attach_to_pool(self, engine: Any) -> None:
-        """
-        Attach monitoring to a database engine's connection pool.
+        pool_type = type(self.pool).__name__
         
-        Args:
-            engine: SQLAlchemy engine (sync or async)
-        """
+        return PoolConfiguration(
+            pool_type=pool_type,
+            pool_size=getattr(self.pool, '_pool_size', 0),
+            max_overflow=getattr(self.pool, '_max_overflow', 0),
+            pool_timeout=getattr(self.pool, '_timeout', 30.0),
+            pool_recycle=getattr(self.pool, '_recycle', -1),
+            pool_pre_ping=getattr(self.pool, '_pre_ping', False)
+        )
+
+    async def check_pool_health(self) -> Dict[str, Any]:
+        """Perform comprehensive pool health check."""
+        start_time = time.time()
+        
+        health_result = {
+            "name": self.name,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "status": PoolHealthStatus.HEALTHY.value,
+            "issues": [],
+            "metrics": {},
+            "recommendations": []
+        }
+        
         try:
-            # Get the actual pool object
-            if hasattr(engine, 'pool'):
-                pool_obj = engine.pool
-            elif hasattr(engine, 'sync_engine') and hasattr(engine.sync_engine, 'pool'):
-                pool_obj = engine.sync_engine.pool
+            # Update basic pool metrics
+            await self._update_pool_metrics()
+            
+            # Test connection acquisition
+            connection_time = await self._test_connection_acquisition()
+            if connection_time:
+                self.metrics.add_connection_time(connection_time)
+            
+            # Analyze pool health
+            health_status, issues = self._analyze_pool_health()
+            health_result["status"] = health_status.value
+            health_result["issues"] = issues
+            
+            # Update metrics in result
+            health_result["metrics"] = {
+                "pool_size": self.metrics.pool_size,
+                "checked_out": self.metrics.checked_out_connections,
+                "overflow": self.metrics.overflow_connections,
+                "utilization_percent": self._calculate_utilization(),
+                "avg_connection_time_ms": round(self.metrics.get_avg_connection_time(), 2),
+                "avg_query_time_ms": round(self.metrics.get_avg_query_time(), 2),
+                "failure_rate_percent": round(self.metrics.get_connection_failure_rate(), 2),
+                "successful_connections": self.metrics.successful_connections,
+                "failed_connections": self.metrics.failed_connections,
+                "connection_timeouts": self.metrics.connection_timeouts
+            }
+            
+            # Infrastructure-specific metrics for Issue #1278
+            health_result["infrastructure_metrics"] = {
+                "vpc_connector_failures": self.metrics.vpc_connector_failures,
+                "cloud_sql_timeouts": self.metrics.cloud_sql_timeouts,
+                "ssl_handshake_failures": self.metrics.ssl_handshake_failures
+            }
+            
+            # Generate recommendations
+            health_result["recommendations"] = self._generate_recommendations(health_status, issues)
+            
+            self.metrics.last_health_check = datetime.now(timezone.utc)
+            
+        except Exception as e:
+            logger.error(f"Pool health check failed for '{self.name}': {e}")
+            health_result["status"] = PoolHealthStatus.FAILED.value
+            health_result["issues"].append({
+                "type": "health_check_failure",
+                "severity": "critical",
+                "description": f"Health check failed: {str(e)}"
+            })
+        
+        check_duration = (time.time() - start_time) * 1000
+        health_result["health_check_duration_ms"] = round(check_duration, 2)
+        
+        return health_result
+
+    async def _update_pool_metrics(self):
+        """Update basic pool metrics from SQLAlchemy pool."""
+        if not self.pool:
+            return
+        
+        try:
+            # Get current pool status
+            self.metrics.pool_size = getattr(self.pool, 'size', 0)
+            self.metrics.checked_out_connections = getattr(self.pool, 'checkedout', 0)
+            self.metrics.overflow_connections = getattr(self.pool, 'overflow', 0)
+            self.metrics.invalidated_connections = getattr(self.pool, 'invalidated', 0)
+            
+        except Exception as e:
+            logger.warning(f"Failed to update pool metrics for '{self.name}': {e}")
+
+    async def _test_connection_acquisition(self) -> Optional[float]:
+        """Test connection acquisition time."""
+        start_time = time.time()
+        
+        try:
+            # For async engines, use async connection
+            if hasattr(self.engine, 'begin'):
+                async with self.engine.begin() as conn:
+                    # Simple health check query
+                    await conn.execute(text("SELECT 1"))
             else:
-                logger.warning(f"Could not find pool in engine: {type(engine)}")
-                return
+                # For sync engines
+                with self.engine.begin() as conn:
+                    conn.execute(text("SELECT 1"))
             
-            # Register pool for monitoring
-            pool_id = str(id(pool_obj))
-            self._monitored_pools[pool_id] = pool_obj
+            acquisition_time = (time.time() - start_time) * 1000
+            self.metrics.successful_connections += 1
+            self.metrics.last_connection_success = datetime.now(timezone.utc)
             
-            # Attach event listeners for pool events
-            self._attach_pool_events(engine)
+            return acquisition_time
             
-            logger.info(f"Attached monitoring to pool {pool_id} for {self.pool_name}")
+        except asyncio.TimeoutError:
+            self.metrics.connection_timeouts += 1
+            self.metrics.cloud_sql_timeouts += 1
+            self.metrics.failed_connections += 1
+            self.metrics.last_connection_failure = datetime.now(timezone.utc)
             
-        except Exception as e:
-            logger.error(f"Failed to attach pool monitoring: {e}", exc_info=True)
-    
-    def _attach_pool_events(self, engine: Any) -> None:
-        """Attach event listeners to track pool events."""
-        try:
-            # Track connection checkout
-            @event.listens_for(engine, "checkout", named=True)
-            def receive_checkout(**kw):
-                self.metrics.checked_out_connections += 1
-                self._update_pool_metrics()
-            
-            # Track connection checkin
-            @event.listens_for(engine, "checkin", named=True)
-            def receive_checkin(**kw):
-                self.metrics.checked_in_connections += 1
-                self._update_pool_metrics()
-            
-            # Track connection errors
-            @event.listens_for(engine, "connect", named=True)
-            def receive_connect(**kw):
-                self.metrics.total_connections += 1
-            
-            logger.debug(f"Pool events attached for {self.pool_name}")
+            self._record_issue(ConnectionIssueType.CLOUD_SQL_TIMEOUT, "critical", "Connection acquisition timed out")
+            return None
             
         except Exception as e:
-            logger.warning(f"Could not attach all pool events: {e}")
-    
-    def _update_pool_metrics(self) -> None:
-        """Update current pool metrics from monitored pools."""
-        try:
-            total_size = 0
-            total_checked_out = 0
-            total_overflow = 0
+            self.metrics.failed_connections += 1
+            self.metrics.last_connection_failure = datetime.now(timezone.utc)
             
-            for pool_id, pool_obj in self._monitored_pools.items():
-                if hasattr(pool_obj, 'size'):
-                    total_size += pool_obj.size()
-                if hasattr(pool_obj, 'checked_out'):
-                    total_checked_out += pool_obj.checked_out()
-                if hasattr(pool_obj, 'overflow'):
-                    total_overflow += pool_obj.overflow()
+            # Classify the error for Issue #1278
+            issue_type = self._classify_connection_error(e)
+            self._record_issue(issue_type, "high", f"Connection failed: {str(e)}")
             
-            # Update metrics
-            self.metrics.total_connections = total_size
-            self.metrics.active_connections = total_checked_out
-            self.metrics.idle_connections = total_size - total_checked_out
-            self.metrics.overflow_connections = total_overflow
-            
-            # Check health status
-            self._check_pool_health()
-            
-        except Exception as e:
-            logger.error(f"Error updating pool metrics: {e}")
-            self.metrics.connection_errors += 1
-            self.metrics.last_error = str(e)
-            self.metrics.last_error_time = datetime.utcnow()
-    
-    def _check_pool_health(self) -> None:
-        """Check pool health and update status."""
-        self.metrics.warnings.clear()
+            return None
+
+    def _classify_connection_error(self, error: Exception) -> ConnectionIssueType:
+        """Classify connection error for Issue #1278 analysis."""
+        error_str = str(error).lower()
         
-        if self.metrics.total_connections == 0:
-            self.metrics.health_status = "unknown"
-            return
+        if any(pattern in error_str for pattern in [
+            'connection refused', 'network unreachable', 'vpc connector'
+        ]):
+            self.metrics.vpc_connector_failures += 1
+            return ConnectionIssueType.VPC_CONNECTIVITY
         
-        # Calculate pool usage percentage
-        usage = self.metrics.active_connections / self.metrics.total_connections
+        elif any(pattern in error_str for pattern in [
+            'timeout', 'timed out'
+        ]):
+            self.metrics.cloud_sql_timeouts += 1
+            return ConnectionIssueType.CLOUD_SQL_TIMEOUT
         
-        if usage >= self.critical_threshold:
-            self.metrics.health_status = "critical"
-            self.metrics.warnings.append(
-                f"Pool usage critical: {usage:.1%} of connections in use"
-            )
-            logger.critical(
-                f"DATABASE POOL CRITICAL: {self.pool_name} at {usage:.1%} capacity "
-                f"({self.metrics.active_connections}/{self.metrics.total_connections})"
-            )
-            
-        elif usage >= self.warning_threshold:
-            self.metrics.health_status = "warning"
-            self.metrics.warnings.append(
-                f"Pool usage high: {usage:.1%} of connections in use"
-            )
-            logger.warning(
-                f"Database pool warning: {self.pool_name} at {usage:.1%} capacity"
-            )
-            
+        elif any(pattern in error_str for pattern in [
+            'ssl', 'certificate', 'handshake'
+        ]):
+            self.metrics.ssl_handshake_failures += 1
+            return ConnectionIssueType.SSL_HANDSHAKE_FAILURE
+        
+        elif any(pattern in error_str for pattern in [
+            'pool', 'too many connections'
+        ]):
+            return ConnectionIssueType.POOL_EXHAUSTION
+        
+        elif any(pattern in error_str for pattern in [
+            'authentication', 'password', 'credentials'
+        ]):
+            return ConnectionIssueType.AUTHENTICATION_FAILURE
+        
         else:
-            self.metrics.health_status = "healthy"
+            return ConnectionIssueType.SLOW_CONNECTIONS
+
+    def _analyze_pool_health(self) -> tuple[PoolHealthStatus, List[Dict[str, Any]]]:
+        """Analyze pool health and identify issues."""
+        issues = []
         
-        # Check for connection leaks (connections checked out for too long)
-        if self.metrics.checked_out_connections - self.metrics.checked_in_connections > 10:
-            self.metrics.warnings.append(
-                "Possible connection leak detected: many unchecked connections"
-            )
+        # Check utilization
+        utilization = self._calculate_utilization()
         
-        # Check for excessive errors
-        if self.metrics.connection_errors > 5:
-            self.metrics.warnings.append(
-                f"High error rate: {self.metrics.connection_errors} connection errors"
-            )
-    
-    async def start_monitoring(self) -> None:
-        """Start background monitoring task."""
-        if self._is_monitoring:
-            logger.warning(f"Monitoring already active for {self.pool_name}")
+        if utilization >= self.critical_utilization_threshold:
+            issues.append({
+                "type": ConnectionIssueType.POOL_EXHAUSTION.value,
+                "severity": "critical",
+                "description": f"Pool utilization critical: {utilization:.1%}",
+                "current_value": f"{utilization:.1%}",
+                "threshold": f"{self.critical_utilization_threshold:.1%}"
+            })
+        elif utilization >= self.high_utilization_threshold:
+            issues.append({
+                "type": ConnectionIssueType.POOL_EXHAUSTION.value,
+                "severity": "high",
+                "description": f"Pool utilization high: {utilization:.1%}",
+                "current_value": f"{utilization:.1%}",
+                "threshold": f"{self.high_utilization_threshold:.1%}"
+            })
+        
+        # Check connection times
+        avg_connection_time = self.metrics.get_avg_connection_time()
+        if avg_connection_time > self.critical_connection_threshold:
+            issues.append({
+                "type": ConnectionIssueType.SLOW_CONNECTIONS.value,
+                "severity": "critical",
+                "description": f"Critical connection time: {avg_connection_time:.0f}ms",
+                "current_value": f"{avg_connection_time:.0f}ms",
+                "threshold": f"{self.critical_connection_threshold:.0f}ms"
+            })
+        elif avg_connection_time > self.slow_connection_threshold:
+            issues.append({
+                "type": ConnectionIssueType.SLOW_CONNECTIONS.value,
+                "severity": "medium",
+                "description": f"Slow connection time: {avg_connection_time:.0f}ms",
+                "current_value": f"{avg_connection_time:.0f}ms",
+                "threshold": f"{self.slow_connection_threshold:.0f}ms"
+            })
+        
+        # Check failure rate
+        failure_rate = self.metrics.get_connection_failure_rate()
+        if failure_rate > 20.0:  # 20% failure rate is critical
+            issues.append({
+                "type": ConnectionIssueType.VPC_CONNECTIVITY.value,
+                "severity": "critical",
+                "description": f"High connection failure rate: {failure_rate:.1f}%",
+                "current_value": f"{failure_rate:.1f}%",
+                "threshold": "20%"
+            })
+        elif failure_rate > 5.0:  # 5% failure rate is concerning
+            issues.append({
+                "type": ConnectionIssueType.VPC_CONNECTIVITY.value,
+                "severity": "high",
+                "description": f"Elevated connection failure rate: {failure_rate:.1f}%",
+                "current_value": f"{failure_rate:.1f}%",
+                "threshold": "5%"
+            })
+        
+        # Check for infrastructure-specific issues
+        if self.metrics.vpc_connector_failures > 0:
+            issues.append({
+                "type": ConnectionIssueType.VPC_CONNECTIVITY.value,
+                "severity": "high",
+                "description": f"VPC connector failures detected: {self.metrics.vpc_connector_failures}",
+                "remediation": "Check VPC connector configuration and capacity"
+            })
+        
+        if self.metrics.cloud_sql_timeouts > 0:
+            issues.append({
+                "type": ConnectionIssueType.CLOUD_SQL_TIMEOUT.value,
+                "severity": "high",
+                "description": f"Cloud SQL timeouts detected: {self.metrics.cloud_sql_timeouts}",
+                "remediation": "Increase timeout settings and check Cloud SQL performance"
+            })
+        
+        # Determine overall health status
+        if any(issue["severity"] == "critical" for issue in issues):
+            status = PoolHealthStatus.CRITICAL
+        elif any(issue["severity"] == "high" for issue in issues):
+            status = PoolHealthStatus.DEGRADED
+        elif len(issues) > 0:
+            status = PoolHealthStatus.DEGRADED
+        else:
+            status = PoolHealthStatus.HEALTHY
+        
+        return status, issues
+
+    def _calculate_utilization(self) -> float:
+        """Calculate pool utilization percentage."""
+        if self.metrics.pool_size == 0:
+            return 0.0
+        
+        total_connections = self.metrics.checked_out_connections + self.metrics.overflow_connections
+        return total_connections / (self.metrics.pool_size + self.config.max_overflow)
+
+    def _record_issue(self, issue_type: ConnectionIssueType, severity: str, description: str):
+        """Record a connection issue for tracking."""
+        issue = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "type": issue_type.value,
+            "severity": severity,
+            "description": description
+        }
+        self.recent_issues.append(issue)
+
+    def _generate_recommendations(self, health_status: PoolHealthStatus, issues: List[Dict[str, Any]]) -> List[str]:
+        """Generate recommendations based on health analysis."""
+        recommendations = []
+        
+        # High utilization recommendations
+        utilization = self._calculate_utilization()
+        if utilization > self.high_utilization_threshold:
+            recommendations.append(f"Consider increasing pool size (current: {self.config.pool_size})")
+            recommendations.append("Monitor for connection leaks in application code")
+            recommendations.append("Review connection usage patterns")
+        
+        # Slow connection recommendations
+        avg_time = self.metrics.get_avg_connection_time()
+        if avg_time > self.slow_connection_threshold:
+            recommendations.append("Investigate network latency to database")
+            recommendations.append("Check VPC connector capacity and configuration")
+            recommendations.append("Consider connection pooling optimization")
+        
+        # Infrastructure-specific recommendations for Issue #1278
+        if self.metrics.vpc_connector_failures > 0:
+            recommendations.append("Review VPC connector configuration in Cloud Run")
+            recommendations.append("Check VPC connector capacity limits")
+            recommendations.append("Validate private IP connectivity to Cloud SQL")
+        
+        if self.metrics.cloud_sql_timeouts > 0:
+            recommendations.append("Increase database timeout settings to 600+ seconds")
+            recommendations.append("Check Cloud SQL instance performance metrics")
+            recommendations.append("Consider Cloud SQL instance scaling")
+        
+        if self.metrics.ssl_handshake_failures > 0:
+            recommendations.append("Check SSL certificate validity")
+            recommendations.append("Review SSL configuration for Cloud SQL")
+            recommendations.append("Validate TLS version compatibility")
+        
+        # Failure rate recommendations
+        failure_rate = self.metrics.get_connection_failure_rate()
+        if failure_rate > 5.0:
+            recommendations.append("Implement connection retry logic with exponential backoff")
+            recommendations.append("Enable connection pre-ping validation")
+            recommendations.append("Review database connectivity from application environment")
+        
+        return recommendations
+
+    async def start_monitoring(self, interval_seconds: int = 60):
+        """Start continuous pool monitoring."""
+        if self.monitoring_active:
+            logger.warning(f"Monitoring already active for pool '{self.name}'")
             return
         
-        self._is_monitoring = True
-        self._monitoring_task = asyncio.create_task(self._monitor_loop())
-        logger.info(f"Started monitoring for pool {self.pool_name}")
-    
-    async def _monitor_loop(self) -> None:
-        """Background monitoring loop."""
-        while self._is_monitoring:
-            try:
-                # Update metrics
-                self._update_pool_metrics()
-                
-                # Log current status
-                if self.metrics.health_status != "healthy":
-                    logger.warning(
-                        f"Pool {self.pool_name} status: {self.metrics.health_status}",
-                        extra={"metrics": self.metrics.to_dict()}
-                    )
-                else:
-                    logger.debug(
-                        f"Pool {self.pool_name} healthy",
-                        extra={"metrics": self.metrics.to_dict()}
-                    )
-                
-                # Wait for next check
-                await asyncio.sleep(self._check_interval)
-                
-            except Exception as e:
-                logger.error(f"Error in monitoring loop: {e}", exc_info=True)
-                await asyncio.sleep(self._check_interval)
-    
-    async def stop_monitoring(self) -> None:
-        """Stop background monitoring task."""
-        self._is_monitoring = False
+        self.monitoring_active = True
+        self._monitoring_task = asyncio.create_task(self._monitoring_loop(interval_seconds))
+        logger.info(f"Started continuous monitoring for pool '{self.name}' (interval: {interval_seconds}s)")
+
+    async def stop_monitoring(self):
+        """Stop continuous monitoring."""
+        if not self.monitoring_active:
+            return
+        
+        self.monitoring_active = False
         if self._monitoring_task:
             self._monitoring_task.cancel()
             try:
                 await self._monitoring_task
             except asyncio.CancelledError:
                 pass
-        logger.info(f"Stopped monitoring for pool {self.pool_name}")
-    
-    def get_metrics(self) -> Dict[str, Any]:
-        """Get current pool metrics."""
-        self._update_pool_metrics()
-        return self.metrics.to_dict()
-    
-    def is_healthy(self) -> bool:
-        """Check if pool is healthy."""
-        return self.metrics.health_status == "healthy"
-    
-    def get_warnings(self) -> List[str]:
-        """Get current warning messages."""
-        return self.metrics.warnings.copy()
+        
+        logger.info(f"Stopped monitoring for pool '{self.name}'")
+
+    async def _monitoring_loop(self, interval_seconds: int):
+        """Continuous monitoring loop."""
+        while self.monitoring_active:
+            try:
+                health_result = await self.check_pool_health()
+                
+                # Log critical issues
+                if health_result["status"] == PoolHealthStatus.CRITICAL.value:
+                    logger.critical(f"Pool '{self.name}' health CRITICAL: {len(health_result['issues'])} issues")
+                    for issue in health_result["issues"]:
+                        if issue.get("severity") == "critical":
+                            logger.critical(f"  • {issue['description']}")
+                
+                elif health_result["status"] == PoolHealthStatus.DEGRADED.value:
+                    logger.warning(f"Pool '{self.name}' health DEGRADED: {len(health_result['issues'])} issues")
+                
+                await asyncio.sleep(interval_seconds)
+                
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Error in monitoring loop for pool '{self.name}': {e}")
+                await asyncio.sleep(interval_seconds)
+
+    def get_summary_report(self) -> Dict[str, Any]:
+        """Get comprehensive summary report."""
+        return {
+            "name": self.name,
+            "health_status": self._analyze_pool_health()[0].value,
+            "configuration": {
+                "pool_type": self.config.pool_type,
+                "pool_size": self.config.pool_size,
+                "max_overflow": self.config.max_overflow,
+                "pool_timeout": self.config.pool_timeout,
+                "pool_recycle": self.config.pool_recycle,
+                "pre_ping": self.config.pool_pre_ping
+            },
+            "current_metrics": {
+                "utilization_percent": round(self._calculate_utilization() * 100, 1),
+                "avg_connection_time_ms": round(self.metrics.get_avg_connection_time(), 2),
+                "failure_rate_percent": round(self.metrics.get_connection_failure_rate(), 2),
+                "total_connections": self.metrics.successful_connections + self.metrics.failed_connections,
+                "recent_failures": len([issue for issue in self.recent_issues 
+                                      if datetime.fromisoformat(issue["timestamp"]) > 
+                                      datetime.now(timezone.utc) - timedelta(minutes=15)])
+            },
+            "infrastructure_health": {
+                "vpc_connector_issues": self.metrics.vpc_connector_failures,
+                "cloud_sql_timeouts": self.metrics.cloud_sql_timeouts,
+                "ssl_handshake_failures": self.metrics.ssl_handshake_failures
+            },
+            "recommendations": self._generate_recommendations(*self._analyze_pool_health()),
+            "last_health_check": self.metrics.last_health_check.isoformat() if self.metrics.last_health_check else None,
+            "monitoring_active": self.monitoring_active
+        }
 
 
-# Global monitor instance
-_pool_monitor: Optional[ConnectionPoolMonitor] = None
+# Global pool monitor registry
+_pool_monitors: Dict[str, ConnectionPoolMonitor] = {}
 
 
-def get_pool_monitor() -> ConnectionPoolMonitor:
-    """Get or create global pool monitor instance."""
-    global _pool_monitor
-    if _pool_monitor is None:
-        _pool_monitor = ConnectionPoolMonitor()
-    return _pool_monitor
+def register_pool_monitor(name: str, engine: Union[Engine, AsyncEngine]) -> ConnectionPoolMonitor:
+    """Register a connection pool monitor."""
+    monitor = ConnectionPoolMonitor(name, engine)
+    _pool_monitors[name] = monitor
+    logger.info(f"Registered connection pool monitor for '{name}'")
+    return monitor
 
 
-async def setup_pool_monitoring(engine: Any) -> None:
-    """
-    Setup connection pool monitoring for an engine.
-    
-    Args:
-        engine: SQLAlchemy engine to monitor
-    """
-    monitor = get_pool_monitor()
-    monitor.attach_to_pool(engine)
-    await monitor.start_monitoring()
-    logger.info("Database connection pool monitoring activated")
+def get_pool_monitor(name: str) -> Optional[ConnectionPoolMonitor]:
+    """Get a registered pool monitor."""
+    return _pool_monitors.get(name)
 
 
-async def get_pool_health() -> Dict[str, Any]:
-    """Get current pool health status."""
-    monitor = get_pool_monitor()
-    return {
-        "pool_name": monitor.pool_name,
-        "health_status": monitor.metrics.health_status,
-        "metrics": monitor.get_metrics(),
-        "warnings": monitor.get_warnings(),
-        "timestamp": datetime.utcnow().isoformat()
+def get_all_pool_monitors() -> Dict[str, ConnectionPoolMonitor]:
+    """Get all registered pool monitors."""
+    return _pool_monitors.copy()
+
+
+async def get_all_pools_health() -> Dict[str, Any]:
+    """Get health status of all monitored pools."""
+    health_report = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "total_pools": len(_pool_monitors),
+        "pools": {},
+        "summary": {
+            "healthy": 0,
+            "degraded": 0,
+            "critical": 0,
+            "failed": 0,
+            "total_issues": 0
+        }
     }
+    
+    for name, monitor in _pool_monitors.items():
+        pool_health = await monitor.check_pool_health()
+        health_report["pools"][name] = pool_health
+        
+        # Update summary
+        status = pool_health["status"]
+        if status == PoolHealthStatus.HEALTHY.value:
+            health_report["summary"]["healthy"] += 1
+        elif status == PoolHealthStatus.DEGRADED.value:
+            health_report["summary"]["degraded"] += 1
+        elif status == PoolHealthStatus.CRITICAL.value:
+            health_report["summary"]["critical"] += 1
+        else:
+            health_report["summary"]["failed"] += 1
+        
+        health_report["summary"]["total_issues"] += len(pool_health.get("issues", []))
+    
+    return health_report
