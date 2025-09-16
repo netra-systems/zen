@@ -147,31 +147,32 @@ class SignatureCompatibilityAnalysisTests(SSotBaseTestCase):
 
     def test_parameter_inspection(self):
         """
-        Analyze parameter differences between implementations.
+        Analyze parameter structure of canonical implementation.
         """
         import inspect
         types_sig = inspect.signature(types_create_server_message)
-        init_sig = inspect.signature(init_create_server_message)
         types_params = {name: param for name, param in types_sig.parameters.items()}
-        init_params = {name: param for name, param in init_sig.parameters.items()}
-        self.logger.info(f'Types implementation parameters: {list(types_params.keys())}')
-        self.logger.info(f'Init implementation parameters: {list(init_params.keys())}')
+        self.logger.info(f'Canonical implementation parameters: {list(types_params.keys())}')
+        
+        # SSOT COMPLIANCE: Validate parameter structure
         types_data = types_params.get('data')
-        init_data = init_params.get('data')
-        if types_data and init_data:
-            self.logger.info(f'Types data default: {types_data.default}')
-            self.logger.info(f'Init data default: {init_data.default}')
-            assert types_data.default != init_data.default, 'Data parameter defaults differ (SSOT violation)'
+        if types_data:
+            self.logger.info(f'Canonical data parameter default: {types_data.default}')
+            # Validate that data parameter is properly structured
+            assert types_data.annotation is not None, 'Data parameter should have type annotation'
 
-    def test_return_type_differences(self):
+    def test_return_type_validation(self):
         """
-        Test return types - both should be the same since init imports from types.
+        Test return type of canonical implementation.
         """
-        types_result = types_create_server_message(MessageType.SYSTEM_MESSAGE, {'test': 'data'})
-        init_result = init_create_server_message(MessageType.SYSTEM_MESSAGE, {'test': 'data'})
-        assert type(types_result) == type(init_result), 'Both should return same type from types.py'
-        assert isinstance(types_result, ServerMessage), 'Types implementation returns ServerMessage'
-        assert isinstance(init_result, ServerMessage), 'Init implementation also returns ServerMessage'
+        result = types_create_server_message(MessageType.SYSTEM_MESSAGE, {'test': 'data'})
+        assert isinstance(result, ServerMessage), 'Canonical implementation returns ServerMessage'
+        
+        # Validate ServerMessage structure
+        assert hasattr(result, 'type'), 'ServerMessage should have type attribute'
+        assert hasattr(result, 'data'), 'ServerMessage should have data attribute'
+        assert result.type == MessageType.SYSTEM_MESSAGE, 'Type should match input'
+        assert result.data['test'] == 'data', 'Data should match input'
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

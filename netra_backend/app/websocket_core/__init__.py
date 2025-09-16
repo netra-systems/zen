@@ -245,6 +245,9 @@ __all__ = [
 
     # Constants
     "CRITICAL_EVENTS",
+    
+    # GOLDEN PATH PHASE 3: Mission critical test compatibility
+    "get_websocket_manager",
 
     # NOTE: All other exports removed to eliminate import path fragmentation
     # COORDINATION FIX: Use direct imports for all other components:
@@ -256,6 +259,9 @@ __all__ = [
     # etc.
 ]
 
+
+# GOLDEN PATH PHASE 3 FIX: Export get_websocket_manager for mission critical tests
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 # Log consolidation
 from netra_backend.app.logging_config import central_logger

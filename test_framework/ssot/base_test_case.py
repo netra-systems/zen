@@ -88,6 +88,52 @@ class CategoryType(Enum):
 logger = logging.getLogger(__name__)
 
 
+def _detect_async_test_context():
+    """
+    Detect if we're running within pytest-asyncio context.
+    
+    This method checks if pytest-asyncio is managing the event loop,
+    which indicates we should not try to create/run our own event loop.
+    
+    Returns:
+        bool: True if pytest-asyncio is managing the event loop
+    """
+    try:
+        # Check if there's already a running event loop
+        current_loop = asyncio.get_running_loop()
+        
+        # Check for pytest-asyncio specific indicators
+        # pytest-asyncio typically sets specific attributes on the event loop
+        if hasattr(current_loop, '_pytest_asyncio'):
+            return True
+            
+        # Also check if we're in a pytest context by looking at the call stack
+        import inspect
+        frame = inspect.currentframe()
+        try:
+            while frame:
+                filename = frame.f_code.co_filename
+                function_name = frame.f_code.co_name
+                
+                # Look for pytest-asyncio specific patterns in the call stack
+                if 'pytest_asyncio' in filename or function_name in ['async_test_wrapper', 'pytest_pyfunc_call']:
+                    return True
+                    
+                # Look for pytest patterns
+                if 'pytest' in filename and ('runtest' in function_name or 'call' in function_name):
+                    return True
+                    
+                frame = frame.f_back
+        finally:
+            del frame
+            
+        return False
+        
+    except RuntimeError:
+        # No event loop running, so we're not in pytest-asyncio context
+        return False
+
+
 @dataclass
 class SsotTestMetrics:
     """SSOT test metrics container."""
@@ -331,6 +377,33 @@ class SSotBaseTestCase:
             self._cleanup_callbacks.clear()
             self._test_context = None
             self._original_env_state = None
+    
+    # === ASYNC EXECUTION HELPER ===
+    
+    def safe_run_async(self, coro):
+        """
+        Run async function safely regardless of event loop state.
+        
+        This method handles the nested event loop issue by using ThreadPoolExecutor
+        when an event loop is already running, preventing RuntimeError: 
+        "This event loop is already running".
+        
+        Args:
+            coro: Coroutine to execute
+            
+        Returns:
+            Result of the coroutine execution
+        """
+        try:
+            # Check if there's already a running event loop
+            loop = asyncio.get_running_loop()
+            # Event loop is running, use ThreadPoolExecutor to avoid nested loop issue
+            with ThreadPoolExecutor() as executor:
+                future = executor.submit(asyncio.run, coro)
+                return future.result()
+        except RuntimeError:
+            # No event loop running, safe to use asyncio.run
+            return asyncio.run(coro)
     
     # === UNITTEST COMPATIBILITY LAYER ===
     # These methods provide compatibility with unittest-style test classes
