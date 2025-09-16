@@ -26,8 +26,14 @@ from netra_backend.app.websocket_core.types import (
     WebSocketManagerMode,
     WebSocketConnection,
     _serialize_message_safely,
-    _get_enum_key_representation
+    _get_enum_key_representation,
+    create_server_message
 )
+from netra_backend.app.websocket_core.protocols import (
+    WebSocketManagerProtocol,
+    WebSocketManagerProtocolValidator
+)
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 
 
 class CanonicalImportDeprecationWarning(UserWarning):
@@ -159,6 +165,9 @@ class UnifiedWebSocketManager(_UnifiedWebSocketManagerImplementation):
 
 # Type alias for backwards compatibility
 WebSocketManager = UnifiedWebSocketManager
+
+# Backwards compatibility alias for WebSocketEventEmitter
+WebSocketEventEmitter = UnifiedWebSocketEmitter
 
 
 # =============================================================================
@@ -349,6 +358,15 @@ __all__ = [
     'RegistryCompat',
     '_serialize_message_safely',
     '_get_enum_key_representation',
+    'create_server_message',
+
+    # Event emitter imports
+    'UnifiedWebSocketEmitter',
+    'WebSocketEventEmitter',
+
+    # Protocol and validation
+    'WebSocketManagerProtocol',
+    'WebSocketManagerProtocolValidator',
 
     # Pattern 3: Component Interfaces
     'get_component_interface',
