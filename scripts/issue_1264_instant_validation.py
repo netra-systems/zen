@@ -36,7 +36,7 @@ def print_header():
     print("ISSUE #1264 INSTANT VALIDATION")
     print("=" * 80)
     print("Validating Cloud SQL PostgreSQL configuration fix")
-    print("Expected: PASS after fix, FAIL before fix")
+    print("Expected: PASS once backend recovers; database configuration is already validated via asyncpg.")
     print("=" * 80)
     print()
 
@@ -299,13 +299,19 @@ def print_results(results: Dict[str, Any]) -> None:
         print("🎉 SUCCESS: All validation tests passed!")
         if results['issue_1264_resolved']:
             print("✓ Issue #1264 appears to be RESOLVED")
-            print("  Database connection times are within acceptable range")
-            print("  All infrastructure components are operational")
+    if results['overall_success']:
+        print('SUCCESS: All validation tests passed.')
+        if results['issue_1264_resolved']:
+            print('  Issue #1264 appears resolved; database connection times are within acceptable range.')
+            print('  All infrastructure components are operational.')
         else:
-            print("⚠️  Partial success - some Issue #1264 indicators remain")
+            print('  Partial success - some Issue #1264 indicators remain.')
     else:
-        print("❌ VALIDATION FAILED: Some tests did not pass")
-        print("   Issue #1264 may not be fully resolved")
+        print('VALIDATION FAILED: Some tests did not pass.')
+        if results['database_connectivity']['success'] and not results['health_endpoint']['success']:
+            print('  Database connectivity succeeded but health endpoint is down -> investigate backend deployment (Issue #1263).')
+        else:
+            print('  Issue #1264 may not be fully resolved.')
 
     # Issue #1264 indicators
     if results['issue_1264_indicators']:
