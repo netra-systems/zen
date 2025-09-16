@@ -156,6 +156,12 @@ try:
 except ImportError:
     get_connection_monitor = None
 
+# REMEDIATION: Add missing WebSocketHeartbeat export for test compatibility
+try:
+    from netra_backend.app.websocket_core.utils import WebSocketHeartbeat
+except ImportError:
+    WebSocketHeartbeat = None
+
 # ISSUE #1176 PHASE 2 REMEDIATION: Add missing get_websocket_manager for test compatibility
 try:
     from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
@@ -319,6 +325,8 @@ if get_connection_monitor is not None:
     _optional_exports.append("get_connection_monitor")
 if get_websocket_manager is not None:
     _optional_exports.append("get_websocket_manager")
+if WebSocketHeartbeat is not None:
+    _optional_exports.append("WebSocketHeartbeat")
 
 __all__.extend(_optional_exports)
 
