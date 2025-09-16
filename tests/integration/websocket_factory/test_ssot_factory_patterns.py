@@ -99,7 +99,7 @@ class WebSocketSSOTFactoryPatternsTests(SSotAsyncTestCase):
         EXPECTED: Different users should have isolated WebSocket contexts.
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             from netra_backend.app.services.user_execution_context import UserExecutionContext, create_defensive_user_execution_context
         except ImportError as e:
             pytest.skip(f"Required modules not available: {e}")
@@ -161,7 +161,7 @@ class WebSocketSSOTFactoryPatternsTests(SSotAsyncTestCase):
         ]
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         except ImportError as e:
             pytest.skip(f"WebSocket manager not available: {e}")
 
@@ -205,7 +205,7 @@ class WebSocketSSOTFactoryPatternsTests(SSotAsyncTestCase):
         EXPECTED: Should properly inject dependencies without circular imports.
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             from netra_backend.app.services.user_execution_context import UserExecutionContext, create_defensive_user_execution_context
         except ImportError as e:
             pytest.skip(f"Required modules not available: {e}")
@@ -243,7 +243,7 @@ class WebSocketSSOTFactoryPatternsTests(SSotAsyncTestCase):
         EXPECTED: Should integrate with Redis and database without errors.
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             redis_client = await self.get_redis_client()
         except ImportError as e:
             pytest.skip(f"Required services not available: {e}")
@@ -296,7 +296,7 @@ class WebSocketSSOTFactoryPatternsTests(SSotAsyncTestCase):
         legacy_import_results = {}
 
         legacy_patterns = [
-            ("unified_manager", "from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager"),
+            ("unified_manager", "from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager"),
             ("direct_core", "from netra_backend.app.websocket_core import WebSocketManager"),
             ("factory_core", "from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager"),
         ]

@@ -51,7 +51,7 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
         
         # Method 1: Direct import and instantiation
         try:
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
             from netra_backend.app.websocket_core.websocket_manager import create_test_user_context
             
             user_context = create_test_user_context()
@@ -247,7 +247,7 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
             
             # Pattern 1: Direct unified manager
             try:
-                from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
                 manager1 = UnifiedWebSocketManager(user_context=user_context)
                 manager_patterns.append(('unified', manager1))
             except Exception as e:
@@ -355,7 +355,7 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
             
             # Collect available manager patterns
             try:
-                from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
                 manager_patterns.append(('unified', UnifiedWebSocketManager))
             except ImportError:
                 pass

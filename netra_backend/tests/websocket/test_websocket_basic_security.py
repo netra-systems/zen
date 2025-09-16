@@ -17,7 +17,7 @@ These are fundamental security tests that validate the core websocket security m
 """
 import json
 from typing import Dict, Any
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 import pytest
 pytestmark = [pytest.mark.env_test]

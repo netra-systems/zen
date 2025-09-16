@@ -11,7 +11,7 @@ This module provides the SSOT alias for WebSocketConnectionManager imports that 
 Following CLAUDE.md SSOT principles by creating proper aliases rather than duplicating code.
 """
 
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.logging_config import central_logger
 from typing import Dict, Any, Optional
 from datetime import datetime, timezone

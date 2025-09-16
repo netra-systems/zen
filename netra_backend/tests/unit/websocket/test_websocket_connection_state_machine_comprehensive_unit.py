@@ -21,7 +21,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from dataclasses import dataclass
 
 from netra_backend.app.core.websocket_recovery_types import ConnectionState, ReconnectionReason
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
 from shared.types.core_types import UserID, ConnectionID, ensure_user_id
 
 

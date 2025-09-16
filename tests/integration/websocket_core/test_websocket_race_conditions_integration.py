@@ -30,8 +30,8 @@ from typing import Dict, Any, List
 from datetime import datetime
 import concurrent.futures
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, WebSocketManagerMode, create_test_user_context
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection, _serialize_message_safely
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager, WebSocketManagerMode, create_test_user_context
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection, _serialize_message_safely
 from shared.types.core_types import UserID, ThreadID, ConnectionID
 from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)

@@ -37,7 +37,7 @@ from shared.types.core_types import (
 )
 
 # WebSocket and thread routing components
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketConnectionManager
 from netra_backend.app.websocket_core.utils import generate_connection_id
 from netra_backend.app.services.thread_service import ThreadService

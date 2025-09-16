@@ -36,8 +36,8 @@ class WebSocketManagerSSotComplianceTests(SSotBaseTestCase):
 
     # CANONICAL SSOT import patterns (these are the ONLY allowed patterns)
     SSOT_IMPORT_PATTERNS = {
-        "unified_manager_import": "from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager",
-        "unified_manager_alias": "from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager"
+        "unified_manager_import": "from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager",
+        "unified_manager_alias": "from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager"
     }
 
     # PROHIBITED legacy import patterns

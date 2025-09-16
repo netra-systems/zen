@@ -29,7 +29,7 @@ from typing import Dict, Any, List, Optional
 # Import WebSocket core modules to test
 from netra_backend.app.websocket_core.utils import generate_connection_id, generate_message_id
 from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage, MessageType, create_standard_message
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 # SSOT import after Issue #824 remediation
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.connection_manager import ConnectionManager
@@ -69,7 +69,7 @@ class ConnectionIdGenerationRoutingTests(SSotBaseTestCase):
         )
 
         # Connection manager for testing routing - create synchronously for tests
-        from netra_backend.app.websocket_core.websocket_manager import _UnifiedWebSocketManagerImplementation, WebSocketManagerMode
+        from netra_backend.app.websocket_core.canonical_import_patterns import _UnifiedWebSocketManagerImplementation, WebSocketManagerMode
         import secrets
         
         # Create test manager with authorization token (bypasses factory restriction)

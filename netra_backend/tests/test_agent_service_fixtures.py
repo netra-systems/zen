@@ -6,7 +6,7 @@ This module provides pytest fixtures for testing agent services.
 
 import pytest
 from netra_backend.tests.test_agent_service_mock_classes import MockOrchestrator, MockAgent
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment

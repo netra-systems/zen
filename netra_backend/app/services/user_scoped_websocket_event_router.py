@@ -94,7 +94,7 @@ class UserEventRoutingRegistry:
 # UserScopedWebSocketEventRouter functionality has been consolidated into CanonicalMessageRouter
 # This file provides compatibility during migration phase
 
-from netra_backend.app.websocket_core.handlers import CanonicalMessageRouter
+from netra_backend.app.websocket_core.canonical_message_router import CanonicalMessageRouter
 
 
 class UserScopedWebSocketEventRouter(CanonicalMessageRouter):

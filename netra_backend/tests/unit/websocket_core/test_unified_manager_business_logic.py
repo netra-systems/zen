@@ -66,7 +66,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
 
     async def test_factory_bypass_protection_blocks_direct_instantiation(self):
         """Test that factory bypass protection prevents direct instantiation."""
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
         from netra_backend.app.websocket_core.ssot_validation_enhancer import FactoryBypassDetected
 
         user_context = self._create_mock_user_context()
@@ -82,7 +82,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
 
     async def test_authorization_token_format_validation(self):
         """Test that authorization tokens must meet security requirements."""
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
         from netra_backend.app.websocket_core.ssot_validation_enhancer import FactoryBypassDetected
 
         user_context = self._create_mock_user_context()
@@ -105,7 +105,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
 
     async def test_user_context_requirement_enforcement(self):
         """Test that user context is required for proper isolation."""
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
         from netra_backend.app.websocket_core.ssot_validation_enhancer import UserIsolationViolation
 
         valid_token = "valid-token-1234567890abcdef"
@@ -123,7 +123,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
     @patch('netra_backend.app.websocket_core.ssot_validation_enhancer.validate_websocket_manager_creation')
     async def test_successful_manager_creation_with_valid_parameters(self, mock_validate):
         """Test successful manager creation when all parameters are valid."""
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
         mock_validate.return_value = True
         user_context = self._create_mock_user_context()
@@ -263,7 +263,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
     @patch('netra_backend.app.websocket_core.ssot_validation_enhancer.validate_websocket_manager_creation')
     async def test_manager_initialization_creates_isolation_structures(self, mock_validate):
         """Test that manager initializes proper user isolation structures."""
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
         mock_validate.return_value = True
         user_context = self._create_mock_user_context()
@@ -297,7 +297,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
     @patch('netra_backend.app.websocket_core.ssot_validation_enhancer.validate_websocket_manager_creation')
     async def test_event_queue_statistics_initialization(self, mock_validate):
         """Test that event queue statistics are properly initialized."""
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
         mock_validate.return_value = True
         user_context = self._create_mock_user_context()
@@ -322,7 +322,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
     @patch('netra_backend.app.websocket_core.ssot_validation_enhancer.validate_websocket_manager_creation')
     async def test_memory_leak_prevention_structures(self, mock_validate):
         """Test that memory leak prevention structures are properly set up."""
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
         import weakref
 
         mock_validate.return_value = True
@@ -344,7 +344,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
     @patch('netra_backend.app.websocket_core.ssot_validation_enhancer.validate_websocket_manager_creation')
     async def test_configuration_defaults_and_overrides(self, mock_validate):
         """Test configuration defaults and override behavior."""
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
         mock_validate.return_value = True
         user_context = self._create_mock_user_context()
@@ -383,7 +383,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
     @patch('netra_backend.app.websocket_core.ssot_validation_enhancer.validate_websocket_manager_creation')
     async def test_forced_unified_mode_regardless_of_input(self, mock_validate):
         """Test that manager always uses unified mode regardless of input mode."""
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketManagerMode
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketManagerMode
 
         mock_validate.return_value = True
         user_context = self._create_mock_user_context()

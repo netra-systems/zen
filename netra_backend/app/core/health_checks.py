@@ -219,7 +219,7 @@ class HealthMonitor:
             # SECURITY FIX: Check factory pattern availability without creating instances
             try:
                 # SSOT MIGRATION: Using direct WebSocket manager instead of deprecated factory pattern
-                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                 
                 # Check if SSOT WebSocket manager is available
                 manager = get_websocket_manager()

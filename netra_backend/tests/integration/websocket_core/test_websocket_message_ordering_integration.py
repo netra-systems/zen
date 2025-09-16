@@ -26,7 +26,7 @@ from typing import Dict, List, Any, Optional, Tuple, Set
 from unittest.mock import AsyncMock, Mock, MagicMock
 from collections import defaultdict, deque
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, UserWebSocketEmitter, WebSocketEvent
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = central_logger.get_logger(__name__)

@@ -152,7 +152,7 @@ class ConnectionDiagnosticsTests:
                 def __init__(self):
                     self.client_state = WebSocketState.CONNECTED
             connection = WebSocketConnection(connection_id='test_conn_123', user_id='test_user', websocket=MockWebSocket(), connected_at=datetime.utcnow())
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
             manager = UnifiedWebSocketManager()
             diagnostics = manager._get_connection_diagnostics(connection)
             json_str = json.dumps(diagnostics)

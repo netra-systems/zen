@@ -12,7 +12,7 @@ import asyncio
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock, patch
 import json
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.unit

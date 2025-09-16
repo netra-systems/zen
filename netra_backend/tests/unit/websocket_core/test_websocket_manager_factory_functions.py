@@ -226,7 +226,7 @@ class WebSocketManagerFactoryFunctionsTests(SSotAsyncTestCase):
         
         Business Critical: Backward compatibility must be maintained.
         """
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
         
         # WebSocketManager should be the same as UnifiedWebSocketManager
         assert WebSocketManager is UnifiedWebSocketManager

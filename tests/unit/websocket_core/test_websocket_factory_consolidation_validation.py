@@ -113,7 +113,7 @@ class WebSocketFactoryConsolidationValidationTests(BaseIntegrationTest):
         """Test unified manager singleton pattern."""
         try:
             # Test singleton behavior
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
             instance1 = UnifiedWebSocketManager()
             instance2 = UnifiedWebSocketManager()
@@ -248,7 +248,7 @@ class WebSocketFactoryConsolidationValidationTests(BaseIntegrationTest):
 
         try:
             # Try unified manager
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
             instance3 = UnifiedWebSocketManager()
             creation_methods.append("unified")
         except ImportError:
@@ -310,7 +310,7 @@ class WebSocketFactoryConsolidationValidationTests(BaseIntegrationTest):
 
                 # Method 3: Unified manager (if available)
                 try:
-                    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+                    from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
                     instance3 = UnifiedWebSocketManager()
                     creation_attempts.append(("unified", instance3, time.time() - start_time))
                 except ImportError:
@@ -506,7 +506,7 @@ class WebSocketFactoryConsolidationValidationTests(BaseIntegrationTest):
     def _test_unified_manager_isolation(self, test_users: List[UserID]) -> Dict[str, Any]:
         """Test isolation for unified manager pattern."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
             instances = []
             for user_id in test_users:
@@ -629,7 +629,7 @@ class WebSocketFactoryConsolidationValidationTests(BaseIntegrationTest):
 
     def _test_unified_lifecycle(self) -> Dict[str, Any]:
         """Test lifecycle for unified manager."""
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
         instance = UnifiedWebSocketManager()
 

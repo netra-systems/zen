@@ -29,7 +29,7 @@ def validate_ssot_phase1():
     # Test 2: SSOT implementation exists
     total_tests += 1
     try:
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
         print("[PASS] Test 2: UnifiedWebSocketManager SSOT implementation exists")
         tests_passed += 1
     except ImportError as e:

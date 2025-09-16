@@ -38,7 +38,7 @@ from dataclasses import dataclass
 from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, ConnectionID, WebSocketID, RequestID, ensure_user_id, ensure_thread_id, ensure_websocket_id
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection, RegistryCompat, _serialize_message_safely, _get_enum_key_representation
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection, RegistryCompat, _serialize_message_safely, _get_enum_key_representation
 from netra_backend.app.websocket_core import create_websocket_manager
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 

@@ -20,7 +20,7 @@ from typing import Any, Dict, Optional
 from unittest.mock import Mock, patch, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.types.core_types import UserID, ensure_user_id
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketManagerMode
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketManagerMode
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.ssot_validation_enhancer import SSotValidationError, FactoryBypassDetected, enable_strict_validation, validate_websocket_manager_creation
 

@@ -55,7 +55,7 @@ def validate_compatibility_layer():
         try:
             from netra_backend.app.websocket_core import WebSocketManager as LegacyManager
             from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CanonicalManager
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
             # All should be the same class
             all_same = (LegacyManager == CanonicalManager == UnifiedWebSocketManager)

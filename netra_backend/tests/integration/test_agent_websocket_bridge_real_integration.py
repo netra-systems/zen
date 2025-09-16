@@ -26,7 +26,7 @@ from typing import Dict, Any, List
 from datetime import datetime
 
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from test_framework.ssot.real_services_test_fixtures import *
 from test_framework.ssot.real_websocket_test_client import RealWebSocketTestClient

@@ -5,7 +5,7 @@ Tests for critical exception handling requirements from websocket_reliability.xm
 
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio

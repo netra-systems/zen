@@ -49,7 +49,7 @@ from netra_backend.app.websocket_core.websocket_manager import (
     WebSocketManagerProtocol,
     _serialize_message_safely
 )
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
 
 class WebSocketManagerCompatibilityLayerTests(SSotBaseTestCase):
@@ -101,7 +101,7 @@ class WebSocketManagerCompatibilityLayerTests(SSotBaseTestCase):
         assert WebSocketManagerFromCompat is SSOTWebSocketManager, "WebSocketManager compatibility broken"
         
         # Test that it's actually the UnifiedWebSocketManager (as per current implementation)
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
         assert WebSocketManagerFromCompat is UnifiedWebSocketManager, "WebSocketManager should be UnifiedWebSocketManager"
 
     def test_websocket_connection_import_compatibility(self):
@@ -177,7 +177,7 @@ class WebSocketManagerCompatibilityLayerTests(SSotBaseTestCase):
         UnifiedManagerFromCompat = websocket_manager_compatibility.UnifiedWebSocketManager
         
         # Verify it's the same class as SSOT implementation
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as SSOTUnified
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as SSOTUnified
         assert UnifiedManagerFromCompat is SSOTUnified, "UnifiedWebSocketManager compatibility broken"
 
     def test_legacy_import_patterns_still_work(self):
@@ -310,7 +310,7 @@ class WebSocketManagerCompatibilityLayerTests(SSotBaseTestCase):
             mock_unified.return_value = mock_manager
             
             # Import get_websocket_manager via compatibility layer
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             
             # Should be able to call it without errors
             result = None

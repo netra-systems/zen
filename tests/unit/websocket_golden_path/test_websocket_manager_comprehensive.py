@@ -36,7 +36,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 from test_framework.ssot.mocks import SSotMockFactory
 from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection, _serialize_message_safely
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection, _serialize_message_safely
 from shared.types.core_types import UserID, ThreadID, ConnectionID, WebSocketID
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 

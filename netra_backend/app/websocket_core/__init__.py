@@ -109,19 +109,21 @@ def _emit_deprecation_warning():
 # Only import for absolute necessity - prefer empty __init__.py for SSOT compliance
 # _emit_deprecation_warning()
 
-# TEMPORARY: Keep critical imports only for backward compatibility during Phase 2 transition
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+# ISSUE #1176 PHASE 2 REMEDIATION: MINIMAL imports to force canonical direct imports
+# COORDINATION STRATEGY: Provide only absolutely critical imports needed for backward compatibility
 
-# 2. CANONICAL Types (SSOT)
-from netra_backend.app.websocket_core.types import WebSocketConnection, _serialize_message_safely
-
-# 3. CANONICAL Protocols (SSOT) - No fallback, fail fast for missing dependencies
-from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
-
-# 4. CANONICAL Emitter (SSOT) - COORDINATION FIX: Direct import only
-# Use: from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+# Minimal imports for critical backward compatibility only
+try:
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+    from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
+except ImportError as e:
+    # FAIL FAST: Critical WebSocket components must be available
+    raise ImportError(
+        f"CRITICAL: Core WebSocket components import failed: {e}. "
+        f"This indicates a dependency issue that must be resolved."
+    ) from e
 
 # SSOT COMPLIANCE: Factory pattern eliminated - use direct WebSocketManager import
 # from netra_backend.app.websocket_core.websocket_manager_factory import (
@@ -190,169 +192,38 @@ def create_websocket_manager(user_context=None):
             _ssot_authorization_token=secrets.token_urlsafe(32)
         )
 
-# 5. CANONICAL Factory Functions (SSOT)
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+# COORDINATION FIX: Remove redundant imports that create fragmentation
+# Use direct imports for these instead:
+# from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+# from netra_backend.app.websocket_core.migration_adapter import get_legacy_websocket_manager
+# from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
+# from netra_backend.app.websocket_core.context import WebSocketContext
 
-from netra_backend.app.websocket_core.migration_adapter import (
-    get_legacy_websocket_manager,
-    migrate_singleton_usage
-)
-
-from netra_backend.app.websocket_core.user_context_extractor import (
-    UserContextExtractor,
-    get_user_context_extractor,
-    extract_websocket_user_context
-)
-
-# CRITICAL FIX: Import WebSocket context classes for proper request handling
-from netra_backend.app.websocket_core.context import (
-    WebSocketContext,
-    WebSocketRequestContext,
-)
-
-# ISSUE #1176 PHASE 2: Backward compatibility aliases (SSOT-compliant)
-# These provide compatibility without creating new import paths
+# ISSUE #1176 PHASE 2: Minimal backward compatibility aliases only
+# COORDINATION FIX: Reduce aliases to prevent import fragmentation
 WebSocketEventEmitter = UnifiedWebSocketEmitter
-IsolatedWebSocketEventEmitter = UnifiedWebSocketEmitter
-UserWebSocketEmitter = UnifiedWebSocketEmitter
 
-# 6. CANONICAL Handlers (SSOT) - Remove WebSocketManager export from handlers
-from netra_backend.app.websocket_core.handlers import (
-    MessageRouter,
-    UserMessageHandler,
-    get_message_router,
-)
+# COORDINATION FIX: Remove handler imports that create fragmentation
+# Use direct imports for handlers instead:
+# from netra_backend.app.websocket_core.handlers import MessageRouter
 
 # Auth imports removed - using SSOT unified_websocket_auth instead
 
-# 7. CANONICAL Types (SSOT) - No fallbacks, fail fast for coordination gaps
-from netra_backend.app.websocket_core.types import (
-    MessageType,
-    ConnectionInfo,
-    WebSocketMessage,
-    ServerMessage,
-    ErrorMessage,
-    WebSocketStats,
-    WebSocketConfig,
-    AuthInfo,
-    create_server_message,
-    create_error_message,
-)
+# COORDINATION FIX: Remove types imports that create fragmentation
+# Use direct imports for types instead:
+# from netra_backend.app.websocket_core.types import WebSocketMessage
 
-# Import JWT protocol handler functions for subprotocol negotiation (Issue #280 fix)
-try:
-    from netra_backend.app.websocket_core.unified_jwt_protocol_handler import (
-        extract_jwt_from_subprotocol,
-        negotiate_websocket_subprotocol,
-        extract_jwt_token,
-        normalize_jwt_token
-    )
-except ImportError:
-    # Fallback implementations for missing protocol handler
-    def extract_jwt_from_subprotocol(subprotocol_value):
-        return None
-    def negotiate_websocket_subprotocol(client_protocols):
-        return None
-    def extract_jwt_token(websocket):
-        return None
-    def normalize_jwt_token(jwt_token):
-        return jwt_token
+# COORDINATION FIX: Remove utility imports that create fragmentation
+# Use direct imports for utilities instead:
+# from netra_backend.app.websocket_core.unified_jwt_protocol_handler import extract_jwt_from_subprotocol
+# from netra_backend.app.websocket_core.rate_limiter import RateLimiter
+# from netra_backend.app.websocket_core.utils import WebSocketHeartbeat
 
-# Import RateLimiter for backward compatibility
-try:
-    from netra_backend.app.websocket_core.rate_limiter import RateLimiter, WebSocketRateLimiter
-except ImportError:
-    # If rate_limiter module fails, try importing from auth
-    try:
-        from netra_backend.app.websocket_core.auth import RateLimiter
-        WebSocketRateLimiter = None
-    except ImportError:
-        RateLimiter = None
-        WebSocketRateLimiter = None
-
-# Import utility functions and classes
-try:
-    from netra_backend.app.websocket_core.utils import (
-        WebSocketHeartbeat,
-        get_connection_monitor,
-        safe_websocket_send,
-        safe_websocket_close,
-        is_websocket_connected,
-        is_websocket_connected_and_ready,
-        validate_websocket_handshake_completion,
-        create_race_condition_detector,
-        create_handshake_coordinator,
-        validate_connection_with_race_detection,
-    )
-except ImportError:
-    # Fallback implementations
-    WebSocketHeartbeat = None
-    get_connection_monitor = None
-    safe_websocket_send = None
-    safe_websocket_close = None
-    is_websocket_connected = None
-    is_websocket_connected_and_ready = None
-    validate_websocket_handshake_completion = None
-    create_race_condition_detector = None
-    create_handshake_coordinator = None
-    validate_connection_with_race_detection = None
-
-# Import new connection state machine and message queue components
-# CRITICAL FIX: Remove fallback behavior that causes 1011 errors
-# Setting critical functions to None causes runtime failures in staging
-try:
-    from netra_backend.app.websocket_core.connection_state_machine import (
-        ApplicationConnectionState,
-        ConnectionStateMachine,
-        ApplicationConnectionStateMachine,
-        ConnectionStateMachineRegistry,
-        StateTransitionInfo,
-        get_connection_state_registry,
-        get_connection_state_machine,
-        is_connection_ready_for_messages,
-    )
-except ImportError as e:
-    # FAIL FAST: Never set critical WebSocket functions to None
-    # This was causing WebSocket 1011 internal server errors in staging
-    raise ImportError(
-        f"CRITICAL: WebSocket state machine import failed: {e}. "
-        f"This will cause 1011 WebSocket errors. Fix import dependencies immediately. "
-        f"See WEBSOCKET_1011_FIVE_WHYS_ANALYSIS_20250909_NIGHT.md for details."
-    ) from e
-
-try:
-    from netra_backend.app.websocket_core.message_queue import (
-        MessageQueue,
-        MessageQueueRegistry, 
-        MessagePriority,
-        MessageQueueState,
-        QueuedMessage,
-        get_message_queue_registry,
-        get_message_queue_for_connection,
-    )
-except ImportError as e:
-    # FAIL FAST: Message queue components are critical for WebSocket reliability
-    raise ImportError(
-        f"CRITICAL: WebSocket message queue import failed: {e}. "
-        f"This may cause message delivery failures and WebSocket instability. "
-        f"Fix import dependencies immediately."
-    ) from e
-
-# Import race condition prevention components
-try:
-    from netra_backend.app.websocket_core.race_condition_prevention import (
-        ApplicationConnectionState as RaceConditionApplicationConnectionState,
-        RaceConditionPattern,
-        RaceConditionDetector,
-        HandshakeCoordinator,
-    )
-except ImportError as e:
-    # FAIL FAST: Race condition prevention is critical for WebSocket stability
-    raise ImportError(
-        f"CRITICAL: WebSocket race condition prevention import failed: {e}. "
-        f"This may cause WebSocket handshake failures and connection instability. "
-        f"Fix import dependencies immediately."
-    ) from e
+# COORDINATION FIX: Remove state machine and queue imports that create fragmentation
+# Use direct imports for these critical components instead:
+# from netra_backend.app.websocket_core.connection_state_machine import ConnectionStateMachine
+# from netra_backend.app.websocket_core.message_queue import MessageQueue
+# from netra_backend.app.websocket_core.race_condition_prevention import RaceConditionDetector
 
 # Critical events that MUST be preserved
 CRITICAL_EVENTS = UnifiedWebSocketEmitter.CRITICAL_EVENTS
@@ -369,15 +240,20 @@ __all__ = [
     # Backward compatibility only - prefer direct imports
     "create_websocket_manager",
 
+    # Backward compatibility alias (minimal)
+    "WebSocketEventEmitter",
+
+    # Constants
+    "CRITICAL_EVENTS",
+
     # NOTE: All other exports removed to eliminate import path fragmentation
     # COORDINATION FIX: Use direct imports for all other components:
     # from netra_backend.app.websocket_core.handlers import MessageRouter
     # from netra_backend.app.websocket_core.auth import WebSocketAuthenticator
     # from netra_backend.app.websocket_core.types import WebSocketMessage
+    # from netra_backend.app.websocket_core.utils import WebSocketHeartbeat
+    # from netra_backend.app.websocket_core.connection_state_machine import ConnectionStateMachine
     # etc.
-
-    # Constants
-    "CRITICAL_EVENTS",
 ]
 
 

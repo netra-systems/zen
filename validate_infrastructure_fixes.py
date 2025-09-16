@@ -60,7 +60,7 @@ class InfrastructureFixValidator:
             current_time = datetime.now(timezone.utc)
             
             # Import WebSocket modules to check they don't use deprecated datetime calls
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
             from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
             
             self.log_result(
