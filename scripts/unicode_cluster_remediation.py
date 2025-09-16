@@ -63,7 +63,7 @@ UNICODE_REPLACEMENTS = {
     # Quotes and punctuation (these can cause encoding issues)
     '"': '"',              # Left double quote
     '"': '"',              # Right double quote
-    ''''''': "'",              # Right single quote
+    "'": "'",              # Right single quote
     '...': '...',            # Ellipsis
     '-': '-',              # En dash
     '--': '--',             # Em dash
