@@ -122,6 +122,12 @@ jobs:
           echo "🔧 Validating environment configurations..."
           python scripts/validate_configs.py --env staging
           
+      # Infrastructure Validation (Issues #1263, #1278, P0 fixes)
+      - name: Validate Infrastructure Requirements
+        run: |
+          echo "🏗️ Running comprehensive infrastructure validation..."
+          python scripts/validate_deployment_infrastructure.py --env staging --check-all
+          
       # Database Migration Check
       - name: Check Pending Migrations
         run: |
@@ -232,8 +238,8 @@ jobs:
       - name: Build frontend
         working-directory: ./frontend
         env:
-          NEXT_PUBLIC_API_URL: https://api-staging.netra.app
-          NEXT_PUBLIC_WS_URL: wss://api-staging.netra.app
+          NEXT_PUBLIC_API_URL: https://staging.netrasystems.ai
+          NEXT_PUBLIC_WS_URL: wss://api-staging.netrasystems.ai
           NEXT_PUBLIC_ENV: staging
         run: |
           npm run build
@@ -322,7 +328,7 @@ jobs:
     timeout-minutes: 15
     environment:
       name: staging
-      url: https://api-staging.netra.app
+      url: https://staging.netrasystems.ai
       
     steps:
       - uses: actions/checkout@v4
@@ -399,7 +405,7 @@ jobs:
     timeout-minutes: 15
     environment:
       name: staging
-      url: https://staging.netra.app
+      url: https://staging.netrasystems.ai
       
     steps:
       - uses: actions/checkout@v4
@@ -452,7 +458,7 @@ jobs:
         run: |
           echo "Checking backend health..."
           for i in {1..30}; do
-            if curl -s https://api-staging.netra.app/health | grep -q "healthy"; then
+            if curl -s https://staging.netrasystems.ai/health | grep -q "healthy"; then
               echo "✅ Backend is healthy"
               break
             fi
@@ -464,7 +470,7 @@ jobs:
         run: |
           echo "Checking frontend health..."
           for i in {1..30}; do
-            if curl -s https://staging.netra.app | grep -q "<!DOCTYPE html>"; then
+            if curl -s https://staging.netrasystems.ai | grep -q "<!DOCTYPE html>"; then
               echo "✅ Frontend is responding"
               break
             fi
@@ -482,9 +488,9 @@ jobs:
           echo "## 🚀 Staging Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Deployed Services" >> $GITHUB_STEP_SUMMARY
-          echo "- Backend: https://api-staging.netra.app ✅" >> $GITHUB_STEP_SUMMARY
-          echo "- Auth Service: https://auth-staging.netra.app ✅" >> $GITHUB_STEP_SUMMARY
-          echo "- Frontend: https://staging.netra.app ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Backend: https://staging.netrasystems.ai ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Auth Service: https://auth.netrasystems.ai ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Frontend: https://staging.netrasystems.ai ✅" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Deployment Details" >> $GITHUB_STEP_SUMMARY
           echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
@@ -524,5 +530,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `${emoji} Staging ${status}!\n\nView at: https://staging.netra.app`
+              body: `${emoji} Staging ${status}!\n\nView at: https://staging.netrasystems.ai`
             });

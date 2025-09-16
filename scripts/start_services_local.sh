@@ -5,7 +5,7 @@
 
 set -e  # Exit on any error
 
-PROJECT_ROOT="/Users/anthony/Documents/GitHub/netra-apex"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VENV_PATH="$PROJECT_ROOT/venv"
 
 echo "🚀 Starting Local Services for Integration Testing"

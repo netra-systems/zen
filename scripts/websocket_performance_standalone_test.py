@@ -15,7 +15,9 @@ from typing import Dict, List, Any
 from unittest.mock import AsyncMock, MagicMock
 
 # Add the project root to the path
-sys.path.insert(0, '/Users/anthony/Documents/GitHub/netra-apex')
+import os
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.websocket_core.message_buffer import BufferConfig, BufferedMessage, BufferPriority

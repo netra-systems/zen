@@ -36,7 +36,9 @@ print(f"Project: {os.environ.get('GOOGLE_CLOUD_PROJECT')}")
 
 # Now import
 import sys
-sys.path.insert(0, '/Users/anthony/Documents/GitHub/netra-apex')
+import os
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 from netra_backend.app.websocket_core.unified_websocket_auth import extract_e2e_context_from_websocket
 
 # Mock WebSocket
@@ -65,7 +67,8 @@ else:
 ]
 
 print("Running fresh security test...")
-result = subprocess.run(cmd, capture_output=True, text=True, cwd='/Users/anthony/Documents/GitHub/netra-apex')
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+result = subprocess.run(cmd, capture_output=True, text=True, cwd=project_root)
 print("STDOUT:")
 print(result.stdout)
 if result.stderr:

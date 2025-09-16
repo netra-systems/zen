@@ -8,7 +8,8 @@ import sys
 import os
 
 # Add the project root to sys.path
-sys.path.insert(0, '/Users/anthony/Documents/GitHub/netra-apex')
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 
 from unittest.mock import Mock, AsyncMock
 from netra_backend.app.agents.supervisor.agent_registry import UserAgentSession, AgentLifecycleManager
