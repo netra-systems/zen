@@ -19,12 +19,12 @@ Coverage: Issue #872 - Supervisor Agent Multi-User Orchestration
 """
 
 # Import test classes for discovery
-from .test_supervisor_multi_user_isolation import TestSupervisorMultiUserIsolation
-from .test_agent_handoff_chain_validation import TestAgentHandoffChainValidation
-from .test_websocket_agent_coordination import TestWebSocketAgentCoordination
+from .test_supervisor_multi_user_isolation import SupervisorMultiUserIsolationTests
+from .test_agent_handoff_chain_validation import AgentHandoffChainValidationTests
+from .test_websocket_agent_coordination import WebSocketAgentCoordinationTests
 
 __all__ = [
-    "TestSupervisorMultiUserIsolation",
-    "TestAgentHandoffChainValidation", 
-    "TestWebSocketAgentCoordination"
+    "SupervisorMultiUserIsolationTests",
+    "AgentHandoffChainValidationTests",
+    "WebSocketAgentCoordinationTests"
 ]

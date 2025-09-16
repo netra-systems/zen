@@ -290,7 +290,7 @@ class WebSocketBridgeBypassDetectionTests(SSotBaseTestCase):
                 f"🔧 BRIDGE PATTERN REMEDIATION GUIDE:",
                 f"",
                 f"1. Remove direct WebSocket imports:",
-                f"   ❌ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+                f"   ❌ from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
                 f"   ✅ # No direct WebSocket imports needed in agents",
                 f"",
                 f"2. Use AgentRegistry bridge pattern:",

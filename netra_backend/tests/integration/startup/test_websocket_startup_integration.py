@@ -46,7 +46,7 @@ class WebSocketStartupIntegrationTests(WebSocketIntegrationTest):
         - Event delivery for business value transparency
         - Connection health monitoring for reliability
         """
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         from shared.isolated_environment import get_env
         env = get_env()
         env.set('TESTING', '1', source='test_websocket_manager')

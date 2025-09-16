@@ -43,7 +43,7 @@ def validate_phase1_completion():
 
     # Test 1.2: SSOT implementation exists
     try:
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
         print("[PASS] 1.2 UnifiedWebSocketManager SSOT implementation available")
     except ImportError as e:
         print(f"[FAIL] 1.2 SSOT implementation missing: {e}")
@@ -51,7 +51,7 @@ def validate_phase1_completion():
 
     # Test 1.3: Canonical import path works
     try:
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         print("[PASS] 1.3 Canonical import path functional")
     except ImportError as e:
         print(f"[FAIL] 1.3 Canonical import broken: {e}")
@@ -77,8 +77,8 @@ def validate_phase1_completion():
     # Test 2.2: All import paths resolve to same SSOT
     try:
         from netra_backend.app.websocket_core import WebSocketManager as Legacy
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as Canonical
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as SSOT
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as Canonical
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as SSOT
 
         if Legacy == Canonical == SSOT:
             print("[PASS] 2.2 All import paths resolve to same SSOT implementation")
@@ -143,8 +143,8 @@ def validate_phase1_completion():
     # Test 4.1: No blocking import cycles
     try:
         # Import all major components to check for cycles
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
         from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
         from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
         print("[PASS] 4.1 No blocking import cycles detected")
@@ -154,7 +154,7 @@ def validate_phase1_completion():
 
     # Test 4.2: Critical methods available in SSOT implementation
     try:
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
         critical_methods = [
             'get_connection_id_by_websocket',  # Five Whys critical method

@@ -1,5 +1,5 @@
 # Shim module for backward compatibility
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 StateSynchronizationManager = WebSocketManager
 
 # Create a stub sync_state function for backward compatibility

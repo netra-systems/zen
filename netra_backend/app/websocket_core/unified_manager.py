@@ -168,7 +168,7 @@ class _UnifiedWebSocketManagerImplementation:
         """
         # Import registry functions (avoid circular imports)
         try:
-            from netra_backend.app.websocket_core.websocket_manager import (
+            from netra_backend.app.websocket_core.canonical_import_patterns import (
                 _get_user_key, _USER_MANAGER_REGISTRY, _REGISTRY_LOCK
             )
             
@@ -352,7 +352,7 @@ class _UnifiedWebSocketManagerImplementation:
 
         # ISSUE #889 REMEDIATION: Register this instance in the user-scoped registry
         try:
-            from netra_backend.app.websocket_core.websocket_manager import (
+            from netra_backend.app.websocket_core.canonical_import_patterns import (
                 _get_user_key, _USER_MANAGER_REGISTRY
             )
             
@@ -4279,7 +4279,7 @@ class _UnifiedWebSocketManagerImplementation:
 #
 # This module now contains the implementation but does NOT export classes directly.
 # All imports must go through the canonical SSOT path:
-# from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+# from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 #
 # This prevents fragmented import paths and enforces SSOT compliance.
 
@@ -4303,7 +4303,7 @@ if __name__ not in sys.modules:
         logger = get_logger(__name__)
         logger.warning(
             "SSOT CONSOLIDATION (Issue #824): Direct imports from unified_manager.py are deprecated. "
-            "Use canonical path: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager"
+            "Use canonical path: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager"
         )
     except ImportError:
         # Fallback logging if logging import fails

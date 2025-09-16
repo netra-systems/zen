@@ -30,7 +30,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from dataclasses import dataclass
 import psutil
 import os
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 from netra_backend.app.logging_config import central_logger
 
@@ -160,7 +160,7 @@ class WebSocketManagerPerformanceStabilityTests(SSotAsyncTestCase):
 
         # Test 2: Direct manager creation
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             def create_direct():
                 return get_websocket_manager(user_context=getattr(self, 'user_context', None))
@@ -298,7 +298,7 @@ class WebSocketManagerPerformanceStabilityTests(SSotAsyncTestCase):
 
         # Test concurrent access to existing managers
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Create a single manager and test concurrent access
             try:
@@ -404,7 +404,7 @@ class WebSocketManagerPerformanceStabilityTests(SSotAsyncTestCase):
 
         # Test 2: Direct managers
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             def create_multiple_direct_managers():
                 managers = []
@@ -512,7 +512,7 @@ class WebSocketManagerPerformanceStabilityTests(SSotAsyncTestCase):
             stability_violations.append(f"Factory manager unavailable: {e}")
             
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             direct_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             managers_to_test.append(('Direct', direct_manager, False))
         except Exception as e:

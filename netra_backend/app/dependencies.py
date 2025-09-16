@@ -13,7 +13,7 @@ from netra_backend.app.database import get_db
 from netra_backend.app.llm.client_unified import ResilientLLMClient
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.security_service import SecurityService
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 # CRITICAL: Import for proper session lifecycle management
 from contextlib import asynccontextmanager
@@ -39,7 +39,8 @@ from netra_backend.app.agents.supervisor.execution_engine_factory import (
     ExecutionEngineFactory,  # SSOT implementation
     configure_execution_engine_factory,
     get_execution_engine_factory,
-    user_execution_engine
+    user_execution_engine,
+    _factory_manager  # Import manager for Phase 2A SSOT consolidation
 )
 # SSOT COMPLIANCE: Use standard UserExecutionContext (no duplicate imports)
 # ExecutionFactoryConfig and FactoryUserExecutionContext aliases removed - use SSOT patterns
@@ -1192,15 +1193,23 @@ async def get_factory_adapter_dependency(request: Request):
 FactoryAdapterDep = Annotated[Any, Depends(get_factory_adapter_dependency)]
 
 async def get_execution_engine_factory_dependency(request: Request):
-    """Get ExecutionEngineFactory from app state."""
-    if not hasattr(request.app.state, 'execution_engine_factory'):
+    """Get ExecutionEngineFactory using SSOT factory manager pattern.
+
+    PHASE 2A CONSOLIDATION: Uses the SSOT factory manager instead of app state
+    to prevent factory duplication violations.
+    """
+    try:
+        # PHASE 2A FIX: Use SSOT factory manager instead of app state
+        return await get_execution_engine_factory("request_dependency")
+    except Exception as e:
+        logger.error(f"Failed to get ExecutionEngineFactory via SSOT manager: {e}")
         raise HTTPException(
             status_code=500,
-            detail="ExecutionEngineFactory not initialized - startup failure"
+            detail=f"ExecutionEngineFactory not available via SSOT manager: {str(e)}"
         )
-    return request.app.state.execution_engine_factory
 
-ExecutionEngineFactoryDep = Annotated[Any, Depends(get_execution_engine_factory_dependency)]
+# PHASE 2A CONSOLIDATION: Keep dependency annotation for backward compatibility
+ExecutionEngineFactoryDep = Annotated[ExecutionEngineFactory, Depends(get_execution_engine_factory_dependency)]
 
 async def get_agent_instance_factory_dependency(
     request: Request,
@@ -1637,31 +1646,40 @@ async def get_isolated_message_handler_service(user_id: str,
 
 # === Factory Pattern Dependencies ===
 
-def get_execution_engine_factory(request: Request) -> ExecutionEngineFactory:
-    """Get ExecutionEngineFactory from app state.
-    
-    The factory should be initialized during app startup and configured
-    with infrastructure components (agent_registry, websocket_bridge_factory, db_pool).
-    
+def get_execution_engine_factory_from_request(request: Request) -> ExecutionEngineFactory:
+    """Get ExecutionEngineFactory using SSOT factory manager - compatibility wrapper.
+
+    PHASE 2A CONSOLIDATION: Renamed to avoid conflicts with SSOT get_execution_engine_factory.
+    This maintains backward compatibility while using the SSOT pattern.
+
     Returns:
-        ExecutionEngineFactory: Configured factory for creating isolated execution engines
-        
+        ExecutionEngineFactory: SSOT-managed factory instance
+
     Raises:
-        HTTPException: If factory not configured
+        HTTPException: If factory not available via SSOT manager
     """
     try:
-        factory = getattr(request.app.state, 'execution_engine_factory', None)
-        if not factory:
-            logger.error("ExecutionEngineFactory not found in app state - ensure it's configured during startup")
-            raise HTTPException(
-                status_code=500,
-                detail="ExecutionEngineFactory unavailable (startup initialization failed or configuration invalid)"
-            )
-        
-        return factory
-        
+        # PHASE 2A FIX: Use SSOT factory manager asynchronously
+        import asyncio
+        if asyncio.iscoroutinefunction(get_execution_engine_factory):
+            # In async context, need to handle this differently
+            # For now, try to get from app state as fallback, but log the SSOT violation
+            factory = getattr(request.app.state, 'execution_engine_factory', None)
+            if factory:
+                logger.warning("PHASE 2A PARTIAL: Using app state factory - should migrate to SSOT async pattern")
+                return factory
+            else:
+                logger.error("PHASE 2A CRITICAL: No factory available via app state or SSOT manager")
+                raise HTTPException(
+                    status_code=500,
+                    detail="ExecutionEngineFactory not available - SSOT manager requires async context"
+                )
+        else:
+            # Synchronous SSOT access
+            return get_execution_engine_factory("sync_request_context")
+
     except Exception as e:
-        logger.error(f"Failed to get ExecutionEngineFactory: {e}")
+        logger.error(f"Failed to get ExecutionEngineFactory via SSOT manager: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"ExecutionEngineFactory error: {str(e)}"
@@ -1932,7 +1950,8 @@ async def get_adaptive_websocket_bridge(
 
 
 # Type aliases for dependency injection
-ExecutionEngineFactoryDep = Annotated[ExecutionEngineFactory, Depends(get_execution_engine_factory)]
+# PHASE 2A CONSOLIDATION: ExecutionEngineFactoryDep already defined above (line 1212)
+# Duplicate removed to prevent SSOT violations
 WebSocketBridgeFactoryDep = Annotated[WebSocketBridgeFactory, Depends(get_websocket_bridge_factory)]
 FactoryAdapterDep = Annotated[FactoryAdapter, Depends(get_factory_adapter)]
 
@@ -2042,24 +2061,21 @@ async def shutdown_session_manager_app(app) -> None:
         # Don't raise exception during shutdown
 
 
-def configure_factory_dependencies(app) -> None:
+async def configure_factory_dependencies(app) -> None:
     """Configure factory pattern dependencies during app startup.
-    
-    This function should be called during FastAPI startup to initialize
-    all factory pattern components and configure them properly.
-    
+
+    PHASE 2A SSOT CONSOLIDATION: Use factory manager pattern instead of creating new instances.
+    This prevents duplicate factory creation that violates SSOT principles.
+
     Args:
         app: FastAPI application instance
     """
     try:
-        logger.info("[U+1F3ED] Configuring factory pattern dependencies...")
-        
-        # SSOT FACTORY: Create ExecutionEngineFactory with SSOT constructor pattern
-        execution_factory = ExecutionEngineFactory(
-            websocket_bridge=None,  # Will be configured via configure_execution_engine_factory
-            database_session_manager=None,
-            redis_manager=None
-        )
+        logger.info("[U+1F3ED] Configuring factory pattern dependencies with SSOT factory manager...")
+
+        # PHASE 2A FIX: Use SSOT factory manager instead of creating new instance
+        # This prevents factory duplication violations (Issue #1196)
+        execution_factory = await get_execution_engine_factory("default_app_startup")
         
         # Create WebSocketBridgeFactory
         websocket_factory_config = WebSocketFactoryConfig.from_env()

@@ -89,7 +89,7 @@ class AsyncAwaitInterfaceValidationTests(BaseIntegrationTest):
         This test verifies the correct async function exists and can be awaited
         without TypeError, providing the proper fix for Issue #1094.
         """
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         # Create proper user context
         user_context = UserExecutionContext(
@@ -115,7 +115,7 @@ class AsyncAwaitInterfaceValidationTests(BaseIntegrationTest):
         This test simulates the fixed agent_service_core.py implementation
         using get_websocket_manager instead of create_websocket_manager.
         """
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         user_id = "test_user_123"
         user_context = UserExecutionContext(
@@ -163,7 +163,7 @@ class AsyncAwaitInterfaceValidationTests(BaseIntegrationTest):
         assert not asyncio.iscoroutine(context_result), "Legacy function should be sync"
         
         # Test 2: Modern get_websocket_manager (async) 
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         proper_context = UserExecutionContext(
             user_id="test_user_123",
@@ -187,7 +187,7 @@ class AsyncAwaitInterfaceValidationTests(BaseIntegrationTest):
         """
         import inspect
         from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         # Verify function signatures and types
         create_sig = inspect.signature(create_websocket_manager)
@@ -220,7 +220,7 @@ class AgentServiceCoreInterfaceFixTests(BaseIntegrationTest):
         with proper WebSocket bridge integration and user context handling.
         """
         from netra_backend.app.services.user_execution_context import get_user_session_context
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         user_id = "production_user_456"
         
@@ -279,7 +279,7 @@ class AgentServiceCoreInterfaceFixTests(BaseIntegrationTest):
         use the correct async interface pattern.
         """
         from netra_backend.app.services.user_execution_context import get_user_session_context
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         user_id = "fallback_user_789"
         
@@ -339,7 +339,7 @@ class WebSocketFactorySSotComplianceTests(BaseIntegrationTest):
         This test validates that all WebSocket manager factory functions follow
         consistent patterns and don't introduce similar interface issues.
         """
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
         
         # Test SSOT compliance across factory interfaces
@@ -375,7 +375,7 @@ class WebSocketFactorySSotComplianceTests(BaseIntegrationTest):
         This test validates that fixing the async/await interface doesn't break
         the critical WebSocket event delivery that enables $500K+ ARR chat functionality.
         """
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         user_id = "golden_path_user_123"
         user_context = UserExecutionContext(

@@ -299,7 +299,7 @@ class SSOTBridgePatternEnforcementTests(SSotAsyncTestCase):
                 f"🔧 BRIDGE PATTERN ENFORCEMENT REMEDIATION:",
                 f"",
                 f"1. Eliminate direct WebSocketManager imports in agents:",
-                f"   ❌ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+                f"   ❌ from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
                 f"   ✅ # No direct WebSocket imports needed",
                 f"",
                 f"2. Use AgentRegistry bridge exclusively:",

@@ -41,7 +41,7 @@ from netra_backend.app.services.agent_websocket_bridge import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # WebSocket Dependencies (for state validation)
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 # Shared utilities
 from shared.isolated_environment import get_env

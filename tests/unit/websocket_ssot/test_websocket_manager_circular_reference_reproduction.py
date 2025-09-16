@@ -100,7 +100,7 @@ class WebSocketManagerCircularReferenceReproductionTests(SSotBaseTestCase):
 
             # Patch get_websocket_manager to track calls if it gets imported
             try:
-                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                 original_get_websocket_manager = get_websocket_manager
 
                 # Apply tracking wrapper

@@ -90,6 +90,32 @@ __all__ = [
     'SSOT_INFO'
 ]
 
+# PHASE 1 INTERFACE VALIDATION
+# Verify that both interfaces are available
+def _validate_dual_interface():
+    """Validate that both add_handler and register_handler are available"""
+    router = CanonicalMessageRouter()
+
+    # Check for modern interface
+    assert hasattr(router, 'add_handler'), "Modern add_handler interface missing"
+
+    # Check for legacy interface
+    assert hasattr(router, 'register_handler'), "Legacy register_handler interface missing"
+
+    # Check for supporting methods
+    assert hasattr(router, 'remove_handler'), "remove_handler method missing"
+    assert hasattr(router, 'get_handlers'), "get_handlers method missing"
+    assert hasattr(router, 'execute_handlers'), "execute_handlers method missing"
+
+    return True
+
+# Run validation on import
+try:
+    _validate_dual_interface()
+    INTERFACE_VALIDATION_STATUS = "PASSED"
+except Exception as e:
+    INTERFACE_VALIDATION_STATUS = f"FAILED: {e}"
+
 # SSOT compatibility information
 COMPATIBILITY_INFO = {
     'status': 'deprecated',

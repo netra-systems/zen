@@ -31,7 +31,7 @@ import pytest
 import asyncio
 from typing import Dict, Any
 import json
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.redis_manager import redis_manager
 from shared.isolated_environment import IsolatedEnvironment
 from fastapi.testclient import TestClient

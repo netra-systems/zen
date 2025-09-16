@@ -46,7 +46,7 @@ from netra_backend.app.websocket_core.types import (
     ConnectionInfo,
     create_standard_message
 )
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuth
 
 
@@ -162,7 +162,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
         
         # Initialize real WebSocket manager for testing
         from netra_backend.app.websocket_core.websocket_manager_factory import create_test_user_context
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerMode
         
         test_user_context = create_test_user_context()
         websocket_manager = UnifiedWebSocketManager(

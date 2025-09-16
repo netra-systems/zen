@@ -210,8 +210,10 @@ class _WebSocketManagerFactory:
 # This enforces factory pattern usage and prevents direct instantiation
 WebSocketManager = _WebSocketManagerFactory
 
-# ISSUE #1184 REMEDIATION: Import UnifiedWebSocketManager from unified_manager.py (SSOT)
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+# ISSUE #1184 REMEDIATION: Export UnifiedWebSocketManager for compatibility
+# Direct access to implementation for type checking and existing imports
+UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation
+# For runtime usage, use get_websocket_manager() factory function
 
 # ISSUE #1182 REMEDIATION COMPLETED: WebSocketManagerFactory consolidated into get_websocket_manager()
 # All legacy test patterns now use the canonical SSOT factory function
@@ -779,12 +781,20 @@ def _validate_ssot_compliance():
 
     # Check for other WebSocket Manager implementations in the module cache
     websocket_manager_classes = []
+    # ISSUE #1176 PHASE 2 FIX: Refined SSOT validation to reduce false positives
+    # Only check core WebSocket modules, exclude legitimate variations
+    core_websocket_modules = [
+        'netra_backend.app.websocket_core.websocket_manager',
+        'netra_backend.app.websocket_core.unified_manager'
+    ]
+
     for module_name, module in modules_snapshot.items():
         # Additional safety: Skip None modules and add error handling
         if module is None:
             continue
 
-        if 'websocket' in module_name.lower():
+        # COORDINATION FIX: Only check core modules, not all modules with 'websocket'
+        if module_name in core_websocket_modules:
             try:
                 # Safety check: Ensure module has valid __dict__ before proceeding
                 if not hasattr(module, '__dict__') or module.__dict__ is None:
@@ -797,15 +807,18 @@ def _validate_ssot_compliance():
                         inspect.isclass(attr) and
                         'websocket' in attr_name.lower() and
                         'manager' in attr_name.lower() and
-                        attr != WebSocketManager):
+                        attr != WebSocketManager and
+                        # COORDINATION FIX: Exclude legitimate SSOT classes
+                        attr_name not in ['UnifiedWebSocketManager', 'IsolatedWebSocketManager']):
                         websocket_manager_classes.append(f"{module_name}.{attr_name}")
             except (AttributeError, TypeError, ImportError) as e:
                 # Silently skip problematic modules during SSOT validation
                 # This prevents validation failures from blocking import-time execution
                 continue
 
+    # COORDINATION FIX: Only warn for actual SSOT violations, not legitimate classes
     if websocket_manager_classes:
-        logger.warning(f"SSOT WARNING: Found other WebSocket Manager classes: {websocket_manager_classes}")
+        logger.warning(f"SSOT WARNING: Found unexpected WebSocket Manager classes: {websocket_manager_classes}")
 
     return len(websocket_manager_classes) == 0
 

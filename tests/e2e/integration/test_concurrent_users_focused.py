@@ -26,7 +26,7 @@ import pytest
 import time
 from shared.isolated_environment import IsolatedEnvironment
 
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 from tests.e2e.concurrent_user_models import IsolationValidator
 from tests.e2e.concurrent_user_simulators import (
     ConcurrentUserSimulator,

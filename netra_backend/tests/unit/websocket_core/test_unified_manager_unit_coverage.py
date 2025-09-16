@@ -27,7 +27,7 @@ from enum import Enum
 from unittest.mock import Mock, AsyncMock
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection, WebSocketManagerMode, _serialize_message_safely, _get_enum_key_representation
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection, WebSocketManagerMode, _serialize_message_safely, _get_enum_key_representation
 from shared.types.core_types import UserID, ensure_user_id
 
 class MockWebSocketManagerMode(Enum):

@@ -46,7 +46,7 @@ except ImportError as e:
     pytest.skip(f"Execution engine factory not available: {e}", allow_module_level=True)
 
 try:
-    from netra_backend.app.websocket_core.websocket_manager import (
+    from netra_backend.app.websocket_core.canonical_import_patterns import (
         WebSocketManager,
         _WebSocketManagerFactory,
         create_test_fallback_manager

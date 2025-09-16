@@ -49,7 +49,7 @@ if project_root not in sys.path:
 from loguru import logger
 from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuthenticator, WebSocketAuthResult, get_websocket_authenticator
 from netra_backend.app.clients.auth_client_core import AuthServiceClient, auth_client, AuthOperationType
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from shared.isolated_environment import get_env, IsolatedEnvironment
 from test_framework.test_context import TestContext, create_test_context

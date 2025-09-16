@@ -9,7 +9,7 @@ from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from shared.isolated_environment import IsolatedEnvironment

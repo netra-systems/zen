@@ -15,7 +15,7 @@ from netra_backend.app.services.service_interfaces import IMessageHandlerService
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 import json
 
 from netra_backend.app.schemas.registry import (
@@ -66,7 +66,7 @@ from netra_backend.app.services.message_processing import (
     send_response_safely as _send_response_safely,
 )
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)

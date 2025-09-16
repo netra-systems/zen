@@ -46,7 +46,7 @@ from loguru import logger
 try:
     from shared.isolated_environment import get_env, IsolatedEnvironment
     from test_framework.unified_docker_manager import UnifiedDockerManager
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
     from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
     from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
     from netra_backend.app.core.registry.universal_registry import AgentRegistry

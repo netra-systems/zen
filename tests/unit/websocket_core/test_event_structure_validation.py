@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any
 from unittest.mock import AsyncMock, MagicMock
 
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.canonical_import_patterns import (
     WebSocketManager,
     get_websocket_manager,
     WebSocketManagerMode

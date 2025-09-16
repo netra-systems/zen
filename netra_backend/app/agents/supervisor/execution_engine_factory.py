@@ -339,7 +339,7 @@ class ExecutionEngineFactory:
                 )
 
                 # COMPATIBILITY FIX: Create test fallback manager for test environments
-                from netra_backend.app.websocket_core.websocket_manager import create_test_fallback_manager
+                from netra_backend.app.websocket_core.canonical_import_patterns import create_test_fallback_manager
                 test_manager = create_test_fallback_manager(context)
 
                 emitter = UnifiedWebSocketEmitter(

@@ -19,7 +19,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.websocket import WebSocketTestUtility
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.unified_websocket_auth import WebSocketAuthenticator
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 from netra_backend.app.models import User, Thread

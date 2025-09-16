@@ -18,7 +18,7 @@ with warnings.catch_warnings(record=True) as w:
     print("Testing legitimate imports...")
     
     # Specific module imports - these should be SAFE
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     print("✓ Import from websocket_manager: NO WARNING expected")
     
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter

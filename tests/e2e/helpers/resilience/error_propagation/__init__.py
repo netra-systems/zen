@@ -51,7 +51,7 @@ from tests.e2e.helpers.resilience.error_propagation.user_message_helpers import 
 )
 
 # Main test class for pytest integration
-from tests.e2e.helpers.resilience.error_propagation.test_suite import TestRealErrorPropagation
+from tests.e2e.helpers.resilience.error_propagation.test_suite import RealErrorPropagationTests
 
 
 # Export all public symbols
@@ -83,7 +83,7 @@ __all__ = [
     'TimeoutPatternAnalyzer',
     
     # Test Suite
-    'TestRealErrorPropagation',
+    'RealErrorPropagationTests',
     
     # Utility Functions
     'run_real_error_propagation_validation',

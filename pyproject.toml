@@ -216,6 +216,7 @@ markers = [
     "ssot_violation: SSOT violation detection tests",
     "toolregistry: Tool registry tests",
     "docker_required: Tests that require Docker services",
+    "docker_infrastructure: Docker infrastructure validation tests",
     "no_docker: Tests that work without Docker",
     "skip_if_no_staging: Skip if staging environment not available",
     "documentation: Documentation and validation tests",
@@ -741,6 +742,7 @@ markers = [
     "issue_1278_reproduction: Issue #1278 reproduction tests for infrastructure problems",
     "database_connectivity: Database connectivity and timeout validation tests",
     "cloud_sql: Cloud SQL specific tests for capacity and performance validation",
+    "import_timing: Import timing and performance tests",
 ]
 
 # Coverage settings

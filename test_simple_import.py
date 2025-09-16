@@ -12,7 +12,7 @@ warnings.simplefilter('always')
 
 print("Testing specific module import (should NOT warn):")
 try:
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as SpecificManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as SpecificManager
     print("✅ Specific import succeeded without warnings")
 except Exception as e:
     print(f"❌ Specific import failed: {e}")

@@ -28,7 +28,7 @@ from unittest.mock import Mock, patch, MagicMock, AsyncMock
 from typing import Dict, Any, List, Optional
 
 # Import WebSocket core modules to test routing logic
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.connection_manager import ConnectionManager
 from netra_backend.app.websocket_core.message_queue import MessageQueue
 from netra_backend.app.websocket_core.types import (
@@ -41,7 +41,7 @@ from netra_backend.app.websocket_core.utils import (
 )
 
 # Import routing-related modules - SSOT after Issue #824
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.user_session_manager import UserSessionManager
 from netra_backend.app.websocket_core.batch_message_handler import BatchMessageHandler
 

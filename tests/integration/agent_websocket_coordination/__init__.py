@@ -73,16 +73,16 @@ __version__ = "1.0.0"
 __author__ = "Netra AI Platform Team"
 
 # Test file imports for easy access
-from .test_agent_factory_websocket_bridge_integration import TestAgentFactoryWebSocketBridgeIntegration
-from .test_user_execution_engine_websocket_integration import TestUserExecutionEngineWebSocketIntegration  
-from .test_agent_event_delivery_validation import TestAgentEventDeliveryValidation
-from .test_multi_user_agent_isolation import TestMultiUserAgentIsolation
-from .test_agent_execution_context_websocket_bridge import TestAgentExecutionContextWebSocketBridge
+from .test_agent_factory_websocket_bridge_integration import AgentFactoryWebSocketBridgeIntegrationTests
+from .test_user_execution_engine_websocket_integration import UserExecutionEngineWebSocketIntegrationTests
+from .test_agent_event_delivery_validation import AgentEventDeliveryValidationTests
+from .test_multi_user_agent_isolation import MultiUserAgentIsolationTests
+from .test_agent_execution_context_websocket_bridge import AgentExecutionContextWebSocketBridgeTests
 
 __all__ = [
-    "TestAgentFactoryWebSocketBridgeIntegration",
-    "TestUserExecutionEngineWebSocketIntegration", 
-    "TestAgentEventDeliveryValidation",
-    "TestMultiUserAgentIsolation",
-    "TestAgentExecutionContextWebSocketBridge"
+    "AgentFactoryWebSocketBridgeIntegrationTests",
+    "UserExecutionEngineWebSocketIntegrationTests",
+    "AgentEventDeliveryValidationTests",
+    "MultiUserAgentIsolationTests",
+    "AgentExecutionContextWebSocketBridgeTests"
 ]

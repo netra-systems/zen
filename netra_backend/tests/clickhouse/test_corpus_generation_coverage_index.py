@@ -18,15 +18,15 @@ BatchProcessingTests as TestBatchProcessing,
 ContentGenerationTests as TestContentGeneration,
 )
 from netra_backend.tests.clickhouse.test_corpus_lifecycle import (
-TestCorpusLifecycle,
-TestWorkloadTypesCoverage,
+CorpusLifecycleTests as TestCorpusLifecycle,
+WorkloadTypesCoverageTests as TestWorkloadTypesCoverage,
 )
 from netra_backend.tests.test_corpus_metadata import (
-TestMetadataTracking,
+MetadataTrackingTests as TestMetadataTracking,
 )
 from netra_backend.tests.test_corpus_validation import (
-TestCorpusCloning,
-TestValidationAndSafety,
+CorpusCloningTests as TestCorpusCloning,
+ValidationAndSafetyTests as TestValidationAndSafety,
 )
 
 # Re-export for backward compatibility

@@ -1,9 +1,9 @@
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 '\nE2E Authentication Flow Tests - Phase 2 Unified System Testing - REAL SERVICES ONLY\n\nBusiness Value Justification (BVJ):\n- Segment: All tiers (Free, Early, Mid, Enterprise)\n- Business Goal: Prevent $100K+ MRR loss from authentication failures\n- Value Impact: Ensures 99.9% successful login-to-chat flow completion\n- Revenue Impact: Protects user activation funnel worth $2M+ ARR\n\nTest cases protect critical authentication flows that enable revenue generation.\nThese tests use REAL authentication services and WebSocket connections.\nNO MOCKING ALLOWED - CLAUDE.md compliance mandatory.\n'
 import asyncio
 import json

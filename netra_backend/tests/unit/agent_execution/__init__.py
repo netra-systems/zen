@@ -23,10 +23,23 @@ from .test_circuit_breaker_logic import CircuitBreakerLogicTests
 from .test_phase_validation_rules import PhaseValidationRulesTests
 from .test_context_validation import ContextValidationTests
 
+# Provide Test* aliases for backward compatibility
+TestExecutionStateTransitions = ExecutionStateTransitionsTests
+TestTimeoutConfiguration = TimeoutConfigurationTests
+TestCircuitBreakerLogic = CircuitBreakerLogicTests
+TestPhaseValidationRules = PhaseValidationRulesTests
+TestContextValidation = ContextValidationTests
+
 __all__ = [
     'ExecutionStateTransitionsTests',
     'TimeoutConfigurationTests',
     'CircuitBreakerLogicTests',
     'PhaseValidationRulesTests',
-    'ContextValidationTests'
+    'ContextValidationTests',
+    # Backward compatibility aliases
+    'TestExecutionStateTransitions',
+    'TestTimeoutConfiguration',
+    'TestCircuitBreakerLogic',
+    'TestPhaseValidationRules',
+    'TestContextValidation'
 ]

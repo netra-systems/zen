@@ -1,5 +1,5 @@
 # Shim module for backward compatibility
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as ConnectionExecutor
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as ConnectionExecutor
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator  # SSOT Import for Phase 2 UUID violation remediation
 WebSocketManager = ConnectionExecutor  # Backward compatibility alias
 

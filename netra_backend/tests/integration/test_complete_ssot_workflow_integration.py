@@ -55,7 +55,7 @@ from netra_backend.app.core.configuration.base import (
 )
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.core.managers.unified_state_manager import (
     UnifiedStateManager,
     StateScope,

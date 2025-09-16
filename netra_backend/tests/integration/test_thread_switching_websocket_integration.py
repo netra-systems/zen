@@ -43,7 +43,7 @@ from shared.id_generation import UnifiedIdGenerator
 from netra_backend.app.schemas.core_models import Thread, Message, User
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.types import MessageType, WebSocketConnectionState
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 from test_framework.websocket_helpers import WebSocketTestClient, assert_websocket_events_sent, WebSocketTestHelpers, MockWebSocket
 

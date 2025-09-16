@@ -34,7 +34,7 @@ def validate_compatibility_layer():
     # Test 2: Canonical import pattern works
     total_tests += 1
     try:
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CanonicalWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as CanonicalWebSocketManager
         print("[PASS] Test 2: Canonical import pattern works")
         tests_passed += 1
     except ImportError as e:
@@ -54,8 +54,8 @@ def validate_compatibility_layer():
         total_tests += 1
         try:
             from netra_backend.app.websocket_core import WebSocketManager as LegacyManager
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CanonicalManager
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as CanonicalManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
             # All should be the same class
             all_same = (LegacyManager == CanonicalManager == UnifiedWebSocketManager)
