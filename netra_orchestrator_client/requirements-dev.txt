@@ -1,0 +1,12 @@
+# Development dependencies for Netra Orchestrator Client
+-r requirements.txt
+
+# Testing framework
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+
+# Code quality
+black>=22.0.0
+flake8>=4.0.0
+mypy>=0.950

@@ -1,0 +1,88 @@
+{
+  "timestamp": 1757985958.7041905,
+  "total_duration": 9.23591661453247,
+  "categories": {
+    "mission_critical": {
+      "category": "mission_critical",
+      "tests": [
+        {
+          "file": "tests/mission_critical/test_singleton_bridge_removal_validation.py",
+          "success": false,
+          "total": 0,
+          "passed": 0,
+          "failed": 0,
+          "returncode": 1,
+          "stdout": "============================= test session starts =============================\ncollecting ... collected 14 items\n\ntests/mission_critical/test_singleton_bridge_removal_validation.py::TestSingletonBridgeRemovalValidation::test_bridge_has_no_imports_anywhere PASSED\ntests/mission_critical/test_singleton_bridge_removal_validation.py::TestSingletonBridgeRemovalValidation::test_websocket_manager_factory_works_without_bridge FAILED\ntests/mission_critical/test_singleton_bridge_removal_validation.py::TestSingletonBridgeRemovalValidation::test_websocket_get_functions_work_without_bridge FAILED\ntests/mission_critical/test_singleton_bridge_removal_validation.py::TestSingletonBridgeRemovalValidation::test_websocket_authenticator_works_without_bridge PASSED\ntests/mission_critical/test_singleton_bridge_removal_validation.py::TestSingletonBridgeRemovalValidation::test_service_locator_works_without_bridge PASSED\ntests/mission_critical/test_singleton_bridge_removal_validation.py::TestSingletonBridgeRemovalValidation::test_agent_execution_works_without_bridge PASSED\ntests/mission_critical/test_singleton_bridge_removal_validation.py::TestSingletonBridgeRemovalValidation::test_user_scoped_patterns_work_without_bridge FAILED\ntests/mission_critical/test_singleton_bridge_removal_validation.py::TestSingletonBridgeRemovalValidation::test_bridge_removal_simulation PASSED\ntests/mission_critical/test_singleton_bridge_removal_validation.py::TestSingletonBridgeRemovalValidation::test_golden_path_integrity_without_bridge FAILED\ntests/mission_critical/test_singleton_bridge_removal_validation.py::TestSingletonBridgeRemovalValidation::test_no_bridge_dependencies_in_critical_modules PASSED\ntests/mission_critical/test_singleton_bridge_removal_validation.py::TestFactoryPatternCompleteness::test_websocket_manager_factory_is_complete PASSED\ntests/mission_critical/test_singleton_bridge_removal_validation.py::TestFactoryPatternCompleteness::test_user_factory_coordinator_is_complete PASSED\ntests/mission_critical/test_singleton_bridge_removal_validation.py::TestFactoryPatternCompleteness::test_user_scoped_service_locator_works FAILED\ntests/mission_critical/test_singleton_bridge_removal_validation.py::TestFactoryPatternCompleteness::test_multi_user_isolation_without_bridge PASSED\n=== Memory Usage Report ===\nLoaded fixture modules: base, mocks\nPeak memory usage: 220.9 MB\n\n\n================================== FAILURES ===================================\n_ TestSingletonBridgeRemovalValidation.test_websocket_manager_factory_works_without_bridge _\ntests\\mission_critical\\test_singleton_bridge_removal_validation.py:135: in test_websocket_manager_factory_works_without_bridge\n    user_context=self.user_context,\n                 ^^^^^^^^^^^^^^^^^\nE   AttributeError: 'TestSingletonBridgeRemovalValidation' object has no attribute 'user_context'\n\nDuring handling of the above exception, another exception occurred:\ntests\\mission_critical\\test_singleton_bridge_removal_validation.py:145: in test_websocket_manager_factory_works_without_bridge\n    self.fail(f\"WebSocket manager creation failed without bridge: {e}\")\ntest_framework\\ssot\\base_test_case.py:801: in fail\n    pytest.fail(msg)\nE   Failed: WebSocket manager creation failed without bridge: 'TestSingletonBridgeRemovalValidation' object has no attribute 'user_context'\n_ TestSingletonBridgeRemovalValidation.test_websocket_get_functions_work_without_bridge _\ntests\\mission_critical\\test_singleton_bridge_removal_validation.py:159: in test_websocket_get_functions_work_without_bridge\n    user_context=self.user_context,\n                 ^^^^^^^^^^^^^^^^^\nE   AttributeError: 'TestSingletonBridgeRemovalValidation' object has no attribute 'user_context'\n\nDuring handling of the above exception, another exception occurred:\ntests\\mission_critical\\test_singleton_bridge_removal_validation.py:168: in test_websocket_get_functions_work_without_bridge\n    self.fail(f\"get_websocket_manager failed without bridge: {e}\")\ntest_framework\\ssot\\base_test_case.py:801: in fail\n    pytest.fail(msg)\nE   Failed: get_websocket_manager failed without bridge: 'TestSingletonBridgeRemovalValidation' object has no attribute 'user_context'\n_ TestSingletonBridgeRemovalValidation.test_user_scoped_patterns_work_without_bridge _\ntests\\mission_critical\\test_singleton_bridge_removal_validation.py:236: in test_user_scoped_patterns_work_without_bridge\n    user_locator = coordinator.get_user_service_locator(self.user_context)\n                                                        ^^^^^^^^^^^^^^^^^\nE   AttributeError: 'TestSingletonBridgeRemovalValidation' object has no attribute 'user_context'\n\nDuring handling of the above exception, another exception occurred:\ntests\\mission_critical\\test_singleton_bridge_removal_validation.py:244: in test_user_scoped_patterns_work_without_bridge\n    self.fail(f\"User-scoped patterns failed without bridge: {e}\")\ntest_framework\\ssot\\base_test_case.py:801: in fail\n    pytest.fail(msg)\nE   Failed: User-scoped patterns failed without bridge: 'TestSingletonBridgeRemovalValidation' object has no attribute 'user_context'\n_ TestSingletonBridgeRemovalValidation.test_golden_path_integrity_without_bridge _\ntests\\mission_critical\\test_singleton_bridge_removal_validation.py:298: in test_golden_path_integrity_without_bridge\n    manager = get_websocket_manager(user_context=self.user_context)\n                                                 ^^^^^^^^^^^^^^^^^\nE   AttributeError: 'TestSingletonBridgeRemovalValidation' object has no attribute 'user_context'\n\nDuring handling of the above exception, another exception occurred:\ntests\\mission_critical\\test_singleton_bridge_removal_validation.py:318: in test_golden_path_integrity_without_bridge\n    self.fail(\ntest_framework\\ssot\\base_test_case.py:801: in fail\n    pytest.fail(msg)\nE   Failed: Golden Path component 0 failed without bridge: 'TestSingletonBridgeRemovalValidation' object has no attribute 'user_context'. Successfully loaded: []. Bridge removal would break Golden Path!\n____ TestFactoryPatternCompleteness.test_user_scoped_service_locator_works ____\ntests\\mission_critical\\test_singleton_bridge_removal_validation.py:424: in test_user_scoped_service_locator_works\n    user_locator = coordinator.get_user_service_locator(self.user_context)\n                                                        ^^^^^^^^^^^^^^^^^\nE   AttributeError: 'TestFactoryPatternCompleteness' object has no attribute 'user_context'\n============================== warnings summary ===============================\nnetra_backend\\app\\websocket_core\\__init__.py:296\n  C:\\GitHub\\netra-apex\\netra_backend\\app\\websocket_core\\__init__.py:296: DeprecationWarning: netra_backend.app.logging_config is deprecated. Use 'from shared.logging.unified_logging_ssot import get_logger' instead.\n    from netra_backend.app.logging_config import central_logger\n\ntests/mission_critical/test_singleton_bridge_removal_validation.py::TestSingletonBridgeRemovalValidation::test_no_bridge_dependencies_in_critical_modules\n  C:\\GitHub\\netra-apex\\netra_backend\\app\\routes\\websocket_ssot.py:140: DeprecationWarning: Importing WebSocketManager from 'netra_backend.app.websocket' is deprecated. Use 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager' instead.\n    from netra_backend.app.websocket.connection_handler import connection_scope\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nFAILED tests/mission_critical/test_singleton_bridge_removal_validation.py::TestSingletonBridgeRemovalValidation::test_websocket_manager_factory_works_without_bridge\nFAILED tests/mission_critical/test_singleton_bridge_removal_validation.py::TestSingletonBridgeRemovalValidation::test_websocket_get_functions_work_without_bridge\nFAILED tests/mission_critical/test_singleton_bridge_removal_validation.py::TestSingletonBridgeRemovalValidation::test_user_scoped_patterns_work_without_bridge\nFAILED tests/mission_critical/test_singleton_bridge_removal_validation.py::TestSingletonBridgeRemovalValidation::test_golden_path_integrity_without_bridge\nFAILED tests/mission_critical/test_singleton_bridge_removal_validation.py::TestFactoryPatternCompleteness::test_user_scoped_service_locator_works\n=================== 5 failed, 9 passed, 2 warnings in 0.56s ===================\n",
+          "stderr": ""
+        }
+      ],
+      "total_tests": 0,
+      "passed_tests": 0,
+      "failed_tests": 0,
+      "duration": 3.388897657394409,
+      "success": false
+    },
+    "integration": {
+      "category": "integration",
+      "tests": [
+        {
+          "file": "tests/integration/test_bridge_removal_integration.py",
+          "success": true,
+          "total": 0,
+          "passed": 0,
+          "failed": 0,
+          "returncode": 0
+        }
+      ],
+      "total_tests": 0,
+      "passed_tests": 0,
+      "failed_tests": 0,
+      "duration": 2.914332389831543,
+      "success": true
+    },
+    "e2e": {
+      "category": "e2e",
+      "tests": [
+        {
+          "file": "tests/e2e/test_golden_path_without_bridge.py",
+          "success": true,
+          "total": 0,
+          "passed": 0,
+          "failed": 0,
+          "returncode": 0
+        }
+      ],
+      "total_tests": 0,
+      "passed_tests": 0,
+      "failed_tests": 0,
+      "duration": 2.9315438270568848,
+      "success": true
+    },
+    "performance": {
+      "category": "performance",
+      "tests": [
+        {
+          "file": "tests/integration/test_bridge_removal_integration.py::TestPerformanceWithoutBridge",
+          "success": false,
+          "error": "File not found",
+          "total": 0,
+          "passed": 0,
+          "failed": 1
+        }
+      ],
+      "total_tests": 0,
+      "passed_tests": 0,
+      "failed_tests": 1,
+      "duration": 0.00015091896057128906,
+      "success": false
+    }
+  },
+  "summary": {
+    "total_categories": 4,
+    "categories_passed": 2,
+    "total_tests": 0,
+    "total_passed": 0,
+    "total_failed": 1,
+    "overall_success": false
+  }
+}
