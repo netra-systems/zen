@@ -1649,7 +1649,8 @@ class _UnifiedWebSocketManagerImplementation:
             
             # Handle agent_started events
             elif event_type == "agent_started":
-                payload = {
+                return {
+                    "type": event_type,
                     "user_id": data.get("user_id"),
                     "thread_id": data.get("thread_id"),
                     "timestamp": data.get("timestamp", time.time()),
@@ -1658,53 +1659,42 @@ class _UnifiedWebSocketManagerImplementation:
                     # Preserve additional fields
                     **{k: v for k, v in data.items() if k not in ["user_id", "thread_id", "timestamp", "agent_name", "task_description"]}
                 }
-                return {
-                    "type": event_type,
-                    "payload": payload
-                }
             
             # Handle agent_thinking events
             elif event_type == "agent_thinking":
-                payload = {
+                return {
+                    "type": event_type,
                     "reasoning": data.get("reasoning", data.get("thought", data.get("thinking", "Agent is processing..."))),
                     "timestamp": data.get("timestamp", time.time()),
                     "user_id": data.get("user_id"),
                     "thread_id": data.get("thread_id"),
                     # Preserve additional fields
-                    **{k: v for k, v in data.items() if k not in ["reasoning", "timestamp"]}
-                }
-                return {
-                    "type": event_type,
-                    "payload": payload
+                    **{k: v for k, v in data.items() if k not in ["reasoning", "timestamp", "user_id", "thread_id"]}
                 }
             
             # Handle agent_completed events
             elif event_type == "agent_completed":
-                payload = {
+                return {
+                    "type": event_type,
                     "status": data.get("status", "completed"),
                     "final_response": data.get("final_response", data.get("response", data.get("result", "Task completed"))),
                     "timestamp": data.get("timestamp", time.time()),
                     "user_id": data.get("user_id"),
                     "thread_id": data.get("thread_id"),
                     # Preserve additional fields
-                    **{k: v for k, v in data.items() if k not in ["status", "final_response", "timestamp"]}
-                }
-                return {
-                    "type": event_type,
-                    "payload": payload
+                    **{k: v for k, v in data.items() if k not in ["status", "final_response", "timestamp", "user_id", "thread_id"]}
                 }
             
-            # For other event types, wrap data in payload object
+            # For other event types, return data at top level
             else:
                 # Ensure timestamp is included
-                if "timestamp" not in data:
-                    data = data.copy()
-                    data["timestamp"] = time.time()
-
-                return {
-                    "type": event_type,
-                    "payload": data
-                }
+                result = data.copy() if isinstance(data, dict) else {}
+                if "timestamp" not in result:
+                    result["timestamp"] = time.time()
+                
+                # Ensure type is at top level
+                result["type"] = event_type
+                return result
                 
         except Exception as e:
             logger.error(f"Failed to process business event {event_type}: {e}")
