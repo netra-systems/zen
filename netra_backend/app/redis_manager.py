@@ -24,8 +24,29 @@ from typing import Optional, Any, Dict, List
 from contextlib import asynccontextmanager
 
 try:
-    import redis.asyncio as redis
-    REDIS_AVAILABLE = True
+    # Check if we should use fake Redis for integration tests
+    from shared.isolated_environment import get_env
+    env = get_env()
+
+    # Use fakeredis if explicitly enabled for tests or if running persistence integration tests
+    use_fake_redis = (
+        env.get("USE_FAKE_REDIS") == "true" or
+        env.get("PYTEST_CURRENT_TEST", "").find("test_3tier_persistence_integration") != -1 or
+        env.get("TEST_DISABLE_REDIS") == "false"  # paradoxically, when we "enable" Redis for tests, use fake
+    )
+
+    if use_fake_redis:
+        try:
+            import fakeredis.aioredis as redis
+            logger = logging.getLogger(__name__)
+            logger.info("Using fakeredis for integration tests")
+            REDIS_AVAILABLE = True
+        except ImportError:
+            import redis.asyncio as redis
+            REDIS_AVAILABLE = True
+    else:
+        import redis.asyncio as redis
+        REDIS_AVAILABLE = True
 except ImportError:
     redis = None
     REDIS_AVAILABLE = False
