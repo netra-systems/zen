@@ -159,9 +159,9 @@ class GCPDeployer:
                     "GCP_PROJECT_ID": self.project_id,  # CRITICAL: Required for secret loading logic
                     "SKIP_OAUTH_VALIDATION": "true",  # TEMPORARY: Skip OAuth validation for E2E testing
                     # Auth Database Timeout Configuration (Issue #1229 Fix)
-                    "AUTH_DB_URL_TIMEOUT": "10.0",
-                    "AUTH_DB_ENGINE_TIMEOUT": "30.0",
-                    "AUTH_DB_VALIDATION_TIMEOUT": "60.0",
+                    "AUTH_DB_URL_TIMEOUT": "90.0",
+                    "AUTH_DB_ENGINE_TIMEOUT": "90.0",
+                    "AUTH_DB_VALIDATION_TIMEOUT": "90.0",
                 }
             ),
             ServiceConfig(

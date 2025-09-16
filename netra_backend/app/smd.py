@@ -824,7 +824,7 @@ class StartupOrchestrator:
         # For UserContext-based pattern, verify configuration and factories
         usercontext_configs = {
             'tool_classes': 'Tool Classes (for per-user tool creation)',
-            'websocket_bridge_factory': 'WebSocketBridgeFactory (per-user WebSocket isolation)',
+            'websocket_bridge_factory': 'AgentWebSocketBridge (per-user WebSocket isolation)',
             'execution_engine_factory': 'ExecutionEngineFactory (per-user execution isolation)',
             'websocket_connection_pool': 'WebSocketConnectionPool (connection management)'
         }
@@ -2066,7 +2066,7 @@ class StartupOrchestrator:
     
     async def _initialize_factory_patterns(self) -> None:
         """Initialize factory patterns for singleton removal - CRITICAL."""
-        from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, get_websocket_bridge_factory
+        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, get_agent_websocket_bridge
         from netra_backend.app.agents.supervisor.agent_instance_factory import (
             get_agent_instance_factory,
             configure_agent_instance_factory
@@ -2095,9 +2095,9 @@ class StartupOrchestrator:
             self.app.state.websocket_connection_pool = connection_pool
             self.logger.info("    [U+2713] WebSocketConnectionPool initialized")
             
-            # 3. Initialize WebSocketBridgeFactory
+            # 3. Initialize AgentWebSocketBridge
             # CRITICAL FIX: Always initialize websocket_factory to prevent "not associated with a value" error
-            websocket_factory = get_websocket_bridge_factory()
+            websocket_factory = get_agent_websocket_bridge()
             
             # Configure with proper parameters including connection pool
             if hasattr(self.app.state, 'agent_supervisor'):
@@ -2115,7 +2115,7 @@ class StartupOrchestrator:
                     health_monitor=health_monitor
                 )
             self.app.state.websocket_bridge_factory = websocket_factory
-            self.logger.info("    [U+2713] WebSocketBridgeFactory configured with connection pool")
+            self.logger.info("    [U+2713] AgentWebSocketBridge configured with connection pool")
             
             # 4. AgentInstanceFactory - REMOVED SINGLETON PATTERN
             # ISSUE #1142 FIX: AgentInstanceFactory now created per-request in dependencies.py
