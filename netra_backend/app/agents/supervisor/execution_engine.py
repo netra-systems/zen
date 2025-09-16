@@ -13,7 +13,7 @@ from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.core.configuration.base import get_config
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from auth_service.auth_core.core.token_validator import TokenValidator
+# ISSUE #1177 FIX: Remove cross-service import, auth integration handles token validation
 
 # SSOT REDIRECTION: Import from consolidated implementation
 from netra_backend.app.agents.execution_engine_consolidated import *
