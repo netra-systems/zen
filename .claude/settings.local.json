@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(find:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(python3:*)",
+      "Bash(timeout 10s python3:*)",
+      "Bash(grep:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

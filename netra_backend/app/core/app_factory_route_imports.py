@@ -83,7 +83,7 @@ def _import_auth_routers() -> dict:
     from netra_backend.app.routes.auth_proxy import compat_router as auth_compat_router
     from netra_backend.app.routes.agents_execute import router as agents_execute_router
     from netra_backend.app.routes.metrics_api import router as metrics_api_router
-    from netra_backend.app.routes.health_check import router as health_check_router
+    from netra_backend.app.routes.api_health import router as health_check_router
     from netra_backend.app.routes.system_info import router as system_info_router
     # Auth resilience router removed - functionality consolidated into auth_client_core
     # Auth proxy router added - provides backward compatibility for tests
