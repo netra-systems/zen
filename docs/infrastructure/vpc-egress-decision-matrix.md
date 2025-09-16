@@ -80,13 +80,22 @@ graph TD
 ## Common Patterns and Examples
 
 ### **LLM Services Pattern**
-All AI/LLM services follow the same pattern:
+All AI/LLM services follow the same pattern as ClickHouse:
 ```yaml
-# OpenAI, Anthropic, Hugging Face, etc.
+# OpenAI, Anthropic, Google Gemini, Hugging Face, etc.
 vpc_egress: private-ranges-only
 cloud_nat: required
 reasoning: "External internet services need NAT for routing"
+network_path: "Cloud Run → VPC → Cloud NAT → Internet → External API"
 ```
+
+**Cross-Reference:** See `/docs/infrastructure/clickhouse-network-path-analysis.md` for detailed network routing analysis. All external APIs follow identical routing patterns.
+
+**Universal External API Pattern** (discovered from Sept 15, 2025 VPC regression):
+- **Problem**: `private-ranges-only` blocks external APIs by default
+- **Solution**: Cloud NAT provides internet routing for external services
+- **Affected Services**: OpenAI, Anthropic, Gemini, ClickHouse, external webhooks, package registries
+- **Network Path**: All external services route identically: `Cloud Run → VPC → Cloud NAT → Internet`
 
 ### **Analytics Services Pattern**
 External analytics services:
@@ -196,6 +205,20 @@ For any new external service:
 - **ClickHouse Analysis**: `/docs/infrastructure/clickhouse-network-path-analysis.md`
 - **Timeline**: `/docs/infrastructure/vpc-egress-regression-timeline.md`
 - **Solutions**: `/SPEC/learnings/vpc_clickhouse_proxy_solutions.xml`
+
+### **External Service Configuration Files**
+- **OpenAI Health Check**: `/netra_backend/app/core/health/` (OpenAI monitoring patterns)
+- **Anthropic Health Check**: `/netra_backend/app/core/health/` (Anthropic monitoring patterns)  
+- **Gemini Health Check**: `/netra_backend/app/core/health/gemini_health.py:213` (Gemini API connectivity)
+- **Configuration Template**: `/config/enhanced-environment-template.env` (API base URLs)
+- **LLM Defaults**: `/netra_backend/app/llm/llm_defaults.py` (Model configurations)
+
+### **Cross-Service Pattern Analysis**
+All external APIs follow the ClickHouse routing pattern discovered in Sept 2025:
+1. **Same Problem**: `private-ranges-only` blocks external internet access
+2. **Same Solution**: Cloud NAT enables external routing while preserving Cloud SQL
+3. **Same Network Path**: `Cloud Run → VPC Connector → VPC → Cloud NAT → Internet → External API`
+4. **Same Cost**: ~$50/month Cloud NAT enables ALL external services simultaneously
 
 ### **Implementation Files**
 - **Deployment Config**: `/scripts/deploy_to_gcp_actual.py:1088`

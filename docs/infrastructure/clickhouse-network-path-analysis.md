@@ -226,3 +226,21 @@ gcloud compute routers nats describe staging-nat-gateway \
 3. **Solution**: ClickHouse works with `private-ranges-only` + Cloud NAT (and Cloud SQL works too)
 
 Cloud NAT provides the "missing internet route" for external services while preserving Cloud SQL Unix socket direct access. This is why it's the optimal solution - it satisfies both conflicting requirements simultaneously.
+
+## Universal External API Pattern
+
+**CRITICAL INSIGHT**: This ClickHouse routing pattern applies to ALL external APIs:
+
+### **All External Services Follow the Same Pattern**
+- **OpenAI API** (`api.openai.com`) - Same problem, same solution
+- **Anthropic API** (`api.anthropic.com`) - Same problem, same solution  
+- **Google Gemini API** (`generativelanguage.googleapis.com`) - Same problem, same solution
+- **External Webhooks** (customer domains) - Same problem, same solution
+- **Package Registries** (`pypi.org`, `npmjs.com`) - Same problem, same solution
+- **Third-party APIs** (payment, analytics, monitoring) - Same problem, same solution
+
+### **Cost Efficiency**
+One Cloud NAT (~$50/month) enables ALL external services simultaneously. The cost is shared across all external API access, making it extremely cost-efficient.
+
+### **Implementation Reference**
+See `/docs/infrastructure/vpc-egress-decision-matrix.md` for comprehensive service categorization and decision rules for all external services.

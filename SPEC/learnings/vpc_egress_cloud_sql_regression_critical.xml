@@ -195,7 +195,7 @@
 
     <external_service_patterns>
         <pattern name="external_api_access_via_nat">
-            <description>All external services require Cloud NAT with private-ranges-only VPC egress</description>
+            <description>Universal pattern: ALL external services require Cloud NAT with private-ranges-only VPC egress</description>
             <affected_services>
                 <service name="ClickHouse Cloud" url="xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443" type="analytics"/>
                 <service name="OpenAI API" url="api.openai.com" type="llm"/>
@@ -204,9 +204,14 @@
                 <service name="External Monitoring" url="various" type="observability"/>
                 <service name="Webhook Endpoints" url="various" type="integration"/>
                 <service name="Third-party APIs" url="various" type="integration"/>
+                <service name="Package Registries" url="pypi.org, npmjs.com, registry.terraform.io" type="deployment"/>
+                <service name="Payment APIs" url="stripe.com, paypal.com" type="business"/>
+                <service name="Analytics APIs" url="segment.com, mixpanel.com" type="business"/>
             </affected_services>
             <routing_requirement>Internet access via Cloud NAT gateway</routing_requirement>
             <vpc_egress_requirement>private-ranges-only (NOT all-traffic)</vpc_egress_requirement>
+            <cost_analysis>Single Cloud NAT (~$50/month) enables ALL external services</cost_analysis>
+            <universal_pattern_reference>docs/infrastructure/vpc-egress-decision-matrix.md</universal_pattern_reference>
         </pattern>
         
         <pattern name="internal_gcp_services_direct">
