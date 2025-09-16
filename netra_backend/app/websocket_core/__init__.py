@@ -121,6 +121,9 @@ try:
 
     # REMEDIATION: Add missing exports for test compatibility (Issue #1176 Phase 2 Fix)
     from netra_backend.app.websocket_core.types import create_server_message, create_error_message
+
+    # ISSUE #1286 FIX: Add missing get_websocket_manager export for test compatibility
+    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 except ImportError as e:
     # FAIL FAST: Critical WebSocket components must be available
     raise ImportError(
@@ -259,6 +262,9 @@ __all__ = [
     # REMEDIATION: Critical missing exports for test compatibility (Issue #1176 Phase 2 Fix)
     "create_server_message",      # CANONICAL: types.py
     "create_error_message",       # CANONICAL: types.py
+
+    # ISSUE #1286 FIX: Add missing get_websocket_manager export for test compatibility
+    "get_websocket_manager",      # CANONICAL: canonical_import_patterns.py
 
     # Backward compatibility only - prefer direct imports
     "create_websocket_manager",

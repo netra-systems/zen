@@ -51,6 +51,45 @@ health_interface.register_checker(SimpleNameDatabaseHealthChecker("redis"))
 health_interface.register_checker(DependencyHealthChecker("websocket"))
 health_interface.register_checker(DependencyHealthChecker("llm"))
 
+# Issue #1278: Add VPC connector capacity health checker
+class VPCConnectorHealthChecker:
+    """Health checker for VPC connector capacity monitoring."""
+
+    def __init__(self):
+        self.name = "vpc_connector"
+        self.timeout = 10.0
+
+    async def check_health(self) -> Dict[str, Any]:
+        """Check VPC connector capacity health."""
+        try:
+            from netra_backend.app.infrastructure.vpc_connector_monitoring import get_vpc_monitor
+            from shared.isolated_environment import get_env
+
+            env = get_env()
+            environment = env.get("ENVIRONMENT", "development").lower()
+
+            # Only check VPC connector in cloud environments
+            if environment not in ["staging", "production"]:
+                return {"status": "healthy", "message": "VPC connector not required in local environment"}
+
+            # Get VPC monitor and check capacity
+            vpc_monitor = get_vpc_monitor(environment)
+            capacity_info = vpc_monitor.get_capacity_info()
+
+            # Determine health based on capacity metrics
+            capacity_usage = capacity_info.get("current_usage_percent", 0)
+            if capacity_usage > 90:
+                return {"status": "critical", "capacity_usage": capacity_usage, "message": "VPC connector at critical capacity"}
+            elif capacity_usage > 80:
+                return {"status": "warning", "capacity_usage": capacity_usage, "message": "VPC connector capacity high"}
+            else:
+                return {"status": "healthy", "capacity_usage": capacity_usage, "message": "VPC connector capacity normal"}
+
+        except Exception as e:
+            return {"status": "unhealthy", "error": str(e), "message": "Failed to check VPC connector health"}
+
+health_interface.register_checker(VPCConnectorHealthChecker())
+
 
 def _create_error_response(status_code: int, response_data: Dict[str, Any]) -> Response:
     """Create a JSON error response with proper status code."""

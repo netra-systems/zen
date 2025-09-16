@@ -25,46 +25,40 @@ import json
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, Optional, List
 
-# Absolute imports per CLAUDE.md
-from test_framework.base_e2e_test import BaseE2ETest
+# Absolute imports per CLAUDE.md - SSOT Migration
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.e2e_auth_helper import (
     E2EAuthHelper, E2EWebSocketAuthHelper, E2EAuthConfig,
     create_authenticated_user_context
 )
 from test_framework.websocket_helpers import WebSocketTestClient
-from shared.isolated_environment import get_env
+# Removed shared.isolated_environment import - using SSOT environment access
 from shared.types.core_types import UserID, ThreadID, WebSocketID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class OAuthEndToEndAuthenticationStagingTests(BaseE2ETest):
+class OAuthEndToEndAuthenticationStagingTests(SSotAsyncTestCase):
     """E2E tests for complete OAuth authentication flow in staging environment."""
     
-    @pytest.fixture(autouse=True)
-    def setup_staging_environment(self):
+    async def asyncSetUp(self):
         """Setup staging environment for OAuth E2E tests."""
-        self.env = get_env()
-        self.env.enable_isolation()
-        
-        # Configure staging OAuth settings
-        staging_oauth_key = self.env.get("E2E_OAUTH_SIMULATION_KEY")
+        await super().asyncSetUp()
+
+        # Configure staging OAuth settings using SSOT environment access
+        staging_oauth_key = self.get_env_var("E2E_OAUTH_SIMULATION_KEY")
         if not staging_oauth_key:
             pytest.skip("E2E_OAUTH_SIMULATION_KEY not configured for staging OAuth tests")
-        
-        self.env.set("ENVIRONMENT", "staging", "test_oauth_e2e")
-        self.env.set("TEST_ENV", "staging", "test_oauth_e2e")
-        
+
+        # Set environment variables using SSOT methods
+        self.set_env_var("ENVIRONMENT", "staging")
+        self.set_env_var("TEST_ENV", "staging")
+
         # Create staging auth configuration
         self.staging_config = E2EAuthConfig.for_staging()
         self.auth_helper = E2EAuthHelper(config=self.staging_config, environment="staging")
         self.websocket_auth_helper = E2EWebSocketAuthHelper(config=self.staging_config, environment="staging")
         self.id_generator = UnifiedIdGenerator()
-        
-        yield
-        
-        # Cleanup
-        self.env.disable_isolation()
     
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -87,7 +81,7 @@ class OAuthEndToEndAuthenticationStagingTests(BaseE2ETest):
         
         access_token = await self.auth_helper.get_staging_token_async(
             email=test_email,
-            bypass_key=self.env.get("E2E_OAUTH_SIMULATION_KEY")
+            bypass_key=self.get_env_var("E2E_OAUTH_SIMULATION_KEY")
         )
         
         assert access_token is not None, "OAuth authentication must succeed and return access token"
@@ -215,7 +209,7 @@ class OAuthEndToEndAuthenticationStagingTests(BaseE2ETest):
                 auth_helper = E2EAuthHelper(config=self.staging_config, environment="staging")
                 token = await auth_helper.get_staging_token_async(
                     email=ctx["email"],
-                    bypass_key=self.env.get("E2E_OAUTH_SIMULATION_KEY")
+                    bypass_key=self.get_env_var("E2E_OAUTH_SIMULATION_KEY")
                 )
                 
                 # Validate token
@@ -332,7 +326,7 @@ class OAuthEndToEndAuthenticationStagingTests(BaseE2ETest):
         # Step 1: Initial OAuth authentication
         access_token = await self.auth_helper.get_staging_token_async(
             email=test_email,
-            bypass_key=self.env.get("E2E_OAUTH_SIMULATION_KEY")
+            bypass_key=self.get_env_var("E2E_OAUTH_SIMULATION_KEY")
         )
         
         assert access_token is not None, "Initial OAuth authentication must succeed"

@@ -470,7 +470,7 @@ class StagingWebSocketErrorHandlingTests:
     # # Run specific test for development
     # async def run_single_test():
     # """Run a single test for development purposes."""
-    # harness = create_e2e_harness(environment=TestEnvironmentType.STAGING)
+    # harness = create_e2e_harness(environment=EnvironmentTypeTests.STAGING)
     # async with harness.test_environment():
     # tester = StagingWebSocketTester(harness)
     # user = await harness.create_test_user()

@@ -444,7 +444,7 @@ class AppConfig(BaseModel):
     
     # PostgreSQL Database Configuration (consolidated from postgres_config.py)
     db_pool_size: int = Field(default=20, description="Database connection pool size")
-    db_max_overflow: int = Field(default=30, description="Maximum overflow connections")
+    db_max_overflow: int = Field(default=25, description="Maximum overflow connections - Issue #1278: Reduced from 30 to 25 for optimal resource balance")
     db_pool_timeout: int = Field(default=30, description="Pool timeout in seconds")
     db_pool_recycle: int = Field(default=1800, description="Recycle connections every N seconds")
     db_pool_pre_ping: bool = Field(default=True, description="Test connections before using")

@@ -49,13 +49,13 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
     4. Schema migration errors use proper classification
     """
     
-    @pytest.fixture
-    def schema_manager(self):
-        """Create ClickHouse schema manager for testing."""
-        return ClickHouseTraceSchema()
+    def setup_method(self, method=None):
+        """Setup method for each test - initialize ClickHouse schema manager."""
+        super().setup_method(method)
+        self.schema_manager = ClickHouseTraceSchema()
 
     @pytest.mark.asyncio
-    async def test_table_creation_uses_specific_error_types(self, schema_manager):
+    async def test_table_creation_uses_specific_error_types(self):
         """
         Test verifies table creation errors use specific TableCreationError types.
         
@@ -63,7 +63,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
         TableCreationError instead of generic Exception types.
         """
         # Mock table creation syntax error
-        with patch.object(schema_manager, '_get_client') as mock_get_client:
+        with patch.object(self.schema_manager, '_get_client') as mock_get_client:
             mock_client = Mock()
             mock_get_client.return_value = mock_client
             
@@ -85,7 +85,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
                 
                 # Should raise TableCreationError (specific type)
                 with pytest.raises(TableCreationError) as exc_info:
-                    await schema_manager.create_table("test_table", table_schema)
+                    await self.schema_manager.create_table("test_table", table_schema)
                 
                 error_name = type(exc_info.value).__name__
                 error_message = str(exc_info.value)
@@ -97,7 +97,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
                 assert "Failed to create table" in error_message, "Should include operation context"
 
     @pytest.mark.asyncio
-    async def test_column_modification_uses_specific_error_types(self, schema_manager):
+    async def test_column_modification_uses_specific_error_types(self):
         """
         Test verifies column modification errors use specific ColumnModificationError types.
         
@@ -105,7 +105,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
         ColumnModificationError instead of generic Exception types.
         """
         # Mock column type incompatibility error
-        with patch.object(schema_manager, '_get_client') as mock_get_client:
+        with patch.object(self.schema_manager, '_get_client') as mock_get_client:
             mock_client = Mock()
             mock_get_client.return_value = mock_client
             
@@ -120,7 +120,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
                 
                 # Should raise ColumnModificationError (specific type)
                 with pytest.raises(ColumnModificationError) as exc_info:
-                    await schema_manager.modify_column("test_table", "id", "String")
+                    await self.schema_manager.modify_column("test_table", "id", "String")
                 
                 error_name = type(exc_info.value).__name__
                 error_message = str(exc_info.value)
@@ -133,7 +133,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
                 assert "String" in error_message, "Should include target type"
 
     @pytest.mark.asyncio
-    async def test_index_creation_uses_specific_error_types(self, schema_manager):
+    async def test_index_creation_uses_specific_error_types(self):
         """
         Test verifies index creation errors use specific IndexCreationError types.
         
@@ -141,7 +141,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
         IndexCreationError instead of generic Exception types.
         """
         # Mock index creation conflict error
-        with patch.object(schema_manager, '_get_client') as mock_get_client:
+        with patch.object(self.schema_manager, '_get_client') as mock_get_client:
             mock_client = Mock()
             mock_get_client.return_value = mock_client
             
@@ -156,7 +156,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
                 
                 # Should raise IndexCreationError (specific type)
                 with pytest.raises(IndexCreationError) as exc_info:
-                    await schema_manager.create_index("test_table", "test_index", ["column1"])
+                    await self.schema_manager.create_index("test_table", "test_index", ["column1"])
                 
                 error_name = type(exc_info.value).__name__
                 error_message = str(exc_info.value)
@@ -168,7 +168,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
                 assert "test_table" in error_message, "Should include table name"
 
     @pytest.mark.asyncio
-    async def test_schema_migration_provides_rollback_error_context(self, schema_manager):
+    async def test_schema_migration_provides_rollback_error_context(self):
         """
         Test verifies migration errors provide proper rollback context.
         
@@ -176,7 +176,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
         context for rollback operations and partial migration state.
         """
         # Mock migration failure in the middle of operation
-        with patch.object(schema_manager, '_get_client') as mock_get_client:
+        with patch.object(self.schema_manager, '_get_client') as mock_get_client:
             mock_client = Mock()
             mock_get_client.return_value = mock_client
             
@@ -199,7 +199,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
                 
                 # Should raise ColumnModificationError with migration context
                 with pytest.raises(ColumnModificationError) as exc_info:
-                    await schema_manager.execute_migration("migration_001", migration_steps)
+                    await self.schema_manager.execute_migration("migration_001", migration_steps)
                 
                 error_message = str(exc_info.value)
                 
@@ -211,7 +211,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
                 assert "Rollback Required:" in error_message, "Should indicate rollback need"
 
     @pytest.mark.asyncio
-    async def test_table_dependency_error_provides_relationship_context(self, schema_manager):
+    async def test_table_dependency_error_provides_relationship_context(self):
         """
         Test verifies dependency errors provide proper relationship context.
         
@@ -219,7 +219,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
         context about dependent objects and resolution steps.
         """
         # Mock table deletion with dependency error
-        with patch.object(schema_manager, '_get_client') as mock_get_client:
+        with patch.object(self.schema_manager, '_get_client') as mock_get_client:
             mock_client = Mock()
             mock_get_client.return_value = mock_client
             
@@ -235,7 +235,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
                 
                 # Should raise TableCreationError with dependency context
                 with pytest.raises(TableCreationError) as exc_info:
-                    await schema_manager.drop_table("parent_table")
+                    await self.schema_manager.drop_table("parent_table")
                 
                 error_message = str(exc_info.value)
                 
@@ -265,18 +265,17 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
             "Schema module should import IndexCreationError"
         
         # Verify schema manager instance has the required methods
-        schema_manager = ClickHouseTraceSchema()
-        assert hasattr(schema_manager, 'create_table'), \
+        assert hasattr(self.schema_manager, 'create_table'), \
             "Schema manager should have create_table method"
-        assert hasattr(schema_manager, 'modify_column'), \
+        assert hasattr(self.schema_manager, 'modify_column'), \
             "Schema manager should have modify_column method"
-        assert hasattr(schema_manager, 'create_index'), \
+        assert hasattr(self.schema_manager, 'create_index'), \
             "Schema manager should have create_index method"
-        assert hasattr(schema_manager, 'execute_migration'), \
+        assert hasattr(self.schema_manager, 'execute_migration'), \
             "Schema manager should have execute_migration method"
 
     @pytest.mark.asyncio
-    async def test_constraint_violation_provides_constraint_context(self, schema_manager):
+    async def test_constraint_violation_provides_constraint_context(self):
         """
         Test verifies constraint errors provide proper constraint context.
         
@@ -284,7 +283,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
         which constraints failed and suggested fixes.
         """
         # Mock constraint violation error
-        with patch.object(schema_manager, '_get_client') as mock_get_client:
+        with patch.object(self.schema_manager, '_get_client') as mock_get_client:
             mock_client = Mock()
             mock_get_client.return_value = mock_client
             
@@ -300,7 +299,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
                 
                 # Should raise ColumnModificationError with constraint context
                 with pytest.raises(ColumnModificationError) as exc_info:
-                    await schema_manager.validate_table_constraints("transactions_table")
+                    await self.schema_manager.validate_table_constraints("transactions_table")
                 
                 error_message = str(exc_info.value)
                 
@@ -310,7 +309,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
                 assert "Fix Suggestion:" in error_message, "Should suggest how to fix"
 
     @pytest.mark.asyncio
-    async def test_engine_configuration_error_provides_engine_context(self, schema_manager):
+    async def test_engine_configuration_error_provides_engine_context(self):
         """
         Test verifies engine errors provide proper configuration context.
         
@@ -318,7 +317,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
         details about engine requirements and configuration issues.
         """
         # Mock engine configuration error
-        with patch.object(schema_manager, '_get_client') as mock_get_client:
+        with patch.object(self.schema_manager, '_get_client') as mock_get_client:
             mock_client = Mock()
             mock_get_client.return_value = mock_client
             
@@ -340,7 +339,7 @@ class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
                 
                 # Should raise EngineConfigurationError with engine context
                 with pytest.raises(EngineConfigurationError) as exc_info:
-                    await schema_manager.create_table("test_table", invalid_table_schema)
+                    await self.schema_manager.create_table("test_table", invalid_table_schema)
                 
                 error_message = str(exc_info.value)
                 
