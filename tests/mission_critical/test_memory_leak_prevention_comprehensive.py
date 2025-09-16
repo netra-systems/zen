@@ -58,7 +58,8 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Set, Any, Optional, Callable, Union, Tuple
 import tempfile
-import resource
+# Use cross-platform resource compatibility for Windows/Unix support
+from shared.resource_compat import getrusage, getrlimit, setrlimit, RLIMIT_AS, RLIMIT_RSS, RUSAGE_SELF
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry

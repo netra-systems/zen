@@ -1167,6 +1167,8 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
             self._test_context = None
         if not hasattr(self, '_original_env_state'):
             self._original_env_state = None
+        if not hasattr(self, '_metrics'):
+            self._metrics = SsotTestMetrics()
         super().teardown_method(method)
 
     async def asyncSetUp(self):

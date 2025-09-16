@@ -1110,6 +1110,50 @@ def reset_websocket_manager_factory():
         logger.warning("Global WebSocketManagerFactory instance reset - FOR TESTING ONLY")
 
 
+async def create_websocket_manager(user_context: Any, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED) -> _UnifiedWebSocketManagerImplementation:
+    """
+    Create WebSocket manager using the global factory.
+
+    This is the main entry point used by 720+ files across the system.
+    Provides enterprise resource management, user isolation, and cleanup.
+
+    Args:
+        user_context: User execution context for isolation
+        mode: WebSocket manager mode (defaults to UNIFIED)
+
+    Returns:
+        WebSocket manager instance with enterprise resource management
+
+    Example:
+        from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+
+        manager = await create_websocket_manager(user_context=ctx)
+    """
+    factory = get_websocket_manager_factory()
+    return await factory.create_manager(user_context=user_context, mode=mode)
+
+
+def create_websocket_manager_sync(user_context: Any, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED) -> _UnifiedWebSocketManagerImplementation:
+    """
+    Synchronous wrapper for create_websocket_manager.
+
+    Used by modules that need to create managers without async/await.
+
+    Args:
+        user_context: User execution context for isolation
+        mode: WebSocket manager mode (defaults to UNIFIED)
+
+    Returns:
+        WebSocket manager instance with enterprise resource management
+    """
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        return loop.run_until_complete(create_websocket_manager(user_context, mode))
+    finally:
+        loop.close()
+
+
 # Export public interface
 __all__ = [
     'WebSocketManagerFactory',
@@ -1118,5 +1162,7 @@ __all__ = [
     'ManagerHealth',
     'FactoryMetrics',
     'get_websocket_manager_factory',
-    'reset_websocket_manager_factory'
+    'reset_websocket_manager_factory',
+    'create_websocket_manager',
+    'create_websocket_manager_sync'
 ]
