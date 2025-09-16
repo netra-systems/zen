@@ -68,5 +68,60 @@ async def backend():
 @router.get("/infrastructure")
 @router.head("/infrastructure")
 async def infrastructure():
-    """Infrastructure health check - returns 200 OK if service is running."""
-    return {"status": "ok"}
+    """Infrastructure health check - includes circuit breaker and resilience status."""
+    try:
+        # Get infrastructure resilience status
+        from netra_backend.app.services.infrastructure_resilience import get_infrastructure_health_summary
+        from netra_backend.app.resilience.circuit_breaker import get_circuit_breaker_manager
+
+        # Get overall infrastructure health
+        infrastructure_health = get_infrastructure_health_summary()
+
+        # Get circuit breaker status
+        circuit_breaker_manager = get_circuit_breaker_manager()
+        circuit_breaker_health = circuit_breaker_manager.get_health_summary()
+
+        # Determine overall status
+        overall_status = "ok"
+        if infrastructure_health.get("overall_status") == "critical":
+            overall_status = "critical"
+        elif infrastructure_health.get("overall_status") == "degraded":
+            overall_status = "degraded"
+        elif circuit_breaker_health.get("overall_health") == "critical":
+            overall_status = "critical"
+
+        return {
+            "status": overall_status,
+            "infrastructure": infrastructure_health,
+            "circuit_breakers": circuit_breaker_health,
+            "chat_functionality_impact": infrastructure_health.get("chat_functionality_impacted", False)
+        }
+    except Exception as e:
+        # Return basic status if resilience components not available yet
+        return {"status": "ok", "note": "Infrastructure resilience not initialized"}
+
+
+@router.get("/circuit-breakers")
+async def circuit_breakers():
+    """Circuit breaker status endpoint."""
+    try:
+        from netra_backend.app.resilience.circuit_breaker import get_circuit_breaker_manager
+
+        circuit_breaker_manager = get_circuit_breaker_manager()
+        return {
+            "health_summary": circuit_breaker_manager.get_health_summary(),
+            "all_statuses": circuit_breaker_manager.get_all_statuses()
+        }
+    except Exception as e:
+        return {"error": f"Circuit breaker status unavailable: {e}"}
+
+
+@router.get("/resilience")
+async def resilience():
+    """Infrastructure resilience status endpoint."""
+    try:
+        from netra_backend.app.services.infrastructure_resilience import get_infrastructure_health_summary
+
+        return get_infrastructure_health_summary()
+    except Exception as e:
+        return {"error": f"Resilience status unavailable: {e}"}

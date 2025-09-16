@@ -194,6 +194,14 @@ class DatabaseManager:
         """Get async database session with enhanced exception handling and user isolation."""
         session_start_time = time.time()
 
+        # Circuit breaker protection for database operations
+        try:
+            from netra_backend.app.resilience.circuit_breaker import get_circuit_breaker
+            database_circuit_breaker = get_circuit_breaker("database")
+        except ImportError:
+            # Circuit breaker not available during startup, proceed normally
+            database_circuit_breaker = None
+
         # Extract user information from context for proper isolation
         user_id = None
         context_valid = False
@@ -245,6 +253,11 @@ class DatabaseManager:
         self._pool_stats['active_sessions_count'] += 1
 
         engine = self.get_engine(engine_name)
+
+        # Circuit breaker monitoring for database operations
+        circuit_breaker_start_time = time.time()
+        session_success = False
+
         async with AsyncSession(engine) as session:
             original_exception = None
             transaction_start_time = time.time()
@@ -261,6 +274,9 @@ class DatabaseManager:
 
                 logger.info(f"✅ Session {session_id} committed successfully - Operation: {operation_type}, "
                            f"User: {user_id or 'system'}, Duration: {session_duration:.3f}s, Commit: {commit_duration:.3f}s")
+
+                # Record successful operation for circuit breaker
+                session_success = True
 
             except (DeadlockError, ConnectionError) as e:
                 # Handle specific transaction errors with enhanced context
@@ -306,6 +322,22 @@ class DatabaseManager:
 
             finally:
                 close_start_time = time.time()
+
+                # Record circuit breaker metrics
+                if database_circuit_breaker:
+                    try:
+                        operation_duration = time.time() - circuit_breaker_start_time
+                        if session_success:
+                            await database_circuit_breaker._record_success(operation_duration)
+                        else:
+                            from netra_backend.app.resilience.circuit_breaker import FailureType
+                            if original_exception:
+                                failure_type = database_circuit_breaker._classify_failure(original_exception)
+                            else:
+                                failure_type = FailureType.UNKNOWN_ERROR
+                            await database_circuit_breaker._record_failure(failure_type, str(original_exception) if original_exception else "Unknown failure")
+                    except Exception as cb_error:
+                        logger.warning(f"Circuit breaker recording failed: {cb_error}")
 
                 # Enhanced session cleanup and tracking
                 try:
