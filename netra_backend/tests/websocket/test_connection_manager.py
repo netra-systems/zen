@@ -14,7 +14,7 @@ from typing import List, Dict, Any, Optional
 from test_framework.real_services import get_real_services, WebSocketTestClient
 from test_framework.environment_isolation import IsolatedEnvironment
 from netra_backend.app.websocket_core.connection_manager import ConnectionManager
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 @pytest.mark.asyncio
 class ConnectionManagerRealConnectionsTests:
@@ -191,7 +191,7 @@ class WebSocketAgentEventsRealTests:
 
     async def test_agent_event_flow_real_websocket(self):
         """Test complete agent event flow with real WebSocket connections."""
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
         ws_manager = WebSocketManager()

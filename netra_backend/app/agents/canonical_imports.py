@@ -30,10 +30,12 @@ from netra_backend.app.agents.canonical_imports import (
 # CANONICAL IMPORT PATHS - Single Source of Truth for Agent Execution
 # ============================================================================
 
-# CANONICAL: ExecutionEngineFactory (SSOT import path)
+# CANONICAL: ExecutionEngineFactory (SSOT import path) - PHASE 2A CONSOLIDATION
 from netra_backend.app.agents.supervisor.execution_engine_factory import (
     ExecutionEngineFactory,
     configure_execution_engine_factory,
+    get_execution_engine_factory,  # PHASE 2A: Add SSOT factory manager function
+    user_execution_engine,  # PHASE 2A: Add SSOT context manager
 )
 
 # CANONICAL: UserExecutionEngine (SSOT import path)
@@ -41,11 +43,12 @@ from netra_backend.app.agents.supervisor.user_execution_engine import (
     UserExecutionEngine,
 )
 
-# CANONICAL: Factory function wrapper for simplified usage
+# CANONICAL: Factory function wrapper for simplified usage - PHASE 2A CONSOLIDATION
 async def create_execution_engine(user_context, websocket_bridge=None, **kwargs):
     """
     Canonical factory function for creating execution engines.
 
+    PHASE 2A UPDATE: Uses SSOT factory manager to prevent factory duplication.
     This is the SSOT method for creating UserExecutionEngine instances,
     replacing all fragmented import patterns.
 
@@ -57,16 +60,18 @@ async def create_execution_engine(user_context, websocket_bridge=None, **kwargs)
     Returns:
         UserExecutionEngine: Configured execution engine instance
     """
-    # Use the SSOT factory pattern
-    factory = ExecutionEngineFactory()
+    # PHASE 2A FIX: Use SSOT factory manager instead of creating new instance
+    factory = await get_execution_engine_factory("canonical_create_engine")
 
     if websocket_bridge:
-        # Configure with WebSocket bridge if provided
-        factory = await configure_execution_engine_factory(websocket_bridge=websocket_bridge)
+        # Configure factory with WebSocket bridge if provided
+        factory = await configure_execution_engine_factory(
+            websocket_bridge=websocket_bridge,
+            **kwargs
+        )
 
-    # Create engine using factory
-    async with factory.create_engine(user_context) as engine:
-        return engine
+    # Create engine using SSOT factory
+    return await factory.create_for_user(user_context)
 
 # ============================================================================
 # DEPRECATED IMPORTS - Do Not Use These Paths
@@ -84,13 +89,16 @@ async def create_execution_engine(user_context, websocket_bridge=None, **kwargs)
 # CANONICAL EXPORT INTERFACE
 # ============================================================================
 
-# Single source of truth exports
+# Single source of truth exports - PHASE 2A CONSOLIDATION
 __all__ = [
     # PREFERRED: Use these for new code
     'ExecutionEngineFactory',
     'UserExecutionEngine',
     'create_execution_engine',
     'configure_execution_engine_factory',
+    # PHASE 2A: Add SSOT factory manager functions
+    'get_execution_engine_factory',
+    'user_execution_engine',
 ]
 
 # ============================================================================

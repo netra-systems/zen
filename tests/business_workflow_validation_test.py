@@ -61,7 +61,7 @@ class BusinessWorkflowValidator:
         try:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             from netra_backend.app.core.agent_execution_tracker import ExecutionState
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             import_time = time.time() - step_start
             import_success = True
@@ -481,7 +481,7 @@ Total: {total_pipeline_time:.2f}s
         
         # Capability 3: WebSocket communication (Real-time UX)
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Can instantiate (doesn't need to be functional)
             manager_importable = True

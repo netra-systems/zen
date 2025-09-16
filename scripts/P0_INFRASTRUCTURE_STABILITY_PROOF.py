@@ -71,7 +71,7 @@ class P0StabilityProof:
         
         try:
             # Import and inspect the fix - CANONICAL IMPORT for SSOT compliance
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             import inspect
             
             # Get the source code of the critical method

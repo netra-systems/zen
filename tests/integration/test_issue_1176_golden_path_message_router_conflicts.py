@@ -26,7 +26,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.isolated_environment_fixtures import isolated_env
 
 # Import MessageRouter components that need integration testing
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.events import WebSocketEventManager
 from netra_backend.app.agents.registry import AgentRegistry
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent

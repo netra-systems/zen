@@ -49,7 +49,7 @@ except ImportError:
     UnifiedWebSocketEmitter = None
 
 try:
-    from netra_backend.app.websocket_core.websocket_manager import (
+    from netra_backend.app.websocket_core.canonical_import_patterns import (
         WebSocketManager,
         create_test_fallback_manager
     )

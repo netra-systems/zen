@@ -22,7 +22,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from typing import Dict, Any, List, Optional
 
 # Core imports  
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.canonical_imports import FactoryInitializationError
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID
@@ -93,12 +93,13 @@ class WebSocketEmergencyCleanupFailureTests:
         """Google OAuth user ID from GCP logs"""
         return "105945141827451681156"
     
-    @pytest.fixture  
+    @pytest.fixture
     def mock_factory(self):
         """Create WebSocketManagerFactory with controlled state"""
-        manager = WebSocketManager()
-        # Note: WebSocketManager can be configured here
-        return manager
+        # Use the new factory pattern instead of direct instantiation
+        from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+        factory = WebSocketManagerFactory(max_managers_per_user=20)
+        return factory
     
     @pytest.fixture
     def create_test_context(self):
@@ -135,18 +136,23 @@ class WebSocketEmergencyCleanupFailureTests:
             active_managers.append((f"isolation_key_{i}", manager))
         
         # Populate factory state to simulate 20 active managers
+        # The new factory uses different internal structure
         with patch.object(mock_factory, '_active_managers', {}), \
-             patch.object(mock_factory, '_user_manager_count', {}), \
-             patch.object(mock_factory, '_manager_creation_time', {}):
-            
+             patch.object(mock_factory, '_user_manager_keys', {}), \
+             patch.object(mock_factory, '_creation_times', {}):
+
             # Simulate factory state with 20 managers
-            for key, manager in active_managers:
+            user_keys = set()
+            for i, (key, manager) in enumerate(active_managers):
                 mock_factory._active_managers[key] = manager
-                mock_factory._user_manager_count[google_oauth_user_id] = 20
-                mock_factory._manager_creation_time[key] = datetime.utcnow() - timedelta(seconds=45)
+                user_keys.add(key)
+                mock_factory._creation_times[key] = datetime.utcnow() - timedelta(seconds=45)
+
+            # Set up user manager tracking
+            mock_factory._user_manager_keys[google_oauth_user_id] = user_keys
             
             # Mock the emergency cleanup to behave like the current conservative implementation
-            async def conservative_emergency_cleanup(user_id: str) -> int:
+            async def conservative_emergency_cleanup(user_id: str, cleanup_level=None) -> int:
                 """Simulate current emergency cleanup that's too conservative"""
                 cleaned = 0
                 cutoff_time = datetime.utcnow() - timedelta(seconds=30)
@@ -170,10 +176,10 @@ class WebSocketEmergencyCleanupFailureTests:
                         del mock_factory._active_managers[key]
                         cleaned += 1
                 
-                # Update count
-                remaining = sum(1 for m in mock_factory._active_managers.values() 
-                              if m.user_context.user_id == user_id)
-                mock_factory._user_manager_count[user_id] = remaining
+                # Update count by updating the user manager keys
+                remaining_keys = {k for k, m in mock_factory._active_managers.items()
+                                if m.user_context.user_id == user_id}
+                mock_factory._user_manager_keys[user_id] = remaining_keys
                 return cleaned
             
             # Patch emergency cleanup method
@@ -195,7 +201,7 @@ class WebSocketEmergencyCleanupFailureTests:
                 assert "resource leak or extremely high connection rate" in error_message
                 
                 # Verify emergency cleanup was called but failed to clean sufficient managers
-                current_count = mock_factory._user_manager_count.get(google_oauth_user_id, 0)
+                current_count = mock_factory.get_user_manager_keys(google_oauth_user_id)
                 assert current_count >= 20, f"Emergency cleanup should have failed to reduce count below limit, got {current_count}"
     
     @pytest.mark.asyncio
@@ -223,13 +229,14 @@ class WebSocketEmergencyCleanupFailureTests:
         
         # Setup factory state
         with patch.object(mock_factory, '_active_managers', {}), \
-             patch.object(mock_factory, '_user_manager_count', {}), \
-             patch.object(mock_factory, '_manager_creation_time', {}):
+             patch.object(mock_factory, '_user_manager_keys', {}), \
+             patch.object(mock_factory, '_creation_times', {}):
             
             for key, manager in managers:
                 mock_factory._active_managers[key] = manager
-                mock_factory._user_manager_count[google_oauth_user_id] = len(managers)
-                mock_factory._manager_creation_time[key] = datetime.utcnow() - timedelta(seconds=60)
+                user_keys = {key for key, _ in managers}
+                mock_factory._user_manager_keys[google_oauth_user_id] = user_keys
+                mock_factory._creation_times[key] = datetime.utcnow() - timedelta(seconds=60)
             
             # Test current emergency cleanup
             cleaned_count = await mock_factory._emergency_cleanup_user_managers(google_oauth_user_id)
@@ -273,13 +280,14 @@ class WebSocketEmergencyCleanupFailureTests:
         
         # Setup factory state
         with patch.object(mock_factory, '_active_managers', {}), \
-             patch.object(mock_factory, '_user_manager_count', {}), \
-             patch.object(mock_factory, '_manager_creation_time', {}):
+             patch.object(mock_factory, '_user_manager_keys', {}), \
+             patch.object(mock_factory, '_creation_times', {}):
             
             for key, manager in managers:
                 mock_factory._active_managers[key] = manager
-                mock_factory._user_manager_count[google_oauth_user_id] = len(managers)
-                mock_factory._manager_creation_time[key] = datetime.utcnow() - timedelta(seconds=60)
+                user_keys = {key for key, _ in managers}
+                mock_factory._user_manager_keys[google_oauth_user_id] = user_keys
+                mock_factory._creation_times[key] = datetime.utcnow() - timedelta(seconds=60)
             
             # Apply the real enhanced emergency cleanup implementation
             cleaned_count = await mock_factory._emergency_cleanup_user_managers(google_oauth_user_id)
@@ -321,13 +329,14 @@ class WebSocketEmergencyCleanupFailureTests:
         
         # Setup factory state
         with patch.object(mock_factory, '_active_managers', {}), \
-             patch.object(mock_factory, '_user_manager_count', {}), \
-             patch.object(mock_factory, '_manager_creation_time', {}):
+             patch.object(mock_factory, '_user_manager_keys', {}), \
+             patch.object(mock_factory, '_creation_times', {}):
             
             for key, manager in managers:
                 mock_factory._active_managers[key] = manager
-                mock_factory._user_manager_count[google_oauth_user_id] = len(managers)
-                mock_factory._manager_creation_time[key] = datetime.utcnow() - timedelta(seconds=30)
+                user_keys = {key for key, _ in managers}
+                mock_factory._user_manager_keys[google_oauth_user_id] = user_keys
+                mock_factory._creation_times[key] = datetime.utcnow() - timedelta(seconds=30)
             
             # Even enhanced cleanup can't clean healthy managers
             cleaned_count = await mock_factory._emergency_cleanup_user_managers(google_oauth_user_id)
@@ -345,8 +354,8 @@ class WebSocketEmergencyCleanupFailureTests:
             # Option 3: Oldest manager force removal as last resort
             if len(managers) >= mock_factory.max_managers_per_user:
                 # Force remove oldest manager regardless of health
-                oldest_key = min(mock_factory._manager_creation_time.keys(),
-                               key=lambda k: mock_factory._manager_creation_time[k])
+                oldest_key = min(mock_factory._creation_times.keys(),
+                               key=lambda k: mock_factory._creation_times[k])
                 
                 # This would be the "nuclear option" in enhanced cleanup
                 assert oldest_key is not None, "Should identify oldest manager for force removal"
@@ -378,13 +387,14 @@ class WebSocketEmergencyCleanupFailureTests:
         
         # Setup initial state
         with patch.object(mock_factory, '_active_managers', {}), \
-             patch.object(mock_factory, '_user_manager_count', {}), \
-             patch.object(mock_factory, '_manager_creation_time', {}):
+             patch.object(mock_factory, '_user_manager_keys', {}), \
+             patch.object(mock_factory, '_creation_times', {}):
             
             for key, manager in managers:
                 mock_factory._active_managers[key] = manager
-                mock_factory._user_manager_count[google_oauth_user_id] = len(managers)
-                mock_factory._manager_creation_time[key] = datetime.utcnow() - timedelta(seconds=120)
+                user_keys = {key for key, _ in managers}
+                mock_factory._user_manager_keys[google_oauth_user_id] = user_keys
+                mock_factory._creation_times[key] = datetime.utcnow() - timedelta(seconds=120)
             
             # User rapidly creates 3 more connections (hits limit at 20, then tries for 21)
             for attempt in range(3):
@@ -395,7 +405,7 @@ class WebSocketEmergencyCleanupFailureTests:
                     try:
                         # This would trigger proactive cleanup, then emergency cleanup
                         # With enhanced logic, this should succeed by removing zombie managers
-                        manager_count = mock_factory._user_manager_count.get(google_oauth_user_id, 0)
+                        manager_count = mock_factory.get_user_manager_count(google_oauth_user_id)
                         
                         if manager_count >= 14:  # Proactive threshold
                             # Simulate enhanced emergency cleanup success
@@ -410,7 +420,7 @@ class WebSocketEmergencyCleanupFailureTests:
                         pytest.fail(f"Enhanced emergency cleanup should prevent hard limit failures: {e}")
                 else:
                     # After enhanced cleanup, there should be room for new managers
-                    final_count = mock_factory._user_manager_count.get(google_oauth_user_id, 0)
+                    final_count = mock_factory.get_user_manager_count(google_oauth_user_id)
                     assert final_count < 15, f"Enhanced cleanup should free significant resources, count: {final_count}"
     
     def test_emergency_cleanup_performance_requirements(self):

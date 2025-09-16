@@ -1,5 +1,5 @@
 # Shim module for backward compatibility
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
 WebSocketRecoveryManager = WebSocketManager
@@ -53,6 +53,9 @@ from enum import Enum
 from typing import List, Dict, Any, Optional
 import asyncio
 import time
+
+# Import UnifiedWebSocketManager for backward compatibility alias
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
 # Backward compatibility alias
 WebSocketReconnectionHandler = UnifiedWebSocketManager

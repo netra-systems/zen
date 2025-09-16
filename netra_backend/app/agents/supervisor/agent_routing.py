@@ -21,7 +21,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 # SupervisorAgentRouter functionality has been consolidated into CanonicalMessageRouter
 # This file provides compatibility during migration phase
 
-from netra_backend.app.websocket_core.handlers import CanonicalMessageRouter
+from netra_backend.app.websocket_core.canonical_message_router import CanonicalMessageRouter
 
 
 class SupervisorAgentRouter(CanonicalMessageRouter):

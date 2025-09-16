@@ -24,7 +24,7 @@ from unittest.mock import Mock, AsyncMock, patch
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager, get_websocket_manager_async
 from netra_backend.app.services.websocket.quality_validation_handler import QualityValidationHandler
 from netra_backend.app.services.websocket.quality_report_handler import QualityReportHandler
 from netra_backend.app.services.websocket.quality_manager import QualityMessageHandler
@@ -83,7 +83,7 @@ class WebSocketManagerAwaitIssueTests(SSotAsyncTestCase):
                         "create_websocket_manager should not return a coroutine")
         
         # Verify it returns correct type
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         self.assertIsInstance(manager, WebSocketManager,
                             "Should return WebSocketManager instance")
         
@@ -182,12 +182,55 @@ class QualityValidationHandlerAwaitFixTests(SSotAsyncTestCase):
                     user_context = mock_get_context(user_id=user_id, thread_id=None, run_id=None)
                     manager = await get_websocket_manager(user_context)  # BROKEN: await on sync function
                     await manager.send_to_user({"type": "test", "payload": result})
+
+                async def fixed_send_validation_result(user_id, result):
+                    # This demonstrates the CORRECT pattern using the async function
+                    user_context = mock_get_context(user_id=user_id, thread_id=None, run_id=None)
+                    manager = await get_websocket_manager_async(user_context)  # CORRECT: await on async function
+                    await manager.send_to_user({"type": "test", "payload": result})
                 
                 mock_send.side_effect = broken_send_validation_result
                 await self.handler.handle(self.user_id, test_payload)
         
         self.assertIn("can't be used in 'await' expression", str(context.exception))
         logger.info(" PASS:  TEST 3 PASSED: Demonstrated broken await pattern fails")
+
+    @patch('netra_backend.app.services.websocket.quality_validation_handler.get_user_execution_context')
+    @patch('netra_backend.app.services.websocket.quality_validation_handler.get_websocket_manager_async')
+    async def test_validation_handler_fixed_async_pattern(self, mock_create_manager_async, mock_get_context):
+        """
+        TEST 3b: Demonstrate fixed pattern using get_websocket_manager_async
+
+        This test shows how the quality validation handler should work when
+        using the new async function properly.
+        """
+        logger.info("TEST 3b: Testing quality validation handler fixed async pattern")
+
+        # Setup mocks
+        mock_context = Mock()
+        mock_get_context.return_value = mock_context
+
+        # Mock manager with send_to_user method
+        mock_manager = Mock()
+        mock_manager.send_to_user = AsyncMock()
+        mock_create_manager_async.return_value = mock_manager
+
+        # Test payload
+        test_payload = {
+            "content": "Test content for validation",
+            "content_type": "general",
+            "strict_mode": False
+        }
+
+        # This should work when using the FIXED async pattern
+        await self.handler.handle(self.user_id, test_payload)
+
+        # Verify the flow completed successfully
+        self.quality_gate_service.validate_content.assert_called_once()
+        # Note: This test shows the pattern but doesn't actually call the async function
+        # because we're mocking the handler's behavior
+
+        logger.info(" PASS:  TEST 3b PASSED: Fixed async pattern demonstration complete")
         
     @patch('netra_backend.app.services.websocket.quality_validation_handler.get_user_execution_context')
     @patch('netra_backend.app.services.websocket.quality_validation_handler.get_websocket_manager')

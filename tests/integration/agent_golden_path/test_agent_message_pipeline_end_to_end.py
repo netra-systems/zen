@@ -50,7 +50,8 @@ from shared.isolated_environment import get_env
 try:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
-    from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
+    from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory, create_agent_instance_factory
+    from shared.id_generation import UnifiedIdGenerator
     from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, AgentExecutionResult
     from netra_backend.app.agents.supervisor.pipeline_executor import PipelineExecutor
     from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
@@ -124,8 +125,15 @@ class AgentMessagePipelineEndToEndTests(SSotAsyncTestCase):
         if not REAL_COMPONENTS_AVAILABLE:return
 
         try:
-            # Initialize real agent factory for message processing
-            self.agent_factory = get_agent_instance_factory()
+            # Create user execution context for SSOT factory pattern
+            user_context = UserExecutionContext(
+                user_id=f"pipeline_test_user_{UnifiedIdGenerator.generate_base_id('user')}",
+                thread_id=f"pipeline_test_thread_{UnifiedIdGenerator.generate_base_id('thread')}",
+                run_id=UnifiedIdGenerator.generate_base_id('run')
+            )
+
+            # Initialize agent factory using SSOT pattern for message processing
+            self.agent_factory = create_agent_instance_factory(user_context)
 
             # Initialize real execution core for agent processing
             self.execution_core = AgentExecutionCore()

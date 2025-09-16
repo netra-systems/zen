@@ -46,7 +46,7 @@ from netra_backend.app.services.websocket_event_router import (
     ConnectionInfo,
     get_websocket_router
 )
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as UnifiedWebSocketManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -94,7 +94,7 @@ class UserEventRoutingRegistry:
 # UserScopedWebSocketEventRouter functionality has been consolidated into CanonicalMessageRouter
 # This file provides compatibility during migration phase
 
-from netra_backend.app.websocket_core.handlers import CanonicalMessageRouter
+from netra_backend.app.websocket_core.canonical_message_router import CanonicalMessageRouter
 
 
 class UserScopedWebSocketEventRouter(CanonicalMessageRouter):
@@ -664,7 +664,7 @@ async def broadcast_user_event(event: Dict[str, Any],
         # Get WebSocket manager from application context
         try:
             # Try to get manager from existing patterns
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             # Create manager with user context for proper isolation
             websocket_manager = get_websocket_manager(user_context=user_context)
@@ -773,7 +773,7 @@ async def broadcast_to_user(user_id: str, event: Dict[str, Any]) -> int:
     try:
         # Import here to avoid circular dependency
         from netra_backend.app.services.websocket_broadcast_service import create_broadcast_service
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
         # Get WebSocket manager instance via SSOT factory
         # NOTE: Module-level function lacks user context - consider upgrading callers

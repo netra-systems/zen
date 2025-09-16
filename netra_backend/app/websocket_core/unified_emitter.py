@@ -41,7 +41,7 @@ central_logger = CentralLoggerCompat()
 
 if TYPE_CHECKING:
     # ISSUE #824 REMEDIATION: Use canonical SSOT import path
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = get_logger(__name__)

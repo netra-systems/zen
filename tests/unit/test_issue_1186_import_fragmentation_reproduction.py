@@ -1,7 +1,7 @@
 """Test Issue #1186: UserExecutionEngine SSOT Consolidation - Phase 1 Reproduction Tests
 
 This test suite is designed to FAIL initially to expose the current UserExecutionEngine
-fragmentation and singleton violations. These tests demonstrate the problem
+import fragmentation and singleton violations. These tests demonstrate the problem
 before SSOT consolidation is implemented.
 
 Expected Behavior: These tests SHOULD FAIL to demonstrate:
@@ -20,6 +20,7 @@ import pytest
 import re
 import sys
 import unittest
+import pytest
 from pathlib import Path
 from typing import List, Set, Dict, Tuple
 from collections import defaultdict

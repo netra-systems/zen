@@ -23,7 +23,7 @@ class GoldenPathMessageRouterSSOTValidationTests(SSotAsyncTestCase):
         """Set up test fixtures."""
         super().setUp()
         self.staging_base_url = 'https://auth.staging.netrasystems.ai'
-        self.websocket_url = 'wss://backend.staging.netrasystems.ai/ws'
+        self.websocket_url = 'wss://api.staging.netrasystems.ai/ws'
         self.timeout = 60.0
         self.test_users = []
         self.websocket_connections = []

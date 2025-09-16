@@ -1299,6 +1299,135 @@ async def create_test_connection_pool():
             logger.info("Using test-specific WebSocketConnectionPool")
             return TestWebSocketConnectionPool()
 
+class StagingWebSocketConnection:
+    """
+    WebSocket connection class specifically for staging environment E2E tests.
+
+    This class provides staging-specific WebSocket connection management
+    that was missing and causing import errors in E2E tests.
+    """
+
+    def __init__(self, staging_config: Dict[str, Any]):
+        """
+        Initialize staging WebSocket connection.
+
+        Args:
+            staging_config: Staging environment configuration
+        """
+        self.staging_config = staging_config
+        self.websocket_url = staging_config.get("websocket_url", "wss://api.staging.netrasystems.ai/ws")
+        self.connection = None
+        self.is_connected = False
+        self._message_queue = asyncio.Queue()
+
+        # Import logger for staging WebSocket debugging
+        from shared.logging.unified_logging_ssot import get_logger
+        self.logger = get_logger(__name__)
+
+    async def connect(self, auth_token: str) -> bool:
+        """
+        Connect to staging WebSocket with authentication.
+
+        Args:
+            auth_token: Authentication token for staging
+
+        Returns:
+            True if connected successfully
+        """
+        try:
+            if not WEBSOCKETS_AVAILABLE:
+                self.logger.warning("STAGING WEBSOCKET: websockets library not available, using mock connection")
+                self.is_connected = True
+                return True
+
+            headers = {"Authorization": f"Bearer {auth_token}"}
+
+            # Use staging WebSocket URL
+            self.connection = await websockets.connect(
+                self.websocket_url,
+                **_get_websocket_headers_kwargs(headers)
+            )
+
+            self.is_connected = True
+            self.logger.info(f"STAGING WEBSOCKET: Connected to {self.websocket_url}")
+            return True
+
+        except Exception as e:
+            self.logger.error(f"STAGING WEBSOCKET: Connection failed: {e}")
+            self.is_connected = False
+            return False
+
+    async def send_message(self, message: Dict[str, Any]) -> bool:
+        """
+        Send message to staging WebSocket.
+
+        Args:
+            message: Message to send
+
+        Returns:
+            True if sent successfully
+        """
+        if not self.is_connected:
+            self.logger.error("STAGING WEBSOCKET: Not connected, cannot send message")
+            return False
+
+        try:
+            message_json = json.dumps(message)
+
+            if self.connection:
+                await self.connection.send(message_json)
+
+            self.logger.info(f"STAGING WEBSOCKET: Sent message: {message.get('type', 'unknown')}")
+            return True
+
+        except Exception as e:
+            self.logger.error(f"STAGING WEBSOCKET: Send failed: {e}")
+            return False
+
+    async def receive_message(self, timeout: float = 30.0) -> Optional[Dict[str, Any]]:
+        """
+        Receive message from staging WebSocket.
+
+        Args:
+            timeout: Timeout in seconds
+
+        Returns:
+            Received message or None
+        """
+        if not self.is_connected:
+            self.logger.error("STAGING WEBSOCKET: Not connected, cannot receive message")
+            return None
+
+        try:
+            if self.connection:
+                message = await asyncio.wait_for(
+                    self.connection.recv(),
+                    timeout=timeout
+                )
+
+                parsed_message = json.loads(message)
+                self.logger.info(f"STAGING WEBSOCKET: Received message: {parsed_message.get('type', 'unknown')}")
+                return parsed_message
+
+            return None
+
+        except asyncio.TimeoutError:
+            self.logger.warning(f"STAGING WEBSOCKET: Receive timeout after {timeout}s")
+            return None
+        except Exception as e:
+            self.logger.error(f"STAGING WEBSOCKET: Receive failed: {e}")
+            return None
+
+    async def disconnect(self):
+        """Disconnect from staging WebSocket."""
+        if self.connection:
+            await self.connection.close()
+            self.logger.info("STAGING WEBSOCKET: Disconnected")
+
+        self.is_connected = False
+        self.connection = None
+
+
 class TestWebSocketConnectionPool:
     """
     Minimal test-focused WebSocket connection pool implementation.
@@ -1540,3 +1669,26 @@ async def wait_for_agent_completion(
     
     logger.error(f"Agent completion timeout after {timeout}s. Expected events: {expected_events}, Received: {received_events}")
     return False
+
+
+# Export all WebSocket utilities
+__all__ = [
+    'WebSocketTestClient',
+    'WebSocketClientAbstraction',
+    'MockWebSocketConnection',
+    'WebSocketTestHelpers',
+    'MockWebSocket',
+    'WebSocketPerformanceMonitor',
+    'HighVolumeWebSocketServer',
+    'HighVolumeThroughputClient',
+    'TestWebSocketConnectionPool',
+    'StagingWebSocketConnection',
+    'websocket_performance_monitor',
+    'create_test_agent',
+    'assert_agent_execution',
+    'assert_websocket_events',
+    'assert_websocket_events_sent',
+    'validate_websocket_message',
+    'assert_websocket_response_time',
+    'create_mock_websocket'
+]

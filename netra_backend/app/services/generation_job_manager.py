@@ -40,7 +40,7 @@ async def update_job_status(job_id: str, status: str, user_context=None, **kwarg
     # Send WebSocket notification if user context is available
     if user_context:
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             websocket_manager = get_websocket_manager(user_context)
             await websocket_manager.broadcast_to_job(job_id, {"job_id": job_id, "status": status, **kwargs})
         except Exception as e:

@@ -40,7 +40,7 @@ class MessageRouterGoldenPathValidationE2ETests(SSotAsyncTestCase):
         if environment not in ['staging', 'development']:
             pytest.skip(f'E2E tests require staging environment, got: {environment}')
         logger.info(f'Running E2E tests in {environment} environment')
-        cls.staging_config = {'environment': environment, 'auth_service_url': env.get('AUTH_SERVICE_URL', 'https://auth.staging.netrasystems.ai'), 'backend_url': env.get('BACKEND_URL', 'https://backend.staging.netrasystems.ai'), 'websocket_url': env.get('WEBSOCKET_URL', 'wss://backend.staging.netrasystems.ai/ws')}
+        cls.staging_config = {'environment': environment, 'auth_service_url': env.get('AUTH_SERVICE_URL', 'https://auth.staging.netrasystems.ai'), 'backend_url': env.get('BACKEND_URL', 'https://api.staging.netrasystems.ai'), 'websocket_url': env.get('WEBSOCKET_URL', 'wss://api.staging.netrasystems.ai/ws')}
         logger.info(f'Staging configuration: {cls.staging_config}')
 
     def setUp(self):

@@ -1,7 +1,27 @@
 {
   "instances": [
     {
+      "command": "carefully deploy all services",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
       "command": "/clear-old-issue-locks",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/runtests goldenpath e2e",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gcploggardener",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/runtests goldenpath, integration",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },

@@ -30,7 +30,7 @@ from netra_backend.app.services.agent_websocket_bridge import (
     IntegrationConfig,
     HealthStatus
 )
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 

@@ -58,7 +58,7 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
 logger = central_logger.get_logger(__name__)
 
-class AgentOrchestrationExecutionTests(SSotAsyncTestCase):
+class TestAgentOrchestrationExecution(SSotAsyncTestCase):
     """
     Comprehensive integration tests for agent orchestration and execution.
     
@@ -346,6 +346,7 @@ class AgentOrchestrationExecutionTests(SSotAsyncTestCase):
         """
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
         factory = create_agent_instance_factory(user_context)
+        await self._configure_factory_with_agent_registry(factory)
         agent = await factory.create_agent_instance('data_helper', user_context)
         mock_tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
         mock_tool_dispatcher.execute_tool.return_value = {'status': 'success', 'tool_name': 'cost_analyzer', 'result': {'monthly_cost': 1500.5, 'recommendations': ['optimize_batch_sizes']}, 'execution_time': 2.3}
@@ -453,6 +454,7 @@ class AgentOrchestrationExecutionTests(SSotAsyncTestCase):
         """
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
         factory = create_agent_instance_factory(user_context)
+        await self._configure_factory_with_agent_registry(factory)
         agent = await factory.create_agent_instance('data_helper', user_context)
         failure_count = 0
 
@@ -491,6 +493,7 @@ class AgentOrchestrationExecutionTests(SSotAsyncTestCase):
         """
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
         factory = create_agent_instance_factory(user_context)
+        await self._configure_factory_with_agent_registry(factory)
         agent = await factory.create_agent_instance('optimization', user_context)
 
         async def slow_tool_execution(*args, **kwargs):
@@ -520,6 +523,7 @@ class AgentOrchestrationExecutionTests(SSotAsyncTestCase):
         """
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
         factory = create_agent_instance_factory(user_context)
+        await self._configure_factory_with_agent_registry(factory)
         data_agent = await factory.create_agent_instance('data_helper', user_context)
         optimizer_agent = await factory.create_agent_instance('optimization', user_context)
         report_agent = await factory.create_agent_instance('reporting', user_context)
@@ -603,6 +607,7 @@ class AgentOrchestrationExecutionTests(SSotAsyncTestCase):
         """
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
         factory = create_agent_instance_factory(user_context)
+        await self._configure_factory_with_agent_registry(factory)
         agent = await factory.create_agent_instance('data_helper', user_context)
         execution_logs = []
         performance_metrics = []
@@ -641,6 +646,7 @@ class AgentOrchestrationExecutionTests(SSotAsyncTestCase):
         """
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
         factory = create_agent_instance_factory(user_context)
+        await self._configure_factory_with_agent_registry(factory)
         agents = []
         initial_memory_usage = self._get_memory_usage()
         for i in range(5):
@@ -681,7 +687,9 @@ class AgentOrchestrationExecutionTests(SSotAsyncTestCase):
         free_user_context = UserExecutionContext(user_id=str(uuid.uuid4()), thread_id=str(uuid.uuid4()), run_id=str(uuid.uuid4()), agent_context={'user_tier': 'free'})
         enterprise_user_context = UserExecutionContext(user_id=str(uuid.uuid4()), thread_id=str(uuid.uuid4()), run_id=str(uuid.uuid4()), agent_context={'user_tier': 'enterprise'})
         free_factory = create_agent_instance_factory(free_user_context)
+        await self._configure_factory_with_agent_registry(free_factory)
         enterprise_factory = create_agent_instance_factory(enterprise_user_context)
+        await self._configure_factory_with_agent_registry(enterprise_factory)
         free_agent = await free_factory.create_agent_instance('triage', free_user_context)
         enterprise_agent = await enterprise_factory.create_agent_instance('optimization', enterprise_user_context)
 
@@ -727,6 +735,7 @@ class AgentOrchestrationExecutionTests(SSotAsyncTestCase):
         async def execute_user_workflow(engine, context):
             start_time = time.time()
             factory = create_agent_instance_factory(context)
+            await self._configure_factory_with_agent_registry(factory)
             agent = await factory.create_agent_instance('data_helper', context)
             agent.tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
             agent.tool_dispatcher.execute_tool.return_value = {'status': 'success'}
@@ -756,6 +765,7 @@ class AgentOrchestrationExecutionTests(SSotAsyncTestCase):
         """
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
         factory = create_agent_instance_factory(user_context)
+        await self._configure_factory_with_agent_registry(factory)
         service_availability = {'database': True, 'redis': True, 'llm_service': False, 'tool_dispatcher': True}
 
         def check_service_availability(service_name: str) -> bool:
@@ -781,6 +791,7 @@ class AgentOrchestrationExecutionTests(SSotAsyncTestCase):
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
         execution_tracker = get_execution_tracker()
         factory = create_agent_instance_factory(user_context)
+        await self._configure_factory_with_agent_registry(factory)
         agent = await factory.create_agent_instance('optimization', user_context)
 
         async def metrics_tool_execution(*args, **kwargs):
@@ -859,7 +870,9 @@ class AgentOrchestrationExecutionTests(SSotAsyncTestCase):
         factory = create_agent_instance_factory(user_context)
         results = {}
         for profile_name, config in configurations.items():
-            agent = await factory.create_agent_instance('data_helper', user_context)
+            factory_local = create_agent_instance_factory(user_context)
+            await self._configure_factory_with_agent_registry(factory_local)
+            agent = await factory_local.create_agent_instance('data_helper', user_context)
 
             async def configured_tool_execution(*args, **kwargs):
                 return {'status': 'success', 'tokens_used': min(config['max_tokens'], 1500), 'tools_executed': min(config['max_tools'], 3), 'configuration_applied': profile_name}
@@ -887,6 +900,7 @@ class AgentOrchestrationExecutionTests(SSotAsyncTestCase):
         external_services['optimization_engine'].analyze.return_value = {'recommendations': [{'type': 'scaling', 'potential_savings': 850}, {'type': 'resource_optimization', 'potential_savings': 420}]}
         external_services['metrics_collector'].record_metrics.return_value = {'recorded': True}
         factory = create_agent_instance_factory(user_context)
+        await self._configure_factory_with_agent_registry(factory)
         agent = await factory.create_agent_instance('optimization', user_context)
 
         async def external_service_tool_execution(tool_name: str, *args, **kwargs):

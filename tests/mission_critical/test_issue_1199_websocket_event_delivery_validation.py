@@ -33,7 +33,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # WebSocket implementation imports
 from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.canonical_import_patterns import (
     create_test_user_context,
     create_test_fallback_manager,
     check_websocket_service_available
@@ -159,7 +159,7 @@ class Issue1199LocalValidationTests(SSotAsyncTestCase):
         ]
 
         # Import and verify the utilities exist
-        from netra_backend.app.websocket_core.websocket_manager import (
+        from netra_backend.app.websocket_core.canonical_import_patterns import (
             create_test_user_context,
             create_test_fallback_manager,
             check_websocket_service_available
@@ -203,7 +203,7 @@ class Issue1199StartupValidationTests(SSotAsyncTestCase):
 
     def test_websocket_factory_pattern_enforcement(self):
         """Test that WebSocket factory pattern is properly enforced."""
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
         # Test that direct instantiation is blocked
         with pytest.raises(RuntimeError) as exc_info:
@@ -292,7 +292,7 @@ class Issue1199DeploymentValidationTests(SSotAsyncTestCase):
         try:
             async with aiohttp.ClientSession() as session:
                 # Replace with actual staging health endpoint
-                async with session.get("https://backend.staging.netrasystems.ai/health", timeout=10) as response:
+                async with session.get("https://api.staging.netrasystems.ai/health", timeout=10) as response:
                     self.assertEqual(response.status, 200)
                     data = await response.json()
                     self.assertIn("status", data)
@@ -309,7 +309,7 @@ class Issue1199DeploymentValidationTests(SSotAsyncTestCase):
 
         try:
             # Replace with actual staging WebSocket endpoint
-            async with websockets.connect("wss://backend.staging.netrasystems.ai/ws", timeout=10) as websocket:
+            async with websockets.connect("wss://api.staging.netrasystems.ai/ws", timeout=10) as websocket:
                 await websocket.ping()
         except Exception as e:
             self.fail(f"Staging WebSocket endpoint not reachable: {e}")

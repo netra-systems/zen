@@ -158,7 +158,7 @@
           <origin>https://app.staging.netrasystems.ai</origin>
           <origin>https://auth.staging.netrasystems.ai</origin>
           <origin>https://api.staging.netrasystems.ai</origin>
-          <origin>https://backend.staging.netrasystems.ai</origin>
+          <origin>https://api.staging.netrasystems.ai</origin>
           <origin>http://localhost:3000</origin>
           <origin>http://localhost:3001</origin>
           <origin>http://localhost:8000</origin>
@@ -181,7 +181,7 @@
           <origin>https://app.staging.netrasystems.ai</origin>
           <origin>https://app.staging.netrasystems.ai</origin>
           <origin>https://auth.staging.netrasystems.ai</origin>
-          <origin>https://backend.staging.netrasystems.ai</origin>
+          <origin>https://api.staging.netrasystems.ai</origin>
           <origin>http://localhost:3000</origin>
           <origin>http://localhost:3001</origin>
         </allowed_origins>

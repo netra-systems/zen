@@ -55,7 +55,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
             # REMOVED_SYNTAX_ERROR: import time
             # REMOVED_SYNTAX_ERROR: import unittest
             # REMOVED_SYNTAX_ERROR: from pathlib import Path
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.redis_manager import redis_manager
             # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager

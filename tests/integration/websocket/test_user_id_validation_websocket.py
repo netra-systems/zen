@@ -41,12 +41,12 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
 from test_framework.websocket_helpers import MockWebSocketConnection
 from netra_backend.app.websocket_core.unified_websocket_auth import WebSocketAuthenticator
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.unified_authentication_service import UnifiedAuthenticationService
 from shared.types.core_types import ensure_user_id, UserID
 from shared.jwt_secret_manager import get_unified_jwt_secret
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 @pytest.mark.integration
 class WebSocketUserIDValidationIntegrationTests(BaseIntegrationTest):

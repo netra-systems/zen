@@ -40,7 +40,7 @@ class ConfigSSotGoldenPathStagingTests(SSotAsyncTestCase):
     @pytest.fixture(scope='class')
     def staging_config(self):
         """Staging environment configuration."""
-        return {'base_url': 'https://backend.staging.netrasystems.ai', 'frontend_url': 'https://app.staging.netrasystems.ai', 'websocket_url': 'wss://backend.staging.netrasystems.ai/ws', 'health_url': 'https://backend.staging.netrasystems.ai/health', 'timeout': 30, 'max_retries': 3}
+        return {'base_url': 'https://api.staging.netrasystems.ai', 'frontend_url': 'https://app.staging.netrasystems.ai', 'websocket_url': 'wss://api.staging.netrasystems.ai/ws', 'health_url': 'https://api.staging.netrasystems.ai/health', 'timeout': 30, 'max_retries': 3}
 
     @pytest.fixture(scope='class')
     def test_user_credentials(self):
@@ -263,8 +263,8 @@ class GoldenPathConfigIntegrationTests:
         if not os.getenv('STAGING_ACCESS_ENABLED'):
             pytest.skip('Staging access not enabled for this test run')
         test_instance = ConfigSSotGoldenPathStagingTests()
-        staging_config = {'base_url': 'https://backend.staging.netrasystems.ai', 'websocket_url': 'wss://backend.staging.netrasystems.ai/ws', 'health_url': 'https://backend.staging.netrasystems.ai/health', 'timeout': 30}
-        test_credentials = {'email': 'test@netrasystems.ai', 'password': 'test123'}
+        staging_config = {'base_url': 'https://api.staging.netrasystems.ai', 'websocket_url': 'wss://api.staging.netrasystems.ai/ws', 'health_url': 'https://api.staging.netrasystems.ai/health', 'timeout': 30}
+        test_credentials = {'email': 'test@netra.ai', 'password': 'test123'}
         try:
             result = await test_instance.test_golden_path_end_to_end_user_flow(staging_config, test_credentials)
             assert result.get('golden_path_success') or result.get('golden_path_partial'), f'Golden Path test failed: {result}'

@@ -18,8 +18,16 @@ import warnings
 from functools import wraps
 
 # Import the actual implementation
-from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
-from netra_backend.app.websocket_core.types import WebSocketManagerMode
+from netra_backend.app.websocket_core.unified_manager import (
+    _UnifiedWebSocketManagerImplementation,
+    RegistryCompat
+)
+from netra_backend.app.websocket_core.types import (
+    WebSocketManagerMode,
+    WebSocketConnection,
+    _serialize_message_safely,
+    _get_enum_key_representation
+)
 
 
 class CanonicalImportDeprecationWarning(UserWarning):
@@ -100,6 +108,22 @@ async def create_websocket_manager_async(user_context: Optional[Any] = None,
 
     # For now, the creation is not actually async, but this provides future compatibility
     return get_websocket_manager(user_context=user_context, **kwargs)
+
+
+def create_test_fallback_manager(user_context: Optional[Any] = None) -> _UnifiedWebSocketManagerImplementation:
+    """
+    Create test fallback manager for test environments.
+
+    Args:
+        user_context: User execution context
+
+    Returns:
+        Test fallback WebSocket manager instance
+    """
+    _log_import_usage("Test Fallback Factory", "canonical_import_patterns.create_test_fallback_manager")
+
+    from netra_backend.app.websocket_core.websocket_manager import create_test_fallback_manager as _create_fallback
+    return _create_fallback(user_context)
 
 
 # =============================================================================
@@ -247,7 +271,7 @@ MIGRATION_GUIDE = {
         "usage": "manager = get_websocket_manager(user_context=ctx)",
         "replaces": [
             "from netra_backend.app.websocket_core.unified_manager import get_websocket_manager",
-            "from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager",
+            "from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager",
             "from netra_backend.app.websocket_core.factory import get_websocket_manager",
             "from netra_backend.app.websocket_core import get_websocket_manager"
         ]
@@ -259,7 +283,7 @@ MIGRATION_GUIDE = {
         "replaces": [
             "from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager",
             "from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation",
-            "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+            "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
             "from netra_backend.app.websocket_core import UnifiedWebSocketManager"
         ]
     },
@@ -316,10 +340,15 @@ __all__ = [
     # Pattern 1: Factory Functions
     'get_websocket_manager',
     'create_websocket_manager_async',
+    'create_test_fallback_manager',
 
     # Pattern 2: Class Imports
     'UnifiedWebSocketManager',
     'WebSocketManager',
+    'WebSocketConnection',
+    'RegistryCompat',
+    '_serialize_message_safely',
+    '_get_enum_key_representation',
 
     # Pattern 3: Component Interfaces
     'get_component_interface',

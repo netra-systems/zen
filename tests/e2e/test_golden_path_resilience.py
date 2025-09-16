@@ -41,10 +41,10 @@ class StagingServiceFailureSimulator:
 
     def __init__(self):
         self.staging_urls = {
-            "backend": "https://backend.staging.netrasystems.ai",
+            "backend": "https://api.staging.netrasystems.ai",
             "auth": "https://auth.staging.netrasystems.ai",
-            "websocket": "wss://backend.staging.netrasystems.ai/ws",
-            "health": "https://backend.staging.netrasystems.ai/health"
+            "websocket": "wss://api.staging.netrasystems.ai/ws",
+            "health": "https://api.staging.netrasystems.ai/health"
         }
         self.simulated_failures: Dict[str, Dict] = {}
 
@@ -141,7 +141,7 @@ class StagingWebSocketClient:
 
     def __init__(self, auth_token: str):
         self.auth_token = auth_token
-        self.websocket_url = "wss://backend.staging.netrasystems.ai/ws"
+        self.websocket_url = "wss://api.staging.netrasystems.ai/ws"
         self.connection = None
         self.events_received: List[Dict] = []
 

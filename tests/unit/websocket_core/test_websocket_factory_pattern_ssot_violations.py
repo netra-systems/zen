@@ -201,7 +201,7 @@ class WebSocketFactoryPatternSSOTViolationsTests(SSotAsyncTestCase):
         # Test direct SSOT instantiation performance
         direct_times = []
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
             for i in range(5):  # 5 iterations
                 start_time = time.perf_counter()
@@ -316,7 +316,7 @@ class WebSocketFactoryPatternSSOTViolationsTests(SSotAsyncTestCase):
         This test ensures the preferred SSOT pattern works correctly.
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             from shared.types.core_types import ensure_user_id
 
@@ -412,7 +412,7 @@ class WebSocketFactoryPatternSSOTViolationsTests(SSotAsyncTestCase):
 
         except ImportError:
             # Factory pattern not available - test direct instantiation isolation
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
             manager1 = WebSocketManager(user_context=user1_context)
             manager2 = WebSocketManager(user_context=user2_context)

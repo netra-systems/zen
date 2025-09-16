@@ -12,7 +12,7 @@
     # REMOVED_SYNTAX_ERROR: import pytest
     # REMOVED_SYNTAX_ERROR: import asyncio
     # REMOVED_SYNTAX_ERROR: from fastapi.testclient import TestClient
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
     # REMOVED_SYNTAX_ERROR: # Removed non-existent AuthManager import
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 

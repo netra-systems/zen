@@ -56,6 +56,7 @@ from shared.types.core_types import UserID, ThreadID, RunID
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.integration
+@pytest.mark.database
 class StatePersistenceIntegrationCoreTests(SSotAsyncTestCase):
     """Core integration tests for StatePersistence with real 3-tier architecture"""
 
@@ -117,6 +118,7 @@ class StatePersistenceIntegrationCoreTests(SSotAsyncTestCase):
         return (user_id, thread_id)
 
 @pytest.mark.integration
+@pytest.mark.database
 class ThreeTierArchitectureIntegrationTests(StatePersistenceIntegrationCoreTests):
     """Integration tests for 3-tier architecture coordination"""
 
@@ -189,6 +191,7 @@ class ThreeTierArchitectureIntegrationTests(StatePersistenceIntegrationCoreTests
         self.assertIn('audit_info', tier_data[2])
 
 @pytest.mark.integration
+@pytest.mark.database
 class DataMigrationIntegrationTests(StatePersistenceIntegrationCoreTests):
     """Integration tests for data migration between tiers"""
 
@@ -246,6 +249,7 @@ class DataMigrationIntegrationTests(StatePersistenceIntegrationCoreTests):
         self.assertEqual(rare_retrieved['type'], 'rare')
 
 @pytest.mark.integration
+@pytest.mark.database
 class PerformanceOptimizationIntegrationTests(StatePersistenceIntegrationCoreTests):
     """Integration tests for performance optimization under real load"""
 
@@ -358,6 +362,7 @@ class PerformanceOptimizationIntegrationTests(StatePersistenceIntegrationCoreTes
             self.assertGreaterEqual(item['score'], 0.5)
 
 @pytest.mark.integration
+@pytest.mark.database
 class DisasterRecoveryIntegrationTests(StatePersistenceIntegrationCoreTests):
     """Integration tests for disaster recovery scenarios"""
 

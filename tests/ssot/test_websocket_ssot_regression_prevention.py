@@ -125,7 +125,7 @@ class WebSocketSSotRegressionPreventionTests(SSotBaseTestCase):
         # Patterns that indicate SSOT violations
         violation_patterns = [
             "from netra_backend.app.websocket_core.manager import",
-            "from netra_backend.app.websocket_core.websocket_manager import",
+            "from netra_backend.app.websocket_core.canonical_import_patterns import",
             "from netra_backend.app.websocket_core.unified_manager import",
             "import netra_backend.app.websocket_core.manager",
             "import netra_backend.app.websocket_core.websocket_manager",

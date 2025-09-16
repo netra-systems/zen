@@ -17,15 +17,28 @@ platform value through reliable chat interactions and agent responses.
 """
 
 # Package imports for convenience
-from .test_execution_state_transitions import TestExecutionStateTransitions
-from .test_timeout_configuration import TestTimeoutConfiguration  
-from .test_circuit_breaker_logic import TestCircuitBreakerLogic
-from .test_phase_validation_rules import TestPhaseValidationRules
-from .test_context_validation import TestContextValidation
+from .test_execution_state_transitions import ExecutionStateTransitionsTests
+from .test_timeout_configuration import TimeoutConfigurationTests
+from .test_circuit_breaker_logic import CircuitBreakerLogicTests
+from .test_phase_validation_rules import PhaseValidationRulesTests
+from .test_context_validation import ContextValidationTests
+
+# Provide Test* aliases for backward compatibility
+TestExecutionStateTransitions = ExecutionStateTransitionsTests
+TestTimeoutConfiguration = TimeoutConfigurationTests
+TestCircuitBreakerLogic = CircuitBreakerLogicTests
+TestPhaseValidationRules = PhaseValidationRulesTests
+TestContextValidation = ContextValidationTests
 
 __all__ = [
+    'ExecutionStateTransitionsTests',
+    'TimeoutConfigurationTests',
+    'CircuitBreakerLogicTests',
+    'PhaseValidationRulesTests',
+    'ContextValidationTests',
+    # Backward compatibility aliases
     'TestExecutionStateTransitions',
-    'TestTimeoutConfiguration', 
+    'TestTimeoutConfiguration',
     'TestCircuitBreakerLogic',
     'TestPhaseValidationRules',
     'TestContextValidation'

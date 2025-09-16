@@ -66,13 +66,13 @@ class WebSocketManagerImportPathFragmentationTests(SSotBaseTestCase):
         logger.info("Testing import path fragmentation - this MUST fail initially to prove violation")
         
         # Import WebSocketManager from primary path (websocket_manager.py)
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as ManagerPath1
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as ManagerPath1
         
         # Import WebSocketManager from compatibility path (manager.py)  
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as ManagerPath2
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as ManagerPath2
         
         # Import UnifiedWebSocketManager directly
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as ManagerPath3
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as ManagerPath3
         
         logger.info(f"ManagerPath1 class: {ManagerPath1}")
         logger.info(f"ManagerPath2 class: {ManagerPath2}")
@@ -132,8 +132,8 @@ class WebSocketManagerImportPathFragmentationTests(SSotBaseTestCase):
         
         try:
             # Create instances from different import paths
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as factory1
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as DirectClass
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager as factory1
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as DirectClass
             
             # Test async factory creation
             import asyncio
@@ -144,7 +144,7 @@ class WebSocketManagerImportPathFragmentationTests(SSotBaseTestCase):
                 
                 # Create instance via direct class instantiation
                 # Note: This may require different parameters due to fragmentation
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerMode
                 
                 # Create test user context for direct instantiation
                 test_context = type('MockUserContext', (), {

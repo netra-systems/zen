@@ -93,8 +93,7 @@ class SecurityOriginsConfig:
                 "https://staging.netrasystems.ai",
                 "https://app.staging.netrasystems.ai",
                 "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth subdomain
-                "https://api.staging.netrasystems.ai",
-                "https://backend.staging.netrasystems.ai"
+                "https://api.staging.netrasystems.ai"
             ],
             "cloud_run": [
                 # Cloud Run service URLs for staging
@@ -104,8 +103,7 @@ class SecurityOriginsConfig:
             ],
             "websocket": [
                 "wss://app.staging.netrasystems.ai",
-                "wss://api.staging.netrasystems.ai",
-                "wss://backend.staging.netrasystems.ai"
+                "wss://api.staging.netrasystems.ai"
             ]
         }
     

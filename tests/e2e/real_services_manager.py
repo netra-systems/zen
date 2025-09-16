@@ -37,7 +37,7 @@ from websockets import WebSocketException, ConnectionClosedError
 
 from shared.isolated_environment import IsolatedEnvironment
 from tests.e2e.config import TEST_CONFIG, TestEnvironmentType
-from tests.e2e.test_environment_config import EnvironmentConfigTests as TestEnvironmentConfig
+from tests.e2e.test_environment_config import EnvironmentConfigTests
 
 # CRITICAL INTEGRATION: Import UnifiedDockerManager for actual service startup
 try:
@@ -478,9 +478,9 @@ class RealServicesManager:
     - Error handling and recovery
     """
     
-    def __init__(self, 
+    def __init__(self,
                  project_root: Optional[Path] = None,
-                 env_config: Optional[TestEnvironmentConfig] = None,
+                 env_config: Optional[EnvironmentConfigTests] = None,
                  health_check_config: Optional[HealthCheckConfig] = None):
         """
         Initialize Real Services Manager.

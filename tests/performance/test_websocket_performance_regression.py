@@ -25,7 +25,7 @@ from typing import List, Dict, Any
 from unittest.mock import AsyncMock, MagicMock
 from netra_backend.app.core.windows_asyncio_safe import windows_safe_sleep, windows_safe_wait_for, WindowsAsyncioSafePatterns
 from netra_backend.app.routes.websocket_ssot import WebSocketSSOTRouter
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.performance

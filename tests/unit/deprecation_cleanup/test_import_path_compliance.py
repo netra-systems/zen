@@ -79,7 +79,7 @@ class TestImportPathCompliance(SSotBaseTestCase):
             
             # Look for compliant patterns instead
             compliant_patterns = [
-                'from netra_backend.app.websocket_core.websocket_manager import',
+                'from netra_backend.app.websocket_core.canonical_import_patterns import',
                 'from netra_backend.app.websocket_core.unified_emitter import',
                 'from netra_backend.app.websocket_core.event_validator import'
             ]
@@ -104,7 +104,7 @@ class TestImportPathCompliance(SSotBaseTestCase):
         # Test canonical import paths one by one
         canonical_imports = [
             {
-                'import_statement': 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
+                'import_statement': 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager',
                 'class_name': 'WebSocketManager',
                 'description': 'WebSocket manager from specific module'
             },
@@ -213,7 +213,7 @@ class TestImportPathCompliance(SSotBaseTestCase):
         equivalence_tests = [
             {
                 'deprecated': 'from netra_backend.app.websocket_core import WebSocketManager',
-                'canonical': 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
+                'canonical': 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager',
                 'class_name': 'WebSocketManager'
             }
         ]
@@ -271,7 +271,7 @@ class TestImportPathCompliance(SSotBaseTestCase):
                 
                 # Count SSOT-compliant patterns
                 ssot_patterns = [
-                    'from netra_backend.app.websocket_core.websocket_manager import',
+                    'from netra_backend.app.websocket_core.canonical_import_patterns import',
                     'from netra_backend.app.websocket_core.event_validator import', 
                     'from netra_backend.app.websocket_core.unified_emitter import',
                     'from netra_backend.app.websocket_core.protocols import'

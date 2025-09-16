@@ -168,7 +168,7 @@ class _UnifiedWebSocketManagerImplementation:
         """
         # Import registry functions (avoid circular imports)
         try:
-            from netra_backend.app.websocket_core.websocket_manager import (
+            from netra_backend.app.websocket_core.canonical_import_patterns import (
                 _get_user_key, _USER_MANAGER_REGISTRY, _REGISTRY_LOCK
             )
             
@@ -352,7 +352,7 @@ class _UnifiedWebSocketManagerImplementation:
 
         # ISSUE #889 REMEDIATION: Register this instance in the user-scoped registry
         try:
-            from netra_backend.app.websocket_core.websocket_manager import (
+            from netra_backend.app.websocket_core.canonical_import_patterns import (
                 _get_user_key, _USER_MANAGER_REGISTRY
             )
             
@@ -3960,6 +3960,304 @@ class _UnifiedWebSocketManagerImplementation:
         logger.debug(f"[Golden Path] Emitting agent event '{event_type}' to user {str(user_id)[:8]}... via emit_agent_event() interface")
         await self.send_agent_event(user_id, event_type, data)
 
+    # ==================================================================================
+    # HEALTH MONITORING AND CLEANUP LIFECYCLE METHODS
+    # Support for WebSocket Manager Factory resource management
+    # ==================================================================================
+
+    def _is_active(self) -> bool:
+        """
+        Check if this manager instance is active and responsive.
+
+        Used by WebSocketManagerFactory for resource management decisions.
+
+        Returns:
+            bool: True if manager is active and handling connections
+        """
+        try:
+            # Manager is active if it has been initialized and has connections or recent activity
+            if not hasattr(self, '_initialized') or not self._initialized:
+                return False
+
+            # Check if we have any active connections
+            if self._connections:
+                return True
+
+            # Check if we had recent activity (within last 5 minutes)
+            if hasattr(self, '_last_activity_time'):
+                time_since_activity = (datetime.now(timezone.utc) - self._last_activity_time).total_seconds()
+                return time_since_activity < 300  # 5 minutes
+
+            # If no connections and no recent activity, consider inactive
+            return False
+
+        except Exception as e:
+            logger.error(f"Error checking manager active status: {e}")
+            return False
+
+    async def health_check(self, timeout: float = 2.0) -> bool:
+        """
+        Perform comprehensive health check of this manager instance.
+
+        Used by WebSocketManagerFactory for zombie detection and cleanup decisions.
+
+        Args:
+            timeout: Maximum time to spend on health check
+
+        Returns:
+            bool: True if manager is healthy and responsive
+        """
+        try:
+            start_time = time.time()
+
+            # Basic state validation
+            if not hasattr(self, '_initialized') or not self._initialized:
+                logger.debug("Health check failed: Manager not initialized")
+                return False
+
+            # Check if we can access core attributes without errors
+            _ = len(self._connections)
+            _ = len(self._user_connections)
+
+            # Test connection responsiveness for active connections
+            responsive_connections = 0
+            total_connections = len(self._connections)
+
+            if total_connections > 0:
+                # Test a sample of connections (max 5 to avoid timeout)
+                test_connections = list(self._connections.values())[:5]
+
+                for connection in test_connections:
+                    if time.time() - start_time > timeout:
+                        break  # Avoid timeout
+
+                    try:
+                        # Quick responsiveness test
+                        if hasattr(connection, 'websocket') and connection.websocket:
+                            # Try to send a ping or check connection state
+                            if hasattr(connection.websocket, 'state'):
+                                # WebSocket has state - check if it's open
+                                if str(connection.websocket.state).lower() in ['open', 'connected']:
+                                    responsive_connections += 1
+                            elif hasattr(connection.websocket, 'ping'):
+                                # Try a ping with short timeout
+                                try:
+                                    await asyncio.wait_for(connection.websocket.ping(), timeout=0.5)
+                                    responsive_connections += 1
+                                except asyncio.TimeoutError:
+                                    pass  # Connection not responsive
+                            else:
+                                # Assume responsive if no way to test
+                                responsive_connections += 1
+                    except Exception:
+                        pass  # Connection not responsive
+
+                # Manager is healthy if majority of connections are responsive
+                if total_connections > 0:
+                    responsiveness_ratio = responsive_connections / min(total_connections, 5)
+                    if responsiveness_ratio < 0.5:  # Less than 50% responsive
+                        logger.debug(f"Health check failed: Low connection responsiveness ({responsive_connections}/{total_connections})")
+                        return False
+
+            # Check for internal error state
+            if hasattr(self, '_error_count'):
+                error_count = getattr(self, '_error_count', 0)
+                if error_count > 10:  # Too many errors
+                    logger.debug(f"Health check failed: High error count ({error_count})")
+                    return False
+
+            # Update last activity time
+            self._last_activity_time = datetime.now(timezone.utc)
+
+            # All checks passed
+            elapsed = time.time() - start_time
+            logger.debug(f"Health check passed in {elapsed:.3f}s: {responsive_connections}/{total_connections} connections responsive")
+            return True
+
+        except Exception as e:
+            logger.error(f"Health check failed with exception: {e}")
+            return False
+
+    async def graceful_shutdown(self, timeout: float = 5.0) -> bool:
+        """
+        Perform graceful shutdown of this manager instance.
+
+        Used by WebSocketManagerFactory during emergency cleanup.
+
+        Args:
+            timeout: Maximum time to spend on shutdown
+
+        Returns:
+            bool: True if shutdown completed successfully
+        """
+        try:
+            logger.info(f"Starting graceful shutdown of WebSocket manager (timeout: {timeout}s)")
+            start_time = time.time()
+
+            # Mark as shutting down
+            self._shutting_down = True
+
+            # Close all connections gracefully
+            connection_ids = list(self._connections.keys())
+            closed_count = 0
+
+            for conn_id in connection_ids:
+                if time.time() - start_time > timeout * 0.8:  # Leave time for cleanup
+                    break
+
+                try:
+                    connection = self._connections.get(conn_id)
+                    if connection and hasattr(connection, 'websocket') and connection.websocket:
+                        # Send close frame if possible
+                        if hasattr(connection.websocket, 'close'):
+                            await asyncio.wait_for(
+                                connection.websocket.close(code=1001, reason="Manager shutdown"),
+                                timeout=1.0
+                            )
+
+                    # Remove from our registry
+                    await self.remove_connection(conn_id)
+                    closed_count += 1
+
+                except Exception as e:
+                    logger.warning(f"Error closing connection {conn_id} during shutdown: {e}")
+
+            # Clear internal state
+            try:
+                self._connections.clear()
+                self._user_connections.clear()
+                if hasattr(self, '_connection_message_queues'):
+                    self._connection_message_queues.clear()
+                if hasattr(self, '_message_recovery_queue'):
+                    self._message_recovery_queue.clear()
+            except Exception as e:
+                logger.warning(f"Error clearing internal state during shutdown: {e}")
+
+            elapsed = time.time() - start_time
+            logger.info(f"Graceful shutdown completed in {elapsed:.3f}s: {closed_count}/{len(connection_ids)} connections closed")
+            return True
+
+        except Exception as e:
+            logger.error(f"Error during graceful shutdown: {e}")
+            return False
+
+    def get_manager_metrics(self) -> Dict[str, Any]:
+        """
+        Get detailed metrics about this manager instance.
+
+        Used by WebSocketManagerFactory for health assessment and monitoring.
+
+        Returns:
+            Dict containing manager metrics and health indicators
+        """
+        try:
+            now = datetime.now(timezone.utc)
+
+            # Basic connection metrics
+            total_connections = len(self._connections) if hasattr(self, '_connections') else 0
+            total_users = len(self._user_connections) if hasattr(self, '_user_connections') else 0
+
+            # Activity metrics
+            last_activity = getattr(self, '_last_activity_time', None)
+            seconds_since_activity = None
+            if last_activity:
+                seconds_since_activity = (now - last_activity).total_seconds()
+
+            # Error metrics
+            error_count = getattr(self, '_error_count', 0)
+            connection_error_count = len(getattr(self, '_connection_error_count', {}))
+
+            # Message queue metrics
+            queued_messages = 0
+            if hasattr(self, '_message_recovery_queue'):
+                queued_messages = sum(len(queue) for queue in self._message_recovery_queue.values())
+
+            # Calculate health score (0.0 to 1.0)
+            health_score = 1.0
+
+            # Penalize for errors
+            if error_count > 0:
+                health_score -= min(0.3, error_count * 0.02)  # Max 30% penalty
+
+            # Penalize for old activity
+            if seconds_since_activity is not None:
+                if seconds_since_activity > 300:  # 5 minutes
+                    health_score -= 0.2
+                elif seconds_since_activity > 600:  # 10 minutes
+                    health_score -= 0.4
+
+            # Penalize for too many queued messages
+            if queued_messages > 10:
+                health_score -= min(0.2, queued_messages * 0.01)
+
+            health_score = max(0.0, health_score)
+
+            return {
+                'connection_count': total_connections,
+                'user_count': total_users,
+                'error_count': error_count,
+                'connection_errors': connection_error_count,
+                'queued_messages': queued_messages,
+                'last_activity': last_activity.isoformat() if last_activity else None,
+                'seconds_since_activity': seconds_since_activity,
+                'health_score': health_score,
+                'is_active': self._is_active(),
+                'is_shutting_down': getattr(self, '_shutting_down', False),
+                'manager_mode': self.mode.value if hasattr(self, 'mode') else 'unknown',
+                'user_id': getattr(self.user_context, 'user_id', 'unknown') if hasattr(self, 'user_context') else 'unknown',
+                'timestamp': now.isoformat()
+            }
+
+        except Exception as e:
+            logger.error(f"Error getting manager metrics: {e}")
+            return {
+                'error': str(e),
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            }
+
+    def get_connection_health_summary(self) -> Dict[str, Any]:
+        """
+        Get summary of connection health for this manager.
+
+        Returns:
+            Dict containing connection health statistics
+        """
+        try:
+            total_connections = len(self._connections)
+            healthy_connections = 0
+            unhealthy_connections = 0
+            unknown_connections = 0
+
+            for connection in self._connections.values():
+                try:
+                    # Basic health check
+                    if hasattr(connection, 'websocket') and connection.websocket:
+                        if hasattr(connection.websocket, 'state'):
+                            state = str(connection.websocket.state).lower()
+                            if state in ['open', 'connected']:
+                                healthy_connections += 1
+                            else:
+                                unhealthy_connections += 1
+                        else:
+                            unknown_connections += 1
+                    else:
+                        unhealthy_connections += 1
+                except Exception:
+                    unhealthy_connections += 1
+
+            return {
+                'total_connections': total_connections,
+                'healthy_connections': healthy_connections,
+                'unhealthy_connections': unhealthy_connections,
+                'unknown_connections': unknown_connections,
+                'health_ratio': healthy_connections / max(1, total_connections),
+                'needs_attention': unhealthy_connections > 0 or (total_connections > 0 and healthy_connections == 0)
+            }
+
+        except Exception as e:
+            logger.error(f"Error getting connection health summary: {e}")
+            return {'error': str(e), 'total_connections': 0}
+
 
 # SECURITY FIX: Replace singleton with factory pattern
 #  ALERT:  SECURITY FIX: Singleton pattern completely removed to prevent multi-user data leakage
@@ -3981,7 +4279,7 @@ class _UnifiedWebSocketManagerImplementation:
 #
 # This module now contains the implementation but does NOT export classes directly.
 # All imports must go through the canonical SSOT path:
-# from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+# from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 #
 # This prevents fragmented import paths and enforces SSOT compliance.
 
@@ -4005,7 +4303,7 @@ if __name__ not in sys.modules:
         logger = get_logger(__name__)
         logger.warning(
             "SSOT CONSOLIDATION (Issue #824): Direct imports from unified_manager.py are deprecated. "
-            "Use canonical path: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager"
+            "Use canonical path: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager"
         )
     except ImportError:
         # Fallback logging if logging import fails

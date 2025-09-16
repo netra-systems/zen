@@ -25,6 +25,7 @@ from auth_service.auth_core.core.lazy_auth_service import get_auth_service
 # Get environment manager
 env = get_env()
 
+# Initialize logger
 logger = logging.getLogger(__name__)
 
 # Import MockAuthService for testing only in appropriate environments

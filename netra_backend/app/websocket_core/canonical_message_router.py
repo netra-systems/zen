@@ -126,7 +126,8 @@ class CanonicalMessageRouter:
         self._stats = {
             'messages_routed': 0,
             'routing_errors': 0,
-            'active_connections': 0
+            'active_connections': 0,
+            'handlers_registered': 0
         }
 
         # Initialize routing strategies
@@ -425,6 +426,179 @@ class CanonicalMessageRouter:
 
         if cleaned_count > 0:
             logger.info(f"Cleaned up {cleaned_count} inactive connections")
+
+    # === DUAL INTERFACE SUPPORT (Issue #1115 Phase 1) ===
+    # Both add_handler and register_handler methods for backwards compatibility
+
+    def add_handler(
+        self,
+        message_type: WebSocketEventType,
+        handler: Callable,
+        priority: int = 0
+    ) -> bool:
+        """
+        Add a message handler for a specific message type (MODERN INTERFACE)
+
+        Args:
+            message_type: Type of message this handler should process
+            handler: Callable to handle the message
+            priority: Handler priority (higher = executed first)
+
+        Returns:
+            bool: Success status
+        """
+        try:
+            if message_type not in self._event_handlers:
+                self._event_handlers[message_type] = []
+
+            # Insert handler maintaining priority order (higher priority first)
+            handler_entry = {'handler': handler, 'priority': priority}
+            inserted = False
+
+            for i, existing in enumerate(self._event_handlers[message_type]):
+                if existing.get('priority', 0) < priority:
+                    self._event_handlers[message_type].insert(i, handler_entry)
+                    inserted = True
+                    break
+
+            if not inserted:
+                self._event_handlers[message_type].append(handler_entry)
+
+            self._stats['handlers_registered'] += 1
+
+            logger.info(
+                f"Handler registered for {message_type} with priority {priority} "
+                f"- Total handlers: {len(self._event_handlers[message_type])}"
+            )
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to add handler for {message_type}: {e}")
+            self._stats['routing_errors'] += 1
+            return False
+
+    def register_handler(
+        self,
+        message_type: WebSocketEventType,
+        handler: Callable,
+        priority: int = 0
+    ) -> bool:
+        """
+        Register a message handler for a specific message type (LEGACY INTERFACE)
+
+        This method provides backwards compatibility for existing code that uses
+        register_handler. Internally delegates to add_handler for SSOT compliance.
+
+        Args:
+            message_type: Type of message this handler should process
+            handler: Callable to handle the message
+            priority: Handler priority (higher = executed first)
+
+        Returns:
+            bool: Success status
+        """
+        logger.debug(
+            f"Legacy register_handler called - delegating to add_handler for SSOT compliance"
+        )
+        return self.add_handler(message_type, handler, priority)
+
+    def remove_handler(self, message_type: WebSocketEventType, handler: Callable) -> bool:
+        """
+        Remove a specific handler for a message type
+
+        Args:
+            message_type: Message type to remove handler from
+            handler: Specific handler to remove
+
+        Returns:
+            bool: Success status (True if handler was found and removed)
+        """
+        try:
+            if message_type not in self._event_handlers:
+                return False
+
+            original_count = len(self._event_handlers[message_type])
+            self._event_handlers[message_type] = [
+                entry for entry in self._event_handlers[message_type]
+                if entry['handler'] != handler
+            ]
+
+            removed_count = original_count - len(self._event_handlers[message_type])
+
+            # Clean up empty handler lists
+            if not self._event_handlers[message_type]:
+                del self._event_handlers[message_type]
+
+            if removed_count > 0:
+                logger.info(f"Removed {removed_count} handler(s) for {message_type}")
+                return True
+            else:
+                logger.debug(f"No handlers found to remove for {message_type}")
+                return False
+
+        except Exception as e:
+            logger.error(f"Failed to remove handler for {message_type}: {e}")
+            self._stats['routing_errors'] += 1
+            return False
+
+    def get_handlers(self, message_type: WebSocketEventType) -> List[Callable]:
+        """
+        Get all handlers for a specific message type, ordered by priority
+
+        Args:
+            message_type: Message type to get handlers for
+
+        Returns:
+            List[Callable]: List of handlers ordered by priority (highest first)
+        """
+        if message_type not in self._event_handlers:
+            return []
+
+        # Return handlers in priority order
+        return [
+            entry['handler']
+            for entry in self._event_handlers[message_type]
+        ]
+
+    async def execute_handlers(
+        self,
+        message_type: WebSocketEventType,
+        *args,
+        **kwargs
+    ) -> List[Any]:
+        """
+        Execute all handlers for a message type with given arguments
+
+        Args:
+            message_type: Type of message to handle
+            *args: Positional arguments to pass to handlers
+            **kwargs: Keyword arguments to pass to handlers
+
+        Returns:
+            List[Any]: Results from all handlers
+        """
+        handlers = self.get_handlers(message_type)
+        if not handlers:
+            logger.debug(f"No handlers found for message type: {message_type}")
+            return []
+
+        results = []
+
+        for handler in handlers:
+            try:
+                if asyncio.iscoroutinefunction(handler):
+                    result = await handler(*args, **kwargs)
+                else:
+                    result = handler(*args, **kwargs)
+                results.append(result)
+
+            except Exception as e:
+                logger.error(f"Handler execution failed for {message_type}: {e}")
+                self._stats['routing_errors'] += 1
+                results.append(None)
+
+        logger.debug(f"Executed {len(handlers)} handlers for {message_type}")
+        return results
 
     @asynccontextmanager
     async def routing_context(self, user_id: str):

@@ -43,11 +43,11 @@ class WebSocketManagerImportPathViolationsTests(SSotBaseTestCase):
     }
 
     # SSOT import pattern (correct)
-    SSOT_IMPORT_PATTERN = "from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager"
+    SSOT_IMPORT_PATTERN = "from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager"
     
     # Legacy import patterns (violating SSOT)
     LEGACY_IMPORT_PATTERNS = [
-        "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+        "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
         "from netra_backend.app.websocket_core import WebSocketManager"
     ]
 
@@ -125,7 +125,7 @@ class WebSocketManagerImportPathViolationsTests(SSotBaseTestCase):
             f"\n\nExpected: SSOT unified_manager import pattern" +
             f"\nFound: Legacy websocket_manager import patterns" +
             f"\nImpact: Causes race conditions during WebSocket initialization" +
-            f"\nFix: Replace with 'from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager'"
+            f"\nFix: Replace with 'from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager'"
         )
 
     def test_detect_legacy_import_violations_in_agent_websocket_bridge(self):
@@ -144,7 +144,7 @@ class WebSocketManagerImportPathViolationsTests(SSotBaseTestCase):
             f"\n\nExpected: SSOT unified_manager import pattern" +
             f"\nFound: Legacy websocket_manager import patterns" +
             f"\nImpact: Causes race conditions in WebSocket bridge initialization" +
-            f"\nFix: Replace with 'from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager'"
+            f"\nFix: Replace with 'from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager'"
         )
 
     def test_detect_legacy_import_violations_in_agent_instance_factory(self):
@@ -163,7 +163,7 @@ class WebSocketManagerImportPathViolationsTests(SSotBaseTestCase):
             f"\n\nExpected: SSOT unified_manager import pattern" +
             f"\nFound: Legacy websocket_manager import patterns" +
             f"\nImpact: Causes race conditions in agent instance creation" +
-            f"\nFix: Replace with 'from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager'"
+            f"\nFix: Replace with 'from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager'"
         )
 
     def test_comprehensive_legacy_import_scan(self):

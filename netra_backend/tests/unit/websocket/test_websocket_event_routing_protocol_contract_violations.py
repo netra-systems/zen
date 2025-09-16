@@ -29,7 +29,7 @@ import pytest
 from shared.types import UserID, ThreadID, RunID, RequestID, WebSocketID, ConnectionID, ensure_user_id, ensure_thread_id, ensure_request_id, WebSocketEventType, StronglyTypedWebSocketEvent
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
 class WebSocketProtocolContractViolationsTests(SSotBaseTestCase):
     """

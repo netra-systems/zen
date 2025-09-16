@@ -27,16 +27,16 @@ __version__ = "1.0.0"
 __author__ = "Netra Apex Development Team"
 
 # Test category exports
-from .test_websocket_event_delivery_reliability import TestWebSocketEventDeliveryReliability
-from .test_websocket_connection_state_management import TestWebSocketConnectionStateManagement  
-from .test_websocket_event_routing_isolation import TestWebSocketEventRoutingIsolation
-from .test_websocket_error_handling_recovery import TestWebSocketErrorHandlingRecovery
-from .test_websocket_performance_load_handling import TestWebSocketPerformanceLoadHandling
+from .test_websocket_event_delivery_reliability import WebSocketEventDeliveryReliabilityTests
+from .test_websocket_connection_state_management import WebSocketConnectionStateManagementTests
+from .test_websocket_event_routing_isolation import WebSocketEventRoutingIsolationTests
+from .test_websocket_error_handling_recovery import WebSocketErrorHandlingRecoveryTests
+from .test_websocket_performance_load_handling import WebSocketPerformanceLoadHandlingTests
 
 __all__ = [
-    "TestWebSocketEventDeliveryReliability",
-    "TestWebSocketConnectionStateManagement", 
-    "TestWebSocketEventRoutingIsolation",
-    "TestWebSocketErrorHandlingRecovery",
-    "TestWebSocketPerformanceLoadHandling"
+    "WebSocketEventDeliveryReliabilityTests",
+    "WebSocketConnectionStateManagementTests",
+    "WebSocketEventRoutingIsolationTests",
+    "WebSocketErrorHandlingRecoveryTests",
+    "WebSocketPerformanceLoadHandlingTests"
 ]

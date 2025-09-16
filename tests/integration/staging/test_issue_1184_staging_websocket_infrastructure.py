@@ -13,7 +13,7 @@ These tests run against staging GCP environment to validate WebSocket infrastruc
 import pytest
 import asyncio
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from shared.logging.unified_logging_ssot import get_logger
 
 logger = get_logger(__name__)
@@ -28,7 +28,7 @@ class StagingWebSocketInfrastructureTests(SSotAsyncTestCase):
         """Set up staging test environment."""
         super().setUp()
         # Reset manager registry for clean test state
-        from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
+        from netra_backend.app.websocket_core.canonical_import_patterns import reset_manager_registry
         reset_manager_registry()
 
     async def test_websocket_manager_staging_compatibility(self):
@@ -238,7 +238,7 @@ class StagingWebSocketInfrastructureTests(SSotAsyncTestCase):
         """
         # Test registry status functionality
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_manager_registry_status
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_manager_registry_status
             registry_status = await get_manager_registry_status()
 
             logger.info(f"Initial staging registry status: {registry_status}")

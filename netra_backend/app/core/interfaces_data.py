@@ -288,7 +288,7 @@ class CoreClickHouseOperations:
                 logger.debug(f"Corpus notification not sent - no user context provided for {corpus_id}")
                 return
                 
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             manager = get_websocket_manager(user_context)
             
             if event_type == "created":

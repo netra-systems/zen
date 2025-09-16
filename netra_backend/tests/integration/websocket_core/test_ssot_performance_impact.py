@@ -32,7 +32,7 @@ from statistics import mean, median, stdev
 from unittest.mock import AsyncMock, Mock, patch
 from typing import Dict, Any, List, Optional, Tuple
 from netra_backend.app.services.websocket_broadcast_service import WebSocketBroadcastService, BroadcastResult, create_broadcast_service
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 from shared.types.core_types import UserID, ensure_user_id

@@ -32,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory, UserWebSocketEmitter, get_agent_instance_factory, configure_agent_instance_factory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.base_agent import BaseAgent
 
 @pytest.fixture

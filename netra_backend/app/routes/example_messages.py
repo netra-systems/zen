@@ -19,7 +19,7 @@ from netra_backend.app.handlers.example_message_handler import (
 )
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as get_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager as get_manager
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter(prefix="/api/example-messages", tags=["example-messages"])

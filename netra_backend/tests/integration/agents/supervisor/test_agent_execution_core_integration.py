@@ -91,6 +91,7 @@ class RealIntegrationAgent(BaseAgent):
 MockIntegrationAgent = RealIntegrationAgent
 
 
+@pytest.mark.database
 class AgentExecutionCoreIntegrationTests:
     """Integration tests with real components."""
 

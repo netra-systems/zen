@@ -7,7 +7,7 @@ Quick test to verify direct instantiation prevention is working.
 import sys
 sys.path.insert(0, '.')
 
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketManagerMode
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketManagerMode
 
 # Mock user context
 class MockUserContext:
@@ -31,7 +31,7 @@ except Exception as e:
 print("Testing factory pattern...")
 
 try:
-    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
     import asyncio
 
     async def test_factory():

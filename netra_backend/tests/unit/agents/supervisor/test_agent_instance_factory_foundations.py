@@ -52,7 +52,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassRegistry
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.factory_performance_config import FactoryPerformanceConfig
 from sqlalchemy.ext.asyncio import AsyncSession
 

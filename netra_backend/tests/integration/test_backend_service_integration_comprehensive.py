@@ -80,7 +80,7 @@ from netra_backend.app.services.middleware_chain import MiddlewareChain
 from netra_backend.app.services.config_service import ConfigService
 from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.user_service import UserService
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry

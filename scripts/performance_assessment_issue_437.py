@@ -87,7 +87,7 @@ class PerformanceAssessment:
         
         try:
             # Import the WebSocket manager components
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, WebSocketManagerMode
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager, WebSocketManagerMode
             
             # Test multiple initialization scenarios
             scenarios = [

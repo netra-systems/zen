@@ -18,6 +18,22 @@ try:
 except ImportError:
     pass  # Continue if Windows encoding not available
 
+# ISSUE #1176 GAP #4 REMEDIATION: Add global print wrapper to handle Windows console output errors
+import builtins
+
+# Store original print function
+_original_print = builtins.print
+
+def safe_print(*args, **kwargs):
+    """Print with error handling for Windows console output issues."""
+    try:
+        _original_print(*args, **kwargs)
+    except OSError:
+        pass  # Ignore console output errors that can occur on Windows
+
+# Replace print with safe version
+builtins.print = safe_print
+
 """
 NETRA APEX UNIFIED TEST RUNNER
 ==============================
@@ -1335,7 +1351,10 @@ class UnifiedTestRunner:
             try:
                 self.cleanup_test_environment()
             except Exception as e:
-                print(f"[WARNING] Post-test cleanup failed: {e}")
+                try:
+                    print(f"[WARNING] Post-test cleanup failed: {e}")
+                except OSError:
+                    pass  # Ignore console output errors
     
     def _initialize_docker_environment(self, args, running_e2e: bool):
         """Initialize Docker environment - automatically starts services if needed."""
@@ -1680,10 +1699,16 @@ class UnifiedTestRunner:
         """
         # Skip cleanup if Docker was not initialized
         if not hasattr(self, 'docker_manager') or self.docker_manager is None:
-            print("[INFO] Skipping Docker cleanup - Docker was not initialized")
+            try:
+                print("[INFO] Skipping Docker cleanup - Docker was not initialized")
+            except OSError:
+                pass  # Ignore console output errors
             return
         
-        print("[INFO] Starting comprehensive test environment cleanup...")
+        try:
+            print("[INFO] Starting comprehensive test environment cleanup...")
+        except OSError:
+            pass  # Ignore console output errors
         
         try:
             # 1. Docker Compose cleanup with volumes and orphans
@@ -2083,9 +2108,15 @@ class UnifiedTestRunner:
                     discovered_db_url = f"postgresql://test_user:test_pass@localhost:{postgres_port}/netra_test"
                     
                 env.set('DATABASE_URL', discovered_db_url, 'test_runner_port_discovery')
-                print(f"[INFO] Updated #removed-legacywith discovered PostgreSQL port: {postgres_port}")
+                try:
+                    print(f"[INFO] Updated #removed-legacywith discovered PostgreSQL port: {postgres_port}")
+                except OSError:
+                    pass  # Ignore console output errors
             else:
-                print(f"[WARNING] PostgreSQL service not found via port discovery, using configured defaults")
+                try:
+                    print(f"[WARNING] PostgreSQL service not found via port discovery, using configured defaults")
+                except OSError:
+                    pass  # Ignore console output errors
             
             # Update Redis URL
             if 'redis' in port_mappings and port_mappings['redis'].is_available:
@@ -2413,13 +2444,23 @@ class UnifiedTestRunner:
                 # Fallback defaults: quick tests that should usually pass
                 categories = ["smoke", "unit", "integration"]
         
-        # Filter categories that exist in the system
-        valid_categories = [cat for cat in categories if cat in self.category_system.categories]
+        # Filter categories that exist in the system - enhanced for combined categories (Issue #1270)
+        def is_valid_category(category: str) -> bool:
+            """Check if a category (simple or combined) is valid."""
+            if '+' in category:
+                # Combined category: validate each part separately
+                parts = [part.strip() for part in category.split('+')]
+                return all(part in self.category_system.categories for part in parts)
+            else:
+                # Simple category: direct validation
+                return category in self.category_system.categories
+
+        valid_categories = [cat for cat in categories if is_valid_category(cat)]
         if valid_categories != categories:
             missing = set(categories) - set(valid_categories)
             if missing:
                 print(f"Warning: Categories not found: {missing}")
-        
+
         return valid_categories
     
     def _get_categories_for_service(self, service: str) -> List[str]:
@@ -3140,35 +3181,68 @@ class UnifiedTestRunner:
                 "category": "cypress"
             }
 
-    def _should_apply_pattern_filtering(self, category_name: str) -> bool:
+    def _should_category_use_pattern_filtering(self, category_name: str) -> bool:
         """
-        Determine if pattern filtering should be applied for a given test category.
+        Determine if a category should use pattern filtering (-k expressions).
 
-        Args:
-            category_name: The test category to check
+        Issue #1270 Fix: Enhanced pattern filtering logic to handle combined categories
+        and prevent WebSocket event routing breakdowns.
 
-        Returns:
-            bool: True if pattern filtering should be applied, False otherwise
+        Categories that SHOULD use patterns:
+        - websocket: Uses -k "websocket or ws" by design
+        - security: Uses -k "auth or security" by design
+        - e2e: Pattern filtering can help narrow down e2e tests
+        - e2e_critical: Pattern filtering can help narrow down critical e2e tests
+        - agent: Pattern filtering useful for agent-related tests
+        - database: When combined with agent tests (agent+database), enables pattern filtering
 
-        Rules:
-        - Database category should NEVER apply -k pattern filtering
-        - E2E-related categories (websocket, security, e2e, e2e_critical, agent, performance) SHOULD apply pattern filtering
-        - Other categories follow default behavior (apply pattern filtering)
+        Categories that should NOT use patterns (standalone):
+        - unit: Uses directory paths, should run all unit tests
+        - integration: Uses directory paths, should run all integration tests
+        - api: Uses specific test files, should run all API tests
+        - smoke: Uses markers, not patterns
+
+        Combined categories (e.g., agent+database):
+        - If ANY component supports pattern filtering, enable for the combination
+        - Special handling for WebSocket-aware patterns to prevent event routing issues
         """
-        # Database category should never use pattern filtering
-        if category_name == "database":
-            return False
+        # Handle combined categories (e.g., "agent+database", "websocket+integration")
+        if '+' in category_name:
+            category_parts = [part.strip() for part in category_name.split('+')]
 
-        # E2E-related categories should use pattern filtering
-        e2e_related_categories = {
-            "websocket", "security", "e2e", "e2e_critical",
-            "agent", "performance", "e2e_full"
+            # Special case: WebSocket-aware pattern filtering
+            # If any part involves websocket, ensure WebSocket event routing works
+            has_websocket = any('websocket' in part.lower() or 'ws' in part.lower() for part in category_parts)
+
+            # Check if any component in the combination supports pattern filtering
+            pattern_enabled_categories = {
+                'websocket', 'security', 'e2e', 'e2e_critical', 'e2e_full',
+                'agent', 'performance', 'database'  # database now enabled for combinations
+            }
+
+            # If any part supports pattern filtering, enable for the whole combination
+            any_supports_patterns = any(part in pattern_enabled_categories for part in category_parts)
+
+            if has_websocket:
+                # For WebSocket combinations, always enable pattern filtering to ensure
+                # proper test selection and prevent event routing breakdowns
+                return True
+
+            return any_supports_patterns
+
+        # Single category logic
+        pattern_enabled_categories = {
+            'websocket',
+            'security',
+            'e2e',
+            'e2e_critical',
+            'e2e_full',
+            'agent',
+            'performance'  # Performance tests may benefit from pattern filtering
+            # Note: 'database' excluded for standalone use, but included in combinations
         }
-        if category_name in e2e_related_categories:
-            return True
 
-        # Default behavior for other categories (apply pattern filtering)
-        return True
+        return category_name in pattern_enabled_categories
 
     def _build_pytest_command(self, service: str, category_name: str, args: argparse.Namespace) -> str:
         """Build pytest command for backend/auth services."""
@@ -3275,13 +3349,15 @@ class UnifiedTestRunner:
         else:
             cmd_parts.extend(["--timeout=300", "--timeout-method=thread"])   # 5min for other test categories
         
-        # Add specific test pattern - with category-aware filtering
-        if args.pattern and self._should_apply_pattern_filtering(category_name):
+        # Add specific test pattern - only for categories that use pattern-based selection
+        # Issue #1270 Fix: Pattern filtering should not be applied to categories that use
+        # specific files (database, api, unit, integration) as it can cause test deselection
+        if args.pattern and self._should_category_use_pattern_filtering(category_name):
             # Clean up pattern - remove asterisks that are invalid for pytest -k expressions
             # pytest -k expects Python-like expressions, not glob patterns
             clean_pattern = args.pattern.strip('*')
             cmd_parts.extend(["-k", f'"{clean_pattern}"'])
-        elif args.pattern and not self._should_apply_pattern_filtering(category_name):
+        elif args.pattern and not self._should_category_use_pattern_filtering(category_name):
             # Pattern provided but filtering disabled for this category (e.g., database)
             print(f"[INFO] Pattern filtering disabled for category '{category_name}' - pattern '{args.pattern}' ignored")
         

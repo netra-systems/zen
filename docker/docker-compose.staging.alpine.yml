@@ -22,7 +22,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: dockerfiles/backend.staging.alpine.Dockerfile
+      dockerfile: dockerfiles/backend.staging.Dockerfile
       args:
         - ENVIRONMENT=staging
         - BUILD_ENV=staging
@@ -125,7 +125,7 @@ services:
   auth:
     build:
       context: .
-      dockerfile: dockerfiles/auth.staging.alpine.Dockerfile
+      dockerfile: dockerfiles/auth.staging.Dockerfile
       args:
         - ENVIRONMENT=staging
         - BUILD_ENV=staging
@@ -205,7 +205,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: dockerfiles/frontend.staging.alpine.Dockerfile
+      dockerfile: dockerfiles/frontend.staging.Dockerfile
       args:
         - NODE_ENV=production
         - BUILD_ENV=staging

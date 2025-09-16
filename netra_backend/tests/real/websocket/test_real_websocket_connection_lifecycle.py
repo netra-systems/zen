@@ -22,7 +22,7 @@ import pytest
 import websockets
 from websockets import WebSocketException
 
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.types import (
     WebSocketConnectionState,
     WebSocketMessage,

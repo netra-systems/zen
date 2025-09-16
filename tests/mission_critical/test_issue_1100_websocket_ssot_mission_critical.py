@@ -130,7 +130,7 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
         
         try:
             # Check for canonical SSOT implementation
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             implementation_analysis['canonical_available'] = True
             logger.info("Canonical WebSocketManager implementation available")
             
@@ -160,7 +160,7 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
         # Test WebSocket manager instantiation consistency
         if implementation_analysis.get('canonical_available'):
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerMode
                 from netra_backend.app.services.user_execution_context import UserExecutionContext
                 from shared.types.core_types import ensure_user_id
                 import uuid
@@ -175,7 +175,7 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
                 )
                 
                 # Test factory function instantiation (SSOT compliant)
-                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                 manager = get_websocket_manager(
                     user_context=test_context,
                     mode=WebSocketManagerMode.UNIFIED

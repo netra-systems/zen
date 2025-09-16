@@ -306,7 +306,7 @@
         # REMOVED_SYNTAX_ERROR: assert auth_env.get_oauth_redirect_uri() == 'https://custom.staging.com/auth/callback'
 
         # Backend and auth should still use staging defaults
-        # REMOVED_SYNTAX_ERROR: assert auth_env.get_backend_url() == 'https://backend.staging.netrasystems.ai'
+        # REMOVED_SYNTAX_ERROR: assert auth_env.get_backend_url() == 'https://api.staging.netrasystems.ai'
         # REMOVED_SYNTAX_ERROR: assert auth_env.get_auth_service_url() == 'https://auth.staging.netrasystems.ai'
 
 # REMOVED_SYNTAX_ERROR: def test_complete_override_scenario(self):

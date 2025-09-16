@@ -15,7 +15,7 @@ def test_websocket_manager_import():
     """Test that WebSocketManager can be imported and instantiated"""
     try:
         # Test specific module imports (should not trigger warnings)
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         from netra_backend.app.core.unified_id_manager import UnifiedIDManager
         

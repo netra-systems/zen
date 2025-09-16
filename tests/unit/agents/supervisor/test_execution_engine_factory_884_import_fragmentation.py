@@ -5,7 +5,7 @@ execution engine factory patterns that cause race conditions, initialization fai
 and WebSocket 1011 errors, protecting $500K+ ARR functionality.
 
 EXPECTED BEHAVIOR: All tests in this file should INITIALLY FAIL to demonstrate
-fragmentation violations. They will pass after SSOT consolidation.
+import fragmentation violations. They will pass after SSOT consolidation.
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal

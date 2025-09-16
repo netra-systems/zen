@@ -24,7 +24,7 @@ from netra_backend.app.services.websocket.quality_validation_handler import (
     QualityValidationHandler,
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context as create_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager_async
 
 logger = central_logger.get_logger(__name__)
 
@@ -107,7 +107,7 @@ class QualityMessageHandler:
                 thread_id=None,  # Let session manager handle missing IDs
                 run_id=None      # Let session manager handle missing IDs
             )
-            manager = await create_websocket_manager(user_context)
+            manager = await get_websocket_manager_async(user_context)
             await manager.send_to_user({"type": "error", "message": f"Unknown message type: {message_type}"})
         except Exception as e:
             logger.error(f"Failed to send unknown message error to user {user_id}: {e}")
@@ -129,7 +129,7 @@ class QualityMessageHandler:
                 thread_id=None,  # Let session manager handle missing IDs
                 run_id=None      # Let session manager handle missing IDs
             )
-            manager = await create_websocket_manager(user_context)
+            manager = await get_websocket_manager_async(user_context)
             await manager.send_to_user(message)
         except Exception as e:
             logger.error(f"Error broadcasting to {user_id}: {str(e)}")
@@ -155,7 +155,7 @@ class QualityMessageHandler:
                 thread_id=None,  # Let session manager handle missing IDs
                 run_id=None      # Let session manager handle missing IDs
             )
-            manager = await create_websocket_manager(user_context)
+            manager = await get_websocket_manager_async(user_context)
             await manager.send_to_user(alert_message)
         except Exception as e:
             logger.error(f"Error broadcasting alert to {user_id}: {str(e)}")

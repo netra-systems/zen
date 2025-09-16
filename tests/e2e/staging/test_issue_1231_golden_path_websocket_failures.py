@@ -43,9 +43,9 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 # Staging environment configuration
-STAGING_BASE_URL = "https://backend.staging.netrasystems.ai"
+STAGING_BASE_URL = "https://api.staging.netrasystems.ai"
 STAGING_AUTH_URL = "https://auth.staging.netrasystems.ai"
-STAGING_WEBSOCKET_URL = "wss://backend.staging.netrasystems.ai/ws"
+STAGING_WEBSOCKET_URL = "wss://api.staging.netrasystems.ai/ws"
 
 
 class Issue1231GoldenPathWebSocketFailuresTests:

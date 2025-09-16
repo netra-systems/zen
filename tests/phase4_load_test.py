@@ -12,7 +12,7 @@ def test_websocket_manager_performance():
     print('Testing WebSocket Manager initialization performance...')
     
     try:
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, WebSocketManagerMode
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager, WebSocketManagerMode
         
         durations = []
         successes = 0
@@ -161,7 +161,7 @@ def simulate_user_operation(user_id):
     
     try:
         # Simulate the operations that happen during startup
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         from netra_backend.app.db.database_manager import DatabaseManager
         from netra_backend.app.core.agent_execution_tracker import ExecutionState
         
