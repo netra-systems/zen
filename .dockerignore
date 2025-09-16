@@ -107,6 +107,9 @@ deployment/monitoring/
 !netra_backend/app/monitoring/
 !netra_backend/app/services/monitoring/
 
+# Keep netra_backend monitoring services (CRITICAL for GCP Error Reporting)
+!netra_backend/app/services/monitoring/
+
 # Claude Code and AI Tools
 **/.claude/
 **/claude_prompts/

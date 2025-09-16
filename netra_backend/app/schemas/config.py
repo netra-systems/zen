@@ -1302,12 +1302,13 @@ class StagingConfig(AppConfig):
     debug: bool = False
     log_level: str = "INFO"
     
-    # CRITICAL FIX: Override localhost defaults with proper staging URLs  
+    # CRITICAL FIX: Override localhost defaults with proper staging URLs using SSOT configuration
     # This fixes validation failures where StagingConfig inherits localhost URLs from AppConfig
     # Issue resolved: Configuration validation failed for environment 'staging'
-    frontend_url: str = "https://app.staging.netrasystems.ai"
-    api_base_url: str = "https://api.staging.netrasystems.ai" 
-    auth_service_url: str = "https://auth.staging.netrasystems.ai"
+    # CRITICAL DOMAIN CONFIGURATION UPDATE (Issue #1278): Use SSOT staging domains
+    frontend_url: str = "https://staging.netrasystems.ai"    # SSOT from shared.constants.staging_domains
+    api_base_url: str = "https://api-staging.netrasystems.ai"  # SSOT from shared.constants.staging_domains
+    auth_service_url: str = "https://staging.netrasystems.ai"  # SSOT from shared.constants.staging_domains
     
     # Staging telemetry settings
     otel_enabled: str = "true"

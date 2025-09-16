@@ -1,0 +1,12 @@
+{
+  "remediation_summary": {
+    "priority": "Priority 1 - Core WebSocket Integration",
+    "total_target_files": 8,
+    "processed_files": 0,
+    "successful_files": 0,
+    "total_fixes_applied": 0,
+    "dry_run": true
+  },
+  "file_results": [],
+  "validation_status": "pending"
+}

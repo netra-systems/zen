@@ -174,3 +174,6 @@ nul
 
 # SPEC files - needed for string literals and configuration
 # Keep SPEC directory as it contains runtime configuration
+
+# Keep netra_backend monitoring services (CRITICAL for GCP Error Reporting)
+!netra_backend/app/services/monitoring/

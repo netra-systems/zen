@@ -16,6 +16,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY netra_backend/ ./netra_backend/
 COPY shared/ ./shared/
 
+# Explicitly ensure monitoring module is included (Fix for staging outage - Issue #1278)
+COPY netra_backend/app/services/monitoring/ ./netra_backend/app/services/monitoring/
+
 # Set environment variables
 ENV PYTHONPATH=/app
 

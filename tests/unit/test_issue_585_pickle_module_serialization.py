@@ -71,7 +71,7 @@ class Issue585PickleModuleSerializationErrorsTests:
     def test_redis_cache_pickle_fallback_behavior(self, mock_pickle_dumps, test_context):
         """Test Redis cache fallback when pickle serialization fails."""
         mock_pickle_dumps.side_effect = TypeError("cannot pickle 'module' object")
-        from netra_backend.app.cache.redis_cache_manager import RedisCacheManager
+        from netra_backend.app.redis_manager import RedisManager as RedisCacheManager
         cache_manager = RedisCacheManager(namespace='test-585')
         problematic_data = {'agent_instance': UserExecutionEngine, 'module_ref': sys, 'user_context': test_context['user_context']}
         try:

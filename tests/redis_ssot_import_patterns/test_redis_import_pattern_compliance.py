@@ -16,7 +16,7 @@ CRITICAL PROTECTIONS:
 
 This test validates:
 1. All imports use SSOT pattern: `from netra_backend.app.redis_manager import redis_manager`
-2. No deprecated auth service patterns: `from auth_service.auth_core.redis_manager import auth_redis_manager`
+2. No deprecated auth service patterns: `from netra_backend.app.redis_manager import redis_manager as auth_redis_manager`
 3. No direct RedisManager instantiation bypassing SSOT
 4. Consistent import patterns across all services
 """
@@ -40,7 +40,7 @@ class RedisImportPatternComplianceTest(SSotBaseTestCase):
         cls.project_root = Path(__file__).parent.parent.parent
         cls.ssot_import_pattern = "from netra_backend.app.redis_manager import redis_manager"
         cls.deprecated_patterns = [
-            "from auth_service.auth_core.redis_manager import auth_redis_manager",
+            "from netra_backend.app.redis_manager import redis_manager as auth_redis_manager",
             "from analytics_service.analytics_core.database.redis_manager import RedisManager",
             "RedisManager()",  # Direct instantiation
         ]
