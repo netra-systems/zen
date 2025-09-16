@@ -1,0 +1,88 @@
+{
+  "instances": [
+    {
+      "command": "/debug-error",
+      "name": "debug-error",
+      "description": "Debugs and analyzes system errors",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/audit-docker-logs",
+      "name": "audit-docker-logs",
+      "description": "Audits Docker container logs",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/audit-gcp-logs",
+      "name": "audit-gcp-logs",
+      "description": "Audits Google Cloud Platform logs",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/audit-gcp-error-loop",
+      "name": "audit-gcp-error-loop",
+      "description": "Continuous GCP error monitoring and analysis",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/audit-staging-logs-gcp-loop",
+      "name": "audit-staging-logs-gcp-loop",
+      "description": "Continuous staging environment log monitoring",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/gcploggardener",
+      "name": "gcp-log-gardener",
+      "description": "Maintains and analyzes GCP logs",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    }
+  ]
+}

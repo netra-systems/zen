@@ -1,0 +1,88 @@
+{
+  "instances": [
+    {
+      "command": "/refreshgardener",
+      "name": "refresh-gardener",
+      "description": "Refreshes and updates system components",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/refresh-upate-tests",
+      "name": "refresh-update-tests",
+      "description": "Refreshes and updates test suites",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/ssotgardener",
+      "name": "ssot-gardener",
+      "description": "Maintains Single Source of Truth architecture",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/ssot-regression-check",
+      "name": "ssot-regression-check",
+      "description": "Checks for SSOT architecture regressions",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/compliance",
+      "name": "compliance",
+      "description": "Runs architectural compliance checks",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    },
+    {
+      "command": "/pre-commit",
+      "name": "pre-commit",
+      "description": "Runs pre-commit hooks and validation",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": [
+        "/clear"
+      ]
+    }
+  ]
+}
