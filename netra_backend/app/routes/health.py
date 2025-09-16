@@ -25,14 +25,14 @@ from netra_backend.app.core.health.environment_health_config import (
     HealthFailureMode
 )
 from netra_backend.app.dependencies import get_request_scoped_db_session
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.services.database_env_service import DatabaseEnvironmentValidator
 from netra_backend.app.services.schema_validation_service import SchemaValidationService
 
 router = APIRouter(
     redirect_slashes=False  # Disable automatic trailing slash redirects
 )
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 # Initialize unified health interface
 health_interface = HealthInterface("netra-ai-platform", "1.0.0")

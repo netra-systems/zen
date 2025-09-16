@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
 # Import SSOT safe WebSocket state logging function
 from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_logging
@@ -51,7 +51,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.timestamp_utils import safe_convert_timestamp
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class MessageHandler(Protocol):
