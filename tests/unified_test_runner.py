@@ -18,6 +18,22 @@ try:
 except ImportError:
     pass  # Continue if Windows encoding not available
 
+# ISSUE #1176 GAP #4 REMEDIATION: Add global print wrapper to handle Windows console output errors
+import builtins
+
+# Store original print function
+_original_print = builtins.print
+
+def safe_print(*args, **kwargs):
+    """Print with error handling for Windows console output issues."""
+    try:
+        _original_print(*args, **kwargs)
+    except OSError:
+        pass  # Ignore console output errors that can occur on Windows
+
+# Replace print with safe version
+builtins.print = safe_print
+
 """
 NETRA APEX UNIFIED TEST RUNNER
 ==============================
@@ -1335,7 +1351,10 @@ class UnifiedTestRunner:
             try:
                 self.cleanup_test_environment()
             except Exception as e:
-                print(f"[WARNING] Post-test cleanup failed: {e}")
+                try:
+                    print(f"[WARNING] Post-test cleanup failed: {e}")
+                except OSError:
+                    pass  # Ignore console output errors
     
     def _initialize_docker_environment(self, args, running_e2e: bool):
         """Initialize Docker environment - automatically starts services if needed."""
@@ -1680,10 +1699,16 @@ class UnifiedTestRunner:
         """
         # Skip cleanup if Docker was not initialized
         if not hasattr(self, 'docker_manager') or self.docker_manager is None:
-            print("[INFO] Skipping Docker cleanup - Docker was not initialized")
+            try:
+                print("[INFO] Skipping Docker cleanup - Docker was not initialized")
+            except OSError:
+                pass  # Ignore console output errors
             return
         
-        print("[INFO] Starting comprehensive test environment cleanup...")
+        try:
+            print("[INFO] Starting comprehensive test environment cleanup...")
+        except OSError:
+            pass  # Ignore console output errors
         
         try:
             # 1. Docker Compose cleanup with volumes and orphans
@@ -2083,9 +2108,15 @@ class UnifiedTestRunner:
                     discovered_db_url = f"postgresql://test_user:test_pass@localhost:{postgres_port}/netra_test"
                     
                 env.set('DATABASE_URL', discovered_db_url, 'test_runner_port_discovery')
-                print(f"[INFO] Updated #removed-legacywith discovered PostgreSQL port: {postgres_port}")
+                try:
+                    print(f"[INFO] Updated #removed-legacywith discovered PostgreSQL port: {postgres_port}")
+                except OSError:
+                    pass  # Ignore console output errors
             else:
-                print(f"[WARNING] PostgreSQL service not found via port discovery, using configured defaults")
+                try:
+                    print(f"[WARNING] PostgreSQL service not found via port discovery, using configured defaults")
+                except OSError:
+                    pass  # Ignore console output errors
             
             # Update Redis URL
             if 'redis' in port_mappings and port_mappings['redis'].is_available:
