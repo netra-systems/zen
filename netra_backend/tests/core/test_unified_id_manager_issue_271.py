@@ -83,19 +83,20 @@ class TestUnifiedIdManagerIssue271(SSotBaseTestCase):
         Test that shows the expected pattern that emergency validation expects.
         
         This test demonstrates what the emergency validation system expects
-        to work, based on UnifiedIdGenerator's interface.
+        to work - a parameterless class method for generating run IDs.
         """
         from shared.id_generation.unified_id_generator import UnifiedIdGenerator
         
-        # This works - emergency validation expects UnifiedIDManager to work similarly
-        generator_run_id = UnifiedIdGenerator.generate_run_id()
-        self.assertIsNotNone(generator_run_id)
-        self.assertIsInstance(generator_run_id, str)
+        # UnifiedIdGenerator has methods like generate_base_id() that work without parameters
+        generator_base_id = UnifiedIdGenerator.generate_base_id()
+        self.assertIsNotNone(generator_base_id)
+        self.assertIsInstance(generator_base_id, str)
         
+        # Emergency validation expects UnifiedIDManager to work similarly
         # But this fails with UnifiedIDManager
         try:
             manager_run_id = UnifiedIDManager.generate_run_id()
-            # Both should have similar interfaces for emergency validation
+            # Should have similar interface for emergency validation
             self.assertIsNotNone(manager_run_id)
         except TypeError as e:
             self.fail(f"Interface inconsistency blocks emergency validation: {e}")
