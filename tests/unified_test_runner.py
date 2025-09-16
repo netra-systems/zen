@@ -3009,7 +3009,11 @@ class UnifiedTestRunner:
                 result.stdout = result.stdout.encode('utf-8', errors='replace').decode('utf-8', errors='replace')
             if result.stderr:
                 result.stderr = result.stderr.encode('utf-8', errors='replace').decode('utf-8', errors='replace')
-            success = result.returncode == 0
+            # ISSUE #1176 PHASE 2 FIX: Validate test collection before claiming success
+            initial_success = result.returncode == 0
+            success = self._validate_test_execution_success(
+                initial_success, result.stdout, result.stderr, service, category_name
+            )
         except subprocess.TimeoutExpired:
             print(f"[ERROR] {service} tests timed out after {timeout_seconds} seconds")
             print(f"[ERROR] Command: {cmd}")
@@ -3515,7 +3519,83 @@ class UnifiedTestRunner:
         test_counts["total"] = test_counts["passed"] + test_counts["failed"]
         
         return test_counts
-    
+
+    def _validate_test_execution_success(
+        self, initial_success: bool, stdout: str, stderr: str, service: str, category_name: str
+    ) -> bool:
+        """
+        Validate that test execution success is legitimate.
+
+        ISSUE #1176 PHASE 2 FIX: Prevent false success when 0 tests are collected.
+        This addresses the "0 tests executed but claiming success" pattern.
+        """
+        if not initial_success:
+            return False  # If pytest failed, definitely not successful
+
+        # Parse stdout for collection and execution information
+        import re
+
+        # Check for import failures that prevent test collection
+        if "ImportError" in stderr or "ModuleNotFoundError" in stderr:
+            print(f"[ERROR] {service}:{category_name} - Import failures detected in test collection")
+            print(f"[ERROR] stderr: {stderr[:500]}...")
+            return False
+
+        # Check for test collection patterns
+        collected_pattern = r'(\d+) tests? collected'
+        collected_match = re.search(collected_pattern, stdout)
+
+        # Check for "no tests ran" patterns
+        no_tests_patterns = [
+            r'no tests ran',
+            r'0 passed',
+            r'collected 0 items',
+            r'= warnings summary =$',  # Often indicates no tests were collected
+        ]
+
+        # Look for execution patterns that indicate tests actually ran
+        execution_patterns = [
+            r'(\d+) passed',
+            r'(\d+) failed',
+            r'(\d+) skipped',
+            r'test session starts',
+            r'::',  # Test path indicator
+        ]
+
+        collected_count = 0
+        if collected_match:
+            collected_count = int(collected_match.group(1))
+
+        # Check if no tests pattern matches
+        no_tests_detected = any(re.search(pattern, stdout, re.IGNORECASE) for pattern in no_tests_patterns)
+
+        # Check if execution patterns are present
+        execution_detected = any(re.search(pattern, stdout, re.IGNORECASE) for pattern in execution_patterns)
+
+        # CRITICAL VALIDATION: Fail if 0 tests collected but claiming success
+        if collected_count == 0 and no_tests_detected and not execution_detected:
+            print(f"[ERROR] {service}:{category_name} - 0 tests executed but claiming success")
+            print(f"[ERROR] This indicates import failures or missing test modules")
+            print(f"[ERROR] stdout sample: {stdout[:300]}...")
+            return False
+
+        # Additional validation: Check for specific warning signs
+        warning_signs = [
+            "cannot import name",
+            "No module named",
+            "ImportError:",
+            "ModuleNotFoundError:",
+            "collection failed",
+        ]
+
+        for warning in warning_signs:
+            if warning in stdout or warning in stderr:
+                print(f"[ERROR] {service}:{category_name} - Collection issue detected: {warning}")
+                return False
+
+        # If we get here, success appears legitimate
+        return True
+
     def _validate_e2e_test_timing(self, category_name: str, result: Dict) -> bool:
         """Validate that e2e tests have non-zero execution time.
         
