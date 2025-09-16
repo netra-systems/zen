@@ -233,30 +233,56 @@ class TestImportPathResolution(SSotBaseTestCase):
         except Exception as e:
             pytest.fail(f"Could not read test file {test_file}: {e}")
         
-        # Extract import lines (simple regex-based approach)
-        import re
-        import_lines = []
-        for line in content.split('\n'):
-            line = line.strip()
-            if line.startswith('from ') and ' import ' in line:
-                import_lines.append(line)
-            elif line.startswith('import ') and not line.startswith('import '):
-                import_lines.append(line)
-        
+        # Extract import statements using AST parsing to handle multiline imports correctly
+        import ast
         failed_imports = []
         
-        for import_line in import_lines:
-            # Skip relative imports and standard library imports
-            if '..' in import_line or import_line.startswith('import os') or import_line.startswith('import sys'):
-                continue
-            if any(std_lib in import_line for std_lib in ['pytest', 'asyncio', 'time', 'typing', 'unittest']):
-                continue
-                
-            # Try to execute the import
-            try:
-                exec(import_line)
-            except (ModuleNotFoundError, ImportError) as e:
-                failed_imports.append(f"{import_line} - {e}")
+        try:
+            # Parse the entire file content with AST
+            tree = ast.parse(content)
+            
+            # Extract all import statements
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    # Handle regular imports like "import os"
+                    for alias in node.names:
+                        import_name = alias.name
+                        
+                        # Skip standard library and relative imports
+                        if any(std_lib in import_name for std_lib in ['os', 'sys', 'pytest', 'asyncio', 'time', 'typing', 'unittest']):
+                            continue
+                        
+                        # Try to execute the import
+                        try:
+                            exec(f"import {import_name}")
+                        except (ModuleNotFoundError, ImportError) as e:
+                            failed_imports.append(f"import {import_name} - {e}")
+                            
+                elif isinstance(node, ast.ImportFrom):
+                    # Handle from imports like "from module import name"
+                    if node.module is None:
+                        continue  # Skip relative imports
+                        
+                    module_name = node.module
+                    
+                    # Skip standard library imports
+                    if any(std_lib in module_name for std_lib in ['pytest', 'asyncio', 'time', 'typing', 'unittest']):
+                        continue
+                    if '..' in module_name:
+                        continue  # Skip relative imports
+                        
+                    # Get the names being imported
+                    imported_names = [alias.name for alias in node.names]
+                    
+                    # Try to execute the import
+                    try:
+                        import_statement = f"from {module_name} import {', '.join(imported_names)}"
+                        exec(import_statement)
+                    except (ModuleNotFoundError, ImportError) as e:
+                        failed_imports.append(f"from {module_name} import {', '.join(imported_names)} - {e}")
+                        
+        except SyntaxError as e:
+            failed_imports.append(f"Syntax error parsing file: {e}")
         
         if failed_imports:
             error_msg = f"Import failures in {test_file}:\n"

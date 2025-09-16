@@ -696,6 +696,23 @@ class DatabaseManager:
                 logger.error("ACTION: Review database configuration and server logs for more details")
             
             raise classified_error
+
+    async def _test_connection_with_retry(self, engine: AsyncEngine, max_retries: int = 3) -> bool:
+        """Test database connection with retry logic for Issue #1278."""
+        for attempt in range(max_retries):
+            try:
+                async with engine.begin() as conn:
+                    await conn.execute(text("SELECT 1"))
+                logger.info(f"Database connection test successful on attempt {attempt + 1}")
+                return True
+            except Exception as e:
+                logger.warning(f"Database connection test failed on attempt {attempt + 1}: {e}")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(1)  # Brief delay before retry
+                else:
+                    logger.error("Database connection test failed after all retry attempts")
+                    return False
+        return False
     
     def get_engine(self, name: str = 'primary') -> AsyncEngine:
         """Get database engine by name with auto-initialization safety.
