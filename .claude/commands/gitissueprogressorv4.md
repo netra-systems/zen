@@ -15,7 +15,8 @@ Context:
         - No PR, issue creation is the log and all work is done directly on the dev branch.
     7.  Issue Exclusion List (IEL): generally do not create issues for the following cases: merge conflicts, local env specific issues
     8. AGENT_SESSION_ID = agent-session-{datetime}
-
+    9. RESEARCH_NEEDED = True : (Defaults to true, step 0 checks it)
+    10. PLANNING_NEEDED = True : (Defaults to true, step 0 checks it)
 
 PROCESS INSTRUCTIONS START:
 
@@ -33,9 +34,21 @@ PROCESS INSTRUCTIONS START:
         Be mindful of dependency tags
         ISSUE = to that number
 
+    0) Is the issue actually clearly complete?
+        If so close it and report to master (and suggest master breaks entire process)
+
+    Audit the current state of the issue to determine
+        1) Is there enough research (including comments) or does the issue need to be researched?
+            Or is there confusing research that needs to be untangled?
+            Declare this and return RESEARCH_NEEDED = {BOOL: True || False}
+
+        2) Is there enough planning?
+        Declare this and return PLANNING_NEEDED = {BOOL: True || False} 
+
     add a tags to the issue: actively-being-worked-on, AGENT_SESSION_ID
     return ISSUE number to master
 
+**only do step 1 if RESEARCH_NEEDED == True**
 1) Research and review : SNST :
 
     1.0 First analyze the existing issue.
@@ -74,8 +87,8 @@ PROCESS INSTRUCTIONS START:
 
 Master:
     Pull latest, and handle merge conflicts
-    OPTIONAL STEPS IF ISSUE IS OPEN:
 
+**only do step 2 if PLANNING_NEEDED == True**
 2) PLANNING: SNST:
 
     Make a new "Master plan"
@@ -104,6 +117,8 @@ Master:
 3) Action the plans: SNST :
     
     Work the plan.
+    If not provided by master then get it from the git history
+    If you don't have a plan, exit to master. Suggest master to go back to step 1 or step 2
 
     IF testing is called for:
         audit and review the test. And run the fake test checks. 
@@ -123,8 +138,7 @@ Master:
     4.3) Git commit work in conceptual batches. 
     4.4) Sync with origin: push/pull latest, and handle merge conflicts
 
-5) PROOF: SNST : Spawn a sub agent 
-    
+5) PROOF: SNST : Spawn a sub agent
     PROVE THAT THE CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
     otherwise go back and ensure that any code changes exclusively add value as one atomic package of commit and
     do not introduce new problems.
