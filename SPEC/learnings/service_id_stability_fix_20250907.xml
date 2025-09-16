@@ -8,8 +8,8 @@
   <problem>
     <description>
       Auth service was expecting a dynamically changing SERVICE_ID with timestamp suffix
-      (e.g., netra-auth-staging-1757252100) while backend was sending a fixed SERVICE_ID
-      (netra-auth-staging-1757251019), causing authentication failures every minute.
+      (e.g., netra-auth-1757252100) while backend was sending a fixed SERVICE_ID
+      (netra-auth-1757251019), causing authentication failures every minute.
     </description>
     <symptoms>
       <symptom>Persistent "Service ID mismatch" warnings in auth service logs</symptom>
