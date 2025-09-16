@@ -1,3 +1,4 @@
+from netra_backend.app.logging_config import central_logger
 """
 SystemLifecycle - SSOT for All Lifecycle Operations
 
