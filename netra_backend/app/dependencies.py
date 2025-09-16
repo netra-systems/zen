@@ -1774,8 +1774,8 @@ async def get_factory_execution_engine(
         HTTPException: If engine creation fails
     """
     try:
-        # Get factory from app state
-        factory = get_execution_engine_factory(request)
+        # PHASE 2A FIX: Get factory using SSOT-compatible function name
+        factory = get_execution_engine_factory_from_request(request)
         
         # SSOT COMPLIANCE FIX: Create user execution context with UnifiedIdGenerator
         if not request_id:
@@ -2143,7 +2143,7 @@ def get_factory_health_status(request: Request) -> Dict[str, Any]:
         
         # Check ExecutionEngineFactory
         try:
-            factory = get_execution_engine_factory(request)
+            factory = get_execution_engine_factory_from_request(request)
             status['execution_factory']['configured'] = True
             metrics = factory.get_factory_metrics()
             status['execution_factory']['healthy'] = True
