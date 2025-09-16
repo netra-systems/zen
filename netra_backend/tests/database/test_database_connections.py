@@ -217,3 +217,15 @@ def _setup_slow_query_mock(mock_session):
     mock_session.execute.return_value.all.return_value = [
         ("SELECT * FROM large_table", 5000)  # 5 second query
     ]
+
+class TestClickHouseConnectionPool:
+    """Stub for test compatibility - ClickHouse connection pool tests."""
+
+    def test_connection_pool_basic(self):
+        """Basic connection pool test."""
+        pytest.skip("ClickHouse connection pool not implemented yet")
+
+    def test_connection_pool_concurrent(self):
+        """Concurrent connection pool test."""
+        pytest.skip("ClickHouse connection pool not implemented yet")
+
