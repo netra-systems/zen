@@ -338,22 +338,22 @@ class SSotBaseTestCase:
     def setUp(self):
         """
         unittest compatibility method with async support.
-        
-        IMPORTANT: This provides backward compatibility for tests that inherit 
-        from unittest.TestCase and use setUp/tearDown pattern. It calls the 
+
+        IMPORTANT: This provides backward compatibility for tests that inherit
+        from unittest.TestCase and use setUp/tearDown pattern. It calls the
         pytest-style setup_method to ensure consistent behavior.
-        
+
         ASYNC SUPPORT: If the test class has an asyncSetUp() method, this will
         automatically call it after the standard setup to ensure proper async
         initialization for unit tests.
-        
+
         NOTE: Tests should prefer setup_method/teardown_method for new code.
         """
         # Get the current test method from the stack
         import inspect
         frame = inspect.currentframe()
         test_method = None
-        
+
         # Walk up the call stack to find the test method
         try:
             while frame:
@@ -368,27 +368,52 @@ class SSotBaseTestCase:
                 frame = frame.f_back
         finally:
             del frame
-        
+
         # Call the standard setup_method
         self.setup_method(test_method)
-        
+
         # Call asyncSetUp if it exists and we're in an async test
         if hasattr(self, 'asyncSetUp') and asyncio.iscoroutinefunction(self.asyncSetUp):
-            # Create event loop if none exists
+            # Check if event loop is already running (pytest-asyncio case)
             try:
-                loop = asyncio.get_event_loop()
-                if loop.is_closed():
-                    raise RuntimeError("Event loop is closed")
+                loop = asyncio.get_running_loop()
+                # If we reach here, loop is running - schedule asyncSetUp as task
+                import concurrent.futures
+                import threading
+
+                # Create a future to bridge sync/async
+                future = concurrent.futures.Future()
+
+                def run_async_setup():
+                    try:
+                        result = asyncio.run_coroutine_threadsafe(self.asyncSetUp(), loop)
+                        future.set_result(result.result())
+                    except Exception as e:
+                        future.set_exception(e)
+
+                # Run in separate thread to avoid event loop conflict
+                thread = threading.Thread(target=run_async_setup)
+                thread.start()
+                thread.join()
+
+                # Get result or re-raise exception
+                try:
+                    future.result()
+                except Exception as e:
+                    logger.error(f"asyncSetUp failed in {self.__class__.__name__}: {e}")
+                    raise
+
             except RuntimeError:
+                # No event loop running - safe to create new one
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-            
-            # Run asyncSetUp
-            try:
-                loop.run_until_complete(self.asyncSetUp())
-            except Exception as e:
-                logger.error(f"asyncSetUp failed in {self.__class__.__name__}: {e}")
-                raise
+                try:
+                    loop.run_until_complete(self.asyncSetUp())
+                except Exception as e:
+                    logger.error(f"asyncSetUp failed in {self.__class__.__name__}: {e}")
+                    raise
+                finally:
+                    loop.close()
     
     def tearDown(self):
         """
@@ -1062,9 +1087,8 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
 
     async def asyncSetUp(self):
         """Async setup method for async tests."""
-        # Call parent sync setup to ensure all base attributes are initialized
-        if hasattr(super(), 'setUp'):
-            super().setUp()
+        # Remove recursive setup call to prevent event loop conflicts
+        # Base setup is already handled by setup_method or setUp
         # This allows subclasses to override asyncSetUp for additional async initialization
         pass
 
@@ -1212,22 +1236,22 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
     def setUp(self):
         """
         unittest compatibility method for async tests with async support.
-        
-        IMPORTANT: This provides backward compatibility for async tests that inherit 
-        from unittest.TestCase and use setUp/tearDown pattern. It calls the 
+
+        IMPORTANT: This provides backward compatibility for async tests that inherit
+        from unittest.TestCase and use setUp/tearDown pattern. It calls the
         pytest-style setup_method to ensure consistent behavior.
-        
+
         ASYNC SUPPORT: If the test class has an asyncSetUp() method, this will
         automatically call it after the standard setup to ensure proper async
         initialization for unit tests.
-        
+
         NOTE: Tests should prefer setup_method/teardown_method for new code.
         """
         # Get the current test method from the stack
         import inspect
         frame = inspect.currentframe()
         test_method = None
-        
+
         # Walk up the call stack to find the test method
         try:
             while frame:
@@ -1242,27 +1266,52 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
                 frame = frame.f_back
         finally:
             del frame
-        
+
         # Call the standard setup_method
         self.setup_method(test_method)
-        
+
         # Call asyncSetUp if it exists and we're in an async test
         if hasattr(self, 'asyncSetUp') and asyncio.iscoroutinefunction(self.asyncSetUp):
-            # Create event loop if none exists
+            # Check if event loop is already running (pytest-asyncio case)
             try:
-                loop = asyncio.get_event_loop()
-                if loop.is_closed():
-                    raise RuntimeError("Event loop is closed")
+                loop = asyncio.get_running_loop()
+                # If we reach here, loop is running - schedule asyncSetUp as task
+                import concurrent.futures
+                import threading
+
+                # Create a future to bridge sync/async
+                future = concurrent.futures.Future()
+
+                def run_async_setup():
+                    try:
+                        result = asyncio.run_coroutine_threadsafe(self.asyncSetUp(), loop)
+                        future.set_result(result.result())
+                    except Exception as e:
+                        future.set_exception(e)
+
+                # Run in separate thread to avoid event loop conflict
+                thread = threading.Thread(target=run_async_setup)
+                thread.start()
+                thread.join()
+
+                # Get result or re-raise exception
+                try:
+                    future.result()
+                except Exception as e:
+                    logger.error(f"asyncSetUp failed in {self.__class__.__name__}: {e}")
+                    raise
+
             except RuntimeError:
+                # No event loop running - safe to create new one
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-            
-            # Run asyncSetUp
-            try:
-                loop.run_until_complete(self.asyncSetUp())
-            except Exception as e:
-                logger.error(f"asyncSetUp failed in {self.__class__.__name__}: {e}")
-                raise
+                try:
+                    loop.run_until_complete(self.asyncSetUp())
+                except Exception as e:
+                    logger.error(f"asyncSetUp failed in {self.__class__.__name__}: {e}")
+                    raise
+                finally:
+                    loop.close()
     
     def tearDown(self):
         """

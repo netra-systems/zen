@@ -94,15 +94,15 @@ const nextConfig = {
             {
               key: 'Content-Security-Policy',
               value: [
-                "default-src 'self' https://*.staging.netrasystems.ai",
-                "script-src 'self' 'unsafe-inline' blob: https://*.staging.netrasystems.ai https://www.googletagmanager.com https://tagmanager.google.com https://www.clarity.ms https://scripts.clarity.ms https://*.clarity.ms",
+                "default-src 'self' https://*.netrasystems.ai https://api-staging.netrasystems.ai",
+                "script-src 'self' 'unsafe-inline' blob: https://*.netrasystems.ai https://api-staging.netrasystems.ai https://www.googletagmanager.com https://tagmanager.google.com https://www.clarity.ms https://scripts.clarity.ms https://*.clarity.ms",
                 "worker-src 'self' blob:",
-                "style-src 'self' 'unsafe-inline' https://*.staging.netrasystems.ai",
-                "img-src 'self' data: blob: https://*.staging.netrasystems.ai https://www.googletagmanager.com https://*.clarity.ms https://c.bing.com",
-                "connect-src 'self' https://*.staging.netrasystems.ai wss://*.staging.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://*.clarity.ms https://prodregistryv2.org https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://featureassets.org https://cloudflare-dns.com",
-                "font-src 'self' data: https://*.staging.netrasystems.ai",
-                "media-src 'self' https://*.staging.netrasystems.ai",
-                "frame-src 'self' https://*.staging.netrasystems.ai https://accounts.google.com https://www.googletagmanager.com"
+                "style-src 'self' 'unsafe-inline' https://*.netrasystems.ai https://api-staging.netrasystems.ai",
+                "img-src 'self' data: blob: https://*.netrasystems.ai https://api-staging.netrasystems.ai https://www.googletagmanager.com https://*.clarity.ms https://c.bing.com",
+                "connect-src 'self' https://*.netrasystems.ai https://api-staging.netrasystems.ai wss://api-staging.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://*.clarity.ms https://prodregistryv2.org https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://featureassets.org https://cloudflare-dns.com",
+                "font-src 'self' data: https://*.netrasystems.ai https://api-staging.netrasystems.ai",
+                "media-src 'self' https://*.netrasystems.ai https://api-staging.netrasystems.ai",
+                "frame-src 'self' https://*.netrasystems.ai https://api-staging.netrasystems.ai https://accounts.google.com https://www.googletagmanager.com"
               ].join('; ')
             },
             {
@@ -155,7 +155,7 @@ const nextConfig = {
     '/_next': ['./node_modules/**/*.js']
   },
   images: {
-    domains: ['localhost', 'staging.netrasystems.ai']
+    domains: ['localhost', 'staging.netrasystems.ai', 'api-staging.netrasystems.ai']
   },
   webpack: (config, { isServer, isProduction, dev }) => {
     // Configure hot reload polling interval for development

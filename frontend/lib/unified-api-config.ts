@@ -79,7 +79,7 @@ function detectEnvironment(): Environment {
   // Check if running in browser and detect by domain
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
-    if (hostname.includes('staging.netrasystems.ai')) {
+    if (hostname.includes('staging.netrasystems.ai') || hostname.includes('api-staging.netrasystems.ai')) {
       console.log('[2025-09-15T' + new Date().toISOString().split('T')[1] + '] INFO: Environment detected from hostname as staging');
       return 'staging';
     }
@@ -235,11 +235,12 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
       };
       
     case 'staging':
-      // Use environment variables if available, otherwise fall back to static staging URLs
-      const stagingApiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.staging.netrasystems.ai';
-      const stagingWsUrl = process.env.NEXT_PUBLIC_WS_URL || 'wss://api.staging.netrasystems.ai';
-      const stagingAuthUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'https://auth.staging.netrasystems.ai';
-      const stagingFrontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://app.staging.netrasystems.ai';
+      // Use environment variables if available, otherwise fall back to CORRECT staging URLs
+      // CRITICAL DOMAIN CONFIGURATION UPDATE (Issue #1278): Use correct domains
+      const stagingApiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api-staging.netrasystems.ai';
+      const stagingWsUrl = process.env.NEXT_PUBLIC_WS_URL || 'wss://api-staging.netrasystems.ai';
+      const stagingAuthUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'https://staging.netrasystems.ai';
+      const stagingFrontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://staging.netrasystems.ai';
       
       return {
         environment: 'staging',

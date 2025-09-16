@@ -87,13 +87,26 @@ class SecurityOriginsConfig:
     
     @classmethod
     def get_staging_domains(cls) -> Dict[str, List[str]]:
-        """Get staging-specific domains."""
+        """Get staging-specific domains.
+
+        CRITICAL DOMAIN CONFIGURATION UPDATE (Issue #1278):
+        Uses correct staging domains (*.netrasystems.ai) instead of deprecated
+        (*.staging.netrasystems.ai) URLs which cause SSL certificate failures.
+        """
+        # Import SSOT staging domains
+        from shared.constants.staging_domains import STAGING_DOMAINS
+
         return {
             "app": [
-                "https://staging.netrasystems.ai",
-                "https://app.staging.netrasystems.ai",
-                "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth subdomain
-                "https://api.staging.netrasystems.ai"
+                STAGING_DOMAINS["FRONTEND_URL"],      # https://staging.netrasystems.ai
+                STAGING_DOMAINS["BACKEND_URL"],       # https://staging.netrasystems.ai
+                STAGING_DOMAINS["AUTH_SERVICE_URL"],  # https://staging.netrasystems.ai
+                STAGING_DOMAINS["API_BASE_URL"],      # https://api-staging.netrasystems.ai
+
+                # DEPRECATED - Keep for compatibility during migration
+                "https://app.staging.netrasystems.ai",   # DEPRECATED
+                "https://auth.staging.netrasystems.ai",  # DEPRECATED
+                "https://api.staging.netrasystems.ai"    # DEPRECATED
             ],
             "cloud_run": [
                 # Cloud Run service URLs for staging
@@ -102,8 +115,11 @@ class SecurityOriginsConfig:
                 "https://auth-service-staging-pnovr5vsba-uc.a.run.app"
             ],
             "websocket": [
-                "wss://app.staging.netrasystems.ai",
-                "wss://api.staging.netrasystems.ai"
+                STAGING_DOMAINS["WEBSOCKET_URL"],     # wss://api-staging.netrasystems.ai
+
+                # DEPRECATED - Keep for compatibility during migration
+                "wss://app.staging.netrasystems.ai",  # DEPRECATED
+                "wss://api.staging.netrasystems.ai"   # DEPRECATED
             ]
         }
     
