@@ -30,10 +30,10 @@ from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Business reliability test configuration
-STAGING_HEALTH_URL = "https://backend.staging.netrasystems.ai/health"
-STAGING_API_URL = "https://backend.staging.netrasystems.ai"
+STAGING_HEALTH_URL = "https://api.staging.netrasystems.ai/health"
+STAGING_API_URL = "https://api.staging.netrasystems.ai"
 STAGING_AUTH_URL = "https://auth.staging.netrasystems.ai"
-STAGING_WS_URL = "wss://backend.staging.netrasystems.ai/ws"
+STAGING_WS_URL = "wss://api.staging.netrasystems.ai/ws"
 
 @dataclass
 class ReliabilityMetric:

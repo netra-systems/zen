@@ -32,8 +32,8 @@ from urllib.parse import urljoin
 
 # Business test configuration for staging environment
 STAGING_BASE_URL = "https://auth.staging.netrasystems.ai"
-STAGING_WS_URL = "wss://backend.staging.netrasystems.ai/ws"
-STAGING_API_URL = "https://backend.staging.netrasystems.ai"
+STAGING_WS_URL = "wss://api.staging.netrasystems.ai/ws"
+STAGING_API_URL = "https://api.staging.netrasystems.ai"
 
 @dataclass
 class CustomerExperienceMetric:
