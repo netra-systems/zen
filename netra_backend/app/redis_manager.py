@@ -24,32 +24,24 @@ from typing import Optional, Any, Dict, List
 from contextlib import asynccontextmanager
 
 try:
-    # Check if we should use fake Redis for integration tests
-    from shared.isolated_environment import get_env
-    env = get_env()
+    # Import both real and fake Redis modules, decide at runtime
+    import redis.asyncio as real_redis
+    try:
+        import fakeredis.aioredis as fake_redis
+        FAKE_REDIS_AVAILABLE = True
+    except ImportError:
+        fake_redis = None
+        FAKE_REDIS_AVAILABLE = False
 
-    # Use fakeredis if explicitly enabled for tests or if running persistence integration tests
-    use_fake_redis = (
-        env.get("USE_FAKE_REDIS") == "true" or
-        env.get("PYTEST_CURRENT_TEST", "").find("test_3tier_persistence_integration") != -1 or
-        env.get("TEST_DISABLE_REDIS") == "false"  # paradoxically, when we "enable" Redis for tests, use fake
-    )
-
-    if use_fake_redis:
-        try:
-            import fakeredis.aioredis as redis
-            logger = logging.getLogger(__name__)
-            logger.info("Using fakeredis for integration tests")
-            REDIS_AVAILABLE = True
-        except ImportError:
-            import redis.asyncio as redis
-            REDIS_AVAILABLE = True
-    else:
-        import redis.asyncio as redis
-        REDIS_AVAILABLE = True
+    # Default to real Redis
+    redis = real_redis
+    REDIS_AVAILABLE = True
 except ImportError:
     redis = None
+    fake_redis = None
+    real_redis = None
     REDIS_AVAILABLE = False
+    FAKE_REDIS_AVAILABLE = False
 
 from shared.isolated_environment import get_env
 from netra_backend.app.core.backend_environment import BackendEnvironment
@@ -103,6 +95,28 @@ class RedisManager:
         self._circuit_breaker = UnifiedCircuitBreaker(circuit_config)
         
         logger.info("Enhanced RedisManager initialized with automatic recovery")
+
+    def _should_use_fake_redis(self) -> bool:
+        """Determine if fake Redis should be used based on runtime environment.
+
+        This allows tests to dynamically switch to fake Redis by setting environment
+        variables after the module has been imported.
+        """
+        env = get_env()
+
+        # Check multiple indicators for test environment requiring fake Redis
+        use_fake_redis = (
+            env.get("USE_FAKE_REDIS") == "true" or
+            env.get("PYTEST_CURRENT_TEST", "").find("test_3tier_persistence_integration") != -1 or
+            env.get("TEST_DISABLE_REDIS") == "false"  # paradoxically, when we "enable" Redis for tests, use fake
+        )
+
+        if use_fake_redis:
+            logger.info(f"Runtime fake Redis detection: USE_FAKE_REDIS={env.get('USE_FAKE_REDIS')}, "
+                       f"PYTEST_CURRENT_TEST contains persistence: {'test_3tier_persistence_integration' in env.get('PYTEST_CURRENT_TEST', '')}, "
+                       f"TEST_DISABLE_REDIS={env.get('TEST_DISABLE_REDIS')}")
+
+        return use_fake_redis
     
     async def initialize(self):
         """Initialize Redis connection with automatic recovery setup."""
@@ -181,7 +195,16 @@ class RedisManager:
                     logger.debug(f"Production environment - using Redis URL: {redis_url}")
                 
                 # Create new client instance in current event loop
-                self._client = redis.from_url(redis_url, decode_responses=True)
+                # CRITICAL FIX: Runtime decision between real and fake Redis
+                should_use_fake_redis = self._should_use_fake_redis()
+
+                if should_use_fake_redis and FAKE_REDIS_AVAILABLE:
+                    # Using fakeredis - create direct instance
+                    self._client = fake_redis.FakeRedis(decode_responses=True)
+                    logger.info("Created FakeRedis instance for integration tests")
+                else:
+                    # Using real redis - use from_url
+                    self._client = real_redis.from_url(redis_url, decode_responses=True)
                 
                 # Test connection with timeout (reduced for faster readiness checks)
                 await asyncio.wait_for(self._client.ping(), timeout=2.0)
