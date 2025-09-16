@@ -2350,12 +2350,6 @@ class StartupOrchestrator:
             self.logger.error(f"Circuit breaker connection failure: {name} - {reason}")
         else:
             self.logger.warning(f"Circuit breaker failure: {name} ({failure_type.value}) - {reason}")
-            self.logger.info(f"      Migration Mode: {status['migration_mode']}")
-            self.logger.info(f"      Routes Enabled: {len(status['route_flags'])}")
-            self.logger.info(f"      Legacy Fallback: {'Enabled' if status['config']['legacy_fallback_enabled'] else 'Disabled'}")
-            
-        except Exception as e:
-            raise DeterministicStartupError(f"Factory pattern initialization failed: {e}")
     
     async def _validate_database_schema(self) -> None:
         """Validate database schema - CRITICAL."""
