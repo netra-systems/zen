@@ -31,6 +31,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext, 
     AgentExecutionResult
 )
+from netra_backend.app.core.execution_tracker import ExecutionState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SsotTestMetrics
@@ -84,8 +85,10 @@ class AgentExecutionCoreBusinessTests(SSotBaseTestCase):
         exec_id = uuid4()
         tracker.register_execution = Mock(return_value=exec_id)
         tracker.start_execution = Mock(return_value=True)
+        # SSOT API: update_execution_state is the primary method
+        tracker.update_execution_state = Mock(return_value=True)
+        # Legacy compatibility: complete_execution still available but not used in implementation
         tracker.complete_execution = Mock()
-        tracker.update_execution_state = Mock()
         tracker.collect_metrics = Mock(return_value={
             'execution_time_ms': 1500,
             'memory_usage_mb': 128,
@@ -254,9 +257,23 @@ class AgentExecutionCoreBusinessTests(SSotBaseTestCase):
         # Verify error was communicated to user via WebSocket
         execution_core.websocket_bridge.notify_agent_error.assert_called()
         
-        # Verify execution was marked as failed for monitoring
-        args, kwargs = execution_core.execution_tracker.complete_execution.call_args
-        assert "error" in kwargs or len(args) > 1
+        # Verify execution was marked as failed for monitoring using SSOT API
+        # The implementation uses update_execution_state (SSOT) instead of complete_execution (legacy)
+        args, kwargs = execution_core.execution_tracker.update_execution_state.call_args
+        
+        # Verify ExecutionState.FAILED was passed
+        failed_state_passed = (
+            (len(args) >= 2 and args[1] == ExecutionState.FAILED) or 
+            kwargs.get('state') == ExecutionState.FAILED
+        )
+        assert failed_state_passed, f"Expected ExecutionState.FAILED, got args={args}, kwargs={kwargs}"
+        
+        # Verify error message was provided
+        error_provided = (
+            (len(args) >= 3 and args[2] is not None) or 
+            kwargs.get('error') is not None
+        )
+        assert error_provided, f"Expected error message to be provided, got args={args}, kwargs={kwargs}"
         
         # Record failure metrics
         self.metrics.record_custom("agent_deaths_detected", 1)
