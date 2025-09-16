@@ -165,6 +165,43 @@ class _WebSocketManagerFactory:
             "Use get_websocket_manager() factory function for SSOT compliance."
         )
 
+    @classmethod
+    def create_factory_manager(cls, user_id: str, thread_id: str, run_id: str, **kwargs):
+        """
+        ISSUE #1176 GAP #3 REMEDIATION: Legacy compatibility method for factory pattern.
+
+        This method provides backward compatibility for test code that expects
+        create_factory_manager while redirecting to the SSOT factory function.
+
+        Args:
+            user_id: User identifier for isolation
+            thread_id: Thread identifier for context
+            run_id: Run identifier for execution context
+            **kwargs: Additional arguments
+
+        Returns:
+            WebSocket manager instance via SSOT factory function
+        """
+        logger.warning(
+            f"DEPRECATED: WebSocketManager.create_factory_manager() called. "
+            f"Use get_websocket_manager() factory function instead for SSOT compliance. "
+            f"user_id={user_id}, thread_id={thread_id}, run_id={run_id}"
+        )
+
+        # Create a mock user context from the parameters
+        user_context = type('MockUserContext', (), {
+            'user_id': user_id,
+            'thread_id': thread_id,
+            'run_id': run_id,
+            'is_test': True
+        })()
+
+        # Redirect to the SSOT factory function (defer to avoid circular import)
+        import sys
+        current_module = sys.modules[__name__]
+        factory_func = getattr(current_module, 'get_websocket_manager')
+        return factory_func(user_context=user_context, **kwargs)
+
 # SSOT CONSOLIDATION: Export factory wrapper as WebSocketManager
 # This enforces factory pattern usage and prevents direct instantiation
 WebSocketManager = _WebSocketManagerFactory
@@ -180,6 +217,9 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 # CRITICAL: This prevents multiple manager instances per user
 _USER_MANAGER_REGISTRY: Dict[str, _UnifiedWebSocketManagerImplementation] = {}
 _REGISTRY_LOCK = threading.Lock()
+
+# Factory integration with fallback support
+_ENABLE_FACTORY_MODE = True  # Toggle factory mode vs legacy registry mode
 
 def _get_user_key(user_context: Optional[Any]) -> str:
     """
