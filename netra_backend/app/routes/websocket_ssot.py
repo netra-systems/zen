@@ -1581,6 +1581,40 @@ class WebSocketSSOTRouter:
                     break
 
                 try:
+                    # CRITICAL FIX FOR ISSUE #1061: Enhanced handshake completion validation for factory mode
+                    # Ensure WebSocket accept() has fully completed before attempting receive operations
+                    max_handshake_wait = 3.0  # Maximum time to wait for handshake completion
+                    handshake_wait_start = time.time()
+                    
+                    while time.time() - handshake_wait_start < max_handshake_wait:
+                        try:
+                            # Test if WebSocket is ready for receive operations
+                            if hasattr(websocket, 'receive') and callable(websocket.receive):
+                                test_ready = True
+                                try:
+                                    if hasattr(websocket, 'client_state') and websocket.client_state != WebSocketState.CONNECTED:
+                                        test_ready = False
+                                    elif hasattr(websocket, 'application_state') and websocket.application_state != WebSocketState.CONNECTED:
+                                        test_ready = False
+                                except Exception:
+                                    test_ready = False
+                                
+                                if test_ready:
+                                    logger.debug(f"[FACTORY MODE] WebSocket handshake completion validated for user {user_id[:8]} after {time.time() - handshake_wait_start:.3f}s")
+                                    break
+                            
+                            await asyncio.sleep(0.01)  # 10ms incremental check
+                            
+                        except Exception as handshake_check_error:
+                            logger.debug(f"[FACTORY MODE] Handshake completion check failed: {handshake_check_error}")
+                            await asyncio.sleep(0.01)
+                    else:
+                        # Handshake completion timeout - log and continue with existing validation
+                        logger.warning(f"[FACTORY MODE] WebSocket handshake completion timeout after {max_handshake_wait}s for user {user_id[:8]}")
+                        if not is_websocket_connected_and_ready(websocket, connection_id):
+                            logger.error(f"[FACTORY MODE] WebSocket not ready after handshake timeout for user {user_id[:8]}")
+                            break
+                    
                     raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=websocket_timeout)
                     message_data = json.loads(raw_message)
 
