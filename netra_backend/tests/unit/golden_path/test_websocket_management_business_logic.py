@@ -24,7 +24,7 @@ from unittest.mock import Mock, MagicMock, AsyncMock, patch
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from netra_backend.app.websocket_core.context import WebSocketContext
-from netra_backend.app.websocket.connection_handler import ConnectionHandler
+from netra_backend.app.websocket_core.handlers import ConnectionHandler
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.user_execution_context import UserExecutionContext

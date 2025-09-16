@@ -1,7 +1,7 @@
 {
-  "scan_timestamp": 458187.714969625,
-  "directory_scanned": "/Users/anthony/Desktop/netra-apex/tests/integration",
-  "total_files": 307,
+  "scan_timestamp": 339441.25,
+  "directory_scanned": "C:\\netra-apex\\tests\\integration",
+  "total_files": 1020,
   "files_with_errors": 0,
   "detailed_errors": []
 }
