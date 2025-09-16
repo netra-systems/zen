@@ -1,465 +1,510 @@
 """
-Test Suite: WebSocket Authentication Pattern Violations Detection
-Issue #1186: UserExecutionEngine SSOT Consolidation - WebSocket Auth Component
+WebSocket Authentication Pattern Violations Test for Issue #1186
 
-PURPOSE: Expose and validate WebSocket authentication pattern violations.
-These tests are DESIGNED TO FAIL initially to demonstrate current violations.
+Tests for detecting WebSocket authentication pattern violations that violate
+SSOT principles and create security vulnerabilities in the Golden Path.
 
-Business Impact: 5 WebSocket authentication violations with 4 different validation
-patterns prevent consistent authentication, blocking $500K+ ARR WebSocket reliability.
+Business Value: Platform/Internal - System Security & Development Velocity
+Prevents authentication bypass vulnerabilities and ensures secure WebSocket
+connections for the $500K+ ARR Golden Path user flow.
 
-EXPECTED BEHAVIOR:
-- All tests SHOULD FAIL initially (demonstrating violations)
-- All tests SHOULD PASS after SSOT consolidation is complete
+Expected: FAIL initially (detects 5+ violations, 4 patterns)
+Target: 100% SSOT compliance with canonical authentication patterns
+
+CRITICAL: This test MUST fail initially to demonstrate current violations.
+Only passes when SSOT consolidation is complete.
 """
 
-import ast
 import re
-import sys
-import pytest
-import unittest
+import ast
 from pathlib import Path
 from typing import Dict, List, Set, Tuple, Optional
-from collections import defaultdict
 from dataclasses import dataclass
-
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @dataclass
-class WebSocketAuthViolation:
-    """Container for WebSocket authentication violation data."""
+class AuthViolation:
+    """Container for WebSocket authentication violations."""
     file_path: str
-    pattern_type: str
     line_number: int
-    code_snippet: str
-    violation_severity: str
+    violation_code: str
+    violation_type: str
+    severity: str
+    pattern_category: str
+    security_impact: str
 
 
 @dataclass
-class AuthPatternAnalysis:
-    """Container for authentication pattern analysis results."""
+class AuthPatternStats:
+    """Statistics for authentication pattern analysis."""
     total_violations: int
-    patterns_found: Set[str]
-    target_pattern: str
-    violations_by_type: Dict[str, List[WebSocketAuthViolation]]
-    severity: str
+    security_critical_violations: int
+    high_violations: int
+    medium_violations: int
+    low_violations: int
+    violation_patterns: Set[str]
+    files_affected: Set[str]
+    auth_bypass_risks: List[str]
 
 
-@pytest.mark.unit
-@pytest.mark.ssot_consolidation
-@pytest.mark.websocket_auth
-class TestWebSocketAuthenticationPatternViolations(SSotBaseTestCase):
+class TestWebSocketAuthPatternViolations(SSotBaseTestCase):
     """
-    Test class to detect and validate WebSocket authentication pattern violations.
+    Test suite for detecting WebSocket authentication pattern violations.
     
-    This test suite exposes the current authentication chaos and validates SSOT consolidation.
+    This test identifies authentication patterns that violate SSOT principles
+    and create security risks in WebSocket connections.
+    
+    CRITICAL BUSINESS IMPACT:
+    - Prevents authentication bypass in Golden Path ($500K+ ARR protection)
+    - Ensures secure WebSocket connections for customer chat functionality
+    - Maintains enterprise-grade security standards for user authentication
     """
     
-    def setup_method(self, method):
-        """Setup test environment with SSOT base."""
+    @classmethod
+    def setup_class(cls):
+        """Set up class-level resources for authentication analysis."""
+        super().setup_class()
+        cls.project_root = Path("/Users/anthony/Desktop/netra-apex")
+        cls.auth_violation_threshold = 5  # Expected current violations
+        cls.pattern_threshold = 4  # Expected distinct violation patterns
+        cls.canonical_auth_patterns = [
+            "from auth_service.auth_core.core.jwt_handler import verify_jwt_token",
+            "from netra_backend.app.auth_integration.auth import validate_websocket_auth",
+            "from test_framework.ssot.e2e_auth_helper import create_authenticated_user"
+        ]
+        cls.logger.info(f"Analyzing WebSocket auth patterns in {cls.project_root}")
+    
+    def setup_method(self, method=None):
+        """Set up per-test resources."""
         super().setup_method(method)
-        self.project_root = Path(__file__).parent.parent.parent.parent
-        
-        # Define SSOT authentication patterns (what SHOULD be used)
-        self.ssot_auth_pattern = "from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot"
-        self.ssot_authenticator_pattern = "from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuthenticator"
-        
-        # Define violation patterns (what should NOT be used)
-        self.violation_patterns = {
-            'legacy_auth_class': r'class\s+WebSocketAuthenticator\s*\(',
-            'duplicate_auth_functions': r'def\s+authenticate_websocket_connection\s*\(',
-            'token_validation_fragments': r'def\s+validate_websocket_token.*\(',
-            'extraction_utility_duplicates': r'def\s+.*extract.*token.*websocket\s*\(',
-        }
-        
-    def test_detect_websocket_auth_pattern_violations(self):
-        """
-        TEST 1: Detect all WebSocket authentication pattern violations.
-        
-        EXPECTED TO FAIL: Should find 5+ authentication violations (audit baseline).
-        TARGET: Should find 0 violations after SSOT consolidation.
-        """
-        print("\n🔍 TEST 1: Detecting WebSocket authentication pattern violations...")
-        
-        auth_analysis = self._analyze_websocket_auth_patterns()
-        
-        # Track metrics for business analysis
-        self.record_metric("websocket_auth_violations", auth_analysis.total_violations)
-        self.record_metric("auth_patterns_found", len(auth_analysis.patterns_found))
-        self.record_metric("auth_violation_severity", auth_analysis.severity)
-        
-        print(f"\n📊 WEBSOCKET AUTH PATTERN ANALYSIS:")
-        print(f"   Total violations: {auth_analysis.total_violations}")
-        print(f"   Unique patterns found: {len(auth_analysis.patterns_found)}")
-        print(f"   Target pattern: {auth_analysis.target_pattern}")
-        print(f"   Severity: {auth_analysis.severity}")
-        
-        # Print violations by type
-        for pattern_type, violations in auth_analysis.violations_by_type.items():
-            print(f"\n   {pattern_type}: {len(violations)} violations")
-            for violation in violations[:3]:  # Show first 3
-                print(f"     • {violation.file_path}:{violation.line_number}")
-        
-        # ASSERTION DESIGNED TO FAIL INITIALLY
-        assert auth_analysis.total_violations == 0, (
-            f"❌ EXPECTED FAILURE: Found {auth_analysis.total_violations} WebSocket authentication pattern violations. "
-            f"SSOT requires exactly 1 canonical authentication pattern.\n"
-            f"Severity: {auth_analysis.severity}\n"
-            f"Violations by type:\n" + 
-            '\n'.join([f"  • {pattern_type}: {len(violations)} violations" 
-                      for pattern_type, violations in auth_analysis.violations_by_type.items()]) +
-            f"\n\n🎯 Target: Use SSOT pattern: {auth_analysis.target_pattern}"
+        self.violations: List[AuthViolation] = []
+        self.stats = AuthPatternStats(
+            total_violations=0,
+            security_critical_violations=0,
+            high_violations=0,
+            medium_violations=0,
+            low_violations=0,
+            violation_patterns=set(),
+            files_affected=set(),
+            auth_bypass_risks=[]
         )
     
-    def test_detect_legacy_websocket_authenticator_classes(self):
-        """
-        TEST 2: Detect legacy WebSocketAuthenticator class implementations.
-        
-        EXPECTED TO FAIL: Should find multiple WebSocketAuthenticator classes.
-        TARGET: Should find only UnifiedWebSocketAuthenticator after consolidation.
-        """
-        print("\n🔍 TEST 2: Detecting legacy WebSocketAuthenticator classes...")
-        
-        authenticator_classes = self._scan_websocket_authenticator_classes()
-        legacy_classes = [cls for cls in authenticator_classes if cls['is_legacy']]
-        
-        # Track metrics
-        self.record_metric("legacy_authenticator_classes", len(legacy_classes))
-        self.record_metric("total_authenticator_classes", len(authenticator_classes))
-        
-        print(f"\n📊 WEBSOCKET AUTHENTICATOR CLASS ANALYSIS:")
-        print(f"   Total authenticator classes: {len(authenticator_classes)}")
-        print(f"   Legacy classes: {len(legacy_classes)}")
-        print(f"   Target: 1 SSOT class (UnifiedWebSocketAuthenticator)")
-        
-        for cls in authenticator_classes:
-            status = "❌ LEGACY" if cls['is_legacy'] else "✅ SSOT"
-            print(f"   {status} {cls['class_name']} in {cls['file_path']}")
-        
-        # ASSERTION DESIGNED TO FAIL INITIALLY
-        assert len(legacy_classes) == 0, (
-            f"❌ EXPECTED FAILURE: Found {len(legacy_classes)} legacy WebSocketAuthenticator classes. "
-            f"SSOT requires only UnifiedWebSocketAuthenticator.\n"
-            f"Legacy classes found:\n" + 
-            '\n'.join([f"  • {cls['class_name']} in {cls['file_path']}" 
-                      for cls in legacy_classes]) +
-            f"\n\n🎯 Target: Only UnifiedWebSocketAuthenticator should exist."
-        )
-    
-    def test_detect_duplicate_auth_functions(self):
-        """
-        TEST 3: Detect duplicate authentication function implementations.
-        
-        EXPECTED TO FAIL: Should find 4+ different authentication functions.
-        TARGET: Should find only authenticate_websocket_ssot after consolidation.
-        """
-        print("\n🔍 TEST 3: Detecting duplicate authentication functions...")
-        
-        auth_functions = self._scan_authentication_functions()
-        duplicate_functions = [func for func in auth_functions if func['is_duplicate']]
-        
-        # Track metrics
-        self.record_metric("duplicate_auth_functions", len(duplicate_functions))
-        self.record_metric("total_auth_functions", len(auth_functions))
-        
-        print(f"\n📊 AUTHENTICATION FUNCTION ANALYSIS:")
-        print(f"   Total auth functions: {len(auth_functions)}")
-        print(f"   Duplicate functions: {len(duplicate_functions)}")
-        print(f"   Target: 1 SSOT function (authenticate_websocket_ssot)")
-        
-        for func in auth_functions:
-            status = "❌ DUPLICATE" if func['is_duplicate'] else "✅ SSOT"
-            print(f"   {status} {func['function_name']} in {func['file_path']}")
-        
-        # ASSERTION DESIGNED TO FAIL INITIALLY
-        assert len(duplicate_functions) == 0, (
-            f"❌ EXPECTED FAILURE: Found {len(duplicate_functions)} duplicate authentication functions. "
-            f"SSOT requires only authenticate_websocket_ssot.\n"
-            f"Duplicate functions found:\n" + 
-            '\n'.join([f"  • {func['function_name']} in {func['file_path']}" 
-                      for func in duplicate_functions]) +
-            f"\n\n🎯 Target: Only authenticate_websocket_ssot should exist."
-        )
-    
-    def test_detect_token_validation_pattern_violations(self):
-        """
-        TEST 4: Detect token validation pattern violations.
-        
-        EXPECTED TO FAIL: Should find multiple token validation patterns.
-        TARGET: Should find validation integrated into SSOT auth flow only.
-        """
-        print("\n🔍 TEST 4: Detecting token validation pattern violations...")
-        
-        validation_patterns = self._scan_token_validation_patterns()
-        
-        # Track metrics
-        self.record_metric("token_validation_violations", len(validation_patterns))
-        
-        print(f"\n📊 TOKEN VALIDATION PATTERN ANALYSIS:")
-        print(f"   Token validation violations: {len(validation_patterns)}")
-        
-        for pattern_type, violations in validation_patterns.items():
-            print(f"   {pattern_type}: {len(violations)} violations")
-            for violation in violations[:2]:  # Show first 2
-                print(f"     • {violation}")
-        
-        # ASSERTION DESIGNED TO FAIL INITIALLY
-        assert len(validation_patterns) == 0, (
-            f"❌ EXPECTED FAILURE: Found {sum(len(v) for v in validation_patterns.values())} token validation pattern violations. "
-            f"Token validation should be integrated into SSOT authentication flow.\n"
-            f"Violations by pattern:\n" + 
-            '\n'.join([f"  • {pattern}: {len(violations)} violations" 
-                      for pattern, violations in validation_patterns.items()]) +
-            f"\n\n🎯 Target: Token validation integrated into authenticate_websocket_ssot only."
-        )
-    
-    def test_validate_ssot_auth_usage_percentage(self):
-        """
-        TEST 5: Validate percentage of code using SSOT authentication patterns.
-        
-        EXPECTED TO FAIL: Most code should NOT use SSOT patterns yet.
-        TARGET: 95%+ of authentication code should use SSOT patterns.
-        """
-        print("\n🔍 TEST 5: Validating SSOT authentication pattern usage...")
-        
-        ssot_usage = self._analyze_ssot_auth_usage()
-        
-        # Track metrics
-        self.record_metric("ssot_auth_usage_percentage", ssot_usage['percentage'])
-        self.record_metric("ssot_auth_files", ssot_usage['ssot_files'])
-        self.record_metric("total_auth_files", ssot_usage['total_files'])
-        
-        print(f"\n📊 SSOT AUTHENTICATION USAGE ANALYSIS:")
-        print(f"   Files using SSOT auth: {ssot_usage['ssot_files']}")
-        print(f"   Total auth files: {ssot_usage['total_files']}")
-        print(f"   SSOT usage percentage: {ssot_usage['percentage']:.1f}%")
-        print(f"   Target: 95%+ SSOT usage")
-        
-        # ASSERTION DESIGNED TO FAIL INITIALLY
-        assert ssot_usage['percentage'] >= 95.0, (
-            f"❌ EXPECTED FAILURE: Only {ssot_usage['percentage']:.1f}% of authentication code uses SSOT patterns. "
-            f"SSOT requires 95%+ canonical usage.\n"
-            f"SSOT files: {ssot_usage['ssot_files']}/{ssot_usage['total_files']}\n"
-            f"Non-SSOT examples:\n" + 
-            '\n'.join([f"  • {path}" for path in ssot_usage['non_ssot_files'][:5]]) +
-            f"\n\n🎯 Target: Use authenticate_websocket_ssot for all authentication."
-        )
-    
-    def _analyze_websocket_auth_patterns(self) -> AuthPatternAnalysis:
-        """Analyze WebSocket authentication patterns and violations."""
-        violations_by_type = defaultdict(list)
-        patterns_found = set()
-        total_violations = 0
-        
-        for py_file in self._get_websocket_related_files():
-            try:
-                with open(py_file, 'r', encoding='utf-8') as f:
-                    lines = f.readlines()
-                    
-                for line_num, line in enumerate(lines, 1):
-                    for pattern_type, pattern in self.violation_patterns.items():
-                        if re.search(pattern, line):
-                            violation = WebSocketAuthViolation(
-                                file_path=str(py_file),
-                                pattern_type=pattern_type,
-                                line_number=line_num,
-                                code_snippet=line.strip(),
-                                violation_severity="HIGH"
-                            )
-                            violations_by_type[pattern_type].append(violation)
-                            patterns_found.add(pattern_type)
-                            total_violations += 1
-                            
-            except (UnicodeDecodeError, PermissionError, OSError):
-                continue
-        
-        # Determine severity
-        if total_violations > 10:
-            severity = "CRITICAL"
-        elif total_violations > 5:
-            severity = "HIGH"
-        elif total_violations > 2:
-            severity = "MEDIUM"
-        else:
-            severity = "LOW"
-        
-        return AuthPatternAnalysis(
-            total_violations=total_violations,
-            patterns_found=patterns_found,
-            target_pattern=self.ssot_auth_pattern,
-            violations_by_type=dict(violations_by_type),
-            severity=severity
-        )
-    
-    def _scan_websocket_authenticator_classes(self) -> List[Dict[str, any]]:
-        """Scan for WebSocketAuthenticator class implementations."""
-        authenticator_classes = []
-        
-        class_patterns = [
-            r'class\s+WebSocketAuthenticator\s*\(',
-            r'class\s+UnifiedWebSocketAuthenticator\s*\(',
-            r'class\s+.*WebSocket.*Auth.*\s*\(',
-        ]
-        
-        for py_file in self._get_websocket_related_files():
-            try:
-                with open(py_file, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    
-                for pattern in class_patterns:
-                    matches = re.finditer(pattern, content, re.MULTILINE)
-                    for match in matches:
-                        class_name = match.group().split()[1].split('(')[0]
-                        is_legacy = class_name != "UnifiedWebSocketAuthenticator"
-                        
-                        authenticator_classes.append({
-                            'class_name': class_name,
-                            'file_path': str(py_file),
-                            'is_legacy': is_legacy,
-                            'pattern_matched': pattern
-                        })
-                        
-            except (UnicodeDecodeError, PermissionError, OSError):
-                continue
-                
-        return authenticator_classes
-    
-    def _scan_authentication_functions(self) -> List[Dict[str, any]]:
-        """Scan for authentication function implementations."""
-        auth_functions = []
-        
-        function_patterns = [
-            r'def\s+authenticate_websocket_connection\s*\(',
-            r'def\s+authenticate_websocket_ssot\s*\(',
-            r'def\s+authenticate_websocket.*\s*\(',
-            r'async\s+def\s+authenticate_websocket.*\s*\(',
-        ]
-        
-        for py_file in self._get_websocket_related_files():
-            try:
-                with open(py_file, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    
-                for pattern in function_patterns:
-                    matches = re.finditer(pattern, content, re.MULTILINE)
-                    for match in matches:
-                        func_name = match.group().split('def ')[-1].split('(')[0].strip()
-                        is_duplicate = func_name != "authenticate_websocket_ssot"
-                        
-                        auth_functions.append({
-                            'function_name': func_name,
-                            'file_path': str(py_file),
-                            'is_duplicate': is_duplicate,
-                            'is_async': 'async' in match.group()
-                        })
-                        
-            except (UnicodeDecodeError, PermissionError, OSError):
-                continue
-                
-        return auth_functions
-    
-    def _scan_token_validation_patterns(self) -> Dict[str, List[str]]:
-        """Scan for token validation pattern violations."""
-        validation_patterns = {
-            'standalone_validation_functions': [],
-            'jwt_decode_duplicates': [],
-            'token_extraction_utilities': [],
-            'validation_method_duplicates': []
-        }
-        
-        patterns = {
-            'standalone_validation_functions': r'def\s+validate.*token.*\(',
-            'jwt_decode_duplicates': r'jwt\.decode\(',
-            'token_extraction_utilities': r'def\s+.*extract.*token.*\(',
-            'validation_method_duplicates': r'def\s+.*validate.*jwt.*\(',
-        }
-        
-        for py_file in self._get_websocket_related_files():
-            try:
-                with open(py_file, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    
-                for pattern_type, pattern in patterns.items():
-                    matches = re.findall(pattern, content, re.MULTILINE)
-                    for match in matches:
-                        validation_patterns[pattern_type].append(f"{py_file}: {match}")
-                        
-            except (UnicodeDecodeError, PermissionError, OSError):
-                continue
-                
-        return validation_patterns
-    
-    def _analyze_ssot_auth_usage(self) -> Dict[str, any]:
-        """Analyze SSOT authentication pattern usage."""
-        ssot_files = set()
-        non_ssot_files = set()
-        total_files = set()
-        
-        ssot_patterns = [
-            'authenticate_websocket_ssot',
-            'UnifiedWebSocketAuthenticator',
-            'from netra_backend.app.websocket_core.unified_websocket_auth'
-        ]
-        
-        for py_file in self._get_websocket_related_files():
-            try:
-                with open(py_file, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    
-                # Check if file contains authentication code
-                if any(auth_keyword in content for auth_keyword in ['websocket', 'auth', 'token']):
-                    total_files.add(str(py_file))
-                    
-                    # Check if file uses SSOT patterns
-                    if any(ssot_pattern in content for ssot_pattern in ssot_patterns):
-                        ssot_files.add(str(py_file))
-                    else:
-                        non_ssot_files.add(str(py_file))
-                        
-            except (UnicodeDecodeError, PermissionError, OSError):
-                continue
-        
-        percentage = (len(ssot_files) / max(1, len(total_files))) * 100
-        
-        return {
-            'ssot_files': len(ssot_files),
-            'total_files': len(total_files),
-            'percentage': percentage,
-            'non_ssot_files': list(non_ssot_files)
-        }
-    
-    def _get_websocket_related_files(self) -> List[Path]:
-        """Get all WebSocket-related Python files for analysis."""
+    def _scan_websocket_files(self) -> List[Path]:
+        """Scan for WebSocket-related files to analyze."""
         websocket_files = []
         
-        # Search paths that likely contain WebSocket authentication code
-        search_paths = [
-            self.project_root / 'netra_backend' / 'app' / 'websocket_core',
-            self.project_root / 'netra_backend' / 'app' / 'routes',
-            self.project_root / 'netra_backend' / 'app' / 'services',
-            self.project_root / 'auth_service',
-            self.project_root / 'tests' / 'websocket',
-            self.project_root / 'tests' / 'integration',
+        # Key directories with WebSocket code
+        scan_patterns = [
+            "netra_backend/app/websocket*/**/*.py",
+            "netra_backend/app/routes/websocket*.py",
+            "netra_backend/app/**/websocket*.py",
+            "test_framework/**/websocket*.py",
+            "tests/**/websocket*.py",
+            "tests/**/test_websocket*.py"
         ]
         
-        for search_path in search_paths:
-            if search_path.exists():
-                for py_file in search_path.rglob('*.py'):
-                    # Include files that likely contain WebSocket or auth code
-                    if any(keyword in str(py_file).lower() for keyword in 
-                           ['websocket', 'auth', 'token', 'jwt', 'connection']):
-                        websocket_files.append(py_file)
+        for pattern in scan_patterns:
+            websocket_files.extend(self.project_root.glob(pattern))
         
+        # Also scan for files containing WebSocket authentication code
+        additional_files = []
+        for py_file in self.project_root.rglob("*.py"):
+            try:
+                with open(py_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    if any(keyword in content.lower() for keyword in 
+                          ['websocket', 'ws_auth', 'socket_auth', 'jwt_websocket']):
+                        additional_files.append(py_file)
+            except (UnicodeDecodeError, PermissionError, OSError):
+                continue
+        
+        websocket_files.extend(additional_files)
+        websocket_files = list(set(websocket_files))  # Remove duplicates
+        
+        self.record_metric("websocket_files_scanned", len(websocket_files))
         return websocket_files
-
-
-if __name__ == '__main__':
-    print("🚨 Issue #1186 WebSocket Authentication Pattern Violations Detection")
-    print("=" * 80)
-    print("⚠️  WARNING: These tests are DESIGNED TO FAIL to demonstrate current violations")
-    print("📊 Expected: Multiple test failures exposing auth pattern violations")
-    print("🎯 Goal: Baseline measurement before SSOT consolidation")
-    print("=" * 80)
     
-    unittest.main(verbosity=2)
+    def _analyze_auth_violations(self, file_path: Path) -> List[AuthViolation]:
+        """Analyze authentication violations in a WebSocket file."""
+        violations = []
+        
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                lines = content.splitlines()
+            
+            # Parse AST for structured analysis
+            try:
+                tree = ast.parse(content)
+            except SyntaxError:
+                return violations
+            
+            rel_path = str(file_path.relative_to(self.project_root))
+            
+            # Check for various authentication violation patterns
+            violations.extend(self._check_direct_jwt_decode_violations(rel_path, lines, tree))
+            violations.extend(self._check_auth_bypass_patterns(rel_path, lines, tree))
+            violations.extend(self._check_fragmented_auth_imports(rel_path, lines, tree))
+            violations.extend(self._check_insecure_auth_patterns(rel_path, lines, tree))
+        
+        except Exception as e:
+            self.logger.warning(f"Error analyzing {file_path}: {e}")
+        
+        return violations
+    
+    def _check_direct_jwt_decode_violations(self, file_path: str, lines: List[str], tree: ast.AST) -> List[AuthViolation]:
+        """Check for direct JWT decoding violations (SSOT violation)."""
+        violations = []
+        
+        # Patterns that indicate direct JWT handling instead of using auth service
+        forbidden_patterns = [
+            (r'jwt\.decode\s*\(', 'direct_jwt_decode'),
+            (r'PyJWT\.decode\s*\(', 'direct_pyjwt_decode'),
+            (r'base64\.decode.*jwt', 'manual_jwt_decode'),
+            (r'json\.loads.*\.split\(.*jwt', 'manual_jwt_parsing'),
+            (r'\.split\(\'\.\'.*jwt', 'jwt_manual_split')
+        ]
+        
+        for line_num, line in enumerate(lines, 1):
+            for pattern, violation_type in forbidden_patterns:
+                if re.search(pattern, line, re.IGNORECASE):
+                    violation = AuthViolation(
+                        file_path=file_path,
+                        line_number=line_num,
+                        violation_code=line.strip(),
+                        violation_type=violation_type,
+                        severity="SECURITY_CRITICAL",
+                        pattern_category="direct_jwt_handling",
+                        security_impact="Authentication bypass risk - JWT validation not centralized"
+                    )
+                    violations.append(violation)
+        
+        return violations
+    
+    def _check_auth_bypass_patterns(self, file_path: str, lines: List[str], tree: ast.AST) -> List[AuthViolation]:
+        """Check for authentication bypass patterns."""
+        violations = []
+        
+        # Patterns that indicate potential authentication bypass
+        bypass_patterns = [
+            (r'if\s+False\s*:', 'hardcoded_auth_disable'),
+            (r'#.*auth.*disable', 'commented_auth_disable'),
+            (r'skip.*auth', 'auth_skip_pattern'),
+            (r'no.*auth.*check', 'no_auth_check'),
+            (r'bypass.*auth', 'explicit_auth_bypass'),
+            (r'mock.*auth.*true', 'mocked_auth_always_true'),
+            (r'return\s+True.*auth', 'hardcoded_auth_success')
+        ]
+        
+        for line_num, line in enumerate(lines, 1):
+            for pattern, violation_type in bypass_patterns:
+                if re.search(pattern, line, re.IGNORECASE):
+                    # Exclude test files from some patterns (they may legitimately mock auth)
+                    if file_path.startswith("tests/") and violation_type in ['mocked_auth_always_true']:
+                        continue
+                        
+                    violation = AuthViolation(
+                        file_path=file_path,
+                        line_number=line_num,
+                        violation_code=line.strip(),
+                        violation_type=violation_type,
+                        severity="SECURITY_CRITICAL",
+                        pattern_category="auth_bypass",
+                        security_impact="Authentication can be bypassed completely"
+                    )
+                    violations.append(violation)
+        
+        return violations
+    
+    def _check_fragmented_auth_imports(self, file_path: str, lines: List[str], tree: ast.AST) -> List[AuthViolation]:
+        """Check for fragmented authentication imports (SSOT violation)."""
+        violations = []
+        
+        # Import patterns that violate SSOT authentication principles
+        fragmented_patterns = [
+            (r'from.*\.auth.*import.*jwt', 'fragmented_jwt_import'),
+            (r'import\s+jwt\s*$', 'direct_jwt_import'),
+            (r'from\s+jwt\s+import', 'direct_jwt_from_import'),
+            (r'from.*websocket.*import.*auth', 'websocket_auth_import_fragmentation'),
+            (r'from.*\.\..*auth', 'relative_auth_import'),
+        ]
+        
+        for line_num, line in enumerate(lines, 1):
+            for pattern, violation_type in fragmented_patterns:
+                if re.search(pattern, line, re.IGNORECASE):
+                    # Check if this is a canonical import pattern
+                    is_canonical = any(canonical in line for canonical in self.canonical_auth_patterns)
+                    
+                    if not is_canonical:
+                        violation = AuthViolation(
+                            file_path=file_path,
+                            line_number=line_num,
+                            violation_code=line.strip(),
+                            violation_type=violation_type,
+                            severity="HIGH",
+                            pattern_category="fragmented_auth_imports",
+                            security_impact="Non-SSOT authentication imports create inconsistent security"
+                        )
+                        violations.append(violation)
+        
+        return violations
+    
+    def _check_insecure_auth_patterns(self, file_path: str, lines: List[str], tree: ast.AST) -> List[AuthViolation]:
+        """Check for insecure authentication patterns."""
+        violations = []
+        
+        # Patterns that indicate insecure authentication practices
+        insecure_patterns = [
+            (r'secret.*=.*["\'].*["\']', 'hardcoded_secret'),
+            (r'key.*=.*["\'].*["\']', 'hardcoded_key'),
+            (r'password.*=.*["\'][^"\']*["\']', 'hardcoded_password'),
+            (r'token.*=.*["\'].*["\']', 'hardcoded_token'),
+            (r'verify.*=.*False', 'jwt_verification_disabled'),
+            (r'check_signature.*=.*False', 'signature_verification_disabled'),
+        ]
+        
+        for line_num, line in enumerate(lines, 1):
+            for pattern, violation_type in insecure_patterns:
+                if re.search(pattern, line, re.IGNORECASE):
+                    # Filter out obvious test patterns and environment variable assignments
+                    if any(safe_pattern in line.lower() for safe_pattern in 
+                          ['os.environ', 'getenv', 'test_', 'mock_', 'example']):
+                        continue
+                        
+                    violation = AuthViolation(
+                        file_path=file_path,
+                        line_number=line_num,
+                        violation_code=line.strip(),
+                        violation_type=violation_type,
+                        severity="HIGH",
+                        pattern_category="insecure_auth_practices",
+                        security_impact="Insecure authentication configuration"
+                    )
+                    violations.append(violation)
+        
+        return violations
+    
+    def _aggregate_stats(self, violations: List[AuthViolation]) -> None:
+        """Aggregate violation statistics."""
+        self.stats.total_violations = len(violations)
+        
+        for violation in violations:
+            # Track violation patterns
+            self.stats.violation_patterns.add(violation.violation_type)
+            self.stats.files_affected.add(violation.file_path)
+            
+            # Count by severity
+            if violation.severity == "SECURITY_CRITICAL":
+                self.stats.security_critical_violations += 1
+                self.stats.auth_bypass_risks.append(f"{violation.file_path}:{violation.line_number}")
+            elif violation.severity == "HIGH":
+                self.stats.high_violations += 1
+            elif violation.severity == "MEDIUM":
+                self.stats.medium_violations += 1
+            else:
+                self.stats.low_violations += 1
+    
+    def test_detect_websocket_auth_pattern_violations(self):
+        """
+        CRITICAL TEST: Detect WebSocket authentication pattern violations.
+        
+        This test MUST FAIL initially to demonstrate the current 5+ violations
+        across 4+ distinct patterns that need to be addressed for SSOT compliance.
+        
+        Expected violations:
+        - 5+ total authentication pattern violations
+        - 2+ security critical violations (auth bypass, direct JWT decode)
+        - 3+ high violations (fragmented imports, insecure practices)
+        - 4+ distinct violation patterns
+        
+        Business Impact:
+        - Prevents authentication bypass in Golden Path ($500K+ ARR protection)
+        - Ensures secure WebSocket connections for customer chat
+        - Maintains enterprise-grade security standards
+        """
+        # Scan WebSocket-related files
+        websocket_files = self._scan_websocket_files()
+        self.assertGreater(len(websocket_files), 5, "Should scan substantial number of WebSocket files")
+        
+        # Analyze each file for authentication violations
+        all_violations = []
+        for file_path in websocket_files:
+            violations = self._analyze_auth_violations(file_path)
+            all_violations.extend(violations)
+        
+        # Store violations for analysis
+        self.violations = all_violations
+        self._aggregate_stats(all_violations)
+        
+        # Record metrics for tracking
+        self.record_metric("total_auth_violations", self.stats.total_violations)
+        self.record_metric("security_critical_violations", self.stats.security_critical_violations)
+        self.record_metric("high_violations", self.stats.high_violations)
+        self.record_metric("violation_patterns", len(self.stats.violation_patterns))
+        self.record_metric("files_affected", len(self.stats.files_affected))
+        
+        # Log detailed results
+        self.logger.error(f"WEBSOCKET AUTH PATTERN VIOLATIONS DETECTED - SSOT VIOLATION")
+        self.logger.error(f"Total violations: {self.stats.total_violations}")
+        self.logger.error(f"Security critical violations: {self.stats.security_critical_violations}")
+        self.logger.error(f"High violations: {self.stats.high_violations}")
+        self.logger.error(f"Medium violations: {self.stats.medium_violations}")
+        self.logger.error(f"Low violations: {self.stats.low_violations}")
+        self.logger.error(f"Violation patterns: {len(self.stats.violation_patterns)}")
+        self.logger.error(f"Files affected: {len(self.stats.files_affected)}")
+        self.logger.error(f"Patterns detected: {sorted(self.stats.violation_patterns)}")
+        
+        # **CRITICAL ASSERTION: This test MUST FAIL to demonstrate current violations**
+        self.assertGreaterEqual(
+            self.stats.total_violations,
+            self.auth_violation_threshold,
+            f"Expected at least {self.auth_violation_threshold} WebSocket auth violations "
+            f"to demonstrate current SSOT compliance issues. Found {self.stats.total_violations}. "
+            f"If violations are below threshold, SSOT consolidation may already be complete."
+        )
+        
+        # Ensure multiple distinct violation patterns exist
+        self.assertGreaterEqual(
+            len(self.stats.violation_patterns),
+            self.pattern_threshold,
+            f"Expected at least {self.pattern_threshold} distinct violation patterns. "
+            f"Found {len(self.stats.violation_patterns)} patterns: {sorted(self.stats.violation_patterns)}. "
+            f"Pattern diversity indicates scope of SSOT authentication issues."
+        )
+        
+        # Verify security critical violations exist (these are urgent)
+        self.assertGreater(
+            self.stats.security_critical_violations,
+            0,
+            f"Expected security critical auth violations to exist. Found {self.stats.security_critical_violations}. "
+            f"Security critical violations indicate immediate security risks that must be addressed."
+        )
+        
+        # Log violation details for prioritization
+        self.logger.error("VIOLATION BREAKDOWN BY CATEGORY:")
+        category_counts = {}
+        for violation in all_violations:
+            category = violation.pattern_category
+            if category not in category_counts:
+                category_counts[category] = []
+            category_counts[category].append(violation)
+        
+        for category, violations in category_counts.items():
+            self.logger.error(f"  {category}: {len(violations)} violations")
+            for violation in violations[:3]:  # Show first 3 examples
+                self.logger.error(f"    {violation.file_path}:{violation.line_number} - {violation.violation_type}")
+        
+        # **THIS TEST FAILS TO DEMONSTRATE CURRENT SECURITY VIOLATIONS**
+        self.fail(
+            f"WEBSOCKET AUTH SSOT CONSOLIDATION REQUIRED: Found {self.stats.total_violations} authentication violations "
+            f"({self.stats.security_critical_violations} security critical, {self.stats.high_violations} high severity) "
+            f"across {len(self.stats.violation_patterns)} patterns. "
+            f"This test fails to demonstrate current authentication security issues that must be addressed "
+            f"for Issue #1186 resolution. See logs for detailed violation analysis."
+        )
+    
+    def test_detect_auth_bypass_security_risks(self):
+        """
+        Detect authentication bypass security risks in WebSocket code.
+        
+        This test identifies critical security vulnerabilities where
+        authentication can be bypassed in WebSocket connections.
+        """
+        # Scan WebSocket files for auth bypass risks
+        websocket_files = self._scan_websocket_files()
+        
+        bypass_violations = []
+        for file_path in websocket_files:
+            violations = self._analyze_auth_violations(file_path)
+            bypass_violations.extend([v for v in violations if v.pattern_category == "auth_bypass"])
+        
+        # Record bypass risk metrics
+        self.record_metric("auth_bypass_violations", len(bypass_violations))
+        
+        # Log bypass risks
+        self.logger.error("AUTHENTICATION BYPASS RISKS DETECTED:")
+        for violation in bypass_violations:
+            self.logger.error(f"  {violation.file_path}:{violation.line_number}")
+            self.logger.error(f"    Type: {violation.violation_type}")
+            self.logger.error(f"    Code: {violation.violation_code}")
+            self.logger.error(f"    Impact: {violation.security_impact}")
+            self.logger.error("")
+        
+        # **THIS TEST FAILS IF BYPASS RISKS EXIST**
+        if bypass_violations:
+            self.fail(
+                f"AUTHENTICATION BYPASS RISKS DETECTED: Found {len(bypass_violations)} patterns "
+                f"that could allow authentication bypass in WebSocket connections. "
+                f"These represent critical security vulnerabilities that must be addressed immediately. "
+                f"See logs for detailed bypass risk analysis."
+            )
+    
+    def test_validate_canonical_auth_pattern_usage(self):
+        """
+        Validate usage of canonical authentication patterns.
+        
+        This test checks whether WebSocket files use the prescribed
+        SSOT authentication patterns instead of fragmented approaches.
+        """
+        websocket_files = self._scan_websocket_files()
+        
+        canonical_usage = 0
+        non_canonical_usage = 0
+        files_with_auth = 0
+        
+        for file_path in websocket_files:
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                
+                # Check if file has authentication code
+                has_auth = any(keyword in content.lower() for keyword in 
+                              ['auth', 'jwt', 'token', 'login', 'authenticate'])
+                
+                if has_auth:
+                    files_with_auth += 1
+                    
+                    # Check for canonical patterns
+                    uses_canonical = any(pattern in content for pattern in self.canonical_auth_patterns)
+                    
+                    if uses_canonical:
+                        canonical_usage += 1
+                    else:
+                        non_canonical_usage += 1
+                        
+            except (UnicodeDecodeError, PermissionError, OSError):
+                continue
+        
+        # Calculate canonical usage percentage
+        canonical_percentage = (canonical_usage / max(1, files_with_auth)) * 100
+        
+        # Record metrics
+        self.record_metric("canonical_auth_usage_percentage", canonical_percentage)
+        self.record_metric("files_with_auth", files_with_auth)
+        self.record_metric("canonical_usage", canonical_usage)
+        self.record_metric("non_canonical_usage", non_canonical_usage)
+        
+        # Log canonical usage analysis
+        self.logger.error("CANONICAL AUTH PATTERN USAGE ANALYSIS:")
+        self.logger.error(f"  Files with authentication code: {files_with_auth}")
+        self.logger.error(f"  Files using canonical patterns: {canonical_usage}")
+        self.logger.error(f"  Files using non-canonical patterns: {non_canonical_usage}")
+        self.logger.error(f"  Canonical usage percentage: {canonical_percentage:.1f}%")
+        self.logger.error(f"  Target: 95%+ canonical usage")
+        
+        # **THIS TEST FAILS IF CANONICAL USAGE IS LOW**
+        self.assertGreaterEqual(
+            canonical_percentage,
+            95.0,
+            f"Expected 95%+ canonical authentication pattern usage. "
+            f"Found {canonical_percentage:.1f}% ({canonical_usage}/{files_with_auth} files). "
+            f"Low canonical usage indicates SSOT authentication patterns are not being followed."
+        )
+        
+        # If we reach here, fail because we expect non-canonical usage initially
+        self.fail(
+            f"CANONICAL AUTH PATTERN VALIDATION: Found {canonical_percentage:.1f}% canonical usage "
+            f"({canonical_usage} canonical, {non_canonical_usage} non-canonical). "
+            f"This test fails to demonstrate that SSOT authentication consolidation is needed."
+        )

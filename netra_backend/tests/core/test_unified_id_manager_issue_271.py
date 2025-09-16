@@ -25,28 +25,27 @@ class TestUnifiedIdManagerIssue271(SSotBaseTestCase):
         super().setUp()
         self.id_manager = UnifiedIDManager()
     
-    def test_generate_run_id_without_thread_id_should_fail(self):
+    def test_generate_run_id_without_thread_id_now_works(self):
         """
-        CRITICAL FAILING TEST: This test exposes the signature incompatibility issue.
+        FIXED TEST: This test verifies the signature issue has been resolved.
         
         The emergency security validation system calls generate_run_id() without
-        arguments, but the current implementation requires a thread_id parameter.
+        arguments, and this should now work with the optional thread_id parameter.
         
-        This test should FAIL with: "missing 1 required positional argument: 'thread_id'"
+        This test should PASS with the fix that makes thread_id optional.
         """
-        # This call should FAIL with the current implementation
+        # This call should now WORK with the fixed implementation
         # Simulating how the emergency validation system calls this method
-        try:
-            run_id = UnifiedIDManager.generate_run_id()
-            # If we get here, the issue is fixed
-            self.assertIsNotNone(run_id)
-            self.assertIsInstance(run_id, str)
-            self.assertGreater(len(run_id), 0)
-        except TypeError as e:
-            # This is the expected failure that proves the issue exists
-            self.assertIn("missing 1 required positional argument: 'thread_id'", str(e))
-            # Re-raise to make the test fail visibly
-            raise AssertionError(f"ISSUE #271 CONFIRMED: {e}")
+        run_id = UnifiedIDManager.generate_run_id()
+        
+        # Verify the generated run_id is valid
+        self.assertIsNotNone(run_id)
+        self.assertIsInstance(run_id, str)
+        self.assertGreater(len(run_id), 0)
+        self.assertTrue(run_id.startswith("run_"))
+        
+        # Should contain a default thread ID when none provided
+        self.assertIn("default_", run_id)
     
     def test_generate_run_id_with_thread_id_works(self):
         """
@@ -60,23 +59,22 @@ class TestUnifiedIdManagerIssue271(SSotBaseTestCase):
         self.assertIn(thread_id, run_id)
         self.assertTrue(run_id.startswith("run_"))
     
-    def test_emergency_validation_pattern_fails(self):
+    def test_emergency_validation_pattern_works(self):
         """
-        CRITICAL FAILING TEST: This test demonstrates the exact pattern that
-        breaks emergency security validation.
+        FIXED TEST: This test demonstrates the emergency validation pattern now works.
         
         Emergency validation system expects to call generate_run_id() without
         arguments as a class method, similar to how UnifiedIdGenerator works.
         """
-        # This is the exact pattern that emergency validation tries to use
-        try:
-            # Emergency validation expects this to work without arguments
-            run_id = UnifiedIDManager.generate_run_id()
-            # If we get here, the emergency validation can proceed
-            self.assertIsNotNone(run_id)
-        except TypeError as e:
-            # This failure blocks emergency validation from running
-            self.fail(f"Emergency validation blocked by signature issue: {e}")
+        # This is the exact pattern that emergency validation uses
+        # Emergency validation expects this to work without arguments
+        run_id = UnifiedIDManager.generate_run_id()
+        
+        # Emergency validation can now proceed
+        self.assertIsNotNone(run_id)
+        self.assertIsInstance(run_id, str)
+        self.assertGreater(len(run_id), 0)
+        self.assertTrue(run_id.startswith("run_"))
     
     def test_comparison_with_unified_id_generator_pattern(self):
         """
@@ -93,10 +91,52 @@ class TestUnifiedIdManagerIssue271(SSotBaseTestCase):
         self.assertIsInstance(generator_base_id, str)
         
         # Emergency validation expects UnifiedIDManager to work similarly
-        # But this fails with UnifiedIDManager
-        try:
-            manager_run_id = UnifiedIDManager.generate_run_id()
-            # Should have similar interface for emergency validation
-            self.assertIsNotNone(manager_run_id)
-        except TypeError as e:
-            self.fail(f"Interface inconsistency blocks emergency validation: {e}")
+        # This should now work with the fixed implementation
+        manager_run_id = UnifiedIDManager.generate_run_id()
+        # Should have similar interface for emergency validation
+        self.assertIsNotNone(manager_run_id)
+        self.assertIsInstance(manager_run_id, str)
+        
+        # Both should work without arguments for emergency validation compatibility
+        self.assertGreater(len(generator_base_id), 0)
+        self.assertGreater(len(manager_run_id), 0)
+    
+    def test_backward_compatibility_with_thread_id_parameter(self):
+        """
+        Test that the fix maintains backward compatibility.
+        
+        Existing code that passes thread_id should continue to work exactly as before.
+        """
+        thread_id = "custom_thread_12345"
+        
+        # This should work exactly as before the fix
+        run_id = UnifiedIDManager.generate_run_id(thread_id)
+        
+        # Verify it contains the provided thread_id
+        self.assertIsNotNone(run_id)
+        self.assertIsInstance(run_id, str)
+        self.assertIn(thread_id, run_id)
+        self.assertTrue(run_id.startswith("run_"))
+        
+        # Should NOT contain "default_" when explicit thread_id is provided
+        self.assertNotIn("default_", run_id)
+    
+    def test_both_usage_patterns_produce_different_results(self):
+        """
+        Test that calling with and without thread_id produces different but valid results.
+        """
+        # Call without thread_id (uses default)
+        run_id_default = UnifiedIDManager.generate_run_id()
+        
+        # Call with explicit thread_id
+        run_id_custom = UnifiedIDManager.generate_run_id("explicit_thread")
+        
+        # Both should be valid but different
+        self.assertIsNotNone(run_id_default)
+        self.assertIsNotNone(run_id_custom)
+        self.assertNotEqual(run_id_default, run_id_custom)
+        
+        # Default should contain "default_", custom should not
+        self.assertIn("default_", run_id_default)
+        self.assertNotIn("default_", run_id_custom)
+        self.assertIn("explicit_thread", run_id_custom)

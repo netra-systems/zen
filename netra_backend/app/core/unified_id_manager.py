@@ -382,18 +382,28 @@ class UnifiedIDManager:
     
     # CRITICAL: Class methods required by startup validator
     @classmethod
-    def generate_run_id(cls, thread_id: str) -> str:
+    def generate_run_id(cls, thread_id: Optional[str] = None) -> str:
         """
         Generate a run ID for a thread (required by startup validator).
         
+        ISSUE #271 FIX: Made thread_id optional to support emergency validation calls.
+        When thread_id is None, generates a default thread identifier automatically.
+        
         Args:
-            thread_id: Thread identifier to embed in run ID
+            thread_id: Optional thread identifier to embed in run ID.
+                      If None, generates a default thread ID automatically.
             
         Returns:
             Unique run ID containing thread ID
         """
         import uuid
         import time
+        
+        # Generate default thread_id if not provided
+        if thread_id is None:
+            timestamp = int(time.time() * 1000) % 100000
+            uuid_part = str(uuid.uuid4())[:8]
+            thread_id = f"default_{timestamp}_{uuid_part}"
         
         # Generate unique run ID with embedded thread ID
         uuid_part = str(uuid.uuid4())[:8]
