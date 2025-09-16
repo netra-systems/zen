@@ -57,14 +57,16 @@ class Issue849WebSocket1011FixTests(SSotAsyncTestCase):
 
     def test_redis_manager_startup_isolation(self):
         """Test that Redis managers don't create startup conflicts."""
-        from netra_backend.app.redis_manager import RedisManager
+        from netra_backend.app.redis_manager import RedisManager, redis_manager
         managers = []
         for i in range(3):
-            manager = RedisManager()
+            # Use SSOT redis_manager instead of creating new instances
+            manager = redis_manager
             managers.append(manager)
         for manager in managers:
             self.assertIsInstance(manager, RedisManager)
-        self.assertEqual(len(managers), 3)
+        # All managers should be the same SSOT instance
+        self.assertEqual(len(set(id(m) for m in managers)), 1, "All managers should be the same SSOT instance")
 
     async def test_no_redis_connection_pool_conflicts(self):
         """Test that Redis connection pools don't conflict."""

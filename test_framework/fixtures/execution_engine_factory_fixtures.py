@@ -74,13 +74,13 @@ class ExecutionEngineFactoryTestManager:
                 
             logger.info("[U+2713] AgentWebSocketBridge created for tests")
             
-            # Step 2: Create infrastructure managers for tests
-            logger.info("Creating infrastructure managers for tests...")
+            # Step 2: Get infrastructure managers for tests using SSOT pattern
+            logger.info("Getting infrastructure managers for tests...")
             from netra_backend.app.database.session_manager import DatabaseSessionManager
-            from netra_backend.app.redis_manager import RedisManager
+            from netra_backend.app.redis_manager import redis_manager
             
             database_session_manager = DatabaseSessionManager()
-            redis_manager = RedisManager()
+            # Use SSOT redis_manager singleton instead of creating new instance
             
             # Step 3: Configure ExecutionEngineFactory singleton
             logger.info("Configuring ExecutionEngineFactory singleton for tests...")
