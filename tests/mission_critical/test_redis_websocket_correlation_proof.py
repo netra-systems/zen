@@ -143,7 +143,7 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
 
         try:
             # Test if legacy auth service redis still exists
-            from auth_service.auth_core.redis_manager import AuthRedisManager
+            from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
             rm2 = AuthRedisManager()
             redis_instances.append({
                 "instance_id": id(rm2),
@@ -155,7 +155,7 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
 
         try:
             # Test if legacy cache redis still exists
-            from netra_backend.app.cache.redis_cache_manager import RedisCacheManager
+            from netra_backend.app.redis_manager import RedisManager as RedisCacheManager
             rm3 = RedisCacheManager()
             redis_instances.append({
                 "instance_id": id(rm3),
