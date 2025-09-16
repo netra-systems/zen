@@ -74,6 +74,9 @@ coverage/
 test-results/
 *.log
 
+# GCP log fetcher output files (diagnostic artifacts)
+netra_backend_logs_*.json
+
 # Coverage HTML reports (generated artifacts)
 reports/coverage/html/
 htmlcov/
