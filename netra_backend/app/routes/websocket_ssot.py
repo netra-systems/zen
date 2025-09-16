@@ -149,7 +149,7 @@ from netra_backend.app.core.timeout_configuration import (
 )
 from shared.isolated_environment import get_env
 # SSOT REMEDIATION: Use auth service instead of auth_integration wrapper
-# from netra_backend.app.auth_integration.auth import get_current_user
+# Removed deprecated auth_integration import
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 # Startup phase validation for Phase 2 remediation
