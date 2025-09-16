@@ -1154,6 +1154,9 @@ def create_websocket_manager_sync(user_context: Any, mode: WebSocketManagerMode 
         loop.close()
 
 
+# Compatibility aliases for legacy test imports
+IsolatedWebSocketManager = _UnifiedWebSocketManagerImplementation
+
 # Export public interface
 __all__ = [
     'WebSocketManagerFactory',
@@ -1164,5 +1167,6 @@ __all__ = [
     'get_websocket_manager_factory',
     'reset_websocket_manager_factory',
     'create_websocket_manager',
-    'create_websocket_manager_sync'
+    'create_websocket_manager_sync',
+    'IsolatedWebSocketManager'  # Add for backwards compatibility
 ]
