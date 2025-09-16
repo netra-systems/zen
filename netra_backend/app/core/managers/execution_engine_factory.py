@@ -39,13 +39,12 @@ try:
 
     # Provide backward compatible aliases for existing consumers
     ExecutionEngineFactory = UserExecutionEngineFactory
-    RequestScopedExecutionEngineFactory = UserExecutionEngineFactory  # Legacy alias
+    # Legacy aliases removed to enforce SSOT - use canonical imports
     create_execution_engine_factory = configure_execution_engine_factory  # Function alias
 
     __all__ = [
         'ExecutionEngineFactory',
         'UserExecutionEngineFactory',
-        'RequestScopedExecutionEngineFactory',
         'get_execution_engine_factory',
         'configure_execution_engine_factory',
         'create_execution_engine_factory',
@@ -63,12 +62,7 @@ except ImportError as e:
             "Check netra_backend.app.agents.supervisor.execution_engine_factory import."
         )
 
-    def RequestScopedExecutionEngineFactory(*args, **kwargs):
-        """Error fallback for legacy request-scoped factory."""
-        raise ImportError(
-            "SSOT UserExecutionEngineFactory not available. "
-            "Check netra_backend.app.agents.supervisor.execution_engine_factory import."
-        )
+    # Legacy aliases removed to enforce SSOT - use canonical imports
 
     UserExecutionEngineFactory = ExecutionEngineFactory
 
@@ -91,7 +85,6 @@ except ImportError as e:
     __all__ = [
         'ExecutionEngineFactory',
         'UserExecutionEngineFactory',
-        'RequestScopedExecutionEngineFactory',
         'get_execution_engine_factory',
         'configure_execution_engine_factory',
         'create_execution_engine_factory',
