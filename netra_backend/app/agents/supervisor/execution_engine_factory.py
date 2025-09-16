@@ -869,7 +869,7 @@ class ExecutionEngineFactory:
 # ISSUE #1116 REMEDIATION: Phase 1 Singleton to User-Scoped Factory Migration
 # Replace global singleton with user-scoped factory for multi-user safety
 
-class ExecutionEngineFactoryManager:
+class UserExecutionEngineManager:
     """User-scoped ExecutionEngineFactory manager for multi-user isolation.
 
     CRITICAL SECURITY: Prevents cross-user data contamination by ensuring
@@ -936,7 +936,7 @@ class ExecutionEngineFactoryManager:
                     await factory.cleanup()
 
 # Factory manager instance for creating user-scoped factories
-_factory_manager = ExecutionEngineFactoryManager()
+_factory_manager = UserExecutionEngineManager()
 # SINGLETON ELIMINATION (Issue #1186 Phase 3): Removed global factory instance
 # Factory instances are now managed per-user to prevent isolation violations
 
@@ -992,7 +992,7 @@ async def configure_execution_engine_factory(
 
 
 # COMPATIBILITY ALIASES for legacy import patterns
-class RequestScopedExecutionEngineFactory(ExecutionEngineFactory):
+class UserScopedEngineFactory(ExecutionEngineFactory):
     """Legacy alias for ExecutionEngineFactory - backward compatibility only."""
     pass
 

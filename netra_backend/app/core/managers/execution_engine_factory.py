@@ -55,23 +55,20 @@ try:
 except ImportError as e:
     logger.error(f"CRITICAL: Could not import UserExecutionEngineFactory from supervisor package: {e}")
 
-    # Provide error-raising fallback implementations
-    class ExecutionEngineFactory:
+    # SSOT ENFORCING: Raise ImportError instead of creating alternative class
+    def ExecutionEngineFactory(*args, **kwargs):
         """Error fallback - SSOT factory not available."""
+        raise ImportError(
+            "SSOT UserExecutionEngineFactory not available. "
+            "Check netra_backend.app.agents.supervisor.execution_engine_factory import."
+        )
 
-        def __init__(self, *args, **kwargs):
-            raise ImportError(
-                "SSOT UserExecutionEngineFactory not available. "
-                "Check netra_backend.app.agents.supervisor.execution_engine_factory import."
-            )
-
-        def create_execution_engine(self, *args, **kwargs):
-            """Create execution engine - error fallback."""
-            raise ImportError("SSOT UserExecutionEngineFactory not available")
-
-    class RequestScopedExecutionEngineFactory(ExecutionEngineFactory):
+    def RequestScopedExecutionEngineFactory(*args, **kwargs):
         """Error fallback for legacy request-scoped factory."""
-        pass
+        raise ImportError(
+            "SSOT UserExecutionEngineFactory not available. "
+            "Check netra_backend.app.agents.supervisor.execution_engine_factory import."
+        )
 
     UserExecutionEngineFactory = ExecutionEngineFactory
 
