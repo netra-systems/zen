@@ -28,7 +28,8 @@ from netra_backend.app.agents.github_analyzer.pattern_detector import AIPatternD
 from netra_backend.app.agents.github_analyzer.scanner_core import RepositoryScanner
 from netra_backend.app.agents.github_analyzer.tool_analyzer import ToolUsageAnalyzer
 from netra_backend.app.agents.input_validation import validate_agent_input
-from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState, UserExecutionContextAdapter
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.core.reliability import get_reliability_wrapper
 from netra_backend.app.core.type_validators import agent_type_safe
