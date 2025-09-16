@@ -295,13 +295,13 @@ def identify_top_issue(analysis: Dict) -> Optional[Dict]:
 
 def main():
     """Main execution"""
-    print("[U+1F680] Starting GCP Staging Log Audit - Cycle 1")
-    
+    print("[U+1F680] Starting GCP Staging Log Audit - Last 1 Hour")
+
     if not setup_gcp_auth():
         return
-    
+
     # Fetch logs
-    logs = get_recent_gcp_logs(hours_back=6)  # Start with recent 6 hours
+    logs = get_recent_gcp_logs(hours_back=1)  # Last 1 hour only
     
     if not logs:
         print(" FAIL:  No logs retrieved")

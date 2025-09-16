@@ -2,8 +2,13 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
+<<<<<<< HEAD
+    "generated_at": "2025-09-15T23:16:28.206928",
+    "root_directory": "C:\\netra-apex",
+=======
     "generated_at": "2025-09-15T20:02:51.438022",
     "root_directory": "C:\\GitHub\\netra-apex",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "total_literals": 45
   },
   "literals": {
@@ -147,7 +152,11 @@
       "value": "emit_user_event",
       "category": "events",
       "locations": [
+<<<<<<< HEAD
+        "netra_backend/app/agents/supervisor/user_execution_engine.py:801"
+=======
         "netra_backend/app/agents/supervisor/user_execution_engine.py:824"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "error": {
@@ -245,7 +254,8 @@
       "value": "onError",
       "category": "events",
       "locations": [
-        "scripts/validate_websocket_compliance.py:185"
+        "scripts/validate_websocket_compliance.py:185",
+        "scripts/validate_websocket_compliance_improved.py:271"
       ]
     },
     "onFilterChange": {
@@ -268,8 +278,13 @@
       "locations": [
         "netra_backend/app/core/cross_service_validators/performance_validators.py:111",
         "netra_backend/app/routes/demo_websocket.py:414",
+<<<<<<< HEAD
+        "netra_backend/app/routes/health.py:1168",
+        "netra_backend/app/routes/health.py:1180",
+=======
         "netra_backend/app/routes/health.py:1129",
         "netra_backend/app/routes/health.py:1141",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
         "netra_backend/app/routes/mcp/websocket_handler.py:86",
         "netra_backend/app/routes/mcp/websocket_handler.py:141",
         "netra_backend/app/routes/utils/websocket_helpers.py:214",
@@ -328,7 +343,7 @@
       "locations": [
         "netra_backend/app/core/tools/unified_tool_dispatcher.py:202",
         "netra_backend/app/core/tools/unified_tool_dispatcher.py:293",
-        "netra_backend/app/db/database_manager.py:388",
+        "netra_backend/app/db/database_manager.py:410",
         "netra_backend/app/factories/tool_dispatcher_factory.py:260",
         "netra_backend/app/factories/websocket_bridge_factory.py:713"
       ]

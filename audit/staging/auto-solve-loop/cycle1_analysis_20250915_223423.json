@@ -1,0 +1,1035 @@
+{
+  "timestamp": "2025-09-15T22:34:23.219909",
+  "total_logs": 400,
+  "issues_by_severity": {
+    "ERROR": {
+      "websocket": 50,
+      "database": 28,
+      "timeout": 28,
+      "connection": 23,
+      "auth": 14,
+      "startup": 14
+    },
+    "WARNING": {},
+    "NOTICE": {},
+    "INFO": {}
+  },
+  "top_errors": [],
+  "recurring_patterns": [
+    {
+      "message": "{\"@type\": \"type.googleapis.com/google.cloud.audit.AuditLog\", \"authenticationInfo\": {\"principalEmail\": \"github-staging-deployer@netra-staging.iam.gserviceaccount.com\", \"serviceAccountKeyName\": \"//iam.g",
+      "count": 100
+    },
+    {
+      "message": "Container called exit(3).",
+      "count": 41
+    },
+    {
+      "message": "Sentry SDK not available - install sentry-sdk[fastapi] to enable error tracking",
+      "count": 29
+    },
+    {
+      "message": "SERVICE_ID contained whitespace - sanitized from 'netra-backend\\n' to 'netra-backend'",
+      "count": 29
+    },
+    {
+      "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/websocket_core/__init__.py\", line 117, in <module>\n    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocke",
+      "count": 20
+    },
+    {
+      "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+      "count": 10
+    },
+    {
+      "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+      "count": 10
+    },
+    {
+      "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+      "count": 10
+    },
+    {
+      "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+      "count": 10
+    },
+    {
+      "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+      "count": 10
+    }
+  ],
+  "service_issues": {
+    "netra-auth-service": [
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:34:11.801432+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:34:11.801432+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:34:11.801432+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:34:11.801432+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:34:11.801432+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:34:11.801416+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:34:11.801416+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:34:11.801416+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:34:11.801416+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:34:11.801416+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:34:11.801403+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:34:11.801403+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:34:11.801403+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T05:34:11.801388+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T05:34:11.801388+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:34:11.789006+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:34:11.789006+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:34:11.789006+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:34:11.789006+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:34:11.789006+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:34:11.788979+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:34:11.788979+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:34:11.788979+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:33:50.465906+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:33:50.465906+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:33:50.465906+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:33:50.465906+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:33:50.465906+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:33:50.465882+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:33:50.465882+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:33:50.465882+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:33:50.465882+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:33:50.465882+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:33:50.465863+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:33:50.465863+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:33:50.465863+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T05:33:50.465842+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T05:33:50.465842+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:33:50.453950+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:33:50.453950+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:33:50.453950+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:33:50.453950+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:33:50.453950+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:33:50.453816+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:33:50.453816+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:33:50.453816+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:33:29.099325+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:33:29.099325+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:33:29.099325+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:33:29.099325+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:33:29.099325+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:33:29.099305+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:33:29.099305+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:33:29.099305+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:33:29.099305+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:33:29.099305+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:33:29.099289+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:33:29.099289+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:33:29.099289+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T05:33:29.099269+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T05:33:29.099269+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:33:29.086344+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:33:29.086344+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:33:29.086344+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:33:29.086344+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:33:29.086344+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:33:29.086291+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:33:29.086291+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:33:29.086291+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:33:06.525106+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:33:06.525106+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:33:06.525106+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:33:06.525106+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:33:06.525106+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:33:06.525083+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:33:06.525083+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:33:06.525083+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:33:06.525083+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:33:06.525083+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:33:06.525066+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:33:06.525066+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:33:06.525066+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T05:33:06.525024+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T05:33:06.525024+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:33:06.515312+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:33:06.515312+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:33:06.515312+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:33:06.515312+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T05:33:06.515312+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:33:06.515279+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:33:06.515279+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T05:33:06.515279+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:32:45.182592+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:32:45.182592+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:32:45.182592+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:32:45.182592+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T05:32:45.182592+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:32:45.182577+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:32:45.182577+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:32:45.182577+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:32:45.182577+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T05:32:45.182577+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:32:45.182564+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:32:45.182564+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T05:32:45.182564+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T05:32:45.182531+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T05:32:45.182531+00:00",
+        "severity": "ERROR"
+      }
+    ],
+    "netra-backend-staging": [
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:34:00.442682+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:34:00.442622+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:34:00.442566+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:34:00.442456+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:34:00.432446+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:34:00.424062+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:34:00.423997+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:34:00.423939+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:34:00.422242+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:34:00.419124+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:33:51.844645+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:33:51.844574+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:33:51.844506+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:33:51.842742+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:33:51.839394+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:33:41.514449+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:33:41.514388+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:33:41.514285+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:33:41.512541+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:33:41.509368+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:33:31.397339+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:33:31.397293+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:33:31.397247+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:33:31.395608+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:33:31.392492+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:33:21.323864+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:33:21.323796+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:33:21.323731+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:33:21.321888+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:33:21.318767+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:33:13.994301+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:33:13.994238+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:33:13.994178+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:33:13.992467+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:33:13.989003+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:33:05.550542+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:33:05.550480+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:33:05.550431+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:33:05.548537+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:33:05.548329+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:32:57.887942+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:32:57.887874+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:32:57.887816+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:32:57.887716+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:32:57.878898+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+        "timestamp": "2025-09-16T05:32:47.227606+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+        "timestamp": "2025-09-16T05:32:47.227549+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+        "timestamp": "2025-09-16T05:32:47.227494+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Middleware setup failure details: ImportError: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:32:47.218222+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "CRITICAL: Enhanced middleware setup failed: CRITICAL: Core WebSocket components import failed: No module named 'auth_service'. This indicates a dependency issue that must be resolved.",
+        "timestamp": "2025-09-16T05:32:47.216727+00:00",
+        "severity": "ERROR"
+      }
+    ]
+  },
+  "http_errors": [
+    {
+      "status": 503,
+      "url": "https://api.staging.netrasystems.ai/api/v1/websocket",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:33:53.947610+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 503,
+      "url": "https://api.staging.netrasystems.ai/health",
+      "method": "GET",
+      "timestamp": "2025-09-16T05:33:53.239039+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 405,
+      "url": "https://34.54.41.44/",
+      "method": "PROPFIND",
+      "timestamp": "2025-09-16T05:33:12.804900+00:00",
+      "service": "netra-frontend-staging"
+    }
+  ],
+  "connection_issues": [],
+  "database_issues": [],
+  "websocket_issues": [],
+  "auth_issues": []
+}

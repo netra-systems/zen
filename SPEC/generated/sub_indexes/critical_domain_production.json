@@ -2,8 +2,13 @@
   "metadata": {
     "version": "3.0.0",
     "category": "critical_domain_production",
+<<<<<<< HEAD
+    "generated_at": "2025-09-15T23:16:28.198769",
+    "root_directory": "C:\\netra-apex",
+=======
     "generated_at": "2025-09-15T20:02:51.434082",
     "root_directory": "C:\\GitHub\\netra-apex",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "total_literals": 4
   },
   "literals": {

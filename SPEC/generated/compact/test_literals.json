@@ -6117,9 +6117,12 @@
     "EARLY",
     "EDGE_CASE@EXAMPLE.COM",
     "EMERGENCY ACTION REQUIRED. Address critical issues immediately.",
+<<<<<<< HEAD
+=======
     "EMERGENCY TEST EXECUTION FAILED",
     "EMERGENCY TEST EXECUTION SUCCESSFUL",
     "EMERGENCY TEST RUNNER - Bypassing unified_test_runner.py",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "EMOJI_VAR",
     "EMPTY_TEST",
     "EMPTY_VAR",
@@ -6286,8 +6289,11 @@
     "Emails should be different",
     "Embedded counters prevent collisions under concurrent load",
     "Emergency Staging Connectivity Test Script\nIssue #1278 Database Connectivity Outage - Phase 1 Diagnostics\n\nCRITICAL: This script provides emergency diagnostics for database connectivity\nin the staging environment. Use this to validate fixes during outage response.\n\nUsage:\n    python scripts/staging_connectivity_test.py --quick       # Basic checks\n    python scripts/staging_connectivity_test.py --full        # Complete diagnostics\n    python scripts/staging_connectivity_test.py --env-check   # Environment validation only\n\nREQUIREMENTS:\n- Must be run with staging environment variables loaded\n- Requires access to staging VPC and Cloud SQL instance\n- Uses SSOT database configuration patterns\n\nBusiness Value: Platform/Internal - Critical incident response\nEnsures rapid diagnosis and resolution of database connectivity issues.",
+<<<<<<< HEAD
+=======
     "Emergency Test Runner - Direct pytest bypass",
     "Emergency Test Runner - Direct pytest execution bypass for infrastructure failures\n\nPURPOSE: When unified_test_runner.py fails, this provides direct pytest access\n         while maintaining basic categorization and SSOT compliance.\n\nUSAGE:\n    python scripts/emergency_test_runner.py unit\n    python scripts/emergency_test_runner.py mission_critical\n    python scripts/emergency_test_runner.py smoke --no-cov",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Emergency shutdown initiated",
     "Emergency staging connectivity test for Issue #1278",
     "Emitter Pool:",
@@ -14854,7 +14860,10 @@
     "Test case",
     "Test category",
     "Test category '",
+<<<<<<< HEAD
+=======
     "Test category to run",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Test category to run (default: all)",
     "Test centralized Docker manager with parallel execution",
     "Test chat interface for errors",
@@ -31364,7 +31373,10 @@
     "❌ Standard collection error:",
     "❌ Standard collection failed",
     "❌ TESTS FAILED - Bridge removal is NOT SAFE!",
+<<<<<<< HEAD
+=======
     "❌ Unknown category:",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "❌ Validation error:",
     "❌ Validation failed:",
     "🎉 ALL TESTS PASSED - Bridge removal is SAFE!",

@@ -700,8 +700,8 @@ class UserExecutionEngine(IExecutionEngine, ToolExecutionEngineInterface):
         if hasattr(self, 'agent_core') and self.agent_core:
             try:
                 # Try to create a new websocket bridge for the agent core
-                from netra_backend.app.factories.websocket_bridge_factory import WebSocketBridgeFactory
-                bridge_factory = WebSocketBridgeFactory(self.context)
+                from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+                bridge_factory = AgentWebSocketBridge(self.context)
                 websocket_bridge = bridge_factory.create_bridge()
                 websocket_bridge.set_websocket_emitter(websocket_emitter)
                 self.agent_core.websocket_bridge = websocket_bridge

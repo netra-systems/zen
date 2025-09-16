@@ -1,3 +1,14 @@
+# CRITICAL: Import path configuration for direct test execution
+# Ensures tests work both directly and through unified_test_runner.py
+import sys
+import os
+from pathlib import Path
+
+# Get project root (two levels up from tests/mission_critical/)
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 # PERFORMANCE: Lazy loading for mission critical tests
 
 _lazy_imports = {}
@@ -14,7 +25,7 @@ def lazy_import(module_path: str, component: str = None):
         except ImportError as e:
             print(f"Warning: Failed to lazy load {module_path}: {e}")
             _lazy_imports[module_path] = None
-    
+
     return _lazy_imports[module_path]
 
 """

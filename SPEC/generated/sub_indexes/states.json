@@ -2,8 +2,13 @@
   "metadata": {
     "version": "3.0.0",
     "category": "states",
+<<<<<<< HEAD
+    "generated_at": "2025-09-15T23:16:28.815764",
+    "root_directory": "C:\\netra-apex",
+=======
     "generated_at": "2025-09-15T20:02:51.785609",
     "root_directory": "C:\\GitHub\\netra-apex",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "total_literals": 30
   },
   "literals": {
@@ -27,8 +32,13 @@
       "value": "Disabled",
       "category": "states",
       "locations": [
+<<<<<<< HEAD
+        "netra_backend/app/smd.py:2168",
+        "scripts/deploy_to_gcp_actual.py:2040"
+=======
         "netra_backend/app/smd.py:2198",
         "scripts/deploy_to_gcp_actual.py:2036"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "Disconnected": {
@@ -42,10 +52,17 @@
       "value": "Enabled",
       "category": "states",
       "locations": [
+<<<<<<< HEAD
+        "netra_backend/app/smd.py:2168",
+        "scripts/deploy_to_gcp_actual.py:2040",
+        "scripts/deploy_to_gcp_actual.py:2042",
+        "scripts/deploy_to_gcp_actual.py:2043"
+=======
         "netra_backend/app/smd.py:2198",
         "scripts/deploy_to_gcp_actual.py:2036",
         "scripts/deploy_to_gcp_actual.py:2038",
         "scripts/deploy_to_gcp_actual.py:2039"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "Error": {
@@ -85,7 +102,11 @@
         "netra_backend/app/middleware/api_gateway_coordinator.py:142",
         "netra_backend/app/routes/discovery.py:182",
         "netra_backend/app/schemas/config.py:1133",
+<<<<<<< HEAD
+        "netra_backend/app/schemas/config.py:1366",
+=======
         "netra_backend/app/schemas/config.py:1365",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
         "auth_service/auth_core/core/jwt_handler.py:847",
         "scripts/e2e_continuous_runner.py:50",
         "scripts/validate_database_connections.py:98"
@@ -104,7 +125,8 @@
       "locations": [
         "frontend/components/chat/ChatHeader.tsx:128",
         "scripts/fix_staging_database_connection.py:90",
-        "scripts/gcp_continuous_audit.py:65"
+        "scripts/gcp_continuous_audit.py:65",
+        "scripts/validate_redis_ssot_current_state.py:241"
       ]
     },
     "Success": {
@@ -212,8 +234,11 @@
         "netra_backend/app/core/websocket_recovery_types.py:17",
         "netra_backend/app/db/clickhouse.py:630",
         "netra_backend/app/db/clickhouse.py:1172",
+<<<<<<< HEAD
+=======
         "netra_backend/app/db/clickhouse_backup.py:547",
         "netra_backend/app/db/clickhouse_backup.py:1061",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
         "netra_backend/app/db/clickhouse_init.py:145",
         "netra_backend/app/db/database_manager.py:64"
       ]
