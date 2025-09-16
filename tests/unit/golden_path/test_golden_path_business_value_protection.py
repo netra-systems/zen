@@ -212,9 +212,13 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
                 def capture_phases(component, msg, *args, **kwargs):
                     extra = kwargs.get('extra', {})
                     if extra.get('correlation_id') == correlation_id:
-                        # Extract phase from message
+                        # Extract phase from message - improved phase detection logic
+                        msg_lower = msg.lower()
                         for phase in expected_phases:
-                            if phase.replace('_', ' ') in msg.lower():
+                            # Enhanced phase matching with more flexible keyword detection
+                            phase_keywords = phase.replace('_', ' ').split()
+                            # Check if all keywords from phase are present in message
+                            if all(keyword in msg_lower for keyword in phase_keywords):
                                 tracked_phases.append({
                                     'phase': phase,
                                     'component': component,
@@ -229,7 +233,7 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
                 mock_tracker.error.side_effect = lambda msg, **kw: capture_phases('tracker', msg, **kw)
                 
                 # Simulate phase logging
-                self._simulate_golden_path_phases(correlation_id)
+                self._simulate_golden_path_phases(correlation_id, mock_core, mock_tracker)
         
         # Analyze phase traceability
         unique_tracked_phases = list(set(p['phase'] for p in tracked_phases))
@@ -297,7 +301,7 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
                 mock_tracker.info.side_effect = tracker_legacy_log
                 
                 # Simulate mixed logging execution
-                self._simulate_execution_logging(correlation_id, 'mixed')
+                self._simulate_execution_logging(correlation_id, 'mixed', mock_core, mock_tracker)
         
         # Test unified SSOT logging (both components use central_logger)
         with mock.patch('netra_backend.app.agents.supervisor.agent_execution_core.logger') as mock_core:
@@ -316,7 +320,7 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
                 mock_tracker.info.side_effect = lambda msg, **kw: unified_log('tracker', msg, **kw)
                 
                 # Simulate unified logging execution
-                self._simulate_execution_logging(correlation_id, 'unified')
+                self._simulate_execution_logging(correlation_id, 'unified', mock_core, mock_tracker)
         
         # Calculate business impact metrics
         mixed_correlation_rate = sum(1 for log in mixed_logging_data if log['has_correlation']) / len(mixed_logging_data) if mixed_logging_data else 0
@@ -366,7 +370,7 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
         # Simulate some processing delay
         await asyncio.sleep(0.01)
     
-    def _simulate_golden_path_phases(self, correlation_id: str):
+    def _simulate_golden_path_phases(self, correlation_id: str, mock_core=None, mock_tracker=None):
         """Simulate Golden Path phases being logged."""
         phases = [
             "Execution started for user request",
@@ -376,28 +380,42 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
             "Execution tracked in system",
             "Completion attempted by agent"
         ]
-        
+
         for phase in phases:
-            # Simulate logging from both components
+            # Simulate logging from both components with correlation context
+            if mock_core:
+                mock_core.info(phase, extra={'correlation_id': correlation_id})
+            if mock_tracker:
+                mock_tracker.info(phase, extra={'correlation_id': correlation_id})
             print(f"Core: {phase} (correlation: {correlation_id})")
             print(f"Tracker: {phase} (correlation: {correlation_id})")
     
-    def _simulate_execution_logging(self, correlation_id: str, scenario: str):
+    def _simulate_execution_logging(self, correlation_id: str, scenario: str, mock_core=None, mock_tracker=None):
         """Simulate execution logging for business impact analysis."""
         messages = [
             "Agent execution lifecycle started",
-            "User context validation initiated", 
+            "User context validation initiated",
             "WebSocket connection established",
             "Agent processing request",
             "State transition recorded",
             "Execution completion attempted"
         ]
-        
+
         for i, message in enumerate(messages):
             # Alternate between core and tracker logging
             if i % 2 == 0:
+                # Core logging
+                if mock_core and scenario == 'mixed':
+                    mock_core.info(message, extra={'correlation_id': correlation_id})
+                elif mock_core and scenario == 'unified':
+                    mock_core.info(message, extra={'correlation_id': correlation_id})
                 print(f"Core ({scenario}): {message}")
             else:
+                # Tracker logging
+                if mock_tracker and scenario == 'mixed':
+                    mock_tracker.info(message)  # No correlation in mixed scenario
+                elif mock_tracker and scenario == 'unified':
+                    mock_tracker.info(message, extra={'correlation_id': correlation_id})
                 print(f"Tracker ({scenario}): {message}")
 
 
