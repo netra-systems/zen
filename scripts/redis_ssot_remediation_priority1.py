@@ -93,7 +93,7 @@ class RedisSSOTRemediator:
             # Auth Redis Manager patterns
             r'auth_redis_manager\s*=\s*AuthRedisManager\(\)': {
                 'replacement': 'auth_redis_manager',
-                'import': 'from auth_service.auth_core.redis_manager import auth_redis_manager',
+                'import': 'from netra_backend.app.redis_manager import redis_manager as auth_redis_manager',
                 'description': 'Replace direct AuthRedisManager instantiation with SSOT singleton'
             },
 
