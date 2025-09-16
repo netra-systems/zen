@@ -62,7 +62,12 @@ class GoldenPathResult:
 class TestGoldenPathCompleteUserJourney:
     """Test complete user journey on staging GCP environment."""
     
-    def __init__(self):
+    def setup_method(self):
+        """Setup method for each test - replaces __init__ for pytest compatibility.
+        
+        Initializes staging test configuration, logger, and result tracking
+        for golden path validation tests.
+        """
         self.config = StagingTestConfig()
         self.logger = logging.getLogger(__name__)
         self.test_results: List[GoldenPathResult] = []
