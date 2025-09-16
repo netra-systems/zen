@@ -27,7 +27,7 @@ class UserRole(Enum):
     SUPER_ADMIN = "super_admin"
 
 
-class TestUserRoleAssignment(SSotBaseTestCase):
+class UserRoleAssignmentTests(SSotBaseTestCase):
     """Unit tests for user role assignment business logic."""
     
     def setup_method(self, method=None):

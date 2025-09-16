@@ -181,7 +181,7 @@ def agent_response_tester():
     """Create agent response tester fixture."""
     return AgentResponseTester()
 
-class TestAgentResponsesComprehensiveE2E:
+class AgentResponsesComprehensiveE2ETests:
     """Comprehensive E2E tests for agent responses."""
     
     @pytest.mark.asyncio

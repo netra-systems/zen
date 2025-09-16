@@ -23,7 +23,7 @@ from netra_backend.app.websocket_core.unified_manager import (
 from test_framework.ssot.base_test_case import BaseTestCase
 
 
-class TestUnifiedWebSocketManagerConnectionHandling(BaseTestCase):
+class UnifiedWebSocketManagerConnectionHandlingTests(BaseTestCase):
     """Integration tests for WebSocket connection lifecycle and management."""
     
     @pytest.fixture
@@ -206,7 +206,7 @@ class TestUnifiedWebSocketManagerConnectionHandling(BaseTestCase):
         assert recovery_count >= 0  # At least attempted recovery
 
 
-class TestUnifiedWebSocketManagerMessageDelivery(BaseTestCase):
+class UnifiedWebSocketManagerMessageDeliveryTests(BaseTestCase):
     """Integration tests for WebSocket message delivery and user isolation."""
     
     @pytest.fixture
@@ -382,7 +382,7 @@ class TestUnifiedWebSocketManagerMessageDelivery(BaseTestCase):
             assert broadcast_received["payload"]["priority"] == "high"
 
 
-class TestUnifiedWebSocketManagerErrorHandling(BaseTestCase):
+class UnifiedWebSocketManagerErrorHandlingTests(BaseTestCase):
     """Integration tests for WebSocket error handling and recovery mechanisms."""
     
     @pytest.fixture

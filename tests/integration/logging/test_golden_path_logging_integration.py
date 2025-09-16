@@ -71,7 +71,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.mark.integration
-class TestGoldenPathLoggingIntegration(SSotAsyncTestCase):
+class GoldenPathLoggingIntegrationTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -525,7 +525,7 @@ class TestGoldenPathLoggingIntegration(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestGoldenPathLoggingPerformance(SSotAsyncTestCase):
+class GoldenPathLoggingPerformanceTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

@@ -29,7 +29,7 @@ from auth_service.services.redis_service import RedisService
 from auth_service.database import get_database
 
 
-class TestJWTIntegration(BaseIntegrationTest):
+class JWTIntegrationTests(BaseIntegrationTest):
     """Integration tests for JWT token functionality with real services."""
     
     @pytest.fixture(autouse=True)

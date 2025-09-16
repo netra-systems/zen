@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, Mock, patch, MagicMock
 
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -24,7 +24,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 
-class TestSupervisorAgentExecution:
+class SupervisorAgentExecutionTests:
     """P0 Security Issue #407: Test execution methods migrated to secure UserExecutionContext."""
     
     @pytest.mark.asyncio
@@ -210,7 +210,7 @@ class TestSupervisorAgentExecution:
         # Result should be secure mock state (not vulnerable DeepAgentState)
         assert hasattr(result, 'user_request')
 
-class TestSupervisorAgentHooks:
+class SupervisorAgentHooksTests:
     """P0 Security Issue #407: Test hook execution migrated to secure UserExecutionContext."""
     
     @pytest.mark.asyncio

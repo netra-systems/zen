@@ -44,7 +44,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.integration
-class TestIssue962AuthenticationFlowValidation(SSotAsyncTestCase):
+class Issue962AuthenticationFlowValidationTests(SSotAsyncTestCase):
     """
     Integration tests to validate authentication flow consistency with SSOT configuration.
 

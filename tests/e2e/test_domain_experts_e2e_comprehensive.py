@@ -300,7 +300,7 @@ async def domain_experts_tester(request):
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.real_llm
-class TestRealDomainExperts:
+class RealDomainExpertsTests:
     """Test suite for real domain expert agent execution."""
 
     async def test_finance_expert_tco_analysis(self, domain_experts_tester):

@@ -47,7 +47,7 @@ from test_framework.http_client import ClientConfig
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
-class TestTokenExpiryReconnectioner:
+class TokenExpiryReconnectionerTests:
     """Core tester for WebSocket token expiry and automatic reconnection."""
     
     def __init__(self):
@@ -269,7 +269,7 @@ class TestTokenExpiryReconnectioner:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestWebSocketTokenExpiryReconnect:
+class WebSocketTokenExpiryReconnectTests:
     """Test #6: WebSocket Token Expiry Reconnection - P1 User Experience."""
     
     @pytest.fixture

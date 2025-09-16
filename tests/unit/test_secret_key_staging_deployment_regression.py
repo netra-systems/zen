@@ -38,7 +38,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.unit
-class TestSecretKeyDeploymentRegression:
+class SecretKeyDeploymentRegressionTests:
     """Test suite to prevent SECRET_KEY deployment regression."""
     
     def test_secret_key_present_in_auth_service_secrets(self):
@@ -241,7 +241,7 @@ class TestSecretKeyDeploymentRegression:
 
 
 @pytest.mark.unit
-class TestRedisConfigurationRegression:
+class RedisConfigurationRegressionTests:
     """Test suite to prevent Redis configuration regressions.
     
     The commit also fixed Redis configuration issues:
@@ -297,7 +297,7 @@ class TestRedisConfigurationRegression:
 
 
 @pytest.mark.unit
-class TestOAuthConfigurationRegression:
+class OAuthConfigurationRegressionTests:
     """Test suite to prevent OAuth configuration regressions.
     
     The commit mentioned that OAuth variable updates caused the SECRET_KEY removal.

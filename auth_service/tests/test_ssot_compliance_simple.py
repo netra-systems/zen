@@ -305,7 +305,7 @@ class Phase4PostMigrationVerification(unittest.TestCase):
         print(f"\nPHASE 4 VALIDATION: All functional areas maintained post-migration")
 
 
-class TestMigrationCompatibility(unittest.TestCase):
+class MigrationCompatibilityTests(unittest.TestCase):
     """
     Test migration compatibility and create a demonstration of SSOT usage
     """
@@ -374,7 +374,7 @@ if __name__ == '__main__':
         Phase2SSotComplianceEnforcement,
         Phase3MigrationValidation,
         Phase4PostMigrationVerification,
-        TestMigrationCompatibility
+        MigrationCompatibilityTests
     ]
 
     total_tests_run = 0

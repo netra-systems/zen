@@ -31,7 +31,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 # Import proper dependencies
 from test_framework.websocket_helpers import MockWebSocket
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
@@ -130,7 +130,7 @@ async def websocket_auth_tester():
 
 
 @pytest.mark.e2e
-class TestWebSocketAuthHandshake:
+class WebSocketAuthHandshakeTests:
     """Test JWT validation during WebSocket connection handshake."""
     
     @pytest.mark.e2e
@@ -185,7 +185,7 @@ class TestWebSocketAuthHandshake:
 
 
 @pytest.mark.e2e
-class TestReconnectionWithAuth:
+class ReconnectionWithAuthTests:
     """Test disconnect  ->  reconnect  ->  resume with auth state."""
     
     @pytest.mark.e2e
@@ -266,7 +266,7 @@ class TestReconnectionWithAuth:
 
 
 @pytest.mark.e2e
-class TestMultiClientBroadcast:
+class MultiClientBroadcastTests:
     """Test message broadcast to multiple authenticated clients."""
     
     @pytest.mark.e2e
@@ -306,7 +306,7 @@ class TestMultiClientBroadcast:
 
 
 @pytest.mark.e2e
-class TestWebSocketRateLimiting:
+class WebSocketRateLimitingTests:
     """Test rate limit enforcement on WebSocket connections."""
     
     @pytest.mark.e2e

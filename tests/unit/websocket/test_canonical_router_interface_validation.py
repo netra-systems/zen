@@ -26,7 +26,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestCanonicalRouterInterfaceValidation(SSotBaseTestCase, unittest.TestCase):
+class CanonicalRouterInterfaceValidationTests(SSotBaseTestCase, unittest.TestCase):
     """Test that validates canonical MessageRouter interface compliance."""
 
     def setUp(self):

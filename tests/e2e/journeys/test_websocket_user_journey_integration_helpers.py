@@ -41,7 +41,7 @@ from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 
 @pytest.mark.e2e
-class TestWebSocketUserJourneyer:
+class WebSocketUserJourneyerTests:
     """Test manager for WebSocket user journey testing."""
 
     def __init__(self):

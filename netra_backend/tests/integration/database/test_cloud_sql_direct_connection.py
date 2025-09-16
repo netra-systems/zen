@@ -33,7 +33,7 @@ from netra_backend.app.core.configuration.database import DatabaseConfigManager
 from netra_backend.app.core.configuration.base import get_unified_config
 
 
-class TestCloudSQLDirectConnection(SSotAsyncTestCase):
+class CloudSQLDirectConnectionTests(SSotAsyncTestCase):
     """
     Direct Cloud SQL Connection Tests - Issue #1263
 

@@ -54,7 +54,7 @@ async def id_generator():
     return UnifiedIdGenerator()
 
 
-class TestStateConsistencyServiceRestarts(BaseIntegrationTest):
+class StateConsistencyServiceRestartsTests(BaseIntegrationTest):
     """
     Test state consistency across service restarts.
     

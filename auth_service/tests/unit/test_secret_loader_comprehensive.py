@@ -40,7 +40,7 @@ from shared.isolated_environment import get_env, IsolatedEnvironment
 from auth_service.auth_core.secret_loader import AuthSecretLoader
 
 
-class TestAuthSecretLoaderCore:
+class AuthSecretLoaderCoreTests:
     """Test core AuthSecretLoader functionality with real instances."""
     
     @pytest.mark.unit
@@ -76,7 +76,7 @@ class TestAuthSecretLoaderCore:
                 f"{method_name} must be static method for SSOT pattern compliance"
 
 
-class TestJWTSecretLoading:
+class JWTSecretLoadingTests:
     """Test JWT secret loading through central configuration validator."""
     
     @pytest.mark.unit
@@ -136,7 +136,7 @@ class TestJWTSecretLoading:
             assert "JWT secret configuration failed" in str(exc_info.value)
 
 
-class TestOAuthCredentialLoading:
+class OAuthCredentialLoadingTests:
     """Test OAuth credential loading with environment-specific validation."""
     
     @pytest.mark.unit
@@ -218,7 +218,7 @@ class TestOAuthCredentialLoading:
             assert "Central configuration validator not available for OAuth configuration" in str(exc_info.value)
 
 
-class TestDatabaseUrlConstruction:
+class DatabaseUrlConstructionTests:
     """Test database URL construction with PostgreSQL variables and URL builders."""
     
     @pytest.mark.unit
@@ -376,7 +376,7 @@ class TestDatabaseUrlConstruction:
             # when PostgreSQL variables are missing in staging environment
 
 
-class TestE2EBypassKey:
+class E2EBypassKeyTests:
     """Test E2E OAuth simulation bypass key for staging environment."""
     
     @pytest.mark.unit
@@ -451,7 +451,7 @@ class TestE2EBypassKey:
             assert result is None
 
 
-class TestSecretManagerIntegration:
+class SecretManagerIntegrationTests:
     """Test Google Secret Manager integration patterns."""
     
     @pytest.mark.unit
@@ -539,7 +539,7 @@ class TestSecretManagerIntegration:
             assert result is None
 
 
-class TestSecretLoaderErrorHandling:
+class SecretLoaderErrorHandlingTests:
     """Test comprehensive error handling scenarios."""
     
     @pytest.mark.unit
@@ -598,7 +598,7 @@ class TestSecretLoaderErrorHandling:
             assert isinstance(result, str)
 
 
-class TestSecretLoaderConfiguration:
+class SecretLoaderConfigurationTests:
     """Test configuration-specific behaviors and environment handling."""
     
     @pytest.mark.unit
@@ -669,7 +669,7 @@ class TestSecretLoaderConfiguration:
                 f"AuthSecretLoader missing required SSOT import: {required_import}"
 
 
-class TestSecretLoaderBusinessValue:
+class SecretLoaderBusinessValueTests:
     """Test business value scenarios and real-world usage patterns."""
     
     @pytest.mark.unit

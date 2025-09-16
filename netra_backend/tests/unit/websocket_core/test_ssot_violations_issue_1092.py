@@ -99,7 +99,7 @@ except ImportError as e:
     logger.error(f"SSOT VIOLATION: Failed to import unified_init: {e}")
 
 
-class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
+class WebSocketSSOTViolationsIssue1092Tests(SSotBaseTestCase):
     """
     Phase 1 SSOT violations discovery tests for Issue #1092.
 
@@ -379,7 +379,7 @@ class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
         # Check if both manager.py and websocket_manager.py exist and provide same functionality
         try:
             from netra_backend.app.websocket_core.manager import WebSocketManager as ManagerImport
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as DirectImport
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as DirectImport
 
             # Check if they're the same class (violation of SSOT)
             if ManagerImport is DirectImport or hasattr(ManagerImport, '__bases__'):
@@ -680,7 +680,7 @@ class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
 
 # Additional test classes for specific violation patterns
 
-class TestWebSocketBroadcastMethodViolations(SSotBaseTestCase):
+class WebSocketBroadcastMethodViolationsTests(SSotBaseTestCase):
     """
     Focused tests for broadcast method SSOT violations.
 
@@ -734,7 +734,7 @@ class TestWebSocketBroadcastMethodViolations(SSotBaseTestCase):
             f"Methods: {list(broadcast_signatures.keys())}")
 
 
-class TestWebSocketFactoryPatternViolations(SSotBaseTestCase):
+class WebSocketFactoryPatternViolationsTests(SSotBaseTestCase):
     """
     Focused tests for factory pattern SSOT violations.
 

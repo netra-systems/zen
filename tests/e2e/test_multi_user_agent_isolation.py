@@ -43,7 +43,7 @@ from test_framework.websocket_helpers import assert_websocket_events_sent, WebSo
 from shared.isolated_environment import get_env
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 
-class TestMultiUserAgentIsolationE2E(BaseE2ETest):
+class MultiUserAgentIsolationE2ETests(BaseE2ETest):
     """
     E2E test for multi-user agent isolation using REAL services only.
     

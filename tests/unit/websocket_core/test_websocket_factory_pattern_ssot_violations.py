@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.unit
-class TestWebSocketFactoryPatternSSOTViolations(SSotAsyncTestCase):
+class WebSocketFactoryPatternSSOTViolationsTests(SSotAsyncTestCase):
     """Test for WebSocket factory pattern SSOT violations."""
 
     async def asyncSetUp(self):
@@ -201,7 +201,7 @@ class TestWebSocketFactoryPatternSSOTViolations(SSotAsyncTestCase):
         # Test direct SSOT instantiation performance
         direct_times = []
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
             for i in range(5):  # 5 iterations
                 start_time = time.perf_counter()
@@ -316,7 +316,7 @@ class TestWebSocketFactoryPatternSSOTViolations(SSotAsyncTestCase):
         This test ensures the preferred SSOT pattern works correctly.
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             from shared.types.core_types import ensure_user_id
 
@@ -412,7 +412,7 @@ class TestWebSocketFactoryPatternSSOTViolations(SSotAsyncTestCase):
 
         except ImportError:
             # Factory pattern not available - test direct instantiation isolation
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
             manager1 = WebSocketManager(user_context=user1_context)
             manager2 = WebSocketManager(user_context=user2_context)
@@ -472,7 +472,7 @@ if __name__ == '__main__':
     import asyncio
 
     async def run_factory_tests():
-        test_instance = TestWebSocketFactoryPatternSSOTViolations()
+        test_instance = WebSocketFactoryPatternSSOTViolationsTests()
         await test_instance.asyncSetUp()
 
         # Run sync tests

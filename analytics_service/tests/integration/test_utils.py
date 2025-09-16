@@ -41,7 +41,7 @@ from analytics_service.analytics_core.models.events import (
 from shared.isolated_environment import get_env
 
 
-class TestDataGenerator:
+class DataGeneratorTests:
     """Generates realistic test data for analytics integration tests."""
     
     def __init__(self, seed: Optional[int] = None):
@@ -295,7 +295,7 @@ class TestDataGenerator:
         return f"{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}"
 
 
-class TestAssertions:
+class AssertionsTests:
     """Helper class for common test assertions in analytics integration tests."""
     
     @staticmethod
@@ -511,8 +511,8 @@ class PerformanceTestUtils:
 
 # Export commonly used utilities for easy importing
 __all__ = [
-    "TestDataGenerator",
-    "TestAssertions", 
+    "DataGeneratorTests",
+    "AssertionsTests", 
     "DatabaseTestUtils",
     "ServiceTestUtils",
     "PerformanceTestUtils",

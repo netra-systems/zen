@@ -43,7 +43,7 @@ import unittest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestWebSocketClassFragmentationMonitoring(SSotBaseTestCase, unittest.TestCase):
+class WebSocketClassFragmentationMonitoringTests(SSotBaseTestCase, unittest.TestCase):
     """Monitor WebSocket class fragmentation across the system."""
 
     def setUp(self):
@@ -457,7 +457,7 @@ class TestWebSocketClassFragmentationMonitoring(SSotBaseTestCase, unittest.TestC
         self.assertTrue(True, "Fragmentation monitoring report generated successfully")
 
 @pytest.mark.unit
-class TestWebSocketFragmentationRegression(SSotBaseTestCase, unittest.TestCase):
+class WebSocketFragmentationRegressionTests(SSotBaseTestCase, unittest.TestCase):
     """Prevent regression to fragmented WebSocket patterns."""
 
     def test_prevent_new_websocket_manager_classes(self):

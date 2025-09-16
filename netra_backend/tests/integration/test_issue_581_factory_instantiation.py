@@ -74,7 +74,7 @@ except ImportError:
     WEBSOCKET_AVAILABLE = False
 
 
-class TestIssue581FactoryInstantiationIntegration(SSotAsyncTestCase):
+class Issue581FactoryInstantiationIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for Issue #581 factory instantiation.
     

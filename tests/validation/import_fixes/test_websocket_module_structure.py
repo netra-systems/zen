@@ -20,7 +20,7 @@ import os
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestWebSocketModuleStructure(SSotBaseTestCase):
+class WebSocketModuleStructureTests(SSotBaseTestCase):
     """
     Test WebSocket module structure validation for collection error fixes.
     
@@ -122,7 +122,7 @@ class TestWebSocketModuleStructure(SSotBaseTestCase):
         Business Impact: Missing WebSocket manager blocks Golden Path tests
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Verify the module structure
             assert hasattr(WebSocketManager, '__init__'), "WebSocketManager should have __init__ method"
@@ -284,7 +284,7 @@ class TestWebSocketModuleStructure(SSotBaseTestCase):
         
         # Test WebSocket manager dependencies
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             # If this succeeds, check for common WebSocket dependencies
             import asyncio
             try:
@@ -308,7 +308,7 @@ class TestWebSocketModuleStructure(SSotBaseTestCase):
         
         # Test unified manager dependencies
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
         except ModuleNotFoundError as e:
             dependency_errors.append(f"Unified WebSocket manager dependency error: {e}")

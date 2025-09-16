@@ -9,7 +9,7 @@ from datetime import datetime
 from netra_backend.app.schemas.corpus import Document, DocumentCreate, DocumentUpdate
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestDocument:
+class DocumentTests:
     """Test suite for Document Pydantic model"""
     
     @pytest.fixture

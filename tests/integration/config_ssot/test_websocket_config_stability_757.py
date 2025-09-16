@@ -14,7 +14,7 @@ import asyncio
 import time
 
 @pytest.mark.integration
-class TestWebSocketConfigurationStability:
+class WebSocketConfigurationStabilityTests:
     """Phase 3 Tests - WebSocket-specific configuration stability"""
 
     def test_websocket_cors_config_stability_CRITICAL(self):
@@ -228,7 +228,7 @@ class TestWebSocketConfigurationStability:
             pytest.skip(f'Cannot test WebSocket connection pooling stability: {e}')
 
 @pytest.mark.integration
-class TestWebSocketMigrationIntegration:
+class WebSocketMigrationIntegrationTests:
     """Test WebSocket integration during configuration migration"""
 
     def test_websocket_manager_config_compatibility_CRITICAL(self):

@@ -33,7 +33,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerConstructorInconsistency(SSotBaseTestCase):
+class WebSocketManagerConstructorInconsistencyTests(SSotBaseTestCase):
     """Phase 1 Reproduction Test: Prove constructor signatures differ between implementations."""
     
     def setup_method(self, method):
@@ -55,9 +55,9 @@ class TestWebSocketManagerConstructorInconsistency(SSotBaseTestCase):
         logger.info("Analyzing constructor signatures across WebSocket manager implementations")
         
         # Import different WebSocket manager implementations
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as ManagerAlias
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CompatibilityManager
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as ManagerAlias
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as CompatibilityManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as UnifiedManager
         
         # Get constructor signatures
         alias_signature = inspect.signature(ManagerAlias.__init__)
@@ -115,10 +115,10 @@ class TestWebSocketManagerConstructorInconsistency(SSotBaseTestCase):
         })()
         
         # Import required enums and classes
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as ManagerAlias
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CompatibilityManager
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerMode
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as ManagerAlias
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as CompatibilityManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as UnifiedManager
         
         # Test that same parameters work for all constructors
         test_parameters = {
@@ -190,8 +190,8 @@ class TestWebSocketManagerConstructorInconsistency(SSotBaseTestCase):
             'is_test': True
         })()
         
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerMode
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         async def test_factory_consistency():
             """Test factory function parameter consistency."""
@@ -234,10 +234,10 @@ class TestWebSocketManagerConstructorInconsistency(SSotBaseTestCase):
         """
         logger.info("Testing constructor error handling consistency")
         
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as ManagerAlias  
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CompatibilityManager
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerMode
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as ManagerAlias  
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as CompatibilityManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as UnifiedManager
         
         # Test with invalid parameters to check error handling consistency
         invalid_parameters = {

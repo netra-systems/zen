@@ -27,7 +27,7 @@ from typing import Dict, Any, List
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
 from netra_backend.app.services.user_scoped_websocket_event_router import UserScopedWebSocketEventRouter
 from netra_backend.app.services.websocket_broadcast_service import WebSocketBroadcastService, BroadcastResult
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from shared.types.core_types import ensure_user_id
 from shared.logging.unified_logging_ssot import get_logger
@@ -39,7 +39,7 @@ logger = get_logger(__name__)
 @pytest.mark.websocket_ssot
 @pytest.mark.issue_1058_integration
 @pytest.mark.no_docker
-class TestSSOTEventRouterIntegration:
+class SSOTEventRouterIntegrationTests:
     """Integration tests validating SSOT event router delegation patterns.
 
     CRITICAL: These tests validate that Issue #1058 SSOT consolidation maintains

@@ -22,7 +22,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types import UserID, ThreadID, RunID
 
-class TestToolDispatcherRoutingExecution:
+class ToolDispatcherRoutingExecutionTests:
     """Test tool dispatcher routing and execution functionality."""
     
     @pytest.fixture

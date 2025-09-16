@@ -12,7 +12,7 @@ from netra_backend.app.agents.triage_sub_agent import UnifiedTriageAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.llm.llm_manager import LLMManager
 
-class TestTriageEntityIntent(BaseTestCase):
+class TriageEntityIntentTests(BaseTestCase):
     """Test triage entity recognition and intent classification."""
 
     def setUp(self):

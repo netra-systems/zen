@@ -33,7 +33,7 @@ from auth_service.auth_core.core.jwt_handler import JWTHandler
 from shared.isolated_environment import get_env
 
 
-class TestAuthRefreshEndpointBugsReal:
+class AuthRefreshEndpointBugsRealTests:
     """MOCK-FREE tests for critical auth refresh endpoint bugs using real services."""
     
     @pytest.mark.asyncio
@@ -355,7 +355,7 @@ class TestAuthRefreshEndpointBugsReal:
         env.set("JWT_SECRET_KEY", original_secret, "test_critical_bugs_restore")
 
 
-class TestDatabaseConnectionBugsReal:
+class DatabaseConnectionBugsRealTests:
     """MOCK-FREE tests for database connection bugs using real PostgreSQL."""
     
     @pytest.mark.asyncio

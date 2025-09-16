@@ -42,7 +42,7 @@ from netra_backend.app.core.timeout_configuration import (
 )
 
 # Import WebSocket components for real connections
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
@@ -52,7 +52,7 @@ from test_framework.websocket_helpers import WebSocketTestHelpers
 
 
 @pytest.mark.integration
-class TestRealWebSocketConfirmationGaps(SSotAsyncTestCase):
+class RealWebSocketConfirmationGapsTests(SSotAsyncTestCase):
     """
     Integration tests using real WebSocket services to demonstrate confirmation gaps.
     
@@ -487,7 +487,7 @@ class TestRealWebSocketConfirmationGaps(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestRealWebSocketTimeoutGaps(SSotAsyncTestCase):
+class RealWebSocketTimeoutGapsTests(SSotAsyncTestCase):
     """
     Integration tests demonstrating real WebSocket timeout gaps with staging services.
     

@@ -35,7 +35,7 @@ def mock_service_config() -> ServiceConfig:
         full_health_check=lambda: True
     )
 
-class TestHealthChecks:
+class HealthChecksTests:
     """Test health check execution."""
     
     @pytest.mark.asyncio
@@ -96,7 +96,7 @@ class TestHealthChecks:
         # Should return without error when no check function
         await health_monitor._check_service_health("no_check_service")
 
-class TestCheckResultProcessing:
+class CheckResultProcessingTests:
     """Test health check result processing."""
     
     @pytest.mark.asyncio
@@ -150,7 +150,7 @@ class TestCheckResultProcessing:
         # Should log error
         await health_monitor._handle_failure("test_service", result)
 
-class TestStageProgression:
+class StageProgressionTests:
     """Test service stage progression."""
     
     @pytest.mark.asyncio

@@ -22,7 +22,7 @@ from pathlib import Path
 
 @pytest.mark.e2e
 @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
-class TestWindowsSubprocessExecution:
+class WindowsSubprocessExecutionTests:
     """Test suite for Windows-specific subprocess execution issues."""
 
     def test_npm_commands_work_on_windows(self):

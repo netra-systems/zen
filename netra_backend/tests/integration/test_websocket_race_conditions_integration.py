@@ -49,7 +49,7 @@ from netra_backend.app.websocket_core.connection_state_machine import (
     ConnectionStateMachine,
     ApplicationConnectionState
 )
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
 # Shared types for strongly typed integration testing
 from shared.types import UserID, ThreadID, RequestID
@@ -92,7 +92,7 @@ class ConcurrentUser:
     race_condition_detected: bool = False
 
 
-class TestWebSocketRaceConditionsIntegration:
+class WebSocketRaceConditionsIntegrationTests:
     """
     Integration tests for WebSocket race conditions using real services.
     
@@ -981,7 +981,7 @@ class TestWebSocketRaceConditionsIntegration:
         }
 
 
-class TestWebSocketRaceConditionRecovery:
+class WebSocketRaceConditionRecoveryTests:
     """
     Advanced integration tests for WebSocket race condition recovery scenarios.
     

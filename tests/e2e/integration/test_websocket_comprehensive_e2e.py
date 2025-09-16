@@ -37,7 +37,7 @@ from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
-class TestWebSocketE2Eer:
+class WebSocketE2EerTests:
     """Helper class for WebSocket E2E testing."""
     
     def __init__(self):
@@ -125,7 +125,7 @@ async def ws_tester():
     await tester.cleanup()
 
 
-class TestWebSocketComprehensiveE2E:
+class WebSocketComprehensiveE2ETests:
     """Comprehensive E2E tests for WebSocket communication."""
     
     @pytest.mark.asyncio

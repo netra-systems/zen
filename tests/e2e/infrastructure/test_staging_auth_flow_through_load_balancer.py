@@ -26,7 +26,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
-class TestStagingAuthFlowThroughLoadBalancer(SSotBaseTestCase):
+class StagingAuthFlowThroughLoadBalancerTests(SSotBaseTestCase):
     """
     Test complete OAuth authentication flow through load balancer.
     
@@ -528,7 +528,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_tests():
-        test_instance = TestStagingAuthFlowThroughLoadBalancer()
+        test_instance = StagingAuthFlowThroughLoadBalancerTests()
         
         try:
             await test_instance.test_oauth_login_flow_through_load_balancer()

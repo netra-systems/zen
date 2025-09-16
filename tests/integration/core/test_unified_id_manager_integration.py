@@ -55,7 +55,7 @@ from shared.types.core_types import UserID, ThreadID, RunID
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.integration
-class TestUnifiedIDManagerIntegrationCore(SSotAsyncTestCase):
+class UnifiedIDManagerIntegrationCoreTests(SSotAsyncTestCase):
     """Core integration tests for UnifiedIDManager with real services"""
 
     @classmethod
@@ -118,7 +118,7 @@ class TestUnifiedIDManagerIntegrationCore(SSotAsyncTestCase):
             cursor.close()
 
 @pytest.mark.integration
-class TestRealDatabaseIntegration(TestUnifiedIDManagerIntegrationCore):
+class RealDatabaseIntegrationTests(UnifiedIDManagerIntegrationCoreTests):
     """Integration tests with real database operations"""
 
     async def test_id_uniqueness_with_real_database_constraints(self):
@@ -259,7 +259,7 @@ class TestRealDatabaseIntegration(TestUnifiedIDManagerIntegrationCore):
         self.assertEqual(final_count, total_success * 2)
 
 @pytest.mark.integration
-class TestHighConcurrencyIntegration(TestUnifiedIDManagerIntegrationCore):
+class HighConcurrencyIntegrationTests(UnifiedIDManagerIntegrationCoreTests):
     """Integration tests for high-concurrency ID generation scenarios"""
 
     async def test_concurrent_id_generation_stress(self):
@@ -421,7 +421,7 @@ class TestHighConcurrencyIntegration(TestUnifiedIDManagerIntegrationCore):
             print(f"{scenario_name}: {results['operations_per_second']:.1f} ops/sec, avg: {results['avg_operation_time'] * 1000:.1f}ms, p95: {results['p95_operation_time'] * 1000:.1f}ms")
 
 @pytest.mark.integration
-class TestDisasterRecoveryIntegration(TestUnifiedIDManagerIntegrationCore):
+class DisasterRecoveryIntegrationTests(UnifiedIDManagerIntegrationCoreTests):
     """Integration tests for disaster recovery scenarios"""
 
     async def test_redis_connection_failure_recovery(self):

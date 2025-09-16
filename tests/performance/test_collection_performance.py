@@ -16,7 +16,7 @@ PROJECT_ROOT = Path(__file__).parent.parent.absolute()
 sys.path.insert(0, str(PROJECT_ROOT))
 
 @pytest.mark.performance
-class TestCollectionPerformanceTest(SSotBaseTestCase):
+class CollectionPerformanceTestTests(SSotBaseTestCase):
     """Validates test collection performance"""
     
     def test_agent_collection_performance(self):

@@ -25,7 +25,7 @@ from pathlib import Path
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestSSotMockRegressionPrevention(SSotBaseTestCase):
+class SSotMockRegressionPreventionTests(SSotBaseTestCase):
     """
     Mission Critical test suite preventing SSOT mock factory regression.
     

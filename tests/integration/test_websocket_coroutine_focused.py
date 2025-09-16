@@ -20,7 +20,7 @@ import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
-class TestWebSocketCoroutineFocused(BaseIntegrationTest):
+class WebSocketCoroutineFocusedTests(BaseIntegrationTest):
     """
     Focused integration test for WebSocket coroutine regression.
     

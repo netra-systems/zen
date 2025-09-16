@@ -75,7 +75,7 @@ class ErrorSimulationAgent(DataHelperAgent):
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAgentResponseErrorHandling(BaseIntegrationTest):
+class AgentResponseErrorHandlingTests(BaseIntegrationTest):
     """Test agent response error handling scenarios."""
     
     def setup_method(self):

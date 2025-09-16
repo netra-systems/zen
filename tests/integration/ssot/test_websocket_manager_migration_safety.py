@@ -34,7 +34,7 @@ from netra_backend.app.services.user_execution_context import (
 )
 
 # WebSocket Manager - Both patterns being tested
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.canonical_import_patterns import (
     get_websocket_manager, WebSocketManager
 )
 from netra_backend.app.websocket_core.websocket_manager_factory import (
@@ -51,7 +51,7 @@ from shared.types.core_types import (
 
 
 @pytest.mark.integration
-class TestWebSocketManagerMigrationSafety(SSotAsyncTestCase):
+class WebSocketManagerMigrationSafetyTests(SSotAsyncTestCase):
     """
     Migration safety tests validating WebSocket manager migration preserves 
     all critical user isolation and security characteristics.

@@ -12,7 +12,7 @@ import psutil
 import gc
 from typing import Dict, Any, List
 from statistics import mean, median, stdev
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
 
 @pytest.mark.performance
-class TestAgentLatencyPerformance:
+class AgentLatencyPerformanceTests:
     """Test agent operation latency and response times."""
     
     @pytest.mark.asyncio
@@ -238,7 +238,7 @@ class TestAgentLatencyPerformance:
 
 
 @pytest.mark.performance
-class TestAgentMemoryPerformance:
+class AgentMemoryPerformanceTests:
     """Test agent memory usage and optimization."""
     
     @pytest.mark.asyncio
@@ -438,7 +438,7 @@ class TestAgentMemoryPerformance:
 
 
 @pytest.mark.performance
-class TestAgentThroughputOptimization:
+class AgentThroughputOptimizationTests:
     """Test agent throughput optimization and scaling."""
     
     @pytest.mark.asyncio

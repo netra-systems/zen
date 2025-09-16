@@ -47,7 +47,7 @@ from shared.logging.unified_logging_ssot import (
 )
 
 
-class TestAuthServiceLoggingKeyErrorIntegration:
+class AuthServiceLoggingKeyErrorIntegrationTests:
     """
     Integration test class for validating KeyError fix in auth service context.
     

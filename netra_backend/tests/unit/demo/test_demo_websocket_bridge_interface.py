@@ -30,7 +30,7 @@ from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmi
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestDemoWebSocketBridgeInterface(SSotBaseTestCase):
+class DemoWebSocketBridgeInterfaceTests(SSotBaseTestCase):
     """Test DemoWebSocketBridge interface compliance and AttributeError reproduction."""
 
     def setUp(self):
@@ -299,7 +299,7 @@ class TestDemoWebSocketBridgeInterface(SSotBaseTestCase):
         print(f"📋 Expected events: {expected_events}")
 
 
-class TestDemoWebSocketBridgeRequirements(SSotBaseTestCase):
+class DemoWebSocketBridgeRequirementsTests(SSotBaseTestCase):
     """Test the requirements and specifications for DemoWebSocketBridge fix."""
 
     def setUp(self):

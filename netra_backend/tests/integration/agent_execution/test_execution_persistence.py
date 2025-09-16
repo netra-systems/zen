@@ -51,7 +51,7 @@ logger = central_logger.get_logger(__name__)
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.database
-class TestExecutionPersistence(BaseAgentExecutionTest):
+class ExecutionPersistenceTests(BaseAgentExecutionTest):
     """Integration tests for agent execution persistence with real database."""
 
     async def setup_method(self):

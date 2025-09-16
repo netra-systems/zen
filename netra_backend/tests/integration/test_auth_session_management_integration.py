@@ -32,7 +32,7 @@ from shared.types.core_types import UserID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestAuthSessionManagementIntegration(BaseIntegrationTest):
+class AuthSessionManagementIntegrationTests(BaseIntegrationTest):
     """Integration tests for authentication session management with real services."""
     
     @pytest.fixture(autouse=True)

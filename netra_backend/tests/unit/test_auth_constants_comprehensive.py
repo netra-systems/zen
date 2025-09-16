@@ -39,7 +39,7 @@ from netra_backend.app.core.auth_constants import (
 )
 
 
-class TestAuthConstants:
+class AuthConstantsTests:
     """Test core authentication constants for SSOT compliance."""
 
     def test_auth_service_url_constant_type(self):
@@ -125,7 +125,7 @@ class TestAuthConstants:
         assert AuthConstants.PR_NUMBER == "pr_number"
 
 
-class TestJWTConstants:
+class JWTConstantsTests:
     """Test JWT constants for token security and standards compliance."""
 
     def test_jwt_secret_key_constants_prevent_configuration_errors(self):
@@ -192,7 +192,7 @@ class TestJWTConstants:
         assert 7 <= JWTConstants.DEFAULT_REFRESH_TOKEN_EXPIRE_DAYS <= 30  # Security range
 
 
-class TestHeaderConstants:
+class HeaderConstantsTests:
     """Test HTTP header constants prevent authentication header errors."""
 
     def test_standard_http_headers_match_rfc_specs(self):
@@ -222,7 +222,7 @@ class TestHeaderConstants:
         assert HeaderConstants.APPLICATION_FORM_URLENCODED == "application/x-www-form-urlencoded"
 
 
-class TestCredentialConstants:
+class CredentialConstantsTests:
     """Test credential constants prevent OAuth configuration failures."""
 
     def test_google_oauth_credential_constants_prevent_misconfigurations(self):
@@ -255,7 +255,7 @@ class TestCredentialConstants:
         assert CredentialConstants.PASSWORD == "password"
 
 
-class TestAuthErrorConstants:
+class AuthErrorConstantsTests:
     """Test auth error constants enable proper user feedback."""
 
     def test_error_codes_are_standard_http_semantics(self):
@@ -284,7 +284,7 @@ class TestAuthErrorConstants:
         assert AuthErrorConstants.AUTH_SERVICE_ERROR == "Authentication service error"
 
 
-class TestOAuthConstants:
+class OAuthConstantsTests:
     """Test OAuth constants match OAuth 2.0 specification."""
 
     def test_oauth_grant_types_match_rfc6749(self):
@@ -328,7 +328,7 @@ class TestOAuthConstants:
         assert OAuthConstants.GITHUB == "github"
 
 
-class TestCacheConstants:
+class CacheConstantsTests:
     """Test cache constants optimize auth performance without breaking security."""
 
     def test_cache_key_prefixes_prevent_key_collisions(self):
@@ -361,7 +361,7 @@ class TestCacheConstants:
         assert 900 <= CacheConstants.SERVICE_TOKEN_CACHE_TTL <= 3600  # 15-60 min range
 
 
-class TestValidationConstants:
+class ValidationConstantsTests:
     """Test validation constants enforce security requirements."""
 
     def test_password_length_requirements_meet_security_standards(self):
@@ -407,7 +407,7 @@ class TestValidationConstants:
         assert ValidationConstants.MAX_EMAIL_LENGTH == 254  # RFC 5321 standard
 
 
-class TestConstantModuleExports:
+class ConstantModuleExportsTests:
     """Test that all constant classes are properly exported from the module."""
 
     def test_all_constant_classes_are_exported(self):
@@ -447,7 +447,7 @@ class TestConstantModuleExports:
         assert hasattr(ValidationConstants, 'MIN_PASSWORD_LENGTH')
 
 
-class TestAuthConstantsBusinessValueValidation:
+class AuthConstantsBusinessValueValidationTests:
     """Test that auth constants deliver the expected business value."""
 
     def test_constants_prevent_hardcoded_string_errors(self):

@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any
 from unittest.mock import AsyncMock, MagicMock
 
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.canonical_import_patterns import (
     WebSocketManager,
     get_websocket_manager,
     WebSocketManagerMode
@@ -28,7 +28,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
 @pytest.mark.unit
-class TestWebSocketEventStructureValidation:
+class WebSocketEventStructureValidationTests:
     """Test suite that reproduces Issue #1021 WebSocket event structure problems."""
 
     @pytest.fixture

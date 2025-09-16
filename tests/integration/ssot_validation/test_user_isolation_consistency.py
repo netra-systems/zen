@@ -22,7 +22,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.integration
-class TestUserIsolationConsistency(SSotAsyncTestCase):
+class UserIsolationConsistencyTests(SSotAsyncTestCase):
     """Test user isolation consistency across all execution engines."""
     
     async def async_setup_method(self, method=None):
@@ -442,7 +442,7 @@ class TestUserIsolationConsistency(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestGoldenPathConcurrency(SSotAsyncTestCase):
+class GoldenPathConcurrencyTests(SSotAsyncTestCase):
     """Test Golden Path protection during concurrent user sessions."""
     
     async def test_golden_path_concurrent_users_no_interference(self):

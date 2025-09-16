@@ -64,7 +64,7 @@ from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, RunID, ensure_user_id
 
 # Application imports using SSOT patterns from registry
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager, WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
 from netra_backend.app.agents.base_agent import BaseAgent, AgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext, UserContextManager
@@ -100,7 +100,7 @@ WEBSOCKET_EVENT_SCHEMAS = {
 }
 
 
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Test WebSocket connection for business-critical integration testing.
     
     IMPORTANT: This is NOT a mock - it's a test harness that captures real WebSocket 
@@ -250,7 +250,7 @@ class TestWebSocketConnection:
         }
 
 
-class TestWebSocketComprehensiveIntegration(BaseIntegrationTest):
+class WebSocketComprehensiveIntegrationTests(BaseIntegrationTest):
     """
     Comprehensive WebSocket integration tests validating business-critical functionality.
     
@@ -300,9 +300,9 @@ class TestWebSocketComprehensiveIntegration(BaseIntegrationTest):
                 
         super().teardown_method()
 
-    def _create_test_connection(self, user_id: Optional[str] = None) -> TestWebSocketConnection:
+    def _create_test_connection(self, user_id: Optional[str] = None) -> WebSocketConnectionTests:
         """Create test WebSocket connection with proper tracking and real auth validation."""
-        connection = TestWebSocketConnection(user_id or self.test_user_id)
+        connection = WebSocketConnectionTests(user_id or self.test_user_id)
         self._created_connections.append(connection)
         return connection
 

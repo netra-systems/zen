@@ -22,7 +22,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
 
 
-class TestAgentExecutionCore:
+class AgentExecutionCoreTests:
     """Unit tests for AgentExecutionCore business logic."""
 
     @pytest.fixture

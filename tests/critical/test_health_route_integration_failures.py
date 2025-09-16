@@ -48,7 +48,7 @@ class HealthIntegrationFailureDetector:
         """Detect timeout cascading failures."""
         self.timeout_cascades.append({'initiating_service': initiating_service, 'affected_services': affected_services})
 
-class TestHealthRouteIntegrationFailures:
+class HealthRouteIntegrationFailuresTests:
     """Test suite to expose health route integration failures."""
 
     @pytest.fixture

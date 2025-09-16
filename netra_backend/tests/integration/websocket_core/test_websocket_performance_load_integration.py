@@ -44,7 +44,7 @@ from test_framework.websocket_helpers import (
 
 try:
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from shared.isolated_environment import get_env
@@ -81,7 +81,7 @@ class PerformanceBenchmarks:
     min_delivery_rate: float = 0.99  # 99% minimum delivery rate
 
 
-class TestWebSocketPerformanceLoadIntegration(BaseIntegrationTest):
+class WebSocketPerformanceLoadIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket performance and load handling."""
 
     async def async_setup(self):

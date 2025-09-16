@@ -79,7 +79,7 @@ from sqlalchemy.pool import NullPool, StaticPool, QueuePool, AsyncAdaptedQueuePo
 from sqlalchemy.exc import SQLAlchemyError
 
 
-class TestDatabaseManagerSSOT(BaseIntegrationTest):
+class DatabaseManagerSSOTTests(BaseIntegrationTest):
     """Test DatabaseManager SSOT implementation with comprehensive coverage."""
     
     def setup_method(self):
@@ -422,7 +422,7 @@ class TestDatabaseManagerSSOT(BaseIntegrationTest):
                 assert session == mock_session
 
 
-class TestDatabaseClassComprehensive(BaseIntegrationTest):
+class DatabaseClassComprehensiveTests(BaseIntegrationTest):
     """Test synchronous Database class with comprehensive coverage."""
     
     def setup_method(self):
@@ -689,7 +689,7 @@ class TestDatabaseClassComprehensive(BaseIntegrationTest):
             mock_engine.dispose.assert_called_once()
 
 
-class TestAsyncDatabaseComprehensive(BaseIntegrationTest):
+class AsyncDatabaseComprehensiveTests(BaseIntegrationTest):
     """Test asynchronous AsyncDatabase class with comprehensive coverage."""
     
     def setup_method(self):
@@ -1046,7 +1046,7 @@ class TestAsyncDatabaseComprehensive(BaseIntegrationTest):
             assert db._initialization_complete is False
 
 
-class TestDatabaseURLBuilderIntegration(BaseIntegrationTest):
+class DatabaseURLBuilderIntegrationTests(BaseIntegrationTest):
     """Test DatabaseURLBuilder integration with database classes."""
     
     def setup_method(self):
@@ -1138,7 +1138,7 @@ class TestDatabaseURLBuilderIntegration(BaseIntegrationTest):
                     manager._get_database_url()
 
 
-class TestDatabaseTimeoutConfiguration(BaseIntegrationTest):
+class DatabaseTimeoutConfigurationTests(BaseIntegrationTest):
     """Test database timeout configuration integration."""
     
     @pytest.mark.unit
@@ -1192,7 +1192,7 @@ class TestDatabaseTimeoutConfiguration(BaseIntegrationTest):
         assert pool_config["pool_size"] < staging_config["pool_config"]["pool_size"]
 
 
-class TestDatabaseErrorHandlingAndRecovery(BaseIntegrationTest):
+class DatabaseErrorHandlingAndRecoveryTests(BaseIntegrationTest):
     """Test database error handling and recovery scenarios."""
     
     @pytest.mark.unit
@@ -1380,7 +1380,7 @@ class TestDatabaseErrorHandlingAndRecovery(BaseIntegrationTest):
             assert db._initialization_complete is True
 
 
-class TestDatabaseShimCompatibility(BaseIntegrationTest):
+class DatabaseShimCompatibilityTests(BaseIntegrationTest):
     """Test backward compatibility shim functionality."""
     
     @pytest.mark.unit
@@ -1429,7 +1429,7 @@ class TestDatabaseShimCompatibility(BaseIntegrationTest):
         assert manager is manager2
 
 
-class TestDatabaseIntegrationWithServices(BaseIntegrationTest):
+class DatabaseIntegrationWithServicesTests(BaseIntegrationTest):
     """Test database integration with other service components."""
     
     @pytest.mark.unit
@@ -1531,7 +1531,7 @@ class TestDatabaseIntegrationWithServices(BaseIntegrationTest):
 
 
 # Integration test to verify all components work together
-class TestDatabaseModuleIntegration(BaseIntegrationTest):
+class DatabaseModuleIntegrationTests(BaseIntegrationTest):
     """Integration tests for complete database module functionality."""
     
     @pytest.mark.unit

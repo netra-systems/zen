@@ -26,7 +26,7 @@ import httpx
 
 
 @pytest.mark.integration
-class TestWebSocketAuthTimeoutIntegration(SSotAsyncTestCase):
+class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests to reproduce WebSocket authentication timeout failures.
     

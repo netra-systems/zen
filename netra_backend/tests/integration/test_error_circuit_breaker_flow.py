@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock
 
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
 from shared.isolated_environment import IsolatedEnvironment
 
 
@@ -182,7 +182,7 @@ class MockErrorProneService:
         return {"user_id": user_id, "api_name": api_name, "response": "success"}
 
 
-class TestErrorPropagationCircuitBreakerIntegration:
+class ErrorPropagationCircuitBreakerIntegrationTests:
     """Integration tests for error propagation and circuit breaker patterns."""
     
     @pytest.fixture

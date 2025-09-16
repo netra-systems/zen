@@ -28,7 +28,7 @@ from unittest.mock import AsyncMock, MagicMock
 logger = logging.getLogger(__name__)
 
 
-class TestGoldenPathIntegrationCoverage:
+class GoldenPathIntegrationCoverageTests:
     """
     Test class to validate Golden Path business value through integration tests.
     
@@ -806,7 +806,7 @@ class TestGoldenPathIntegrationCoverage:
             "Service-independent infrastructure does not adequately protect $500K+ ARR business value"
 
 
-class TestGoldenPathPerformanceRequirements:
+class GoldenPathPerformanceRequirementsTests:
     """
     Test class to validate Golden Path performance requirements are met.
     

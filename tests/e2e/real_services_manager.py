@@ -37,7 +37,7 @@ from websockets import WebSocketException, ConnectionClosedError
 
 from shared.isolated_environment import IsolatedEnvironment
 from tests.e2e.config import TEST_CONFIG, TestEnvironmentType
-from tests.e2e.test_environment_config import TestEnvironmentConfig
+from tests.e2e.test_environment_config import EnvironmentConfigTests
 
 # CRITICAL INTEGRATION: Import UnifiedDockerManager for actual service startup
 try:
@@ -478,9 +478,9 @@ class RealServicesManager:
     - Error handling and recovery
     """
     
-    def __init__(self, 
+    def __init__(self,
                  project_root: Optional[Path] = None,
-                 env_config: Optional[TestEnvironmentConfig] = None,
+                 env_config: Optional[EnvironmentConfigTests] = None,
                  health_check_config: Optional[HealthCheckConfig] = None):
         """
         Initialize Real Services Manager.
@@ -523,24 +523,24 @@ class RealServicesManager:
         
         # Go up from tests/e2e/ to find project root
         while current.parent != current:
-            # Look for key project indicators - must have CLAUDE.md AND netra_backend or auth_service
-            has_claude = (current / "CLAUDE.md").exists()
+            # Look for key project indicators - must have pyproject.toml AND netra_backend or auth_service
+            has_project_toml = (current / "pyproject.toml").exists()
             has_netra_backend = (current / "netra_backend").exists()
             has_auth_service = (current / "auth_service").exists()
-            
-            if has_claude and (has_netra_backend or has_auth_service):
+
+            if has_project_toml and (has_netra_backend or has_auth_service):
                 return current
             current = current.parent
         
         # If we can't find it by walking up, try a more direct approach
         # From tests/e2e/real_services_manager.py, go up 2 levels to project root
         direct_path = Path(__file__).parent.parent.parent
-        if (direct_path / "CLAUDE.md").exists() and (direct_path / "netra_backend").exists():
+        if (direct_path / "pyproject.toml").exists() and (direct_path / "netra_backend").exists():
             return direct_path
         
         # Final fallback - use current working directory if it has project indicators
         cwd = Path.cwd()
-        if (cwd / "CLAUDE.md").exists() and (cwd / "netra_backend").exists():
+        if (cwd / "pyproject.toml").exists() and (cwd / "netra_backend").exists():
             return cwd
         
         raise RuntimeError("Cannot detect project root from real_services_manager.py")

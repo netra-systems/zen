@@ -37,7 +37,7 @@ docker_manager = UnifiedDockerManager()
 @pytest.mark.rate_limiting
 @pytest.mark.security
 @pytest.mark.asyncio
-class TestRealAuthRateLimiting:
+class RealAuthRateLimitingTests:
     """
     Real auth rate limiting tests using Docker services.
     

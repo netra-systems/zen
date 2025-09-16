@@ -29,7 +29,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 
 @pytest.mark.integration
-class TestMultiUserExecutionIsolation:
+class MultiUserExecutionIsolationTests:
     """Test multi-user execution isolation patterns."""
 
     @pytest.fixture
@@ -248,7 +248,7 @@ class TestMultiUserExecutionIsolation:
         assert child1.request_id != child2.request_id
 
 @pytest.mark.integration
-class TestMultiUserResourceIsolation:
+class MultiUserResourceIsolationTests:
     """Test resource isolation between multiple users."""
 
     def test_user_execution_stats_isolation(self):

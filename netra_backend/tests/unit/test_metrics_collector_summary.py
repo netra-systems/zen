@@ -19,7 +19,7 @@ import pytest
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector, PerformanceMetric
 
 
-class TestMetricsCollectorSummary:
+class MetricsCollectorSummaryTests:
     """Test suite for MetricsCollector summary and analysis features."""
 
     @pytest.fixture

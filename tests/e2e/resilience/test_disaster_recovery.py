@@ -54,7 +54,7 @@ async def disaster_recovery_suite():
     await suite.cleanup()
 
 
-class TestDisasterRecoverySuite:
+class DisasterRecoverySuiteTests:
     """Comprehensive disaster recovery test suite."""
     
     def __init__(self):
@@ -93,7 +93,7 @@ class TestDisasterRecoverySuite:
             pass  # Best effort cleanup
 
 
-class TestDisasterRecovery:
+class DisasterRecoveryTests:
     """E2E Tests for disaster recovery and system restoration."""
     
     @pytest.mark.asyncio
@@ -407,7 +407,7 @@ class TestDisasterRecovery:
             return {'data_consistent': False, 'error': str(e)}
 
 
-class TestDisasterRecoveryPerformance:
+class DisasterRecoveryPerformanceTests:
     """Performance tests for disaster recovery operations."""
     
     @pytest.mark.asyncio

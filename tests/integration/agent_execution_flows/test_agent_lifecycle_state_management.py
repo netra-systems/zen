@@ -39,7 +39,7 @@ class AgentLifecyclePhase(Enum):
     DESTROYED = "destroyed"
 
 
-class TestAgentLifecycleStateManagement(BaseIntegrationTest):
+class AgentLifecycleStateManagementTests(BaseIntegrationTest):
     """Integration tests for agent lifecycle state management."""
 
     @pytest.mark.integration

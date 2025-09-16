@@ -24,7 +24,7 @@ from tests.e2e.test_helpers.performance_base import HIGH_VOLUME_CONFIG
 logger = logging.getLogger(__name__)
 
 
-class TestMemoryEfficiencyUnderLoad:
+class MemoryEfficiencyUnderLoadTests:
     """Test memory efficiency and leak detection under load."""
     
     @pytest.mark.asyncio

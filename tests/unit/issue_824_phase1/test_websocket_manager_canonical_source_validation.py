@@ -22,7 +22,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerCanonicalSourceValidation(SSotAsyncTestCase):
+class WebSocketManagerCanonicalSourceValidationTests(SSotAsyncTestCase):
     """Test canonical source validation for WebSocket Manager SSOT."""
 
     def setUp(self):
@@ -35,7 +35,7 @@ class TestWebSocketManagerCanonicalSourceValidation(SSotAsyncTestCase):
         """Test that canonical WebSocketManager is the primary import source."""
         # Import from canonical source
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CanonicalWSM
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as CanonicalWSM
         except ImportError as e:
             self.fail(f"CRITICAL: Cannot import canonical WebSocketManager: {e}")
 
@@ -137,7 +137,7 @@ class TestWebSocketManagerCanonicalSourceValidation(SSotAsyncTestCase):
 
     def test_websocket_manager_ssot_enforcement(self):
         """Test that SSOT WebSocket Manager prevents multiple instance patterns."""
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
         # Test that WebSocketManager class exists and is properly formed
         self.assertTrue(inspect.isclass(WebSocketManager))

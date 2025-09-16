@@ -24,7 +24,7 @@ from netra_backend.app.db.postgres import (
 
 from netra_backend.app.database import get_db
 
-class TestDatabaseConnectionPooling:
+class DatabaseConnectionPoolingTests:
     """Test database connection pooling behavior."""
 
     @pytest.mark.asyncio
@@ -109,7 +109,7 @@ class TestDatabaseConnectionPooling:
         # Some queries may succeed
         successful_results = [r for r in results if r != None and not isinstance(r, Exception)]
         assert len(successful_results) >= 0  # At least allow for database not being available
-class TestSessionManagement:
+class SessionManagementTests:
     """Test database session lifecycle management."""
 
     @pytest.mark.asyncio
@@ -156,7 +156,7 @@ class TestSessionManagement:
             assert db.SessionLocal != None
         except Exception as e:
             pytest.skip(f"Cannot create database instance: {e}")
-class TestClickHouseConnection:
+class ClickHouseConnectionTests:
     """Test ClickHouse connection management."""
 
     @pytest.mark.asyncio

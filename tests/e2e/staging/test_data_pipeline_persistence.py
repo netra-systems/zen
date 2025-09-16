@@ -34,7 +34,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from tests.e2e.staging_config import get_staging_config
 
 
-class TestDataPipelinePersistence(BaseE2ETest):
+class DataPipelinePersistenceTests(BaseE2ETest):
     """Test data pipeline persistence and integrity."""
     
     def setup_method(self):

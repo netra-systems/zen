@@ -42,7 +42,7 @@ ORDERING_CONFIG = {
     "concurrent_delivery_ratio": 0.95
 }
 
-class TestMessageOrderingPreservation:
+class MessageOrderingPreservationTests:
     """Test message ordering preservation under high load"""
     
     @pytest.mark.asyncio

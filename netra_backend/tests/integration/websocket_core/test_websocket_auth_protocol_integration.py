@@ -27,7 +27,7 @@ from netra_backend.app.services.unified_authentication_service import UnifiedAut
 from netra_backend.app.websocket_core.user_context_extractor import WebSocketUserContextExtractor
 from netra_backend.app.auth_integration.auth import generate_access_token
 
-class TestWebSocketAuthProtocolIntegration(SSotAsyncTestCase):
+class WebSocketAuthProtocolIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket authentication protocol - REAL SERVICES ONLY"""
 
     @classmethod
@@ -272,7 +272,7 @@ class TestWebSocketAuthProtocolIntegration(SSotAsyncTestCase):
                 if conn_info['connection'] and (not conn_info['connection'].closed):
                     await conn_info['connection'].close()
 
-class TestWebSocketUnifiedAuthIntegration(SSotAsyncTestCase):
+class WebSocketUnifiedAuthIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket + unified auth service"""
 
     async def asyncSetUp(self):

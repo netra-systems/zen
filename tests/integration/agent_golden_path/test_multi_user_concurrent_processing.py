@@ -361,7 +361,7 @@ class MultiUserConcurrencyValidator:
         )
 
 
-class TestMultiUserConcurrentProcessing(SSotAsyncTestCase):
+class MultiUserConcurrentProcessingTests(SSotAsyncTestCase):
     """
     Multi-User Concurrent Processing Integration Tests.
     
@@ -643,7 +643,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_test():
-        test_instance = TestMultiUserConcurrentProcessing()
+        test_instance = MultiUserConcurrentProcessingTests()
         test_instance.setup_method()
         await test_instance.test_multi_user_concurrent_agent_interactions()
         print("Direct test execution completed successfully")

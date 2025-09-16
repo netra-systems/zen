@@ -11,7 +11,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 
-class TestSystemStartup:
+class SystemStartupTests:
     """Test system startup functionality."""
     
     @pytest.fixture(autouse=True)

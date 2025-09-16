@@ -17,7 +17,7 @@ from typing import Dict, List, Set, Tuple
 from unittest.mock import patch
 
 
-class TestImportPathFragmentationIssue1196(unittest.TestCase):
+class ImportPathFragmentationIssue1196Tests(unittest.TestCase):
     """Test suite demonstrating SSOT import path fragmentation violations.
 
     These tests MUST FAIL initially to prove the fragmentation problem exists.
@@ -32,7 +32,7 @@ class TestImportPathFragmentationIssue1196(unittest.TestCase):
 
         # Expected SSOT canonical import paths (what should be used)
         self.canonical_imports = {
-            "WebSocketManager": "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+            "WebSocketManager": "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
             "ExecutionEngine": "from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine",
             "AgentRegistry": "from netra_backend.app.agents.registry import AgentRegistry"
         }

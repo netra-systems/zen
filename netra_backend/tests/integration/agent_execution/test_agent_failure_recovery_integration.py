@@ -120,7 +120,7 @@ class RecoveryWebSocketManager:
         bridge.notify_tool_completed = AsyncMock(side_effect=lambda run_id, agent_name, tool_name, result: track_emit('tool_completed', {'agent_name': agent_name, 'tool_name': tool_name, 'result': result}))
         return bridge
 
-class TestAgentFailureRecoveryIntegration(BaseIntegrationTest):
+class AgentFailureRecoveryIntegrationTests(BaseIntegrationTest):
     """Integration tests for agent failure recovery and compensation."""
 
     def setup_method(self):

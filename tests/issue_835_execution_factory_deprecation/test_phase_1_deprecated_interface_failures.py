@@ -15,7 +15,7 @@ import pytest
 import warnings
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestPhase1DeprecatedInterfaceFailures(SSotAsyncTestCase):
+class Phase1DeprecatedInterfaceFailuresTests(SSotAsyncTestCase):
     """
     Phase 1: Demonstrate deprecated interface usage failures
     These tests intentionally use deprecated patterns to validate warnings.

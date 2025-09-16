@@ -34,7 +34,7 @@ from tests.e2e.websocket_resilience_core import (
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestWebSocketReconnectionWithStateRecovery:
+class WebSocketReconnectionWithStateRecoveryTests:
     """Test #3: WebSocket Reconnection with State Recovery."""
     
     @pytest.fixture
@@ -105,7 +105,7 @@ class TestWebSocketReconnectionWithStateRecovery:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestErrorMessageToUserNotificationRecovery:
+class ErrorMessageToUserNotificationRecoveryTests:
     """Test #6: Error Message  ->  User Notification  ->  Recovery."""
     
     @pytest.fixture

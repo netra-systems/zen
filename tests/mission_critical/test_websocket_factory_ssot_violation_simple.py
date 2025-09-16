@@ -24,13 +24,13 @@ import asyncio
 from typing import Set, Dict, Any
 
 # Import WebSocket components to test
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import ensure_user_id
 
 
-class TestWebSocketFactorySsotViolation:
+class WebSocketFactorySsotViolationTests:
     """Prove that WebSocket factory pattern violates SSOT principles."""
     
     def setup_method(self):
@@ -155,7 +155,7 @@ class TestWebSocketFactorySsotViolation:
         print("CONSOLIDATION APPROACH: Single SSOT manager with user-context-based isolation")
 
 
-class TestFactoryPatternSsotCompliance:
+class FactoryPatternSsotComplianceTests:
     """Synchronous tests for factory pattern SSOT compliance."""
     
     def test_factory_registration_violates_ssot_registry_pattern(self):

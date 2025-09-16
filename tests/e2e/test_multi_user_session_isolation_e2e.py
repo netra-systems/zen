@@ -39,7 +39,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
+class MultiUserSessionIsolationE2ETests(SSotAsyncTestCase):
     """E2E tests for multi-user session isolation in staging environment."""
     
     @pytest.fixture(autouse=True)

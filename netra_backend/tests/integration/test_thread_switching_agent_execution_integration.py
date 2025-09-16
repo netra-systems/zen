@@ -212,7 +212,7 @@ class MockToolDispatcher:
         return result
 
 
-class TestThreadSwitchingAgentExecutionIntegration(BaseTestCase):
+class ThreadSwitchingAgentExecutionIntegrationTests(BaseTestCase):
     """
     Comprehensive integration tests for agent execution during thread switching.
     

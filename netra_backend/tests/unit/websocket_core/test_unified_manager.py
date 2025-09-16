@@ -46,7 +46,7 @@ from netra_backend.app.websocket_core.unified_manager import (
     UnifiedWebSocketManager
 )
 # Import get_websocket_manager from SSOT location
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 # Import related types and dependencies
 from shared.types.core_types import (
@@ -57,7 +57,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestUnifiedWebSocketManager(SSotAsyncTestCase):
+class UnifiedWebSocketManagerTests(SSotAsyncTestCase):
     """Test suite for unified WebSocket manager functionality."""
 
     def setup_method(self, method):
@@ -188,11 +188,11 @@ class TestUnifiedWebSocketManager(SSotAsyncTestCase):
         from dataclasses import dataclass
 
         @dataclass
-        class TestDataClass:
+        class DataClassTests:
             name: str
             value: int
 
-        test_obj = TestDataClass(name="test", value=42)
+        test_obj = DataClassTests(name="test", value=42)
         result = _serialize_message_safely(test_obj)
 
         self.assertEqual(result["name"], "test")

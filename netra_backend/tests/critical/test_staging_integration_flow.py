@@ -1,5 +1,5 @@
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from shared.isolated_environment import IsolatedEnvironment
@@ -78,7 +78,7 @@ def staging_environment():
                         "clickhouse": mock_ch
                         }
 
-                        class TestStagingStartupFlow:
+                        class StagingStartupFlowTests:
                             """Test staging application startup flow."""
 
                             @env("staging")
@@ -110,7 +110,7 @@ def staging_environment():
                                         assert app is not None
                                         assert hasattr(app, "state")
 
-                                        class TestStagingHealthEndpoints:
+                                        class StagingHealthEndpointsTests:
                                             """Test staging health check endpoints."""
 
                                             @env("dev", "staging")
@@ -134,7 +134,7 @@ def staging_environment():
                                                         from netra_backend.app.routes.health import router
                                                         assert router is not None
 
-                                                        class TestStagingDatabaseConnectivity:
+                                                        class StagingDatabaseConnectivityTests:
                                                             """Test staging database connectivity."""
 
                                                             @env("staging")
@@ -158,7 +158,7 @@ def staging_environment():
                                                                         """Test ClickHouse connection for staging."""
                                                                         mock_external_services["clickhouse"].assert_called()
 
-                                                                        class TestStagingAPIEndpoints:
+                                                                        class StagingAPIEndpointsTests:
                                                                             """Test staging API endpoint configurations."""
 
                                                                             @pytest.mark.asyncio
@@ -183,7 +183,7 @@ def staging_environment():
                                                                                         assert rate_limit > 0
                                                                                         assert rate_limit < 1000  # Not too high for staging
 
-                                                                                        class TestStagingWebSocketConfiguration:
+                                                                                        class StagingWebSocketConfigurationTests:
                                                                                             """Test staging WebSocket configurations."""
 
                                                                                             @pytest.mark.asyncio
@@ -205,7 +205,7 @@ def staging_environment():
                                                                                                         assert max_reconnect_attempts >= 3
                                                                                                         assert max_reconnect_attempts <= 10
 
-                                                                                                        class TestStagingErrorHandling:
+                                                                                                        class StagingErrorHandlingTests:
                                                                                                             """Test staging error handling configurations."""
 
                                                                                                             @pytest.mark.asyncio
@@ -227,7 +227,7 @@ def staging_environment():
                                                                                                                         assert shutdown_timeout >= 10
                                                                                                                         assert shutdown_timeout <= 60
 
-                                                                                                                        class TestStagingMonitoring:
+                                                                                                                        class StagingMonitoringTests:
                                                                                                                             """Test staging monitoring configurations."""
 
                                                                                                                             @pytest.mark.asyncio
@@ -249,7 +249,7 @@ def staging_environment():
                                                                                                                                         assert track_performance
 
                                                                                                                                         @pytest.mark.critical
-                                                                                                                                        class TestStagingEndToEndFlow:
+                                                                                                                                        class StagingEndToEndFlowTests:
                                                                                                                                             """Test complete end-to-end staging flow."""
 
                                                                                                                                             @pytest.mark.asyncio

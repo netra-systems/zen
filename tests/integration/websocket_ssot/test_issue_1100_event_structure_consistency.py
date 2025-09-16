@@ -26,7 +26,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestWebSocketEventStructureConsistency(BaseIntegrationTest):
+class WebSocketEventStructureConsistencyTests(BaseIntegrationTest):
     """Test WebSocket event structure consistency with real services."""
     
     # Required WebSocket events for Golden Path functionality
@@ -66,7 +66,7 @@ class TestWebSocketEventStructureConsistency(BaseIntegrationTest):
         
         try:
             # Test canonical SSOT WebSocket manager event structure
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketManagerMode
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             from shared.types.core_types import ensure_user_id
             
@@ -223,7 +223,7 @@ class TestWebSocketEventStructureConsistency(BaseIntegrationTest):
         event_support_issues = []
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketManagerMode
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             from shared.types.core_types import ensure_user_id
             
@@ -327,7 +327,7 @@ class TestWebSocketEventStructureConsistency(BaseIntegrationTest):
         delivery_results = []
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketManagerMode
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             from shared.types.core_types import ensure_user_id
             

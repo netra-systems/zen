@@ -46,7 +46,7 @@ class MockBadTool:
     name = 'bad_tool'
     description = 'Not a real tool'
 
-class TestToolRegistrySpecificExceptions(unittest.TestCase):
+class ToolRegistrySpecificExceptionsTests(unittest.TestCase):
     """Test specific exception classes for tool registry operations."""
 
     def setUp(self):
@@ -205,7 +205,7 @@ class TestToolRegistrySpecificExceptions(unittest.TestCase):
         if hasattr(self, 'unified_registry'):
             self.unified_registry.clear()
 
-class TestToolRegistryExceptionRecovery(unittest.TestCase):
+class ToolRegistryExceptionRecoveryTests(unittest.TestCase):
     """Test exception recovery and error handling patterns."""
 
     def setUp(self):

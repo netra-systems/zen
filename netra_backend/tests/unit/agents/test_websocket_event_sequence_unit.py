@@ -144,7 +144,7 @@ class MockWebSocketEventValidator:
         self.out_of_order_events = []
 
 
-class TestWebSocketEventSequenceValidation(SSotAsyncTestCase):
+class WebSocketEventSequenceValidationTests(SSotAsyncTestCase):
     """Test WebSocket event sequence validation for Golden Path business value."""
 
     def setup_method(self, method):

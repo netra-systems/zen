@@ -131,7 +131,7 @@ class MockWebSocketConnection:
         self.message_handlers[event_type] = handler
 
 
-class TestWebSocketThreadIntegration(SSotAsyncTestCase):
+class WebSocketThreadIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket-thread integration and real-time communication.
     

@@ -34,7 +34,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.websocket_core.types import WebSocketConfig
 
 
-class TestWebSocketTypesSSOTViolations(SSotBaseTestCase):
+class WebSocketTypesSSOTViolationsTests(SSotBaseTestCase):
     """Test suite proving WebSocket types SSOT violations at specific lines."""
 
     def setup_method(self, method):

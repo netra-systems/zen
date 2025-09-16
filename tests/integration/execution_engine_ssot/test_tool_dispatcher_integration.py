@@ -61,7 +61,7 @@ class ToolExecutionCapture:
 
 
 @pytest.mark.integration
-class TestToolDispatcherIntegration(SSotAsyncTestCase):
+class ToolDispatcherIntegrationTests(SSotAsyncTestCase):
     """Integration Test 6: Validate tool dispatcher integration with UserExecutionEngine SSOT"""
     
     def setUp(self):

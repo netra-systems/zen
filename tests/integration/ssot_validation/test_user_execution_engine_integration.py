@@ -35,7 +35,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 
 
 @pytest.mark.integration
-class TestUserExecutionEngineIntegration(SSotAsyncTestCase):
+class UserExecutionEngineIntegrationTests(SSotAsyncTestCase):
     """
     Integration test suite for UserExecutionEngine with real system components.
 

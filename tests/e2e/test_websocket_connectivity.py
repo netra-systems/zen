@@ -25,9 +25,9 @@ import pytest
 from loguru import logger
 from test_framework.environment_isolation import get_env
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 class InMemoryWebSocketConnection:
     """Real in-memory WebSocket connection for E2E testing without external WebSocket server."""
@@ -73,7 +73,7 @@ class InMemoryWebSocketConnection:
         return 'CONNECTED' if self._connected else 'DISCONNECTED'
 
 @pytest.mark.e2e
-class TestWebSocketConnectivityAuthenticated:
+class WebSocketConnectivityAuthenticatedTests:
     """CLAUDE.md compliant WebSocket connectivity tests with mandatory authentication."""
 
     @pytest.mark.asyncio

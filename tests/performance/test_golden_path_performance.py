@@ -94,7 +94,7 @@ PERFORMANCE_SCENARIOS = [
 ]
 
 
-class TestGoldenPathPerformance(SSotAsyncTestCase):
+class GoldenPathPerformanceTests(SSotAsyncTestCase):
     """
     Golden Path Performance SLA Test Suite
     

@@ -31,7 +31,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -39,7 +39,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
 class MockWebSocketWithTimeout:
@@ -98,7 +98,7 @@ class WebSocketTimeoutRetryTestSuite:
         return connection_id
 
 @pytest.mark.asyncio
-class TestWebSocketTimeoutRetryBasic(WebSocketTimeoutRetryTestSuite):
+class WebSocketTimeoutRetryBasicTests(WebSocketTimeoutRetryTestSuite):
     """Basic timeout and retry functionality tests."""
 
     async def test_normal_message_send_completes_within_timeout(self):
@@ -174,7 +174,7 @@ class TestWebSocketTimeoutRetryBasic(WebSocketTimeoutRetryTestSuite):
             pytest.fail('EXPECTED FAILURE: Error handling for max retry failures not implemented')
 
 @pytest.mark.asyncio
-class TestWebSocketTimeoutRetryTiming(WebSocketTimeoutRetryTestSuite):
+class WebSocketTimeoutRetryTimingTests(WebSocketTimeoutRetryTestSuite):
     """Test exponential backoff timing and timeout values."""
 
     async def test_exponential_backoff_timing_precision(self):
@@ -223,7 +223,7 @@ class TestWebSocketTimeoutRetryTiming(WebSocketTimeoutRetryTestSuite):
             pytest.fail('EXPECTED FAILURE: 5-second timeout not implemented')
 
 @pytest.mark.asyncio
-class TestWebSocketTimeoutRetryConcurrency(WebSocketTimeoutRetryTestSuite):
+class WebSocketTimeoutRetryConcurrencyTests(WebSocketTimeoutRetryTestSuite):
     """Test concurrent timeout/retry scenarios."""
 
     async def test_concurrent_sends_mixed_success_failure(self):
@@ -276,7 +276,7 @@ class TestWebSocketTimeoutRetryConcurrency(WebSocketTimeoutRetryTestSuite):
             pytest.fail('EXPECTED FAILURE: Disconnection handling during retry not implemented')
 
 @pytest.mark.asyncio
-class TestWebSocketTimeoutRetryEdgeCases(WebSocketTimeoutRetryTestSuite):
+class WebSocketTimeoutRetryEdgeCasesTests(WebSocketTimeoutRetryTestSuite):
     """Test edge cases and error scenarios."""
 
     async def test_large_message_handling_with_timeout(self):
@@ -338,7 +338,7 @@ class TestWebSocketTimeoutRetryEdgeCases(WebSocketTimeoutRetryTestSuite):
             pytest.fail('EXPECTED FAILURE: Comprehensive timeout/retry metrics not implemented')
 
 @pytest.mark.asyncio
-class TestWebSocketTimeoutRetryIntegration(WebSocketTimeoutRetryTestSuite):
+class WebSocketTimeoutRetryIntegrationTests(WebSocketTimeoutRetryTestSuite):
     """Integration tests with real WebSocket manager behavior."""
 
     async def test_integration_with_actual_websocket_manager(self):

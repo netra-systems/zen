@@ -25,7 +25,7 @@ from netra_backend.app.routes.auth_routes.utils import (
 from netra_backend.app.services.audit.utils import AuditTimer
 
 
-class TestDataTransformationUtilities(BaseTestCase):
+class DataTransformationUtilitiesTests(BaseTestCase):
     """Test data transformation utilities deliver reliable operations for business value."""
     
     def setup_method(self):

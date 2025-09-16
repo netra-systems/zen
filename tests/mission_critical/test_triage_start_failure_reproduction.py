@@ -48,7 +48,7 @@ from netra_backend.app.websocket_core.manager import UnifiedWebSocketManager
 from shared.id_generation import UnifiedIdGenerator
 
 
-class TestTriageStartFailureReproduction(SSotAsyncTestCase):
+class TriageStartFailureReproductionTests(SSotAsyncTestCase):
     """
     Mission Critical: Triage Agent Start Failure Reproduction
     

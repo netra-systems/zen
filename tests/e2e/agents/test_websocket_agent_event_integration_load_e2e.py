@@ -37,11 +37,11 @@ from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecut
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 
 @pytest.mark.e2e
-class TestWebSocketAgentEventIntegrationLoadE2E(BaseE2ETest):
+class WebSocketAgentEventIntegrationLoadE2ETests(BaseE2ETest):
     """E2E tests for WebSocket agent event integration under load with authenticated full-stack testing."""
 
     async def create_multiple_authenticated_users(self, count: int = 5) -> List[Dict[str, Any]]:

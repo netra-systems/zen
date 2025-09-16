@@ -29,14 +29,14 @@ import sys
 import asyncio
 from typing import Optional, Dict, Any
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketManagerMode
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID, ThreadID, RunID
 from test_framework.ssot.mock_factory import SSotMockFactory
 from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 
 @pytest.mark.unit
-class TestFactoryMigrationValidation(SSotBaseTestCase):
+class FactoryMigrationValidationTests(SSotBaseTestCase):
     """
     Tests for validating WebSocket factory migration from deprecated to canonical patterns.
 
@@ -141,7 +141,7 @@ class TestFactoryMigrationValidation(SSotBaseTestCase):
         print('SUCCESS: SSOT Import Registry compliance validated')
 
 @pytest.mark.unit
-class TestFactoryMigrationIntegration(SSotBaseTestCase):
+class FactoryMigrationIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for factory migration patterns.
 

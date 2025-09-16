@@ -158,7 +158,7 @@ class CascadeFailureDetector:
 @pytest.mark.real_services
 @pytest.mark.fallback_prevention
 @pytest.mark.cascade_failure_testing
-class TestMultipleServiceFailureCascade:
+class MultipleServiceFailureCascadeTests:
     """
     Integration tests for multiple service failure cascade prevention.
     

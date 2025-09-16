@@ -33,7 +33,7 @@ from netra_backend.app.core.service_dependencies.models import (
 )
 
 
-class TestAuthServiceIntegrationLogic(SSotAsyncTestCase):
+class AuthServiceIntegrationLogicTests(SSotAsyncTestCase):
     """
     Unit tests for Auth Service integration validation logic.
     

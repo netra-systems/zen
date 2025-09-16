@@ -14,7 +14,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
 @pytest.mark.unit
-class TestOAuthConfigurationIsolation:
+class OAuthConfigurationIsolationTests:
     """Test OAuth configuration isolation between environments to prevent credential leaks."""
 
     def test_oauth_dual_naming_convention_compliance(self):
@@ -285,7 +285,7 @@ class TestOAuthConfigurationIsolation:
 
 
 @pytest.mark.unit
-class TestOAuthRegressionPrevention:
+class OAuthRegressionPreventionTests:
     """Test OAuth regression prevention mechanisms based on previous incidents."""
 
     def test_e2e_oauth_simulation_key_availability(self):

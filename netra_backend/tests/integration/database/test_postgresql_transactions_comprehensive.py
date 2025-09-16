@@ -30,7 +30,7 @@ from netra_backend.app.db.transaction_manager import TransactionManager
 from netra_backend.app.db.models_postgres import User, Thread, Message, AgentExecution
 from netra_backend.app.db.database_manager import get_database_manager
 
-class TestPostgreSQLTransactionsComprehensive(SSotBaseTestCase):
+class PostgreSQLTransactionsComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive PostgreSQL transaction tests.
     

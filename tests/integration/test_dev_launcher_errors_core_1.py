@@ -35,7 +35,7 @@ class ErrorDetector:
 
 
 @pytest.mark.integration
-class TestSyntaxFix:
+class SyntaxFixTests:
     """Test class for orphaned methods"""
 
     def setup_method(self):

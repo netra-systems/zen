@@ -22,7 +22,7 @@ from unittest.mock import Mock, patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestOpenTelemetryInstrumentation(SSotBaseTestCase):
+class OpenTelemetryInstrumentationTests(SSotBaseTestCase):
     """Unit tests for OpenTelemetry tracing instrumentation - MUST FAIL before implementation."""
 
     def test_tracer_provider_initialization_fails_without_config(self):
@@ -201,7 +201,7 @@ class TestOpenTelemetryInstrumentation(SSotBaseTestCase):
             # Should fail before header handling implementation
 
 
-class TestTracingConfigurationValidation(SSotBaseTestCase):
+class TracingConfigurationValidationTests(SSotBaseTestCase):
     """Test tracing configuration validation - MUST FAIL before implementation."""
 
     def test_environment_based_configuration_missing(self):
@@ -259,7 +259,7 @@ class TestTracingConfigurationValidation(SSotBaseTestCase):
             # Should fail before processor configuration
 
 
-class TestTracingIntegrationPoints(SSotBaseTestCase):
+class TracingIntegrationPointsTests(SSotBaseTestCase):
     """Test tracing integration with existing systems - MUST FAIL before implementation."""
 
     def test_fastapi_integration_missing(self):

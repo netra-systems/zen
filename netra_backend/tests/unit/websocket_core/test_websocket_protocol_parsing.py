@@ -16,7 +16,7 @@ from fastapi import WebSocket
 from netra_backend.app.websocket_core.user_context_extractor import WebSocketUserContextExtractor
 from netra_backend.app.services.unified_authentication_service import UnifiedAuthenticationService
 
-class TestWebSocketProtocolParsing:
+class WebSocketProtocolParsingTests:
     """Unit tests for WebSocket protocol format parsing - DESIGNED TO FAIL INITIALLY"""
 
     def setup_method(self):
@@ -160,7 +160,7 @@ class TestWebSocketProtocolParsing:
             else:
                 assert extracted_token is None, f'Should handle malformed protocols gracefully: {subprotocols}'
 
-class TestUnifiedAuthenticationServiceProtocolParsing:
+class UnifiedAuthenticationServiceProtocolParsingTests:
     """Unit tests for UnifiedAuthenticationService JWT extraction"""
 
     def setup_method(self):

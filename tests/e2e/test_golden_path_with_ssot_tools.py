@@ -239,7 +239,7 @@ class WebSocketEventCollector:
 
 
 @pytest.mark.e2e
-class TestGoldenPathSSotTools(SSotAsyncTestCase):
+class GoldenPathSSotToolsTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -587,7 +587,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_golden_path_tests():
-        test_case = TestGoldenPathSSotTools()
+        test_case = GoldenPathSSotToolsTests()
         await test_case.asyncSetUp()
         
         print("Running Golden Path SSOT E2E Tests on Staging GCP...")

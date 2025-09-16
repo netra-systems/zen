@@ -44,7 +44,7 @@ from netra_backend.app.db.clickhouse import (
 )
 
 
-class TestClickHouseCacheSSO:
+class ClickHouseCacheSSOTests:
     """Test ClickHouse Cache as Single Source of Truth for query caching."""
     
     @pytest.fixture
@@ -179,7 +179,7 @@ class TestClickHouseCacheSSO:
         assert cache.get("system", "SELECT health_check()") is None
 
 
-class TestNoOpClickHouseClient:
+class NoOpClickHouseClientTests:
     """Test NoOp ClickHouse Client for testing environments."""
     
     @pytest.fixture
@@ -253,7 +253,7 @@ class TestNoOpClickHouseClient:
         assert "disconnected" in str(exc_info.value)
 
 
-class TestClickHouseService:
+class ClickHouseServiceTests:
     """Test ClickHouse Service as the main interface for analytics operations."""
     
     @pytest.fixture
@@ -438,7 +438,7 @@ class TestClickHouseService:
         assert duration > 1.0  # Should have exponential backoff delays
 
 
-class TestClickHouseClientFactory:
+class ClickHouseClientFactoryTests:
     """Test ClickHouse client factory functions for environment-based selection."""
     
     @pytest.mark.unit
@@ -496,7 +496,7 @@ class TestClickHouseClientFactory:
                 assert use_mock_clickhouse() == False
 
 
-class TestClickHouseConfiguration:
+class ClickHouseConfigurationTests:
     """Test ClickHouse configuration management for different environments."""
     
     @pytest.mark.unit
@@ -562,7 +562,7 @@ class TestClickHouseConfiguration:
             assert config.secure == True  # Staging should use secure connections
 
 
-class TestClickHouseBusinessScenarios:
+class ClickHouseBusinessScenariosTests:
     """Test business-critical ClickHouse scenarios for golden path validation."""
     
     @pytest.mark.unit
@@ -688,7 +688,7 @@ class TestClickHouseBusinessScenarios:
 
 
 @pytest.mark.integration
-class TestClickHouseSSotIntegration:
+class ClickHouseSSotIntegrationTests:
     """Integration tests for ClickHouse SSOT compliance with real service operations."""
     
     @pytest.mark.real_database

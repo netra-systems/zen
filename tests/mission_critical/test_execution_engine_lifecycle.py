@@ -39,7 +39,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestExecutionEngineLifecycle(SSotAsyncTestCase):
+class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
     """Test ExecutionEngine lifecycle management and resource handling."""
     
     def setup_method(self, method=None):

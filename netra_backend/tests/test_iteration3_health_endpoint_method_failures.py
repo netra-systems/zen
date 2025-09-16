@@ -17,7 +17,7 @@ from netra_backend.app.services.database_env_service import DatabaseEnvironmentV
 from netra_backend.app.routes.health import router
 
 
-class TestDatabaseEnvironmentValidatorMissingMethods:
+class DatabaseEnvironmentValidatorMissingMethodsTests:
     """Tests that demonstrate missing methods in DatabaseEnvironmentValidator"""
     
     def test_get_environment_info_method_missing(self):
@@ -115,7 +115,7 @@ class TestDatabaseEnvironmentValidatorMissingMethods:
                 f"Expected {method_name} to be missing or non-callable"
 
 
-class TestHealthEndpointIntegrationFailures:
+class HealthEndpointIntegrationFailuresTests:
     """Tests for health endpoint integration failures due to missing methods"""
     
     def test_database_env_endpoint_500_error_due_to_missing_methods(self):
@@ -188,7 +188,7 @@ class TestHealthEndpointIntegrationFailures:
                 f"Error message should be descriptive for {method_name}: {error_msg}"
 
 
-class TestRequiredMethodImplementations:
+class RequiredMethodImplementationsTests:
     """Tests for what the required methods should do when implemented"""
     
     def test_get_environment_info_expected_return_format(self):
@@ -300,7 +300,7 @@ class TestRequiredMethodImplementations:
                 raise KeyError(f"Missing required fields in environment info: {missing_fields}")
 
 
-class TestDatabaseEnvironmentValidatorMethodCompatibility:
+class DatabaseEnvironmentValidatorMethodCompatibilityTests:
     """Tests for method compatibility with health endpoint expectations"""
     
     def test_method_compatibility_with_health_route_usage(self):

@@ -16,7 +16,7 @@ if project_root not in sys.path:
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.state import OptimizationsResult, ActionPlanResult, PlanStep
-from netra_backend.app.schemas.shared_types import DataAnalysisResponse
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse, PerformanceMetrics
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
@@ -64,7 +64,7 @@ class WebSocketEventCapture:
         self.start_time = time.time()
 
 
-class TestActionsAgentWebSocketCompliance:
+class ActionsAgentWebSocketComplianceTests:
     """Test ActionsAgent WebSocket event compliance."""
     
     REQUIRED_EVENTS = {
@@ -138,11 +138,11 @@ class TestActionsAgentWebSocketCompliance:
                 confidence_score=0.8
             ),
             data_result=DataAnalysisResponse(
-                query="test query",
-                results=[],
-                insights={"test": "insight"},
-                metadata={"test": "meta"},
-                recommendations=["test recommendation"]
+                analysis_id="test-analysis-001",
+                status="completed",
+                results={"test": "result", "insights": {"test": "insight"}, "metadata": {"test": "meta"}},
+                metrics=PerformanceMetrics(duration_ms=100.0),
+                created_at=time.time()
             )
         )
         
@@ -188,11 +188,11 @@ class TestActionsAgentWebSocketCompliance:
                     confidence_score=0.9
                 ),
                 data_result=DataAnalysisResponse(
-                    query="performance analysis",
-                    results=["slow query detected"],
-                    insights={"performance": "needs improvement"},
-                    metadata={"source": "database_logs"},
-                    recommendations=["add indexes", "optimize queries"]
+                    analysis_id="performance-analysis-001",
+                    status="completed",
+                    results={"queries": ["slow query detected"], "insights": {"performance": "needs improvement"}, "metadata": {"source": "database_logs"}, "recommendations": ["add indexes", "optimize queries"]},
+                    metrics=PerformanceMetrics(duration_ms=250.0),
+                    created_at=time.time()
                 )
             )
             
@@ -269,22 +269,27 @@ class TestActionsAgentWebSocketCompliance:
                     confidence_score=0.85
                 ),
                 data_result=DataAnalysisResponse(
-                    query="system performance analysis",
-                    results=[
-                        "Database query time: 2.3s avg",
-                        "Memory usage: 85%",
-                        "CPU utilization: 70%"
-                    ],
-                    insights={
-                        "bottlenecks": ["database", "memory"],
-                        "optimization_potential": "high"
+                    analysis_id="system-performance-analysis-001",
+                    status="completed",
+                    results={
+                        "analysis_results": [
+                            "Database query time: 2.3s avg",
+                            "Memory usage: 85%",
+                            "CPU utilization: 70%"
+                        ],
+                        "insights": {
+                            "bottlenecks": ["database", "memory"],
+                            "optimization_potential": "high"
+                        },
+                        "metadata": {"analysis_date": "2025-09-02"},
+                        "recommendations": [
+                            "Add database indexes",
+                            "Implement Redis caching",
+                            "Monitor memory usage"
+                        ]
                     },
-                    metadata={"analysis_date": "2025-09-02"},
-                    recommendations=[
-                        "Add database indexes",
-                        "Implement Redis caching",
-                        "Monitor memory usage"
-                    ]
+                    metrics=PerformanceMetrics(duration_ms=1500.0),
+                    created_at=time.time()
                 )
             )
             
@@ -377,8 +382,11 @@ class TestActionsAgentWebSocketCompliance:
                     confidence_score=0.5
                 ),
                 data_result=DataAnalysisResponse(
-                    query="test", results=[], insights={}, 
-                    metadata={}, recommendations=[]
+                    analysis_id="compliance-test-001",
+                    status="completed",
+                    results={"insights": {}, "metadata": {}, "recommendations": []},
+                    metrics=PerformanceMetrics(duration_ms=50.0),
+                    created_at=time.time()
                 )
             )
             
@@ -441,11 +449,16 @@ class TestActionsAgentWebSocketCompliance:
                     confidence_score=0.95
                 ),
                 data_result=DataAnalysisResponse(
-                    query="performance analysis query",
-                    results=[f"Result {i}" for i in range(100)],
-                    insights={f"insight_{i}": f"value_{i}" for i in range(20)},
-                    metadata={"large_dataset": True},
-                    recommendations=[f"Performance rec {i}" for i in range(15)]
+                    analysis_id="performance-test-analysis-001",
+                    status="completed",
+                    results={
+                        "analysis_results": [f"Result {i}" for i in range(100)],
+                        "insights": {f"insight_{i}": f"value_{i}" for i in range(20)},
+                        "metadata": {"large_dataset": True},
+                        "recommendations": [f"Performance rec {i}" for i in range(15)]
+                    },
+                    metrics=PerformanceMetrics(duration_ms=2500.0),
+                    created_at=time.time()
                 )
             )
             
@@ -487,11 +500,16 @@ class TestActionsAgentWebSocketCompliance:
                 confidence_score=0.7
             ),
             data_result=DataAnalysisResponse(
-                query="degradation test query",
-                results=["degradation result"],
-                insights={"test": "degradation"},
-                metadata={"mode": "graceful_degradation"},
-                recommendations=["handle gracefully"]
+                analysis_id="degradation-test-analysis-001",
+                status="completed",
+                results={
+                    "analysis_results": ["degradation result"],
+                    "insights": {"test": "degradation"},
+                    "metadata": {"mode": "graceful_degradation"},
+                    "recommendations": ["handle gracefully"]
+                },
+                metrics=PerformanceMetrics(duration_ms=75.0),
+                created_at=time.time()
             )
         )
         

@@ -22,7 +22,7 @@ Business Value Justification (BVJ):
 """
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 import asyncio
 import json
@@ -35,7 +35,7 @@ from netra_backend.app.websocket_core.connection_info import ConnectionInfo
 from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.websocket.connection_manager import ConnectionManager
 
-class TestWebSocketConnectionEstablishment:
+class WebSocketConnectionEstablishmentTests:
     """Test 1: Connection establishment with auth"""
 
     @pytest.mark.asyncio
@@ -51,7 +51,7 @@ class TestWebSocketConnectionEstablishment:
         assert 'authenticated_user_123' in conn_manager.user_connections
         print(f'[OK] Connection established with auth for user authenticated_user_123')
 
-class TestWebSocketAuthValidation:
+class WebSocketAuthValidationTests:
     """Test 2: Auth validation in handshake"""
 
     @pytest.mark.asyncio
@@ -81,7 +81,7 @@ class TestWebSocketAuthValidation:
             print(f'[OK] Auth validation correctly failed: {e}')
             assert True
 
-class TestWebSocketMessageRouting:
+class WebSocketMessageRoutingTests:
     """Test 3: Message routing to correct handlers"""
 
     @pytest.mark.asyncio
@@ -102,7 +102,7 @@ class TestWebSocketMessageRouting:
         assert routed_messages[2]['handler'] == 'data_handler'
         print('[OK] Messages routed to correct handlers')
 
-class TestWebSocketBroadcasting:
+class WebSocketBroadcastingTests:
     """Test 4: Broadcasting to multiple clients"""
 
     @pytest.mark.asyncio
@@ -127,7 +127,7 @@ class TestWebSocketBroadcasting:
             conn['websocket'].send_json.assert_called_with(broadcast_message)
         print('[OK] Broadcasting to multiple clients successful')
 
-class TestWebSocketErrorHandling:
+class WebSocketErrorHandlingTests:
     """Test 5: Error handling and recovery"""
 
     @pytest.mark.asyncio
@@ -150,7 +150,7 @@ class TestWebSocketErrorHandling:
         websocket.send_json.assert_called_once()
         print('[OK] Error handling and recovery working')
 
-class TestWebSocketReconnection:
+class WebSocketReconnectionTests:
     """Test 6: Reconnection logic"""
 
     @pytest.mark.asyncio
@@ -170,7 +170,7 @@ class TestWebSocketReconnection:
         assert 'reconnect_user' in conn_manager.user_connections
         print('[OK] Reconnection logic working')
 
-class TestWebSocketRateLimiting:
+class WebSocketRateLimitingTests:
     """Test 7: Rate limiting enforcement"""
 
     @pytest.mark.asyncio
@@ -194,7 +194,7 @@ class TestWebSocketRateLimiting:
         assert rate_limited
         print('[OK] Rate limiting enforcement working')
 
-class TestWebSocketMessageOrdering:
+class WebSocketMessageOrderingTests:
     """Test 8: Message ordering guarantees"""
 
     @pytest.mark.asyncio
@@ -217,7 +217,7 @@ class TestWebSocketMessageOrdering:
             assert call[0][0]['sequence'] == i
         print('[OK] Message ordering guarantees working')
 
-class TestWebSocketBinaryMessages:
+class WebSocketBinaryMessagesTests:
     """Test 9: Binary message handling"""
 
     @pytest.mark.asyncio
@@ -233,7 +233,7 @@ class TestWebSocketBinaryMessages:
         websocket.send_bytes.assert_called_once_with(binary_data)
         print('[OK] Binary message handling working')
 
-class TestWebSocketConnectionCleanup:
+class WebSocketConnectionCleanupTests:
     """Test 10: Connection cleanup on disconnect"""
 
     @pytest.mark.asyncio
@@ -254,7 +254,7 @@ class TestWebSocketConnectionCleanup:
         assert connection_id not in conn_manager.connections
         print('[OK] Connection cleanup on disconnect working')
 
-class TestWebSocketMultiRoom:
+class WebSocketMultiRoomTests:
     """Test 11: Multi-room support"""
 
     @pytest.mark.asyncio
@@ -287,7 +287,7 @@ class TestWebSocketMultiRoom:
             conn['websocket'].send_json.assert_called_with(room_b_message)
         print('[OK] Multi-room support working')
 
-class TestWebSocketPerformance:
+class WebSocketPerformanceTests:
     """Test 12: Performance under load"""
 
     @pytest.mark.asyncio

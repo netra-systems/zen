@@ -35,7 +35,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestDatabaseManagerConnectivityViolations(SSotAsyncTestCase):
+class DatabaseManagerConnectivityViolationsTests(SSotAsyncTestCase):
     """Test suite to detect DatabaseManager connectivity violations."""
 
     async def test_database_manager_initialization_completeness(self):

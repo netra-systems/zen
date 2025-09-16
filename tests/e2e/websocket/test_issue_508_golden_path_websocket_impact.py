@@ -41,7 +41,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 @pytest.mark.e2e
-class TestIssue508GoldenPathWebSocketFailure(SSotAsyncTestCase):
+class Issue508GoldenPathWebSocketFailureTests(SSotAsyncTestCase):
     """
     Issue #508: Golden Path WebSocket Functionality Complete Failure Tests
     
@@ -180,7 +180,7 @@ class TestIssue508GoldenPathWebSocketFailure(SSotAsyncTestCase):
         assert "'URL' object has no attribute 'query_params'" in str(exc_info.value)
 
 @pytest.mark.e2e
-class TestIssue508GoldenPathBusinessScenarios(SSotAsyncTestCase):
+class Issue508GoldenPathBusinessScenariosTests(SSotAsyncTestCase):
     """
     Issue #508: Real business scenarios that fail completely due to the bug
     

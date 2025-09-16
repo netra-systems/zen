@@ -20,7 +20,7 @@ import pytest
 from sqlalchemy import text
 from netra_backend.tests.isolated_test_config import isolated_clickhouse, isolated_full_stack, isolated_postgres, isolated_test_config, with_database_snapshots, with_isolated_postgres
 
-class TestPostgreSQLIsolation:
+class PostgreSQLIsolationTests:
     """Test PostgreSQL database isolation functionality."""
 
     @pytest.mark.asyncio
@@ -72,7 +72,7 @@ class TestPostgreSQLIsolation:
         assert postgres_results['status'] in ['passed', 'warning']
         assert postgres_results['summary']['failed_checks'] == 0
 
-class TestClickHouseIsolation:
+class ClickHouseIsolationTests:
     """Test ClickHouse database isolation functionality."""
 
     @pytest.mark.asyncio
@@ -99,7 +99,7 @@ class TestClickHouseIsolation:
         level = result.result_rows[0][0]
         assert level == 'ERROR'
 
-class TestFullStackIsolation:
+class FullStackIsolationTests:
     """Test full database stack isolation (PostgreSQL + ClickHouse)."""
 
     @pytest.mark.asyncio
@@ -136,7 +136,7 @@ class TestFullStackIsolation:
         restored_count = result.scalar()
         assert restored_count == initial_count
 
-class TestPerformanceIsolation:
+class PerformanceIsolationTests:
     """Test performance scenarios with isolated databases."""
 
     @pytest.mark.asyncio
@@ -166,7 +166,7 @@ class TestPerformanceIsolation:
         results = await asyncio.gather(*tasks)
         assert all((count == 3 for count in results))
 
-class TestSnapshotSystem:
+class SnapshotSystemTests:
     """Test database snapshot system functionality."""
 
     @pytest.mark.asyncio
@@ -202,7 +202,7 @@ class TestSnapshotSystem:
         restored_count = result.scalar()
         assert restored_count < current_count
 
-class TestValidationSystem:
+class ValidationSystemTests:
     """Test database state validation system."""
 
     @pytest.mark.asyncio

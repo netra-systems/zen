@@ -67,7 +67,7 @@ from shared.types.core_types import (
 )
 
 
-class TestUnifiedIDManagerComprehensive:
+class UnifiedIDManagerComprehensiveTests:
     """Comprehensive test suite for UnifiedIDManager."""
     
     def setup_method(self):

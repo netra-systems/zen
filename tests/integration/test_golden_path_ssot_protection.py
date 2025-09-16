@@ -48,7 +48,7 @@ class GoldenPathValidation:
     details: Optional[Dict[str, Any]] = None
 
 @pytest.mark.integration
-class TestGoldenPathSSOTProtection(SSotAsyncTestCase):
+class GoldenPathSSOTProtectionTests(SSotAsyncTestCase):
     """
     MISSION CRITICAL: Test that SSOT compliance protects rather than breaks Golden Path.
     

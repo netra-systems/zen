@@ -24,7 +24,7 @@ from dev_launcher.config_validator import (
 )
 
 
-class TestConfigValidationResult:
+class ConfigValidationResultTests:
     """Test ConfigValidationResult model."""
     
     def test_valid_status_creation(self):
@@ -45,7 +45,7 @@ class TestConfigValidationResult:
         assert len(result.errors) == 1
 
 
-class TestValidationContext:
+class ValidationContextTests:
     """Test ValidationContext dataclass."""
     
     def test_context_creation(self):
@@ -57,7 +57,7 @@ class TestValidationContext:
         assert context.is_ci_environment is False
 
 
-class TestServiceConfigValidator:
+class ServiceConfigValidatorTests:
     """Test ServiceConfigValidator class."""
     
     @pytest.fixture
@@ -101,7 +101,7 @@ class TestServiceConfigValidator:
         assert result.config_age_days > 30
 
 
-class TestConfigDecisionEngine:
+class ConfigDecisionEngineTests:
     """Test ConfigDecisionEngine class."""
     
     @pytest.fixture
@@ -143,7 +143,7 @@ class TestConfigDecisionEngine:
         assert engine.should_prompt_user(result) is False
 
 
-class TestHelperFunctions:
+class HelperFunctionsTests:
     """Test helper functions."""
     
     def test_detect_ci_environment_with_ci(self):
@@ -162,7 +162,7 @@ class TestHelperFunctions:
         assert overrides['REDIS_HOST'] == 'localhost'
 
 
-class TestValidateServiceConfig:
+class ValidateServiceConfigTests:
     """Test main validation function."""
     
     @pytest.mark.asyncio

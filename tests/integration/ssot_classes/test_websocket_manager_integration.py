@@ -41,7 +41,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from shared.types.core_types import UserID, ThreadID, ConnectionID, WebSocketID, ensure_user_id, ensure_thread_id
 
 # WebSocketManager SSOT imports
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.unified_manager import (
     UnifiedWebSocketManager, 
     WebSocketConnection, 
@@ -103,7 +103,7 @@ class MockWebSocket:
 
 
 @pytest.mark.integration
-class TestWebSocketManagerIntegration(SSotAsyncTestCase):
+class WebSocketManagerIntegrationTests(SSotAsyncTestCase):
     """
     Comprehensive integration tests for WebSocketManager SSOT class.
     

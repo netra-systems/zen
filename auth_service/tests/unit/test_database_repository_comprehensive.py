@@ -14,7 +14,7 @@ from auth_service.auth_core.database.connection import auth_db
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAuthUserRepository:
+class AuthUserRepositoryTests:
     """Test AuthUserRepository database operations"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -226,7 +226,7 @@ class TestAuthUserRepository:
             assert locked_user.locked_until is not None
 
 
-class TestAuthSessionRepository:
+class AuthSessionRepositoryTests:
     """Test AuthSessionRepository database operations"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -365,7 +365,7 @@ class TestAuthSessionRepository:
             assert expired is None
 
 
-class TestAuthAuditRepository:
+class AuthAuditRepositoryTests:
     """Test AuthAuditRepository database operations"""
     
     @pytest_asyncio.fixture(autouse=True)

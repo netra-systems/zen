@@ -25,7 +25,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 
-class TestStagingMessagesAPIAuthE2E(SSotAsyncTestCase):
+class StagingMessagesAPIAuthE2ETests(SSotAsyncTestCase):
     """
     E2E tests for staging messages API authentication - Issue #1234 reproduction.
     

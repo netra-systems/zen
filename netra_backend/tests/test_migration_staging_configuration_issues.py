@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 from netra_backend.app.db.migration_utils import _get_alembic_ini_path, create_alembic_config, create_alembic_config_with_fallback
 
-class TestMigrationConfigurationStagingFailures:
+class MigrationConfigurationStagingFailuresTests:
     """Test migration configuration failures in staging environment."""
 
     def test_alembic_ini_path_resolution_works_with_fallbacks(self):
@@ -145,7 +145,7 @@ class TestMigrationConfigurationStagingFailures:
                     else:
                         raise
 
-class TestMigrationConfigurationEdgeCases:
+class MigrationConfigurationEdgeCasesTests:
     """Test edge cases related to migration configuration issues."""
 
     def test_relative_vs_absolute_path_resolution_fails(self):

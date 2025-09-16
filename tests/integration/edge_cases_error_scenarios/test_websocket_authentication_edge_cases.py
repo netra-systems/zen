@@ -27,7 +27,7 @@ from test_framework.real_services import get_real_services
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketAuthenticationEdgeCases(BaseIntegrationTest):
+class WebSocketAuthenticationEdgeCasesTests(BaseIntegrationTest):
     """Test WebSocket authentication edge cases and security scenarios."""
     
     @pytest.mark.integration

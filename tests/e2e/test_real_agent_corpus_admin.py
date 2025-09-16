@@ -227,7 +227,7 @@ async def corpus_admin_tester(request):
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestRealAgentCorpusAdmin:
+class RealAgentCorpusAdminTests:
     """Test suite for real corpus admin agent execution."""
 
     async def test_document_organization_flow(self, corpus_admin_tester):

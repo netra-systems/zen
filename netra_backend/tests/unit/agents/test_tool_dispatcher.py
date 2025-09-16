@@ -53,7 +53,7 @@ class MockUserExecutionContext:
         self.correlation_id = str(uuid4())
 
 
-class TestToolDispatcher(SSotAsyncTestCase):
+class ToolDispatcherTests(SSotAsyncTestCase):
     """Unit tests for ToolDispatcher - Public API facade for tool dispatching."""
 
     def setup_method(self, method=None):

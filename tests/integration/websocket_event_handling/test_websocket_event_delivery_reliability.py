@@ -25,7 +25,7 @@ from test_framework.ssot.websocket import (
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketEventDeliveryReliability(SSotAsyncTestCase):
+class WebSocketEventDeliveryReliabilityTests(SSotAsyncTestCase):
     """Test WebSocket event delivery reliability patterns."""
     
     async def setup_method(self, method=None):

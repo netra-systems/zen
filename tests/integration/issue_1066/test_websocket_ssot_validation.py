@@ -31,7 +31,7 @@ sys.path.insert(0, str(project_root))
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestWebSocketSSotValidation(BaseIntegrationTest):
+class WebSocketSSotValidationTests(BaseIntegrationTest):
     """Integration tests for WebSocket SSOT pattern validation."""
 
     def setup_method(self):
@@ -65,7 +65,7 @@ class TestWebSocketSSotValidation(BaseIntegrationTest):
         """
         try:
             # Import SSOT components
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
 
             # Create test user context following SSOT pattern
@@ -101,7 +101,7 @@ class TestWebSocketSSotValidation(BaseIntegrationTest):
         This is essential for enterprise compliance and security.
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
 
             # Create two different user contexts
@@ -146,7 +146,7 @@ class TestWebSocketSSotValidation(BaseIntegrationTest):
         CRITICAL: Validates that events sent through SSOT pattern reach only the intended user.
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
 
             # Create user context and manager
@@ -286,7 +286,7 @@ class TestWebSocketSSotValidation(BaseIntegrationTest):
         in multi-user scenarios.
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
 
             # Create multiple user contexts concurrently
@@ -340,7 +340,7 @@ class TestWebSocketSSotValidation(BaseIntegrationTest):
         between users.
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
 
             # Create two managers
@@ -379,7 +379,7 @@ class TestWebSocketSSotValidation(BaseIntegrationTest):
             pytest.fail(f"Memory isolation test failed: {e}")
 
 
-class TestSSotWebSocketDeprecationTransition:
+class SSotWebSocketDeprecationTransitionTests:
     """Test the transition period behavior during SSOT migration."""
 
     @pytest.mark.integration
@@ -436,7 +436,7 @@ class TestSSotWebSocketDeprecationTransition:
         """
         try:
             # CANONICAL SSOT IMPORT (preferred)
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
 
             user_context = UserExecutionContextFactory.create_test_context()

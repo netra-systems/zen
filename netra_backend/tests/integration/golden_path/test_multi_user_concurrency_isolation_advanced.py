@@ -49,7 +49,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.agents.supervisor.user_execution_engine import create_request_scoped_engine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.models.agent_execution import AgentExecution
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.execution_types import AgentExecutionState
@@ -97,7 +97,7 @@ class UserTestSession:
             self.performance_metrics = {}
 
 
-class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
+class AdvancedMultiUserConcurrencyIsolationTests(BaseIntegrationTest):
     """Advanced integration tests for multi-user concurrency and isolation."""
 
     @pytest.mark.asyncio

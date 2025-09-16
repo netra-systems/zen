@@ -83,7 +83,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.integration
-class TestDatabaseManagerBusinessCriticalRevenue(SSotBaseTestCase):
+class DatabaseManagerBusinessCriticalRevenueTests(SSotBaseTestCase):
     """
     Test business-critical revenue-impacting database scenarios.
     

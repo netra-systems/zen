@@ -20,7 +20,7 @@ from netra_backend.app.config import get_config
 
 from netra_backend.app.services.session_service import SessionService
 
-class TestSessionValidationL3:
+class SessionValidationL3Tests:
     """Test session validation scenarios"""
 
     @pytest.mark.asyncio

@@ -13,7 +13,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.integration
-class TestPytestMarkerSystemIssue272(SSotBaseTestCase):
+class PytestMarkerSystemIssue272Tests(SSotBaseTestCase):
     """Integration tests for pytest marker collection system"""
     
     def test_strict_marker_enforcement_blocks_collection(self):

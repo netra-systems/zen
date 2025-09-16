@@ -58,7 +58,7 @@ from shared.types.core_types import UserID, ConnectionID, ensure_user_id
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
+class AdvancedStateTransitionsAuthTests(SSotBaseTestCase):
     """
     Advanced unit tests for WebSocket state machine authentication integration.
     

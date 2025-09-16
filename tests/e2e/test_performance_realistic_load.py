@@ -44,7 +44,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestPerformanceRealisticLoad(SSotBaseTestCase):
+class PerformanceRealisticLoadTests(SSotBaseTestCase):
     """
     E2E tests for performance under realistic load conditions.
     Tests complete system performance with concurrent users and realistic usage patterns.

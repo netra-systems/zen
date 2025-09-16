@@ -50,7 +50,7 @@ from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAgentMessageProcessingPipeline(SSotAsyncTestCase):
+class AgentMessageProcessingPipelineTests(SSotAsyncTestCase):
     """Unit tests for agent message processing pipeline."""
 
     def setup_method(self, method):

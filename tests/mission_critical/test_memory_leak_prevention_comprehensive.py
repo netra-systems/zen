@@ -78,7 +78,7 @@ from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 from netra_backend.app.services.circuit_breaker import CircuitBreaker, CircuitBreakerConfig
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
@@ -1126,7 +1126,7 @@ async def test_garbage_collection_effectiveness(memory_profiler):
 # AUTHENTICATION FLOW VALIDATION TESTS
 # ============================================================================
 
-class TestAuthenticationFlowMemoryManagement:
+class AuthenticationFlowMemoryManagementTests:
     """Test authentication flows under memory stress to prevent leaks during user journeys."""
     
     @pytest.fixture(autouse=True)
@@ -1602,7 +1602,7 @@ class TestAuthenticationFlowMemoryManagement:
 # USER JOURNEY TESTING UNDER MEMORY CONSTRAINTS
 # ============================================================================
 
-class TestUserJourneyMemoryOptimization:
+class UserJourneyMemoryOptimizationTests:
     """Test complete user journeys under memory constraints to ensure optimal performance."""
     
     @pytest.fixture(autouse=True)  
@@ -2031,7 +2031,7 @@ class TestUserJourneyMemoryOptimization:
 # PERFORMANCE UNDER LOAD WITH AUTHENTICATION
 # ============================================================================
 
-class TestAuthenticationPerformanceUnderLoad:
+class AuthenticationPerformanceUnderLoadTests:
     """Test authentication and user journey performance under extreme load."""
     
     @pytest.fixture(autouse=True)

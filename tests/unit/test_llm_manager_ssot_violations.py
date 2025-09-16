@@ -35,7 +35,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestLLMManagerSSOTViolations(SSotBaseTestCase):
+class LLMManagerSSOTViolationsTests(SSotBaseTestCase):
     """Test 1: SSOT Violation Detection - Static analysis for violation patterns"""
     
     def test_detect_llm_manager_violations(self):

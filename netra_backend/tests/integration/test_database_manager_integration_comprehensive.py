@@ -59,7 +59,7 @@ from test_framework.isolated_environment_fixtures import isolated_env
 from test_framework.real_services_test_fixtures import real_services_fixture
 logger = logging.getLogger(__name__)
 
-class TestDatabaseManagerIntegrationComprehensive(BaseIntegrationTest):
+class DatabaseManagerIntegrationComprehensiveTests(BaseIntegrationTest):
     """Comprehensive integration test suite for DatabaseManager with real database connections."""
 
     def setup_method(self):

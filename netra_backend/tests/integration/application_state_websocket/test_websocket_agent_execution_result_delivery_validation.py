@@ -98,7 +98,7 @@ class ResultDeliveryValidator:
         validation['delivery_quality'] = 'excellent' if validation['overall_score'] >= 90 else 'good' if validation['overall_score'] >= 70 else 'acceptable' if validation['overall_score'] >= 50 else 'needs_improvement'
         return validation
 
-class TestWebSocketAgentExecutionResultDeliveryValidation(BaseIntegrationTest):
+class WebSocketAgentExecutionResultDeliveryValidationTests(BaseIntegrationTest):
 
     def setup_method(self):
         super().setup_method()

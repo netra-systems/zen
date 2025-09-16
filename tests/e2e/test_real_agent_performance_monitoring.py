@@ -328,7 +328,7 @@ async def performance_monitoring_tester(request):
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestRealAgentPerformanceMonitoring:
+class RealAgentPerformanceMonitoringTests:
     """Test suite for real agent performance monitoring."""
 
     async def test_baseline_performance_measurement(self, performance_monitoring_tester):

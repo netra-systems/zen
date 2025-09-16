@@ -25,7 +25,7 @@ from test_framework.ssot.service_independent_test_base import (
 from test_framework.ssot.hybrid_execution_manager import ExecutionMode
 
 
-class TestIssue862FixesValidation:
+class Issue862FixesValidationTests:
     """Validate that Issue #862 fixes resolve all critical bugs."""
     
     def test_service_independent_test_initialization_fixed(self):
@@ -168,7 +168,7 @@ class TestIssue862FixesValidation:
             print("✅ Fix validated: assert_business_value_delivered works (assertion logic is functional)")
             
 
-class TestIssue862BeforeAfterComparison:
+class Issue862BeforeAfterComparisonTests:
     """
     Compare behavior before and after the Issue #862 fix.
     
@@ -237,7 +237,7 @@ class TestIssue862BeforeAfterComparison:
         print("🎉 Issue #862 fix successful: All AttributeError issues resolved!")
 
 
-class TestIssue862PytestCollectionValidation:
+class Issue862PytestCollectionValidationTests:
     """
     Validate that pytest collection works properly after the fix.
     

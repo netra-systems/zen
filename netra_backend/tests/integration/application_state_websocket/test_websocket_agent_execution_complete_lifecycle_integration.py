@@ -140,7 +140,7 @@ class WebSocketEventCollector:
                     validation['business_value_indicators']['has_technical_analysis'] = 'technical_analysis' in result
         return validation
 
-class TestWebSocketAgentExecutionCompleteLifecycleIntegration(BaseIntegrationTest):
+class WebSocketAgentExecutionCompleteLifecycleIntegrationTests(BaseIntegrationTest):
     """Integration test for complete agent execution lifecycle with WebSocket events."""
 
     def setup_method(self):

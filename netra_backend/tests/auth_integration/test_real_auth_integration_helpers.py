@@ -6,7 +6,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from typing import Any, Dict, List, Optional
 import pytest
 
-class TestRealAuthIntegrationHelpers:
+class RealAuthIntegrationHelpersTests:
     """Test class for real_auth_integration_helpers"""
 
     def setup_method(self):

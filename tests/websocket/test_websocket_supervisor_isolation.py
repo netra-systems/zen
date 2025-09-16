@@ -32,7 +32,7 @@ import websockets
 from netra_backend.app.websocket_core.context import WebSocketContext
 from netra_backend.app.websocket_core.supervisor_factory import get_websocket_scoped_supervisor
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType, WebSocketConnectionState, ConnectionInfo
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.db.database_manager import DatabaseManager
 from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, E2EAuthConfig
@@ -41,7 +41,7 @@ from test_framework.database.database_fixtures import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 @pytest.mark.websocket
-class TestWebSocketSupervisorIsolation(SSotBaseTestCase):
+class WebSocketSupervisorIsolationTests(SSotBaseTestCase):
     """
     Comprehensive tests for WebSocket supervisor isolation using REAL services.
     

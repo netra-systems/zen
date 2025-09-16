@@ -17,7 +17,7 @@ Usage:
     python -m pytest tests/e2e/test_gcp_deployment_requirements.py -v
 
     # Run specific requirement tests
-    python -m pytest tests/e2e/test_gcp_deployment_requirements.py::TestWebSocketSupport -v
+    python -m pytest tests/e2e/test_gcp_deployment_requirements.py::WebSocketSupportTests -v
     
     # Run with staging environment
     pytest tests/e2e/test_gcp_deployment_requirements.py --env=staging -v
@@ -39,7 +39,7 @@ sys.path.insert(0, str(project_root))
 from test_framework.environment_markers import env
 from test_framework.base_e2e_test import BaseE2ETest
 
-class TestGCPDeploymentRequirementsBase(BaseE2ETest):
+class GCPDeploymentRequirementsBaseTests(BaseE2ETest):
     """Base class for GCP deployment requirement tests."""
 
     @classmethod
@@ -53,7 +53,7 @@ class TestGCPDeploymentRequirementsBase(BaseE2ETest):
         cls.ssl_context.verify_mode = ssl.CERT_REQUIRED
 
 @env('staging', 'prod')
-class TestBackendProtocolHTTPS(GCPDeploymentRequirementsTestBase):
+class BackendProtocolHTTPSTests(GCPDeploymentRequirementsTestBase):
     """Test Requirement 1: Load Balancer Backend Protocol must be HTTPS."""
 
     @pytest.mark.e2e
@@ -97,7 +97,7 @@ class TestBackendProtocolHTTPS(GCPDeploymentRequirementsTestBase):
                     print(f'[WARN] {service_name}: HTTP not accessible (acceptable - HTTPS-only configuration)')
 
 @env('staging', 'prod')
-class TestWebSocketSupport(GCPDeploymentRequirementsTestBase):
+class WebSocketSupportTests(GCPDeploymentRequirementsTestBase):
     """Test Requirement 2: WebSocket Support with 3600s timeout and session affinity."""
 
     @pytest.mark.e2e
@@ -177,7 +177,7 @@ class TestWebSocketSupport(GCPDeploymentRequirementsTestBase):
                 print(f'[WARN] WebSocket upgrade test inconclusive: {e}')
 
 @env('staging', 'prod')
-class TestProtocolHeaders(GCPDeploymentRequirementsTestBase):
+class ProtocolHeadersTests(GCPDeploymentRequirementsTestBase):
     """Test Requirement 3: Protocol Headers - X-Forwarded-Proto preservation."""
 
     @pytest.mark.e2e
@@ -223,7 +223,7 @@ class TestProtocolHeaders(GCPDeploymentRequirementsTestBase):
                 print(f'[WARN] Secure cookie test inconclusive for auth service: {e}')
 
 @env('staging', 'prod')
-class TestHTTPSHealthChecks(GCPDeploymentRequirementsTestBase):
+class HTTPSHealthChecksTests(GCPDeploymentRequirementsTestBase):
     """Test Requirement 4: Health Checks use HTTPS protocol with port 443."""
 
     @pytest.mark.e2e
@@ -264,7 +264,7 @@ class TestHTTPSHealthChecks(GCPDeploymentRequirementsTestBase):
                     print(f'[WARN] {service_name}: Health check error (may be expected): {e}')
 
 @env('staging', 'prod')
-class TestCORSConfiguration(GCPDeploymentRequirementsTestBase):
+class CORSConfigurationTests(GCPDeploymentRequirementsTestBase):
     """Test Requirement 5: CORS - HTTPS-only origins."""
 
     @pytest.mark.e2e
@@ -307,7 +307,7 @@ class TestCORSConfiguration(GCPDeploymentRequirementsTestBase):
                 print(f'[WARN] CORS actual request test inconclusive: {e}')
 
 @env('staging', 'prod')
-class TestCloudRunIngress(GCPDeploymentRequirementsTestBase):
+class CloudRunIngressTests(GCPDeploymentRequirementsTestBase):
     """Test Requirement 6: Cloud Run Ingress 'all' with FORCE_HTTPS=true."""
 
     @pytest.mark.e2e
@@ -366,7 +366,7 @@ class TestCloudRunIngress(GCPDeploymentRequirementsTestBase):
             pytest.fail(f'WebSocket external access test failed: {e}')
 
 @env('staging', 'prod')
-class TestOverallDeploymentRequirements(GCPDeploymentRequirementsTestBase):
+class OverallDeploymentRequirementsTests(GCPDeploymentRequirementsTestBase):
     """Integration test for all deployment requirements working together."""
 
     @pytest.mark.e2e

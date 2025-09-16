@@ -32,7 +32,7 @@ import asyncio
 import time
 import os
 from typing import Dict, Any, Optional
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -45,7 +45,7 @@ from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.services.agent_service import get_agent_service
 from shared.isolated_environment import get_env
 
-class TestStartupDependencies:
+class StartupDependenciesTests:
     """Test startup dependency handling that currently fails."""
 
     @pytest.mark.asyncio

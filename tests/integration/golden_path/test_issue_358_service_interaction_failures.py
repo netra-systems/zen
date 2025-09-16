@@ -48,7 +48,7 @@ try:
         UserExecutionContext,
         UserContextManager
     )
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 except ImportError as e:
     pytest.skip(f"Required service imports not available: {e}", allow_module_level=True)
@@ -57,7 +57,7 @@ except ImportError as e:
 logger = logging.getLogger(__name__)
 
 
-class TestIssue358ServiceInteractionFailures(SSotAsyncTestCase):
+class Issue358ServiceInteractionFailuresTests(SSotAsyncTestCase):
     """
     Integration tests for Issue #358 service interaction failures.
     

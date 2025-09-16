@@ -17,7 +17,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from unittest.mock import MagicMock
 
-class TestPhase2ModernSsotInterfaceValidation(SSotAsyncTestCase):
+class Phase2ModernSsotInterfaceValidationTests(SSotAsyncTestCase):
     """
     Phase 2: Validate modern SSOT interface works correctly
     These tests should pass, demonstrating modern patterns are functional.

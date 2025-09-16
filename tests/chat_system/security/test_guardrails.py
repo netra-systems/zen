@@ -13,7 +13,7 @@ from netra_backend.app.guardrails.input_filters import InputFilters
 from netra_backend.app.guardrails.output_validators import OutputValidators
 
 
-class TestInputFilters:
+class InputFiltersTests:
     """Test input filtering security."""
     
     @pytest.fixture
@@ -68,7 +68,7 @@ class TestInputFilters:
         assert filters.is_safe(warnings)
 
 
-class TestOutputValidators:
+class OutputValidatorsTests:
     """Test output validation security."""
     
     @pytest.fixture

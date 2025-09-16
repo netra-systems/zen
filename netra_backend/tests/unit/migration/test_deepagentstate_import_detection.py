@@ -17,7 +17,7 @@ import unittest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestDeepAgentStateMigrationDetection(SSotAsyncTestCase):
+class DeepAgentStateMigrationDetectionTests(SSotAsyncTestCase):
     """
     Migration validation test for DeepAgentState  ->  UserExecutionContext
     

@@ -26,7 +26,7 @@ from netra_backend.app.services.agent_websocket_bridge import (
 )
 
 
-class TestAgentWebSocketBridgeCore:
+class AgentWebSocketBridgeCoreTests:
     """Unit tests for core AgentWebSocketBridge functionality."""
     
     @pytest.fixture
@@ -219,7 +219,7 @@ class TestAgentWebSocketBridgeCore:
         assert "uptime_seconds" in metrics_dict
 
 
-class TestAgentWebSocketBridgeRecovery:
+class AgentWebSocketBridgeRecoveryTests:
     """Unit tests for AgentWebSocketBridge recovery mechanisms."""
     
     @pytest.fixture

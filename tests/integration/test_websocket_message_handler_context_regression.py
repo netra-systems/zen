@@ -46,7 +46,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 # Removed unnecessary import - test uses mock data instead of real auth for message handler testing
 
 
-class TestWebSocketMessageHandlerContextRegression:
+class WebSocketMessageHandlerContextRegressionTests:
     """Integration tests for WebSocket message handler context regression prevention.
     
     Tests the CRITICAL regression where message handlers incorrectly create new contexts

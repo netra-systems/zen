@@ -26,7 +26,7 @@ from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.core.environment_context.cloud_environment_detector import CloudEnvironmentDetector, EnvironmentContext, EnvironmentType, CloudPlatform
 
-class TestCloudEnvironmentDetectorConfidenceFailure(SSotAsyncTestCase):
+class CloudEnvironmentDetectorConfidenceFailureTests(SSotAsyncTestCase):
     """
     Tests designed to reproduce the CloudEnvironmentDetector confidence failure.
     

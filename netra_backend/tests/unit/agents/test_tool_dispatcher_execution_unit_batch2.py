@@ -31,7 +31,7 @@ from netra_backend.app.schemas.tool import (
 )
 
 
-class TestToolExecutionEngineUnit(SSotBaseTestCase):
+class ToolExecutionEngineUnitTests(SSotBaseTestCase):
     """Unit tests for tool execution engine."""
     
     def setup_method(self, method):
@@ -223,7 +223,7 @@ class TestToolExecutionEngineUnit(SSotBaseTestCase):
         self.record_metric("error_response_conversion", "validated")
 
 
-class TestToolExecutionEngineInterface(SSotBaseTestCase):
+class ToolExecutionEngineInterfaceTests(SSotBaseTestCase):
     """Unit tests for tool execution engine interface compliance."""
     
     def setup_method(self, method):

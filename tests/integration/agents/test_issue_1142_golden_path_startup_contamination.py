@@ -48,6 +48,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
     create_agent_instance_factory
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
+from shared.id_generation import UnifiedIdGenerator
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassRegistry
@@ -55,7 +56,7 @@ from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmi
 
 
 @pytest.mark.integration
-class TestIssue1142GoldenPathStartupContamination(SSotAsyncTestCase):
+class Issue1142GoldenPathStartupContaminationTests(SSotAsyncTestCase):
     """
     Integration tests proving startup contamination blocks golden path.
 
@@ -132,10 +133,15 @@ class TestIssue1142GoldenPathStartupContamination(SSotAsyncTestCase):
             """Execute complete golden path for a user."""
             print(f"👤 Golden Path User {user_id} starting execution...")
 
-            # Step 1: User requests agent factory (gets contaminated singleton)
-            user_factory = get_agent_instance_factory()
+            # Step 1: Create user execution context for SSOT factory pattern
+            user_context = UserExecutionContext(
+                user_id=user_id,
+                thread_id=thread_id,
+                run_id=run_id
+            )
 
-            # Step 2: Create user execution context
+            # Step 2: Create isolated agent factory using SSOT pattern (prevents contamination)
+            user_factory = create_agent_instance_factory(user_context)
             user_context = await user_factory.create_user_execution_context(
                 user_id=user_id,
                 thread_id=thread_id,

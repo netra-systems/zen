@@ -32,7 +32,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
+class CompleteAgentOptimizationWorkflowTests(SSotBaseTestCase):
     """
     E2E tests for complete agent optimization workflows.
     Tests the full business journey from user request to optimization recommendations.

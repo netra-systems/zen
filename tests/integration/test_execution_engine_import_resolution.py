@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestExecutionEngineImportResolution(SSotAsyncTestCase):
+class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
     """Integration tests for ExecutionEngine import resolution and initialization.
     
     Tests the real runtime behavior of ExecutionEngine imports and user isolation

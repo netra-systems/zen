@@ -24,12 +24,12 @@ from typing import Dict, Any, List
 from fastapi import WebSocket
 from netra_backend.app.websocket_core.handlers import MessageRouter, get_message_router
 from netra_backend.app.websocket_core.types import MessageType, LEGACY_MESSAGE_TYPE_MAP, normalize_message_type, create_standard_message, WebSocketMessage
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
 from test_framework.database.test_database_manager import DatabaseTestManager
 
 @pytest.mark.integration
-class TestMessageRouterLegacyMappingIntegration:
+class MessageRouterLegacyMappingIntegrationTests:
     """
     Integration tests for MessageRouter legacy type mapping with real service integration.
     
@@ -191,7 +191,7 @@ class TestMessageRouterLegacyMappingIntegration:
             print(f"     {target}: {len(sources)} sources -> {sources[:3]}{('...' if len(sources) > 3 else '')}")
 
 @pytest.mark.integration
-class TestMessageRouterServiceIntegration:
+class MessageRouterServiceIntegrationTests:
     """
     Integration tests for MessageRouter with external service dependencies.
     

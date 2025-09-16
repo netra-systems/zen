@@ -61,7 +61,7 @@ GOLDEN_PATH_SLA = {
 }
 
 
-class TestGoldenPathCompleteFlow(SSotAsyncTestCase):
+class GoldenPathCompleteFlowTests(SSotAsyncTestCase):
     """
     Complete Golden Path E2E Test Suite
     

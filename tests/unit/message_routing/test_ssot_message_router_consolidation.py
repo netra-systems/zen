@@ -64,14 +64,14 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDisp
 from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
 
 # WebSocket manager imports
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestSSOTMessageRouterConsolidation(SSotAsyncTestCase):
+class SSOTMessageRouterConsolidationTests(SSotAsyncTestCase):
     """Test suite for SSOT Message Router consolidation validation.
 
     These tests validate that SSOT consolidation works properly and that
@@ -257,14 +257,14 @@ class TestSSOTMessageRouterConsolidation(SSotAsyncTestCase):
         initial_count = len(router1.handlers)
 
         # Create a test handler
-        class TestHandler:
+        class HandlerTests:
             def can_handle(self, message_type):
                 return message_type == MessageType.PING
 
             async def handle_message(self, user_id, websocket, message):
                 return True
 
-        test_handler = TestHandler()
+        test_handler = HandlerTests()
         router1.add_handler(test_handler)
 
         # Verify handler was added
@@ -350,7 +350,7 @@ class TestSSOTMessageRouterConsolidation(SSotAsyncTestCase):
                         "UnifiedToolDispatcher import must resolve to SSOT module")
 
         # Test WebSocketManager import resolution
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as ImportedManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as ImportedManager
 
         self.assertEqual(ImportedManager.__module__, "netra_backend.app.websocket_core.websocket_manager",
                         "WebSocketManager import must resolve to SSOT module")

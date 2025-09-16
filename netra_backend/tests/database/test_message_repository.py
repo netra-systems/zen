@@ -23,7 +23,7 @@ from netra_backend.app.schemas import Message, MessageType
 
 from netra_backend.app.services.database.message_repository import MessageRepository
 
-class TestMessageRepositoryQueries:
+class MessageRepositoryQueriesTests:
     """test_message_repository_queries - Test message queries and pagination"""
 
     @pytest.mark.asyncio

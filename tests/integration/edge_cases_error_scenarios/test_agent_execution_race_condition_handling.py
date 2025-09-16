@@ -25,7 +25,7 @@ from test_framework.real_services import get_real_services
 logger = logging.getLogger(__name__)
 
 
-class TestAgentExecutionRaceConditionHandling(BaseIntegrationTest):
+class AgentExecutionRaceConditionHandlingTests(BaseIntegrationTest):
     """Test race condition handling in agent execution scenarios."""
     
     @pytest.mark.integration

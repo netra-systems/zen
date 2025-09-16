@@ -40,7 +40,7 @@ import pytest
 from loguru import logger
 
 # Import the improved components
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.manager import WebSocketHeartbeatManager, HeartbeatConfig
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from shared.types.core_types import AgentExecutionContext
@@ -199,7 +199,7 @@ class RobustnessValidator:
 # CORE ROBUSTNESS PROOF TESTS
 # ============================================================================
 
-class TestWebSocketRobustnessProof:
+class WebSocketRobustnessProofTests:
     """Standalone tests proving WebSocket robustness improvements."""
     
     @pytest.fixture(autouse=True)
@@ -642,7 +642,7 @@ async def test_comprehensive_robustness_audit():
     """Run comprehensive audit of all WebSocket robustness improvements."""
     logger.info("[U+1F680] Starting Comprehensive WebSocket Robustness Audit")
     
-    test_suite = TestWebSocketRobustnessProof()
+    test_suite = WebSocketRobustnessProofTests()
     await test_suite.setup_standalone_test()
     
     # Run all robustness tests

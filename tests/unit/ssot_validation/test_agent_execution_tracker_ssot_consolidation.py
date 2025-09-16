@@ -17,7 +17,7 @@ from unittest.mock import Mock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestAgentExecutionTrackerSSOTConsolidation(SSotBaseTestCase):
+class AgentExecutionTrackerSSOTConsolidationTests(SSotBaseTestCase):
     """
     SSOT validation tests for AgentExecutionTracker consolidation.
     

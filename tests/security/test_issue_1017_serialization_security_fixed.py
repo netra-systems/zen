@@ -40,7 +40,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState, AgentMetadata
 from netra_backend.app.models.agent_execution import AgentExecution
 
 
-class TestIssue1017SerializationSecurityFixed(SSotBaseTestCase, unittest.TestCase):
+class Issue1017SerializationSecurityFixedTests(SSotBaseTestCase, unittest.TestCase):
     """
     FIXED VERSION: Comprehensive serialization security vulnerability tests for Issue #1017.
 

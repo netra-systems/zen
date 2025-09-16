@@ -89,7 +89,7 @@ class BusinessFailureMetrics:
             self.critical_user_workflows_blocked = []
 
 
-class TestIssue358BusinessImpactValidation(SSotAsyncTestCase):
+class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
     """
     Mission critical tests for Issue #358 business impact validation.
     

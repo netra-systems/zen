@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 
-class TestExecutionEngineSSotEnforcement(SSotBaseTestCase):
+class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
     """Validates ExecutionEngine SSOT compliance and prevents legacy adapter usage."""
 
     def setUp(self):

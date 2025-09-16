@@ -46,7 +46,7 @@ from tests.e2e.integration.websocket_message_format_validators import (
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestWebSocketMessageFormatValidation:
+class WebSocketMessageFormatValidationTests:
     """Test #7: WebSocket Message Format Validation - P0 CRITICAL"""
     
     @pytest.fixture

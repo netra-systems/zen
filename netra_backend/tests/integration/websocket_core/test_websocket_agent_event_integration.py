@@ -25,7 +25,7 @@ from shared.types.core_types import WebSocketEventType, UserID, ThreadID, Reques
 from test_framework.ssot.websocket import WebSocketTestUtility, WebSocketEventType as TestEventType
 
 # Import production WebSocket components - NO MOCKS per CLAUDE.md
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, create_agent_websocket_bridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -60,7 +60,7 @@ async def real_websocket_manager():
 
 
 @pytest.mark.integration
-class TestRealWebSocketAgentEvents:
+class RealWebSocketAgentEventsTests:
     """Integration tests for real WebSocket agent event delivery."""
     
     @pytest.mark.asyncio
@@ -380,7 +380,7 @@ class TestRealWebSocketAgentEvents:
 
 
 @pytest.mark.integration
-class TestWebSocketAgentRegistryIntegration:
+class WebSocketAgentRegistryIntegrationTests:
     """Integration tests for WebSocket integration with AgentRegistry."""
     
     @pytest.mark.asyncio

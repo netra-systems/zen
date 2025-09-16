@@ -33,7 +33,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestIssue1181DeprecatedImportMigrationIntegration(SSotAsyncTestCase):
+class Issue1181DeprecatedImportMigrationIntegrationTests(SSotAsyncTestCase):
     """Integration test suite for deprecated import migration validation."""
     
     def setUp(self):

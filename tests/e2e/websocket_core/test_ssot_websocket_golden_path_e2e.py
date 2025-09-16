@@ -35,7 +35,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestWebSocketSSOTGoldenPathE2E(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketSSOTGoldenPathE2ETests(SSotAsyncTestCase, unittest.TestCase):
     """E2E tests for WebSocket SSOT Golden Path on GCP staging."""
 
     def setup_method(self, method):
@@ -65,7 +65,8 @@ class TestWebSocketSSOTGoldenPathE2E(SSotAsyncTestCase, unittest.TestCase):
             }
         ]
         
-        logger.info(f"Starting E2E staging test: {method.__name__}")
+        method_name = method.__name__ if method else "unknown_method"
+        logger.info(f"Starting E2E staging test: {method_name}")
 
     def teardown_method(self, method):
         """Clean up E2E test environment."""
@@ -385,13 +386,14 @@ class TestWebSocketSSOTGoldenPathE2E(SSotAsyncTestCase, unittest.TestCase):
                    f"{len(successful_operations)} successful, {len(failed_operations)} failed")
 
 
-class TestWebSocketSSOTStagingRaceConditionPrevention(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketSSOTStagingRaceConditionPreventionTests(SSotAsyncTestCase, unittest.TestCase):
     """Test WebSocket race condition prevention on GCP staging."""
 
     def setup_method(self, method):
         """Set up race condition prevention tests."""
         super().setup_method(method)
-        logger.info(f"Starting race condition prevention test: {method.__name__}")
+        method_name = method.__name__ if method else "unknown_method"
+        logger.info(f"Starting race condition prevention test: {method_name}")
 
     async def test_websocket_handshake_race_condition_prevention(self):
         """Test WebSocket handshake race condition prevention on staging."""

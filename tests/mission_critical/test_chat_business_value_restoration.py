@@ -129,7 +129,7 @@ class WebSocketEventCapture:
 @pytest.mark.mission_critical
 @pytest.mark.e2e
 @pytest.mark.authenticated
-class TestChatBusinessValueRestoration(SSotBaseTestCase):
+class ChatBusinessValueRestorationTests(SSotBaseTestCase):
     """
     Mission critical tests for chat business value restoration.
     

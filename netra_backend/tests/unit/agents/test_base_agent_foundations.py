@@ -37,7 +37,7 @@ from typing import Dict, Any, Optional, List
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
 # Minimal imports to avoid configuration system issues
-class TestBaseAgent:
+class BaseAgentTests:
     """Foundation unit tests for BaseAgent class with lightweight dependencies."""
 
     def setup_method(self, method):
@@ -275,7 +275,7 @@ class TestBaseAgent:
             assert callable(getattr(agent, method_name))
 
 
-class TestBaseAgentFactoryPatterns:
+class BaseAgentFactoryPatternsTests:
     """Test BaseAgent factory patterns and user isolation."""
 
     def setup_method(self, method):

@@ -69,7 +69,7 @@ class FactorySsotAnalysis:
     compliance_score: float = 0.0
 
 
-class TestFactorySsotCompliance(SSotBaseTestCase):
+class FactorySsotComplianceTests(SSotBaseTestCase):
     """
     Factory SSOT compliance baseline test suite.
 

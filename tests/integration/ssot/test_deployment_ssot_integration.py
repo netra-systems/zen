@@ -36,7 +36,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
-class TestDeploymentSsotIntegration(SSotBaseTestCase):
+class DeploymentSsotIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for deployment SSOT compliance.
     
@@ -258,7 +258,7 @@ class TestDeploymentSsotIntegration(SSotBaseTestCase):
         return changed_keys / len(total_keys)
 
 @pytest.mark.integration
-class TestDeploymentSsotIntegrationEdgeCases(SSotBaseTestCase):
+class DeploymentSsotIntegrationEdgeCasesTests(SSotBaseTestCase):
     """
     Edge case tests for deployment SSOT integration.
     """

@@ -29,7 +29,7 @@ from netra_backend.app.websocket_core.unified_websocket_auth import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestUnifiedWebSocketAuthBusinessLogic:
+class UnifiedWebSocketAuthBusinessLogicTests:
     """Test WebSocket authentication business logic patterns."""
     
     @pytest.fixture

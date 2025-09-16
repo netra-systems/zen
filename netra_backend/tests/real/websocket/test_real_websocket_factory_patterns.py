@@ -33,7 +33,7 @@ env = get_env()
 @pytest.mark.factory_patterns
 @pytest.mark.multi_user_isolation
 @skip_if_no_real_services
-class TestRealWebSocketFactoryPatterns:
+class RealWebSocketFactoryPatternsTests:
     """Test real WebSocket factory patterns for user isolation."""
     
     @pytest.fixture

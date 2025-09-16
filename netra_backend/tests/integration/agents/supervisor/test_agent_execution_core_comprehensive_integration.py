@@ -198,7 +198,7 @@ class MockWebSocketBridge:
 
 @pytest.mark.integration
 @pytest.mark.real_services  
-class TestAgentExecutionCoreComprehensiveIntegration:
+class AgentExecutionCoreComprehensiveIntegrationTests:
     """Comprehensive integration tests for agent execution core."""
     
     @pytest.fixture

@@ -33,7 +33,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestUserIsolationFailsWithFragmentedManagers(SSotAsyncTestCase):
+class UserIsolationFailsWithFragmentedManagersTests(SSotAsyncTestCase):
     """Phase 1 Reproduction Test: Prove user isolation fails with fragmented managers."""
     
     def setup_method(self, method):
@@ -74,9 +74,9 @@ class TestUserIsolationFailsWithFragmentedManagers(SSotAsyncTestCase):
         logger.info("Testing user data isolation with potentially fragmented managers")
         
         # Import different manager implementations to test isolation
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as factory1
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as DirectManager
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode, UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager as factory1
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as DirectManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerMode, UnifiedWebSocketManager
         
         try:
             # Create managers for each user via different import paths
@@ -269,8 +269,8 @@ class TestUserIsolationFailsWithFragmentedManagers(SSotAsyncTestCase):
         """
         logger.info("Testing concurrent user operations isolation")
         
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerMode
         
         try:
             # Create managers for concurrent testing

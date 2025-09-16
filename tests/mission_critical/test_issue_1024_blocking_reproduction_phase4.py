@@ -47,7 +47,7 @@ except ImportError:
     AsyncBaseTestCase = unittest.TestCase
 
 
-class TestDeploymentBlockingReproduction(BaseTestCase):
+class DeploymentBlockingReproductionTests(BaseTestCase):
     """Mission critical tests to reproduce deployment-blocking issues"""
 
     def setUp(self):
@@ -236,7 +236,7 @@ class TestDeploymentBlockingReproduction(BaseTestCase):
         )
 
 
-class TestBusinessImpactQuantification(AsyncBaseTestCase):
+class BusinessImpactQuantificationTests(AsyncBaseTestCase):
     """Mission critical tests to quantify business impact of test chaos"""
 
     async def test_calculate_revenue_at_risk(self):
@@ -356,7 +356,7 @@ class TestBusinessImpactQuantification(AsyncBaseTestCase):
         )
 
 
-class TestUnauthorizedRunnerImpactReproduction(BaseTestCase):
+class UnauthorizedRunnerImpactReproductionTests(BaseTestCase):
     """Reproduce specific impacts of unauthorized test runners"""
 
     def test_reproduce_pytest_main_environment_contamination(self):

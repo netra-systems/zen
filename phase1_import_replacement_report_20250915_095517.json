@@ -1,0 +1,39 @@
+{
+  "phase": "Phase 1 - Systematic Import Replacement",
+  "timestamp": "2025-09-15T09:55:17.751937",
+  "summary": {
+    "total_changes_made": 13,
+    "successful_validations": 3,
+    "total_validations": 3,
+    "validation_success_rate": "100.0%"
+  },
+  "changes_by_priority": {
+    "medium": 4,
+    "high": 9
+  },
+  "changes_by_pattern": {
+    "Deprecated factory imports": 4,
+    "Legacy manager.py imports": 6,
+    "Package-level websocket_core imports": 3
+  },
+  "validation_history": [
+    {
+      "timestamp": "2025-09-15T09:54:52.351808",
+      "success": true,
+      "stdout": "py::TestMissionCriticalWebSocketEvents::test_unified_tool_execution_sends_critical_events\n  /opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/events.py:89: RuntimeWarning: coroutine 'TestMissionCriticalWebSocketEvents.test_unified_tool_execution_sends_critical_events.<locals>.critical_test_tool' was never awaited\n    self._context.run(self._callback, *self._args)\n  Enable tracemalloc to get traceback where the object was allocated.\n  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n======================== 7 passed, 4 warnings in 0.37s =========================\n\n================================================================================\nSUCCESS: ALL MISSION CRITICAL TESTS PASSED!\nWebSocket agent events are working correctly.\n================================================================================\n",
+      "stderr": ""
+    },
+    {
+      "timestamp": "2025-09-15T09:55:05.252566",
+      "success": true,
+      "stdout": "py::TestMissionCriticalWebSocketEvents::test_unified_tool_execution_sends_critical_events\n  /opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/events.py:89: RuntimeWarning: coroutine 'TestMissionCriticalWebSocketEvents.test_unified_tool_execution_sends_critical_events.<locals>.critical_test_tool' was never awaited\n    self._context.run(self._callback, *self._args)\n  Enable tracemalloc to get traceback where the object was allocated.\n  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n======================== 7 passed, 4 warnings in 0.34s =========================\n\n================================================================================\nSUCCESS: ALL MISSION CRITICAL TESTS PASSED!\nWebSocket agent events are working correctly.\n================================================================================\n",
+      "stderr": ""
+    },
+    {
+      "timestamp": "2025-09-15T09:55:17.751875",
+      "success": true,
+      "stdout": "py::TestMissionCriticalWebSocketEvents::test_unified_tool_execution_sends_critical_events\n  /opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/events.py:89: RuntimeWarning: coroutine 'TestMissionCriticalWebSocketEvents.test_unified_tool_execution_sends_critical_events.<locals>.critical_test_tool' was never awaited\n    self._context.run(self._callback, *self._args)\n  Enable tracemalloc to get traceback where the object was allocated.\n  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n======================== 7 passed, 4 warnings in 0.30s =========================\n\n================================================================================\nSUCCESS: ALL MISSION CRITICAL TESTS PASSED!\nWebSocket agent events are working correctly.\n================================================================================\n",
+      "stderr": ""
+    }
+  ]
+}

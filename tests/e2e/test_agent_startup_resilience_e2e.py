@@ -30,7 +30,7 @@ import pytest
 from tests.e2e.test_data_factory import create_test_message_data, create_test_user_data
 
 
-class TestAgentRateLimiter:
+class AgentRateLimiterTests:
 
     """Tests agent behavior under rate limiting conditions."""
     
@@ -256,7 +256,7 @@ async def test_agent_startup_with_rate_limiting():
     """
     # Mock the rate limiting behavior for focused testing
 
-    rate_limit_tester = TestAgentRateLimiter(None, "mock://backend")
+    rate_limit_tester = AgentRateLimiterTests(None, "mock://backend")
 
     user_data = create_test_user_data()
     

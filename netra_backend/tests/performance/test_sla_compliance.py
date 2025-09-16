@@ -365,7 +365,7 @@ class SLAComplianceTester:
         return []
 
 @pytest.mark.performance
-class TestSLACompliance:
+class SLAComplianceTests:
     """SLA compliance validation test suite."""
 
     def setup_method(self):

@@ -296,7 +296,7 @@ class CircuitBreakerValidator:
 @pytest.mark.critical
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestHealthCascade:
+class HealthCascadeTests:
     """Health check cascade test suite."""
     
     @pytest.fixture

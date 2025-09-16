@@ -16,7 +16,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from scripts.staging_health_checks import AutomatedHealthChecker, HealthCheckMode, CheckResult
 
-class TestAutomatedHealthChecker:
+class AutomatedHealthCheckerTests:
     """Test automated health checker initialization and configuration."""
 
     @pytest.fixture
@@ -55,7 +55,7 @@ class TestAutomatedHealthChecker:
         assert thresholds['consecutive_failure_threshold'] == 3
         assert thresholds['rollback_threshold'] == 0.5
 
-class TestPreDeploymentChecks:
+class PreDeploymentChecksTests:
     """Test pre-deployment validation checks."""
 
     @pytest.fixture
@@ -113,7 +113,7 @@ class TestPreDeploymentChecks:
         approval = health_checker._evaluate_deployment_approval(results_many_failures)
         assert approval is False
 
-class TestPostDeploymentVerification:
+class PostDeploymentVerificationTests:
     """Test post-deployment verification checks."""
 
     @pytest.fixture
@@ -162,7 +162,7 @@ class TestPostDeploymentVerification:
         rollback_needed = health_checker._evaluate_rollback_necessity(results_healthy)
         assert rollback_needed is False
 
-class TestContinuousMonitoring:
+class ContinuousMonitoringTests:
     """Test continuous health monitoring functionality."""
 
     @pytest.fixture
@@ -224,7 +224,7 @@ class TestContinuousMonitoring:
             assert health_checker.rollback_triggered is True
             assert health_checker.monitoring_active is False
 
-class TestEnvironmentValidation:
+class EnvironmentValidationTests:
     """Test environment validation functionality."""
 
     @pytest.fixture
@@ -290,7 +290,7 @@ class TestEnvironmentValidation:
             assert result['result'] == CheckResult.PASS
             assert 'Sufficient resources available' in result['message']
 
-class TestSpecificHealthChecks:
+class SpecificHealthChecksTests:
     """Test specific health check implementations."""
 
     @pytest.fixture
@@ -352,7 +352,7 @@ class TestSpecificHealthChecks:
             assert result['business_impact_level'] == 'critical'
             assert 'CRITICAL business impact detected' in result['message']
 
-class TestNotificationsAndAlerts:
+class NotificationsAndAlertsTests:
     """Test notification and alert functionality."""
 
     @pytest.fixture
@@ -384,7 +384,7 @@ class TestNotificationsAndAlerts:
             await health_checker._send_rollback_notification(rollback_info)
             mock_client.return_value.post.assert_called()
 
-class TestHealthChecksIntegration:
+class HealthChecksIntegrationTests:
     """Integration tests for automated health checks."""
 
     @pytest.mark.asyncio

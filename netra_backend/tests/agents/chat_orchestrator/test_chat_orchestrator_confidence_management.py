@@ -42,7 +42,7 @@ class AgentState:
             self.accumulated_data = {}
 
 
-class TestChatOrchestratorConfidenceManagement(SSotAsyncTestCase, unittest.TestCase):
+class ChatOrchestratorConfidenceManagementTests(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive tests for ChatOrchestrator confidence management business logic."""
 
     def setUp(self):
@@ -340,7 +340,7 @@ class TestChatOrchestratorConfidenceManagement(SSotAsyncTestCase, unittest.TestC
         super().tearDown()
 
 
-class TestConfidenceManagerCacheKeyGeneration(SSotAsyncTestCase, unittest.TestCase):
+class ConfidenceManagerCacheKeyGenerationTests(SSotAsyncTestCase, unittest.TestCase):
     """Specialized tests for cache key generation edge cases."""
 
     def setUp(self):

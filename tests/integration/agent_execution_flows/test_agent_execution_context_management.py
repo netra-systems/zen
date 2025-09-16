@@ -31,7 +31,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
-class TestAgentExecutionContextManagement(BaseIntegrationTest):
+class AgentExecutionContextManagementTests(BaseIntegrationTest):
     """Integration tests for agent execution context management."""
 
     @pytest.mark.integration

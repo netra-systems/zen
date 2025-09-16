@@ -51,7 +51,7 @@ from auth_service.auth_core.auth_environment import get_auth_env
 from shared.isolated_environment import get_env
 
 
-class TestAuthServiceHealthCheckScript:
+class AuthServiceHealthCheckScriptTests:
     """Test standalone health_check.py script functionality"""
     
     @pytest.mark.unit
@@ -202,7 +202,7 @@ class TestAuthServiceHealthCheckScript:
             assert result is False
 
 
-class TestAuthServiceHealthEndpoints:
+class AuthServiceHealthEndpointsTests:
     """Test FastAPI health endpoints in main.py"""
     
     @pytest.mark.unit
@@ -429,7 +429,7 @@ class TestAuthServiceHealthEndpoints:
                     assert should_be_strict is False
 
 
-class TestHealthConfigModule:
+class HealthConfigModuleTests:
     """Test health_config.py health check functions"""
     
     @pytest.mark.unit
@@ -615,7 +615,7 @@ class TestHealthConfigModule:
             assert result["status"] == HealthStatus.UNHEALTHY.value
 
 
-class TestHealthCheckBusinessValue:
+class HealthCheckBusinessValueTests:
     """Test health check functionality delivers real business value"""
     
     @pytest.mark.unit

@@ -9,7 +9,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestSessionMiddlewareSecretKeyValidation(SSotBaseTestCase):
+class SessionMiddlewareSecretKeyValidationTests(SSotBaseTestCase):
     """Test SECRET_KEY validation for SessionMiddleware configuration."""
     
     def setup_method(self, method=None):

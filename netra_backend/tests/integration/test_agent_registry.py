@@ -197,7 +197,7 @@ class MockAgentRegistry(AgentRegistry):
         """Get comprehensive registry statistics."""
         return {'total_registrations': self.registration_count, 'active_agents': len(self.agents), 'available_agent_classes': len(self.registered_classes), 'cache_hits': self.cache_hits, 'cache_misses': self.cache_misses, 'cache_hit_rate': self.cache_hits / max(self.cache_hits + self.cache_misses, 1), 'initialization_count': self.initialization_count, 'redis_enabled': self.redis_manager is not None, 'database_enabled': self.db_session is not None}
 
-class TestAgentRegistry(BaseIntegrationTest):
+class AgentRegistryTests(BaseIntegrationTest):
     """Integration tests for agent registry with real services."""
 
     def setup_method(self):

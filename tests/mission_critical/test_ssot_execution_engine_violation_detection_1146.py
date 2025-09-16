@@ -31,7 +31,7 @@ sys.path.insert(0, str(project_root))
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestSSotExecutionEngineViolationDetection1146(SSotBaseTestCase):
+class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
     """Detects SSOT violations in execution engine consolidation and prevents regression."""
 
     def setup_method(self, method=None):

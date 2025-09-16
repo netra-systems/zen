@@ -32,7 +32,7 @@ from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.logging.auth_trace_logger import AuthTraceLogger
 
 
-class TestCrossServiceLogCorrelation(SSotAsyncTestCase):
+class CrossServiceLogCorrelationTests(SSotAsyncTestCase):
     """Test cross-service log correlation with real services."""
     
     def setup_method(self, method=None):

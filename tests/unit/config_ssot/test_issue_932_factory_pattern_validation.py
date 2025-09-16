@@ -39,7 +39,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestIssue932FactoryPatternValidation(SSotBaseTestCase, unittest.TestCase):
+class Issue932FactoryPatternValidationTests(SSotBaseTestCase, unittest.TestCase):
     """Unit tests to validate configuration factory patterns for Issue #932."""
     
     def setUp(self):

@@ -10,7 +10,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestMessageRouterSSOTViolationsQuick(SSotBaseTestCase):
+class MessageRouterSSOTViolationsQuickTests(SSotBaseTestCase):
     """Quick unit tests to detect MessageRouter SSOT violations."""
     
     def setup_method(self, method):

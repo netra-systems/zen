@@ -28,7 +28,7 @@ class InterfaceRequirement:
     description: str = ''
 
 @pytest.mark.unit
-class TestMessageRouterInterfaceCompleteness(SSotBaseTestCase):
+class MessageRouterInterfaceCompletenessTests(SSotBaseTestCase):
     """Test MessageRouter interface completeness across implementations."""
 
     def setUp(self):

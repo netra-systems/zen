@@ -32,7 +32,7 @@ from test_framework.category_system import ExecutionPlan
 
 
 @pytest.mark.unit
-class TestRunnerStatusAggregationBugUnit(SSotBaseTestCase):
+class RunnerStatusAggregationBugUnitTests(SSotBaseTestCase):
     """
     Unit tests targeting the specific status aggregation bug in lines 579-589.
     

@@ -40,7 +40,7 @@ from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult, ActionPlanResult, PlanStep
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse, RetryConfig
@@ -133,7 +133,7 @@ class RealisticDataGenerator:
         scenarios = {'cost_analysis': DataAnalysisResponse(query='Analyze cost patterns over last 6 months', results=[{'service': 'compute', 'cost': 15000, 'trend': 'increasing'}, {'service': 'storage', 'cost': 8000, 'trend': 'stable'}, {'service': 'networking', 'cost': 3000, 'trend': 'decreasing'}, {'service': 'database', 'cost': 12000, 'trend': 'increasing'}], insights={'total_cost': 38000, 'cost_drivers': ['compute', 'database'], 'optimization_potential': 8500, 'seasonality_detected': True}, metadata={'time_range': '6_months', 'data_quality': 'high', 'analysis_confidence': 0.89}, recommendations=['Focus optimization efforts on compute and database services', 'Implement cost monitoring alerts for anomaly detection', 'Consider reserved instances for predictable workloads']), 'performance_analysis': DataAnalysisResponse(query='Analyze system performance metrics', results=[{'metric': 'response_time', 'value': 245, 'unit': 'ms', 'status': 'warning'}, {'metric': 'throughput', 'value': 1250, 'unit': 'req/s', 'status': 'normal'}, {'metric': 'cpu_utilization', 'value': 78, 'unit': '%', 'status': 'warning'}, {'metric': 'memory_usage', 'value': 65, 'unit': '%', 'status': 'normal'}], insights={'bottlenecks': ['response_time', 'cpu_utilization'], 'peak_hours': ['9-11AM', '2-4PM'], 'performance_trend': 'degrading', 'scaling_needed': True}, metadata={'monitoring_period': '30_days', 'data_points': 43200, 'anomalies_detected': 12}, recommendations=['Scale compute resources during peak hours', 'Investigate CPU-intensive processes', 'Implement performance monitoring dashboard']), 'default': DataAnalysisResponse(query='General system analysis', results=[{'status': 'analyzed'}], insights={'general': 'system analyzed'}, metadata={'source': 'default'}, recommendations=['Continue monitoring'])}
         return scenarios.get(scenario, scenarios['default'])
 
-class TestActionsAgentSupervisorIntegration:
+class ActionsAgentSupervisorIntegrationTests:
     """Test ActionsAgent integration with supervisor components."""
 
     @pytest.fixture(autouse=True)
@@ -228,7 +228,7 @@ class TestActionsAgentSupervisorIntegration:
             assert last_event in completion_events, f'Last event should be completion type, got {last_event}'
         logger.info(f" PASS:  WebSocket propagation: {len(events)} events, {integration_analysis['integration_score']:.2f} score")
 
-class TestActionsAgentToolDispatcherIntegration:
+class ActionsAgentToolDispatcherIntegrationTests:
     """Test ActionsAgent integration with tool dispatcher and state management."""
 
     @pytest.fixture(autouse=True)
@@ -314,7 +314,7 @@ class TestActionsAgentToolDispatcherIntegration:
             assert execution_time < 60.0, f"Scenario '{scenario['name']}' too slow: {execution_time:.2f}s"
             logger.info(f" PASS:  {scenario['name']}: executed in {execution_time:.2f}s")
 
-class TestActionsAgentErrorRecoveryIntegration:
+class ActionsAgentErrorRecoveryIntegrationTests:
     """Test ActionsAgent error recovery and fallback integration patterns."""
 
     @pytest.fixture(autouse=True)
@@ -422,7 +422,7 @@ class TestActionsAgentErrorRecoveryIntegration:
         assert total_time < 90.0, f'Concurrent error recovery too slow: {total_time:.2f}s'
         logger.info(f' PASS:  Concurrent error recovery: {recovery_rate:.1%} success rate in {total_time:.2f}s')
 
-class TestActionsAgentPerformanceIntegration:
+class ActionsAgentPerformanceIntegrationTests:
     """Test ActionsAgent performance under realistic integration loads."""
 
     @pytest.fixture(autouse=True)
@@ -484,7 +484,7 @@ class TestActionsAgentPerformanceIntegration:
 
 @pytest.mark.critical
 @pytest.mark.integration
-class TestActionsAgentIntegrationComprehensive:
+class ActionsAgentIntegrationComprehensiveTests:
     """Comprehensive integration test suite for ActionsAgent SSOT compliance."""
 
     @pytest.mark.asyncio

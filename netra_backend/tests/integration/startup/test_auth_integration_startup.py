@@ -26,7 +26,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.integration
 @pytest.mark.startup
 @pytest.mark.auth
-class TestAuthIntegrationStartup(BaseIntegrationTest):
+class AuthIntegrationStartupTests(BaseIntegrationTest):
     """Integration tests for authentication service startup and configuration."""
 
     async def async_setup(self):
@@ -288,7 +288,7 @@ class TestAuthIntegrationStartup(BaseIntegrationTest):
 @pytest.mark.integration
 @pytest.mark.startup
 @pytest.mark.business_value
-class TestAuthStartupBusinessValue(BaseIntegrationTest):
+class AuthStartupBusinessValueTests(BaseIntegrationTest):
     """Business value validation for authentication startup integration."""
 
     async def test_auth_enables_secure_revenue_access(self):

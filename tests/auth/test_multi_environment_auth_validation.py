@@ -127,7 +127,7 @@ class EnvironmentAuthTester:
         return validation_results
 
 @pytest.mark.asyncio
-class TestMultiEnvironmentAuthValidation:
+class MultiEnvironmentAuthValidationTests:
     """Test suite for multi-environment authentication validation."""
 
     @pytest.fixture(params=['development', 'staging'])
@@ -187,7 +187,7 @@ class TestMultiEnvironmentAuthValidation:
         assert overall_assessment.get('success', False), f'Comprehensive validation failed in {auth_tester.environment}'
 
 @pytest.mark.staging
-class TestStagingSpecificValidation:
+class StagingSpecificValidationTests:
     """Staging-specific validation tests based on Five Whys analysis."""
 
     @pytest.fixture

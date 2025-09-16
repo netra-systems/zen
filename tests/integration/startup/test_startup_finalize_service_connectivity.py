@@ -34,7 +34,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from shared.isolated_environment import get_env
 
 
-class TestStartupFinalizeServiceConnectivity(SSotBaseTestCase):
+class StartupFinalizeServiceConnectivityTests(SSotBaseTestCase):
     """Integration tests for FINALIZE phase inter-service connectivity."""
     
     def setup_method(self, method):

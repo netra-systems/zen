@@ -10,7 +10,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestWebSocketSSOTImportPathValidation(SSotBaseTestCase):
+class WebSocketSSOTImportPathValidationTests(SSotBaseTestCase):
     """Test import path validation for WebSocket SSOT agent bridge integration."""
     
     def test_websocket_ssot_broken_import_agents_path_remains_broken(self):
@@ -184,7 +184,7 @@ class TestWebSocketSSOTImportPathValidation(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestWebSocketSSOTImportSuccessAnalysis(SSotBaseTestCase):
+class WebSocketSSOTImportSuccessAnalysisTests(SSotBaseTestCase):
     """Analyze the business and technical success of the SSOT implementation."""
     
     def test_import_success_enables_agent_handler_setup(self):

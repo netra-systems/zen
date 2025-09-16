@@ -18,12 +18,12 @@ import uuid
 from typing import Dict, Any
 
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from shared.types import UserID, ThreadID, RunID
 
-class TestWebSocketEventGeneration:
+class WebSocketEventGenerationTests:
     """Test WebSocket event generation for agent execution transparency."""
     
     @pytest.fixture

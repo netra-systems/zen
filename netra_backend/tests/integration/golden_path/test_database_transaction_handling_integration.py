@@ -83,7 +83,7 @@ class DatabaseTransactionMetrics:
     data_integrity_violations: int = 0
 
 
-class TestDatabaseTransactionHandlingIntegration(BaseIntegrationTest):
+class DatabaseTransactionHandlingIntegrationTests(BaseIntegrationTest):
     """Integration tests for database transaction handling patterns."""
     
     def setup_method(self):

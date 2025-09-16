@@ -207,7 +207,7 @@ class ConcurrentExecutionOrchestrator:
         validation_result['session_integrity'] = {'users_with_events': len(user_events), 'session_mixing_violations': session_mixing_violations, 'clean_separation': session_mixing_violations == 0}
         return validation_result
 
-class TestWebSocketMultiAgentConcurrentExecutionIsolation(BaseIntegrationTest):
+class WebSocketMultiAgentConcurrentExecutionIsolationTests(BaseIntegrationTest):
     """Integration test for multi-agent concurrent execution with WebSocket isolation."""
 
     def setup_method(self):

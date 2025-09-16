@@ -54,7 +54,7 @@ class ConfigurationScope(Enum):
     ENVIRONMENT = "environment"
 
 
-class TestConfigurationManagementCore(SSotBaseTestCase):
+class ConfigurationManagementCoreTests(SSotBaseTestCase):
     """Unit tests for core configuration management business logic."""
     
     def setup_method(self, method=None):

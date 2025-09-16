@@ -28,7 +28,7 @@ def test_context():
     return {'user_id': test_user_id, 'thread_id': test_thread_id, 'run_id': test_run_id, 'user_context': user_context}
 
 @pytest.mark.unit
-class TestIssue585PickleModuleSerializationErrors:
+class Issue585PickleModuleSerializationErrorsTests:
     """Test suite to reproduce pickle module serialization errors in agent pipelines."""
 
     def test_pickle_module_object_error_reproduction(self):

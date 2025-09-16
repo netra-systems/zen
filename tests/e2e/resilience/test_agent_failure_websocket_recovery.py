@@ -80,7 +80,7 @@ async def websocket_client():
 
 
 @pytest.mark.e2e
-class TestAgentFailureRecovery:
+class AgentFailureRecoveryTests:
     """Test agent failure recovery mechanisms via WebSocket."""
     
     @pytest.mark.e2e

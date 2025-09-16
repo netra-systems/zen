@@ -54,7 +54,7 @@ pytestmark = [
 ]
 
 
-class TestSSOTDatabaseMigrator(SSotBaseTestCase):
+class SSOTDatabaseMigratorTests(SSotBaseTestCase):
     """
     SSOT Unit Tests for DatabaseMigrator Class.
     
@@ -539,5 +539,5 @@ class TestSSOTDatabaseMigrator(SSotBaseTestCase):
 
 # SSOT Export Control
 __all__ = [
-    "TestSSOTDatabaseMigrator"
+    "SSOTDatabaseMigratorTests"
 ]

@@ -24,7 +24,7 @@ from netra_backend.app.websocket_core.graceful_degradation_manager import Gracef
 import logging
 logger = logging.getLogger(__name__)
 
-class TestGracefulDegradationFunctionality:
+class GracefulDegradationFunctionalityTests:
     """Test graceful degradation functionality works correctly."""
 
     @pytest.fixture

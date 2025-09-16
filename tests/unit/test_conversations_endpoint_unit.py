@@ -23,7 +23,7 @@ from netra_backend.app.main import app
 from netra_backend.app.db.models_auth import User
 
 
-class TestConversationsEndpointUnit(SSotAsyncTestCase):
+class ConversationsEndpointUnitTests(SSotAsyncTestCase):
     """Unit tests for conversations endpoint - reproducing 404 behavior and defining expectations."""
     
     def setup_method(self, method):

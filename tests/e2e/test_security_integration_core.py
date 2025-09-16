@@ -8,7 +8,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 @pytest.mark.e2e
-class TestSecurityIntegrationCore:
+class SecurityIntegrationCoreTests:
     """Test class for security_integration_core"""
 
     def setup_method(self):

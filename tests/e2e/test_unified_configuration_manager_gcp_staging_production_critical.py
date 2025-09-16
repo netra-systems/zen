@@ -89,7 +89,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.e2e
 @pytest.mark.gcp_staging
-class TestUnifiedConfigurationManagerGCPStagingProductionCritical(BaseE2ETest):
+class UnifiedConfigurationManagerGCPStagingProductionCriticalTests(BaseE2ETest):
     """E2E tests for UnifiedConfigurationManager in GCP staging environment protecting production readiness."""
 
     @pytest.fixture

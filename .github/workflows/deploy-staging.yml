@@ -334,6 +334,21 @@ jobs:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
           
+      - uses: actions/setup-python@v5
+        if: inputs.act_mode != 'true'
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Prepare Cloud SQL and secret mappings
+        if: inputs.act_mode != 'true'
+        run: |
+          python - <<'PYCODE' >> "$GITHUB_ENV"
+from deployment.secrets_config import SecretConfig
+print(f"BACKEND_SECRETS={SecretConfig.generate_secrets_string('backend','staging')}")
+print(f"AUTH_SECRETS={SecretConfig.generate_secrets_string('auth','staging')}")
+PYCODE
+          echo "CLOUD_SQL_INSTANCES=${{ env.GCP_PROJECT }}:us-central1:staging-shared-postgres,${{ env.GCP_PROJECT }}:us-central1:netra-postgres" >> "$GITHUB_ENV"
+
       - name: Deploy Backend to Cloud Run
         if: inputs.act_mode != 'true'
         run: |
@@ -347,16 +362,13 @@ jobs:
             --memory 4Gi \
             --min-instances 1 \
             --max-instances 10 \
+            --vpc-connector staging-connector \
+            --vpc-egress all-traffic \
+            --timeout 600 \
+            --cpu-boost \
+            --add-cloudsql-instances "${{ env.CLOUD_SQL_INSTANCES }}" \
             --set-env-vars="NETRA_ENV=staging" \
-            --set-secrets="POSTGRES_HOST=staging-postgres-host:latest" \
-            --set-secrets="POSTGRES_PORT=staging-postgres-port:latest" \
-            --set-secrets="POSTGRES_DB=staging-postgres-db:latest" \
-            --set-secrets="POSTGRES_USER=staging-postgres-user:latest" \
-            --set-secrets="POSTGRES_PASSWORD=staging-postgres-password:latest" \
-            --set-secrets="REDIS_HOST=staging-redis-host:latest" \
-            --set-secrets="REDIS_PORT=staging-redis-port:latest" \
-            --set-secrets="REDIS_PASSWORD=staging-redis-password:latest" \
-            --set-secrets="JWT_SECRET=staging-jwt-secret:latest"
+            --set-secrets "${{ env.BACKEND_SECRETS }}"
 
       - name: Deploy Auth Service to Cloud Run
         if: inputs.act_mode != 'true'
@@ -371,17 +383,13 @@ jobs:
             --memory 2Gi \
             --min-instances 1 \
             --max-instances 5 \
+            --vpc-connector staging-connector \
+            --vpc-egress all-traffic \
+            --timeout 600 \
+            --cpu-boost \
+            --add-cloudsql-instances "${{ env.CLOUD_SQL_INSTANCES }}" \
             --set-env-vars="NETRA_ENV=staging" \
-            --set-secrets="POSTGRES_HOST=staging-postgres-host:latest" \
-            --set-secrets="POSTGRES_PORT=staging-postgres-port:latest" \
-            --set-secrets="POSTGRES_DB=staging-postgres-db:latest" \
-            --set-secrets="POSTGRES_USER=staging-postgres-user:latest" \
-            --set-secrets="POSTGRES_PASSWORD=staging-postgres-password:latest" \
-            --set-secrets="REDIS_HOST=staging-redis-host:latest" \
-            --set-secrets="REDIS_PORT=staging-redis-port:latest" \
-            --set-secrets="REDIS_PASSWORD=staging-redis-password:latest" \
-            --set-secrets="JWT_SECRET=staging-jwt-secret:latest"
-
+            --set-secrets "${{ env.AUTH_SECRETS }}"
   deploy-frontend:
     name: Deploy Frontend
     needs: [build-frontend, deploy-backend]

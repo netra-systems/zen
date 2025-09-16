@@ -35,7 +35,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 
 
-class TestAgentExecutionPipelineIntegration(BaseIntegrationTest):
+class AgentExecutionPipelineIntegrationTests(BaseIntegrationTest):
     """Integration tests for agent execution pipeline with real services."""
     
     @pytest.fixture(autouse=True)

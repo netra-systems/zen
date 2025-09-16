@@ -57,7 +57,7 @@ def staging_websocket_auth_helper(staging_config):
 
 
 @pytest.mark.e2e
-class TestWebSocket1011ErrorReproduction:
+class WebSocket1011ErrorReproductionTests:
     """
     Test suite that reproduces the exact WebSocket 1011 internal errors.
     
@@ -552,7 +552,7 @@ if __name__ == "__main__":
         staging_config = StagingTestConfig()
         auth_helper = E2EWebSocketAuthHelper(environment="staging")
         
-        test_instance = TestWebSocket1011ErrorReproduction()
+        test_instance = WebSocket1011ErrorReproductionTests()
         
         try:
             await test_instance.test_websocket_connection_1011_error_exact_reproduction(

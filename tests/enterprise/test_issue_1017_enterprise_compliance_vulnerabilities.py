@@ -24,7 +24,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.schemas.agent_models import DeepAgentState, AgentMetadata
 
-class TestIssue1017EnterpriseComplianceVulnerabilities(SSotBaseTestCase):
+class Issue1017EnterpriseComplianceVulnerabilitiesTests(SSotBaseTestCase):
     """Enterprise compliance tests for Issue #1017 security vulnerabilities."""
 
     def setup_method(self, method=None):

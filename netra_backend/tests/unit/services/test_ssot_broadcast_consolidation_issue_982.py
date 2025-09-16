@@ -31,7 +31,7 @@ from netra_backend.app.core.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID
 
 
-class TestSSotBroadcastAdapterDelegation:
+class SSotBroadcastAdapterDelegationTests:
     """Test suite for validating adapter delegation to SSOT WebSocket broadcast service."""
 
     @pytest.fixture

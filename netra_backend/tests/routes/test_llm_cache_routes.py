@@ -13,7 +13,7 @@ import pytest
 
 from netra_backend.tests.test_utilities import base_client
 
-class TestLLMCacheRoute:
+class LLMCacheRouteTests:
     """Test cache invalidation and metrics."""
     
     def test_cache_metrics(self, base_client):

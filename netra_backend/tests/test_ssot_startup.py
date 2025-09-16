@@ -14,7 +14,7 @@ import asyncio
 import pytest
 from typing import Any, Dict
 from unittest.mock import Mock
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -22,7 +22,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.database import get_db, get_database_url, get_engine, get_sessionmaker, DatabaseManager, database_manager, get_clickhouse_client
 
-class TestDatabaseSSOT:
+class DatabaseSSOTTests:
     """Test database SSOT consolidation at startup."""
 
     def test_database_module_imports(self):
@@ -50,7 +50,7 @@ class TestDatabaseSSOT:
         async with get_clickhouse_client(bypass_manager=True) as client:
             assert client is not None
 
-class TestAgentRegistrySSOT:
+class AgentRegistrySSOTTests:
     """Test agent registry SSOT consolidation."""
 
     def test_agent_registry_import(self):
@@ -82,7 +82,7 @@ class TestAgentRegistrySSOT:
         assert hasattr(factory, 'create_for_context')
         assert callable(factory.create_for_context)
 
-class TestExecutionEngineSSOT:
+class ExecutionEngineSSOTTests:
     """Test execution engine SSOT consolidation."""
 
     def test_execution_engine_imports(self):
@@ -101,7 +101,7 @@ class TestExecutionEngineSSOT:
         assert hasattr(factory, 'create_execution_engine')
         assert callable(factory.create_execution_engine)
 
-class TestStatePersistenceSSOT:
+class StatePersistenceSSOTTests:
     """Test state persistence SSOT modules."""
 
     def test_state_managers_import(self):
@@ -128,7 +128,7 @@ class TestStatePersistenceSSOT:
         result = await state_recovery_manager.complete_recovery_log('recovery_1', True, None)
         assert result is True
 
-class TestStartupModuleIntegration:
+class StartupModuleIntegrationTests:
     """Test complete startup module integration with SSOT changes."""
 
     def test_startup_module_import(self):
@@ -151,7 +151,7 @@ class TestStartupModuleIntegration:
         assert index_manager is not None
         assert hasattr(index_manager, 'optimize_all_databases')
 
-class TestCorpusAdminSSOT:
+class CorpusAdminSSOTTests:
     """Test corpus admin SSOT modules."""
 
     def test_corpus_operations_enum(self):
@@ -188,7 +188,7 @@ class TestCorpusAdminSSOT:
         merged = merge_domain_settings({'a': 1}, {'b': 2})
         assert merged == {'a': 1, 'b': 2}
 
-class TestWebSocketSSOT:
+class WebSocketSSOTTests:
     """Test WebSocket SSOT consolidation."""
 
     def test_websocket_manager_import(self):

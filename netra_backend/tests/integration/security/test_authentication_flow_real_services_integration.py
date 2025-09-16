@@ -27,7 +27,7 @@ from netra_backend.app.auth_integration import auth
 from netra_backend.app.services.session_service import SessionService as SessionManager
 from netra_backend.app.services.auth.oauth_integration import OAuthIntegration
 
-class TestAuthenticationFlowRealServicesIntegration(SSotBaseTestCase):
+class AuthenticationFlowRealServicesIntegrationTests(SSotBaseTestCase):
     """Test authentication flows with real services"""
 
     def setup_method(self):

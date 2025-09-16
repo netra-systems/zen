@@ -71,7 +71,7 @@ class SSotImportComplianceValidator:
         ImportPattern(
             pattern_regex=r'from\s+netra_backend\.app\.websocket_core\s+import\s+create_websocket_manager',
             violation_type="DEPRECATED_FACTORY_IMPORT",
-            recommended_replacement="from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+            recommended_replacement="from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
             description="Deprecated factory function import - use direct WebSocketManager import"
         ),
         ImportPattern(
@@ -83,17 +83,17 @@ class SSotImportComplianceValidator:
         ImportPattern(
             pattern_regex=r'from\s+.*\.websocket_core\.factory\s+import',
             violation_type="DEPRECATED_FACTORY_MODULE",
-            recommended_replacement="from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+            recommended_replacement="from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
             description="Deprecated factory module import - use canonical websocket_manager module"
         ),
     ]
 
     # Canonical patterns that should be used instead
     CANONICAL_PATTERNS = [
-        "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
-        "from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode",
-        "from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection",
-        "from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager",
+        "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
+        "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerMode",
+        "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketConnection",
+        "from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager",
     ]
 
     def __init__(self, project_root: str):
@@ -228,7 +228,7 @@ class SSotImportComplianceValidator:
 
 
 @pytest.mark.unit
-class TestSSotImportCompliance(SSotBaseTestCase):
+class SSotImportComplianceTests(SSotBaseTestCase):
     """
     Automated tests for SSOT import compliance validation.
 
@@ -288,7 +288,7 @@ class TestSSotImportCompliance(SSotBaseTestCase):
         # Test file content with known deprecated patterns
         test_content = '''
 from netra_backend.app.websocket_core import create_websocket_manager
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 @pytest.mark.unit
 def test_function():
@@ -328,7 +328,7 @@ def test_function():
         """
         # Test file content with canonical patterns
         canonical_content = '''
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketManagerMode
 from netra_backend.app.services.user_execution_context import create_isolated_execution_context
 
 @pytest.mark.unit
@@ -390,7 +390,7 @@ def test_function():
         the documented SSOT Import Registry.
         """
         # Test that validator knows about canonical patterns from SSOT Import Registry
-        canonical_websocket_import = "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager"
+        canonical_websocket_import = "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager"
 
         self.assertIn(canonical_websocket_import, self.validator.CANONICAL_PATTERNS,
             "Validator should recognize SSOT Import Registry canonical WebSocket import")

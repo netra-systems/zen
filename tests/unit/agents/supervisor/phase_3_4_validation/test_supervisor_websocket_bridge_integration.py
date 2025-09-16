@@ -51,7 +51,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestSupervisorWebSocketBridgeIntegration(SSotAsyncTestCase):
+class SupervisorWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
     """
     Phase 3.4 Supervisor WebSocket Bridge Integration Tests
     
@@ -67,11 +67,11 @@ class TestSupervisorWebSocketBridgeIntegration(SSotAsyncTestCase):
         self.mock_factory = SSotMockFactory()
         
         # Test user context for bridge integration
-        self.test_user_context = UserExecutionContext(
+        self.test_user_context = UserExecutionContext.from_request(
             user_id="bridge_test_user",
             thread_id="bridge_test_thread",
             run_id="bridge_test_run",
-            client_id="bridge_test_client"
+            websocket_client_id="bridge_test_client"
         )
         
         # Mock WebSocket bridge with critical event methods

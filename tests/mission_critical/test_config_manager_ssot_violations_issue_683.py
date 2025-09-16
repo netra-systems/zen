@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestConfigManagerSsotViolationsIssue683(SSotBaseTestCase):
+class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
     """
     Mission critical tests to detect SSOT violations in configuration management.
 

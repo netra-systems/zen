@@ -69,7 +69,7 @@ from netra_backend.app.auth_integration.validators import (
 )
 
 
-class TestEmailValidation:
+class EmailValidationTests:
     """Test email validation prevents injection attacks and follows RFC standards."""
 
     def test_validate_email_format_accepts_valid_emails(self):
@@ -123,7 +123,7 @@ class TestEmailValidation:
             assert validate_email_format(injection) is False, f"Should block injection: {injection}"
 
 
-class TestPasswordValidation:
+class PasswordValidationTests:
     """Test password validation enforces NIST security requirements."""
 
     def test_validate_password_strength_enforces_minimum_length(self):
@@ -188,7 +188,7 @@ class TestPasswordValidation:
             assert missing_type.lower() in result["error"].lower()
 
 
-class TestTokenValidation:
+class TokenValidationTests:
     """Test token validation prevents malformed JWT attacks."""
 
     def test_validate_token_format_accepts_valid_jwt_structure(self):
@@ -236,7 +236,7 @@ class TestTokenValidation:
         assert _check_token_length("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.signature") is True
 
 
-class TestServiceValidation:
+class ServiceValidationTests:
     """Test service ID validation prevents inter-service auth failures."""
 
     def test_validate_service_id_accepts_valid_service_names(self):
@@ -291,7 +291,7 @@ class TestServiceValidation:
         assert _check_service_id_length("a" * 51) is False
 
 
-class TestPermissionValidation:
+class PermissionValidationTests:
     """Test permission validation ensures proper access control."""
 
     def test_validate_permission_format_accepts_valid_permissions(self):
@@ -375,7 +375,7 @@ class TestPermissionValidation:
                     validate_permission_list(perm_list)
 
 
-class TestIPAddressValidation:
+class IPAddressValidationTests:
     """Test IP address validation supports audit and security logging."""
 
     def test_validate_ip_address_accepts_valid_ipv4_addresses(self):
@@ -448,7 +448,7 @@ class TestIPAddressValidation:
         assert _is_valid_ipv6("not.an.ipv6") is False
 
 
-class TestSessionAndMetadataValidation:
+class SessionAndMetadataValidationTests:
     """Test session metadata validation prevents DoS and injection attacks."""
 
     def test_validate_session_metadata_accepts_valid_metadata(self):
@@ -486,7 +486,7 @@ class TestSessionAndMetadataValidation:
         assert validate_user_agent(long_user_agent) is False
 
 
-class TestAuditAndEventValidation:
+class AuditAndEventValidationTests:
     """Test audit event validation ensures proper security logging."""
 
     def test_validate_audit_event_type_accepts_valid_events(self):
@@ -568,7 +568,7 @@ class TestAuditAndEventValidation:
                     validate_token_type(token_type)
 
 
-class TestTimingValidation:
+class TimingValidationTests:
     """Test timing validation prevents replay attacks and clock skew issues."""
 
     def test_validate_expires_at_accepts_future_timestamps(self):
@@ -651,7 +651,7 @@ class TestTimingValidation:
             assert validate_auth_request_timing(request_time) is False, f"Should reject old time: {request_time}"
 
 
-class TestInputSanitization:
+class InputSanitizationTests:
     """Test input sanitization prevents XSS and injection attacks."""
 
     def test_sanitize_user_input_removes_dangerous_characters(self):
@@ -698,7 +698,7 @@ class TestInputSanitization:
             assert result == expected, f"Should process: {input_str} -> {expected}"
 
 
-class TestURLAndOriginValidation:
+class URLAndOriginValidationTests:
     """Test URL and CORS origin validation prevents security misconfigurations."""
 
     def test_validate_endpoint_url_accepts_valid_urls(self):
@@ -785,7 +785,7 @@ class TestURLAndOriginValidation:
         assert _is_valid_domain(".example.com") is False
 
 
-class TestOAuthTokenValidation:
+class OAuthTokenValidationTests:
     """Test OAuth token validation prevents token-based attacks."""
 
     def test_validate_oauth_token_accepts_valid_tokens(self):
@@ -829,7 +829,7 @@ class TestOAuthTokenValidation:
         assert _check_oauth_token_length("x" * 2001) is False
 
 
-class TestErrorCodeValidation:
+class ErrorCodeValidationTests:
     """Test error code validation ensures consistent error handling."""
 
     def test_validate_error_code_accepts_valid_error_codes(self):
@@ -877,7 +877,7 @@ class TestErrorCodeValidation:
         assert _check_error_code_length("x" * 51) is False
 
 
-class TestValidationErrorHandling:
+class ValidationErrorHandlingTests:
     """Test validation error handling provides consistent, secure error responses."""
 
     def test_create_validation_error_creates_standardized_error(self):
@@ -927,7 +927,7 @@ class TestValidationErrorHandling:
         assert "Validator error" in exc_info.value.message
 
 
-class TestValidationBusinessValueDelivery:
+class ValidationBusinessValueDeliveryTests:
     """Test that auth validators deliver the expected business value."""
 
     def test_validators_prevent_injection_attacks(self):

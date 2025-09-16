@@ -22,15 +22,15 @@ from typing import Dict, List
 import warnings
 
 # Import all test modules
-from test_issue_416_deprecation_detection import TestDeprecationWarningDetection
-from test_issue_416_migration_validation import TestDeprecationMigrationValidation  
-from test_issue_416_regression_prevention import TestDeprecationRegressionPrevention
-from test_issue_416_category_coverage import TestDeprecationCategoryCoverage
+from .test_issue_416_deprecation_detection import DeprecationWarningDetectionTests
+from .test_issue_416_migration_validation import DeprecationMigrationValidationTests
+from .test_issue_416_regression_prevention import DeprecationRegressionPreventionTests
+from .test_issue_416_category_coverage import DeprecationCategoryCoverageTests
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestIssue416ComprehensiveSuite(SSotBaseTestCase):
+class Issue416ComprehensiveSuiteTests(SSotBaseTestCase):
     """Comprehensive test suite orchestrator for Issue #416"""
     
     def setUp(self):
@@ -172,7 +172,7 @@ class TestIssue416ComprehensiveSuite(SSotBaseTestCase):
         
         # Test migration paths
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             strategy_components['migration_paths_validated'] = True
             print("  ✓ Migration paths validated")
         except Exception as e:

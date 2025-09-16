@@ -25,7 +25,7 @@ from shared.types.core_types import WebSocketEventType, UserID, ThreadID, Reques
 from test_framework.ssot.websocket import WebSocketTestUtility, WebSocketEventType as TestEventType
 
 # Import production WebSocket components - NO MOCKS per CLAUDE.md
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
@@ -48,7 +48,7 @@ async def performance_websocket_manager():
 
 @pytest.mark.integration
 @pytest.mark.performance
-class TestWebSocketConcurrentPerformance:
+class WebSocketConcurrentPerformanceTests:
     """Integration tests for WebSocket concurrent performance."""
     
     @pytest.mark.asyncio
@@ -402,7 +402,7 @@ class TestWebSocketConcurrentPerformance:
 
 @pytest.mark.integration
 @pytest.mark.performance
-class TestWebSocketStressAndResilience:
+class WebSocketStressAndResilienceTests:
     """Integration tests for WebSocket stress testing and resilience."""
     
     @pytest.mark.asyncio

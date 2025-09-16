@@ -55,7 +55,7 @@ from netra_backend.app.core.configuration.base import (
 )
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.core.managers.unified_state_manager import (
     UnifiedStateManager,
     StateScope,
@@ -70,7 +70,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 
 
-class TestCompleteSSotWorkflowIntegration(BaseIntegrationTest):
+class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
     """
     Complete SSOT workflow integration tests.
     
@@ -199,7 +199,7 @@ class TestCompleteSSotWorkflowIntegration(BaseIntegrationTest):
         # This represents the complete chat workflow that delivers business value
         
         # Mock agent for testing (in real scenario, this would be a real agent)
-        class TestChatAgent(BaseAgent):
+        class ChatAgentTests(BaseAgent):
             async def execute(self, message: str, context: Dict[str, Any]) -> Dict[str, Any]:
                 # Simulate agent processing with WebSocket events
                 await self.send_websocket_event("agent_started", {"message": "Processing chat request"})
@@ -230,7 +230,7 @@ class TestCompleteSSotWorkflowIntegration(BaseIntegrationTest):
                 pass
         
         # Execute the agent workflow
-        agent = TestChatAgent()
+        agent = ChatAgentTests()
         agent.config_manager = self.config_manager
         
         result = await agent.execute(
@@ -671,7 +671,7 @@ class TestCompleteSSotWorkflowIntegration(BaseIntegrationTest):
         await self.websocket_manager.add_connection(websocket_conn)
         
         # Phase 4: Execute Agent with Complete Event Flow
-        class TestOptimizationAgent(BaseAgent):
+        class OptimizationAgentTests(BaseAgent):
             async def execute(self, message: str, context: Dict[str, Any]) -> Dict[str, Any]:
                 execution_id = context["execution_id"]
                 
@@ -741,7 +741,7 @@ class TestCompleteSSotWorkflowIntegration(BaseIntegrationTest):
                 await mock_websocket.send_json(event_data)
         
         # Execute the agent
-        agent = TestOptimizationAgent()
+        agent = OptimizationAgentTests()
         
         # Create execution state for persistence
         execution_state = StateEntry(

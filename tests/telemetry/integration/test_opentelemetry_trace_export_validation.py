@@ -46,7 +46,7 @@ class TraceExportTestResult:
     error_message: Optional[str] = None
 
 
-class TestOpenTelemetryTraceExportValidation(SSotAsyncTestCase):
+class OpenTelemetryTraceExportValidationTests(SSotAsyncTestCase):
     """Test validation of trace export configuration and connectivity."""
     
     def setup_method(self, method=None):
@@ -572,7 +572,7 @@ class TestOpenTelemetryTraceExportValidation(SSotAsyncTestCase):
         )
 
 
-class TestTraceExportEnvironmentConfiguration(SSotAsyncTestCase):
+class TraceExportEnvironmentConfigurationTests(SSotAsyncTestCase):
     """Test environment-specific trace export configuration."""
     
     def setup_method(self, method=None):

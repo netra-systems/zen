@@ -14,7 +14,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.middleware.security_headers_middleware import SecurityHeadersMiddleware
 
 
-class TestSecurityHeadersMiddleware:
+class SecurityHeadersMiddlewareTests:
     """Test suite for Security Headers Middleware."""
 
     @pytest.fixture

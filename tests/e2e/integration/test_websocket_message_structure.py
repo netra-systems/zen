@@ -41,7 +41,7 @@ from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestWebSocketMessageStructure:
+class WebSocketMessageStructureTests:
     """Test #9: WebSocket Message Structure Consistency - P1 CRITICAL"""
     
     @pytest.mark.e2e

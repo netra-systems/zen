@@ -25,7 +25,7 @@ from test_framework.ssot.docker import DockerTestUtility
 from test_framework.ssot.websocket import WebSocketTestUtility
 logger = logging.getLogger(__name__)
 
-class TestWebSocketHandshakeStateRegistryIntegration(SSotAsyncTestCase):
+class WebSocketHandshakeStateRegistryIntegrationTests(SSotAsyncTestCase):
     """
     CRITICAL INTEGRATION TEST: WebSocket handshake race conditions with state registry
     

@@ -36,7 +36,7 @@ from shared.types.core_types import (
 
 
 @pytest.mark.e2e
-class TestWebSocketResourceCleanupIdPatterns(SSotAsyncTestCase):
+class WebSocketResourceCleanupIdPatternsTests(SSotAsyncTestCase):
     """Test WebSocket resource cleanup with consistent ID patterns."""
 
     def setup_method(self, method=None):

@@ -59,7 +59,7 @@ class UserContextFactoryResult:
     creation_time: float = 0.0
 
 
-class TestUserContextFactoryIntegration(BaseIntegrationTest):
+class UserContextFactoryIntegrationTests(BaseIntegrationTest):
     """Test ExecutionEngineFactory with real PostgreSQL and Redis services."""
     
     def setup_method(self):

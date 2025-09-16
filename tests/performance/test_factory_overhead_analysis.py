@@ -182,7 +182,7 @@ def direct_object_creation(object_type: str = "default", **kwargs):
     }
 
 
-class TestFactoryOverheadAnalysis(SSotBaseTestCase):
+class FactoryOverheadAnalysisTests(SSotBaseTestCase):
     """
     Phase 3: Performance Impact Assessment
 

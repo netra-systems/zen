@@ -27,7 +27,7 @@ sys.path.insert(0, str(project_root))
 
 
 @pytest.mark.unit
-class TestMissingBridgeFunctions(unittest.TestCase):
+class MissingBridgeFunctionsTests(unittest.TestCase):
     """
     Test that demonstrates the missing bridge functions issue.
     
@@ -195,7 +195,7 @@ class TestMissingBridgeFunctions(unittest.TestCase):
 
 
 @pytest.mark.unit
-class TestConfigurationRegressionBlocking(unittest.TestCase):
+class ConfigurationRegressionBlockingTests(unittest.TestCase):
     """
     Test that demonstrates how missing functions block configuration protection.
     

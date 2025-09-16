@@ -49,7 +49,7 @@ except ImportError:
     UnifiedWebSocketEmitter = None
 
 try:
-    from netra_backend.app.websocket_core.websocket_manager import (
+    from netra_backend.app.websocket_core.canonical_import_patterns import (
         WebSocketManager,
         create_test_fallback_manager
     )
@@ -63,7 +63,7 @@ except ImportError:
 
 
 @pytest.mark.unit
-class TestWebSocketManagerMethodSignatureConflicts:
+class WebSocketManagerMethodSignatureConflictsTests:
     """Test WebSocket manager method signature conflicts."""
     
     @pytest.fixture
@@ -267,7 +267,7 @@ class TestWebSocketManagerMethodSignatureConflicts:
 
 
 @pytest.mark.unit
-class TestWebSocketBridgeAdapterInterfaceConflicts:
+class WebSocketBridgeAdapterInterfaceConflictsTests:
     """Test WebSocket bridge adapter interface conflicts."""
     
     @pytest.fixture

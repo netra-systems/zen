@@ -20,7 +20,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.integration
-class TestWebSocketMessageDeliveryReliability(SSotAsyncTestCase):
+class WebSocketMessageDeliveryReliabilityTests(SSotAsyncTestCase):
     """Test WebSocket message delivery reliability during SSOT changes."""
 
     def setUp(self):

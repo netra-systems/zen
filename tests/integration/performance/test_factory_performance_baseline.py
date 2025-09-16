@@ -69,7 +69,7 @@ class GoldenPathMetrics:
     concurrent_users_supported: int = 0
 
 
-class TestFactoryPerformanceBaseline(SSotAsyncTestCase):
+class FactoryPerformanceBaselineTests(SSotAsyncTestCase):
     """
     Factory performance baseline test suite.
 

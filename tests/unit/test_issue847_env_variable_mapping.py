@@ -31,7 +31,7 @@ from test_framework.test_context import TestContext
 
 
 @pytest.mark.unit
-class TestIssue847EnvironmentVariableMapping(unittest.TestCase):
+class Issue847EnvironmentVariableMappingTests(unittest.TestCase):
     """Test the specific environment variable mapping gap in Issue #847."""
 
     def test_staging_environment_variable_mapping_gap(self):

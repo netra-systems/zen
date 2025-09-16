@@ -35,7 +35,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestExecutionEngineSSotViolations(SSotBaseTestCase):
+class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
     """Test for detecting ExecutionEngine SSOT violations and fragmentation."""
     
     def setUp(self):

@@ -35,7 +35,7 @@ from test_framework.real_services import get_real_services
 # Import WebSocket core modules for auth testing
 from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage, generate_default_message
 from netra_backend.app.websocket_core.context import WebSocketRequestContext
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
 from netra_backend.app.middleware.auth_middleware import WebSocketAuthMiddleware
 
@@ -112,7 +112,7 @@ from shared.types.core_types import AuthValidationResult, SessionValidationResul
 @pytest.mark.integration  
 @pytest.mark.authentication
 @pytest.mark.websocket
-class TestWebSocketAuthIdIntegration(BaseIntegrationTest):
+class WebSocketAuthIdIntegrationTests(BaseIntegrationTest):
     """
     Integration tests that EXPOSE auth integration failures with uuid.uuid4().
     

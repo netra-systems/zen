@@ -382,7 +382,7 @@ class ProductionWebSocketEventStream:
         return total_time / len(completed_traces)
 
 
-class TestToolExecutionEngineRealServiceE2E(SSotBaseTestCase):
+class ToolExecutionEngineRealServiceE2ETests(SSotBaseTestCase):
     """Test tool execution engine with real services in E2E environment."""
     
     @pytest.mark.e2e

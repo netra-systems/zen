@@ -21,7 +21,7 @@ from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 
-class TestWebSocketNotifierLegacyUnit:
+class WebSocketNotifierLegacyUnitTests:
     """Unit tests for WebSocketNotifier edge cases and legacy patterns."""
     
     @pytest.fixture

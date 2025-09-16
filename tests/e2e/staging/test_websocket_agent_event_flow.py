@@ -83,7 +83,7 @@ class AgentEventFlowValidation:
     sla_compliance_rate: float
 
 
-class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
+class WebSocketAgentEventFlowStagingTests(BaseIntegrationTest):
     """
     Comprehensive E2E test suite for WebSocket agent event flow in staging environment.
     

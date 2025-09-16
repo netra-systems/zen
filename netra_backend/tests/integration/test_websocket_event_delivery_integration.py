@@ -46,7 +46,7 @@ from test_framework.real_services import get_real_services
 from shared.isolated_environment import get_env
 
 # Core WebSocket infrastructure imports
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.types import MessageType, WebSocketConnectionState
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 # ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
@@ -61,7 +61,7 @@ from shared.types import UserID, ThreadID, RunID, RequestID
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketEventDeliveryIntegration(WebSocketIntegrationTest):
+class WebSocketEventDeliveryIntegrationTests(WebSocketIntegrationTest):
     """
     15 Comprehensive WebSocket Event Delivery Integration Tests for Golden Path.
     

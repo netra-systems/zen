@@ -11,7 +11,7 @@ from typing import Dict, Any, List
 import time
 import json
 from datetime import datetime, timezone
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
 
 @pytest.mark.monitoring
-class TestAgentMetricsCollection:
+class AgentMetricsCollectionTests:
     """Test comprehensive agent metrics collection."""
     
     @pytest.mark.asyncio
@@ -268,7 +268,7 @@ class TestAgentMetricsCollection:
 
 
 @pytest.mark.monitoring
-class TestAgentTracing:
+class AgentTracingTests:
     """Test distributed tracing for agent operations."""
     
     @pytest.mark.asyncio
@@ -527,7 +527,7 @@ class TestAgentTracing:
 
 
 @pytest.mark.monitoring
-class TestAgentConfigurationMonitoring:
+class AgentConfigurationMonitoringTests:
     """Test agent configuration monitoring and management."""
     
     @pytest.mark.asyncio

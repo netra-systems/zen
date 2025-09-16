@@ -28,7 +28,7 @@ from shared.id_generation import UnifiedIdGenerator
 
 
 @pytest.mark.integration
-class TestWebSocketManagerMethodCompatibility:
+class WebSocketManagerMethodCompatibilityTests:
     """Test suite to ensure WebSocket manager has all required methods."""
     
     async def test_isolated_manager_has_get_connection_id_by_websocket(self):
@@ -271,7 +271,7 @@ if __name__ == "__main__":
     import pytest
     
     # Run tests
-    test_instance = TestWebSocketManagerMethodCompatibility()
+    test_instance = WebSocketManagerMethodCompatibilityTests()
     
     # Run async tests that were previously sync (FIXED: All tests are now async)
     async def run_sync_like_tests():

@@ -48,7 +48,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 # Import WebSocket core modules for isolation testing
 from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage, MessageType
 from netra_backend.app.websocket_core.context import WebSocketRequestContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
 
 # Import SSOT UnifiedIdGenerator for proper isolation
@@ -61,7 +61,7 @@ from shared.types.core_types import UserID, ConnectionID, ThreadID, ExecutionID
 @pytest.mark.multi_user
 @pytest.mark.isolation
 @pytest.mark.security
-class TestWebSocketMultiUserIsolationE2E(BaseE2ETest):
+class WebSocketMultiUserIsolationE2ETests(BaseE2ETest):
     """
     E2E tests that EXPOSE multi-user isolation failures with uuid.uuid4().
     

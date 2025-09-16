@@ -31,7 +31,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from shared.types.core_types import UserID, ensure_user_id
 
 
-class TestWebSocketSSotFactoryViolations(SSotAsyncTestCase):
+class WebSocketSSotFactoryViolationsTests(SSotAsyncTestCase):
     """
     Test suite to detect WebSocket SSOT factory pattern violations.
     
@@ -49,7 +49,7 @@ class TestWebSocketSSotFactoryViolations(SSotAsyncTestCase):
         
         # Test current factory creation patterns
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             # SSOT: Direct manager instantiation - no factory needed
             manager1 = WebSocketManager()
             factory_creation_results['websocket_manager_ssot'] = manager1 is not None
@@ -66,7 +66,7 @@ class TestWebSocketSSotFactoryViolations(SSotAsyncTestCase):
             
         try:
             # Direct instantiation (should be prevented after SSOT)
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             direct_manager = UnifiedWebSocketManager()
             factory_creation_results['direct_instantiation'] = direct_manager is not None
         except (ImportError, TypeError):
@@ -100,7 +100,7 @@ class TestWebSocketSSotFactoryViolations(SSotAsyncTestCase):
         
         # Create managers for each user
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             for user_id in users:
                 # Create manager instance for user
@@ -187,7 +187,7 @@ class TestWebSocketSSotFactoryViolations(SSotAsyncTestCase):
         connection_count = 50
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager = UnifiedWebSocketManager()
             
             # Create many connections for single user

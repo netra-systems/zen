@@ -5,7 +5,7 @@ See: SPEC/learnings/agent_registration_idempotency.xml
 """
 
 import asyncio
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -15,7 +15,7 @@ import pytest
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 
 
-class TestAgentRegistryIdempotency:
+class AgentRegistryIdempotencyTests:
     """Test suite for agent registry idempotency."""
 
     @pytest.fixture

@@ -32,7 +32,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 logger = logging.getLogger(__name__)
 
-class TestBackupRecoveryer:
+class BackupRecoveryerTests:
     """Tests backup and recovery pipeline functionality."""
     
     def __init__(self):
@@ -524,7 +524,7 @@ async def test_backup_recovery_pipeline():
     
     Must complete in <120 seconds including recovery simulation.
     """
-    tester = TestBackupRecoveryer()
+    tester = BackupRecoveryerTests()
     
     # Execute complete backup/recovery flow
     results = await tester.execute_backup_recovery_flow()
@@ -584,7 +584,7 @@ async def test_disaster_recovery_failover():
     3. Data consistency validation across services
     4. Performance impact assessment
     """
-    tester = TestBackupRecoveryer()
+    tester = BackupRecoveryerTests()
     start_time = time.time()
     
     try:

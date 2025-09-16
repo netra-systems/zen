@@ -100,7 +100,7 @@ class AlertEvent:
 @pytest.mark.integration
 @pytest.mark.cross_system
 @pytest.mark.monitoring
-class TestMonitoringIntegrationCoordination(SSotAsyncTestCase):
+class MonitoringIntegrationCoordinationTests(SSotAsyncTestCase):
     """
     Integration tests for monitoring and observability coordination.
     

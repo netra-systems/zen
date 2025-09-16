@@ -148,7 +148,7 @@ async def ws_tester():
     await tester.cleanup()
 
 
-class TestWebSocketComprehensiveE2E:
+class WebSocketComprehensiveE2ETests:
     """Comprehensive E2E tests for WebSocket communication."""
     
     @pytest.mark.asyncio

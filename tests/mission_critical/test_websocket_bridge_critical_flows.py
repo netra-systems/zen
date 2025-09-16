@@ -250,7 +250,7 @@ class MockOrchestrator:
 @pytest.fixture
 async def real_websocket_manager():
     """Real WebSocket manager fixture - NO MOCKS."""
-    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
     manager = get_websocket_manager()
     yield manager
 
@@ -287,7 +287,7 @@ async def websocket_bridge(real_websocket_manager, mock_orchestrator, test_regis
     return bridge
 
 
-class TestRunIdSSotCompliance:
+class RunIdSSotComplianceTests:
     """Test SSOT compliance for run ID generation and thread extraction."""
     
     @pytest.mark.asyncio
@@ -438,7 +438,7 @@ class TestRunIdSSotCompliance:
         print(" PASS:  Simple run ID failure detection: PASSED")
 
 
-class TestThreadRegistryOperations:
+class ThreadRegistryOperationsTests:
     """Test thread registry operations including TTL and cleanup."""
     
     @pytest.mark.asyncio
@@ -594,7 +594,7 @@ class TestThreadRegistryOperations:
         print(f" PASS:  Registry concurrent access: {total_stats['registered']} registrations, {total_stats['lookups']} lookups across {worker_count} workers")
 
 
-class TestWebSocketEventDelivery:
+class WebSocketEventDeliveryTests:
     """Test end-to-end WebSocket event delivery."""
     
     @pytest.mark.asyncio
@@ -802,7 +802,7 @@ class TestWebSocketEventDelivery:
         print(f" PASS:  High-frequency event delivery: {event_count} events delivered in {total_time:.2f}s ({events_per_second:.1f} events/sec)")
 
 
-class TestOrchestratorIntegration:
+class OrchestratorIntegrationTests:
     """Test orchestrator initialization and fallback mechanisms."""
     
     @pytest.mark.asyncio
@@ -932,7 +932,7 @@ class TestOrchestratorIntegration:
         print(f" PASS:  Orchestrator performance degradation: {len(all_run_ids)} resolutions in {total_time:.2f}s")
 
 
-class TestConcurrentOperations:
+class ConcurrentOperationsTests:
     """Test concurrent agent executions and multi-user scenarios."""
     
     @pytest.mark.asyncio
@@ -1209,7 +1209,7 @@ class TestConcurrentOperations:
         print(f" PASS:  System under extreme load: {thread_count} threads  x  {events_per_thread} events = {total_sent} events in {load_time:.2f}s ({events_per_second:.1f} events/sec, {success_rate:.1%} success rate)")
 
 
-class TestBusinessMetrics:
+class BusinessMetricsTests:
     """Test business value validation and metrics tracking."""
     
     @pytest.mark.asyncio

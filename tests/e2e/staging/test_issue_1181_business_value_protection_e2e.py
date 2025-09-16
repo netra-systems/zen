@@ -23,7 +23,7 @@ from test_framework.websocket_helpers import WebSocketTestClient
 from shared.isolated_environment import get_env
 
 
-class TestIssue1181BusinessValueProtectionE2E(BaseE2ETest):
+class Issue1181BusinessValueProtectionE2ETests(BaseE2ETest):
     """Test business value protection during MessageRouter consolidation."""
 
     @pytest.mark.e2e

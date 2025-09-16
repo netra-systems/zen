@@ -27,7 +27,7 @@ from tests.e2e.test_helpers.performance_base import (
 logger = logging.getLogger(__name__)
 
 
-class TestBackpressureMechanismTesting:
+class BackpressureMechanismTestingTests:
     """Test backpressure and queue overflow protection."""
     
     @pytest.mark.asyncio

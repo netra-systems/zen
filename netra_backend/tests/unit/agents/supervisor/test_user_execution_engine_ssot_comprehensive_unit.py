@@ -69,7 +69,7 @@ from netra_backend.app.agents.execution_engine_interface import IExecutionEngine
 from netra_backend.app.core.agent_execution_tracker import ExecutionState
 
 
-class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
+class UserExecutionEngineSSotComprehensiveUnitTests(SSotAsyncTestCase):
     """
     Comprehensive unit test suite for UserExecutionEngine SSOT class.
     

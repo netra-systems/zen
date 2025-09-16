@@ -34,7 +34,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestJsonOutputSizeOptimization(SSotBaseTestCase):
+class JsonOutputSizeOptimizationTests(SSotBaseTestCase):
     """Unit tests for JSON output size optimization features in unified test runner."""
 
     def setup_method(self, method=None):
@@ -330,7 +330,7 @@ class TestJsonOutputSizeOptimization(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestJsonOutputFormatConfiguration(SSotBaseTestCase):
+class JsonOutputFormatConfigurationTests(SSotBaseTestCase):
     """Test JSON output format configuration options."""
 
     def test_compact_vs_pretty_print_size_difference(self):

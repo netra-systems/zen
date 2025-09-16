@@ -46,7 +46,7 @@ from netra_backend.app.services.websocket_event_router import (
     ConnectionInfo,
     get_websocket_router
 )
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as UnifiedWebSocketManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -94,7 +94,7 @@ class UserEventRoutingRegistry:
 # UserScopedWebSocketEventRouter functionality has been consolidated into CanonicalMessageRouter
 # This file provides compatibility during migration phase
 
-from netra_backend.app.websocket_core.handlers import CanonicalMessageRouter
+from netra_backend.app.websocket_core.canonical_message_router import CanonicalMessageRouter
 
 
 class UserScopedWebSocketEventRouter(CanonicalMessageRouter):
@@ -591,25 +591,23 @@ class WebSocketEventRouterFactory:
             return None
 
 
-# Global factory instance for creating user-scoped routers
-_factory_instance: Optional[WebSocketEventRouterFactory] = None
-_factory_lock = threading.RLock()
-
+# SINGLETON ELIMINATION (Issue #1186 Phase 3): Removed global factory instance
+# Factory instances are now created per-request to prevent user isolation violations
 
 def get_event_router_factory() -> WebSocketEventRouterFactory:
     """
-    Get the global WebSocketEventRouterFactory instance.
-    
+    Create a new WebSocketEventRouterFactory instance per request.
+
+    SINGLETON ELIMINATION: This function now creates a fresh factory instance
+    for each call, ensuring proper user isolation and preventing cross-user
+    contamination of event routing state.
+
     Returns:
-        WebSocketEventRouterFactory instance
+        WebSocketEventRouterFactory: Fresh factory instance
     """
-    global _factory_instance
-    
-    with _factory_lock:
-        if _factory_instance is None:
-            _factory_instance = WebSocketEventRouterFactory()
-        
-        return _factory_instance
+    # Issue #1186 Phase 3: Create new factory instance per request
+    # This eliminates the singleton pattern that violated user isolation
+    return WebSocketEventRouterFactory()
 
 
 def create_user_event_router(user_context: UserExecutionContext) -> UserScopedWebSocketEventRouter:
@@ -666,7 +664,7 @@ async def broadcast_user_event(event: Dict[str, Any],
         # Get WebSocket manager from application context
         try:
             # Try to get manager from existing patterns
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             # Create manager with user context for proper isolation
             websocket_manager = get_websocket_manager(user_context=user_context)
@@ -775,7 +773,7 @@ async def broadcast_to_user(user_id: str, event: Dict[str, Any]) -> int:
     try:
         # Import here to avoid circular dependency
         from netra_backend.app.services.websocket_broadcast_service import create_broadcast_service
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
         # Get WebSocket manager instance via SSOT factory
         # NOTE: Module-level function lacks user context - consider upgrading callers

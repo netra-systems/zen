@@ -199,7 +199,7 @@ class MultiServiceCoordinator:
         total_throughput = sum((metrics.throughput_ops_per_sec for metrics in self.health_metrics.values()))
         return {'system_health': 'healthy' if failed_count == 0 else 'degraded' if healthy_count > failed_count else 'critical', 'service_counts': {'total': total_services, 'healthy': healthy_count, 'degraded': degraded_count, 'failed': failed_count, 'recovering': recovering_count}, 'health_ratios': {'healthy_ratio': healthy_count / max(total_services, 1), 'availability_ratio': (healthy_count + degraded_count) / max(total_services, 1), 'failure_ratio': failed_count / max(total_services, 1)}, 'performance_metrics': {'avg_response_time_ms': avg_response_time, 'avg_error_rate': avg_error_rate, 'total_throughput_ops_per_sec': total_throughput}, 'failure_events_count': len(self.failure_events), 'dependencies_count': len(self.dependencies), 'last_updated': datetime.now(timezone.utc).isoformat()}
 
-class TestMultiServiceCoordination(BaseIntegrationTest):
+class MultiServiceCoordinationTests(BaseIntegrationTest):
     """Integration tests for multi-service failure coordination and recovery."""
 
     def setup_method(self):

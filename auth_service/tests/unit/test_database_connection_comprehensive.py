@@ -29,7 +29,7 @@ from shared.isolated_environment import get_env
 from test_framework.real_services_test_fixtures import real_services_fixture
 
 
-class TestAuthDatabaseConnectionInitialization:
+class AuthDatabaseConnectionInitializationTests:
     """Test database connection initialization and configuration"""
     
     @pytest.mark.unit
@@ -138,7 +138,7 @@ class TestAuthDatabaseConnectionInitialization:
             assert db_conn.engine is None
 
 
-class TestAuthDatabaseConnectionSessionManagement:
+class AuthDatabaseConnectionSessionManagementTests:
     """Test database session management and transactions"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -284,7 +284,7 @@ class TestAuthDatabaseConnectionSessionManagement:
             pass  # Expected
 
 
-class TestAuthDatabaseConnectionPoolingAndPerformance:
+class AuthDatabaseConnectionPoolingAndPerformanceTests:
     """Test connection pooling and performance aspects"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -365,7 +365,7 @@ class TestAuthDatabaseConnectionPoolingAndPerformance:
                 pass  # Skip if pool inspection not available
 
 
-class TestAuthDatabaseConnectionHealthAndMonitoring:
+class AuthDatabaseConnectionHealthAndMonitoringTests:
     """Test database connection health checks and monitoring"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -446,7 +446,7 @@ class TestAuthDatabaseConnectionHealthAndMonitoring:
         assert health["engine_exists"] is False
 
 
-class TestAuthDatabaseConnectionErrorHandling:
+class AuthDatabaseConnectionErrorHandlingTests:
     """Test error handling and edge cases in database connection"""
     
     @pytest.mark.unit
@@ -596,7 +596,7 @@ class TestAuthDatabaseConnectionErrorHandling:
             assert result is False
 
 
-class TestAuthDatabaseConnectionTableManagement:
+class AuthDatabaseConnectionTableManagementTests:
     """Test table creation and management"""
     
     @pytest.mark.unit
@@ -646,7 +646,7 @@ class TestAuthDatabaseConnectionTableManagement:
         await db_conn.close()
 
 
-class TestAuthDatabaseConnectionCompatibilityAliases:
+class AuthDatabaseConnectionCompatibilityAliasesTests:
     """Test compatibility aliases for backward compatibility"""
     
     @pytest.mark.unit

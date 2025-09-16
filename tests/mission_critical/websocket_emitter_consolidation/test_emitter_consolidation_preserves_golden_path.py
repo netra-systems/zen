@@ -115,7 +115,7 @@ class ChatInteractionFlow:
     business_value_category: str  # "cost_optimization", "performance", "security", etc.
 
 
-class TestEmitterConsolidationPreservesGoldenPath(SSotAsyncTestCase):
+class EmitterConsolidationPreservesGoldenPathTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

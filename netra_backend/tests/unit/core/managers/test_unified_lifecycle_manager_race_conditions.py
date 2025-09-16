@@ -115,7 +115,7 @@ class MockWebSocketManager:
         self.connection_count = 0
 
 
-class TestUnifiedLifecycleManagerRaceConditions:
+class UnifiedLifecycleManagerRaceConditionsTests:
     """Test race conditions in UnifiedLifecycleManager startup sequences."""
     
     def setup_method(self):

@@ -49,7 +49,7 @@ from test_framework.database.test_database_manager import DatabaseTestManager
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 pytestmark = [pytest.mark.integration, pytest.mark.config, pytest.mark.shared_components, pytest.mark.cross_service]
 
-class TestDatabaseURLBuilderCrossService:
+class DatabaseURLBuilderCrossServiceTests:
     """Test DatabaseURLBuilder across different services (backend, auth, analytics)."""
 
     def test_database_url_builder_backend_service_integration(self):
@@ -131,7 +131,7 @@ class TestDatabaseURLBuilderCrossService:
         auto_url = builder.production.auto_url
         assert auto_url == async_url, 'Production should auto-select Cloud SQL'
 
-class TestSharedJWTSecretManagerCrossService:
+class SharedJWTSecretManagerCrossServiceTests:
     """Test SharedJWTSecretManager for cross-service JWT consistency."""
 
     def setup_method(self):
@@ -229,7 +229,7 @@ class TestSharedJWTSecretManagerCrossService:
             expected_secret = test_env['JWT_SECRET_KEY']
             assert list(unique_secrets)[0] == expected_secret, 'All services should get correct JWT secret'
 
-class TestPortDiscoveryCrossService:
+class PortDiscoveryCrossServiceTests:
     """Test PortDiscovery for dynamic service URL discovery."""
 
     def test_port_discovery_all_services_development(self):
@@ -333,7 +333,7 @@ class TestPortDiscoveryCrossService:
             assert not is_valid, 'Configuration with port conflicts should fail validation'
             assert 'conflict' in message.lower(), 'Error message should mention port conflict'
 
-class TestConfigurationManagerCrossService:
+class ConfigurationManagerCrossServiceTests:
     """Test configuration management features across services."""
 
     def test_configuration_backup_restore_functionality(self):
@@ -417,7 +417,7 @@ class TestConfigurationManagerCrossService:
         unique_jwt_secrets = set(jwt_secrets.values())
         assert len(unique_jwt_secrets) == 1, f'JWT secrets should be consistent across services: {jwt_secrets}'
 
-class TestEnvironmentSpecificConfiguration:
+class EnvironmentSpecificConfigurationTests:
     """Test environment-specific configuration loading (dev/test/staging/prod)."""
 
     def test_development_environment_configuration_loading(self):
@@ -513,7 +513,7 @@ class TestEnvironmentSpecificConfiguration:
             assert 'staging.' not in backend_url, 'Production should not use staging subdomain'
             assert 'netrasystems.ai' in backend_url, 'Production should use proper domain'
 
-class TestConfigurationDependencyMapping:
+class ConfigurationDependencyMappingTests:
     """Test configuration dependency mapping and validation."""
 
     def test_configuration_dependency_validation_prevents_cascade_failures(self):
@@ -564,7 +564,7 @@ class TestConfigurationDependencyMapping:
         assert audit_trail['changes_count'] == 3, 'Audit trail should record correct number of changes'
         assert audit_trail['validation_passed'] is True, 'Audit trail should record validation status'
 
-class TestClickHouseRemoteConfiguration:
+class ClickHouseRemoteConfigurationTests:
     """Test ClickHouse remote configuration for staging/production scenarios."""
 
     def test_clickhouse_staging_configuration(self):
@@ -634,7 +634,7 @@ class TestClickHouseRemoteConfiguration:
             else:
                 assert not is_valid, f"Configuration {test_case['name']} should be invalid, but passed validation"
 
-class TestConfigurationSecretsAndSecurity:
+class ConfigurationSecretsAndSecurityTests:
     """Test configuration scenarios involving secrets and security."""
 
     def test_jwt_secret_security_across_services(self):

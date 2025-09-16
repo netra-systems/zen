@@ -68,7 +68,7 @@ except ImportError:
     WINDOWS_ASYNCIO_SAFE_AVAILABLE = False
 
 
-class TestWindowsAsyncioCompatibilityComprehensive(BaseIntegrationTest):
+class WindowsAsyncioCompatibilityComprehensiveTests(BaseIntegrationTest):
     """
     Comprehensive Windows asyncio compatibility test suite.
     

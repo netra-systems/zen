@@ -22,7 +22,7 @@ import httpx
 from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 
-class TestIssue860WebSocketInfrastructureFailures(BaseIntegrationTest):
+class Issue860WebSocketInfrastructureFailuresTests(BaseIntegrationTest):
     """Test WebSocket infrastructure failures specific to Windows platform."""
 
     def setup_method(self):

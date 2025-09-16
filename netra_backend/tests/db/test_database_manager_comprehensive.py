@@ -42,7 +42,7 @@ from netra_backend.app.db.database_manager import (
 )
 
 
-class TestDatabaseManagerSSO:
+class DatabaseManagerSSOTests:
     """Test Database Manager as Single Source of Truth for database operations."""
     
     @pytest.fixture
@@ -436,7 +436,7 @@ class TestDatabaseManagerSSO:
             assert engine == mock_engine
 
 
-class TestDatabaseSessionHelpers:
+class DatabaseSessionHelpersTests:
     """Test database session helper functions for golden path integration."""
     
     @pytest.mark.unit
@@ -466,7 +466,7 @@ class TestDatabaseSessionHelpers:
             mock_manager.get_session.assert_called_once_with('primary')
 
 
-class TestDatabaseManagerBusinessScenarios:
+class DatabaseManagerBusinessScenariosTests:
     """Test business-critical database scenarios for golden path validation."""
     
     @pytest.mark.unit
@@ -573,7 +573,7 @@ class TestDatabaseManagerBusinessScenarios:
 
 
 @pytest.mark.integration  
-class TestDatabaseManagerSSotIntegration:
+class DatabaseManagerSSotIntegrationTests:
     """Integration tests for Database Manager SSOT compliance with real database operations."""
     
     @pytest.mark.real_database

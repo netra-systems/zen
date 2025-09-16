@@ -41,7 +41,7 @@ from fastapi import FastAPI
 logger = logging.getLogger(__name__)
 
 
-class TestIssue690Phase7HealthFailureReproduction(SSotBaseTestCase):
+class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
     """
     Test suite to reproduce Issue #690 Phase 7 health validation failures.
 
@@ -304,7 +304,7 @@ class TestIssue690Phase7HealthFailureReproduction(SSotBaseTestCase):
 
 
 @pytest.mark.asyncio
-class TestIssue690RemedationStrategyValidation:
+class Issue690RemedationStrategyValidationTests:
     """
     Tests to validate remediation strategies for Issue #690.
 
@@ -379,7 +379,7 @@ if __name__ == "__main__":
         print("Expected: Tests should FAIL, demonstrating the issues\n")
 
         # Run a simple reproduction test
-        test_instance = TestIssue690Phase7HealthFailureReproduction()
+        test_instance = Issue690Phase7HealthFailureReproductionTests()
         test_instance.setup_method(None)
 
         try:

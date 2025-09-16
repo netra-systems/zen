@@ -29,7 +29,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestWebSocketFactoryConsolidation(SSotAsyncTestCase):
+class WebSocketFactoryConsolidationTests(SSotAsyncTestCase):
     """Test WebSocket factory pattern consolidation and consistency.
     
     These tests MUST FAIL with current inconsistent factory implementations.
@@ -160,7 +160,7 @@ class TestWebSocketFactoryConsolidation(SSotAsyncTestCase):
         logger.info("Testing WebSocket manager user isolation enforcement...")
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             
             # Create managers for different users
             user_managers = {}
@@ -264,7 +264,7 @@ class TestWebSocketFactoryConsolidation(SSotAsyncTestCase):
         logger.info("Testing WebSocket manager factory thread safety...")
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             
             # Test concurrent factory calls
             thread_results = {}
@@ -346,7 +346,7 @@ class TestWebSocketFactoryConsolidation(SSotAsyncTestCase):
         logger.info("Testing WebSocket manager factory memory isolation...")
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             
             memory_violations = []
             created_managers_memory = []

@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 env = get_env()
-class TestHealthEndpointer:
+class HealthEndpointerTests:
     """Tests health endpoints directly for degraded mode behavior."""
     
     def __init__(self, base_url: str = "http://localhost:8000"):
@@ -126,7 +126,7 @@ class TestHealthEndpointer:
 
 @pytest.mark.asyncio 
 @pytest.mark.e2e
-class TestHealthCascadeIntegration:
+class HealthCascadeIntegrationTests:
     """Integration tests for health check cascade with real endpoints."""
     
     @pytest.fixture

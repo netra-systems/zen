@@ -16,7 +16,7 @@ from collections import deque
 from datetime import datetime, timedelta
 from unittest.mock import Mock, AsyncMock
 
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.resilience.unified_circuit_breaker import (
@@ -30,7 +30,7 @@ from netra_backend.app.core.shared_health_types import HealthChecker, HealthStat
 from netra_backend.app.schemas.core_models import HealthCheckResult
 
 
-class TestCircuitBreakerInitialization:
+class CircuitBreakerInitializationTests:
     """Test circuit breaker initialization and setup."""
 
     @pytest.fixture
@@ -90,7 +90,7 @@ class TestCircuitBreakerInitialization:
         assert circuit_breaker.metrics.failed_calls == 0
 
 
-class TestCircuitStateTransitions:
+class CircuitStateTransitionsTests:
     """Test circuit breaker state transition logic."""
 
     @pytest.fixture
@@ -155,7 +155,7 @@ class TestCircuitStateTransitions:
         assert circuit_breaker.state == CircuitBreakerState.CLOSED
 
 
-class TestOperationExecution:
+class OperationExecutionTests:
     """Test operation execution through circuit breaker."""
 
     @pytest.fixture
@@ -214,7 +214,7 @@ class TestOperationExecution:
         assert circuit_breaker.metrics.average_response_time >= 0.0
 
 
-class TestMetricsAndStatus:
+class MetricsAndStatusTests:
     """Test metrics collection and status reporting."""
 
     @pytest.fixture
@@ -252,7 +252,7 @@ class TestMetricsAndStatus:
         assert status['name'] == "test_circuit"
 
 
-class TestCircuitBreakerEdgeCases:
+class CircuitBreakerEdgeCasesTests:
     """Test edge cases and complex scenarios for circuit breaker."""
 
     @pytest.fixture

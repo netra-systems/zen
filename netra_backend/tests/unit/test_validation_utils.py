@@ -8,7 +8,7 @@ import pytest
 from netra_backend.app.utils.validation_utils import ValidationUtils
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestValidationUtils:
+class ValidationUtilsTests:
     """Test suite for ValidationUtils"""
 
     @pytest.fixture

@@ -134,7 +134,7 @@ class MockHealthService:
         """Mark as shutting down."""
         self.marked_shutting_down = True
 
-class TestComponentRegistration:
+class ComponentRegistrationTests:
     """Test component registration and management with real lifecycle manager."""
 
     @pytest.fixture
@@ -201,7 +201,7 @@ class TestComponentRegistration:
         component = lifecycle_manager.get_component(ComponentType.CLICKHOUSE_MANAGER)
         assert component is None
 
-class TestStartupLifecycle:
+class StartupLifecycleTests:
     """Test startup lifecycle operations with real components."""
 
     @pytest.fixture
@@ -298,7 +298,7 @@ class TestStartupLifecycle:
         assert lifecycle_manager._health_check_task is not None
         assert not lifecycle_manager._health_check_task.done()
 
-class TestShutdownLifecycle:
+class ShutdownLifecycleTests:
     """Test shutdown lifecycle operations with real components."""
 
     @pytest.fixture
@@ -404,7 +404,7 @@ class TestShutdownLifecycle:
         assert health_service.marked_shutting_down is True
         assert end_time - start_time >= 1.0
 
-class TestRequestTracking:
+class RequestTrackingTests:
     """Test request tracking for graceful shutdown."""
 
     @pytest.fixture
@@ -490,7 +490,7 @@ class TestRequestTracking:
         status = lifecycle_manager.get_status()
         assert status['active_requests'] == 1
 
-class TestHealthMonitoring:
+class HealthMonitoringTests:
     """Test health monitoring functionality."""
 
     @pytest.fixture
@@ -583,7 +583,7 @@ class TestHealthMonitoring:
         assert status['phase'] == 'shutting_down'
         assert status['ready'] is False
 
-class TestLifecycleHooks:
+class LifecycleHooksTests:
     """Test lifecycle hooks and custom handlers."""
 
     @pytest.fixture
@@ -690,7 +690,7 @@ class TestLifecycleHooks:
         lifecycle_manager.register_lifecycle_hook('unknown_event', test_hook)
         assert 'unknown_event' not in lifecycle_manager._lifecycle_hooks
 
-class TestMultiUserSupport:
+class MultiUserSupportTests:
     """Test multi-user support and factory pattern."""
 
     def test_user_specific_lifecycle_manager_creation(self, isolated_env):
@@ -776,7 +776,7 @@ class TestMultiUserSupport:
         assert user2_manager.get_component(ComponentType.DATABASE_MANAGER) is user2_component
         assert user1_manager.get_component(ComponentType.DATABASE_MANAGER) is not user2_component
 
-class TestWebSocketIntegration:
+class WebSocketIntegrationTests:
     """Test WebSocket integration for lifecycle events."""
 
     @pytest.fixture
@@ -860,7 +860,7 @@ class TestWebSocketIntegration:
         result = await lifecycle_manager.startup()
         assert result is True
 
-class TestStatusAndMonitoring:
+class StatusAndMonitoringTests:
     """Test status reporting and monitoring functionality."""
 
     @pytest.fixture
@@ -945,7 +945,7 @@ class TestStatusAndMonitoring:
         await asyncio.gather(shutdown_task, wait_task)
         assert lifecycle_manager.get_current_phase() == LifecyclePhase.SHUTDOWN_COMPLETE
 
-class TestErrorHandlingAndEdgeCases:
+class ErrorHandlingAndEdgeCasesTests:
     """Test error handling and edge cases."""
 
     @pytest.fixture
@@ -1053,7 +1053,7 @@ class TestErrorHandlingAndEdgeCases:
         assert result is True
         assert exception_count == 2
 
-class TestEnvironmentConfiguration:
+class EnvironmentConfigurationTests:
     """Test environment configuration and IsolatedEnvironment integration."""
 
     @pytest.mark.asyncio
@@ -1090,7 +1090,7 @@ class TestEnvironmentConfiguration:
         assert manager.shutdown_timeout == 42
         assert manager.startup_timeout == 84
 
-class TestSetupApplicationLifecycle:
+class SetupApplicationLifecycleTests:
     """Test setup_application_lifecycle integration function."""
 
     @pytest.fixture

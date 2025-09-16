@@ -12,7 +12,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestJWTSSOTViolationDetection(SSotBaseTestCase):
+class JWTSSOTViolationDetectionTests(SSotBaseTestCase):
     """Unit tests to detect JWT SSOT violations in backend service"""
     
     def setup_method(self):

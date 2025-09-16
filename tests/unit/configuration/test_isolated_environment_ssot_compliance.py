@@ -16,7 +16,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
 @pytest.mark.unit
-class TestIsolatedEnvironmentSSOTCompliance:
+class IsolatedEnvironmentSSOTComplianceTests:
     """Test IsolatedEnvironment SSOT compliance patterns to prevent cascade failures."""
 
     def test_singleton_consistency_across_modules(self):
@@ -163,7 +163,7 @@ class TestIsolatedEnvironmentSSOTCompliance:
 
 
 @pytest.mark.unit
-class TestEnvironmentIsolationBoundaries:
+class EnvironmentIsolationBoundariesTests:
     """Test environment isolation boundaries to prevent configuration drift."""
 
     def test_test_context_automatic_isolation(self):

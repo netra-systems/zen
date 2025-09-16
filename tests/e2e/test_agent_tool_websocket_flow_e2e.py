@@ -151,7 +151,7 @@ class MockE2EAgent:
 
 
 @pytest.mark.e2e
-class TestAgentToolWebSocketFlowE2E:
+class AgentToolWebSocketFlowE2ETests:
     """E2E tests for complete agent-tool-websocket integration."""
 
     @pytest.fixture

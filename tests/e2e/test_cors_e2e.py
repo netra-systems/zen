@@ -23,7 +23,7 @@ class ServiceEndpoints:
     websocket_url: str = 'ws://localhost:8000/ws'
 
 @pytest.mark.e2e
-class TestCORSCompleteAuthFlow:
+class CORSCompleteAuthFlowTests:
     """Test complete authentication flow across services with CORS."""
 
     @pytest.fixture
@@ -106,7 +106,7 @@ class TestCORSCompleteAuthFlow:
                 pytest.skip('Service timeout during e2e token validation test')
 
 @pytest.mark.e2e
-class TestCORSPREnvironmentValidation:
+class CORSPREnvironmentValidationTests:
     """Test PR environment dynamic origin validation."""
 
     @pytest.fixture
@@ -142,7 +142,7 @@ class TestCORSPREnvironmentValidation:
                 assert is_origin_allowed(origin, origins), f'Cloud Run PR origin should be allowed: {origin}'
 
 @pytest.mark.e2e
-class TestCORSProductionStrictValidation:
+class CORSProductionStrictValidationTests:
     """Test production strict origin enforcement."""
 
     @pytest.mark.asyncio
@@ -167,7 +167,7 @@ class TestCORSProductionStrictValidation:
             assert not _evaluate_wildcard_environment(), 'Production should not allow wildcard origins'
 
 @pytest.mark.e2e
-class TestCORSDynamicPortValidation:
+class CORSDynamicPortValidationTests:
     """Test CORS with dynamic localhost ports."""
 
     @pytest.fixture
@@ -198,7 +198,7 @@ class TestCORSDynamicPortValidation:
                 assert not _check_localhost_pattern(origin), f'Non-localhost should not match: {origin}'
 
 @pytest.mark.e2e
-class TestCORSCredentialRequestsAcrossServices:
+class CORSCredentialRequestsAcrossServicesTests:
     """Test credential-based requests across services."""
 
     @pytest.fixture
@@ -258,7 +258,7 @@ class TestCORSCredentialRequestsAcrossServices:
             pytest.skip('WebSocket timeout for auth CORS test')
 
 @pytest.mark.e2e
-class TestCORSRegressionComprehensive:
+class CORSRegressionComprehensiveTests:
     """Comprehensive regression tests for all CORS scenarios."""
 
     @pytest.fixture
@@ -307,7 +307,7 @@ class TestCORSRegressionComprehensive:
             assert '*' in origins, 'Dev launcher should set CORS_ORIGINS=* for development'
 
 @pytest.mark.e2e
-class TestCORSPerformanceAndResilience:
+class CORSPerformanceAndResilienceTests:
     """Test CORS performance and resilience characteristics."""
 
     @pytest.mark.asyncio

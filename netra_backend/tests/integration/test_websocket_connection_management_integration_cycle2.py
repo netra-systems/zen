@@ -18,14 +18,14 @@ from typing import Dict, Any, List
 import time
 import uuid
 
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager  
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager  
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from shared.types import UserID, ConnectionID, ThreadID
 from test_framework.ssot.websocket import WebSocketTestClient
 from test_framework.database_test_utilities import DatabaseTestUtilities
 
 
-class TestWebSocketConnectionManagementIntegration:
+class WebSocketConnectionManagementIntegrationTests:
     """Test WebSocket connection management with real service integration."""
     
     @pytest.mark.integration

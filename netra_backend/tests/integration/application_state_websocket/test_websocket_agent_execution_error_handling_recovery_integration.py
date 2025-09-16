@@ -146,7 +146,7 @@ class ErrorHandlingEventCollector:
         """Analyze error handling patterns and effectiveness."""
         return {'total_events': len(self.all_events), 'error_events': len(self.error_events), 'recovery_events': len(self.recovery_patterns), 'error_handling_metrics': {'error_detection_rate': len(self.error_events) / len(self.all_events) * 100 if self.all_events else 0, 'recovery_attempt_rate': len(self.recovery_patterns) / max(1, len(self.error_events)) * 100, 'graceful_handling': len(self.error_events) > 0 and len(self.recovery_patterns) > 0}, 'business_impact': {'user_transparency': len(self.error_events) > 0, 'service_continuity': len(self.recovery_patterns) > 0, 'data_integrity': 'maintained'}}
 
-class TestWebSocketAgentExecutionErrorHandlingRecoveryIntegration(BaseIntegrationTest):
+class WebSocketAgentExecutionErrorHandlingRecoveryIntegrationTests(BaseIntegrationTest):
     """Integration test for agent execution error handling with WebSocket events."""
 
     def setup_method(self):

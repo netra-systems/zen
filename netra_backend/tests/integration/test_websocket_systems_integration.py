@@ -48,7 +48,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 
 # WebSocket core components
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.websocket_core.types import (
     WebSocketConnectionState, MessageType, ConnectionInfo, WebSocketMessage,
     ServerMessage, ErrorMessage, WebSocketConfig, ReconnectionConfig
@@ -97,7 +97,7 @@ class MockWebSocket:
         self.client_state = WebSocketConnectionState.DISCONNECTED
 
 
-class TestWebSocketSystems(SSotBaseTestCase):
+class WebSocketSystemsTests(SSotBaseTestCase):
     """Integration tests for WebSocket systems functionality."""
     
     def setup_method(self, method=None):

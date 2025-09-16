@@ -40,7 +40,7 @@ from netra_backend.app.services.database.pool_metrics import ConnectionPoolMetri
 logger = central_logger.get_logger(__name__)
 
 
-class TestPoolExhaustionHarness:
+class PoolExhaustionHarnessTests:
     """Test harness for database connection pool exhaustion scenarios."""
     
     def __init__(self):
@@ -224,7 +224,7 @@ async def test_pool_test_harness():
 
 @pytest.mark.e2e
 @pytest.mark.critical
-class TestDatabaseConnectionPoolExhaustion:
+class DatabaseConnectionPoolExhaustionTests:
     """Test suite for database connection pool exhaustion scenarios."""
     
     async def test_pool_saturation_detection(self, pool_test_harness):
@@ -521,7 +521,7 @@ class TestDatabaseConnectionPoolExhaustion:
 
 @pytest.mark.e2e
 @pytest.mark.performance
-class TestDatabaseConnectionPoolPerformance:
+class DatabaseConnectionPoolPerformanceTests:
     """Performance-focused tests for connection pool behavior."""
     
     async def test_connection_acquisition_latency(self, pool_test_harness):

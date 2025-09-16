@@ -20,7 +20,7 @@ def cost_calculator():
     return CostCalculatorService()
 
 
-class TestFaultTolerance:
+class FaultToleranceTests:
     """Test system fault tolerance capabilities."""
 
     def test_graceful_degradation_under_stress(self, cost_calculator):
@@ -102,7 +102,7 @@ class TestFaultTolerance:
         assert successful_handles == len(corrupted_scenarios), "System should handle corrupted data gracefully"
 
 
-class TestRecoveryScenarios:
+class RecoveryScenariosTests:
     """Test system recovery from various failure scenarios."""
 
     def test_service_restart_simulation(self):
@@ -170,7 +170,7 @@ class TestRecoveryScenarios:
                     assert False, f"Unexpected error under memory pressure: {e}"
 
 
-class TestConcurrencyResilience:
+class ConcurrencyResilienceTests:
     """Test resilience under concurrent load."""
 
     def test_thread_safety_simulation(self, cost_calculator):
@@ -239,7 +239,7 @@ class TestConcurrencyResilience:
         assert len(set(costs)) == 1, "Services should not be affected by race conditions"
 
 
-class TestSystemLimitsAndBoundaries:
+class SystemLimitsAndBoundariesTests:
     """Test system behavior at limits and boundaries."""
 
     def test_extreme_input_handling(self, cost_calculator):
@@ -313,7 +313,7 @@ class TestSystemLimitsAndBoundaries:
             assert current_cost == baseline_cost, f"System should remain stable after {checkpoint} operations"
 
 
-class TestProductionReadiness:
+class ProductionReadinessTests:
     """Test production readiness scenarios."""
 
     def test_error_handling_production_quality(self):

@@ -199,7 +199,7 @@ class IntegratedWorkflowWebSocketManager:
                 return False
         return len(tool_executions) > 0
 
-class TestRealToolExecutionDispatchingWorkflows(SSotAsyncTestCase):
+class RealToolExecutionDispatchingWorkflowsTests(SSotAsyncTestCase):
     """Integration tests for real tool execution dispatching workflows."""
 
     def setUp(self):

@@ -39,7 +39,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestWebSocketChatSessionsE2E(SSotBaseTestCase):
+class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
     """
     E2E tests for complete WebSocket chat sessions with authentication.
     

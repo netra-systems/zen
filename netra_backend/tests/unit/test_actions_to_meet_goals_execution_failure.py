@@ -31,7 +31,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
-class TestActionsToMeetGoalsExecutionFailures(SSotAsyncTestCase):
+class ActionsToMeetGoalsExecutionFailuresTests(SSotAsyncTestCase):
     """Unit test suite reproducing ActionsToMeetGoalsSubAgent execution failures.
     
     CRITICAL: These tests are designed to FAIL initially to prove the issue exists.

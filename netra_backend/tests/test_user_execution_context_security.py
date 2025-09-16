@@ -11,7 +11,7 @@ import pytest
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestUserExecutionContextSecurity:
+class UserExecutionContextSecurityTests:
     """Security demonstration tests for UserExecutionContext."""
 
     def test_prevents_none_user_id_data_leakage(self):

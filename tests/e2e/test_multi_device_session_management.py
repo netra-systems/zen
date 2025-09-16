@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
-class TestMultiDeviceSessionManagement(SSotAsyncTestCase):
+class MultiDeviceSessionManagementTests(SSotAsyncTestCase):
     """E2E tests for multi-device session management."""
     
     async def async_setup_method(self, method=None):

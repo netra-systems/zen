@@ -30,7 +30,7 @@ from auth_service.services.jwt_service import JWTService
 from auth_service.services.redis_service import RedisService
 
 
-class TestAuthSecurityEdgeCasesIntegration(SSotAsyncTestCase):
+class AuthSecurityEdgeCasesIntegrationTests(SSotAsyncTestCase):
     """Security edge case testing for auth integration with real services."""
 
     @pytest.fixture(autouse=True)

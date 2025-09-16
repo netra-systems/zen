@@ -28,7 +28,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
 @pytest.mark.unit
-class TestRequestScopedToolDispatcherSSotCompliance(SSotBaseTestCase):
+class RequestScopedToolDispatcherSSotComplianceTests(SSotBaseTestCase):
     """Test SSOT compliance for RequestScopedToolDispatcher system.
     
     These tests should FAIL initially due to SSOT violations and PASS after consolidation.
@@ -159,19 +159,19 @@ class TestRequestScopedToolDispatcherSSotCompliance(SSotBaseTestCase):
             dispatcher_1 = RequestScopedToolDispatcher(user_context=self.user_context_1)
             dispatcher_2 = RequestScopedToolDispatcher(user_context=self.user_context_2)
 
-            class TestTool1:
+            class Tool1Tests:
                 name = 'user1_tool'
 
                 def run(self, query: str) -> str:
                     return f'User 1 result: {query}'
 
-            class TestTool2:
+            class Tool2Tests:
                 name = 'user2_tool'
 
                 def run(self, query: str) -> str:
                     return f'User 2 result: {query}'
-            dispatcher_1.register_tool('user1_tool', TestTool1().run)
-            dispatcher_2.register_tool('user2_tool', TestTool2().run)
+            dispatcher_1.register_tool('user1_tool', Tool1Tests().run)
+            dispatcher_2.register_tool('user2_tool', Tool2Tests().run)
             self.assertTrue(dispatcher_1.has_tool('user1_tool'), 'User 1 dispatcher should have user1_tool')
             self.assertFalse(dispatcher_1.has_tool('user2_tool'), 'ISOLATION VIOLATION: User 1 dispatcher should NOT have access to user2_tool')
             self.assertTrue(dispatcher_2.has_tool('user2_tool'), 'User 2 dispatcher should have user2_tool')
@@ -245,7 +245,7 @@ class TestRequestScopedToolDispatcherSSotCompliance(SSotBaseTestCase):
             self.assertIn('RequestScopedToolDispatcher', instantiable_classes, f'SSOT implementation RequestScopedToolDispatcher should be instantiable, but found: {instantiable_classes}')
 
 @pytest.mark.unit
-class TestRequestScopedToolDispatcherFactoryConsistency(SSotBaseTestCase):
+class RequestScopedToolDispatcherFactoryConsistencyTests(SSotBaseTestCase):
     """Test factory consistency for RequestScopedToolDispatcher system."""
 
     def setUp(self):

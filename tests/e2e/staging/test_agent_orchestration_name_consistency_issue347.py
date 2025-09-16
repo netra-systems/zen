@@ -27,13 +27,13 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.staging
 @pytest.mark.e2e
-class TestAgentOrchestrationNameConsistencyE2E(SSotAsyncTestCase):
+class AgentOrchestrationNameConsistencyE2ETests(SSotAsyncTestCase):
     """E2E staging tests for agent orchestration naming consistency."""
     
     @classmethod
@@ -286,7 +286,7 @@ class TestAgentOrchestrationNameConsistencyE2E(SSotAsyncTestCase):
 
 @pytest.mark.staging
 @pytest.mark.slow
-class TestStagingAgentWorkflowIntegration(SSotAsyncTestCase):
+class StagingAgentWorkflowIntegrationTests(SSotAsyncTestCase):
     """Complete staging workflow integration tests for agent naming."""
     
     async def asyncSetUp(self):

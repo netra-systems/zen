@@ -44,7 +44,7 @@ class WebSocketPerformanceMetrics:
     disconnection_time: Optional[float] = None
 
 
-class TestWebSocketScalingPerformance(BaseIntegrationTest):
+class WebSocketScalingPerformanceTests(BaseIntegrationTest):
     """Test WebSocket scaling performance with real connections and authentication."""
     
     @pytest.mark.integration

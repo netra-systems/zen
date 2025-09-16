@@ -187,22 +187,22 @@ def mock_httpx_responses():
     class MockResponses:
         def __init__(self):
             # Mock: Generic component isolation for controlled unit testing
-            self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            self.websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             self.backend_health.status_code = 200
             self.backend_health.json.return_value = {"status": "healthy", "service": "backend"}
             
             # Mock: Generic component isolation for controlled unit testing
-            self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            self.websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             self.frontend_health.status_code = 200
             self.frontend_health.json.return_value = {"status": "healthy", "service": "frontend"}
             
             # Mock: Generic component isolation for controlled unit testing
-            self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            self.websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             self.auth_health.status_code = 200
             self.auth_health.json.return_value = {"status": "healthy", "service": "auth"}
             
             # Mock: Generic component isolation for controlled unit testing
-            self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            self.websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             self.auth_config.status_code = 200
             self.auth_config.json.return_value = {
                 "client_id": "test-client-id",
@@ -211,7 +211,7 @@ def mock_httpx_responses():
             }
             
             # Mock: Generic component isolation for controlled unit testing
-            self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            self.websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             self.token_validation.status_code = 200
             self.token_validation.json.return_value = {
                 "valid": True,
@@ -238,7 +238,7 @@ def performance_test_config():
 
 
 @pytest.mark.integration
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):

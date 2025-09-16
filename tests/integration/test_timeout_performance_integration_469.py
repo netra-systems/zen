@@ -94,7 +94,7 @@ class RealisticLoadSimulator:
         return load_results
 
 @pytest.mark.integration
-class TestTimeoutPerformanceIntegration(SSotAsyncTestCase):
+class TimeoutPerformanceIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for timeout performance under realistic conditions (Issue #469).
     

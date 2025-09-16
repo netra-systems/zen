@@ -21,7 +21,7 @@ from typing import List, Dict, Any
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestDuplicateAuthenticatorClassesViolation(SSotAsyncTestCase):
+class DuplicateAuthenticatorClassesViolationTests(SSotAsyncTestCase):
     """
     Mission Critical Test: WebSocket Authentication SSOT Violation Detection
     

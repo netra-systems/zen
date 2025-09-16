@@ -16,7 +16,7 @@ fix_clickhouse_array_syntax,
 validate_clickhouse_query,
 )
 
-class TestMultiSourceCorrelation:
+class MultiSourceCorrelationTests:
     """Test correlation analysis across multiple data sources"""
 
     def test_cross_table_correlation(self):
@@ -157,7 +157,7 @@ class TestMultiSourceCorrelation:
                 is_valid, error = validate_clickhouse_query(fixed_query)
                 assert is_valid, f"Resource utilization query failed: {error}"
 
-                class TestBusinessMetricsAggregation:
+                class BusinessMetricsAggregationTests:
                     """Test business metrics aggregation across sources"""
 
                     def test_business_metrics_aggregation(self):

@@ -504,7 +504,7 @@ class RealDashboardTestHarness(AnalyticsE2ETestHarness):
 # GRAFANA INTEGRATION TESTS - REAL SERVICE ONLY
 # =============================================================================
 
-class TestRealGrafanaDashboardIntegration:
+class RealGrafanaDashboardIntegrationTests:
     """Test suite for REAL Grafana dashboard integration - NO MOCKS"""
     
     @pytest.fixture
@@ -729,7 +729,7 @@ class TestRealGrafanaDashboardIntegration:
 # REAL-TIME DASHBOARD UPDATES TESTS - NO MOCKS
 # =============================================================================
 
-class TestRealTimeDashboardUpdates:
+class RealTimeDashboardUpdatesTests:
     """Test suite for REAL real-time dashboard updates using live services"""
     
     @pytest.fixture
@@ -870,7 +870,7 @@ class TestRealTimeDashboardUpdates:
 # DASHBOARD PERFORMANCE TESTS - REAL LOAD TESTING
 # =============================================================================
 
-class TestRealDashboardPerformance:
+class RealDashboardPerformanceTests:
     """Test suite for REAL dashboard performance under actual load"""
     
     @pytest.fixture
@@ -986,7 +986,7 @@ class TestRealDashboardPerformance:
 # CUSTOM DASHBOARD TESTS - REAL GRAFANA MANAGEMENT
 # =============================================================================
 
-class TestRealCustomDashboardManagement:
+class RealCustomDashboardManagementTests:
     """Test suite for REAL custom dashboard creation and management in live Grafana"""
     
     @pytest.fixture
@@ -1143,7 +1143,7 @@ class TestRealCustomDashboardManagement:
 # DASHBOARD DATA ACCURACY TESTS - REAL DATA VALIDATION
 # =============================================================================
 
-class TestRealDashboardDataAccuracy:
+class RealDashboardDataAccuracyTests:
     """Test suite for REAL dashboard data accuracy and consistency with live pipeline"""
     
     @pytest.fixture

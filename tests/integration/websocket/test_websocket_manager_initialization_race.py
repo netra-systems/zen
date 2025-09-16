@@ -34,7 +34,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestWebSocketManagerInitializationRace(SSotAsyncTestCase):
+class WebSocketManagerInitializationRaceTests(SSotAsyncTestCase):
     """Test suite to demonstrate WebSocket Manager initialization race conditions."""
 
     def setUp(self):
@@ -463,7 +463,7 @@ class TestWebSocketManagerInitializationRace(SSotAsyncTestCase):
         
         if import_scenario == 'legacy_websocket_manager':
             # This would normally test:
-            # from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            # from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Simulate the legacy import creating a different instance
             legacy_manager_mock = MagicMock()
@@ -473,7 +473,7 @@ class TestWebSocketManagerInitializationRace(SSotAsyncTestCase):
         
         elif import_scenario == 'unified_manager_import':
             # This would normally test:
-            # from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager
+            # from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager
             
             # Simulate the SSOT import creating a consistent instance
             unified_manager_mock = MagicMock()

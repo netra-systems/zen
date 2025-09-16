@@ -257,7 +257,7 @@ class CompleteJWTAuthTesterClaude:
 
 
 # CLAUDE.md COMPLIANT TEST CASES
-class TestWebSocketJWTCompleteAuthenticated:
+class WebSocketJWTCompleteAuthenticatedTests:
     """
     CLAUDE.md COMPLIANT: Complete JWT Authentication Tests with MANDATORY Authentication
     

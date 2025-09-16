@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
 @pytest.mark.integration
-class TestWebSocketManagerSSOTComplianceIntegration(SSotAsyncTestCase):
+class WebSocketManagerSSOTComplianceIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket Manager SSOT compliance with staging services."""
 
     @classmethod
@@ -83,7 +83,7 @@ class TestWebSocketManagerSSOTComplianceIntegration(SSotAsyncTestCase):
         managers_created = []
         creation_errors = []
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
             manager1 = WebSocketManager(user_context=self.user_context)
             managers_created.append(('Direct WebSocketManager', manager1))
             manager2 = get_websocket_manager(user_context=self.user_context)
@@ -91,7 +91,7 @@ class TestWebSocketManagerSSOTComplianceIntegration(SSotAsyncTestCase):
         except Exception as e:
             creation_errors.append(f'SSOT canonical import failed: {e}')
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager3 = UnifiedWebSocketManager(user_context=self.user_context)
             managers_created.append(('UnifiedWebSocketManager direct', manager3))
         except Exception as e:
@@ -117,7 +117,7 @@ class TestWebSocketManagerSSOTComplianceIntegration(SSotAsyncTestCase):
         required_events = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
         received_events = []
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager = WebSocketManager(user_context=self.user_context)
 
             class MockWebSocketConnection:
@@ -168,7 +168,7 @@ class TestWebSocketManagerSSOTComplianceIntegration(SSotAsyncTestCase):
             user_contexts.append(user_context)
         managers = []
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             for i, context in enumerate(user_contexts):
                 manager = WebSocketManager(user_context=context)
                 managers.append((f'user_{i}', manager))
@@ -194,7 +194,7 @@ class TestWebSocketManagerSSOTComplianceIntegration(SSotAsyncTestCase):
         async def create_manager_method_1():
             start_time = time.time()
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 manager = WebSocketManager(user_context=self.user_context)
                 end_time = time.time()
                 creation_times.append(('Direct WebSocketManager', end_time - start_time))
@@ -206,7 +206,7 @@ class TestWebSocketManagerSSOTComplianceIntegration(SSotAsyncTestCase):
         async def create_manager_method_2():
             start_time = time.time()
             try:
-                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                 manager = get_websocket_manager(user_context=self.user_context)
                 end_time = time.time()
                 creation_times.append(('Factory get_websocket_manager', end_time - start_time))
@@ -218,7 +218,7 @@ class TestWebSocketManagerSSOTComplianceIntegration(SSotAsyncTestCase):
         async def create_manager_method_3():
             start_time = time.time()
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 manager = UnifiedWebSocketManager(user_context=self.user_context)
                 end_time = time.time()
                 creation_times.append(('UnifiedWebSocketManager', end_time - start_time))
@@ -261,7 +261,7 @@ class TestWebSocketManagerSSOTComplianceIntegration(SSotAsyncTestCase):
         env = IsolatedEnvironment()
         staging_url = env.get('STAGING_BACKEND_URL', 'https://staging-backend-dot-netra-staging.uc.r.appspot.com')
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager = WebSocketManager(user_context=self.user_context)
             timeout = aiohttp.ClientTimeout(total=30)
             async with aiohttp.ClientSession(timeout=timeout) as session:

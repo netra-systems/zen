@@ -58,7 +58,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestAuthenticationGoldenPathComplete(BaseE2ETest):
+class AuthenticationGoldenPathCompleteTests(BaseE2ETest):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

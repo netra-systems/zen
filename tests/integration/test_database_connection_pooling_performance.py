@@ -58,7 +58,7 @@ class DatabaseLoadTestResult:
     performance_degradation: float
 
 
-class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
+class DatabaseConnectionPoolingPerformanceTests(BaseIntegrationTest):
     """Test database connection pooling performance under load."""
     
     @pytest.mark.integration

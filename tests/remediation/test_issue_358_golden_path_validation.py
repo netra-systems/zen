@@ -35,6 +35,7 @@ import requests
 import websocket
 import json
 import time
+import unittest
 from typing import Dict, List, Optional
 from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -42,7 +43,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID, ThreadID, RunID
 
-class TestIssue358GoldenPathValidation(SSotAsyncTestCase):
+class Issue358GoldenPathValidationTests(SSotAsyncTestCase, unittest.TestCase):
     """
     CRITICAL VALIDATION SUITE for Issue #358 Remediation
     
@@ -243,7 +244,7 @@ class TestIssue358GoldenPathValidation(SSotAsyncTestCase):
         self.assertTrue(validation_results['api_compatibility'], 'API compatibility FAILED - Issue #357 fix not deployed')
         self.assertTrue(validation_results['websocket_connectivity'], 'WebSocket connectivity FAILED - Core chat functionality unavailable')
 
-class TestBusinessValueValidation(SSotAsyncTestCase):
+class BusinessValueValidationTests(SSotAsyncTestCase):
     """
     Business Value Validation for Issue #358 Remediation
     

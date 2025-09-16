@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketFactoryImportValidationFixed(unittest.TestCase):
+class WebSocketFactoryImportValidationFixedTests(unittest.TestCase):
     """
     Validate WebSocket Factory Import patterns for safe SSOT transition.
     
@@ -88,14 +88,14 @@ class TestWebSocketFactoryImportValidationFixed(unittest.TestCase):
         
         try:
             # Test canonical WebSocket manager import
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Validate classes are importable and properly defined
             self.assertTrue(hasattr(WebSocketManager, '__init__'), 
                           "WebSocketManager class missing __init__ method")
             
             # Test WebSocket manager functions
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             self.assertTrue(callable(get_websocket_manager), 
                           "get_websocket_manager is not callable")
             
@@ -190,7 +190,7 @@ class TestWebSocketFactoryImportValidationFixed(unittest.TestCase):
         logger.info("Testing WebSocket manager initialization without factory...")
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             # Create user context via SSOT pattern

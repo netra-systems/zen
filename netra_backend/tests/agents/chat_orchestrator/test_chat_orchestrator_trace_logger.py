@@ -28,7 +28,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from netra_backend.app.agents.chat_orchestrator.trace_logger import TraceLogger
 
 
-class TestChatOrchestratorTraceLogger(SSotAsyncTestCase, unittest.TestCase):
+class ChatOrchestratorTraceLoggerTests(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive tests for ChatOrchestrator trace logging business logic."""
 
     def setUp(self):

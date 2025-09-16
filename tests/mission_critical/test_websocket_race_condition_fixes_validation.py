@@ -63,7 +63,7 @@ class MockClient:
         self.port = 443
 
 
-class TestWebSocketRaceConditionFixesValidation(SSotAsyncTestCase):
+class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
     """
     Test suite validating WebSocket authentication race condition fixes.
     

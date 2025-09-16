@@ -25,7 +25,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 @pytest.mark.e2e
 @pytest.mark.asyncio
-class TestDevelopmentThreadHandling:
+class DevelopmentThreadHandlingTests:
     """E2E tests for thread handling in development mode."""
     
     @pytest.fixture

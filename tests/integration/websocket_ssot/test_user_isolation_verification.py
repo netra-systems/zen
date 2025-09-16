@@ -19,7 +19,7 @@ from typing import Dict, List, Any
 from test_framework.ssot.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.user_context_test_helpers import UserContextTestHelper
 
-class TestWebSocketUserIsolationVerification(BaseIntegrationTest, unittest.TestCase):
+class WebSocketUserIsolationVerificationTests(BaseIntegrationTest, unittest.TestCase):
     """Test user isolation preservation during WebSocket SSOT consolidation."""
 
     def setUp(self):

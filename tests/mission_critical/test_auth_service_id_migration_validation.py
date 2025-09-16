@@ -44,7 +44,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestAuthServiceIDMigrationValidation(SSotBaseTestCase):
+class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
     """
     Mission Critical Test Suite for Auth Service ID Migration - Phase 1
     
@@ -590,7 +590,7 @@ class TestAuthServiceIDMigrationValidation(SSotBaseTestCase):
 # SPECIALIZED VIOLATION DETECTION TESTS
 # ================================================================================
 
-class TestAuthServiceIDViolationPatterns(SSotBaseTestCase):
+class AuthServiceIDViolationPatternsTests(SSotBaseTestCase):
     """
     Specialized tests for detecting specific UUID violation patterns in auth service.
     

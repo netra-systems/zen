@@ -23,7 +23,7 @@ from test_framework.ssot.real_services_test_fixtures import *
 
 
 @pytest.mark.integration
-class TestStateManagementRealServices:
+class StateManagementRealServicesTests:
     """Integration tests for state management with real services."""
     
     @pytest.mark.asyncio

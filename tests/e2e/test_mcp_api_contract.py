@@ -16,7 +16,7 @@ from fastapi.testclient import TestClient
 
 
 @pytest.mark.e2e
-class TestMCPAPIContract:
+class MCPAPIContractTests:
     """Test suite demonstrating MCP API contract mismatches."""
 
     @pytest.fixture
@@ -153,7 +153,7 @@ class TestMCPAPIContract:
 
 
                                     @pytest.mark.e2e
-                                    class TestMCPEdgeCases:
+                                    class MCPEdgeCasesTests:
                                         """Additional edge case tests for similar issues."""
 
                                         @pytest.fixture

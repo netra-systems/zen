@@ -40,7 +40,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
+class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
     """
     E2E tests for WebSocket event delivery and real-time updates.
     Validates the mission-critical WebSocket events that enable chat business value.

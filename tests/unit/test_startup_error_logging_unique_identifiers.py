@@ -20,7 +20,7 @@ import asyncio
 
 
 @pytest.mark.unit
-class TestStartupErrorLoggingUniqueIdentifiers:
+class StartupErrorLoggingUniqueIdentifiersTests:
     """Test startup error logging produces unique identifiable error codes."""
     
     def setup_method(self):

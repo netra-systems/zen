@@ -17,7 +17,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestWebSocketAuthSSOTCompliance(SSotAsyncTestCase):
+class WebSocketAuthSSOTComplianceTests(SSotAsyncTestCase):
     """
     Integration test validating WebSocket authentication SSOT compliance.
     Tests proper delegation to auth service for all WebSocket auth operations.
@@ -68,7 +68,7 @@ class TestWebSocketAuthSSOTCompliance(SSotAsyncTestCase):
         """
         with patch('netra_backend.app.websocket_core.manager.auth_client') as mock_auth_client:
             mock_auth_client.get_user_context.return_value = {'user_id': 'manager-user-789', 'email': 'manager@example.com', 'tier': 'mid', 'permissions': ['chat', 'websocket'], 'session_context': {'workspace': 'default'}}
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             ws_manager = WebSocketManager()
             test_token = 'manager-test-token'
             connection_id = await ws_manager.initialize_connection(token=test_token, connection_type='chat')

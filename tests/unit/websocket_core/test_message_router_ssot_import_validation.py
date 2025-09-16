@@ -19,7 +19,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestMessageRouterSSOTImportValidation(SSotBaseTestCase):
+class MessageRouterSSOTImportValidationTests(SSotBaseTestCase):
     """Test MessageRouter SSOT import path validation."""
 
     def setUp(self):

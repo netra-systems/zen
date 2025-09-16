@@ -138,7 +138,7 @@ class MockWebSocketClient:
         self.events_received.append(event)
 
 
-class TestWebSocketEventDeliveryGoldenPath(WebSocketIntegrationTest, ServiceOrchestrationIntegrationTest):
+class WebSocketEventDeliveryGoldenPathTests(WebSocketIntegrationTest, ServiceOrchestrationIntegrationTest):
     """
     Enhanced WebSocket Event Delivery Integration Tests
     

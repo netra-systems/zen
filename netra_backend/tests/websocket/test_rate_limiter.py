@@ -10,7 +10,7 @@ from netra_backend.app.websocket_core.rate_limiter import WebSocketRateLimiter
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.asyncio
-class TestRateLimiterAsync:
+class RateLimiterAsyncTests:
     """Async test suite for RateLimiter"""
     
     async def test_websocket_connection(self):

@@ -85,7 +85,7 @@ class PersistenceValidationResult:
     data_integrity_verified: bool
     errors: List[str]
 
-class TestAgentMessagePersistenceIntegration(SSotAsyncTestCase):
+class AgentMessagePersistenceIntegrationTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Agent Message Persistence.
 

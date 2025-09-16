@@ -46,7 +46,7 @@ def collaboration_auth_helper():
 
 @pytest.mark.e2e
 @pytest.mark.staging
-class TestStagingWebSocketCollaboration:
+class StagingWebSocketCollaborationTests:
     """E2E tests for WebSocket real-time collaboration features."""
     
     @pytest.mark.asyncio

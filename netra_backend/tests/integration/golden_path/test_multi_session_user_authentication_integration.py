@@ -87,7 +87,7 @@ class SessionIsolationResult:
     violations: List[str]
 
 
-class TestMultiSessionUserAuthenticationIntegration(BaseIntegrationTest):
+class MultiSessionUserAuthenticationIntegrationTests(BaseIntegrationTest):
     """Test multi-session user authentication with real services."""
     
     def setup_method(self):

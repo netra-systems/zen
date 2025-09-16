@@ -16,7 +16,7 @@ from unittest.mock import patch
 from netra_backend.app.services.user_execution_context import UserExecutionContext, InvalidContextError
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestUserExecutionContextPlaceholderValidationBug:
+class UserExecutionContextPlaceholderValidationBugTests:
     """Test suite to reproduce and verify fix for placeholder validation bug."""
 
     def test_bug_reproduction_test_user_pattern_rejected_in_all_environments(self):

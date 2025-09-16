@@ -43,16 +43,16 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.websocket_core import manager as websocket_manager_compatibility
 
 # Import expected components for validation
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.canonical_import_patterns import (
     WebSocketManager,
     WebSocketConnection, 
     WebSocketManagerProtocol,
     _serialize_message_safely
 )
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
 
-class TestWebSocketManagerCompatibilityLayer(SSotBaseTestCase):
+class WebSocketManagerCompatibilityLayerTests(SSotBaseTestCase):
     """
     Comprehensive unit tests for WebSocket manager compatibility layer.
     
@@ -97,11 +97,11 @@ class TestWebSocketManagerCompatibilityLayer(SSotBaseTestCase):
         WebSocketManagerFromCompat = websocket_manager_compatibility.WebSocketManager
         
         # Verify it's the same class as the SSOT implementation
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as SSOTWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as SSOTWebSocketManager
         assert WebSocketManagerFromCompat is SSOTWebSocketManager, "WebSocketManager compatibility broken"
         
         # Test that it's actually the UnifiedWebSocketManager (as per current implementation)
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
         assert WebSocketManagerFromCompat is UnifiedWebSocketManager, "WebSocketManager should be UnifiedWebSocketManager"
 
     def test_websocket_connection_import_compatibility(self):
@@ -115,7 +115,7 @@ class TestWebSocketManagerCompatibilityLayer(SSotBaseTestCase):
         WebSocketConnectionFromCompat = websocket_manager_compatibility.WebSocketConnection
 
         # Verify it's the same class as SSOT implementation
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection as SSOTWebSocketConnection
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketConnection as SSOTWebSocketConnection
         assert WebSocketConnectionFromCompat is SSOTWebSocketConnection, "WebSocketConnection compatibility broken"
         
         # Test that we can create instances (basic functionality)
@@ -141,7 +141,7 @@ class TestWebSocketManagerCompatibilityLayer(SSotBaseTestCase):
         ProtocolFromCompat = websocket_manager_compatibility.WebSocketManagerProtocol
         
         # Verify it's the same as SSOT implementation
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerProtocol as SSOTProtocol
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerProtocol as SSOTProtocol
         assert ProtocolFromCompat is SSOTProtocol, "WebSocketManagerProtocol compatibility broken"
         
         # Verify it's a Protocol (for type checking)
@@ -157,7 +157,7 @@ class TestWebSocketManagerCompatibilityLayer(SSotBaseTestCase):
         serialize_func = websocket_manager_compatibility._serialize_message_safely
         
         # Verify it's the same function as SSOT implementation
-        from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely as SSOTSerialize
+        from netra_backend.app.websocket_core.canonical_import_patterns import _serialize_message_safely as SSOTSerialize
         assert serialize_func is SSOTSerialize, "_serialize_message_safely compatibility broken"
         
         # Test basic functionality with a simple message
@@ -177,7 +177,7 @@ class TestWebSocketManagerCompatibilityLayer(SSotBaseTestCase):
         UnifiedManagerFromCompat = websocket_manager_compatibility.UnifiedWebSocketManager
         
         # Verify it's the same class as SSOT implementation
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as SSOTUnified
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as SSOTUnified
         assert UnifiedManagerFromCompat is SSOTUnified, "UnifiedWebSocketManager compatibility broken"
 
     def test_legacy_import_patterns_still_work(self):
@@ -287,7 +287,7 @@ class TestWebSocketManagerCompatibilityLayer(SSotBaseTestCase):
             content = f.read()
         
         # Should contain key structural elements
-        assert 'from netra_backend.app.websocket_core.websocket_manager import' in content
+        assert 'from netra_backend.app.websocket_core.canonical_import_patterns import' in content
         assert 'from netra_backend.app.websocket_core.unified_manager import' in content
         assert '__all__' in content
         
@@ -310,7 +310,7 @@ class TestWebSocketManagerCompatibilityLayer(SSotBaseTestCase):
             mock_unified.return_value = mock_manager
             
             # Import get_websocket_manager via compatibility layer
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             
             # Should be able to call it without errors
             result = None
@@ -340,7 +340,7 @@ class TestWebSocketManagerCompatibilityLayer(SSotBaseTestCase):
         assert all_size < 1000, f"__all__ list too large: {all_size} bytes"
 
 
-class TestWebSocketManagerCompatibilityIntegration(SSotBaseTestCase):
+class WebSocketManagerCompatibilityIntegrationTests(SSotBaseTestCase):
     """
     Integration tests to ensure compatibility layer works with real components.
     
@@ -389,17 +389,17 @@ class TestWebSocketManagerCompatibilityIntegration(SSotBaseTestCase):
         from enum import Enum
         
         # Create complex message with various data types
-        class TestEnum(Enum):
+        class EnumTests(Enum):
             STARTED = "agent_started"
             THINKING = "agent_thinking"
         
         complex_message = {
-            "type": TestEnum.STARTED,
+            "type": EnumTests.STARTED,
             "timestamp": datetime.now(timezone.utc),
             "data": {
                 "nested": {"deep": {"value": 42}},
                 "list": [1, 2, 3],
-                "enum_value": TestEnum.THINKING
+                "enum_value": EnumTests.THINKING
             },
             "metadata": {
                 "priority": "high",

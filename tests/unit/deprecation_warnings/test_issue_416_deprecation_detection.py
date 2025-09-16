@@ -29,7 +29,7 @@ import contextlib
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDeprecationWarningDetection(SSotBaseTestCase):
+class DeprecationWarningDetectionTests(SSotBaseTestCase):
     """Test suite to detect and validate deprecation warnings - should initially FAIL"""
     
     def setUp(self):
@@ -209,7 +209,7 @@ class TestDeprecationWarningDetection(SSotBaseTestCase):
         migration_tests = [
             {
                 'deprecated': 'from netra_backend.app.websocket_core import WebSocketManager',
-                'canonical': 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'
+                'canonical': 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager'
             },
             {
                 'deprecated': 'from netra_backend.app.websocket_core.event_validator import get_websocket_validator',

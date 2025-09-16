@@ -147,7 +147,7 @@ class BackendServiceSimulator:
         })
 
 
-class TestDatabaseConsistencyer:
+class DatabaseConsistencyerTests:
     """Orchestrates consistency testing between Auth and Backend services."""
     
     def __init__(self):
@@ -255,7 +255,7 @@ def create_test_user_data(identifier: str = None) -> Dict:
 
 
 @pytest.mark.e2e
-class TestAuthBackendDatabaseConsistency:
+class AuthBackendDatabaseConsistencyTests:
     """Database consistency tests between Auth and Backend services."""
     
     @pytest.mark.asyncio
@@ -342,7 +342,7 @@ class TestAuthBackendDatabaseConsistency:
 
 
 @pytest.mark.e2e
-class TestAuthBackendDataIntegrity:
+class AuthBackendDataIntegrityTests:
     """Data integrity and edge case testing."""
     
     @pytest.mark.asyncio

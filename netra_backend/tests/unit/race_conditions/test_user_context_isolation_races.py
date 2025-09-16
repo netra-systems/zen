@@ -43,7 +43,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestUserContextIsolationRaces(SSotBaseTestCase):
+class UserContextIsolationRacesTests(SSotBaseTestCase):
     """Test race conditions in user context isolation and management."""
     
     def setup_method(self):

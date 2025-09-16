@@ -26,7 +26,7 @@ from tests.e2e.staging_auth_client import StagingAuthClient
 from auth_service.auth_core.unified_auth_interface import UnifiedAuthInterface, get_unified_auth
 
 @pytest.mark.e2e
-class TestAuthGoldenPathBlockageStaging(SSotAsyncTestCase, StagingTestBase):
+class AuthGoldenPathBlockageStagingTests(SSotAsyncTestCase, StagingTestBase):
     """E2E staging tests for auth golden path blockage due to missing method."""
 
     @classmethod

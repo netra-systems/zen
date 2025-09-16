@@ -25,7 +25,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.integration
 @pytest.mark.startup
 @pytest.mark.websocket
-class TestWebSocketStartupIntegration(WebSocketIntegrationTest):
+class WebSocketStartupIntegrationTests(WebSocketIntegrationTest):
     """Integration tests for WebSocket infrastructure startup and initialization."""
 
     async def async_setup(self):
@@ -46,7 +46,7 @@ class TestWebSocketStartupIntegration(WebSocketIntegrationTest):
         - Event delivery for business value transparency
         - Connection health monitoring for reliability
         """
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         from shared.isolated_environment import get_env
         env = get_env()
         env.set('TESTING', '1', source='test_websocket_manager')
@@ -304,7 +304,7 @@ class TestWebSocketStartupIntegration(WebSocketIntegrationTest):
 @pytest.mark.startup
 @pytest.mark.business_value
 @pytest.mark.chat_events
-class TestWebSocketStartupBusinessValue(WebSocketIntegrationTest):
+class WebSocketStartupBusinessValueTests(WebSocketIntegrationTest):
     """Business value validation for WebSocket startup initialization."""
 
     async def test_websocket_enables_chat_business_value_delivery(self):

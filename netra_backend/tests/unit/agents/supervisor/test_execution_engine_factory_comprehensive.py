@@ -31,7 +31,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-class TestExecutionEngineFactoryInitialization(AsyncTestCase):
+class ExecutionEngineFactoryInitializationTests(AsyncTestCase):
     """Test ExecutionEngineFactory initialization and dependency validation."""
 
     @pytest.mark.unit
@@ -79,7 +79,7 @@ class TestExecutionEngineFactoryInitialization(AsyncTestCase):
         factory.set_tool_dispatcher_factory(tool_dispatcher_factory)
         assert factory._tool_dispatcher_factory is tool_dispatcher_factory
 
-class TestUserEngineCreation(AsyncTestCase):
+class UserEngineCreationTests(AsyncTestCase):
     """Test user execution engine creation and isolation patterns."""
 
     @pytest.fixture
@@ -165,7 +165,7 @@ class TestUserEngineCreation(AsyncTestCase):
                     assert 'Engine creation failed' in str(exc_info.value)
                     assert factory._factory_metrics['creation_errors'] == 1
 
-class TestUserEngineLimitsAndIsolation(AsyncTestCase):
+class UserEngineLimitsAndIsolationTests(AsyncTestCase):
     """Test user engine limits and complete user isolation."""
 
     @pytest.fixture
@@ -232,7 +232,7 @@ class TestUserEngineLimitsAndIsolation(AsyncTestCase):
         await factory._enforce_user_engine_limits(user_id)
         assert factory._factory_metrics['user_limit_rejections'] == 0
 
-class TestWebSocketEmitterCreation(AsyncTestCase):
+class WebSocketEmitterCreationTests(AsyncTestCase):
     """Test WebSocket emitter creation with validated bridge."""
 
     @pytest.fixture
@@ -265,7 +265,7 @@ class TestWebSocketEmitterCreation(AsyncTestCase):
                 await factory._create_user_websocket_emitter(user_context, Mock())
             assert 'WebSocket emitter creation failed' in str(exc_info.value)
 
-class TestUserExecutionScope(AsyncTestCase):
+class UserExecutionScopeTests(AsyncTestCase):
     """Test user execution scope context manager."""
 
     @pytest.fixture
@@ -325,7 +325,7 @@ class TestUserExecutionScope(AsyncTestCase):
                 async with factory.user_execution_scope(user_context) as engine:
                     assert engine is mock_engine
 
-class TestEngineCleanup(AsyncTestCase):
+class EngineCleanupTests(AsyncTestCase):
     """Test engine cleanup and lifecycle management."""
 
     @pytest.fixture
@@ -376,7 +376,7 @@ class TestEngineCleanup(AsyncTestCase):
         assert factory._factory_metrics['cleanup_errors'] == 1
         assert engine_key in factory._active_engines
 
-class TestBackgroundCleanup(AsyncTestCase):
+class BackgroundCleanupTests(AsyncTestCase):
     """Test background cleanup loop and inactive engine cleanup."""
 
     @pytest.fixture
@@ -449,7 +449,7 @@ class TestBackgroundCleanup(AsyncTestCase):
         await factory._cleanup_inactive_engines()
         assert factory._factory_metrics['total_engines_cleaned'] == 0
 
-class TestFactoryMetrics(AsyncTestCase):
+class FactoryMetricsTests(AsyncTestCase):
     """Test factory metrics and monitoring functionality."""
 
     @pytest.fixture
@@ -555,7 +555,7 @@ class TestFactoryMetrics(AsyncTestCase):
         assert contexts['user-1'] == 2
         assert contexts['user-2'] == 1
 
-class TestFactoryShutdown(AsyncTestCase):
+class FactoryShutdownTests(AsyncTestCase):
     """Test factory shutdown and resource cleanup."""
 
     @pytest.fixture
@@ -642,7 +642,7 @@ class TestFactoryShutdown(AsyncTestCase):
         result = await factory.cleanup_user_context('test-user')
         assert result is False
 
-class TestFactorySingleton(AsyncTestCase):
+class FactorySingletonTests(AsyncTestCase):
     """Test factory singleton pattern and global access."""
 
     @pytest.mark.unit
@@ -701,7 +701,7 @@ class TestFactorySingleton(AsyncTestCase):
                 assert engine is mock_engine
             mock_scope.assert_called_once_with(user_context)
 
-class TestFactoryAliasMethodsCompatibility(AsyncTestCase):
+class FactoryAliasMethodsCompatibilityTests(AsyncTestCase):
     """Test factory alias methods for backward compatibility."""
 
     @pytest.fixture
@@ -732,7 +732,7 @@ class TestFactoryAliasMethodsCompatibility(AsyncTestCase):
             await factory.cleanup_all_contexts()
             mock_shutdown.assert_called_once()
 
-class TestFactoryPerformanceBenchmarks(AsyncTestCase):
+class FactoryPerformanceBenchmarksTests(AsyncTestCase):
     """Test factory performance benchmarks and resource usage."""
 
     @pytest.fixture

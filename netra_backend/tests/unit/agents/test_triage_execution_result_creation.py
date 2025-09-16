@@ -20,7 +20,7 @@ from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionR
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.llm.llm_manager import LLMManager
 
-class TestExecutionResultCreation:
+class ExecutionResultCreationTests:
     """Test ExecutionResult creation patterns."""
 
     @pytest.fixture
@@ -53,7 +53,7 @@ class TestExecutionResultCreation:
         assert result.execution_time_ms == 50.0
         assert result.request_id == sample_execution_context.request_id
 
-class TestResultDataStructures:
+class ResultDataStructuresTests:
     """Test result data structure consistency."""
 
     @pytest.fixture
@@ -78,7 +78,7 @@ class TestResultDataStructures:
         assert isinstance(complex_data['entities_extracted'], list)
         assert len(complex_data['entities_extracted']) == 2
 
-class TestResultValidation:
+class ResultValidationTests:
     """Test result validation and consistency checks."""
 
     def test_result_consistency_validation(self):
@@ -96,7 +96,7 @@ class TestResultValidation:
         assert 0.0 <= min_confidence['confidence_score'] <= 1.0
         assert 0.0 <= max_confidence['confidence_score'] <= 1.0
 
-class TestErrorHandling:
+class ErrorHandlingTests:
     """Test error handling in result creation."""
 
     @pytest.fixture
@@ -118,7 +118,7 @@ class TestErrorHandling:
         assert 'warnings' in result.data
         assert len(result.data['warnings']) == 2
 
-class TestPerformanceOptimization:
+class PerformanceOptimizationTests:
     """Test performance optimization patterns for result processing."""
 
     def test_rapid_result_creation(self):
@@ -141,7 +141,7 @@ class TestPerformanceOptimization:
         assert len(results) == 50
         del results
 
-class TestMetadataHandling:
+class MetadataHandlingTests:
     """Test metadata and context preservation."""
 
     @pytest.fixture
@@ -162,7 +162,7 @@ class TestMetadataHandling:
         assert result.status == ExecutionStatus.COMPLETED
         assert result.data == {'test': 'data'}
 
-class TestEdgeCases:
+class EdgeCasesTests:
     """Test edge cases in result creation."""
 
     def test_empty_result_data(self):

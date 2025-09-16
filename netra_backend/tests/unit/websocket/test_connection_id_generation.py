@@ -29,9 +29,9 @@ from typing import Dict, Any, List, Optional
 # Import WebSocket core modules to test
 from netra_backend.app.websocket_core.utils import generate_connection_id, generate_message_id
 from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage, MessageType, create_standard_message
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 # SSOT import after Issue #824 remediation
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.connection_manager import ConnectionManager
 
 # Import ID generation components
@@ -42,7 +42,7 @@ from shared.types.core_types import ConnectionID, UserID, ensure_user_id
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestConnectionIdGenerationRouting(SSotBaseTestCase):
+class ConnectionIdGenerationRoutingTests(SSotBaseTestCase):
     """
     Unit tests that expose connection ID generation inconsistencies causing routing failures.
     
@@ -69,7 +69,7 @@ class TestConnectionIdGenerationRouting(SSotBaseTestCase):
         )
 
         # Connection manager for testing routing - create synchronously for tests
-        from netra_backend.app.websocket_core.websocket_manager import _UnifiedWebSocketManagerImplementation, WebSocketManagerMode
+        from netra_backend.app.websocket_core.canonical_import_patterns import _UnifiedWebSocketManagerImplementation, WebSocketManagerMode
         import secrets
         
         # Create test manager with authorization token (bypasses factory restriction)

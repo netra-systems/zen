@@ -25,7 +25,7 @@ import re
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDeprecationRegressionPrevention(SSotBaseTestCase):
+class DeprecationRegressionPreventionTests(SSotBaseTestCase):
     """Prevent regression of deprecated import patterns"""
     
     def setUp(self):
@@ -235,7 +235,7 @@ class TestDeprecationRegressionPrevention(SSotBaseTestCase):
         
         # Test that importing doesn't generate ISSUE #1144 warnings
         test_imports = [
-            'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
+            'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager',
             'from netra_backend.app.websocket_core.event_validation_framework import get_websocket_validator',
         ]
         
@@ -275,7 +275,7 @@ class TestDeprecationRegressionPrevention(SSotBaseTestCase):
         
         # Define template patterns for common WebSocket imports
         recommended_templates = {
-            'websocket_manager': 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
+            'websocket_manager': 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager',
             'event_validator': 'from netra_backend.app.websocket_core.event_validation_framework import get_websocket_validator',
             'websocket_factory': 'from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager',
         }

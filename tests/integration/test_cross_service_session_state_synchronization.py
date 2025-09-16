@@ -332,7 +332,7 @@ class CrossServiceSessionSynchronizer:
 
 
 @pytest.mark.asyncio
-class TestCrossServiceSessionStateSynchronization(BaseIntegrationTest):
+class CrossServiceSessionStateSynchronizationTests(BaseIntegrationTest):
     """Test cross-service session state synchronization."""
     
     def setup_method(self):

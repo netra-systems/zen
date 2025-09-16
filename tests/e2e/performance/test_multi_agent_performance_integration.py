@@ -161,7 +161,7 @@ class PerformanceLoadSimulator:
 
 @pytest.mark.integration
 @pytest.mark.e2e
-class TestMultiAgentPerformanceIntegration:
+class MultiAgentPerformanceIntegrationTests:
     """Integration tests for multi-agent performance benchmarking."""
     
     @pytest.fixture

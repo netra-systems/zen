@@ -65,7 +65,7 @@ from netra_backend.app.websocket_core.service_readiness_validator import (
     ServiceReadinessValidator
 )
 from netra_backend.app.websocket_core.manager import UnifiedWebSocketManager
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 # Shared types and utilities
 from shared.isolated_environment import get_env
@@ -79,7 +79,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketHandshakeRaceConditions(WebSocketIntegrationTest):
+class WebSocketHandshakeRaceConditionsTests(WebSocketIntegrationTest):
     """
     MISSION CRITICAL: WebSocket Handshake Race Conditions Integration Test Suite
     

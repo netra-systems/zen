@@ -18,7 +18,7 @@ from shared.isolated_environment import get_env
 env = get_env()
 
 
-class TestDockerHostnameResolution(SSotBaseTestCase):
+class DockerHostnameResolutionTests(SSotBaseTestCase):
     """Test Docker environment detection and hostname resolution.
 
     Note: Docker hostname resolution only applies in development and test environments,

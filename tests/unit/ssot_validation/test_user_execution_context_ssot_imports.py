@@ -38,7 +38,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.unit
-class TestUserExecutionContextSSotImports(SSotAsyncTestCase):
+class UserExecutionContextSSotImportsTests(SSotAsyncTestCase):
     """SSOT Import Compliance: Validate single canonical import path for UserExecutionContext"""
     
     async def test_single_canonical_import_path_enforced(self):

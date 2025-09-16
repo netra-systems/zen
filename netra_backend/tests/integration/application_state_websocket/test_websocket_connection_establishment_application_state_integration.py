@@ -30,7 +30,7 @@ from shared.types.core_types import (
 )
 
 # SSOT WebSocket and ID Management
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 # SSOT Real Services Test Management
@@ -38,7 +38,7 @@ from test_framework.real_services import RealServicesManager
 import redis.asyncio as redis_async
 
 
-class TestWebSocketConnectionEstablishmentApplicationStateIntegration(WebSocketIntegrationTest):
+class WebSocketConnectionEstablishmentApplicationStateIntegrationTests(WebSocketIntegrationTest):
     """Test WebSocket connection establishment with comprehensive application state validation."""
     
     @pytest.mark.integration

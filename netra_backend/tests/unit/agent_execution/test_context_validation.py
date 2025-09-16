@@ -26,7 +26,7 @@ from netra_backend.app.agents.supervisor.agent_execution_context_manager import 
 from shared.types.core_types import UserID, ThreadID, RunID
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestContextValidation(SSotAsyncTestCase):
+class ContextValidationTests(SSotAsyncTestCase):
     """Unit tests for user execution context validation and security."""
 
     def setup_method(self):

@@ -40,7 +40,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.e2e
 @pytest.mark.staging_compatible
-class TestAuthenticatedMultiAgentChatFlowE2E(SSotBaseTestCase):
+class AuthenticatedMultiAgentChatFlowE2ETests(SSotBaseTestCase):
     """
     E2E Tests for Authenticated Multi-Agent Chat Workflows.
     

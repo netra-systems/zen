@@ -42,7 +42,7 @@ from tests.helpers.auth_helper import create_test_user_with_jwt
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.integration
-class TestWebSocketAuthModes(SSotBaseTestCase):
+class WebSocketAuthModesTests(SSotBaseTestCase):
     """
     Integration tests for WebSocket authentication modes.
     
@@ -283,7 +283,7 @@ class TestWebSocketAuthModes(SSotBaseTestCase):
         await super().asyncTearDown()
 
 @pytest.mark.integration
-class TestAuthModeEnvironmentDetection(SSotBaseTestCase):
+class AuthModeEnvironmentDetectionTests(SSotBaseTestCase):
     """Test detection of authentication modes from environment configuration."""
 
     def test_auth_mode_environment_variable_detection(self):

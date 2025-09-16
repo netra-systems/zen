@@ -44,7 +44,7 @@ from netra_backend.app.clients.auth_client_core import (
 )
 
 
-class TestAuthValidation(SSotBaseTestCase):
+class AuthValidationTests(SSotBaseTestCase):
     """Unit tests for authentication validation business logic."""
     
     def setup_method(self, method=None):

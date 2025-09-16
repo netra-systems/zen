@@ -46,7 +46,7 @@ from tests.e2e.staging_test_helpers import (
 
 
 @pytest.mark.e2e
-class TestStaticAssets404Failures:
+class StaticAssets404FailuresTests:
     """
     Test suite replicating critical static asset 404 failures from GCP staging.
     
@@ -356,7 +356,7 @@ class TestStaticAssets404Failures:
 
 
 @pytest.mark.e2e
-class TestStaticAssetRecoveryAndOptimization:
+class StaticAssetRecoveryAndOptimizationTests:
     """
     Additional tests for static asset recovery mechanisms and optimizations.
     These tests help identify specific improvement opportunities.

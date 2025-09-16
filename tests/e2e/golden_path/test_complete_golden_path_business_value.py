@@ -92,7 +92,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocke
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 # Database and persistence imports
 import httpx
@@ -102,7 +102,7 @@ import websockets
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.asyncio
-class TestCompleteGoldenPathBusinessValue(SSotAsyncTestCase):
+class CompleteGoldenPathBusinessValueTests(SSotAsyncTestCase):
     """
     CRITICAL: The PRIMARY test for revenue protection.
     

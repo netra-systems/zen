@@ -34,7 +34,7 @@ from analytics_service.analytics_core.database.clickhouse_manager import ClickHo
 from shared.isolated_environment import get_env
 from analytics_service.analytics_core.config import get_config
 
-class TestRealAnalyticsServiceIntegration:
+class RealAnalyticsServiceIntegrationTests:
     """Integration tests using real analytics service infrastructure."""
 
     @pytest.fixture(autouse=True)
@@ -74,7 +74,7 @@ class TestRealAnalyticsServiceIntegration:
         async with httpx.AsyncClient(timeout=10.0) as client:
             yield client
 
-class TestRealEventIngestion:
+class RealEventIngestionTests:
     """Test real event ingestion pipeline end-to-end."""
 
     @pytest.fixture(autouse=True)
@@ -149,7 +149,7 @@ class TestRealEventIngestion:
         assert success_stats[1] == 2, 'Should have 2 successful executions'
         assert error_stats[1] == 1, 'Should have 1 failed execution'
 
-class TestRealAnalyticsQueries:
+class RealAnalyticsQueriesTests:
     """Test real analytics queries and aggregations."""
 
     @pytest.fixture(autouse=True)
@@ -216,7 +216,7 @@ class TestRealAnalyticsQueries:
             first_result = billing_results[0]
             assert len(first_result) == 6, 'Should have 6 columns in billing results'
 
-class TestRealServiceHealthAndMonitoring:
+class RealServiceHealthAndMonitoringTests:
     """Test real service health monitoring and observability."""
 
     @pytest.fixture(autouse=True)

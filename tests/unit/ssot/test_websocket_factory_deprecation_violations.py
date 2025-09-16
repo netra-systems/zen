@@ -47,7 +47,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestWebSocketFactoryDeprecationViolations(SSotBaseTestCase):
+class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
     """
     SSOT violation detection tests for WebSocket factory deprecation.
     
@@ -232,7 +232,7 @@ class TestWebSocketFactoryDeprecationViolations(SSotBaseTestCase):
                 f"",
                 f"1. Replace deprecated factory imports:",
                 f"   ❌ from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory",
-                f"   ✅ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager",
+                f"   ✅ from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager",
                 f"",
                 f"2. Replace deprecated factory usage:",
                 f"   ❌ factory = get_websocket_manager_factory()",
@@ -503,8 +503,8 @@ class TestWebSocketFactoryDeprecationViolations(SSotBaseTestCase):
                 f"🔧 IMPORT STANDARDIZATION:",
                 f"",
                 f"✅ PREFERRED CANONICAL IMPORTS:",
-                f"   from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
-                f"   from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager",
+                f"   from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
+                f"   from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager",
                 f"",
                 f"❌ ELIMINATE NON-CANONICAL IMPORTS:",
                 f"   from netra_backend.app.websocket_core.websocket_manager_factory import *",

@@ -75,7 +75,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.unit
-class TestGoldenPathTestRunnerProtection(SSotBaseTestCase):
+class GoldenPathTestRunnerProtectionTests(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

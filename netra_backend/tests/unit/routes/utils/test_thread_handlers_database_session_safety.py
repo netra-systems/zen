@@ -41,7 +41,7 @@ from netra_backend.app.routes.utils.thread_handlers import (
 )
 
 
-class TestThreadHandlersDatabaseSessionSafety(BaseIntegrationTest):
+class ThreadHandlersDatabaseSessionSafetyTests(BaseIntegrationTest):
     """
     CRITICAL DATABASE SESSION SAFETY TESTS
     
@@ -388,7 +388,7 @@ class TestThreadHandlersDatabaseSessionSafety(BaseIntegrationTest):
         mock_db2.commit.assert_called_once()
 
 
-class TestSessionLeakDetection(BaseIntegrationTest):
+class SessionLeakDetectionTests(BaseIntegrationTest):
     """
     Additional tests specifically for database session leak detection.
     These tests are designed to FAIL and prove session management issues.

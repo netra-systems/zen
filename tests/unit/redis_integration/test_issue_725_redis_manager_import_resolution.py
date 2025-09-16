@@ -21,7 +21,7 @@ from pathlib import Path
 
 
 @pytest.mark.unit
-class TestIssue725RedisManagerImportResolution:
+class Issue725RedisManagerImportResolutionTests:
     """Test suite validating Issue #725 RedisTestManager import error resolution."""
 
     def test_redis_test_manager_import_fails_as_expected(self):
@@ -197,7 +197,7 @@ class TestIssue725RedisManagerImportResolution:
 
 
 @pytest.mark.unit
-class TestIssue725ComplianceValidation:
+class Issue725ComplianceValidationTests:
     """Additional validation tests for Issue #725 architectural compliance."""
 
     def test_redis_test_utils_exports_only_redis_manager(self):

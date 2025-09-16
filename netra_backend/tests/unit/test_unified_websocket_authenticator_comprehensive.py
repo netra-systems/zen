@@ -59,7 +59,7 @@ class MockWebSocket:
         self.close = AsyncMock()
 
 @pytest.mark.unit
-class TestUnifiedWebSocketAuthenticatorBusinessLogic(SSotAsyncTestCase):
+class UnifiedWebSocketAuthenticatorBusinessLogicTests(SSotAsyncTestCase):
     """Test UnifiedWebSocketAuthenticator business logic."""
 
     async def asyncSetUp(self):
@@ -199,7 +199,7 @@ class TestUnifiedWebSocketAuthenticatorBusinessLogic(SSotAsyncTestCase):
             assert close_code == expected_close_code, f'Error {error_code} should map to {expected_close_code}'
 
 @pytest.mark.unit
-class TestE2EContextExtractionBusinessLogic(SSotAsyncTestCase):
+class E2EContextExtractionBusinessLogicTests(SSotAsyncTestCase):
     """Test E2E context extraction business logic."""
 
     def test_extract_e2e_context_from_headers(self):
@@ -243,7 +243,7 @@ class TestE2EContextExtractionBusinessLogic(SSotAsyncTestCase):
         assert safe_non_enum == 'some_string'
 
 @pytest.mark.unit
-class TestWebSocketAuthenticatorSSotCompliance(SSotAsyncTestCase):
+class WebSocketAuthenticatorSSotComplianceTests(SSotAsyncTestCase):
     """Test SSOT compliance and global instance management."""
 
     def test_get_websocket_authenticator_singleton_pattern(self):
@@ -278,7 +278,7 @@ class TestWebSocketAuthenticatorSSotCompliance(SSotAsyncTestCase):
             mock_authenticator.authenticate_websocket_connection.assert_called_once_with(websocket, e2e_context=e2e_context)
 
 @pytest.mark.unit
-class TestWebSocketAuthenticatorErrorHandling(SSotAsyncTestCase):
+class WebSocketAuthenticatorErrorHandlingTests(SSotAsyncTestCase):
     """Test WebSocket authenticator error handling business logic."""
 
     async def asyncSetUp(self):

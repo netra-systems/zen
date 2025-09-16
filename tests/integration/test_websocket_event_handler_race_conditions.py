@@ -42,8 +42,8 @@ from netra_backend.app.services.agent_websocket_bridge import (
     AgentWebSocketBridge,
     create_agent_websocket_bridge
 )
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.handlers import BaseMessageHandler
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
 @pytest.mark.websocket_race_conditions  
-class TestWebSocketEventHandlerRaceConditions(SSotBaseTestCase):
+class WebSocketEventHandlerRaceConditionsTests(SSotBaseTestCase):
     """
     Integration tests for WebSocket event handler wiring race conditions.
     
@@ -614,7 +614,7 @@ class TestWebSocketEventHandlerRaceConditions(SSotBaseTestCase):
 @pytest.mark.integration
 @pytest.mark.performance
 @pytest.mark.websocket_race_conditions
-class TestWebSocketEventHandlerPerformanceRaces(SSotBaseTestCase):
+class WebSocketEventHandlerPerformanceRacesTests(SSotBaseTestCase):
     """
     Performance-focused tests for WebSocket event handler race conditions
     under load conditions that expose timing-sensitive issues.

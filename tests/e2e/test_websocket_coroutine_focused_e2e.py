@@ -21,7 +21,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
-class TestWebSocketCoroutineFocusedE2E(SSotBaseTestCase):
+class WebSocketCoroutineFocusedE2ETests(SSotBaseTestCase):
     """
     Focused E2E test for WebSocket coroutine regression.
     

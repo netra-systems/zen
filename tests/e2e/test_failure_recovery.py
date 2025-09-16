@@ -38,7 +38,7 @@ class FailureScenario(Enum):
 
 
 @dataclass
-class TestFailureResult:
+class FailureResultTests:
     """Result of failure recovery test"""
     scenario: str
     cascade_prevented: bool
@@ -47,7 +47,7 @@ class TestFailureResult:
 
 
 # Alias for backward compatibility
-FailureTestResult = TestFailureResult
+FailureTestResult = FailureResultTests
 
 
 class MockFailingService:
@@ -67,7 +67,7 @@ class MockFailingService:
 
 
 @pytest.mark.e2e
-class TestServiceFailureCascade:
+class ServiceFailureCascadeTests:
     """Test cascade failure prevention - BVJ: Protect system revenue"""
     
     @pytest.fixture
@@ -118,7 +118,7 @@ class TestServiceFailureCascade:
 
 
 @pytest.mark.e2e
-class TestCircuitBreakerActivation:
+class CircuitBreakerActivationTests:
     """Test circuit breaker activation - BVJ: Automated protection"""
     
     @pytest.mark.asyncio
@@ -149,7 +149,7 @@ class TestCircuitBreakerActivation:
 
 
 @pytest.mark.e2e
-class TestRetryWithBackoff:
+class RetryWithBackoffTests:
     """Test retry with exponential backoff - BVJ: Smart recovery"""
     
     @pytest.mark.asyncio  
@@ -185,7 +185,7 @@ class TestRetryWithBackoff:
 
 
 @pytest.mark.e2e
-class TestFallbackUIActivation:
+class FallbackUIActivationTests:
     """Test UI fallback activation - BVJ: User experience continuity"""
     
     @pytest.fixture
@@ -238,7 +238,7 @@ class TestFallbackUIActivation:
 
 
 @pytest.mark.e2e
-class TestComprehensiveFailureRecovery:
+class ComprehensiveFailureRecoveryTests:
     """Test integrated failure recovery - BVJ: Complete system resilience"""
     
     @pytest.mark.asyncio

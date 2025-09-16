@@ -32,7 +32,7 @@ from netra_backend.app.services.corpus_service import CorpusService
 # Import SSOT test database fixture
 from test_framework.fixtures.database_fixtures import test_db_session
 
-class TestLargeDatasetPerformance:
+class LargeDatasetPerformanceTests:
     """Test query performance with large datasets"""
     @pytest.mark.asyncio
     async def test_corpus_bulk_insert_performance(self):
@@ -147,7 +147,7 @@ class TestLargeDatasetPerformance:
         assert ("GROUP BY hour_of_day, day_of_week" in query or 
                 "GROUP BY day_of_week, hour_of_day" in query)
 
-class TestEdgeCaseHandling:
+class EdgeCaseHandlingTests:
     """Test edge cases in query handling"""
     @pytest.mark.asyncio
     async def test_empty_corpus_handling(self, test_db_session):
@@ -260,7 +260,7 @@ class TestEdgeCaseHandling:
         assert not result["valid"]
         assert "invalid workload_type" in result["errors"][0]
 
-class TestConcurrencyAndAsync:
+class ConcurrencyAndAsyncTests:
     """Test concurrent query execution and async patterns"""
     @pytest.mark.asyncio
     async def test_concurrent_corpus_operations(self):
@@ -342,7 +342,7 @@ class TestConcurrencyAndAsync:
             # Should return quickly despite slow operation
             assert duration < 1.0
 
-class TestMetricsCalculation:
+class MetricsCalculationTests:
     """Test metrics calculation edge cases"""
     
     def test_statistics_with_empty_data(self):
@@ -387,7 +387,7 @@ class TestMetricsCalculation:
         # Test basic functionality
         assert result["mean"] == 2.0
 
-class TestPatternDetection:
+class PatternDetectionTests:
     """Test pattern detection edge cases"""
     
     def test_seasonality_insufficient_data(self):
@@ -428,7 +428,7 @@ class TestPatternDetection:
         zscore_outliers = engine.identify_outliers(values, method="zscore")
         assert zscore_outliers != None  # Should detect outliers
 
-class TestConnectionHandling:
+class ConnectionHandlingTests:
     """Test database connection handling"""
     @pytest.mark.asyncio
     async def test_connection_cleanup_on_error(self):

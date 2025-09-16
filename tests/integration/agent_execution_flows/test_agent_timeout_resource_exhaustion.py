@@ -27,7 +27,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.supervisor.execution_context import PipelineStep
 
 
-class TestAgentTimeoutResourceExhaustion(BaseIntegrationTest):
+class AgentTimeoutResourceExhaustionTests(BaseIntegrationTest):
     """Integration tests for agent timeout and resource exhaustion handling."""
 
     @pytest.mark.integration

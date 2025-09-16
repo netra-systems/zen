@@ -19,7 +19,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e
-class TestAuthServicePortConfigurationConsistency:
+class AuthServicePortConfigurationConsistencyTests:
     """Test suite for auth service port configuration consistency."""
     
     @pytest.mark.auth

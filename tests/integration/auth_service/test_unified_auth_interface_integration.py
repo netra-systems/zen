@@ -541,7 +541,7 @@ class MockUnifiedAuthInterface:
         return self.security_events.get(user_id, [])
 
 @pytest.mark.integration
-class TestUnifiedAuthInterfaceIntegrationCore(SSotAsyncTestCase):
+class UnifiedAuthInterfaceIntegrationCoreTests(SSotAsyncTestCase):
     """Core integration tests for UnifiedAuthInterface with real services"""
 
     def setup_method(self, method=None):
@@ -612,7 +612,7 @@ class TestUnifiedAuthInterfaceIntegrationCore(SSotAsyncTestCase):
         return jwt.encode(payload, self.private_key_pem, algorithm='RS256')
 
 @pytest.mark.integration
-class TestRealJWTIntegration(TestUnifiedAuthInterfaceIntegrationCore):
+class RealJWTIntegrationTests(UnifiedAuthInterfaceIntegrationCoreTests):
     """Integration tests with real JWT cryptographic operations"""
 
     async def test_jwt_creation_with_real_rsa_signing(self):
@@ -702,7 +702,7 @@ class TestRealJWTIntegration(TestUnifiedAuthInterfaceIntegrationCore):
         self.assertEqual(blacklist_record[0], 'security_incident')
 
 @pytest.mark.integration
-class TestRealOAuthIntegration(TestUnifiedAuthInterfaceIntegrationCore):
+class RealOAuthIntegrationTests(UnifiedAuthInterfaceIntegrationCoreTests):
     """Integration tests with real OAuth provider interactions"""
 
     async def test_oauth_provider_authentication_flow(self):
@@ -777,7 +777,7 @@ class TestRealOAuthIntegration(TestUnifiedAuthInterfaceIntegrationCore):
         self.assertTrue(github_token_valid.valid)
 
 @pytest.mark.integration
-class TestSessionManagementIntegration(TestUnifiedAuthInterfaceIntegrationCore):
+class SessionManagementIntegrationTests(UnifiedAuthInterfaceIntegrationCoreTests):
     """Integration tests for session management with real Redis"""
 
     async def test_session_creation_with_real_redis_persistence(self):
@@ -847,7 +847,7 @@ class TestSessionManagementIntegration(TestUnifiedAuthInterfaceIntegrationCore):
         self.assertEqual(redis_exists, 0)
 
 @pytest.mark.integration
-class TestSecurityIncidentResponse(TestUnifiedAuthInterfaceIntegrationCore):
+class SecurityIncidentResponseTests(UnifiedAuthInterfaceIntegrationCoreTests):
     """Integration tests for security incident response scenarios"""
 
     async def test_mass_token_revocation_incident(self):
@@ -932,7 +932,7 @@ class TestSecurityIncidentResponse(TestUnifiedAuthInterfaceIntegrationCore):
         self.test_user_ids.add('post-load-verification')
 
 @pytest.mark.integration
-class TestCrossServiceAuthCoordination(TestUnifiedAuthInterfaceIntegrationCore):
+class CrossServiceAuthCoordinationTests(UnifiedAuthInterfaceIntegrationCoreTests):
     """Integration tests for cross-service authentication coordination"""
 
     async def test_backend_auth_service_integration(self):

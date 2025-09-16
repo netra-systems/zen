@@ -18,7 +18,7 @@ import sys
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestIssue668ImportValidation(SSotBaseTestCase):
+class Issue668ImportValidationTests(SSotBaseTestCase):
     """Test Issue #668 - Import validation for E2E auth helper dependencies."""
 
     def test_e2e_auth_helper_imports_work_in_isolation(self):

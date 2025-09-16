@@ -21,7 +21,7 @@ import httpx
 from test_framework.base_e2e_test import BaseE2ETest
 from shared.isolated_environment import get_env
 
-class TestIssue860StagingWebSocketCompatibility(BaseE2ETest):
+class Issue860StagingWebSocketCompatibilityTests(BaseE2ETest):
     """Test staging WebSocket compatibility for Windows Issue #860 resolution."""
 
     def setup_method(self):

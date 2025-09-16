@@ -27,7 +27,7 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestWebSocketErrorMessagingReliability(SSotAsyncTestCase):
+class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
     """
     MISSION CRITICAL: WebSocket error messaging reliability tests.
     
@@ -402,7 +402,7 @@ class TestWebSocketErrorMessagingReliability(SSotAsyncTestCase):
                     pass
 
 
-class TestWebSocketErrorMessagingBusinessContinuity(SSotAsyncTestCase):
+class WebSocketErrorMessagingBusinessContinuityTests(SSotAsyncTestCase):
     """
     MISSION CRITICAL: Business continuity tests for WebSocket error messaging.
     

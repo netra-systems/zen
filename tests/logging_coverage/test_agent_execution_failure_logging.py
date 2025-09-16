@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 import uuid
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestAgentExecutionFailureLogging(SSotAsyncTestCase):
+class AgentExecutionFailureLoggingTests(SSotAsyncTestCase):
     """Test agent execution failure logging coverage."""
 
     def setUp(self):
@@ -199,7 +199,7 @@ class TestAgentExecutionFailureLogging(SSotAsyncTestCase):
         assert run_id in message
         assert processing_error in message
 
-class TestAgentOrchestrationFailureLogging(SSotAsyncTestCase):
+class AgentOrchestrationFailureLoggingTests(SSotAsyncTestCase):
     """Test agent orchestration failure logging coverage."""
 
     def setUp(self):
@@ -296,7 +296,7 @@ class TestAgentOrchestrationFailureLogging(SSotAsyncTestCase):
         assert f'duration: {execution_duration}s' in message1
         assert f'events: {events_delivered}/5' in message1
 
-class TestAgentLoggingCoverageGaps(SSotAsyncTestCase):
+class AgentLoggingCoverageGapsTests(SSotAsyncTestCase):
     """Identify agent execution logging coverage gaps."""
 
     def test_agent_logging_coverage_analysis(self):

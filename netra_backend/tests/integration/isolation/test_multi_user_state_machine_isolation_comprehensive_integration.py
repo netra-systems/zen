@@ -26,7 +26,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.websocket import WebSocketTestClient
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, ConnectionID, ensure_user_id
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
@@ -76,7 +76,7 @@ class UserIsolationContext:
             self.postgres_records = []
 
 
-class TestMultiUserStateIsolationIntegration(BaseIntegrationTest):
+class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
     """Integration tests for multi-user state machine isolation."""
     
     async def _create_isolated_user_context(self, real_services_fixture, user_index: int,

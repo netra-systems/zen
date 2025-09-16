@@ -50,7 +50,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 
 
 # ============================================================================
@@ -240,7 +240,7 @@ class RealWebSocketTestInfrastructure:
 
 @pytest.mark.asyncio
 @pytest.mark.mission_critical
-class TestWebSocketAgentEventsReal:
+class WebSocketAgentEventsRealTests:
     """Mission critical tests using REAL WebSocket connections and services."""
     
     @pytest.fixture
@@ -521,7 +521,7 @@ class TestWebSocketAgentEventsReal:
 @pytest.mark.asyncio
 @pytest.mark.mission_critical
 @pytest.mark.performance  
-class TestWebSocketPerformanceReal:
+class WebSocketPerformanceRealTests:
     """Performance validation using real WebSocket infrastructure."""
     
     @pytest.fixture

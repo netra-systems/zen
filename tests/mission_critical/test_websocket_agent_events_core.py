@@ -65,7 +65,7 @@ except ImportError:
 
 # Import production WebSocket components for validation
 try:
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     # SECURITY FIX: Use UserExecutionEngine SSOT instead of deprecated ExecutionEngine
@@ -236,7 +236,7 @@ class MockWebSocketForEventCapture:
 @pytest.mark.mission_critical
 @pytest.mark.critical
 @pytest.mark.websocket_events  
-class TestWebSocketAgentEventsCore:
+class WebSocketAgentEventsCoreTests:
     """
     P0 Mission Critical WebSocket Event Delivery Test Suite.
     

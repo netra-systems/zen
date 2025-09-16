@@ -18,7 +18,7 @@ from dev_launcher.port_allocator import PortAllocator, AllocationResult
 from dev_launcher.service_registry import ServiceRegistry, ServiceEndpoint, ServiceStatus, DiscoveryQuery
 logger = logging.getLogger(__name__)
 
-class TestServiceCoordinationIntegration:
+class ServiceCoordinationIntegrationTests:
     """Integration tests for the complete service coordination system."""
 
     @pytest.fixture
@@ -245,7 +245,7 @@ class TestServiceCoordinationIntegration:
         assert service.metadata.get('test') == 'data'
         await registry2.stop()
 
-class TestCoordinationSystemPerformance:
+class CoordinationSystemPerformanceTests:
     """Performance tests for coordination system."""
 
     @pytest.mark.asyncio

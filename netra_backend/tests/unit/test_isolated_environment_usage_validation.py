@@ -19,7 +19,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.core.backend_environment import BackendEnvironment
 
 
-class TestIsolatedEnvironmentUsageValidation(BaseTestCase):
+class IsolatedEnvironmentUsageValidationTests(BaseTestCase):
     """Validate IsolatedEnvironment usage enforces CLAUDE.md compliance for environment access."""
     
     def setup_method(self):

@@ -47,7 +47,7 @@ except ImportError:
     PYDANTIC_AVAILABLE = False
 
 
-class TestPydanticConfigurationDeprecation(SSotBaseTestCase):
+class PydanticConfigurationDeprecationTests(SSotBaseTestCase):
     """
     Test Pydantic configuration deprecation warnings.
 
@@ -371,7 +371,7 @@ class TestPydanticConfigurationDeprecation(SSotBaseTestCase):
         )
 
 
-class TestPydanticMigrationGuidance(SSotBaseTestCase):
+class PydanticMigrationGuidanceTests(SSotBaseTestCase):
     """
     Test Pydantic migration guidance and correct patterns.
 

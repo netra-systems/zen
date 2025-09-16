@@ -15,7 +15,7 @@ from dev_launcher.startup_optimizer import (
 )
 
 
-class TestStartupPhase:
+class StartupPhaseTests:
     """Test StartupPhase enum."""
     
     def test_startup_phase_values(self):
@@ -42,7 +42,7 @@ class TestStartupPhase:
         assert len(phases) == 4
 
 
-class TestStartupStep:
+class StartupStepTests:
     """Test StartupStep dataclass."""
     
     def test_startup_step_minimal_creation(self):
@@ -98,7 +98,7 @@ class TestStartupStep:
         assert step.dependencies is deps  # Same reference preserved
 
 
-class TestStartupOptimizer:
+class StartupOptimizerTests:
     """Test StartupOptimizer class."""
     
     def test_init_without_cache_manager(self):
@@ -526,7 +526,7 @@ class TestStartupOptimizer:
         assert len(optimizer.completed_steps) == 0
 
 
-class TestStartupOptimizerLogging:
+class StartupOptimizerLoggingTests:
     """Test logging functionality in StartupOptimizer."""
     
     @patch('dev_launcher.startup_optimizer.logger')
@@ -580,7 +580,7 @@ class TestStartupOptimizerLogging:
         mock_logger.info.assert_called_with("StartupOptimizer timing started")
 
 
-class TestStartupOptimizerStateManagement:
+class StartupOptimizerStateManagementTests:
     """Test state management and consistency in StartupOptimizer."""
     
     def test_state_isolation_multiple_optimizers(self):
@@ -644,7 +644,7 @@ class TestStartupOptimizerStateManagement:
         assert optimizer.completed_steps == ["first", "second", "third"]
 
 
-class TestStartupOptimizerMemoryManagement:
+class StartupOptimizerMemoryManagementTests:
     """Test memory management and resource cleanup."""
     
     def test_reset_clears_references(self):

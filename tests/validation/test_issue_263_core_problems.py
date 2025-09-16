@@ -23,7 +23,7 @@ from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestIssue263CoreProblemOne(SSotAsyncTestCase):
+class Issue263CoreProblemOneTests(SSotAsyncTestCase):
     """
     Reproduces Problem #1: setUp() vs setup_method() incompatibility
     
@@ -55,7 +55,7 @@ class TestIssue263CoreProblemOne(SSotAsyncTestCase):
         assert self.golden_user_context.thread_id == "test_thread_263"
 
 
-class TestIssue263CoreProblemTwo(SSotAsyncTestCase):
+class Issue263CoreProblemTwoTests(SSotAsyncTestCase):
     """
     Reproduces Problem #2: ExecutionResult parameter incompatibility
     
@@ -151,7 +151,7 @@ class BrokenTestPatternExample:
             assert "unexpected keyword argument" in str(e) or "required positional argument" in str(e)
 
 
-class TestIssue263FullFixValidation(SSotAsyncTestCase):
+class Issue263FullFixValidationTests(SSotAsyncTestCase):
     """
     Complete fix validation showing the workflow orchestrator pattern working correctly.
     """

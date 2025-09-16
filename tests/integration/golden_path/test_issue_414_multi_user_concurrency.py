@@ -40,7 +40,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
 from shared.types.core_types import UserID, ThreadID, RunID
 import logging
@@ -72,7 +72,7 @@ class UserExecutionResult:
     errors: List[str] = field(default_factory=list)
 
 @pytest.mark.integration
-class TestMultiUserConcurrency(SSotAsyncTestCase):
+class MultiUserConcurrencyTests(SSotAsyncTestCase):
     """Integration tests reproducing multi-user concurrency issues from Issue #414."""
 
     def setup_method(self, method):

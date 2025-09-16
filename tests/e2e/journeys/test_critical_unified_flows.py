@@ -18,14 +18,14 @@ pytestmark = [pytest.mark.integration, pytest.mark.critical, pytest.mark.real_se
 
 @dataclass
 @pytest.mark.e2e
-class TestUser:
+class UserTests:
     """Test user data"""
     email: str
     password: str
     user_id: Optional[str] = None
     jwt_token: Optional[str] = None
 
-class TestUnifiedE2EHarness:
+class UnifiedE2EHarnessTests:
     """Manages real service connections for unified testing"""
 
     def __init__(self):
@@ -49,17 +49,17 @@ class TestUnifiedE2EHarness:
         except:
             return False
 
-    async def create_user(self, email: str, password: str) -> TestUser:
+    async def create_user(self, email: str, password: str) -> UserTests:
         """Create user via Auth service"""
         async with aiohttp.ClientSession() as session:
             payload = {'email': email, 'password': password}
             async with session.post(f'{self.auth_url}/auth/register', json=payload) as resp:
                 data = await resp.json()
-                user = TestUser(email=email, password=password)
+                user = UserTests(email=email, password=password)
                 user.user_id = data.get('user_id')
                 return user
 
-    async def login_user(self, user: TestUser) -> str:
+    async def login_user(self, user: UserTests) -> str:
         """Login user and get JWT token"""
         async with aiohttp.ClientSession() as session:
             payload = {'email': user.email, 'password': user.password}
@@ -86,7 +86,7 @@ class TestUnifiedE2EHarness:
                 return False
 
 @pytest.mark.e2e
-class TestCriticalUnifiedFlows:
+class CriticalUnifiedFlowsTests:
     """
     Test critical user journeys across unified system.
     BVJ: Each test protects specific MRR amount.
@@ -208,7 +208,7 @@ class TestCriticalUnifiedFlows:
         assert True, 'Rate limiting check completed'
 
 @pytest.mark.e2e
-class TestDataConsistency:
+class DataConsistencyTests:
     """Test data consistency across services"""
 
     @pytest.fixture(autouse=True)

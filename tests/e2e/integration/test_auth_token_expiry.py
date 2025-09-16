@@ -35,7 +35,7 @@ from test_framework.helpers.auth_helpers import (
 @pytest.mark.critical
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAuthTokenExpiry:
+class AuthTokenExpiryTests:
     """Authentication Token Expiry and Refresh Tests."""
     
     @pytest.fixture

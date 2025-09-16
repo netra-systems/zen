@@ -38,7 +38,7 @@ from netra_backend.app.db.transaction_errors import (
 
 @pytest.mark.unit
 @pytest.mark.database  
-class TestClickHouseExceptionSpecificity(SSotAsyncTestCase):
+class ClickHouseExceptionSpecificityTests(SSotAsyncTestCase):
     """
     Tests demonstrating current broad exception handling in ClickHouse operations.
     

@@ -36,7 +36,7 @@ if project_root not in sys.path:
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDevLauncherImportIssuesReproduction(SSotBaseTestCase):
+class DevLauncherImportIssuesReproductionTests(SSotBaseTestCase):
     """
     Reproduction tests that demonstrate dev_launcher import failures.
     
@@ -217,7 +217,7 @@ config = get_demo_config()
             self.fail(f"VERIFICATION FAILED: shared.isolated_environment import failed: {e}")
 
 
-class TestDevLauncherImportPatternAnalysis(SSotBaseTestCase):
+class DevLauncherImportPatternAnalysisTests(SSotBaseTestCase):
     """
     Analysis tests that examine the import patterns and their failures.
     

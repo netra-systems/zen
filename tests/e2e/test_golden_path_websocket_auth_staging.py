@@ -31,7 +31,7 @@ from tests.e2e.staging_auth_client import StagingAuthClient
 from tests.e2e.real_websocket_client import RealWebSocketClient
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestWebSocketAuthGoldenPathStaging(SSotAsyncTestCase):
+class WebSocketAuthGoldenPathStagingTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

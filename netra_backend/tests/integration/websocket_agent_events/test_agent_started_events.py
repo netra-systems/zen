@@ -45,7 +45,7 @@ from test_framework.fixtures.websocket_test_helpers import (
 from shared.isolated_environment import get_env
 
 
-class TestAgentStartedEvents(BaseIntegrationTest):
+class AgentStartedEventsTests(BaseIntegrationTest):
     """
     Integration tests for agent_started WebSocket events reaching end users.
     
@@ -1855,7 +1855,7 @@ def calculate_business_impact_score(events: List[Dict[str, Any]]) -> float:
 
 # Export test class and utilities
 __all__ = [
-    "TestAgentStartedEvents",
+    "AgentStartedEventsTests",
     "validate_websocket_event_business_value", 
     "calculate_business_impact_score"
 ]

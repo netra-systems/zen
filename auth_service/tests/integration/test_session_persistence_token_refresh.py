@@ -54,7 +54,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestSessionPersistenceTokenRefresh(SSotBaseTestCase):
+class SessionPersistenceTokenRefreshTests(SSotBaseTestCase):
     """
     Session Persistence and Token Refresh Mechanism Integration Tests.
     

@@ -32,7 +32,7 @@ from netra_backend.app.services.message_handlers import MessageHandlerService
 # ============================================================================
 
 @pytest.mark.asyncio
-class TestMessageHandling:
+class MessageHandlingTests:
     """Test suite for message handling, validation, and routing."""
 
     @pytest.fixture(autouse=True)

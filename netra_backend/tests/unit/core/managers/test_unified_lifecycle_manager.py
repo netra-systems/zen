@@ -83,7 +83,7 @@ class MockService:
     async def shutdown(self):
         self.status = 'stopped'
 
-class TestUnifiedLifecycleManagerBasics:
+class UnifiedLifecycleManagerBasicsTests:
     """Test basic functionality of UnifiedLifecycleManager."""
 
     @pytest.fixture
@@ -126,7 +126,7 @@ class TestUnifiedLifecycleManagerBasics:
         assert service.status == 'stopped'
         assert 'test_service' in lifecycle_manager.shutdown_order
 
-class TestLifecycleOrdering:
+class LifecycleOrderingTests:
     """Test service startup and shutdown ordering."""
 
     @pytest.fixture
@@ -158,7 +158,7 @@ class TestLifecycleOrdering:
         assert all((service.status == 'stopped' for service in services))
         assert lifecycle_manager.get_status() == 'stopped'
 
-class TestLifecycleStatusManagement:
+class LifecycleStatusManagementTests:
     """Test lifecycle status management."""
 
     @pytest.fixture
@@ -183,7 +183,7 @@ class TestLifecycleStatusManagement:
         lifecycle_manager.services['service_2'] = MockService('service_2')
         assert lifecycle_manager.get_service_count() == 2
 
-class TestErrorHandling:
+class ErrorHandlingTests:
     """Test error handling in lifecycle management."""
 
     @pytest.fixture
@@ -202,7 +202,7 @@ class TestErrorHandling:
         result = await lifecycle_manager.shutdown_service('nonexistent')
         assert result is False
 
-class TestServiceLifecycleIntegration:
+class ServiceLifecycleIntegrationTests:
     """Test integration patterns for service lifecycle."""
 
     @pytest.fixture
@@ -235,7 +235,7 @@ class TestServiceLifecycleIntegration:
         assert service1.status == 'running'
         assert service2.status == 'initialized'
 
-class TestPerformancePatterns:
+class PerformancePatternsTests:
     """Test performance characteristics of lifecycle management."""
 
     @pytest.fixture

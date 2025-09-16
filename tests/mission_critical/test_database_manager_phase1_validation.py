@@ -18,7 +18,7 @@ sys.path.insert(0, '/Users/anthony/Desktop/netra-apex')
 from netra_backend.app.db.database_manager import DatabaseManager
 
 
-class TestDatabaseManagerPhase1Baseline:
+class DatabaseManagerPhase1BaselineTests:
     """Baseline validation tests for primary DatabaseManager."""
 
     def test_database_manager_import_successful(self):
@@ -115,7 +115,7 @@ if __name__ == "__main__":
     # Run basic validation
     print("🧪 Running Phase 1 DatabaseManager Validation Tests...")
     
-    test_instance = TestDatabaseManagerPhase1Baseline()
+    test_instance = DatabaseManagerPhase1BaselineTests()
     
     # Run sync tests
     try:

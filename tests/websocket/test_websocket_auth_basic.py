@@ -22,7 +22,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.asyncio
 @pytest.mark.websocket
-class TestBasicWebSocketAuth:
+class BasicWebSocketAuthTests:
     """Test basic WebSocket authentication logic."""
 
     async def test_token_validation_logic(self):
@@ -73,7 +73,7 @@ class TestBasicWebSocketAuth:
 
 @pytest.mark.asyncio
 @pytest.mark.websocket
-class TestWebSocketAuthResponses:
+class WebSocketAuthResponsesTests:
     """Test WebSocket authentication response structures."""
 
     async def test_connection_ack_message(self):

@@ -13,20 +13,20 @@ Tests the 5 required WebSocket events without Docker dependencies.
 import pytest
 from unittest.mock import MagicMock, AsyncMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from shared.logging.unified_logging_ssot import get_logger
 
 logger = get_logger(__name__)
 
 
-class TestMissionCriticalWebSocketEvents1184(SSotAsyncTestCase):
+class MissionCriticalWebSocketEvents1184Tests(SSotAsyncTestCase):
     """Mission critical tests for WebSocket event delivery."""
 
     def setUp(self):
         """Set up test environment."""
         super().setUp()
         # Reset manager registry between tests to prevent cross-test contamination
-        from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
+        from netra_backend.app.websocket_core.canonical_import_patterns import reset_manager_registry
         reset_manager_registry()
 
     @pytest.mark.mission_critical

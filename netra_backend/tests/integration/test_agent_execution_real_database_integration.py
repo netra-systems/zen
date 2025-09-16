@@ -35,10 +35,11 @@ from test_framework.ssot.real_services_test_fixtures import *
 
 
 @pytest.mark.integration
-class TestAgentExecutionRealDatabase:
+class AgentExecutionRealDatabaseTests:
     """Integration tests for agent execution with real database services."""
     
     @pytest.mark.asyncio
+    @pytest.mark.database
     async def test_agent_execution_state_persistence(self, real_services_fixture):
         """Test agent execution state persists to real database."""
         # Arrange - verify database is available
@@ -105,6 +106,7 @@ class TestAgentExecutionRealDatabase:
             assert execution_record.status == "completed"
     
     @pytest.mark.asyncio
+    @pytest.mark.database
     async def test_multi_user_execution_isolation_in_database(self, real_services_fixture):
         """Test multi-user agent execution isolation using real database."""
         # Arrange - verify database is available
@@ -218,6 +220,7 @@ class TestAgentExecutionRealDatabase:
                     assert "user1" not in record.execution_data
     
     @pytest.mark.asyncio
+    @pytest.mark.database
     async def test_agent_execution_transaction_handling(self, real_services_fixture):
         """Test transaction handling during agent execution with real database."""
         # Arrange - verify database is available
@@ -346,6 +349,7 @@ class TestAgentExecutionRealDatabase:
         assert rollback_count == 0  # Record should not exist due to rollback
     
     @pytest.mark.asyncio
+    @pytest.mark.database
     async def test_agent_execution_recovery_from_database_failures(self, real_services_fixture):
         """Test agent execution recovery when database operations fail."""
         # Arrange - verify database is available

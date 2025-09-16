@@ -31,7 +31,7 @@ from shared.types.core_types import UserID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestJWTTokenRefreshFlowIntegration(BaseIntegrationTest):
+class JWTTokenRefreshFlowIntegrationTests(BaseIntegrationTest):
     """Integration tests for JWT token refresh flow with real auth service."""
     
     @pytest.fixture(autouse=True)

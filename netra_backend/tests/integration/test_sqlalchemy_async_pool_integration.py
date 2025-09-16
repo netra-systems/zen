@@ -53,7 +53,7 @@ from netra_backend.app.database import get_engine as get_netra_engine, get_sessi
 from netra_backend.app.dependencies import get_request_scoped_db_session
 
 
-class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
+class SQLAlchemyAsyncPoolIntegrationTests(BaseIntegrationTest):
     """
     Integration Tests for SQLAlchemy Async Pool Configuration Management.
     

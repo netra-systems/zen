@@ -20,7 +20,7 @@ from tests.e2e.test_environment_config import (
 
 
 @pytest.mark.e2e
-class TestServiceAvailabilityDetection:
+class ServiceAvailabilityDetectionTests:
     """Test suite for service availability detection."""
     
     @pytest.mark.asyncio
@@ -162,7 +162,7 @@ class TestServiceAvailabilityDetection:
 
 
 @pytest.mark.e2e
-class TestExampleUsagePatterns:
+class ExampleUsagePatternsTests:
     """Demonstrate usage patterns for the service detection system."""
     
     @pytest.mark.asyncio 

@@ -22,7 +22,7 @@ def auth_token():
 
 
 @pytest.mark.integration
-class TestLargePayloadProcessing:
+class LargePayloadProcessingTests:
 
     def test_large_json_payload(self, auth_token):
         """

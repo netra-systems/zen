@@ -29,7 +29,7 @@ env = get_env()
 @pytest.mark.websocket
 @pytest.mark.circuit_breaker
 @skip_if_no_real_services
-class TestRealWebSocketCircuitBreaker:
+class RealWebSocketCircuitBreakerTests:
     """Test real WebSocket circuit breaker patterns."""
     
     @pytest.fixture

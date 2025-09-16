@@ -34,7 +34,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
-class TestWebSocketRouteSSOTConsolidation(SSotAsyncTestCase):
+class WebSocketRouteSSOTConsolidationTests(SSotAsyncTestCase):
     """
     Test suite validating SSOT WebSocket route consolidation.
     

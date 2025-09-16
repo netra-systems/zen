@@ -254,7 +254,7 @@ class MigrationValidationUtility:
         return comparison
 
 @pytest.mark.unit
-class TestUserExecutionContextMigrationHelpers(SSotAsyncTestCase):
+class UserExecutionContextMigrationHelpersTests(SSotAsyncTestCase):
     """Test suite for UserExecutionContext migration helper utilities.
     
     This test class validates that the migration utilities work correctly

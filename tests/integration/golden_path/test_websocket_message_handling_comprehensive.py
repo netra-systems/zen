@@ -74,7 +74,7 @@ from shared.types import UserID, ThreadID, RunID, RequestID, StronglyTypedUserEx
 
 # Backend Service Imports
 try:
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     from netra_backend.app.websocket_core.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
     from netra_backend.app.services.user_execution_context import UserExecutionContextManager
@@ -84,7 +84,7 @@ except ImportError:
     BACKEND_IMPORTS_AVAILABLE = False
 
 
-class TestWebSocketMessageHandlingComprehensive(WebSocketIntegrationTest):
+class WebSocketMessageHandlingComprehensiveTests(WebSocketIntegrationTest):
     """
     Comprehensive integration tests for WebSocket message handling in golden path.
     

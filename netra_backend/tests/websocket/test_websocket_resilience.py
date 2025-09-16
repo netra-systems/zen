@@ -3,7 +3,7 @@
 Tests focused on connection resilience, error recovery, and network instability scenarios.
 """
 import pytest
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 pytestmark = pytest.mark.skip(reason='Missing dependencies: get_unified_websocket_manager not yet implemented')
@@ -16,7 +16,7 @@ from netra_backend.app.core.websocket_cors import WebSocketCORSHandler
 from netra_backend.app.routes.websocket_unified import unified_websocket_endpoint
 
 @pytest.mark.asyncio
-class TestWebSocketConnectionResilience:
+class WebSocketConnectionResilienceTests:
     """Test WebSocket connection resilience."""
 
     @pytest.mark.asyncio
@@ -74,7 +74,7 @@ class TestWebSocketConnectionResilience:
             await connection_manager.remove_connection(user_id, conn_id)
 
 @pytest.mark.asyncio
-class TestWebSocketNetworkInstability:
+class WebSocketNetworkInstabilityTests:
     """Test WebSocket behavior under network instability."""
 
     @pytest.mark.asyncio
@@ -122,7 +122,7 @@ class TestWebSocketNetworkInstability:
             assert False, f'Cleanup should handle missing metadata gracefully: {e}'
 
 @pytest.mark.asyncio
-class TestWebSocketErrorRecovery:
+class WebSocketErrorRecoveryTests:
     """Test WebSocket error recovery mechanisms."""
 
     @pytest.mark.asyncio
@@ -198,7 +198,7 @@ class TestWebSocketErrorRecovery:
                 await connection_manager.remove_connection(user_id, conn_id)
 
 @pytest.mark.asyncio
-class TestWebSocketConcurrencyResilience:
+class WebSocketConcurrencyResilienceTests:
     """Test WebSocket resilience under concurrent load."""
 
     @pytest.mark.asyncio
@@ -266,7 +266,7 @@ class TestWebSocketConcurrencyResilience:
                     pass
 
 @pytest.mark.asyncio
-class TestWebSocketCORSResilience:
+class WebSocketCORSResilienceTests:
     """Test CORS resilience and security."""
 
     def test_cors_handles_missing_origin(self):

@@ -227,7 +227,7 @@ class RealTimeAnalyticsTestHarness(AnalyticsE2ETestHarness):
 # WEBSOCKET CONNECTION TESTS
 # =============================================================================
 
-class TestWebSocketConnectionManagement:
+class WebSocketConnectionManagementTests:
     """Test suite for WebSocket connection management and reliability"""
     
     @pytest.fixture
@@ -334,7 +334,7 @@ class TestWebSocketConnectionManagement:
 # REAL-TIME EVENT STREAMING TESTS
 # =============================================================================
 
-class TestRealTimeEventStreaming:
+class RealTimeEventStreamingTests:
     """Test suite for real-time event streaming and processing"""
     
     @pytest.fixture
@@ -519,7 +519,7 @@ class TestRealTimeEventStreaming:
 # LIVE DASHBOARD UPDATES TESTS
 # =============================================================================
 
-class TestLiveDashboardUpdates:
+class LiveDashboardUpdatesTests:
     """Test suite for live dashboard updates via WebSocket"""
     
     @pytest.fixture
@@ -631,7 +631,7 @@ class TestLiveDashboardUpdates:
 # REAL-TIME ALERTS TESTS
 # =============================================================================
 
-class TestRealTimeAlerts:
+class RealTimeAlertsTests:
     """Test suite for real-time alert system functionality"""
     
     @pytest.fixture
@@ -740,7 +740,7 @@ class TestRealTimeAlerts:
 # STREAM PROCESSING PERFORMANCE TESTS
 # =============================================================================
 
-class TestStreamProcessingPerformance:
+class StreamProcessingPerformanceTests:
     """Test suite for stream processing performance and accuracy"""
     
     @pytest.fixture

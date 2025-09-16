@@ -138,7 +138,7 @@ def mock_user_sessions_dict_class():
             super().__delitem__(key)
     return MockUserSessionsDict
 
-class TestUserAgentSessionComplete(SSotBaseTestCase):
+class UserAgentSessionCompleteTests(SSotBaseTestCase):
     """Complete test coverage for UserAgentSession class."""
 
     def test_user_session_initialization_validates_user_id(self):
@@ -308,7 +308,7 @@ class TestUserAgentSessionComplete(SSotBaseTestCase):
         agents = await asyncio.gather(*get_tasks)
         assert all((agent is not None for agent in agents))
 
-class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
+class AgentLifecycleManagerCompleteTests(SSotBaseTestCase):
     """Complete test coverage for AgentLifecycleManager class."""
 
     def test_lifecycle_manager_initialization(self):
@@ -437,7 +437,7 @@ class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
         await manager.trigger_cleanup(test_user_id)
         assert test_user_id not in mock_registry._user_sessions
 
-class TestAgentRegistryComplete(SSotBaseTestCase):
+class AgentRegistryCompleteTests(SSotBaseTestCase):
     """Complete test coverage for AgentRegistry class with all isolation features."""
 
     def test_agent_registry_initialization_comprehensive(self, mock_llm_manager):
@@ -645,7 +645,7 @@ class TestAgentRegistryComplete(SSotBaseTestCase):
         await registry.set_websocket_manager_async(None)
         assert registry.websocket_manager is None
 
-class TestToolDispatcherIntegration(SSotBaseTestCase):
+class ToolDispatcherIntegrationTests(SSotBaseTestCase):
     """Test tool dispatcher creation and user isolation."""
 
     @pytest.mark.asyncio
@@ -694,7 +694,7 @@ class TestToolDispatcherIntegration(SSotBaseTestCase):
         registry.tool_dispatcher = mock_dispatcher
         assert registry.tool_dispatcher is None
 
-class TestConcurrentUserScenarios(SSotBaseTestCase):
+class ConcurrentUserScenariosTests(SSotBaseTestCase):
     """Test concurrent user scenarios with isolation guarantees."""
 
     @pytest.mark.asyncio
@@ -822,7 +822,7 @@ class TestConcurrentUserScenarios(SSotBaseTestCase):
         assert cleanup_report['users_cleaned'] == len(multiple_test_users)
         assert len(cleanup_report['errors']) >= 0
 
-class TestAgentFactoryRegistration(SSotBaseTestCase):
+class AgentFactoryRegistrationTests(SSotBaseTestCase):
     """Test agent factory registration and default agent setup."""
 
     def test_register_default_agents_sets_registration_flag(self, mock_llm_manager):
@@ -895,7 +895,7 @@ class TestAgentFactoryRegistration(SSotBaseTestCase):
             assert 'failing_agent' in registry.registration_errors
             assert 'Registration failed' in registry.registration_errors['failing_agent']
 
-class TestRegistryHealthAndDiagnostics(SSotBaseTestCase):
+class RegistryHealthAndDiagnosticsTests(SSotBaseTestCase):
     """Test registry health monitoring and diagnostic capabilities."""
 
     def test_get_registry_health_comprehensive_metrics(self, mock_llm_manager):
@@ -1008,7 +1008,7 @@ class TestRegistryHealthAndDiagnostics(SSotBaseTestCase):
         assert isinstance(status['timestamp'], str)
         datetime.fromisoformat(status['timestamp'].replace('Z', '+00:00'))
 
-class TestBackwardCompatibilityAndLegacySupport(SSotBaseTestCase):
+class BackwardCompatibilityAndLegacySupportTests(SSotBaseTestCase):
     """Test backward compatibility methods and legacy support."""
 
     def test_list_agents_returns_registered_keys(self, mock_llm_manager):
@@ -1079,7 +1079,7 @@ class TestBackwardCompatibilityAndLegacySupport(SSotBaseTestCase):
                 assert 'status' in detail
                 assert detail['status'] == 'factory_pattern'
 
-class TestModuleExportsAndFactoryFunctions(SSotBaseTestCase):
+class ModuleExportsAndFactoryFunctionsTests(SSotBaseTestCase):
     """Test module-level exports and factory functions."""
 
     def test_get_agent_registry_returns_proper_instance(self, mock_llm_manager):
@@ -1104,7 +1104,7 @@ class TestModuleExportsAndFactoryFunctions(SSotBaseTestCase):
         assert registry1.llm_manager == mock_llm_manager
         assert registry2.llm_manager == mock_llm_manager
 
-class TestMemoryLeakPreventionAndResourceManagement(SSotBaseTestCase):
+class MemoryLeakPreventionAndResourceManagementTests(SSotBaseTestCase):
     """Test memory leak prevention and resource management features."""
 
     @pytest.mark.asyncio
@@ -1208,7 +1208,7 @@ class TestMemoryLeakPreventionAndResourceManagement(SSotBaseTestCase):
         del mock_session
         gc.collect()
 
-class TestErrorHandlingAndEdgeCases(SSotBaseTestCase):
+class ErrorHandlingAndEdgeCasesTests(SSotBaseTestCase):
     """Test comprehensive error handling and edge cases."""
 
     @pytest.mark.asyncio

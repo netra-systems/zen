@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 """
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -95,7 +95,7 @@ async def agent_service_with_mocks():
     yield (agent_service, supervisor, llm_manager)
 
 @pytest.mark.asyncio
-class TestMessagePipeline:
+class MessagePipelineTests:
     """Test complete message processing pipeline."""
 
     @pytest.mark.asyncio

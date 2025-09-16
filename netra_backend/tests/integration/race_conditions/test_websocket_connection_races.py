@@ -37,7 +37,7 @@ from contextlib import asynccontextmanager
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.fixtures.real_services import real_services_fixture, real_redis_fixture
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ConnectionID, WebSocketID, ensure_user_id
@@ -47,7 +47,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestWebSocketConnectionRaces(BaseIntegrationTest):
+class WebSocketConnectionRacesTests(BaseIntegrationTest):
     """Test race conditions in WebSocket connection management."""
     
     def setup_method(self):

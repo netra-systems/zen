@@ -31,7 +31,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.integration
-class TestWebSocketEventDeliveryIssue620(BaseIntegrationTest):
+class WebSocketEventDeliveryIssue620Tests(BaseIntegrationTest):
     """Test WebSocket event delivery through SSOT ExecutionEngine migration."""
     
     # Critical WebSocket events for Golden Path
@@ -648,7 +648,7 @@ class TestWebSocketEventDeliveryIssue620(BaseIntegrationTest):
 
 
 @pytest.mark.integration
-class TestWebSocketEventValidationRegressionPrevention(BaseIntegrationTest):
+class WebSocketEventValidationRegressionPreventionTests(BaseIntegrationTest):
     """Prevent regressions in WebSocket event delivery."""
     
     async def test_websocket_bridge_methods_exist(self):
@@ -757,7 +757,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_manual_tests():
-        test_instance = TestWebSocketEventDeliveryIssue620()
+        test_instance = WebSocketEventDeliveryIssue620Tests()
         
         try:
             # Test SSOT WebSocket event delivery

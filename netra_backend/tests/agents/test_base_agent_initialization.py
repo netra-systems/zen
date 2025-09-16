@@ -50,7 +50,7 @@ class ConcreteTestAgent(BaseAgent):
         }
 
 
-class TestBaseAgentInitialization(SSotAsyncTestCase):
+class BaseAgentInitializationTests(SSotAsyncTestCase):
     """Test BaseAgent initialization, dependency injection, and setup patterns."""
 
     def setup_method(self, method):
@@ -227,7 +227,7 @@ class TestBaseAgentInitialization(SSotAsyncTestCase):
         assert "test request for async initialization" in result["response"]
 
 
-class TestBaseAgentInitializationEdgeCases(SSotBaseTestCase):
+class BaseAgentInitializationEdgeCasesTests(SSotBaseTestCase):
     """Test BaseAgent initialization edge cases and error conditions."""
 
     def setup_method(self, method):

@@ -111,7 +111,7 @@ class MockBaseAgent(BaseAgent):
         }
 
 
-class TestBaseAgentMessageProcessing(SSotAsyncTestCase):
+class BaseAgentMessageProcessingTests(SSotAsyncTestCase):
     """Unit tests for BaseAgent message processing functionality
     
     This test class validates the critical message processing capabilities that

@@ -36,7 +36,7 @@ from tests.e2e.staging_test_helpers import (
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.e2e
-class TestStagingServiceHealth:
+class StagingServiceHealthTests:
     """Test health endpoints for all staging services."""
     
     @pytest.mark.e2e
@@ -83,7 +83,7 @@ class TestStagingServiceHealth:
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.e2e
-class TestStagingWebSocketConnectivity:
+class StagingWebSocketConnectivityTests:
     """Test WebSocket service connectivity and protocol support."""
     
     @pytest.mark.e2e
@@ -142,7 +142,7 @@ class TestStagingWebSocketConnectivity:
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.e2e
-class TestStagingDatabaseHealth:
+class StagingDatabaseHealthTests:
     """Test database connections and health for staging environment."""
     
     @pytest.mark.e2e
@@ -190,7 +190,7 @@ class TestStagingDatabaseHealth:
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.e2e
-class TestStagingServiceRecovery:
+class StagingServiceRecoveryTests:
     """Test service recovery mechanisms and resilience."""
     
     @pytest.mark.e2e
@@ -240,7 +240,7 @@ class TestStagingServiceRecovery:
 @pytest.mark.staging
 @pytest.mark.comprehensive
 @pytest.mark.e2e
-class TestStagingServiceIntegration:
+class StagingServiceIntegrationTests:
     """Test service integration and communication patterns."""
     
     @pytest.mark.e2e

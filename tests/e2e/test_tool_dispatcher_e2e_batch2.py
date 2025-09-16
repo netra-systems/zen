@@ -29,7 +29,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.isolated_environment import get_env
 from langchain_core.tools import BaseTool
 
-class TestToolDispatcherE2EAuthenticated(SSotAsyncTestCase):
+class ToolDispatcherE2EAuthenticatedTests(SSotAsyncTestCase):
     """E2E tests with full authentication for tool dispatcher system - CLAUDE.md Compliant.
     
     CRITICAL: ALL E2E tests MUST use authentication (JWT/OAuth) except tests that directly validate auth itself.

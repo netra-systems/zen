@@ -17,7 +17,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestModuleImportValidation(SSotBaseTestCase):
+class ModuleImportValidationTests(SSotBaseTestCase):
     """
     Test module import validation for collection error fixes.
     
@@ -36,7 +36,7 @@ class TestModuleImportValidation(SSotBaseTestCase):
         Business Impact: Blocks Golden Path test collection (321 tests)
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             # If we reach here, the import succeeded
             assert True, "WebSocket manager import succeeded"
         except ModuleNotFoundError as e:

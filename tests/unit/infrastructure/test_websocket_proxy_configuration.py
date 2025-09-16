@@ -37,7 +37,7 @@ from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
-class TestWebSocketProxyConfiguration:
+class WebSocketProxyConfigurationTests:
     """
     Tests WebSocket proxy layer configuration without application dependencies.
     

@@ -16,7 +16,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import create_we
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.mark.integration
-class TestWebSocketManagerSignature:
+class WebSocketManagerSignatureTests:
     """Test suite to prevent regression of WebSocket manager signature issues."""
 
     def test_create_websocket_manager_accepts_positional_argument(self):

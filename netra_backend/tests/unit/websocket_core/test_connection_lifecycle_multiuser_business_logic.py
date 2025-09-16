@@ -45,7 +45,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.core_types import UserID, ThreadID, ensure_user_id, ensure_thread_id
 from test_framework.base import BaseUnitTest
 
-class TestWebSocketConnectionLifecycleBusinessLogic(BaseUnitTest):
+class WebSocketConnectionLifecycleBusinessLogicTests(BaseUnitTest):
     """Test WebSocket connection lifecycle for reliable connection management."""
 
     def setUp(self):
@@ -157,7 +157,7 @@ class TestWebSocketConnectionLifecycleBusinessLogic(BaseUnitTest):
         assert connection.is_active is False, 'Must mark as inactive after graceful shutdown'
         mock_websocket.close.assert_called_once_with(code=1000, reason='Graceful shutdown')
 
-class TestMultiUserIsolationBusinessLogic(BaseUnitTest):
+class MultiUserIsolationBusinessLogicTests(BaseUnitTest):
     """Test multi-user isolation for secure concurrent operations."""
 
     def setUp(self):
@@ -275,7 +275,7 @@ class TestMultiUserIsolationBusinessLogic(BaseUnitTest):
         assert regular1_conn[0].messages_sent == 1, 'Regular user 1 connection must track broadcast'
         assert regular2_conn[0].messages_sent == 1, 'Regular user 2 connection must track broadcast'
 
-class TestConcurrentConnectionManagement(BaseUnitTest):
+class ConcurrentConnectionManagementTests(BaseUnitTest):
     """Test concurrent connection management for race condition prevention."""
 
     def setUp(self):
@@ -362,7 +362,7 @@ class TestConcurrentConnectionManagement(BaseUnitTest):
             assert remaining_id in self.manager.connections, f'Connection {remaining_id} must remain'
             assert self.manager.connections[remaining_id].is_active is True, 'Remaining connections must stay active'
 
-class TestWebSocketSecurityBoundaries(BaseUnitTest):
+class WebSocketSecurityBoundariesTests(BaseUnitTest):
     """Test WebSocket security boundaries for multi-user safety."""
 
     def setUp(self):

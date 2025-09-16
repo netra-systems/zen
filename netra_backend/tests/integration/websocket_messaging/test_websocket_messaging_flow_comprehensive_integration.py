@@ -63,7 +63,7 @@ from shared.isolated_environment import get_env
 from shared.id_generation import UnifiedIdGenerator
 
 
-class TestWebSocketMessagingFlowComprehensive(BaseIntegrationTest):
+class WebSocketMessagingFlowComprehensiveTests(BaseIntegrationTest):
     """
     Comprehensive integration test for WebSocket messaging flow.
     

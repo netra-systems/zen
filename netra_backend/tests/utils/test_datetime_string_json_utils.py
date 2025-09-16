@@ -22,7 +22,7 @@ from netra_backend.tests.datetime_string_test_helpers import (
 from netra_backend.tests.json_file_crypto_test_helpers import JsonTestHelpers
 
 # Test 86: Datetime utils timezone
-class TestDatetimeUtilsTimezone:
+class DatetimeUtilsTimezoneTests:
     """test_datetime_utils_timezone - Test timezone conversions and DST handling"""
     
     @pytest.mark.asyncio
@@ -72,7 +72,7 @@ class TestDatetimeUtilsTimezone:
         assert resolved != None
 
 # Test 87: String utils sanitization
-class TestStringUtilsSanitization:
+class StringUtilsSanitizationTests:
     """test_string_utils_sanitization - Test string sanitization and XSS prevention"""
     
     @pytest.mark.asyncio
@@ -137,7 +137,7 @@ class TestStringUtilsSanitization:
         assert len(truncated) <= 100
 
 # Test 88: JSON utils serialization
-class TestJsonUtilsSerialization:
+class JsonUtilsSerializationTests:
     """test_json_utils_serialization - Test custom serialization and circular reference handling"""
     
     @pytest.mark.asyncio

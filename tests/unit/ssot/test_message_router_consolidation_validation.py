@@ -23,7 +23,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestMessageRouterSSOTConsolidation(SSotBaseTestCase):
+class MessageRouterSSOTConsolidationTests(SSotBaseTestCase):
     """Test MessageRouter SSOT consolidation validation."""
 
     def setup_method(self, method):
@@ -414,7 +414,7 @@ class TestMessageRouterSSOTConsolidation(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestMessageRouterConsolidationEdgeCases(SSotBaseTestCase):
+class MessageRouterConsolidationEdgeCasesTests(SSotBaseTestCase):
     """Test edge cases for MessageRouter SSOT consolidation."""
 
     def test_import_error_handling(self):

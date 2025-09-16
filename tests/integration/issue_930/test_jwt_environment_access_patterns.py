@@ -22,7 +22,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
 @pytest.mark.integration
-class TestJWTEnvironmentAccessPatterns(SSotAsyncTestCase):
+class JWTEnvironmentAccessPatternsTests(SSotAsyncTestCase):
     """Integration tests for JWT environment access patterns causing staging failures."""
 
     async def asyncSetUp(self):

@@ -127,7 +127,7 @@ class GoldenPathTracker:
 
 
 @pytest.mark.e2e
-class TestGoldenPathExecution(SSotAsyncTestCase):
+class GoldenPathExecutionTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

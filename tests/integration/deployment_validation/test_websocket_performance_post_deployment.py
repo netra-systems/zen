@@ -10,7 +10,7 @@ import time
 import httpx
 
 @pytest.mark.integration
-class TestWebSocketPerformancePostDeployment:
+class WebSocketPerformancePostDeploymentTests:
     
     @pytest.mark.asyncio
     async def test_websocket_timeout_configs_active_in_staging(self):

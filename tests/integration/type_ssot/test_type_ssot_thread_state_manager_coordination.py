@@ -23,7 +23,7 @@ from shared.isolated_environment import get_env
 from shared.types.core_types import ThreadID, UserID, ConnectionID
 
 
-class TestThreadStateManagerCoordination(BaseIntegrationTest):
+class ThreadStateManagerCoordinationTests(BaseIntegrationTest):
     """Integration tests for thread state manager cross-service type coordination."""
     
     @pytest.mark.integration

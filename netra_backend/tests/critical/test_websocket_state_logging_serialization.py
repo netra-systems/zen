@@ -22,7 +22,7 @@ from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_log
 # (These should fail with ImportError since functions were removed/consolidated)
 
 
-class TestWebSocketStateSafeLogging:
+class WebSocketStateSafeLoggingTests:
     """Test safe WebSocket state serialization for logging contexts."""
 
     @pytest.mark.parametrize("safe_logging_func", [
@@ -111,7 +111,7 @@ class TestWebSocketStateSafeLogging:
         json.dumps(result)  # This should not raise an exception
 
 
-class TestGCPStructuredLoggingCompatibility:
+class GCPStructuredLoggingCompatibilityTests:
     """Test that our fixes work with GCP structured logging patterns."""
     
     def test_structured_logging_with_websocket_state(self):
@@ -172,7 +172,7 @@ class TestGCPStructuredLoggingCompatibility:
         assert "WebSocket client_state: connected" in caplog.text
 
 
-class TestRegressionPrevention:
+class RegressionPreventionTests:
     """Test that prevents regression of the original WebSocket 1011 error."""
     
     def test_original_error_pattern_fixed(self):

@@ -81,7 +81,7 @@ class FirstTimeUserTestHarness:
 @pytest.mark.e2e
 @pytest.mark.frontend
 @pytest.mark.first_time_user
-class TestFrontendFirstTimeUser:
+class FrontendFirstTimeUserTests:
     """Test first-time user experience and onboarding"""
     
     @pytest.fixture(autouse=True)

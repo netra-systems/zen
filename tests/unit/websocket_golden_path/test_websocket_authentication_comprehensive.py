@@ -43,7 +43,7 @@ from shared.types.core_types import UserID
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 @pytest.mark.unit
-class TestWebSocketAuthenticationComprehensive(SSotAsyncTestCase):
+class WebSocketAuthenticationComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for WebSocket Authentication.
     
@@ -320,7 +320,7 @@ class TestWebSocketAuthenticationComprehensive(SSotAsyncTestCase):
                         pass
 
 @pytest.mark.unit
-class TestWebSocketAuthenticationEdgeCases(SSotBaseTestCase):
+class WebSocketAuthenticationEdgeCasesTests(SSotBaseTestCase):
     """
     Unit tests for WebSocket Authentication edge cases and error conditions.
     

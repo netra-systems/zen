@@ -42,7 +42,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestStartupCrossPhaseIntegration(BaseIntegrationTest):
+class StartupCrossPhaseIntegrationTests(BaseIntegrationTest):
     """Test integration between multiple startup phases."""
     
     def __init__(self):

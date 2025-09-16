@@ -71,7 +71,7 @@ class RouteTestScenario:
     performance_requirements: Dict[str, int]
 
 
-class TestMessageRoutingValidationComprehensive(SSotAsyncTestCase):
+class MessageRoutingValidationComprehensiveTests(SSotAsyncTestCase):
     """Comprehensive unit tests for message routing validation patterns"""
 
     def setup_method(self, method):

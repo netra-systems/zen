@@ -39,7 +39,7 @@ class MockWebSocketManager:
 
 
 @pytest.mark.unit
-class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
+class FactoryDelegationConsolidationTests(SSotAsyncTestCase):
     """Unit Test 2: Validate factory delegation to UserExecutionEngine SSOT"""
     
     def setUp(self):

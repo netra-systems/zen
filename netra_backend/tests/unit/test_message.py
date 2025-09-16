@@ -9,7 +9,7 @@ from netra_backend.app.models.message import Message
 from netra_backend.app.schemas.core_enums import MessageType
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestMessage:
+class MessageTests:
     """Test suite for Message"""
 
     @pytest.fixture

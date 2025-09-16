@@ -36,7 +36,7 @@ from test_framework.websocket_helpers import WebSocketTestClient, WebSocketTestH
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketThreadIntegrationE2E(BaseE2ETest):
+class WebSocketThreadIntegrationE2ETests(BaseE2ETest):
     """E2E tests for WebSocket thread integration with authentication and real services."""
     
     def setup_method(self):

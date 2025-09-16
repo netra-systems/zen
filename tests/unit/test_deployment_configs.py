@@ -181,7 +181,7 @@ class DeploymentConfigValidator:
             recommendations['cloud_run_compatibility_score'] = max(0.0, 1.0 - critical_issues / total_issues)
         return recommendations
 
-class TestDeploymentConfigs(SSotBaseTestCase):
+class DeploymentConfigsTests(SSotBaseTestCase):
     """
     Unit tests for deployment configuration validation.
     

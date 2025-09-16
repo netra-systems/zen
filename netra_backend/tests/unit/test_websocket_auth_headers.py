@@ -35,7 +35,7 @@ from netra_backend.app.services.unified_authentication_service import AuthResult
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
-class TestWebSocketAuthHeaders(SSotAsyncTestCase):
+class WebSocketAuthHeadersTests(SSotAsyncTestCase):
     """
     CRITICAL Unit Tests for WebSocket Authentication Header Processing
     
@@ -245,7 +245,7 @@ class TestWebSocketAuthHeaders(SSotAsyncTestCase):
                 elif e2e_context is not None:
                     self.assertFalse(e2e_context.get('is_e2e_testing', False), f'E2E should be disabled for env_vars: {env_vars}, but got context: {e2e_context}')
 
-class TestWebSocketAuthenticatorIntegration(SSotAsyncTestCase):
+class WebSocketAuthenticatorIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for UnifiedWebSocketAuthenticator with mocked services.
     

@@ -11,10 +11,10 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.types import ConnectionInfo
 
-class TestUnifiedManagerConnectionLifecycle(SSotAsyncTestCase):
+class UnifiedManagerConnectionLifecycleTests(SSotAsyncTestCase):
     """Test connection lifecycle management in UnifiedWebSocketManager."""
 
     def setUp(self):

@@ -83,7 +83,7 @@ class StagingTestResult:
 
 
 @pytest.mark.e2e
-class TestSSotUserExecutionContextStaging(SSotAsyncTestCase):
+class SSotUserExecutionContextStagingTests(SSotAsyncTestCase):
     """SSOT Staging E2E: Validate UserExecutionContext works in real staging environment"""
     
     def setUp(self):

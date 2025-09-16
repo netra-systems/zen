@@ -32,7 +32,7 @@ from netra_backend.app.schemas.tool import (
 )
 
 
-class TestToolExecutionEngineIntegration(SSotAsyncTestCase):
+class ToolExecutionEngineIntegrationTests(SSotAsyncTestCase):
     """Integration tests for tool execution engine with real components."""
     
     def setup_method(self, method):

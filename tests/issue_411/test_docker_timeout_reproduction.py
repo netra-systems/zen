@@ -31,7 +31,7 @@ from test_framework.unified_docker_manager import UnifiedDockerManager
 from test_framework.docker_rate_limiter import DockerRateLimiter, execute_docker_command
 
 
-class TestDockerTimeoutReproduction:
+class DockerTimeoutReproductionTests:
     """Phase 1: Failing tests that prove the Docker timeout issue exists."""
 
     def test_docker_availability_timeout_reproduction(self):
@@ -296,7 +296,7 @@ class TestDockerTimeoutReproduction:
 
 if __name__ == "__main__":
     # Run individual tests for direct execution
-    test_instance = TestDockerTimeoutReproduction()
+    test_instance = DockerTimeoutReproductionTests()
     
     print(" ALERT:  ISSUE #411 REPRODUCTION TESTS - These tests SHOULD FAIL/TIMEOUT to prove the issue")
     print("=" * 80)

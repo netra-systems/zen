@@ -91,7 +91,7 @@ class MockWebSocketConnection:
         self.is_connected = False
 
 
-class TestWebSocketCoreIntegration(BaseIntegrationTest):
+class WebSocketCoreIntegrationTests(BaseIntegrationTest):
     """Test WebSocket core functionality with real business value focus."""
 
     @pytest.mark.integration

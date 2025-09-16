@@ -24,13 +24,13 @@ from netra_backend.app.services.agent_websocket_bridge import (
     HealthStatus,
     IntegrationResult
 )
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketConnection
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 
-class TestAgentWebSocketBridgeE2EIntegration(BaseTestCase):
+class AgentWebSocketBridgeE2EIntegrationTests(BaseTestCase):
     """
     E2E test for complete agent-WebSocket integration with real authentication and components.
     

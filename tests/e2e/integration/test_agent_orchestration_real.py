@@ -149,7 +149,7 @@ class RealAgentOrchestrationCore:
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.integration
-class TestRealAgentOrchestration:
+class RealAgentOrchestrationTests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

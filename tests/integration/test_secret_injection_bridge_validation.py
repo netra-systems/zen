@@ -19,7 +19,7 @@ sys.path.insert(0, str(project_root))
 from scripts.deploy_to_gcp_actual import GCPDeployer
 
 @pytest.mark.integration
-class TestSecretInjectionBridge:
+class SecretInjectionBridgeTests:
     """Integration tests for the automated secret injection bridge."""
 
     def test_secret_bridge_validation_with_missing_credentials(self):

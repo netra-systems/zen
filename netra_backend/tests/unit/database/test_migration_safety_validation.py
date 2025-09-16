@@ -65,7 +65,7 @@ except ImportError:
     SQLALCHEMY_AVAILABLE = False
 
 
-class TestMigrationSafetyValidation(BaseUnitTest):
+class MigrationSafetyValidationTests(BaseUnitTest):
     """Test migration safety and schema validation."""
 
     def setUp(self):

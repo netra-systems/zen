@@ -42,7 +42,7 @@ from netra_backend.app.websocket_core.types import (
     WebSocketMessage, MessageType, ConnectionInfo, generate_default_message
 )
 from netra_backend.app.websocket_core.context import WebSocketRequestContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.event_validation_framework import EventValidationFramework
 from netra_backend.app.websocket_core.audit_logger import WebSocketAuditLogger
 
@@ -75,7 +75,7 @@ class AuditTrailEntry:
 @pytest.mark.websocket
 @pytest.mark.audit_trail
 @pytest.mark.compliance
-class TestWebSocketAuditTrailComplianceMissionCritical(BaseMissionCriticalTest):
+class WebSocketAuditTrailComplianceMissionCriticalTests(BaseMissionCriticalTest):
     """
     Mission Critical tests that EXPOSE audit trail compliance failures with uuid.uuid4().
     

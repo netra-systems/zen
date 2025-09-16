@@ -35,7 +35,7 @@ from tests.clients.backend_client import BackendTestClient
 from tests.clients.websocket_client import WebSocketTestClient
 
 @pytest.mark.e2e
-class TestTenantIsolation:
+class TenantIsolationTests:
     """Test 1: Tenant Isolation and IDOR Prevention
     
     Critical security test ensuring users cannot access data belonging to other tenants.
@@ -103,7 +103,7 @@ class TestTenantIsolation:
         await ws2.close()
 
 @pytest.mark.e2e
-class TestAdminToolAuthorization:
+class AdminToolAuthorizationTests:
     """Test 2: Admin Tool Authorization
     
     Validates proper access control for administrative functions including
@@ -230,7 +230,7 @@ class CustomerTierBasedFeatureGating:
             assert 'upgrade' in error_data.get('detail', '').lower()
 
 @pytest.mark.e2e
-class TestJWTSecurity:
+class JWTSecurityTests:
     """Test 4: JWT Security and Token Validation
     
     Validates JWT security implementation including signature validation,
@@ -305,7 +305,7 @@ class TestJWTSecurity:
         assert len(unique_results) == 1, f'Inconsistent token validation across services: {validation_results}'
 
 @pytest.mark.e2e
-class TestPIISecretProtection:
+class PIISecretProtectionTests:
     """Test 5: PII and Secret Protection
     
     Ensures sensitive data is properly encrypted, masked in logs,

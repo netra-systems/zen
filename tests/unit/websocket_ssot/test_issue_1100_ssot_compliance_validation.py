@@ -27,7 +27,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestSSotComplianceValidation(BaseIntegrationTest):
+class SSotComplianceValidationTests(BaseIntegrationTest):
     """Test SSOT compliance for WebSocket manager implementations."""
     
     @pytest.mark.unit
@@ -46,7 +46,7 @@ class TestSSotComplianceValidation(BaseIntegrationTest):
         
         try:
             # Check for canonical SSOT implementation
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             websocket_manager_modules.append({
                 'module': 'netra_backend.app.websocket_core.websocket_manager',
                 'class': 'WebSocketManager',
@@ -118,7 +118,7 @@ class TestSSotComplianceValidation(BaseIntegrationTest):
         
         try:
             # Canonical import (should work)
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CanonicalWsManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as CanonicalWsManager
             import_scenarios.append({
                 'path': 'netra_backend.app.websocket_core.websocket_manager',
                 'class': 'WebSocketManager',
@@ -185,7 +185,7 @@ class TestSSotComplianceValidation(BaseIntegrationTest):
         
         try:
             # Test direct instantiation (should work)
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketManagerMode
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             from shared.types.core_types import ensure_user_id
             
@@ -272,7 +272,7 @@ class TestSSotComplianceValidation(BaseIntegrationTest):
         
         try:
             # Import from canonical path
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CanonicalWsManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as CanonicalWsManager
             websocket_classes.append({
                 'import_path': 'netra_backend.app.websocket_core.websocket_manager.WebSocketManager',
                 'class_object': CanonicalWsManager,
@@ -329,7 +329,7 @@ class TestSSotComplianceValidation(BaseIntegrationTest):
         logger.info("Validating WebSocketManager SSOT attributes consistency")
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         except ImportError as e:
             pytest.fail(f"Cannot import WebSocketManager for attribute validation: {e}")
         
@@ -377,7 +377,7 @@ class TestSSotComplianceValidation(BaseIntegrationTest):
         logger.info("WebSocketManager SSOT attributes validation completed")
 
 
-class TestFactoryPatternElimination(BaseIntegrationTest):
+class FactoryPatternEliminationTests(BaseIntegrationTest):
     """Test elimination of factory patterns in favor of direct instantiation."""
     
     @pytest.mark.unit
@@ -484,7 +484,7 @@ class TestFactoryPatternElimination(BaseIntegrationTest):
         logger.info("Validating WebSocketManager direct instantiation")
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketManagerMode
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             from shared.types.core_types import ensure_user_id
             

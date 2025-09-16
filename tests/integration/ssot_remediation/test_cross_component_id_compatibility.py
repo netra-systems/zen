@@ -32,7 +32,7 @@ from shared.types.core_types import UserID, ThreadID, WebSocketID, ensure_user_i
 
 
 @pytest.mark.integration
-class TestCrossComponentIdCompatibility(SSotBaseTestCase):
+class CrossComponentIdCompatibilityTests(SSotBaseTestCase):
     """Test cross-component ID compatibility for SSOT validation."""
 
     def setup_method(self, method=None):

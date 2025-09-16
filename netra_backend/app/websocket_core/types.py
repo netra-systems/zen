@@ -252,6 +252,21 @@ class MessageType(str, Enum):
     RESILIENCE_TEST = "resilience_test"
     RECOVERY_TEST = "recovery_test"
 
+    # Quality and Metrics
+    QUALITY_METRICS = "quality_metrics"
+
+    # Batch processing
+    BATCH = "batch"
+
+    # Additional connection types
+    CONNECTION = "connection"
+
+    # Additional typing indicators
+    TYPING = "typing"
+
+    # Additional error types
+    ERROR = "error"
+
 
 class ConnectionInfo(BaseModel):
     """WebSocket connection information."""

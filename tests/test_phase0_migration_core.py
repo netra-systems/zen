@@ -18,7 +18,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
-class TestUserExecutionContextCore:
+class UserExecutionContextCoreTests:
     """Core UserExecutionContext validation tests."""
 
     def test_context_creation_with_valid_data(self):
@@ -65,7 +65,7 @@ class TestUserExecutionContextCore:
         assert str_repr is not None
         assert 'UserExecutionContext' in str_repr
 
-class TestAgentExecuteMethodMigration:
+class AgentExecuteMethodMigrationTests:
     """Test BaseAgent execute method migration to context-based execution."""
 
     class MigrationTestAgent(BaseAgent):
@@ -116,7 +116,7 @@ class TestAgentExecuteMethodMigration:
         assert result['status'] == 'completed'
         assert 'LegacyAgent executed successfully' in result['message']
 
-class TestConcurrentUserHandling:
+class ConcurrentUserHandlingTests:
     """Test system behavior with concurrent users."""
 
     @pytest.mark.asyncio
@@ -154,7 +154,7 @@ class TestConcurrentUserHandling:
             user_ids_seen.add(result['user_id'])
             assert result['secret'].startswith(f"secret_for_{result['user_id']}")
 
-class TestPerformanceValidation:
+class PerformanceValidationTests:
     """Performance tests to ensure no degradation from Phase 0 migration."""
 
     @pytest.mark.asyncio

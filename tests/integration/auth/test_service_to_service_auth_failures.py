@@ -38,7 +38,7 @@ from netra_backend.app.core.auth_constants import AuthConstants
 logger = logging.getLogger(__name__)
 
 
-class TestServiceToServiceAuthFailures(BaseIntegrationTest):
+class ServiceToServiceAuthFailuresTests(BaseIntegrationTest):
     """
     Integration tests for service-to-service authentication failures.
 
@@ -269,7 +269,7 @@ class TestServiceToServiceAuthFailures(BaseIntegrationTest):
                     assert True, "GCP Secret Manager synchronization failure reproduced"
 
 
-class TestRequestScopedSessionAuthFailure(BaseIntegrationTest):
+class RequestScopedSessionAuthFailureTests(BaseIntegrationTest):
     """Test database session creation authentication failures."""
 
     @pytest.mark.integration
@@ -376,7 +376,7 @@ class TestRequestScopedSessionAuthFailure(BaseIntegrationTest):
 
 # Test Suite Runner for Issue #1037 Integration Tests
 @pytest.mark.issue_1037_integration_reproduction
-class TestIssue1037IntegrationSuite:
+class Issue1037IntegrationSuiteTests:
     """
     Complete integration test suite for Issue #1037 service authentication failures.
 

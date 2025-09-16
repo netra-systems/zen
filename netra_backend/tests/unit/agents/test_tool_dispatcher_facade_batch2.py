@@ -21,7 +21,7 @@ from typing import List, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher, UnifiedToolDispatcher, UnifiedToolDispatcherFactory, create_tool_dispatcher, create_request_scoped_tool_dispatcher, ToolDispatchRequest, ToolDispatchResponse, DispatchStrategy, ToolExecutionResult, UnifiedTool, ProductionTool, ToolExecuteResponse
 
-class TestToolDispatcherFacadeUnit(SSotBaseTestCase):
+class ToolDispatcherFacadeUnitTests(SSotBaseTestCase):
     """Unit tests for tool dispatcher facade (tool_dispatcher.py)."""
 
     def setup_method(self, method):
@@ -193,7 +193,7 @@ class TestToolDispatcherFacadeUnit(SSotBaseTestCase):
             assert forbidden not in source_text, f'Facade should not import from: {forbidden}'
         self.record_metric('architecture_boundaries_verified', True)
 
-class TestToolDispatcherBackwardCompatibilityUnit(SSotBaseTestCase):
+class ToolDispatcherBackwardCompatibilityUnitTests(SSotBaseTestCase):
     """Unit tests for backward compatibility features."""
 
     def setup_method(self, method):
@@ -246,7 +246,7 @@ class TestToolDispatcherBackwardCompatibilityUnit(SSotBaseTestCase):
             assert 'tools' in call_kwargs
         self.record_metric('new_api_signature_verified', True)
 
-class TestToolDispatcherErrorHandlingUnit(SSotBaseTestCase):
+class ToolDispatcherErrorHandlingUnitTests(SSotBaseTestCase):
     """Unit tests for error handling in the facade layer."""
 
     def test_import_error_handling_for_optional_dependencies(self):

@@ -43,7 +43,7 @@ logger = central_logger.get_logger(__name__)
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAgentResponseAnalyticsBusinessIntelligence(BaseIntegrationTest):
+class AgentResponseAnalyticsBusinessIntelligenceTests(BaseIntegrationTest):
     """Test agent response analytics and business intelligence capabilities."""
     
     def setup_method(self):

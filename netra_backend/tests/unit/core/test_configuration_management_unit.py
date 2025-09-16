@@ -17,7 +17,7 @@ from netra_backend.app.config import get_config, reload_config, validate_configu
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.configuration_validator import TestConfigurationValidator, get_config_validator, validate_test_config
 
-class TestConfigurationManagementUnit(BaseIntegrationTest):
+class ConfigurationManagementUnitTests(BaseIntegrationTest):
     """Test configuration management core functionality."""
 
     @pytest.mark.unit
@@ -101,7 +101,7 @@ class TestConfigurationManagementUnit(BaseIntegrationTest):
                 mock_get_config.assert_not_called()
                 assert settings2 is settings
 
-class TestConfigurationValidatorUnit(BaseIntegrationTest):
+class ConfigurationValidatorUnitTests(BaseIntegrationTest):
     """Test configuration validator functionality."""
 
     @pytest.mark.unit
@@ -160,7 +160,7 @@ class TestConfigurationValidatorUnit(BaseIntegrationTest):
             is_valid, errors = validator.validate_database_configuration('backend')
             assert is_valid is False, 'Invalid database URL should fail validation'
 
-class TestConfigurationPortAllocationUnit(BaseIntegrationTest):
+class ConfigurationPortAllocationUnitTests(BaseIntegrationTest):
     """Test configuration port allocation and conflict detection."""
 
     @pytest.mark.unit

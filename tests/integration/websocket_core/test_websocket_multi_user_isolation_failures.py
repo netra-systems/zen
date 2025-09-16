@@ -42,7 +42,7 @@ import unittest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.integration
-class TestWebSocketMultiUserIsolationFailures(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketMultiUserIsolationFailuresTests(SSotAsyncTestCase, unittest.TestCase):
     """Test multi-user isolation failures caused by WebSocket Manager fragmentation."""
 
     def setUp(self):
@@ -112,7 +112,7 @@ class TestWebSocketMultiUserIsolationFailures(SSotAsyncTestCase, unittest.TestCa
         websockets_by_user = {}
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             # Create WebSocket managers for each user
             for user in users:
@@ -248,7 +248,7 @@ class TestWebSocketMultiUserIsolationFailures(SSotAsyncTestCase, unittest.TestCa
         connection_pools = {}
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             # Create managers and examine their connection pools
             for user in users:
@@ -318,7 +318,7 @@ class TestWebSocketMultiUserIsolationFailures(SSotAsyncTestCase, unittest.TestCa
         managers_created = []
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             # Create many manager instances (simulating fragmentation load)
             for i in range(20):
@@ -372,7 +372,7 @@ class TestWebSocketMultiUserIsolationFailures(SSotAsyncTestCase, unittest.TestCa
             self.fail(f"MEMORY LEAK TEST FAILURE: Cannot test memory usage due to manager fragmentation: {e}")
 
 @pytest.mark.integration
-class TestWebSocketEnterpriseComplianceFailures(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketEnterpriseComplianceFailuresTests(SSotAsyncTestCase, unittest.TestCase):
     """Test enterprise compliance failures caused by WebSocket Manager fragmentation."""
 
     async def test_hipaa_compliance_violation_simulation(self):
@@ -419,7 +419,7 @@ class TestWebSocketEnterpriseComplianceFailures(SSotAsyncTestCase, unittest.Test
         ]
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             phi_tracking = {}  # Track Protected Health Information
 
@@ -538,7 +538,7 @@ class TestWebSocketEnterpriseComplianceFailures(SSotAsyncTestCase, unittest.Test
         ]
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             financial_tracking = {}
 

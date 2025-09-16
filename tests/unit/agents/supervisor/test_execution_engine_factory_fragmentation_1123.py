@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.mark.unit
-class TestExecutionEngineFactoryFragmentation1123(SSotAsyncTestCase):
+class ExecutionEngineFactoryFragmentation1123Tests(SSotAsyncTestCase):
     """Phase 1 Unit Tests: Factory Fragmentation Reproduction
 
     These tests are designed to FAIL initially to demonstrate the factory

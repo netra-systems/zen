@@ -17,12 +17,12 @@ These are fundamental security tests that validate the core websocket security m
 """
 import json
 from typing import Dict, Any
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 import pytest
 pytestmark = [pytest.mark.env_test]
 
-class TestWebSocketBasicSecurity:
+class WebSocketBasicSecurityTests:
     """Test basic WebSocket security functionality."""
 
     def test_websocket_message_type_validation(self):
@@ -92,7 +92,7 @@ class TestWebSocketBasicSecurity:
     def test_websocket_connection_rate_limiting_exists(self):
         """Test that rate limiting functionality exists for WebSocket connections."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager = WebSocketManager()
             rate_limit_methods = ['add_connection', 'remove_connection', 'get_connection_count']
             for method in rate_limit_methods:

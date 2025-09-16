@@ -127,7 +127,7 @@ class CriticalEventValidator:
         report.append('=' * 60)
         return '\n'.join(report)
 
-class TestCriticalWebSocketAgentEvents:
+class CriticalWebSocketAgentEventsTests:
     """Test suite for critical WebSocket agent event flow - COMPLETELY REWRITTEN."""
 
     @pytest.fixture

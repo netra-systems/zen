@@ -32,7 +32,7 @@ from netra_backend.app.schemas.tool import (
 from test_framework.ssot.mocks import MockFactory
 
 
-class TestToolDispatcherExecutionBusiness:
+class ToolDispatcherExecutionBusinessTests:
     """Unit tests for Tool Dispatcher Execution business logic validation."""
     
     def setup_method(self):

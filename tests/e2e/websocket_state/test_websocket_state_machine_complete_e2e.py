@@ -55,7 +55,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
 from shared.isolated_environment import get_env
 
 @pytest.mark.e2e
-class TestWebSocketStateMachineCompleteLifecycle:
+class WebSocketStateMachineCompleteLifecycleTests:
     """
     E2E tests for complete WebSocket state machine lifecycle.
     

@@ -31,7 +31,7 @@ from netra_backend.app.websocket_core.unified_websocket_auth import (
 )
 
 @pytest.mark.unit
-class TestWebSocketSubprotocolAuthenticationBug(SSotAsyncTestCase):
+class WebSocketSubprotocolAuthenticationBugTests(SSotAsyncTestCase):
     """
     Test suite to reproduce WebSocket subprotocol authentication bug.
     

@@ -10,7 +10,7 @@ import pytest
 from typing import Dict, Any, List
 import time
 import random
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -22,7 +22,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
 
 @pytest.mark.recovery
-class TestAgentErrorRecovery:
+class AgentErrorRecoveryTests:
     """Test comprehensive agent error recovery mechanisms."""
     
     @pytest.mark.asyncio
@@ -311,7 +311,7 @@ class TestAgentErrorRecovery:
 
 
 @pytest.mark.recovery
-class TestAgentResiliencePatterns:
+class AgentResiliencePatternsTests:
     """Test advanced resilience patterns in agent operations."""
     
     @pytest.mark.asyncio

@@ -23,7 +23,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from shared.isolated_environment import get_env
 
-class TestWebSocketStateMachineTiming(SSotBaseTestCase):
+class WebSocketStateMachineTimingTests(SSotBaseTestCase):
     """
     Integration tests using REAL SERVICES to reproduce WebSocket import timing bugs.
     

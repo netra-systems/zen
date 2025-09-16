@@ -40,8 +40,8 @@ from netra_backend.app.services.agent_websocket_bridge import (
     AgentWebSocketBridge,
     create_agent_websocket_bridge
 )
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.unit
 @pytest.mark.interface_violations
-class TestWebSocketDualInterfaceViolations(SSotBaseTestCase):
+class WebSocketDualInterfaceViolationsTests(SSotBaseTestCase):
     """
     Unit tests for detecting WebSocket dual interface architecture violations.
     
@@ -377,7 +377,7 @@ class TestWebSocketDualInterfaceViolations(SSotBaseTestCase):
 
 @pytest.mark.integration  
 @pytest.mark.interface_violations
-class TestWebSocketInterfaceIntegrationViolations(SSotBaseTestCase):
+class WebSocketInterfaceIntegrationViolationsTests(SSotBaseTestCase):
     """
     Integration tests for WebSocket interface violations in real scenarios.
     

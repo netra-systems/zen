@@ -31,7 +31,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.environment_isolation import get_test_env_manager
 from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker
 from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.external_api_client import HTTPError
 logger = logging.getLogger(__name__)
 
@@ -181,7 +181,7 @@ def circuit_breaker():
     breaker = UnifiedCircuitBreaker(failure_threshold=3, recovery_timeout=5.0, timeout=2.0)
     yield breaker
 
-class TestRealDatabaseCircuitBreaker:
+class RealDatabaseCircuitBreakerTests:
     """Test circuit breaker with real database failures."""
 
     @pytest.mark.asyncio
@@ -239,7 +239,7 @@ class TestRealDatabaseCircuitBreaker:
         else:
             logger.info('Database recovery simulation failed - this is acceptable in test environment')
 
-class TestRealRedisCircuitBreaker:
+class RealRedisCircuitBreakerTests:
     """Test circuit breaker with real Redis failures."""
 
     @pytest.mark.asyncio
@@ -299,7 +299,7 @@ class TestRealRedisCircuitBreaker:
         if timeout_count >= short_timeout_breaker.failure_threshold:
             assert short_timeout_breaker.state == 'open', 'Circuit breaker should open to protect against slow operations'
 
-class TestRealHTTPCircuitBreaker:
+class RealHTTPCircuitBreakerTests:
     """Test circuit breaker with real HTTP service failures."""
 
     @pytest.mark.asyncio
@@ -361,7 +361,7 @@ class TestRealHTTPCircuitBreaker:
         if success_count > 0:
             assert circuit_breaker.state == 'closed', 'Circuit breaker should remain closed for successful operations'
 
-class TestRealWebSocketCircuitBreaker:
+class RealWebSocketCircuitBreakerTests:
     """Test circuit breaker with WebSocket connection failures."""
 
     @pytest.mark.asyncio
@@ -397,7 +397,7 @@ class TestRealWebSocketCircuitBreaker:
         if connection_failures >= circuit_breaker.failure_threshold:
             assert circuit_breaker.state == 'open', 'Circuit breaker should open after WebSocket connection failures'
 
-class TestRealCircuitBreakerIntegration:
+class RealCircuitBreakerIntegrationTests:
     """Test circuit breaker integration across multiple real services."""
 
     @pytest.mark.asyncio

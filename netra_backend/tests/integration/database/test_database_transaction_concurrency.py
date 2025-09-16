@@ -46,7 +46,7 @@ except ImportError:
     AsyncSession = None
 
 
-class TestDatabaseTransactionConcurrency(BaseIntegrationTest):
+class DatabaseTransactionConcurrencyTests(BaseIntegrationTest):
     """Test database transaction integrity under concurrency."""
 
     def setUp(self):

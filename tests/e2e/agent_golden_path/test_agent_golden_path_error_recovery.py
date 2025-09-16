@@ -44,7 +44,7 @@ from tests.e2e.staging_config import StagingTestConfig
 from shared.isolated_environment import get_env
 
 @pytest.mark.e2e
-class TestAgentGoldenPathErrorRecovery(SSotAsyncTestCase):
+class AgentGoldenPathErrorRecoveryTests(SSotAsyncTestCase):
     """
     Error recovery tests for agent golden path functionality.
     

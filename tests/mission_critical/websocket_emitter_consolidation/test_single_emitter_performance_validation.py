@@ -88,7 +88,7 @@ class LoadTestScenario:
     expected_max_latency_ms: float = 20.0
 
 
-class TestSingleEmitterPerformanceValidation(SSotAsyncTestCase):
+class SingleEmitterPerformanceValidationTests(SSotAsyncTestCase):
     """
     Phase 3 test to validate single emitter performance characteristics.
     

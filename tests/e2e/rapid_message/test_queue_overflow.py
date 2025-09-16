@@ -25,7 +25,7 @@ from tests.e2e.utils.rapid_message_sender import RapidMessageSender
 
 @pytest.mark.asyncio
 @pytest.mark.e2e  
-class TestQueueOverflowBackpressure:
+class QueueOverflowBackpressureTests:
     """Test queue overflow handling and backpressure mechanisms."""
     
     async def test_high_volume_burst_handling(self, user_token, message_validator, test_config):

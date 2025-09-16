@@ -14,7 +14,7 @@ from unittest.mock import Mock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestE2EBypassKeyIntegrationIssue1087(SSotAsyncTestCase):
+class E2EBypassKeyIntegrationIssue1087Tests(SSotAsyncTestCase):
     """Integration tests for E2E bypass key authentication."""
 
     def setup_method(self, method):

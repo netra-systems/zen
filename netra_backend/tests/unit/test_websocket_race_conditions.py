@@ -36,7 +36,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketConnectionStateValidation:
+class WebSocketConnectionStateValidationTests:
     """Test WebSocket connection state detection logic."""
     
     def test_connection_state_detection_basic_logic(self):
@@ -228,7 +228,7 @@ class TestWebSocketConnectionStateValidation:
         assert is_websocket_connected_and_ready(basic_ws, require_all_attributes=True) == False
 
 
-class TestApplicationLevelConnectionStateMachine:
+class ApplicationLevelConnectionStateMachineTests:
     """Test application-level connection state management to prevent race conditions."""
     
     def setup_method(self):
@@ -598,7 +598,7 @@ class TestApplicationLevelConnectionStateMachine:
         assert state_machine.attempt_transition("connected", will_fail=False) == False
 
 
-class TestHandshakeCompletionValidation:
+class HandshakeCompletionValidationTests:
     """Test handshake completion detection and timing validation."""
     
     @pytest.mark.asyncio
@@ -868,7 +868,7 @@ class TestHandshakeCompletionValidation:
         assert result == True  # Should succeed with longer staging timeout
 
 
-class TestConcurrentConnectionHandling:
+class ConcurrentConnectionHandlingTests:
     """Test concurrent connection attempt handling."""
     
     def test_concurrent_connection_registration(self):
@@ -1163,7 +1163,7 @@ class TestConcurrentConnectionHandling:
         assert "closed-2" not in remaining_connections
 
 
-class TestPrematureMessageSendingPrevention:
+class PrematureMessageSendingPreventionTests:
     """Test prevention of premature message sending before handshake completion."""
     
     @pytest.mark.asyncio
@@ -1588,7 +1588,7 @@ class TestPrematureMessageSendingPrevention:
         assert 'state_machine' in result['failed_checks']
 
 
-class TestCloudEnvironmentSpecificLogic:
+class CloudEnvironmentSpecificLogicTests:
     """Test cloud environment-specific race condition handling."""
     
     def test_staging_environment_conservative_validation(self):
@@ -1909,7 +1909,7 @@ class TestCloudEnvironmentSpecificLogic:
         assert prod_config.should_retry(0, auth_error) == False
 
 
-class TestRaceConditionReproduction:
+class RaceConditionReproductionTests:
     """Test reproduction of specific race conditions from staging environment."""
     
     @pytest.mark.asyncio
@@ -2389,7 +2389,7 @@ class TestRaceConditionReproduction:
         assert result['total_time'] < 5.0  # Should complete within 5 seconds for E2E flow
 
 
-class TestPerformanceAndResourceManagement:
+class PerformanceAndResourceManagementTests:
     """Test performance implications of race condition fixes."""
     
     def test_state_machine_memory_footprint_under_load(self):

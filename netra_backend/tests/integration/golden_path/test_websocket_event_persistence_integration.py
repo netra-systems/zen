@@ -71,7 +71,7 @@ class WebSocketEventRecord:
     replay_validated: bool = False
 
 
-class TestWebSocketEventPersistenceIntegration(BaseIntegrationTest):
+class WebSocketEventPersistenceIntegrationTests(BaseIntegrationTest):
     """Test WebSocket event persistence with real PostgreSQL and Redis."""
     
     def setup_method(self):

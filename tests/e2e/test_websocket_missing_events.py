@@ -27,7 +27,7 @@ from tests.e2e.config import UnifiedTestConfig
 
 
 @pytest.mark.e2e
-class TestWebSocketMissingEvents:
+class WebSocketMissingEventsTests:
     """Test suite for missing WebSocket events per SPEC/websocket_communication.xml."""
     
     @pytest.fixture

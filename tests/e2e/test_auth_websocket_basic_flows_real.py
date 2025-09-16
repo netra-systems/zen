@@ -24,7 +24,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.environment_isolation import get_env as get_isolated_env
 from test_framework.base_e2e_test import BaseE2ETest
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from auth_service.auth_core.config import AuthConfig
 logger = central_logger.get_logger(__name__)
@@ -70,7 +70,7 @@ class RealWebSocketConnection:
         return 'CONNECTED' if self._connected else 'DISCONNECTED'
 
 @pytest.mark.e2e
-class TestBasicAuthFlow(BaseE2ETest):
+class BasicAuthFlowTests(BaseE2ETest):
     """Test 1-3: Basic authentication flow using REAL authentication services."""
 
     def setup_method(self):

@@ -85,7 +85,7 @@ class MockWebSocket:
         mock_ws = MockWebSocket(has_client_state=True, client_state_value=None, has_receive=True, is_closed=False, state_value='CONNECTING')
         return mock_ws
 
-class TestWebSocketStateValidation(SSotBaseTestCase):
+class WebSocketStateValidationTests(SSotBaseTestCase):
     """
     Integration tests for WebSocket state validation across environments.
     

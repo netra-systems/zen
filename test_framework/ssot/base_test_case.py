@@ -64,6 +64,7 @@ from typing import Any, Dict, List, Optional, Union, AsyncGenerator, Generator, 
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
+import unittest
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
 # from test_framework.unified import (
@@ -675,6 +676,119 @@ class SSotBaseTestCase:
         """Assert that first is not second (different object identity)."""
         assert first is not second, msg or f"Expected {first} is not {second} (different object identity)"
 
+    def assertRaises(self, exception_class, callable_obj=None, *args, **kwargs):
+        """Assert that calling callable_obj raises exception_class.
+        
+        This provides unittest compatibility for tests that use assertRaises.
+        Can be used as context manager or with callable.
+        
+        Args:
+            exception_class: Expected exception class
+            callable_obj: Optional callable to test
+            *args: Arguments for callable
+            **kwargs: Keyword arguments for callable
+            
+        Returns:
+            Context manager if callable_obj is None, otherwise None
+        """
+        if callable_obj is None:
+            # Used as context manager: with self.assertRaises(ValueError):
+            return pytest.raises(exception_class)
+        else:
+            # Used with callable: self.assertRaises(ValueError, func, arg1, arg2)
+            with pytest.raises(exception_class):
+                callable_obj(*args, **kwargs)
+
+    def assertRaisesRegex(self, exception_class, regex, callable_obj=None, *args, **kwargs):
+        """Assert that calling callable_obj raises exception_class with message matching regex.
+        
+        This provides unittest compatibility for tests that use assertRaisesRegex.
+        
+        Args:
+            exception_class: Expected exception class
+            regex: Regular expression pattern to match exception message
+            callable_obj: Optional callable to test
+            *args: Arguments for callable
+            **kwargs: Keyword arguments for callable
+            
+        Returns:
+            Context manager if callable_obj is None, otherwise None
+        """
+        if callable_obj is None:
+            # Used as context manager: with self.assertRaisesRegex(ValueError, "pattern"):
+            return pytest.raises(exception_class, match=regex)
+        else:
+            # Used with callable: self.assertRaisesRegex(ValueError, "pattern", func, arg1)
+            with pytest.raises(exception_class, match=regex):
+                callable_obj(*args, **kwargs)
+
+    # Alias for assertRaisesRegex (some tests use the older name)
+    def assertRaisesRegexp(self, exception_class, regex, callable_obj=None, *args, **kwargs):
+        """Alias for assertRaisesRegex for backward compatibility."""
+        return self.assertRaisesRegex(exception_class, regex, callable_obj, *args, **kwargs)
+
+    def assertCountEqual(self, first, second, msg=None):
+        """Assert that two sequences have the same elements regardless of order."""
+        # Convert to lists and sort for comparison
+        first_sorted = sorted(list(first))
+        second_sorted = sorted(list(second))
+        assert first_sorted == second_sorted, msg or f"Expected same elements: {first} vs {second}"
+
+    def assertSequenceEqual(self, first, second, msg=None, seq_type=None):
+        """Assert that two sequences are equal."""
+        if seq_type is not None:
+            assert isinstance(first, seq_type), f"First sequence is not {seq_type}: {type(first)}"
+            assert isinstance(second, seq_type), f"Second sequence is not {seq_type}: {type(second)}"
+        assert first == second, msg or f"Sequences not equal: {first} != {second}"
+
+    def assertListEqual(self, first, second, msg=None):
+        """Assert that two lists are equal."""
+        self.assertSequenceEqual(first, second, msg, list)
+
+    def assertTupleEqual(self, first, second, msg=None):
+        """Assert that two tuples are equal."""
+        self.assertSequenceEqual(first, second, msg, tuple)
+
+    def assertSetEqual(self, first, second, msg=None):
+        """Assert that two sets are equal."""
+        assert isinstance(first, set), f"First argument is not a set: {type(first)}"
+        assert isinstance(second, set), f"Second argument is not a set: {type(second)}"
+        assert first == second, msg or f"Sets not equal: {first} != {second}"
+
+    def assertDictEqual(self, first, second, msg=None):
+        """Assert that two dictionaries are equal."""
+        assert isinstance(first, dict), f"First argument is not a dict: {type(first)}"
+        assert isinstance(second, dict), f"Second argument is not a dict: {type(second)}"
+        assert first == second, msg or f"Dicts not equal: {first} != {second}"
+
+    def assertMultiLineEqual(self, first, second, msg=None):
+        """Assert that two multi-line strings are equal."""
+        assert isinstance(first, str), f"First argument is not a string: {type(first)}"
+        assert isinstance(second, str), f"Second argument is not a string: {type(second)}"
+        assert first == second, msg or f"Multi-line strings not equal:\nFirst:\n{first}\nSecond:\n{second}"
+
+    def assertRegex(self, text, regex, msg=None):
+        """Assert that text matches regex pattern."""
+        import re
+        assert re.search(regex, text), msg or f"Regex {regex} not found in {text}"
+
+    def assertNotRegex(self, text, regex, msg=None):
+        """Assert that text does not match regex pattern."""
+        import re
+        assert not re.search(regex, text), msg or f"Regex {regex} unexpectedly found in {text}"
+
+    def assertNotAlmostEqual(self, first, second, places=7, msg=None, delta=None):
+        """Assert that first and second are NOT approximately equal."""
+        if delta is not None:
+            diff = abs(first - second)
+            assert diff > delta, msg or f"Expected {first} != {second} (delta={delta}), but difference was {diff}"
+        else:
+            if places is None:
+                places = 7
+            tolerance = 10**(-places)
+            diff = abs(first - second)
+            assert diff > tolerance, msg or f"Expected {first} != {second} (places={places}), but difference was {diff}"
+
     def fail(self, msg=None):
         """Fail the test with an optional message.
 
@@ -854,7 +968,7 @@ class SSotBaseTestCase:
             )
 
 
-class SSotAsyncTestCase(SSotBaseTestCase):
+class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
     """
     SSOT Async Test Case - For async tests only.
     
@@ -923,7 +1037,20 @@ class SSotAsyncTestCase(SSotBaseTestCase):
         if not hasattr(self, '_original_env_state'):
             self._original_env_state = None
         super().teardown_method(method)
-    
+
+    async def asyncSetUp(self):
+        """Async setup method for async tests."""
+        # Call parent sync setup to ensure all base attributes are initialized
+        if hasattr(super(), 'setUp'):
+            super().setUp()
+        # This allows subclasses to override asyncSetUp for additional async initialization
+        pass
+
+    async def asyncTearDown(self):
+        """Async teardown method for async tests."""
+        # This allows subclasses to override asyncTearDown for additional async cleanup
+        pass
+
     # === AGENT EXECUTION WITH MONITORING ===
     # PHASE 1 CORE INFRASTRUCTURE: Missing method implementation for Issue #976
 
@@ -1169,6 +1296,57 @@ class SSotAsyncTestCase(SSotBaseTestCase):
     # === UNITTEST COMPATIBILITY METHODS ===
     # Ensure all unittest assertion methods are available in async test case
 
+    def assertRaises(self, exception_class, callable_obj=None, *args, **kwargs):
+        """Assert that calling callable_obj raises exception_class.
+        
+        This provides unittest compatibility for async tests that use assertRaises.
+        Can be used as context manager or with callable.
+        
+        Args:
+            exception_class: Expected exception class
+            callable_obj: Optional callable to test
+            *args: Arguments for callable
+            **kwargs: Keyword arguments for callable
+            
+        Returns:
+            Context manager if callable_obj is None, otherwise None
+        """
+        if callable_obj is None:
+            # Used as context manager: with self.assertRaises(ValueError):
+            return pytest.raises(exception_class)
+        else:
+            # Used with callable: self.assertRaises(ValueError, func, arg1, arg2)
+            with pytest.raises(exception_class):
+                callable_obj(*args, **kwargs)
+
+    def assertRaisesRegex(self, exception_class, regex, callable_obj=None, *args, **kwargs):
+        """Assert that calling callable_obj raises exception_class with message matching regex.
+        
+        This provides unittest compatibility for async tests that use assertRaisesRegex.
+        
+        Args:
+            exception_class: Expected exception class
+            regex: Regular expression pattern to match exception message
+            callable_obj: Optional callable to test
+            *args: Arguments for callable
+            **kwargs: Keyword arguments for callable
+            
+        Returns:
+            Context manager if callable_obj is None, otherwise None
+        """
+        if callable_obj is None:
+            # Used as context manager: with self.assertRaisesRegex(ValueError, "pattern"):
+            return pytest.raises(exception_class, match=regex)
+        else:
+            # Used with callable: self.assertRaisesRegex(ValueError, "pattern", func, arg1)
+            with pytest.raises(exception_class, match=regex):
+                callable_obj(*args, **kwargs)
+
+    # Alias for assertRaisesRegex (some tests use the older name)
+    def assertRaisesRegexp(self, exception_class, regex, callable_obj=None, *args, **kwargs):
+        """Alias for assertRaisesRegex for backward compatibility."""
+        return self.assertRaisesRegex(exception_class, regex, callable_obj, *args, **kwargs)
+
     def fail(self, msg=None):
         """Fail the test with an optional message.
 
@@ -1189,6 +1367,7 @@ class SSotAsyncTestCase(SSotBaseTestCase):
 BaseTestCase = SSotBaseTestCase
 AsyncTestCase = SSotAsyncTestCase
 BaseIntegrationTest = SSotBaseTestCase  # Legacy alias for integration tests
+BaseE2ETest = SSotAsyncTestCase  # Legacy alias for E2E tests
 
 # Legacy compatibility classes removed - use SSotBaseTestCase directly
 
@@ -1201,19 +1380,20 @@ SSotAsyncBaseTestCase = SSotAsyncTestCase  # Alias for integration test compatib
 __all__ = [
     # SSOT Classes
     "SSotBaseTestCase",
-    "SSotAsyncTestCase", 
+    "SSotAsyncTestCase",
     "SsotTestMetrics",
     "SsotTestContext",
-    
+
     # SSOT Aliases
     "BaseTestCase",
     "AsyncTestCase",
     "BaseIntegrationTest",  # Legacy alias for integration tests
-    
+    "BaseE2ETest",  # Legacy alias for E2E tests
+
     # Legacy compatibility classes removed
-    
+
     # Legacy Aliases (deprecated)
-    "TestMetrics", 
+    "TestMetrics",
     "TestContext",
 ]
 

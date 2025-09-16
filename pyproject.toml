@@ -32,7 +32,7 @@ python_files = [
     "test_*.py",
     "*_test.py"
 ]
-python_classes = ["Test*"]
+python_classes = ["Test*", "*Tests", "*TestCase"]
 python_functions = ["test_*"]
 
 # Performance optimizations for test collection
@@ -76,6 +76,7 @@ markers = [
     "test: Tests for test environment only",
     "dev: Tests for dev environment only",
     "staging: Tests for staging environment only",
+    "staging_gcp: Tests for staging GCP environment specifically",
     "prod: Tests for production environment only",
     
     # Test categories
@@ -130,8 +131,18 @@ markers = [
     "regression: Regression prevention tests",
     "regression_prevention: Regression prevention validation tests",
     "architecture: Architecture compliance tests",
+    "issue_1099: Issue #1099 WebSocket message handler migration tests",
+    "factory_patterns: Handler factory pattern tests",
+    "import_paths: Import path resolution tests",
+    "user_isolation: User context isolation tests",
+    "gcp_staging: GCP staging environment tests",
+    "conflict_reproduction: Handler conflict reproduction tests",
+    "migration_validation: Migration success validation tests",
+    "success_criteria: Migration success criteria tests",
+    "expected_failure: Tests designed to fail initially",
     "issue_1140: Issue #1140 specific tests",
     "timeout: Tests with custom timeout settings",
+    "timeout_reproduction: Tests that reproduce timeout-related issues",
     "skipif: Conditional test skipping",
     "xfail: Expected to fail tests",
     "parametrize: Parameterized tests",
@@ -145,9 +156,12 @@ markers = [
     "execution_tracking: Execution tracking tests",
     "critical_type_safety: Critical type safety tests",
     "database: Database-related tests",
+    "database_timeout: Database timeout-related tests",
     "id_system: ID system tests",
     "business_requirements: Business requirements tests",
     "user_isolation: User isolation tests",
+    "agent_database_state: Agent database state tests",
+    "issue_1270: Issue #1270 specific tests",
     "error_handling: Error handling tests",
     "isolation_critical: Isolation-critical tests", 
     "state_persistence: State persistence tests",
@@ -202,6 +216,7 @@ markers = [
     "ssot_violation: SSOT violation detection tests",
     "toolregistry: Tool registry tests",
     "docker_required: Tests that require Docker services",
+    "docker_infrastructure: Docker infrastructure validation tests",
     "no_docker: Tests that work without Docker",
     "skip_if_no_staging: Skip if staging environment not available",
     "documentation: Documentation and validation tests",
@@ -222,6 +237,15 @@ markers = [
     "issue_1116: Issue #1116 specific tests",
     "issue_1186_phase3: Issue #1186 UserExecutionEngine SSOT consolidation Phase 3 tests",
     "issue_1197: Issue #1197 specific tests",
+    "issue_1270: Issue #1270 E2E Agent Tests Database Category Failure reproduction tests",
+    "pattern_filtering: Pattern filtering tests",
+    "agent_database: Agent database integration tests",
+    "agent_database_pattern: Agent database pattern filtering tests",
+    "staging_only: Staging environment only tests",
+    "test_collection: Test collection and discovery tests",
+    "execution_plan: Test execution plan tests",
+    "agent_state_persistence: Agent state persistence tests",
+    "end_to_end_workflow: End-to-end workflow tests",
     "sla_validation: SLA validation tests",
     "ssot_compliance: SSOT compliance tests",
     "user_engine_delegation: User engine delegation tests", 
@@ -242,6 +266,7 @@ markers = [
     "app_factory: Application factory pattern tests",
     "health_checks: Health check and service status tests",
     "ssot_violation: SSOT violation detection and remediation tests",
+    "advanced_scenarios: Advanced user scenarios and enterprise workflows tests",
     
     # Missing marker for auth service secret loader tests (Issue #687)
     "secret_loader: Secret loader component tests",
@@ -270,6 +295,9 @@ markers = [
     "integration_errors: Integration errors tests",
     "health_check_errors: Health check errors tests",
     "concurrent_errors: Concurrent errors tests",
+    
+    # Issue #1184 WebSocket Infrastructure test markers
+    "issue_1184: Issue #1184 WebSocket infrastructure async/await compatibility tests",
     "recovery_mechanisms: Recovery mechanisms tests",
     "resource_cleanup: Resource cleanup tests",
     "memory_errors: Memory errors tests",
@@ -704,6 +732,17 @@ markers = [
 
     # Scalability and performance markers
     "scalability: Scalability and concurrent user load testing",
+    "advanced_scenarios: Advanced user scenarios for enterprise and complex business use cases",
+
+    # Issue #1174 specific marker
+    "issue_1174: Issue #1174 auth token validation unit tests",
+
+    # Issue #1278 specific markers for infrastructure reproduction tests
+    "issue_1278: Issue #1278 database connectivity and FastAPI lifespan validation tests",
+    "issue_1278_reproduction: Issue #1278 reproduction tests for infrastructure problems",
+    "database_connectivity: Database connectivity and timeout validation tests",
+    "cloud_sql: Cloud SQL specific tests for capacity and performance validation",
+    "import_timing: Import timing and performance tests",
 ]
 
 # Coverage settings

@@ -16,7 +16,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.e2e
-class TestAgentOrchestrationStaging(StagingTestBase):
+class AgentOrchestrationStagingTests(StagingTestBase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -148,7 +148,7 @@ class TestAgentOrchestrationStaging(StagingTestBase):
 
 if __name__ == "__main__":
     async def run_tests():
-        test_class = TestAgentOrchestrationStaging()
+        test_class = AgentOrchestrationStagingTests()
         test_class.setup_class()
         
         try:

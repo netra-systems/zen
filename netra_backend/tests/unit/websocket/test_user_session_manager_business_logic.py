@@ -29,7 +29,7 @@ from shared.types import UserID
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestUserSessionManagerInitialization(SSotBaseTestCase):
+class UserSessionManagerInitializationTests(SSotBaseTestCase):
     """Test UserSessionManager initialization business logic."""
 
     def test_session_manager_initializes_empty_state(self):
@@ -51,7 +51,7 @@ class TestUserSessionManagerInitialization(SSotBaseTestCase):
         assert len(user2_sessions) == 0
 
 @pytest.mark.unit
-class TestSessionCreation(SSotBaseTestCase):
+class SessionCreationTests(SSotBaseTestCase):
     """Test session creation business logic - CRITICAL for user onboarding."""
 
     def setup_method(self):
@@ -124,7 +124,7 @@ class TestSessionCreation(SSotBaseTestCase):
         assert session_b not in self.manager._user_sessions[user_a]
 
 @pytest.mark.unit
-class TestSessionRetrieval(SSotBaseTestCase):
+class SessionRetrievalTests(SSotBaseTestCase):
     """Test session retrieval business logic - validates data access patterns."""
 
     def setup_method(self):
@@ -192,7 +192,7 @@ class TestSessionRetrieval(SSotBaseTestCase):
         assert session_a2 not in sessions_b
 
 @pytest.mark.unit
-class TestSessionUpdates(SSotBaseTestCase):
+class SessionUpdatesTests(SSotBaseTestCase):
     """Test session update business logic - validates data mutation patterns."""
 
     def setup_method(self):
@@ -239,7 +239,7 @@ class TestSessionUpdates(SSotBaseTestCase):
         assert data['metadata']['updated'] == '2025-01-09'
 
 @pytest.mark.unit
-class TestSessionLifecycle(SSotBaseTestCase):
+class SessionLifecycleTests(SSotBaseTestCase):
     """Test session lifecycle management - validates cleanup and state transitions."""
 
     def setup_method(self):
@@ -302,7 +302,7 @@ class TestSessionLifecycle(SSotBaseTestCase):
         assert session_id not in user_sessions
 
 @pytest.mark.unit
-class TestSessionCleanupAndUtilities(SSotBaseTestCase):
+class SessionCleanupAndUtilitiesTests(SSotBaseTestCase):
     """Test session cleanup utilities and administrative functions."""
 
     def setup_method(self):
@@ -351,7 +351,7 @@ class TestSessionCleanupAndUtilities(SSotBaseTestCase):
             assert session['active'] is True
 
 @pytest.mark.unit
-class TestSessionSecurityAndValidation(SSotBaseTestCase):
+class SessionSecurityAndValidationTests(SSotBaseTestCase):
     """Test session security patterns and data validation."""
 
     def setup_method(self):

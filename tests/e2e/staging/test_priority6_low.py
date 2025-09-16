@@ -22,7 +22,7 @@ from tests.e2e.staging_test_config import get_staging_config
 pytestmark = [pytest.mark.staging, pytest.mark.low, pytest.mark.real]
 
 @pytest.mark.e2e
-class TestLowMonitoring:
+class LowMonitoringTests:
     """Tests 86-90: Core Monitoring - REAL TESTS"""
     
     @pytest.mark.asyncio
@@ -283,7 +283,7 @@ class TestLowMonitoring:
         assert len(error_report["tags"]) > 0
 
 @pytest.mark.e2e
-class TestLowPerformanceMonitoring:
+class LowPerformanceMonitoringTests:
     """Tests 91-95: Performance Monitoring - REAL TESTS"""
     
     @pytest.mark.asyncio
@@ -422,7 +422,7 @@ class TestLowPerformanceMonitoring:
         assert len(version_info["git_commit"]) > 0
 
 @pytest.mark.e2e
-class TestLowOperational:
+class LowOperationalTests:
     """Tests 96-100: Operational Features - REAL TESTS"""
     
     @pytest.mark.asyncio

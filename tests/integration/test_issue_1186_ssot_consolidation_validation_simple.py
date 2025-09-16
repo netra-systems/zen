@@ -55,7 +55,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestIssue1186SSOTConsolidationValidationSimple(SSotAsyncTestCase):
+class Issue1186SSOTConsolidationValidationSimpleTests(SSotAsyncTestCase):
     """
     Phase 2: Simplified SSOT Consolidation Validation for Issue #1186 UserExecutionEngine.
     
@@ -483,9 +483,9 @@ if __name__ == '__main__':
     # Run specific test if provided
     if len(sys.argv) > 1:
         test_name = sys.argv[1]
-        suite = unittest.TestLoader().loadTestsFromName(f'test_{test_name}', TestIssue1186SSOTConsolidationValidationSimple)
+        suite = unittest.TestLoader().loadTestsFromName(f'test_{test_name}', Issue1186SSOTConsolidationValidationSimpleTests)
     else:
-        suite = unittest.TestLoader().loadTestsFromTestCase(TestIssue1186SSOTConsolidationValidationSimple)
+        suite = unittest.TestLoader().loadTestsFromTestCase(Issue1186SSOTConsolidationValidationSimpleTests)
     
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)

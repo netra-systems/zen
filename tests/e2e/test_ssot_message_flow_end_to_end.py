@@ -37,7 +37,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 @pytest.mark.e2e
-class TestSSotMessageFlowEndToEnd:
+class SSotMessageFlowEndToEndTests:
     """
     End-to-End Tests for SSOT Message Flow Validation
     

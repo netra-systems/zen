@@ -29,7 +29,7 @@ from tests.e2e.test_helpers.performance_base import (
 logger = logging.getLogger(__name__)
 
 
-class TestErrorRecoveryAndResilience:
+class ErrorRecoveryAndResilienceTests:
     """Test error recovery and system resilience."""
     
     @pytest.mark.asyncio

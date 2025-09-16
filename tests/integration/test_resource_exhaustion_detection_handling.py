@@ -60,7 +60,7 @@ class SystemResourceSnapshot:
     thread_count: int
 
 
-class TestResourceExhaustionDetectionHandling(BaseIntegrationTest):
+class ResourceExhaustionDetectionHandlingTests(BaseIntegrationTest):
     """Test resource exhaustion detection and handling mechanisms."""
     
     def _get_system_resource_snapshot(self) -> SystemResourceSnapshot:

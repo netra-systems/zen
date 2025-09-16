@@ -90,7 +90,7 @@ class UserExecutionTracker:
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.isolation
-class TestMultiUserIsolation(BaseAgentExecutionTest):
+class MultiUserIsolationTests(BaseAgentExecutionTest):
     """Integration tests for multi-user execution isolation with factory patterns."""
 
     async def setup_method(self):

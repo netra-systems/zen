@@ -32,7 +32,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.integration
-class TestFactorySSotValidationIntegration:
+class FactorySSotValidationIntegrationTests:
     """Test SSOT validation failures in factory integration with real services."""
     
     @pytest.mark.asyncio

@@ -32,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 class AuthenticatedStagingUser:
@@ -200,7 +200,7 @@ class StagingBusinessTool:
             await asyncio.sleep(0.02)
 
 @pytest.mark.e2e
-class TestCompleteToolWorkflowsWithAuthentication(SSotAsyncTestCase):
+class CompleteToolWorkflowsWithAuthenticationTests(SSotAsyncTestCase):
     """E2E staging tests for complete authenticated tool workflows."""
 
     def setUp(self):

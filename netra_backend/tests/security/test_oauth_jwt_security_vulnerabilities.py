@@ -24,7 +24,7 @@ import json
 import time
 from datetime import datetime, timedelta
 from typing import Dict, Any
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import jwt
@@ -36,7 +36,7 @@ from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.clients.auth_client_core import auth_client
 
 
-class TestOAuthJWTSecurityVulnerabilities:
+class OAuthJWTSecurityVulnerabilitiesTests:
     """Test OAuth JWT security vulnerabilities and attack vectors"""
     
     def test_jwt_algorithm_switching_attack(self):

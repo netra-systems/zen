@@ -27,7 +27,7 @@ import warnings
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDeprecationMigrationValidation(SSotBaseTestCase):
+class DeprecationMigrationValidationTests(SSotBaseTestCase):
     """Validate migration paths for deprecated imports"""
     
     def setUp(self):
@@ -38,7 +38,7 @@ class TestDeprecationMigrationValidation(SSotBaseTestCase):
         self.migration_mappings = {
             # WebSocket Core migrations
             'from netra_backend.app.websocket_core import WebSocketManager': [
-                'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
+                'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager',
                 'from netra_backend.app.websocket_core.manager import WebSocketManager'
             ],
             'from netra_backend.app.websocket_core.event_validator import get_websocket_validator': [
@@ -48,7 +48,7 @@ class TestDeprecationMigrationValidation(SSotBaseTestCase):
                 'from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager'
             ],
             'from netra_backend.app.websocket_core import get_websocket_manager': [
-                'from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager'
+                'from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager'
             ]
         }
         
@@ -125,7 +125,7 @@ print(result)
 ''',
                 'canonical_code': '''
 try:
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     manager = WebSocketManager
     result = "WebSocketManager imported successfully"
 except Exception as e:
@@ -294,7 +294,7 @@ print(result)
         
         # Check 1: Canonical imports functional
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.websocket_core.event_validation_framework import get_websocket_validator
             readiness_checks['canonical_imports_functional'] = True
             print("  ✓ Canonical imports functional")

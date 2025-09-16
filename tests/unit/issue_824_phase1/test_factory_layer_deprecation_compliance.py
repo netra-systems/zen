@@ -22,7 +22,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestFactoryLayerDeprecationCompliance(SSotAsyncTestCase):
+class FactoryLayerDeprecationComplianceTests(SSotAsyncTestCase):
     """Test factory layer deprecation compliance for WebSocket Manager SSOT."""
 
     def setUp(self):
@@ -100,7 +100,7 @@ class TestFactoryLayerDeprecationCompliance(SSotAsyncTestCase):
         """Test that factory functions redirect to canonical SSOT implementation."""
         try:
             from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CanonicalWSM
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as CanonicalWSM
         except ImportError as e:
             self.skipTest(f"Required modules not available: {e}")
 

@@ -35,7 +35,7 @@ from netra_backend.app.db.models_auth import User
 from shared.isolated_environment import get_env
 
 
-class TestThreadLifecycleIntegration(SSotAsyncTestCase):
+class ThreadLifecycleIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for thread lifecycle management.
     

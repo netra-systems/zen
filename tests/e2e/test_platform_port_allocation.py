@@ -18,7 +18,7 @@ from dev_launcher.service_coordination import (
 
 
 @pytest.mark.e2e
-class TestWindowsPlatformPortAllocation:
+class WindowsPlatformPortAllocationTests:
     """Test Windows-specific port allocation behavior."""
     
     @pytest.mark.skipif(platform.system() != "Windows", reason="Windows-specific test")
@@ -64,7 +64,7 @@ class TestWindowsPlatformPortAllocation:
 
 
 @pytest.mark.e2e
-class TestLinuxPlatformPortAllocation:
+class LinuxPlatformPortAllocationTests:
     """Test Linux-specific port allocation behavior."""
     
     @pytest.mark.skipif(platform.system() != "Linux", reason="Linux-specific test")
@@ -110,7 +110,7 @@ class TestLinuxPlatformPortAllocation:
 
 
 @pytest.mark.e2e
-class TestMacOSPlatformPortAllocation:
+class MacOSPlatformPortAllocationTests:
     """Test macOS-specific port allocation behavior."""
     
     @pytest.mark.skipif(platform.system() != "Darwin", reason="macOS-specific test")
@@ -156,7 +156,7 @@ class TestMacOSPlatformPortAllocation:
 
 
 @pytest.mark.e2e
-class TestCrossPlatformPortAllocation:
+class CrossPlatformPortAllocationTests:
     """Test cross-platform port allocation compatibility."""
     
     @pytest.fixture
@@ -273,7 +273,7 @@ class TestCrossPlatformPortAllocation:
 
 
 @pytest.mark.e2e
-class TestPortAllocationEdgeCases:
+class PortAllocationEdgeCasesTests:
     """Test edge cases in port allocation."""
     
     @pytest.fixture
@@ -337,7 +337,7 @@ class TestPortAllocationEdgeCases:
 
 
 @pytest.mark.e2e
-class TestPortAllocationIntegration:
+class PortAllocationIntegrationTests:
     """Integration tests for port allocation with real sockets."""
     
     @pytest.mark.asyncio

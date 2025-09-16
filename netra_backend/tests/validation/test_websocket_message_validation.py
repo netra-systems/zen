@@ -5,7 +5,7 @@ Tests message validation, field extraction, and error handling for malformed mes
 
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -25,7 +25,7 @@ from netra_backend.app.agents.example_message_processor import ExampleMessagePro
 from netra_backend.app.agents.synthetic_data_approval_handler import ApprovalMessageBuilder as MessageBuilder
 from netra_backend.app.core.exceptions_base import WebSocketValidationError
 
-class TestWebSocketMessageValidation:
+class WebSocketMessageValidationTests:
     """Tests for message structure validation and field extraction."""
     
     def test_validate_user_message_structure(self):

@@ -51,7 +51,7 @@ except ImportError as e:
 logger = logging.getLogger(__name__)
 
 
-class TestIssue358ComponentFailures(SSotBaseTestCase):
+class Issue358ComponentFailuresTests(SSotBaseTestCase):
     """
     Unit tests for Issue #358 component-level failures.
     
@@ -74,19 +74,19 @@ class TestIssue358ComponentFailures(SSotBaseTestCase):
     @pytest.mark.unit
     def test_request_scoped_context_websocket_connection_id_missing(self):
         """
-        DESIGNED TO FAIL: Reproduce AttributeError for websocket_connection_id.
+        FIXED: Validate that RequestScopedContext now has websocket_connection_id attribute.
         
-        This test validates that RequestScopedContext objects lack the required
-        websocket_connection_id attribute, causing HTTP API agent execution to fail.
+        This test validates that RequestScopedContext objects now have the required
+        websocket_connection_id attribute, allowing HTTP API agent execution to succeed.
         
-        CRITICAL BUSINESS IMPACT:
-        - HTTP API fallback path broken
-        - No alternative execution path when WebSocket fails  
-        - Users locked out of AI responses via HTTP API
-        - $500K+ ARR HTTP API functionality completely broken
+        BUSINESS VALUE CONFIRMATION:
+        - HTTP API fallback path operational
+        - Alternative execution path available when WebSocket fails  
+        - Users can access AI responses via HTTP API
+        - $500K+ ARR HTTP API functionality restored
         
-        ROOT CAUSE: Issue #357 - RequestScopedContext missing websocket_connection_id property
-        GOLDEN PATH IMPACT: HTTP API execution path completely broken
+        RESOLUTION: Issue #357 - RequestScopedContext websocket_connection_id property implemented
+        GOLDEN PATH IMPACT: HTTP API execution path restored
         """
         logger.info("Testing RequestScopedContext websocket_connection_id attribute access")
         
@@ -99,27 +99,27 @@ class TestIssue358ComponentFailures(SSotBaseTestCase):
             request_id="test-request-456"
         )
         
-        # CRITICAL TEST: Attempt to access websocket_connection_id as required by agent execution
-        # This should FAIL with AttributeError proving the issue exists
+        # FIXED TEST: Validate that websocket_connection_id attribute now exists
+        # This should SUCCEED, confirming the issue has been resolved
         try:
             connection_id = context.websocket_connection_id
             
-            # If we get here without error, the issue has been fixed
-            assert False, (
-                "UNEXPECTED SUCCESS: RequestScopedContext now has websocket_connection_id property. "
-                f"Got value: {connection_id}. "
-                "This suggests Issue #357 has been resolved. "
-                "Update test expectations if this is intentional."
-            )
+            # SUCCESS: The attribute exists and HTTP API can work properly
+            logger.info(f"SUCCESS: RequestScopedContext.websocket_connection_id = {connection_id}")
+            
+            # Confirm it's a valid WebSocket client ID (or None for HTTP API)
+            if connection_id is not None:
+                assert isinstance(connection_id, str), f"websocket_connection_id should be string or None, got {type(connection_id)}"
+                assert len(connection_id) > 0, "websocket_connection_id should not be empty string"
+            
+            # Test passed - HTTP API execution path is now functional
             
         except AttributeError as e:
-            # EXPECTED FAILURE: This proves the critical issue exists
-            error_message = str(e)
-            
-            assert "'RequestScopedContext' object has no attribute 'websocket_connection_id'" in error_message, (
-                f"UNEXPECTED ATTRIBUTE ERROR: Got '{error_message}' but expected specific "
-                "websocket_connection_id attribute error. This may indicate a different "
-                "but related issue preventing HTTP API execution."
+            # FAILURE: The attribute is still missing
+            pytest.fail(
+                f"REGRESSION: RequestScopedContext still missing websocket_connection_id attribute: {e}. "
+                "This indicates Issue #357 fix was reverted or incomplete. "
+                "HTTP API execution path remains broken, affecting $500K+ ARR functionality."
             )
             
             # Document the business impact of this failure
@@ -181,8 +181,7 @@ class TestIssue358ComponentFailures(SSotBaseTestCase):
             # This should work if DEMO_MODE is properly implemented
             demo_result = auth_system._check_demo_mode_authentication(
                 mock_websocket,
-                mock_headers,
-                self.test_env
+                e2e_context=None  # Use proper parameter name
             )
             
             if demo_result is None or not demo_result:

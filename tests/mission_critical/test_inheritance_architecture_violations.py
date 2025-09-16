@@ -21,7 +21,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 
-class TestInheritanceArchitectureViolations:
+class InheritanceArchitectureViolationsTests:
     """Test suite exposing critical inheritance architecture violations."""
     
     @pytest.fixture
@@ -90,16 +90,16 @@ class TestInheritanceArchitectureViolations:
     
     def test_initialization_order_confusion(self, mock_llm_manager, mock_tool_dispatcher):
         """Test that multiple __init__ calls create initialization confusion."""
-        class TestAgent(BaseAgent):
+        class AgentTests(BaseAgent):
             init_calls = []
             
             def __init__(self, llm_manager, tool_dispatcher):
                 # Track which __init__ methods are called (single inheritance now)
-                TestAgent.init_calls = []
+                AgentTests.init_calls = []
                 
                 # Single parent __init__ method
-                BaseAgent.__init__(self, llm_manager, name="TestAgent")
-                TestAgent.init_calls.append("BaseAgent")
+                BaseAgent.__init__(self, llm_manager, name="AgentTests")
+                AgentTests.init_calls.append("BaseAgent")
                 
                 # Using composition pattern for execution logic
             
@@ -109,11 +109,11 @@ class TestInheritanceArchitectureViolations:
             async def validate_preconditions(self, context):
                 return True
         
-        agent = TestAgent(mock_llm_manager, mock_tool_dispatcher)
+        agent = AgentTests(mock_llm_manager, mock_tool_dispatcher)
         
         # VIOLATION: Multiple initialization creates complexity
-        assert len(TestAgent.init_calls) == 1, \
-            f"Multiple __init__ calls required: {TestAgent.init_calls}"
+        assert len(AgentTests.init_calls) == 1, \
+            f"Multiple __init__ calls required: {AgentTests.init_calls}"
     
     def test_conflicting_attribute_ownership(self, data_agent, validation_agent):
         """Test that attributes are owned by multiple parent classes."""
@@ -268,7 +268,7 @@ class TestInheritanceArchitectureViolations:
             assert False, f"MRO conflict detected: {e}"
 
 
-class TestMissionCriticalInheritanceFixes:
+class MissionCriticalInheritanceFixesTests:
     """Tests that must pass after fixing inheritance issues."""
     
     @pytest.mark.skip(reason="Will pass after inheritance is fixed")
@@ -314,7 +314,7 @@ class TestMissionCriticalInheritanceFixes:
         assert len(core_methods) < 20, "Too many public methods - responsibilities not focused"
 
 
-class TestInheritanceErrorRecovery:
+class InheritanceErrorRecoveryTests:
     """Test error recovery patterns under 5 seconds in inheritance context."""
     
     @pytest.fixture
@@ -406,7 +406,7 @@ class TestInheritanceErrorRecovery:
             assert recovery_time < 5.0
 
 
-class TestInheritanceExecuteCore:
+class InheritanceExecuteCoreTests:
     """Test _execute_core implementation patterns in inheritance context."""
     
     @pytest.fixture
@@ -480,7 +480,7 @@ class TestInheritanceExecuteCore:
             assert class_name is not None
 
 
-class TestInheritanceResourceCleanup:
+class InheritanceResourceCleanupTests:
     """Test resource cleanup patterns in inheritance context."""
     
     @pytest.fixture
@@ -520,7 +520,7 @@ class TestInheritanceResourceCleanup:
         assert len(resource_attrs) >= 0  # May be zero due to inheritance issues
 
 
-class TestInheritanceBaseCompliance:
+class InheritanceBaseComplianceTests:
     """Test BaseAgent inheritance compliance in complex hierarchies."""
     
     @pytest.fixture

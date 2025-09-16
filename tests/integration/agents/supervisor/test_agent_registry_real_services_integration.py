@@ -37,7 +37,7 @@ from typing import Any, Dict, Optional, List
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, UserAgentSession, get_agent_registry
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
@@ -46,7 +46,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.llm.llm_manager import LLMManager
 
 @pytest.mark.integration
-class TestRealWebSocketManagerIntegration(SSotAsyncTestCase):
+class RealWebSocketManagerIntegrationTests(SSotAsyncTestCase):
     """Test Suite 1: Real WebSocket Manager Integration (Protects chat value delivery)
     
     Business Value: Validates WebSocket events work with live WebSocket connections
@@ -131,7 +131,7 @@ class TestRealWebSocketManagerIntegration(SSotAsyncTestCase):
             self.fail(f'WebSocket adapter integration failed: {e}')
 
 @pytest.mark.integration
-class TestRealToolDispatcherIntegration(SSotAsyncTestCase):
+class RealToolDispatcherIntegrationTests(SSotAsyncTestCase):
     """Test Suite 2: Real Tool Dispatcher Integration (Protects tool execution reliability)
     
     Business Value: Validates tools work correctly with real backend services
@@ -223,7 +223,7 @@ class TestRealToolDispatcherIntegration(SSotAsyncTestCase):
             self.fail(f'Tool execution integration failed: {e}')
 
 @pytest.mark.integration
-class TestRealDatabaseIntegration(SSotAsyncTestCase):
+class RealDatabaseIntegrationTests(SSotAsyncTestCase):
     """Test Suite 3: Real Database Integration (Protects agent state persistence)
     
     Business Value: Validates agent state persists correctly with real database
@@ -314,7 +314,7 @@ class TestRealDatabaseIntegration(SSotAsyncTestCase):
             self.fail(f'Concurrent database integration failed: {e}')
 
 @pytest.mark.integration
-class TestRealAgentExecutionFlow(SSotAsyncTestCase):
+class RealAgentExecutionFlowTests(SSotAsyncTestCase):
     """Test Suite 4: Real Agent Execution Flow (Protects end-to-end agent orchestration)
     
     Business Value: Validates complete agent lifecycle works with real services
@@ -407,7 +407,7 @@ class TestRealAgentExecutionFlow(SSotAsyncTestCase):
             self.fail(f'Agent error recovery integration failed: {e}')
 
 @pytest.mark.integration
-class TestRealPerformanceUnderLoad(SSotAsyncTestCase):
+class RealPerformanceUnderLoadTests(SSotAsyncTestCase):
     """Test Suite 5: Real Performance Under Load (Protects system scalability)
     
     Business Value: Validates registry performance with actual service calls

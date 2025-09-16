@@ -34,7 +34,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestWebSocketEventDeliveryFragmentationFailures(SSotAsyncTestCase):
+class WebSocketEventDeliveryFragmentationFailuresTests(SSotAsyncTestCase):
     """Phase 1 Reproduction Test: Prove event delivery fails with fragmented managers."""
     
     def setup_method(self, method):
@@ -70,9 +70,9 @@ class TestWebSocketEventDeliveryFragmentationFailures(SSotAsyncTestCase):
         logger.info("Testing event delivery consistency across fragmented managers")
         
         # Import different WebSocket manager implementations
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as factory1
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as DirectManager
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager as factory1
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as DirectManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerMode
         
         try:
             # Create managers via different import paths
@@ -293,8 +293,8 @@ class TestWebSocketEventDeliveryFragmentationFailures(SSotAsyncTestCase):
         """
         logger.info("Testing event deduplication with fragmented managers")
         
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerMode
         
         try:
             # Create multiple managers for the same user (potential duplication scenario)
@@ -366,7 +366,7 @@ class TestWebSocketEventDeliveryFragmentationFailures(SSotAsyncTestCase):
         """
         logger.info("Testing event ordering consistency across managers")
         
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         try:
             # Create managers for ordering test

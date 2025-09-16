@@ -76,7 +76,7 @@ class ConcreteAgentLifecycle(AgentLifecycleMixin):
         self.executed_with = {"state": state, "run_id": run_id, "stream_updates": stream_updates}
 
 
-class TestAgentLifecycleCore(SSotAsyncTestCase):
+class AgentLifecycleCoreTests(SSotAsyncTestCase):
     """Test AgentLifecycleMixin core lifecycle management functionality."""
 
     def setup_method(self, method):
@@ -260,7 +260,7 @@ class TestAgentLifecycleCore(SSotAsyncTestCase):
         self.agent.emit_error.assert_not_called()
 
 
-class TestAgentLifecycleExecution(SSotAsyncTestCase):
+class AgentLifecycleExecutionTests(SSotAsyncTestCase):
     """Test AgentLifecycleMixin execution flow and error handling."""
 
     def setup_method(self, method):
@@ -464,7 +464,7 @@ class TestAgentLifecycleExecution(SSotAsyncTestCase):
         assert len(self.agent.context) == 0
 
 
-class TestAgentLifecycleEdgeCases(SSotBaseTestCase):
+class AgentLifecycleEdgeCasesTests(SSotBaseTestCase):
     """Test AgentLifecycleMixin edge cases and error scenarios."""
 
     def setup_method(self, method):

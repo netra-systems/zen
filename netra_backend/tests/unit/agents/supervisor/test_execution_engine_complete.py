@@ -107,7 +107,7 @@ class MockAgentCore:
         else:
             raise RuntimeError('Mock execution failure')
 
-class TestExecutionEngineConstruction(SSotAsyncTestCase):
+class ExecutionEngineConstructionTests(SSotAsyncTestCase):
     """Test ExecutionEngine construction and initialization patterns."""
 
     def setup_method(self, method=None):
@@ -181,7 +181,7 @@ class TestExecutionEngineConstruction(SSotAsyncTestCase):
         error_msg = str(cm.exception)
         self.assertIn('No fallback paths allowed', error_msg)
 
-class TestExecutionEngineInitialization(SSotAsyncTestCase):
+class ExecutionEngineInitializationTests(SSotAsyncTestCase):
     """Test ExecutionEngine initialization and component setup."""
 
     def create_engine(self) -> ExecutionEngine:
@@ -299,7 +299,7 @@ class TestExecutionEngineInitialization(SSotAsyncTestCase):
         mock_tracker.register_death_callback.assert_called_once_with(engine._handle_agent_death)
         mock_tracker.register_timeout_callback.assert_called_once_with(engine._handle_agent_timeout)
 
-class TestExecutionEngineValidation(SSotAsyncTestCase):
+class ExecutionEngineValidationTests(SSotAsyncTestCase):
     """Test ExecutionEngine context validation functionality."""
 
     def test_valid_execution_context_passes(self):
@@ -384,7 +384,7 @@ class TestExecutionEngineValidation(SSotAsyncTestCase):
         end_time = time.time()
         self.assertLess(end_time - start_time, 0.1)
 
-class TestExecutionEngineWebSocketEvents(SSotAsyncTestCase):
+class ExecutionEngineWebSocketEventsTests(SSotAsyncTestCase):
     """Test ExecutionEngine WebSocket event emission functionality."""
 
     async def test_send_agent_thinking_event(self):
@@ -493,7 +493,7 @@ class TestExecutionEngineWebSocketEvents(SSotAsyncTestCase):
         self.assertIn('(In Progress)', incomplete_event['reasoning'])
         self.assertIn('(Complete)', complete_event['reasoning'])
 
-class TestExecutionEngineAgentExecution(SSotAsyncTestCase):
+class ExecutionEngineAgentExecutionTests(SSotAsyncTestCase):
     """Test ExecutionEngine single agent execution functionality."""
 
     def create_engine_with_mock_core(self) -> ExecutionEngine:
@@ -601,7 +601,7 @@ class TestExecutionEngineAgentExecution(SSotAsyncTestCase):
             self.assertTrue(len(engine.execution_stats['execution_times']) > 0)
             self.assertTrue(len(engine.execution_stats['queue_wait_times']) > 0)
 
-class TestExecutionEnginePipelineExecution(SSotAsyncTestCase):
+class ExecutionEnginePipelineExecutionTests(SSotAsyncTestCase):
     """Test ExecutionEngine pipeline execution functionality."""
 
     def create_pipeline_steps(self, count: int, strategy: AgentExecutionStrategy=AgentExecutionStrategy.SEQUENTIAL) -> List[PipelineStep]:
@@ -697,7 +697,7 @@ class TestExecutionEnginePipelineExecution(SSotAsyncTestCase):
         self.assertEqual(step_context.agent_name, 'step_agent')
         self.assertEqual(step_context.metadata, {'step_type': 'analysis', 'priority': 'high'})
 
-class TestExecutionEngineErrorHandling(SSotAsyncTestCase):
+class ExecutionEngineErrorHandlingTests(SSotAsyncTestCase):
     """Test ExecutionEngine error handling and recovery functionality."""
 
     async def test_execution_error_handling(self):
@@ -789,7 +789,7 @@ class TestExecutionEngineErrorHandling(SSotAsyncTestCase):
         self.assertIn('system error', system_event['error'])
         self.assertIn('engineering team', system_event['error'])
 
-class TestExecutionEnginePerformanceAndStats(SSotAsyncTestCase):
+class ExecutionEnginePerformanceAndStatsTests(SSotAsyncTestCase):
     """Test ExecutionEngine performance monitoring and statistics."""
 
     async def test_execution_stats_collection(self):
@@ -884,7 +884,7 @@ class TestExecutionEnginePerformanceAndStats(SSotAsyncTestCase):
         self.assertEqual(len(timeout_events), 1)
         self.assertEqual(self.engine.execution_stats['timeout_executions'], 1)
 
-class TestExecutionEngineFactoryMethods(SSotAsyncTestCase):
+class ExecutionEngineFactoryMethodsTests(SSotAsyncTestCase):
     """Test ExecutionEngine factory methods and creation patterns."""
 
     def test_create_request_scoped_engine_factory(self):
@@ -928,7 +928,7 @@ class TestExecutionEngineFactoryMethods(SSotAsyncTestCase):
         recommendations_text = ' '.join(result['recommendations'])
         self.assertIn('RequestScopedExecutionEngine', recommendations_text)
 
-class TestExecutionEngineUserIsolation(SSotAsyncTestCase):
+class ExecutionEngineUserIsolationTests(SSotAsyncTestCase):
     """Test ExecutionEngine user isolation and context management."""
 
     def test_user_execution_context_integration(self):
@@ -1029,7 +1029,7 @@ class TestExecutionEngineUserIsolation(SSotAsyncTestCase):
             self.assertEqual(result.agent_name, 'static_agent')
             mock_engine.execute_agent.assert_called_once_with(agent_context, state)
 
-class TestExecutionEngineShutdownAndCleanup(SSotAsyncTestCase):
+class ExecutionEngineShutdownAndCleanupTests(SSotAsyncTestCase):
     """Test ExecutionEngine shutdown and cleanup functionality."""
 
     async def test_engine_shutdown(self):

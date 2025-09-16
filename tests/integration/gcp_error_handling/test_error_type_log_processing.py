@@ -306,7 +306,7 @@ class ErrorFingerprinter:
         return '|'.join(relevant_lines)
 
 
-class TestGCPErrorTypeLogProcessing(SSotAsyncTestCase):
+class GCPErrorTypeLogProcessingTests(SSotAsyncTestCase):
     """
     Integration tests for advanced GCP error type log processing.
     

@@ -42,7 +42,7 @@ from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 from tests.e2e.test_websocket_real_connection import WebSocketRealConnectionTester
 logger = logging.getLogger(__name__)
 
-class TestAuthServiceRecoveryer:
+class AuthServiceRecoveryerTests:
     """Core tester for Auth service failure and recovery scenarios."""
 
     def __init__(self):

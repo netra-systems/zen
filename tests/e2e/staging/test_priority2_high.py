@@ -24,7 +24,7 @@ pytestmark = [pytest.mark.staging, pytest.mark.high, pytest.mark.real]
 
 
 @pytest.mark.e2e
-class TestHighAuthentication:
+class HighAuthenticationTests:
     """Tests 26-30: REAL Authentication Tests"""
     
     @pytest.mark.asyncio
@@ -348,7 +348,7 @@ class TestHighAuthentication:
 
 
 @pytest.mark.e2e
-class TestHighSecurity:
+class HighSecurityTests:
     """Tests 31-35: REAL Security Controls Testing"""
     
     @pytest.mark.asyncio

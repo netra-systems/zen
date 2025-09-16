@@ -30,7 +30,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 # Redis test utility not needed for basic SSOT tests
 
 
-class TestRedisSSOTConsolidation(SSotAsyncTestCase):
+class RedisSSOTConsolidationTests(SSotAsyncTestCase):
     """Mission Critical: Test Redis SSOT consolidation fixes."""
     
     def setUp(self):
@@ -461,7 +461,7 @@ class TestRedisSSOTConsolidation(SSotAsyncTestCase):
 
 
 # Additional validation tests for specific SSOT scenarios
-class TestRedisSSOTValidation(SSotAsyncTestCase):
+class RedisSSOTValidationTests(SSotAsyncTestCase):
     """Additional validation tests for Redis SSOT scenarios."""
     
     async def test_ssot_redis_manager_singleton_pattern(self):

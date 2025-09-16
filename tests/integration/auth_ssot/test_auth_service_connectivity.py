@@ -29,7 +29,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 
 
-class TestAuthServiceConnectivity(BaseIntegrationTest):
+class AuthServiceConnectivityTests(BaseIntegrationTest):
     """
     Integration tests for auth service connectivity and communication.
     

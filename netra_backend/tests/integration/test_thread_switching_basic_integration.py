@@ -52,7 +52,7 @@ except ImportError:
     ThreadService = None
     THREAD_SERVICE_AVAILABLE = False
 
-class TestThreadSwitchingBasicIntegration(BaseTestCase):
+class ThreadSwitchingBasicIntegrationTests(BaseTestCase):
     """
     Comprehensive integration tests for basic thread switching functionality.
     

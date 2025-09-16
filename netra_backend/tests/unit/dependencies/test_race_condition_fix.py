@@ -15,7 +15,7 @@ from netra_backend.app.dependencies import (
 from shared.id_generation import UnifiedIdGenerator
 
 
-class TestRaceConditionFix:
+class RaceConditionFixTests:
     """Test race condition fix in supervisor dependency injection."""
     
     def setup_method(self):

@@ -32,7 +32,7 @@ from netra_backend.app.schemas.auth_types import RequestContext
 from netra_backend.app.core.exceptions_auth import AuthenticationError, TokenInvalidError
 from shared.types.core_types import AuthValidationResult, UserID, WebSocketID, TokenString, ensure_user_id
 
-class TestAuthorizationHeaderExtraction:
+class AuthorizationHeaderExtractionTests:
     """Test Authorization header extraction logic.
     
     Business Value: Prevents auth failures when GCP load balancer strips or modifies headers.
@@ -101,7 +101,7 @@ class TestAuthorizationHeaderExtraction:
         token = middleware._extract_token(context)
         assert token == 'test_token_for_e2e'
 
-class TestWebSocketHeaderValidation:
+class WebSocketHeaderValidationTests:
     """Test WebSocket-specific header validation logic.
     
     Business Value: Prevents WebSocket connection failures that break real-time agent updates.
@@ -166,7 +166,7 @@ class TestWebSocketHeaderValidation:
             assert 'Invalid token format' in result.error_message
         asyncio.run(run_test())
 
-class TestLoadBalancerHeaderFiltering:
+class LoadBalancerHeaderFilteringTests:
     """Test GCP load balancer specific header handling.
     
     Business Value: Ensures authentication works correctly when headers pass through GCP infrastructure.
@@ -209,7 +209,7 @@ class TestLoadBalancerHeaderFiltering:
         assert auth_context.get('jwt_token') == 'gcp_user_token'
         assert auth_context.get('auth_method') == 'jwt'
 
-class TestHeaderProcessingLogic:
+class HeaderProcessingLogicTests:
     """Test core header processing logic with business validation.
     
     Business Value: Ensures consistent header processing across all authentication paths.
@@ -261,7 +261,7 @@ class TestHeaderProcessingLogic:
         assert 'X-Admin' not in context.headers
         assert context.headers.get('X-Forwarded-For') == '127.0.0.1\r\nHost: evil.com'
 
-class TestBusinessValueValidation:
+class BusinessValueValidationTests:
     """Test business value and compliance requirements.
     
     These tests ensure the header validation logic serves actual business needs

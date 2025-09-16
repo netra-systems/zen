@@ -74,7 +74,7 @@ from tests.e2e.agent_conversation_helpers import (
 
 @pytest.mark.e2e
 @pytest.mark.corpus_admin
-class TestCorpusAdminE2E:
+class CorpusAdminE2ETests:
     """Comprehensive E2E tests for CorpusAdminSubAgent workflow."""
 
     @pytest_asyncio.fixture
@@ -1440,7 +1440,7 @@ class TestCorpusAdminE2E:
 @pytest.mark.e2e
 @pytest.mark.corpus_admin
 @pytest.mark.real_llm 
-class TestCorpusAdminRealLLME2E:
+class CorpusAdminRealLLME2ETests:
     """E2E tests with real LLM integration for corpus admin workflows."""
     
     @pytest.fixture

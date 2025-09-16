@@ -21,12 +21,12 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import Mock, patch, MagicMock, AsyncMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.types.core_types import UserID, ThreadID, ensure_user_id
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketManagerMode
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketManagerMode
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.websocket_core.ssot_validation_enhancer import SSotValidationError, UserIsolationViolation, enable_strict_validation, validate_user_isolation, get_ssot_validation_summary
 
 @pytest.mark.unit
-class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
+class WebSocketManagerUserIsolationValidationTests(SSotAsyncTestCase):
     """
     Test suite for validating WebSocket Manager user isolation.
 
@@ -211,7 +211,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         self.assertTrue(final_summary['tracked_users'] <= updated_summary['tracked_users'], 'User context not cleaned up after manager destruction')
 
 @pytest.mark.unit
-class TestUserIsolationValidationGapDocumentation(SSotAsyncTestCase):
+class UserIsolationValidationGapDocumentationTests(SSotAsyncTestCase):
     """
     Test suite specifically designed to document user isolation validation gaps.
 

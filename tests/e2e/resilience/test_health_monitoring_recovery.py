@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestHealthMonitoringRecovery:
+class HealthMonitoringRecoveryTests:
     """Test #10: Health Monitoring Auto-Recovery System."""
     
     @pytest_asyncio.fixture
@@ -279,9 +279,9 @@ class TestHealthMonitoringRecovery:
         assert alert_results["notification_channels"] > 0, "No notifications sent"
 
 # Test execution helper functions
-def create_health_monitoring_test_suite() -> TestHealthMonitoringRecovery:
+def create_health_monitoring_test_suite() -> HealthMonitoringRecoveryTests:
     """Create health monitoring test suite instance."""
-    return TestHealthMonitoringRecovery()
+    return HealthMonitoringRecoveryTests()
 
 async def run_health_monitoring_validation() -> Dict[str, Any]:
     """Run health monitoring validation and return results."""

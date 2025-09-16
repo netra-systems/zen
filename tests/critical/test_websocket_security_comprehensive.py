@@ -195,7 +195,7 @@ async def security_test_users(isolated_websocket_managers):
 
 @pytest.mark.critical
 @pytest.mark.security
-class TestSingletonPatternPrevention:
+class SingletonPatternPreventionTests:
     """Test suite to ensure singleton patterns are completely eliminated."""
     
     async def test_no_global_websocket_manager_singleton(self, security_test_context):
@@ -322,7 +322,7 @@ class TestSingletonPatternPrevention:
 
 @pytest.mark.critical
 @pytest.mark.security
-class TestFactoryPatternUserIsolation:
+class FactoryPatternUserIsolationTests:
     """Test suite to verify factory patterns provide complete user isolation."""
     
     async def test_user_execution_context_isolation(self, security_test_users):
@@ -457,7 +457,7 @@ class TestFactoryPatternUserIsolation:
 
 @pytest.mark.critical
 @pytest.mark.security
-class TestUserContextExtraction:
+class UserContextExtractionTests:
     """Test suite to verify proper user context extraction from WebSocket connections."""
     
     async def test_websocket_message_user_context_creation(self, security_test_context):
@@ -588,7 +588,7 @@ class TestUserContextExtraction:
 
 @pytest.mark.critical  
 @pytest.mark.security
-class TestWebSocketAuthenticationSecurity:
+class WebSocketAuthenticationSecurityTests:
     """Test suite to prevent WebSocket authentication bypass attempts."""
     
     async def test_no_unauthenticated_websocket_access(self, security_test_context):
@@ -707,7 +707,7 @@ class TestWebSocketAuthenticationSecurity:
 
 @pytest.mark.critical
 @pytest.mark.security
-class TestConcurrentMultiUserSecurity:
+class ConcurrentMultiUserSecurityTests:
     """Test suite for concurrent multi-user WebSocket connection security."""
     
     async def test_concurrent_user_message_isolation(self, security_test_users):
@@ -908,7 +908,7 @@ class TestConcurrentMultiUserSecurity:
 
 @pytest.mark.critical
 @pytest.mark.security  
-class TestWebSocketAuthenticationFailureHandling:
+class WebSocketAuthenticationFailureHandlingTests:
     """Test suite for proper handling of WebSocket authentication failures."""
     
     async def test_invalid_context_handling(self, security_test_context):
@@ -1067,12 +1067,12 @@ async def test_websocket_security_comprehensive_suite():
     
     # Test categories and their criticality
     test_categories = [
-        ("Singleton Pattern Prevention", TestSingletonPatternPrevention),
-        ("Factory Pattern User Isolation", TestFactoryPatternUserIsolation), 
-        ("User Context Extraction", TestUserContextExtraction),
-        ("WebSocket Authentication Security", TestWebSocketAuthenticationSecurity),
-        ("Concurrent Multi-User Security", TestConcurrentMultiUserSecurity),
-        ("Authentication Failure Handling", TestWebSocketAuthenticationFailureHandling),
+        ("Singleton Pattern Prevention", SingletonPatternPreventionTests),
+        ("Factory Pattern User Isolation", FactoryPatternUserIsolationTests), 
+        ("User Context Extraction", UserContextExtractionTests),
+        ("WebSocket Authentication Security", WebSocketAuthenticationSecurityTests),
+        ("Concurrent Multi-User Security", ConcurrentMultiUserSecurityTests),
+        ("Authentication Failure Handling", WebSocketAuthenticationFailureHandlingTests),
     ]
     
     results = []

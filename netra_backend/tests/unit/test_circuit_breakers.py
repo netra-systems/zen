@@ -25,7 +25,7 @@ from netra_backend.app.core.resilience.unified_circuit_breaker import (
 from netra_backend.app.core.circuit_breaker_types import CircuitBreakerOpenError
 
 
-class TestUnifiedCircuitBreakerStateTransitions:
+class UnifiedCircuitBreakerStateTransitionsTests:
     """Test circuit breaker state transitions and business logic."""
     
     def test_circuit_breaker_initial_state_is_closed(self):
@@ -117,7 +117,7 @@ class TestUnifiedCircuitBreakerStateTransitions:
         assert breaker.metrics.adaptive_failure_threshold >= 1  # Minimum threshold
 
 
-class TestCircuitBreakerMetrics:
+class CircuitBreakerMetricsTests:
     """Test circuit breaker metrics collection and reporting."""
     
     def test_metrics_initialization(self):
@@ -179,7 +179,7 @@ class TestCircuitBreakerMetrics:
         assert metrics["error_rate"] == 0.0   # No errors out of 1 total call
 
 
-class TestCircuitBreakerExecution:
+class CircuitBreakerExecutionTests:
     """Test circuit breaker execution patterns and error handling."""
     
     @pytest.mark.asyncio
@@ -263,7 +263,7 @@ class TestCircuitBreakerExecution:
         assert breaker.metrics.average_response_time >= 1.5
 
 
-class TestCircuitBreakerManager:
+class CircuitBreakerManagerTests:
     """Test circuit breaker manager functionality."""
     
     def test_manager_creates_breakers_with_default_config(self):
@@ -302,7 +302,7 @@ class TestCircuitBreakerManager:
         assert breaker1 is breaker2
 
 
-class TestCircuitBreakerDecorator:
+class CircuitBreakerDecoratorTests:
     """Test circuit breaker decorator functionality."""
     
     @pytest.mark.asyncio
@@ -355,7 +355,7 @@ class TestCircuitBreakerDecorator:
             protected_sync_function(5)
 
 
-class TestCircuitBreakerEdgeCases:
+class CircuitBreakerEdgeCasesTests:
     """Test circuit breaker edge cases and error conditions."""
     
     def test_zero_failure_threshold_always_open(self):

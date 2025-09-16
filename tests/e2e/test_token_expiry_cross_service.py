@@ -40,7 +40,7 @@ def security_tester():
 
 
 @pytest.mark.e2e
-class TestTokenExpiryRejection:
+class TokenExpiryRejectionTests:
     """Test expired tokens rejected by all services consistently."""
     
     @pytest.mark.asyncio
@@ -89,7 +89,7 @@ class TestTokenExpiryRejection:
 
 
 @pytest.mark.e2e
-class TestTokenRefreshCrossService:
+class TokenRefreshCrossServiceTests:
     """Test token refresh works correctly across all services."""
     
     @pytest.mark.asyncio
@@ -172,7 +172,7 @@ class TestTokenRefreshCrossService:
 
 
 @pytest.mark.e2e
-class TestGracePeriodHandling:
+class GracePeriodHandlingTests:
     """Test grace period and clock skew tolerance."""
     
     @pytest.mark.asyncio
@@ -227,7 +227,7 @@ class TestGracePeriodHandling:
 
 
 @pytest.mark.e2e
-class TestExpiryPerformance:
+class ExpiryPerformanceTests:
     """Test performance requirements for token expiry checks."""
     
     @pytest.mark.asyncio
@@ -288,7 +288,7 @@ class TestExpiryPerformance:
 
 
 @pytest.mark.e2e
-class TestWebSocketExpiryDisconnection:
+class WebSocketExpiryDisconnectionTests:
     """Test WebSocket auto-disconnect on token expiry."""
     
     @pytest.mark.asyncio

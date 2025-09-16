@@ -27,7 +27,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.ssot.websocket import WebSocketTestClient
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ConnectionID, ensure_user_id
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
 
 class E2EConnectionState(Enum):
@@ -46,7 +46,7 @@ class E2EConnectionState(Enum):
     ERROR = "error"
 
 
-class TestWebSocketConnectionStateMachineE2E(BaseE2ETest):
+class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
     """E2E tests for WebSocket connection state machine with full user journeys."""
     
     def __init__(self):

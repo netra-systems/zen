@@ -38,7 +38,7 @@ docker_manager = UnifiedDockerManager()
 @pytest.mark.database_integrity
 @pytest.mark.critical
 @pytest.mark.asyncio
-class TestRealAuthDatabaseIntegrity:
+class RealAuthDatabaseIntegrityTests:
     """
     Real auth database integrity tests using Docker services.
     

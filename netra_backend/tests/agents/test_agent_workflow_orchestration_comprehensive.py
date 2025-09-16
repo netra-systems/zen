@@ -25,7 +25,7 @@ from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionR
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 
-class TestAgentWorkflowOrchestrationComprehensive(SSotAsyncTestCase, unittest.TestCase):
+class AgentWorkflowOrchestrationComprehensiveTests(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive test suite for agent workflow orchestration."""
 
     def setUp(self):

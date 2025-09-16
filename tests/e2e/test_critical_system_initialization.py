@@ -84,7 +84,7 @@ settings = Settings()
 from test_framework.test_utils import wait_for_condition, retry_with_backoff, create_test_user, cleanup_test_data
 
 @pytest.mark.e2e
-class TestDatabaseInitialization:
+class DatabaseInitializationTests:
     """Tests for database initialization and connection management."""
 
     @pytest.mark.asyncio
@@ -216,7 +216,7 @@ class TestDatabaseInitialization:
             await engine.dispose()
 
 @pytest.mark.e2e
-class TestServiceStartupOrder:
+class ServiceStartupOrderTests:
     """Tests for service startup order and dependencies."""
 
     @pytest.mark.asyncio
@@ -329,7 +329,7 @@ class TestServiceStartupOrder:
             print(f'Recovery test completed with expected behavior: {e}')
 
 @pytest.mark.e2e
-class TestWebSocketInfrastructure:
+class WebSocketInfrastructureTests:
     """Tests for WebSocket infrastructure and cross-service communication."""
 
     @pytest.mark.asyncio
@@ -430,7 +430,7 @@ class TestWebSocketInfrastructure:
         print(f'Successfully simulated {successful} connections out of {max_connections} attempts')
 
 @pytest.mark.e2e
-class TestAuthenticationUserFlow:
+class AuthenticationUserFlowTests:
     """Tests for authentication and user signup flows."""
 
     @pytest.mark.asyncio
@@ -533,7 +533,7 @@ class TestAuthenticationUserFlow:
                 pytest.skip('Services not fully available')
 
 @pytest.mark.e2e
-class TestFrontendIntegration:
+class FrontendIntegrationTests:
     """Tests for frontend loading and integration."""
 
     @pytest.mark.asyncio
@@ -616,7 +616,7 @@ class TestFrontendIntegration:
                 pass
 
 @pytest.mark.e2e
-class TestErrorRecovery:
+class ErrorRecoveryTests:
     """Tests for error recovery and resilience."""
 
     @pytest.mark.asyncio

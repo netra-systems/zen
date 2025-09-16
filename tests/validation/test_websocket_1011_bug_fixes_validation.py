@@ -22,7 +22,7 @@ from shared.jwt_secret_manager import JWTSecretManager, get_unified_jwt_secret
 from shared.jwt_secret_validator import JWTSecretValidator, validate_jwt_secrets, validate_staging_jwt_config
 from tests.e2e.staging_test_config import StagingConfig, STAGING_CONFIG
 
-class TestJWTSecretResolutionFixes:
+class JWTSecretResolutionFixesTests:
     """Test JWT secret resolution fixes for SSOT compliance."""
 
     def test_staging_jwt_secret_hierarchy_fix(self):
@@ -62,7 +62,7 @@ class TestJWTSecretResolutionFixes:
             with pytest.raises(ValueError, match='JWT secret not configured for staging'):
                 manager.get_jwt_secret()
 
-class TestStagingConfigFixes:
+class StagingConfigFixesTests:
     """Test StagingConfig missing base_url attribute fix."""
 
     def test_staging_config_has_base_url_attribute(self):
@@ -85,7 +85,7 @@ class TestStagingConfigFixes:
         assert 'staging.netrasystems.ai' in config.base_url
         assert config.base_url == config.backend_url
 
-class TestJWTSecretCrossServiceValidation:
+class JWTSecretCrossServiceValidationTests:
     """Test JWT secret cross-service validation functionality."""
 
     def test_jwt_secret_validator_detects_consistency(self):
@@ -129,7 +129,7 @@ class TestJWTSecretCrossServiceValidation:
         with patch('shared.jwt_secret_validator.get_env', return_value=staging_env):
             assert validate_staging_jwt_config() is False
 
-class TestWebSocketErrorHandlingFixes:
+class WebSocketErrorHandlingFixesTests:
     """Test WebSocket error handling graceful degradation."""
 
     def test_websocket_graceful_degradation_mock(self):
@@ -150,7 +150,7 @@ class TestWebSocketErrorHandlingFixes:
         assert 'limited functionality' in error_msg['message']
         assert 'environment' in error_msg['details']
 
-class TestBugFixIntegration:
+class BugFixIntegrationTests:
     """Integration tests for all bug fixes working together."""
 
     def test_complete_staging_environment_simulation(self):

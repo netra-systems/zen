@@ -1,5 +1,5 @@
 @pytest.mark.integration
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
@@ -43,7 +43,7 @@ class TestWebSocketConnection:
                 import asyncio
 
 
-                class TestDiscoveryEndpointURLs:
+                class DiscoveryEndpointURLsTests:
                     """Test discovery endpoint returns environment-specific URLs."""
 
                     def test_staging_environment_urls(self):

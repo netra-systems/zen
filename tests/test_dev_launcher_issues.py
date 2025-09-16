@@ -11,7 +11,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.pool import QueuePool
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from auth_service.core.auth_manager import AuthManager
@@ -20,7 +20,7 @@ from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 env = get_env()
 
-class TestDatabaseConnectionIssues:
+class DatabaseConnectionIssuesTests:
     """Tests for database connection failures and redundancies."""
 
     def test_clickhouse_connection_failure_handling(self, monkeypatch):
@@ -50,7 +50,7 @@ class TestDatabaseConnectionIssues:
             pool.invalid
         assert hasattr(pool, 'dispose'), 'Pool should have dispose method for cleanup'
 
-class TestSQLAlchemyLoggingIssues:
+class SQLAlchemyLoggingIssuesTests:
     """Tests for SQLAlchemy verbose logging issues."""
 
     def test_sqlalchemy_logging_disabled_by_default(self):
@@ -70,7 +70,7 @@ class TestSQLAlchemyLoggingIssues:
         assert engine_config.get('echo', False) is False, 'Echo must be False in production'
         assert engine_config.get('echo_pool', False) is False, 'Echo pool must be False in production'
 
-class TestAuthServiceIssues:
+class AuthServiceIssuesTests:
     """Tests for auth service connectivity and health check issues."""
 
     def test_auth_service_port_consistency(self):
@@ -86,7 +86,7 @@ class TestAuthServiceIssues:
             result = await _check_auth_connection()
             assert result is False, 'Auth check should return False on timeout, not hang'
 
-class TestWebSocketIssues:
+class WebSocketIssuesTests:
     """Tests for WebSocket authentication and configuration issues."""
 
     @pytest.mark.asyncio
@@ -102,7 +102,7 @@ class TestWebSocketIssues:
                 pass
         assert 'Authentication required' in str(exc_info.value)
 
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):

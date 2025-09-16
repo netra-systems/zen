@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker, ExecutionRecord, ExecutionState, get_execution_tracker
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
-class TestAgentExecutionIDMigration:
+class AgentExecutionIDMigrationTests:
     """
     Test suite focused on migrating agent execution ID generation 
     from uuid.uuid4() to UnifiedIDManager.
@@ -222,7 +222,7 @@ class TestAgentExecutionIDMigration:
         assert technical_ctx.get('execution_environment') == 'production'
         assert technical_ctx.get('resource_pool') == 'high_priority'
 
-class TestAgentExecutionIDMigrationIntegration:
+class AgentExecutionIDMigrationIntegrationTests:
     """
     Integration tests for UnifiedIDManager migration.
     These tests validate the complete migration path.

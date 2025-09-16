@@ -2,7 +2,7 @@
 import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 
-class TestDatabaseTransactionsIntegration(BaseIntegrationTest):
+class DatabaseTransactionsIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     def test_transaction_integrity_integration(self):

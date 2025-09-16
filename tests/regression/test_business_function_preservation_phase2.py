@@ -253,7 +253,7 @@ class MockDatabaseOperations:
         return self.connection_pool.copy()
 
 
-class TestBusinessFunctionPreservationPhase2(SSotBaseTestCase):
+class BusinessFunctionPreservationPhase2Tests(SSotBaseTestCase):
     """
     Business Function Preservation Validation - Phase 2
 

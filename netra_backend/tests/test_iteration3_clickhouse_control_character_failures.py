@@ -10,14 +10,14 @@ Critical Issue: "ClickHouse URL control characters: Still has newline at positio
 import pytest
 import re
 from urllib.parse import urlparse
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 
 from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestClickHouseControlCharacterPersistence:
+class ClickHouseControlCharacterPersistenceTests:
     """Tests that demonstrate persistent control character issues in ClickHouse URLs"""
     
     def test_newline_at_position_34_specific_issue(self):
@@ -222,7 +222,7 @@ class TestClickHouseControlCharacterPersistence:
         return url
 
 
-class TestClickHouseEnvironmentVariableSanitization:
+class ClickHouseEnvironmentVariableSanitizationTests:
     """Tests for ClickHouse environment variable sanitization issues"""
     
     def test_clickhouse_host_newline_not_sanitized_from_environment(self):
@@ -343,7 +343,7 @@ class TestClickHouseEnvironmentVariableSanitization:
         return True
 
 
-class TestClickHouseURLParsingRobustness:
+class ClickHouseURLParsingRobustnessTests:
     """Tests for robust ClickHouse URL parsing with control characters"""
     
     def test_url_parsing_error_reporting_for_control_characters(self):

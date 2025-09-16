@@ -23,7 +23,7 @@ from typing import Dict, Any, List
 from enum import Enum
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 
-class TestExecutionStateConsistency(SSotBaseTestCase):
+class ExecutionStateConsistencyTests(SSotBaseTestCase):
     """Test ExecutionState enum consistency across all implementations."""
 
     def setup_method(self):
@@ -125,7 +125,7 @@ class TestExecutionStateConsistency(SSotBaseTestCase):
 
 @pytest.mark.unit
 @pytest.mark.ssot_validation
-class TestExecutionStateSSotCompliance:
+class ExecutionStateSSotComplianceTests:
     """Extended SSOT compliance tests for ExecutionState."""
 
     def test_execution_state_single_source_of_truth(self):

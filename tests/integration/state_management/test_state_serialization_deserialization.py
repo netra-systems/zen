@@ -137,7 +137,7 @@ def serialization_helper():
     return StateSerializationHelper()
 
 
-class TestStateSerializationDeserialization(BaseIntegrationTest):
+class StateSerializationDeserializationTests(BaseIntegrationTest):
     """
     Comprehensive state serialization and deserialization tests.
     

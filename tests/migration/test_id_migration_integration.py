@@ -38,7 +38,7 @@ try:
 except ImportError:
     AUTH_SERVICE_AVAILABLE = False
 
-class TestIDMigrationCrossServiceIntegration(SSotAsyncTestCase):
+class IDMigrationCrossServiceIntegrationTests(SSotAsyncTestCase):
     """Integration tests for cross-service ID consistency and migration compliance."""
 
     def setup_method(self, method=None):

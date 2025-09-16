@@ -19,7 +19,7 @@ from netra_backend.app.config import get_config
 
 from netra_backend.app.services.session_service import SessionService
 
-class TestSessionSharingL3:
+class SessionSharingL3Tests:
     """Test session sharing scenarios"""
 
     @pytest.mark.asyncio

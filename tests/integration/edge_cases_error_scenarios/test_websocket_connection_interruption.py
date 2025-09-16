@@ -27,7 +27,7 @@ from test_framework.websocket_helpers import WebSocketTestClient
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketConnectionInterruption(BaseIntegrationTest):
+class WebSocketConnectionInterruptionTests(BaseIntegrationTest):
     """Test WebSocket connection behavior during various interruption scenarios."""
     
     @pytest.mark.integration

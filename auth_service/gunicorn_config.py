@@ -30,7 +30,7 @@ except (NameError, AttributeError):
     # Fallback when AuthEnvironment not available
     from shared.isolated_environment import get_env
     env_manager = get_env()
-    port = env_manager.get('PORT', '8081')
+    port = env_manager.get('PORT', '8080')
     host = "0.0.0.0"
 
 bind = f"{host}:{port}"

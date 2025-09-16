@@ -31,7 +31,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
-class TestPerformanceSLALogicUnit(SSotAsyncTestCase):
+class PerformanceSLALogicUnitTests(SSotAsyncTestCase):
     """
     Unit tests for performance SLA validation logic.
 

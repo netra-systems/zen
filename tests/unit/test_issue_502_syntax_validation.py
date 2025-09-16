@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 
-class TestIssue502SyntaxValidation:
+class Issue502SyntaxValidationTests:
     """Test suite for Issue #502 syntax validation and import resolution."""
     
     def test_problematic_file_syntax_compiles(self):
@@ -216,7 +216,7 @@ class TestIssue502SyntaxValidation:
 
 
 @pytest.mark.unit
-class TestIssue502RegressionPrevention:
+class Issue502RegressionPreventionTests:
     """
     Additional tests to prevent regression of this type of issue.
     """

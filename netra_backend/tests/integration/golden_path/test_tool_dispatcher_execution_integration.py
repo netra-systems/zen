@@ -31,7 +31,7 @@ from shared.types import UserID, ThreadID, RequestID, RunID
 logger = logging.getLogger(__name__)
 
 
-class TestToolDispatcherExecutionIntegration(BaseIntegrationTest):
+class ToolDispatcherExecutionIntegrationTests(BaseIntegrationTest):
     """Integration tests for tool dispatcher execution patterns that deliver business value."""
 
     @pytest.mark.integration

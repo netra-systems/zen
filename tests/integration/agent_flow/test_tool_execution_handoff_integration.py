@@ -52,7 +52,7 @@ try:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.base_agent import BaseAgent
     from netra_backend.app.schemas.agent_models import DeepAgentState
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
     from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
     from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
@@ -84,7 +84,7 @@ class ToolExecutionPhase(Enum):
     HANDOFF_COMPLETED = "handoff_completed"
 
 
-class TestToolExecutionHandoffIntegration(SSotAsyncTestCase):
+class ToolExecutionHandoffIntegrationTests(SSotAsyncTestCase):
     """
     Integration Tests for Tool Execution Handoff Integration.
     

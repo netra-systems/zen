@@ -1,0 +1,61 @@
+{
+  "timestamp": "2025-09-15T13:20:05.892500",
+  "total_validation_time_ms": 25983.21,
+  "http_connectivity": {
+    "api": {
+      "url": "https://api.staging.netrasystems.ai/health",
+      "status": "ERROR: ",
+      "success": false,
+      "response_time_ms": 15326.91,
+      "error": ""
+    },
+    "auth": {
+      "url": "https://auth.staging.netrasystems.ai/health",
+      "status": "UP",
+      "status_code": 200,
+      "response_time_ms": 340.93,
+      "success": true,
+      "content_length": 194,
+      "service_info": {
+        "status": "healthy",
+        "service": "auth-service",
+        "version": "1.0.0",
+        "database_status": "connected"
+      }
+    },
+    "frontend": {
+      "url": "https://chat.staging.netrasystems.ai",
+      "status": "ERROR: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not va",
+      "success": false,
+      "response_time_ms": 246.51,
+      "error": "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'chat.staging.netrasystems.ai'. (_ssl.c:1032)"
+    }
+  },
+  "websocket_connectivity": {
+    "websocket_url": "wss://api.staging.netrasystems.ai/ws",
+    "success": false,
+    "error": "timed out during opening handshake",
+    "total_time_ms": 10014.85
+  },
+  "database_connectivity": {
+    "connection_test": {
+      "success": false,
+      "connection_time_ms": 53.67,
+      "error": "(psycopg2.OperationalError) connection to server at \"postgres.staging.netrasystems.ai\" (34.54.41.44), port 5432 failed: invalid integer value \"8.0\" for connection option \"connect_timeout\"\n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)",
+      "status": "Failed: (psycopg2.OperationalError) connection to server at \"postgres.staging.netrasystems.ai\" (34.54.41.44)"
+    },
+    "health_check_test": null,
+    "transaction_test": null,
+    "overall_success": false,
+    "success_rate": 0.0
+  },
+  "overall_assessment": {
+    "status": "INFRASTRUCTURE_IN_PROGRESS",
+    "message": "[PROGRESS] Some services up, database connectivity still being fixed",
+    "infrastructure_fix_applied": false,
+    "http_success_rate": 0.3333333333333333,
+    "database_connectivity": false,
+    "websocket_connectivity": false,
+    "ready_for_validation_framework": false
+  }
+}

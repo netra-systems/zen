@@ -43,14 +43,14 @@ from netra_backend.app.websocket_core.event_validator import (
     get_critical_event_types,
     create_mock_critical_events
 )
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 from shared.isolated_environment import get_env
 
 
 @pytest.mark.integration
-class TestWebSocketEventEmissionValidation(SSotAsyncTestCase):
+class WebSocketEventEmissionValidationTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket event emission with validation.
     
@@ -614,7 +614,7 @@ class TestWebSocketEventEmissionValidation(SSotAsyncTestCase):
 # === SPECIALIZED TEST SCENARIOS ===
 
 @pytest.mark.integration
-class TestWebSocketEventEmissionErrorScenarios(SSotAsyncTestCase):
+class WebSocketEventEmissionErrorScenariosTests(SSotAsyncTestCase):
     """
     Specialized tests for error scenarios and edge cases in event emission.
     
@@ -735,10 +735,10 @@ def test_suite():
     suite = unittest.TestSuite()
     
     # Add main test class
-    suite.addTests(loader.loadTestsFromTestCase(TestWebSocketEventEmissionValidation))
+    suite.addTests(loader.loadTestsFromTestCase(WebSocketEventEmissionValidationTests))
     
     # Add error scenarios test class
-    suite.addTests(loader.loadTestsFromTestCase(TestWebSocketEventEmissionErrorScenarios))
+    suite.addTests(loader.loadTestsFromTestCase(WebSocketEventEmissionErrorScenariosTests))
     
     return suite
 

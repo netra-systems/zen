@@ -216,7 +216,7 @@ class EssentialUserIsolationFactory:
         return len(self.active_contexts)
 
 
-class TestUserContextIsolationPhase2(SSotBaseTestCase):
+class UserContextIsolationPhase2Tests(SSotBaseTestCase):
     """
     User Context Isolation Validation - Phase 2
 

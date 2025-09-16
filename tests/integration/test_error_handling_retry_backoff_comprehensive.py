@@ -172,7 +172,7 @@ class ConcurrentRetryCoordinator:
             finally:
                 self.active_retries -= 1
 
-class TestRetryBackoffErrorHandling(BaseIntegrationTest):
+class RetryBackoffErrorHandlingTests(BaseIntegrationTest):
     """Integration tests for retry logic and exponential backoff patterns."""
 
     def setup_method(self):

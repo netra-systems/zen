@@ -35,7 +35,7 @@ try:
     from netra_backend.app.websocket_core.unified_manager import (
         WebSocketConnection, UnifiedWebSocketManager, WebSocketManagerMode
     )
-    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
     from netra_backend.app.websocket_core.types import (
         WebSocketConnectionState, ConnectionInfo
     )
@@ -90,7 +90,7 @@ class MockWebSocket:
         await asyncio.sleep(0.001)
 
 
-class TestWebSocketRaceConditionIssue335(SSotAsyncTestCase):
+class WebSocketRaceConditionIssue335Tests(SSotAsyncTestCase):
     """
     Test suite for Issue #335 - WebSocket Send After Close Race Condition.
 
@@ -377,7 +377,7 @@ class TestWebSocketRaceConditionIssue335(SSotAsyncTestCase):
 
 
 # Integration test (non-docker) for WebSocket lifecycle
-class TestWebSocketLifecycleRaceCondition(SSotAsyncTestCase):
+class WebSocketLifecycleRaceConditionTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket lifecycle race conditions without Docker.
 

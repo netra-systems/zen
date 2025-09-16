@@ -48,7 +48,7 @@ class ResponseFormatValidation:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAgentResponseFormattingValidation(BaseIntegrationTest):
+class AgentResponseFormattingValidationTests(BaseIntegrationTest):
     """Test agent response formatting and structure validation."""
     
     def setup_method(self):

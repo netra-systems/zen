@@ -32,7 +32,7 @@ from test_framework.base_integration_test import BaseIntegrationTest, WebSocketI
 from test_framework.real_services import get_real_services
 from test_framework.ssot.e2e_auth_helper import create_authenticated_test_user
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, IntegrationState
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.schemas.websocket_message_types import WebSocketConnectionState, ClientMessage, ServerMessage
 from netra_backend.app.schemas.core_enums import WebSocketMessageType

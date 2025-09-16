@@ -18,7 +18,7 @@ from fastapi import WebSocket
 from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
 
 @pytest.mark.e2e
-class TestJWTSecretMismatch:
+class JWTSecretMismatchTests:
     """Test JWT secret mismatch scenarios and error reporting."""
 
     @pytest.mark.asyncio
@@ -128,7 +128,7 @@ class TestJWTSecretMismatch:
             assert exc_info.value.status_code == 401
 
 @pytest.mark.e2e
-class TestSingletonFallback:
+class SingletonFallbackTests:
     """Test that dangerous singleton fallback is removed."""
 
     @pytest.mark.asyncio

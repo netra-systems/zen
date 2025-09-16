@@ -28,7 +28,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
-class TestSSOTUserContaminationViolations(SSotAsyncTestCase):
+class SSOTUserContaminationViolationsTests(SSotAsyncTestCase):
     """Test that exposes cross-user state contamination from singleton patterns.
 
     These tests SHOULD FAIL before SSOT remediation because singleton patterns

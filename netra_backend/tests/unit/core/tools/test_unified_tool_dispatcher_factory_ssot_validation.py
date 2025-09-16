@@ -37,7 +37,7 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestUnifiedToolDispatcherFactorySSotValidation:
+class UnifiedToolDispatcherFactorySSotValidationTests:
     """Test SSOT validation failures in UnifiedToolDispatcherFactory."""
     
     def test_unified_tool_dispatcher_direct_instantiation_ssot_violation(self):

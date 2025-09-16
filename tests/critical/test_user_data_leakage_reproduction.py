@@ -51,7 +51,7 @@ class ProductionUserProfile:
     sensitive_data: Dict[str, Any]
     compliance_requirements: List[str]
 
-class TestUserDataLeakageReproduction(SSotAsyncTestCase):
+class UserDataLeakageReproductionTests(SSotAsyncTestCase):
     """Critical tests reproducing production user data leakage scenarios."""
 
     def setUp(self):

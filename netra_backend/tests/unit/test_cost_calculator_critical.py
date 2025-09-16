@@ -63,7 +63,7 @@ from netra_backend.app.services.cost_calculator import (
     ModelCostInfo,
 )
 
-class TestCriticalPricingAccuracy:
+class CriticalPricingAccuracyTests:
     """Revenue-protecting pricing accuracy tests."""
     
     @pytest.fixture
@@ -118,7 +118,7 @@ class TestCriticalPricingAccuracy:
         # Updated expected values: 1950.0 - 7.125 = 1942.875
         assert savings == Decimal("1942.875") and percentage > Decimal("99")
 
-class TestCriticalTokenPrecision:
+class CriticalTokenPrecisionTests:
     """Token precision tests for billing accuracy."""
     
     @pytest.fixture
@@ -162,7 +162,7 @@ class TestCriticalTokenPrecision:
         cost = calculator.calculate_cost(max_usage, LLMProvider.OPENAI, "gpt-4")
         assert isinstance(cost, Decimal) and cost == Decimal("193273.52823")
 
-class TestCriticalModelRecommendations:
+class CriticalModelRecommendationsTests:
     """Model recommendation tests for customer value."""
     
     @pytest.fixture
@@ -194,7 +194,7 @@ class TestCriticalModelRecommendations:
         assert openai_premium == "gpt-4"
         assert anthropic_premium == "claude-3-opus"
 
-class TestCriticalBudgetProjections:
+class CriticalBudgetProjectionsTests:
     """Budget projection tests for enterprise sales."""
     
     @pytest.fixture
@@ -216,7 +216,7 @@ class TestCriticalBudgetProjections:
         annual = monthly * Decimal("12")
         assert monthly == Decimal("388.575000") and annual == Decimal("4662.900000")
 
-class TestCriticalErrorScenarios:
+class CriticalErrorScenariosTests:
     """Error scenario tests for customer trust."""
     
     @pytest.fixture
@@ -246,7 +246,7 @@ class TestCriticalErrorScenarios:
         # Negative inputs must be handled gracefully, return zero
         assert cost == Decimal("0")
 
-class TestCriticalPerformanceRequirements:
+class CriticalPerformanceRequirementsTests:
     """Performance tests for cost calculations."""
     
     @pytest.fixture

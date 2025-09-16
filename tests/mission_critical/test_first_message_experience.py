@@ -44,7 +44,7 @@ from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # Import test utilities
@@ -282,7 +282,7 @@ class FirstMessageEventValidator:
         return "\n".join(report)
 
 
-class TestFirstMessageExperience:
+class FirstMessageExperienceTests:
     """E2E tests for first message user experience."""
     
     @pytest.fixture(autouse=True)
@@ -914,7 +914,7 @@ class TestFirstMessageExperience:
         logger.info(" PASS:  All malformed messages handled appropriately")
 
 
-class TestFirstMessageIntegration:
+class FirstMessageIntegrationTests:
     """Integration tests for first message with system components."""
     
     @pytest.fixture(autouse=True)
@@ -1030,7 +1030,7 @@ class TestFirstMessageIntegration:
         logger.info(" PASS:  AgentRegistry properly enhances with WebSocket support")
 
 
-class TestFirstMessagePerformance:
+class FirstMessagePerformanceTests:
     """Performance tests for first message experience."""
     
     @pytest.fixture(autouse=True)

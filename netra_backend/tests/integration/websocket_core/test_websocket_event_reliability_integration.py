@@ -42,7 +42,7 @@ from test_framework.websocket_helpers import (
 
 try:
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from shared.isolated_environment import get_env
     RELIABILITY_COMPONENTS_AVAILABLE = True
@@ -51,7 +51,7 @@ except ImportError as e:
     pytest.skip(f"Reliability test components not available: {e}", allow_module_level=True)
 
 
-class TestWebSocketEventReliabilityIntegration(BaseIntegrationTest):
+class WebSocketEventReliabilityIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket event delivery reliability."""
 
     async def async_setup(self):

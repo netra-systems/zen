@@ -147,7 +147,7 @@ class RealisticMockAgent:
         return {}
 
 
-class TestAgentExecutionCoreRealisticIntegration(SSotBaseTestCase):
+class AgentExecutionCoreRealisticIntegrationTests(SSotBaseTestCase):
     """Realistic integration tests for Agent Execution Core functionality."""
     
     def setup_method(self):

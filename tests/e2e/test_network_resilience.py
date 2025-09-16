@@ -36,7 +36,7 @@ def network_simulator():
 
 
 @pytest.mark.e2e
-class TestNetworkPartitionHandling:
+class NetworkPartitionHandlingTests:
     """Test split-brain scenario handling during network partitions."""
     
     @pytest.mark.asyncio
@@ -93,7 +93,7 @@ class TestNetworkPartitionHandling:
 
 
 @pytest.mark.e2e
-class TestPacketLossRecovery:
+class PacketLossRecoveryTests:
     """Test 50% packet loss tolerance and recovery mechanisms."""
     
     @pytest.mark.asyncio
@@ -149,7 +149,7 @@ class TestPacketLossRecovery:
 
 
 @pytest.mark.e2e
-class TestDnsFailureHandling:
+class DnsFailureHandlingTests:
     """Test DNS resilience mechanisms and fallback strategies."""
     
     @pytest.mark.asyncio
@@ -205,7 +205,7 @@ class TestDnsFailureHandling:
 
 
 @pytest.mark.e2e
-class TestCdnFallbackMechanisms:
+class CdnFallbackMechanismsTests:
     """Test asset delivery fallback paths during CDN failures."""
     
     @pytest.mark.asyncio
@@ -263,7 +263,7 @@ class TestCdnFallbackMechanisms:
 
 
 @pytest.mark.e2e
-class TestNetworkResilienceIntegration:
+class NetworkResilienceIntegrationTests:
     """Integration tests for combined network failure scenarios."""
     
     @pytest.mark.asyncio

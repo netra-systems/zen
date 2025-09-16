@@ -49,7 +49,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcherFactory
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 from test_framework.test_context import TestContext, create_test_context
@@ -289,7 +289,7 @@ class RealAgentExecutionWebSocketIntegrator:
         await context.websocket_notifier.send_event('agent_completed', {'message': 'General agent execution completed', 'status': 'success'})
         return {'status': 'completed', 'agent_type': 'general', 'processing_result': 'success'}
 
-class TestAgentExecutionWebSocketIntegration:
+class AgentExecutionWebSocketIntegrationTests:
     """E2E tests for agent execution WebSocket integration."""
 
     @pytest.mark.asyncio

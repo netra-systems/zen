@@ -210,7 +210,7 @@ async def oauth_real_service_runner():
     await runner.cleanup_test_resources()
 
 @pytest.mark.e2e
-class TestOAuthRealServiceFlow:
+class OAuthRealServiceFlowTests:
     """Critical OAuth real service flow tests for Enterprise SSO"""
 
     @pytest.mark.asyncio

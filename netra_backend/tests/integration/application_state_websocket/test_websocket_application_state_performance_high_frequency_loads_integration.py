@@ -128,7 +128,7 @@ class LoadTestConnection:
             return False, latency
 
 
-class TestWebSocketApplicationStatePerformanceHighFrequencyLoads(BaseIntegrationTest):
+class WebSocketApplicationStatePerformanceHighFrequencyLoadsTests(BaseIntegrationTest):
     """Test state synchronization performance under high-frequency WebSocket message loads."""
     
     async def setup_performance_test_environment(self, services, connection_count: int = 10) -> Tuple[List[LoadTestConnection], Dict[str, Any]]:

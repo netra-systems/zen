@@ -104,7 +104,7 @@ class UserChatSession:
 
 @pytest.mark.e2e
 @pytest.mark.requires_docker
-class TestMultiUserConcurrentChatIsolation(SSotAsyncTestCase):
+class MultiUserConcurrentChatIsolationTests(SSotAsyncTestCase):
     """
     CRITICAL: E2E tests for complete user isolation during concurrent chat sessions.
     

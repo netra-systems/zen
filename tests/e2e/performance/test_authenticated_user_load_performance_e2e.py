@@ -26,7 +26,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.base_e2e_test import BaseE2ETest
 from shared.isolated_environment import get_env
 
-class TestAuthenticatedUserLoadPerformanceE2E(BaseE2ETest):
+class AuthenticatedUserLoadPerformanceE2ETests(BaseE2ETest):
     """
     Test authenticated user load performance in realistic E2E scenarios.
     

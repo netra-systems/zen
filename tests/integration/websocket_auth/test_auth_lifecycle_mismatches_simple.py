@@ -20,7 +20,7 @@ import uuid
 from shared.isolated_environment import get_env
 from shared.types.core_types import ensure_user_id
 
-class TestAuthLifecycleMismatchesPOC:
+class AuthLifecycleMismatchesPOCTests:
     """
     Proof of Concept: WebSocket auth lifecycle mismatches.
     

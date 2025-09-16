@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -35,7 +35,7 @@ import pytest
 import asyncio
 import time
 from typing import Dict, Any, Optional
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from auth_service.core.auth_manager import AuthManager
@@ -58,7 +58,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.e2e
-class TestCacheResilienceValidation:
+class CacheResilienceValidationTests:
     """Test cache failure scenarios and recovery patterns."""
 
     @pytest.mark.asyncio

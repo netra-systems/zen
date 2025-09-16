@@ -40,7 +40,7 @@ from test_framework.fixtures.websocket_test_helpers import WebSocketTestClient, 
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketConnectionManagementAdvanced(BaseIntegrationTest):
+class WebSocketConnectionManagementAdvancedTests(BaseIntegrationTest):
     """
     Advanced tests for WebSocket connection management scenarios.
     

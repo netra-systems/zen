@@ -18,7 +18,7 @@ from shared.isolated_environment import IsolatedEnvironment, EnvironmentValidato
 from shared.configuration.central_config_validator import CentralConfigurationValidator
 
 
-class TestConfigurationValidationCascadePrevention(BaseTestCase):
+class ConfigurationValidationCascadePreventionTests(BaseTestCase):
     """Test configuration validation that prevents cascade failures."""
     
     def setup_method(self):

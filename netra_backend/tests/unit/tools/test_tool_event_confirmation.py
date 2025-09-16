@@ -18,7 +18,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
-class TestToolEventConfirmationMissing:
+class ToolEventConfirmationMissingTests:
     """Test suite demonstrating missing event confirmation in tool execution.
     
     These tests are designed to FAIL, proving that the current implementation

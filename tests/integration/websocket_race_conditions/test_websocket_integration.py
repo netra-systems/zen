@@ -26,7 +26,7 @@ import redis.asyncio as redis
 import websockets
 import httpx
 from fastapi.testclient import TestClient
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 from netra_backend.app.websocket_core.handlers import MessageRouter
 from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready
@@ -41,7 +41,7 @@ from netra_backend.app.websocket_core.types import MessageType
 
 @requires_docker
 @pytest.mark.integration
-class TestWebSocketRedisAuthRaceConditions:
+class WebSocketRedisAuthRaceConditionsTests:
     """
     CRITICAL TEST: WebSocket + Redis + Auth service race conditions under timing stress.
     
@@ -156,7 +156,7 @@ class TestWebSocketRedisAuthRaceConditions:
 
 @requires_docker
 @pytest.mark.integration
-class TestMultiUserWebSocketIsolation:
+class MultiUserWebSocketIsolationTests:
     """
     CRITICAL TEST: 10+ simultaneous user WebSocket connections with proper isolation.
     
@@ -252,7 +252,7 @@ class TestMultiUserWebSocketIsolation:
 
 @requires_docker
 @pytest.mark.integration
-class TestAgentEventDeliveryLifecycle:
+class AgentEventDeliveryLifecycleTests:
     """
     CRITICAL TEST: All 5 required agent events delivered through complete WebSocket lifecycle.
     

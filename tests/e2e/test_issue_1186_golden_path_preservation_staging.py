@@ -55,7 +55,7 @@ class GoldenPathMetrics:
 
 
 @pytest.mark.e2e
-class TestIssue1186GoldenPathPreservationStaging:
+class Issue1186GoldenPathPreservationStagingTests:
     """E2E staging tests for Issue #1186 UserExecutionEngine SSOT consolidation Golden Path protection."""
     
     def setup_method(self):
@@ -538,7 +538,7 @@ class TestIssue1186GoldenPathPreservationStaging:
 # Additional helper tests for SSOT consolidation validation
 
 @pytest.mark.e2e
-class TestIssue1186SSotConsolidationValidation:
+class Issue1186SSotConsolidationValidationTests:
     """Additional validation tests for UserExecutionEngine SSOT consolidation."""
     
     def setup_method(self):

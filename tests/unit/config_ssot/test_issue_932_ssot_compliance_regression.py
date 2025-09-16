@@ -42,7 +42,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestIssue932SSOTComplianceRegression(SSotBaseTestCase, unittest.TestCase):
+class Issue932SSOTComplianceRegressionTests(SSotBaseTestCase, unittest.TestCase):
     """Unit tests to prevent SSOT configuration compliance regression for Issue #932."""
     
     def setUp(self):

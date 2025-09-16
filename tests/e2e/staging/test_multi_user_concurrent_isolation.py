@@ -75,7 +75,7 @@ class UserTestSession:
         if self.isolated_data is None:
             self.isolated_data = set()
 
-class TestMultiUserConcurrentIsolation:
+class MultiUserConcurrentIsolationTests:
     """
     Complete E2E multi-user concurrent isolation tests for staging environment.
     

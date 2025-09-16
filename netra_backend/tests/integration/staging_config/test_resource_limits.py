@@ -22,7 +22,7 @@ import psutil
 
 from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
-class TestResourceLimits(StagingConfigTestBase):
+class ResourceLimitsTests(StagingConfigTestBase):
     """Test resource limits in staging."""
 
     @pytest.mark.asyncio

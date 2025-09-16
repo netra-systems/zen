@@ -2,7 +2,7 @@
 Issue #999 Reproduction Test: Pytest Collection Warnings for Test Classes with __init__
 
 This test reproduces the specific pytest collection warning:
-"cannot collect test class 'TestWebSocketConnection' because it has a __init__ constructor"
+"cannot collect test class 'WebSocketConnectionTests' because it has a __init__ constructor"
 
 Created: 2025-09-14
 Purpose: Validate pytest collection warnings and establish baseline for remediation
@@ -15,12 +15,12 @@ from unittest.mock import Mock, patch
 
 
 @pytest.mark.unit
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """
     INTENTIONAL ISSUE: This class has __init__ constructor which causes pytest collection warning.
 
     This reproduces the exact warning pattern found in the codebase:
-    "cannot collect test class 'TestWebSocketConnection' because it has a __init__ constructor"
+    "cannot collect test class 'WebSocketConnectionTests' because it has a __init__ constructor"
     """
 
     def __init__(self, websocket_url="ws://test"):
@@ -47,7 +47,7 @@ class TestWebSocketConnection:
 
 
 @pytest.mark.unit
-class TestDatabaseConnection:
+class DatabaseConnectionTests:
     """
     INTENTIONAL ISSUE: Another test class with __init__ constructor.
 
@@ -74,7 +74,7 @@ class TestDatabaseConnection:
 
 
 @pytest.mark.unit
-class TestProperTestClass:
+class ProperTestClassTests:
     """
     CORRECT PATTERN: Test class without __init__ constructor.
 
@@ -98,7 +98,7 @@ class TestProperTestClass:
 
 
 @pytest.mark.unit
-class TestUnittestStyleClass(unittest.TestCase):
+class UnittestStyleClassTests(unittest.TestCase):
     """
     UNITTEST STYLE: Using unittest.TestCase base class.
 
@@ -194,8 +194,8 @@ if __name__ == "__main__":
         print("✅ SUCCESS: Pytest collection warnings successfully reproduced")
         print("\nThis confirms Issue #999 is present in this test file.")
         print("Expected warnings should include:")
-        print("- cannot collect test class 'TestWebSocketConnection' because it has a __init__ constructor")
-        print("- cannot collect test class 'TestDatabaseConnection' because it has a __init__ constructor")
+        print("- cannot collect test class 'WebSocketConnectionTests' because it has a __init__ constructor")
+        print("- cannot collect test class 'DatabaseConnectionTests' because it has a __init__ constructor")
     else:
         print("❌ WARNING: Pytest collection warnings not detected")
         print("This may indicate the issue is not properly reproduced.")

@@ -56,8 +56,9 @@ try:
         CircuitBreaker, CircuitBreakerOpen, CircuitBreakerTimeout, CircuitBreakerHalfOpen
     )
     from shared.types.core_types import UserID, ThreadID, RunID
-    from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
-    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+    from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory, create_agent_instance_factory
+    from shared.id_generation import UnifiedIdGenerator
+    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
     from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
     REAL_ERROR_RECOVERY_COMPONENTS_AVAILABLE = True
 except ImportError as e:
@@ -69,7 +70,7 @@ except ImportError as e:
     CircuitBreakerOpen = Exception
     CircuitBreakerTimeout = Exception
 
-class TestAgentMessageErrorRecovery(SSotAsyncTestCase):
+class AgentMessageErrorRecoveryTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Agent Message Error Recovery.
 
@@ -188,8 +189,15 @@ class TestAgentMessageErrorRecovery(SSotAsyncTestCase):
             # Create real WebSocket bridge for error handling
             self.websocket_bridge = create_agent_websocket_bridge()
 
-            # Get real agent instance factory
-            self.agent_factory = get_agent_instance_factory()
+            # Create user execution context for SSOT factory pattern
+            user_context = UserExecutionContext(
+                user_id=f"error_recovery_test_user_{UnifiedIdGenerator.generate_base_id('user')}",
+                thread_id=f"error_recovery_test_thread_{UnifiedIdGenerator.generate_base_id('thread')}",
+                run_id=UnifiedIdGenerator.generate_base_id('run')
+            )
+
+            # Create agent instance factory using SSOT pattern for error recovery testing
+            self.agent_factory = create_agent_instance_factory(user_context)
 
             # Initialize error injection controllers
             self.error_injectors = {}

@@ -35,7 +35,7 @@ from test_framework.test_context import TestContext
 
 
 @pytest.mark.unit
-class TestConfigurationGapDemonstration(unittest.TestCase):
+class ConfigurationGapDemonstrationTests(unittest.TestCase):
     """Test complete configuration gap demonstration for Issue #847."""
 
     def setUp(self):

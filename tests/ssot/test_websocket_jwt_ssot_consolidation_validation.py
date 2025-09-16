@@ -21,7 +21,7 @@ from unittest.mock import Mock, patch, AsyncMock
 from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestWebSocketJWTSSOTCompliance(SSotBaseTestCase):
+class WebSocketJWTSSOTComplianceTests(SSotBaseTestCase):
     """
     Tests that validate SSOT compliance for WebSocket JWT validation.
     These tests are designed to FAIL initially to prove violations exist.

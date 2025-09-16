@@ -82,7 +82,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 
-class TestWorkflowOrchestratorComprehensiveGoldenPath(SSotAsyncTestCase):
+class WorkflowOrchestratorComprehensiveGoldenPathTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for WorkflowOrchestrator SSOT class.
     

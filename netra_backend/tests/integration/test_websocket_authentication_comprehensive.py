@@ -194,7 +194,7 @@ def extract_websocket_user_context(*args, **kwargs):
     return MagicMock()
 
 
-class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
+class WebSocketAuthenticationComprehensiveTests(BaseIntegrationTest):
     """
     Comprehensive WebSocket authentication integration tests.
     

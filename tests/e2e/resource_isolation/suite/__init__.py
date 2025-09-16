@@ -11,7 +11,7 @@ from tests.e2e.resource_isolation.suite.fixtures import (
 )
 from tests.e2e.resource_isolation.suite.test_suite_core import (
     TEST_CONFIG,
-    TestResourceIsolationSuite,
+    ResourceIsolationSuiteTests as TestResourceIsolationSuite,
 )
 from tests.e2e.resource_isolation.suite.workload_generator import WorkloadGenerator
 

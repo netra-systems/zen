@@ -16,7 +16,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
-class TestStagingJWTConfigurationEnvironment(SSotAsyncTestCase):
+class StagingJWTConfigurationEnvironmentTests(SSotAsyncTestCase):
     """Staging environment tests for JWT configuration validation."""
 
     @pytest.fixture(autouse=True)
@@ -163,7 +163,7 @@ class TestStagingJWTConfigurationEnvironment(SSotAsyncTestCase):
             pytest.fail(f'JWT secret validation failed for staging environment. Context: {context}. This confirms Issue #681.')
         logger.info('SUCCESS: Comprehensive JWT configuration validation passed in staging')
 
-class TestStagingWebSocketJWTIntegration(SSotAsyncTestCase):
+class StagingWebSocketJWTIntegrationTests(SSotAsyncTestCase):
     """Test WebSocket JWT integration in staging environment."""
 
     @pytest.fixture(autouse=True)
@@ -182,7 +182,7 @@ class TestStagingWebSocketJWTIntegration(SSotAsyncTestCase):
         after Issue #681 is resolved.
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager = WebSocketManager()
             logger.info('WebSocket manager created successfully in staging')
         except Exception as e:
@@ -207,7 +207,7 @@ class TestStagingWebSocketJWTIntegration(SSotAsyncTestCase):
             from netra_backend.app.websocket_core.auth import WebSocketAuth
             auth = WebSocketAuth()
             logger.info('Golden Path Step 2: WebSocket authentication components available')
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager = WebSocketManager()
             logger.info('Golden Path Step 3: WebSocket manager available for agent events')
             logger.info('SUCCESS: Golden Path JWT dependencies validated in staging')
@@ -218,7 +218,7 @@ class TestStagingWebSocketJWTIntegration(SSotAsyncTestCase):
             else:
                 pytest.fail(f'Unexpected Golden Path JWT validation error: {error_message}')
 
-class TestStagingJWTConfigurationBusinessImpact(SSotAsyncTestCase):
+class StagingJWTConfigurationBusinessImpactTests(SSotAsyncTestCase):
     """Test business impact validation in staging environment."""
 
     @pytest.fixture(autouse=True)
@@ -267,7 +267,7 @@ class TestStagingJWTConfigurationBusinessImpact(SSotAsyncTestCase):
             from netra_backend.app.core.configuration.unified_secrets import get_jwt_secret
             secret = get_jwt_secret()
             validation_steps.append('WebSocket authentication ready')
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager = WebSocketManager()
             validation_steps.append('Golden Path components available')
             logger.info(f'SUCCESS: Staging deployment validation complete: {validation_steps}')

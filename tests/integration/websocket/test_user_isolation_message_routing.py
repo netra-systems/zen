@@ -40,7 +40,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 
 # Core imports for user isolation testing
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.handlers import (
     MessageRouter,
     get_message_router,
@@ -60,7 +60,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestUserIsolationMessageRouting(SSotAsyncTestCase):
+class UserIsolationMessageRoutingTests(SSotAsyncTestCase):
     """Test suite for user isolation in message routing after SSOT consolidation.
 
     These tests ensure that SSOT Message Router consolidation maintains strict

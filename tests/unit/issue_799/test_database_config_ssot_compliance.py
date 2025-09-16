@@ -19,7 +19,7 @@ from pathlib import Path
 from netra_backend.app.schemas.config import AppConfig
 
 @pytest.mark.unit
-class TestDatabaseConfigSSotCompliance:
+class DatabaseConfigSSotComplianceTests:
     """Test complete SSOT compliance in database configuration."""
 
     def setup_method(self, method):

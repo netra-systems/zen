@@ -31,7 +31,7 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDisp
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
@@ -39,7 +39,7 @@ from shared.types.agent_types import AgentExecutionResult
 from shared.types.core_types import UserID, ThreadID, RunID
 
 @pytest.mark.integration
-class TestWebSocketFailureIntegrationNoDocker(SSotAsyncTestCase):
+class WebSocketFailureIntegrationNoDockerTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket failure cascades across components.
     NO DOCKER DEPENDENCIES - uses in-memory mocks and real object interactions.

@@ -23,7 +23,7 @@ from test_framework.ssot.websocket import WebSocketTestUtility
 from shared.isolated_environment import get_env
 
 
-class TestCompleteWebSocketAgentFlowE2E(SSotBaseTestCase):
+class CompleteWebSocketAgentFlowE2ETests(SSotBaseTestCase):
     """E2E tests for complete WebSocket agent workflows with authentication."""
     
     @pytest.fixture

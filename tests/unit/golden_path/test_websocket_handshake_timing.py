@@ -117,7 +117,7 @@ class WebSocketHandshakeTimingValidator:
         else:
             return min(2.0, previous_failures * 0.5)
 
-class TestWebSocketHandshakeTimingLogic(SSotAsyncTestCase):
+class WebSocketHandshakeTimingLogicTests(SSotAsyncTestCase):
     """Test WebSocket handshake timing and race condition prevention logic."""
 
     def setup_method(self, method=None):

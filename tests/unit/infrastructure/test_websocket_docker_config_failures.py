@@ -24,7 +24,7 @@ from test_framework.unified_docker_manager import UnifiedDockerManager, Environm
 
 
 @pytest.mark.unit
-class TestWebSocketDockerConfigurationFailures:
+class WebSocketDockerConfigurationFailuresTests:
     """Tests that FAIL to demonstrate Docker infrastructure configuration issues."""
 
     def test_real_websocket_test_config_missing_docker_startup_timeout_attribute(self):
@@ -265,7 +265,7 @@ class TestWebSocketDockerConfigurationFailures:
 
 
 @pytest.mark.unit
-class TestWebSocketInfrastructureBusinessImpact:
+class WebSocketInfrastructureBusinessImpactTests:
     """Tests documenting the business impact of WebSocket infrastructure failures."""
     
     def test_websocket_failure_impact_on_golden_path(self):

@@ -64,7 +64,7 @@ async def auth_helper():
     return E2EAuthHelper(environment=TEST_ENVIRONMENT)
 
 @pytest.mark.e2e
-class TestRealMultiUserWebSocketIsolation:
+class RealMultiUserWebSocketIsolationTests:
     """
     CRITICAL SECURITY TESTS: Multi-User WebSocket Isolation
     

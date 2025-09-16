@@ -113,7 +113,7 @@ class MockBusinessTool(BaseTool):
         return result
 
 
-class TestToolExecutionEngineBasicValidation(SSotBaseTestCase):
+class ToolExecutionEngineBasicValidationTests(SSotBaseTestCase):
     """Test basic tool execution engine validation and setup."""
     
     @pytest.mark.unit
@@ -183,7 +183,7 @@ class TestToolExecutionEngineBasicValidation(SSotBaseTestCase):
         assert "tool_completed" in event_types
 
 
-class TestToolExecutionEngineResultProcessing(SSotBaseTestCase):
+class ToolExecutionEngineResultProcessingTests(SSotBaseTestCase):
     """Test result processing and response formatting."""
     
     @pytest.mark.unit
@@ -297,7 +297,7 @@ class TestToolExecutionEngineResultProcessing(SSotBaseTestCase):
             assert response.error is not None
 
 
-class TestToolExecutionEngineTimeoutAndConcurrency(SSotBaseTestCase):
+class ToolExecutionEngineTimeoutAndConcurrencyTests(SSotBaseTestCase):
     """Test timeout handling and concurrent execution scenarios."""
     
     @pytest.mark.unit

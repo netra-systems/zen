@@ -15,12 +15,12 @@ Business Value Justification:
 - All factory patterns preserved for backward compatibility
 - Performance optimization inherited from SSOT implementation
 
-OLD IMPLEMENTATION REPLACED BY: UnifiedWebSocketEmitter + UnifiedWebSocketManager
+OLD IMPLEMENTATION REPLACED BY: UnifiedWebSocketEmitter + WebSocketManager
 """
 
 # SSOT REDIRECT: Import the unified implementation
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.monitoring.websocket_notification_monitor import get_websocket_notification_monitor
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool, ConnectionInfo
@@ -182,7 +182,7 @@ class WebSocketFactoryConfig:
 # SSOT CONSOLIDATION COMPLETE: All functionality provided by UnifiedWebSocketEmitter
 
 class WebSocketBridgeFactory:
-    """LEGACY COMPATIBILITY WRAPPER - Redirects to UnifiedWebSocketManager + UnifiedWebSocketEmitter
+    """LEGACY COMPATIBILITY WRAPPER - Redirects to WebSocketManager + UnifiedWebSocketEmitter
     
     This factory maintains backward compatibility while redirecting all functionality
     to the SSOT WebSocket implementations. All emitters created use UnifiedWebSocketEmitter.
@@ -197,13 +197,13 @@ class WebSocketBridgeFactory:
         """Initialize the WebSocket bridge factory (SSOT redirect)."""
         self.config = config or WebSocketFactoryConfig.from_env()
         
-        logger.info(" CYCLE:  WebSocketBridgeFactory  ->  SSOT (UnifiedWebSocketManager + UnifiedWebSocketEmitter)")
+        logger.info(" CYCLE:  WebSocketBridgeFactory  ->  SSOT (WebSocketManager + UnifiedWebSocketEmitter)")
         
         # Initialize monitoring
         self.notification_monitor = get_websocket_notification_monitor()
         
         # Infrastructure components (will redirect to SSOT)
-        self._unified_manager: Optional[UnifiedWebSocketManager] = None
+        self._unified_manager: Optional[WebSocketManager] = None
         self._connection_pool: Optional[WebSocketConnectionPool] = None
         self._agent_registry: Optional['AgentRegistry'] = None
         self._health_monitor: Optional[Any] = None
@@ -268,7 +268,7 @@ class WebSocketBridgeFactory:
             # ISSUE #824 FIX: Use canonical SSOT get_websocket_manager instead of deprecated factory
             try:
                 # ISSUE #824 FIX: Use canonical SSOT import path
-                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 
                 # Try different registry import paths - SSOT first
@@ -513,5 +513,5 @@ __all__ = [
     'ConnectionNotFound',            # Exception class
     'ConnectionClosed',             # Exception class
     'UnifiedWebSocketEmitter',       # Direct SSOT access
-    'UnifiedWebSocketManager',       # Direct SSOT access
+    'WebSocketManager',       # Direct SSOT access
 ]

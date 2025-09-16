@@ -1,0 +1,5 @@
+GitHub Issue #1115 Update Command:
+
+gh issue comment 1115 --body-file "C:\netra-apex\github_issue_1115_comprehensive_status_update.md"
+
+Or copy the content from the file and paste directly into GitHub issue #1115 comment section.

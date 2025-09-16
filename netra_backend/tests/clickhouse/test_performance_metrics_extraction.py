@@ -20,7 +20,7 @@ from netra_backend.app.db.clickhouse_query_fixer import (
 )
 from netra_backend.tests.fixtures.realistic_test_fixtures import validate_array_query_syntax
 
-class TestPerformanceMetricsWithClickHouse:
+class PerformanceMetricsWithClickHouseTests:
 
     """Test performance metrics extraction from ClickHouse"""
     

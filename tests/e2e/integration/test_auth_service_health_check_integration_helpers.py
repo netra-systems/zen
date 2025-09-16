@@ -8,7 +8,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 @pytest.mark.e2e
-class TestAuthServiceHealthCheckIntegrationHelpers:
+class AuthServiceHealthCheckIntegrationHelpersTests:
     """Test class for auth_service_health_check_integration_helpers"""
 
     def setup_method(self):

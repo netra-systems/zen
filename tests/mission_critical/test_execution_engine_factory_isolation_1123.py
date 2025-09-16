@@ -39,7 +39,7 @@ from netra_backend.app.services.user_execution_context import (
 logger = central_logger.get_logger(__name__)
 
 
-class TestExecutionEngineFactoryIsolation1123(SSotAsyncTestCase):
+class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
     """Test for ExecutionEngine Factory instance isolation violations (Issue #1123)."""
     
     async def asyncSetUp(self):

@@ -36,7 +36,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.e2e
-class TestGoldenPathEndToEndStagingValidation(SSotAsyncTestCase):
+class GoldenPathEndToEndStagingValidationTests(SSotAsyncTestCase):
     """
     Comprehensive Golden Path validation tests for staging environment.
     

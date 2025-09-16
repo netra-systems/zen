@@ -58,7 +58,7 @@ from netra_backend.app.routes.websocket import websocket_endpoint
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketConnectionRaceConditions(BaseIntegrationTest):
+class WebSocketConnectionRaceConditionsTests(BaseIntegrationTest):
     """
     Test WebSocket connection state race conditions that cause "accept first" errors.
     

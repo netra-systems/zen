@@ -45,9 +45,9 @@ from netra_backend.app.services.state_persistence_optimized import OptimizedStat
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.db.clickhouse_client import ClickHouseClient
 from netra_backend.app.core.configuration.database import DatabaseConfig
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
-class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
+class DatabasePersistenceAgentStateTests(SSotAsyncTestCase):
     """
     Comprehensive tests for database persistence of agent state.
 

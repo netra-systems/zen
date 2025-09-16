@@ -24,7 +24,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-class TestComprehensiveDatabaseOperations:
+class ComprehensiveDatabaseOperationsTests:
     """Comprehensive database tests covering all 12 requirements."""
     
     @pytest.fixture

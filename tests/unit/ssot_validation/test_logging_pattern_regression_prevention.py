@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestLoggingPatternRegressionPrevention(SSotBaseTestCase):
+class LoggingPatternRegressionPreventionTests(SSotBaseTestCase):
     """
     Prevent future mixing of logging patterns in Golden Path.
     
@@ -326,7 +326,7 @@ class TestLoggingPatternRegressionPrevention(SSotBaseTestCase):
 if __name__ == '__main__':
     import unittest
     
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestLoggingPatternRegressionPrevention)
+    suite = unittest.TestLoader().loadTestsFromTestCase(LoggingPatternRegressionPreventionTests)
     runner = unittest.TextTestRunner(verbosity=2)
     
     result = runner.run(suite)

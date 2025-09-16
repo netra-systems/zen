@@ -261,7 +261,7 @@ class ThreadEventWebSocketClient:
         logger.warning(f" SEARCH:  Missing events: {validation.get('missing_events', [])}")
         return validation
 
-class TestAgentWebSocketThreadEventsE2E:
+class AgentWebSocketThreadEventsE2ETests:
     """
     CRITICAL E2E test suite for agent WebSocket thread event routing.
     

@@ -21,7 +21,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.configuration.base import get_unified_config
 
 
-class TestIssue465WebSocketAPIConcurrentReal(SSotAsyncTestCase):
+class Issue465WebSocketAPIConcurrentRealTests(SSotAsyncTestCase):
     """
     E2E tests for WebSocket + API concurrent access with real services
     

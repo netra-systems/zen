@@ -9,14 +9,14 @@ import asyncio
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any
 from contextlib import asynccontextmanager
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.services.user_execution_context import UserExecutionContext, InvalidContextError, ContextIsolationError, validate_user_context, managed_user_context, register_shared_object, clear_shared_object_registry
 
-class TestUserExecutionContextValidation:
+class UserExecutionContextValidationTests:
     """Test validation logic for UserExecutionContext."""
 
     def test_valid_context_creation(self):
@@ -83,7 +83,7 @@ class TestUserExecutionContextValidation:
         with pytest.raises(InvalidContextError, match='reserved keys'):
             UserExecutionContext(user_id='user_12345', thread_id='thread_67890', run_id='run_abcdef123456', audit_metadata={'db_session': 'conflicting_value'})
 
-class TestUserExecutionContextFactoryMethods:
+class UserExecutionContextFactoryMethodsTests:
     """Test factory methods for creating UserExecutionContext."""
 
     def test_from_request_factory(self):
@@ -130,7 +130,7 @@ class TestUserExecutionContextFactoryMethods:
         assert context.audit_metadata['user_agent'] == 'unknown'
         assert context.audit_metadata['content_type'] == 'unknown'
 
-class TestUserExecutionContextChildContexts:
+class UserExecutionContextChildContextsTests:
     """Test child context creation and hierarchy tracking."""
 
     def test_create_child_context(self):
@@ -178,7 +178,7 @@ class TestUserExecutionContextChildContexts:
         assert level2_context.parent_request_id == level1_context.request_id
         assert level1_context.parent_request_id == root_context.request_id
 
-class TestUserExecutionContextImmutability:
+class UserExecutionContextImmutabilityTests:
     """Test immutability and isolation features."""
 
     def test_context_immutability(self):
@@ -221,7 +221,7 @@ class TestUserExecutionContextImmutability:
         with pytest.raises(InvalidContextError, match='connection_id must be a non-empty string'):
             context.with_websocket_connection(None)
 
-class TestUserExecutionContextIsolation:
+class UserExecutionContextIsolationTests:
     """Test isolation verification and shared object detection."""
 
     def setup_method(self):
@@ -255,7 +255,7 @@ class TestUserExecutionContextIsolation:
         context.verify_isolation()
         assert 'duplicate ID values' in caplog.text
 
-class TestUserExecutionContextUtilityMethods:
+class UserExecutionContextUtilityMethodsTests:
     """Test utility methods and serialization."""
 
     def test_to_dict(self):
@@ -313,7 +313,7 @@ class TestUserExecutionContextUtilityMethods:
         assert execution_context.metadata['operation_depth'] == 1
         assert execution_context.metadata['websocket_client_id'] == 'ws_connection_123'
 
-class TestUserExecutionContextValidation:
+class UserExecutionContextValidationTests:
     """Test the validate_user_context function."""
 
     def test_valid_context_validation(self):
@@ -329,7 +329,7 @@ class TestUserExecutionContextValidation:
         with pytest.raises(TypeError, match='Expected UserExecutionContext'):
             validate_user_context({'user_id': 'user_123'})
 
-class TestManagedUserContext:
+class ManagedUserContextTests:
     """Test the managed_user_context async context manager."""
 
     @pytest.mark.asyncio
@@ -379,7 +379,7 @@ class TestManagedUserContext:
             pass
         assert 'Error closing database session' in caplog.text
 
-class TestUserExecutionContextEdgeCases:
+class UserExecutionContextEdgeCasesTests:
     """Test edge cases and error conditions."""
 
     def test_very_long_ids(self):
@@ -413,7 +413,7 @@ class TestUserExecutionContextEdgeCases:
         child.agent_context['level1']['level2']['value'] = 'child_modified'
         assert context.agent_context['level1']['level2']['value'] == 'modified'
 
-class TestUserExecutionContextIntegration:
+class UserExecutionContextIntegrationTests:
     """Test integration scenarios and compatibility."""
 
     def test_multiple_contexts_isolation(self):

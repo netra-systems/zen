@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.integration
-class TestCrossServiceAuthCascadeFailures(SSotAsyncTestCase):
+class CrossServiceAuthCascadeFailuresTests(SSotAsyncTestCase):
     """Test cross-service authentication cascade failures in integration scenarios."""
     
     def setup_method(self, method):
@@ -390,7 +390,7 @@ class TestCrossServiceAuthCascadeFailures(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestAuthenticationMiddlewareConflicts(SSotAsyncTestCase):
+class AuthenticationMiddlewareConflictsTests(SSotAsyncTestCase):
     """Test authentication middleware conflicts causing cascade failures."""
     
     def setup_method(self, method):

@@ -26,7 +26,7 @@ from netra_backend.app.websocket_core.types import (
 
 
 @pytest.mark.unit
-class TestLegacyMessageTypeNormalization913(unittest.TestCase):
+class LegacyMessageTypeNormalization913Tests(unittest.TestCase):
     """Test normalize_message_type() function with legacy message types for Issue #913."""
 
     def test_legacy_response_message_type_fails_before_fix(self):
@@ -173,7 +173,7 @@ class TestLegacyMessageTypeNormalization913(unittest.TestCase):
 
 
 @pytest.mark.unit
-class TestLegacyMessageTypeFix913(unittest.TestCase):
+class LegacyMessageTypeFix913Tests(unittest.TestCase):
     """
     Tests that will PASS after Issue #913 fix is implemented.
 

@@ -42,7 +42,7 @@ logger = get_logger(__name__)
 
 
 @dataclass
-class TestSuiteResult:
+class SuiteResultTests:
     """Result of running a test suite."""
     test_file: str
     test_name: str
@@ -64,7 +64,7 @@ class SSOTValidationProgress:
     validation_complete: bool = False
 
 
-class TestWebSocketManagerSSOTValidationSuite(SSotBaseTestCase):
+class WebSocketManagerSSOTValidationSuiteTests(SSotBaseTestCase):
     """
     Test suite orchestrator for WebSocket Manager SSOT validation (Issue #996).
 
@@ -75,7 +75,7 @@ class TestWebSocketManagerSSOTValidationSuite(SSotBaseTestCase):
     def setup_method(self, method):
         """Set up validation suite with SSOT compliance."""
         super().setup_method(method)
-        self.test_results: List[TestSuiteResult] = []
+        self.test_results: List[SuiteResultTests] = []
         self.validation_progress = SSOTValidationProgress(
             total_tests=0,
             passed_tests=0,
@@ -269,7 +269,7 @@ class TestWebSocketManagerSSOTValidationSuite(SSotBaseTestCase):
         test_class: str,
         test_method: str,
         expected_to_fail: bool
-    ) -> TestSuiteResult:
+    ) -> SuiteResultTests:
         """
         Run an individual SSOT validation test.
 
@@ -280,14 +280,14 @@ class TestWebSocketManagerSSOTValidationSuite(SSotBaseTestCase):
             expected_to_fail: Whether this test is expected to fail before SSOT fix
 
         Returns:
-            TestSuiteResult with execution details
+            SuiteResultTests with execution details
         """
         print(f"\n🧪 RUNNING SSOT TEST: {test_method}")
         print(f"   File: {Path(test_file).name}")
         print(f"   Expected to fail: {expected_to_fail}")
 
         start_time = time.time()
-        result = TestSuiteResult(
+        result = SuiteResultTests(
             test_file=test_file,
             test_name=f"{test_class}::{test_method}",
             success=False,

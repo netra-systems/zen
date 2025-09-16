@@ -12,7 +12,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.websocket_core import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 try:
@@ -92,7 +92,7 @@ def mock_websocket_manager():
         mock.return_value = manager
         yield manager
 
-class TestOAuthCompleteFlow:
+class OAuthCompleteFlowTests:
     """Test complete OAuth login sequence"""
 
     @pytest.mark.asyncio
@@ -116,7 +116,7 @@ class TestOAuthCompleteFlow:
         assert 'state=test_state' in callback_redirect_url
         print('OAuth redirect flow working correctly')
 
-class TestTokenGenerationAndValidation:
+class TokenGenerationAndValidationTests:
     """Test JWT token lifecycle"""
 
     @pytest.mark.asyncio
@@ -145,7 +145,7 @@ class TestTokenGenerationAndValidation:
         assert validation_result['valid'] is False
         assert 'expired' in validation_result.get('error', '').lower()
 
-class TestWebSocketAuthentication:
+class WebSocketAuthenticationTests:
     """Test WebSocket auth with JWT"""
 
     @pytest.mark.asyncio
@@ -169,7 +169,7 @@ class TestWebSocketAuthentication:
         assert auth_result['authenticated'] is False
         assert 'invalid' in auth_result.get('error', '').lower()
 
-class TestTokenRefreshFlow:
+class TokenRefreshFlowTests:
     """Test token refresh across services"""
 
     @pytest.mark.asyncio
@@ -187,7 +187,7 @@ class TestTokenRefreshFlow:
             assert refresh_result['refresh_token'] == 'new_refresh_token'
             assert refresh_result['token_type'] == 'Bearer'
 
-class TestOAuthErrorScenarios:
+class OAuthErrorScenariosTests:
     """Test OAuth error handling scenarios"""
 
     @pytest.mark.asyncio
@@ -212,7 +212,7 @@ class TestOAuthErrorScenarios:
         response = test_client.get('/auth/callback?code=test_code')
         assert response.status_code in [400, 403]
 
-class TestCrossServiceTokenValidation:
+class CrossServiceTokenValidationTests:
     """Test token validation across different services"""
 
     @pytest.mark.asyncio
@@ -235,7 +235,7 @@ class TestCrossServiceTokenValidation:
             user_data = response.json()
             assert user_data['authenticated'] is True
 
-class TestDevLoginFlow:
+class DevLoginFlowTests:
     """Test development login functionality"""
 
     @pytest.mark.asyncio
@@ -252,7 +252,7 @@ class TestDevLoginFlow:
             assert data['user']['email'] == 'dev@example.com'
 
 @pytest.mark.integration
-class TestOAuthIntegrationFlow:
+class OAuthIntegrationFlowTests:
     """Integration tests for complete OAuth flow"""
 
     @pytest.mark.asyncio

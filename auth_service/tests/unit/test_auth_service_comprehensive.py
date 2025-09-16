@@ -15,7 +15,7 @@ from auth_service.auth_core.core.jwt_handler import JWTHandler
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAuthServiceBasics:
+class AuthServiceBasicsTests:
     """Test basic AuthService functionality"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -146,7 +146,7 @@ class TestAuthServiceBasics:
         assert user is None
 
 
-class TestAuthServiceSessions:
+class AuthServiceSessionsTests:
     """Test session management functionality"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -212,7 +212,7 @@ class TestAuthServiceSessions:
         assert True
 
 
-class TestAuthServicePasswordManagement:
+class AuthServicePasswordManagementTests:
     """Test password-related functionality"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -283,7 +283,7 @@ class TestAuthServicePasswordManagement:
             await self.service.register_user("nodigit@example.com", "NoDigitPassword!", "nodigituser")
 
 
-class TestAuthServiceUserManagement:
+class AuthServiceUserManagementTests:
     """Test user management functionality"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -371,7 +371,7 @@ class TestAuthServiceUserManagement:
         assert auth_token is None
 
 
-class TestAuthServicePermissions:
+class AuthServicePermissionsTests:
     """Test permission and role management"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -445,7 +445,7 @@ class TestAuthServicePermissions:
         assert set(payload["permissions"]) == {"read", "write"}
 
 
-class TestAuthServiceEmailVerification:
+class AuthServiceEmailVerificationTests:
     """Test email verification functionality"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -505,7 +505,7 @@ class TestAuthServiceEmailVerification:
         assert validated_user.email_verified is False
 
 
-class TestAuthServiceRateLimiting:
+class AuthServiceRateLimitingTests:
     """Test rate limiting functionality"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -567,7 +567,7 @@ class TestAuthServiceRateLimiting:
         assert auth_token is not None
 
 
-class TestAuthServiceAuditLogging:
+class AuthServiceAuditLoggingTests:
     """Test audit logging functionality"""
     
     @pytest_asyncio.fixture(autouse=True)

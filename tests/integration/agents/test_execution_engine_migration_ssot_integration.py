@@ -26,9 +26,9 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime, timezone
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
-class TestExecutionEngineMigrationSSotIntegration(SSotAsyncTestCase):
+class ExecutionEngineMigrationSSotIntegrationTests(SSotAsyncTestCase):
     """Test execution engine migration with real services integration."""
 
     def setup_method(self):
@@ -43,7 +43,7 @@ class TestExecutionEngineMigrationSSotIntegration(SSotAsyncTestCase):
         """
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         try:
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
         except ImportError:
             pytest.skip('WebSocket infrastructure not available for real service testing')
         user_context = UserExecutionContext(user_id='integration_test_user_ws', thread_id='integration_thread_ws_123', run_id='integration_run_ws_456', request_id='integration_req_ws_789')
@@ -234,7 +234,7 @@ class TestExecutionEngineMigrationSSotIntegration(SSotAsyncTestCase):
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.no_docker
-class TestExecutionEngineRealServiceValidation:
+class ExecutionEngineRealServiceValidationTests:
     """Test execution engine with real services (pytest-style)."""
 
     @pytest.mark.asyncio

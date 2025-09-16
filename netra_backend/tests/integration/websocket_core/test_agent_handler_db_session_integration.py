@@ -35,7 +35,7 @@ from netra_backend.app.dependencies import get_request_scoped_db_session
 from netra_backend.app.database.request_scoped_session_factory import get_session_factory
 from netra_backend.app.db.database_manager import DatabaseManager
 
-class TestAgentHandlerDbSessionIntegration(SSotAsyncTestCase):
+class AgentHandlerDbSessionIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for database session patterns in agent_handler.py
     

@@ -38,7 +38,7 @@ class AgentStateType(Enum):
     ERROR = "error"
 
 
-class TestDeepAgentStateTransitions(BaseIntegrationTest):
+class DeepAgentStateTransitionsTests(BaseIntegrationTest):
     """Integration tests for deep agent state transitions."""
 
     @pytest.mark.integration

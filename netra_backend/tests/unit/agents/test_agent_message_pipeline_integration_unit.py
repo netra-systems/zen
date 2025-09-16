@@ -50,7 +50,7 @@ from netra_backend.app.websocket_core.types import (
     normalize_message_type
 )
 from netra_backend.app.websocket_core.handlers import MessageHandler, ConnectionHandler
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
 
 # Import pipeline state and coordination components
@@ -70,7 +70,7 @@ class MockMessagePipelineData:
     context_data: Dict[str, Any]
 
 
-class TestAgentMessagePipelineIntegration(SSotAsyncTestCase):
+class AgentMessagePipelineIntegrationTests(SSotAsyncTestCase):
     """Unit tests for agent message pipeline integration patterns"""
 
     def setup_method(self, method):

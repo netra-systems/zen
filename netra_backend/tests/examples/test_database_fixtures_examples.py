@@ -9,7 +9,7 @@ Shows real-world usage patterns that can replace existing test code.
 
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -31,7 +31,7 @@ from netra_backend.tests.fixtures.database_test_fixtures import (
     transaction_session_mock,
 )
 
-class TestDatabaseFixtureExamples:
+class DatabaseFixtureExamplesTests:
     """Examples showing how to use the new database fixtures."""
     
     @pytest.mark.asyncio
@@ -162,7 +162,7 @@ class TestDatabaseFixtureExamples:
         expected_changes = [("users", "ADD_COLUMN"), ("threads", "ALTER_COLUMN")]
         assert migration_helper.verify_migration_state(expected_changes)
 
-class TestRealWorldReplacementExamples:
+class RealWorldReplacementExamplesTests:
     """Real examples showing how to replace existing test patterns."""
     
     @pytest.mark.asyncio

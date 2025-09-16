@@ -5,7 +5,7 @@ netra_backend.app.core.error_recovery_integration focusing on error handling cap
 """
 import asyncio
 from typing import Dict, Any
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -17,7 +17,7 @@ try:
 except ImportError:
     pytest.skip('Error recovery integration modules have missing dependencies', allow_module_level=True)
 
-class TestEnhancedErrorRecoverySystemErrorHandling:
+class EnhancedErrorRecoverySystemErrorHandlingTests:
     """Test error handling capabilities of EnhancedErrorRecoverySystem."""
 
     def setup_method(self):

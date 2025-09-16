@@ -194,7 +194,7 @@ class PerformanceTrackingAgent(BaseAgent):
         }
 
 
-class TestAgentPerformanceReliability(BaseAgentExecutionTest):
+class AgentPerformanceReliabilityTests(BaseAgentExecutionTest):
     """Test agent performance and reliability under various load conditions."""
 
     @pytest.mark.asyncio

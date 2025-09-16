@@ -36,7 +36,7 @@ from netra_backend.app.core.redis_connection_handler import RedisConnectionHandl
 @pytest.mark.integration
 @pytest.mark.websocket_auth
 @pytest.mark.timeout(30)
-class TestWebSocketToolPermissionAuthorization(BaseTestCase):
+class WebSocketToolPermissionAuthorizationTests(BaseTestCase):
     """Integration tests for tool permission authorization in WebSocket context"""
 
     @pytest.fixture(autouse=True)

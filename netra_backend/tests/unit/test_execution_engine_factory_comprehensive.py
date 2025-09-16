@@ -89,7 +89,7 @@ class MockUserExecutionEngine(Mock):
         """Get execution stats."""
         return {'total_executions': len(self.active_runs), 'success_rate': 1.0, 'average_execution_time': 100.0}
 
-class TestExecutionEngineFactoryCreation(SSotAsyncTestCase):
+class ExecutionEngineFactoryCreationTests(SSotAsyncTestCase):
     """Test suite for execution engine factory creation and configuration."""
 
     def setUp(self):
@@ -144,7 +144,7 @@ class TestExecutionEngineFactoryCreation(SSotAsyncTestCase):
         factory.set_tool_dispatcher_factory(mock_tool_factory)
         self.assertEqual(factory._tool_dispatcher_factory, mock_tool_factory)
 
-class TestExecutionEngineLifecycle(SSotAsyncTestCase):
+class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
     """Test suite for execution engine lifecycle management."""
 
     def setUp(self):
@@ -251,7 +251,7 @@ class TestExecutionEngineLifecycle(SSotAsyncTestCase):
                 remaining_engine = list(self.factory._active_engines.values())[0]
                 self.assertEqual(remaining_engine.get_user_context().user_id, 'other_user')
 
-class TestExecutionEngineContextManagers(SSotAsyncTestCase):
+class ExecutionEngineContextManagersTests(SSotAsyncTestCase):
     """Test suite for context managers and scope management."""
 
     def setUp(self):
@@ -316,7 +316,7 @@ class TestExecutionEngineContextManagers(SSotAsyncTestCase):
             self.assertEqual(engine, mock_engine)
         mock_get_factory.assert_called_once()
 
-class TestExecutionEngineFactoryMetrics(SSotAsyncTestCase):
+class ExecutionEngineFactoryMetricsTests(SSotAsyncTestCase):
     """Test suite for factory metrics and monitoring."""
 
     def setUp(self):
@@ -385,7 +385,7 @@ class TestExecutionEngineFactoryMetrics(SSotAsyncTestCase):
         """Create test user execution context."""
         return UserExecutionContext(user_id=UserID(user_id), thread_id=ThreadID(f'thread_{user_id}'), run_id=RunID(f'run_{user_id}_{int(time.time())}'), request_id=f'req_{user_id}_{int(time.time())}', operation_depth=1, agent_context={'user_request': f'Test request from {user_id}'}, metadata={})
 
-class TestExecutionEngineFactoryErrorHandling(SSotAsyncTestCase):
+class ExecutionEngineFactoryErrorHandlingTests(SSotAsyncTestCase):
     """Test suite for error handling and recovery patterns."""
 
     def setUp(self):
@@ -456,7 +456,7 @@ class TestExecutionEngineFactoryErrorHandling(SSotAsyncTestCase):
                 metrics = self.factory.get_factory_metrics()
                 self.assertEqual(metrics['active_engines_count'], 0)
 
-class TestExecutionEngineFactoryCompatibility(SSotAsyncTestCase):
+class ExecutionEngineFactoryCompatibilityTests(SSotAsyncTestCase):
     """Test suite for compatibility functions and aliases."""
 
     def setUp(self):

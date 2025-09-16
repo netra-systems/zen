@@ -34,7 +34,7 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestDeploymentPipelineIntegration(SSotBaseTestCase):
+class DeploymentPipelineIntegrationTests(SSotBaseTestCase):
     """Test suite for deployment pipeline integration validation."""
 
     @classmethod

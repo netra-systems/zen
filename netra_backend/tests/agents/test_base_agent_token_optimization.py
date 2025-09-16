@@ -103,7 +103,7 @@ class TokenOptimizationTestAgent(BaseAgent):
         return self.token_operations_log.copy()
 
 
-class TestBaseAgentTokenOptimization(SSotAsyncTestCase):
+class BaseAgentTokenOptimizationTests(SSotAsyncTestCase):
     """Test BaseAgent token optimization and cost management features."""
 
     def setup_method(self, method):

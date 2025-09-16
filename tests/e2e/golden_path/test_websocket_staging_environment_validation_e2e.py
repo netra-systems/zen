@@ -58,7 +58,7 @@ from shared.types.core_types import UserID, WebSocketID
 @pytest.mark.staging_environment
 @pytest.mark.asyncio
 @pytest.mark.websocket_staging
-class TestWebSocketStagingEnvironmentValidationE2E(SSotAsyncTestCase):
+class WebSocketStagingEnvironmentValidationE2ETests(SSotAsyncTestCase):
     """
     WebSocket Staging Environment Validation Tests.
     

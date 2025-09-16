@@ -40,7 +40,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.websocket
 @pytest.mark.auth
 @pytest.mark.performance
-class TestPerformanceOptimizationValidation(SSotBaseTestCase):
+class PerformanceOptimizationValidationTests(SSotBaseTestCase):
     """
     Performance Optimization Validation Tests.
     

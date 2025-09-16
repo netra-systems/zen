@@ -35,7 +35,7 @@ from netra_backend.app.core.exceptions.error_policy import ErrorPolicy, Environm
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestErrorPolicyIsolatedEnvironmentIntegration(SSotBaseTestCase):
+class ErrorPolicyIsolatedEnvironmentIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for ErrorPolicy and IsolatedEnvironment SSOT compliance.
 

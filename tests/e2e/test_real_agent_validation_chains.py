@@ -302,7 +302,7 @@ async def validation_chains_tester(request):
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestRealAgentValidationChains:
+class RealAgentValidationChainsTests:
     """Test suite for real agent validation chains execution."""
 
     async def test_data_quality_validation_chain(self, validation_chains_tester):

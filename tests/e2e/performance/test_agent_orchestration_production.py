@@ -138,7 +138,7 @@ class ProductionAgentOrchestrator:
 
 
 @pytest.mark.e2e
-class TestAgentOrchestrationProduction:
+class AgentOrchestrationProductionTests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -319,7 +319,7 @@ class TestAgentOrchestrationProduction:
 
 @pytest.mark.production
 @pytest.mark.e2e
-class TestEnterpriseAgentScenarios:
+class EnterpriseAgentScenariosTests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

@@ -9,7 +9,7 @@ from test_framework.performance_helpers import fast_test
 @pytest.mark.unit
 @pytest.mark.database
 @fast_test
-class TestClickHouseErrorHandling:
+class ClickHouseErrorHandlingTests:
     """Unit tests for error handling and recovery"""
 
     @pytest.mark.asyncio

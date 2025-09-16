@@ -18,7 +18,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.integration
-class TestGcpSecretInjectionIntegrationIssue683(SSotBaseTestCase):
+class GcpSecretInjectionIntegrationIssue683Tests(SSotBaseTestCase):
     """
     Integration tests to reproduce GCP secret injection pipeline failures in staging environment.
 

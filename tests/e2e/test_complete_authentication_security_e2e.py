@@ -25,7 +25,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
-class TestCompleteAuthenticationSecurityE2E(BaseIntegrationTest):
+class CompleteAuthenticationSecurityE2ETests(BaseIntegrationTest):
     """E2E test of complete authentication security across all components"""
 
     def setup_method(self):

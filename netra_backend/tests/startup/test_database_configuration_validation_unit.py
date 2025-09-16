@@ -34,7 +34,7 @@ from netra_backend.app.core.startup_validation import (
 )
 
 
-class TestDatabaseConfigurationValidationUnit(SSotAsyncTestCase):
+class DatabaseConfigurationValidationUnitTests(SSotAsyncTestCase):
     """Unit tests for database configuration validation during startup."""
 
     def setup_method(self, method):
@@ -327,7 +327,7 @@ class TestDatabaseConfigurationValidationUnit(SSotAsyncTestCase):
         assert config_validations[0].status == ComponentStatus.HEALTHY
 
 
-class TestDatabaseConfigurationIntegrationUnit(SSotAsyncTestCase):
+class DatabaseConfigurationIntegrationUnitTests(SSotAsyncTestCase):
     """Unit tests for database configuration integration with main validation flow."""
 
     def setup_method(self, method):

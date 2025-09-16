@@ -24,7 +24,7 @@ from shared.isolated_environment import get_env
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestSessionLifecycleIntegration(BaseIntegrationTest):
+class SessionLifecycleIntegrationTests(BaseIntegrationTest):
     """Integration tests for user session lifecycle management."""
     
     def setup_method(self):

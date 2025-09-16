@@ -22,7 +22,7 @@ from unittest.mock import Mock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestPhase1InterfaceDefinitions(SSotAsyncTestCase):
+class Phase1InterfaceDefinitionsTests(SSotAsyncTestCase):
     """Test that component interfaces are correctly defined."""
 
     def test_all_component_interfaces_defined(self):
@@ -108,7 +108,7 @@ class TestPhase1InterfaceDefinitions(SSotAsyncTestCase):
                          f"Critical method {method} should be covered by component interfaces")
 
 
-class TestPhase1DependencyContracts(SSotAsyncTestCase):
+class Phase1DependencyContractsTests(SSotAsyncTestCase):
     """Test that component dependency contracts are correctly defined."""
 
     def test_dependency_registry_initialization(self):
@@ -178,7 +178,7 @@ class TestPhase1DependencyContracts(SSotAsyncTestCase):
                              f"Validation should include {key} for component {component}")
 
 
-class TestPhase1CanonicalImportPatterns(SSotAsyncTestCase):
+class Phase1CanonicalImportPatternsTests(SSotAsyncTestCase):
     """Test that canonical import patterns are correctly implemented."""
 
     def test_canonical_pattern_1_factory_function(self):
@@ -298,7 +298,7 @@ class TestPhase1CanonicalImportPatterns(SSotAsyncTestCase):
                              f"Pattern {pattern_name} should include {field}")
 
 
-class TestPhase1ValidationFramework(SSotAsyncTestCase):
+class Phase1ValidationFrameworkTests(SSotAsyncTestCase):
     """Test that validation framework is properly established."""
 
     def test_component_validation_framework_initialization(self):
@@ -324,7 +324,7 @@ class TestPhase1ValidationFramework(SSotAsyncTestCase):
         from netra_backend.app.websocket_core.component_contracts import validate_phase1_foundation
 
         # Create a simple test class instead of modifying Mock
-        class TestManager:
+        class ManagerTests:
             """Simple test manager class."""
             def __init__(self):
                 pass
@@ -341,7 +341,7 @@ class TestPhase1ValidationFramework(SSotAsyncTestCase):
             def _validate_user_isolation(self):
                 pass
 
-        mock_manager = TestManager()
+        mock_manager = ManagerTests()
 
         # Run validation
         results = validate_phase1_foundation(mock_manager)
@@ -355,7 +355,7 @@ class TestPhase1ValidationFramework(SSotAsyncTestCase):
                        "Phase 1 should be marked as complete")
 
 
-class TestPhase1BackwardsCompatibility(SSotAsyncTestCase):
+class Phase1BackwardsCompatibilityTests(SSotAsyncTestCase):
     """Test that Phase 1 maintains backwards compatibility."""
 
     def test_existing_imports_still_work(self):
@@ -387,7 +387,7 @@ class TestPhase1BackwardsCompatibility(SSotAsyncTestCase):
             self.fail(f"Component contract imports should not fail: {e}")
 
 
-class TestPhase1SystemIntegrity(SSotAsyncTestCase):
+class Phase1SystemIntegrityTests(SSotAsyncTestCase):
     """Test that Phase 1 maintains system integrity."""
 
     def test_no_breaking_changes_to_existing_code(self):

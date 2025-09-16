@@ -25,7 +25,7 @@ from shared.isolated_environment import IsolatedEnvironment
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestServiceSecretAuthenticationRegression(SSotAsyncTestCase):
+class ServiceSecretAuthenticationRegressionTests(SSotAsyncTestCase):
     """
     Integration tests proving Issue #1037 causes real 403 failures.
     These tests will FAIL initially to demonstrate the regression.

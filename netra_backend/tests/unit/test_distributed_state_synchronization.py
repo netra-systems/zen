@@ -20,7 +20,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestDistributedStateConsistency:
+class DistributedStateConsistencyTests:
     """Test suite for distributed state consistency patterns."""
 
     @pytest.fixture
@@ -211,7 +211,7 @@ class TestDistributedStateConsistency:
 
 
 
-class TestAgentStateCoordination:
+class AgentStateCoordinationTests:
     """Test suite for agent state coordination patterns."""
 
     @pytest.fixture
@@ -313,7 +313,7 @@ class TestAgentStateCoordination:
 
 
 
-class TestEventualConsistencyPatterns:
+class EventualConsistencyPatternsTests:
     """Test suite for eventual consistency patterns and conflict resolution."""
 
     def test_crdt_like_state_merging(self):

@@ -31,7 +31,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.e2e
 @pytest.mark.asyncio
-class TestSimplifiedGoldenPathE2E(SSotAsyncTestCase):
+class SimplifiedGoldenPathE2ETests(SSotAsyncTestCase):
     """
     Simplified Golden Path E2E test for Issue #1197 validation.
     

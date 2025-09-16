@@ -23,7 +23,7 @@ from tests.e2e.staging_test_config import get_staging_config
 pytestmark = [pytest.mark.staging, pytest.mark.critical, pytest.mark.real]
 
 @pytest.mark.e2e
-class TestCriticalWebSocket:
+class CriticalWebSocketTests:
     """Tests 1-4: REAL WebSocket Core Functionality"""
     
     @pytest.mark.asyncio
@@ -528,7 +528,7 @@ class TestCriticalWebSocket:
         assert len(successful_results) == 5, "Should get results for all connections"
 
 @pytest.mark.e2e
-class TestCriticalAgent:
+class CriticalAgentTests:
     """Tests 5-11: REAL Agent Core Functionality"""
     
     @pytest.mark.asyncio
@@ -928,7 +928,7 @@ class TestCriticalAgent:
             assert max_response > min_response, "Response times should vary"
 
 @pytest.mark.e2e
-class TestCriticalMessaging:
+class CriticalMessagingTests:
     """Tests 12-16: REAL Message and Thread Management"""
     
     @pytest.mark.asyncio
@@ -1321,7 +1321,7 @@ class TestCriticalMessaging:
         assert len(isolation_results) > 1, "Should test user isolation endpoints"
 
 @pytest.mark.e2e
-class TestCriticalScalability:
+class CriticalScalabilityTests:
     """Tests 17-21: REAL Scalability and Reliability"""
     
     @pytest.mark.asyncio
@@ -1770,7 +1770,7 @@ class TestCriticalScalability:
         assert len(session_results["session_endpoints"]) > 0, "Should test session endpoints"
 
 @pytest.mark.e2e
-class TestCriticalUserExperience:
+class CriticalUserExperienceTests:
     """Tests 22-25: REAL User Experience Critical Features"""
     
     @pytest.mark.asyncio

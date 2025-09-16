@@ -20,7 +20,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType, 
 from shared.types.core_types import UserID, ThreadID, RunID, ExecutionID, ensure_user_id, ensure_thread_id
 from test_framework.fixtures.id_system.id_format_samples import get_uuid_samples, get_unified_samples, get_mixed_scenarios, generate_fresh_uuid_sample, generate_unified_sample
 
-class TestIDFormatCompatibility:
+class IDFormatCompatibilityTests:
     """
     Tests that validate critical ID format compatibility.
     
@@ -194,7 +194,7 @@ class TestIDFormatCompatibility:
         """Helper function that expects ThreadID type."""
         return f'Processing thread: {thread_id}'
 
-class TestLegacyUUIDCompatibilityRequirements:
+class LegacyUUIDCompatibilityRequirementsTests:
     """
     Tests that validate UUID compatibility meets business requirements.
     """
@@ -301,7 +301,7 @@ class TestLegacyUUIDCompatibilityRequirements:
 
 @pytest.mark.critical
 @pytest.mark.id_system
-class TestIDSystemBusinessValue:
+class IDSystemBusinessValueTests:
     """
     Tests that demonstrate the business value of the enhanced ID system.
     """

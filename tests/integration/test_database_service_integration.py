@@ -85,7 +85,7 @@ except ImportError as e:
     DatabaseURLBuilder = MagicMock
     AgentInstanceFactory = MagicMock
 
-class TestDatabaseServiceIntegration(SSotAsyncTestCase):
+class DatabaseServiceIntegrationTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Database Service Integration.
     

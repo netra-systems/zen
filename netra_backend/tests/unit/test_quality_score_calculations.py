@@ -18,7 +18,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.services.quality.quality_score_calculators import QualityScoreCalculators
 
 
-class TestQualityScoreCalculations(BaseTestCase):
+class QualityScoreCalculationsTests(BaseTestCase):
     """Test quality score calculations deliver accurate content assessment for business value."""
     
     def setup_method(self):

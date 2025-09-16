@@ -25,7 +25,7 @@ import psutil
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestContainerImportEnvironment(BaseIntegrationTest):
+class ContainerImportEnvironmentTests(BaseIntegrationTest):
     """Tests for ServiceError imports under various container conditions."""
     
     @classmethod

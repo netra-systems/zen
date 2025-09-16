@@ -43,7 +43,7 @@ from tests.mission_critical.websocket_real_test_base import (
     RealWebSocketTestBase,
 )
 
-class TestIssue544DockerDependencyDemonstration:
+class Issue544DockerDependencyDemonstrationTests:
     """Demonstrate how Docker dependency blocks mission critical tests."""
     
     def test_docker_availability_fast_check(self):
@@ -176,7 +176,7 @@ class TestIssue544DockerDependencyDemonstration:
         logger.info(f"ISSUE #544 IMPACT: {len(websocket_tests)} mission critical tests blocked when Docker unavailable")
 
 
-class TestIssue544EnvironmentAnalysis:
+class Issue544EnvironmentAnalysisTests:
     """Analyze current environment configuration for Issue #544."""
     
     def test_current_environment_configuration(self):

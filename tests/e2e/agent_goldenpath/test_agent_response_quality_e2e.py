@@ -45,7 +45,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestHelper
 @pytest.mark.gcp_staging
 @pytest.mark.agent_goldenpath
 @pytest.mark.mission_critical
-class TestAgentResponseQualityE2E(SSotAsyncTestCase):
+class AgentResponseQualityE2ETests(SSotAsyncTestCase):
     """
     E2E tests for validating agent response quality and business value delivery.
 

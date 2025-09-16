@@ -30,7 +30,7 @@ from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from test_framework.ssot.mocks import MockFactory
 
 
-class TestWebSocketNotifierBusiness:
+class WebSocketNotifierBusinessTests:
     """Unit tests for WebSocket Notifier business logic validation."""
     
     def setup_method(self):

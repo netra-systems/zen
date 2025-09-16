@@ -45,7 +45,7 @@ except ImportError:
         REDIS_AVAILABLE = False
 
 
-class TestStateSynchronizationAcrossServices(BaseIntegrationTest):
+class StateSynchronizationAcrossServicesTests(BaseIntegrationTest):
     """Integration tests for state synchronization across services."""
 
     @pytest.fixture(autouse=True)

@@ -74,7 +74,7 @@ class MetadataComplianceReport:
     scan_timestamp: str
 
 
-class TestSSotMetadataComplianceIssue700(SSotAsyncTestCase):
+class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
     """Mission Critical Test Suite: SSOT Metadata Compliance Issue #700
 
     Tests that validate agents use proper SSOT store_metadata_result() method
@@ -225,7 +225,7 @@ class TestSSotMetadataComplianceIssue700(SSotAsyncTestCase):
         )
 
         # Create minimal agent instance
-        class TestAgent(BaseAgent):
+        class AgentTests(BaseAgent):
             def __init__(self):
                 self.config = Mock()
                 self.timing_collector = Mock()
@@ -233,7 +233,7 @@ class TestSSotMetadataComplianceIssue700(SSotAsyncTestCase):
             async def _execute_implementation(self, context, **kwargs):
                 pass
 
-        agent = TestAgent()
+        agent = AgentTests()
 
         # Test storing metadata via SSOT method
         test_key = "test_result"
@@ -259,7 +259,7 @@ class TestSSotMetadataComplianceIssue700(SSotAsyncTestCase):
         )
 
         # Create minimal agent instance
-        class TestAgent(BaseAgent):
+        class AgentTests(BaseAgent):
             def __init__(self):
                 self.config = Mock()
                 self.timing_collector = Mock()
@@ -267,7 +267,7 @@ class TestSSotMetadataComplianceIssue700(SSotAsyncTestCase):
             async def _execute_implementation(self, context, **kwargs):
                 pass
 
-        agent = TestAgent()
+        agent = AgentTests()
 
         # Test with complex data that needs serialization
         test_data = {

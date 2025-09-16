@@ -27,7 +27,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.supervisor.execution_context import PipelineStep
 
 
-class TestDistributedAgentFailureCoordination(BaseIntegrationTest):
+class DistributedAgentFailureCoordinationTests(BaseIntegrationTest):
     """Integration tests for distributed agent failure coordination."""
 
     @pytest.mark.integration

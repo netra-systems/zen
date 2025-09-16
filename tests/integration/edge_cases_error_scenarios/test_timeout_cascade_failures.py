@@ -25,7 +25,7 @@ from test_framework.real_services import get_real_services
 logger = logging.getLogger(__name__)
 
 
-class TestTimeoutCascadeFailures(BaseIntegrationTest):
+class TimeoutCascadeFailuresTests(BaseIntegrationTest):
     """Test system behavior under timeout cascade failure conditions."""
     
     @pytest.mark.integration

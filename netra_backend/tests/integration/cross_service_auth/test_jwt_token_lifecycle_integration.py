@@ -40,7 +40,7 @@ from test_framework.fixtures.real_services import real_services_fixture
 from shared.isolated_environment import get_env
 
 
-class TestJWTTokenLifecycleIntegration:
+class JWTTokenLifecycleIntegrationTests:
     """Test JWT token lifecycle with real authentication components."""
 
     @pytest.mark.integration

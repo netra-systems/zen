@@ -21,7 +21,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ConnectionID, WebSocketID
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
@@ -33,7 +33,7 @@ class HealthStatus:
     DISCONNECTED = "disconnected"
 
 
-class TestWebSocketConnectionHealthMonitoringHeartbeatIntegration(BaseIntegrationTest):
+class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrationTest):
     """Test WebSocket connection health monitoring and heartbeat with comprehensive application state validation."""
     
     def _create_health_monitoring_websocket(self, connection_id: str, user_id: str, simulate_issues: bool = False):

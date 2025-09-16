@@ -26,7 +26,7 @@ AgentValidationError as ValidationError,
 NetworkError,
 )
 
-class TestGlobalErrorHandler:
+class GlobalErrorHandlerTests:
     """Test global error handler functionality."""
 
     def test_global_error_handler_exists(self):
@@ -84,7 +84,7 @@ class TestGlobalErrorHandler:
 
                     assert global_error_handler._error_metrics['total_errors'] >= initial_count + 2
 
-                    class TestErrorHandlerDecorator:
+                    class ErrorHandlerDecoratorTests:
                         """Test handle_agent_error decorator functionality."""
 
                         async def _create_successful_function(self):

@@ -21,7 +21,7 @@ from netra_backend.app.core.timeout_configuration import get_websocket_recv_time
 
 
 @pytest.mark.e2e
-class TestAgentPipelineStaging(StagingTestBase):
+class AgentPipelineStagingTests(StagingTestBase):
     """Test agent pipeline in staging environment"""
     
     def setup_method(self):
@@ -684,7 +684,7 @@ class TestAgentPipelineStaging(StagingTestBase):
 
 if __name__ == "__main__":
     async def run_tests():
-        test_class = TestAgentPipelineStaging()
+        test_class = AgentPipelineStagingTests()
         test_class.setup_class()
         
         # Ensure authentication setup for direct execution (not managed by pytest)

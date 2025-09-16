@@ -167,7 +167,7 @@ class DockerRedisTestManager:
             return "Could not retrieve Redis logs"
 
 
-class TestDockerRedisConnectivity:
+class DockerRedisConnectivityTests:
     """Test Redis connectivity in Docker environment."""
     
     @pytest.fixture(autouse=True)
@@ -463,7 +463,7 @@ class TestDockerRedisConnectivity:
             pytest.fail(f"Redis database selection test failed: {e}")
 
 
-class TestRedisDockerHealthChecks:
+class RedisDockerHealthChecksTests:
     """Test Redis health checks in Docker environment."""
     
     @pytest.fixture(autouse=True)
@@ -590,7 +590,7 @@ class TestRedisDockerHealthChecks:
             self.docker_manager.stop_test_redis()
 
 
-class TestRedisConfigurationEnvironmentIntegration:
+class RedisConfigurationEnvironmentIntegrationTests:
     """Test Redis configuration integration across different environments."""
     
     @pytest.fixture(autouse=True) 
@@ -714,7 +714,7 @@ class TestRedisConfigurationEnvironmentIntegration:
 
 @pytest.mark.integration
 @pytest.mark.docker  
-class TestRedisDockerIntegrationEnd2End:
+class RedisDockerIntegrationEnd2EndTests:
     """End-to-end Redis Docker integration tests."""
     
     @pytest.fixture(scope="class")

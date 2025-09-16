@@ -22,7 +22,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.e2e
-class TestSupervisorGoldenPathReliability(SSotAsyncTestCase):
+class SupervisorGoldenPathReliabilityTests(SSotAsyncTestCase):
     """E2E tests exposing supervisor reliability issues in Golden Path."""
 
     @pytest.mark.asyncio
@@ -587,7 +587,7 @@ class TestSupervisorGoldenPathReliability(SSotAsyncTestCase):
 
 # After SSOT remediation validation tests (currently skipped)
 @pytest.mark.e2e
-class TestSupervisorGoldenPathValidation(SSotAsyncTestCase):
+class SupervisorGoldenPathValidationTests(SSotAsyncTestCase):
     """E2E tests that will pass after SSOT remediation."""
     
     @pytest.mark.skip("Will be enabled after SSOT remediation")
@@ -659,7 +659,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_golden_path_analysis():
-        test_instance = TestSupervisorGoldenPathReliability()
+        test_instance = SupervisorGoldenPathReliabilityTests()
         
         print("🔍 Running SupervisorAgent Golden Path Reliability Analysis:")
         

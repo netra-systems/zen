@@ -38,7 +38,7 @@ from netra_backend.app.agents.base.agent_errors import (
 from netra_backend.app.core.exceptions_agent import AgentExecutionError as CoreAgentExecutionError
 
 
-class TestAgentExecutionError(BaseTestCase):
+class AgentExecutionErrorTests(BaseTestCase):
     """
     Comprehensive tests for AgentExecutionError class.
     
@@ -200,7 +200,7 @@ class TestAgentExecutionError(BaseTestCase):
         assert error.context["key_999"] == "value_999" * 100
 
 
-class TestValidationError(BaseTestCase):
+class ValidationErrorTests(BaseTestCase):
     """
     Comprehensive tests for ValidationError class.
     
@@ -294,7 +294,7 @@ class TestValidationError(BaseTestCase):
         assert password_error.field == "password"
 
 
-class TestExternalServiceError(BaseTestCase):
+class ExternalServiceErrorTests(BaseTestCase):
     """
     Comprehensive tests for ExternalServiceError class.
     
@@ -419,7 +419,7 @@ class TestExternalServiceError(BaseTestCase):
         assert error2.status_code == -1
 
 
-class TestDatabaseError(BaseTestCase):
+class DatabaseErrorTests(BaseTestCase):
     """
     Comprehensive tests for DatabaseError class.
     
@@ -517,7 +517,7 @@ class TestDatabaseError(BaseTestCase):
         assert deadlock_error.table == "transactions"
 
 
-class TestErrorClassRelationships(BaseTestCase):
+class ErrorClassRelationshipsTests(BaseTestCase):
     """
     Test relationships and interactions between error classes.
     
@@ -626,7 +626,7 @@ class TestErrorClassRelationships(BaseTestCase):
                 assert len(caused_by_str) > 0
 
 
-class TestErrorEdgeCases(BaseTestCase):
+class ErrorEdgeCasesTests(BaseTestCase):
     """
     Test edge cases and boundary conditions for agent errors.
     
@@ -769,7 +769,7 @@ class TestErrorEdgeCases(BaseTestCase):
         assert len(set(thread_ids)) >= 1  # At least one unique thread (could be more)
 
 
-class TestErrorBusinessScenarios(BaseTestCase):
+class ErrorBusinessScenariosTests(BaseTestCase):
     """
     Test real-world business scenarios and error handling patterns.
     

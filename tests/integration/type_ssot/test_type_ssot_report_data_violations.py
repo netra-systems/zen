@@ -41,7 +41,7 @@ class ReportDataDefinition:
         return "|".join(field_sigs)
 
 
-class TestReportDataSSotViolations(BaseIntegrationTest):
+class ReportDataSSotViolationsTests(BaseIntegrationTest):
     """Integration tests for ReportData type SSOT compliance."""
     
     @pytest.mark.integration

@@ -35,7 +35,7 @@ class AgentDefinition:
 @pytest.mark.integration
 @pytest.mark.startup
 @pytest.mark.agents
-class TestAgentRegistryStartup(BaseIntegrationTest):
+class AgentRegistryStartupTests(BaseIntegrationTest):
     """Integration tests for agent registry startup and agent loading."""
 
     async def async_setup(self):
@@ -261,7 +261,7 @@ class TestAgentRegistryStartup(BaseIntegrationTest):
 @pytest.mark.startup
 @pytest.mark.business_value
 @pytest.mark.agents
-class TestAgentRegistryBusinessValue(BaseIntegrationTest):
+class AgentRegistryBusinessValueTests(BaseIntegrationTest):
     """Business value validation for agent registry startup."""
 
     async def test_agent_registry_enables_business_value_delivery(self):

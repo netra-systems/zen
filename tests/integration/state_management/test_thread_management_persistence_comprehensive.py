@@ -56,7 +56,7 @@ async def id_generator():
     return UnifiedIdGenerator()
 
 
-class TestThreadManagementPersistence(BaseIntegrationTest):
+class ThreadManagementPersistenceTests(BaseIntegrationTest):
     """
     Comprehensive thread management and persistence tests.
     

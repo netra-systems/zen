@@ -26,7 +26,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestDeprecatedImportElimination(BaseIntegrationTest):
+class DeprecatedImportEliminationTests(BaseIntegrationTest):
     """Test elimination of deprecated websocket_manager_factory imports."""
     
     # Priority files that MUST be migrated to SSOT imports
@@ -230,7 +230,7 @@ class TestDeprecatedImportElimination(BaseIntegrationTest):
         # Validate canonical patterns are present
         assert len(canonical_matches) > 0, (
             "AgentWebSocketBridge should use canonical WebSocket imports. "
-            "Expected patterns like: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager"
+            "Expected patterns like: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager"
         )
     
     @pytest.mark.unit
@@ -357,7 +357,7 @@ class TestDeprecatedImportElimination(BaseIntegrationTest):
         )
 
 
-class TestSSotImportPathConsistency(BaseIntegrationTest):
+class SSotImportPathConsistencyTests(BaseIntegrationTest):
     """Test consistency of SSOT import paths across the codebase."""
     
     @pytest.mark.unit
@@ -402,7 +402,7 @@ class TestSSotImportPathConsistency(BaseIntegrationTest):
             logger.info(f"  Pattern: {pattern} (used in {len(usages)} files)")
         
         # Should have only one canonical pattern for WebSocketManager imports
-        canonical_pattern = "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager"
+        canonical_pattern = "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager"
         
         non_canonical_imports = []
         for pattern, usages in import_patterns.items():

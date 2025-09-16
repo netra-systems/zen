@@ -21,7 +21,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
 
 @pytest.mark.security
-class TestAgentAuthentication:
+class AgentAuthenticationTests:
     """Test agent authentication and session security."""
     
     @pytest.mark.asyncio
@@ -251,7 +251,7 @@ class TestAgentAuthentication:
 
 
 @pytest.mark.security
-class TestAgentDataProtection:
+class AgentDataProtectionTests:
     """Test agent data protection and privacy measures."""
     
     @pytest.mark.asyncio
@@ -466,7 +466,7 @@ class TestAgentDataProtection:
 
 
 @pytest.mark.security
-class TestAgentSecurityBoundaries:
+class AgentSecurityBoundariesTests:
     """Test agent security boundaries and isolation."""
     
     @pytest.mark.asyncio

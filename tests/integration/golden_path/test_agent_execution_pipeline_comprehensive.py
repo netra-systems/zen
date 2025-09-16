@@ -49,11 +49,11 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 # Infrastructure Dependencies
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from shared.id_generation import UnifiedIdGenerator
 
 
-class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
+class AgentExecutionPipelineComprehensiveTests(BaseIntegrationTest):
     """
     Comprehensive integration tests for the golden path agent execution pipeline.
     

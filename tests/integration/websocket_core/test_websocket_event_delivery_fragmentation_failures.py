@@ -40,7 +40,7 @@ import unittest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.integration
-class TestWebSocketEventDeliveryFragmentation(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketEventDeliveryFragmentationTests(SSotAsyncTestCase, unittest.TestCase):
     """Test event delivery failures caused by WebSocket Manager fragmentation."""
 
     def setUp(self):
@@ -214,7 +214,7 @@ class TestWebSocketEventDeliveryFragmentation(SSotAsyncTestCase, unittest.TestCa
 
         try:
             # Create managers for both users
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             manager1 = get_websocket_manager(user_context=user1_context)
             manager2 = get_websocket_manager(user_context=user2_context)
@@ -283,7 +283,7 @@ class TestWebSocketEventDeliveryFragmentation(SSotAsyncTestCase, unittest.TestCa
 
         try:
             # Create multiple manager instances for same user (simulating fragmentation)
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             managers = []
             mock_websockets = []
@@ -380,7 +380,7 @@ class TestWebSocketEventDeliveryFragmentation(SSotAsyncTestCase, unittest.TestCa
             self.fail(f"RACE CONDITION FRAGMENTATION: Cannot test race conditions due to manager fragmentation: {e}")
 
 @pytest.mark.integration
-class TestWebSocketManagerGoldenPathFragmentation(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketManagerGoldenPathFragmentationTests(SSotAsyncTestCase, unittest.TestCase):
     """Test Golden Path chat functionality degradation caused by WebSocket Manager fragmentation."""
 
     async def test_golden_path_chat_functionality_degradation(self):
@@ -414,7 +414,7 @@ class TestWebSocketManagerGoldenPathFragmentation(SSotAsyncTestCase, unittest.Te
 
         try:
             # Test Golden Path with current (potentially fragmented) manager
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             manager = get_websocket_manager(user_context=golden_path_context)
 

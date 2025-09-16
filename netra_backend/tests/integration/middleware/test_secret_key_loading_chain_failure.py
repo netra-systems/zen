@@ -22,7 +22,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestSecretKeyLoadingChainFailure(SSotAsyncTestCase):
+class SecretKeyLoadingChainFailureTests(SSotAsyncTestCase):
     """Integration tests designed to FAIL and reproduce SECRET_KEY loading chain issues."""
 
     def setup_method(self, method=None):

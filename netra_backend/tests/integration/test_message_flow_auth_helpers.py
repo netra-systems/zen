@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch, MagicMock
 
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
@@ -69,7 +69,7 @@ class AuthFlowTracker:
                     successful = sum(1 for attempt in self.auth_attempts if attempt["token_valid"])
                     return successful / len(self.auth_attempts)
 
-                class TestWebSocketAuthMock(Mock):
+                class WebSocketAuthMockTests(Mock):
                     """Extended mock WebSocket for auth testing."""
     
                     def __init__(self, user_id=None):

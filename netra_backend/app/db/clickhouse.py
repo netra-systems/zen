@@ -259,6 +259,15 @@ def use_mock_clickhouse() -> bool:
     Development MUST use real ClickHouse connections.
     Tests marked with @pytest.mark.real_database should attempt real connections.
     """
+    # CRITICAL FIX Issue #1270: Check for staging database test mode guards
+    env = get_env()
+    test_mode = env.get("DATABASE_CATEGORY_TEST_MODE")
+    clickhouse_mode = env.get("CLICKHOUSE_MODE")
+    
+    if test_mode == "staging" and clickhouse_mode == "mock":
+        logger.info("[Issue #1270 Fix] Staging database test mode detected - forcing mock ClickHouse")
+        return True
+    
     # Check if we're in a testing environment AND ClickHouse is disabled for this context
     return _is_testing_environment() and _should_disable_clickhouse_for_tests()
 
@@ -325,8 +334,37 @@ def _extract_clickhouse_config(config):
                 from urllib.parse import urlparse, parse_qs
                 env = get_env()
                 
+                # CRITICAL FIX Issue #1270: Check for staging database test mode guards
+                test_mode = env.get("DATABASE_CATEGORY_TEST_MODE")
+                clickhouse_mode = env.get("CLICKHOUSE_MODE")
+                clickhouse_required = env.get("CLICKHOUSE_REQUIRED", "true").lower() == "true"
+                
+                if test_mode == "staging" and clickhouse_mode == "mock":
+                    logger.info("[Issue #1270 Fix] Staging database test mode detected - using mock ClickHouse")
+                    # Use mock configuration for database category tests
+                    self.host = "localhost"
+                    self.port = 8123
+                    self.user = "default"
+                    self.password = ""
+                    self.database = "test"
+                    self.secure = False
+                    self.client_name = "test"
+                    return
+                
                 # Load ClickHouse URL from environment
                 clickhouse_url = env.get("CLICKHOUSE_URL", "")
+                
+                if not clickhouse_url and not clickhouse_required:
+                    logger.info("[Issue #1270 Fix] ClickHouse not required in staging test mode - using mock configuration")
+                    # Use mock configuration when not required
+                    self.host = "localhost"
+                    self.port = 8123
+                    self.user = "default"
+                    self.password = ""
+                    self.database = "test"
+                    self.secure = False
+                    self.client_name = "test"
+                    return
                 
                 if not clickhouse_url:
                     # Try to build from components

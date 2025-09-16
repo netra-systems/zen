@@ -1,5 +1,5 @@
 @pytest.mark.integration
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -63,11 +63,11 @@ def pytest_configure(config):
     def create_test_request_with_origin(origin: str, method: str = "GET") -> Mock:
         """Create mock request with specified origin."""
         # Mock: Generic component isolation for controlled unit testing
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        websocket = WebSocketConnectionTests()  # Real WebSocket implementation
         request.method = method
         request.headers = {"origin": origin}
         # Mock: Generic component isolation for controlled unit testing
-        request.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        request.websocket = WebSocketConnectionTests()  # Real WebSocket implementation
         request.url.path = "/api/test"
         return request
 
@@ -115,22 +115,22 @@ def pytest_configure(config):
 
         def __init__(self):
             # Mock: Generic component isolation for controlled unit testing
-            self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            self.websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             self.backend_health.status_code = 200
             self.backend_health.json.return_value = {"status": "healthy", "service": "backend"}
             
             # Mock: Generic component isolation for controlled unit testing
-            self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            self.websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             self.frontend_health.status_code = 200
             self.frontend_health.json.return_value = {"status": "healthy", "service": "frontend"}
             
             # Mock: Generic component isolation for controlled unit testing
-            self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            self.websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             self.auth_health.status_code = 200
             self.auth_health.json.return_value = {"status": "healthy", "service": "auth"}
             
             # Mock: Generic component isolation for controlled unit testing
-            self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            self.websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             self.auth_config.status_code = 200
             self.auth_config.json.return_value = {
                 "client_id": "test-client-id",
@@ -139,7 +139,7 @@ def pytest_configure(config):
             }
             
             # Mock: Generic component isolation for controlled unit testing
-            self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            self.websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             self.token_validation.status_code = 200
             self.token_validation.json.return_value = {
                 "valid": True,

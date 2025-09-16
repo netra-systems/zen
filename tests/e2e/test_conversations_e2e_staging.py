@@ -24,7 +24,7 @@ from typing import Dict, Any, List
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestConversationsE2EStaging(SSotAsyncTestCase):
+class ConversationsE2EStagingTests(SSotAsyncTestCase):
     """E2E tests for conversations API on GCP staging environment."""
     
     def setup_method(self, method):

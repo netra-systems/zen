@@ -124,7 +124,7 @@ class DistributedTransaction:
 
 
 @pytest.mark.mission_critical
-class TestServiceMeshIntegration:
+class ServiceMeshIntegrationTests:
     """Test service mesh integration and sidecar management - COMPREHENSIVE tests."""
 
     @pytest.fixture

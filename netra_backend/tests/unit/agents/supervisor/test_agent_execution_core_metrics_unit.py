@@ -20,7 +20,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
-class TestAgentExecutionCoreMetrics:
+class AgentExecutionCoreMetricsTests:
     """Unit tests for AgentExecutionCore metrics functionality."""
     
     @pytest.fixture

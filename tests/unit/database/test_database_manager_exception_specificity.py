@@ -31,7 +31,7 @@ from netra_backend.app.db.transaction_errors import (
 )
 
 
-class TestDatabaseManagerExceptionSpecificity:
+class DatabaseManagerExceptionSpecificityTests:
     """Test suite proving database_manager.py uses broad exception handling instead of specific types."""
     
     @pytest.mark.unit
@@ -169,7 +169,7 @@ class TestDatabaseManagerExceptionSpecificity:
                     await session.execute("SELECT 1")
 
 
-class TestDatabaseManagerBusinessImpact:
+class DatabaseManagerBusinessImpactTests:
     """Tests demonstrating business impact of broad exception handling."""
     
     @pytest.mark.unit

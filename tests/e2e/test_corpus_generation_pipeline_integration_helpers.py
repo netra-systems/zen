@@ -8,7 +8,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 @pytest.mark.e2e
-class TestCorpusGenerationPipelineIntegrationHelpers:
+class CorpusGenerationPipelineIntegrationHelpersTests:
     """Test class for corpus_generation_pipeline_integration_helpers"""
 
     def setup_method(self):

@@ -23,7 +23,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 import asyncio
 
-class TestSupplyResearcherErrorHandling:
+class SupplyResearcherErrorHandlingTests:
     """Test suite for SupplyResearcherAgent error handling"""
 
     @pytest.fixture

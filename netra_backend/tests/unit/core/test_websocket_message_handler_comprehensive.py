@@ -38,7 +38,7 @@ from netra_backend.app.core.websocket_message_handler import WebSocketMessageHan
 from netra_backend.app.core.websocket_recovery_types import MessageState
 
 
-class TestWebSocketMessageHandlerComprehensive(BaseIntegrationTest):
+class WebSocketMessageHandlerComprehensiveTests(BaseIntegrationTest):
     """Comprehensive unit tests for WebSocketMessageHandler SSOT class."""
 
     def setup_method(self):

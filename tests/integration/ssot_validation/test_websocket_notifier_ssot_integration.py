@@ -21,7 +21,7 @@ from test_framework.ssot.database import SSotDatabaseTestMixin
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.integration
-class TestWebSocketNotifierSSOTIntegrationPatterns(SSotAsyncTestCase, SSotDatabaseTestMixin):
+class WebSocketNotifierSSOTIntegrationPatternsTests(SSotAsyncTestCase, SSotDatabaseTestMixin):
     """Integration tests for SSOT WebSocketNotifier patterns (MIXED RESULTS)"""
 
     def setUp(self):
@@ -174,7 +174,7 @@ class TestWebSocketNotifierSSOTIntegrationPatterns(SSotAsyncTestCase, SSotDataba
         except (ImportError, TypeError):
             pass
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager = WebSocketManager()
             direct_instantiation_success.append('WebSocketManager')
         except (ImportError, TypeError):
@@ -185,7 +185,7 @@ class TestWebSocketNotifierSSOTIntegrationPatterns(SSotAsyncTestCase, SSotDataba
             self.fail('Direct instantiation properly blocked - violation test should fail')
 
 @pytest.mark.integration
-class TestWebSocketNotifierSSOTServiceCoordination(SSotAsyncTestCase):
+class WebSocketNotifierSSOTServiceCoordinationTests(SSotAsyncTestCase):
     """Integration tests for SSOT service coordination (MIXED RESULTS)"""
 
     async def test_websocket_bridge_coordinates_with_execution_engine(self):

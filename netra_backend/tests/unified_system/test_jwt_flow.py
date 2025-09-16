@@ -130,7 +130,7 @@ class JWTTestHelper:
         except Exception:
             return False
 
-class TestJWTCreationAndSigning:
+class JWTCreationAndSigningTests:
     """Test JWT creation with proper claims and signing."""
     
     @pytest.fixture
@@ -190,7 +190,7 @@ class TestJWTCreationAndSigning:
         assert decoded["service"] == "netra-backend"
         assert decoded["token_type"] == "service"
 
-class TestCrossServiceJWTValidation:
+class CrossServiceJWTValidationTests:
     """Test JWT validation across services."""
     
     @pytest.fixture
@@ -249,7 +249,7 @@ class TestCrossServiceJWTValidation:
         assert auth_result["status"] in rejection_codes
         assert backend_result["status"] in rejection_codes
 
-class TestSessionManagementUnified:
+class SessionManagementUnifiedTests:
     """Test session consistency across services."""
     
     @pytest.fixture
@@ -309,7 +309,7 @@ class TestSessionManagementUnified:
         # Token should still be valid
         assert decoded1["exp"] == decoded2["exp"]
 
-class TestTokenExpirationHandling:
+class TokenExpirationHandlingTests:
     """Test token expiry scenarios."""
     
     @pytest.fixture

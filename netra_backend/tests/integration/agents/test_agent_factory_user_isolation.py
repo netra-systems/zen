@@ -84,7 +84,7 @@ class AgentUserTestContext:
             self.agent_results = []
 
 
-class TestAgentFactoryUserIsolation(SSotAsyncTestCase):
+class AgentFactoryUserIsolationTests(SSotAsyncTestCase):
     """CRITICAL integration tests for agent factory pattern user isolation."""
     
     @pytest.fixture

@@ -28,12 +28,12 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 from netra_backend.app.services.user_execution_context import UserExecutionContext, create_isolated_execution_context
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, create_agent_websocket_bridge
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from shared.types.core_types import UserID, ThreadID, RunID
 
 @pytest.mark.unit
-class TestRunIdUserIdConfusion(SSotAsyncTestCase):
+class RunIdUserIdConfusionTests(SSotAsyncTestCase):
     """Unit tests demonstrating User ID vs Run ID confusion in WebSocket event delivery."""
 
     def setup_method(self, method=None):

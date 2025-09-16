@@ -55,7 +55,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.integration
-class TestE2EOAuthSimulationKeyValidator:
+class E2EOAuthSimulationKeyValidatorTests:
     """Test E2E OAuth simulation key consistency validation."""
     
     @pytest.fixture
@@ -167,7 +167,7 @@ class TestE2EOAuthSimulationKeyValidator:
 
 
 @pytest.mark.integration
-class TestJWTSecretAlignmentValidator:
+class JWTSecretAlignmentValidatorTests:
     """Test JWT secret alignment validation."""
     
     @pytest.fixture
@@ -256,7 +256,7 @@ class TestJWTSecretAlignmentValidator:
 
 
 @pytest.mark.integration
-class TestWebSocketConfigurationValidator:
+class WebSocketConfigurationValidatorTests:
     """Test WebSocket authentication configuration validation."""
     
     @pytest.fixture
@@ -329,7 +329,7 @@ class TestWebSocketConfigurationValidator:
 
 
 @pytest.mark.integration
-class TestConfigurationDriftMonitor:
+class ConfigurationDriftMonitorTests:
     """Test the comprehensive configuration drift monitor."""
     
     @pytest.fixture
@@ -453,7 +453,7 @@ class TestConfigurationDriftMonitor:
 
 
 @pytest.mark.integration
-class TestConfigurationDriftAlerting:
+class ConfigurationDriftAlertingTests:
     """Test configuration drift alerting system."""
     
     @pytest.fixture
@@ -548,7 +548,7 @@ class TestConfigurationDriftAlerting:
 
 
 @pytest.mark.integration
-class TestUnifiedConfigurationMonitoring:
+class UnifiedConfigurationMonitoringTests:
     """Test the unified configuration monitoring orchestration."""
     
     @pytest.fixture
@@ -652,7 +652,7 @@ class TestUnifiedConfigurationMonitoring:
 
 
 @pytest.mark.integration
-class TestIntegrationScenarios:
+class IntegrationScenariosTests:
     """Test complete integration scenarios representing real-world drift patterns."""
     
     @pytest.mark.asyncio
@@ -828,7 +828,7 @@ if __name__ == "__main__":
         test_results = []
         
         # Test E2E OAuth Validation
-        oauth_tests = TestE2EOAuthSimulationKeyValidator()
+        oauth_tests = E2EOAuthSimulationKeyValidatorTests()
         oauth_validator = E2EOAuthSimulationKeyValidator()
         
         try:
@@ -841,7 +841,7 @@ if __name__ == "__main__":
             test_results.append(f" FAIL:  E2E OAuth Validation Tests: FAILED - {e}")
         
         # Test JWT Secret Validation
-        jwt_tests = TestJWTSecretAlignmentValidator()
+        jwt_tests = JWTSecretAlignmentValidatorTests()
         jwt_validator = JWTSecretAlignmentValidator()
         
         try:
@@ -853,7 +853,7 @@ if __name__ == "__main__":
             test_results.append(f" FAIL:  JWT Secret Validation Tests: FAILED - {e}")
         
         # Test WebSocket Configuration Validation
-        ws_tests = TestWebSocketConfigurationValidator()
+        ws_tests = WebSocketConfigurationValidatorTests()
         ws_validator = WebSocketConfigurationValidator()
         
         try:
@@ -864,7 +864,7 @@ if __name__ == "__main__":
             test_results.append(f" FAIL:  WebSocket Configuration Validation Tests: FAILED - {e}")
         
         # Test Configuration Drift Monitor
-        monitor_tests = TestConfigurationDriftMonitor()
+        monitor_tests = ConfigurationDriftMonitorTests()
         drift_monitor = ConfigurationDriftMonitor()
         
         try:
@@ -875,7 +875,7 @@ if __name__ == "__main__":
             test_results.append(f" FAIL:  Configuration Drift Monitor Tests: FAILED - {e}")
         
         # Test Configuration Drift Alerting
-        alert_tests = TestConfigurationDriftAlerting()
+        alert_tests = ConfigurationDriftAlertingTests()
         drift_alerting = ConfigurationDriftAlerting()
         
         try:
@@ -886,7 +886,7 @@ if __name__ == "__main__":
             test_results.append(f" FAIL:  Configuration Drift Alerting Tests: FAILED - {e}")
         
         # Test Unified Configuration Monitoring
-        unified_tests = TestUnifiedConfigurationMonitoring()
+        unified_tests = UnifiedConfigurationMonitoringTests()
         unified_monitoring = UnifiedConfigurationMonitoring(monitoring_interval_seconds=1)
         
         try:
@@ -898,7 +898,7 @@ if __name__ == "__main__":
             test_results.append(f" FAIL:  Unified Configuration Monitoring Tests: FAILED - {e}")
         
         # Test Integration Scenarios
-        integration_tests = TestIntegrationScenarios()
+        integration_tests = IntegrationScenariosTests()
         
         try:
             await integration_tests.test_websocket_authentication_failure_scenario()

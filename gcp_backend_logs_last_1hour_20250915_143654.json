@@ -1,0 +1,3654 @@
+{
+  "collection_time": "2025-09-15T14:36:54.864572",
+  "time_range": {
+    "start": "2025-09-15T20:36:51.218251+00:00",
+    "end": "2025-09-15T21:36:51.218251+00:00",
+    "duration_hours": 1
+  },
+  "logs_by_severity": {
+    "ERROR": [
+      {
+        "timestamp": "2025-09-15T21:36:22.216925+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d600034f5dba22c3cc",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:22.216913+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d600034f5153650818",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:22.192708+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d60002f0c48bee57cc",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:22.052912+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d60000ceb005e8f264",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:22.052775+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d60000ce2725f503c8",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:19.832364+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d70007840fb947c55a",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3"
+        },
+        "trace": "projects/netra-staging/traces/6df457b0be48acdf7927aaa7550af4c7",
+        "span_id": "5a1cff4ab190c5cb",
+        "http_request": {
+          "method": "GET",
+          "url": "https://api.staging.netrasystems.ai/health",
+          "status": 503,
+          "user_agent": "python-httpx/0.28.1",
+          "latency": "3.658183038s"
+        }
+      },
+      {
+        "timestamp": "2025-09-15T21:36:14.494627+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d70007844fbc69f07f",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": "projects/netra-staging/traces/31587406d5296dc1f0d94d3efecfdd5e",
+        "span_id": "176c4afd7504164f",
+        "http_request": {
+          "method": "GET",
+          "url": "https://api.staging.netrasystems.ai/health",
+          "status": 503,
+          "user_agent": "python-httpx/0.28.1",
+          "latency": "8.995500689s"
+        }
+      },
+      {
+        "timestamp": "2025-09-15T21:36:11.725199+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886cb000b10cf9b264073",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:09.233702+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d7000782b1c9f8650f",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3"
+        },
+        "trace": "projects/netra-staging/traces/ea36a41de7dc922900e5a09ad6dfcbd2",
+        "span_id": "d2ace13daa92d78a",
+        "http_request": {
+          "method": "GET",
+          "url": "https://api.staging.netrasystems.ai/health",
+          "status": 503,
+          "user_agent": "python-httpx/0.28.1",
+          "latency": "14.255626429s"
+        }
+      },
+      {
+        "timestamp": "2025-09-15T21:36:03.972989+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d700078400562bef68",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": "projects/netra-staging/traces/6979d5129da58efb10d48e2df911b3ff",
+        "span_id": "37b8b367a47c3f61",
+        "http_request": {
+          "method": "GET",
+          "url": "https://api.staging.netrasystems.ai/health",
+          "status": 503,
+          "user_agent": "python-httpx/0.28.1",
+          "latency": "19.516417328s"
+        }
+      },
+      {
+        "timestamp": "2025-09-15T21:35:58.709520+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d7000782a52d3f98e9",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3"
+        },
+        "trace": "projects/netra-staging/traces/da525e9b0f1f58b4161f78290a535fc7",
+        "span_id": "730bec3ef526ac25",
+        "http_request": {
+          "method": "GET",
+          "url": "https://api.staging.netrasystems.ai/health",
+          "status": 503,
+          "user_agent": "python-httpx/0.28.1",
+          "latency": "24.778704660s"
+        }
+      },
+      {
+        "timestamp": "2025-09-15T21:35:53.483867+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d7000783f51810f5fa",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": "projects/netra-staging/traces/287da782356e8aeaeca9a227418a8d54",
+        "span_id": "78f0c73d93bf7c88",
+        "http_request": {
+          "method": "GET",
+          "url": "https://api.staging.netrasystems.ai/health",
+          "status": 503,
+          "user_agent": "python-httpx/0.28.1",
+          "latency": "30.004461262s"
+        }
+      },
+      {
+        "timestamp": "2025-09-15T21:35:48.980787+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d70007827efb5816a2",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3",
+          "migration-run": "1757350810"
+        },
+        "trace": "projects/netra-staging/traces/08a9e1f4bfb5a5a54acbe0abc74fa611",
+        "span_id": "bc0f49a042a7f4cd",
+        "http_request": {
+          "method": "GET",
+          "url": "https://api.staging.netrasystems.ai/health",
+          "status": 503,
+          "user_agent": "python-httpx/0.28.1",
+          "latency": "34.506534031s"
+        }
+      },
+      {
+        "timestamp": "2025-09-15T21:35:42.956765+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d70007829b7ad7875b",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": "projects/netra-staging/traces/ed45596d3bf2e21b28e8f586128ad18c",
+        "span_id": "ddd9bcee359bf52f",
+        "http_request": {
+          "method": "GET",
+          "url": "https://api.staging.netrasystems.ai/health",
+          "status": 503,
+          "user_agent": "python-httpx/0.28.1",
+          "latency": "40.529951079s"
+        }
+      },
+      {
+        "timestamp": "2025-09-15T21:35:37.692305+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d70007837056c9e133",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3",
+          "migration-run": "1757350810"
+        },
+        "trace": "projects/netra-staging/traces/fd117e05a9684ff06360e38296533f33",
+        "span_id": "463b7c1cfc5ba536",
+        "http_request": {
+          "method": "GET",
+          "url": "https://api.staging.netrasystems.ai/health",
+          "status": 503,
+          "user_agent": "python-httpx/0.28.1",
+          "latency": "45.794145507s"
+        }
+      },
+      {
+        "timestamp": "2025-09-15T21:35:32.381262+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d700078513e5df2763",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": "projects/netra-staging/traces/86deca4b883a57adc51e1f0b448d8859",
+        "span_id": "7c9f26b51782d31c",
+        "http_request": {
+          "method": "GET",
+          "url": "https://api.staging.netrasystems.ai/health",
+          "status": 503,
+          "user_agent": "python-httpx/0.28.1",
+          "latency": "51.104782105s"
+        }
+      },
+      {
+        "timestamp": "2025-09-15T21:35:27.138102+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d700078373a20ec9bb",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3",
+          "migration-run": "1757350810"
+        },
+        "trace": "projects/netra-staging/traces/5efa8435f39b9c853655e7c74968265f",
+        "span_id": "8442fe0623fc617d",
+        "http_request": {
+          "method": "GET",
+          "url": "https://api.staging.netrasystems.ai/health",
+          "status": 503,
+          "user_agent": "python-httpx/0.28.1",
+          "latency": "56.347406840s"
+        }
+      },
+      {
+        "timestamp": "2025-09-15T21:35:21.922040+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d7000782c5ebb450d3",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": "projects/netra-staging/traces/ce1affc65a0fa3ff2f2f777075586be5",
+        "span_id": "41148b9060fb4482",
+        "http_request": {
+          "method": "GET",
+          "url": "https://api.staging.netrasystems.ai/health",
+          "status": 503,
+          "user_agent": "python-httpx/0.28.1",
+          "latency": "61.562894911s"
+        }
+      },
+      {
+        "timestamp": "2025-09-15T21:35:21.887707+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c88699000d8b9b01cafeba",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988932982e9f83fcf507e77dc7e2595b1ea4f438d8ac6efa26626fa2ffd72acea21a4333629797ab67ce5b7f6094b6384379ad74a7e19169367c46776168297edf3f88641ee0fcdc085ca8b",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:35:21.760304+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c88699000b99f001389adb",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988932982e9f83fcf507e77dc7e2595b1ea4f438d8ac6efa26626fa2ffd72acea21a4333629797ab67ce5b7f6094b6384379ad74a7e19169367c46776168297edf3f88641ee0fcdc085ca8b"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:35:21.757016+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c88699000b8d185c0ef7eb",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988932982e9f83fcf507e77dc7e2595b1ea4f438d8ac6efa26626fa2ffd72acea21a4333629797ab67ce5b7f6094b6384379ad74a7e19169367c46776168297edf3f88641ee0fcdc085ca8b"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:35:16.243675+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886d70007828db8a7a1b0",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": "projects/netra-staging/traces/a8284962e3f7d65ccf1b8e00cfbf93f3",
+        "span_id": "2c1cf74a134e9475",
+        "http_request": {
+          "method": "GET",
+          "url": "https://api.staging.netrasystems.ai/health",
+          "status": 503,
+          "user_agent": "python-httpx/0.28.1",
+          "latency": "67.228814580s"
+        }
+      },
+      {
+        "timestamp": "2025-09-15T21:35:11.599639+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c8868f00092657acb03503",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988932982e9f83fcf507e77dc7e2595b1ea4f438d8ac6efa26626fa2ffd72acea21a4333629797ab67ce5b7f6094b6384379ad74a7e19169367c46776168297edf3f88641ee0fcdc085ca8b",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:34:14.497992+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886560007994827ca677b",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a9885452d55cff4b93a17408ce2623ea76bc2361930d4957cf2f21cc2e22a88e103a84bc4c40c815f0181b5af73cb7d30526bede222f0a98202d0dc5a3e212d2b5b268d929bc8bfe2367da64"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:34:14.497902+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c88656000798ee6ce9a979",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a9885452d55cff4b93a17408ce2623ea76bc2361930d4957cf2f21cc2e22a88e103a84bc4c40c815f0181b5af73cb7d30526bede222f0a98202d0dc5a3e212d2b5b268d929bc8bfe2367da64",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:34:14.467384+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c88656000721b84dbe25cd",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a9885452d55cff4b93a17408ce2623ea76bc2361930d4957cf2f21cc2e22a88e103a84bc4c40c815f0181b5af73cb7d30526bede222f0a98202d0dc5a3e212d2b5b268d929bc8bfe2367da64",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:34:14.332169+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c88656000511893a29a80e",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a9885452d55cff4b93a17408ce2623ea76bc2361930d4957cf2f21cc2e22a88e103a84bc4c40c815f0181b5af73cb7d30526bede222f0a98202d0dc5a3e212d2b5b268d929bc8bfe2367da64",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:34:14.332060+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886560005111caff09627",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a9885452d55cff4b93a17408ce2623ea76bc2361930d4957cf2f21cc2e22a88e103a84bc4c40c815f0181b5af73cb7d30526bede222f0a98202d0dc5a3e212d2b5b268d929bc8bfe2367da64",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:34:04.135798+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c8864c000212760938eb42",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a9885452d55cff4b93a17408ce2623ea76bc2361930d4957cf2f21cc2e22a88e103a84bc4c40c815f0181b5af73cb7d30526bede222f0a98202d0dc5a3e212d2b5b268d929bc8bfe2367da64",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:33:11.739121+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c88617000b4731cbf4c805",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988024403a3422209364db09557fb735cc028f28e52837f6d14b8f22504f4850a9c4c1a69d6da8a57b079f17da0b80dcb7bd358a91aa80f2e8a8cb8a8c8cf9789848115ff4266503dbdf550",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:33:11.738688+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c88617000b4580de58a2af",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988024403a3422209364db09557fb735cc028f28e52837f6d14b8f22504f4850a9c4c1a69d6da8a57b079f17da0b80dcb7bd358a91aa80f2e8a8cb8a8c8cf9789848115ff4266503dbdf550",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:33:11.724993+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c88617000b1001e211d48c",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988024403a3422209364db09557fb735cc028f28e52837f6d14b8f22504f4850a9c4c1a69d6da8a57b079f17da0b80dcb7bd358a91aa80f2e8a8cb8a8c8cf9789848115ff4266503dbdf550",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:33:11.590993+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c8861700090491b0851c4e",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988024403a3422209364db09557fb735cc028f28e52837f6d14b8f22504f4850a9c4c1a69d6da8a57b079f17da0b80dcb7bd358a91aa80f2e8a8cb8a8c8cf9789848115ff4266503dbdf550",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:33:11.590756+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c88617000903a4a7d88d6b",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988024403a3422209364db09557fb735cc028f28e52837f6d14b8f22504f4850a9c4c1a69d6da8a57b079f17da0b80dcb7bd358a91aa80f2e8a8cb8a8c8cf9789848115ff4266503dbdf550",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:33:01.414140+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c8860d000651bc3c24593c",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988024403a3422209364db09557fb735cc028f28e52837f6d14b8f22504f4850a9c4c1a69d6da8a57b079f17da0b80dcb7bd358a91aa80f2e8a8cb8a8c8cf9789848115ff4266503dbdf550",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:32:27.337771+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886190002c3d2c3aa88eb",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988024403a3422209364db09557fb735cc028f28e52837f6d14b8f22504f4850a9c4c1a69d6da8a57b079f17da0b80dcb7bd358a91aa80f2e8a8cb8a8c8cf9789848115ff4266503dbdf550",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": "projects/netra-staging/traces/905e2b620a09c1cf31989058f0409b6d",
+        "span_id": "cb9a8b8e0d8c07e0",
+        "http_request": {
+          "method": "GET",
+          "url": "https://netra-backend-staging-701982941522.us-central1.run.app/health",
+          "status": 503,
+          "user_agent": "Python/3.12 aiohttp/3.12.15",
+          "latency": "45.841809075s"
+        }
+      },
+      {
+        "timestamp": "2025-09-15T21:32:23.532369+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c886190002c3cc0b3be8d6",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988024403a3422209364db09557fb735cc028f28e52837f6d14b8f22504f4850a9c4c1a69d6da8a57b079f17da0b80dcb7bd358a91aa80f2e8a8cb8a8c8cf9789848115ff4266503dbdf550",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": "projects/netra-staging/traces/6ef259746cd58ecefbc100cffd674fe7",
+        "span_id": "95c933dadcfee7c8",
+        "http_request": {
+          "method": "GET",
+          "url": "https://api.staging.netrasystems.ai/health/ready",
+          "status": 503,
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+          "latency": "49.642326671s"
+        }
+      },
+      {
+        "timestamp": "2025-09-15T21:32:04.122987+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c885d40001e06bb063088e",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988f8aa9192121fce9dc1a2ad6933c8acd46969f9d7230280039993af9902e800ae4290edcfc7ff7e5656e246ec74cf4da947dbe3fddbdf445a93579a57f5e4a4aaa005511cb23e74e885cd",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:32:04.122977+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c885d40001e0617c912a98",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988f8aa9192121fce9dc1a2ad6933c8acd46969f9d7230280039993af9902e800ae4290edcfc7ff7e5656e246ec74cf4da947dbe3fddbdf445a93579a57f5e4a4aaa005511cb23e74e885cd",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:32:04.105771+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c885d400019d2be4d0209f",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988f8aa9192121fce9dc1a2ad6933c8acd46969f9d7230280039993af9902e800ae4290edcfc7ff7e5656e246ec74cf4da947dbe3fddbdf445a93579a57f5e4a4aaa005511cb23e74e885cd",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:32:03.978253+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c885d3000eed4d6b5948e7",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988f8aa9192121fce9dc1a2ad6933c8acd46969f9d7230280039993af9902e800ae4290edcfc7ff7e5656e246ec74cf4da947dbe3fddbdf445a93579a57f5e4a4aaa005511cb23e74e885cd"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:32:03.978179+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c885d3000eed033eac995c",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988f8aa9192121fce9dc1a2ad6933c8acd46969f9d7230280039993af9902e800ae4290edcfc7ff7e5656e246ec74cf4da947dbe3fddbdf445a93579a57f5e4a4aaa005511cb23e74e885cd"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:31:53.794818+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c885c9000c20c2158dbbf5",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988f8aa9192121fce9dc1a2ad6933c8acd46969f9d7230280039993af9902e800ae4290edcfc7ff7e5656e246ec74cf4da947dbe3fddbdf445a93579a57f5e4a4aaa005511cb23e74e885cd",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:30:57.217527+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c88591000351b70e98fb4d",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988c764f9b893fbe557aa2d7631ded74f07b5e50ef2cf7f1e49688705e2d968dfa18d357e2230462c5395fde5f06ad6a1c288d092401189a8d939c95fc9f1afab554e3556894b2251233004"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:30:57.217511+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c88591000351a78695c86d",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988c764f9b893fbe557aa2d7631ded74f07b5e50ef2cf7f1e49688705e2d968dfa18d357e2230462c5395fde5f06ad6a1c288d092401189a8d939c95fc9f1afab554e3556894b2251233004",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:30:57.191991+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c885910002edf77b348166",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988c764f9b893fbe557aa2d7631ded74f07b5e50ef2cf7f1e49688705e2d968dfa18d357e2230462c5395fde5f06ad6a1c288d092401189a8d939c95fc9f1afab554e3556894b2251233004",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:30:57.066836+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c88591000105147d2f92d4",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988c764f9b893fbe557aa2d7631ded74f07b5e50ef2cf7f1e49688705e2d968dfa18d357e2230462c5395fde5f06ad6a1c288d092401189a8d939c95fc9f1afab554e3556894b2251233004",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:30:57.066712+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c8859100010498dd85d68c",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988c764f9b893fbe557aa2d7631ded74f07b5e50ef2cf7f1e49688705e2d968dfa18d357e2230462c5395fde5f06ad6a1c288d092401189a8d939c95fc9f1afab554e3556894b2251233004",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:30:46.850189+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c88586000cf90d23830ae7",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988c764f9b893fbe557aa2d7631ded74f07b5e50ef2cf7f1e49688705e2d968dfa18d357e2230462c5395fde5f06ad6a1c288d092401189a8d939c95fc9f1afab554e3556894b2251233004"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:29:49.468627+00:00",
+        "severity": "ERROR",
+        "insert_id": "68c8854d00072693cf907007",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a9886654af7a0dab97acca0f2ea17ccedf65b4479b98d43cfe329d9f0dd9102456d8843cacc58eea33e5cf622a3f91898e1ca3537b49e1f4242f0dd04836063334847b6db45f3324d35b9ac7",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      }
+    ],
+    "WARNING": [
+      {
+        "timestamp": "2025-09-15T21:36:30.321473+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c886de0004e7c187b7b7aa",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:29.106584+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c886dd0001a0585a5c50ab",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:27.768795+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c886db000bbb1bc6753259",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:11.746670+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c886cb000b64aecab540aa",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:11.725709+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c886cb000b12cd2c5e3925",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:35:17.542385+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c88695000846b15ced4e19",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:35:15.075801+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c8869300012819e5ac30a0",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:35:12.516789+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c886900007e2b5cbc1b884",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988a96c976d3a8a14f9481619873a6326d23257e77a811d1de4edf2350cbf701122cfa83cd83342c54f51158b93eed33fd7534dd865447b46748cf0d24b51a72ae8a27ac92e9b9cbf22868ec3",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:35:11.617814+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c8868f00096d568e0e2c5d",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988932982e9f83fcf507e77dc7e2595b1ea4f438d8ac6efa26626fa2ffd72acea21a4333629797ab67ce5b7f6094b6384379ad74a7e19169367c46776168297edf3f88641ee0fcdc085ca8b"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:35:11.599660+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c8868f0009266c1bb089ed",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988932982e9f83fcf507e77dc7e2595b1ea4f438d8ac6efa26626fa2ffd72acea21a4333629797ab67ce5b7f6094b6384379ad74a7e19169367c46776168297edf3f88641ee0fcdc085ca8b"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:34:30.231602+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c88666000388b2645cf296",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988932982e9f83fcf507e77dc7e2595b1ea4f438d8ac6efa26626fa2ffd72acea21a4333629797ab67ce5b7f6094b6384379ad74a7e19169367c46776168297edf3f88641ee0fcdc085ca8b"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:34:28.508253+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c886640007c15d21e800c0",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988932982e9f83fcf507e77dc7e2595b1ea4f438d8ac6efa26626fa2ffd72acea21a4333629797ab67ce5b7f6094b6384379ad74a7e19169367c46776168297edf3f88641ee0fcdc085ca8b"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:34:26.576575+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c886620008cc3ffc0ed516",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988932982e9f83fcf507e77dc7e2595b1ea4f438d8ac6efa26626fa2ffd72acea21a4333629797ab67ce5b7f6094b6384379ad74a7e19169367c46776168297edf3f88641ee0fcdc085ca8b",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:34:15.933849+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c88657000e4059229a5908",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a9885452d55cff4b93a17408ce2623ea76bc2361930d4957cf2f21cc2e22a88e103a84bc4c40c815f0181b5af73cb7d30526bede222f0a98202d0dc5a3e212d2b5b268d929bc8bfe2367da64",
+          "container_name": "netra-backend-staging-1",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:34:04.189990+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c8864c0002e6266f8be351",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a9885452d55cff4b93a17408ce2623ea76bc2361930d4957cf2f21cc2e22a88e103a84bc4c40c815f0181b5af73cb7d30526bede222f0a98202d0dc5a3e212d2b5b268d929bc8bfe2367da64"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:34:04.136160+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c8864c000213e04c02e222",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a9885452d55cff4b93a17408ce2623ea76bc2361930d4957cf2f21cc2e22a88e103a84bc4c40c815f0181b5af73cb7d30526bede222f0a98202d0dc5a3e212d2b5b268d929bc8bfe2367da64",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:33:23.227316+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c88623000377f42d76d250",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a9885452d55cff4b93a17408ce2623ea76bc2361930d4957cf2f21cc2e22a88e103a84bc4c40c815f0181b5af73cb7d30526bede222f0a98202d0dc5a3e212d2b5b268d929bc8bfe2367da64",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:33:21.446204+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c886210006cefc1384f5ea",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a9885452d55cff4b93a17408ce2623ea76bc2361930d4957cf2f21cc2e22a88e103a84bc4c40c815f0181b5af73cb7d30526bede222f0a98202d0dc5a3e212d2b5b268d929bc8bfe2367da64"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:33:19.825038+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c8861f000c96ce11d047da",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a9885452d55cff4b93a17408ce2623ea76bc2361930d4957cf2f21cc2e22a88e103a84bc4c40c815f0181b5af73cb7d30526bede222f0a98202d0dc5a3e212d2b5b268d929bc8bfe2367da64",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:33:01.435541+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c8860d0006a5552ac4b72b",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988024403a3422209364db09557fb735cc028f28e52837f6d14b8f22504f4850a9c4c1a69d6da8a57b079f17da0b80dcb7bd358a91aa80f2e8a8cb8a8c8cf9789848115ff4266503dbdf550"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:33:01.414200+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c8860d000651f8523b5684",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988024403a3422209364db09557fb735cc028f28e52837f6d14b8f22504f4850a9c4c1a69d6da8a57b079f17da0b80dcb7bd358a91aa80f2e8a8cb8a8c8cf9789848115ff4266503dbdf550",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:32:20.021346+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c885e4000053629fed3462",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988024403a3422209364db09557fb735cc028f28e52837f6d14b8f22504f4850a9c4c1a69d6da8a57b079f17da0b80dcb7bd358a91aa80f2e8a8cb8a8c8cf9789848115ff4266503dbdf550",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:32:18.088174+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c885e20001586eea8a7de0",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988024403a3422209364db09557fb735cc028f28e52837f6d14b8f22504f4850a9c4c1a69d6da8a57b079f17da0b80dcb7bd358a91aa80f2e8a8cb8a8c8cf9789848115ff4266503dbdf550",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:32:16.291526+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c885e0000472c6573fbec4",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988024403a3422209364db09557fb735cc028f28e52837f6d14b8f22504f4850a9c4c1a69d6da8a57b079f17da0b80dcb7bd358a91aa80f2e8a8cb8a8c8cf9789848115ff4266503dbdf550"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:32:05.516830+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c885d50007e352f2b4dbe0",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988f8aa9192121fce9dc1a2ad6933c8acd46969f9d7230280039993af9902e800ae4290edcfc7ff7e5656e246ec74cf4da947dbe3fddbdf445a93579a57f5e4a4aaa005511cb23e74e885cd",
+          "container_name": "netra-backend-staging-1",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:31:53.815854+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c885c9000c72eee89465be",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988f8aa9192121fce9dc1a2ad6933c8acd46969f9d7230280039993af9902e800ae4290edcfc7ff7e5656e246ec74cf4da947dbe3fddbdf445a93579a57f5e4a4aaa005511cb23e74e885cd",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:31:53.794864+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c885c9000c20f00d5bfb47",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988f8aa9192121fce9dc1a2ad6933c8acd46969f9d7230280039993af9902e800ae4290edcfc7ff7e5656e246ec74cf4da947dbe3fddbdf445a93579a57f5e4a4aaa005511cb23e74e885cd"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:31:12.131034+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c885a00001ffda81aa9fba",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988f8aa9192121fce9dc1a2ad6933c8acd46969f9d7230280039993af9902e800ae4290edcfc7ff7e5656e246ec74cf4da947dbe3fddbdf445a93579a57f5e4a4aaa005511cb23e74e885cd"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:31:10.278859+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c8859e0004414b66cd96c3",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988f8aa9192121fce9dc1a2ad6933c8acd46969f9d7230280039993af9902e800ae4290edcfc7ff7e5656e246ec74cf4da947dbe3fddbdf445a93579a57f5e4a4aaa005511cb23e74e885cd",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:31:08.403257+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c8859c00062739892591b1",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988f8aa9192121fce9dc1a2ad6933c8acd46969f9d7230280039993af9902e800ae4290edcfc7ff7e5656e246ec74cf4da947dbe3fddbdf445a93579a57f5e4a4aaa005511cb23e74e885cd"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:30:58.644413+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c885920009d5afcf2ac450",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988c764f9b893fbe557aa2d7631ded74f07b5e50ef2cf7f1e49688705e2d968dfa18d357e2230462c5395fde5f06ad6a1c288d092401189a8d939c95fc9f1afab554e3556894b2251233004",
+          "container_name": "netra-backend-staging-1",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:30:46.870521+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c88586000d4879546b15f5",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988c764f9b893fbe557aa2d7631ded74f07b5e50ef2cf7f1e49688705e2d968dfa18d357e2230462c5395fde5f06ad6a1c288d092401189a8d939c95fc9f1afab554e3556894b2251233004",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:30:46.850453+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c88586000cfa159a7b5dff",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988c764f9b893fbe557aa2d7631ded74f07b5e50ef2cf7f1e49688705e2d968dfa18d357e2230462c5395fde5f06ad6a1c288d092401189a8d939c95fc9f1afab554e3556894b2251233004",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:30:05.324929+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c8855d0004f541a2f0a7a9",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988c764f9b893fbe557aa2d7631ded74f07b5e50ef2cf7f1e49688705e2d968dfa18d357e2230462c5395fde5f06ad6a1c288d092401189a8d939c95fc9f1afab554e3556894b2251233004",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:30:03.053460+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c8855b0000d0d4adbe0b90",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a988c764f9b893fbe557aa2d7631ded74f07b5e50ef2cf7f1e49688705e2d968dfa18d357e2230462c5395fde5f06ad6a1c288d092401189a8d939c95fc9f1afab554e3556894b2251233004",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:30:01.020960+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c88559000051e07c15443f",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988c764f9b893fbe557aa2d7631ded74f07b5e50ef2cf7f1e49688705e2d968dfa18d357e2230462c5395fde5f06ad6a1c288d092401189a8d939c95fc9f1afab554e3556894b2251233004"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:29:50.901051+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c8854e000dc03d043f8f3e",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a9886654af7a0dab97acca0f2ea17ccedf65b4479b98d43cfe329d9f0dd9102456d8843cacc58eea33e5cf622a3f91898e1ca3537b49e1f4242f0dd04836063334847b6db45f3324d35b9ac7",
+          "container_name": "netra-backend-staging-1",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:29:39.195004+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c885430002f9bc9e86b2e2",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a9886654af7a0dab97acca0f2ea17ccedf65b4479b98d43cfe329d9f0dd9102456d8843cacc58eea33e5cf622a3f91898e1ca3537b49e1f4242f0dd04836063334847b6db45f3324d35b9ac7"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:29:39.180547+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c885430002c143e27bd14b",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a9886654af7a0dab97acca0f2ea17ccedf65b4479b98d43cfe329d9f0dd9102456d8843cacc58eea33e5cf622a3f91898e1ca3537b49e1f4242f0dd04836063334847b6db45f3324d35b9ac7"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:28:58.899130+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c8851a000db83a9e22f620",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a9886654af7a0dab97acca0f2ea17ccedf65b4479b98d43cfe329d9f0dd9102456d8843cacc58eea33e5cf622a3f91898e1ca3537b49e1f4242f0dd04836063334847b6db45f3324d35b9ac7",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:28:57.278497+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c8851900043fe1cab46092",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a9886654af7a0dab97acca0f2ea17ccedf65b4479b98d43cfe329d9f0dd9102456d8843cacc58eea33e5cf622a3f91898e1ca3537b49e1f4242f0dd04836063334847b6db45f3324d35b9ac7",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:28:55.551078+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c88517000868a67a28c21e",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a9886654af7a0dab97acca0f2ea17ccedf65b4479b98d43cfe329d9f0dd9102456d8843cacc58eea33e5cf622a3f91898e1ca3537b49e1f4242f0dd04836063334847b6db45f3324d35b9ac7",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:28:46.213539+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c8850e000342a03a50e42c",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988324d6dad197433d29e7c94931dfbad9e385a313915fdedbc8d8bfa0a39684dff517c7b2dc4f01a77b328ccf45968fa17a22b3db93676814c98728cf31cee9e7ab11d2aec7d9e88a97e4d",
+          "container_name": "netra-backend-staging-1",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:28:34.637530+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c885020009ba5a7a240caa",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a988324d6dad197433d29e7c94931dfbad9e385a313915fdedbc8d8bfa0a39684dff517c7b2dc4f01a77b328ccf45968fa17a22b3db93676814c98728cf31cee9e7ab11d2aec7d9e88a97e4d"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:28:34.622823+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c88502000980e7448e9191",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988324d6dad197433d29e7c94931dfbad9e385a313915fdedbc8d8bfa0a39684dff517c7b2dc4f01a77b328ccf45968fa17a22b3db93676814c98728cf31cee9e7ab11d2aec7d9e88a97e4d",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:27:55.262641+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c884db000401f1a1493e51",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988324d6dad197433d29e7c94931dfbad9e385a313915fdedbc8d8bfa0a39684dff517c7b2dc4f01a77b328ccf45968fa17a22b3db93676814c98728cf31cee9e7ab11d2aec7d9e88a97e4d",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:27:53.733855+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c884d9000b329f0bd7e861",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988324d6dad197433d29e7c94931dfbad9e385a313915fdedbc8d8bfa0a39684dff517c7b2dc4f01a77b328ccf45968fa17a22b3db93676814c98728cf31cee9e7ab11d2aec7d9e88a97e4d",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:27:52.150040+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c884d800024a187b0c4eb6",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a988324d6dad197433d29e7c94931dfbad9e385a313915fdedbc8d8bfa0a39684dff517c7b2dc4f01a77b328ccf45968fa17a22b3db93676814c98728cf31cee9e7ab11d2aec7d9e88a97e4d"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:27:43.005842+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c884cf000017423c1a0442",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00709-bg5",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a9886c5eef70249dd2d37b892085f73c7b37bac7c8bc3ea97b491e6227d08eb8e9dc634143804b7fb3ff8644b743c9f4fb40acdac7d8d583468258cbe35882314ce629b13038f793d4948f7a",
+          "container_name": "netra-backend-staging-1",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:27:31.286096+00:00",
+        "severity": "WARNING",
+        "insert_id": "68c884c300045d903505979e",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00709-bg5"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a9886c5eef70249dd2d37b892085f73c7b37bac7c8bc3ea97b491e6227d08eb8e9dc634143804b7fb3ff8644b743c9f4fb40acdac7d8d583468258cbe35882314ce629b13038f793d4948f7a",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      }
+    ],
+    "NOTICE": [
+      {
+        "timestamp": "2025-09-15T21:35:23.593650+00:00",
+        "severity": "NOTICE",
+        "insert_id": "v2t2oodamro",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": ""
+          }
+        },
+        "labels": {},
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:35:23.546111+00:00",
+        "severity": "NOTICE",
+        "insert_id": "1ji2dq5dcqmp",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "",
+            "configuration_name": "",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {},
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:33:44.423528+00:00",
+        "severity": "NOTICE",
+        "insert_id": "1ji2dq5dcqc9",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "",
+            "configuration_name": "",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {},
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:33:41.055952+00:00",
+        "severity": "NOTICE",
+        "insert_id": "1ru7y82dauu2",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": ""
+          }
+        },
+        "labels": {},
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:17:39.433341+00:00",
+        "severity": "NOTICE",
+        "insert_id": "12b203vdagqc",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": ""
+          }
+        },
+        "labels": {},
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:16:41.994465+00:00",
+        "severity": "NOTICE",
+        "insert_id": "1h0hra3dar6m",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": ""
+          }
+        },
+        "labels": {},
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:14:00.152172+00:00",
+        "severity": "NOTICE",
+        "insert_id": "v2t2oodajtl",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "",
+            "configuration_name": "",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {},
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:13:08.048485+00:00",
+        "severity": "NOTICE",
+        "insert_id": "kl3wc3darcd",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": ""
+          }
+        },
+        "labels": {},
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:06:04.257609+00:00",
+        "severity": "NOTICE",
+        "insert_id": "1ru7y82dare8",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": ""
+          }
+        },
+        "labels": {},
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:05:12.343841+00:00",
+        "severity": "NOTICE",
+        "insert_id": "17k9b87dajxe",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": ""
+          }
+        },
+        "labels": {},
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T20:38:51.653167+00:00",
+        "severity": "NOTICE",
+        "insert_id": "w6w2grdbi92",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "",
+            "configuration_name": "",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {},
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T20:38:01.857723+00:00",
+        "severity": "NOTICE",
+        "insert_id": "17m6246d9d4i",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "",
+            "configuration_name": "",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {},
+        "trace": null,
+        "span_id": null
+      }
+    ],
+    "INFO": [
+      {
+        "timestamp": "2025-09-15T21:36:36.791748+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000c14c428fff456",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.742731+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000b554b48a5205a",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.742505+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000b5469c52a9bf8",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.742285+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000b538d2a8342d5",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.741985+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000b52611a8d8ceb",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.741708+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000b514c7192738c",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.741423+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000b502f924c6b43",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.740955+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000b4e5bc62f70a6",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.740582+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000b4ce6f719bdab",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.740351+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000b4bff9aa5e66d",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.738863+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000b462f98b187b1",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.738664+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000b45684863f53a",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.738503+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000b44c7c627d7f7",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.733966+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000b330e33829ae4",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.733821+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000b327dcdc31d45",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.341154+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000534a22c223ace",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.340889+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000533997184b681",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.340803+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e400053343c0a80027",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.336061+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000520bd6cb6f4d6",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.335869+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e400051ffde3133931",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.335713+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e400051f6132ab2880",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.335510+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e400051e960cb1a940",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.335347+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e400051df30b422733",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.335150+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e400051d2e24d002c4",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.334927+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e400051c4fcc4f7c6a",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.334773+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e400051bb517f00c56",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.334587+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e400051afbdc910abe",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.334327+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000519f754584536",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.334194+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000519721124627d",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.334021+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000518c541b161f3",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.333793+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000517e17b88ac34",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.333270+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000515d6c321c0ab",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.333110+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e400051536fb4b324a",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.332994+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000514c2e9c9aadd",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.332109+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e40005114d300bba20",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.331873+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e400051061d1f9d560",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.330903+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e400050c971afef671",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.330021+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e400050925d47b72cf",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.323207+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e40004ee875402444a",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.319980+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e40004e1ecc22c75bd",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.315997+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e40004d25dd3f27a00",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.278826+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e40004412a64c4f257",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:36.278674+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e4000440921ba27c9c",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:35.446377+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e30006cfa97a0a05b6",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "vpc-connectivity": "enabled",
+          "migration-run": "1757350810"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:35.446237+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e30006cf1d55566e2c",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:35.344185+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e300054079955faa7a",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:35.344036+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e300053fe41bbea9e1",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "service_name": "netra-backend-staging",
+            "location": "us-central1",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:35.316994+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e30004d642bcdb48bb",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "project_id": "netra-staging",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "revision_name": "netra-backend-staging-00711-d6z"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:35.253125+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e30003dcc598c76b1d",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "migration-run": "1757350810",
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      },
+      {
+        "timestamp": "2025-09-15T21:36:35.232775+00:00",
+        "severity": "INFO",
+        "insert_id": "68c886e300038d470c76fb05",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "revision_name": "netra-backend-staging-00711-d6z",
+            "configuration_name": "netra-backend-staging",
+            "location": "us-central1",
+            "service_name": "netra-backend-staging",
+            "project_id": "netra-staging"
+          }
+        },
+        "labels": {
+          "instanceId": "0069c7a98816a4904dde58e2a1f835c796f46f09342499d48b739058728fa76b490763503e60a3a034c362132be4aac86a8c2df94403d8cd7b1269053581de46ba191a8b49e296486a46a017dc447c2c",
+          "migration-run": "1757350810",
+          "vpc-connectivity": "enabled"
+        },
+        "trace": null,
+        "span_id": null
+      }
+    ]
+  },
+  "summary": {
+    "total_logs": 162,
+    "counts_by_severity": {
+      "ERROR": 50,
+      "WARNING": 50,
+      "NOTICE": 12,
+      "INFO": 50
+    }
+  }
+}

@@ -36,7 +36,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 
 
 @pytest.mark.e2e
-class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
+class Issue686GoldenPathExecutionEngineConflictsTests(SSotAsyncTestCase):
     """
     E2E tests demonstrating how ExecutionEngine SSOT violations break Golden Path.
     

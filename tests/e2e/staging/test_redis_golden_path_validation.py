@@ -25,7 +25,7 @@ from datetime import datetime
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestRedisGoldenPathValidation(SSotAsyncTestCase):
+class RedisGoldenPathValidationTests(SSotAsyncTestCase):
     """E2E validation of Golden Path Redis dependencies on staging GCP."""
 
     @classmethod

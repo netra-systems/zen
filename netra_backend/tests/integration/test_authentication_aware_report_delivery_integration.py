@@ -103,7 +103,7 @@ class AuthenticationReportValidator:
         }
 
 
-class TestAuthenticationAwareReportDeliveryIntegration(BaseIntegrationTest):
+class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for authentication-aware report delivery
     

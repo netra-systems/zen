@@ -54,7 +54,7 @@ except ImportError:
         USER_EXECUTION_CONTEXT_AVAILABLE = False
 
 
-class TestToolExecutorFactorySSotConsolidation(SSotBaseTestCase):
+class ToolExecutorFactorySSotConsolidationTests(SSotBaseTestCase):
     """
     Integration tests validating SSOT consolidation is working correctly.
     

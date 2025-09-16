@@ -47,7 +47,7 @@ from auth_service.auth_core.core.session_manager import SessionManager
 from auth_service.auth_core.core.token_validator import TokenValidator
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
@@ -130,7 +130,7 @@ class RealAuthTestClient:
             raise ValueError('No JWT token available')
         return {'Authorization': f'Bearer {self.jwt_token}', 'X-User-ID': self.user_info.get('user_id') if self.user_info else 'unknown'}
 
-class TestAuthenticationIntegrationAgentWorkflows(SSotAsyncTestCase):
+class AuthenticationIntegrationAgentWorkflowsTests(SSotAsyncTestCase):
     """
     Comprehensive tests for authentication integration in agent workflows.
 

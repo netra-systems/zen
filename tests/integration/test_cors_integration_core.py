@@ -68,7 +68,7 @@ class CORSTestHelper:
         return validation
 
 @pytest.mark.integration
-class TestCORSIntegrationCore:
+class CORSIntegrationCoreTests:
     """Core CORS integration tests."""
 
     @pytest.fixture

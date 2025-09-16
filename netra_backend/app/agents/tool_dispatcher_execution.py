@@ -22,7 +22,7 @@ from netra_backend.app.schemas.tool import (
 if TYPE_CHECKING:
     from netra_backend.app.agents.tool_dispatcher_core import ToolDispatchResponse
     # ISSUE #1144 FIX: Use canonical SSOT import path
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -73,7 +73,8 @@ class ToolExecutionEngine(ToolExecutionEngineInterface):
             
         try:
             # Import required components
-            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+            # SSOT REMEDIATION Issue #1186: Use canonical imports
+            from netra_backend.app.agents.canonical_imports import UserExecutionEngine
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
             

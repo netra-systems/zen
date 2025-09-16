@@ -33,7 +33,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.tests.conftest_helpers import create_mock_websocket
 
 @pytest.mark.unit
-class TestBaseMessageHandler(SSotBaseTestCase):
+class BaseMessageHandlerTests(SSotBaseTestCase):
     """Test BaseMessageHandler business logic."""
 
     def setup_method(self):
@@ -57,7 +57,7 @@ class TestBaseMessageHandler(SSotBaseTestCase):
         assert result is True, 'Default handler should return success'
 
 @pytest.mark.unit
-class TestConnectionHandler(SSotBaseTestCase):
+class ConnectionHandlerTests(SSotBaseTestCase):
     """Test ConnectionHandler business logic - critical for user session management."""
 
     def setup_method(self):
@@ -116,7 +116,7 @@ class TestConnectionHandler(SSotBaseTestCase):
         assert result is False, 'Handler should fail when WebSocket is disconnected'
 
 @pytest.mark.unit
-class TestTypingHandler(SSotBaseTestCase):
+class TypingHandlerTests(SSotBaseTestCase):
     """Test TypingHandler business logic - enables real-time user interaction feedback."""
 
     def setup_method(self):
@@ -149,7 +149,7 @@ class TestTypingHandler(SSotBaseTestCase):
         assert call_args['payload']['thread_id'] == thread_id
 
 @pytest.mark.unit
-class TestHeartbeatHandler(SSotBaseTestCase):
+class HeartbeatHandlerTests(SSotBaseTestCase):
     """Test HeartbeatHandler business logic - critical for connection health."""
 
     def setup_method(self):
@@ -193,7 +193,7 @@ class TestHeartbeatHandler(SSotBaseTestCase):
         assert call_args['payload']['status'] == 'healthy'
 
 @pytest.mark.unit
-class TestAgentRequestHandler(SSotBaseTestCase):
+class AgentRequestHandlerTests(SSotBaseTestCase):
     """Test AgentRequestHandler business logic - CRITICAL for agent execution events."""
 
     def setup_method(self):
@@ -241,7 +241,7 @@ class TestAgentRequestHandler(SSotBaseTestCase):
         assert response['payload']['real_llm_used'] is True
 
 @pytest.mark.unit
-class TestAgentHandler(SSotBaseTestCase):
+class AgentHandlerTests(SSotBaseTestCase):
     """Test AgentHandler business logic - handles agent status and response messages."""
 
     def setup_method(self):
@@ -273,7 +273,7 @@ class TestAgentHandler(SSotBaseTestCase):
         assert call_args['data']['original_type'] == 'MessageType.AGENT_RESPONSE_CHUNK'
 
 @pytest.mark.unit
-class TestUserMessageHandler(SSotBaseTestCase):
+class UserMessageHandlerTests(SSotBaseTestCase):
     """Test UserMessageHandler business logic - processes system and thread messages."""
 
     def setup_method(self):
@@ -308,7 +308,7 @@ class TestUserMessageHandler(SSotBaseTestCase):
         assert isinstance(stats['processed'], int)
 
 @pytest.mark.unit
-class TestErrorHandler(SSotBaseTestCase):
+class ErrorHandlerTests(SSotBaseTestCase):
     """Test ErrorHandler business logic - critical for error management."""
 
     def setup_method(self):
@@ -341,7 +341,7 @@ class TestErrorHandler(SSotBaseTestCase):
         assert call_args['payload']['error_code'] == error_code
 
 @pytest.mark.unit
-class TestBatchMessageHandler(SSotBaseTestCase):
+class BatchMessageHandlerTests(SSotBaseTestCase):
     """Test BatchMessageHandler business logic - handles message batching for performance."""
 
     def setup_method(self):
@@ -380,7 +380,7 @@ class TestBatchMessageHandler(SSotBaseTestCase):
         assert 'active_timers' in stats
 
 @pytest.mark.unit
-class TestMessageRouter(SSotBaseTestCase):
+class MessageRouterTests(SSotBaseTestCase):
     """Test MessageRouter business logic - CRITICAL for routing WebSocket agent events."""
 
     def setup_method(self):
@@ -458,7 +458,7 @@ class TestMessageRouter(SSotBaseTestCase):
         assert 'handler_status' in stats
 
 @pytest.mark.unit
-class TestGlobalMessageRouterFunctions(SSotBaseTestCase):
+class GlobalMessageRouterFunctionsTests(SSotBaseTestCase):
     """Test global message router functions - SSOT for WebSocket message routing."""
 
     def test_get_message_router_returns_singleton(self):
@@ -481,7 +481,7 @@ class TestGlobalMessageRouterFunctions(SSotBaseTestCase):
         assert 'ConnectionHandler' in handlers
 
 @pytest.mark.unit
-class TestWebSocketUtilityFunctions(SSotBaseTestCase):
+class WebSocketUtilityFunctionsTests(SSotBaseTestCase):
     """Test WebSocket utility functions for error handling and system messages."""
 
     @patch('netra_backend.app.websocket_core.handlers.is_websocket_connected')

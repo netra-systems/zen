@@ -21,7 +21,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ConnectionID, WebSocketID
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
@@ -34,7 +34,7 @@ class TimeoutType:
     GRACEFUL_TIMEOUT = "graceful_timeout"
 
 
-class TestWebSocketConnectionTimeoutHandlingGracefulStateIntegration(BaseIntegrationTest):
+class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegrationTest):
     """Test WebSocket connection timeout handling with comprehensive graceful state preservation."""
     
     def _create_timeout_handling_websocket(self, connection_id: str, user_id: str, timeout_config: Dict[str, float]):

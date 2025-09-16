@@ -18,7 +18,7 @@ import pytest
 from fastapi import FastAPI
 from netra_backend.app.startup_module import setup_database_connections, startup_health_checks, _async_initialize_postgres
 
-class TestServerStartupTimeouts:
+class ServerStartupTimeoutsTests:
     """Test timeout protections in server startup."""
 
     @fast_test

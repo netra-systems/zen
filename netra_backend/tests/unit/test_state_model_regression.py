@@ -22,7 +22,7 @@ except ImportError:
     pytest.skip("Required modules have been removed or have missing dependencies", allow_module_level=True)
 from netra_backend.app.websocket_core.connection_executor import ConnectionOperationBuilder
 
-class TestDeepAgentStateRegression:
+class DeepAgentStateRegressionTests:
     """Regression tests for DeepAgentState validation issues."""
     
     def test_deep_agent_state_minimal_init(self):
@@ -51,7 +51,7 @@ class TestDeepAgentStateRegression:
         state = AgentsDeepAgentState(user_request=request)
         assert state.user_request == request
 
-class TestWebSocketConnectionRegression:
+class WebSocketConnectionRegressionTests:
     """Regression tests for WebSocket connection state issues."""
     
     def test_connection_builder_creates_valid_state(self):
@@ -82,7 +82,7 @@ class TestWebSocketConnectionRegression:
         state = builder._create_agent_state()
         assert state.user_request == "websocket_operation"
 
-class TestAllStateModelsInit:
+class AllStateModelsInitTests:
     """Test all state models can be initialized properly."""
     
     def test_migration_state_init(self):
@@ -159,7 +159,7 @@ class TestAllStateModelsInit:
         assert state.memory_usage == 0.0
         assert state.cpu_usage == 0.0
 
-class TestValidationErrorMessages:
+class ValidationErrorMessagesTests:
     """Test that validation errors are clear and helpful."""
     
     def test_missing_required_field_error_message(self):

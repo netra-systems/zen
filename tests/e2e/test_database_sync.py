@@ -53,7 +53,7 @@ from tests.e2e.database_sync_helpers import (
 
 
 @pytest.mark.e2e
-class TestDatabaseSync:
+class DatabaseSyncTests:
     """Phase 5: Database sync consistency tests."""
     
     @pytest.fixture
@@ -110,7 +110,7 @@ class TestDatabaseSync:
 
 
 @pytest.mark.e2e
-class TestDatabaseSyncPerformance:
+class DatabaseSyncPerformanceTests:
     """Performance tests for database synchronization."""
     
     @pytest.mark.asyncio
@@ -126,7 +126,7 @@ class TestDatabaseSyncPerformance:
 
 
 @pytest.mark.e2e
-class TestEventualConsistency:
+class EventualConsistencyTests:
     """Test eventual consistency patterns."""
     
     @pytest.mark.asyncio

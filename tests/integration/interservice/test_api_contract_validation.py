@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import BaseTestCase
 from shared.isolated_environment import get_env
 
 
-class TestAPIContractValidation(BaseTestCase):
+class APIContractValidationTests(BaseTestCase):
     """Integration tests for API contract validation between services."""
     
     @pytest.mark.integration

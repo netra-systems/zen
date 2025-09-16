@@ -27,7 +27,7 @@ from tests.e2e.config import UnifiedTestConfig
 
 
 @pytest.mark.e2e
-class TestWebSocketConnectionLifecycleCompliant:
+class WebSocketConnectionLifecycleCompliantTests:
     """Compliance-focused WebSocket connection lifecycle tests."""
     
     @pytest.fixture

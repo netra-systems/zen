@@ -22,7 +22,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from typing import Dict, Any, List, Optional
 
 # Core imports  
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.canonical_imports import FactoryInitializationError
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID
@@ -85,7 +85,7 @@ class MockIsolatedManager:
             return False
 
 
-class TestWebSocketEmergencyCleanupFailure:
+class WebSocketEmergencyCleanupFailureTests:
     """Test suite for WebSocket emergency cleanup failure scenarios"""
     
     @pytest.fixture

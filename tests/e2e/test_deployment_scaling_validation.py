@@ -29,7 +29,7 @@ pytestmark = [
 
 
 @pytest.mark.e2e
-class TestDeploymentScalingValidation:
+class DeploymentScalingValidationTests:
     """Test deployment and scaling resilience patterns."""
 
     @pytest.mark.asyncio

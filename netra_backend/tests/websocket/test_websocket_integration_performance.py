@@ -3,7 +3,7 @@
 Integration tests of all performance improvements working together.
 """
 import pytest
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # Skip this entire module due to missing dependencies
@@ -118,7 +118,7 @@ class WebSocketIntegrationTestVerifier:
         assert throughput > min_throughput
         print(f"Integrated test completed: {throughput:.1f} msg/s throughput")
 
-class TestWebSocketIntegratedPerformance:
+class WebSocketIntegratedPerformanceTests:
     """Integration tests for WebSocket performance improvements."""
     
     @pytest.mark.asyncio
@@ -317,7 +317,7 @@ class TestWebSocketIntegratedPerformance:
 if __name__ == "__main__":
     async def run_integration_tests():
         """Run integration performance tests."""
-        test_integration = TestWebSocketIntegratedPerformance()
+        test_integration = WebSocketIntegratedPerformanceTests()
         
         print("Running integrated performance test...")
         await test_integration.test_integrated_performance_improvements()

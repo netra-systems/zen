@@ -34,7 +34,7 @@ from netra_backend.app.core.startup_validation import (
 )
 
 
-class TestStartupValidatorInitialization(BaseIntegrationTest):
+class StartupValidatorInitializationTests(BaseIntegrationTest):
     """Test StartupValidator initialization and configuration."""
 
     def test_startup_validator_init(self):
@@ -76,7 +76,7 @@ class TestStartupValidatorInitialization(BaseIntegrationTest):
             assert result == (True, {"test": "report"})
 
 
-class TestComponentValidationDataClass:
+class ComponentValidationDataClassTests:
     """Test ComponentValidation dataclass functionality."""
 
     def test_component_validation_creation(self):
@@ -117,7 +117,7 @@ class TestComponentValidationDataClass:
         assert validation.metadata == {}  # Default is empty dict
 
 
-class TestComponentStatusEnum:
+class ComponentStatusEnumTests:
     """Test ComponentStatus enum values and behavior."""
 
     def test_component_status_enum_values(self):
@@ -144,7 +144,7 @@ class TestComponentStatusEnum:
         assert ComponentStatus.WARNING not in critical_statuses
 
 
-class TestGetStatusMethod:
+class GetStatusMethodTests:
     """Test _get_status method logic comprehensively."""
 
     def setup_method(self):
@@ -192,7 +192,7 @@ class TestGetStatusMethod:
         assert status == ComponentStatus.HEALTHY
 
 
-class TestAddFailedValidationMethod:
+class AddFailedValidationMethodTests:
     """Test _add_failed_validation method."""
 
     def setup_method(self):
@@ -235,7 +235,7 @@ class TestAddFailedValidationMethod:
             mock_error.assert_called_once_with(" FAIL:  Test: Error message")
 
 
-class TestDetermineSuccessMethod:
+class DetermineSuccessMethodTests:
     """Test _determine_success method logic."""
 
     def setup_method(self):
@@ -298,7 +298,7 @@ class TestDetermineSuccessMethod:
         assert success is False  # Critical failure causes overall failure
 
 
-class TestGenerateReportMethod:
+class GenerateReportMethodTests:
     """Test _generate_report method comprehensively."""
 
     def setup_method(self):
@@ -406,7 +406,7 @@ class TestGenerateReportMethod:
         assert report["duration"] is None
 
 
-class TestValidateStartupMainMethod:
+class ValidateStartupMainMethodTests:
     """Test the main validate_startup orchestration method."""
 
     def setup_method(self):
@@ -510,7 +510,7 @@ class TestValidateStartupMainMethod:
                 mock_log.assert_called_once_with(success, report)
 
 
-class TestValidateAgentsMethod:
+class ValidateAgentsMethodTests:
     """Test _validate_agents method comprehensively."""
 
     def setup_method(self):
@@ -631,7 +631,7 @@ class TestValidateAgentsMethod:
         assert "Test exception" in validation.message
 
 
-class TestValidateToolsMethod:
+class ValidateToolsMethodTests:
     """Test _validate_tools method comprehensively."""
 
     def setup_method(self):
@@ -773,7 +773,7 @@ class TestValidateToolsMethod:
         assert "Test exception" in validation.message
 
 
-class TestValidateDatabaseMethod:
+class ValidateDatabaseMethodTests:
     """Test _validate_database method comprehensively."""
 
     def setup_method(self):
@@ -896,7 +896,7 @@ class TestValidateDatabaseMethod:
         assert "DB exception" in validation.message
 
 
-class TestCountDatabaseTablesMethod:
+class CountDatabaseTablesMethodTests:
     """Test _count_database_tables method."""
 
     def setup_method(self):
@@ -948,7 +948,7 @@ class TestCountDatabaseTablesMethod:
         assert count == 0  # Returns 0 on exception
 
 
-class TestValidateWebSocketMethod:
+class ValidateWebSocketMethodTests:
     """Test _validate_websocket method comprehensively."""
 
     def setup_method(self):
@@ -1066,7 +1066,7 @@ class TestValidateWebSocketMethod:
         assert "WebSocket error" in validation.message
 
 
-class TestValidateServicesMethod:
+class ValidateServicesMethodTests:
     """Test _validate_services method comprehensively."""
 
     def setup_method(self):
@@ -1224,7 +1224,7 @@ class TestValidateServicesMethod:
         assert "Service exception" in failure_validation.message
 
 
-class TestLogResultsMethod:
+class LogResultsMethodTests:
     """Test _log_results method comprehensively."""
 
     def setup_method(self):
@@ -1322,7 +1322,7 @@ class TestLogResultsMethod:
             mock_warning.assert_not_called()
 
 
-class TestCriticalPathValidation:
+class CriticalPathValidationTests:
     """Test _validate_critical_paths method."""
 
     def setup_method(self):
@@ -1441,7 +1441,7 @@ class TestCriticalPathValidation:
         assert "Validation error" in validation.message
 
 
-class TestIntegrationScenarios:
+class IntegrationScenariosTests:
     """Test integration scenarios and end-to-end workflows."""
 
     def setup_method(self):
@@ -1588,7 +1588,7 @@ class TestIntegrationScenarios:
         assert "status_counts" in report
 
 
-class TestEdgeCasesAndErrorHandling:
+class EdgeCasesAndErrorHandlingTests:
     """Test edge cases and comprehensive error handling."""
 
     def setup_method(self):
@@ -1726,7 +1726,7 @@ class TestEdgeCasesAndErrorHandling:
         assert len(self.validator.validations) == 0
 
 
-class TestComprehensiveIntegration:
+class ComprehensiveIntegrationTests:
     """Final comprehensive integration tests covering all functionality."""
 
     @pytest.mark.asyncio
@@ -1905,23 +1905,23 @@ class TestComprehensiveIntegration:
 
 # Export test classes for pytest discovery
 __all__ = [
-    "TestStartupValidatorInitialization",
-    "TestComponentValidationDataClass", 
-    "TestComponentStatusEnum",
-    "TestGetStatusMethod",
-    "TestAddFailedValidationMethod",
-    "TestDetermineSuccessMethod",
-    "TestGenerateReportMethod",
-    "TestValidateStartupMainMethod",
-    "TestValidateAgentsMethod",
-    "TestValidateToolsMethod",
-    "TestValidateDatabaseMethod",
-    "TestCountDatabaseTablesMethod",
-    "TestValidateWebSocketMethod",
-    "TestValidateServicesMethod",
-    "TestLogResultsMethod",
-    "TestCriticalPathValidation",
-    "TestIntegrationScenarios",
-    "TestEdgeCasesAndErrorHandling",
-    "TestComprehensiveIntegration"
+    "StartupValidatorInitializationTests",
+    "ComponentValidationDataClassTests", 
+    "ComponentStatusEnumTests",
+    "GetStatusMethodTests",
+    "AddFailedValidationMethodTests",
+    "DetermineSuccessMethodTests",
+    "GenerateReportMethodTests",
+    "ValidateStartupMainMethodTests",
+    "ValidateAgentsMethodTests",
+    "ValidateToolsMethodTests",
+    "ValidateDatabaseMethodTests",
+    "CountDatabaseTablesMethodTests",
+    "ValidateWebSocketMethodTests",
+    "ValidateServicesMethodTests",
+    "LogResultsMethodTests",
+    "CriticalPathValidationTests",
+    "IntegrationScenariosTests",
+    "EdgeCasesAndErrorHandlingTests",
+    "ComprehensiveIntegrationTests"
 ]

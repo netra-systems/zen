@@ -23,7 +23,7 @@ from netra_backend.app.core.startup_validation import StartupValidator, validate
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.integration
-class TestDatabaseConfigurationValidation(SSotAsyncTestCase):
+class DatabaseConfigurationValidationTests(SSotAsyncTestCase):
     """Test suite for database configuration validation during startup."""
 
     def setup_method(self, method):

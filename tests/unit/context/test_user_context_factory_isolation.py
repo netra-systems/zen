@@ -208,7 +208,7 @@ class UserContextFactory:
 
 
 @pytest.mark.unit
-class TestUserContextFactoryIsolation(SSotBaseTestCase):
+class UserContextFactoryIsolationTests(SSotBaseTestCase):
     """Test user context factory isolation patterns."""
     
     def setUp(self):
@@ -377,7 +377,7 @@ class TestUserContextFactoryIsolation(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestUserContextMemoryCleanup(SSotBaseTestCase):
+class UserContextMemoryCleanupTests(SSotBaseTestCase):
     """Test memory cleanup and resource management for user contexts."""
     
     def setUp(self):
@@ -471,7 +471,7 @@ class TestUserContextMemoryCleanup(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestUserContextInheritancePatterns(SSotBaseTestCase):
+class UserContextInheritancePatternsTests(SSotBaseTestCase):
     """Test context inheritance patterns and validation."""
     
     def setUp(self):
@@ -554,7 +554,7 @@ class TestUserContextInheritancePatterns(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestUserContextValidationErrors(SSotBaseTestCase):
+class UserContextValidationErrorsTests(SSotBaseTestCase):
     """Test validation error handling in user context factory."""
     
     def setUp(self):

@@ -33,7 +33,7 @@ from contextlib import contextmanager
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.formatters.example_response_formatter import ExampleResponseFormatter, ResponseFormat, FormattedMetric, FormattedRecommendation, FormattedResult, format_example_response, get_response_formatter, response_formatter
 
-class TestExampleResponseFormatter(SSotBaseTestCase):
+class ExampleResponseFormatterTests(SSotBaseTestCase):
     """Comprehensive test suite for ExampleResponseFormatter class.
 
     Tests all major formatting strategies and utility methods with emphasis on
@@ -66,7 +66,7 @@ class TestExampleResponseFormatter(SSotBaseTestCase):
         """Custom fail method for compatibility."""
         assert False, msg
 
-class TestFormatterInitialization(TestExampleResponseFormatter):
+class FormatterInitializationTests(ExampleResponseFormatterTests):
     """Test formatter initialization and strategy registration."""
 
     def test_formatter_initialization_strategies(self):
@@ -87,7 +87,7 @@ class TestFormatterInitialization(TestExampleResponseFormatter):
         formatted = format_example_response(test_result)
         self.assertIsInstance(formatted, FormattedResult)
 
-class TestDataClasses(TestExampleResponseFormatter):
+class DataClassesTests(ExampleResponseFormatterTests):
     """Test data class functionality and validation."""
 
     def test_formatted_metric_creation(self):
@@ -129,7 +129,7 @@ class TestDataClasses(TestExampleResponseFormatter):
         self.assertIsNone(result.charts_data)
         self.assertIsNone(result.export_data)
 
-class TestResponseFormatSelection(TestExampleResponseFormatter):
+class ResponseFormatSelectionTests(ExampleResponseFormatterTests):
     """Test main format_response method and strategy selection."""
 
     def test_format_response_strategy_selection(self):
@@ -198,7 +198,7 @@ class TestResponseFormatSelection(TestExampleResponseFormatter):
         self.assertIn('generated_at', metadata)
         self.assertIn('optimization_type', metadata)
 
-class TestCostOptimizationFormatting(TestExampleResponseFormatter):
+class CostOptimizationFormattingTests(ExampleResponseFormatterTests):
     """Test cost optimization specific formatting logic."""
 
     def test_cost_optimization_complete_data(self):
@@ -254,7 +254,7 @@ class TestCostOptimizationFormatting(TestExampleResponseFormatter):
         self.assertIsInstance(savings_chart['data'], list)
         self.assertEqual(len(savings_chart['data']), 2)
 
-class TestLatencyOptimizationFormatting(TestExampleResponseFormatter):
+class LatencyOptimizationFormattingTests(ExampleResponseFormatterTests):
     """Test latency optimization specific formatting logic."""
 
     def test_latency_optimization_complete_data(self):
@@ -298,7 +298,7 @@ class TestLatencyOptimizationFormatting(TestExampleResponseFormatter):
         self.assertEqual(chart_data['current_avg'], '2000')
         self.assertEqual(chart_data['optimized_avg'], '800')
 
-class TestModelSelectionFormatting(TestExampleResponseFormatter):
+class ModelSelectionFormattingTests(ExampleResponseFormatterTests):
     """Test model selection analysis formatting logic."""
 
     def test_model_selection_complete_data(self):
@@ -342,7 +342,7 @@ class TestModelSelectionFormatting(TestExampleResponseFormatter):
         self.assertEqual(model_a_data['accuracy'], '95')
         self.assertEqual(model_a_data['consistency'], '92')
 
-class TestScalingAnalysisFormatting(TestExampleResponseFormatter):
+class ScalingAnalysisFormattingTests(ExampleResponseFormatterTests):
     """Test scaling analysis specific formatting logic."""
 
     def test_scaling_analysis_complete_data(self):
@@ -385,7 +385,7 @@ class TestScalingAnalysisFormatting(TestExampleResponseFormatter):
         self.assertEqual(chart_data['projected_requests'], '75000')
         self.assertEqual(chart_data['optimized_cost'], '3200')
 
-class TestAdvancedOptimizationFormatting(TestExampleResponseFormatter):
+class AdvancedOptimizationFormattingTests(ExampleResponseFormatterTests):
     """Test advanced multi-dimensional optimization formatting logic."""
 
     def test_advanced_optimization_complete_data(self):
@@ -432,7 +432,7 @@ class TestAdvancedOptimizationFormatting(TestExampleResponseFormatter):
         self.assertEqual(chart_data['latency_target'], '2')
         self.assertEqual(chart_data['latency_achieved'], '2.1')
 
-class TestGeneralAndErrorFormatting(TestExampleResponseFormatter):
+class GeneralAndErrorFormattingTests(ExampleResponseFormatterTests):
     """Test general response and error handling formatting."""
 
     def test_general_response_formatting(self):
@@ -490,7 +490,7 @@ class TestGeneralAndErrorFormatting(TestExampleResponseFormatter):
         finally:
             self.formatter.format_strategies['cost_optimization'] = original_strategy
 
-class TestExportDataGeneration(TestExampleResponseFormatter):
+class ExportDataGenerationTests(ExampleResponseFormatterTests):
     """Test export data generation functionality."""
 
     def test_export_data_generation_complete(self):
@@ -530,7 +530,7 @@ class TestExportDataGeneration(TestExampleResponseFormatter):
         parsed_time = datetime.fromisoformat(generated_at.replace('Z', '+00:00'))
         self.assertIsInstance(parsed_time, datetime)
 
-class TestPublicInterface(TestExampleResponseFormatter):
+class PublicInterfaceTests(ExampleResponseFormatterTests):
     """Test public interface functions and global instances."""
 
     def test_public_format_function(self):
@@ -562,7 +562,7 @@ class TestPublicInterface(TestExampleResponseFormatter):
                 self.assertIsNotNone(formatted.title)
                 self.assertIsNotNone(formatted.summary)
 
-class TestEdgeCasesAndErrorHandling(TestExampleResponseFormatter):
+class EdgeCasesAndErrorHandlingTests(ExampleResponseFormatterTests):
     """Test edge cases, error conditions, and robustness."""
 
     def test_empty_result_handling(self):
@@ -623,7 +623,7 @@ class TestEdgeCasesAndErrorHandling(TestExampleResponseFormatter):
         self.assertEqual(len(export_data['metrics_summary']), 1000)
         self.record_metric('large_export_test_completed', True)
 
-class TestBusinessLogicValidation(TestExampleResponseFormatter):
+class BusinessLogicValidationTests(ExampleResponseFormatterTests):
     """Test business logic validation and Golden Path compliance."""
 
     def test_golden_path_user_tier_handling(self):

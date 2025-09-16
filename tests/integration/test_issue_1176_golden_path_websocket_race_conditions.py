@@ -27,13 +27,13 @@ from test_framework.isolated_environment_fixtures import isolated_env
 from test_framework.websocket_helpers import WebSocketTestClient
 
 # Import WebSocket components that need integration testing
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.auth import WebSocketAuth
 from netra_backend.app.websocket_core.events import WebSocketEventManager
 from netra_backend.app.routes.websocket_unified import websocket_endpoint
 
 
-class TestGoldenPathWebSocketRaceConditions(BaseIntegrationTest):
+class GoldenPathWebSocketRaceConditionsTests(BaseIntegrationTest):
     """Test WebSocket race conditions causing Golden Path failures."""
 
     @pytest.mark.integration

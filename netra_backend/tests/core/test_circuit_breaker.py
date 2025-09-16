@@ -8,7 +8,7 @@ import pytest
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestCircuitBreaker:
+class CircuitBreakerTests:
     """Test suite for CircuitBreaker"""
 
     @pytest.fixture

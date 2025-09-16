@@ -23,7 +23,7 @@ from auth_service.auth_core.database.staging_validation import (
 from shared.isolated_environment import get_env
 
 
-class TestStagingDatabaseValidatorURLFormat:
+class StagingDatabaseValidatorURLFormatTests:
     """Test database URL format validation"""
     
     @pytest.mark.unit
@@ -176,7 +176,7 @@ class TestStagingDatabaseValidatorURLFormat:
         assert "Specify database name after @/" in result["recommendations"]
 
 
-class TestStagingDatabaseValidatorCredentials:
+class StagingDatabaseValidatorCredentialsTests:
     """Test credential validation functionality"""
     
     @pytest.mark.unit
@@ -327,7 +327,7 @@ class TestStagingDatabaseValidatorCredentials:
         assert "Credential validation failed" in result["error"]
 
 
-class TestStagingDatabaseValidatorSSLCompatibility:
+class StagingDatabaseValidatorSSLCompatibilityTests:
     """Test SSL compatibility validation"""
     
     @pytest.mark.unit
@@ -392,7 +392,7 @@ class TestStagingDatabaseValidatorSSLCompatibility:
             assert "SSL compatibility check failed: Regex error" in result["error"]
 
 
-class TestStagingDatabaseValidatorPreDeployment:
+class StagingDatabaseValidatorPreDeploymentTests:
     """Test pre-deployment validation functionality"""
     
     @pytest.mark.unit
@@ -497,7 +497,7 @@ class TestStagingDatabaseValidatorPreDeployment:
         assert len(report["database_url"]) <= 53  # 50 + "..."
 
 
-class TestStagingDatabaseValidatorReporting:
+class StagingDatabaseValidatorReportingTests:
     """Test validation report printing and formatting"""
     
     @pytest.mark.unit
@@ -575,7 +575,7 @@ class TestStagingDatabaseValidatorReporting:
         assert "UNKNOWN UNKNOWN" in captured.out
 
 
-class TestValidateStagingDeploymentFunction:
+class ValidateStagingDeploymentFunctionTests:
     """Test the main validate_staging_deployment function"""
     
     @pytest.mark.unit
@@ -633,7 +633,7 @@ class TestValidateStagingDeploymentFunction:
             # Note: The function prints but doesn't capture in this test context
 
 
-class TestStagingDatabaseValidatorEdgeCases:
+class StagingDatabaseValidatorEdgeCasesTests:
     """Test edge cases and error scenarios"""
     
     @pytest.mark.unit
@@ -729,7 +729,7 @@ class TestStagingDatabaseValidatorEdgeCases:
                     f"Expected issue '{expected_issue}' not found for password '{password}'"
 
 
-class TestMainModuleBehavior:
+class MainModuleBehaviorTests:
     """Test behavior when module is run as main"""
     
     @pytest.mark.unit

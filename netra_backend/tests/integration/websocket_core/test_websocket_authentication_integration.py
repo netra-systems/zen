@@ -27,7 +27,7 @@ from test_framework.ssot.websocket import WebSocketTestUtility, WebSocketEventTy
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 # Import production WebSocket and auth components - NO MOCKS per CLAUDE.md
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.isolated_environment import get_env
@@ -76,7 +76,7 @@ def create_test_jwt_token(user_id: str, jwt_secret: str, expires_in_minutes: int
 
 
 @pytest.mark.integration
-class TestWebSocketAuthenticationFlow:
+class WebSocketAuthenticationFlowTests:
     """Integration tests for WebSocket authentication flows."""
     
     @pytest.mark.asyncio
@@ -296,7 +296,7 @@ class TestWebSocketAuthenticationFlow:
 
 
 @pytest.mark.integration
-class TestWebSocketSessionManagement:
+class WebSocketSessionManagementTests:
     """Integration tests for WebSocket session management with authentication."""
     
     @pytest.mark.asyncio
@@ -514,7 +514,7 @@ class TestWebSocketSessionManagement:
 
 
 @pytest.mark.integration
-class TestWebSocketAuthenticationErrorHandling:
+class WebSocketAuthenticationErrorHandlingTests:
     """Integration tests for WebSocket authentication error handling."""
     
     @pytest.mark.asyncio

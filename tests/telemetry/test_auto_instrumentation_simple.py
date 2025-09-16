@@ -14,7 +14,7 @@ import sys
 import os
 from unittest.mock import patch, MagicMock
 
-class TestOpenTelemetryAutoInstrumentation(SSotBaseTestCase):
+class OpenTelemetryAutoInstrumentationTests(SSotBaseTestCase):
     """
     Test OpenTelemetry automatic instrumentation setup and configuration.
     

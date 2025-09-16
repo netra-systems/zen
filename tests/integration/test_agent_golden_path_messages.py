@@ -48,12 +48,13 @@ from shared.isolated_environment import get_env
 # CRITICAL: Import REAL agent execution components (NO MOCKS per CLAUDE.md)
 try:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
-    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
     from shared.types.core_types import UserID, ThreadID, RunID, AgentExecutionContext
     from netra_backend.app.agents.base_agent import BaseAgent
-    from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
+    from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory, create_agent_instance_factory
     from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
     from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
+    from shared.id_generation import UnifiedIdGenerator
     REAL_COMPONENTS_AVAILABLE = True
 except ImportError as e:
     # Graceful fallback if components not available
@@ -64,7 +65,7 @@ except ImportError as e:
     BaseAgent = MagicMock
     AgentExecutionContext = MagicMock
 
-class TestAgentGoldenPathMessages(SSotAsyncTestCase):
+class AgentGoldenPathMessagesTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Agent Golden Path Message Processing.
 
@@ -164,8 +165,15 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
             self.llm_manager = MagicMock()
             self.llm_manager.chat_completion = AsyncMock()
 
-            # Get real agent instance factory
-            self.agent_factory = get_agent_instance_factory()
+            # Create user execution context for SSOT factory pattern
+            user_context = UserExecutionContext(
+                user_id=f"test_user_{UnifiedIdGenerator.generate_base_id('user')}",
+                thread_id=f"test_thread_{UnifiedIdGenerator.generate_base_id('thread')}",
+                run_id=UnifiedIdGenerator.generate_base_id('run')
+            )
+
+            # Create agent instance factory using SSOT pattern
+            self.agent_factory = create_agent_instance_factory(user_context)
             if hasattr(self.agent_factory, 'configure'):
                 self.agent_factory.configure(
                     websocket_bridge=self.websocket_bridge,

@@ -38,7 +38,7 @@ from netra_backend.app.websocket_core import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestWebSocketEventDeliveryIntegration(BaseIntegrationTest):
+class WebSocketEventDeliveryIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket event delivery in Golden Path scenarios."""
 
     @pytest.mark.integration

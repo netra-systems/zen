@@ -47,7 +47,7 @@ from test_framework.fixtures.id_system.id_format_samples import (
 # Target modules for migration testing (REAL imports)
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 # Import detection utilities
 import sys
@@ -57,7 +57,7 @@ import inspect
 
 
 @pytest.mark.unit
-class TestUUIDViolationDetection(SSotBaseTestCase):
+class UUIDViolationDetectionTests(SSotBaseTestCase):
     """Unit tests to detect direct UUID violations requiring migration."""
     
     def setup_method(self, method):
@@ -413,7 +413,7 @@ class TestUUIDViolationDetection(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestIDMigrationImpactAnalysis(SSotBaseTestCase):
+class IDMigrationImpactAnalysisTests(SSotBaseTestCase):
     """Tests to analyze the business impact of ID migration gaps."""
     
     def setup_method(self, method):

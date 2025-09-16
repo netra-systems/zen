@@ -46,7 +46,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 try:
     from netra_backend.app.core.configuration.base import get_config
     from netra_backend.app.services.user_execution_context import UserExecutionContext
-    from netra_backend.app.websocket_core.manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     from netra_backend.app.agents.registry import AgentRegistry
     REAL_SERVICES_AVAILABLE = True
 except ImportError as e:
@@ -61,7 +61,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestServiceLifecycleCritical(SSotAsyncTestCase):
+class ServiceLifecycleCriticalTests(SSotAsyncTestCase):
     """
     Comprehensive tests for service lifecycle management without Docker dependencies.
 

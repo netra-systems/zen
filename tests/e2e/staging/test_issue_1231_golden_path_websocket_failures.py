@@ -48,7 +48,7 @@ STAGING_AUTH_URL = "https://auth.staging.netrasystems.ai"
 STAGING_WEBSOCKET_URL = "wss://backend.staging.netrasystems.ai/ws"
 
 
-class TestIssue1231GoldenPathWebSocketFailures:
+class Issue1231GoldenPathWebSocketFailuresTests:
     """
     E2E STAGING TESTS: Demonstrate Golden Path failures due to async/await bug
 

@@ -131,7 +131,7 @@ def mock_redis_manager():
     return mock_manager
 
 @pytest.mark.asyncio
-class TestUserAgentSessionIsolationSecurity(SSotBaseTestCase):
+class UserAgentSessionIsolationSecurityTests(SSotBaseTestCase):
     """Test UserAgentSession complete user isolation and security patterns."""
 
     async def test_user_session_prevents_cross_user_contamination(self):
@@ -272,7 +272,7 @@ class TestUserAgentSessionIsolationSecurity(SSotBaseTestCase):
             assert field in metrics, f'Missing metric field: {field}'
 
 @pytest.mark.asyncio
-class TestAgentRegistryEnhancedUserIsolation(SSotBaseTestCase):
+class AgentRegistryEnhancedUserIsolationTests(SSotBaseTestCase):
     """Test AgentRegistry enhanced user isolation and hardening features."""
 
     async def test_agent_registry_enforces_complete_user_session_isolation(self, mock_llm_manager):
@@ -466,7 +466,7 @@ class TestAgentRegistryEnhancedUserIsolation(SSotBaseTestCase):
         await asyncio.sleep(0.01)
 
 @pytest.mark.asyncio
-class TestExecutionEngineFactoryIntegration(SSotBaseTestCase):
+class ExecutionEngineFactoryIntegrationTests(SSotBaseTestCase):
     """Test ExecutionEngineFactory integration with AgentRegistry and user isolation."""
 
     async def test_execution_engine_factory_requires_websocket_bridge_validation(self):
@@ -623,7 +623,7 @@ class TestExecutionEngineFactoryIntegration(SSotBaseTestCase):
         assert final_metrics['total_engines_cleaned'] == 4
 
 @pytest.mark.asyncio
-class TestAgentRegistryExecutionEngineFactoryIntegration(SSotBaseTestCase):
+class AgentRegistryExecutionEngineFactoryIntegrationTests(SSotBaseTestCase):
     """Test integration between AgentRegistry and ExecutionEngineFactory for complete user isolation."""
 
     async def test_integrated_user_isolation_end_to_end(self, mock_llm_manager, mock_websocket_bridge):

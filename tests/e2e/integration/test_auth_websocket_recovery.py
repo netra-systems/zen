@@ -42,7 +42,7 @@ from test_framework.helpers.auth_helpers import (
 @pytest.mark.critical
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAuthWebSocketRecovery:
+class AuthWebSocketRecoveryTests:
     """WebSocket Authentication Recovery and Message Preservation Tests."""
     
     @pytest.fixture

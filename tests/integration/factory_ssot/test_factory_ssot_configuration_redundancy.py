@@ -27,7 +27,7 @@ from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestConfigurationFactoryRedundancy(BaseIntegrationTest):
+class ConfigurationFactoryRedundancyTests(BaseIntegrationTest):
     """Test SSOT violations in configuration factory redundancy patterns."""
 
     @pytest.mark.integration

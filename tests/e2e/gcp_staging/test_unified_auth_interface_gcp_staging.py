@@ -37,7 +37,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestUnifiedAuthInterfaceGCPStaging(SSotAsyncTestCase):
+class UnifiedAuthInterfaceGCPStagingTests(SSotAsyncTestCase):
     """
     E2E GCP Staging tests for UnifiedAuthInterface protecting business value.
     Tests real GCP IAM, OAuth providers, and production security scenarios.

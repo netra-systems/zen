@@ -11,7 +11,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.llm.llm_manager import LLMManager
 
 
-class TestLLMManagerMethodFix:
+class LLMManagerMethodFixTests:
     """Test that the LLM manager has all required methods."""
     
     @pytest.mark.asyncio

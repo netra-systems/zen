@@ -27,11 +27,11 @@ project_root = Path(__file__).parents[3]
 if project_root not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestIssue1231AsyncAwaitBugReproduction:
+class Issue1231AsyncAwaitBugReproductionTests:
     """
     REPRODUCTION TESTS: These tests demonstrate the async/await bug in websocket_ssot.py
 

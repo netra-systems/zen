@@ -38,7 +38,7 @@ except ImportError:
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestAgentRegistrySSotViolations(SSotAsyncTestCase):
+class AgentRegistrySSotViolationsTests(SSotAsyncTestCase):
     """Test class to reproduce and validate SSOT violations in AgentRegistry classes."""
 
     def setUp(self):
@@ -437,7 +437,7 @@ if __name__ == '__main__':
     import unittest
 
     # Create test suite
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestAgentRegistrySSotViolations)
+    suite = unittest.TestLoader().loadTestsFromTestCase(AgentRegistrySSotViolationsTests)
 
     # Run tests with detailed output
     runner = unittest.TextTestRunner(verbosity=2)

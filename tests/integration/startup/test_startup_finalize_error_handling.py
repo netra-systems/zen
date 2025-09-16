@@ -38,7 +38,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthH
 from shared.isolated_environment import get_env
 
 
-class TestStartupFinalizeErrorHandling(SSotBaseTestCase):
+class StartupFinalizeErrorHandlingTests(SSotBaseTestCase):
     """Integration tests for FINALIZE phase error recovery and fault tolerance."""
     
     def setup_method(self, method):

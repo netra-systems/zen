@@ -78,7 +78,7 @@ async def jwt_helper():
 
 
 @pytest.mark.e2e
-class TestSessionStateSynchronization:
+class SessionStateSynchronizationTests:
     """Test session state synchronization across services."""
     
     @pytest.mark.e2e

@@ -44,7 +44,7 @@ class StateSnapshot:
     user_context_state: Dict[str, Any]
     layer_consistency_score: float = 0.0
 
-class TestMultiLayerStateSynchronization(SSotAsyncTestCase):
+class MultiLayerStateSynchronizationTests(SSotAsyncTestCase):
     """Integration tests for multi-layer state synchronization."""
 
     def setup_method(self, method):

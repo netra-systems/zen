@@ -32,7 +32,7 @@ from test_framework.unified_docker_manager import UnifiedDockerManager
 from test_framework.docker_rate_limiter import DockerRateLimiter
 
 
-class TestDockerFastFailValidation:
+class DockerFastFailValidationTests:
     """Phase 2: Validation tests that should PASS after Issue #411 fixes."""
 
     def test_docker_availability_fast_fail_when_unavailable(self):
@@ -275,7 +275,7 @@ class TestDockerFastFailValidation:
 
 if __name__ == "__main__":
     # Run validation tests for direct execution
-    test_instance = TestDockerFastFailValidation()
+    test_instance = DockerFastFailValidationTests()
     
     print(" PASS:  ISSUE #411 VALIDATION TESTS - These tests should PASS after fixes")
     print("=" * 80)

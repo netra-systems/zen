@@ -181,7 +181,7 @@ class SimulatedRetryMechanism:
 
 
 @pytest.mark.integration
-class TestAutomaticRetryBackoffMechanisms(BaseIntegrationTest):
+class AutomaticRetryBackoffMechanismsTests(BaseIntegrationTest):
     """
     Test automatic retry and backoff mechanisms for transient failure recovery.
     

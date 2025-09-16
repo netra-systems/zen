@@ -37,7 +37,7 @@ def create_compensation_context(operation_id: str, error: Exception, metadata: D
     return RecoveryContext(operation_id=operation_id, operation_type=OperationType.AGENT_EXECUTION, error=error, severity=ErrorSeverity.MEDIUM, metadata=metadata or {}, max_retries=int(env.get('COMPENSATION_MAX_RETRIES', '3')))
 
 @pytest.mark.e2e
-class TestRealAgentCompensationFixtures:
+class RealAgentCompensationFixturesTests:
     """Test real agent compensation fixtures - BVJ: Business continuity through compensation"""
 
     @pytest.mark.asyncio
@@ -183,7 +183,7 @@ class TestRealAgentCompensationFixtures:
                 env.delete('COMPENSATION_TIMEOUT_SECONDS')
 
 @pytest.mark.e2e
-class TestRealCompensationBusinessValue:
+class RealCompensationBusinessValueTests:
     """Test compensation mechanisms deliver real business value - BVJ validation"""
 
     @pytest.mark.asyncio

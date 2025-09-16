@@ -31,7 +31,7 @@ from unittest.mock import Mock, patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestFactoryPatternMigrationDeprecation(SSotBaseTestCase):
+class FactoryPatternMigrationDeprecationTests(SSotBaseTestCase):
     """
     Test factory pattern migration deprecation warnings.
 
@@ -341,7 +341,7 @@ class TestFactoryPatternMigrationDeprecation(SSotBaseTestCase):
         )
 
 
-class TestFactoryPatternMigrationGuidance(SSotBaseTestCase):
+class FactoryPatternMigrationGuidanceTests(SSotBaseTestCase):
     """
     Test factory pattern migration guidance and correct patterns.
 

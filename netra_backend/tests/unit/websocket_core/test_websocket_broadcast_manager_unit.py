@@ -15,7 +15,7 @@ import pytest
 import asyncio
 from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, Mock, patch
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.types import WebSocketMessage
 from dataclasses import dataclass
 from enum import Enum
@@ -230,7 +230,7 @@ class WebSocketBroadcastManager:
                 del self._broadcast_groups[group_name]
 
 
-class TestWebSocketBroadcastManager:
+class WebSocketBroadcastManagerTests:
     """Unit tests for WebSocket broadcast management."""
     
     @pytest.fixture

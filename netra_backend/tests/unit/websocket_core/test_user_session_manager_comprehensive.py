@@ -47,7 +47,7 @@ from shared.types import UserID
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestUserSessionManagerInitialization(SSotBaseTestCase):
+class UserSessionManagerInitializationTests(SSotBaseTestCase):
     """
     Test UserSessionManager initialization and basic state management.
     
@@ -101,7 +101,7 @@ class TestUserSessionManagerInitialization(SSotBaseTestCase):
             self.record_metric('initialization_logged', True)
 
 @pytest.mark.unit
-class TestSessionCreation(SSotBaseTestCase):
+class SessionCreationTests(SSotBaseTestCase):
     """
     Test session creation business logic - CRITICAL for user onboarding.
     
@@ -287,7 +287,7 @@ class TestSessionCreation(SSotBaseTestCase):
         self.record_metric('user_profile_data_preserved', True)
 
 @pytest.mark.unit
-class TestSessionRetrieval(SSotBaseTestCase):
+class SessionRetrievalTests(SSotBaseTestCase):
     """
     Test session retrieval business logic - validates data access patterns.
     
@@ -435,7 +435,7 @@ class TestSessionRetrieval(SSotBaseTestCase):
         self.record_metric('retrieval_performance_acceptable', retrieval_time < 1.0)
 
 @pytest.mark.unit
-class TestSessionUpdates(SSotBaseTestCase):
+class SessionUpdatesTests(SSotBaseTestCase):
     """
     Test session update business logic - validates data mutation patterns.
     
@@ -547,7 +547,7 @@ class TestSessionUpdates(SSotBaseTestCase):
         self.record_metric('session_metadata_preserved', True)
 
 @pytest.mark.unit
-class TestSessionLifecycle(SSotBaseTestCase):
+class SessionLifecycleTests(SSotBaseTestCase):
     """
     Test session lifecycle management - validates cleanup and state transitions.
     
@@ -700,7 +700,7 @@ class TestSessionLifecycle(SSotBaseTestCase):
         self.record_metric('session_mapping_consistency_maintained', True)
 
 @pytest.mark.unit
-class TestSessionCleanupAndUtilities(SSotBaseTestCase):
+class SessionCleanupAndUtilitiesTests(SSotBaseTestCase):
     """
     Test session cleanup utilities and administrative functions.
     
@@ -848,7 +848,7 @@ class TestSessionCleanupAndUtilities(SSotBaseTestCase):
         self.record_metric('system_recovery_after_errors', True)
 
 @pytest.mark.unit
-class TestSessionSecurityAndValidation(SSotBaseTestCase):
+class SessionSecurityAndValidationTests(SSotBaseTestCase):
     """
     Test session security patterns and data validation.
     

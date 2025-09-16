@@ -27,7 +27,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestIssue1182WebSocketManagerSSOTViolations(SSotBaseTestCase):
+class Issue1182WebSocketManagerSSOTViolationsTests(SSotBaseTestCase):
     """Mission critical tests for WebSocket Manager SSOT violations"""
 
     def setUp(self):
@@ -569,7 +569,7 @@ class TestIssue1182WebSocketManagerSSOTViolations(SSotBaseTestCase):
     def _try_direct_manager_import(self):
         """Try direct manager import"""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             return WebSocketManager()
         except:
             return None

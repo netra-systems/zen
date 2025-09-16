@@ -97,7 +97,7 @@ class DatabaseTestFixture:
             await self.async_engine.dispose()
 
 
-class TestDatabaseORMOperations(SSotAsyncTestCase):
+class DatabaseORMOperationsTests(SSotAsyncTestCase):
     """Integration tests for Database ORM operations.
     
     Tests REAL database operations without Docker dependencies using SQLite in-memory.

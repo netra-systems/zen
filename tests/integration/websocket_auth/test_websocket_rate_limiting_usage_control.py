@@ -34,7 +34,7 @@ from netra_backend.app.core.redis_connection_handler import RedisConnectionHandl
 @pytest.mark.integration
 @pytest.mark.websocket_auth
 @pytest.mark.timeout(45)
-class TestWebSocketRateLimitingUsageControl(BaseTestCase):
+class WebSocketRateLimitingUsageControlTests(BaseTestCase):
     """Integration tests for rate limiting and usage control in WebSocket context"""
 
     @pytest.fixture(autouse=True)

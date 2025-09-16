@@ -25,7 +25,7 @@ import pytest
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from typing import Dict, Any
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.canonical_imports import ConnectionLifecycleManager, FactoryInitializationError, get_websocket_manager_factory, create_websocket_manager, create_websocket_manager_sync, _validate_ssot_user_context, _validate_ssot_user_context_staging_safe
 from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context
 from netra_backend.app.monitoring.websocket_metrics import FactoryMetrics, ManagerMetrics
@@ -36,7 +36,7 @@ from shared.types.core_types import UserID, ThreadID, ConnectionID
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestFactoryMetrics(SSotBaseTestCase):
+class FactoryMetricsTests(SSotBaseTestCase):
     """Test FactoryMetrics business logic - tracks factory performance."""
 
     def test_factory_metrics_initialization(self):
@@ -62,7 +62,7 @@ class TestFactoryMetrics(SSotBaseTestCase):
         assert 'ssot_redirect' in metrics_dict
 
 @pytest.mark.unit
-class TestManagerMetrics(SSotBaseTestCase):
+class ManagerMetricsTests(SSotBaseTestCase):
     """Test ManagerMetrics business logic - tracks individual manager performance."""
 
     def test_manager_metrics_initialization(self):
@@ -86,7 +86,7 @@ class TestManagerMetrics(SSotBaseTestCase):
         assert 'T' in metrics_dict['created_at']
 
 @pytest.mark.unit
-class TestFactoryInitializationError(SSotBaseTestCase):
+class FactoryInitializationErrorTests(SSotBaseTestCase):
     """Test FactoryInitializationError business logic."""
 
     def test_factory_error_with_user_context(self):
@@ -98,7 +98,7 @@ class TestFactoryInitializationError(SSotBaseTestCase):
         assert isinstance(error, Exception)
 
 @pytest.mark.unit
-class TestDefensiveUserExecutionContext(SSotBaseTestCase):
+class DefensiveUserExecutionContextTests(SSotBaseTestCase):
     """Test create_defensive_user_execution_context business logic."""
 
     def test_defensive_context_creation_with_valid_user_id(self):
@@ -121,7 +121,7 @@ class TestDefensiveUserExecutionContext(SSotBaseTestCase):
             assert result.user_id == user_id
 
 @pytest.mark.unit
-class TestSSotUserContextValidation(SSotBaseTestCase):
+class SSotUserContextValidationTests(SSotBaseTestCase):
     """Test SSOT user context validation business logic."""
 
     def test_ssot_validation_accepts_legacy_user_context(self):
@@ -165,7 +165,7 @@ class TestSSotUserContextValidation(SSotBaseTestCase):
         assert result is False
 
 @pytest.mark.unit
-class TestConnectionLifecycleManager(SSotBaseTestCase):
+class ConnectionLifecycleManagerTests(SSotBaseTestCase):
     """Test ConnectionLifecycleManager business logic - manages connection lifecycle."""
 
     def setup_method(self):
@@ -222,7 +222,7 @@ class TestConnectionLifecycleManager(SSotBaseTestCase):
         assert connection_id not in self.lifecycle_manager._active_connections
 
 @pytest.mark.unit
-class TestIsolatedWebSocketManager(SSotBaseTestCase):
+class IsolatedWebSocketManagerTests(SSotBaseTestCase):
     """Test IsolatedWebSocketManager business logic - CRITICAL for user isolation."""
 
     def setup_method(self):
@@ -311,7 +311,7 @@ class TestIsolatedWebSocketManager(SSotBaseTestCase):
         assert isinstance(result, bool)
 
 @pytest.mark.unit
-class TestWebSocketManagerFactory(SSotBaseTestCase):
+class WebSocketManagerFactoryTests(SSotBaseTestCase):
     """Test WebSocket Manager factory functions - CRITICAL for multi-user resource management."""
 
     def setup_method(self):
@@ -379,7 +379,7 @@ class TestWebSocketManagerFactory(SSotBaseTestCase):
         assert 'components' in health_status
 
 @pytest.mark.unit
-class TestGlobalFactoryFunctions(SSotBaseTestCase):
+class GlobalFactoryFunctionsTests(SSotBaseTestCase):
     """Test global factory functions - SSOT for manager creation."""
 
     def test_get_websocket_manager_factory_function(self):

@@ -16,7 +16,7 @@ from typing import List, Dict, Set
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestEventValidatorSsotCompliance(SSotBaseTestCase):
+class EventValidatorSsotComplianceTests(SSotBaseTestCase):
     """
     SSOT Compliance validation for EventValidator consolidation.
     

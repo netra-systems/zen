@@ -13,7 +13,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 from netra_backend.app.services.security.compliance_validator import ComplianceValidator
 
-class TestSecurityComplianceRealValidationIntegration(SSotBaseTestCase):
+class SecurityComplianceRealValidationIntegrationTests(SSotBaseTestCase):
     """Test security compliance with real validation systems"""
 
     def setup_method(self):

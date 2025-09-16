@@ -65,7 +65,7 @@ def test_user_context(test_user_id):
     return UserExecutionContext(user_id=test_user_id, request_id=f'test_request_{uuid.uuid4().hex[:8]}', thread_id=f'test_thread_{uuid.uuid4().hex[:8]}', run_id=f'test_run_{uuid.uuid4().hex[:8]}')
 
 @pytest.mark.asyncio
-class TestAgentRegistryInitialization:
+class AgentRegistryInitializationTests:
     """Test AgentRegistry initialization and basic configuration."""
 
     async def test_init_creates_registry_with_required_components(self, mock_llm_manager, mock_tool_dispatcher_factory):
@@ -98,7 +98,7 @@ class TestAgentRegistryInitialization:
             assert callable(registry.tool_dispatcher_factory)
 
 @pytest.mark.asyncio
-class TestUserSessionManagement:
+class UserSessionManagementTests:
     """Test user session management and isolation features."""
 
     async def test_get_user_session_creates_new_session(self, mock_llm_manager, test_user_id):
@@ -157,7 +157,7 @@ class TestUserSessionManagement:
             await registry.cleanup_user_session(None)
 
 @pytest.mark.asyncio
-class TestWebSocketManagerIntegration:
+class WebSocketManagerIntegrationTests:
     """Test WebSocket manager integration and propagation."""
 
     async def test_set_websocket_manager_stores_manager(self, mock_llm_manager):
@@ -183,7 +183,7 @@ class TestWebSocketManagerIntegration:
         assert registry.websocket_manager is None
 
 @pytest.mark.asyncio
-class TestAgentCreationAndManagement:
+class AgentCreationAndManagementTests:
     """Test agent creation, registration, and management."""
 
     async def test_create_agent_for_user_validates_parameters(self, mock_llm_manager, test_user_context):
@@ -242,7 +242,7 @@ class TestAgentCreationAndManagement:
         assert result is False
 
 @pytest.mark.asyncio
-class TestToolDispatcherIntegration:
+class ToolDispatcherIntegrationTests:
     """Test tool dispatcher creation and enhancement."""
 
     @patch('netra_backend.app.core.tools.unified_tool_dispatcher.UnifiedToolDispatcher')
@@ -289,7 +289,7 @@ class TestToolDispatcherIntegration:
         assert registry.tool_dispatcher is None
 
 @pytest.mark.asyncio
-class TestAgentFactoryRegistration:
+class AgentFactoryRegistrationTests:
     """Test agent factory registration and default agent setup."""
 
     def test_register_default_agents_sets_flag(self, mock_llm_manager):
@@ -336,7 +336,7 @@ class TestAgentFactoryRegistration:
         assert 'Test error' in registry.registration_errors['failing_agent']
 
 @pytest.mark.asyncio
-class TestRegistryHealthAndDiagnostics:
+class RegistryHealthAndDiagnosticsTests:
     """Test registry health monitoring and diagnostic methods."""
 
     async def test_get_registry_health_returns_complete_status(self, mock_llm_manager):
@@ -409,7 +409,7 @@ class TestRegistryHealthAndDiagnostics:
         assert status['global_state_eliminated'] is True
 
 @pytest.mark.asyncio
-class TestUserSessionBehavior:
+class UserSessionBehaviorTests:
     """Test UserAgentSession behavior and lifecycle management."""
 
     def test_user_session_initialization(self, test_user_id):
@@ -480,7 +480,7 @@ class TestUserSessionBehavior:
         assert metrics['uptime_seconds'] >= 0
 
 @pytest.mark.asyncio
-class TestConcurrencyAndThreadSafety:
+class ConcurrencyAndThreadSafetyTests:
     """Test concurrent access and thread safety."""
 
     async def test_concurrent_user_session_creation(self, mock_llm_manager):
@@ -518,7 +518,7 @@ class TestConcurrencyAndThreadSafety:
         assert registry.websocket_manager == mock_websocket_managers[-1]
 
 @pytest.mark.asyncio
-class TestMemoryLeakPrevention:
+class MemoryLeakPreventionTests:
     """Test memory leak prevention features."""
 
     async def test_monitor_all_users_detects_memory_issues(self, mock_llm_manager):
@@ -561,7 +561,7 @@ class TestMemoryLeakPrevention:
         assert len(new_session._agents) == 0
 
 @pytest.mark.asyncio
-class TestBackwardCompatibility:
+class BackwardCompatibilityTests:
     """Test backward compatibility methods."""
 
     def test_list_agents_returns_registered_keys(self, mock_llm_manager):
@@ -598,7 +598,7 @@ class TestBackwardCompatibility:
         assert reset_report['using_universal_registry'] is True
 
 @pytest.mark.asyncio
-class TestModuleExports:
+class ModuleExportsTests:
     """Test module-level exports and factory functions."""
 
     def test_get_agent_registry_returns_registry_instance(self, mock_llm_manager):

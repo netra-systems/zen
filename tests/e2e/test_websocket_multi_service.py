@@ -27,7 +27,7 @@ from tests.e2e.config import UnifiedTestConfig
 
 
 @pytest.mark.e2e
-class TestWebSocketMultiService:
+class WebSocketMultiServiceTests:
     """Test suite for WebSocket multi-service communication."""
     
     @pytest.fixture

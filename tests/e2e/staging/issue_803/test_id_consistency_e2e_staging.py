@@ -31,7 +31,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.e2e
-class TestIssue803IDConsistencyE2EStaging(SSotAsyncTestCase):
+class Issue803IDConsistencyE2EStagingTests(SSotAsyncTestCase):
     """E2E staging tests for ID consistency in production-like environment."""
 
     async def asyncSetUp(self):

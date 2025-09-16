@@ -37,7 +37,7 @@ from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.schemas.registry import AgentStatus
 
 
-class TestWebSocketNotifierUnit(SSotBaseTestCase):
+class WebSocketNotifierUnitTests(SSotBaseTestCase):
     """Comprehensive unit tests for WebSocketNotifier business logic."""
 
     @pytest.fixture

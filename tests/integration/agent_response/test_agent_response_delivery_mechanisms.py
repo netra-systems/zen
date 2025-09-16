@@ -28,8 +28,8 @@ from netra_backend.app.services.user_execution_context import (
     create_isolated_execution_context
 )
 from netra_backend.app.schemas.agent_result_types import TypedAgentResult
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import UserAgentSession
 from netra_backend.app.logging_config import central_logger
 
@@ -63,7 +63,7 @@ class MockWebSocketConnection:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAgentResponseDeliveryMechanisms(BaseIntegrationTest):
+class AgentResponseDeliveryMechanismsTests(BaseIntegrationTest):
     """Test agent response delivery mechanisms."""
     
     def setup_method(self):

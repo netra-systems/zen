@@ -149,7 +149,7 @@ class BusinessValueValidator:
 
 @pytest.mark.e2e
 @pytest.mark.staging
-class TestStagingWebSocketBusinessValue:
+class StagingWebSocketBusinessValueTests:
     """E2E tests for business value delivery through WebSocket chat."""
     
     @pytest.mark.asyncio

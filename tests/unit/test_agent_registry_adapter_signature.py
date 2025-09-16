@@ -37,7 +37,7 @@ class MockAgent(BaseAgent):
         return {"result": f"Mock execution for {self.name}"}
 
 
-class TestAgentRegistryAdapterSignature:
+class AgentRegistryAdapterSignatureTests:
     """Test suite for AgentRegistryAdapter signature issues."""
 
     def setup_method(self):
@@ -214,7 +214,7 @@ class TestAgentRegistryAdapterSignature:
         assert result is None
 
 
-class TestAgentRegistryAdapterIntegrationWithExecutionCore:
+class AgentRegistryAdapterIntegrationWithExecutionCoreTests:
     """Integration tests showing the signature mismatch in context of AgentExecutionCore."""
 
     def setup_method(self):

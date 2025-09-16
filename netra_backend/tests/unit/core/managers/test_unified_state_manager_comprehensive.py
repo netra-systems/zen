@@ -92,7 +92,7 @@ def state_change_events():
         events.append(event)
     return (events, event_listener)
 
-class TestCoreStateOperations(BaseTestCase):
+class CoreStateOperationsTests(BaseTestCase):
     """Test core state operations - get, set, delete, exists, update."""
 
     def test_basic_get_set_operations(self):
@@ -177,7 +177,7 @@ class TestCoreStateOperations(BaseTestCase):
         self.assertEqual(result[0]['name'], 'item1')
         self.assertTrue(result[1]['metadata']['active'])
 
-class TestStateEntryMetadata(BaseTestCase):
+class StateEntryMetadataTests(BaseTestCase):
     """Test StateEntry metadata and versioning functionality."""
 
     def test_state_entry_creation(self):
@@ -247,7 +247,7 @@ class TestStateEntryMetadata(BaseTestCase):
         self.assertEqual(serialized['user_id'], 'user123')
         self.assertEqual(serialized['metadata'], {'priority': 'high'})
 
-class TestScopedStateIsolation(BaseTestCase):
+class ScopedStateIsolationTests(BaseTestCase):
     """Test scoped state operations and isolation boundaries."""
 
     def test_user_scoped_state(self):
@@ -335,7 +335,7 @@ class TestScopedStateIsolation(BaseTestCase):
         self.assertEqual(manager.get_thread_state('thread1', 'data'), 'thread_data')
         self.assertEqual(manager.get_agent_state('agent1', 'data'), 'agent_data')
 
-class TestThreadSafeOperations(BaseTestCase):
+class ThreadSafeOperationsTests(BaseTestCase):
     """Test thread-safe operations and race condition prevention."""
 
     def test_concurrent_set_operations(self):
@@ -452,7 +452,7 @@ class TestThreadSafeOperations(BaseTestCase):
             for result in results:
                 self.assertIsNotNone(result)
 
-class TestTTLExpiration(BaseTestCase):
+class TTLExpirationTests(BaseTestCase):
     """Test TTL-based state expiration functionality."""
 
     def test_basic_ttl_expiration(self):
@@ -539,7 +539,7 @@ class TestTTLExpiration(BaseTestCase):
         for key in states.keys():
             self.assertIsNone(results[key])
 
-class TestWebSocketIntegration(BaseTestCase):
+class WebSocketIntegrationTests(BaseTestCase):
     """Test WebSocket integration and real-time state synchronization."""
 
     def test_websocket_manager_integration(self):
@@ -607,7 +607,7 @@ class TestWebSocketIntegration(BaseTestCase):
         finally:
             await manager.shutdown()
 
-class TestStateQuerying(BaseTestCase):
+class StateQueryingTests(BaseTestCase):
     """Test state querying, filtering, and search operations."""
 
     def test_basic_state_query(self):
@@ -708,7 +708,7 @@ class TestStateQuerying(BaseTestCase):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0].key, 'persistent_key')
 
-class TestBulkOperations(BaseTestCase):
+class BulkOperationsTests(BaseTestCase):
     """Test bulk state operations for efficiency and performance."""
 
     def test_bulk_get_operations(self):
@@ -789,7 +789,7 @@ class TestBulkOperations(BaseTestCase):
         self.assertIsNone(manager.get_agent_state('agent1', 'context'))
         self.assertEqual(manager.get_agent_state('agent2', 'step'), 10)
 
-class TestMultiUserIsolation(BaseTestCase):
+class MultiUserIsolationTests(BaseTestCase):
     """Test multi-user isolation and prevent cross-contamination."""
 
     def test_user_manager_isolation(self):
@@ -888,7 +888,7 @@ class TestMultiUserIsolation(BaseTestCase):
         self.assertEqual(id(manager1), id(manager1_again))
         self.assertEqual(manager1_again.get('factory_test'), 'user1_data')
 
-class TestContextManagers(BaseTestCase):
+class ContextManagersTests(BaseTestCase):
     """Test context manager functionality for scoped operations."""
 
     @pytest.mark.asyncio
@@ -968,7 +968,7 @@ class TestContextManagers(BaseTestCase):
         self.assertIsNone(agent_ctx.get('temp_state'))
         self.assertIsNone(thread_ctx.get('temp_context'))
 
-class TestPerformanceAndMemory(BaseTestCase):
+class PerformanceAndMemoryTests(BaseTestCase):
     """Test performance characteristics and memory management."""
 
     def test_memory_limit_enforcement(self):
@@ -1057,7 +1057,7 @@ class TestPerformanceAndMemory(BaseTestCase):
         self.assertEqual(len(agent_results), 25)
         self.assertLess(query_time, 1.0, 'Index-based queries should be fast')
 
-class TestErrorHandlingAndEdgeCases(BaseTestCase):
+class ErrorHandlingAndEdgeCasesTests(BaseTestCase):
     """Test error handling, recovery, and edge cases."""
 
     def test_invalid_state_operations(self):
@@ -1146,7 +1146,7 @@ class TestErrorHandlingAndEdgeCases(BaseTestCase):
             future2.result()
         self.assertEqual(len(results), 200)
 
-class TestIntegrationAndMigration(BaseTestCase):
+class IntegrationAndMigrationTests(BaseTestCase):
     """Test integration patterns and legacy manager migration."""
 
     def test_legacy_function_compatibility(self):
@@ -1212,7 +1212,7 @@ class TestIntegrationAndMigration(BaseTestCase):
         counts_after = StateManagerFactory.get_manager_count()
         self.assertEqual(counts_after['total'], 0)
 
-class TestStatusAndMonitoring(BaseTestCase):
+class StatusAndMonitoringTests(BaseTestCase):
     """Test status reporting and monitoring functionality."""
 
     def test_status_reporting(self):
@@ -1301,7 +1301,7 @@ class TestStatusAndMonitoring(BaseTestCase):
         self.assertGreater(type_stats['session_data'], 0)
         self.assertGreater(type_stats['agent_execution'], 0)
 
-class TestEventSystemComprehensive(BaseTestCase):
+class EventSystemComprehensiveTests(BaseTestCase):
     """Test comprehensive event system functionality."""
 
     def test_change_listener_management(self):
@@ -1374,7 +1374,7 @@ class TestEventSystemComprehensive(BaseTestCase):
         self.assertIn('update', event_types)
         self.assertIn('delete', event_types)
 
-class TestEnvironmentConfigurationHandling(BaseTestCase):
+class EnvironmentConfigurationHandlingTests(BaseTestCase):
     """Test environment configuration loading and handling."""
 
     def test_environment_config_loading(self):
@@ -1407,7 +1407,7 @@ class TestEnvironmentConfigurationHandling(BaseTestCase):
             self.assertGreater(manager.cleanup_interval, 0)
             self.assertGreater(manager.max_memory_entries, 0)
 
-class TestAsyncBackgroundTasks(BaseTestCase):
+class AsyncBackgroundTasksTests(BaseTestCase):
     """Test async background task functionality."""
 
     @pytest.mark.asyncio
@@ -1453,7 +1453,7 @@ class TestAsyncBackgroundTasks(BaseTestCase):
         finally:
             await manager.shutdown()
 
-class TestAdvancedQueryOperations(BaseTestCase):
+class AdvancedQueryOperationsTests(BaseTestCase):
     """Test advanced state querying operations."""
 
     def test_empty_query_results(self):
@@ -1497,7 +1497,7 @@ class TestAdvancedQueryOperations(BaseTestCase):
         for i in range(len(results) - 1):
             self.assertGreaterEqual(results[i].updated_at, results[i + 1].updated_at, 'Results should be sorted by updated_at descending')
 
-class TestStateValidationAndIntegrity(BaseTestCase):
+class StateValidationAndIntegrityTests(BaseTestCase):
     """Test state validation and data integrity operations."""
 
     def test_state_scope_validation(self):
@@ -1540,7 +1540,7 @@ class TestStateValidationAndIntegrity(BaseTestCase):
         self.assertTrue(final_data['modified'])
         self.assertEqual(final_data['metadata']['version'], 1)
 
-class TestErrorRecoveryAndResilience(BaseTestCase):
+class ErrorRecoveryAndResilienceTests(BaseTestCase):
     """Test error recovery and system resilience."""
 
     def test_recovery_from_index_corruption(self):
@@ -1589,7 +1589,7 @@ class TestErrorRecoveryAndResilience(BaseTestCase):
             except:
                 pass
 
-class TestWebSocketIntegrationAdvanced(BaseTestCase):
+class WebSocketIntegrationAdvancedTests(BaseTestCase):
     """Test advanced WebSocket integration scenarios."""
 
     @pytest.mark.asyncio
@@ -1617,7 +1617,7 @@ class TestWebSocketIntegrationAdvanced(BaseTestCase):
         await asyncio.sleep(0.01)
         self.assertEqual(manager.get('ws_error_test'), 'test_value')
 
-class TestFactoryPatternAdvanced(BaseTestCase):
+class FactoryPatternAdvancedTests(BaseTestCase):
     """Test advanced factory pattern scenarios."""
 
     @pytest.mark.asyncio

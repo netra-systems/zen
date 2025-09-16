@@ -29,7 +29,7 @@ env.set('RUN_E2E_TESTS', 'true', "test")
 from test_framework.real_services import get_real_services, RealServicesManager
 
 # Import production WebSocket components
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
@@ -89,7 +89,7 @@ Sequence: {'  ->  '.join(event_types)}
 
 @pytest.mark.critical
 @pytest.mark.mission_critical 
-class TestRealWebSocketSubAgent:
+class RealWebSocketSubAgentTests:
     """Test WebSocket sub-agent events using FORCED real connections."""
     
     @pytest.mark.asyncio
@@ -193,13 +193,13 @@ class TestRealWebSocketSubAgent:
         
         events_received = []
         
-        class TestWebSocket:
+        class WebSocketTests:
             async def send_json(self, data):
                 events_received.append(data)
                 logger.info(f"Manager sent: {data.get('type')}")
         
         # Connect and test
-        test_ws = TestWebSocket()
+        test_ws = WebSocketTests()
         await ws_manager.connect_user(connection_id, test_ws, connection_id)
         
         # Send test message

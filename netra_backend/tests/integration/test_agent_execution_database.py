@@ -107,7 +107,7 @@ class DatabasePersistenceAgent(BaseAgent):
         self.persistent_data.update(state_updates)
         await asyncio.sleep(0.01)
 
-class TestAgentExecutionDatabase(BaseIntegrationTest):
+class AgentExecutionDatabaseTests(BaseIntegrationTest):
     """Integration tests for agent execution with database persistence."""
 
     def setup_method(self):
@@ -138,6 +138,7 @@ class TestAgentExecutionDatabase(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
+    @pytest.mark.database
     async def test_agent_persists_state_across_requests(self, real_services_fixture, database_test_context, database_persistence_agent):
         """Test agent state persistence with real PostgreSQL database."""
         db = real_services_fixture['db']
@@ -166,6 +167,7 @@ class TestAgentExecutionDatabase(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
+    @pytest.mark.database
     async def test_database_transaction_isolation_between_users(self, real_services_fixture, mock_llm_manager):
         """Test database transaction isolation between concurrent users."""
         db = real_services_fixture['db']
@@ -196,6 +198,7 @@ class TestAgentExecutionDatabase(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
+    @pytest.mark.database
     async def test_cross_session_state_recovery(self, real_services_fixture, database_test_context, mock_llm_manager):
         """Test agent state recovery across different sessions."""
         db = real_services_fixture['db']
@@ -218,6 +221,7 @@ class TestAgentExecutionDatabase(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
+    @pytest.mark.database
     async def test_database_error_handling_and_rollback(self, real_services_fixture, database_test_context, mock_llm_manager):
         """Test database error handling and transaction rollback."""
         db = real_services_fixture['db']
@@ -242,6 +246,7 @@ class TestAgentExecutionDatabase(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
+    @pytest.mark.database
     async def test_agent_database_performance_under_load(self, real_services_fixture, mock_llm_manager):
         """Test agent database performance under concurrent load."""
         db = real_services_fixture['db']
@@ -276,6 +281,7 @@ class TestAgentExecutionDatabase(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
+    @pytest.mark.database
     async def test_data_consistency_across_multiple_operations(self, real_services_fixture, database_test_context, database_persistence_agent):
         """Test data consistency across multiple database operations."""
         db = real_services_fixture['db']

@@ -12,7 +12,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.schemas.shared_types import ErrorContext
 
 
-class TestErrorContextTraceId:
+class ErrorContextTraceIdTests:
     """Test suite for ErrorContext trace_id field validation."""
     
     def test_error_context_with_explicit_trace_id(self):
@@ -154,7 +154,7 @@ class TestErrorContextTraceId:
 
 if __name__ == "__main__":
     # Run the tests
-    test_suite = TestErrorContextTraceId()
+    test_suite = ErrorContextTraceIdTests()
     
     print("Running ErrorContext trace_id validation tests...")
     

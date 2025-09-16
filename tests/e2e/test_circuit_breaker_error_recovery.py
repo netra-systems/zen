@@ -27,7 +27,7 @@ pytestmark = [
 
 
 @pytest.mark.e2e
-class TestCircuitBreakerErrorRecovery:
+class CircuitBreakerErrorRecoveryTests:
     """Test circuit breaker patterns and error recovery."""
 
     @pytest.mark.asyncio

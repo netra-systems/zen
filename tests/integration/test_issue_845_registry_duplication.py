@@ -27,7 +27,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.integration
-class TestIssue845RegistryDuplication(SSotAsyncTestCase):
+class Issue845RegistryDuplicationTests(SSotAsyncTestCase):
     """Test suite demonstrating SSOT AgentRegistry duplication issues."""
 
     async def asyncSetUp(self):

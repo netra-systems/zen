@@ -110,7 +110,7 @@ class MinimalTestAgent:
         return {"status": "success", "agent": self.name}
 
 
-class TestWebSocketBridgeMinimal(unittest.IsolatedAsyncioTestCase):
+class WebSocketBridgeMinimalTests(unittest.IsolatedAsyncioTestCase):
     """Minimal WebSocket bridge lifecycle tests."""
     
     async def test_bridge_propagation_to_agent(self):

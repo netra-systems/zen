@@ -22,7 +22,7 @@ from dev_launcher.service_coordination import (
 
 
 @pytest.mark.e2e
-class TestPlatformAwarePortAllocator:
+class PlatformAwarePortAllocatorTests:
     """Test platform-aware port allocation."""
     
     @pytest.fixture
@@ -149,7 +149,7 @@ class TestPlatformAwarePortAllocator:
 
 
 @pytest.mark.e2e
-class TestServiceInitializationGates:
+class ServiceInitializationGatesTests:
     """Test service initialization with dependency gates."""
     
     @pytest.fixture
@@ -327,7 +327,7 @@ class TestServiceInitializationGates:
 
 
 @pytest.mark.e2e
-class TestIntegratedServiceCoordination:
+class IntegratedServiceCoordinationTests:
     """Test integrated service coordination scenarios."""
     
     @pytest.mark.asyncio
@@ -447,7 +447,7 @@ class TestIntegratedServiceCoordination:
 
 
 @pytest.mark.e2e
-class TestPortAvailabilityChecking:
+class PortAvailabilityCheckingTests:
     """Test port availability checking logic."""
     
     @pytest.fixture

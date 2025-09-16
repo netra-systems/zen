@@ -58,7 +58,7 @@ class CrossServiceConfigurationAnalysis:
     integration_risks: List[str]
 
 @pytest.mark.integration
-class TestSSotConfigurationAccessIntegration(SSotAsyncTestCase):
+class SSotConfigurationAccessIntegrationTests(SSotAsyncTestCase):
     """Integration tests for SSOT configuration access patterns across services."""
 
     def setup_method(self, method=None):

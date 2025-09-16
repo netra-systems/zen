@@ -46,7 +46,7 @@ from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestWebSocketAgentEventEmission(SSotAsyncTestCase):
+class WebSocketAgentEventEmissionTests(SSotAsyncTestCase):
     """Test suite for WebSocket agent event emission validation."""
 
     def setup_method(self, method):

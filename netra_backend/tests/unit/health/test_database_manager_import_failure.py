@@ -13,7 +13,7 @@ from unittest.mock import patch, MagicMock
 from contextlib import contextmanager
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestDatabaseManagerImportFailure(SSotBaseTestCase):
+class DatabaseManagerImportFailureTests(SSotBaseTestCase):
     """Test cases to prove database manager import failure in deep health checks."""
 
     def setUp(self):

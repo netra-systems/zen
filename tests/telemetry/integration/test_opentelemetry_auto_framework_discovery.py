@@ -30,7 +30,7 @@ from test_framework.unified_docker_manager import UnifiedDockerManager
 logger = logging.getLogger(__name__)
 
 
-class TestAutoInstrumentationFrameworkDiscovery(SSotAsyncTestCase):
+class AutoInstrumentationFrameworkDiscoveryTests(SSotAsyncTestCase):
     """Test automatic discovery and instrumentation of frameworks."""
     
     @pytest.fixture(autouse=True)
@@ -380,7 +380,7 @@ class TestAutoInstrumentationFrameworkDiscovery(SSotAsyncTestCase):
                 pass
 
 
-class TestAutoInstrumentationMultiFrameworkIntegration(SSotAsyncTestCase):
+class AutoInstrumentationMultiFrameworkIntegrationTests(SSotAsyncTestCase):
     """Test automatic instrumentation across multiple frameworks simultaneously."""
     
     def setup_method(self, method=None):

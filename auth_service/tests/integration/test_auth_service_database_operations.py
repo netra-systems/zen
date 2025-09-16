@@ -19,7 +19,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.isolated_environment_fixtures import isolated_env
 
 
-class TestAuthServiceDatabaseOperations(BaseIntegrationTest):
+class AuthServiceDatabaseOperationsTests(BaseIntegrationTest):
     """Test auth service database operations and persistence"""
 
     def setup_method(self):

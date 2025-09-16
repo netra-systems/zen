@@ -19,7 +19,7 @@ from shared.isolated_environment import IsolatedEnvironment
 @pytest.mark.e2e
 @pytest.mark.github_integration
 @pytest.mark.authenticated
-class TestCompleteGitHubIssueWorkflowE2E(SSotAsyncTestCase):
+class CompleteGitHubIssueWorkflowE2ETests(SSotAsyncTestCase):
     """E2E test for complete GitHub issue creation and management workflow."""
 
     def setup_method(self, method):
@@ -281,7 +281,7 @@ class TestCompleteGitHubIssueWorkflowE2E(SSotAsyncTestCase):
 @pytest.mark.github_integration
 @pytest.mark.claude_commands
 @pytest.mark.authenticated
-class TestClaudeCommandGitHubIntegrationE2E(SSotAsyncTestCase):
+class ClaudeCommandGitHubIntegrationE2ETests(SSotAsyncTestCase):
     """E2E test for Claude command integration with GitHub operations."""
 
     def setup_method(self, method):
@@ -418,7 +418,7 @@ class TestClaudeCommandGitHubIntegrationE2E(SSotAsyncTestCase):
 @pytest.mark.github_integration
 @pytest.mark.multi_user
 @pytest.mark.authenticated
-class TestGitHubIntegrationMultiUserE2E(SSotAsyncTestCase):
+class GitHubIntegrationMultiUserE2ETests(SSotAsyncTestCase):
     """E2E test for GitHub integration in multi-user scenarios."""
 
     def setup_method(self, method):

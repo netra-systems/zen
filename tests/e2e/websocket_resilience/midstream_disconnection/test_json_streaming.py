@@ -33,7 +33,7 @@ from tests.e2e.websocket_resilience.utils.streaming_response_generator import (
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestJSONStreamingDisconnection:
+class JSONStreamingDisconnectionTests:
     """Test JSON streaming disconnection and recovery."""
     
     @pytest.mark.resilience

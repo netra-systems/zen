@@ -66,7 +66,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 logger = logging.getLogger(__name__)
 
 
-class TestAuthComprehensiveIntegration(BaseIntegrationTest):
+class AuthComprehensiveIntegrationTests(BaseIntegrationTest):
     """
     Comprehensive integration tests for auth service covering all business scenarios.
     

@@ -17,7 +17,7 @@ from netra_backend.app.core.backend_environment import BackendEnvironment
 from netra_backend.app.core.health_checkers import check_redis_health
 from netra_backend.app.redis_manager import redis_manager
 
-class TestRedisConfigurationValidationIntegration(SSotAsyncTestCase):
+class RedisConfigurationValidationIntegrationTests(SSotAsyncTestCase):
     """Integration tests for Redis configuration validation failures."""
 
     def setUp(self):

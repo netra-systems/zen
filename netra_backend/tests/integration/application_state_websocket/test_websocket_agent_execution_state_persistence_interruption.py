@@ -72,7 +72,7 @@ class StatePersistenceAgent(BaseAgent):
         """Handle errors while preserving state."""
         await self.websocket_bridge.notify_agent_error(run_id, self.name, error_msg, error_context={'state_preserved': True, 'recovery_possible': True})
 
-class TestWebSocketAgentExecutionStatePersistenceInterruption(BaseIntegrationTest):
+class WebSocketAgentExecutionStatePersistenceInterruptionTests(BaseIntegrationTest):
 
     def setup_method(self):
         super().setup_method()

@@ -47,7 +47,7 @@ from netra_backend.app.db.comprehensive_health_monitor import ComprehensiveHealt
 from netra_backend.app.db.connection_pool_monitor import ConnectionPoolMonitor
 from netra_backend.app.monitoring.system_resource_monitor import SystemResourceMonitor
 
-class TestSystemHealthMonitoringCritical(SSotBaseTestCase):
+class SystemHealthMonitoringCriticalTests(SSotBaseTestCase):
     """
     Critical system health monitoring tests.
     

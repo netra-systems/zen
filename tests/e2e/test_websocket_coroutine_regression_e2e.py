@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.e2e
-class TestWebSocketCoroutineRegressionE2E(SSotBaseTestCase):
+class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
     """
     E2E tests for WebSocket coroutine regression prevention.
     

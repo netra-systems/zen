@@ -19,7 +19,7 @@ from test_framework.ssot.base_test_case import BaseTestCase
 from shared.isolated_environment import get_env
 
 
-class TestCrossServiceConfigurationValidation(BaseTestCase):
+class CrossServiceConfigurationValidationTests(BaseTestCase):
     """Integration tests for cross-service configuration consistency."""
     
     @pytest.mark.integration

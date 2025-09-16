@@ -22,7 +22,7 @@ from netra_backend.app.services.state_persistence import StateCacheManager, stat
 from netra_backend.app.redis_manager import redis_manager
 
 
-class TestStateCacheManagerRedisIntegration:
+class StateCacheManagerRedisIntegrationTests:
     """Unit tests for StateCacheManager Redis integration - FAILING TESTS."""
     
     @pytest.mark.unit

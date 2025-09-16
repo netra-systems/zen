@@ -20,7 +20,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from shared.configuration.central_config_validator import CentralConfigurationValidator
 
 
-class TestConfigRegressionPreventionAlgorithms(BaseTestCase):
+class ConfigRegressionPreventionAlgorithmsTests(BaseTestCase):
     """Test algorithms that prevent configuration regressions and cascade failures."""
     
     def setup_method(self):

@@ -230,7 +230,7 @@ class UserExperienceAnalyzer:
         return communication_quality
 
 
-class TestEnhancedGracefulDegradation(SSotAsyncTestCase):
+class EnhancedGracefulDegradationTests(SSotAsyncTestCase):
     """
     Enhanced graceful degradation tests with advanced failure scenarios.
 

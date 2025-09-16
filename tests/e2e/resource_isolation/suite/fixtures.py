@@ -10,7 +10,7 @@ import pytest
 import pytest_asyncio
 
 from tests.e2e.resource_isolation.suite.test_suite_core import (
-    TestResourceIsolationSuite,
+    ResourceIsolationSuiteTests as TestResourceIsolationSuite,
 )
 
 logger = logging.getLogger(__name__)

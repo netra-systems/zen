@@ -792,7 +792,7 @@ class EnhancedCompleteUserPromptToReportTester:
                 logger.warning('Cleanup timeout - some connections may not have closed cleanly')
         logger.info(' PASS:  Enhanced cleanup completed')
 
-class TestEnhancedCompleteUserPromptToReportFlow:
+class EnhancedCompleteUserPromptToReportFlowTests:
     """Enhanced mission critical tests for complete user prompt to actionable report flow."""
 
     @pytest.mark.asyncio

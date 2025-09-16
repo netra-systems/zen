@@ -56,7 +56,7 @@ from test_framework.ssot.e2e_auth_helper import (
 
 # Import production components to validate against fallback creation
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.smd import StartupOrchestrator
 
@@ -588,7 +588,7 @@ class WebSocketTestClient:
 @pytest.mark.mission_critical
 @pytest.mark.real_services
 @pytest.mark.fallback_prevention
-class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
+class FallbackHandlerDegradationPreventionTests(BaseE2ETest):
     """
     Mission Critical Test Suite: Fallback Handler Degradation Prevention
     

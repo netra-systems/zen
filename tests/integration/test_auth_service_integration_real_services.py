@@ -29,7 +29,7 @@ from netra_backend.app.clients.auth_client_core import AuthClientCore
 logger = logging.getLogger(__name__)
 
 
-class TestAuthServiceIntegrationRealServices(SSotBaseTestCase):
+class AuthServiceIntegrationRealServicesTests(SSotBaseTestCase):
     """Test authentication service integration with real services."""
     
     async def _check_auth_service_availability(self, auth_client: AuthClientCore) -> bool:

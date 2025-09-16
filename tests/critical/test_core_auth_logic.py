@@ -325,7 +325,7 @@ def token_service():
 
 
 @pytest.mark.asyncio
-class TestCoreAuthLogic:
+class CoreAuthLogicTests:
     """Test core authentication logic without external dependencies."""
     
     def test_email_validation_logic(self):

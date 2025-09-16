@@ -24,7 +24,7 @@ from tests.helpers.auth_test_utils import TestAuthHelper
 
 
 @pytest.mark.e2e
-class TestWebSocketAuthConsistencyFix(StagingTestBase):
+class WebSocketAuthConsistencyFixTests(StagingTestBase):
     """Test that WebSocket auth is consistent with REST auth after fix"""
     
     def setup_method(self):
@@ -331,7 +331,7 @@ if __name__ == "__main__":
     print("[U+1F680] Starting WebSocket Authentication Consistency Fix Test...")
     
     async def run_tests():
-        test_class = TestWebSocketAuthConsistencyFix()
+        test_class = WebSocketAuthConsistencyFixTests()
         test_class.setup_class()
         test_class.ensure_auth_setup()
         

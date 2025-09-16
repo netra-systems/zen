@@ -22,7 +22,7 @@ from unittest.mock import Mock, patch, AsyncMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.websocket_core.handlers import MessageRouter, get_message_router
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
@@ -44,7 +44,7 @@ class MockWebSocket:
         self.sent_messages.append(('text', data))
 
 @pytest.mark.integration
-class TestMessageRouterConsolidatedFunctionality(SSotAsyncTestCase):
+class MessageRouterConsolidatedFunctionalityTests(SSotAsyncTestCase):
     """Integration tests for MessageRouter consolidated functionality."""
 
     def setUp(self):
@@ -83,7 +83,7 @@ class TestMessageRouterConsolidatedFunctionality(SSotAsyncTestCase):
         router = get_message_router()
         mock_websocket = MockWebSocket()
 
-        class TestHandler:
+        class HandlerTests:
 
             def __init__(self, name):
                 self.name = name
@@ -95,7 +95,7 @@ class TestMessageRouterConsolidatedFunctionality(SSotAsyncTestCase):
             async def handle_message(self, user_id, websocket, message):
                 self.handled_messages.append({'user_id': user_id, 'message_type': str(message.type), 'timestamp': time.time()})
                 return True
-        test_handler = TestHandler('CustomTestHandler')
+        test_handler = HandlerTests('CustomTestHandler')
         initial_handler_count = len(router.handlers)
         start_time = time.time()
         router.add_handler(test_handler)

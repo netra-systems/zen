@@ -23,7 +23,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = logging.getLogger(__name__)
 
 
-class TestOpenTelemetryAutoInstrumentationConfig(SSotBaseTestCase):
+class OpenTelemetryAutoInstrumentationConfigTests(SSotBaseTestCase):
     """Test automatic instrumentation configuration and setup."""
     
     def setup_method(self, method=None):
@@ -451,7 +451,7 @@ class TestOpenTelemetryAutoInstrumentationConfig(SSotBaseTestCase):
         self.record_metric("export_timeout_ms", timeout_ms)
 
 
-class TestAutoInstrumentationInitialization(SSotBaseTestCase):
+class AutoInstrumentationInitializationTests(SSotBaseTestCase):
     """Test automatic instrumentation initialization patterns."""
     
     def setup_method(self, method=None):

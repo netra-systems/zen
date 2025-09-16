@@ -45,7 +45,7 @@ Core AI functionality validation.
 
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -59,7 +59,7 @@ from typing import Any, Dict
 
 import pytest
 
-class TestAPIAgentGenerationCritical:
+class APIAgentGenerationCriticalTests:
     """Critical agent and generation API endpoint tests."""
     @pytest.mark.asyncio
     async def test_agent_query_endpoint(self):

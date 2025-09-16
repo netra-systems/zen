@@ -24,10 +24,10 @@ from netra_backend.app.websocket_core.unified_manager import (
     WebSocketConnection,
     _serialize_message_safely
 )
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 
-class TestUnifiedWebSocketManagerE2EMultiUser(BaseTestCase):
+class UnifiedWebSocketManagerE2EMultiUserTests(BaseTestCase):
     """
     E2E test for multi-user WebSocket infrastructure with authentication and isolation.
     

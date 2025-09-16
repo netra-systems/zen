@@ -28,7 +28,7 @@ from typing import Dict, List, Set
 import unittest
 from unittest import TestCase
 
-class TestUserExecutionEngineSSotImports(TestCase):
+class UserExecutionEngineSSotImportsTests(TestCase):
     """Test suite validating UserExecutionEngine SSOT import consolidation."""
 
     def setUp(self):

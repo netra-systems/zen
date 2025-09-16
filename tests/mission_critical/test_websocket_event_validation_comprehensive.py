@@ -258,7 +258,7 @@ class ComprehensiveEventValidator:
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.mission_critical
-class TestComprehensiveWebSocketEventValidation:
+class ComprehensiveWebSocketEventValidationTests:
     """
     MISSION CRITICAL: Comprehensive WebSocket Event Validation Test Suite
     

@@ -14,7 +14,7 @@ from tests.utils.asyncio_test_utils import AsyncioTestUtils, EventLoopTestError,
 from unittest.mock import patch
 
 @pytest.mark.unit
-class TestAsyncioSafetyChecks:
+class AsyncioSafetyChecksTests:
     """Test suite for asyncio safety checks"""
 
     def test_detect_event_loop_running_no_loop(self):
@@ -93,7 +93,7 @@ class TestAsyncioSafetyChecks:
         assert results['is_coroutine_function'] is True
 
 @pytest.mark.unit
-class TestAsyncioRegressionTester:
+class AsyncioRegressionTesterTests:
     """Test the regression tester functionality"""
 
     @pytest.mark.asyncio
@@ -124,7 +124,7 @@ class TestAsyncioRegressionTester:
         assert 'Failed: 0' in report
 
 @pytest.mark.unit
-class TestEventLoopValidator:
+class EventLoopValidatorTests:
     """Test the module validation functionality"""
 
     def test_validate_module_with_test_file(self, tmp_path):
@@ -140,7 +140,7 @@ class TestEventLoopValidator:
         assert results['issues'][0]['function'] == 'bad_async_function'
 
 @pytest.mark.unit
-class TestNestedEventLoopPatterns:
+class NestedEventLoopPatternsTests:
     """Test specific patterns that caused issues in production"""
 
     def test_startup_fixes_pattern(self):
@@ -201,7 +201,7 @@ class TestNestedEventLoopPatterns:
         asyncio.run(test_from_async())
 
 @pytest.mark.unit
-class TestThreadSafeExecution:
+class ThreadSafeExecutionTests:
     """Test thread-safe execution patterns"""
 
     def test_run_in_thread_with_loop_sync_function(self):
@@ -231,7 +231,7 @@ class TestThreadSafeExecution:
         assert 'Test error' in str(exc_info.value)
 
 @pytest.mark.unit
-class TestEventLoopIsolation:
+class EventLoopIsolationTests:
     """Test event loop isolation patterns"""
 
     def test_isolated_event_loop_execution(self):

@@ -25,14 +25,14 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any
 import threading
 import time
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerMode
 from netra_backend.app.websocket_core.connection_state_machine import ApplicationConnectionState, ConnectionStateMachine
 from shared.types.core_types import UserID, ConnectionID
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.unit
-class TestSendAfterCloseRaceCondition(SSotAsyncTestCase):
+class SendAfterCloseRaceConditionTests(SSotAsyncTestCase):
     """
     Unit tests to reproduce WebSocket send-after-close race condition.
 
@@ -167,7 +167,7 @@ class TestSendAfterCloseRaceCondition(SSotAsyncTestCase):
                 asyncio.run(self.manager.send_message(self.user_id, {'type': 'test'}))
 
 @pytest.mark.unit
-class TestWebSocketStateValidationMissing(SSotAsyncTestCase):
+class WebSocketStateValidationMissingTests(SSotAsyncTestCase):
     """
     Tests to demonstrate missing validation patterns that cause race conditions.
 

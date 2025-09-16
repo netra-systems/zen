@@ -42,7 +42,7 @@ from shared.types.core_types import UserID, ThreadID, RunID
 
 
 @pytest.mark.unit
-class TestReportingSubAgentDeepAgentStateMigration(SSotAsyncTestCase):
+class ReportingSubAgentDeepAgentStateMigrationTests(SSotAsyncTestCase):
     """
     Unit tests for ReportingSubAgent migration from DeepAgentState to UserExecutionContext.
     

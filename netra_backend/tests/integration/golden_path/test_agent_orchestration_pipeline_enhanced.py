@@ -87,7 +87,7 @@ class PipelineExecutionResult:
     error_recovery_actions: List[str] = None
 
 
-class TestAgentOrchestrationPipeline(ServiceOrchestrationIntegrationTest):
+class AgentOrchestrationPipelineTests(ServiceOrchestrationIntegrationTest):
     """
     Enhanced Agent Orchestration Pipeline Integration Tests
     

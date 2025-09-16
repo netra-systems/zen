@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 
 
-class TestMissionCriticalAccessibility:
+class MissionCriticalAccessibilityTests:
     """Test that Mission Critical tests are accessible and runnable."""
     
     def test_phase4_mission_critical_test_discovery(self):
@@ -185,7 +185,7 @@ class TestMissionCriticalAccessibility:
         assert True, "Mission Critical tests work with --analyze-service-deps option"
 
 
-class TestBusinessValueProtection:
+class BusinessValueProtectionTests:
     """Test that business value protection through tests is functional."""
     
     def test_phase4_critical_test_execution_capability(self):
@@ -315,7 +315,7 @@ class TestBusinessValueProtection:
         assert True, "WebSocket business value protection tests are accessible"
 
 
-class TestStagingEnvironmentIntegration:
+class StagingEnvironmentIntegrationTests:
     """Test integration with staging environment for validation."""
     
     def test_phase4_staging_environment_test_execution(self):
@@ -410,7 +410,7 @@ class TestStagingEnvironmentIntegration:
         assert test_count > 0, f"Production readiness validation ready: {test_count} critical tests"
 
 
-class TestRegressionPrevention:
+class RegressionPreventionTests:
     """Test that fixes don't introduce regressions."""
     
     def test_phase4_configuration_regression_detection(self):

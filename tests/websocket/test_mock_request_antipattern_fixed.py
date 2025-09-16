@@ -1,7 +1,7 @@
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
 @pytest.mark.websocket
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
@@ -34,7 +34,7 @@ class TestWebSocketConnection:
                 from starlette.requests import Request
                 from starlette.websockets import WebSocket, WebSocketState
                 from sqlalchemy.ext.asyncio import AsyncSession
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 from test_framework.database.test_database_manager import DatabaseTestManager
                 from auth_service.core.auth_manager import AuthManager
                 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -49,7 +49,7 @@ class TestWebSocketConnection:
                 from netra_backend.app.clients.auth_client_core import AuthServiceClient
                 from shared.isolated_environment import get_env
 
-                class TestWebSocketRemediationCore:
+                class WebSocketRemediationCoreTests:
                     """Core tests for WebSocket mock Request elimination."""
 
                     @pytest.mark.asyncio

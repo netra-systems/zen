@@ -55,7 +55,7 @@ class EventSequence:
     sequence_violations: List[str] = field(default_factory=list)
 
 
-class TestGoldenPathWebSocketEvents(SSotAsyncTestCase):
+class GoldenPathWebSocketEventsTests(SSotAsyncTestCase):
     """Test Golden Path WebSocket events in staging environment.
     
     These tests MUST FAIL with current race conditions in event delivery.

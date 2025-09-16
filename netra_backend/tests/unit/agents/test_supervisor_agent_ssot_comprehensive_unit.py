@@ -95,7 +95,7 @@ class MockAgentInstanceFactory:
         if llm_manager:
             self.llm_manager = llm_manager
 
-class TestSupervisorAgentSSOTCore(SSotAsyncTestCase):
+class SupervisorAgentSSOTCoreTests(SSotAsyncTestCase):
     """Test core SupervisorAgent SSOT functionality - MISSION CRITICAL for chat delivery."""
 
     def setup_method(self, method):
@@ -370,7 +370,7 @@ class TestSupervisorAgentSSOTCore(SSotAsyncTestCase):
         self.assertIn('factory_based=True', repr_str)
         self.record_metric('string_representations_validated', True)
 
-class TestSupervisorAgentSSOTErrorScenarios(SSotAsyncTestCase):
+class SupervisorAgentSSOTErrorScenariosTests(SSotAsyncTestCase):
     """Test SupervisorAgent SSOT error scenarios and edge cases."""
 
     def setup_method(self, method):
@@ -455,7 +455,7 @@ class TestSupervisorAgentSSOTErrorScenarios(SSotAsyncTestCase):
             self.assertEqual(len(cleanup_tracking), 1)
         self.record_metric('cleanup_on_error_validated', True)
 
-class TestSupervisorAgentSSOTPerformance(SSotAsyncTestCase):
+class SupervisorAgentSSOTPerformanceTests(SSotAsyncTestCase):
     """Test SupervisorAgent SSOT performance characteristics."""
 
     def setup_method(self, method):

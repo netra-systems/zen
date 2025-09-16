@@ -46,7 +46,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.integration
-class TestWebSocketAuthenticationFlow(SSotAsyncTestCase):
+class WebSocketAuthenticationFlowTests(SSotAsyncTestCase):
     """
     Integration tests for core WebSocket authentication flows.
     
@@ -597,4 +597,4 @@ class TestWebSocketAuthenticationFlow(SSotAsyncTestCase):
 
 
 # Export test class for pytest discovery
-__all__ = ["TestWebSocketAuthenticationFlow"]
+__all__ = ["WebSocketAuthenticationFlowTests"]

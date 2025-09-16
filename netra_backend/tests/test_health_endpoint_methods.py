@@ -31,7 +31,7 @@ import pytest
 import asyncio
 from typing import Dict, Any
 import json
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.redis_manager import redis_manager
 from shared.isolated_environment import IsolatedEnvironment
 from fastapi.testclient import TestClient
@@ -45,7 +45,7 @@ def create_test_app() -> FastAPI:
     app.include_router(router, prefix='/health', tags=['health'])
     return app
 
-class TestHealthEndpointMethods:
+class HealthEndpointMethodsTests:
     """Test health endpoint HTTP method support that currently fails."""
 
     def setup_method(self):

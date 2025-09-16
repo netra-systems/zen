@@ -24,7 +24,7 @@ from auth_service.auth_core.security.cross_service_validator import (
 from auth_service.auth_core.auth_environment import AuthEnvironment
 
 
-class TestCrossServiceValidator:
+class CrossServiceValidatorTests:
     """Comprehensive unit tests for cross-service validation security logic."""
 
     @pytest_asyncio.fixture(autouse=True)
@@ -352,7 +352,7 @@ class TestCrossServiceValidator:
         self.assertIsInstance(denied_result.allowed_operations, list)
 
 
-class TestCrossServiceValidatorEdgeCases:
+class CrossServiceValidatorEdgeCasesTests:
     """Test edge cases and security scenarios for cross-service validation."""
 
     @pytest_asyncio.fixture(autouse=True)

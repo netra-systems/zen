@@ -29,7 +29,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestServiceSecretValidationFailures(BaseIntegrationTest):
+class ServiceSecretValidationFailuresTests(BaseIntegrationTest):
     """
     Test SERVICE_SECRET validation failures that cause 403 authentication errors.
 
@@ -179,7 +179,7 @@ class TestServiceSecretValidationFailures(BaseIntegrationTest):
         logger.error("   This matches production pattern: 403: Not authenticated")
 
 
-class TestAuthClientServiceHeaderGeneration(BaseIntegrationTest):
+class AuthClientServiceHeaderGenerationTests(BaseIntegrationTest):
     """Test authentication client header generation failures."""
 
     @pytest.mark.unit
@@ -239,7 +239,7 @@ class TestAuthClientServiceHeaderGeneration(BaseIntegrationTest):
 
 
 # Test Execution Helper for Issue #1037
-class TestIssue1037ReproductionSuite:
+class Issue1037ReproductionSuiteTests:
     """
     Complete test suite to reproduce Issue #1037 service authentication failures.
 

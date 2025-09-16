@@ -24,10 +24,10 @@ from datetime import datetime, timezone
 from netra_backend.app.websocket_core.message_queue import MessageQueue
 from netra_backend.app.websocket_core.connection_manager import ConnectionManager
 from netra_backend.app.websocket_core.batch_message_handler import BatchMessageHandler
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
 
-class TestWebSocketMessageRoutingBusinessLogic:
+class WebSocketMessageRoutingBusinessLogicTests:
     """Test WebSocket message routing business logic patterns."""
     
     @pytest.fixture

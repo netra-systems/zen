@@ -24,7 +24,7 @@ import pytest
 
 # ===== EXAMPLE 1: PROPERLY SIZED TEST FUNCTIONS =====
 
-class TestAuthenticationCompliant:
+class AuthenticationCompliantTests:
     """Example of compliant test class with 25-line function limit"""
     
     def test_successful_login(self, auth_service, valid_user):
@@ -55,7 +55,7 @@ class TestAuthenticationCompliant:
 
 # ===== EXAMPLE 2: EXTRACTING HELPER METHODS =====
 
-class TestDataProcessingCompliant:
+class DataProcessingCompliantTests:
     """Example showing how to extract logic to keep tests under 8 lines"""
     
     def test_process_user_data_valid(self, processor):
@@ -99,7 +99,7 @@ class TestDataProcessingCompliant:
 
 # ===== EXAMPLE 3: PARAMETRIZED TESTS =====
 
-class TestValidationCompliant:
+class ValidationCompliantTests:
     """Example using parametrized tests to avoid repetition"""
     
     @pytest.mark.parametrize("email,expected", [
@@ -166,7 +166,7 @@ def validator():
 
 # ===== EXAMPLE 5: INTEGRATION TEST PATTERNS =====
 
-class TestAPIIntegrationCompliant:
+class APIIntegrationCompliantTests:
     """Example of compliant integration tests"""
     
     def test_create_user_api(self, client, valid_user_data):
@@ -208,7 +208,7 @@ def test_complex_workflow_bad():
     assert service.get_user_status(user.id) == "offline"
 
 #  PASS:  DO THIS - Split into focused functions
-class TestComplexWorkflowGood:
+class ComplexWorkflowGoodTests:
     """GOOD: Split complex test into focused functions"""
     
     def test_user_login_success(self, user, auth_service):
@@ -259,7 +259,7 @@ When a test file exceeds 300 lines, split using these patterns:
 
 # ===== EXAMPLE 7: PROPER TEST ORGANIZATION =====
 
-class TestFileOrganizationExample:
+class FileOrganizationExampleTests:
     """
     This class demonstrates proper organization:
     

@@ -49,7 +49,7 @@ from netra_backend.app.core.environment_constants import Environment
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-class TestUnifiedAuthServiceClientIntegration(BaseIntegrationTest):
+class UnifiedAuthServiceClientIntegrationTests(BaseIntegrationTest):
     """Integration tests for UnifiedAuthenticationService with AuthServiceClient communication."""
     
     async def setup_method(self):
@@ -300,7 +300,7 @@ class TestUnifiedAuthServiceClientIntegration(BaseIntegrationTest):
 
 @pytest.mark.integration  
 @pytest.mark.asyncio
-class TestAuthenticationContextSwitching(BaseIntegrationTest):
+class AuthenticationContextSwitchingTests(BaseIntegrationTest):
     """Test authentication context switching between REST API and WebSocket."""
     
     async def setup_method(self):

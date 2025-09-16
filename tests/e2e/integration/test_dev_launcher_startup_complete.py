@@ -65,7 +65,7 @@ class ServiceStatus:
     error: Optional[str] = None
 
 
-class TestRealDevLauncherer:
+class RealDevLaunchererTests:
     """Real dev launcher system tester using actual DevLauncher module."""
     
     def __init__(self):
@@ -440,7 +440,7 @@ class TestRealDevLauncherer:
 @pytest.mark.critical
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestDevLauncherStartupComplete:
+class DevLauncherStartupCompleteTests:
     """Critical dev launcher startup validation test suite."""
     
     @pytest.fixture

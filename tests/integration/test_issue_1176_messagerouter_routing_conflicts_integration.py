@@ -24,7 +24,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestMessageRouterConcurrentRoutingConflicts(SSotAsyncTestCase):
+class MessageRouterConcurrentRoutingConflictsTests(SSotAsyncTestCase):
     """Integration tests for MessageRouter conflicts in concurrent execution."""
 
     async def asyncSetUp(self):
@@ -368,7 +368,7 @@ class TestMessageRouterConcurrentRoutingConflicts(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestMessageRouterStateConflicts(SSotAsyncTestCase):
+class MessageRouterStateConflictsTests(SSotAsyncTestCase):
     """Test state conflicts between different MessageRouter implementations."""
 
     async def test_shared_state_contamination(self):

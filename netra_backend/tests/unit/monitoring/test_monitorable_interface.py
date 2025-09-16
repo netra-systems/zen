@@ -14,7 +14,7 @@ import pytest
 import asyncio
 import time
 from typing import Dict, Any, List
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 from shared.monitoring.interfaces import MonitorableComponent, ComponentMonitor, HealthStatus, MonitoringMetrics
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
@@ -64,7 +64,7 @@ class MockMonitorableComponent(MonitorableComponent):
             except Exception:
                 pass
 
-class TestMonitoringInterfaces:
+class MonitoringInterfacesTests:
     """Test monitoring interface abstractions."""
 
     def test_health_status_creation(self):
@@ -107,7 +107,7 @@ class TestMonitoringInterfaces:
         assert 'timers' in metrics_dict
         assert 'timestamps' in metrics_dict
 
-class TestMockComponent:
+class MockComponentTests:
     """Test our mock component implementation."""
 
     @pytest.mark.asyncio
@@ -145,7 +145,7 @@ class TestMockComponent:
         assert call_args[0][0] == 'test_comp'
         assert call_args[0][1]['healthy'] is False
 
-class TestChatEventMonitorComponentAuditing:
+class ChatEventMonitorComponentAuditingTests:
     """Test ChatEventMonitor's new component auditing capabilities."""
 
     def test_monitor_implements_component_monitor_interface(self):
@@ -268,7 +268,7 @@ class TestChatEventMonitorComponentAuditing:
         assert summary['overall_system_health'] in ['warning', 'critical']
         assert '1/' in summary['healthy_component_ratio'] or '2/' in summary['healthy_component_ratio']
 
-class TestMonitorIndependence:
+class MonitorIndependenceTests:
     """Test that monitor works independently without registered components."""
 
     def test_monitor_starts_without_components(self):
@@ -299,7 +299,7 @@ class TestMonitorIndependence:
         assert summary['total_monitored_components'] == 0
         await monitor.on_component_health_change('unknown', {'healthy': True})
 
-class TestComponentIndependence:
+class ComponentIndependenceTests:
     """Test that components work independently without monitors."""
 
     @pytest.mark.asyncio
@@ -322,7 +322,7 @@ class TestComponentIndependence:
         component.remove_monitor_observer(mock_observer)
         assert len(component.observers) == 0
 
-class TestIntegrationScenarios:
+class IntegrationScenariosTests:
     """Test integration scenarios demonstrating both independence and cooperation."""
 
     @pytest.mark.asyncio

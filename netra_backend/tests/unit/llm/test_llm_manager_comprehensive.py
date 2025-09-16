@@ -56,7 +56,7 @@ class StructuredResponseModel(BaseModel):
     category: str = "test"
 
 
-class TestLLMManagerComprehensive:
+class LLMManagerComprehensiveTests:
     """
     Comprehensive unit tests for LLMManager SSOT class.
     

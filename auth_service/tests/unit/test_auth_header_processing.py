@@ -34,7 +34,7 @@ from auth_service.auth_core.services.auth_service import AuthService
 from shared.types.core_types import AuthValidationResult, TokenString, UserID
 from shared.isolated_environment import get_env
 
-class TestServiceAuthenticationHeaders:
+class ServiceAuthenticationHeadersTests:
     """Test service-to-service authentication header processing.
     
     Business Value: Ensures auth service can authenticate backend and other services.
@@ -98,7 +98,7 @@ class TestServiceAuthenticationHeaders:
             elif len(service_id or '') >= 100:
                 assert not is_reasonable_length
 
-class TestTokenValidationHeaderProcessing:
+class TokenValidationHeaderProcessingTests:
     """Test token validation endpoint header processing.
     
     Business Value: Ensures token validation works correctly with GCP load balancer headers.
@@ -166,7 +166,7 @@ class TestTokenValidationHeaderProcessing:
             except Exception:
                 pass
 
-class TestOAuthCallbackHeaderHandling:
+class OAuthCallbackHeaderHandlingTests:
     """Test OAuth callback endpoint header processing.
     
     Business Value: Ensures OAuth authentication works through GCP load balancer.
@@ -214,7 +214,7 @@ class TestOAuthCallbackHeaderHandling:
         assert oauth_security_params.get('state') is not None
         assert len(oauth_security_params['state']) > 15
 
-class TestE2ETestingHeaderSupport:
+class E2ETestingHeaderSupportTests:
     """Test E2E testing header support and bypass mechanisms.
     
     Business Value: Enables automated testing while maintaining security.
@@ -279,7 +279,7 @@ class TestE2ETestingHeaderSupport:
                 elif '{"admin": true' in header_value:
                     assert has_json_structure
 
-class TestCrossServiceHeaderCompatibility:
+class CrossServiceHeaderCompatibilityTests:
     """Test cross-service header compatibility and processing.
     
     Business Value: Ensures auth service works correctly with all platform services.

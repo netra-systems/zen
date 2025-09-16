@@ -58,7 +58,7 @@ from netra_backend.app.agents.supervisor.agent_coordination_validator import (
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 
-class TestWorkflowOrchestratorSSOTComprehensiveUnit(SSotAsyncTestCase):
+class WorkflowOrchestratorSSOTComprehensiveUnitTests(SSotAsyncTestCase):
     """
     Comprehensive unit test suite for WorkflowOrchestrator SSOT.
     

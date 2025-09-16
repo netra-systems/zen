@@ -68,7 +68,7 @@ def _create_mock_openai_response(content: str='Mock response'):
     mock_response.total_tokens = 75
     return mock_response
 
-class TestRealResponsePatterns:
+class RealResponsePatternsTests:
     """Test real-world LLM response patterns and edge cases."""
 
     def test_markdown_wrapped_json_response(self):
@@ -107,7 +107,7 @@ class TestRealResponsePatterns:
         assert isinstance(parsed['results']['metrics'], dict)
         assert parsed['results']['metrics']['latency'] == 50
 
-class TestRetryMechanisms:
+class RetryMechanismsTests:
     """Test LLM retry logic and backoff strategies."""
 
     @pytest.mark.asyncio
@@ -138,7 +138,7 @@ class TestRetryMechanisms:
             with pytest.raises(asyncio.TimeoutError):
                 await llm_manager.ask_llm('test prompt', 'primary')
 
-class TestCostOptimization:
+class CostOptimizationTests:
     """Test cost optimization through intelligent model selection."""
 
     @pytest.mark.asyncio
@@ -161,7 +161,7 @@ class TestCostOptimization:
             result = await llm_manager.ask_llm(complex_prompt, 'primary')
             assert 'analysis' in result.lower()
 
-class TestStructuredGenerationEdgeCases:
+class StructuredGenerationEdgeCasesTests:
     """Test edge cases in structured generation."""
 
     @pytest.mark.asyncio
@@ -185,7 +185,7 @@ class TestStructuredGenerationEdgeCases:
         with pytest.raises((ValidationError, Exception)):
             attempt_json_fallback_parse(invalid_json, ResponseModel)
 
-class TestTokenUsageMonitoring:
+class TokenUsageMonitoringTests:
     """Test token usage tracking and optimization."""
 
     def test_token_usage_calculation(self):
@@ -209,7 +209,7 @@ class TestTokenUsageMonitoring:
             assert isinstance(result, LLMResponse)
             assert result.usage.total_tokens == 75
 
-class TestProviderSwitching:
+class ProviderSwitchingTests:
     """Test switching between different LLM providers."""
 
     @pytest.mark.asyncio

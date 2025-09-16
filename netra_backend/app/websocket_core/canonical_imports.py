@@ -19,7 +19,7 @@ Usage:
 # CANONICAL IMPORTS - Use these paths only:
 from netra_backend.app.websocket_core.canonical_imports import (
     create_websocket_manager,     # Factory function for isolated managers
-    UnifiedWebSocketManager,      # Direct manager (use factory instead)
+    WebSocketManager,             # Direct manager (use factory instead)
     WebSocketManagerProtocol,     # Interface protocol
 )
 ```
@@ -103,42 +103,63 @@ class ConnectionLifecycleManager:
         self._is_active = False
 
 
-# Compatibility wrapper for tests
+# PHASE 2 ENHANCEMENT: Factory function that routes to SSOT get_websocket_manager
 async def create_websocket_manager(user_context=None, **kwargs):
     """
-    Compatibility wrapper for WebSocket manager creation.
+    ISSUE #885 PHASE 2: Enhanced factory wrapper that routes to SSOT get_websocket_manager.
     
     This function provides backward compatibility for tests and existing code
     that expects the old factory interface while delegating to the SSOT implementation.
     
     Args:
-        user_context: UserExecutionContext object (if provided, extracts user_id)
+        user_context: UserExecutionContext object (if provided, routes to SSOT manager)
         **kwargs: Additional arguments passed to the SSOT function
         
     Returns:
-        UserExecutionContext: The created user execution context
+        UnifiedWebSocketManager: The SSOT WebSocket manager instance
     """
-    if user_context is not None:
-        # Extract user_id from user_context object
-        user_id = getattr(user_context, 'user_id', str(user_context))
-        websocket_client_id = getattr(user_context, 'websocket_client_id', None)
-        return _create_defensive_context(
-            user_id=user_id,
-            websocket_client_id=websocket_client_id,
-            **kwargs
-        )
-    else:
-        # Handle legacy direct user_id call
-        return _create_defensive_context(**kwargs)
-
-
-# Additional compatibility functions for removed websocket_manager_factory
-def create_websocket_manager_sync(user_context=None, **kwargs):
-    """Synchronous compatibility wrapper (returns context, not manager)."""
-    return _create_defensive_context(
-        user_id=getattr(user_context, 'user_id', None) if user_context else None,
-        **kwargs
+    # Import the SSOT function
+    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+    import warnings
+    
+    # Issue deprecation warning to guide migration
+    warnings.warn(
+        "create_websocket_manager() is deprecated. "
+        "Use get_websocket_manager() directly for SSOT compliance.",
+        DeprecationWarning,
+        stacklevel=2
     )
+    
+    # Route to SSOT implementation
+    return get_websocket_manager(user_context, **kwargs)
+
+
+# PHASE 2 ENHANCEMENT: Sync factory function that routes to SSOT get_websocket_manager
+def create_websocket_manager_sync(user_context=None, **kwargs):
+    """
+    ISSUE #885 PHASE 2: Synchronous factory wrapper that routes to SSOT get_websocket_manager.
+    
+    Args:
+        user_context: UserExecutionContext object
+        **kwargs: Additional arguments
+        
+    Returns:
+        UnifiedWebSocketManager: The SSOT WebSocket manager instance
+    """
+    # Import the SSOT function
+    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+    import warnings
+    
+    # Issue deprecation warning to guide migration
+    warnings.warn(
+        "create_websocket_manager_sync() is deprecated. "
+        "Use get_websocket_manager() directly for SSOT compliance.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    # Route to SSOT implementation (sync version)
+    return get_websocket_manager(user_context, **kwargs)
 
 
 def get_websocket_manager_factory():
@@ -155,29 +176,22 @@ def get_websocket_manager_factory():
             self._cleanup_started = False
         
         def create_manager(self, user_context):
-            """Create a manager (compatibility)."""
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            import asyncio
-            # Return the SSOT WebSocket manager
-            try:
-                loop = asyncio.get_event_loop()
-                return loop.run_until_complete(get_websocket_manager(user_context))
-            except:
-                # Fallback for non-async contexts
-                return type('MockManager', (), {
-                    'user_context': user_context,
-                    '_is_active': True,
-                    '_connections': {},
-                    '_connection_ids': set(),
-                    '_metrics': type('MockMetrics', (), {
-                        'connections_managed': 0,
-                        'messages_sent_total': 0,
-                        'messages_failed_total': 0,
-                        'last_activity': None,
-                        'manager_age_seconds': 0.0,
-                        'cleanup_scheduled': False
-                    })()
-                })()
+            """
+            PHASE 2 ENHANCEMENT: Create a manager by routing to SSOT get_websocket_manager.
+            """
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            import warnings
+            
+            # Issue deprecation warning
+            warnings.warn(
+                "MockWebSocketManagerFactory.create_manager() is deprecated. "
+                "Use get_websocket_manager() directly for SSOT compliance.",
+                DeprecationWarning,
+                stacklevel=2
+            )
+            
+            # Route to SSOT WebSocket manager
+            return get_websocket_manager(user_context)
     
     return MockWebSocketManagerFactory()
 
@@ -242,7 +256,7 @@ from netra_backend.app.websocket_core.unified_manager import (
     WebSocketConnection,
 )
 # CANONICAL: WebSocket Manager (SSOT import path)
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 # Backward compatibility alias
 UnifiedWebSocketManager = WebSocketManager
 
@@ -263,14 +277,14 @@ from netra_backend.app.websocket_core.migration_adapter import (
 # ============================================================================
 
 # DEPRECATED: Direct manager imports (use factory instead)
-# from netra_backend.app.websocket_core.manager import WebSocketManager
+# from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 # from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
 
 # DEPRECATED: Multiple interface imports (use canonical protocol instead)  
 # from netra_backend.app.core.interfaces_websocket import WebSocketManagerProtocol
 
 # DEPRECATED: Global function access (use factory pattern instead)
-# from netra_backend.app.websocket_core import get_websocket_manager
+# from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 # ============================================================================
 # CANONICAL EXPORT INTERFACE
@@ -377,8 +391,8 @@ manager = await factory.create_isolated_manager(user_id, connection_id)
  FAIL:  INCORRECT (Don't use these patterns):
 ```python
 # Multiple import paths (causes SSOT violations)
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager  
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager  # WRONG: Use canonical alias instead
 from netra_backend.app.core.interfaces_websocket import WebSocketManagerProtocol
 
 # Singleton patterns (security risk)

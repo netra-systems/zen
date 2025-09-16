@@ -28,7 +28,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.core.configuration import get_configuration
 from netra_backend.app.database import get_db
 from netra_backend.app.main import app
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 from test_framework.auth_jwt_test_manager import JWTGenerationTestManager as AuthJWTTestManager
 from test_framework.services import ServiceManager, get_service_manager
 from test_framework.ssot.auth_test_helpers import SSOTAuthTestHelper
@@ -89,7 +89,7 @@ class TokenRefreshTestScenarios:
 
 
 @pytest.mark.asyncio
-class TestTokenRefreshDuringActiveChat:
+class TokenRefreshDuringActiveChatTests:
     """Test token refresh during active WebSocket chat sessions."""
     
     async def test_seamless_token_refresh_mid_conversation(self):
@@ -344,7 +344,7 @@ class TestTokenRefreshDuringActiveChat:
 
 
 @pytest.mark.asyncio
-class TestTokenRefreshRaceConditions:
+class TokenRefreshRaceConditionsTests:
     """Test race conditions during token refresh."""
     
     async def test_simultaneous_refresh_requests(self):
@@ -433,7 +433,7 @@ class TestTokenRefreshRaceConditions:
 
 
 @pytest.mark.asyncio
-class TestTokenRefreshPerformance:
+class TokenRefreshPerformanceTests:
     """Test performance characteristics of token refresh."""
     
     async def test_refresh_latency_under_load(self):
@@ -558,13 +558,13 @@ if __name__ == "__main__":
     test_suite = sys.argv[1] if len(sys.argv) > 1 else "all"
     
     if test_suite == "seamless":
-        asyncio.run(TestTokenRefreshDuringActiveChat().test_seamless_token_refresh_mid_conversation())
+        asyncio.run(TokenRefreshDuringActiveChatTests().test_seamless_token_refresh_mid_conversation())
     elif test_suite == "concurrent":
-        asyncio.run(TestTokenRefreshDuringActiveChat().test_token_refresh_with_concurrent_api_calls())
+        asyncio.run(TokenRefreshDuringActiveChatTests().test_token_refresh_with_concurrent_api_calls())
     elif test_suite == "race":
-        asyncio.run(TestTokenRefreshRaceConditions().test_simultaneous_refresh_requests())
+        asyncio.run(TokenRefreshRaceConditionsTests().test_simultaneous_refresh_requests())
     elif test_suite == "performance":
-        asyncio.run(TestTokenRefreshPerformance().test_refresh_latency_under_load())
+        asyncio.run(TokenRefreshPerformanceTests().test_refresh_latency_under_load())
     else:
         # Run all tests
         print("Please use: python tests/unified_test_runner.py --category mission_critical")

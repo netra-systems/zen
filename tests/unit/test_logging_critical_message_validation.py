@@ -39,7 +39,7 @@ from shared.logging.unified_logging_ssot import (
 
 
 @pytest.mark.unit
-class TestLoggingCriticalMessageValidation(SSotBaseTestCase):
+class LoggingCriticalMessageValidationTests(SSotBaseTestCase):
     """
     Unit test suite for SSOT logging critical message validation.
     

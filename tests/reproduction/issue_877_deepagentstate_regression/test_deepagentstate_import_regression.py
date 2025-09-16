@@ -18,7 +18,7 @@ from typing import get_type_hints
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestDeepAgentStateImportRegression(SSotBaseTestCase):
+class DeepAgentStateImportRegressionTests(SSotBaseTestCase):
     """Test suite to validate DeepAgentState import regression exists."""
 
     def test_agent_lifecycle_still_imports_deepagentstate_deprecated(self):
@@ -120,7 +120,7 @@ class TestDeepAgentStateImportRegression(SSotBaseTestCase):
             self.fail(f"REGRESSION CONFIRMED: Migration claims don't match reality\n\nCLAIMS in base_agent.py:\n" + '\n'.join(migration_claims) + f'\n\nREALITY in agent_lifecycle.py:\n' + '\n'.join(deepagent_usage) + f'\n\nExpected: Consistent migration state across all files\nImpact: False sense of security, incomplete migration')
         self.assertTrue(True, 'Migration claims consistent with actual implementation')
 
-class TestUserExecutionContextMigrationIncomplete(SSotBaseTestCase):
+class UserExecutionContextMigrationIncompleteTests(SSotBaseTestCase):
     """Test suite to validate UserExecutionContext migration is incomplete."""
 
     def test_agent_lifecycle_not_using_user_execution_context(self):

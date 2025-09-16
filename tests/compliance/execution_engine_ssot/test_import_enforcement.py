@@ -16,7 +16,7 @@ from typing import Dict, List, Set, Tuple
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestImportEnforcement(SSotBaseTestCase):
+class ImportEnforcementTests(SSotBaseTestCase):
     """Enforce SSOT import patterns for execution engines."""
 
     def setUp(self):

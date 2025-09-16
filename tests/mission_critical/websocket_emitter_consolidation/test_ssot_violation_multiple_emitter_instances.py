@@ -23,7 +23,7 @@ from pathlib import Path
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestSSotViolationMultipleEmitterInstances(SSotAsyncTestCase):
+class SSotViolationMultipleEmitterInstancesTests(SSotAsyncTestCase):
     """Test that demonstrates SSOT violations in WebSocket emitter implementations.
     
     This test MUST FAIL before consolidation to prove the problem exists.

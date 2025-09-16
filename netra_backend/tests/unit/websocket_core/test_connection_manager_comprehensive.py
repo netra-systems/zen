@@ -46,7 +46,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SsotTestMetric
 
 # Target Module Under Test
 from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager, ConnectionManager
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
 
 # Supporting Imports
 from shared.types.core_types import UserID, ThreadID, ConnectionID, WebSocketID, RequestID
@@ -64,7 +64,7 @@ class ConnectionTestData:
     metadata: Optional[Dict[str, Any]] = None
 
 
-class TestWebSocketConnectionManagerCore(SSotAsyncTestCase):
+class WebSocketConnectionManagerCoreTests(SSotAsyncTestCase):
     """
     Core connection manager functionality tests.
     
@@ -497,7 +497,7 @@ class TestWebSocketConnectionManagerCore(SSotAsyncTestCase):
         self.record_metric("error_recovery", "success")
 
 
-class TestWebSocketConnectionManagerAdvanced(SSotAsyncTestCase):
+class WebSocketConnectionManagerAdvancedTests(SSotAsyncTestCase):
     """
     Advanced connection manager scenarios for edge cases and performance.
     
@@ -868,7 +868,7 @@ class TestWebSocketConnectionManagerAdvanced(SSotAsyncTestCase):
         self.record_metric("health_monitoring", "success")
 
 
-class TestWebSocketConnectionManagerPerformance(SSotAsyncTestCase):
+class WebSocketConnectionManagerPerformanceTests(SSotAsyncTestCase):
     """
     Performance and load testing for connection manager.
     
@@ -1090,7 +1090,7 @@ class TestWebSocketConnectionManagerPerformance(SSotAsyncTestCase):
 # === TEST SUITE SUMMARY ===
 # This comprehensive test suite provides:
 # 
-# 1. CORE FUNCTIONALITY (TestWebSocketConnectionManagerCore):
+# 1. CORE FUNCTIONALITY (WebSocketConnectionManagerCoreTests):
 #    - Manager initialization and SSOT compliance
 #    - JWT authentication and DEMO_MODE bypass  
 #    - UserExecutionContext creation and isolation
@@ -1100,7 +1100,7 @@ class TestWebSocketConnectionManagerPerformance(SSotAsyncTestCase):
 #    - Memory efficiency validation (<250MB)
 #    - Error scenarios and recovery
 #
-# 2. ADVANCED SCENARIOS (TestWebSocketConnectionManagerAdvanced):
+# 2. ADVANCED SCENARIOS (WebSocketConnectionManagerAdvancedTests):
 #    - Cloud Run race condition resilience
 #    - WebSocket 1011 error prevention
 #    - Connection pool scaling and limits
@@ -1108,7 +1108,7 @@ class TestWebSocketConnectionManagerPerformance(SSotAsyncTestCase):
 #    - Multi-user isolation and privacy
 #    - Heartbeat and health monitoring
 #
-# 3. PERFORMANCE TESTING (TestWebSocketConnectionManagerPerformance):
+# 3. PERFORMANCE TESTING (WebSocketConnectionManagerPerformanceTests):
 #    - Connection establishment performance
 #    - Message throughput testing
 #    - Sustained load memory usage

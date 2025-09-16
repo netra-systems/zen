@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.websocket_core.types import MessageType, ServerMessage, create_server_message, WebSocketMessage
 from netra_backend.app.websocket_core.handlers import get_message_router, get_router_handler_count, list_registered_handlers
 
-class TestWebSocketMessageCreationSignatureIntegration(SSotAsyncTestCase):
+class WebSocketMessageCreationSignatureIntegrationTests(SSotAsyncTestCase):
     """Integration tests for create_server_message signature compatibility."""
 
     async def asyncSetUp(self):
@@ -175,7 +175,7 @@ class TestWebSocketMessageCreationSignatureIntegration(SSotAsyncTestCase):
             self.logger.error(f'End-to-end integration signature error: {e}')
             pytest.fail(f'End-to-end message flow failed: {e}')
 
-class TestSignatureErrorScenarios(SSotAsyncTestCase):
+class SignatureErrorScenariosTests(SSotAsyncTestCase):
     """Test specific signature error scenarios that should fail."""
 
     async def test_missing_data_parameter_should_fail(self):

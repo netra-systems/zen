@@ -17,7 +17,7 @@ from netra_backend.app.routes.agents_execute import router
 
 
 @pytest.mark.integration
-class TestAgentServiceRouteFixes:
+class AgentServiceRouteFixesTests:
     """Test class to verify that the AgentService route parameter fixes work."""
 
     @pytest.fixture

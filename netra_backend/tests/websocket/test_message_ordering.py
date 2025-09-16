@@ -5,7 +5,7 @@ Tests message sequencing, protocol version handling, and binary data transmissio
 
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -237,7 +237,7 @@ async def test_protocol_version_mismatch():
     assert selected in subprotocols, "Should select valid subprotocol"
 
 
-class TestWebSocketMessageTamperingPrevention:
+class WebSocketMessageTamperingPreventionTests:
     """ITERATION 29: Prevent WebSocket message tampering attacks."""
     
     @pytest.mark.asyncio

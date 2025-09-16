@@ -40,7 +40,7 @@ class WebSocketEventTrace:
     authenticity_indicators: Dict[str, Any]
     processing_context: Dict[str, Any]
 
-class TestWebSocketEventIntegrity(BaseE2ETest):
+class WebSocketEventIntegrityTests(BaseE2ETest):
     """
     FAILING TESTS: Prove WebSocket events can mislead users about AI authenticity.
     

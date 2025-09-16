@@ -71,7 +71,7 @@ def multiple_users():
         users.append(context)
     return users
 
-class TestAgentRegistryInitialization(SSotBaseTestCase):
+class AgentRegistryInitializationTests(SSotBaseTestCase):
     """Test AgentRegistry initialization and configuration."""
 
     def test_agent_registry_basic_initialization(self, mock_llm_manager):
@@ -108,7 +108,7 @@ class TestAgentRegistryInitialization(SSotBaseTestCase):
         registry.set_tool_dispatcher_factory(new_factory)
         assert registry.tool_dispatcher_factory == new_factory
 
-class TestUserSessionManagement(SSotBaseTestCase):
+class UserSessionManagementTests(SSotBaseTestCase):
     """Test user session creation, retrieval, and lifecycle management."""
 
     @pytest.mark.asyncio
@@ -200,7 +200,7 @@ class TestUserSessionManagement(SSotBaseTestCase):
             assert session.user_id == expected_user_id
             assert len(session._agents) == 1
 
-class TestWebSocketManagerIntegration(SSotBaseTestCase):
+class WebSocketManagerIntegrationTests(SSotBaseTestCase):
     """Test WebSocket manager integration and lifecycle."""
 
     @pytest.mark.asyncio
@@ -241,7 +241,7 @@ class TestWebSocketManagerIntegration(SSotBaseTestCase):
             await registry.set_websocket_manager_async(mock_ws_manager)
             assert registry.websocket_manager == mock_ws_manager
 
-class TestAgentCreationAndManagement(SSotBaseTestCase):
+class AgentCreationAndManagementTests(SSotBaseTestCase):
     """Test agent creation, registration, and management within user sessions."""
 
     @pytest.mark.asyncio
@@ -338,7 +338,7 @@ class TestAgentCreationAndManagement(SSotBaseTestCase):
         assert reset_report['status'] == 'no_session'
         assert reset_report['agents_reset'] == 0
 
-class TestRegistryCleanupAndResourceManagement(SSotBaseTestCase):
+class RegistryCleanupAndResourceManagementTests(SSotBaseTestCase):
     """Test registry cleanup operations and resource management."""
 
     @pytest.mark.asyncio
@@ -418,7 +418,7 @@ class TestRegistryCleanupAndResourceManagement(SSotBaseTestCase):
         assert len(cleanup_report['errors']) >= 0
         assert len(registry._user_sessions) == 0
 
-class TestLifecycleManagerIntegration(SSotBaseTestCase):
+class LifecycleManagerIntegrationTests(SSotBaseTestCase):
     """Test AgentLifecycleManager integration and functionality."""
 
     def test_lifecycle_manager_initialization_with_registry(self, mock_llm_manager):

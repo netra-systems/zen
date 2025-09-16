@@ -41,7 +41,7 @@ class GoldenPathValidation:
 
 
 @pytest.mark.e2e
-class TestGoldenPathWebSocketValidation(SSotAsyncTestCase):
+class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
     """
     E2E tests for Issue #1182 Golden Path WebSocket validation in staging environment.
     

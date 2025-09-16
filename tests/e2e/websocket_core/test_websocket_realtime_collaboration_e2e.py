@@ -23,7 +23,7 @@ from test_framework.ssot.websocket import WebSocketTestUtility
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketRealtimeCollaborationE2E(SSotBaseTestCase):
+class WebSocketRealtimeCollaborationE2ETests(SSotBaseTestCase):
     """E2E tests for WebSocket real-time collaboration features."""
     
     @pytest.fixture

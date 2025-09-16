@@ -29,7 +29,7 @@ from test_framework.http_client import ClientConfig
 
 
 @dataclass
-class TestLoadMetrics:
+class LoadMetricsTests:
     """Metrics for concurrent load testing."""
     concurrent_users: int = 0
     successful_connections: int = 0
@@ -43,10 +43,10 @@ class TestLoadMetrics:
 
 
 # Alias for backward compatibility
-LoadTestMetrics = TestLoadMetrics
+LoadTestMetrics = LoadMetricsTests
 
 
-class TestConcurrentUserLoader:
+class ConcurrentUserLoaderTests:
     """Manages concurrent user load testing."""
     
     def __init__(self, harness: UnifiedTestHarnessComplete):
@@ -235,7 +235,7 @@ class TestConcurrentUserLoader:
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.timeout(300)  # 5 minutes max
-class TestConcurrentUserLoad:
+class ConcurrentUserLoadTests:
     """Concurrent user load testing."""
     
     @pytest.mark.performance
@@ -307,4 +307,4 @@ async def unified_test_harness():
 
 
 # Backward compatibility aliases
-TestConcurrentLoadCore = TestConcurrentUserLoad
+TestConcurrentLoadCore = ConcurrentUserLoadTests

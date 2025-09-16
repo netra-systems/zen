@@ -32,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 import logging
 logger = logging.getLogger(__name__)
 
-class TestIssue642DevLauncherImportWarnings(SSotBaseTestCase):
+class Issue642DevLauncherImportWarningsTests(SSotBaseTestCase):
     """
     Test suite to reproduce and validate Issue #642 dev_launcher import issues.
     

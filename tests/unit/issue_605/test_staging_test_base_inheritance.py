@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.unit
-class TestStagingTestBaseInheritance(SSotBaseTestCase):
+class StagingTestBaseInheritanceTests(SSotBaseTestCase):
     """
     Unit tests for staging test base inheritance issues in Issue #605.
     
@@ -356,12 +356,12 @@ class TestStagingTestBaseInheritance(SSotBaseTestCase):
             
             # Pattern 1: BaseE2ETest only
             try:
-                class TestBaseE2EOnly(BaseE2ETest):
+                class BaseE2EOnlyTests(BaseE2ETest):
                     pass
                 inheritance_patterns.append({
                     "pattern": "BaseE2ETest_only",
                     "success": True,
-                    "mro": [cls.__name__ for cls in TestBaseE2EOnly.__mro__]
+                    "mro": [cls.__name__ for cls in BaseE2EOnlyTests.__mro__]
                 })
             except Exception as e:
                 inheritance_patterns.append({
@@ -372,12 +372,12 @@ class TestStagingTestBaseInheritance(SSotBaseTestCase):
             
             # Pattern 2: StagingTestBase only  
             try:
-                class TestStagingOnly(StagingTestBase):
+                class StagingOnlyTests(StagingTestBase):
                     pass
                 inheritance_patterns.append({
                     "pattern": "StagingTestBase_only",
                     "success": True,
-                    "mro": [cls.__name__ for cls in TestStagingOnly.__mro__]
+                    "mro": [cls.__name__ for cls in StagingOnlyTests.__mro__]
                 })
             except Exception as e:
                 inheritance_patterns.append({
@@ -388,12 +388,12 @@ class TestStagingTestBaseInheritance(SSotBaseTestCase):
             
             # Pattern 3: Multiple inheritance (the problematic case)
             try:
-                class TestMultipleInheritance(BaseE2ETest, StagingTestBase):
+                class MultipleInheritanceTests(BaseE2ETest, StagingTestBase):
                     pass
                 inheritance_patterns.append({
                     "pattern": "Multiple_inheritance",
                     "success": True,
-                    "mro": [cls.__name__ for cls in TestMultipleInheritance.__mro__]
+                    "mro": [cls.__name__ for cls in MultipleInheritanceTests.__mro__]
                 })
             except Exception as e:
                 inheritance_patterns.append({
@@ -405,12 +405,12 @@ class TestStagingTestBaseInheritance(SSotBaseTestCase):
             
             # Pattern 4: Alternative order multiple inheritance
             try:
-                class TestMultipleInheritanceAlt(StagingTestBase, BaseE2ETest):
+                class MultipleInheritanceAltTests(StagingTestBase, BaseE2ETest):
                     pass
                 inheritance_patterns.append({
                     "pattern": "Multiple_inheritance_alt_order",
                     "success": True,
-                    "mro": [cls.__name__ for cls in TestMultipleInheritanceAlt.__mro__]
+                    "mro": [cls.__name__ for cls in MultipleInheritanceAltTests.__mro__]
                 })
             except Exception as e:
                 inheritance_patterns.append({

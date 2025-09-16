@@ -41,7 +41,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 # State Persistence Core Imports
 from netra_backend.app.services.state_persistence_optimized import OptimizedStatePersistence
 from netra_backend.app.db.clickhouse import ClickHouseClient
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.types import MessageType, create_standard_message
 
 # Database and Redis clients for direct testing
@@ -49,7 +49,7 @@ import redis.asyncio as redis
 import asyncpg
 
 
-class TestGoldenPathStatePersistenceNonDocker(SSotAsyncTestCase):
+class GoldenPathStatePersistenceNonDockerTests(SSotAsyncTestCase):
     """
     Golden Path State Persistence Integration Tests - NO DOCKER
     

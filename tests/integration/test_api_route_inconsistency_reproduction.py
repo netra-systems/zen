@@ -21,7 +21,7 @@ from netra_backend.app.config import get_config
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAPIEndpointConsistencyReproduction(SSotBaseTestCase):
+class APIEndpointConsistencyReproductionTests(SSotBaseTestCase):
     """Reproduction tests for API endpoint inconsistency issue."""
     
     def setUp(self):
@@ -140,7 +140,7 @@ class TestAPIEndpointConsistencyReproduction(SSotBaseTestCase):
         return config.API_BASE_URL or "http://localhost:8000"
 
 
-class TestAPIEndpointConsistencyRealService(SSotBaseTestCase):
+class APIEndpointConsistencyRealServiceTests(SSotBaseTestCase):
     """Real service tests for API endpoint consistency (requires running backend)."""
     
     def setUp(self):

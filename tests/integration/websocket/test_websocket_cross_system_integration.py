@@ -21,7 +21,7 @@ from typing import Dict, Any, List, Optional, Union
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from concurrent.futures import ThreadPoolExecutor
 import time
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 # Import all the WebSocket-related systems for integration testing
 from netra_backend.app.websocket_core.unified_manager import (
@@ -131,7 +131,7 @@ class MockIntegrationService:
 
 
 @pytest.mark.integration
-class TestIntegrationScenario1_AgentToWebSocketFlow:
+class IntegrationScenario1_AgentToWebSocketFlowTests:
     """Integration test: Agent execution -> WebSocket manager -> Client delivery."""
     
     @pytest.fixture
@@ -305,7 +305,7 @@ class TestIntegrationScenario1_AgentToWebSocketFlow:
 
 
 @pytest.mark.integration
-class TestIntegrationScenario2_MultiServiceCommunication:
+class IntegrationScenario2_MultiServiceCommunicationTests:
     """Integration test: Multi-service communication through WebSocket bridge."""
     
     @pytest.fixture
@@ -590,7 +590,7 @@ class TestIntegrationScenario2_MultiServiceCommunication:
 
 
 @pytest.mark.integration
-class TestIntegrationScenario3_ErrorHandlingAndRecovery:
+class IntegrationScenario3_ErrorHandlingAndRecoveryTests:
     """Integration test: Error handling and recovery with WebSocket serialization."""
     
     @pytest.fixture
@@ -735,7 +735,7 @@ class TestIntegrationScenario3_ErrorHandlingAndRecovery:
 
 
 @pytest.mark.integration
-class TestIntegrationScenario4_PerformanceUnderLoad:
+class IntegrationScenario4_PerformanceUnderLoadTests:
     """Integration test: Performance testing with high message volume and complex serialization."""
     
     async def test_high_volume_serialization_performance(self):
@@ -871,7 +871,7 @@ class TestIntegrationScenario4_PerformanceUnderLoad:
 
 
 @pytest.mark.integration
-class TestIntegrationScenario5_RealWorldComplexity:
+class IntegrationScenario5_RealWorldComplexityTests:
     """Integration test: Real-world complexity scenarios with full system integration."""
     
     async def test_complete_user_session_flow(self):

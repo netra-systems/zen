@@ -36,7 +36,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestUserExecutionEngineIsolation(SSotBaseTestCase):
+class UserExecutionEngineIsolationTests(SSotBaseTestCase):
     """Test UserExecutionEngine multi-user isolation functionality."""
     
     def setup_method(self, method):

@@ -58,7 +58,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 
 # Import integration test utilities
 try:
-    from netra_backend.app.websocket_core.websocket_manager import (
+    from netra_backend.app.websocket_core.canonical_import_patterns import (
         WebSocketManager,
         UnifiedWebSocketManager,
         WebSocketManagerFactory,
@@ -105,7 +105,7 @@ class IntegrationTestContext:
             self.request_id = f"req-{self.service_name}-{self.session_id}"
 
 
-class TestIssue889WebSocketManagerDuplicationIntegration(SSotAsyncTestCase):
+class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests to reproduce WebSocket manager duplication in service contexts.
 

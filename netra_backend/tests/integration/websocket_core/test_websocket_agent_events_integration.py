@@ -47,7 +47,7 @@ from test_framework.websocket_helpers import (
 try:
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, IntegrationState
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.core.unified_id_manager import UnifiedIDManager
@@ -58,7 +58,7 @@ except ImportError as e:
     pytest.skip(f"Integration components not available: {e}", allow_module_level=True)
 
 
-class TestWebSocketAgentEventsIntegration(BaseIntegrationTest):
+class WebSocketAgentEventsIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket agent events with real services."""
 
     async def async_setup(self):

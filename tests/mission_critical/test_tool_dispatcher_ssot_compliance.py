@@ -77,7 +77,7 @@ class SSotComplianceReport:
     recommendations: List[str]
 
 
-class TestToolDispatcherSSotCompliance:
+class ToolDispatcherSSotComplianceTests:
     """CRITICAL: Tool Dispatcher SSOT compliance validation."""
 
     @pytest.fixture(autouse=True)
@@ -494,7 +494,7 @@ class TestToolDispatcherSSotCompliance:
 
 if __name__ == "__main__":
     # Run individual test to see current violations
-    test_case = TestToolDispatcherSSotCompliance()
+    test_case = ToolDispatcherSSotComplianceTests()
     test_case.setUp()
     
     print("Running Tool Dispatcher SSOT Compliance Tests...")

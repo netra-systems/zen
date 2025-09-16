@@ -41,7 +41,7 @@ from netra_backend.app.services.user_execution_context import (
 
 
 @pytest.mark.integration
-class TestExecutionEngineConsolidationValidation1146(SSotAsyncTestCase):
+class ExecutionEngineConsolidationValidation1146Tests(SSotAsyncTestCase):
     """Validates complete execution engine consolidation maintains all functionality."""
 
     async def asyncSetUp(self):

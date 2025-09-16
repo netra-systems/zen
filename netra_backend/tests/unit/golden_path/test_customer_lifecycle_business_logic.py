@@ -459,7 +459,7 @@ class CustomerLifecycleManager:
 
 @pytest.mark.golden_path
 @pytest.mark.unit
-class TestCustomerLifecycleBusinessLogic:
+class CustomerLifecycleBusinessLogicTests:
     """Test customer lifecycle business logic that drives revenue growth."""
     
     def setup_method(self):

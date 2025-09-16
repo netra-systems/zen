@@ -26,7 +26,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 @pytest.mark.unit
-class TestMessageRouterProxyRemovalImpact(SSotBaseTestCase):
+class MessageRouterProxyRemovalImpactTests(SSotBaseTestCase):
     """Unit tests for analyzing the impact of removing MessageRouter proxy layer."""
 
     def setUp(self):

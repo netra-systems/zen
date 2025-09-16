@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import BaseTestCase
 from shared.isolated_environment import get_env
 
 
-class TestServiceDiscoveryHealthChecks(BaseTestCase):
+class ServiceDiscoveryHealthChecksTests(BaseTestCase):
     """Integration tests for service discovery and health monitoring."""
     
     @pytest.mark.integration

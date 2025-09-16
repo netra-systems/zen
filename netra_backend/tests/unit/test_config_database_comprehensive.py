@@ -45,7 +45,7 @@ from netra_backend.app.core.configuration.database import DatabaseConfigManager,
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.schemas.config import AppConfig
 
-class TestDatabaseConfigurationComprehensive(SSotBaseTestCase):
+class DatabaseConfigurationComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive test suite for Database Configuration Module.
     

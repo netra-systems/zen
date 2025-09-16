@@ -9,7 +9,7 @@ from pathlib import Path
 from netra_backend.app.db.database_manager import DatabaseManager
 from shared.isolated_environment import get_env
 
-class TestMigrationJobInfrastructure:
+class MigrationJobInfrastructureTests:
     """Test suite for migration job infrastructure compatibility"""
 
     def test_dockerfile_structure(self):
@@ -108,7 +108,7 @@ class TestMigrationJobInfrastructure:
         assert 'upgrade head' in content, 'Must include upgrade head command'
         assert 'Environment:' in content, 'Must validate environment on startup'
 
-class TestStagingDeploymentCompatibility:
+class StagingDeploymentCompatibilityTests:
     """Test suite for ensuring staging deployment works correctly"""
 
     def test_gcp_deployment_script_exists(self):
@@ -154,7 +154,7 @@ class TestStagingDeploymentCompatibility:
         assert 'Migration' in content and ('completed' in content or 'success' in content)
 
 @pytest.mark.integration
-class TestMigrationExecutionIntegration:
+class MigrationExecutionIntegrationTests:
     """Integration tests that require actual database connection"""
 
     @pytest.mark.skipif(not os.environ.get('TEST_WITH_REAL_DB'), reason='Requires TEST_WITH_REAL_DB environment variable')

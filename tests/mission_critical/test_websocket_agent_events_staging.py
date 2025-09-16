@@ -238,7 +238,7 @@ class StagingWebSocketTestCore:
 
 @pytest.mark.asyncio
 @pytest.mark.mission_critical
-class TestWebSocketAgentEventsStaging:
+class WebSocketAgentEventsStagingTests:
     """Mission critical tests using REAL GCP staging WebSocket connections and services."""
 
     @pytest.fixture

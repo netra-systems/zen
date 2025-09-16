@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -38,7 +38,7 @@ import asyncio
 import time
 import uuid
 from typing import Any, Dict, Optional
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
@@ -78,10 +78,10 @@ class MinimalOrchestrationSuite:
         })
         
         # Mock WebSocket manager
-        self.websocket = TestWebSocketConnection()  # TODO: Use real service instead of Mock
+        self.websocket = WebSocketConnectionTests()  # TODO: Use real service instead of Mock
         
         # Initialize the 3 core agents
-        websocket = TestWebSocketConnection()  # TODO: Use real service instead of Mock
+        websocket = WebSocketConnectionTests()  # TODO: Use real service instead of Mock
         
         self.agents = {
             'triage': UnifiedTriageAgent(

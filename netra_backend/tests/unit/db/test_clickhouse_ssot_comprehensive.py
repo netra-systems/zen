@@ -39,7 +39,7 @@ from netra_backend.app.db.clickhouse import (
 )
 
 
-class TestClickHouseCacheUserIsolation(SSotBaseTestCase):
+class ClickHouseCacheUserIsolationTests(SSotBaseTestCase):
     """
     Unit tests for ClickHouse Cache System with User Isolation
     
@@ -229,7 +229,7 @@ class TestClickHouseCacheUserIsolation(SSotBaseTestCase):
         self.record_metric("privacy_compliance_verified", True)
 
 
-class TestNoOpClickHouseClientBehavior(SSotBaseTestCase):
+class NoOpClickHouseClientBehaviorTests(SSotBaseTestCase):
     """
     Unit tests for NoOp ClickHouse Client behavior in testing environments
     
@@ -322,7 +322,7 @@ class TestNoOpClickHouseClientBehavior(SSotBaseTestCase):
         self.record_metric("connection_state_simulation_tested", True)
 
 
-class TestClickHouseServiceBusinessLogic(SSotBaseTestCase):
+class ClickHouseServiceBusinessLogicTests(SSotBaseTestCase):
     """
     Unit tests for ClickHouse Service business logic and resilience
     
@@ -608,7 +608,7 @@ class TestClickHouseServiceBusinessLogic(SSotBaseTestCase):
         self.record_metric("retry_attempts_needed", call_count)
 
 
-class TestClickHouseConfigurationManagement(SSotBaseTestCase):
+class ClickHouseConfigurationManagementTests(SSotBaseTestCase):
     """
     Unit tests for ClickHouse configuration management across environments
     
@@ -758,7 +758,7 @@ class TestClickHouseConfigurationManagement(SSotBaseTestCase):
                 self.record_metric("secret_manager_integration_verified", True)
 
 
-class TestClickHouseBusinessScenarios(SSotBaseTestCase):
+class ClickHouseBusinessScenariosTests(SSotBaseTestCase):
     """
     Unit tests for critical business scenarios and analytics workflows
     
@@ -1059,7 +1059,7 @@ class TestClickHouseBusinessScenarios(SSotBaseTestCase):
 
 
 # Mark completion of comprehensive unit tests
-class TestClickHouseUnitTestsComplete(SSotBaseTestCase):
+class ClickHouseUnitTestsCompleteTests(SSotBaseTestCase):
     """Marker class indicating completion of unit test suite"""
 
     def test_unit_test_suite_completion_metrics(self):

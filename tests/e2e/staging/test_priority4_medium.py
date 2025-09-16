@@ -22,7 +22,7 @@ from tests.e2e.staging_test_config import get_staging_config
 pytestmark = [pytest.mark.staging, pytest.mark.medium, pytest.mark.real]
 
 @pytest.mark.e2e
-class TestMediumPerformance:
+class MediumPerformanceTests:
     """Tests 56-60: Response Time Metrics - REAL TESTS"""
     
     @pytest.mark.asyncio
@@ -237,7 +237,7 @@ class TestMediumPerformance:
         assert success_count > 0, "At least some concurrent connections should succeed"
 
 @pytest.mark.e2e
-class TestMediumResources:
+class MediumResourcesTests:
     """Tests 61-65: Resource Management - REAL TESTS"""
     
     @pytest.mark.asyncio
@@ -457,7 +457,7 @@ class TestMediumResources:
         assert cold_start_metrics["cold_start_ms"] < cold_start_metrics["target_cold_start_ms"] * 5
 
 @pytest.mark.e2e
-class TestMediumReliability:
+class MediumReliabilityTests:
     """Tests 66-70: System Reliability - REAL TESTS"""
     
     @pytest.mark.asyncio

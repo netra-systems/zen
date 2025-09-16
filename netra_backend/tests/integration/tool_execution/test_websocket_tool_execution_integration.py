@@ -21,7 +21,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import get_env
 
 
@@ -71,7 +71,7 @@ class MockWebSocketTool:
         return f"WebSocket test execution of {self.name} completed successfully"
 
 
-class TestWebSocketToolExecutionIntegration(BaseIntegrationTest):
+class WebSocketToolExecutionIntegrationTests(BaseIntegrationTest):
     """Test WebSocket integration with tool execution using real services."""
     
     @pytest.mark.integration

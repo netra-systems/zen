@@ -52,7 +52,7 @@ import pytest
 from loguru import logger
 
 
-class TestWebSocketSSotImportViolationsDetection(SSotBaseTestCase):
+class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
     """Mission Critical: WebSocket SSOT Import Violations Detection
     
     This test scans the entire codebase to detect import patterns that violate

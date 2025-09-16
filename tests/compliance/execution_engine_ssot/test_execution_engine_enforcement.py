@@ -31,7 +31,7 @@ from unittest import TestCase
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestExecutionEngineSSotEnforcement(SSotBaseTestCase):
+class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
     """Compliance tests that enforce execution engine SSOT patterns."""
 
     def setUp(self):

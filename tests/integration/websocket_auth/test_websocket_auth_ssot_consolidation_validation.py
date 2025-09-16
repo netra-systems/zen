@@ -24,7 +24,7 @@ from test_framework.websocket_helpers import MockWebSocketConnection
 
 
 @pytest.mark.integration
-class TestWebSocketAuthSSOTConsolidationValidation(SSotAsyncTestCase):
+class WebSocketAuthSSOTConsolidationValidationTests(SSotAsyncTestCase):
     """
     Integration Test: WebSocket Authentication SSOT Entry Point Validation
     

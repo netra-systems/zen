@@ -18,7 +18,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestSecretInjectionBridgeIssue683(SSotBaseTestCase):
+class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
     """
     Unit tests to reproduce secret injection bridge failures between SecretConfig and GCP deployment.
 

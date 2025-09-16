@@ -31,11 +31,11 @@ import websockets
 from shared.types import UserID, ThreadID, RunID, RequestID, WebSocketID, ConnectionID, ensure_user_id, ensure_thread_id, ensure_request_id, StronglyTypedUserExecutionContext, StronglyTypedWebSocketEvent
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
 from netra_backend.app.websocket_core.utils import extract_user_info_from_message
 
-class TestWebSocketMultiUserDataLeakageIntegration(SSotBaseTestCase):
+class WebSocketMultiUserDataLeakageIntegrationTests(SSotBaseTestCase):
     """
     Integration tests to expose multi-user data leakage vulnerabilities.
     

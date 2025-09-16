@@ -37,7 +37,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.integration
-class TestExecutionFactoryCompliance(SSotAsyncTestCase):
+class ExecutionFactoryComplianceTests(SSotAsyncTestCase):
     """
     Test suite validating ExecutionEngine factory pattern compliance with SSOT.
 

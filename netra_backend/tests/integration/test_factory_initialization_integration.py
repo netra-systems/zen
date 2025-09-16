@@ -72,7 +72,7 @@ pytestmark = [
 ]
 
 
-class TestFactoryInitializationIntegration(BaseIntegrationTest):
+class FactoryInitializationIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for factory initialization patterns with real services.
     

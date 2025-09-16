@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 import websockets
 import logging
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -37,7 +37,7 @@ from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.config import AgentConfig
 from netra_backend.app.schemas.agent_models import AgentResult
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.db.database_manager import DatabaseManager
 logger = logging.getLogger(__name__)
 
@@ -129,7 +129,7 @@ async def agent_registry():
     yield registry
     await registry.shutdown()
 
-class TestRealAgentExecution:
+class RealAgentExecutionTests:
     """Test real agent execution without any mocks."""
 
     @pytest.mark.asyncio
@@ -323,7 +323,7 @@ class TestRealAgentExecution:
         assert len(successful_results) > 0, 'At least some concurrent executions should succeed'
         logger.info(f'Concurrent execution: {len(successful_results)}/{len(states)} succeeded in {total_time:.2f}s')
 
-class TestRealAgentIntegration:
+class RealAgentIntegrationTests:
     """Test agent integration with all real services."""
 
     @pytest.mark.asyncio

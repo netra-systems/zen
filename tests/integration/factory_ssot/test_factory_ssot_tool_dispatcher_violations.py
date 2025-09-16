@@ -28,7 +28,7 @@ from netra_backend.app.agents.tool_executor_factory import ToolExecutorFactory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestToolDispatcherFactoryViolations(BaseIntegrationTest):
+class ToolDispatcherFactoryViolationsTests(BaseIntegrationTest):
     """Test SSOT violations in tool dispatcher factory patterns."""
 
     @pytest.mark.integration

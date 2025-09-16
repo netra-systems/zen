@@ -49,7 +49,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 from netra_backend.app.services.user_execution_context import (
     UserExecutionContext, UserContextManager, create_isolated_execution_context
 )
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.services.redis_client import get_redis_client
@@ -61,7 +61,7 @@ from netra_backend.app.auth_integration.auth import (
 )
 
 
-class TestComprehensiveE2EIntegration(SSotAsyncTestCase):
+class ComprehensiveE2EIntegrationTests(SSotAsyncTestCase):
     """
     COMPREHENSIVE E2E Integration Tests for Complete Business Workflows.
     

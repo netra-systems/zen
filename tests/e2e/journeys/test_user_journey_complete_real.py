@@ -57,10 +57,10 @@ except ImportError:
             return type('ServiceInfo', (), {'port': 8000 if service_name == 'backend' else 8001})()
 
 try:
-    from tests.clients.factory import TestClientFactory
+    from tests.clients.factory import ClientFactoryTests
 except ImportError:
     @pytest.mark.e2e
-    class TestClientFactory:
+    class ClientFactoryTests:
         def __init__(self, discovery):
             self.discovery = discovery
         
@@ -71,12 +71,12 @@ except ImportError:
             pass
 
 
-class TestCompleteUserJourneyRealer:
+class CompleteUserJourneyRealerTests:
     """Tests complete user journey with REAL services only."""
     
     def __init__(self):
         self.discovery = ServiceDiscovery()
-        self.factory = TestClientFactory(self.discovery)
+        self.factory = ClientFactoryTests(self.discovery)
         self.user_data: Dict[str, Any] = {}
         self.journey_results: Dict[str, Any] = {}
         self.auth_client = None

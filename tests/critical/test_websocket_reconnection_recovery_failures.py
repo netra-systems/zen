@@ -38,7 +38,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
@@ -147,7 +147,7 @@ def reconnection_tracker():
     tracker = ReconnectionTracker()
     yield tracker
 
-class TestReconnectionFailureScenarios:
+class ReconnectionFailureScenariosTests:
     """Test WebSocket reconnection failure scenarios."""
 
     @pytest.mark.asyncio
@@ -397,7 +397,7 @@ class TestReconnectionFailureScenarios:
         corruption_events = [e for e in failed_events if 'corruption' in e.reason.lower()]
         assert len(corruption_events) > 0, 'Expected state corruption to affect multiple users'
 
-class TestReconnectionRecoveryFailures:
+class ReconnectionRecoveryFailuresTests:
     """Test recovery failure scenarios during reconnection."""
 
     @pytest.mark.asyncio

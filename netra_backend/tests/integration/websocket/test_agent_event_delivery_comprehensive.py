@@ -66,7 +66,7 @@ class MockLLMForEventDelivery:
         }
 
 
-class TestAgentEventDeliveryComprehensive(BaseIntegrationTest):
+class AgentEventDeliveryComprehensiveTests(BaseIntegrationTest):
     """
     Comprehensive tests for WebSocket agent event delivery patterns.
     

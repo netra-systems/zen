@@ -20,7 +20,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 from shared.cors_config_builder import CORSConfigurationBuilder
 
-class TestCORSConfiguration:
+class CORSConfigurationTests:
     """Test suite for CORS configuration across all environments."""
 
     def test_staging_required_origins(self):
@@ -192,7 +192,7 @@ class TestCORSConfiguration:
             is_valid, error = cors.origins.validate_origin_format(origin)
             assert is_valid, f'Invalid origin format in {environment}: {origin}. Error: {error}'
 
-class TestCORSRegressionPrevention:
+class CORSRegressionPreventionTests:
     """Tests specifically designed to prevent known CORS issues from recurring."""
 
     def test_staging_base_domain_included(self):

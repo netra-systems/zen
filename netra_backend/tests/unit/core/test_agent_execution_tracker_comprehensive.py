@@ -31,7 +31,7 @@ from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
 
 @pytest.mark.unit
 @pytest.mark.execution_tracking
-class TestAgentExecutionTrackerCoreOperations(SSotAsyncTestCase):
+class AgentExecutionTrackerCoreOperationsTests(SSotAsyncTestCase):
     """
     BUSINESS VALUE: Core execution tracking validation
     
@@ -174,7 +174,7 @@ class TestAgentExecutionTrackerCoreOperations(SSotAsyncTestCase):
 
 @pytest.mark.unit
 @pytest.mark.phase_transitions
-class TestAgentExecutionTrackerPhaseManagement(SSotAsyncTestCase):
+class AgentExecutionTrackerPhaseManagementTests(SSotAsyncTestCase):
     """
     BUSINESS VALUE: Phase transition validation for WebSocket events
     
@@ -255,7 +255,7 @@ class TestAgentExecutionTrackerPhaseManagement(SSotAsyncTestCase):
 
 @pytest.mark.unit
 @pytest.mark.timeout_management
-class TestAgentExecutionTrackerTimeoutManagement(SSotAsyncTestCase):
+class AgentExecutionTrackerTimeoutManagementTests(SSotAsyncTestCase):
     """
     BUSINESS VALUE: Timeout and circuit breaker protection
     
@@ -362,7 +362,7 @@ class TestAgentExecutionTrackerTimeoutManagement(SSotAsyncTestCase):
 
 @pytest.mark.unit
 @pytest.mark.performance_monitoring
-class TestAgentExecutionTrackerPerformanceMonitoring(SSotAsyncTestCase):
+class AgentExecutionTrackerPerformanceMonitoringTests(SSotAsyncTestCase):
     """
     BUSINESS VALUE: Performance monitoring and optimization
     
@@ -491,7 +491,7 @@ class TestAgentExecutionTrackerPerformanceMonitoring(SSotAsyncTestCase):
 
 @pytest.mark.unit
 @pytest.mark.ssot_compliance
-class TestAgentExecutionTrackerSSOTCompliance(SSotAsyncTestCase):
+class AgentExecutionTrackerSSOTComplianceTests(SSotAsyncTestCase):
     """
     BUSINESS VALUE: SSOT compliance and integration validation
     

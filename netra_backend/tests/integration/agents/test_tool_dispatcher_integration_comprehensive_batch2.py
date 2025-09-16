@@ -27,7 +27,7 @@ from netra_backend.app.schemas.tool import ToolInput, ToolResult, ToolStatus
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from langchain_core.tools import BaseTool
 
-class TestToolDispatcherRealIntegration(SSotBaseTestCase):
+class ToolDispatcherRealIntegrationTests(SSotBaseTestCase):
     """Integration tests with real service components (no Docker required)."""
 
     def setup_method(self, method):
@@ -251,7 +251,7 @@ class TestToolDispatcherRealIntegration(SSotBaseTestCase):
             assert 'state_data' in result.result
         self.record_metric('real_state_management_verified', True)
 
-class TestToolDispatcherFactoryIntegration(SSotBaseTestCase):
+class ToolDispatcherFactoryIntegrationTests(SSotBaseTestCase):
     """Integration tests for tool dispatcher factory patterns."""
 
     def setup_method(self, method):
@@ -292,7 +292,7 @@ class TestToolDispatcherFactoryIntegration(SSotBaseTestCase):
         await factory.cleanup_all_dispatchers()
         self.record_metric('tool_registry_integration_verified', True)
 
-class TestToolDispatcherErrorScenarioIntegration(SSotBaseTestCase):
+class ToolDispatcherErrorScenarioIntegrationTests(SSotBaseTestCase):
     """Integration tests for error scenarios with real components."""
 
     def setup_method(self, method):
@@ -323,13 +323,13 @@ class TestToolDispatcherErrorScenarioIntegration(SSotBaseTestCase):
         failing_websocket = Mock()
         failing_websocket.send_event = AsyncMock(side_effect=Exception('WebSocket connection failed'))
 
-        class TestTool(BaseTool):
+        class ToolTests(BaseTool):
             name: str = 'websocket_test_tool'
             description: str = 'Tool for testing WebSocket failures'
 
             def _run(self) -> str:
                 return 'Tool executed successfully'
-        async with UnifiedToolDispatcher.create_scoped(user_context=self.user_context, websocket_bridge=failing_websocket, tools=[TestTool()]) as dispatcher:
+        async with UnifiedToolDispatcher.create_scoped(user_context=self.user_context, websocket_bridge=failing_websocket, tools=[ToolTests()]) as dispatcher:
             result = await dispatcher.execute_tool('websocket_test_tool')
             assert result.success
             assert 'Tool executed successfully' in str(result.result)

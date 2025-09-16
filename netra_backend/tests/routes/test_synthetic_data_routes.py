@@ -5,7 +5,7 @@ Tests for synthetic data creation - app/routes/synthetic_data.py
 
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -14,7 +14,7 @@ import pytest
 
 from netra_backend.tests.test_utilities import base_client
 
-class TestSyntheticDataRoute:
+class SyntheticDataRouteTests:
     """Test synthetic data creation."""
     
     def test_synthetic_data_generation(self, base_client):

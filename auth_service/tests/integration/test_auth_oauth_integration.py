@@ -31,7 +31,7 @@ from auth_service.services.user_service import UserService
 from auth_service.database import get_database
 
 
-class TestOAuthIntegration(BaseIntegrationTest):
+class OAuthIntegrationTests(BaseIntegrationTest):
     """Integration tests for OAuth functionality with real services."""
     
     @pytest.fixture(autouse=True)

@@ -40,7 +40,7 @@ from loguru import logger
 # Import environment and utilities
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
-class TestIssue544StagingEnvironmentConnectivity:
+class Issue544StagingEnvironmentConnectivityTests:
     """Test staging environment connectivity for Issue #544 fallback solution."""
     
     @pytest.fixture(autouse=True)
@@ -265,7 +265,7 @@ class TestIssue544StagingEnvironmentConnectivity:
         assert True, "Configuration validation completed"
 
 
-class TestIssue544StagingPerformanceValidation:
+class Issue544StagingPerformanceValidationTests:
     """Test staging environment performance for Issue #544 solution validation."""
     
     def test_staging_response_time_analysis(self):

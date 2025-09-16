@@ -44,12 +44,12 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcherFactory
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
 from netra_backend.app.agents.supervisor.pipeline_executor import PipelineExecutor
 from netra_backend.app.agents.supervisor.state_manager import StateManager
 
-class TestAgentOrchestrationCore(SSotAsyncTestCase):
+class AgentOrchestrationCoreTests(SSotAsyncTestCase):
     """
     Comprehensive tests for agent orchestration core functionality.
 

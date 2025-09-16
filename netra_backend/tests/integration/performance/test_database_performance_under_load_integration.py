@@ -31,7 +31,7 @@ from netra_backend.app.db.query_optimizer import QueryOptimizer
 from netra_backend.app.db.transaction_manager import TransactionManager
 from netra_backend.app.db.performance_monitor import DatabasePerformanceMonitor
 
-class TestDatabasePerformanceUnderLoadIntegration(SSotBaseTestCase):
+class DatabasePerformanceUnderLoadIntegrationTests(SSotBaseTestCase):
     """
     Test database performance under realistic load conditions.
     

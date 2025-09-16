@@ -38,7 +38,7 @@ from shared.database_url_builder import DatabaseURLBuilder
 
 @pytest.mark.unit
 @pytest.mark.database
-class TestDatabaseInitializerErrorContext(SSotAsyncTestCase):
+class DatabaseInitializerErrorContextTests(SSotAsyncTestCase):
     """
     Tests demonstrating current insufficient error context in database initialization.
     

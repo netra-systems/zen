@@ -38,7 +38,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInst
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestAgentRegistryAdapterIntegrationIssue1205(SSotAsyncTestCase):
+class AgentRegistryAdapterIntegrationIssue1205Tests(SSotAsyncTestCase):
     """Integration tests for AgentRegistryAdapter Issue #1205 fix."""
 
     async def setup_method(self, method):
@@ -79,7 +79,7 @@ class TestAgentRegistryAdapterIntegrationIssue1205(SSotAsyncTestCase):
 
     def _create_test_agent_class(self):
         """Create a test agent class for integration testing."""
-        class TestAgent:
+        class AgentTests:
             def __init__(self, user_context=None, **kwargs):
                 self.user_context = user_context
                 self._user_id = getattr(user_context, 'user_id', None)
@@ -93,7 +93,7 @@ class TestAgentRegistryAdapterIntegrationIssue1205(SSotAsyncTestCase):
                     "agent_type": "test_agent"
                 }
 
-        return TestAgent
+        return AgentTests
 
     @pytest.mark.asyncio
     async def test_adapter_get_async_current_signature(self):
@@ -103,7 +103,7 @@ class TestAgentRegistryAdapterIntegrationIssue1205(SSotAsyncTestCase):
 
         # Should successfully create agent instance
         self.assertIsNotNone(result)
-        self.assertEqual(result.__class__.__name__, "TestAgent")
+        self.assertEqual(result.__class__.__name__, "AgentTests")
         self.assertEqual(result.user_context, self.user_context)
 
     @pytest.mark.asyncio

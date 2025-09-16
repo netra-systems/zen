@@ -79,7 +79,7 @@ class Optimization(Base):
                 (now, 65.0)
                 ]
 
-                class TestUserRepositoryAuth:
+                class UserRepositoryAuthTests:
                     """test_user_repository_auth - Test user authentication and password hashing"""
 
                     @pytest.mark.asyncio
@@ -150,7 +150,7 @@ class Optimization(Base):
         )
         assert authenticated == None
 
-class TestOptimizationRepositoryStorage:
+class OptimizationRepositoryStorageTests:
     """test_optimization_repository_storage - Test optimization storage and versioning"""
 
     @pytest.mark.asyncio
@@ -195,7 +195,7 @@ class TestOptimizationRepositoryStorage:
         assert history[0].version == 1
         assert history[-1].version == 3
 
-        class TestMetricRepositoryAggregation:
+        class MetricRepositoryAggregationTests:
             """test_metric_repository_aggregation - Test metric aggregation and time-series queries"""
 
             @pytest.mark.asyncio

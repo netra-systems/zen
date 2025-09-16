@@ -52,8 +52,10 @@ from netra_backend.app.agents.supervisor.execution_context import (
     PipelineStep,
     AgentExecutionStrategy
 )
-from netra_backend.app.schemas.agent_models import DeepAgentState
+# Removed deprecated DeepAgentState import - migrated to UserExecutionContext for security
+# from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # SSOT Dependencies
 from netra_backend.app.core.agent_execution_tracker import (
@@ -67,7 +69,7 @@ from netra_backend.app.core.execution_tracker import ExecutionState
 from shared.isolated_environment import get_env
 
 
-class TestAgentExecutionCoreComprehensive(SSotBaseTestCase):
+class AgentExecutionCoreComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive unit tests for AgentExecutionCore business logic.
     
@@ -124,20 +126,23 @@ class TestAgentExecutionCoreComprehensive(SSotBaseTestCase):
     @pytest.fixture
     def mock_execution_tracker(self):
         """Create mock execution tracker with realistic business metrics."""
-        tracker = AsyncMock()
-        exec_id = uuid4()
+        tracker = Mock()  # Use Mock instead of AsyncMock since methods are synchronous
+        exec_id = str(uuid4())  # Return string ID as expected
         
-        # Core execution tracking methods
-        tracker.register_execution = AsyncMock(return_value=exec_id)
-        tracker.start_execution = AsyncMock()
-        tracker.complete_execution = AsyncMock()
-        tracker.collect_metrics = AsyncMock(return_value={
+        # Core execution tracking methods (all synchronous per the actual implementation)
+        tracker.create_execution = Mock(return_value=exec_id)
+        tracker.start_execution = Mock(return_value=True)
+        tracker.complete_execution = Mock()
+        tracker.collect_metrics = Mock(return_value={
             'execution_time_ms': 1500,
             'memory_usage_mb': 256,
             'cpu_percent': 15.5,
             'heartbeat_count': 3,
             'success_rate': 0.95
         })
+        
+        # Add update_execution_state as it's used in the code
+        tracker.update_execution_state = Mock()
         
         return tracker, exec_id
 
@@ -223,20 +228,30 @@ class TestAgentExecutionCoreComprehensive(SSotBaseTestCase):
 
     @pytest.fixture
     def business_agent_state(self):
-        """Create realistic agent state with business context."""
-        state = Mock(spec=DeepAgentState)
-        state.user_id = "enterprise_customer_789"
-        state.thread_id = "business_session_12345"
-        state.current_task = "supply_chain_optimization"
-        state.context = {
-            "annual_spend": 2000000,
-            "supplier_count": 150,
-            "optimization_goals": ["reduce_costs", "improve_quality", "reduce_lead_times"]
-        }
-        # Mock tool dispatcher for WebSocket integration testing
-        state.tool_dispatcher = Mock()
-        state.tool_dispatcher.set_websocket_manager = Mock()
-        return state
+        """Create realistic UserExecutionContext with business context."""
+        # Create tool dispatcher mock for WebSocket integration testing that doesn't trigger isolation checks
+        # Use a simple object to avoid Mock's automatic attribute creation
+        class MockToolDispatcher:
+            def __init__(self):
+                self.set_websocket_manager = Mock()
+        
+        tool_dispatcher = MockToolDispatcher()
+        
+        # Use UserExecutionContext instead of deprecated DeepAgentState
+        user_context = UserExecutionContext.from_request(
+            user_id="enterprise_customer_789",
+            thread_id="business_session_12345", 
+            run_id="supply_chain_optimization_run_123",
+            agent_context={
+                "current_task": "supply_chain_optimization",
+                "annual_spend": 2000000,
+                "supplier_count": 150,
+                "optimization_goals": ["reduce_costs", "improve_quality", "reduce_lead_times"],
+                "tool_dispatcher": tool_dispatcher  # Put directly in agent_context as expected
+            }
+        )
+        
+        return user_context
 
     @pytest.fixture
     def successful_business_agent(self):
@@ -354,7 +369,7 @@ class TestAgentExecutionCoreComprehensive(SSotBaseTestCase):
         assert result.agent_name == "supply_chain_optimizer"
         
         # Verify execution tracking for monitoring
-        execution_core.execution_tracker.register_execution.assert_called_once()
+        execution_core.execution_tracker.create_execution.assert_called_once()
         execution_core.execution_tracker.start_execution.assert_called_once()
         execution_core.execution_tracker.complete_execution.assert_called_once()
         
@@ -669,7 +684,7 @@ class TestAgentExecutionCoreComprehensive(SSotBaseTestCase):
                 assert metric in result.metrics
         
         # Verify execution tracking included timeout configuration
-        tracker_calls = execution_core.execution_tracker.register_execution.call_args_list
+        tracker_calls = execution_core.execution_tracker.create_execution.call_args_list
         assert len(tracker_calls) == 1
         call_kwargs = tracker_calls[0][1]
         assert 'timeout_seconds' in call_kwargs
@@ -743,15 +758,19 @@ class TestAgentExecutionCoreComprehensive(SSotBaseTestCase):
             correlation_id="optimization_b_456"
         )
         
-        state_user_a = Mock(spec=DeepAgentState)
-        state_user_a.user_id = "enterprise_customer_a"
-        state_user_a.thread_id = "enterprise_a_session"
-        state_user_a.sensitive_data = {"revenue": 10000000}
+        state_user_a = UserExecutionContext.from_request(
+            user_id="enterprise_customer_a",
+            thread_id="enterprise_a_session",
+            run_id="enterprise_a_run_123",
+            agent_context={"sensitive_data": {"revenue": 10000000}}
+        )
         
-        state_user_b = Mock(spec=DeepAgentState)
-        state_user_b.user_id = "enterprise_customer_b"
-        state_user_b.thread_id = "enterprise_b_session"
-        state_user_b.sensitive_data = {"revenue": 5000000}
+        state_user_b = UserExecutionContext.from_request(
+            user_id="enterprise_customer_b",
+            thread_id="enterprise_b_session",
+            run_id="enterprise_b_run_456",
+            agent_context={"sensitive_data": {"revenue": 5000000}}
+        )
         
         # Mock successful agent
         mock_agent = AsyncMock()
@@ -780,7 +799,7 @@ class TestAgentExecutionCoreComprehensive(SSotBaseTestCase):
         assert result_b.success is True
         
         # Verify separate execution tracking for each user
-        tracker_calls = execution_core.execution_tracker.register_execution.call_args_list
+        tracker_calls = execution_core.execution_tracker.create_execution.call_args_list
         assert len(tracker_calls) >= 2
         
         # Extract user IDs from tracking calls
@@ -867,7 +886,8 @@ class TestAgentExecutionCoreComprehensive(SSotBaseTestCase):
         )
         
         # Verify WebSocket manager was set on tool dispatcher
-        business_agent_state.tool_dispatcher.set_websocket_manager.assert_called_once()
+        tool_dispatcher = business_agent_state.agent_context.get("tool_dispatcher")
+        tool_dispatcher.set_websocket_manager.assert_called_once()
         
         # Verify WebSocket bridge was set on agent through multiple methods
         successful_business_agent.set_websocket_bridge.assert_called_with(
@@ -996,7 +1016,7 @@ class TestAgentExecutionCoreComprehensive(SSotBaseTestCase):
 
 # ===== ADDITIONAL SPECIALIZED TEST CLASSES =====
 
-class TestAgentExecutionCoreIntegrationPoints(SSotBaseTestCase):
+class AgentExecutionCoreIntegrationPointsTests(SSotBaseTestCase):
     """Test integration points between AgentExecutionCore and other system components."""
 
     async def test_execution_engine_integration_patterns(self):
@@ -1051,6 +1071,6 @@ class TestAgentExecutionCoreIntegrationPoints(SSotBaseTestCase):
 
 # Export the test classes for discovery
 __all__ = [
-    "TestAgentExecutionCoreComprehensive",
-    "TestAgentExecutionCoreIntegrationPoints"
+    "AgentExecutionCoreComprehensiveTests",
+    "AgentExecutionCoreIntegrationPointsTests"
 ]

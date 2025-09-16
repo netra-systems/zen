@@ -17,7 +17,7 @@ Business Value Justification (BVJ):
 
 CRITICAL: This test validates the security fix that prevents mock session factories
 from being returned in any environment, which would cause silent data corruption.
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 """
@@ -45,7 +45,7 @@ from netra_backend.app.database import get_db, get_database_url, get_engine, get
 from shared.isolated_environment import get_env
 from test_framework.database_test_utilities import DatabaseTestUtilities
 
-class TestMockSessionFactoryRemoval:
+class MockSessionFactoryRemovalTests:
     """Test that mock session factory code has been completely removed."""
 
     def test_initialize_postgres_no_mock_factory_fallback(self):
@@ -104,7 +104,7 @@ class TestMockSessionFactoryRemoval:
                 if 'return lambda' in code_only:
                     assert False, f'CRITICAL: Function {func.__name__} contains lambda in return path. All session factory returns must be real async_sessionmaker instances.'
 
-class TestInitializePostgresFailFast:
+class InitializePostgresFailFastTests:
     """Test that initialize_postgres fails fast on errors with no silent degradation."""
 
     @pytest.mark.asyncio
@@ -187,7 +187,7 @@ class TestInitializePostgresFailFast:
             async_engine = original_engine
             async_session_factory = original_factory
 
-class TestRealDatabaseSessions:
+class RealDatabaseSessionsTests:
     """Test real database session creation and operations."""
 
     @pytest.mark.asyncio
@@ -259,14 +259,14 @@ class TestRealDatabaseSessions:
                 await cleanup_session.execute(text('\n                    DELETE FROM mock_removal_test WHERE test_value = :test_value\n                '), {'test_value': f'test_data_{test_id}'})
                 await cleanup_session.execute(text('\n                    DROP TABLE IF EXISTS mock_removal_test\n                '))
 
-class TestPytestCurrentTestBehavior:
+class PytestCurrentTestBehaviorTests:
     """Test behavior with PYTEST_CURRENT_TEST environment variable set."""
 
     def test_pytest_current_test_env_var_handling(self):
         """Test that PYTEST_CURRENT_TEST environment variable is handled correctly."""
         original_value = os.environ.get('PYTEST_CURRENT_TEST')
         try:
-            os.environ['PYTEST_CURRENT_TEST'] = 'netra_backend/tests/unit/db/test_postgres_core_production_fix.py::TestPytestCurrentTestBehavior::test_pytest_current_test_env_var_handling'
+            os.environ['PYTEST_CURRENT_TEST'] = 'netra_backend/tests/unit/db/test_postgres_core_production_fix.py::PytestCurrentTestBehaviorTests::test_pytest_current_test_env_var_handling'
             env = get_env()
             current_test = env.get('PYTEST_CURRENT_TEST')
             assert current_test is not None, 'PYTEST_CURRENT_TEST should be accessible through get_env()'
@@ -325,7 +325,7 @@ class TestPytestCurrentTestBehavior:
                 else:
                     os.environ[var] = original_value
 
-class TestConcurrentSessionIsolation:
+class ConcurrentSessionIsolationTests:
     """Test concurrent session creation and isolation."""
 
     @pytest.mark.asyncio
@@ -435,7 +435,7 @@ class TestConcurrentSessionIsolation:
             results.append(results_queue.get())
         assert len(results) == num_threads, f'Expected {num_threads} successful thread results, got {len(results)}'
 
-class TestDifficultEdgeCases:
+class DifficultEdgeCasesTests:
     """Create difficult edge cases that could trigger mock fallback."""
 
     @pytest.mark.asyncio
@@ -526,7 +526,7 @@ class TestDifficultEdgeCases:
             async_engine = original_engine
             async_session_factory = original_factory
 
-class TestRealSessionValidation:
+class RealSessionValidationTests:
     """Validate all database connections use real sessions (NO MOCKS)."""
 
     @pytest.mark.asyncio

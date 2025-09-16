@@ -48,7 +48,7 @@ class BusinessWorkflowContext:
     completion_metrics: Dict
 
 
-class TestComprehensiveBusinessWorkflows(ServiceOrchestrationIntegrationTest):
+class ComprehensiveBusinessWorkflowsTests(ServiceOrchestrationIntegrationTest):
     """Test complete business workflows with real services integration."""
 
     @pytest.mark.integration

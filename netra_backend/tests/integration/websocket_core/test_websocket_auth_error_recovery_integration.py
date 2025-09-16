@@ -84,7 +84,7 @@ class MockWebSocket:
 
 
 @pytest.mark.integration
-class TestWebSocketAuthErrorHandlingIntegration(SSotAsyncTestCase):
+class WebSocketAuthErrorHandlingIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket authentication error handling."""
 
     def setup_method(self, method):

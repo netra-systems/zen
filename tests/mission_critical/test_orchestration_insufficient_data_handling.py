@@ -29,7 +29,7 @@ from shared.isolated_environment import get_env
 logger = central_logger.get_logger(__name__)
 
 
-class TestInsufficientDataHandling:
+class InsufficientDataHandlingTests:
     """Test suite for insufficient data handling scenarios in orchestration."""
     
     # === Test Data Fixtures ===

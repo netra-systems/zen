@@ -27,7 +27,7 @@ from shared.database_url_builder import DatabaseURLBuilder
 from shared.types.core_types import UserID, ensure_user_id
 
 
-class TestDatabaseURLBuilderIsolation(BaseUnitTest):
+class DatabaseURLBuilderIsolationTests(BaseUnitTest):
     """Test DatabaseURLBuilder for multi-user connection isolation."""
 
     def setUp(self):

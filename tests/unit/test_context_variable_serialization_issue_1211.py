@@ -59,7 +59,7 @@ from netra_backend.app.services.user_execution_context import (
 )
 
 
-class TestContextVarSerializationFailures(SSotAsyncTestCase):
+class ContextVarSerializationFailuresTests(SSotAsyncTestCase):
     """Test suite reproducing ContextVar serialization failures for Issue #1211."""
 
     def setup_method(self, method):
@@ -358,7 +358,7 @@ class TestContextVarSerializationFailures(SSotAsyncTestCase):
             pickle.dumps(agent_state)
 
 
-class TestContextVarSerializationWorkarounds(SSotAsyncTestCase):
+class ContextVarSerializationWorkaroundsTests(SSotAsyncTestCase):
     """Test potential workarounds for ContextVar serialization issues."""
 
     def setup_method(self, method):

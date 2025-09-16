@@ -32,7 +32,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, Us
 from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory, configure_agent_instance_factory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, create_agent_websocket_bridge
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 
 @pytest.fixture
@@ -99,7 +99,7 @@ def mock_agent_with_websocket_support():
             pass
     return MockAgentWithWebSocket
 
-class TestAgentRegistryWebSocketManagerIntegration(SSotBaseTestCase):
+class AgentRegistryWebSocketManagerIntegrationTests(SSotBaseTestCase):
     """Test AgentRegistry integration with WebSocket manager."""
 
     @pytest.mark.asyncio
@@ -202,7 +202,7 @@ class TestAgentRegistryWebSocketManagerIntegration(SSotBaseTestCase):
         assert final_manager in managers
         assert len(managers) == 5
 
-class TestRealWebSocketEventPropagation(SSotBaseTestCase):
+class RealWebSocketEventPropagationTests(SSotBaseTestCase):
     """Test real WebSocket event propagation through the integrated system."""
 
     @pytest.mark.asyncio
@@ -315,7 +315,7 @@ class TestRealWebSocketEventPropagation(SSotBaseTestCase):
         except Exception as e:
             assert 'WebSocket' in str(e) or 'connection' in str(e)
 
-class TestToolDispatcherEnhancementIntegration(SSotBaseTestCase):
+class ToolDispatcherEnhancementIntegrationTests(SSotBaseTestCase):
     """Test tool dispatcher enhancement with WebSocket capabilities."""
 
     @pytest.mark.asyncio
@@ -378,7 +378,7 @@ class TestToolDispatcherEnhancementIntegration(SSotBaseTestCase):
             assert dispatcher.user_context == user_context
             assert dispatcher.has_websocket is True
 
-class TestIntegrationWithAgentInstanceFactory(SSotBaseTestCase):
+class IntegrationWithAgentInstanceFactoryTests(SSotBaseTestCase):
     """Test integration between AgentRegistry and AgentInstanceFactory WebSocket systems."""
 
     @pytest.mark.asyncio

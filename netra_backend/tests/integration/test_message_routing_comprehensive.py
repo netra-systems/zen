@@ -197,7 +197,7 @@ class MockWebSocket:
         self.is_connected = False
         self.client_state = 'disconnected'
 
-class TestMessageRoutingCore(BaseIntegrationTest):
+class MessageRoutingCoreTests(BaseIntegrationTest):
     """Test Message Router core functionality and handler management."""
 
     @pytest.mark.integration
@@ -437,7 +437,7 @@ class TestMessageRoutingCore(BaseIntegrationTest):
         assert temp_handler.call_count == 1
         logger.info(' PASS:  Handler deregistration test completed')
 
-class TestWebSocketMessageRouting(BaseIntegrationTest):
+class WebSocketMessageRoutingTests(BaseIntegrationTest):
     """Test WebSocket-specific message routing and user isolation."""
 
     @pytest.mark.integration
@@ -593,7 +593,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
         assert stats['connections']['total'] == 0
         logger.info(' PASS:  WebSocket connection cleanup test completed')
 
-class TestMultiUserIsolation(BaseIntegrationTest):
+class MultiUserIsolationTests(BaseIntegrationTest):
     """Test multi-user isolation via Factory pattern and UserExecutionContext."""
 
     @pytest.mark.integration
@@ -763,7 +763,7 @@ class TestMultiUserIsolation(BaseIntegrationTest):
         assert factory_stats['current_state']['users_with_managers'] >= 3
         logger.info(' PASS:  Multi-user state consistency test completed')
 
-class TestAgentMessageIntegration(BaseIntegrationTest):
+class AgentMessageIntegrationTests(BaseIntegrationTest):
     """Test Agent message integration with WebSocket routing."""
 
     @pytest.mark.integration

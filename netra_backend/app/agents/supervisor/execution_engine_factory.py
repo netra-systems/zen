@@ -339,7 +339,7 @@ class ExecutionEngineFactory:
                 )
 
                 # COMPATIBILITY FIX: Create test fallback manager for test environments
-                from netra_backend.app.websocket_core.websocket_manager import create_test_fallback_manager
+                from netra_backend.app.websocket_core.canonical_import_patterns import create_test_fallback_manager
                 test_manager = create_test_fallback_manager(context)
 
                 emitter = UnifiedWebSocketEmitter(
@@ -937,8 +937,8 @@ class ExecutionEngineFactoryManager:
 
 # Factory manager instance for creating user-scoped factories
 _factory_manager = ExecutionEngineFactoryManager()
-_factory_lock = asyncio.Lock()  # Keep for backward compatibility
-_factory_instance: Optional[ExecutionEngineFactory] = None  # Global factory instance for backward compatibility - Fixed 2025-09-15
+# SINGLETON ELIMINATION (Issue #1186 Phase 3): Removed global factory instance
+# Factory instances are now managed per-user to prevent isolation violations
 
 
 async def get_execution_engine_factory(user_context: Optional[str] = None) -> ExecutionEngineFactory:
@@ -977,21 +977,18 @@ async def configure_execution_engine_factory(
     Raises:
         ExecutionEngineFactoryError: If configuration fails
     """
-    global _factory_instance
-    
-    async with _factory_lock:
-        if _factory_instance is not None:
-            logger.warning("ExecutionEngineFactory already configured - replacing with new instance")
-        
-        # Create new factory with validated dependencies
-        _factory_instance = ExecutionEngineFactory(
-            websocket_bridge=websocket_bridge,
-            database_session_manager=database_session_manager,
-            redis_manager=redis_manager
-        )
-        logger.info(f" PASS:  ExecutionEngineFactory configured with WebSocket bridge and infrastructure managers")
-        
-        return _factory_instance
+    # SINGLETON ELIMINATION (Issue #1186 Phase 3): Create new factory per configuration
+    # This prevents singleton-based user isolation violations
+
+    # Create new factory with validated dependencies
+    factory = ExecutionEngineFactory(
+        websocket_bridge=websocket_bridge,
+        database_session_manager=database_session_manager,
+        redis_manager=redis_manager
+    )
+    logger.info(f" PASS:  ExecutionEngineFactory configured with WebSocket bridge and infrastructure managers (per-request pattern)")
+
+    return factory
 
 
 # COMPATIBILITY ALIASES for legacy import patterns

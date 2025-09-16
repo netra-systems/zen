@@ -22,7 +22,7 @@ from netra_backend.app.services.websocket_connection_pool import WebSocketConnec
 
 
 @pytest.mark.integration
-class TestWebSocketStateSerializationIntegration:
+class WebSocketStateSerializationIntegrationTests:
     """Integration tests for WebSocket state serialization in real scenarios."""
 
     @pytest.fixture
@@ -143,7 +143,7 @@ class TestWebSocketStateSerializationIntegration:
 
 
 @pytest.mark.integration
-class TestGCPCloudRunCompatibility:
+class GCPCloudRunCompatibilityTests:
     """Test compatibility with GCP Cloud Run structured logging patterns."""
 
     def test_gcp_structured_logging_format(self):
@@ -222,7 +222,7 @@ class TestGCPCloudRunCompatibility:
 
 
 @pytest.mark.integration
-class TestRegressionPrevention:
+class RegressionPreventionTests:
     """Ensure the original 1011 error pattern is completely fixed."""
 
     def test_original_1011_error_scenario_fixed(self):

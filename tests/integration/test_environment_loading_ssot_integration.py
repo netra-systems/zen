@@ -23,7 +23,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.integration
-class TestEnvironmentLoadingSSotIntegration(SSotBaseTestCase):
+class EnvironmentLoadingSSotIntegrationTests(SSotBaseTestCase):
     """Test suite for SSOT environment loading integration."""
 
     def test_backend_and_auth_use_same_environment_loader(self):

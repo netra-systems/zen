@@ -23,7 +23,7 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
 sys.path.insert(0, str(PROJECT_ROOT))
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestUnifiedTestRunnerCollection(SSotBaseTestCase):
+class UnifiedTestRunnerCollectionTests(SSotBaseTestCase):
     """
     Test unified test runner collection reliability.
     
@@ -196,7 +196,7 @@ class TestUnifiedTestRunnerCollection(SSotBaseTestCase):
             mission_critical_issues.append(f'Cannot import UnifiedTestRunner: {e}')
         assert len(mission_critical_issues) == 0, f'Mission critical test collection issues detected ({len(mission_critical_issues)} problems):\n' + '\n'.join((f'  - {issue}' for issue in mission_critical_issues)) + '\n\nMission critical tests protect $500K+ ARR - collection MUST be 100% reliable.'
 
-class TestTestDiscoveryReliability(SSotBaseTestCase):
+class TestDiscoveryReliabilityTests(SSotBaseTestCase):
     """
     Test discovery reliability validation.
     

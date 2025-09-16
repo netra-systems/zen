@@ -43,7 +43,7 @@ setup_test_manager_with_helper,
 
 )
 
-class TestWebSocketPerformanceUnderLoad:
+class WebSocketPerformanceUnderLoadTests:
     pass
 
     """Performance tests for WebSocket state recovery operations under load."""
@@ -174,7 +174,7 @@ class TestWebSocketPerformanceUnderLoad:
 
                                     assert stats["pending_messages"] <= expected_size, "Queue size should be managed efficiently"
 
-                                    class TestWebSocketErrorScenarios:
+                                    class WebSocketErrorScenariosTests:
                                         pass
 
                                         """Error scenario tests for WebSocket state recovery resilience."""
@@ -287,7 +287,7 @@ class TestWebSocketPerformanceUnderLoad:
 
                                                             assert connections_opened >= 0, "Connection tracking should remain consistent"
 
-                                                            class TestWebSocketNetworkConditionRecovery:
+                                                            class WebSocketNetworkConditionRecoveryTests:
                                                                 pass
 
                                                                 """Network condition simulation and recovery tests."""
@@ -401,7 +401,7 @@ class TestWebSocketPerformanceUnderLoad:
 
                                                                                     assert stats["active_connections"] >= 0, "Connection tracking should remain stable"
 
-                                                                                    class TestWebSocketCircuitBreakerRecovery:
+                                                                                    class WebSocketCircuitBreakerRecoveryTests:
                                                                                         pass
 
                                                                                         """Circuit breaker pattern tests for WebSocket error recovery."""

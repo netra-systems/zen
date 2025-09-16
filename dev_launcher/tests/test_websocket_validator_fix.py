@@ -19,7 +19,7 @@ from dev_launcher.websocket_validator import WebSocketValidator, WebSocketEndpoi
 pytest.skip("WebSocket validator tests require running services or complex async mocking", allow_module_level=True)
 
 
-class TestWebSocketValidatorFix:
+class WebSocketValidatorFixTests:
     """Test the WebSocket validator fix for MCP endpoints."""
     
     @pytest.mark.asyncio

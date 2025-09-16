@@ -36,7 +36,7 @@ from netra_backend.app.models.agent_execution import AgentExecution
 
 
 @pytest.mark.unit
-class TestIssue1017SerializationSecurityVulnerabilities(SSotBaseTestCase):
+class Issue1017SerializationSecurityVulnerabilitiesTests(SSotBaseTestCase):
     """
     Comprehensive serialization security vulnerability tests for Issue #1017.
 

@@ -29,7 +29,7 @@ from shared.isolated_environment import get_env
 from shared.types.core_types import UserID
 logger = logging.getLogger(__name__)
 
-class TestAgentExecutionMockDetection(BaseE2ETest):
+class AgentExecutionMockDetectionTests(BaseE2ETest):
     """
     FAILING TESTS: Prove agent execution can return mock responses to users.
     

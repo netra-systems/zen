@@ -76,7 +76,7 @@ class AgentExecutionTrace:
     critical_events_received: Set[str] = field(default_factory=set)
 
 
-class TestWebSocketAgentCoordination(SSotAsyncTestCase):
+class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
     """
     E2E Tests for WebSocket Agent Coordination.
     

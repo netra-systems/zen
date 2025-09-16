@@ -429,7 +429,7 @@ class MockExecutionEngineFactory:
         return engine
 
 
-class TestDataGenerator:
+class DataGeneratorTests:
     """Generator for test data and scenarios."""
     
     @staticmethod
@@ -682,7 +682,7 @@ __all__ = [
     'ExecutionEngineDetector',
     'UserContextContaminationChecker', 
     'MockExecutionEngineFactory',
-    'TestDataGenerator',
+    'DataGeneratorTests',
     'NonDockerTestEnvironment',
     'MigrationProgressTracker',
     'E2ETestHelpers'

@@ -52,7 +52,7 @@ from shared.types.core_types import ConnectionID, UserID, ensure_user_id
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestApplicationConnectionStateEnum(SSotBaseTestCase):
+class ApplicationConnectionStateEnumTests(SSotBaseTestCase):
     """
     Unit tests for ApplicationConnectionState enum definitions and validation.
     
@@ -117,7 +117,7 @@ class TestApplicationConnectionStateEnum(SSotBaseTestCase):
             assert deserialized == state_str
 
 @pytest.mark.unit
-class TestConnectionStateTransition(SSotBaseTestCase):
+class ConnectionStateTransitionTests(SSotBaseTestCase):
     """
     Unit tests for ConnectionStateTransition atomic operations.
     
@@ -239,7 +239,7 @@ class TestConnectionStateTransition(SSotBaseTestCase):
         assert isinstance(transition.timestamp, datetime)
 
 @pytest.mark.unit
-class TestConnectionStateMachine(SSotBaseTestCase):
+class ConnectionStateMachineTests(SSotBaseTestCase):
     """
     Unit tests for ConnectionStateMachine core business logic.
     

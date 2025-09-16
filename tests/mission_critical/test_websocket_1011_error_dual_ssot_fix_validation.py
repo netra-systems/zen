@@ -34,7 +34,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestWebSocket1011ErrorDualSSOTFixValidation(SSotBaseTestCase):
+class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
     """Mission-critical validation of WebSocket 1011 error fix."""
 
     def setup_method(self):

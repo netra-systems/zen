@@ -76,7 +76,7 @@ class WebSocketEventSequence:
         return self.events[-1]['relative_time']
 
 @pytest.mark.e2e
-class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
+class WebSocketAgentEventsComprehensiveTests(BaseE2ETest):
     """
     Comprehensive WebSocket Agent Events E2E Tests for Staging Environment.
     

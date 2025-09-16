@@ -26,7 +26,7 @@ from netra_backend.app.services.billing.cost_calculator import (
 )
 
 
-class TestCostCalculationBusinessValue(BaseTestCase):
+class CostCalculationBusinessValueTests(BaseTestCase):
     """Test cost calculation delivers accurate billing for business value."""
     
     def setup_method(self):

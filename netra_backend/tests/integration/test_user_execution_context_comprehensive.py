@@ -35,7 +35,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
-class TestUserExecutionContextLifecycle(BaseIntegrationTest):
+class UserExecutionContextLifecycleTests(BaseIntegrationTest):
     """Test user execution context lifecycle: creation  ->  validation  ->  usage  ->  cleanup"""
 
     def setup_method(self):
@@ -124,7 +124,7 @@ class TestUserExecutionContextLifecycle(BaseIntegrationTest):
         assert context.audit_metadata['method'] == 'POST'
         assert 'x_request_id' in context.audit_metadata
 
-class TestUserExecutionContextMultiUserIsolation(BaseIntegrationTest):
+class UserExecutionContextMultiUserIsolationTests(BaseIntegrationTest):
     """Test multi-user context isolation and concurrent user session management"""
 
     def setup_method(self):
@@ -191,7 +191,7 @@ class TestUserExecutionContextMultiUserIsolation(BaseIntegrationTest):
         request_ids = [ctx.request_id for ctx in results]
         assert len(set(request_ids)) == 50
 
-class TestUserExecutionContextChildContexts(BaseIntegrationTest):
+class UserExecutionContextChildContextsTests(BaseIntegrationTest):
     """Test user context inheritance and child context creation patterns"""
 
     def setup_method(self):
@@ -274,7 +274,7 @@ class TestUserExecutionContextChildContexts(BaseIntegrationTest):
         with pytest.raises(InvalidContextError, match='operation_name must be a non-empty string'):
             self.parent_context.create_child_context('   ')
 
-class TestUserExecutionContextCrossServiceIntegration(BaseIntegrationTest):
+class UserExecutionContextCrossServiceIntegrationTests(BaseIntegrationTest):
     """Test cross-service user context propagation (agents [U+2194] tools [U+2194] WebSocket)"""
 
     def setup_method(self):
@@ -360,7 +360,7 @@ class TestUserExecutionContextCrossServiceIntegration(BaseIntegrationTest):
         with pytest.raises(InvalidContextError, match='connection_id must be a non-empty string'):
             self.integration_context.with_websocket_connection(None)
 
-class TestUserExecutionContextBusinessCriticalOperations(BaseIntegrationTest):
+class UserExecutionContextBusinessCriticalOperationsTests(BaseIntegrationTest):
     """Test business-critical user context operations (agent execution, tool dispatch, WebSocket events)"""
 
     def setup_method(self):
@@ -423,7 +423,7 @@ class TestUserExecutionContextBusinessCriticalOperations(BaseIntegrationTest):
         assert tool_result_context.operation_depth == 2
         assert tool_result_context.agent_context['result_status'] == 'success'
 
-class TestUserExecutionContextErrorHandlingAndValidation(BaseIntegrationTest):
+class UserExecutionContextErrorHandlingAndValidationTests(BaseIntegrationTest):
     """Test user context error handling and validation failure scenarios"""
 
     def setup_method(self):
@@ -482,7 +482,7 @@ class TestUserExecutionContextErrorHandlingAndValidation(BaseIntegrationTest):
         with pytest.raises(TypeError, match='Expected UserExecutionContext'):
             validate_user_context(None)
 
-class TestUserExecutionContextResourceManagement(BaseIntegrationTest):
+class UserExecutionContextResourceManagementTests(BaseIntegrationTest):
     """Test user context resource management and memory leak prevention"""
 
     def setup_method(self):
@@ -556,7 +556,7 @@ class TestUserExecutionContextResourceManagement(BaseIntegrationTest):
         final_context = UserExecutionContext(user_id='final_memory_test_user', thread_id='final_memory_test_thread', run_id='final_memory_test_run')
         assert final_context.verify_isolation() is True
 
-class TestUserExecutionContextPerformanceAndConcurrency(BaseIntegrationTest):
+class UserExecutionContextPerformanceAndConcurrencyTests(BaseIntegrationTest):
     """Test user context performance under concurrent access and load"""
 
     def setup_method(self):

@@ -8,6 +8,7 @@ Business Impact: Protects $500K+ ARR by ensuring core chat functionality works.
 import asyncio
 import time
 import pytest
+import unittest
 from typing import Dict, List, Any, Optional
 from unittest.mock import Mock, AsyncMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -16,7 +17,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
-class TestGoldenPathProtection(SSotAsyncTestCase):
+class GoldenPathProtectionTests(SSotAsyncTestCase, unittest.TestCase):
     """Test suite to protect golden path user flow during SSOT migration."""
 
     async def test_golden_path_login_to_ai_response(self):

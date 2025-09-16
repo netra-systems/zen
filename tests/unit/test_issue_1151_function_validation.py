@@ -15,7 +15,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 @pytest.mark.unit
-class TestIsDockerAvailableFunction:
+class IsDockerAvailableFunctionTests:
     """Test suite for the newly added is_docker_available function."""
 
     def test_function_exists_and_importable(self):
@@ -87,7 +87,7 @@ class TestIsDockerAvailableFunction:
             assert True
 
 @pytest.mark.unit
-class TestWebSocketTestBaseIntegration:
+class WebSocketTestBaseIntegrationTests:
     """Test integration of new function with existing websocket test base."""
 
     def test_all_required_functions_available(self):

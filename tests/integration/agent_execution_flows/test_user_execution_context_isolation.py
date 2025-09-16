@@ -29,7 +29,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
-class TestUserExecutionContextIsolation(BaseIntegrationTest):
+class UserExecutionContextIsolationTests(BaseIntegrationTest):
     """Integration tests for user execution context isolation."""
 
     @pytest.mark.integration

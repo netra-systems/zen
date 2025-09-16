@@ -54,7 +54,7 @@ class OrchestrationEvent:
 @pytest.mark.gcp_staging
 @pytest.mark.agent_goldenpath
 @pytest.mark.mission_critical
-class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
+class ComplexAgentOrchestrationE2ETests(SSotAsyncTestCase):
     """
     E2E tests for validating complex agent orchestration and coordination.
 

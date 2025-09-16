@@ -76,7 +76,7 @@ class LoadTestResults:
 @pytest.mark.integration
 @pytest.mark.cross_system
 @pytest.mark.performance
-class TestPerformanceCoordinationIntegration(SSotAsyncTestCase):
+class PerformanceCoordinationIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for performance coordination across services.
     

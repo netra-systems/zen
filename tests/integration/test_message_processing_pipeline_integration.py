@@ -86,7 +86,7 @@ class MockMessageProcessor:
         else:
             return 'triage_agent'
 
-class TestPipelineAgent(BaseAgent):
+class PipelineAgentTests(BaseAgent):
     """Test agent for pipeline testing."""
 
     def __init__(self, agent_type: str='test_agent', *args, **kwargs):
@@ -137,7 +137,7 @@ class TestPipelineAgent(BaseAgent):
         await self.emit_thinking('Processing general request')
         await asyncio.sleep(0.1)
 
-class TestMessageProcessingPipelineIntegration(BaseIntegrationTest):
+class MessageProcessingPipelineIntegrationTests(BaseIntegrationTest):
     """Integration tests for message processing pipeline with real services."""
 
     @pytest.fixture(autouse=True)
@@ -156,7 +156,7 @@ class TestMessageProcessingPipelineIntegration(BaseIntegrationTest):
         except Exception:
             self.llm_manager = None
         self.agent_registry = AgentRegistry()
-        test_agents = {'cost_analysis_agent': TestPipelineAgent('cost_analysis_agent', llm_manager=self.llm_manager), 'security_agent': TestPipelineAgent('security_agent', llm_manager=self.llm_manager), 'deployment_agent': TestPipelineAgent('deployment_agent', llm_manager=self.llm_manager), 'triage_agent': TestPipelineAgent('triage_agent', llm_manager=self.llm_manager)}
+        test_agents = {'cost_analysis_agent': PipelineAgentTests('cost_analysis_agent', llm_manager=self.llm_manager), 'security_agent': PipelineAgentTests('security_agent', llm_manager=self.llm_manager), 'deployment_agent': PipelineAgentTests('deployment_agent', llm_manager=self.llm_manager), 'triage_agent': PipelineAgentTests('triage_agent', llm_manager=self.llm_manager)}
 
         async def mock_execute_agent(agent_type: str, user_message: str, user_context: UserExecutionContext):
             if agent_type in test_agents:

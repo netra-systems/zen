@@ -66,7 +66,7 @@ class NetworkCallDetector:
 
 
 @pytest.mark.e2e
-class TestNetworkCallVerification:
+class NetworkCallVerificationTests:
     """Tests that FAIL if network calls are not actually made"""
     
     @pytest.mark.asyncio
@@ -207,7 +207,7 @@ class TestNetworkCallVerification:
 
 
 @pytest.mark.e2e
-class TestWebSocketConnectionAuthenticity:
+class WebSocketConnectionAuthenticityTests:
     """Tests that FAIL if WebSocket connections are fake"""
     
     @pytest.mark.asyncio
@@ -306,7 +306,7 @@ class TestWebSocketConnectionAuthenticity:
 
 
 @pytest.mark.e2e
-class TestAPIResponseAuthenticity:
+class APIResponseAuthenticityTests:
     """Tests that FAIL if API responses are mocked/fake"""
     
     @pytest.mark.asyncio
@@ -432,7 +432,7 @@ class TestAPIResponseAuthenticity:
 
 
 @pytest.mark.e2e
-class TestTimingBasedAuthenticity:
+class TimingBasedAuthenticityTests:
     """Tests that FAIL if operations complete too quickly (indicating mocks)"""
     
     @pytest.mark.asyncio
@@ -531,7 +531,7 @@ class TestTimingBasedAuthenticity:
 
 
 @pytest.mark.e2e
-class TestDataIntegrityAndPersistence:
+class DataIntegrityAndPersistenceTests:
     """Tests that FAIL if data operations are fake/mocked"""
     
     @pytest.mark.asyncio
@@ -619,7 +619,7 @@ class TestDataIntegrityAndPersistence:
 
 
 @pytest.mark.e2e
-class TestResourceUsageValidation:
+class ResourceUsageValidationTests:
     """Tests that FAIL if system resources aren't used (indicating mocks)"""
     
     @pytest.mark.asyncio
@@ -691,7 +691,7 @@ class TestResourceUsageValidation:
 
 
 @pytest.mark.e2e
-class TestAsyncBehaviorValidation:
+class AsyncBehaviorValidationTests:
     """Tests that FAIL if async operations are fake/synchronous"""
     
     @pytest.mark.asyncio
@@ -783,7 +783,7 @@ class TestAsyncBehaviorValidation:
 
 
 @pytest.mark.e2e
-class TestAuthenticationValidation:
+class AuthenticationValidationTests:
     """Tests that FAIL if authentication is bypassed or fake"""
     
     @pytest.mark.asyncio
@@ -848,7 +848,7 @@ class TestAuthenticationValidation:
 
 # Summary test that ties everything together
 @pytest.mark.e2e
-class TestComprehensiveFakeDetection:
+class ComprehensiveFakeDetectionTests:
     """Final test that combines multiple detection methods"""
     
     @pytest.mark.asyncio

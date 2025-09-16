@@ -42,7 +42,7 @@ DELIVERY_CONFIG = {
     "max_retries": 3
 }
 
-class TestDeliveryGuaranteeValidation:
+class DeliveryGuaranteeValidationTests:
     """Test delivery guarantees under various conditions"""
     
     @pytest.mark.asyncio

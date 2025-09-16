@@ -27,7 +27,7 @@ from typing import Dict, Any, List, Optional
 from netra_backend.app.services.websocket_broadcast_service import WebSocketBroadcastService, BroadcastResult, create_broadcast_service
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
 from netra_backend.app.services.user_scoped_websocket_event_router import UserScopedWebSocketEventRouter
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from shared.types.core_types import UserID, ensure_user_id
 from shared.logging.unified_logging_ssot import get_logger
@@ -36,7 +36,7 @@ logger = get_logger(__name__)
 @pytest.mark.unit
 @pytest.mark.websocket_ssot
 @pytest.mark.issue_1058_broadcast_consolidation
-class TestSSOTBroadcastConsolidation:
+class SSOTBroadcastConsolidationTests:
     """Unit tests validating SSOT consolidation for WebSocket broadcasting.
 
     CRITICAL: These tests validate the consolidation of 3 duplicate broadcast
@@ -277,7 +277,7 @@ class TestSSOTBroadcastConsolidation:
         logger.info(f'✅ SSOT concurrent operations validated: {len(user_ids)} concurrent broadcasts')
 
 @pytest.mark.integration_demo
-class TestSSOTConsolidationIntegrationDemo:
+class SSOTConsolidationIntegrationDemoTests:
     """Demonstrate SSOT consolidation benefits through integration scenarios."""
 
     @pytest.mark.asyncio

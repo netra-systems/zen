@@ -42,7 +42,7 @@ from netra_backend.app.services.user_execution_context import (
 from netra_backend.app.services.agent_websocket_bridge import (
     AgentWebSocketBridge, create_agent_websocket_bridge
 )
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.logging_config import central_logger
 
@@ -55,7 +55,7 @@ logger = central_logger.get_logger(__name__)
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.websocket
-class TestWebSocketIntegration(BaseAgentExecutionTest):
+class WebSocketIntegrationTests(BaseAgentExecutionTest):
     """Integration tests for agent execution WebSocket event delivery with real connections."""
 
     async def setup_method(self):

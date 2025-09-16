@@ -80,7 +80,7 @@ class CompatibleCORSMiddleware(BaseHTTPMiddleware):
         return upgrade == 'websocket' and 'upgrade' in connection
 
 @pytest.mark.integration
-class TestIssue449MiddlewareCompatibilityValidation(SSotBaseTestCase):
+class Issue449MiddlewareCompatibilityValidationTests(SSotBaseTestCase):
     """
     Integration tests for Issue #449 middleware compatibility validation.
 
@@ -334,7 +334,7 @@ class TestIssue449MiddlewareCompatibilityValidation(SSotBaseTestCase):
             self.fail(f'Enhanced middleware should support real-world integration: {e}')
 
 @pytest.mark.integration
-class TestIssue449EnhancedMiddlewareFactory(SSotBaseTestCase):
+class Issue449EnhancedMiddlewareFactoryTests(SSotBaseTestCase):
     """
     Tests for enhanced middleware factory and configuration.
 

@@ -36,7 +36,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.integration
-class TestUnifiedTestRunnerJsonIntegration(SSotBaseTestCase):
+class UnifiedTestRunnerJsonIntegrationTests(SSotBaseTestCase):
     """Integration tests for JSON output with real test runner execution."""
 
     def setup_method(self, method=None):
@@ -470,7 +470,7 @@ class TestUnifiedTestRunnerJsonIntegration(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestJsonOutputRealServiceIntegration(SSotBaseTestCase):
+class JsonOutputRealServiceIntegrationTests(SSotBaseTestCase):
     """Integration tests for JSON output with real service dependencies."""
 
     def test_json_output_with_database_services(self):

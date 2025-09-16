@@ -29,7 +29,7 @@ from netra_backend.app.agents.tool_dispatcher_core import (
 )
 
 
-class TestToolDispatcherCoreE2E(SSotAsyncTestCase):
+class ToolDispatcherCoreE2ETests(SSotAsyncTestCase):
     """E2E tests for tool dispatcher core with full authentication stack."""
     
     def setup_method(self, method):

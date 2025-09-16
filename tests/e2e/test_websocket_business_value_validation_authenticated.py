@@ -317,7 +317,7 @@ class BusinessValueWebSocketValidator:
 
 # CLAUDE.md COMPLIANT TEST CASES
 @pytest.mark.e2e
-class TestWebSocketBusinessValueAuthenticated:
+class WebSocketBusinessValueAuthenticatedTests:
     """
     CLAUDE.md COMPLIANT: WebSocket Business Value Tests with MANDATORY Authentication
     

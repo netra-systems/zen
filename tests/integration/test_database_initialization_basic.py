@@ -26,7 +26,7 @@ from shared.isolated_environment import get_env
 from test_framework.ssot.database_skip_conditions import skip_if_postgresql_unavailable
 
 @pytest.mark.integration
-class TestDatabaseInitializationBasic:
+class DatabaseInitializationBasicTests:
     """Test basic database initialization and setup."""
 
     @pytest.fixture(scope='class')
@@ -170,7 +170,7 @@ def run_database_basic_test():
     print('=' * 60)
     print('DATABASE INITIALIZATION BASIC FUNCTIONALITY TEST')
     print('=' * 60)
-    test_instance = TestDatabaseInitializationBasic()
+    test_instance = DatabaseInitializationBasicTests()
     env = get_env()
     builder = DatabaseURLBuilder(env.get_all())
     sync_url = builder.get_url_for_environment(sync=True)

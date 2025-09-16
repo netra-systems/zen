@@ -14,7 +14,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestUnifiedSecretManagerSessionKeys(SSotBaseTestCase):
+class UnifiedSecretManagerSessionKeysTests(SSotBaseTestCase):
     """Test UnifiedSecretManager SESSION_SECRET loading scenarios."""
     
     def setUp(self):

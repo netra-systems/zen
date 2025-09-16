@@ -7,7 +7,7 @@ Test Coverage: All failure scenarios, partial data, and emergency fallbacks.
 import pytest
 import uuid
 from typing import Dict, Any
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -17,7 +17,7 @@ from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestReportingResilience:
+class ReportingResilienceTests:
     """Test suite for UVS resilience requirements."""
     
     @pytest.mark.asyncio

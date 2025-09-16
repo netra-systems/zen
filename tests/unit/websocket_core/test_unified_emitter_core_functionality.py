@@ -54,7 +54,7 @@ class MockWebSocketManager:
         self.sent_messages.clear()
 
 @pytest.mark.unit
-class TestUnifiedWebSocketEmitterCore(SSotAsyncTestCase):
+class UnifiedWebSocketEmitterCoreTests(SSotAsyncTestCase):
     """Test core functionality of UnifiedWebSocketEmitter."""
 
     async def asyncSetUp(self):
@@ -188,7 +188,7 @@ class TestUnifiedWebSocketEmitterCore(SSotAsyncTestCase):
         self.assertEqual(event_data['data']['user_id'], 'test_user_001')
 
 @pytest.mark.unit
-class TestWebSocketEmitterWithRealScenarios(SSotAsyncTestCase):
+class WebSocketEmitterWithRealScenariosTests(SSotAsyncTestCase):
     """Test emitter with realistic usage scenarios."""
 
     async def asyncSetUp(self):

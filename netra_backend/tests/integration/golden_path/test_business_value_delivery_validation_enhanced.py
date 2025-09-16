@@ -108,7 +108,7 @@ class BusinessValueDeliveryResult:
     personalization_verified: bool
 
 
-class TestBusinessValueDeliveryValidation(ServiceOrchestrationIntegrationTest):
+class BusinessValueDeliveryValidationTests(ServiceOrchestrationIntegrationTest):
     """
     Enhanced Business Value Delivery Validation Tests
     

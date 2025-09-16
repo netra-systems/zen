@@ -27,7 +27,7 @@ from netra_backend.app.websocket_core.gcp_initialization_validator import GCPWeb
 from netra_backend.app.redis_manager import RedisManager
 
 @pytest.mark.integration
-class TestRedisCallableFixGCPIntegration334(SSotAsyncTestCase):
+class RedisCallableFixGCPIntegration334Tests(SSotAsyncTestCase):
     """
     INTEGRATION TEST SUITE: Redis callable fix in GCP initialization validator
     

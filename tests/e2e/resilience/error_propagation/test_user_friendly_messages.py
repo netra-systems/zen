@@ -27,7 +27,7 @@ from tests.e2e.fixtures.error_propagation_fixtures import (
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestUserFriendlyMessages:
+class UserFriendlyMessagesTests:
     """Test user-friendly error message generation."""
     
     @pytest.mark.resilience

@@ -74,7 +74,7 @@ class ExecutionStateTracker:
         return self.timings[-1] - self.timings[0]
 
 
-class TestUserExecutionEngineStateManagement(SSotAsyncTestCase):
+class UserExecutionEngineStateManagementTests(SSotAsyncTestCase):
     """Test UserExecutionEngine state management and execution tracking."""
 
     def setup_method(self, method):

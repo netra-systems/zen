@@ -85,7 +85,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.schemas.agent_state import CheckpointType, StatePersistenceRequest
 
 
-class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
+class PipelineExecutorComprehensiveGoldenPathTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for PipelineExecutor SSOT class.
     

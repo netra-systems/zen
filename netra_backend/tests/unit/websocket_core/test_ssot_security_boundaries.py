@@ -28,7 +28,7 @@ from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
 from typing import Dict, Any, List, Optional, Set, Tuple
 from netra_backend.app.services.websocket_broadcast_service import WebSocketBroadcastService, BroadcastResult, create_broadcast_service
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID, ensure_user_id
@@ -39,7 +39,7 @@ logger = get_logger(__name__)
 @pytest.mark.websocket_ssot
 @pytest.mark.security_critical
 @pytest.mark.issue_1058_security_boundaries
-class TestSSOTSecurityBoundaries:
+class SSOTSecurityBoundariesTests:
     """Unit tests validating security boundaries in SSOT WebSocket broadcasting.
 
     CRITICAL: These tests ensure SSOT consolidation maintains enterprise-grade
@@ -310,7 +310,7 @@ class TestSSOTSecurityBoundaries:
         logger.info('✅ Security feature validation complete - all features verifiable')
 
 @pytest.mark.enterprise_compliance
-class TestSSOTEnterpriseCompliance:
+class SSOTEnterpriseComplianceTests:
     """Enterprise compliance tests for SSOT security boundaries."""
 
     @pytest.mark.asyncio

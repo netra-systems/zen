@@ -160,7 +160,7 @@ class LoadTestMetrics:
     timestamp: str
 
 
-class TestConcurrentLoad(SSotAsyncTestCase):
+class ConcurrentLoadTests(SSotAsyncTestCase):
     """
     Concurrent Load Performance Test Suite for Issue #1200
 

@@ -281,7 +281,7 @@ def real_system_monitor():
     return RealSystemMonitor()
 
 
-class TestBasicHealthEndpoints:
+class BasicHealthEndpointsTests:
     """Test suite for basic health endpoint functionality with real services - NO MOCKS"""
 
     def setup_method(self):
@@ -334,7 +334,7 @@ class TestBasicHealthEndpoints:
         assert isinstance(data["uptime_seconds"], (int, float))
 
 
-class TestRealHealthEndpoints:
+class RealHealthEndpointsTests:
     """Test suite for real health endpoints using actual services - NO MOCKS"""
 
     def setup_method(self):
@@ -455,7 +455,7 @@ class TestRealHealthEndpoints:
         assert callable(config.get_redis_connection_params)
 
 
-class TestHealthEndpointErrorHandling:
+class HealthEndpointErrorHandlingTests:
     """Test suite for health endpoint error handling with real services - NO MOCKS"""
 
     def setup_method(self):
@@ -584,7 +584,7 @@ class TestHealthEndpointErrorHandling:
         assert all(code == 200 for code in status_codes)
 
 
-class TestHealthEndpointPerformance:
+class HealthEndpointPerformanceTests:
     """Test suite for health endpoint performance characteristics with real services - NO MOCKS"""
 
     def setup_method(self):

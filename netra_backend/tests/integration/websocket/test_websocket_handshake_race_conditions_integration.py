@@ -42,7 +42,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketHandshakeRaceConditions(BaseIntegrationTest):
+class WebSocketHandshakeRaceConditionsTests(BaseIntegrationTest):
     """Integration tests for WebSocket handshake race conditions with real services."""
     
     def setup_method(self):
@@ -789,7 +789,7 @@ class TestWebSocketHandshakeRaceConditions(BaseIntegrationTest):
         logger.info(f" PASS:  Concurrent connection attempts test passed - {len(successful_connections)} successful connections")
 
 
-class TestWebSocketHandshakeAdvancedScenarios(BaseIntegrationTest):
+class WebSocketHandshakeAdvancedScenariosTests(BaseIntegrationTest):
     """Advanced WebSocket handshake scenarios for edge cases and stress testing."""
     
     def setup_method(self):
@@ -998,7 +998,7 @@ class TestWebSocketHandshakeAdvancedScenarios(BaseIntegrationTest):
 
 
 # Integration test for service dependency monitoring during handshake
-class TestWebSocketHandshakeServiceDependencies(BaseIntegrationTest):
+class WebSocketHandshakeServiceDependenciesTests(BaseIntegrationTest):
     """Test WebSocket handshake with service dependency validation."""
     
     @pytest.mark.integration

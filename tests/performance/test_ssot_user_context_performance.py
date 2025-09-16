@@ -96,7 +96,7 @@ class ScalabilityTestResult:
 
 
 @pytest.mark.performance
-class TestSSotUserContextPerformance(SSotAsyncTestCase):
+class SSotUserContextPerformanceTests(SSotAsyncTestCase):
     """SSOT Performance: Validate performance impact of UserExecutionContext consolidation"""
     
     async def test_ssot_performance_degradation_from_multiple_implementations(self):

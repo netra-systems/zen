@@ -48,7 +48,7 @@ class ToolExecutionContext:
     error: Optional[str] = None
 
 
-class TestToolExecutionPipeline(ServiceOrchestrationIntegrationTest):
+class ToolExecutionPipelineTests(ServiceOrchestrationIntegrationTest):
     """Test tool execution pipeline with real services coordination."""
 
     @pytest.mark.integration

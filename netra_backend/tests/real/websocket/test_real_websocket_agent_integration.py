@@ -31,7 +31,7 @@ env = get_env()
 @pytest.mark.websocket
 @pytest.mark.agent_integration
 @skip_if_no_real_services
-class TestRealWebSocketAgentIntegration:
+class RealWebSocketAgentIntegrationTests:
     """Test real WebSocket integration with agent execution."""
     
     @pytest.fixture

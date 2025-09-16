@@ -27,7 +27,7 @@ from unittest.mock import patch, MagicMock
 import inspect
 
 
-class TestIssue1186UserExecutionEngineImportValidation(unittest.TestCase):
+class Issue1186UserExecutionEngineImportValidationTests(unittest.TestCase):
     """Unit test suite validating UserExecutionEngine SSOT import consolidation.
 
     Focus: Verification of import pattern consolidation and business value protection

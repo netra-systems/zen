@@ -38,7 +38,7 @@ def get_env(key, default=None):
 
 
 @pytest.mark.integration
-class TestIssue847StagingWebSocketConnectivity(unittest.TestCase):
+class Issue847StagingWebSocketConnectivityTests(unittest.TestCase):
     """Integration tests for staging WebSocket connectivity validation."""
 
     def setUp(self):

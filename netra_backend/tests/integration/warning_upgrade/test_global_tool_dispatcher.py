@@ -45,7 +45,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 logger = logging.getLogger(__name__)
 
 
-class TestGlobalToolDispatcherWarningUpgrade(SsotAsyncWarningUpgradeTestCase):
+class GlobalToolDispatcherWarningUpgradeTests(SsotAsyncWarningUpgradeTestCase):
     """
     Test suite for global tool dispatcher warning-to-error upgrades.
     

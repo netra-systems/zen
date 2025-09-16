@@ -25,7 +25,7 @@ from netra_backend.app.websocket_core.reconnection_handler import (
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 
 
-class TestWebSocketReconnectionHandler:
+class WebSocketReconnectionHandlerTests:
     """Unit tests for WebSocket reconnection handling."""
     
     @pytest.fixture

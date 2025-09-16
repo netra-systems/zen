@@ -23,7 +23,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID, ThreadID, RunID
 
-class TestWebSocketAuthenticationFlow(SSotAsyncTestCase):
+class WebSocketAuthenticationFlowTests(SSotAsyncTestCase):
     """Integration tests for WebSocket authentication flow coordination"""
 
     async def asyncSetUp(self):

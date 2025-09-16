@@ -32,7 +32,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerConstructorValidation(SSotBaseTestCase):
+class WebSocketManagerConstructorValidationTests(SSotBaseTestCase):
     """
     Tests to prove WebSocket manager constructor validation violations exist.
     
@@ -54,7 +54,7 @@ class TestWebSocketManagerConstructorValidation(SSotBaseTestCase):
         try:
             # Test main factory constructor compatibility
             from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Check factory creation method signature
             factory = WebSocketManagerFactory()
@@ -133,13 +133,13 @@ class TestWebSocketManagerConstructorValidation(SSotBaseTestCase):
         manager_classes = []
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager_classes.append(('UnifiedWebSocketManager', UnifiedWebSocketManager))
         except ImportError:
             pass
             
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager_classes.append(('WebSocketManager', WebSocketManager))
         except ImportError:
             pass
@@ -285,7 +285,7 @@ class TestWebSocketManagerConstructorValidation(SSotBaseTestCase):
             pass
             
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager_classes.append(('UnifiedWebSocketManager', UnifiedWebSocketManager))
         except ImportError:
             pass

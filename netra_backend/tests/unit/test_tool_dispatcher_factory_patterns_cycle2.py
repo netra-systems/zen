@@ -19,7 +19,7 @@ from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcherFactor
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from shared.types import UserID, ThreadID, RunID
 
-class TestToolDispatcherFactoryPatterns:
+class ToolDispatcherFactoryPatternsTests:
     """Test tool dispatcher factory patterns and configuration."""
     
     @pytest.mark.unit

@@ -54,7 +54,7 @@ from netra_backend.app.websocket_core.unified_emitter import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestUnifiedWebSocketEmitter(SSotAsyncTestCase):
+class UnifiedWebSocketEmitterTests(SSotAsyncTestCase):
     """Unit tests for UnifiedWebSocketEmitter functionality
     
     This test class validates the critical event generation capabilities that
@@ -952,7 +952,7 @@ class TestUnifiedWebSocketEmitter(SSotAsyncTestCase):
         super().teardown_method(method)
 
 
-class TestWebSocketEmitterFactory(SSotAsyncTestCase):
+class WebSocketEmitterFactoryTests(SSotAsyncTestCase):
     """Unit tests for WebSocketEmitterFactory functionality"""
     
     def setup_method(self, method=None):

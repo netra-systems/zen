@@ -106,7 +106,7 @@ class AuthWebSocketFlowValidator:
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.websocket
-class TestAuthWebSocketCompleteFlow(BaseE2ETest):
+class AuthWebSocketCompleteFlowTests(BaseE2ETest):
     """E2E: Complete authentication + WebSocket flow for chat value delivery."""
 
     @pytest.fixture(autouse=True)
@@ -355,7 +355,7 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.websocket
-class TestAuthWebSocketPerformance(BaseE2ETest):
+class AuthWebSocketPerformanceTests(BaseE2ETest):
     """E2E: Authentication + WebSocket performance under realistic load."""
 
     async def test_auth_websocket_concurrent_load(self):

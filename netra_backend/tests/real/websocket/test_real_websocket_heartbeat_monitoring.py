@@ -29,7 +29,7 @@ env = get_env()
 @pytest.mark.websocket
 @pytest.mark.heartbeat_monitoring
 @skip_if_no_real_services
-class TestRealWebSocketHeartbeatMonitoring:
+class RealWebSocketHeartbeatMonitoringTests:
     """Test real WebSocket heartbeat and health monitoring."""
     
     @pytest.fixture

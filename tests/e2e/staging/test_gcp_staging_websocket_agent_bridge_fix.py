@@ -12,7 +12,7 @@ from test_framework.ssot.base_test_case import SSotAsyncBaseTestCase
 
 @pytest.mark.e2e
 @pytest.mark.staging
-class TestGCPStagingWebSocketAgentBridgeSuccess(SSotAsyncBaseTestCase):
+class GCPStagingWebSocketAgentBridgeSuccessTests(SSotAsyncBaseTestCase):
     """E2E tests for staging WebSocket agent bridge functionality (Post-Resolution)."""
 
     @pytest.mark.staging_validation
@@ -227,7 +227,7 @@ class TestGCPStagingWebSocketAgentBridgeSuccess(SSotAsyncBaseTestCase):
 
 @pytest.mark.e2e
 @pytest.mark.staging_regression_prevention
-class TestGCPStagingRegressionPrevention(SSotAsyncBaseTestCase):
+class GCPStagingRegressionPreventionTests(SSotAsyncBaseTestCase):
     """Regression prevention tests for staging WebSocket agent bridge functionality."""
     
     async def test_staging_ssot_import_consistency_validation(self):

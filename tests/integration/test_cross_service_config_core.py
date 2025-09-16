@@ -8,7 +8,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 @pytest.mark.integration
-class TestCrossServiceConfigCore:
+class CrossServiceConfigCoreTests:
     """Test class for cross_service_config_core"""
 
     def setup_method(self):

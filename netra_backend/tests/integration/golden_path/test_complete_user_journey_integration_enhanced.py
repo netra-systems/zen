@@ -64,7 +64,7 @@ class GoldenPathStageResult:
     stage_data: Optional[Dict[str, Any]] = None
 
 
-class TestCompleteUserJourneyIntegration(ServiceOrchestrationIntegrationTest):
+class CompleteUserJourneyIntegrationTests(ServiceOrchestrationIntegrationTest):
     """
     Enhanced Golden Path Integration Test Suite
     

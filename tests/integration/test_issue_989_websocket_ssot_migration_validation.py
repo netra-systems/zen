@@ -68,7 +68,7 @@ class ImportPatternAnalysis:
     import_analysis_by_pattern: Dict[str, List[str]] = field(default_factory=dict)
 
 @pytest.mark.integration
-class TestIssue989WebSocketSSOTMigrationValidation(SSotBaseTestCase):
+class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
     """Mission Critical: Issue #989 WebSocket SSOT Migration Validation
 
     This test suite validates that WebSocket factory SSOT migration has been
@@ -85,7 +85,7 @@ class TestIssue989WebSocketSSOTMigrationValidation(SSotBaseTestCase):
         self.canonical_imports_path = Path(project_root) / 'netra_backend' / 'app' / 'websocket_core' / 'canonical_imports.py'
         self.websocket_manager_path = Path(project_root) / 'netra_backend' / 'app' / 'websocket_core' / 'websocket_manager.py'
         self.search_paths = [Path(project_root) / 'netra_backend' / 'app', Path(project_root) / 'tests', Path(project_root) / 'test_framework', Path(project_root) / 'scripts']
-        self.ssot_target_patterns = ['get_websocket_manager', 'WebSocketManager', 'from netra_backend.app.websocket_core.websocket_manager import']
+        self.ssot_target_patterns = ['get_websocket_manager', 'WebSocketManager', 'from netra_backend.app.websocket_core.canonical_import_patterns import']
         self.deprecated_patterns = ['get_websocket_manager_factory', 'WebSocketManagerFactory', 'from netra_backend.app.websocket_core.websocket_manager_factory import', 'canonical_imports.*get_websocket_manager_factory']
         self.migration_results: List[MigrationValidationResult] = []
         logger.info('📋 Issue #989 SSOT Migration Validation - Starting comprehensive validation...')
@@ -280,7 +280,7 @@ class TestIssue989WebSocketSSOTMigrationValidation(SSotBaseTestCase):
         inconsistent_files = []
         circular_dependency_risks = []
         import re
-        canonical_import_paths = {'websocket_manager': 'from netra_backend.app.websocket_core.websocket_manager import', 'websocket_protocols': 'from netra_backend.app.websocket_core.protocols import', 'websocket_unified': 'from netra_backend.app.websocket_core.unified_manager import'}
+        canonical_import_paths = {'websocket_manager': 'from netra_backend.app.websocket_core.canonical_import_patterns import', 'websocket_protocols': 'from netra_backend.app.websocket_core.protocols import', 'websocket_unified': 'from netra_backend.app.websocket_core.unified_manager import'}
         deprecated_import_paths = {'factory_imports': 'from netra_backend.app.websocket_core.websocket_manager_factory import', 'canonical_factory': 'from netra_backend.app.websocket_core.canonical_imports import.*get_websocket_manager_factory'}
         for search_path in self.search_paths:
             if search_path.exists():

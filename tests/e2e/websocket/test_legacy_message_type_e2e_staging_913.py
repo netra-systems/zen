@@ -21,7 +21,7 @@ import pytest
 import pytest_asyncio
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestLegacyMessageTypeE2EStaging913:
+class LegacyMessageTypeE2EStaging913Tests:
     """E2E staging tests for legacy message type handling in Issue #913."""
 
     @pytest.fixture(scope='class')
@@ -112,7 +112,7 @@ class TestLegacyMessageTypeE2EStaging913:
             for message in working_messages:
                 pass
 
-class TestLegacyMessageTypeE2EStagingAfterFix:
+class LegacyMessageTypeE2EStagingAfterFixTests:
     """
     E2E staging tests that will PASS after Issue #913 fix is deployed.
 

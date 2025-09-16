@@ -48,7 +48,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 @pytest.mark.e2e
 @pytest.mark.staging
 @pytest.mark.real_llm
-class TestBusinessProblemSolvingRealLLME2E(SSotBaseTestCase):
+class BusinessProblemSolvingRealLLME2ETests(SSotBaseTestCase):
     """
     MISSION CRITICAL E2E Tests for Business Problem Solving with Real LLM.
     

@@ -28,7 +28,7 @@ from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 
-class TestConcurrentAgentStateManagement(BaseIntegrationTest):
+class ConcurrentAgentStateManagementTests(BaseIntegrationTest):
     """Integration tests for concurrent agent state management."""
 
     @pytest.mark.integration

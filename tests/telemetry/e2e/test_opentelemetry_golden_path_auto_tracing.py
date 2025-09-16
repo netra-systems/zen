@@ -72,7 +72,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 logger = logging.getLogger(__name__)
 
 
-class TestOpenTelemetryGoldenPathAutoTracing(SSotAsyncTestCase):
+class OpenTelemetryGoldenPathAutoTracingTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -516,7 +516,7 @@ class TestOpenTelemetryGoldenPathAutoTracing(SSotAsyncTestCase):
                 self.record_metric(f"golden_path_error_{i}", error["error"])
 
 
-class TestAutoTracingGoldenPathPerformanceImpact(SSotAsyncTestCase):
+class AutoTracingGoldenPathPerformanceImpactTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

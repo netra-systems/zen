@@ -160,7 +160,7 @@ async def storage_service(mock_redis, mock_websocket):
 
 
 @pytest.mark.asyncio
-class TestUnifiedMessageStorageService:
+class UnifiedMessageStorageServiceTests:
     """Test suite for UnifiedMessageStorageService."""
     
     async def test_service_initialization(self, mock_redis):
@@ -485,7 +485,7 @@ class TestUnifiedMessageStorageService:
         assert metrics['avg_redis_latency_ms'] < 50, "Average Redis latency exceeds target"
 
 
-class TestMessageStorageMetrics:
+class MessageStorageMetricsTests:
     """Test suite for MessageStorageMetrics."""
     
     def test_metrics_initialization(self):

@@ -37,7 +37,7 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.isolated_environment import get_env
@@ -132,13 +132,24 @@ class RealAgentOrchestrationTester:
     def __init__(self):
         self.env = get_env()
         self.config = get_config()
-        self.llm_manager = LLMManager(self.config)
+        # Create proper UserExecutionContext for e2e testing with user isolation
+        self.user_context = UserExecutionContext.from_request(
+            user_id="test-user-e2e-orchestration", 
+            thread_id="test-thread-orchestration",
+            run_id="test-run-orchestration"
+        )
+        self.llm_manager = LLMManager(self.user_context)
         
         # REAL services - no mocks allowed per Claude.md
         # WebSocket manager will be created with factory pattern during async initialization
         self.websocket_manager = None
         self.agent_registry = AgentRegistry()
-        self.execution_engine = UserExecutionEngine()
+        # Create execution engine with required parameters for user isolation
+        self.execution_engine = ExecutionEngine(
+            context=self.user_context,
+            agent_factory=self.agent_registry,
+            websocket_emitter=None  # Will be set during async initialization
+        )
         self.websocket_notifier = None  # Will be set during async init
         self.bridge = AgentWebSocketBridge.get_instance()
         
@@ -407,7 +418,7 @@ class RealAgentOrchestrationTester:
 
 
 @pytest.mark.e2e
-class TestRealAgentOrchestration(SSotBaseTestCase):
+class RealAgentOrchestrationTests(SSotBaseTestCase):
     """REAL E2E tests for agent orchestration with MANDATORY authentication and business value validation."""
     
     def setup_method(self):
@@ -702,7 +713,7 @@ class TestRealAgentOrchestration(SSotBaseTestCase):
 
 @pytest.mark.critical
 @pytest.mark.e2e
-class TestCriticalRealOrchestrationScenarios(SSotBaseTestCase):
+class CriticalRealOrchestrationScenariosTests(SSotBaseTestCase):
     """MISSION CRITICAL orchestration scenarios with REAL business value and MANDATORY authentication."""
     
     def setup_method(self):

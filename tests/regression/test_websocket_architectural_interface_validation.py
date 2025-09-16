@@ -47,7 +47,7 @@ class ComponentInterface:
     HEALTH_CHECK_INTERFACE = {'register_component_check': ['component_name', 'check_callback'], 'include_websocket_readiness': [], 'validate_websocket_integration': [], 'get_component_health': ['component_name'], 'overall_health_includes_websocket': []}
     APP_STATE_INTERFACE = {'register_websocket_manager': ['websocket_manager'], 'get_websocket_readiness': [], 'coordinate_startup_sequence': [], 'validate_service_dependencies': [], 'get_startup_coordination': []}
 
-class TestWebSocketArchitecturalInterfaceValidation(SSotAsyncTestCase):
+class WebSocketArchitecturalInterfaceValidationTests(SSotAsyncTestCase):
     """Regression tests for WebSocket architectural interface validation."""
 
     def setup_method(self, method=None):

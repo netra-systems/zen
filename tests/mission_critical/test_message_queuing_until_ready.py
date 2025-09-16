@@ -47,7 +47,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager, get_websocket_manager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState
@@ -57,7 +57,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 
-class TestMessageQueueingUntilReady:
+class MessageQueueingUntilReadyTests:
     """Test message queuing behavior when WebSocket not ready."""
 
     @pytest.fixture

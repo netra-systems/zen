@@ -41,7 +41,7 @@ from auth_service.auth_core.oauth_manager import OAuthManager
 from auth_service.auth_core.redis_manager import AuthRedisManager
 
 
-class TestOAuthRedisInterfaceMismatchesIssue316:
+class OAuthRedisInterfaceMismatchesIssue316Tests:
     """
     Test suite to reproduce OAuth/Redis interface mismatches identified in Issue #316.
     
@@ -583,7 +583,7 @@ class TestOAuthRedisInterfaceMismatchesIssue316:
         return business_value_results
 
 
-class TestIssue316RemediationStrategy:
+class Issue316RemediationStrategyTests:
     """
     Test suite demonstrating the correct remediation strategy for Issue #316.
     

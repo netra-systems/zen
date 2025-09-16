@@ -52,7 +52,7 @@ class MockConfigBuilder(ConfigBuilderBase):
         return base_info
 
 
-class TestConfigurationEnvironment(BaseIntegrationTest):
+class ConfigurationEnvironmentTests(BaseIntegrationTest):
     """Integration tests for configuration and environment functionality."""
     
     def setup_method(self):

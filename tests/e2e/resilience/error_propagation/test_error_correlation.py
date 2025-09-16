@@ -28,7 +28,7 @@ from tests.e2e.fixtures.error_propagation_fixtures import (
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestErrorCorrelation:
+class ErrorCorrelationTests:
     """Test error correlation and tracking across services."""
     
     @pytest.mark.resilience

@@ -26,7 +26,7 @@ from netra_backend.app.schemas.core_enums import ErrorCategory
 from netra_backend.app.schemas.shared_types import ErrorContext
 
 
-class TestAgentErrorTypes(SSotBaseTestCase):
+class AgentErrorTypesTests(SSotBaseTestCase):
     """Test agent error type classification and behavior."""
 
     @pytest.mark.unit

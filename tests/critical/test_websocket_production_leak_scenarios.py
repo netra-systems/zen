@@ -52,7 +52,7 @@ import logging
 import random
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
@@ -608,7 +608,7 @@ class ProductionLeakReproducer:
         }
 
 
-class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
+class WebSocketProductionLeakScenariosTests(SSotAsyncTestCase):
     """Critical WebSocket production leak scenario reproduction tests."""
     
     def setup_method(self, method=None):

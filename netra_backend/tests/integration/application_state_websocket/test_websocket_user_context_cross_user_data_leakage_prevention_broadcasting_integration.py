@@ -506,7 +506,7 @@ class WebSocketBroadcastingSecurityValidator:
         return isolation_validation
 
 
-class TestWebSocketCrossUserDataLeakagePrevention(BaseIntegrationTest):
+class WebSocketCrossUserDataLeakagePreventionTests(BaseIntegrationTest):
     """
     Integration test for cross-user data leakage prevention during WebSocket broadcasting.
     

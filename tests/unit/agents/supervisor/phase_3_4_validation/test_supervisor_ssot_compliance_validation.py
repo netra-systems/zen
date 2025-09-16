@@ -50,7 +50,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestSupervisorSsotComplianceValidation(SSotAsyncTestCase):
+class SupervisorSsotComplianceValidationTests(SSotAsyncTestCase):
     """
     Phase 3.4 Supervisor SSOT Compliance Validation Tests
     
@@ -66,11 +66,11 @@ class TestSupervisorSsotComplianceValidation(SSotAsyncTestCase):
         self.mock_factory = SSotMockFactory()
         
         # Test user context for SSOT pattern validation
-        self.test_user_context = UserExecutionContext(
+        self.test_user_context = UserExecutionContext.from_request(
             user_id="ssot_test_user",
             thread_id="ssot_test_thread",
             run_id="ssot_test_run",
-            client_id="ssot_test_client"
+            websocket_client_id="ssot_test_client"
         )
         
     def test_supervisor_ssot_import_patterns(self):
@@ -159,11 +159,11 @@ class TestSupervisorSsotComplianceValidation(SSotAsyncTestCase):
         supervisor_2 = SupervisorAgent(
             llm_manager=mock_llm_manager,
             websocket_bridge=mock_websocket_bridge,
-            user_context=UserExecutionContext(
+            user_context=UserExecutionContext.from_request(
                 user_id="different_user",
                 thread_id="different_thread", 
                 run_id="different_run",
-                client_id="different_client"
+                websocket_client_id="different_client"
             )
         )
         
@@ -193,7 +193,7 @@ class TestSupervisorSsotComplianceValidation(SSotAsyncTestCase):
             "SSOT VIOLATION: Using non-SSOT UserExecutionContext implementation")
         
         # Validate UserExecutionContext has required SSOT attributes
-        required_attributes = ['user_id', 'thread_id', 'run_id', 'client_id']
+        required_attributes = ['user_id', 'thread_id', 'run_id', 'websocket_client_id']
         for attr in required_attributes:
             self.assertTrue(hasattr(self.test_user_context, attr),
                 f"SSOT VIOLATION: UserExecutionContext missing required attribute: {attr}")
@@ -202,7 +202,7 @@ class TestSupervisorSsotComplianceValidation(SSotAsyncTestCase):
         self.assertEqual(self.test_user_context.user_id, "ssot_test_user")
         self.assertEqual(self.test_user_context.thread_id, "ssot_test_thread")
         self.assertEqual(self.test_user_context.run_id, "ssot_test_run")
-        self.assertEqual(self.test_user_context.client_id, "ssot_test_client")
+        self.assertEqual(self.test_user_context.websocket_client_id, "ssot_test_client")
         
         logger.info("✅ UserExecutionContext SSOT integration validated")
         

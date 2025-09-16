@@ -68,7 +68,7 @@ from netra_backend.app.clients.auth_client_cache import AuthCircuitBreakerManage
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestGoldenPathAuthCircuitBreakerPreservation(SSotAsyncTestCase):
+class GoldenPathAuthCircuitBreakerPreservationTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

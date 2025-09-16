@@ -48,7 +48,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 # Real service imports for integration testing
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from netra_backend.app.core.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 # Import utilities
 from test_framework.fixtures.auth_fixtures import auth_service_client
@@ -56,7 +56,7 @@ from test_framework.database_test_utilities import DatabaseTestUtilities
 
 
 @pytest.mark.integration
-class TestCrossServiceIDConsistency(SSotAsyncTestCase, BaseIntegrationTest):
+class CrossServiceIDConsistencyTests(SSotAsyncTestCase, BaseIntegrationTest):
     """Integration tests for ID consistency across service boundaries."""
     
     async def setup_method(self, method):

@@ -41,7 +41,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestImportSSotValidation(SSotBaseTestCase):
+class ImportSSotValidationTests(SSotBaseTestCase):
     """Test suite for validating Import SSOT compliance."""
     
     def setUp(self):

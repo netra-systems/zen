@@ -149,6 +149,6 @@ class MockWebSocketServer:
         await websocket.send(json.dumps(response))
 
 @pytest.mark.e2e
-class TestWebSocketStabilityMessageBursts:
+class WebSocketStabilityMessageBurstsTests:
     pass
 

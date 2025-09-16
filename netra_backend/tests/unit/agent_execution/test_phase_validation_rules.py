@@ -24,7 +24,7 @@ from unittest.mock import Mock, patch
 from netra_backend.app.core.agent_execution_tracker import AgentExecutionPhase, PhaseTransition, ExecutionRecord, AgentExecutionTracker, ExecutionState, get_execution_tracker
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestPhaseValidationRules(SSotBaseTestCase, unittest.TestCase):
+class PhaseValidationRulesTests(SSotBaseTestCase, unittest.TestCase):
     """Unit tests for agent execution phase validation and transition rules."""
 
     def setUp(self):

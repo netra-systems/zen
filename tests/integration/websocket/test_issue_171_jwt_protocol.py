@@ -25,7 +25,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.integration
-class TestIssue171JWTProtocol(SSotAsyncTestCase):
+class Issue171JWTProtocolTests(SSotAsyncTestCase):
     """Integration tests to reproduce Issue #171: JWT protocol validation failures."""
 
     @pytest.mark.asyncio
@@ -415,7 +415,7 @@ if __name__ == "__main__":
     
     async def run_issue_171_tests():
         """Run all Issue #171 JWT protocol tests."""
-        test_instance = TestIssue171JWTProtocol()
+        test_instance = Issue171JWTProtocolTests()
         
         print(" ALERT:  STARTING ISSUE #171 JWT PROTOCOL TESTS")
         print("=" * 60)

@@ -18,7 +18,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
-class TestConnectionManagerDateTimeMigration(unittest.TestCase):
+class ConnectionManagerDateTimeMigrationTests(unittest.TestCase):
     """Test cases for WebSocket connection manager datetime migration."""
 
     def setUp(self):
@@ -192,7 +192,7 @@ class TestConnectionManagerDateTimeMigration(unittest.TestCase):
                                   f"Connection {i} should be created after connection {i-1}")
 
 
-class TestConnectionManagerCaching(unittest.TestCase):
+class ConnectionManagerCachingTests(unittest.TestCase):
     """Tests for connection manager caching and cleanup behavior."""
 
     def test_connection_cleanup_timing(self):

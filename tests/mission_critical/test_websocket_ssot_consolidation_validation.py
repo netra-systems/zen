@@ -31,13 +31,13 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from shared.isolated_environment import IsolatedEnvironment
 
 # Import components for future SSOT validation
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID, ensure_user_id
 
 
-class TestWebSocketSsotConsolidationValidation(SSotAsyncTestCase):
+class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
     """Validate expected behavior after WebSocket SSOT consolidation."""
     
     async def asyncSetUp(self):
@@ -112,7 +112,7 @@ class TestWebSocketSsotConsolidationValidation(SSotAsyncTestCase):
         # TARGET STATE: Get SSOT singleton instance
         try:
             # Future SSOT pattern: Singleton access method
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager_singleton
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager_singleton
             
             ssot_manager = get_websocket_manager_singleton()
             self.assertIsNotNone(ssot_manager, "SSOT singleton should be available")
@@ -377,7 +377,7 @@ class TestWebSocketSsotConsolidationValidation(SSotAsyncTestCase):
         self.logger.warning(f"Golden Path FAILURE - {event_type}: {failure_reason}")
 
 
-class TestSsotConsolidationIntegration(SSotBaseTestCase):
+class SsotConsolidationIntegrationTests(SSotBaseTestCase):
     """Integration tests for SSOT consolidation patterns."""
     
     def test_ssot_consolidation_maintains_service_boundaries(self):
@@ -389,7 +389,7 @@ class TestSsotConsolidationIntegration(SSotBaseTestCase):
         """
         # TARGET STATE: WebSocket SSOT isolated to backend service
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Check that WebSocket SSOT doesn't import cross-service dependencies
             websocket_module_path = WebSocketManager.__module__

@@ -35,7 +35,7 @@ from unittest.mock import patch, MagicMock
 from concurrent.futures import ThreadPoolExecutor
 from netra_backend.app.services.user_execution_context import UserExecutionContext, UserContextManager, InvalidContextError, ContextIsolationError, validate_user_context, managed_user_context, create_isolated_execution_context
 
-class TestUserExecutionContextIsolationValidation:
+class UserExecutionContextIsolationValidationTests:
     """
     Validation tests for UserExecutionContext security and isolation.
     

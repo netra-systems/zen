@@ -12,7 +12,7 @@ import asyncio
 from unittest.mock import Mock, patch
 
 @pytest.mark.unit
-class TestHealthMonitoringBug:
+class HealthMonitoringBugTests:
     """Test health monitoring bug fixes."""
 
     def test_health_monitoring_basic_functionality(self):

@@ -95,7 +95,7 @@ class MockResult:
     def fetchall(self):
         return [(table,) for table in self.existing_tables]
 
-class TestStartupNonCriticalTableFix:
+class StartupNonCriticalTableFixTests:
     """Test the non-critical table startup logic fix."""
 
     def setup_method(self):

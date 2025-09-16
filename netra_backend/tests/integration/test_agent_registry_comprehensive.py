@@ -46,7 +46,7 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 
 
-class TestAgentRegistryComprehensive(BaseIntegrationTest):
+class AgentRegistryComprehensiveTests(BaseIntegrationTest):
     """Comprehensive integration tests for AgentRegistry with real services."""
     
     def setup_method(self):
@@ -1129,7 +1129,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
 
 # ===================== PERFORMANCE BENCHMARKING =====================
 
-class TestAgentRegistryPerformanceBenchmarks(BaseIntegrationTest):
+class AgentRegistryPerformanceBenchmarksTests(BaseIntegrationTest):
     """Performance benchmarking tests for AgentRegistry scaling characteristics."""
     
     @pytest.mark.integration

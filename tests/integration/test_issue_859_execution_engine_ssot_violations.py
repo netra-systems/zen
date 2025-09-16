@@ -53,7 +53,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestIssue859ExecutionEngineSSotViolations(SSotAsyncTestCase):
+class Issue859ExecutionEngineSSotViolationsTests(SSotAsyncTestCase):
     """Issue #859: Test suite to detect and prove SSOT violations in execution engines."""
 
     async def asyncSetUp(self):

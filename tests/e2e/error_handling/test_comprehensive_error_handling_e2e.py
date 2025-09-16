@@ -26,7 +26,7 @@ from test_framework.conftest_real_services import real_services_fixture
 from test_framework.websocket_helpers import WebSocketTestClient
 from shared.isolated_environment import get_env
 
-class TestCustomerErrorExperienceE2E(SSotAsyncTestCase):
+class CustomerErrorExperienceE2ETests(SSotAsyncTestCase):
     """
     Test complete customer error experience with real authentication.
     
@@ -141,7 +141,7 @@ class TestCustomerErrorExperienceE2E(SSotAsyncTestCase):
         self.assertEqual(agent_response.get('type'), 'agent_started')
         await reconnect_client.close()
 
-class TestMultiUserErrorIsolationE2E(SSotAsyncTestCase):
+class MultiUserErrorIsolationE2ETests(SSotAsyncTestCase):
     """
     Test multi-user error isolation with real authentication.
     
@@ -260,7 +260,7 @@ class TestMultiUserErrorIsolationE2E(SSotAsyncTestCase):
         for client in clients:
             await client.close()
 
-class TestSystemRecoveryCustomerExperienceE2E(SSotAsyncTestCase):
+class SystemRecoveryCustomerExperienceE2ETests(SSotAsyncTestCase):
     """
     Test system recovery customer experience with real services.
     

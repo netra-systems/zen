@@ -90,7 +90,7 @@ async def real_redis_client():
     except Exception as e:
         logger.warning(f'Error closing Redis client: {e}')
 
-class TestGCPRedisConnectivityGoldenPath:
+class GCPRedisConnectivityGoldenPathTests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

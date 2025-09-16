@@ -25,7 +25,7 @@ from auth_service.auth_core.routes.auth_routes import router
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestServiceIdStabilityRegression:
+class ServiceIdStabilityRegressionTests:
     """Regression test suite for SERVICE_ID stability fix"""
     
     def test_auth_routes_uses_hardcoded_service_id(self):
@@ -175,7 +175,7 @@ def run_service_id_stability_regression_tests():
     print("Ensuring SERVICE_ID remains stable and doesn't regress to using timestamps")
     print()
     
-    test_suite = TestServiceIdStabilityRegression()
+    test_suite = ServiceIdStabilityRegressionTests()
     
     # Run all tests
     test_methods = [

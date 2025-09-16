@@ -81,7 +81,7 @@ from tests.e2e.agent_collaboration_helpers import AgentCollaborationTestCore
 @pytest.mark.e2e
 @pytest.mark.env("dev")
 @pytest.mark.env("staging")
-class TestAgentPipelineCritical:
+class AgentPipelineCriticalTests:
     """Critical E2E tests for the complete agent pipeline workflow."""
     
     @pytest.fixture
@@ -761,7 +761,7 @@ class TestAgentPipelineCritical:
 
 @pytest.mark.e2e
 @pytest.mark.env("staging")
-class TestAgentPipelineStaging:
+class AgentPipelineStagingTests:
     """Staging-specific tests for agent pipeline with production-like conditions."""
     
     @pytest.mark.asyncio

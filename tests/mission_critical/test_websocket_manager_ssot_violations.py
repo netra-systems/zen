@@ -47,7 +47,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestWebSocketManagerSSotViolationsUnit(SSotBaseTestCase):
+class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
     """
     Unit tests detecting WebSocket Manager SSOT violations.
     
@@ -74,7 +74,7 @@ class TestWebSocketManagerSSotViolationsUnit(SSotBaseTestCase):
         try:
             # Try to import the factory and manager
             # ISSUE #1182: WebSocketManagerFactory is now consolidated into websocket_manager.py
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerFactory, WebSocketManager, UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerFactory, WebSocketManager, UnifiedWebSocketManager
             
             # Check if factory exists (indicating SSOT violation)
             # Issue #712 Fix: Factory is acceptable if it creates SSOT instances
@@ -179,7 +179,7 @@ class TestWebSocketManagerSSotViolationsUnit(SSotBaseTestCase):
         
         try:
             # Check for direct instantiation patterns
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Try to create an instance directly (should be prevented in SSOT)
             try:
@@ -237,7 +237,7 @@ class TestWebSocketManagerSSotViolationsUnit(SSotBaseTestCase):
         try:
             # Check for mock implementations that diverge from SSOT
             from test_framework.fixtures.websocket_manager_mock import MockWebSocketManager
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Compare mock vs real implementation signatures
             mock_methods = set(dir(MockWebSocketManager))
@@ -341,7 +341,7 @@ class TestWebSocketManagerSSotViolationsUnit(SSotBaseTestCase):
         # Check for context-based SSOT implementation
         try:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, UnifiedWebSocketManager
 
             # SSOT should use single manager with context
             if not hasattr(UnifiedWebSocketManager, 'with_context') and not hasattr(UnifiedWebSocketManager, 'set_context'):
@@ -365,7 +365,7 @@ class TestWebSocketManagerSSotViolationsUnit(SSotBaseTestCase):
             logger.info("No user isolation architecture violations detected")
 
 
-class TestWebSocketManagerSSotViolationsIntegration(SSotBaseTestCase):
+class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
     """
     Integration tests detecting WebSocket Manager SSOT violations with real services.
     
@@ -389,7 +389,7 @@ class TestWebSocketManagerSSotViolationsIntegration(SSotBaseTestCase):
         
         try:
             # Import necessary components
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Try to create multiple instances to see if singleton/SSOT is enforced
             instances = []
@@ -456,7 +456,7 @@ class TestWebSocketManagerSSotViolationsIntegration(SSotBaseTestCase):
         violation_details = []
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Simulate two different users
             user1_id = UserID("test_user_1")
@@ -486,7 +486,7 @@ class TestWebSocketManagerSSotViolationsIntegration(SSotBaseTestCase):
             # Try to get WebSocket manager and register connections
             try:
                 # ISSUE #1182: Use proper factory pattern instead of direct instantiation
-                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                 manager = get_websocket_manager()
                 
                 # Register connections (if manager supports it)
@@ -552,7 +552,7 @@ class TestWebSocketManagerSSotViolationsIntegration(SSotBaseTestCase):
         
         try:
             from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Get instances from both factory and direct
             factory_instance = None
@@ -621,7 +621,7 @@ class TestWebSocketManagerSSotViolationsIntegration(SSotBaseTestCase):
             logger.info("No factory vs SSOT behavior inconsistencies detected")
 
 
-class TestWebSocketManagerSSotViolationsE2EStaging(SSotAsyncTestCase):
+class WebSocketManagerSSotViolationsE2EStagingTests(SSotAsyncTestCase):
     """
     E2E tests detecting WebSocket Manager SSOT violations on staging environment.
     

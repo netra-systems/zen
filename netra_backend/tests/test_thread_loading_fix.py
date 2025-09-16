@@ -12,7 +12,7 @@ from netra_backend.app.routes.utils.thread_validators import validate_thread_acc
 from netra_backend.app.routes.utils.thread_creators import prepare_thread_metadata, generate_thread_id
 from netra_backend.app.routes.utils.thread_handlers import handle_create_thread_request, handle_get_thread_request, handle_get_messages_request, update_thread_metadata_fields
 
-class TestThreadValidation:
+class ThreadValidationTests:
     """Test thread validation with various user_id types."""
 
     def test_validate_thread_access_with_string_ids(self):
@@ -70,7 +70,7 @@ class TestThreadValidation:
         assert exc.value.status_code == 500
         assert 'no associated user' in exc.value.detail
 
-class TestThreadCreation:
+class ThreadCreationTests:
     """Test thread creation with consistent user_id handling."""
 
     def test_prepare_thread_metadata_string_user_id(self):
@@ -111,7 +111,7 @@ class TestThreadCreation:
         metadata = prepare_thread_metadata(thread_data, '  user_123  ')
         assert metadata['user_id'] == 'user_123'
 
-class TestThreadUpdate:
+class ThreadUpdateTests:
     """Test thread update preserves user_id consistency."""
 
     @pytest.mark.asyncio
@@ -141,7 +141,7 @@ class TestThreadUpdate:
         await update_thread_metadata_fields(thread, thread_update)
         assert thread.metadata_['user_id'] == '123'
 
-class TestThreadHandlers:
+class ThreadHandlersTests:
     """Test thread request handlers with various scenarios."""
 
     @pytest.mark.asyncio
@@ -196,7 +196,7 @@ class TestThreadHandlers:
                 assert len(result['messages']) == 1
                 mock_validate.assert_called_once_with(db, 'thread_123', 'user_456')
 
-class TestEdgeCases:
+class EdgeCasesTests:
     """Test edge cases and error scenarios."""
 
     def test_validate_thread_exists_with_none(self):

@@ -25,7 +25,7 @@ def auth_token():
 
 
 @pytest.mark.integration
-class TestConcurrentUpdates:
+class ConcurrentUpdatesTests:
 
     @pytest.mark.asyncio
     async def test_concurrent_profile_updates(self, auth_token):

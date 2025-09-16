@@ -30,7 +30,7 @@ import traceback
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-class TestExecutionEngineSSotValidation565(unittest.TestCase):
+class ExecutionEngineSSotValidation565Tests(unittest.TestCase):
     """Validation tests to determine Issue #565 status"""
     
     def setUp(self):

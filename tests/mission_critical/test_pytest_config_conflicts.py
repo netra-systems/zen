@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 
 
-class TestPytestConfigConflicts:
+class PytestConfigConflictsTests:
     """Test suite for reproducing pytest configuration conflicts."""
     
     def test_phase1_reproduce_duplicate_option_conflict(self):
@@ -165,7 +165,7 @@ class TestPytestConfigConflicts:
         assert True, f"Plugin discovery behavior documented. Output: {output[:500]}..."
 
 
-class TestPytestConfigDeprecation:
+class PytestConfigDeprecationTests:
     """Test suite for deprecated configuration patterns."""
     
     def test_phase1_check_collect_ignore_deprecation(self):
@@ -226,7 +226,7 @@ class TestPytestConfigDeprecation:
         print(f"Current pytest configuration:\n{pytest_config}")
         
         
-class TestEnvironmentConflicts:
+class EnvironmentConflictsTests:
     """Test environment-specific conflicts that might affect pytest."""
     
     def test_phase1_check_multiple_python_paths(self):

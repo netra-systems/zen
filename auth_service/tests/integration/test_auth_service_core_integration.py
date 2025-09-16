@@ -48,7 +48,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 logger = logging.getLogger(__name__)
 
 
-class TestAuthServiceCore(BaseIntegrationTest):
+class AuthServiceCoreTests(BaseIntegrationTest):
     """Integration tests for auth service core functionality."""
     
     def setup_method(self):

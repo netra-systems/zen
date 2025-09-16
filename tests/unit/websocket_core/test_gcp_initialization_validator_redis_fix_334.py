@@ -23,7 +23,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.websocket_core.gcp_initialization_validator import GCPWebSocketInitializationValidator
 
 @pytest.mark.unit
-class TestGCPInitializationValidatorRedisFix334(SSotBaseTestCase):
+class GCPInitializationValidatorRedisFix334Tests(SSotBaseTestCase):
     """
     FOCUSED UNIT TEST: GCP initialization validator Redis 'bool' callable fix
     

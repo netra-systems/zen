@@ -463,7 +463,7 @@ class BusinessErrorRecoveryManager:
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestErrorRecoveryBusinessLogic(BaseTestCase):
+class ErrorRecoveryBusinessLogicTests(BaseTestCase):
     """Test error recovery business logic for system resilience and business continuity."""
 
     def setup_method(self):

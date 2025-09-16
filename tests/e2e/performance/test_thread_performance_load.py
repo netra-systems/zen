@@ -29,7 +29,7 @@ from tests.e2e.fixtures.core.thread_test_fixtures_core import (
 )
 
 
-class TestThreadLoader:
+class ThreadLoaderTests:
     """Specialized load testing for thread operations."""
     
     def __init__(self, ws_fixtures: ThreadWebSocketFixtures, perf_utils: ThreadPerformanceUtils):

@@ -33,7 +33,7 @@ sys.path.insert(0, str(project_root))
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestDeprecatedVsSSotComparison(BaseIntegrationTest):
+class DeprecatedVsSSotComparisonTests(BaseIntegrationTest):
     """Integration tests comparing deprecated factory patterns vs SSOT patterns."""
 
     def setup_method(self):
@@ -394,7 +394,7 @@ class TestDeprecatedVsSSotComparison(BaseIntegrationTest):
         managers = []
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
 
             for i in range(count):
@@ -424,7 +424,7 @@ class TestDeprecatedVsSSotComparison(BaseIntegrationTest):
 
     async def _create_single_ssot_manager(self) -> Any:
         """Create a single WebSocket manager using SSOT pattern."""
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
 
         user_context = UserExecutionContextFactory.create_test_context()

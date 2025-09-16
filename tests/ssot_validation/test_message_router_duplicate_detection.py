@@ -40,7 +40,7 @@ class RouterSignature:
     similarity_score: float = 0.0
 
 
-class TestMessageRouterDuplicateDetection(SSotBaseTestCase, unittest.TestCase):
+class MessageRouterDuplicateDetectionTests(SSotBaseTestCase, unittest.TestCase):
     """Test automated detection of MessageRouter duplicates and SSOT violations."""
 
     def setUp(self):

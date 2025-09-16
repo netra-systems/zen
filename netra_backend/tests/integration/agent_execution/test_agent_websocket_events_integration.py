@@ -194,7 +194,7 @@ class WebSocketEventTracker:
             inter_event_times.append((curr_time - prev_time).total_seconds())
         return {'run_id': run_id, 'total_events': len(run_events), 'total_duration_seconds': total_duration, 'average_inter_event_time': sum(inter_event_times) / len(inter_event_times) if inter_event_times else 0, 'max_gap_seconds': max(inter_event_times) if inter_event_times else 0, 'min_gap_seconds': min(inter_event_times) if inter_event_times else 0, 'events_per_second': len(run_events) / total_duration if total_duration > 0 else 0}
 
-class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
+class AgentWebSocketEventsIntegrationTests(BaseIntegrationTest):
     """Integration tests for agent WebSocket events - MISSION CRITICAL for chat value."""
 
     def setup_method(self):

@@ -24,7 +24,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestWebSocketSSotConfigurationViolations(SSotBaseTestCase):
+class WebSocketSSotConfigurationViolationsTests(SSotBaseTestCase):
     """Test configuration SSOT violations."""
     
     def test_websocket_configuration_source_consistency(self):
@@ -51,7 +51,7 @@ class TestWebSocketSSotConfigurationViolations(SSotBaseTestCase):
         
         try:
             # WebSocket-specific config
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             # Check if manager has its own config
             manager = WebSocketManager()
             manager_config_attrs = [attr for attr in dir(manager) if 'config' in attr.lower()]
@@ -61,7 +61,7 @@ class TestWebSocketSSotConfigurationViolations(SSotBaseTestCase):
         
         try:
             # Factory config
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             factory = WebSocketManagerFactory()
             factory_config_attrs = [attr for attr in dir(factory) if 'config' in attr.lower()]
             configuration_sources['factory_config'] = len(factory_config_attrs) > 0
@@ -149,7 +149,7 @@ class TestWebSocketSSotConfigurationViolations(SSotBaseTestCase):
         
         # Test default configurations in different components
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Check manager defaults
             manager = UnifiedWebSocketManager()
@@ -171,7 +171,7 @@ class TestWebSocketSSotConfigurationViolations(SSotBaseTestCase):
         
         try:
             # Check factory defaults
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             factory = WebSocketManagerFactory()
             factory_defaults = {}

@@ -30,7 +30,7 @@ from auth_service.services.jwt_service import JWTService
 from auth_service.auth_core.config import AuthConfig
 
 
-class TestJWTManagement(SSotBaseTestCase):
+class JWTManagementTests(SSotBaseTestCase):
     """Unit tests for JWT management business logic."""
     
     def setup_method(self, method=None):

@@ -19,7 +19,7 @@ import logging
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = logging.getLogger(__name__)
 
-class TestWebSocketStateRegistryScopeBug(SSotBaseTestCase):
+class WebSocketStateRegistryScopeBugTests(SSotBaseTestCase):
     """
     CRITICAL: Test reproduces the exact scope bug where state_registry
     variable is not accessible in websocket_endpoint() function.

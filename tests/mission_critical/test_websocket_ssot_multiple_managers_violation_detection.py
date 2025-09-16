@@ -48,7 +48,7 @@ import pytest
 from loguru import logger
 
 
-class TestWebSocketSSotMultipleManagersViolationDetection(SSotBaseTestCase):
+class WebSocketSSotMultipleManagersViolationDetectionTests(SSotBaseTestCase):
     """Mission Critical: WebSocket SSOT Multiple Managers Violation Detection
     
     This test detects the current SSOT violation where multiple WebSocket managers
@@ -178,7 +178,7 @@ class TestWebSocketSSotMultipleManagersViolationDetection(SSotBaseTestCase):
             logger.info("✓ Issue #1209: DemoWebSocketBridge imports successfully")
             
             # Test interface compatibility with consolidated manager
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Check if WebSocketManager has required interface for demo bridge
             required_methods = ['emit_agent_event', 'get_active_connections', 'send_message']
@@ -252,7 +252,7 @@ class TestWebSocketSSotMultipleManagersViolationDetection(SSotBaseTestCase):
                         
                         # Check for dual imports
                         has_websocket_manager_import = (
-                            'from netra_backend.app.websocket_core.websocket_manager import' in content or
+                            'from netra_backend.app.websocket_core.canonical_import_patterns import' in content or
                             'import netra_backend.app.websocket_core.websocket_manager' in content
                         )
                         has_unified_manager_import = (

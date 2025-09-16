@@ -45,6 +45,8 @@ from netra_backend.app.services.websocket.message_handler import (
     UserMessageHandler, 
     ThreadHistoryHandler
 )
+# Import SSOT adapters for migration compatibility
+from netra_backend.app.adapters.legacy_to_ssot_adapter import LegacyToSSOTAdapter
 from netra_backend.app.dependencies import get_user_execution_context, create_user_execution_context
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
@@ -133,7 +135,7 @@ class ContextTrackingHandler:
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.asyncio
-class TestMessageQueueContextCreationRegression:
+class MessageQueueContextCreationRegressionTests:
     """Integration tests for message queue context creation regression prevention.
     
     Tests the CRITICAL regression where message queue processors incorrectly create new contexts
@@ -757,7 +759,7 @@ def test_message_queue_context_regression_test_structure():
     """Unit test to validate the structure of the integration test suite."""
     
     # Validate test class structure
-    test_class = TestMessageQueueContextCreationRegression
+    test_class = MessageQueueContextCreationRegressionTests
     
     # Check that all required test methods exist
     test_methods = [method for method in dir(test_class) if method.startswith("test_")]

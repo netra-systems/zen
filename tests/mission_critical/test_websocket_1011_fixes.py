@@ -30,7 +30,7 @@ from netra_backend.app.redis_manager import redis_manager
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestWebSocket1011Fixes(SSotAsyncTestCase):
+class WebSocket1011FixesTests(SSotAsyncTestCase):
     """Mission Critical: Test WebSocket 1011 error fixes through Redis SSOT."""
     
     def setUp(self):
@@ -517,7 +517,7 @@ class TestWebSocket1011Fixes(SSotAsyncTestCase):
             self.logger.debug(f"Cleanup failed for {user_id}: {e}")
 
 
-class TestWebSocketRedisIntegration(SSotAsyncTestCase):
+class WebSocketRedisIntegrationTests(SSotAsyncTestCase):
     """Additional WebSocket-Redis integration tests for edge cases."""
     
     async def test_websocket_redis_circuit_breaker_behavior(self):

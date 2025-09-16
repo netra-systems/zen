@@ -82,7 +82,7 @@ except ImportError as e:
 logger = logging.getLogger(__name__)
 
 
-class TestFactoryIsolationPatterns(BaseIntegrationTest):
+class FactoryIsolationPatternsTests(BaseIntegrationTest):
     """Comprehensive factory isolation pattern tests for multi-user execution."""
     
     @pytest.fixture(autouse=True)

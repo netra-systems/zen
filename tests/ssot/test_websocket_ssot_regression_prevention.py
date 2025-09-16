@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 
-class TestWebSocketSSotRegressionPrevention(SSotBaseTestCase):
+class WebSocketSSotRegressionPreventionTests(SSotBaseTestCase):
     """
     Test suite to prevent regression of WebSocket SSOT violations.
     
@@ -125,7 +125,7 @@ class TestWebSocketSSotRegressionPrevention(SSotBaseTestCase):
         # Patterns that indicate SSOT violations
         violation_patterns = [
             "from netra_backend.app.websocket_core.manager import",
-            "from netra_backend.app.websocket_core.websocket_manager import",
+            "from netra_backend.app.websocket_core.canonical_import_patterns import",
             "from netra_backend.app.websocket_core.unified_manager import",
             "import netra_backend.app.websocket_core.manager",
             "import netra_backend.app.websocket_core.websocket_manager",

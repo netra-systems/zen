@@ -10,14 +10,16 @@ emergency remediation efforts.
 
 import ast
 import os
+import pytest
 import re
 from pathlib import Path
 from typing import Dict, List, Set
 import unittest
+import pytest
 
 
 @pytest.mark.unit
-class TestIssue1024PytestViolationsDetection(unittest.TestCase):
+class Issue1024PytestViolationsDetectionTests(unittest.TestCase):
     """SSOT violation detection for Issue #1024 remediation."""
 
     def setUp(self):

@@ -23,7 +23,7 @@ from netra_backend.app.core.backend_environment import BackendEnvironment
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestRedisConfigurationPatterns(SSotAsyncTestCase):
+class RedisConfigurationPatternsTests(SSotAsyncTestCase):
     """Test Redis configuration pattern detection and validation."""
 
     def setup_method(self, method):

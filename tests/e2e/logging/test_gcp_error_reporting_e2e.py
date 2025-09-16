@@ -40,7 +40,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.e2e
-class TestGCPErrorReportingE2E(SSotAsyncTestCase):
+class GCPErrorReportingE2ETests(SSotAsyncTestCase):
     """End-to-End tests for complete GCP Error Reporting integration."""
     
     def setup_method(self, method):
@@ -603,5 +603,5 @@ class TestGCPErrorReportingE2E(SSotAsyncTestCase):
 
 # Export test classes  
 __all__ = [
-    'TestGCPErrorReportingE2E'
+    'GCPErrorReportingE2ETests'
 ]

@@ -24,7 +24,7 @@ from unittest.mock import patch, MagicMock
 from datetime import datetime
 from netra_backend.app.core.thread_cleanup_manager import ThreadCleanupManager, ThreadInfo, get_thread_cleanup_manager, force_cleanup_all_threads
 
-class TestThreadCleanupDeadlockReproduction:
+class ThreadCleanupDeadlockReproductionTests:
     """Test suite to reproduce the thread cleanup deadlock issue."""
 
     def setup_method(self):
@@ -245,7 +245,7 @@ class TestThreadCleanupDeadlockReproduction:
         finally:
             self.manager._cleanup_lock = original_lock
 
-class TestSpecificDeadlockScenarios:
+class SpecificDeadlockScenariosTests:
     """Additional tests for specific deadlock scenarios identified in Issue #601."""
 
     def test_startup_deadlock_scenario(self):

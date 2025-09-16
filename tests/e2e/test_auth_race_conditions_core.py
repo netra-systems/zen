@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -42,7 +42,7 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from auth_service.core.auth_manager import AuthManager
@@ -397,7 +397,7 @@ class MockRedisWithRaceConditions:
         return True
 
 @pytest.mark.e2e
-class TestConcurrentTokenRefreshRaceConditions:
+class ConcurrentTokenRefreshRaceConditionsTests:
     """Test Case 1: Concurrent Token Refresh Race Conditions"""
     
     @pytest.mark.asyncio
@@ -464,7 +464,7 @@ class TestConcurrentTokenRefreshRaceConditions:
             })
 
 @pytest.mark.e2e
-class TestMultiDeviceLoginCollision:
+class MultiDeviceLoginCollisionTests:
     """Test Case 2: Multi-Device Login Collision"""
     
     @pytest.mark.asyncio
@@ -556,7 +556,7 @@ class TestMultiDeviceLoginCollision:
         race_detector.take_memory_snapshot("after_multidevice_test")
 
 @pytest.mark.e2e
-class TestConcurrentSessionInvalidation:
+class ConcurrentSessionInvalidationTests:
     """Test Case 3: Session Invalidation Race Conditions"""
     
     @pytest.mark.asyncio
@@ -665,7 +665,7 @@ class TestConcurrentSessionInvalidation:
         race_detector.take_memory_snapshot("after_invalidation_test")
 
 @pytest.mark.e2e
-class TestJWTTokenCollisionDetection:
+class JWTTokenCollisionDetectionTests:
     """Test Case 4: JWT Token Collision Detection"""
     
     @pytest.mark.asyncio
@@ -791,7 +791,7 @@ class TestJWTTokenCollisionDetection:
         race_detector.take_memory_snapshot("after_token_collision_test")
 
 @pytest.mark.e2e
-class TestRaceConditionLoadStress:
+class RaceConditionLoadStressTests:
     """Comprehensive load stress test for race condition detection"""
     
     @pytest.mark.asyncio

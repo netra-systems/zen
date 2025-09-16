@@ -9,7 +9,7 @@ def test_ssot_consolidation():
 
     # Test 1: Import from consolidated module should work
     try:
-        from netra_backend.app.websocket_core.websocket_manager import (
+        from netra_backend.app.websocket_core.canonical_import_patterns import (
             create_websocket_manager,
             WebSocketManagerFactory,
             get_websocket_manager,

@@ -41,7 +41,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = central_logger.get_logger(__name__)
 
 
-class TestAgentExecutionStateRaces(SSotBaseTestCase):
+class AgentExecutionStateRacesTests(SSotBaseTestCase):
     """Test race conditions in agent execution state management."""
     
     def setup_method(self):

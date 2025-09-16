@@ -218,7 +218,7 @@ def get_event_counts(events: List[Dict[str, Any]]) -> Dict[str, int]:
     return event_counts
 
 
-class TestRealE2EChatInteraction(SSotAsyncTestCase):
+class RealE2EChatInteractionTests(SSotAsyncTestCase):
     """Comprehensive E2E tests for chat interaction experience."""
     
     def setup_method(self, method=None):
@@ -765,7 +765,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_test_suite():
-        test_instance = TestRealE2EChatInteraction()
+        test_instance = RealE2EChatInteractionTests()
         
         try:
             test_instance.setup_method()

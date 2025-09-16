@@ -38,7 +38,7 @@ from tests.e2e.real_services_manager import (
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestBusinessValueProtection:
+class BusinessValueProtectionTests:
     """Test suite validating business value protection in staging."""
     
     def __init__(self):
@@ -366,7 +366,7 @@ async def main():
     print("- Golden Path user flow protection")
     print()
     
-    test_suite = TestBusinessValueProtection()
+    test_suite = BusinessValueProtectionTests()
     
     test_results = []
     

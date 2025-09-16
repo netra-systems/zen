@@ -34,7 +34,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestIssue686ExecutionEngineConsolidation(SSotBaseTestCase):
+class Issue686ExecutionEngineConsolidationTests(SSotBaseTestCase):
     """Test ExecutionEngine SSOT consolidation compliance."""
 
     def setUp(self):

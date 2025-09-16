@@ -31,7 +31,7 @@ from shared.types import UserID, ThreadID, MessageID
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketApplicationStateCrossServiceSynchronization(BaseIntegrationTest):
+class WebSocketApplicationStateCrossServiceSynchronizationTests(BaseIntegrationTest):
     """Test cross-service state synchronization during WebSocket events."""
     
     @pytest.mark.integration

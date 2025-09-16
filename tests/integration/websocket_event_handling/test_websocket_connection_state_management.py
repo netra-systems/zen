@@ -27,7 +27,7 @@ from test_framework.ssot.websocket import (
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketConnectionStateManagement(SSotAsyncTestCase):
+class WebSocketConnectionStateManagementTests(SSotAsyncTestCase):
     """Test WebSocket connection state management patterns."""
     
     async def setup_method(self, method=None):

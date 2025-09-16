@@ -36,7 +36,7 @@ from test_framework.ssot.base_test_case import BaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestServiceDependencyChecker(BaseTestCase):
+class ServiceDependencyCheckerTests(BaseTestCase):
     """Test core dependency checking logic."""
     
     def setUp(self):
@@ -125,7 +125,7 @@ class TestServiceDependencyChecker(BaseTestCase):
             assert not result.blocks_startup
 
 
-class TestHealthCheckValidator(BaseTestCase):
+class HealthCheckValidatorTests(BaseTestCase):
     """Test health check validation logic."""
     
     def setUp(self):
@@ -194,7 +194,7 @@ class TestHealthCheckValidator(BaseTestCase):
             assert "timeout" in result.error.lower()
 
 
-class TestRetryMechanism(BaseTestCase):
+class RetryMechanismTests(BaseTestCase):
     """Test progressive retry logic."""
     
     def setUp(self):
@@ -249,7 +249,7 @@ class TestRetryMechanism(BaseTestCase):
         assert self.retry_mechanism.circuit_breaker.is_open
 
 
-class TestStartupOrchestrator(BaseTestCase):
+class StartupOrchestratorTests(BaseTestCase):
     """Test coordinated service startup orchestration."""
     
     def setUp(self):
@@ -317,7 +317,7 @@ class TestStartupOrchestrator(BaseTestCase):
             assert "postgresql" in result.healthy_services
 
 
-class TestDependencyGraphResolver(BaseTestCase):
+class DependencyGraphResolverTests(BaseTestCase):
     """Test dependency graph resolution logic."""
     
     def setUp(self):
@@ -394,7 +394,7 @@ class TestDependencyGraphResolver(BaseTestCase):
         assert not self.resolver.validate_dependency_graph(invalid_graph)
 
 
-class TestEnvironmentSpecificConfiguration(BaseTestCase):
+class EnvironmentSpecificConfigurationTests(BaseTestCase):
     """Test environment-specific dependency configuration."""
     
     def setUp(self):

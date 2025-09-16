@@ -41,7 +41,7 @@ docker_manager = UnifiedDockerManager()
 @pytest.mark.real_services
 @pytest.mark.e2e
 @pytest.mark.asyncio
-class TestRealAdminAuditTrailValidation:
+class RealAdminAuditTrailValidationTests:
     """REAL E2E Admin Audit Trail Validation - Zero Mocks, Zero Cheating.
     
     This test validates that ALL admin operations create proper audit entries

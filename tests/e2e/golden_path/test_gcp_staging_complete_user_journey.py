@@ -56,7 +56,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 @pytest.mark.gcp_staging
 @pytest.mark.mission_critical
 @pytest.mark.golden_path
-class TestGCPStagingCompleteUserJourney(BaseE2ETest):
+class GCPStagingCompleteUserJourneyTests(BaseE2ETest):
     """
     Test complete user journey from login to AI response in GCP staging.
     

@@ -51,7 +51,7 @@ from netra_backend.app.db.models_agent import Thread, Message, Run
 from netra_backend.app.db.models_user import User, Secret, ToolUsageLog
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext, create_isolated_execution_context, managed_user_context
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketManagerMode
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketManagerMode
 from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
 from shared.isolated_environment import IsolatedEnvironment
 from shared.types.core_types import UserID, ThreadID, RunID
@@ -61,7 +61,7 @@ from test_framework.ssot.websocket import WebSocketTestUtility
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-class TestAgentStateSyncIntegrationHelpers(SSotBaseTestCase):
+class AgentStateSyncIntegrationHelpersTests(SSotBaseTestCase):
     """E2E tests for agent state synchronization with real services.
     
     This test class validates that multiple agents can coordinate state changes

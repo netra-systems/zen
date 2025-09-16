@@ -17,7 +17,7 @@ from tests.clients.websocket_client import WebSocketTestClient
 from tests.e2e.config import UnifiedTestConfig
 
 
-class TestPermissionPropagationer:
+class PermissionPropagationerTests:
     """Tests permission changes propagating across all services."""
     
     def __init__(self):

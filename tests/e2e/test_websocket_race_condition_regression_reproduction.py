@@ -39,7 +39,7 @@ from shared.types.core_types import UserID, ensure_user_id
 # Critical imports for full E2E WebSocket testing  
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from tests.e2e.staging_config import staging_urls
 
@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.e2e
 @pytest.mark.websocket_regression
 @pytest.mark.real_services
-class TestWebSocketRaceConditionRegressionE2E(SSotBaseTestCase):
+class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
     """
     End-to-end tests reproducing WebSocket race condition regression in
     complete user chat flows with real WebSocket connections and services.
@@ -706,7 +706,7 @@ class TestWebSocketRaceConditionRegressionE2E(SSotBaseTestCase):
 @pytest.mark.e2e
 @pytest.mark.websocket_regression  
 @pytest.mark.production_simulation
-class TestProductionWebSocketEventDeliveryFailures(SSotBaseTestCase):
+class ProductionWebSocketEventDeliveryFailuresTests(SSotBaseTestCase):
     """
     Production-level simulation tests for WebSocket event delivery failures
     that reproduce the specific patterns seen in production environments.

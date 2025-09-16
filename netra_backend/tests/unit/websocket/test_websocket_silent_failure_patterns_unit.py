@@ -30,12 +30,12 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDisp
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.agent_types import AgentExecutionResult
 
-class TestWebSocketSilentFailurePatternsUnit(SSotAsyncTestCase):
+class WebSocketSilentFailurePatternsUnitTests(SSotAsyncTestCase):
     """
     Unit tests demonstrating silent failure patterns in WebSocket event emission.
     
@@ -190,7 +190,7 @@ class TestWebSocketSilentFailurePatternsUnit(SSotAsyncTestCase):
         except Exception:
             pass
         try:
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
             if hasattr(UnifiedWebSocketManager, 'emit_critical_event'):
                 modern_infrastructure_available.append('UnifiedWebSocketManager')
         except Exception:
@@ -200,7 +200,7 @@ class TestWebSocketSilentFailurePatternsUnit(SSotAsyncTestCase):
         infrastructure_gap = len(old_patterns_found) > 0 and len(modern_infrastructure_available) > 0
         self.assertTrue(infrastructure_gap, f'CRITICAL BUSINESS GAP: {len(old_patterns_found)} files use old patterns while {len(modern_infrastructure_available)} modern alternatives exist!')
 
-class TestWebSocketFailureBusinessImpact(SSotBaseTestCase):
+class WebSocketFailureBusinessImpactTests(SSotBaseTestCase):
     """
     Business impact analysis tests for WebSocket silent failures.
     These tests quantify the business cost of silent failures.

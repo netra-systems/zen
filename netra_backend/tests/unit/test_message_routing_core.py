@@ -32,7 +32,7 @@ from netra_backend.app.services.quality_monitoring_service import QualityMonitor
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestMessageRoutingCore(SSotBaseTestCase):
+class MessageRoutingCoreTests(SSotBaseTestCase):
     """Unit tests for core message routing business logic."""
     
     def setup_method(self, method=None):

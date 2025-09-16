@@ -48,7 +48,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.config import get_config
 
 
-class TestGCPLoggingCriticalMessageIntegration(SSotAsyncTestCase):
+class GCPLoggingCriticalMessageIntegrationTests(SSotAsyncTestCase):
     """
     Integration test suite for GCP logging critical message infrastructure.
     

@@ -47,7 +47,7 @@ except ImportError:
 from test_framework.base_integration_test import BaseIntegrationTest
 from shared.database.session_validation import validate_db_session
 
-class TestLegacySessionManager(BaseIntegrationTest):
+class LegacySessionManagerTests(BaseIntegrationTest):
     """Test legacy SessionManager stub functionality."""
 
     def setup_method(self):
@@ -80,7 +80,7 @@ class TestLegacySessionManager(BaseIntegrationTest):
         result = validate_agent_session_isolation(mock_agent)
         assert result is True
 
-class TestDatabaseSessionManager(BaseIntegrationTest):
+class DatabaseSessionManagerTests(BaseIntegrationTest):
     """Test DatabaseSessionManager stub functionality."""
 
     def setup_method(self):
@@ -102,7 +102,7 @@ class TestDatabaseSessionManager(BaseIntegrationTest):
         """Test close_session handles None gracefully."""
         await self.db_session_manager.close_session(None)
 
-class TestSessionScopeValidator(BaseIntegrationTest):
+class SessionScopeValidatorTests(BaseIntegrationTest):
     """Test SessionScopeValidator functionality."""
 
     def test_validate_request_scoped_with_global_flag(self):
@@ -125,7 +125,7 @@ class TestSessionScopeValidator(BaseIntegrationTest):
             delattr(mock_session, '_global_storage_flag')
         SessionScopeValidator.validate_request_scoped(mock_session)
 
-class TestDatabaseSessionMetrics(BaseIntegrationTest):
+class DatabaseSessionMetricsTests(BaseIntegrationTest):
     """Test DatabaseSessionMetrics data class functionality."""
 
     def test_session_metrics_initialization(self):
@@ -169,7 +169,7 @@ class TestDatabaseSessionMetrics(BaseIntegrationTest):
         assert metrics.total_time_ms is not None
         assert metrics.total_time_ms >= 40
 
-class TestConnectionPoolMetrics(BaseIntegrationTest):
+class ConnectionPoolMetricsTests(BaseIntegrationTest):
     """Test ConnectionPoolMetrics functionality."""
 
     def test_connection_pool_metrics_initialization(self):
@@ -214,7 +214,7 @@ class TestConnectionPoolMetrics(BaseIntegrationTest):
         assert metrics.last_leak_detection is not None
         assert before_record <= metrics.last_leak_detection <= after_record
 
-class TestRequestScopedSessionFactory(BaseIntegrationTest):
+class RequestScopedSessionFactoryTests(BaseIntegrationTest):
     """Test RequestScopedSessionFactory - the CRITICAL component for user isolation."""
 
     def setup_method(self):
@@ -340,7 +340,7 @@ class TestRequestScopedSessionFactory(BaseIntegrationTest):
         assert self.factory._cleanup_task.done()
         assert session_metrics.state == SessionState.ERROR
 
-class TestConcurrentSessionIsolation(BaseIntegrationTest):
+class ConcurrentSessionIsolationTests(BaseIntegrationTest):
     """Test concurrent session management and isolation."""
 
     async def test_concurrent_session_creation(self):
@@ -405,7 +405,7 @@ class TestConcurrentSessionIsolation(BaseIntegrationTest):
         finally:
             await factory.close()
 
-class TestGlobalSessionFactoryFunctions(BaseIntegrationTest):
+class GlobalSessionFactoryFunctionsTests(BaseIntegrationTest):
     """Test global session factory functions."""
 
     def teardown_method(self):
@@ -459,7 +459,7 @@ class TestGlobalSessionFactoryFunctions(BaseIntegrationTest):
         new_factory = await get_session_factory()
         assert new_factory is not factory
 
-class TestSessionValidationUtilities(BaseIntegrationTest):
+class SessionValidationUtilitiesTests(BaseIntegrationTest):
     """Test session validation utilities."""
 
     def test_validate_db_session_with_real_session(self):
@@ -486,7 +486,7 @@ class TestSessionValidationUtilities(BaseIntegrationTest):
         with pytest.raises(TypeError, match='Expected AsyncSession'):
             validate_db_session(mock_session, 'test_context', allow_mock=False)
 
-class TestErrorHandlingAndRecovery(BaseIntegrationTest):
+class ErrorHandlingAndRecoveryTests(BaseIntegrationTest):
     """Test error handling and recovery scenarios."""
 
     async def test_session_error_handling_with_rollback(self):
@@ -545,7 +545,7 @@ class TestErrorHandlingAndRecovery(BaseIntegrationTest):
         finally:
             await factory.close()
 
-class TestSessionManagerPerformance(BaseIntegrationTest):
+class SessionManagerPerformanceTests(BaseIntegrationTest):
     """Test session manager performance under load."""
 
     async def test_high_concurrency_session_creation(self):

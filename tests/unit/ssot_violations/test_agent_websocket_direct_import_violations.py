@@ -28,7 +28,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestAgentWebSocketDirectImportViolations(SSotBaseTestCase):
+class AgentWebSocketDirectImportViolationsTests(SSotBaseTestCase):
     """
     Test suite for detecting direct WebSocketManager imports in agent files.
     
@@ -218,7 +218,7 @@ class TestAgentWebSocketDirectImportViolations(SSotBaseTestCase):
         
         # Prohibited direct access patterns  
         prohibited_patterns = [
-            "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+            "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
             "from netra_backend.app.websocket_core.manager import",
             "WebSocketManager(",
         ]

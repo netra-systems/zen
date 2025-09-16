@@ -8,7 +8,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 @pytest.mark.e2e
-class TestAgentResourceCleanupIntegrationFixtures:
+class AgentResourceCleanupIntegrationFixturesTests:
     """Test class for agent_resource_cleanup_integration_fixtures"""
 
     def setup_method(self):

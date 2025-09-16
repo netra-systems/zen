@@ -37,14 +37,14 @@ from netra_backend.app.services.websocket.quality_metrics_handler import Quality
 from netra_backend.app.services.websocket.quality_validation_handler import QualityValidationHandler
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.agent_service_core import AgentService
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
 # Models for message testing
 from netra_backend.app.models.user import User
 from netra_backend.app.models.thread import Thread, Message
 
 
-class TestMessageRoutingIntegration(BaseIntegrationTest):
+class MessageRoutingIntegrationTests(BaseIntegrationTest):
     """Test message routing and processing with real service integration."""
 
     @pytest.mark.integration

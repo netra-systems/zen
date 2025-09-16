@@ -28,7 +28,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.schemas.tenant import SubscriptionTier
 
 
-class TestAuthBusinessLogicValidation:
+class AuthBusinessLogicValidationTests:
     """Comprehensive auth business logic validation tests."""
 
     @pytest.fixture
@@ -182,7 +182,7 @@ class TestAuthBusinessLogicValidation:
         assert over_limit_result.overage_amount > 0
 
 
-class TestAuthCrossServiceValidation:
+class AuthCrossServiceValidationTests:
     """Test 7: Cross-service validation business logic."""
 
     @pytest.fixture
@@ -221,7 +221,7 @@ class TestAuthCrossServiceValidation:
         assert "insufficient privileges" in unauthorized_result.denial_reason.lower()
 
 
-class TestAuthSecurityPolicyValidation:
+class AuthSecurityPolicyValidationTests:
     """Test 8: Security policy validation business logic."""
 
     @pytest.fixture
@@ -273,7 +273,7 @@ class TestAuthSecurityPolicyValidation:
             assert not result.can_create_new_session
 
 
-class TestAuthIntegrationBusinessLogic:
+class AuthIntegrationBusinessLogicTests:
     """Test 9: OAuth integration business logic."""
 
     @pytest.fixture
@@ -313,7 +313,7 @@ class TestAuthIntegrationBusinessLogic:
         assert link_result.should_link_accounts
 
 
-class TestAuthAuditBusinessLogic:
+class AuthAuditBusinessLogicTests:
     """Test 10: Audit and compliance business logic."""
 
     @pytest.fixture

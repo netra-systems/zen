@@ -14,7 +14,7 @@ def validate_functionality():
     
     # Test 1: Core imports work correctly
     try:
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
         print("PASS: Core WebSocket imports working")
         results.append(True)
     except Exception as e:

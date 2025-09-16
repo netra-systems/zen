@@ -41,7 +41,7 @@ from netra_backend.app.services.user_execution_context import (
 
 
 @pytest.mark.integration
-class TestUserExecutionEngineSSotValidation1146(SSotAsyncTestCase):
+class UserExecutionEngineSSotValidation1146Tests(SSotAsyncTestCase):
     """Validates UserExecutionEngine handles all execution scenarios after SSOT consolidation."""
 
     async def asyncSetUp(self):

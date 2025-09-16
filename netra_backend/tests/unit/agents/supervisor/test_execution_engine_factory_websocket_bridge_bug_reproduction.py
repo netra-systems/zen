@@ -31,7 +31,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInst
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
-class TestExecutionEngineFactoryWebSocketBridgeBugReproduction:
+class ExecutionEngineFactoryWebSocketBridgeBugReproductionTests:
     """
     CRITICAL reproduction test for WebSocket bridge configuration bug.
     

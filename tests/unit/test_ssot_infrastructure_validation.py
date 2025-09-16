@@ -23,7 +23,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 
 
 @pytest.mark.unit
-class TestSSotInfrastructureValidation(SSotBaseTestCase):
+class SSotInfrastructureValidationTests(SSotBaseTestCase):
     """Validate SSOT infrastructure consolidation works correctly."""
 
     def test_ssot_base_test_case_is_singular_source(self):

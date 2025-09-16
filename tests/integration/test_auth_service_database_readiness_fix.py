@@ -209,7 +209,7 @@ class AuthDatabaseConnectionTimeoutFix:
 
 
 @pytest.mark.integration
-class TestAuthServiceDatabaseReadinessFix:
+class AuthServiceDatabaseReadinessFixTests:
     """Test suite for auth service database readiness fixes."""
     
     @pytest.mark.asyncio

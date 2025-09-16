@@ -41,7 +41,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 
 @pytest.mark.unit
 @pytest.mark.timeout_race_conditions
-class TestWebSocketTimeoutRaceConditions(BaseIntegrationTest):
+class WebSocketTimeoutRaceConditionsTests(BaseIntegrationTest):
     """
     Test WebSocket timeout configuration to prevent race conditions.
     
@@ -321,7 +321,7 @@ class TestWebSocketTimeoutRaceConditions(BaseIntegrationTest):
 
 @pytest.mark.unit
 @pytest.mark.timeout_edge_cases
-class TestWebSocketTimeoutEdgeCases(BaseIntegrationTest):
+class WebSocketTimeoutEdgeCasesTests(BaseIntegrationTest):
     """
     Test edge cases in WebSocket timeout handling that could cause race conditions.
     """

@@ -8,7 +8,7 @@ from typing import Dict, List, Any, Optional
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestComplianceValidationComprehensive:
+class ComplianceValidationComprehensiveTests:
     """Validates comprehensive regulatory compliance requirements."""
     
     @pytest.fixture

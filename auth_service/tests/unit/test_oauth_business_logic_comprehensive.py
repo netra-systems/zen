@@ -42,7 +42,7 @@ from auth_service.auth_core.auth_environment import AuthEnvironment
 from netra_backend.app.schemas.tenant import SubscriptionTier
 
 
-class TestOAuthBusinessLogicComprehensive(SSotBaseTestCase):
+class OAuthBusinessLogicComprehensiveTests(SSotBaseTestCase):
     """
     PRIORITY 1: Comprehensive OAuth business logic tests with tier validation and attack prevention.
     
@@ -588,4 +588,4 @@ class TestOAuthBusinessLogicComprehensive(SSotBaseTestCase):
         assert no_flag_result.email_verification_required is True
 
 
-__all__ = ["TestOAuthBusinessLogicComprehensive"]
+__all__ = ["OAuthBusinessLogicComprehensiveTests"]

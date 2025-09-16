@@ -35,7 +35,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator, TestIdUtils
 
 
-class TestSsotIdUserIsolation(SSotAsyncTestCase):
+class SsotIdUserIsolationTests(SSotAsyncTestCase):
     """Integration tests for SSOT ID generation impact on user isolation.
     
     These tests use real services to validate how ID generation violations

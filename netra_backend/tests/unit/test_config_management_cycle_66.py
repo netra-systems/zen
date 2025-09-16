@@ -23,7 +23,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.unit
 @pytest.mark.config
 @pytest.mark.environment
-class TestConfigurationManagement:
+class ConfigurationManagementTests:
     """Test configuration management system."""
     
     @pytest.fixture(autouse=True)

@@ -25,7 +25,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestWebSocketManagerIntegration(BaseIntegrationTest):
+class WebSocketManagerIntegrationTests(BaseIntegrationTest):
     """Test WebSocket manager integration with real services."""
     
     @pytest.mark.integration
@@ -40,7 +40,7 @@ class TestWebSocketManagerIntegration(BaseIntegrationTest):
         logger.info("Testing WebSocket manager consistent behavior with real services")
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketManagerMode
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             from shared.types.core_types import ensure_user_id
             
@@ -100,7 +100,7 @@ class TestWebSocketManagerIntegration(BaseIntegrationTest):
         
         try:
             from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketManagerMode
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             from shared.types.core_types import ensure_user_id
             
@@ -168,7 +168,7 @@ class TestWebSocketManagerIntegration(BaseIntegrationTest):
         logger.info("Testing WebSocket event structure consistency with real services")
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketManagerMode
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             from shared.types.core_types import ensure_user_id
             
@@ -275,7 +275,7 @@ class TestWebSocketManagerIntegration(BaseIntegrationTest):
         
         # Test 1: Canonical WebSocketManager should be available
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketManagerMode
             canonical_available = True
             logger.info("Canonical WebSocketManager successfully imported")
         except ImportError as e:
@@ -373,7 +373,7 @@ class TestWebSocketManagerIntegration(BaseIntegrationTest):
         logger.info("Testing WebSocket manager user isolation with real services")
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketManagerMode
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             from shared.types.core_types import ensure_user_id
             

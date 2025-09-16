@@ -230,7 +230,7 @@ class MockAgentExecution:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestDatabaseBusinessLogicIntegration:
+class DatabaseBusinessLogicIntegrationTests:
     """Database business logic integration tests."""
     
     @pytest.fixture

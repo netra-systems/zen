@@ -19,7 +19,11 @@ from functools import wraps
 
 # Import the actual implementation
 from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
-from netra_backend.app.websocket_core.types import WebSocketManagerMode
+from netra_backend.app.websocket_core.types import (
+    WebSocketManagerMode,
+    WebSocketConnection,
+    _serialize_message_safely
+)
 
 
 class CanonicalImportDeprecationWarning(UserWarning):
@@ -78,7 +82,7 @@ def get_websocket_manager(user_context: Optional[Any] = None,
     _log_import_usage("Factory Function", "canonical_import_patterns.get_websocket_manager")
 
     # Use the existing factory function from websocket_manager.py
-    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as _get_manager
+    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager as _get_manager
     return _get_manager(user_context=user_context, mode=mode, **kwargs)
 
 
@@ -247,7 +251,7 @@ MIGRATION_GUIDE = {
         "usage": "manager = get_websocket_manager(user_context=ctx)",
         "replaces": [
             "from netra_backend.app.websocket_core.unified_manager import get_websocket_manager",
-            "from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager",
+            "from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager",
             "from netra_backend.app.websocket_core.factory import get_websocket_manager",
             "from netra_backend.app.websocket_core import get_websocket_manager"
         ]
@@ -259,7 +263,7 @@ MIGRATION_GUIDE = {
         "replaces": [
             "from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager",
             "from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation",
-            "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+            "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
             "from netra_backend.app.websocket_core import UnifiedWebSocketManager"
         ]
     },

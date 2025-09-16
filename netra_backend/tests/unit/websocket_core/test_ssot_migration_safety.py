@@ -39,7 +39,7 @@ try:
     USER_SCOPED_ROUTER_AVAILABLE = True
 except ImportError:
     USER_SCOPED_ROUTER_AVAILABLE = False
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from shared.types.core_types import UserID, ensure_user_id
 from shared.logging.unified_logging_ssot import get_logger
@@ -49,7 +49,7 @@ logger = get_logger(__name__)
 @pytest.mark.websocket_ssot
 @pytest.mark.migration_safety
 @pytest.mark.issue_1058_migration_safety
-class TestSSOTMigrationSafety:
+class SSOTMigrationSafetyTests:
     """Unit tests validating safe SSOT migration for WebSocket broadcasting.
 
     CRITICAL: These tests ensure SSOT migration can be deployed to production
@@ -318,7 +318,7 @@ class TestSSOTMigrationSafety:
         logger.info('✅ SSOT migration compatibility validated')
 
 @pytest.mark.performance_safety
-class TestSSOTMigrationPerformanceSafety:
+class SSOTMigrationPerformanceSafetyTests:
     """Performance safety tests for SSOT migration."""
 
     @pytest.mark.asyncio

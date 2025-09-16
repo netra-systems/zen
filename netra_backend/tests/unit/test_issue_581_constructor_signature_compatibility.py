@@ -42,7 +42,7 @@ from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.llm.llm_manager import LLMManager
 
-class TestIssue581ConstructorSignatureCompatibility(SSotBaseTestCase):
+class Issue581ConstructorSignatureCompatibilityTests(SSotBaseTestCase):
     """
     Unit tests for Issue #581 constructor signature compatibility.
     
@@ -360,7 +360,7 @@ class TestIssue581ConstructorSignatureCompatibility(SSotBaseTestCase):
                     self.record_metric(f"legacy_pattern_{i}_error", str(e))
 
 
-class TestIssue581PerformanceAndMemory(SSotBaseTestCase):
+class Issue581PerformanceAndMemoryTests(SSotBaseTestCase):
     """
     Performance and memory tests for Issue #581 fix.
     

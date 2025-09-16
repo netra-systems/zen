@@ -210,7 +210,7 @@ class StateManager:
 
 
 @pytest.mark.unit
-class TestStateEntrySerialization(SSotBaseTestCase):
+class StateEntrySerializationTests(SSotBaseTestCase):
     """Test StateEntry serialization and deserialization."""
     
     def setUp(self):
@@ -330,7 +330,7 @@ class TestStateEntrySerialization(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestTTLExpirationLogic(SSotBaseTestCase):
+class TTLExpirationLogicTests(SSotBaseTestCase):
     """Test TTL (Time To Live) expiration logic for state cleanup."""
     
     def test_state_entry_expiration_check(self):
@@ -472,7 +472,7 @@ class TestTTLExpirationLogic(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestStateVersioningAndConflicts(SSotBaseTestCase):
+class StateVersioningAndConflictsTests(SSotBaseTestCase):
     """Test state versioning and conflict resolution."""
     
     def test_version_increment(self):
@@ -575,7 +575,7 @@ class TestStateVersioningAndConflicts(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestUserStateIsolation(SSotBaseTestCase):
+class UserStateIsolationTests(SSotBaseTestCase):
     """Test that state is properly isolated between users."""
     
     def test_user_state_isolation(self):

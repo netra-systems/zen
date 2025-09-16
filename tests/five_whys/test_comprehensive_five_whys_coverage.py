@@ -31,7 +31,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestComprehensiveFiveWhysCoverage:
+class ComprehensiveFiveWhysCoverageTests:
     """
     Comprehensive coverage tests for WHY #4 and WHY #5 from the Five Whys analysis,
     ensuring complete validation coverage and regression prevention for the

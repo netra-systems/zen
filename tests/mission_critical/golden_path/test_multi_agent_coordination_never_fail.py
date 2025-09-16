@@ -123,7 +123,7 @@ class CoordinationEventType(Enum):
 
 @pytest.mark.mission_critical
 @pytest.mark.auth_required
-class TestMultiAgentCoordinationNeverFail(SSotBaseTestCase):
+class MultiAgentCoordinationNeverFailTests(SSotBaseTestCase):
     """Mission Critical tests for Enterprise multi-agent coordination reliability."""
 
     @pytest.fixture(autouse=True)

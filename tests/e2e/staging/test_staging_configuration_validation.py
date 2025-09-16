@@ -44,7 +44,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
-class TestStagingConfigurationValidation(BaseE2ETest):
+class StagingConfigurationValidationTests(BaseE2ETest):
     """
     Staging Configuration Validation E2E Tests.
     

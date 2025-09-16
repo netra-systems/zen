@@ -40,7 +40,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 
 
 @pytest.mark.unit
-class TestExecutionEngineFactoryResourceLimitsUnit(SSotBaseTestCase):
+class ExecutionEngineFactoryResourceLimitsUnitTests(SSotBaseTestCase):
     """SSOT Unit test for ExecutionEngineFactory resource limit enforcement.
     
     This test ensures the factory properly enforces resource limits to prevent

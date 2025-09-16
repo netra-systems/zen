@@ -4,7 +4,7 @@ Tests advanced business value scenarios for cache, resilience, reporting, and wo
 """
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -14,7 +14,7 @@ from typing import Dict, List
 import pytest
 from netra_backend.tests.test_business_value_fixtures import BusinessValueFixtures
 
-class TestBusinessValueAdvanced(BusinessValueFixtures):
+class BusinessValueAdvancedTests(BusinessValueFixtures):
     """
     Advanced business value tests focused on complex optimization scenarios
     """

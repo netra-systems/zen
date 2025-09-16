@@ -9,7 +9,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.health_checkers import HealthChecker
 
 
-class TestStartupInitialization:
+class StartupInitializationTests:
     """Test system startup initialization and readiness checks."""
     
     @pytest.mark.asyncio
@@ -93,7 +93,7 @@ class TestStartupInitialization:
             assert ':' in url
 
 
-class TestStartupErrorHandling:
+class StartupErrorHandlingTests:
     """Test error handling during system startup."""
     
     @pytest.mark.asyncio

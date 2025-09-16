@@ -29,7 +29,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestAgentExecutionTimeoutManagement(BaseIntegrationTest):
+class AgentExecutionTimeoutManagementTests(BaseIntegrationTest):
     """Integration tests for agent execution timeout management."""
 
     @pytest.mark.integration

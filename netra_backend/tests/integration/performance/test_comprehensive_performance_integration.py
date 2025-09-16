@@ -29,7 +29,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.schemas.agent_models import DeepAgentState
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
 @dataclass
 class IntegrationPerformanceMetrics:
@@ -127,7 +127,7 @@ class IntegrationPerformanceProfiler:
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.performance
-class TestDatabasePerformanceIntegration(BaseIntegrationTest):
+class DatabasePerformanceIntegrationTests(BaseIntegrationTest):
     """Test database performance with real PostgreSQL and Redis."""
 
     @pytest.fixture
@@ -251,7 +251,7 @@ class TestDatabasePerformanceIntegration(BaseIntegrationTest):
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.performance
-class TestWebSocketPerformanceIntegration(BaseIntegrationTest):
+class WebSocketPerformanceIntegrationTests(BaseIntegrationTest):
     """Test WebSocket performance with real connections - critical for chat experience."""
 
     @pytest.mark.asyncio
@@ -322,7 +322,7 @@ class TestWebSocketPerformanceIntegration(BaseIntegrationTest):
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.performance
-class TestAgentExecutionPerformanceIntegration(BaseIntegrationTest):
+class AgentExecutionPerformanceIntegrationTests(BaseIntegrationTest):
     """Test agent execution performance with real services - core business value."""
 
     @pytest.mark.asyncio
@@ -388,7 +388,7 @@ class TestAgentExecutionPerformanceIntegration(BaseIntegrationTest):
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.performance
-class TestSystemResourcePerformanceIntegration(BaseIntegrationTest):
+class SystemResourcePerformanceIntegrationTests(BaseIntegrationTest):
     """Test system-wide resource performance integration."""
 
     @pytest.mark.asyncio

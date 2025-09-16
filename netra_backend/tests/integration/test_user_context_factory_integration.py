@@ -58,7 +58,7 @@ from netra_backend.app.models.thread import Thread
 from netra_backend.app.models.session import Session
 
 
-class TestUserContextFactoryIntegration(BaseIntegrationTest):
+class UserContextFactoryIntegrationTests(BaseIntegrationTest):
     """Test user context factory with real isolation and database persistence."""
 
     @pytest.mark.integration

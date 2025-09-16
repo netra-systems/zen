@@ -14,7 +14,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.config import get_config
 
 
-class TestDevLauncherHealth:
+class DevLauncherHealthTests:
     """Test dev launcher health and startup."""
 
     def test_dev_environment_config_loaded(self):

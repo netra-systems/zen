@@ -35,13 +35,13 @@ from fastapi.websockets import WebSocketState
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase, CategoryType
 from test_framework.ssot.mocks import SSotMockFactory
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection, _serialize_message_safely
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection, _serialize_message_safely
 from shared.types.core_types import UserID, ThreadID, ConnectionID, WebSocketID
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 @pytest.mark.unit
-class TestWebSocketManagerComprehensive(SSotAsyncTestCase):
+class WebSocketManagerComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for WebSocket Manager SSOT class.
     
@@ -271,7 +271,7 @@ class TestWebSocketManagerComprehensive(SSotAsyncTestCase):
                             self.fail(f"Cross-user message delivery detected: User {j} received User {i}'s message")
 
 @pytest.mark.unit
-class TestWebSocketManagerEdgeCases(SSotBaseTestCase):
+class WebSocketManagerEdgeCasesTests(SSotBaseTestCase):
     """
     Unit tests for WebSocket Manager edge cases and error conditions.
     

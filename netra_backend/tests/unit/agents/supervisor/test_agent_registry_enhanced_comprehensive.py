@@ -120,7 +120,7 @@ def mock_base_agent():
     return mock_agent
 
 @pytest.mark.asyncio
-class TestAgentRegistryAdvancedInitialization(BaseTestCase):
+class AgentRegistryAdvancedInitializationTests(BaseTestCase):
     """Test advanced AgentRegistry initialization scenarios and edge cases."""
 
     async def test_init_with_custom_tool_dispatcher_factory_validation(self, mock_llm_manager):
@@ -153,7 +153,7 @@ class TestAgentRegistryAdvancedInitialization(BaseTestCase):
         assert isinstance(registry._created_at, datetime)
 
 @pytest.mark.asyncio
-class TestUserAgentSessionAdvancedBehavior(BaseTestCase):
+class UserAgentSessionAdvancedBehaviorTests(BaseTestCase):
     """Test advanced UserAgentSession behavior and edge cases."""
 
     async def test_user_session_concurrent_agent_registration(self, test_user_id):
@@ -212,7 +212,7 @@ class TestUserAgentSessionAdvancedBehavior(BaseTestCase):
         agents['agent_with_exception'].cleanup.assert_called_once()
 
 @pytest.mark.asyncio
-class TestWebSocketManagerAdvancedIntegration(BaseTestCase):
+class WebSocketManagerAdvancedIntegrationTests(BaseTestCase):
     """Test advanced WebSocket manager integration scenarios."""
 
     async def test_websocket_manager_propagation_to_existing_sessions(self, mock_llm_manager, mock_websocket_manager):
@@ -256,7 +256,7 @@ class TestWebSocketManagerAdvancedIntegration(BaseTestCase):
         assert registry.websocket_manager == mock_websocket_manager
 
 @pytest.mark.asyncio
-class TestAdvancedAgentFactoryAndCreation(BaseTestCase):
+class AdvancedAgentFactoryAndCreationTests(BaseTestCase):
     """Test advanced agent factory patterns and creation scenarios."""
 
     async def test_create_agent_for_user_with_websocket_manager_integration(self, mock_llm_manager, mock_websocket_manager, test_user_context):
@@ -304,7 +304,7 @@ class TestAdvancedAgentFactoryAndCreation(BaseTestCase):
         assert result is None
 
 @pytest.mark.asyncio
-class TestAdvancedToolDispatcherIntegration(BaseTestCase):
+class AdvancedToolDispatcherIntegrationTests(BaseTestCase):
     """Test advanced tool dispatcher integration and customization."""
 
     @patch('netra_backend.app.core.tools.unified_tool_dispatcher.UnifiedToolDispatcher')
@@ -353,7 +353,7 @@ class TestAdvancedToolDispatcherIntegration(BaseTestCase):
         assert hasattr(agent, 'tool_dispatcher')
 
 @pytest.mark.asyncio
-class TestAdvancedConcurrencyAndThreadSafety(BaseTestCase):
+class AdvancedConcurrencyAndThreadSafetyTests(BaseTestCase):
     """Test advanced concurrency scenarios and thread safety edge cases."""
 
     async def test_high_concurrency_user_session_management(self, mock_llm_manager):
@@ -425,7 +425,7 @@ class TestAdvancedConcurrencyAndThreadSafety(BaseTestCase):
             assert session.user_id == user_id
 
 @pytest.mark.asyncio
-class TestAdvancedMemoryLeakPreventionAndLifecycle(BaseTestCase):
+class AdvancedMemoryLeakPreventionAndLifecycleTests(BaseTestCase):
     """Test advanced memory leak prevention and lifecycle management."""
 
     async def test_agent_lifecycle_manager_weakref_behavior(self, mock_llm_manager):
@@ -495,7 +495,7 @@ class TestAdvancedMemoryLeakPreventionAndLifecycle(BaseTestCase):
         assert metrics['user_id'] == test_user_id
 
 @pytest.mark.asyncio
-class TestAdvancedRegistryHealthAndDiagnostics(BaseTestCase):
+class AdvancedRegistryHealthAndDiagnosticsTests(BaseTestCase):
     """Test advanced registry health monitoring and diagnostic capabilities."""
 
     async def test_registry_health_under_stress_conditions(self, mock_llm_manager):
@@ -561,7 +561,7 @@ class TestAdvancedRegistryHealthAndDiagnostics(BaseTestCase):
         assert 'timestamp' in status
 
 @pytest.mark.asyncio
-class TestAdvancedBackwardCompatibilityAndMigration(BaseTestCase):
+class AdvancedBackwardCompatibilityAndMigrationTests(BaseTestCase):
     """Test advanced backward compatibility and migration scenarios."""
 
     async def test_legacy_tool_dispatcher_property_access_patterns(self, mock_llm_manager):
@@ -608,7 +608,7 @@ class TestAdvancedBackwardCompatibilityAndMigration(BaseTestCase):
             assert f'test_agent_{i}' in registry.list_keys()
 
 @pytest.mark.asyncio
-class TestAdvancedErrorHandlingAndRecovery(BaseTestCase):
+class AdvancedErrorHandlingAndRecoveryTests(BaseTestCase):
     """Test advanced error handling and recovery scenarios."""
 
     async def test_websocket_manager_failure_recovery(self, mock_llm_manager):
@@ -659,7 +659,7 @@ class TestAdvancedErrorHandlingAndRecovery(BaseTestCase):
         assert len(new_session._agents) == 0
 
 @pytest.mark.asyncio
-class TestAdvancedPerformanceAndScaling(BaseTestCase):
+class AdvancedPerformanceAndScalingTests(BaseTestCase):
     """Test advanced performance characteristics and scaling behavior."""
 
     async def test_registry_performance_under_load(self, mock_llm_manager):

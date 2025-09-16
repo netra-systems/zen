@@ -67,7 +67,7 @@ class SSotViolation:
     evidence: Dict[str, Any] = field(default_factory=dict)
 
 
-class TestDeepAgentStateImportBlockingCompliance(SSotBaseTestCase):
+class DeepAgentStateImportBlockingComplianceTests(SSotBaseTestCase):
     """
     SSOT compliance tests for systematic DeepAgentState elimination.
     

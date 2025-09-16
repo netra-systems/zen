@@ -77,7 +77,7 @@ class AgentExecutionState:
     execution_end_time: Optional[float] = None
 
 
-class TestJWTTokenRefreshAgentExecutionIntegration(BaseIntegrationTest):
+class JWTTokenRefreshAgentExecutionIntegrationTests(BaseIntegrationTest):
     """Test JWT token refresh during active agent execution with real services."""
     
     def setup_method(self):

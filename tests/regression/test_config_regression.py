@@ -20,7 +20,7 @@ from auth_service.auth_core.config import AuthConfig
 from shared.jwt_secret_manager import SharedJWTSecretManager
 
 
-class TestConfigurationRegression:
+class ConfigurationRegressionTests:
     """Comprehensive regression tests for configuration changes"""
     
     @pytest.fixture(autouse=True)

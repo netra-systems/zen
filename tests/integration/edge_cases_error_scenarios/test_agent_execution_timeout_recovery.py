@@ -25,7 +25,7 @@ from test_framework.real_services import get_real_services
 logger = logging.getLogger(__name__)
 
 
-class TestAgentExecutionTimeoutRecovery(BaseIntegrationTest):
+class AgentExecutionTimeoutRecoveryTests(BaseIntegrationTest):
     """Test agent execution timeout handling and recovery mechanisms."""
     
     @pytest.mark.integration

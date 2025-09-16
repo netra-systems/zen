@@ -56,7 +56,7 @@ from shared.types.core_types import UserID, WebSocketID
 @pytest.mark.service_connectivity
 @pytest.mark.asyncio
 @pytest.mark.websocket_service
-class TestWebSocketServiceConnectivityE2E(SSotAsyncTestCase):
+class WebSocketServiceConnectivityE2ETests(SSotAsyncTestCase):
     """
     WebSocket Service Connectivity Failure Detection Tests.
     

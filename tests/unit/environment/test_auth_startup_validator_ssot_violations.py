@@ -29,7 +29,7 @@ from shared.isolated_environment import get_env
 from netra_backend.tests.unit.test_base import BaseUnitTest
 
 
-class TestAuthStartupValidatorSSOTViolations(BaseUnitTest):
+class AuthStartupValidatorSSOTViolationsTests(BaseUnitTest):
     """Test SSOT violations in AuthStartupValidator that block Golden Path."""
     
     def setup_method(self):

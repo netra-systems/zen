@@ -38,7 +38,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
 from test_framework.websocket_helpers import WebSocketTestHelpers, WebSocketTestClient
 from shared.isolated_environment import get_env
 
-class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
+class WebSocketAgentEventsComprehensiveTests(BaseE2ETest):
     """Comprehensive WebSocket agent event flow tests using real services only."""
 
     @pytest.fixture(scope='class', autouse=True)

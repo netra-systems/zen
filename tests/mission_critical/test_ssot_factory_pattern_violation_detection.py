@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Set
 
 
-class TestSSotFactoryPatternViolationDetection(SSotAsyncTestCase):
+class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
     """Tests that detect SSOT factory pattern violations in codebase."""
     
     def __init__(self, *args, **kwargs):
@@ -316,7 +316,7 @@ class TestSSotFactoryPatternViolationDetection(SSotAsyncTestCase):
         return len(line_numbers) > 0
 
 
-class TestSSotFactoryPatternRegressionPrevention(SSotAsyncTestCase):
+class SSotFactoryPatternRegressionPreventionTests(SSotAsyncTestCase):
     """Tests that prevent regression of factory pattern violations."""
     
     def __init__(self, *args, **kwargs):

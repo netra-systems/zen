@@ -50,7 +50,7 @@ import pytest
 from loguru import logger
 
 
-class TestWebSocketManagerInterfaceConsolidation(SSotBaseTestCase):
+class WebSocketManagerInterfaceConsolidationTests(SSotBaseTestCase):
     """Issue #960: WebSocket Manager Interface Consolidation Validation
 
     This test validates consistent interfaces across all WebSocket manager

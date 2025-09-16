@@ -7,7 +7,7 @@ import tempfile
 from pathlib import Path
 from shared.isolated_environment import IsolatedEnvironment, get_env, setenv, getenv, delenv
 
-class TestIsolatedEnvironmentBasics:
+class IsolatedEnvironmentBasicsTests:
     """Test basic IsolatedEnvironment functionality."""
 
     def test_singleton_pattern(self):
@@ -63,7 +63,7 @@ class TestIsolatedEnvironmentBasics:
         for key, expected_value in variables.items():
             assert env.get(key) == expected_value
 
-class TestIsolatedEnvironmentIsolation:
+class IsolatedEnvironmentIsolationTests:
     """Test isolation mode functionality."""
 
     def test_isolation_mode_prevents_os_environ_pollution(self):
@@ -116,7 +116,7 @@ class TestIsolatedEnvironmentIsolation:
         finally:
             env.disable_isolation()
 
-class TestIsolatedEnvironmentProtection:
+class IsolatedEnvironmentProtectionTests:
     """Test variable protection functionality."""
 
     def test_protected_variables(self):
@@ -137,7 +137,7 @@ class TestIsolatedEnvironmentProtection:
         assert success
         assert env.get('PROTECTED_VAR') == 'unprotected_value'
 
-class TestIsolatedEnvironmentFileOperations:
+class IsolatedEnvironmentFileOperationsTests:
     """Test file loading functionality."""
 
     def test_load_from_file(self):
@@ -174,7 +174,7 @@ class TestIsolatedEnvironmentFileOperations:
         assert len(errors) == 1
         assert 'not found' in errors[0].lower()
 
-class TestIsolatedEnvironmentThreadSafety:
+class IsolatedEnvironmentThreadSafetyTests:
     """Test thread safety of IsolatedEnvironment."""
 
     def test_concurrent_access(self):
@@ -209,7 +209,7 @@ class TestIsolatedEnvironmentThreadSafety:
                 expected_value = f'thread_{thread_id}_value_{i}'
                 assert env.get(key) == expected_value
 
-class TestIsolatedEnvironmentCallbacks:
+class IsolatedEnvironmentCallbacksTests:
     """Test change callback functionality."""
 
     def test_change_callbacks(self):
@@ -233,7 +233,7 @@ class TestIsolatedEnvironmentCallbacks:
         env.set('CALLBACK_VAR', 'value3', 'callback_test')
         assert len(callback_events) == 3
 
-class TestIsolatedEnvironmentUtilityFunctions:
+class IsolatedEnvironmentUtilityFunctionsTests:
     """Test utility and debug functions."""
 
     def test_get_all_variables(self):
@@ -282,7 +282,7 @@ class TestIsolatedEnvironmentUtilityFunctions:
         env.reset_to_original()
         assert env.get('RESET_TEST_VAR') is None
 
-class TestBackwardsCompatibilityFunctions:
+class BackwardsCompatibilityFunctionsTests:
     """Test backwards compatibility functions."""
 
     def test_global_functions(self):
@@ -298,7 +298,7 @@ class TestBackwardsCompatibilityFunctions:
         value = getenv('COMPAT_VAR')
         assert value is None
 
-class TestIsolatedEnvironmentEdgeCases:
+class IsolatedEnvironmentEdgeCasesTests:
     """Test edge cases and error conditions."""
 
     def test_empty_values(self):
@@ -336,7 +336,7 @@ class TestIsolatedEnvironmentEdgeCases:
         assert success
         assert env.get('CALLBACK_ERROR_VAR') == 'value'
 
-class TestIsolatedEnvironmentIntegration:
+class IsolatedEnvironmentIntegrationTests:
     """Integration tests with existing system."""
 
     def test_integration_with_os_environ(self):

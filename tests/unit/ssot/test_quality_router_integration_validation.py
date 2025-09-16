@@ -18,7 +18,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.unit
-class TestQualityRouterIntegrationValidation(SSotAsyncTestCase):
+class QualityRouterIntegrationValidationTests(SSotAsyncTestCase):
     """Test QualityMessageRouter integration into main router."""
 
     def setUp(self):
@@ -243,7 +243,7 @@ class TestQualityRouterIntegrationValidation(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestQualityRoutingMigrationValidation(SSotAsyncTestCase):
+class QualityRoutingMigrationValidationTests(SSotAsyncTestCase):
     """Test that quality routing migration maintains functionality."""
 
     async def test_quality_message_routing_compatibility(self):

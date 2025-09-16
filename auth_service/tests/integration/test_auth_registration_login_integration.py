@@ -33,7 +33,7 @@ from auth_service.database import get_database
 from auth_service.auth_core.database.models import AuthUser as User
 
 
-class TestRegistrationLoginIntegration(BaseIntegrationTest):
+class RegistrationLoginIntegrationTests(BaseIntegrationTest):
     """Integration tests for user registration and login flows with real services."""
     
     @pytest.fixture(autouse=True)

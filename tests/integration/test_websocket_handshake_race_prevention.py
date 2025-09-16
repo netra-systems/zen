@@ -50,7 +50,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.integration
 @pytest.mark.websocket_race_conditions  
 @pytest.mark.real_services
-class TestWebSocketHandshakeRacePrevention(BaseIntegrationTest):
+class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
     """
     Test WebSocket handshake race condition prevention with real service components.
     

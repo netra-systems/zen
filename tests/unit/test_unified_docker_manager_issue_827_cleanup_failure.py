@@ -24,7 +24,7 @@ from test_framework.unified_docker_manager import UnifiedDockerManager, Environm
 
 
 @pytest.mark.unit
-class TestUnifiedDockerManagerIssue827CleanupFailure(SSotAsyncTestCase):
+class UnifiedDockerManagerIssue827CleanupFailureTests(SSotAsyncTestCase):
     """Test Issue #827 Windows Docker Desktop pipe communication failures during cleanup."""
 
     def setup_method(self, method):
@@ -282,7 +282,7 @@ class TestUnifiedDockerManagerIssue827CleanupFailure(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestUnifiedDockerManagerWindowsPipeErrorReproduction(SSotAsyncTestCase):
+class UnifiedDockerManagerWindowsPipeErrorReproductionTests(SSotAsyncTestCase):
     """Specific tests to reproduce the exact Windows pipe error patterns."""
 
     def setup_method(self, method):

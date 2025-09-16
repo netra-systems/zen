@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 from shared.isolated_environment import IsolatedEnvironment
 
 # Import WebSocket components to test
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import (
     WebSocketManagerFactory, ConnectionLifecycleManager
 )
@@ -37,7 +37,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.core_types import UserID, ensure_user_id
 
 
-class TestWebSocketFactorySsotViolationProof(SSotAsyncTestCase):
+class WebSocketFactorySsotViolationProofTests(SSotAsyncTestCase):
     """Prove that WebSocket factory pattern violates SSOT principles."""
     
     async def asyncSetUp(self):
@@ -112,7 +112,7 @@ class TestWebSocketFactorySsotViolationProof(SSotAsyncTestCase):
         )
         
         # Import the SSOT UnifiedWebSocketManager
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as UnifiedWebSocketManager
         
         # VIOLATION PROOF: Factory creates WebSocketManager instead of using SSOT
         self.assertIsInstance(
@@ -201,7 +201,7 @@ class TestWebSocketFactorySsotViolationProof(SSotAsyncTestCase):
         )
 
 
-class TestFactoryPatternSsotCompliance(SSotBaseTestCase):
+class FactoryPatternSsotComplianceTests(SSotBaseTestCase):
     """Synchronous tests for factory pattern SSOT compliance."""
     
     def test_factory_registration_violates_ssot_registry_pattern(self):

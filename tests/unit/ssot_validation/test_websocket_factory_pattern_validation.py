@@ -25,7 +25,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.unit
-class TestWebSocketFactoryPatternCompliance(SSotBaseTestCase):
+class WebSocketFactoryPatternComplianceTests(SSotBaseTestCase):
     """Factory pattern compliance tests (PASSING tests for proper implementation)"""
 
     def setUp(self):
@@ -123,7 +123,7 @@ class TestWebSocketFactoryPatternCompliance(SSotBaseTestCase):
             self.skipTest(f'Factory cleanup not available: {e}')
 
 @pytest.mark.unit
-class TestWebSocketFactoryAntiPatternDetection(SSotBaseTestCase):
+class WebSocketFactoryAntiPatternDetectionTests(SSotBaseTestCase):
     """Anti-pattern detection tests (FAILING tests for violation detection)"""
 
     def test_singleton_pattern_violation_detected(self):
@@ -264,7 +264,7 @@ class TestWebSocketFactoryAntiPatternDetection(SSotBaseTestCase):
         except ImportError:
             pass
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             try:
                 direct_manager = WebSocketManager()
                 direct_import_violations.append('WebSocketManager_direct')
@@ -278,7 +278,7 @@ class TestWebSocketFactoryAntiPatternDetection(SSotBaseTestCase):
             self.fail('Factory bypassing properly prevented - violation test should fail')
 
 @pytest.mark.unit
-class TestWebSocketFactoryResourceManagement(SSotBaseTestCase):
+class WebSocketFactoryResourceManagementTests(SSotBaseTestCase):
     """Factory resource management tests (MIXED RESULTS)"""
 
     def test_factory_properly_manages_emitter_lifecycle(self):

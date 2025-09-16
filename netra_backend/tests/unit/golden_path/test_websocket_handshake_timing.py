@@ -116,7 +116,7 @@ class MockWebSocketHandshakeValidator:
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestWebSocketHandshakeTimingLogic(SSotBaseTestCase):
+class WebSocketHandshakeTimingLogicTests(SSotBaseTestCase):
     """Test WebSocket handshake timing business logic validation."""
 
     def setup_method(self, method=None):

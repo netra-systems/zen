@@ -71,7 +71,7 @@
                 # REMOVED_SYNTAX_ERROR: sys.path.insert(0, project_root)
 
                 # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
-                # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+                # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.logging_config import central_logger
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler

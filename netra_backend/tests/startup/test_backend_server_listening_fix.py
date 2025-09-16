@@ -1,5 +1,5 @@
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 "\nenv = get_env()\nBackend Server Listening Fix Test\nTests and fixes the issue where the backend service initializes but doesn't listen on port 8000.\n\nBusiness Value Justification (BVJ):\n- Segment: All (Free, Early, Mid, Enterprise)  \n- Business Goal: Ensure backend service starts listening and serving HTTP requests\n- Value Impact: Enables all API functionality - without this, zero user operations work\n- Revenue Impact: Blocking - fixes complete system unavailability\n\nThis test identifies and fixes the root cause of why the backend connects to database but doesn't\ncomplete the HTTP server initialization to listen on port 8000.\n"
@@ -157,7 +157,7 @@ class BackendServerController:
                 print('   - Missing dependencies')
                 print('   - Port binding failure')
 
-class TestBackendServerListening:
+class BackendServerListeningTests:
     """Test backend server listening functionality."""
 
     def setup_method(self):

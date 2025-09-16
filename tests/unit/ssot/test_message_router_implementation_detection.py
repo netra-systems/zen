@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestMessageRouterImplementationDetection(SSotBaseTestCase):
+class MessageRouterImplementationDetectionTests(SSotBaseTestCase):
     """Test that detects ALL MessageRouter implementations in the codebase."""
 
     def setUp(self):
@@ -328,7 +328,7 @@ class TestMessageRouterImplementationDetection(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestMessageRouterImplementationConflictDetection(SSotBaseTestCase):
+class MessageRouterImplementationConflictDetectionTests(SSotBaseTestCase):
     """Test for detecting conflicts between different implementations."""
 
     def test_detect_method_signature_conflicts(self):

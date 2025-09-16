@@ -65,7 +65,7 @@ class ErrorPropagationTrace:
         return len(self.gcp_error_reports) >= len(self.service_errors)
 
 
-class TestErrorPropagationGCPIntegration(SSotBaseTestCase):
+class ErrorPropagationGCPIntegrationTests(SSotBaseTestCase):
     """Integration tests for error propagation to GCP Error Reporting."""
     
     def setup_method(self, method):
@@ -496,7 +496,7 @@ class TestErrorPropagationGCPIntegration(SSotBaseTestCase):
         print(f"=== END INTEGRATION ANALYSIS ===\n")
 
 
-class TestAsyncErrorPropagationGCPIntegration(SSotAsyncTestCase):
+class AsyncErrorPropagationGCPIntegrationTests(SSotAsyncTestCase):
     """Async integration tests for error propagation to GCP."""
     
     def setup_method(self, method):
@@ -588,7 +588,7 @@ class TestAsyncErrorPropagationGCPIntegration(SSotAsyncTestCase):
 
 # Export test classes
 __all__ = [
-    'TestErrorPropagationGCPIntegration',
-    'TestAsyncErrorPropagationGCPIntegration',
+    'ErrorPropagationGCPIntegrationTests',
+    'AsyncErrorPropagationGCPIntegrationTests',
     'ErrorPropagationTrace'
 ]

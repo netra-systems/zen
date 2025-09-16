@@ -72,7 +72,7 @@ class SimpleAgentState:
         self.data = {}
 
 
-class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
+class WorkflowOrchestratorGoldenPathTests(SSotAsyncTestCase):
     """E2E tests for WorkflowOrchestrator golden path with SSOT compliance.
     
     These tests should FAIL initially, proving golden path is broken.

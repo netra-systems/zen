@@ -8,7 +8,7 @@ from auth_service.auth_core.core.jwt_handler import JWTHandler
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestRefreshCriticalFix:
+class RefreshCriticalFixTests:
     """Critical test suite focused on the specific refresh token bug"""
     
     @pytest.fixture

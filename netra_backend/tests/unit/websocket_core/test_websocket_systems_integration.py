@@ -27,7 +27,7 @@ from netra_backend.app.websocket_core.unified_manager import (
     WebSocketConnection
 )
 # SSOT imports - Issue #824 remediation
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
@@ -88,7 +88,7 @@ class MockPydanticModel:
             }
 
 
-class TestSystem1_UnifiedWebSocketManager:
+class System1_UnifiedWebSocketManagerTests:
     """Tests for System 1: UnifiedWebSocketManager serialization integration."""
     
     @pytest.fixture
@@ -171,7 +171,7 @@ class TestSystem1_UnifiedWebSocketManager:
         json.dumps(sent_message)
 
 
-class TestSystem2_WebSocketManager:
+class System2_WebSocketManagerTests:
     """Tests for System 2: WebSocketManager with complex serialization."""
     
     @pytest.fixture
@@ -261,7 +261,7 @@ class TestSystem2_WebSocketManager:
         json.dumps(sent_message)
 
 
-class TestSystem3_WebSocketRoutes:
+class System3_WebSocketRoutesTests:
     """Tests for System 3: FastAPI WebSocket Routes with serialization."""
     
     async def test_websocket_route_message_processing(self):
@@ -305,7 +305,7 @@ class TestSystem3_WebSocketRoutes:
         json.dumps(sent_data)
 
 
-class TestSystem4_AgentExecutionCore:
+class System4_AgentExecutionCoreTests:
     """Tests for System 4: Agent Execution Core WebSocket notifications."""
     
     async def test_agent_execution_websocket_events(self):
@@ -369,7 +369,7 @@ class TestSystem4_AgentExecutionCore:
         assert mock_manager.emit_critical_event.call_count == len(events)
 
 
-class TestSystem5_WebSocketNotifier:
+class System5_WebSocketNotifierTests:
     """Tests for System 5: WebSocket Notifier with agent supervisor integration."""
     
     async def test_websocket_notifier_handles_supervisor_data(self):
@@ -421,7 +421,7 @@ class TestSystem5_WebSocketNotifier:
         assert mock_websocket_manager.emit_critical_event.called
 
 
-class TestSystem6_AgentService:
+class System6_AgentServiceTests:
     """Tests for System 6: Agent Service WebSocket integration."""
     
     async def test_agent_service_websocket_updates(self):
@@ -490,7 +490,7 @@ class TestSystem6_AgentService:
         assert mock_websocket_bridge.send_agent_update.called
 
 
-class TestSystem7_WebSocketConnectionHandler:
+class System7_WebSocketConnectionHandlerTests:
     """Tests for System 7: WebSocket Connection Handler low-level operations."""
     
     async def test_connection_handler_state_transitions(self):
@@ -546,7 +546,7 @@ class TestSystem7_WebSocketConnectionHandler:
             json.dumps(safe_transition)
 
 
-class TestSystem8_AuthenticationIntegration:
+class System8_AuthenticationIntegrationTests:
     """Tests for System 8: Authentication Integration with WebSocket serialization."""
     
     async def test_auth_integration_websocket_messages(self):
@@ -614,7 +614,7 @@ class TestSystem8_AuthenticationIntegration:
             json.dumps(safe_event)
 
 
-class TestSystem9_WebSocketBridgeFactory:
+class System9_WebSocketBridgeFactoryTests:
     """Tests for System 9: WebSocket Bridge Factory service integration."""
     
     async def test_bridge_factory_cross_service_messages(self):
@@ -677,7 +677,7 @@ class TestSystem9_WebSocketBridgeFactory:
             json.dumps(safe_message)
 
 
-class TestSystem10_CircuitBreaker:
+class System10_CircuitBreakerTests:
     """Tests for System 10: Circuit Breaker with WebSocket error handling."""
     
     async def test_circuit_breaker_websocket_error_recovery(self):
@@ -758,7 +758,7 @@ class TestSystem10_CircuitBreaker:
             json.dumps(safe_scenario)
 
 
-class TestCrossSystemIntegration:
+class CrossSystemIntegrationTests:
     """Integration tests across multiple WebSocket systems."""
     
     async def test_full_pipeline_serialization(self):
@@ -920,7 +920,7 @@ class TestCrossSystemIntegration:
 
 
 # Performance and stress testing
-class TestSerializationPerformance:
+class SerializationPerformanceTests:
     """Performance tests for WebSocket serialization across systems."""
     
     def test_serialization_performance_with_large_datasets(self):
@@ -975,7 +975,7 @@ class TestSerializationPerformance:
 
 
 # Regression tests for specific error scenarios
-class TestSerializationRegressionScenarios:
+class SerializationRegressionScenariosTests:
     """Regression tests for specific WebSocket serialization error scenarios."""
     
     def test_regression_websocket_state_in_nested_dict_keys(self):

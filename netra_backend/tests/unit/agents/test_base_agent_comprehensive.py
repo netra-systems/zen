@@ -135,7 +135,7 @@ class MockableBaseAgent(BaseAgent):
             raise ValueError('Test core logic failure')
         return {'status': 'legacy_completed', 'result': self._test_execution_result, 'agent_name': self.name}
 
-class TestBaseAgentInitialization:
+class BaseAgentInitializationTests:
     """Test BaseAgent initialization patterns and configuration.
     
     BVJ: Platform Stability | Agent initialization must be bulletproof for system reliability.
@@ -204,7 +204,7 @@ class TestBaseAgentInitialization:
         agent = MockableBaseAgent(name='IsolatedAgent')
         assert agent is not None
 
-class TestBaseAgentStateManagement:
+class BaseAgentStateManagementTests:
     """Test BaseAgent state management and lifecycle transitions.
     
     BVJ: Platform Stability | Agent state consistency prevents execution errors and user confusion.
@@ -288,7 +288,7 @@ class TestBaseAgentStateManagement:
         with pytest.raises(ValueError):
             self.agent.set_state(SubAgentLifecycle.PENDING)
 
-class TestBaseAgentWebSocketBridge:
+class BaseAgentWebSocketBridgeTests:
     """Test BaseAgent WebSocket bridge integration and event emission.
     
     BVJ: Revenue Generation | WebSocket events = User engagement = Chat value = Revenue.
@@ -409,7 +409,7 @@ class TestBaseAgentWebSocketBridge:
         assert hasattr(self.agent, '_websocket_context')
         assert self.agent._websocket_context == context
 
-class TestBaseAgentTokenManagement:
+class BaseAgentTokenManagementTests:
     """Test BaseAgent token management and cost optimization methods.
     
     BVJ: Cost Optimization | Token management = Cost control = Customer satisfaction = Revenue retention.
@@ -483,7 +483,7 @@ class TestBaseAgentTokenManagement:
         assert summary['current_session']['operations_count'] == 2
         assert summary['current_session']['cumulative_cost'] == 0.025
 
-class TestBaseAgentSessionIsolation:
+class BaseAgentSessionIsolationTests:
     """Test BaseAgent session isolation validation methods.
     
     BVJ: Data Security | Session isolation = User privacy = Legal compliance = Business continuity.
@@ -539,7 +539,7 @@ class TestBaseAgentSessionIsolation:
             self.agent._get_session_manager(invalid_context)
         assert 'Expected UserExecutionContext' in str(exc_info.value)
 
-class TestBaseAgentReliabilityInfrastructure:
+class BaseAgentReliabilityInfrastructureTests:
     """Test BaseAgent reliability infrastructure patterns.
     
     BVJ: System Availability | Reliability features = Uptime = Customer satisfaction = Revenue protection.
@@ -665,7 +665,7 @@ class TestBaseAgentReliabilityInfrastructure:
         assert status['status'] == 'not_available'
         assert 'reliability not enabled' in status['reason']
 
-class TestBaseAgentHealthStatus:
+class BaseAgentHealthStatusTests:
     """Test BaseAgent health status infrastructure.
     
     BVJ: Operations Excellence | Health monitoring = Proactive issue detection = Reduced downtime.
@@ -716,7 +716,7 @@ class TestBaseAgentHealthStatus:
         status = self.agent._determine_overall_health_status(health_data)
         assert status == 'degraded'
 
-class TestBaseAgentExecutionPatterns:
+class BaseAgentExecutionPatternsTests:
     """Test BaseAgent execution patterns and abstract method contracts.
     
     BVJ: Core Functionality | Execution patterns = Agent behavior = User value = Revenue generation.
@@ -806,7 +806,7 @@ class TestBaseAgentExecutionPatterns:
         await self.agent.send_status_update(context, 'custom', 'Custom status')
         self.agent._websocket_adapter.emit_progress.assert_called_with('Custom status')
 
-class TestBaseAgentFactoryPatterns:
+class BaseAgentFactoryPatternsTests:
     """Test BaseAgent factory method patterns and agent creation.
     
     BVJ: Architecture Quality | Factory patterns = Proper isolation = User data security = Compliance.
@@ -865,7 +865,7 @@ class TestBaseAgentFactoryPatterns:
         assert agent._user_execution_context is self.mock_context
         assert agent.name == 'MockableBaseAgent'
 
-class TestBaseAgentValidationAndMigration:
+class BaseAgentValidationAndMigrationTests:
     """Test BaseAgent validation and migration support methods.
     
     BVJ: Migration Support | Pattern validation = Smooth transitions = Reduced technical debt.
@@ -941,7 +941,7 @@ class TestBaseAgentValidationAndMigration:
         assert 'user_isolation_safe' in status
         assert 'validation_timestamp' in status
 
-class TestBaseAgentResetAndShutdown:
+class BaseAgentResetAndShutdownTests:
     """Test BaseAgent reset and shutdown lifecycle methods.
     
     BVJ: System Stability | Proper cleanup = Resource management = System reliability.
@@ -1004,7 +1004,7 @@ class TestBaseAgentResetAndShutdown:
         await self.agent.shutdown()
         self.agent.timing_collector.complete_execution.assert_called_once()
 
-class TestBaseAgentMetadataStorage:
+class BaseAgentMetadataStorageTests:
     """Test BaseAgent metadata storage SSOT methods.
     
     BVJ: Data Integrity | Proper metadata handling = Consistent state = Reliable WebSocket events.

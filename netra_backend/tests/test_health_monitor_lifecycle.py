@@ -3,11 +3,11 @@ from shared.isolated_environment import IsolatedEnvironment
 # Contains test classes for health monitoring lifecycle functionality
 
 
-class TestMonitoringLifecycle:
+class MonitoringLifecycleTests:
     """Placeholder test class for monitoring lifecycle."""
     pass
 
 
-class TestServiceRegistration:
+class ServiceRegistrationTests:
     """Placeholder test class for service registration."""
     pass

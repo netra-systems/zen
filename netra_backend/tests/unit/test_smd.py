@@ -64,7 +64,7 @@ from netra_backend.app.smd import (
 )
 
 
-class TestStartupPhaseEnum(BaseTestCase):
+class StartupPhaseEnumTests(BaseTestCase):
     """Test StartupPhase enum defines correct business-critical phases."""
     
     def test_startup_phases_cover_all_business_requirements(self):
@@ -119,7 +119,7 @@ class TestStartupPhaseEnum(BaseTestCase):
         )
 
 
-class TestDeterministicStartupError(BaseTestCase):
+class DeterministicStartupErrorTests(BaseTestCase):
     """Test DeterministicStartupError provides proper business context."""
     
     def test_deterministic_startup_error_inheritance(self):
@@ -149,7 +149,7 @@ class TestDeterministicStartupError(BaseTestCase):
                 )
 
 
-class TestStartupOrchestrator(BaseTestCase):
+class StartupOrchestratorTests(BaseTestCase):
     """Test StartupOrchestrator manages deterministic startup with business validation."""
     
     REQUIRES_DATABASE = False  # Unit tests mock database  
@@ -196,6 +196,7 @@ class TestStartupOrchestrator(BaseTestCase):
         self.mock_app.state.startup_phase_timings = {}
         self.mock_app.state.startup_completed_phases = []
         self.mock_app.state.startup_failed_phases = []
+        self.mock_app.state.startup_phase_errors = {}
         
         # Service attributes
         critical_services = [
@@ -298,7 +299,7 @@ class TestStartupOrchestrator(BaseTestCase):
         self.assertIn("WebSocket", self.mock_app.state.startup_error)
         self.assertIn("phase", self.mock_app.state.startup_error.lower())
 
-    def test_startup_completion_validation_enforces_business_requirements(self):
+    async def test_startup_completion_validation_enforces_business_requirements(self):
         """Test startup completion validation enforces all business requirements."""
         # Set up all phases as completed (business requirement)
         all_phases = set(StartupPhase)
@@ -313,7 +314,7 @@ class TestStartupOrchestrator(BaseTestCase):
             }
         
         # Test successful completion  
-        self.orchestrator._mark_startup_complete()
+        await self.orchestrator._mark_startup_complete()
         
         # Verify business-critical completion state
         self.assertTrue(self.mock_app.state.startup_complete)
@@ -322,7 +323,7 @@ class TestStartupOrchestrator(BaseTestCase):
         self.assertIsNone(self.mock_app.state.startup_error)
         self.assertEqual(self.mock_app.state.startup_phase, "complete")
 
-    def test_startup_completion_fails_with_missing_phases(self):
+    async def test_startup_completion_fails_with_missing_phases(self):
         """Test startup completion fails if business-critical phases are missing."""
         # Set up incomplete phases (missing critical WEBSOCKET phase)
         incomplete_phases = {StartupPhase.INIT, StartupPhase.DEPENDENCIES, StartupPhase.DATABASE}
@@ -331,7 +332,7 @@ class TestStartupOrchestrator(BaseTestCase):
         
         # Test completion validation
         with self.assertRaises(DeterministicStartupError) as cm:
-            self.orchestrator._mark_startup_complete()
+            await self.orchestrator._mark_startup_complete()
         
         # Verify error indicates missing phases  
         error_message = str(cm.exception)
@@ -365,7 +366,7 @@ class TestStartupOrchestrator(BaseTestCase):
         self.assertIn("failed", error_context.lower())
 
 
-class TestDeterministicStartupPhases(BaseTestCase):
+class DeterministicStartupPhasesTests(BaseTestCase):
     """Test each phase of deterministic startup for business requirements."""
     
     REQUIRES_DATABASE = False
@@ -618,7 +619,7 @@ class TestDeterministicStartupPhases(BaseTestCase):
             mock_monitoring.assert_called_once()
 
 
-class TestDeterministicStartupIntegration(BaseTestCase):
+class DeterministicStartupIntegrationTests(BaseTestCase):
     """Test complete deterministic startup integration for business scenarios."""
     
     REQUIRES_DATABASE = False
@@ -754,7 +755,7 @@ class TestDeterministicStartupIntegration(BaseTestCase):
         super().tearDown()
 
 
-class TestBusinessCriticalValidation(BaseTestCase):
+class BusinessCriticalValidationTests(BaseTestCase):
     """Test business-critical validation patterns in deterministic startup."""
     
     def test_startup_phase_enum_business_completeness(self):

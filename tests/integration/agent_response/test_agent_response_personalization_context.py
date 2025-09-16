@@ -42,7 +42,7 @@ logger = central_logger.get_logger(__name__)
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAgentResponsePersonalizationContext(BaseIntegrationTest):
+class AgentResponsePersonalizationContextTests(BaseIntegrationTest):
     """Test agent response personalization and context awareness."""
     
     def setup_method(self):

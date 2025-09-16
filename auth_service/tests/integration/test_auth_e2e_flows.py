@@ -16,7 +16,7 @@ from netra_backend.app.redis_manager import redis_manager as auth_redis_manager
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestCompleteUserLifecycle:
+class CompleteUserLifecycleTests:
     """Test complete user lifecycle from registration to deletion"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -119,7 +119,7 @@ class TestCompleteUserLifecycle:
             assert validated is None
 
 
-class TestSecurityFlows:
+class SecurityFlowsTests:
     """Test security-related flows"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -222,7 +222,7 @@ class TestSecurityFlows:
         assert validated is not None
 
 
-class TestConcurrencyAndPerformance:
+class ConcurrencyAndPerformanceTests:
     """Test concurrent operations and performance"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -323,7 +323,7 @@ class TestConcurrencyAndPerformance:
         assert user1.id == user2.id
 
 
-class TestDatabaseTransactions:
+class DatabaseTransactionsTests:
     """Test database transaction handling"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -377,7 +377,7 @@ class TestDatabaseTransactions:
         assert len(audit_logs) == 0
 
 
-class TestRedisIntegration:
+class RedisIntegrationTests:
     """Test Redis integration for caching and sessions"""
     
     @pytest_asyncio.fixture(autouse=True)

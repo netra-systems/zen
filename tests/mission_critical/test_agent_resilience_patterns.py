@@ -55,7 +55,7 @@ from typing import Dict, Any, List, Optional, Callable, Awaitable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 import random
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -256,7 +256,7 @@ class ConcurrentStressTestAgent(BaseAgent):
 
 
 @pytest.mark.asyncio
-class TestAgentResiliencePatterns:
+class AgentResiliencePatternsTests:
     """CRITICAL tests that MUST FAIL if resilience patterns are missing."""
     
     def get_memory_usage_mb(self) -> float:

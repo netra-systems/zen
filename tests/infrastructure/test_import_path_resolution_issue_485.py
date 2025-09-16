@@ -21,7 +21,7 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
 sys.path.insert(0, str(PROJECT_ROOT))
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestImportPathResolution(SSotBaseTestCase):
+class ImportPathResolutionTests(SSotBaseTestCase):
     """
     Test import path resolution reliability for test_framework modules.
     
@@ -158,7 +158,7 @@ class TestImportPathResolution(SSotBaseTestCase):
                 discovery_failures.append(f'{module_name}: Unexpected error during discovery - {e}')
         assert len(discovery_failures) == 0, f'Test framework module discovery failures in {len(discovery_failures)} critical modules:\n' + '\n'.join((f'  - {failure}' for failure in discovery_failures)) + '\n\nThis indicates comprehensive import path resolution issues affecting test infrastructure.'
 
-class TestModulePathResolutionEdgeCases(SSotBaseTestCase):
+class ModulePathResolutionEdgeCasesTests(SSotBaseTestCase):
     """
     Test edge cases in module path resolution that could cause import failures
     in different execution contexts.

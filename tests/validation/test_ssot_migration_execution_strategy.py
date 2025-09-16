@@ -28,7 +28,7 @@ from typing import Dict, List, Tuple, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestSsotMigrationExecutionStrategy(SSotBaseTestCase):
+class SsotMigrationExecutionStrategyTests(SSotBaseTestCase):
     """Test comprehensive execution strategy for SSOT migration."""
     
     def setup_method(self, method):
@@ -167,7 +167,7 @@ class TestSsotMigrationExecutionStrategy(SSotBaseTestCase):
 import os
 from unittest.mock import Mock, patch
 
-class TestLegacyExample(unittest.TestCase):
+class LegacyExampleTests(unittest.TestCase):
     """Sample legacy test for migration validation."""
     
     def setUp(self):
@@ -208,7 +208,7 @@ class TestLegacyExample(unittest.TestCase):
         migrated_content = '''from test_framework.ssot.base_test_case import SSotBaseTestCase
 from unittest.mock import Mock, patch
 
-class TestLegacyExample(SSotBaseTestCase):
+class LegacyExampleTests(SSotBaseTestCase):
     """Sample legacy test for migration validation."""
     
     def setup_method(self, method):
@@ -589,7 +589,7 @@ if __name__ == "__main__":
     print("Running SSOT Migration Execution Strategy Tests for Issue #1097...")
     
     # Create test instance
-    test_instance = TestSsotMigrationExecutionStrategy()
+    test_instance = SsotMigrationExecutionStrategyTests()
     test_instance.setup_method(None)
     
     try:

@@ -38,18 +38,18 @@ from dataclasses import dataclass
 from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, ConnectionID, WebSocketID, RequestID, ensure_user_id, ensure_thread_id, ensure_websocket_id
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection, RegistryCompat, _serialize_message_safely, _get_enum_key_representation
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection, RegistryCompat, _serialize_message_safely, _get_enum_key_representation
 from netra_backend.app.websocket_core import create_websocket_manager
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
-class TestWebSocketState(Enum):
+class WebSocketStateTests(Enum):
     """Test enum to simulate WebSocket states for serialization testing."""
     CONNECTING = 0
     OPEN = 1
     CLOSING = 2
     CLOSED = 3
 
-class TestComplexData:
+class ComplexDataTests:
     """Test class with complex serialization requirements."""
 
     def __init__(self, value: str):
@@ -57,10 +57,10 @@ class TestComplexData:
         self.timestamp = datetime.utcnow()
 
     def to_dict(self):
-        return {'value': self.value, 'timestamp': self.timestamp.isoformat(), 'type': 'TestComplexData'}
+        return {'value': self.value, 'timestamp': self.timestamp.isoformat(), 'type': 'ComplexDataTests'}
 
 @dataclass
-class TestDataClass:
+class DataClassTests:
     """Test dataclass for serialization testing."""
     name: str
     value: int
@@ -83,7 +83,7 @@ class MockWebSocket:
         self.should_fail = should_fail
         self.sent_messages: List[Dict[str, Any]] = []
         self.is_closed = False
-        self.client_state = TestWebSocketState.OPEN
+        self.client_state = WebSocketStateTests.OPEN
         self.send_delay = 0.0
         self.message_count = 0
         self.bytes_sent = 0
@@ -92,7 +92,7 @@ class MockWebSocket:
         """Mock sending JSON message with realistic behavior."""
         if self.should_fail:
             raise RuntimeError(f'Mock WebSocket send failure for connection {self.connection_id}')
-        if self.is_closed or self.client_state == TestWebSocketState.CLOSED:
+        if self.is_closed or self.client_state == WebSocketStateTests.CLOSED:
             raise RuntimeError('WebSocket connection closed')
         if self.send_delay > 0:
             await asyncio.sleep(self.send_delay)
@@ -108,7 +108,7 @@ class MockWebSocket:
     async def close(self, code: int=1000, reason: str='Normal closure') -> None:
         """Mock closing WebSocket with status codes."""
         self.is_closed = True
-        self.client_state = TestWebSocketState.CLOSED
+        self.client_state = WebSocketStateTests.CLOSED
 
     def get_sent_messages(self) -> List[Dict[str, Any]]:
         """Get all sent messages for validation."""
@@ -125,7 +125,7 @@ class MockWebSocket:
         self.send_delay = delay
         self.should_fail = should_fail
 
-class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
+class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
     """
     Comprehensive unit test suite for UnifiedWebSocketManager.
     
@@ -344,7 +344,7 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         user_id = self.id_manager.generate_id(IDType.USER, prefix='serialization_test_user')
         connection = self.create_mock_connection(user_id)
         await self.manager.add_connection(connection)
-        complex_test_cases = [{'type': 'enum_test', 'data': {'websocket_state': TestWebSocketState.OPEN, 'connection_status': TestWebSocketState.CONNECTING}}, {'type': 'datetime_test', 'data': {'timestamp': datetime.utcnow(), 'scheduled_time': datetime.utcnow() + timedelta(hours=1), 'expiry': datetime.utcnow() + timedelta(days=30)}}, {'type': 'dataclass_test', 'data': {'config': TestDataClass('test_config', 42, True), 'backup_config': TestDataClass('backup', 24, False)}}, {'type': 'nested_complex', 'data': {'user_profile': {'id': user_id, 'preferences': {'notifications': True, 'theme': 'dark', 'auto_save': TestWebSocketState.OPEN}, 'metadata': TestComplexData('user_metadata'), 'created_at': datetime.utcnow()}, 'session_data': [TestDataClass('session_1', 100), TestDataClass('session_2', 200)]}}, {'type': 'large_data_test', 'data': {'large_list': [f'item_{i}' for i in range(1000)], 'large_dict': {f'key_{i}': f'value_{i}' for i in range(500)}, 'timestamp': datetime.utcnow()}}]
+        complex_test_cases = [{'type': 'enum_test', 'data': {'websocket_state': WebSocketStateTests.OPEN, 'connection_status': WebSocketStateTests.CONNECTING}}, {'type': 'datetime_test', 'data': {'timestamp': datetime.utcnow(), 'scheduled_time': datetime.utcnow() + timedelta(hours=1), 'expiry': datetime.utcnow() + timedelta(days=30)}}, {'type': 'dataclass_test', 'data': {'config': DataClassTests('test_config', 42, True), 'backup_config': DataClassTests('backup', 24, False)}}, {'type': 'nested_complex', 'data': {'user_profile': {'id': user_id, 'preferences': {'notifications': True, 'theme': 'dark', 'auto_save': WebSocketStateTests.OPEN}, 'metadata': ComplexDataTests('user_metadata'), 'created_at': datetime.utcnow()}, 'session_data': [DataClassTests('session_1', 100), DataClassTests('session_2', 200)]}}, {'type': 'large_data_test', 'data': {'large_list': [f'item_{i}' for i in range(1000)], 'large_dict': {f'key_{i}': f'value_{i}' for i in range(500)}, 'timestamp': datetime.utcnow()}}]
         for test_case in complex_test_cases:
             start_time = time.time()
             await self.manager.send_to_user(user_id, test_case)

@@ -9,7 +9,7 @@ from unittest.mock import patch
 from netra_backend.app.agents.corpus_admin.corpus_creation_helpers import get_handlers
 
 
-class TestCorpusCreationHelpers:
+class CorpusCreationHelpersTests:
     """Test suite for corpus creation helpers"""
 
     def test_get_handlers_with_available_handlers(self):

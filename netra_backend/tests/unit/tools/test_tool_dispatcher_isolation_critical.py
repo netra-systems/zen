@@ -119,7 +119,7 @@ class MockToolExecution:
             self.isolation_violations = []
 
 
-class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
+class ToolDispatcherIsolationFailuresTests(SSotBaseTestCase):
     """
     CRITICAL FAILING TESTS: Tool Dispatcher Isolation Failures
     

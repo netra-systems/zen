@@ -32,7 +32,7 @@ from tests.e2e.database_test_operations import DatabaseOperations
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete as TestHarness
 
 
-class TestDatabaseE2Eer:
+class DatabaseE2EerTests:
     """Helper class for database E2E testing."""
     
     def __init__(self):
@@ -108,7 +108,7 @@ async def db_tester():
     await tester.cleanup()
 
 
-class TestDatabaseComprehensiveE2E:
+class DatabaseComprehensiveE2ETests:
     """Comprehensive E2E tests for database operations."""
     
     @pytest.mark.asyncio

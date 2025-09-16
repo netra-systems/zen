@@ -86,7 +86,7 @@ def sample_message():
     }
 
 
-class TestMessageRouterInitialization:
+class MessageRouterInitializationTests:
     """
     BVJ: Validates MessageRouter initialization and default handler setup.
     Business Impact: Ensures all critical handlers are available for WebSocket message processing.
@@ -139,7 +139,7 @@ class TestMessageRouterInitialization:
         assert abs(current_time - message_router.startup_time) < 1.0, "Startup time must be recent"
 
 
-class TestMessageRouterHandlerManagement:
+class MessageRouterHandlerManagementTests:
     """
     BVJ: Tests dynamic handler registration and removal functionality.
     Business Impact: Enables runtime handler management for feature rollouts and customization.
@@ -202,7 +202,7 @@ class TestMessageRouterHandlerManagement:
         mock_message_handler.handle.assert_called_once()
 
 
-class TestMessageRouterCoreRouting:
+class MessageRouterCoreRoutingTests:
     """
     BVJ: Tests core message routing logic that enables WebSocket agent events.
     Business Impact: Ensures 100% reliable message delivery for chat functionality.
@@ -316,7 +316,7 @@ class TestMessageRouterCoreRouting:
         assert message_router.routing_stats["messages_routed"] >= 1, "JSON-RPC message must be routed"
 
 
-class TestMessageRouterStatistics:
+class MessageRouterStatisticsTests:
     """
     BVJ: Validates routing statistics and monitoring functionality.
     Business Impact: Enables performance monitoring and troubleshooting of WebSocket routing.
@@ -384,7 +384,7 @@ class TestMessageRouterStatistics:
         assert message_router.routing_stats["unhandled_messages"] == initial_unhandled + 1, "Unhandled count must increment"
 
 
-class TestMessageRouterStartupGracePeriod:
+class MessageRouterStartupGracePeriodTests:
     """
     BVJ: Validates startup grace period logic that prevents false warnings.
     Business Impact: Reduces false alerts during system startup and deployment.
@@ -419,7 +419,7 @@ class TestMessageRouterStartupGracePeriod:
         assert isinstance(message_router.startup_grace_period_seconds, (int, float)), "Grace period must be numeric"
 
 
-class TestMessageRouterUnknownMessageTypes:
+class MessageRouterUnknownMessageTypesTests:
     """
     BVJ: Validates handling of unknown or unsupported message types.
     Business Impact: Ensures system resilience when encountering new or malformed messages.
@@ -483,7 +483,7 @@ class TestMessageRouterUnknownMessageTypes:
                 pytest.fail(f"Router should handle malformed message gracefully: {malformed_msg}, error: {e}")
 
 
-class TestMessageRouterMessagePreparation:
+class MessageRouterMessagePreparationTests:
     """
     BVJ: Tests message preparation and normalization for different formats.
     Business Impact: Ensures compatibility with multiple WebSocket message formats.
@@ -540,7 +540,7 @@ class TestMessageRouterMessagePreparation:
         assert message_router.routing_stats["messages_routed"] >= 1, "Extended message must be routed"
 
 
-class TestMessageRouterConcurrency:
+class MessageRouterConcurrencyTests:
     """
     BVJ: Validates concurrent message routing for multi-user scenarios.
     Business Impact: Ensures router remains stable under high concurrent load.
@@ -615,7 +615,7 @@ class TestMessageRouterConcurrency:
         assert final_count - initial_count >= 50, "Statistics must accurately track concurrent messages"
 
 
-class TestMessageRouterPerformance:
+class MessageRouterPerformanceTests:
     """
     BVJ: Validates routing performance meets production requirements.
     Business Impact: Ensures sub-millisecond routing latency for responsive chat experience.
@@ -688,7 +688,7 @@ class TestMessageRouterPerformance:
         assert throughput > 1000, f"Routing throughput {throughput:.0f} msg/sec must be >1000 msg/sec"
 
 
-class TestMessageRouterEdgeCases:
+class MessageRouterEdgeCasesTests:
     """
     BVJ: Tests edge cases and error conditions for system resilience.
     Business Impact: Ensures router remains stable under unusual conditions.

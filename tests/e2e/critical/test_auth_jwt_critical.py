@@ -156,7 +156,7 @@ class RealBackendServiceClient:
             return False
 
 
-class TestCriticalJWTAuthentication:
+class CriticalJWTAuthenticationTests:
     """Critical JWT authentication tests using REAL services with HTTP calls"""
     
     def setup_method(self):
@@ -274,7 +274,7 @@ class TestCriticalJWTAuthentication:
         asyncio.run(_test())
 
 
-class TestCriticalAuthenticationFlow:
+class CriticalAuthenticationFlowTests:
     """Critical authentication flow tests using REAL services"""
     
     def setup_method(self):

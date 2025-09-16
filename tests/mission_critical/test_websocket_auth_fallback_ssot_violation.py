@@ -42,7 +42,7 @@ from test_framework.ssot.no_docker_mode_detector import NoDockerModeDetector
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
+class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
     """
     SSOT Violation Reproduction: Tests WebSocket fallback auth patterns violate SSOT.
     

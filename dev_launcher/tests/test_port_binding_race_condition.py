@@ -28,7 +28,7 @@ from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.utils import find_available_port, is_port_available
 
 
-class TestPortBindingRaceCondition(SSotBaseTestCase):
+class PortBindingRaceConditionTests(SSotBaseTestCase):
     """Test that reproduces the port binding race condition."""
     
     def setUp(self):

@@ -26,7 +26,7 @@ from unittest.mock import patch, AsyncMock
 from netra_backend.tests.integration.business_value.enhanced_base_integration_test import EnhancedBaseIntegrationTest
 from test_framework.ssot.websocket import WebSocketEventType, WebSocketTestClient
 
-class TestWebSocketBusinessEvents(EnhancedBaseIntegrationTest):
+class WebSocketBusinessEventsTests(EnhancedBaseIntegrationTest):
     """
     Integration tests validating WebSocket events deliver business value through transparency.
     

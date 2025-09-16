@@ -35,7 +35,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
 
 
-class TestAgentExecutionCoreUnit(SSotBaseTestCase):
+class AgentExecutionCoreUnitTests(SSotBaseTestCase):
     """Comprehensive unit tests for AgentExecutionCore business logic."""
 
     @pytest.fixture

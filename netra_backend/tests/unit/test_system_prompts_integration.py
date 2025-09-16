@@ -25,7 +25,7 @@ from netra_backend.app.agents.prompts import (
 )
 
 
-class TestSystemPromptsIntegration:
+class SystemPromptsIntegrationTests:
     """Test suite for system prompts integration into agent templates."""
     
     def test_all_system_prompts_exist(self):
@@ -177,7 +177,7 @@ class TestSystemPromptsIntegration:
         assert "{previous_results}" in template_str, "Missing previous_results placeholder"
 
 
-class TestSystemPromptContent:
+class SystemPromptContentTests:
     """Test the content and quality of system prompts."""
     
     def test_supervisor_system_prompt_content(self):

@@ -42,7 +42,7 @@ class UserSession:
 
 
 @pytest.mark.integration
-class TestWebSocketMultiUserIsolation(SSotAsyncTestCase):
+class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
     """Test WebSocket manager multi-user isolation and security.
     
     These tests MUST FAIL with current cross-user state contamination.
@@ -127,7 +127,7 @@ class TestWebSocketMultiUserIsolation(SSotAsyncTestCase):
         logger.info("Testing WebSocket manager user data isolation...")
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             
             # Create managers for each user and set sensitive data
             for user_id, session in self.user_sessions.items():
@@ -384,7 +384,7 @@ class TestWebSocketMultiUserIsolation(SSotAsyncTestCase):
                 
                 async def thread_operation():
                     try:
-                        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                         
                         # Create user context
                         user_context = type('ThreadUserContext', (), {

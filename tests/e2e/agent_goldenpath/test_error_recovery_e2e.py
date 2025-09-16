@@ -51,7 +51,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestHelper
 @pytest.mark.agent_goldenpath
 @pytest.mark.error_recovery
 @pytest.mark.mission_critical
-class TestErrorRecoveryE2E(SSotAsyncTestCase):
+class ErrorRecoveryE2ETests(SSotAsyncTestCase):
     """
     E2E tests validating comprehensive error handling and recovery in the agent system.
 

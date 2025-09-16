@@ -33,7 +33,7 @@ from shared.types.core_types import UserID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestOAuthCompleteAuthenticationFlowIntegration(BaseIntegrationTest):
+class OAuthCompleteAuthenticationFlowIntegrationTests(BaseIntegrationTest):
     """Integration tests for complete OAuth authentication flow with real auth service."""
     
     @pytest.fixture(autouse=True)

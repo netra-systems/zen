@@ -30,7 +30,7 @@ MISSION_CRITICAL_EVENTS = {
 
 
 @pytest.mark.e2e
-class TestWebSocketEventsStaging(StagingTestBase):
+class WebSocketEventsStagingTests(StagingTestBase):
     """Test WebSocket events in staging environment"""
     
     def setup_method(self):
@@ -419,7 +419,7 @@ if __name__ == "__main__":
     import sys
     
     async def run_tests():
-        test_class = TestWebSocketEventsStaging()
+        test_class = WebSocketEventsStagingTests()
         test_class.setup_class()
         
         # Ensure authentication setup for direct execution (not managed by pytest)

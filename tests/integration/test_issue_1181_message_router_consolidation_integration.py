@@ -32,7 +32,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestIssue1181MessageRouterConsolidationIntegration(SSotAsyncTestCase, unittest.TestCase):
+class Issue1181MessageRouterConsolidationIntegrationTests(SSotAsyncTestCase, unittest.TestCase):
     """Integration test suite for MessageRouter consolidation validation."""
     
     def setUp(self):
@@ -152,7 +152,7 @@ class TestIssue1181MessageRouterConsolidationIntegration(SSotAsyncTestCase, unit
         initial_handler_count = len(router.handlers)
         
         # Create a custom handler for testing
-        class TestIntegrationHandler(BaseMessageHandler):
+        class IntegrationHandlerTests(BaseMessageHandler):
             def __init__(self):
                 super().__init__([MessageType.USER_MESSAGE])
                 self.handled_messages = []
@@ -167,7 +167,7 @@ class TestIssue1181MessageRouterConsolidationIntegration(SSotAsyncTestCase, unit
                 # Send a test response
                 response = {
                     "type": "test_handler_response",
-                    "handled_by": "TestIntegrationHandler",
+                    "handled_by": "IntegrationHandlerTests",
                     "original_message": str(message.type),
                     "user_id": user_id
                 }
@@ -175,7 +175,7 @@ class TestIssue1181MessageRouterConsolidationIntegration(SSotAsyncTestCase, unit
                 return True
         
         # Register the custom handler
-        test_handler = TestIntegrationHandler()
+        test_handler = IntegrationHandlerTests()
         router.add_handler(test_handler)
         
         # Verify handler was registered

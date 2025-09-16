@@ -70,7 +70,7 @@ class ExecutionContextTracker:
         return [event.event_type for event in self.events]
 
 
-class TestAgentExecutionContextWebSocketBridge(SSotAsyncTestCase):
+class AgentExecutionContextWebSocketBridgeTests(SSotAsyncTestCase):
     """Test Agent Execution Context WebSocket Bridge."""
     
     @pytest.mark.integration

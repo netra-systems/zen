@@ -40,7 +40,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.orchestration import get_orchestration_config
 from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.websocket.connection_handler import ConnectionHandler
 from netra_backend.app.websocket_core.auth import WebSocketAuthenticator
@@ -96,7 +96,7 @@ class WebSocketConnectionLifecycleTracker:
         return {'connection_up_count': len(connection_up_events), 'connection_down_count': len(connection_down_events), 'agent_active_count': len(agent_active_events), 'agent_recovery_count': len(agent_recovery_events), 'has_connection_events': len(self.connection_events) > 0, 'has_agent_events': len(self.agent_state_events) > 0, 'correlation_valid': len(connection_up_events) >= len(agent_active_events) or len(agent_recovery_events) > 0, 'final_connection_state': self.connection_state, 'active_agents': len(self.agent_states)}
 
 @pytest.mark.integration
-class TestWebSocketConnectionLifecycleAgentStatesIntegration(SSotAsyncTestCase):
+class WebSocketConnectionLifecycleAgentStatesIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket connection lifecycle with agent states."""
 
     def setUp(self):

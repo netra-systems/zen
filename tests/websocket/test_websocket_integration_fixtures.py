@@ -1,5 +1,5 @@
 @pytest.mark.websocket
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -37,7 +37,7 @@ class TestWebSocketConnection:
                     from netra_backend.app.routes.websocket_unified import (
                     UNIFIED_WEBSOCKET_CONFIG)
                     # SECURITY FIX: Use factory pattern instead of singleton
-                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                     from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
                     from sqlalchemy.ext.asyncio import AsyncSession
                     from typing import Any, Dict
@@ -46,7 +46,7 @@ class TestWebSocketConnection:
                     import pytest
                     import time
                     import websockets
-                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                     from test_framework.database.test_database_manager import DatabaseTestManager
                     from auth_service.core.auth_manager import AuthManager
                     from shared.isolated_environment import IsolatedEnvironment

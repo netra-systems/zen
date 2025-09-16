@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 @pytest.mark.unit
-class TestSingletonToFactoryMigration(SSotAsyncTestCase):
+class SingletonToFactoryMigrationTests(SSotAsyncTestCase):
     """
     Test suite validating elimination of singleton patterns in agent factory modules.
 

@@ -35,7 +35,7 @@ SCALABILITY_CONFIG = {
     "max_resource_growth": 500  # MB
 }
 
-class TestConcurrentConnectionScalability:
+class ConcurrentConnectionScalabilityTests:
     """Test concurrent connection scalability"""
     
     @pytest.mark.asyncio

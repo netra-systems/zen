@@ -36,7 +36,7 @@ MEMORY_CONFIG = {
     "gc_frequency": 30          # seconds
 }
 
-class TestMemoryEfficiencyUnderLoad:
+class MemoryEfficiencyUnderLoadTests:
     """Test memory efficiency under sustained load"""
     
     @pytest.mark.asyncio

@@ -35,7 +35,7 @@ from netra_backend.app.core.startup_validation import (
 from netra_backend.app.core.service_dependencies import ServiceType
 
 
-class TestLLMManagerInitializationUnit(SSotAsyncTestCase):
+class LLMManagerInitializationUnitTests(SSotAsyncTestCase):
     """Unit tests for LLM manager initialization validation during startup."""
 
     def setup_method(self, method):
@@ -345,7 +345,7 @@ class TestLLMManagerInitializationUnit(SSotAsyncTestCase):
         assert len(healthy_factories) == len(factory_validations), "All factories should be healthy with LLM manager"
 
 
-class TestLLMManagerServiceIntegrationUnit(SSotAsyncTestCase):
+class LLMManagerServiceIntegrationUnitTests(SSotAsyncTestCase):
     """Unit tests for LLM manager integration with service dependencies."""
 
     def setup_method(self, method):

@@ -63,7 +63,7 @@ class RaceConditionTest:
 
 
 @pytest.mark.unit
-class TestWebSocketManagerRaceConditionDetection(SSotAsyncTestCase):
+class WebSocketManagerRaceConditionDetectionTests(SSotAsyncTestCase):
     """
     CRITICAL: Tests for Issue #1182 WebSocket Manager race condition detection.
     
@@ -98,7 +98,7 @@ class TestWebSocketManagerRaceConditionDetection(SSotAsyncTestCase):
         async def initialize_websocket_manager(user_index: int) -> Dict[str, Any]:
             """Simulate concurrent WebSocket manager initialization for different users."""
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
                 
                 # Generate unique user context
@@ -265,7 +265,7 @@ class TestWebSocketManagerRaceConditionDetection(SSotAsyncTestCase):
         async def test_user_isolation(user_index: int) -> Dict[str, Any]:
             """Test user isolation in WebSocket operations."""
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
                 
                 # Create unique user context
@@ -421,7 +421,7 @@ class TestWebSocketManagerRaceConditionDetection(SSotAsyncTestCase):
         async def send_concurrent_events(user_index: int, event_count: int = 5) -> Dict[str, Any]:
             """Send multiple events concurrently for race condition testing."""
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
                 
                 # Create user context

@@ -1,32 +1,37 @@
 {
   "instances": [
     {
-      "command": "/gitissueprogressorv3 golden path p0",
+      "command": "/clear-old-issue-locks",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
     {
-      "command": "/gitissueprogressorv3 golden path phase 2",
+      "command": "/gitissueprogressorv3 goldenpath p0",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
     {
-      "command": "/gitissueprogressorv3 golden path p0",
+      "command": "/gitissueprogressorv3 goldenpath phase 2",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
     {
-      "command": "/gitissueprogressorv3 golden path phase 3",
+      "command": "/gitissueprogressorv3 goldenpath p0",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
     {
-      "command": "/gitissueprogressorv3 golden path p0",
+      "command": "/gitissueprogressorv3 goldenpath phase 3",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
     {
-      "command": "/gitissueprogressorv3 golden path",
+      "command": "/gitissueprogressorv3 goldenpath p0",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 goldenpath",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },

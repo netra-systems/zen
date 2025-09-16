@@ -31,7 +31,7 @@ from netra_backend.tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTe
     data=["concurrent_test_users", "performance_baselines"]
 )
 @pytest.mark.e2e
-class TestConcurrentLoadCore:
+class ConcurrentLoadCoreTests:
     """Core concurrent user load tests"""
     
     @pytest.mark.e2e

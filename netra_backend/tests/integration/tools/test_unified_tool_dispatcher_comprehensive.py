@@ -38,7 +38,7 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import (
 )
 from netra_backend.app.core.registry.universal_registry import ToolRegistry
 from netra_backend.app.schemas.tool import ToolInput, ToolResult, ToolStatus
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import get_env
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
@@ -253,7 +253,7 @@ class MockWebSocketManager:
         return len(self.events)
 
 
-class TestUnifiedToolDispatcherComprehensive(BaseIntegrationTest):
+class UnifiedToolDispatcherComprehensiveTests(BaseIntegrationTest):
     """Comprehensive integration tests for UnifiedToolDispatcher."""
     
     def setup_method(self):

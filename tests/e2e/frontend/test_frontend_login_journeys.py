@@ -124,7 +124,7 @@ class FrontendLoginJourneyTester:
 @pytest.mark.e2e
 @pytest.mark.frontend
 @pytest.mark.asyncio
-class TestFrontendLoginJourneys:
+class FrontendLoginJourneysTests:
     """Test various login journeys and edge cases"""
     
     @pytest.fixture(autouse=True)

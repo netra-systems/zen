@@ -501,7 +501,7 @@ class EnhancedStagingWebSocketEventValidator:
 # Pytest test classes
 @pytest.mark.asyncio
 @pytest.mark.staging
-class TestStagingWebSocketAuthentication:
+class StagingWebSocketAuthenticationTests:
     """Test staging WebSocket functionality with comprehensive authentication flows."""
     
     @pytest.fixture

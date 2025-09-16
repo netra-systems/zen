@@ -122,7 +122,7 @@ class CriticalLLMFailureSimulator:
             raise ServiceError(f"Unknown LLM failure mode: {self.failure_mode}")
 
 
-class TestAgentExecutionLLMFailureWebSocketEvents:
+class AgentExecutionLLMFailureWebSocketEventsTests:
     """Mission critical test for WebSocket events during LLM failures."""
     
     @pytest.mark.mission_critical

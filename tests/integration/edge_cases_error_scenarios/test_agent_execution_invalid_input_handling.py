@@ -25,7 +25,7 @@ from test_framework.real_services import get_real_services
 logger = logging.getLogger(__name__)
 
 
-class TestAgentExecutionInvalidInputHandling(BaseIntegrationTest):
+class AgentExecutionInvalidInputHandlingTests(BaseIntegrationTest):
     """Test agent execution with various invalid input scenarios."""
     
     @pytest.mark.integration

@@ -218,7 +218,7 @@ class AnalyticsE2ETestHarness:
 # BASIC E2E WORKFLOW TESTS
 # =============================================================================
 
-class TestBasicE2EWorkflows:
+class BasicE2EWorkflowsTests:
     """Test suite for basic end-to-end workflows"""
     
     @pytest.fixture
@@ -334,7 +334,7 @@ class TestBasicE2EWorkflows:
 # WEBSOCKET STREAMING TESTS
 # =============================================================================
 
-class TestWebSocketStreaming:
+class WebSocketStreamingTests:
     """Test suite for WebSocket streaming functionality"""
     
     @pytest.fixture
@@ -431,7 +431,7 @@ class TestWebSocketStreaming:
 # PERFORMANCE TESTS
 # =============================================================================
 
-class TestE2EPerformance:
+class E2EPerformanceTests:
     """Test suite for end-to-end performance validation"""
     
     @pytest.fixture
@@ -569,7 +569,7 @@ class TestE2EPerformance:
 # DATA CONSISTENCY TESTS
 # =============================================================================
 
-class TestDataConsistency:
+class DataConsistencyTests:
     """Test suite for data consistency across all storage layers"""
     
     @pytest.fixture
@@ -711,7 +711,7 @@ class TestDataConsistency:
 # ERROR RECOVERY TESTS
 # =============================================================================
 
-class TestErrorRecovery:
+class ErrorRecoveryTests:
     """Test suite for error recovery and resilience"""
     
     @pytest.fixture
@@ -831,7 +831,7 @@ class TestErrorRecovery:
 # INTEGRATION WITH EXTERNAL SERVICES
 # =============================================================================
 
-class TestExternalServiceIntegration:
+class ExternalServiceIntegrationTests:
     """Test suite for integration with external services"""
     
     @pytest.fixture
@@ -912,7 +912,7 @@ class TestExternalServiceIntegration:
 # INTEGRATION WITH FIXTURES
 # =============================================================================
 
-class TestE2EWithFixtures:
+class E2EWithFixturesTests:
     """Test E2E functionality using conftest fixtures"""
     
     @pytest.fixture

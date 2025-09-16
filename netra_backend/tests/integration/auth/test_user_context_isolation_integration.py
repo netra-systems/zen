@@ -25,7 +25,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
-class TestUserExecutionContextIsolation(BaseIntegrationTest):
+class UserExecutionContextIsolationTests(BaseIntegrationTest):
     """Integration tests for user execution context isolation - CRITICAL for multi-tenant system."""
     
     def setup_method(self):

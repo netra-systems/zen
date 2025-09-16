@@ -118,7 +118,7 @@ class AuthConfigRegressionValidator:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAuthConfigRegressionPrevention(BaseIntegrationTest):
+class AuthConfigRegressionPreventionTests(BaseIntegrationTest):
     """Integration: Authentication configuration regression prevention."""
 
     @pytest.fixture(autouse=True)
@@ -316,7 +316,7 @@ class TestAuthConfigRegressionPrevention(BaseIntegrationTest):
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAuthConfigRegressionRecovery(BaseIntegrationTest):
+class AuthConfigRegressionRecoveryTests(BaseIntegrationTest):
     """Integration: Auth configuration regression recovery testing."""
 
     async def test_configuration_error_recovery(self):

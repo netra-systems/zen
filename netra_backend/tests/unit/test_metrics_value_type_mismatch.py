@@ -17,7 +17,7 @@ from netra_backend.app.db.clickhouse_query_fixer import (
     fix_clickhouse_array_syntax,
 )
 
-class TestMetricsValueTypeMismatch:
+class MetricsValueTypeMismatchTests:
     """Test suite for metrics.value type mismatch issue from issue7.txt"""
     
     def test_fix_metrics_value_array_syntax(self):

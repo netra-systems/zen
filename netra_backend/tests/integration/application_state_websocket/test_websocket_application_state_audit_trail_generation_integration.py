@@ -272,7 +272,7 @@ class AuditTrailManager:
         return events
 
 
-class TestWebSocketApplicationStateAuditTrailGeneration(BaseIntegrationTest):
+class WebSocketApplicationStateAuditTrailGenerationTests(BaseIntegrationTest):
     """Test application state audit trail generation during WebSocket-triggered state changes."""
     
     async def setup_audit_test_environment(self, services) -> AuditTrailManager:

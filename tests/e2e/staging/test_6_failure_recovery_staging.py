@@ -14,7 +14,7 @@ from tests.e2e.staging_test_base import StagingTestBase, staging_test
 
 
 @pytest.mark.e2e
-class TestFailureRecoveryStaging(StagingTestBase):
+class FailureRecoveryStagingTests(StagingTestBase):
     """Test failure recovery in staging environment"""
     
     @staging_test
@@ -127,7 +127,7 @@ class TestFailureRecoveryStaging(StagingTestBase):
 
 if __name__ == "__main__":
     async def run_tests():
-        test_class = TestFailureRecoveryStaging()
+        test_class = FailureRecoveryStagingTests()
         test_class.setup_class()
         
         try:

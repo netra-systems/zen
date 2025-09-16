@@ -28,7 +28,7 @@ from netra_backend.app.core.exceptions_base import NetraException
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestProductionSecurityFiltering:
+class ProductionSecurityFilteringTests:
     """Test security filtering of debug information in production."""
 
     @pytest.fixture
@@ -139,7 +139,7 @@ class TestProductionSecurityFiltering:
             assert "staging_safety_mode" not in details
 
 
-class TestInformationDisclosureVulnerabilities:
+class InformationDisclosureVulnerabilitiesTests:
     """Test for information disclosure vulnerabilities in error responses."""
 
     @pytest.fixture
@@ -267,7 +267,7 @@ class TestInformationDisclosureVulnerabilities:
             assert "sk-1234567890" in response_str
 
 
-class TestSecurityHeaders:
+class SecurityHeadersTests:
     """Test security-related headers in error responses."""
 
     @pytest.mark.asyncio
@@ -305,7 +305,7 @@ class TestSecurityHeaders:
             _ = error_response.sanitization_applied
 
 
-class TestRateLimitingAndDDoSProtection:
+class RateLimitingAndDDoSProtectionTests:
     """Test rate limiting for error endpoints to prevent information gathering."""
 
     @pytest.mark.asyncio
@@ -361,7 +361,7 @@ class TestRateLimitingAndDDoSProtection:
             assert "security_alert_triggered" not in details
 
 
-class TestAuditingAndCompliance:
+class AuditingAndComplianceTests:
     """Test auditing and compliance features for error handling."""
 
     @pytest.mark.asyncio
@@ -435,7 +435,7 @@ class TestAuditingAndCompliance:
         assert "healthcare_audit_trail" not in details
 
 
-class TestSecurityTesting:
+class SecurityTestingTests:
     """Test security testing capabilities for error handling."""
 
     @pytest.mark.asyncio

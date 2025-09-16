@@ -20,7 +20,7 @@ from typing import Dict, List, Any
 from tests.mission_critical.test_websocket_agent_events_suite import MissionCriticalEventValidator
 
 
-class TestServerMessageValidatorIntegration(SSotBaseTestCase):
+class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
     """Integration test for MissionCriticalEventValidator with real message formats."""
     
     def setup_method(self, method):

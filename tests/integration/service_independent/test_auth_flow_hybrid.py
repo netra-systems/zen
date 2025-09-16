@@ -32,7 +32,7 @@ from test_framework.ssot.hybrid_execution_manager import ExecutionMode
 logger = logging.getLogger(__name__)
 
 
-class TestAuthFlowHybrid(AuthIntegrationTestBase):
+class AuthFlowHybridTests(AuthIntegrationTestBase):
     """Auth flow integration tests with hybrid execution."""
     
     REQUIRED_SERVICES = ["auth", "backend"]

@@ -22,7 +22,7 @@ import pytest
 import websockets
 from websockets import WebSocketException
 
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.types import (
     WebSocketConnectionState,
     WebSocketMessage,
@@ -37,7 +37,7 @@ env = get_env()
 @pytest.mark.real_services
 @pytest.mark.websocket
 @skip_if_no_real_services
-class TestRealWebSocketConnectionLifecycle:
+class RealWebSocketConnectionLifecycleTests:
     """Test real WebSocket connection lifecycle with Docker services.
     
     CRITICAL: Tests actual WebSocket connections, not mocks.

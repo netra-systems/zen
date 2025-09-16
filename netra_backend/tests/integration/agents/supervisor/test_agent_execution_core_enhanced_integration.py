@@ -41,7 +41,7 @@ from test_framework.fixtures.lightweight_services import lightweight_services_fi
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAgentExecutionCoreEnhancedIntegration:
+class AgentExecutionCoreEnhancedIntegrationTests:
     """
     Enhanced integration tests for AgentExecutionCore using real services.
     

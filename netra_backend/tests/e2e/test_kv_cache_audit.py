@@ -14,7 +14,7 @@ import pytest
 import pytest_asyncio
 
 from netra_backend.app.schemas.agent import SubAgentLifecycle
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.schemas.agent_models import DeepAgentState
@@ -81,7 +81,7 @@ def _build_kv_cache_setup(agents: Dict, llm: LLMManager, ws: WebSocketManager) -
 
 @pytest.mark.real_llm
 
-class TestKVCacheAuditWorkflow:
+class KVCacheAuditWorkflowTests:
     pass
 
     """Test KV cache audit and optimization workflows."""
@@ -362,7 +362,7 @@ class TestKVCacheAuditWorkflow:
 
                                                                         @pytest.mark.real_llm
 
-                                                                        class TestKVCacheAuditEdgeCases:
+                                                                        class KVCacheAuditEdgeCasesTests:
                                                                             pass
 
                                                                             """Test edge cases in KV cache audit workflows."""
@@ -445,7 +445,7 @@ class TestKVCacheAuditWorkflow:
 
                                                                                             @pytest.mark.real_llm
 
-                                                                                            class TestKVCacheWorkflowIntegrity:
+                                                                                            class KVCacheWorkflowIntegrityTests:
                                                                                                 pass
 
                                                                                                 """Test overall workflow integrity for KV cache audit."""

@@ -8,7 +8,7 @@ import pytest
 from netra_backend.app.utils.string_utils import StringUtils
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestStringUtils:
+class StringUtilsTests:
     """Test suite for StringUtils"""
 
     @pytest.fixture

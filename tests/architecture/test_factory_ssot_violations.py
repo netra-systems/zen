@@ -114,7 +114,7 @@ class FactorySSotAnalyzer(ast.NodeVisitor):
         return str(annotation)
 
 
-class TestFactorySSotViolations(SSotBaseTestCase):
+class FactorySSotViolationsTests(SSotBaseTestCase):
     """
     Phase 2: SSOT Compliance Validation
 

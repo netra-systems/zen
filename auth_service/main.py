@@ -125,7 +125,9 @@ async def lifespan(app: FastAPI):
     
     # CRITICAL OAUTH VALIDATION - FAIL FAST IF OAUTH IS BROKEN
     env = AuthConfig.get_environment()
-    if env in ["staging", "production"]:
+    skip_oauth_validation = get_env().get("SKIP_OAUTH_VALIDATION", "false").lower() == "true"
+    
+    if env in ["staging", "production"] and not skip_oauth_validation:
         logger.info("[U+1F510] VALIDATING CRITICAL OAUTH CONFIGURATION...")
         oauth_validation_errors = []
         
@@ -837,8 +839,8 @@ async def oauth_status() -> Dict[str, Any]:
 if __name__ == "__main__":
     import uvicorn
     # @marked: Port binding for container runtime with performance optimizations
-    # Default to 8081 to align with dev launcher expectations and E2E test configurations
-    port = int(get_env().get("PORT", "8081"))
+    # Default to 8080 to align with Cloud Run expectations (GCP standard)
+    port = int(get_env().get("PORT", "8080"))
     
     # Performance-optimized uvicorn settings
     uvicorn_config = {

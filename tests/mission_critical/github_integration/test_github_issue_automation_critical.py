@@ -63,7 +63,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from tests.mission_critical.helpers.test_helpers import MissionCriticalTestHelper
 
-class TestGitHubIssueAutomationCritical(SSotBaseTestCase):
+class GitHubIssueAutomationCriticalTests(SSotBaseTestCase):
     """
     Mission Critical tests for GitHub issue automation
     

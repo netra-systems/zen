@@ -49,7 +49,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestSupervisorFactoryDependencyInjection(SSotAsyncTestCase):
+class SupervisorFactoryDependencyInjectionTests(SSotAsyncTestCase):
     """
     Phase 3.4 Supervisor Factory Dependency Injection Tests
     
@@ -65,18 +65,18 @@ class TestSupervisorFactoryDependencyInjection(SSotAsyncTestCase):
         self.mock_factory = SSotMockFactory()
         
         # Mock user contexts for testing isolation
-        self.user_context_1 = UserExecutionContext(
+        self.user_context_1 = UserExecutionContext.from_request(
             user_id="test_user_1",
             thread_id="test_thread_1", 
             run_id="test_run_1",
-            client_id="test_client_1"
+            websocket_client_id="test_client_1"
         )
         
-        self.user_context_2 = UserExecutionContext(
+        self.user_context_2 = UserExecutionContext.from_request(
             user_id="test_user_2",
             thread_id="test_thread_2",
             run_id="test_run_2", 
-            client_id="test_client_2"
+            websocket_client_id="test_client_2"
         )
         
         # Mock dependencies

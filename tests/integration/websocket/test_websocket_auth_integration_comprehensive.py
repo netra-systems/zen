@@ -40,7 +40,7 @@ from shared.isolated_environment import get_env
 from shared.jwt_secret_manager import get_unified_jwt_secret
 
 
-class TestWebSocketAuthenticationIntegrationComprehensive(BaseIntegrationTest):
+class WebSocketAuthenticationIntegrationComprehensiveTests(BaseIntegrationTest):
     """
     Comprehensive integration tests for WebSocket authentication flows.
     

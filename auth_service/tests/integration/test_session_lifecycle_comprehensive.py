@@ -50,7 +50,7 @@ from auth_service.services.user_service import UserService
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 
 
-class TestSessionLifecycleComprehensive(SSotBaseTestCase):
+class SessionLifecycleComprehensiveTests(SSotBaseTestCase):
     """
     PRIORITY 2: Comprehensive session lifecycle tests with security focus.
     
@@ -779,4 +779,4 @@ class TestSessionLifecycleComprehensive(SSotBaseTestCase):
         assert cleanup_total_time < 10.0, f"Total cleanup time too slow: {cleanup_total_time:.3f}s"
 
 
-__all__ = ["TestSessionLifecycleComprehensive"]
+__all__ = ["SessionLifecycleComprehensiveTests"]

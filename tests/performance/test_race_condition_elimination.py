@@ -131,7 +131,7 @@ RACE_CONDITION_TEST_SCENARIOS = [
 ]
 
 
-class TestRaceConditionElimination(SSotAsyncTestCase):
+class RaceConditionEliminationTests(SSotAsyncTestCase):
     """
     Race Condition Elimination Performance Test Suite for Issue #1200
 

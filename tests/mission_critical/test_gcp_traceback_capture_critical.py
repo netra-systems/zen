@@ -79,7 +79,7 @@ from netra_backend.app.core.unified_logging import get_logger
 from shared.isolated_environment import get_env
 
 
-class TestGCPTracebackCaptureCritical(SSotAsyncTestCase):
+class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
     """Mission Critical tests for GCP traceback capture validation."""
     
     def setup_method(self, method):

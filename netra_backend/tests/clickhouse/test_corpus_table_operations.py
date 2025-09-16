@@ -23,7 +23,7 @@ from netra_backend.tests.clickhouse.clickhouse_test_fixtures import (
     cleanup_test_table,
 )
 
-class TestCorpusTableOperations:
+class CorpusTableOperationsTests:
     """Test corpus table creation and management"""
 
     @pytest.mark.asyncio

@@ -27,7 +27,7 @@ from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.handlers import WebSocketHandler
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
@@ -136,7 +136,7 @@ class MockConnectionManager:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestWebSocketAgentIntegrationComprehensive:
+class WebSocketAgentIntegrationComprehensiveTests:
     """Comprehensive WebSocket agent integration tests."""
     
     @pytest.fixture

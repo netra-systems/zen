@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.asyncio
 @pytest.mark.critical
 @pytest.mark.e2e
-class TestRealErrorPropagation:
+class RealErrorPropagationTests:
     """Comprehensive real error propagation test suite."""
     
     @pytest.fixture
@@ -333,6 +333,6 @@ class TestRealErrorPropagation:
         }
 
 
-def create_real_error_propagation_test_suite() -> TestRealErrorPropagation:
+def create_real_error_propagation_test_suite() -> RealErrorPropagationTests:
     """Create real error propagation test suite instance."""
-    return TestRealErrorPropagation()
+    return RealErrorPropagationTests()

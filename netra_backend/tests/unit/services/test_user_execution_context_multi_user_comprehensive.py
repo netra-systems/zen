@@ -40,7 +40,7 @@ from netra_backend.app.services.user_execution_context import (
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestUserExecutionContextMultiUserComprehensive(SSotAsyncTestCase):
+class UserExecutionContextMultiUserComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive multi-user unit tests for UserExecutionContext.
     

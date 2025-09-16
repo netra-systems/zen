@@ -29,7 +29,7 @@ from netra_backend.app.agents.supervisor.execution_engine_factory import Executi
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 @pytest.mark.e2e
-class TestExecutionWorkflowWithAuthentication(SSotBaseTestCase):
+class ExecutionWorkflowWithAuthenticationTests(SSotBaseTestCase):
     """Test execution workflow with real authentication end-to-end."""
 
     @pytest.fixture

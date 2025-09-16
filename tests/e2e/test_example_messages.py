@@ -62,7 +62,7 @@ async def test_user_id():
 
 
 @pytest.mark.e2e
-class TestExampleMessageBasicFlow:
+class ExampleMessageBasicFlowTests:
     """Test basic example message processing flow"""
 
     @pytest.mark.e2e
@@ -119,7 +119,7 @@ class TestExampleMessageBasicFlow:
 
 
 @pytest.mark.e2e
-class TestExampleMessageAdvanced:
+class ExampleMessageAdvancedTests:
     """Test advanced example message scenarios"""
 
     @pytest.mark.e2e
@@ -177,7 +177,7 @@ class TestExampleMessageAdvanced:
 
 
 @pytest.mark.e2e
-class TestExampleMessageValidation:
+class ExampleMessageValidationTests:
     """Test message validation and error handling"""
 
     @pytest.mark.e2e
@@ -225,7 +225,7 @@ class TestExampleMessageValidation:
 
 
 @pytest.mark.e2e
-class TestExampleMessageBusiness:
+class ExampleMessageBusinessTests:
     """Test business value and insights generation"""
 
     @pytest.mark.e2e

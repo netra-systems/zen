@@ -37,7 +37,7 @@ from netra_backend.app.core.tool_models import ToolExecutionResult, UnifiedTool
 from netra_backend.app.core.exceptions_base import NetraException
 
 
-class TestUnifiedToolExecutionEngine(SSotBaseTestCase):
+class UnifiedToolExecutionEngineTests(SSotBaseTestCase):
     """Test UnifiedToolExecutionEngine business logic without external dependencies."""
     
     def setup_method(self, method):
@@ -363,7 +363,7 @@ class TestUnifiedToolExecutionEngine(SSotBaseTestCase):
         super().teardown_method(method)
 
 
-class TestToolExecutionEnginePerformance(SSotBaseTestCase):
+class ToolExecutionEnginePerformanceTests(SSotBaseTestCase):
     """Test performance characteristics of tool execution engine."""
     
     @pytest.mark.unit

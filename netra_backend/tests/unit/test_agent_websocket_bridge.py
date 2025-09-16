@@ -35,7 +35,7 @@ from test_framework.ssot.mocks import MockFactory
 from shared.isolated_environment import get_env
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, IntegrationState, IntegrationConfig, HealthStatus, IntegrationResult, IntegrationMetrics, create_agent_websocket_bridge
 
-class TestAgentWebSocketBridgeInitialization:
+class AgentWebSocketBridgeInitializationTests:
     """Test AgentWebSocketBridge initialization and configuration."""
 
     @pytest.mark.unit
@@ -76,7 +76,7 @@ class TestAgentWebSocketBridgeInitialization:
         assert bridge.metrics.successful_recoveries == 0
         assert bridge.metrics.health_checks_performed == 0
 
-class TestAgentWebSocketBridgeIntegration:
+class AgentWebSocketBridgeIntegrationTests:
     """Test AgentWebSocketBridge integration lifecycle management."""
 
     @pytest.mark.unit
@@ -164,7 +164,7 @@ class TestAgentWebSocketBridgeIntegration:
             assert bridge._supervisor is mock_supervisor, 'Supervisor should be stored'
             assert bridge._registry is mock_registry, 'Registry should be stored'
 
-class TestAgentWebSocketBridgeHealthMonitoring:
+class AgentWebSocketBridgeHealthMonitoringTests:
     """Test AgentWebSocketBridge health monitoring and recovery."""
 
     @pytest.mark.unit
@@ -279,7 +279,7 @@ class TestAgentWebSocketBridgeHealthMonitoring:
             bridge.state = IntegrationState.FAILED
             await bridge.health_check()
 
-class TestAgentWebSocketBridgeRecovery:
+class AgentWebSocketBridgeRecoveryTests:
     """Test AgentWebSocketBridge recovery mechanisms."""
 
     @pytest.mark.unit
@@ -328,7 +328,7 @@ class TestAgentWebSocketBridgeRecovery:
                 result3 = await bridge.recover_integration()
                 mock_blocked.assert_not_called()
 
-class TestAgentWebSocketBridgeUserEmitters:
+class AgentWebSocketBridgeUserEmittersTests:
     """Test AgentWebSocketBridge per-user emitter creation."""
 
     @pytest.mark.unit
@@ -390,7 +390,7 @@ class TestAgentWebSocketBridgeUserEmitters:
             assert result is mock_emitter
             mock_create.assert_called_once_with(user_id, session_id)
 
-class TestAgentWebSocketBridgeWebSocketNotifications:
+class AgentWebSocketBridgeWebSocketNotificationsTests:
     """Test AgentWebSocketBridge WebSocket event notifications (MISSION CRITICAL for chat value)."""
 
     @pytest.mark.unit
@@ -518,7 +518,7 @@ class TestAgentWebSocketBridgeWebSocketNotifications:
             assert call_args['event_type'] == event_type
             assert call_args['data'] == custom_data
 
-class TestAgentWebSocketBridgeThreadRegistry:
+class AgentWebSocketBridgeThreadRegistryTests:
     """Test AgentWebSocketBridge thread registry integration."""
 
     @pytest.mark.unit
@@ -583,7 +583,7 @@ class TestAgentWebSocketBridgeThreadRegistry:
         result = bridge.extract_thread_id(run_id)
         assert result == run_id
 
-class TestAgentWebSocketBridgeConcurrencyAndEdgeCases:
+class AgentWebSocketBridgeConcurrencyAndEdgeCasesTests:
     """Test AgentWebSocketBridge concurrency handling and edge cases."""
 
     @pytest.mark.unit
@@ -686,7 +686,7 @@ class TestAgentWebSocketBridgeConcurrencyAndEdgeCases:
                 bridge.remove_monitor_observer(observer_to_remove)
         assert len(bridge._monitor_observers) == initial_observer_count
 
-class TestAgentWebSocketBridgeFactoryFunction:
+class AgentWebSocketBridgeFactoryFunctionTests:
     """Test the factory function for creating AgentWebSocketBridge instances."""
 
     @pytest.mark.unit

@@ -18,7 +18,7 @@ from auth_service.auth_core.business_logic.user_business_logic import UserRegist
 from netra_backend.app.schemas.tenant import SubscriptionTier
 
 
-class TestInstitutionalDomainClassification:
+class InstitutionalDomainClassificationTests:
     """Test institutional domain classification for Issue #487."""
 
     def setup_method(self):
@@ -178,7 +178,7 @@ class TestInstitutionalDomainClassification:
         assert is_business == True, "Cornell should be classified as business opportunity"
 
 
-class TestInstitutionalDomainBusinessIntelligence:
+class InstitutionalDomainBusinessIntelligenceTests:
     """Test business intelligence features for institutional domains."""
 
     def setup_method(self):
@@ -232,7 +232,7 @@ class TestInstitutionalDomainBusinessIntelligence:
                 f"Partnership opportunity {opportunity_type} should get extended trial"
 
 
-class TestInstitutionalDomainEdgeCases:
+class InstitutionalDomainEdgeCasesTests:
     """Test edge cases for institutional domain classification."""
 
     def setup_method(self):

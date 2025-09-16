@@ -21,7 +21,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 
 
-class TestJWTTokenSecurityValidation(BaseIntegrationTest):
+class JWTTokenSecurityValidationTests(BaseIntegrationTest):
     """Test JWT token security validation and attack prevention"""
 
     def setup_method(self):

@@ -103,7 +103,7 @@ class WebSocketEventValidator:
         return True
 
 
-class TestWebSocketReportDelivery(BaseIntegrationTest):
+class WebSocketReportDeliveryTests(BaseIntegrationTest):
     """Test WebSocket report delivery with real services."""
     
     @pytest.mark.integration

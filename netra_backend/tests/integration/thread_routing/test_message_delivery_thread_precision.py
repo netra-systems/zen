@@ -39,7 +39,7 @@ from shared.types.core_types import (
 
 # Full stack components for message routing
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.utils import generate_connection_id
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.db.models_postgres import Thread, Message, User
@@ -61,7 +61,7 @@ except ImportError:
     select = None
 
 
-class TestMessageDeliveryThreadPrecision(BaseIntegrationTest):
+class MessageDeliveryThreadPrecisionTests(BaseIntegrationTest):
     """Test message delivery precision across full infrastructure stack."""
 
     @pytest.mark.integration

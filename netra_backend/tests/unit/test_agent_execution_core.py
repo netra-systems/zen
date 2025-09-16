@@ -33,7 +33,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.core.execution_tracker import ExecutionState
 
 
-class TestAgentExecutionCore(BaseIntegrationTest):
+class AgentExecutionCoreTests(BaseIntegrationTest):
     """Test AgentExecutionCore pure business logic - SSOT compliant."""
 
     def setup_method(self):

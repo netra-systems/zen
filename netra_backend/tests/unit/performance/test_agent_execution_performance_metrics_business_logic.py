@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.services.apex_optimizer_agent.tools.performance_predictor import PerformancePredictor
 from netra_backend.app.services.context import ToolContext
 
-class TestAgentExecutionPerformanceMetricsBusinessLogic(SSotBaseTestCase):
+class AgentExecutionPerformanceMetricsBusinessLogicTests(SSotBaseTestCase):
     """Test agent execution performance metrics business logic"""
 
     def setup_method(self):

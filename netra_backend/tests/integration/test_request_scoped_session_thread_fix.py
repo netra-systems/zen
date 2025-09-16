@@ -29,7 +29,7 @@ from netra_backend.app.routes.utils.thread_validators import get_thread_with_val
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestRequestScopedSessionThreadFix:
+class RequestScopedSessionThreadFixTests:
     """Test suite for thread ID session mismatch fixes."""
     
     @pytest.fixture
@@ -254,7 +254,7 @@ class TestRequestScopedSessionThreadFix:
             assert session.info['user_id'] == user_id
 
 
-class TestThreadIDConsistencyValidation:
+class ThreadIDConsistencyValidationTests:
     """Validation tests for thread ID consistency across system components."""
     
     def test_unified_id_generator_patterns(self):
@@ -316,7 +316,7 @@ class TestThreadIDConsistencyValidation:
 
 
 @pytest.mark.integration
-class TestRegressionValidation:
+class RegressionValidationTests:
     """Regression tests to ensure the original error patterns are fixed."""
     
     @pytest.mark.asyncio

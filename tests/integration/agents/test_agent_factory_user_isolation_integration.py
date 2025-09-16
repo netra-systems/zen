@@ -38,7 +38,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestAgentFactoryUserIsolationIntegration(SSotAsyncTestCase):
+class AgentFactoryUserIsolationIntegrationTests(SSotAsyncTestCase):
     """
     Integration test suite for agent factory user isolation with real services.
     

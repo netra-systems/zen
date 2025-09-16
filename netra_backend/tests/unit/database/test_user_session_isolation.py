@@ -40,7 +40,7 @@ except ImportError:
     AsyncSession = None
 
 
-class TestUserSessionIsolation(BaseUnitTest):
+class UserSessionIsolationTests(BaseUnitTest):
     """Test user session isolation and database connection management."""
 
     def setUp(self):

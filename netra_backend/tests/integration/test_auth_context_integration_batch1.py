@@ -34,7 +34,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import get_test_jwt_token, E2EAuthHelper
 
-class TestAuthContextIntegration(SSotAsyncTestCase):
+class AuthContextIntegrationTests(SSotAsyncTestCase):
     """Integration tests for UnifiedAuthenticationService + UserExecutionContext."""
 
     def setUp(self):

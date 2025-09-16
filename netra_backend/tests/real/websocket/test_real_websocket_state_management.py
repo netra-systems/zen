@@ -30,7 +30,7 @@ env = get_env()
 @pytest.mark.websocket
 @pytest.mark.state_management
 @skip_if_no_real_services
-class TestRealWebSocketStateManagement:
+class RealWebSocketStateManagementTests:
     """Test real WebSocket connection state management."""
     
     @pytest.fixture

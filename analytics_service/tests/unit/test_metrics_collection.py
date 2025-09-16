@@ -337,7 +337,7 @@ class MockMetricsCollector:
         return deleted_count
 
 
-class TestMetricsCollector(SSotBaseTestCase):
+class MetricsCollectorTests(SSotBaseTestCase):
     """Test MetricsCollector business logic and functionality."""
     
     def setup_method(self, method):
@@ -694,7 +694,7 @@ class TestMetricsCollector(SSotBaseTestCase):
         self.record_metric("retention_cleanup_validated", True)
 
 
-class TestMetricsCollectorPerformance(SSotBaseTestCase):
+class MetricsCollectorPerformanceTests(SSotBaseTestCase):
     """Test metrics collector performance characteristics."""
     
     def setup_method(self, method):

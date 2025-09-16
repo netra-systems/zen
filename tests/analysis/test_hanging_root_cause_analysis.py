@@ -28,7 +28,7 @@ import httpx
 from typing import Dict, Any
 from tests.e2e.real_services_manager import RealServicesManager, ServiceEndpoint
 
-class TestHangingRootCauseAnalysis:
+class HangingRootCauseAnalysisTests:
     """Root cause analysis tests for hanging behavior"""
 
     def setup_method(self):
@@ -167,7 +167,7 @@ class TestHangingRootCauseAnalysis:
         else:
             print(' PASS:  Total startup time acceptable')
 
-class TestHangingFixRecommendations:
+class HangingFixRecommendationsTests:
     """Tests to validate potential fixes for hanging behavior"""
 
     async def test_fix_1_proper_timeout_configuration(self):

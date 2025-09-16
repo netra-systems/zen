@@ -27,7 +27,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
-class TestAuthCacheIntegration(BaseIntegrationTest):
+class AuthCacheIntegrationTests(BaseIntegrationTest):
     """Integration tests for authentication caching patterns and performance."""
     
     def setup_method(self):

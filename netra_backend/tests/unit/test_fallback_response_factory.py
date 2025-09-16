@@ -8,7 +8,7 @@ import pytest
 
 from netra_backend.app.llm.fallback_responses import FallbackResponseFactory
 
-class TestFallbackResponseFactory:
+class FallbackResponseFactoryTests:
     """Test fallback response factory behavior."""
     
     @pytest.fixture

@@ -11,7 +11,7 @@ from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestMultiTenantDataIsolation:
+class MultiTenantDataIsolationTests:
     """Validates strict data isolation between tenants."""
 
     @pytest.fixture

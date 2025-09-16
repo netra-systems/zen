@@ -52,7 +52,7 @@ from test_framework.ssot.e2e_auth_helper import (
 )
 
 # Application imports using absolute paths - FIXED: Use SSOT WebSocket imports
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.redis_manager import RedisManager
@@ -69,7 +69,7 @@ pytestmark = [
 ]
 
 
-class TestWebSocketHandshakeTiming(BaseIntegrationTest):
+class WebSocketHandshakeTimingTests(BaseIntegrationTest):
     """
     Integration tests for WebSocket handshake timing with real services.
     

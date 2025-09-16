@@ -6,7 +6,7 @@ concurrent access, and ClickHouse optimization patterns.
 """
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 import asyncio
@@ -16,7 +16,7 @@ from typing import Dict, List
 import pytest
 from netra_backend.app.services.generation_job_manager import get_corpus_from_clickhouse, save_corpus_to_clickhouse
 
-class TestDatabasePerformance:
+class DatabasePerformanceTests:
     """Test database performance under load"""
 
     @pytest.mark.performance

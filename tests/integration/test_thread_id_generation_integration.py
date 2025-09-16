@@ -15,7 +15,7 @@ from netra_backend.app.core.id_generation_contracts import validate_id_generatio
 from netra_backend.app.routes.utils.thread_creators import generate_thread_id as thread_creator_generate_id, prepare_thread_metadata
 
 @pytest.mark.integration
-class TestThreadIDGenerationIntegration:
+class ThreadIDGenerationIntegrationTests:
     """Integration tests for thread ID generation patterns"""
 
     def test_unified_id_manager_thread_support(self):
@@ -156,7 +156,7 @@ class TestThreadIDGenerationIntegration:
         assert all((isinstance(id_val, str) and len(id_val) > 0 for id_val in [new_pattern_id, class_method_id, convenience_id]))
 
 @pytest.mark.integration
-class TestContractValidation:
+class ContractValidationTests:
     """Tests for contract validation system"""
 
     def test_contract_validator_initialization(self):

@@ -28,7 +28,7 @@ from netra_backend.app.websocket_core.compression import (
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 
 
-class TestWebSocketCompressionHandler:
+class WebSocketCompressionHandlerTests:
     """Unit tests for WebSocket compression handling."""
     
     @pytest.fixture

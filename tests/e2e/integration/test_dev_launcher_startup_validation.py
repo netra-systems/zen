@@ -420,7 +420,7 @@ class DevLauncherStartupValidator:
 
 @pytest.mark.e2e
 @pytest.mark.integration
-class TestDevLauncherStartupValidation:
+class DevLauncherStartupValidationTests:
     """Integration test for dev launcher startup validation sequence."""
     
     @pytest.fixture

@@ -14,7 +14,7 @@ from test_framework.performance import BatchingTestHelper, PerformanceBenchmark
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestBatchProcessor:
+class BatchProcessorTests:
     """Test batch processing operations."""
     
     @pytest.fixture
@@ -58,7 +58,7 @@ class TestBatchProcessor:
         assert len(batches[2]) == 2  # Remainder
 
 
-class TestMessageBatcher:
+class MessageBatcherTests:
     """Test message batching operations."""
     
     @pytest.fixture

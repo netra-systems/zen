@@ -171,7 +171,7 @@ class HealthEndpointValidator:
             analysis['format_issues'].append('unsupported_response_type')
         return analysis
 
-class TestHealthEndpoints(SSotBaseTestCase):
+class HealthEndpointsTests(SSotBaseTestCase):
     """
     Integration tests for health endpoint functionality.
     

@@ -43,7 +43,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestRegistrySSotValidation(SSotBaseTestCase):
+class RegistrySSotValidationTests(SSotBaseTestCase):
     """Test suite for validating Agent Registry SSOT compliance."""
     
     def setup_method(self, method=None):

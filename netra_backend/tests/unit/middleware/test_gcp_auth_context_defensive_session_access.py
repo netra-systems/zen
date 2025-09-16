@@ -10,7 +10,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import asyncio
 
 
-class TestGCPAuthContextDefensiveSessionAccess(SSotBaseTestCase):
+class GCPAuthContextDefensiveSessionAccessTests(SSotBaseTestCase):
     """Test defensive session access patterns in GCPAuthContextMiddleware."""
     
     def setUp(self):

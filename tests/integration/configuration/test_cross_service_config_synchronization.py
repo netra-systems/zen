@@ -20,7 +20,7 @@ from shared.port_discovery import PortDiscovery
 
 
 @pytest.mark.integration
-class TestCrossServiceConfigSynchronization:
+class CrossServiceConfigSynchronizationTests:
     """Test configuration synchronization across services to prevent drift and conflicts."""
 
     @pytest.fixture(autouse=True)
@@ -276,7 +276,7 @@ class TestCrossServiceConfigSynchronization:
 
 
 @pytest.mark.integration  
-class TestConfigurationDriftPrevention:
+class ConfigurationDriftPreventionTests:
     """Test prevention of configuration drift across service updates and deployments."""
 
     @pytest.fixture(autouse=True)

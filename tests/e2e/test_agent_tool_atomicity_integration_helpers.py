@@ -8,7 +8,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 @pytest.mark.e2e
-class TestAgentToolAtomicityIntegrationHelpers:
+class AgentToolAtomicityIntegrationHelpersTests:
     """Test class for agent_tool_atomicity_integration_helpers"""
 
     def setup_method(self):

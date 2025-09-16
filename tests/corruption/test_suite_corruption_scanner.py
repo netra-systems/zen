@@ -185,7 +185,7 @@ class SuiteCorruptionScanner:
         )
 
 
-class TestCorruptionScanner:
+class CorruptionScannerTests:
     """Test cases for corruption scanner functionality."""
 
     def setup_method(self):

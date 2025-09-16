@@ -32,7 +32,7 @@ from netra_backend.app.services.user_execution_context import (
 )
 
 
-class TestUserExecutionContextSSotValidation:
+class UserExecutionContextSSotValidationTests:
     """Test SSOT validation failures in UserExecutionContext."""
     
     def test_user_context_requires_valid_user_id_ssot_validation(self):

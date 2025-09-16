@@ -40,7 +40,7 @@ from netra_backend.app.core.resilience.domain_circuit_breakers import (
 )
 
 
-class TestUnifiedReliabilityManagerCore:
+class UnifiedReliabilityManagerCoreTests:
     """Test core functionality of UnifiedReliabilityManager."""
     
     def setup_method(self):
@@ -152,7 +152,7 @@ class TestUnifiedReliabilityManagerCore:
         assert updated_config.timeout_seconds == 90.0
 
 
-class TestReliabilityExecution:
+class ReliabilityExecutionTests:
     """Test reliability-managed operation execution."""
     
     def setup_method(self):
@@ -312,7 +312,7 @@ class TestReliabilityExecution:
         assert 1.5 < time2_gap < 2.5  # ~2 second backoff
 
 
-class TestFallbackMechanisms:
+class FallbackMechanismsTests:
     """Test fallback mechanisms for graceful degradation."""
     
     def setup_method(self):
@@ -404,7 +404,7 @@ class TestFallbackMechanisms:
             self.manager._get_fallback_result = original_get_fallback
 
 
-class TestCircuitBreakerIntegration:
+class CircuitBreakerIntegrationTests:
     """Test circuit breaker integration with reliability manager."""
     
     def setup_method(self):
@@ -474,7 +474,7 @@ class TestCircuitBreakerIntegration:
             circuit_breaker.can_execute = original_can_execute
 
 
-class TestHealthMonitoring:
+class HealthMonitoringTests:
     """Test health monitoring and status reporting."""
     
     def setup_method(self):
@@ -590,7 +590,7 @@ class TestHealthMonitoring:
         assert system_health["overall_status"] == "healthy"
 
 
-class TestReliabilityConfiguration:
+class ReliabilityConfigurationTests:
     """Test reliability configuration management."""
     
     def test_reliability_config_creation_and_serialization(self):
@@ -650,7 +650,7 @@ class TestReliabilityConfiguration:
         assert result.metadata == metadata
 
 
-class TestGlobalManagerSingleton:
+class GlobalManagerSingletonTests:
     """Test global reliability manager singleton behavior."""
     
     def test_get_reliability_manager_returns_singleton(self):
@@ -689,7 +689,7 @@ class TestGlobalManagerSingleton:
         assert "persistent_test" in same_manager._domain_configs
 
 
-class TestMultiUserScenarios:
+class MultiUserScenariosTests:
     """Test multi-user scenarios and isolation."""
     
     def setup_method(self):
@@ -765,7 +765,7 @@ class TestMultiUserScenarios:
         assert self.manager._failure_stats["failing_service"][FailureMode.INTERNAL_ERROR] > 0
 
 
-class TestErrorHandlingAndEdgeCases:
+class ErrorHandlingAndEdgeCasesTests:
     """Test error handling and edge cases."""
     
     def setup_method(self):

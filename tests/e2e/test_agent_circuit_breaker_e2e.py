@@ -52,7 +52,7 @@ env.set("USE_REAL_SERVICES", "true", "test_agent_circuit_breaker_e2e")
 env.set("CIRCUIT_BREAKER_ENABLED", "true", "test_agent_circuit_breaker_e2e")
 
 
-class TestAgentCircuitBreakerE2E:
+class AgentCircuitBreakerE2ETests:
     """E2E tests for agent execution with circuit breaker protection - REAL SERVICES ONLY."""
     
     @pytest.fixture(autouse=True)
@@ -453,7 +453,7 @@ class TestAgentCircuitBreakerE2E:
             pass
             
 
-class TestCircuitBreakerMetricsMonitoring:
+class CircuitBreakerMetricsMonitoringTests:
     """E2E tests for REAL circuit breaker metrics monitoring and alerting - NO MOCKS."""
     
     @pytest.fixture(autouse=True)
@@ -551,7 +551,7 @@ class TestCircuitBreakerMetricsMonitoring:
                            len(breaker_data) > 0
                            
 
-class TestRegressionPrevention:
+class RegressionPreventionTests:
     """CRITICAL regression tests to prevent circuit breaker AttributeError - REAL SERVICES ONLY."""
     
     @pytest.fixture(autouse=True)

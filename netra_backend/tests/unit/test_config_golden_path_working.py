@@ -38,7 +38,7 @@ from netra_backend.app.config import get_config, reload_config, validate_configu
 from netra_backend.app.schemas.config import AppConfig
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestConfigurationGoldenPathWorking(SSotBaseTestCase):
+class ConfigurationGoldenPathWorkingTests(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

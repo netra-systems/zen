@@ -17,7 +17,7 @@ import pytest
 from unittest.mock import Mock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestAgentExecutionCoreImportValidation(SSotBaseTestCase):
+class AgentExecutionCoreImportValidationTests(SSotBaseTestCase):
     """Test to reproduce the agent_execution_core import validation bug."""
 
     def test_get_agent_state_tracker_import_should_fail(self):

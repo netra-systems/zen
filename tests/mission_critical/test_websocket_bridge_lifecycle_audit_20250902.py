@@ -151,10 +151,10 @@ class MockWebSocketConnection:
         return [msg for msg in self.sent_messages if msg.get('type') == message_type]
 
 
-class TestAgent(BaseAgent):
+class AgentTests(BaseAgent):
     """Test agent for WebSocket bridge lifecycle testing."""
     
-    def __init__(self, name: str = "TestAgent", should_fail: bool = False, execution_time: float = 0.1):
+    def __init__(self, name: str = "AgentTests", should_fail: bool = False, execution_time: float = 0.1):
         super().__init__(name=name, description=f"Test agent: {name}")
         self.should_fail = should_fail
         self.execution_time = execution_time
@@ -279,7 +279,7 @@ async def bridge_auditor():
     await auditor.cleanup_test_environment()
 
 
-class TestWebSocketBridgeLifecycle:
+class WebSocketBridgeLifecycleTests:
     """Comprehensive WebSocket bridge lifecycle tests."""
     
     @pytest.mark.asyncio
@@ -290,7 +290,7 @@ class TestWebSocketBridgeLifecycle:
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
         
         # Create test agent
-        test_agent = TestAgent("BridgeTestAgent")
+        test_agent = AgentTests("BridgeTestAgent")
         registry.register("BridgeTestAgent", test_agent)
         
         # Create execution context
@@ -322,7 +322,7 @@ class TestWebSocketBridgeLifecycle:
         # Setup
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
         
-        test_agent = TestAgent("EventTestAgent", execution_time=0.2)
+        test_agent = AgentTests("EventTestAgent", execution_time=0.2)
         registry.register("EventTestAgent", test_agent)
         
         context = AgentExecutionContext(
@@ -397,7 +397,7 @@ class TestWebSocketBridgeLifecycle:
         assert result.success, "Legacy agent without bridge support should still work"
         
         # Test 2: Agent that fails during execution
-        failing_agent = TestAgent("FailingAgent", should_fail=True)
+        failing_agent = AgentTests("FailingAgent", should_fail=True)
         registry.register("FailingAgent", failing_agent)
         
         context = AgentExecutionContext(
@@ -438,7 +438,7 @@ class TestWebSocketBridgeLifecycle:
         # Create test agents
         agents = []
         for i in range(3):
-            agent = TestAgent(f"ConcurrentAgent_{i}", execution_time=0.3)
+            agent = AgentTests(f"ConcurrentAgent_{i}", execution_time=0.3)
             agents.append(agent)
             registry.register(f"ConcurrentAgent_{i}", agent)
         
@@ -490,7 +490,7 @@ class TestWebSocketBridgeLifecycle:
         # Setup
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
         
-        test_agent = TestAgent("HeartbeatAgent", execution_time=0.5)  # Longer execution
+        test_agent = AgentTests("HeartbeatAgent", execution_time=0.5)  # Longer execution
         registry.register("HeartbeatAgent", test_agent)
         
         context = AgentExecutionContext(
@@ -527,7 +527,7 @@ class TestWebSocketBridgeLifecycle:
         # Setup
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
         
-        test_agent = TestAgent("ExecutionEngineAgent")
+        test_agent = AgentTests("ExecutionEngineAgent")
         registry.register("ExecutionEngineAgent", test_agent)
         
         # Test pipeline execution through ExecutionEngine
@@ -664,7 +664,7 @@ class TestWebSocketBridgeLifecycle:
         # Create multiple test agents
         num_agents = 10
         for i in range(num_agents):
-            agent = TestAgent(f"LoadTestAgent_{i}", execution_time=0.1)
+            agent = AgentTests(f"LoadTestAgent_{i}", execution_time=0.1)
             registry.register(f"LoadTestAgent_{i}", agent)
         
         # Create concurrent execution tasks
@@ -729,7 +729,7 @@ class TestWebSocketBridgeLifecycle:
             # Setup with potential real WebSocket manager
             execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
             
-            test_agent = TestAgent("RealWebSocketAgent")
+            test_agent = AgentTests("RealWebSocketAgent")
             registry.register("RealWebSocketAgent", test_agent)
             
             context = AgentExecutionContext(
@@ -754,7 +754,7 @@ class TestWebSocketBridgeLifecycle:
 
 
 # Additional edge case and regression tests
-class TestWebSocketBridgeEdgeCases:
+class WebSocketBridgeEdgeCasesTests:
     """Edge cases and regression tests for WebSocket bridge lifecycle."""
     
     @pytest.mark.asyncio
@@ -844,7 +844,7 @@ class TestWebSocketBridgeEdgeCases:
         initial_event_count = len(bridge_auditor.event_captures["test_user_0"].events)
         
         for i in range(num_iterations):
-            agent = TestAgent(f"LeakTestAgent_{i}", execution_time=0.01)
+            agent = AgentTests(f"LeakTestAgent_{i}", execution_time=0.01)
             registry.register(f"LeakTestAgent_{i}", agent)
             
             context = AgentExecutionContext(

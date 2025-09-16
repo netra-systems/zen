@@ -37,7 +37,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestIssue859MultipleEngineUserIsolationViolations(SSotAsyncTestCase, unittest.TestCase):
+class Issue859MultipleEngineUserIsolationViolationsTests(SSotAsyncTestCase, unittest.TestCase):
     """
     FAILING Test: Multiple execution engines cause user isolation violations.
 

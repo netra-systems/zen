@@ -12,7 +12,7 @@ from typing import Dict, Any, List
 from datetime import datetime
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestQualityRouterGoldenPathDegradation(SSotAsyncTestCase):
+class QualityRouterGoldenPathDegradationTests(SSotAsyncTestCase):
     """E2E tests demonstrating Quality Router fragmentation impact on Golden Path."""
 
     def setUp(self):

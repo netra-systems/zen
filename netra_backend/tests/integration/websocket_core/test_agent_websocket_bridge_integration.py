@@ -25,7 +25,7 @@ from netra_backend.app.services.agent_websocket_bridge import (
 from test_framework.ssot.base_test_case import BaseTestCase
 
 
-class TestAgentWebSocketBridgeInitialization(BaseTestCase):
+class AgentWebSocketBridgeInitializationTests(BaseTestCase):
     """Integration tests for AgentWebSocketBridge initialization with real components."""
     
     @pytest.fixture
@@ -216,7 +216,7 @@ class TestAgentWebSocketBridgeInitialization(BaseTestCase):
         mock_websocket_manager.get_stats.assert_called()
 
 
-class TestAgentWebSocketBridgeHealthMonitoring(BaseTestCase):
+class AgentWebSocketBridgeHealthMonitoringTests(BaseTestCase):
     """Integration tests for AgentWebSocketBridge health monitoring system."""
     
     @pytest.fixture
@@ -370,7 +370,7 @@ class TestAgentWebSocketBridgeHealthMonitoring(BaseTestCase):
             assert metric in metrics_dict
 
 
-class TestAgentWebSocketBridgeRecoverySystem(BaseTestCase):
+class AgentWebSocketBridgeRecoverySystemTests(BaseTestCase):
     """Integration tests for AgentWebSocketBridge recovery mechanisms."""
     
     @pytest.fixture

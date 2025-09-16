@@ -53,7 +53,7 @@ from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
 
 # WebSocket Integration (Real Services)
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, create_agent_websocket_bridge
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 
@@ -132,7 +132,7 @@ class AgentExecutionStates(Enum):
     TIMEOUT = "timeout"
 
 
-class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
+class AgentExecutionLifecycleComprehensiveTests(BaseIntegrationTest):
     """Comprehensive integration test for complete agent execution lifecycle."""
     
     def setup_method(self):

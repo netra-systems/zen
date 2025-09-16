@@ -10,7 +10,7 @@ Business Value: $12K MRR - Data consistency and real-time synchronization
 from netra_backend.app.websocket_core import WebSocketManager
 from pathlib import Path
 import sys
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -39,7 +39,7 @@ from netra_backend.tests.fixtures import (
 
 )
 
-class TestDatabaseSynchronization:
+class DatabaseSynchronizationTests:
 
     """Test database synchronization and real-time updates"""
 

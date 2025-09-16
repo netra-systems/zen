@@ -49,7 +49,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.integration
-class TestIssue686UserIsolationComprehensive(SSotAsyncTestCase):
+class Issue686UserIsolationComprehensiveTests(SSotAsyncTestCase):
     """Comprehensive integration validation of user isolation for Issue #686."""
 
     def setUp(self):

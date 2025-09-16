@@ -24,7 +24,7 @@ from typing import Dict, List, Optional, Set
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestServiceIdSsotCompliance(SSotBaseTestCase):
+class ServiceIdSsotComplianceTests(SSotBaseTestCase):
     """
     Validate SERVICE_ID SSOT compliance across the entire codebase.
     

@@ -36,7 +36,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestDeploymentEntryPointAudit(SSotBaseTestCase):
+class DeploymentEntryPointAuditTests(SSotBaseTestCase):
     """
     Unit tests for deployment entry point audit.
     
@@ -305,7 +305,7 @@ class TestDeploymentEntryPointAudit(SSotBaseTestCase):
         return {'enabled': True, 'effective': True, 'issues': []}
 
 @pytest.mark.unit
-class TestDeploymentEntryPointAuditComprehensive(SSotBaseTestCase):
+class DeploymentEntryPointAuditComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive tests for deployment entry point audit system.
     """

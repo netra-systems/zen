@@ -100,7 +100,7 @@ def mock_websocket_bridge_factory():
     return lambda: MockWebSocketBridge()
 
 
-class TestUserContextToolFactoryBasics:
+class UserContextToolFactoryBasicsTests:
     """Test basic functionality and interfaces of UserContextToolFactory."""
     
     @pytest.mark.unit
@@ -117,7 +117,7 @@ class TestUserContextToolFactoryBasics:
         assert isinstance(tool_classes, list)
 
 
-class TestUserContextToolFactoryCompleteSystemCreation:
+class UserContextToolFactoryCompleteSystemCreationTests:
     """Test complete tool system creation with all components."""
     
     @pytest.mark.unit
@@ -212,7 +212,7 @@ class TestUserContextToolFactoryCompleteSystemCreation:
         assert len(mock_registry.registered_tools) == 0
 
 
-class TestUserContextToolFactoryUserIsolation:
+class UserContextToolFactoryUserIsolationTests:
     """Test critical user isolation functionality - prevents $10M+ churn from data leaks."""
     
     @pytest.mark.unit
@@ -333,7 +333,7 @@ class TestUserContextToolFactoryUserIsolation:
                 assert systems[i]['correlation_id'] != systems[j]['correlation_id']
 
 
-class TestUserContextToolFactoryErrorHandling:
+class UserContextToolFactoryErrorHandlingTests:
     """Test error handling and graceful degradation."""
     
     @pytest.mark.unit
@@ -440,7 +440,7 @@ class TestUserContextToolFactoryErrorHandling:
             )
 
 
-class TestUserContextToolFactoryMinimalSystem:
+class UserContextToolFactoryMinimalSystemTests:
     """Test minimal system creation for lightweight scenarios."""
     
     @pytest.mark.unit
@@ -477,7 +477,7 @@ class TestUserContextToolFactoryMinimalSystem:
         assert result == expected_result
 
 
-class TestUserContextToolFactoryValidation:
+class UserContextToolFactoryValidationTests:
     """Test tool system validation functionality."""
     
     @pytest.mark.unit
@@ -541,7 +541,7 @@ class TestUserContextToolFactoryValidation:
         assert result is True
 
 
-class TestUserContextToolFactoryWebSocketBridgeIntegration:
+class UserContextToolFactoryWebSocketBridgeIntegrationTests:
     """Test WebSocket bridge integration with factory."""
     
     @pytest.mark.unit
@@ -614,7 +614,7 @@ class TestUserContextToolFactoryWebSocketBridgeIntegration:
         assert system1['bridge'] is not system2['bridge']
 
 
-class TestUserContextToolFactoryPerformanceAndStress:
+class UserContextToolFactoryPerformanceAndStressTests:
     """Test performance characteristics and stress scenarios."""
     
     @pytest.mark.unit
@@ -685,7 +685,7 @@ class TestUserContextToolFactoryPerformanceAndStress:
             assert len(system['tools']) == 1
 
 
-class TestUserContextToolFactoryEdgeCasesAndRobustness:
+class UserContextToolFactoryEdgeCasesAndRobustnessTests:
     """Test edge cases and robustness scenarios."""
     
     @pytest.mark.unit
@@ -746,7 +746,7 @@ class TestUserContextToolFactoryEdgeCasesAndRobustness:
         assert result is False
 
 
-class TestGetAppToolClasses:
+class GetAppToolClassesTests:
     """Test the standalone get_app_tool_classes function."""
     
     @pytest.mark.unit

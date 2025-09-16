@@ -21,7 +21,7 @@ from dev_launcher.launcher import DevLauncher
 from dev_launcher.process_manager import ProcessManager
 
 
-class TestDevUserCreation:
+class DevUserCreationTests:
     """Test development environment initialization and management"""
 
     @pytest.fixture
@@ -136,7 +136,7 @@ class TestDevUserCreation:
             assert dev_launcher.parallel_executor is None
 
 
-class TestDevWorkflowOptimization:
+class DevWorkflowOptimizationTests:
     """Test developer workflow optimization features"""
 
     @pytest.fixture
@@ -212,7 +212,7 @@ class TestDevWorkflowOptimization:
         assert 'cached_steps' in report
 
 
-class TestDevLauncherIntegration:
+class DevLauncherIntegrationTests:
     """Test integrated launcher workflows"""
 
     @pytest.fixture

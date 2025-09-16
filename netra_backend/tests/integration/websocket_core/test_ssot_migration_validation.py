@@ -36,7 +36,7 @@ try:
     LEGACY_USER_SCOPED_ROUTER_AVAILABLE = True
 except ImportError:
     LEGACY_USER_SCOPED_ROUTER_AVAILABLE = False
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 from shared.types.core_types import UserID, ensure_user_id
@@ -48,7 +48,7 @@ logger = get_logger(__name__)
 @pytest.mark.websocket_ssot
 @pytest.mark.non_docker
 @pytest.mark.issue_1058_migration_validation
-class TestSSOTMigrationValidation(SSotAsyncTestCase):
+class SSOTMigrationValidationTests(SSotAsyncTestCase):
     """Integration tests validating safe SSOT migration and rollback capabilities.
 
     CRITICAL: These tests ensure SSOT migration can be deployed to production
@@ -345,7 +345,7 @@ class TestSSOTMigrationValidation(SSotAsyncTestCase):
         logger.info(f'✅ Data consistency validated: {len(successful_patterns)}/{total_patterns} patterns consistent')
 
 @pytest.mark.migration_stress_test
-class TestSSOTMigrationStressValidation:
+class SSOTMigrationStressValidationTests:
     """Stress tests for SSOT migration validation."""
 
     @pytest.mark.asyncio

@@ -219,7 +219,7 @@ async def redis_connection_pool_test():
     yield pool_test
     await pool_test.cleanup()
 
-class TestRealRedisBasicOperations:
+class RealRedisBasicOperationsTests:
     """Test basic Redis operations with real Redis instance."""
 
     @pytest.mark.asyncio
@@ -292,7 +292,7 @@ class TestRealRedisBasicOperations:
         assert incrby_result == 15, 'INCRBY should return 15'
         logger.info('Atomic operations test completed successfully')
 
-class TestRealRedisCacheOperations:
+class RealRedisCacheOperationsTests:
     """Test Redis caching operations and patterns."""
 
     @pytest.mark.asyncio
@@ -357,7 +357,7 @@ class TestRealRedisCacheOperations:
         assert 'last_activity' in updated_session, 'Should have last_activity field'
         logger.info('Session management test completed successfully')
 
-class TestRealRedisConnectionPooling:
+class RealRedisConnectionPoolingTests:
     """Test Redis connection pooling and concurrent operations."""
 
     @pytest.mark.asyncio
@@ -444,7 +444,7 @@ class TestRealRedisConnectionPooling:
         assert ops_per_second > 50, f'Should achieve reasonable throughput: {ops_per_second:.2f} ops/sec'
         assert total_time < 30, f'Load test should complete in reasonable time: {total_time:.2f}s'
 
-class TestRealRedisErrorHandlingAndRecovery:
+class RealRedisErrorHandlingAndRecoveryTests:
     """Test Redis error handling and recovery scenarios."""
 
     @pytest.mark.asyncio

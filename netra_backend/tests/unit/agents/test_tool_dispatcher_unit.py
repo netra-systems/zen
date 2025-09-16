@@ -39,7 +39,7 @@ class MockTool(BaseTool):
         return "async mock tool result"
 
 
-class TestToolDispatcherFacade:
+class ToolDispatcherFacadeTests:
     """Unit tests for tool dispatcher facade and factory patterns."""
 
     def test_backward_compatibility_alias(self):

@@ -16,7 +16,7 @@ from unittest.mock import Mock, AsyncMock
 
 
 @pytest.mark.unit
-class TestWebSocketEventDuplicationSimple567(unittest.TestCase):
+class WebSocketEventDuplicationSimple567Tests(unittest.TestCase):
     """
     Simple unit tests for WebSocket event duplication prevention.
     

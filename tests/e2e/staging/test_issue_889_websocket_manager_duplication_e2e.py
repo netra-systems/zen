@@ -48,7 +48,7 @@ except ImportError as e:
 
 # WebSocket manager imports - testing staging environment
 try:
-    from netra_backend.app.websocket_core.websocket_manager import (
+    from netra_backend.app.websocket_core.canonical_import_patterns import (
         get_websocket_manager,
         _UnifiedWebSocketManagerImplementation,
         WebSocketManagerMode,
@@ -61,7 +61,7 @@ except ImportError as e:
 
 
 @pytest.mark.e2e
-class TestIssue889WebSocketManagerDuplicationE2E(SSotAsyncTestCase):
+class Issue889WebSocketManagerDuplicationE2ETests(SSotAsyncTestCase):
     """
     E2E tests for Issue #889 WebSocket Manager SSOT Violations in Staging Environment
     

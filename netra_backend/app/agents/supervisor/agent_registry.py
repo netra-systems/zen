@@ -54,7 +54,9 @@ else:
     # Import at runtime to avoid circular imports
     create_agent_websocket_bridge = None
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
+
+central_logger = get_logger(__name__)
 
 # CRITICAL ISSUE #387 REMEDIATION: Agent Execution Prerequisites Validation  
 from netra_backend.app.agents.supervisor.agent_execution_prerequisites import (
@@ -62,7 +64,7 @@ from netra_backend.app.agents.supervisor.agent_execution_prerequisites import (
     PrerequisiteValidationLevel
 )
 
-logger = central_logger.get_logger(__name__)
+logger = central_logger
 
 
 # SSOT CONSOLIDATION: Agent enums moved here to break circular imports

@@ -106,7 +106,7 @@ class GoldenPathResult:
 
 
 @pytest.mark.integration
-class TestReportingAgentUserContextGoldenPath(SSotAsyncTestCase):
+class ReportingAgentUserContextGoldenPathTests(SSotAsyncTestCase):
     """
     Golden Path tests ensuring ReportingSubAgent works with UserExecutionContext.
     

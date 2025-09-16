@@ -50,7 +50,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 # Core WebSocket and agent imports for real integration testing
 from netra_backend.app.websocket_core.types import MessageType
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.event_monitor import EventType
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
@@ -150,7 +150,7 @@ class MockWebSocketManager:
         return critical_events
 
 
-class TestWebSocketAgentEventsIntegrationComprehensive(SSotAsyncTestCase):
+class WebSocketAgentEventsIntegrationComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive Integration Tests for WebSocket Agent Event Notifications.
     

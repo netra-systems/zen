@@ -22,7 +22,7 @@ from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from netra_backend.app.db.health_checks import DatabaseHealthChecker
 from netra_backend.app.db.migrations.migration_runner import MigrationRunner
 
-class TestClickHouseConnectionPool:
+class ClickHouseConnectionPoolTests:
     """test_clickhouse_connection_pool - Test connection pooling and query timeout"""
 
     @pytest.mark.asyncio
@@ -92,7 +92,7 @@ class TestClickHouseConnectionPool:
 
 
 
-class TestMigrationRunnerSafety:
+class MigrationRunnerSafetyTests:
     """test_migration_runner_safety - Test migration safety and rollback capability"""
 
     @pytest.mark.asyncio
@@ -126,7 +126,7 @@ class TestMigrationRunnerSafety:
         # Migration commit handled internally
 
 
-class TestDatabaseHealthChecks:
+class DatabaseHealthChecksTests:
     """test_database_health_checks - Test health monitoring and alert thresholds"""
 
     @pytest.mark.asyncio
@@ -203,12 +203,12 @@ def _create_failing_migration():
 
 def _create_test_migration():
     """Create test migration."""
-    class TestMigration:
+    class MigrationTests:
         async def up(self, session):
             await session.execute("CREATE TABLE test_table (id INT)")
             await session.execute("INSERT INTO test_table VALUES (1)")
 
-    return TestMigration()
+    return MigrationTests()
 
 
 

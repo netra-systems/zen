@@ -75,7 +75,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.e2e
-class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase):
+class ConfigurationValidatorGoldenPathTests(SSotAsyncTestCase, unittest.TestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

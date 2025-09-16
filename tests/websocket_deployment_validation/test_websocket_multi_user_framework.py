@@ -712,7 +712,7 @@ class MultiUserWebSocketTestSuite:
 @pytest.mark.asyncio
 @pytest.mark.deployment
 @pytest.mark.websocket
-class TestMultiUserWebSocket:
+class MultiUserWebSocketTests:
     """Pytest integration for multi-user WebSocket testing."""
     
     @pytest.fixture(scope="class")

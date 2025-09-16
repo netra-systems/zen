@@ -246,7 +246,7 @@ class MockAgentLifecycleManager:
         self.cleanup_operations = []
 
 
-class TestAgentLifecycleEvents(SSotAsyncTestCase):
+class AgentLifecycleEventsTests(SSotAsyncTestCase):
     """Test agent lifecycle event generation for Golden Path business value."""
 
     def setup_method(self, method):

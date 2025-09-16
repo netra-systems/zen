@@ -48,7 +48,7 @@ import redis.asyncio as redis
 
 
 @pytest.mark.integration
-class TestBillingPaymentIntegrationReal:
+class BillingPaymentIntegrationRealTests:
     """
     REAL Integration Test for Complete Billing System
     

@@ -49,7 +49,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
-class TestGoldenPathDatabaseFlow:
+class GoldenPathDatabaseFlowTests:
     """
     Golden Path E2E Database Flow Test Suite.
     

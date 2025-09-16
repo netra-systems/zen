@@ -11,7 +11,7 @@ from test_framework.unified_docker_manager import UnifiedDockerManager, Environm
 
 
 @pytest.mark.unit
-class TestUnifiedDockerManagerParameterValidation:
+class UnifiedDockerManagerParameterValidationTests:
     """Test parameter validation for UnifiedDockerManager initialization."""
 
     def test_invalid_environment_parameter_rejected(self):

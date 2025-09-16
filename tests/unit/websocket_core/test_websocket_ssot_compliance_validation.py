@@ -26,7 +26,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.unit
-class TestWebSocketSSOTComplianceValidation(SSotAsyncTestCase):
+class WebSocketSSOTComplianceValidationTests(SSotAsyncTestCase):
     """Comprehensive SSOT compliance validation for WebSocket imports."""
 
     async def asyncSetUp(self):
@@ -155,11 +155,11 @@ class TestWebSocketSSOTComplianceValidation(SSotAsyncTestCase):
         """
         canonical_patterns = [
             {
-                'pattern': 'from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager',
+                'pattern': 'from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager',
                 'expected_callable': 'get_websocket_manager'
             },
             {
-                'pattern': 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
+                'pattern': 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager',
                 'expected_class': 'WebSocketManager'
             }
         ]
@@ -167,14 +167,14 @@ class TestWebSocketSSOTComplianceValidation(SSotAsyncTestCase):
         for pattern_info in canonical_patterns:
             try:
                 if 'expected_callable' in pattern_info:
-                    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                     self.assertTrue(
                         callable(get_websocket_manager),
                         f"SSOT canonical import failed: {pattern_info['pattern']}"
                     )
 
                 elif 'expected_class' in pattern_info:
-                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                     self.assertTrue(
                         inspect.isclass(WebSocketManager),
                         f"SSOT canonical import failed: {pattern_info['pattern']}"
@@ -320,7 +320,7 @@ class TestWebSocketSSOTComplianceValidation(SSotAsyncTestCase):
                                 'event': event,
                                 'status': 'SSOT_VIOLATION'
                             })
-                        elif 'from netra_backend.app.websocket_core.websocket_manager import' in content:
+                        elif 'from netra_backend.app.websocket_core.canonical_import_patterns import' in content:
                             ssot_compliant_emissions += 1
                             self.compliant_imports.append({
                                 'type': 'event_emission_ssot_compliant',
@@ -375,7 +375,7 @@ class TestWebSocketSSOTComplianceValidation(SSotAsyncTestCase):
 
             # Test canonical pattern (should work)
             try:
-                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                 canonical_manager = get_websocket_manager(user_context=test_context)
                 creation_results['canonical_pattern'] = 'SUCCESS'
             except Exception as e:
@@ -383,7 +383,7 @@ class TestWebSocketSSOTComplianceValidation(SSotAsyncTestCase):
 
             # Test direct instantiation (should work)
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 direct_manager = WebSocketManager(user_context=test_context)
                 creation_results['direct_instantiation'] = 'SUCCESS'
             except Exception as e:
@@ -446,7 +446,7 @@ if __name__ == '__main__':
     import asyncio
 
     async def run_async_tests():
-        test_instance = TestWebSocketSSOTComplianceValidation()
+        test_instance = WebSocketSSOTComplianceValidationTests()
         await test_instance.asyncSetUp()
 
         # Run sync tests

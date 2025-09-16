@@ -31,7 +31,7 @@ import websockets
 from tests.e2e.config import TestDataFactory, create_unified_config
 
 
-class TestObservabilityHarness:
+class ObservabilityHarnessTests:
     """Test harness for observability validation"""
     
     def __init__(self):

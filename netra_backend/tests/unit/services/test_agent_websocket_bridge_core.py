@@ -32,7 +32,7 @@ from dataclasses import dataclass
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, IntegrationState, IntegrationConfig, HealthStatus, IntegrationResult, IntegrationMetrics
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext, create_defensive_user_execution_context
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.monitoring.interfaces import MonitorableComponent
@@ -84,7 +84,7 @@ class MockThreadRunRegistry:
         """Mock health check."""
         return self.is_healthy
 
-class TestAgentWebSocketBridgeCore(SSotAsyncTestCase):
+class AgentWebSocketBridgeCoreTests(SSotAsyncTestCase):
     """Comprehensive unit tests for AgentWebSocketBridge core functionality."""
 
     def setup_method(self, method):

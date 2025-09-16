@@ -35,7 +35,7 @@ RECOVERY_CONFIG = {
     "resilience_test_duration": 120   # 2 minutes
 }
 
-class TestErrorRecoveryAndResilience:
+class ErrorRecoveryAndResilienceTests:
     """Test error recovery and system resilience"""
     
     @pytest.mark.asyncio

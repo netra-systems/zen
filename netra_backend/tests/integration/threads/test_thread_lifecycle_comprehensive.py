@@ -50,7 +50,7 @@ from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 from netra_backend.app.services.database.unit_of_work import get_unit_of_work
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
 from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context
 from netra_backend.app.db.models_postgres import Thread, Message, User
 from netra_backend.app.schemas.core_models import Thread as ThreadModel, ThreadMetadata
@@ -114,7 +114,7 @@ async def clean_test_data(database_manager):
         await session.execute(text("DELETE FROM messages WHERE thread_id LIKE 'test_%'"))
 
 
-class TestThreadLifecycleComprehensive(BaseIntegrationTest):
+class ThreadLifecycleComprehensiveTests(BaseIntegrationTest):
     """Comprehensive thread lifecycle integration tests with real services."""
 
     # =============================================================================

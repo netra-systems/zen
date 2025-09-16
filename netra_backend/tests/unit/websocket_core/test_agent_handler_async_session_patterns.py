@@ -30,7 +30,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestAgentHandlerAsyncSessionPatterns(SSotBaseTestCase):
+class AgentHandlerAsyncSessionPatternsTests(SSotBaseTestCase):
     """
     Unit tests for async session patterns in agent_handler.py
     

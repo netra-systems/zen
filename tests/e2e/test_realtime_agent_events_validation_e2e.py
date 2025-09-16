@@ -47,7 +47,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.e2e
 @pytest.mark.staging_compatible
-class TestRealtimeAgentEventsValidationE2E(SSotBaseTestCase):
+class RealtimeAgentEventsValidationE2ETests(SSotBaseTestCase):
     """
     MISSION CRITICAL E2E Tests for Real-time Agent Event Quality Validation.
     

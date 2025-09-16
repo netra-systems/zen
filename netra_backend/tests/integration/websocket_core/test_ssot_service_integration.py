@@ -26,7 +26,7 @@ from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
 from typing import Dict, Any, List, Optional, Set
 from netra_backend.app.services.websocket_broadcast_service import WebSocketBroadcastService, BroadcastResult, create_broadcast_service
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.websocket_core.factory import create_websocket_manager
 try:
@@ -47,7 +47,7 @@ logger = get_logger(__name__)
 @pytest.mark.websocket_ssot
 @pytest.mark.non_docker
 @pytest.mark.issue_1058_service_integration
-class TestSSOTServiceIntegration(SSotAsyncTestCase):
+class SSOTServiceIntegrationTests(SSotAsyncTestCase):
     """Integration tests validating SSOT service integration across system boundaries.
 
     CRITICAL: These tests validate SSOT consolidation works correctly with
@@ -264,7 +264,7 @@ class TestSSOTServiceIntegration(SSotAsyncTestCase):
         logger.info(f'✅ Integration error resilience validated - {len(error_scenarios)} scenarios tested')
 
 @pytest.mark.integration_performance
-class TestSSOTIntegrationPerformance:
+class SSOTIntegrationPerformanceTests:
     """Performance integration tests for SSOT service."""
 
     @pytest.mark.asyncio

@@ -93,7 +93,7 @@ class PerformanceMeasurementContext:
 @pytest.mark.unit
 @pytest.mark.performance
 @pytest.mark.benchmark
-class TestAlgorithmicPerformanceUnit:
+class AlgorithmicPerformanceUnitTests:
     """Test core algorithm performance - critical for business SLAs."""
 
     @pytest.fixture
@@ -384,7 +384,7 @@ class TestAlgorithmicPerformanceUnit:
 @pytest.mark.unit
 @pytest.mark.performance
 @pytest.mark.benchmark
-class TestPerformanceSLACompliance:
+class PerformanceSLAComplianceTests:
     """Validate unit-level performance SLA compliance - business critical."""
 
     def test_performance_sla_validation(self):

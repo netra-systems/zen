@@ -14,7 +14,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.integration
-class TestSystemIntegrationValidation:
+class SystemIntegrationValidationTests:
     """Test system-wide integration validation."""
 
     def test_cross_service_imports_work(self):
@@ -137,7 +137,7 @@ class TestSystemIntegrationValidation:
     def test_websocket_integration_ready(self):
         """Test that WebSocket integration is ready."""
         from netra_backend.app.routes.websocket import router
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
         
         assert router is not None
         assert WebSocketManager is not None
@@ -221,7 +221,7 @@ class TestSystemIntegrationValidation:
 
         # Test WebSocket health
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             health_status['websocket'] = WebSocketManager is not None
         except Exception:
             health_status['websocket'] = False

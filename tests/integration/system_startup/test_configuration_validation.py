@@ -30,7 +30,7 @@ from shared.configuration.central_config_validator import (
 )
 
 
-class TestConfigurationValidation(SSotBaseTestCase):
+class ConfigurationValidationTests(SSotBaseTestCase):
     """Integration tests for configuration validation during system startup."""
     
     def setup_method(self, method):

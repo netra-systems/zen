@@ -28,7 +28,7 @@ def backend_decode(encoded_token: str) -> str:
     decoded_string = decoded_bytes.decode('utf-8')
     return decoded_string
 
-class TestWebSocketJWTEncodingFailureScenarios:
+class WebSocketJWTEncodingFailureScenariosTests:
     """Test suite demonstrating failure scenarios if the fix is reverted."""
 
     def test_broken_encoding_fails_with_special_chars(self):
@@ -94,7 +94,7 @@ class TestWebSocketJWTEncodingFailureScenarios:
         decoded = backend_decode(wrong_encoded)
         assert decoded == jwt_token
 
-class TestProductionReadinessChecks:
+class ProductionReadinessChecksTests:
     """Tests to ensure the fix is production-ready."""
 
     def test_performance_with_large_tokens(self):

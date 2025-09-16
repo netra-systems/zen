@@ -17,7 +17,7 @@ import re
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
-class TestEventValidatorMigrationValidation(SSotBaseTestCase):
+class EventValidatorMigrationValidationTests(SSotBaseTestCase):
     """
     Migration validation for EventValidator SSOT consolidation.
     

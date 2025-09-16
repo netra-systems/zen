@@ -40,7 +40,7 @@ class MockStartupPhase(Enum):
 
 
 @pytest.mark.unit
-class TestStartupPhaseCoordination:
+class StartupPhaseCoordinationTests:
     """Test startup phase coordination with WebSocket validation."""
     
     @pytest.fixture
@@ -246,7 +246,7 @@ class TestStartupPhaseCoordination:
 
 
 @pytest.mark.unit
-class TestTimeoutConfiguration:
+class TimeoutConfigurationTests:
     """Test timeout configuration and environment-specific behavior."""
     
     @pytest.fixture
@@ -321,7 +321,7 @@ class TestTimeoutConfiguration:
 
 
 @pytest.mark.unit
-class TestAppStateIntegration:
+class AppStateIntegrationTests:
     """Test app_state integration and synchronization."""
     
     def test_app_state_availability_detection(self):
@@ -405,7 +405,7 @@ class TestAppStateIntegration:
 
 
 @pytest.mark.unit
-class TestGracefulDegradation:
+class GracefulDegradationTests:
     """Test graceful degradation during race conditions."""
     
     @pytest.fixture

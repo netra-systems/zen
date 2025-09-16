@@ -26,12 +26,12 @@ import threading
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.core.config import get_config
 
 
 @pytest.mark.integration
-class TestUserSessionIsolationBoundaries(BaseIntegrationTest):
+class UserSessionIsolationBoundariesTests(BaseIntegrationTest):
     """
     Test user session isolation boundaries under concurrent access patterns.
     

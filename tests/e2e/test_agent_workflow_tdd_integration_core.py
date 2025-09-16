@@ -8,7 +8,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 @pytest.mark.e2e
-class TestAgentWorkflowTddIntegrationCore:
+class AgentWorkflowTddIntegrationCoreTests:
     """Test class for agent_workflow_tdd_integration_core"""
 
     def setup_method(self):

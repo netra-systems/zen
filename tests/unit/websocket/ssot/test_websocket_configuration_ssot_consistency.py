@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SsotTestMetrics
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 @pytest.mark.unit
-class TestWebSocketConfigurationSSOTConsistency(SSotBaseTestCase):
+class WebSocketConfigurationSSOTConsistencyTests(SSotBaseTestCase):
     """Unit tests for WebSocket configuration SSOT consistency (Issue #507)"""
 
     def setup_method(self, method):
@@ -151,7 +151,7 @@ class TestWebSocketConfigurationSSOTConsistency(SSotBaseTestCase):
                 pytest.fail(f'SSOT VIOLATION: Both variables exist - NEXT_PUBLIC_WS_URL={canonical_url}, NEXT_PUBLIC_WEBSOCKET_URL={deprecated_url}. Issue #507 SSOT migration required.')
 
 @pytest.mark.unit
-class TestWebSocketServiceConfigurationIntegration(SSotBaseTestCase):
+class WebSocketServiceConfigurationIntegrationTests(SSotBaseTestCase):
     """Unit tests for WebSocket service configuration integration"""
 
     def setup_method(self, method):

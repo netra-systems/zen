@@ -21,7 +21,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestImportPathUnificationValidation(SSotAsyncTestCase):
+class ImportPathUnificationValidationTests(SSotAsyncTestCase):
     """Test import path unification for WebSocket Manager SSOT."""
 
     def setUp(self):
@@ -225,7 +225,7 @@ class TestImportPathUnificationValidation(SSotAsyncTestCase):
                 if module_name in sys.modules:
                     del sys.modules[module_name]
 
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 canonical_classes.append({
                     'iteration': i,
                     'class': WebSocketManager,
@@ -261,7 +261,7 @@ class TestImportPathUnificationValidation(SSotAsyncTestCase):
         canonical_class = None
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CanonicalWSM
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as CanonicalWSM
             canonical_class = CanonicalWSM
             canonical_id = id(CanonicalWSM)
             logger.info(f"✓ Canonical WebSocketManager loaded (id: {canonical_id})")

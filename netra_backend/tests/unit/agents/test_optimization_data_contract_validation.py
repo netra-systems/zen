@@ -16,7 +16,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.core_types import UserID, ThreadID, RunID
 
 
-class TestOptimizationDataContractValidation:
+class OptimizationDataContractValidationTests:
     """Test data contract validation in OptimizationsCoreSubAgent."""
 
     def setup_method(self):

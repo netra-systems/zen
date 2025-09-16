@@ -85,7 +85,7 @@ class ServiceDependencyMetrics:
     error_recoveries: int = 0
 
 
-class TestBackendToAuthServiceIntegration:
+class BackendToAuthServiceIntegrationTests:
     """
     Integration tests for Backend [U+2194] Auth Service dependency using real services.
     
@@ -350,7 +350,7 @@ class TestBackendToAuthServiceIntegration:
             }
 
 
-class TestBackendToDatabaseIntegration:
+class BackendToDatabaseIntegrationTests:
     """
     Integration tests for Backend [U+2194] PostgreSQL database dependency using real database.
     
@@ -555,7 +555,7 @@ class TestBackendToDatabaseIntegration:
             }
 
 
-class TestBackendToRedisIntegration:
+class BackendToRedisIntegrationTests:
     """
     Integration tests for Backend [U+2194] Redis cache dependency using real Redis.
     
@@ -772,7 +772,7 @@ class TestBackendToRedisIntegration:
             assert recovery_result == "normal_value", "Redis recovery failed"
 
 
-class TestCrossServiceDependencyChains:
+class CrossServiceDependencyChainsTests:
     """
     Integration tests for complete service dependency chains using real services.
     

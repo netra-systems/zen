@@ -45,7 +45,7 @@ except ImportError:
     SSOT_AVAILABLE = False
     
 
-class TestAuthServiceIDGenerationCompliance(BaseIntegrationTest):
+class AuthServiceIDGenerationComplianceTests(BaseIntegrationTest):
     """
     Test suite to expose auth service ID generation SSOT violations.
     

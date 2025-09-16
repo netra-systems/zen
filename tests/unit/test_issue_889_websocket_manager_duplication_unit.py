@@ -49,7 +49,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 
 # Import core WebSocket components to test duplication patterns
 try:
-    from netra_backend.app.websocket_core.websocket_manager import (
+    from netra_backend.app.websocket_core.canonical_import_patterns import (
         WebSocketManager,
         UnifiedWebSocketManager,
         WebSocketManagerFactory,
@@ -92,7 +92,7 @@ class UserContextMock:
             self.connection_id = f"conn-{self.user_id}-{self.session_id}"
 
 
-class TestIssue889WebSocketManagerDuplicationUnit(SSotBaseTestCase):
+class Issue889WebSocketManagerDuplicationUnitTests(SSotBaseTestCase):
     """
     Unit tests to reproduce WebSocket manager duplication for demo-user-001.
 

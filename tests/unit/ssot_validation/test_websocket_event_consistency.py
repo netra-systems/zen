@@ -25,7 +25,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
 @pytest.mark.unit
-class TestWebSocketEventConsistencyValidation(SSotAsyncTestCase):
+class WebSocketEventConsistencyValidationTests(SSotAsyncTestCase):
     """Test WebSocket event consistency across SSOT tool dispatcher implementations."""
 
     async def asyncSetUp(self):
@@ -213,7 +213,7 @@ class TestWebSocketEventConsistencyValidation(SSotAsyncTestCase):
         self.assertEqual(len(error_scenarios), 0, f'WEBSOCKET ERROR HANDLING VIOLATIONS: {error_scenarios}')
 
 @pytest.mark.unit
-class TestWebSocketEventTimingAndOrdering(SSotAsyncTestCase):
+class WebSocketEventTimingAndOrderingTests(SSotAsyncTestCase):
     """Test WebSocket event timing and ordering consistency."""
 
     async def asyncSetUp(self):

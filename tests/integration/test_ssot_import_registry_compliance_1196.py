@@ -18,7 +18,7 @@ from unittest.mock import patch
 import traceback
 
 
-class TestSSotImportRegistryComplianceIssue1196(unittest.TestCase):
+class SSotImportRegistryComplianceIssue1196Tests(unittest.TestCase):
     """Integration test suite for SSOT Import Registry compliance validation.
 
     Tests MUST demonstrate registry inaccuracies and performance inconsistencies
@@ -34,10 +34,10 @@ class TestSSotImportRegistryComplianceIssue1196(unittest.TestCase):
         self.ssot_registry_imports = {
             # WebSocket Manager - should be single canonical path
             "WebSocketManager": {
-                "canonical": "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+                "canonical": "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
                 "alternatives": [
                     "from netra_backend.app.websocket_core import WebSocketManager",  # Deprecated
-                    "from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager",  # SSOT but different name
+                    "from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager",  # SSOT but different name
                     "from netra_backend.app.websocket_core.manager import WebSocketManager",  # Legacy
                 ]
             },
@@ -198,13 +198,13 @@ class TestSSotImportRegistryComplianceIssue1196(unittest.TestCase):
         problematic_sequences = [
             # WebSocket -> ExecutionEngine -> WebSocket cycle
             [
-                "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+                "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
                 "from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine",
             ],
             # AgentRegistry -> WebSocket -> AgentRegistry cycle
             [
                 "from netra_backend.app.agents.registry import AgentRegistry",
-                "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+                "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
             ],
             # ExecutionEngine -> AgentRegistry -> ExecutionEngine cycle
             [
@@ -274,7 +274,7 @@ class TestSSotImportRegistryComplianceIssue1196(unittest.TestCase):
                     del sys.modules[mod]
 
             # Import via canonical path
-            exec("from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WM1")
+            exec("from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WM1")
             canonical_instance = locals().get('WM1')
 
             # Clear and import via alternative path
@@ -325,7 +325,7 @@ class TestSSotImportRegistryComplianceIssue1196(unittest.TestCase):
         # Common import patterns we know exist but might not be documented
         undocumented_patterns = [
             "from netra_backend.app.websocket_core.manager import WebSocketManager",
-            "from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager",
+            "from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager",
             "from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry",
             "from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine",
         ]

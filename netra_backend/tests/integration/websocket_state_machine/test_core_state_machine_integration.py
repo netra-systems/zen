@@ -40,7 +40,7 @@ from netra_backend.app.websocket_core.connection_state_machine import (
 )
 
 
-class TestCoreStateMachineIntegration(BaseIntegrationTest):
+class CoreStateMachineIntegrationTests(BaseIntegrationTest):
     """Comprehensive tests for WebSocket connection state machine core functionality."""
 
     @pytest.mark.integration

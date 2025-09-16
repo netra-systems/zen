@@ -58,7 +58,7 @@ async def authenticated_user():
     return await auth_helper.create_test_user_session()
 
 
-class TestRealServiceErrorHandling:
+class RealServiceErrorHandlingTests:
     """Test error handling with real backend services."""
 
     @pytest.mark.asyncio
@@ -203,7 +203,7 @@ class TestRealServiceErrorHandling:
         assert "rate_limit_status" not in details
 
 
-class TestComplexErrorScenarios:
+class ComplexErrorScenariosTests:
     """Test complex error scenarios requiring detailed debugging."""
 
     @pytest.mark.asyncio
@@ -303,7 +303,7 @@ class TestComplexErrorScenarios:
             assert "cpu_time_ms" not in details
 
 
-class TestEnvironmentSpecificDebugInfo:
+class EnvironmentSpecificDebugInfoTests:
     """Test environment-specific debug information handling."""
 
     @pytest.mark.asyncio
@@ -360,7 +360,7 @@ class TestEnvironmentSpecificDebugInfo:
             assert "database_service_debug" not in details
 
 
-class TestRealTimeDebugging:
+class RealTimeDebuggingTests:
     """Test real-time debugging capabilities."""
 
     @pytest.mark.asyncio
@@ -418,7 +418,7 @@ class TestRealTimeDebugging:
         pass
 
 
-class TestErrorHandlerIntegrationAPI:
+class ErrorHandlerIntegrationAPITests:
     """Test unified error handler integration with real API endpoints."""
 
     @pytest.mark.asyncio

@@ -23,7 +23,7 @@ from dev_launcher.service_discovery import ServiceDiscovery
 # Remove service_config import until module exists
 
 
-class TestLauncherConfig(SSotBaseTestCase):
+class LauncherConfigTests(SSotBaseTestCase):
     """Test configuration management."""
     
     def test_config_defaults(self):
@@ -94,7 +94,7 @@ class TestLauncherConfig(SSotBaseTestCase):
         self.assertTrue(config.no_browser)
 
 
-class TestServiceDiscovery(SSotBaseTestCase):
+class ServiceDiscoveryTests(SSotBaseTestCase):
     """Test service discovery functionality."""
     
     def test_service_info_persistence(self):
@@ -178,7 +178,7 @@ class TestServiceDiscovery(SSotBaseTestCase):
         pass
 
 
-class TestEnvironmentConfiguration(SSotBaseTestCase):
+class EnvironmentConfigurationTests(SSotBaseTestCase):
     """Test environment-based configuration."""
     
     def test_multi_environment_launch(self):

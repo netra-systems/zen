@@ -121,7 +121,7 @@ def validate_websocket_fixes():
     # Test WebSocket manager import and instantiation
     test_code = '''
 import asyncio
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # Test synchronous call works

@@ -32,7 +32,7 @@ class MockAgent(AgentObservabilityMixin):
         self._execution_metrics = AgentExecutionMetrics(execution_time_ms=100.0)
 
 
-class TestAgentObservability(SSotBaseTestCase):
+class AgentObservabilityTests(SSotBaseTestCase):
     """Test agent observability functionality."""
 
     def setup_method(self, method=None):

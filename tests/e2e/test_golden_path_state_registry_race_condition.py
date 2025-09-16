@@ -45,7 +45,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
-class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
+class GoldenPathStateRegistryRaceConditionTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

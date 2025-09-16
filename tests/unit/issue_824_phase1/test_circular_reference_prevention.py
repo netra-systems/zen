@@ -22,7 +22,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestCircularReferencePreventionValidation(SSotAsyncTestCase):
+class CircularReferencePreventionValidationTests(SSotAsyncTestCase):
     """Test circular reference prevention for WebSocket Manager SSOT."""
 
     def setUp(self):
@@ -163,7 +163,7 @@ class TestCircularReferencePreventionValidation(SSotAsyncTestCase):
 
         try:
             # Test importing the canonical WebSocket Manager
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             logger.info("✓ WebSocketManager imported successfully")
 
             # Verify it's actually usable (not just importable)
@@ -194,7 +194,7 @@ class TestCircularReferencePreventionValidation(SSotAsyncTestCase):
             logger.info("✓ Factory module imported successfully")
 
             # Test that factory doesn't cause circular issues with manager
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             logger.info("✓ Manager imported after factory without issues")
 
             # Test reverse order
@@ -222,7 +222,7 @@ class TestCircularReferencePreventionValidation(SSotAsyncTestCase):
             logger.info("✓ WebSocket routes imported successfully")
 
             # Test that routes can access WebSocket manager without cycles
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             logger.info("✓ Manager accessible from routes without circular issues")
 
         except ImportError as e:
@@ -243,7 +243,7 @@ class TestCircularReferencePreventionValidation(SSotAsyncTestCase):
             logger.info("✓ Protocols module imported successfully")
 
             # Test that protocols and manager can coexist
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             logger.info("✓ Manager and protocols coexist without circular issues")
 
             # Verify protocols don't depend on manager implementation

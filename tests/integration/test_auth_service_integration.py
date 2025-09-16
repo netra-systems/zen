@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.database_test_utilities import DatabaseTestUtilities
 
 @pytest.mark.integration
-class TestAuthServiceIntegration(SSotAsyncTestCase):
+class AuthServiceIntegrationTests(SSotAsyncTestCase):
     """Integration tests for auth service connectivity across multiple modules"""
 
     async def asyncSetUp(self):

@@ -54,7 +54,7 @@ class SLADefinition:
     success_rate_threshold: float = 0.99
 
 
-class TestResponseTimeSLACompliance(BaseIntegrationTest):
+class ResponseTimeSLAComplianceTests(BaseIntegrationTest):
     """Test response time SLAs across all system operations."""
     
     # Define SLA thresholds for different operations

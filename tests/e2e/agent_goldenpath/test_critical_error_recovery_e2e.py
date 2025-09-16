@@ -71,7 +71,7 @@ class ErrorRecoveryResult:
 @pytest.mark.agent_goldenpath
 @pytest.mark.error_recovery
 @pytest.mark.mission_critical
-class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
+class CriticalErrorRecoveryE2ETests(SSotAsyncTestCase):
     """
     E2E tests for validating critical error recovery and system resilience.
 

@@ -188,7 +188,7 @@ class MockUserExecutionContext:
         self.request_id = request_id or f'req_{uuid.uuid4().hex[:8]}'
         self.metadata = {}
 
-class TestEngineConfig(BaseTestCase):
+class EngineConfigTests(BaseTestCase):
     """Test EngineConfig model and validation."""
 
     def test_engine_config_default_values(self):
@@ -231,7 +231,7 @@ class TestEngineConfig(BaseTestCase):
         self.assertEqual(config.max_concurrent_agents, 1)
         self.assertEqual(config.agent_execution_timeout, 1.0)
 
-class TestAgentExecutionContext(BaseTestCase):
+class AgentExecutionContextTests(BaseTestCase):
     """Test AgentExecutionContext model."""
 
     def test_agent_execution_context_creation(self):
@@ -278,7 +278,7 @@ class TestAgentExecutionContext(BaseTestCase):
         self.assertEqual(context.max_retries, 5)
         self.assertEqual(context.timeout, 30)
 
-class TestAgentExecutionResult(BaseTestCase):
+class AgentExecutionResultTests(BaseTestCase):
     """Test AgentExecutionResult model."""
 
     def test_agent_execution_result_success(self):
@@ -305,7 +305,7 @@ class TestAgentExecutionResult(BaseTestCase):
         self.assertEqual(result.execution_time_ms, 75.2)
         self.assertEqual(result.metadata, {'error_code': 'TIMEOUT'})
 
-class TestExecutionExtensions(BaseTestCase):
+class ExecutionExtensionsTests(BaseTestCase):
     """Test execution engine extensions."""
 
     def test_user_execution_extension_initialization(self):
@@ -358,7 +358,7 @@ class TestExecutionExtensions(BaseTestCase):
         self.assertEqual(extension.name(), 'WebSocketExtension')
         self.assertIsNone(extension.websocket_bridge)
 
-class TestUserExecutionExtension(AsyncBaseTestCase):
+class UserExecutionExtensionTests(AsyncBaseTestCase):
     """Test UserExecutionExtension concurrency and lifecycle."""
 
     async def test_user_semaphore_creation(self):
@@ -403,7 +403,7 @@ class TestUserExecutionExtension(AsyncBaseTestCase):
         self.assertEqual(updated_result.metadata['user_id'], 'user456')
         self.assertNotIn('_user_semaphore', context.metadata)
 
-class TestMCPExecutionExtension(AsyncBaseTestCase):
+class MCPExecutionExtensionTests(AsyncBaseTestCase):
     """Test MCPExecutionExtension functionality."""
 
     async def test_mcp_extension_initialization(self):
@@ -439,7 +439,7 @@ class TestMCPExecutionExtension(AsyncBaseTestCase):
         updated_result = await extension.post_execute(result, context)
         self.assertEqual(updated_result.metadata['mcp_tools_used'], ['tool1', 'tool2'])
 
-class TestDataExecutionExtension(AsyncBaseTestCase):
+class DataExecutionExtensionTests(AsyncBaseTestCase):
     """Test DataExecutionExtension optimization functionality."""
 
     async def test_data_extension_pre_execute_optimization(self):
@@ -468,7 +468,7 @@ class TestDataExecutionExtension(AsyncBaseTestCase):
         self.assertIn('dataset_123', extension.data_cache)
         self.assertEqual(extension.data_cache['dataset_123'], {'analysis': 'complete'})
 
-class TestWebSocketExtension(AsyncBaseTestCase):
+class WebSocketExtensionTests(AsyncBaseTestCase):
     """Test WebSocketExtension event delivery."""
 
     async def test_websocket_extension_agent_started_event(self):
@@ -530,7 +530,7 @@ class TestWebSocketExtension(AsyncBaseTestCase):
         self.assertEqual(bridge.metrics['errors'], 1)
         self.assertEqual(len(bridge.events), 0)
 
-class TestExecutionEngine(AsyncBaseTestCase):
+class ExecutionEngineTests(AsyncBaseTestCase):
     """Test core ExecutionEngine functionality."""
 
     def setUp(self):
@@ -736,7 +736,7 @@ class TestExecutionEngine(AsyncBaseTestCase):
         self.assertEqual(len(engine.active_runs), 0)
         self.assertEqual(len(engine.run_history), 0)
 
-class TestRequestScopedExecutionEngine(AsyncBaseTestCase):
+class RequestScopedExecutionEngineTests(AsyncBaseTestCase):
     """Test RequestScopedExecutionEngine isolation functionality."""
 
     def setUp(self):
@@ -803,7 +803,7 @@ class TestRequestScopedExecutionEngine(AsyncBaseTestCase):
         self.assertEqual(scoped_engine.request_id, 'req_67890')
         self.assertEqual(scoped_engine.engine, self.base_engine)
 
-class TestExecutionEngineFactory(BaseTestCase):
+class ExecutionEngineFactoryTests(BaseTestCase):
     """Test ExecutionEngineFactory methods."""
 
     def setUp(self):
@@ -902,7 +902,7 @@ class TestExecutionEngineFactory(BaseTestCase):
         self.assertEqual(scoped_engine.request_id, 'req_12345')
         self.assertEqual(scoped_engine.engine.user_context, user_context)
 
-class TestConvenienceFunctions(AsyncBaseTestCase):
+class ConvenienceFunctionsTests(AsyncBaseTestCase):
     """Test convenience functions for execution."""
 
     def setUp(self):
@@ -933,7 +933,7 @@ class TestConvenienceFunctions(AsyncBaseTestCase):
             result = await engine.execute('test_agent', 'test_task')
             self.assertTrue(result.success)
 
-class TestBackwardsCompatibility(BaseTestCase):
+class BackwardsCompatibilityTests(BaseTestCase):
     """Test backwards compatibility functions."""
 
     def test_create_execution_engine_deprecation(self):
@@ -954,7 +954,7 @@ class TestBackwardsCompatibility(BaseTestCase):
             factory = get_execution_engine_factory()
         self.assertEqual(factory, ExecutionEngineFactory)
 
-class TestConcurrentExecution(AsyncBaseTestCase):
+class ConcurrentExecutionTests(AsyncBaseTestCase):
     """Test concurrent execution scenarios for multi-user support."""
 
     def setUp(self):
@@ -1006,7 +1006,7 @@ class TestConcurrentExecution(AsyncBaseTestCase):
         user_extension = engine._extensions['user']
         self.assertIn('user123', user_extension.user_semaphores)
 
-class TestPerformanceRequirements(AsyncBaseTestCase):
+class PerformanceRequirementsTests(AsyncBaseTestCase):
     """Test performance requirements compliance."""
 
     def setUp(self):
@@ -1055,7 +1055,7 @@ class TestPerformanceRequirements(AsyncBaseTestCase):
         """
         self.assert_performance_threshold(5.0)
 
-class TestWebSocketEventIntegration(AsyncBaseTestCase):
+class WebSocketEventIntegrationTests(AsyncBaseTestCase):
     """Test comprehensive WebSocket event integration."""
 
     def setUp(self):
@@ -1131,7 +1131,7 @@ class TestWebSocketEventIntegration(AsyncBaseTestCase):
         timestamps = [event['timestamp'] for event in events]
         self.assertEqual(timestamps, sorted(timestamps))
 
-class TestErrorHandlingAndRecovery(AsyncBaseTestCase):
+class ErrorHandlingAndRecoveryTests(AsyncBaseTestCase):
     """Test comprehensive error handling and recovery scenarios."""
 
     def setUp(self):

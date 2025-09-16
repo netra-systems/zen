@@ -34,7 +34,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestEnhancedUserIsolationWithSsotManager(SSotAsyncTestCase):
+class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
     """Phase 2 SSOT Validation Test: Validate enhanced user isolation with consolidated SSOT manager."""
     
     def setup_method(self, method):
@@ -82,7 +82,7 @@ class TestEnhancedUserIsolationWithSsotManager(SSotAsyncTestCase):
         """
         logger.info("Validating bulletproof user data isolation with SSOT manager")
         
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         # Create isolated managers for each enterprise user
         enterprise_managers = []
@@ -353,7 +353,7 @@ class TestEnhancedUserIsolationWithSsotManager(SSotAsyncTestCase):
         """
         logger.info("Validating enterprise-grade security features")
         
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         # Create enterprise manager with maximum security context
         max_security_context = self.enterprise_users[1]  # beta_industries with maximum security
@@ -455,7 +455,7 @@ class TestEnhancedUserIsolationWithSsotManager(SSotAsyncTestCase):
         """
         logger.info("Validating SSOT manager performance under enterprise load")
         
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         # Create multiple enterprise managers for load testing
         enterprise_load_managers = []

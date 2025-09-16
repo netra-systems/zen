@@ -25,7 +25,7 @@ from netra_backend.app.agents.base.execution_context import (
 )
 
 
-class TestExecutionContext:
+class ExecutionContextTests:
     """Test ExecutionContext business logic"""
     
     @pytest.mark.unit
@@ -286,7 +286,7 @@ class TestExecutionContext:
         assert len(context.get_logs()) == 10
 
 
-class TestExecutionMetadata:
+class ExecutionMetadataTests:
     """Test ExecutionMetadata business logic"""
     
     @pytest.mark.unit
@@ -322,7 +322,7 @@ class TestExecutionMetadata:
         assert metadata.custom_data['tags'] == ['agent', 'optimization']
 
 
-class TestExecutionContextManager:
+class ExecutionContextManagerTests:
     """Test ExecutionContextManager business logic"""
     
     @pytest.mark.unit
@@ -465,7 +465,7 @@ class TestExecutionContextManager:
         assert len(manager.get_all_contexts()) == 10
 
 
-class TestAgentExecutionContext:
+class AgentExecutionContextTests:
     """Test AgentExecutionContext business logic"""
     
     @pytest.mark.unit
@@ -511,7 +511,7 @@ class TestAgentExecutionContext:
         assert context.timestamp is not None
 
 
-class TestConvenienceFunctions:
+class ConvenienceFunctionsTests:
     """Test convenience functions for context creation"""
     
     @pytest.mark.unit
@@ -548,7 +548,7 @@ class TestConvenienceFunctions:
         assert retrieved is context
 
 
-class TestEdgeCases:
+class EdgeCasesTests:
     """Test edge cases and error conditions"""
     
     @pytest.mark.unit

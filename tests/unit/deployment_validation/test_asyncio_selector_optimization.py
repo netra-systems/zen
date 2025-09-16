@@ -9,7 +9,7 @@ import asyncio
 import time
 
 @pytest.mark.unit
-class TestAsyncioSelectorOptimization:
+class AsyncioSelectorOptimizationTests:
     
     def test_selector_timeout_optimization_exists(self):
         """UNIT: Validate selector.select() timeout limiting exists"""

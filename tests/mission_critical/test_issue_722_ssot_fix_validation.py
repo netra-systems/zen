@@ -40,7 +40,7 @@ from netra_backend.app.admin.corpus.unified_corpus_admin import (
 from netra_backend.app.core.auth_startup_validator import AuthStartupValidator
 
 
-class TestIssue722SsotFixValidation(SSotAsyncTestCase):
+class Issue722SsotFixValidationTests(SSotAsyncTestCase):
     """Mission critical validation for Issue #722 SSOT fix implementation."""
 
     def setup_method(self, method):

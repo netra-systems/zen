@@ -13,7 +13,7 @@ from netra_backend.app.main import app
 from unittest.mock import Mock, patch, MagicMock, AsyncMock
 import json
 
-class TestReferenceManagement:
+class ReferenceManagementTests:
     
     def test_create_reference(self):
         """Test creating a new reference"""

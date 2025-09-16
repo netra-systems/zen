@@ -28,7 +28,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.core.unified_id_manager import is_valid_id_format, is_valid_id_format_compatible
 from shared.types.core_types import UserID, ensure_user_id
 
-class TestDefensiveAuthIDValidation(SSotBaseTestCase):
+class DefensiveAuthIDValidationTests(SSotBaseTestCase):
     """
     Test suite reproducing defensive_auth request ID validation failures from Issue #406.
     

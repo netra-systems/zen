@@ -219,7 +219,7 @@ class MockCorpusHandler:
         }
 
 
-class TestCorpusHandler(SSotBaseTestCase):
+class CorpusHandlerTests(SSotBaseTestCase):
     """Test CorpusHandler business logic and operations."""
     
     def setup_method(self, method):
@@ -494,7 +494,7 @@ class TestCorpusHandler(SSotBaseTestCase):
         self.record_metric("statistics_accuracy_validated", True)
 
 
-class TestCorpusHandlerPerformance(SSotBaseTestCase):
+class CorpusHandlerPerformanceTests(SSotBaseTestCase):
     """Test corpus handler performance characteristics."""
     
     def setup_method(self, method):

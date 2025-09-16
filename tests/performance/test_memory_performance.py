@@ -312,7 +312,7 @@ class MemoryLeakDetector:
         }
 
 
-class TestMemoryPerformance(SSotAsyncTestCase):
+class MemoryPerformanceTests(SSotAsyncTestCase):
     """
     Memory Performance and Leak Detection Test Suite for Issue #1200
 

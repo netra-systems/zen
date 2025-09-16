@@ -19,7 +19,7 @@ from netra_backend.app.db.clickhouse import get_clickhouse_service
 import asyncio
 pytestmark = [pytest.mark.env_test, pytest.mark.unit, pytest.mark.agents]
 
-class TestClickHouseServiceConnection:
+class ClickHouseServiceConnectionTests:
     """Test ClickHouse connection management."""
 
     @pytest.fixture
@@ -51,7 +51,7 @@ class TestClickHouseServiceConnection:
         result = await clickhouse_client.ping()
         assert result is True
 
-class TestClickHouseServiceBasic:
+class ClickHouseServiceBasicTests:
     """Basic test functionality."""
 
     @pytest.fixture

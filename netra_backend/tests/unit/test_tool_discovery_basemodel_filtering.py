@@ -84,7 +84,7 @@ class ToolWithoutName:
 
 @pytest.mark.unit
 @pytest.mark.toolregistry
-class TestToolDiscoveryBaseModelFiltering(SSotBaseTestCase):
+class ToolDiscoveryBaseModelFilteringTests(SSotBaseTestCase):
     """
     Unit tests for BaseModel filtering in tool discovery.
     
@@ -430,7 +430,7 @@ class TestToolDiscoveryBaseModelFiltering(SSotBaseTestCase):
 
 @pytest.mark.unit
 @pytest.mark.toolregistry
-class TestUniversalRegistryDuplicatePrevention(SSotBaseTestCase):
+class UniversalRegistryDuplicatePreventionTests(SSotBaseTestCase):
     """
     Unit tests for UniversalRegistry duplicate registration prevention.
     
@@ -501,7 +501,7 @@ class TestUniversalRegistryDuplicatePrevention(SSotBaseTestCase):
 
 @pytest.mark.unit
 @pytest.mark.toolregistry  
-class TestToolRegistryValidationHelpers(SSotBaseTestCase):
+class ToolRegistryValidationHelpersTests(SSotBaseTestCase):
     """
     Unit tests for helper functions that should validate tools before registration.
     

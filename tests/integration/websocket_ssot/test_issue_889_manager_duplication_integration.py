@@ -49,7 +49,7 @@ except ImportError as e:
 
 # WebSocket manager imports - testing the actual implementation
 try:
-    from netra_backend.app.websocket_core.websocket_manager import (
+    from netra_backend.app.websocket_core.canonical_import_patterns import (
         get_websocket_manager,
         _UnifiedWebSocketManagerImplementation,
         WebSocketManagerMode,
@@ -62,7 +62,7 @@ except ImportError as e:
 
 
 @pytest.mark.integration
-class TestIssue889ManagerDuplicationIntegration(SSotAsyncTestCase):
+class Issue889ManagerDuplicationIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for Issue #889 WebSocket Manager SSOT Violations
     

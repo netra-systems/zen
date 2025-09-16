@@ -102,7 +102,7 @@ def gcp_validator_working(mock_app_state_redis_available):
     validator.update_environment_configuration(environment='staging', is_gcp=True)
     return validator
 
-class TestWebSocketReadinessValidatorGCPRedis:
+class WebSocketReadinessValidatorGCPRedisTests:
     """
     Integration Test Suite: WebSocket Readiness Validator GCP Redis Failure
     

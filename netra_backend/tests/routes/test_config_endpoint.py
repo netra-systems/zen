@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 from netra_backend.app.main import app
 import json
 
-class TestConfigEndpoint:
+class ConfigEndpointTests:
     
     def test_get_public_config(self):
         """Test retrieving public configuration"""

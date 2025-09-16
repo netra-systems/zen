@@ -19,7 +19,7 @@ from typing import Dict, List, Tuple
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestPasswordStrengthValidation(SSotBaseTestCase):
+class PasswordStrengthValidationTests(SSotBaseTestCase):
     """Unit tests for password strength validation algorithms."""
     
     def setup_method(self, method=None):

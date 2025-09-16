@@ -23,7 +23,7 @@ from test_framework.ssot.base_test_case import BaseTestCase
 from shared.isolated_environment import get_env
 
 
-class TestBackendAnalyticsServiceIntegration(BaseTestCase):
+class BackendAnalyticsServiceIntegrationTests(BaseTestCase):
     """Integration tests for Backend <-> Analytics Service communication."""
     
     @pytest.mark.integration

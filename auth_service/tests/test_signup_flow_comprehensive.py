@@ -58,7 +58,7 @@ def password_hasher():
     return PasswordHasher()
 
 
-class TestEmailValidation:
+class EmailValidationTests:
     """Test email validation edge cases"""
     
     @pytest.mark.parametrize("email,expected", [
@@ -83,7 +83,7 @@ class TestEmailValidation:
             assert auth_service.validate_email(email) == expected
 
 
-class TestPasswordValidation:
+class PasswordValidationTests:
     """Test password validation edge cases"""
     
     @pytest.mark.parametrize("password,should_pass,error_message", [
@@ -106,7 +106,7 @@ class TestPasswordValidation:
         assert message == error_message
 
 
-class TestUserRegistration:
+class UserRegistrationTests:
     """Test user registration with database persistence"""
     
     @pytest.mark.asyncio
@@ -233,7 +233,7 @@ class TestUserRegistration:
         assert "test@example.com" in auth_service._test_users
 
 
-class TestPasswordHashing:
+class PasswordHashingTests:
     """Test password hashing and verification"""
     
     def test_password_hashing(self, password_hasher):
@@ -270,7 +270,7 @@ class TestPasswordHashing:
         password_hasher.verify(hash2, password)
 
 
-class TestEdgeCases:
+class EdgeCasesTests:
     """Test edge cases and boundary conditions"""
     
     @pytest.mark.asyncio

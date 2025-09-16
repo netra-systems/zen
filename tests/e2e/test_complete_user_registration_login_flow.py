@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user
 
 
-class TestCompleteUserRegistrationLoginFlow(SSotAsyncTestCase):
+class CompleteUserRegistrationLoginFlowTests(SSotAsyncTestCase):
     """
     E2E tests for complete user registration and login flow.
     Tests the full user journey from registration to authenticated operations.

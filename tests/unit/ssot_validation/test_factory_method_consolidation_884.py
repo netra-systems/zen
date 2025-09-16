@@ -31,7 +31,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestFactoryMethodConsolidation884(SSotBaseTestCase):
+class FactoryMethodConsolidation884Tests(SSotBaseTestCase):
     """
     CRITICAL SSOT Test: Detect scattered execution engine factory methods
     

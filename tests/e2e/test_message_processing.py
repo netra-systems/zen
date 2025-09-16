@@ -23,7 +23,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestMessageProcessing:
+class MessageProcessingTests:
     """Test suite for message processing pipeline."""
 
     @pytest.mark.asyncio

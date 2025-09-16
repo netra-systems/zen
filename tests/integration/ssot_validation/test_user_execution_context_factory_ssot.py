@@ -76,7 +76,7 @@ class MockRequest:
 
 
 @pytest.mark.integration
-class TestUserExecutionContextFactorySSot(SSotAsyncTestCase):
+class UserExecutionContextFactorySSotTests(SSotAsyncTestCase):
     """SSOT Factory Pattern: Validate single canonical factory pattern for UserExecutionContext"""
     
     async def test_factory_pattern_ssot_violation_detection(self):

@@ -23,7 +23,7 @@ from netra_backend.app.core.app_factory import create_app
 from netra_backend.app.core.configuration import get_configuration
 from shared.isolated_environment import get_env
 
-class TestIssue466ASGIExceptionReproduction(SSotAsyncTestCase):
+class Issue466ASGIExceptionReproductionTests(SSotAsyncTestCase):
     """
     Reproduce ASGI exceptions from Issue #466 staging environment.
     

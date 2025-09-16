@@ -22,7 +22,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
-class TestConfigurationCrossEnvironmentValidation(BaseIntegrationTest):
+class ConfigurationCrossEnvironmentValidationTests(BaseIntegrationTest):
     """Test configuration system across different environments."""
 
     @pytest.mark.integration

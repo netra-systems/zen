@@ -14,7 +14,7 @@ from typing import Dict, Any
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
-class TestHealthEndpointRedisValidationStagingE2E(SSotAsyncTestCase):
+class HealthEndpointRedisValidationStagingE2ETests(SSotAsyncTestCase):
     """E2E tests for health endpoint Redis validation in staging environment."""
     STAGING_BASE_URL = 'https://netra-backend-staging-123456789-uc.a.run.app'
     STAGING_HEALTH_ENDPOINTS = ['/health', '/health/', '/health/ready', '/health/startup', '/health/backend']
@@ -157,7 +157,7 @@ class TestHealthEndpointRedisValidationStagingE2E(SSotAsyncTestCase):
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.staging
-class TestHealthEndpointRedisValidationStagingE2EAsync:
+class HealthEndpointRedisValidationStagingE2EAsyncTests:
     """Async-based E2E tests for staging health endpoint Redis validation."""
     STAGING_BASE_URL = 'https://netra-backend-staging-123456789-uc.a.run.app'
 

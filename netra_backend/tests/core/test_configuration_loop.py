@@ -10,7 +10,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.redis_manager import redis_manager
 
 
-class TestConfigurationLoop(SSotBaseTestCase):
+class ConfigurationLoopTests(SSotBaseTestCase):
     """Test cases for configuration loop issue."""
     
     def setUp(self):

@@ -196,7 +196,7 @@ def schema_tester():
     """Create schema alignment tester instance."""
     return CrossServiceDataSchemaAlignmentTester()
 
-class TestCrossServiceDataSchemaAlignment:
+class CrossServiceDataSchemaAlignmentTests:
     """Test suite for cross-service data schema alignment."""
 
     @pytest.mark.asyncio

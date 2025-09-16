@@ -26,7 +26,7 @@ from netra_backend.app.services.service_initialization.health_checker import Hea
 from netra_backend.app.services.service_initialization.graceful_degradation_handler import GracefulDegradationHandler
 
 
-class TestServiceInitializationBusinessLogic:
+class ServiceInitializationBusinessLogicTests:
     """Test service initialization business logic patterns."""
     
     @pytest.fixture

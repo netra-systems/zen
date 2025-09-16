@@ -6,7 +6,7 @@ Validates system behavior under concurrent load conditions.
 """
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 import asyncio
 import time
@@ -17,7 +17,7 @@ import pytest
 from netra_backend.app.schemas.generation import ContentGenParams
 from netra_backend.app.services.generation_service import run_content_generation_job
 
-class TestConcurrentProcessing:
+class ConcurrentProcessingTests:
     """Test concurrent generation requests and resource sharing"""
 
     @pytest.mark.performance

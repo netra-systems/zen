@@ -24,11 +24,11 @@ import threading
 import websockets
 import requests
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
+from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory, create_agent_instance_factory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.mark.e2e
-class TestGoldenPathMultiUserConcurrent(SSotAsyncTestCase):
+class GoldenPathMultiUserConcurrentTests(SSotAsyncTestCase):
     """
     E2E test suite to PROVE Golden Path multi-user vulnerabilities.
     
@@ -73,7 +73,7 @@ class TestGoldenPathMultiUserConcurrent(SSotAsyncTestCase):
             user_context = UserExecutionContext(user_id=auth_data['user_id'], session_id=auth_data['session_id'], request_id=str(uuid.uuid4()), websocket_manager=Mock(), execution_metadata={'organization': auth_data['organization'], 'role': auth_data['role'], 'auth_token': auth_data['auth_token'], 'permissions': auth_data['permissions']})
             websocket_events = []
             user_context.websocket_manager.send_message = AsyncMock(side_effect=lambda event, data: websocket_events.append({'event': event, 'data': data, 'timestamp': time.time(), 'user_id': auth_data['user_id'], 'session_id': auth_data['session_id'], 'thread_id': threading.current_thread().ident}))
-            factory = get_agent_instance_factory()
+            factory = create_agent_instance_factory(user_context)
             agent = factory.create_supervisor_agent(user_context)
             chat_message = {'message': customer_data['chat_request'], 'timestamp': time.time(), 'user_id': auth_data['user_id'], 'session_id': auth_data['session_id']}
             agent_response = {'response': f"AI Analysis for {auth_data['organization']}: {customer_data['chat_request'][:50]}...", 'user_id': auth_data['user_id'], 'session_id': auth_data['session_id'], 'organization': auth_data['organization'], 'keywords_used': customer_data['expected_keywords'], 'processing_time': 0.1, 'timestamp': time.time()}

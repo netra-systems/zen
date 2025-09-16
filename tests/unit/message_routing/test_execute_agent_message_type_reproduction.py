@@ -35,7 +35,7 @@ from netra_backend.app.dependencies import get_user_execution_context
 from shared.isolated_environment import get_env
 
 
-class TestExecuteAgentMessageTypeReproduction(BaseIntegrationTest):
+class ExecuteAgentMessageTypeReproductionTests(BaseIntegrationTest):
     """
     Reproduce execute_agent message type failures that cause P1 critical issues.
     

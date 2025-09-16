@@ -41,7 +41,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 from netra_backend.app.routes.websocket import websocket_endpoint
 from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry, get_connection_state_machine, ApplicationConnectionState
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from fastapi import WebSocket
 try:
     import websockets
@@ -51,7 +51,7 @@ except ImportError:
     WEBSOCKETS_AVAILABLE = False
     logger.warning('websockets library not available - some tests will be skipped')
 
-class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
+class WebSocketScopeValidationIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for WebSocket scope bug validation with real services.
     

@@ -14,7 +14,7 @@ from starlette.websockets import WebSocketState
 from fastapi import WebSocket
 
 # Simple test without complex imports
-class TestWebSocketConnectionRace:
+class WebSocketConnectionRaceTests:
     """Simple test class to reproduce WebSocket race condition."""
 
     def test_connection_state_validation_issue(self):
@@ -108,7 +108,7 @@ class TestWebSocketConnectionRace:
 
 if __name__ == "__main__":
     # Run the basic test
-    test = TestWebSocketConnectionRace()
+    test = WebSocketConnectionRaceTests()
     test.test_connection_state_validation_issue()
 
     # Run async test

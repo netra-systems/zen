@@ -18,7 +18,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestWebSocketAuthBypassDetection(SSotAsyncTestCase):
+class WebSocketAuthBypassDetectionTests(SSotAsyncTestCase):
     """
     Integration test detecting WebSocket authentication SSOT violations.
     EXPECTED TO FAIL until WebSocket auth properly delegates to auth service.
@@ -129,7 +129,7 @@ class TestWebSocketAuthBypassDetection(SSotAsyncTestCase):
         except Exception as e:
             self.skipTest(f'Auth service token creation failed: {e}')
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             ws_manager = WebSocketManager()
             event_result = await ws_manager.handle_authenticated_event(token=test_token, event_type='agent_started', event_data={'message': 'Test event'})
             assert event_result is not None, 'WebSocket event handling failed'

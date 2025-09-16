@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketManagerMode
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketManagerMode
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID, ConnectionID, WebSocketID
 from shared.logging.unified_logging_ssot import get_logger
@@ -56,7 +56,7 @@ class MockWebSocketConnection:
         return self.messages_sent.copy()
 
 @pytest.mark.unit
-class TestUnifiedWebSocketManagerCore(SSotAsyncTestCase):
+class UnifiedWebSocketManagerCoreTests(SSotAsyncTestCase):
     """Test core functionality of UnifiedWebSocketManager.
 
     Focuses on business-critical functionality without external dependencies.
@@ -167,7 +167,7 @@ class TestUnifiedWebSocketManagerCore(SSotAsyncTestCase):
         self.assertFalse(await self.manager.has_connection('nonexistent_connection'))
 
 @pytest.mark.unit
-class TestWebSocketManagerModes(SSotAsyncTestCase):
+class WebSocketManagerModesTests(SSotAsyncTestCase):
     """Test different WebSocket manager modes."""
 
     async def test_unified_mode_compatibility(self):
@@ -185,7 +185,7 @@ class TestWebSocketManagerModes(SSotAsyncTestCase):
             self.assertEqual(manager.mode, WebSocketManagerMode.UNIFIED)
 
 @pytest.mark.unit
-class TestWebSocketManagerWithUserContext(SSotAsyncTestCase):
+class WebSocketManagerWithUserContextTests(SSotAsyncTestCase):
     """Test WebSocket manager integration with UserExecutionContext."""
 
     async def asyncSetUp(self):

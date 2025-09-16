@@ -36,7 +36,7 @@ import inspect
 from dataclasses import dataclass
 logger = logging.getLogger(__name__)
 
-class TestUserAuthServiceComprehensive(AsyncBaseTestCase):
+class UserAuthServiceComprehensiveTests(AsyncBaseTestCase):
     """
     Real behavior tests for UserAuthService backward compatibility shim.
     

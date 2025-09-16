@@ -29,7 +29,7 @@ from auth_service.auth_core.config import AuthConfig
 from shared.isolated_environment import get_env
 
 
-class TestAuthCircuitBreakersCore:
+class AuthCircuitBreakersCoreTests:
     """Unit tests for authentication circuit breaker patterns and error handling."""
     
     @pytest.fixture(autouse=True)

@@ -25,7 +25,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from shared.types.core_types import UserID, ThreadID, ExecutionID, ensure_user_id, ensure_thread_id
 from test_framework.fixtures.id_system.id_format_samples import get_mixed_scenarios, generate_fresh_uuid_sample
 
-class TestCrossServiceIDContamination:
+class CrossServiceIDContaminationTests:
     """
     Integration tests that expose ID contamination across service boundaries.
     
@@ -176,7 +176,7 @@ class TestCrossServiceIDContamination:
         """Check if agent service can validate run ID - should fail."""
         return False
 
-class TestServiceBoundaryIDFailures:
+class ServiceBoundaryIDFailuresTests:
     """
     Tests that expose ID failures specifically at service boundaries.
     """
@@ -279,7 +279,7 @@ class TestServiceBoundaryIDFailures:
 @pytest.mark.critical
 @pytest.mark.service_integration
 @pytest.mark.id_contamination
-class TestCriticalServiceIDContamination:
+class CriticalServiceIDContaminationTests:
     """
     Most critical tests that prove service contamination breaks business operations.
     """

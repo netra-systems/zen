@@ -37,7 +37,7 @@ from netra_backend.app.middleware.auth_middleware import AuthMiddleware
 logger = logging.getLogger(__name__)
 
 
-class TestAuthServiceIntegration(BaseIntegrationTest):
+class AuthServiceIntegrationTests(BaseIntegrationTest):
     """Comprehensive auth service integration tests with real services."""
     
     def setup_method(self):

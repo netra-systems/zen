@@ -28,7 +28,7 @@ from test_framework.ssot.websocket_test_infrastructure_factory import WebSocketT
 from shared.isolated_environment import get_env
 
 
-class TestGoldenPathMessageRoutingFailures(SSotAsyncTestCase):
+class GoldenPathMessageRoutingFailuresTests(SSotAsyncTestCase):
     """Test Golden Path message routing with real services."""
 
     @pytest.mark.integration

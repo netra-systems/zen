@@ -45,7 +45,7 @@ class MockAuthValidationResult:
         self.auth_components_validated.append(component)
 
 
-class TestAuthValidationResultPatterns(BaseIntegrationTest):
+class AuthValidationResultPatternsTests(BaseIntegrationTest):
     """Test authentication validation result SSOT compliance."""
     
     @pytest.mark.integration

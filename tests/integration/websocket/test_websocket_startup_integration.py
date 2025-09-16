@@ -32,7 +32,7 @@ from netra_backend.app.websocket_core.gcp_initialization_validator import (
 
 
 @pytest.mark.integration
-class TestWebSocketStartupTiming:
+class WebSocketStartupTimingTests:
     """Test WebSocket startup timing with realistic service coordination."""
     
     @pytest.fixture
@@ -280,7 +280,7 @@ class TestWebSocketStartupTiming:
 
 
 @pytest.mark.integration 
-class TestServiceCoordinationTiming:
+class ServiceCoordinationTimingTests:
     """Test service coordination timing with realistic dependencies."""
     
     @pytest.fixture
@@ -452,7 +452,7 @@ class TestServiceCoordinationTiming:
 
 
 @pytest.mark.integration
-class TestGracefulDegradationScenarios:
+class GracefulDegradationScenariosTests:
     """Test graceful degradation scenarios with realistic service behavior."""
     
     @pytest.fixture

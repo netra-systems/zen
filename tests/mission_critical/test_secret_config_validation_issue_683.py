@@ -19,7 +19,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestSecretConfigValidationIssue683(SSotBaseTestCase):
+class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
     """
     Unit tests to reproduce secret configuration validation failures in staging environment.
 

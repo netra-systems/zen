@@ -29,7 +29,7 @@ env = get_env()
 @pytest.mark.websocket
 @pytest.mark.reconnection
 @skip_if_no_real_services
-class TestRealWebSocketReconnectionHandling:
+class RealWebSocketReconnectionHandlingTests:
     """Test real WebSocket reconnection handling mechanisms."""
     
     @pytest.fixture

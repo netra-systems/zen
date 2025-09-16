@@ -26,7 +26,7 @@ import unittest
 
 
 @pytest.mark.integration
-class TestRedisSharedPoolIntegration(SSotAsyncTestCase):
+class RedisSharedPoolIntegrationTests(SSotAsyncTestCase):
     """Integration tests validating Redis shared pool across all services.
     
     These tests are designed to FAIL initially, proving the lack of

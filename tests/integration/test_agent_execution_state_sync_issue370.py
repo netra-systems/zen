@@ -116,7 +116,7 @@ class MockAgentDatabase:
         """Get all state records for a specific execution."""
         return [r for r in self.state_records if r.execution_id == execution_id]
 
-class TestAgentExecutionStateSynchronization(SSotAsyncTestCase):
+class AgentExecutionStateSynchronizationTests(SSotAsyncTestCase):
     """Integration tests for agent execution state synchronization."""
 
     def setup_method(self, method):

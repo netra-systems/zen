@@ -77,7 +77,7 @@ except ImportError as e:
 
 # Import WebSocket components for real-time testing
 try:
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     from netra_backend.app.websocket_core.auth import WebSocketAuth
 except ImportError as e:
     logger.warning(f"Could not import WebSocket components: {e}")
@@ -88,7 +88,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.mission_critical
-class TestLLMManagerGoldenPathProtection(SSotAsyncTestCase):
+class LLMManagerGoldenPathProtectionTests(SSotAsyncTestCase):
     """Test 1: Golden Path LLM Reliability E2E - Complete AI response validation"""
     
     async def test_golden_path_llm_reliability_e2e(self):

@@ -20,7 +20,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestWebSocketSSOTComplianceDualPattern(SSotBaseTestCase):
+class WebSocketSSOTComplianceDualPatternTests(SSotBaseTestCase):
     """Test suite to detect SSOT compliance violations (SHOULD FAIL)"""
 
     def setUp(self):

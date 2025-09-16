@@ -37,7 +37,7 @@ from shared.configuration.central_config_validator import (
 logger = logging.getLogger(__name__)
 
 
-class TestGCPSecretManagerMissingVariables(SSotBaseTestCase):
+class GCPSecretManagerMissingVariablesTests(SSotBaseTestCase):
     """
     Phase 1 Unit Tests: Prove GCP Secret Manager configuration gaps exist.
     
@@ -410,7 +410,7 @@ class TestGCPSecretManagerMissingVariables(SSotBaseTestCase):
             logger.info("🔧 REMEDIATION: Replace placeholder values with actual secrets in GCP Secret Manager")
 
 
-class TestGCPSecretManagerValidationRequirements(SSotBaseTestCase):
+class GCPSecretManagerValidationRequirementsTests(SSotBaseTestCase):
     """
     Additional validation tests for GCP Secret Manager integration requirements.
     

@@ -38,7 +38,7 @@ from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.quality_types import QualityMetrics, QualityLevel
 
-class TestChatOrchestrator(BaseIntegrationTest):
+class ChatOrchestratorTests(BaseIntegrationTest):
     """Test ChatOrchestrator main orchestration logic - MISSION CRITICAL."""
 
     def setup_method(self):
@@ -135,7 +135,7 @@ class TestChatOrchestrator(BaseIntegrationTest):
             assert result is not None
             assert orchestrator.nacis_enabled == False
 
-class TestIntentClassifier(BaseIntegrationTest):
+class IntentClassifierTests(BaseIntegrationTest):
     """Test IntentClassifier business logic - Revenue-critical routing decisions."""
 
     def setup_method(self):
@@ -183,7 +183,7 @@ class TestIntentClassifier(BaseIntegrationTest):
         assert intent == IntentType.GENERAL_INQUIRY
         assert confidence == 0.3
 
-class TestExecutionPlanner(BaseIntegrationTest):
+class ExecutionPlannerTests(BaseIntegrationTest):
     """Test ExecutionPlanner strategic planning logic - Workflow optimization."""
 
     def setup_method(self):
@@ -224,7 +224,7 @@ class TestExecutionPlanner(BaseIntegrationTest):
         assert research_step is not None
         assert research_step['params']['require_citations'] == True
 
-class TestPipelineExecutor(BaseIntegrationTest):
+class PipelineExecutorTests(BaseIntegrationTest):
     """Test PipelineExecutor workflow execution - Business process reliability."""
 
     def setup_method(self):
@@ -285,7 +285,7 @@ class TestPipelineExecutor(BaseIntegrationTest):
         call_args = self.mock_orchestrator.trace_logger.log.call_args_list
         assert any(('Executing researcher.research' in str(call) for call in call_args))
 
-class TestTraceLogger(BaseIntegrationTest):
+class TraceLoggerTests(BaseIntegrationTest):
     """Test TraceLogger transparency features - User trust and debugging."""
 
     def setup_method(self):
@@ -323,7 +323,7 @@ class TestTraceLogger(BaseIntegrationTest):
         assert 'Research phase initiated' in compressed[0]
         assert 'Analysis completed' in compressed[1]
 
-class TestConfidenceManager(BaseIntegrationTest):
+class ConfidenceManagerTests(BaseIntegrationTest):
     """Test ConfidenceManager decision logic - Smart routing and caching."""
 
     def setup_method(self):
@@ -363,7 +363,7 @@ class TestConfidenceManager(BaseIntegrationTest):
         should_escalate_general = self.confidence_manager.should_escalate(confidence=0.6, intent=IntentType.GENERAL_INQUIRY)
         assert should_escalate_general == False
 
-class TestQualityEvaluator(BaseIntegrationTest):
+class QualityEvaluatorTests(BaseIntegrationTest):
     """Test QualityEvaluator assessment logic - Quality assurance for business value."""
 
     def setup_method(self):

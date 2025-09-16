@@ -73,7 +73,7 @@ class EventEmissionTestScenario:
     delivery_guarantees: List[str]
 
 
-class TestAgentEventEmissionValidation(SSotAsyncTestCase):
+class AgentEventEmissionValidationTests(SSotAsyncTestCase):
     """Unit tests for agent event emission validation patterns"""
 
     def setup_method(self, method):

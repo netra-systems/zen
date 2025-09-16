@@ -31,7 +31,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.types import UserID, SessionID, RequestID
 
 
-class TestUserSessionStateRaces(BaseIntegrationTest):
+class UserSessionStateRacesTests(BaseIntegrationTest):
     """Integration tests for user session state race conditions and concurrent access patterns."""
     
     def setup_method(self):

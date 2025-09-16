@@ -155,7 +155,7 @@ async def websocket_client(auth_token):
 
 
 @pytest.mark.e2e
-class TestPresenceDetectionE2E:
+class PresenceDetectionE2ETests:
     """End-to-end tests for presence detection."""
     
     @pytest.mark.asyncio
@@ -417,7 +417,7 @@ class TestPresenceDetectionE2E:
 
 
 @pytest.mark.e2e
-class TestPresenceDetectionEdgeCases:
+class PresenceDetectionEdgeCasesTests:
     """Test edge cases in presence detection E2E."""
     
     @pytest.mark.asyncio

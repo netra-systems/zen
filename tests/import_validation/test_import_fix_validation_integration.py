@@ -40,7 +40,7 @@ if project_root not in sys.path:
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestImportFixValidationIntegration(SSotBaseTestCase):
+class ImportFixValidationIntegrationTests(SSotBaseTestCase):
     """
     Validation tests that prove the correct shared imports work.
     
@@ -259,7 +259,7 @@ class TestImportFixValidationIntegration(SSotBaseTestCase):
             self.fail(f"VALIDATION FAILED: Configuration integration functionality: {e}")
 
 
-class TestImportFixComprehensiveValidation(SSotBaseTestCase):
+class ImportFixComprehensiveValidationTests(SSotBaseTestCase):
     """
     Comprehensive validation tests that ensure complete functionality
     is maintained after the SSOT migration.
@@ -466,7 +466,7 @@ class TestImportFixComprehensiveValidation(SSotBaseTestCase):
             self.fail(f"VALIDATION FAILED: Migration completeness check: {e}")
 
 
-class TestImportFixRegressionPrevention(SSotBaseTestCase):
+class ImportFixRegressionPreventionTests(SSotBaseTestCase):
     """
     Regression prevention tests that ensure the SSOT migration
     doesn't break existing functionality or introduce new issues.

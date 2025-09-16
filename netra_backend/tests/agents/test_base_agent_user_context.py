@@ -97,7 +97,7 @@ class UserContextTestAgent(BaseAgent):
         self.execution_log.clear()
 
 
-class TestBaseAgentUserContext(SSotAsyncTestCase):
+class BaseAgentUserContextTests(SSotAsyncTestCase):
     """Test BaseAgent UserExecutionContext integration and user isolation."""
 
     def setup_method(self, method):

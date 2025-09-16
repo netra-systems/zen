@@ -155,7 +155,7 @@ class WebSocketReliabilityTester:
 @pytest.mark.e2e
 @pytest.mark.frontend
 @pytest.mark.websocket
-class TestFrontendWebSocketReliability:
+class FrontendWebSocketReliabilityTests:
     """Test WebSocket connection reliability and recovery"""
     
     @pytest.fixture(autouse=True)

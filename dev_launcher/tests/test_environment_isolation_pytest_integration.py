@@ -15,7 +15,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from shared.isolated_environment import get_env, get_environment_manager
 env = get_env()
 
-class TestPytestEnvironmentIntegration:
+class PytestEnvironmentIntegrationTests:
     """Test environment isolation integration with pytest framework."""
 
     def setup_method(self):
@@ -45,7 +45,7 @@ class TestPytestEnvironmentIntegration:
         environment isolation has interfered with pytest's own environment variables.
         """
         manager = get_environment_manager()
-        pytest_test_var = 'dev_launcher/tests/test_environment_isolation_pytest_integration.py::TestPytestEnvironmentIntegration::test_pytest_current_test_isolation_compatibility (call)'
+        pytest_test_var = 'dev_launcher/tests/test_environment_isolation_pytest_integration.py::PytestEnvironmentIntegrationTests::test_pytest_current_test_isolation_compatibility (call)'
         env.set('PYTEST_CURRENT_TEST', pytest_test_var, 'test')
         manager.enable_isolation()
         assert 'PYTEST_CURRENT_TEST' in os.environ

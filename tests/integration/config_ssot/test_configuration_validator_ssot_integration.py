@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.integration
-class TestConfigurationValidatorSSOTIntegration(SSotAsyncTestCase, unittest.TestCase):
+class ConfigurationValidatorSSOTIntegrationTests(SSotAsyncTestCase, unittest.TestCase):
     """
     SSOT Integration Tests
     

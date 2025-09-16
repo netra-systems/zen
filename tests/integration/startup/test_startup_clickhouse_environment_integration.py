@@ -19,7 +19,7 @@ from netra_backend.app.core.environment_context.cloud_environment_detector impor
 from netra_backend.app.logging_config import central_logger
 
 @pytest.mark.integration
-class TestStartupClickHouseEnvironmentIntegration:
+class StartupClickHouseEnvironmentIntegrationTests:
     """Integration tests for ClickHouse startup with environment detection."""
 
     @pytest.fixture

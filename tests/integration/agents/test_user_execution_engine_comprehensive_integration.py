@@ -77,7 +77,7 @@ class UserSessionData:
 
 
 @pytest.mark.integration
-class TestUserExecutionEngineComprehensiveIntegration(SSotAsyncTestCase):
+class UserExecutionEngineComprehensiveIntegrationTests(SSotAsyncTestCase):
     """
     User Execution Engine Comprehensive Integration Tests - Issue #870 Phase 1
     

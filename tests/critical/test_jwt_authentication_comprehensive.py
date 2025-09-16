@@ -49,7 +49,7 @@ if project_root not in sys.path:
 from loguru import logger
 from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuthenticator, WebSocketAuthResult, get_websocket_authenticator
 from netra_backend.app.clients.auth_client_core import AuthServiceClient, auth_client, AuthOperationType
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from shared.isolated_environment import get_env, IsolatedEnvironment
 from test_framework.test_context import TestContext, create_test_context
@@ -126,7 +126,7 @@ class JWTAuthenticationTestSuite:
         """Create malformed JWT tokens for testing."""
         return {'missing_signature': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0IiwiZXhwIjoxNjQwOTk1MjAwfQ', 'invalid_header': 'invalid_header.eyJzdWIiOiJ0ZXN0IiwiZXhwIjoxNjQwOTk1MjAwfQ.signature', 'corrupted_payload': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.corrupted_payload.signature', 'empty_token': '', 'non_jwt_token': 'this_is_not_a_jwt_token', 'too_many_parts': 'part1.part2.part3.part4.part5'}
 
-class TestJWTWebSocketValidationFailures(JWTAuthenticationTestSuite):
+class JWTWebSocketValidationFailuresTests(JWTAuthenticationTestSuite):
     """Test JWT token validation failures in WebSocket connections."""
 
     @pytest.mark.asyncio
@@ -177,7 +177,7 @@ class TestJWTWebSocketValidationFailures(JWTAuthenticationTestSuite):
         extracted = websocket_authenticator.extract_token_from_websocket(real_websocket)
         assert extracted is None, 'Should return None when no token found'
 
-class TestAuthServiceCommunicationBreakdowns(JWTAuthenticationTestSuite):
+class AuthServiceCommunicationBreakdownsTests(JWTAuthenticationTestSuite):
     """Test auth service communication breakdowns and recovery mechanisms."""
 
     @pytest.mark.asyncio
@@ -255,7 +255,7 @@ class TestAuthServiceCommunicationBreakdowns(JWTAuthenticationTestSuite):
             if result.get('valid', False):
                 assert result.get('fallback_used', False) or result.get('source') in ['cache', 'emergency_test_fallback']
 
-class TestJWTSecretMismatches(JWTAuthenticationTestSuite):
+class JWTSecretMismatchesTests(JWTAuthenticationTestSuite):
     """Test JWT secret mismatches between services."""
 
     @pytest.mark.asyncio
@@ -288,7 +288,7 @@ class TestJWTSecretMismatches(JWTAuthenticationTestSuite):
         jwt_signature = hmac.new(jwt_secret.encode(), payload_json.encode(), hashlib.sha256).hexdigest()
         assert service_signature != jwt_signature, 'CRITICAL SECURITY ISSUE: Service and JWT signatures are identical! This indicates the same secret is being used for both purposes.'
 
-class TestTokenExpirationHandling(JWTAuthenticationTestSuite):
+class TokenExpirationHandlingTests(JWTAuthenticationTestSuite):
     """Test token expiration handling and refresh flows."""
 
     @pytest.mark.asyncio
@@ -348,7 +348,7 @@ class TestTokenExpirationHandling(JWTAuthenticationTestSuite):
                 assert result.access_token.startswith('refreshed_token_')
             assert refresh_call_count >= 1
 
-class TestServiceToServiceAuthentication(JWTAuthenticationTestSuite):
+class ServiceToServiceAuthenticationTests(JWTAuthenticationTestSuite):
     """Test service-to-service authentication with SERVICE_SECRET."""
 
     def test_service_secret_configuration_validation(self, auth_client_instance):
@@ -417,7 +417,7 @@ class TestServiceToServiceAuthentication(JWTAuthenticationTestSuite):
                     if 'production' in str(e).lower():
                         assert 'SERVICE_SECRET' in str(e)
 
-class TestWebSocketAuthenticationMiddleware(JWTAuthenticationTestSuite):
+class WebSocketAuthenticationMiddlewareTests(JWTAuthenticationTestSuite):
     """Test WebSocket authentication middleware edge cases."""
 
     @pytest.mark.asyncio
@@ -474,7 +474,7 @@ class TestWebSocketAuthenticationMiddleware(JWTAuthenticationTestSuite):
         timing_variance_threshold = avg_time * 2.0
         assert max_deviation < timing_variance_threshold, f'POTENTIAL TIMING ATTACK VULNERABILITY: Authentication timing varies significantly (max deviation: {max_deviation}ns). This could reveal information about token validity. Results: {timing_results}'
 
-class TestTokenBlacklistFunctionality(JWTAuthenticationTestSuite):
+class TokenBlacklistFunctionalityTests(JWTAuthenticationTestSuite):
     """Test token blacklist functionality and race conditions."""
 
     @pytest.mark.asyncio
@@ -536,7 +536,7 @@ class TestTokenBlacklistFunctionality(JWTAuthenticationTestSuite):
                 expected = blacklist_responses[token]
                 assert result == expected, f'Token {token} blacklist check failed: expected {expected}, got {result}'
 
-class TestMultiUserAuthenticationIsolation(JWTAuthenticationTestSuite):
+class MultiUserAuthenticationIsolationTests(JWTAuthenticationTestSuite):
     """Test multi-user scenarios and authentication isolation."""
 
     @pytest.mark.asyncio
@@ -625,7 +625,7 @@ class TestMultiUserAuthenticationIsolation(JWTAuthenticationTestSuite):
                         assert result['user_id'] == 'guest_user'
                         assert result['permissions'] == ['guest']
 
-class TestEdgeCasesAndRaceConditions(JWTAuthenticationTestSuite):
+class EdgeCasesAndRaceConditionsTests(JWTAuthenticationTestSuite):
     """Test edge cases and race conditions in authentication."""
 
     @pytest.mark.asyncio

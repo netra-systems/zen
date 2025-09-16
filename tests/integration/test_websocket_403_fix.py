@@ -24,7 +24,7 @@ from netra_backend.app.websocket_core.user_context_extractor import UserContextE
 from shared.isolated_environment import get_env
 
 
-class TestWebSocket403Fix:
+class WebSocket403FixTests:
     """Test that unified JWT secret manager fixes WebSocket 403 errors."""
     
     def setup_method(self):
@@ -216,7 +216,7 @@ class TestWebSocket403Fix:
 
 
 @pytest.mark.integration
-class TestWebSocketAuthenticationPipeline:
+class WebSocketAuthenticationPipelineTests:
     """Integration tests for the complete WebSocket authentication pipeline."""
     
     async def test_end_to_end_websocket_auth_pipeline(self):
@@ -275,7 +275,7 @@ if __name__ == "__main__":
         print("WebSocket 403 Fix Validation Tests")
         print("=" * 60)
         
-        test_instance = TestWebSocket403Fix()
+        test_instance = WebSocket403FixTests()
         test_instance.setup_method()
         
         try:
@@ -288,7 +288,7 @@ if __name__ == "__main__":
             test_instance.test_staging_environment_configuration()
             
             # Integration test
-            integration_test = TestWebSocketAuthenticationPipeline()
+            integration_test = WebSocketAuthenticationPipelineTests()
             await integration_test.test_end_to_end_websocket_auth_pipeline()  # CRITICAL FIX: Added await
             
             print("\n" + "=" * 60)

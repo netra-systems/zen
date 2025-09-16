@@ -20,7 +20,7 @@ from netra_backend.app.websocket_core.user_context_extractor import UserContextE
 
 
 @pytest.mark.integration
-class TestWebSocketAuthFix:
+class WebSocketAuthFixTests:
     """Test suite to verify WebSocket authentication fix"""
     
     async def test_jwt_secret_alignment(self):
@@ -130,7 +130,7 @@ class TestWebSocketAuthFix:
 
 
 @pytest.mark.integration
-class TestWebSocketAuthFixIntegration:
+class WebSocketAuthFixIntegrationTests:
     """Integration tests for WebSocket authentication fix"""
     
     @pytest.mark.asyncio
@@ -186,13 +186,13 @@ def run_websocket_auth_fix_tests():
     
     # Run all tests asynchronously (some methods now require async)
     async def run_all_tests():
-        test_suite = TestWebSocketAuthFix()
+        test_suite = WebSocketAuthFixTests()
         await test_suite.test_jwt_secret_alignment()  # CRITICAL FIX: Now async
         test_suite.test_websocket_headers_creation()
         test_suite.test_staging_config_environment_detection()
         test_suite.test_jwt_secret_priority_order()
         
-        integration_suite = TestWebSocketAuthFixIntegration()
+        integration_suite = WebSocketAuthFixIntegrationTests()
         await integration_suite.test_websocket_auth_flow_simulation()
         
         await test_suite.test_websocket_connection_staging_mock()

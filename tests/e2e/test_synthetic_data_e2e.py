@@ -137,7 +137,7 @@ class WebSocketMessageTracker:
 
 @pytest.mark.e2e
 @pytest.mark.asyncio
-class TestSyntheticDataE2E:
+class SyntheticDataE2ETests:
     """Comprehensive E2E tests for SyntheticDataSubAgent workflow."""
     
     @pytest_asyncio.fixture
@@ -776,7 +776,7 @@ class TestSyntheticDataE2E:
 
 @pytest.mark.e2e
 @pytest.mark.staging
-class TestSyntheticDataE2EStaging(TestSyntheticDataE2E):
+class SyntheticDataE2EStagingTests(SyntheticDataE2ETests):
     """Staging-specific E2E tests for SyntheticDataSubAgent."""
     
     @pytest.mark.asyncio

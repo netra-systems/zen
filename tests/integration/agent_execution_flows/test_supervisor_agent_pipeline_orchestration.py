@@ -31,7 +31,7 @@ from netra_backend.app.services.user_execution_context import (
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
-class TestSupervisorAgentPipelineOrchestration(BaseIntegrationTest):
+class SupervisorAgentPipelineOrchestrationTests(BaseIntegrationTest):
     """Integration tests for supervisor agent pipeline orchestration."""
 
     @pytest.mark.integration

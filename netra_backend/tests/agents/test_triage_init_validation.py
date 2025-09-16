@@ -12,7 +12,7 @@ from netra_backend.app.agents.triage_sub_agent import UnifiedTriageAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext, InvalidContextError
 from netra_backend.app.llm.llm_manager import LLMManager
 
-class TestTriageInitValidation(BaseTestCase):
+class TriageInitValidationTests(BaseTestCase):
     """Test triage agent initialization and validation patterns."""
 
     def setUp(self):

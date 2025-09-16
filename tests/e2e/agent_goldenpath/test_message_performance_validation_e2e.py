@@ -45,7 +45,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestHelper
 @pytest.mark.gcp_staging
 @pytest.mark.performance_validation
 @pytest.mark.mission_critical
-class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
+class MessagePerformanceValidationE2ETests(SSotAsyncTestCase):
     """
     E2E tests for validating message processing performance in staging GCP.
 

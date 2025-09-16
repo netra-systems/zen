@@ -168,7 +168,7 @@ class _UnifiedWebSocketManagerImplementation:
         """
         # Import registry functions (avoid circular imports)
         try:
-            from netra_backend.app.websocket_core.websocket_manager import (
+            from netra_backend.app.websocket_core.canonical_import_patterns import (
                 _get_user_key, _USER_MANAGER_REGISTRY, _REGISTRY_LOCK
             )
             
@@ -352,7 +352,7 @@ class _UnifiedWebSocketManagerImplementation:
 
         # ISSUE #889 REMEDIATION: Register this instance in the user-scoped registry
         try:
-            from netra_backend.app.websocket_core.websocket_manager import (
+            from netra_backend.app.websocket_core.canonical_import_patterns import (
                 _get_user_key, _USER_MANAGER_REGISTRY
             )
             
@@ -1405,15 +1405,16 @@ class _UnifiedWebSocketManagerImplementation:
         
         # CRITICAL FIX: Add retry logic for staging/production
         from shared.isolated_environment import get_env
-        environment = get_env().get("ENVIRONMENT", "development").lower()
+        env_instance = get_env()
+        environment = env_instance.get("ENVIRONMENT", "development").lower()
         
         # CRITICAL FIX: GCP staging auto-detection to prevent 1011 errors  
         # Environment variable propagation gaps in Cloud Run require auto-detection
         if not environment or environment == "development":
             # Auto-detect GCP staging based on service URLs and project context
-            gcp_project = get_env().get("GCP_PROJECT_ID", "")
-            backend_url = get_env().get("BACKEND_URL", "")
-            auth_service_url = get_env().get("AUTH_SERVICE_URL", "")
+            gcp_project = env_instance.get("GCP_PROJECT_ID", "")
+            backend_url = env_instance.get("BACKEND_URL", "")
+            auth_service_url = env_instance.get("AUTH_SERVICE_URL", "")
             
             if ("staging" in gcp_project or 
                 "staging.netrasystems.ai" in backend_url or 
@@ -3980,7 +3981,7 @@ class _UnifiedWebSocketManagerImplementation:
 #
 # This module now contains the implementation but does NOT export classes directly.
 # All imports must go through the canonical SSOT path:
-# from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+# from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 #
 # This prevents fragmented import paths and enforces SSOT compliance.
 
@@ -3991,7 +3992,9 @@ class _UnifiedWebSocketManagerImplementation:
 # UnifiedWebSocketManager export - RESTORED for Issue #1236 import fix
 UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation
 
-__all__ = ['WebSocketConnection', '_serialize_message_safely', 'WebSocketManagerMode', 'UnifiedWebSocketManager']
+# ISSUE #1184 REMEDIATION: Remove duplicate exports to eliminate SSOT violations
+# WebSocketConnection, _serialize_message_safely, WebSocketManagerMode are in types.py (SSOT)
+__all__ = ['UnifiedWebSocketManager']
 
 # SSOT Consolidation: Log that direct imports are not supported
 import sys
@@ -4002,7 +4005,7 @@ if __name__ not in sys.modules:
         logger = get_logger(__name__)
         logger.warning(
             "SSOT CONSOLIDATION (Issue #824): Direct imports from unified_manager.py are deprecated. "
-            "Use canonical path: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager"
+            "Use canonical path: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager"
         )
     except ImportError:
         # Fallback logging if logging import fails

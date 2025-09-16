@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.unit
-class TestAuthTimeoutRemediationValidation(SSotAsyncTestCase):
+class AuthTimeoutRemediationValidationTests(SSotAsyncTestCase):
     """
     Unit tests to validate the remediation fixes for Issue #395.
     

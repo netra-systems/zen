@@ -14,7 +14,7 @@ CRITICAL BUSINESS IMPACT:
 
 DUAL PATTERN VIOLATION DETECTED:
 In netra_backend/app/agents/supervisor/agent_instance_factory.py:
-- Line 46: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+- Line 46: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 - Line 41: from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 - Line 48: from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 
@@ -47,7 +47,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestWebSocketFactoryDualPatternDetection(SSotBaseTestCase):
+class WebSocketFactoryDualPatternDetectionTests(SSotBaseTestCase):
     """
     SSOT violation detection tests for dual WebSocket patterns in factories.
 
@@ -74,8 +74,8 @@ class TestWebSocketFactoryDualPatternDetection(SSotBaseTestCase):
 
         # Violation patterns (SHOULD BE ELIMINATED)
         self.dual_pattern_violations = [
-            "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
-            "from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager",
+            "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
+            "from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager",
             "WebSocketManager(",
         ]
 

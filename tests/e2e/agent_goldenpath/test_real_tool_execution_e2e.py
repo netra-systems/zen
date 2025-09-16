@@ -44,7 +44,7 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, Authenti
 @pytest.mark.agent_goldenpath
 @pytest.mark.tool_execution
 @pytest.mark.mission_critical
-class TestRealToolExecutionE2E(SSotAsyncTestCase):
+class RealToolExecutionE2ETests(SSotAsyncTestCase):
     """
     E2E tests for real tool execution in agent golden path.
     

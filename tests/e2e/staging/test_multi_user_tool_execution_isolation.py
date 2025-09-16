@@ -234,7 +234,7 @@ class MultiUserWebSocketManager:
         self.connected_users.discard(user_id)
 
 @pytest.mark.e2e
-class TestMultiUserToolExecutionIsolation(SSotAsyncTestCase):
+class MultiUserToolExecutionIsolationTests(SSotAsyncTestCase):
     """E2E staging tests for multi-user tool execution isolation."""
 
     def setUp(self):

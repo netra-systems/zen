@@ -65,7 +65,7 @@ from netra_backend.app.core.unified_logging import UnifiedLogger as CoreUnifiedL
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
-class TestLoggingConfigExports:
+class LoggingConfigExportsTests:
     """Test that logging_config.py properly exports all required components."""
     
     def test_all_exports_available(self):
@@ -121,7 +121,7 @@ class TestLoggingConfigExports:
         assert user_id_context is orig_user
 
 
-class TestUnifiedLoggerConfiguration:
+class UnifiedLoggerConfigurationTests:
     """Test UnifiedLogger configuration and initialization."""
     
     @pytest.fixture
@@ -254,7 +254,7 @@ class TestUnifiedLoggerConfiguration:
         assert fresh_logger._config is first_config
 
 
-class TestLoggingMethods:
+class LoggingMethodsTests:
     """Test the logging methods of UnifiedLogger.
     
     CLAUDE.md Compliance: NO MOCKS - Real logging functionality testing.
@@ -353,7 +353,7 @@ class TestLoggingMethods:
             real_logger.clear_context()
 
 
-class TestContextManagement:
+class ContextManagementTests:
     """Test logging context management functionality."""
     
     @pytest.fixture
@@ -398,7 +398,7 @@ class TestContextManagement:
         assert request_id_context.get() is None
 
 
-class TestPerformanceTracking:
+class PerformanceTrackingTests:
     """Test performance tracking and monitoring functionality.
     
     CLAUDE.md Compliance: Real performance tracking testing.
@@ -469,7 +469,7 @@ class TestPerformanceTracking:
             failing_function()
 
 
-class TestModuleFunctionInterface:
+class ModuleFunctionInterfaceTests:
     """Test module-level functions and convenience interfaces."""
     
     def test_get_central_logger_returns_singleton(self):
@@ -509,7 +509,7 @@ class TestModuleFunctionInterface:
         assert isinstance(central_logger, UnifiedLogger)
 
 
-class TestSensitiveDataFilterIntegration:
+class SensitiveDataFilterIntegrationTests:
     """Test integration with sensitive data filtering."""
     
     @pytest.fixture
@@ -567,7 +567,7 @@ class TestSensitiveDataFilterIntegration:
         assert "***@example.com" in filtered
 
 
-class TestEnvironmentSpecificBehavior:
+class EnvironmentSpecificBehaviorTests:
     """Test behavior in different environments."""
     
     @pytest.fixture
@@ -613,7 +613,7 @@ class TestEnvironmentSpecificBehavior:
             assert config['enable_json_logging'] == True  # Should force JSON in staging
 
 
-class TestErrorHandlingAndFallbacks:
+class ErrorHandlingAndFallbacksTests:
     """Test error handling and fallback mechanisms."""
     
     @pytest.fixture
@@ -667,7 +667,7 @@ class TestErrorHandlingAndFallbacks:
         await error_prone_logger.shutdown()
 
 
-class TestCrossServiceCompatibility:
+class CrossServiceCompatibilityTests:
     """Test compatibility across different services and contexts."""
     
     def test_multiple_logger_instances(self):
@@ -715,7 +715,7 @@ class TestCrossServiceCompatibility:
         assert test_logger._initialized
 
 
-class TestLogFormatterIntegration:
+class LogFormatterIntegrationTests:
     """Test integration with log formatters."""
     
     @pytest.fixture
@@ -796,7 +796,7 @@ class TestLogFormatterIntegration:
         assert "{message}" in format_string
 
 
-class TestLogHandlerConfig:
+class LogHandlerConfigTests:
     """Test log handler configuration."""
     
     def test_handler_config_creation(self):
@@ -834,7 +834,7 @@ class TestLogHandlerConfig:
             assert log_file.parent.exists()
 
 
-class TestIntegrationWithWebSocketTrace:
+class IntegrationWithWebSocketTraceTests:
     """Test integration with WebSocket tracing and context propagation."""
     
     def test_unified_trace_context_integration(self):
@@ -869,7 +869,7 @@ class TestIntegrationWithWebSocketTrace:
             mock_parent.propagate_to_child.assert_called_once()
 
 
-class TestPerformanceAndScalability:
+class PerformanceAndScalabilityTests:
     """Test performance characteristics and scalability."""
     
     def test_config_loading_performance(self):
@@ -937,7 +937,7 @@ class TestPerformanceAndScalability:
         assert total_time < 1.0
 
 
-class TestRegressionsAndEdgeCases:
+class RegressionsAndEdgeCasesTests:
     """Test for regressions and edge cases."""
     
     def test_empty_message_handling(self):

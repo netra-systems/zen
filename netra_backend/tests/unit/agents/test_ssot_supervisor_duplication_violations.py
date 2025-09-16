@@ -28,7 +28,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
-class TestSSOTSupervisorDuplicationViolations(SSotAsyncTestCase):
+class SSOTSupervisorDuplicationViolationsTests(SSotAsyncTestCase):
     """Test that exposes inconsistent behavior from multiple SupervisorAgent implementations.
 
     These tests SHOULD FAIL before SSOT remediation because multiple SupervisorAgent

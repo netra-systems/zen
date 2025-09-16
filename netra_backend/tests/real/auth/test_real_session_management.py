@@ -40,7 +40,7 @@ docker_manager = UnifiedDockerManager()
 @pytest.mark.real_services
 @pytest.mark.session
 @pytest.mark.asyncio
-class TestRealSessionManagement:
+class RealSessionManagementTests:
     """
     Real session management tests using Docker services.
     

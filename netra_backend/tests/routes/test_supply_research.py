@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 
@@ -22,7 +22,7 @@ from netra_backend.tests.test_route_fixtures import (
     basic_test_client,
 )
 
-class TestSupplyResearch:
+class SupplyResearchTests:
     """Test supply chain research and validation functionality."""
     
     def test_supply_research(self, basic_test_client):

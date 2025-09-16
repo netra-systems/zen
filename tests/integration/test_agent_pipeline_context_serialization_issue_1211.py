@@ -58,7 +58,7 @@ from netra_backend.app.core.logging_context import (
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 
 
-class TestAgentPipelineContextVarSerialization(SSotAsyncTestCase):
+class AgentPipelineContextVarSerializationTests(SSotAsyncTestCase):
     """Integration tests for ContextVar serialization failures in agent pipeline."""
 
     def setup_method(self, method):
@@ -496,7 +496,7 @@ class TestAgentPipelineContextVarSerialization(SSotAsyncTestCase):
         )
 
 
-class TestAgentPipelineSerializationWorkarounds(SSotAsyncTestCase):
+class AgentPipelineSerializationWorkaroundsTests(SSotAsyncTestCase):
     """Integration tests for potential workarounds to ContextVar serialization issues."""
 
     def setup_method(self, method):

@@ -44,7 +44,7 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDisp
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class TestChatOrchestratorIntegration(SSotAsyncTestCase, unittest.TestCase):
+class ChatOrchestratorIntegrationTests(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive integration tests for ChatOrchestrator with real services."""
 
     def setUp(self):
@@ -361,7 +361,7 @@ class TestChatOrchestratorIntegration(SSotAsyncTestCase, unittest.TestCase):
         super().tearDown()
 
 
-class TestChatOrchestratorWebSocketEventIntegration(SSotAsyncTestCase, unittest.TestCase):
+class ChatOrchestratorWebSocketEventIntegrationTests(SSotAsyncTestCase, unittest.TestCase):
     """Specialized tests for WebSocket event integration during orchestration."""
 
     def setUp(self):

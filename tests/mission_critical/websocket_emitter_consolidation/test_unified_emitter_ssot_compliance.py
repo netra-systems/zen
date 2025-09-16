@@ -60,7 +60,7 @@ class SSOTComplianceMetrics:
     event_delivery_reliability: float = 0.0
 
 
-class TestUnifiedEmitterSSOTCompliance(SSotAsyncTestCase):
+class UnifiedEmitterSSOTComplianceTests(SSotAsyncTestCase):
     """
     Phase 2 test to validate SSOT compliance after emitter consolidation.
     

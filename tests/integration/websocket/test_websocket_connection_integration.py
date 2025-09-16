@@ -29,12 +29,12 @@ from netra_backend.app.websocket_core.types import (
     WebSocketMessage
 )
 from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from shared.isolated_environment import get_env
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestWebSocketConnectionIntegration(BaseIntegrationTest):
+class WebSocketConnectionIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket connection management."""
 
     async def async_setup(self):

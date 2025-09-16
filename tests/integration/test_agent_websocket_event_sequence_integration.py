@@ -44,7 +44,7 @@ from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOr
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.schemas.agent_models import DeepAgentState
@@ -79,7 +79,7 @@ class WebSocketEventSequenceCapture:
         return {'has_all_events': all((event_type in self.event_sequence for event_type in expected_sequence)), 'correct_order': self.event_sequence == expected_sequence, 'event_count': len(self.events), 'sequence_received': self.event_sequence.copy(), 'timing_valid': all((timing < 5000 for timing in self.timing_data.values())), 'total_duration_ms': max(self.timing_data.values()) if self.timing_data else 0}
 
 @pytest.mark.integration
-class TestAgentWebSocketEventSequenceIntegration(SSotAsyncTestCase):
+class AgentWebSocketEventSequenceIntegrationTests(SSotAsyncTestCase):
     """Integration tests for Agent-to-WebSocket event sequence delivery."""
 
     def setUp(self):

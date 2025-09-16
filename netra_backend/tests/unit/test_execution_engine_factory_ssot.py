@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestExecutionEngineFactorySSotCompliance(SSotAsyncTestCase):
+class ExecutionEngineFactorySSotComplianceTests(SSotAsyncTestCase):
     """Test that execution engine factories enforce SSOT UserExecutionEngine compliance.
     
     These tests should FAIL initially, proving the factory SSOT violations exist.
@@ -175,7 +175,7 @@ class TestExecutionEngineFactorySSotCompliance(SSotAsyncTestCase):
                 asyncio.run(factory.create_engine(self.user_context))
 
 
-class TestUnifiedExecutionEngineFactorySSotCompliance(SSotAsyncTestCase):
+class UnifiedExecutionEngineFactorySSotComplianceTests(SSotAsyncTestCase):
     """Test UnifiedExecutionEngineFactory SSOT compliance.
     
     This tests the newer unified factory for SSOT violations.

@@ -43,7 +43,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestAuthenticationSessionManagement(SSotBaseTestCase):
+class AuthenticationSessionManagementTests(SSotBaseTestCase):
     """
     E2E tests for authentication and session management.
     Tests complete auth flows from login to authenticated service access.

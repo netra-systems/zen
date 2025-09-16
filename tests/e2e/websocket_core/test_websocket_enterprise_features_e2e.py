@@ -23,7 +23,7 @@ from test_framework.ssot.websocket import WebSocketTestUtility
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketEnterpriseFeaturesE2E(SSotBaseTestCase):
+class WebSocketEnterpriseFeaturesE2ETests(SSotBaseTestCase):
     """E2E tests for WebSocket enterprise features."""
     
     @pytest.fixture

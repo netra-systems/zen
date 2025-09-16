@@ -40,7 +40,7 @@ except ImportError as e:
 
 
 @pytest.mark.unit
-class TestFactoryDelegationValidation(SSotAsyncTestCase):
+class FactoryDelegationValidationTests(SSotAsyncTestCase):
     """Comprehensive validation of ExecutionEngineFactory delegation to UserExecutionEngine"""
     
     def setUp(self):

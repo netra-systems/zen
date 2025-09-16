@@ -1779,12 +1779,30 @@ def _validate_auth_service_health() -> Dict[str, Any]:
     return health_result
 
 
+# BACKWARD COMPATIBILITY FUNCTIONS
+# These functions provide backward compatibility for legacy imports
+async def authenticate_websocket_connection(
+    websocket: WebSocket,
+    e2e_context: Optional[Dict[str, Any]] = None,
+    preliminary_connection_id: Optional[str] = None
+) -> WebSocketAuthResult:
+    """Backward compatibility wrapper for authenticate_websocket_connection.
+
+    This function wraps the UnifiedWebSocketAuthenticator.authenticate_websocket_connection method
+    to maintain backward compatibility for existing code that imports this function directly.
+    """
+    authenticator = get_websocket_authenticator()
+    return await authenticator.authenticate_websocket_connection(
+        websocket, e2e_context, preliminary_connection_id
+    )
+
+
 # SSOT ENFORCEMENT: Export only SSOT-compliant interfaces
 __all__ = [
     "UnifiedWebSocketAuthenticator",
     "WebSocketAuthenticator",  # Legacy alias
     "UnifiedWebSocketAuth",  # Legacy alias
-    "WebSocketAuthResult", 
+    "WebSocketAuthResult",
     "get_websocket_authenticator",
     "authenticate_websocket_ssot",
     "authenticate_websocket_connection",  # Backward compatibility

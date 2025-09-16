@@ -33,7 +33,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestJwtSsotEnforcement(SSotBaseTestCase):
+class JwtSsotEnforcementTests(SSotBaseTestCase):
     """
     JWT SSOT Enforcement Tests - Designed to FAIL initially
 

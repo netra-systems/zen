@@ -19,7 +19,7 @@ import os
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestE2EHelperModules(SSotBaseTestCase):
+class E2EHelperModulesTests(SSotBaseTestCase):
     """
     Test E2E helper modules validation for collection error fixes.
     

@@ -18,7 +18,7 @@ import base64
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from test_framework.base_integration_test import BaseIntegrationTest
 
-class TestConfigurationSecretsManagementUnit(BaseIntegrationTest):
+class ConfigurationSecretsManagementUnitTests(BaseIntegrationTest):
     """Test configuration secrets management functionality."""
 
     @pytest.mark.unit
@@ -140,7 +140,7 @@ class TestConfigurationSecretsManagementUnit(BaseIntegrationTest):
         secret_lower = secret.lower()
         return any((pattern in secret_lower for pattern in weak_patterns))
 
-class TestConfigurationSecretsIntegrationUnit(BaseIntegrationTest):
+class ConfigurationSecretsIntegrationUnitTests(BaseIntegrationTest):
     """Test secrets management integration with configuration system."""
 
     @pytest.mark.unit

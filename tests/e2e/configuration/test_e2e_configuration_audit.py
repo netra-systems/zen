@@ -25,7 +25,7 @@ import yaml
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestE2EConfigurationAudit(SSotBaseTestCase):
+class E2EConfigurationAuditTests(SSotBaseTestCase):
     """
     Comprehensive audit of E2E test configurations for load balancer compliance.
     
@@ -697,7 +697,7 @@ class TestE2EConfigurationAudit(SSotBaseTestCase):
 
 if __name__ == "__main__":
     # Run this test standalone to perform E2E configuration audit
-    test_instance = TestE2EConfigurationAudit()
+    test_instance = E2EConfigurationAuditTests()
     
     tests = [
         test_instance.test_e2e_configuration_files_load_balancer_compliance,

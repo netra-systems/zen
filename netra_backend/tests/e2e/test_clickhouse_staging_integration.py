@@ -21,7 +21,7 @@ from netra_backend.app.db.clickhouse_schema import ClickHouseTraceSchema
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 
 
-class TestClickHouseStagingIntegration:
+class ClickHouseStagingIntegrationTests:
     """E2E tests for ClickHouse operations in staging environment."""
 
     @pytest.fixture

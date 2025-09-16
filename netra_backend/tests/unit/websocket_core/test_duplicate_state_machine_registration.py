@@ -35,7 +35,7 @@ from netra_backend.app.websocket_core.connection_state_machine import (
 )
 
 
-class TestDuplicateStateMachineRegistration(SSotBaseTestCase):
+class DuplicateStateMachineRegistrationTests(SSotBaseTestCase):
     """Test suite to detect duplicate state machine registration race conditions."""
 
     def setup_method(self, method=None):

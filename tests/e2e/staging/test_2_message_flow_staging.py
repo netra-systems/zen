@@ -20,7 +20,7 @@ from tests.helpers.auth_test_utils import TestAuthHelper
 
 
 @pytest.mark.e2e
-class TestMessageFlowStaging(StagingTestBase):
+class MessageFlowStagingTests(StagingTestBase):
     """Test message flow in staging environment"""
     
     def setup_method(self):
@@ -355,7 +355,7 @@ class TestMessageFlowStaging(StagingTestBase):
 
 if __name__ == "__main__":
     async def run_tests():
-        test_class = TestMessageFlowStaging()
+        test_class = MessageFlowStagingTests()
         test_class.setup_class()
         
         # Ensure authentication setup for direct execution (not managed by pytest)

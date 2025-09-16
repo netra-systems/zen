@@ -19,7 +19,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
 
-class TestIssue668FunctionalityValidation(SSotAsyncTestCase):
+class Issue668FunctionalityValidationTests(SSotAsyncTestCase):
     """Test Issue #668 - Functionality validation for E2E auth helper after fix."""
 
     def setup_method(self, method):

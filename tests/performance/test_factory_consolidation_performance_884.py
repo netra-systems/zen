@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.performance
-class TestFactoryConsolidationPerformance884(SSotAsyncTestCase):
+class FactoryConsolidationPerformance884Tests(SSotAsyncTestCase):
     """
     Performance Test: Validate factory consolidation performance impact
     
@@ -109,13 +109,13 @@ class TestFactoryConsolidationPerformance884(SSotAsyncTestCase):
             try:
                 from netra_backend.app.agents.user_execution_context import UserExecutionContext
             except ImportError:
-                class TestUserExecutionContext:
+                class UserExecutionContextTests:
                     def __init__(self, user_id: str, session_id: str, **kwargs):
                         self.user_id = user_id
                         self.session_id = session_id
                         for key, value in kwargs.items():
                             setattr(self, key, value)
-                UserExecutionContext = TestUserExecutionContext
+                UserExecutionContext = UserExecutionContextTests
                 
         except Exception as e:
             pytest.skip(f"Required components not available: {e}")
@@ -323,13 +323,13 @@ class TestFactoryConsolidationPerformance884(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.user_execution_context import UserExecutionContext
         except ImportError:
-            class TestUserExecutionContext:
+            class UserExecutionContextTests:
                 def __init__(self, user_id: str, session_id: str, **kwargs):
                     self.user_id = user_id
                     self.session_id = session_id
                     for key, value in kwargs.items():
                         setattr(self, key, value)
-            UserExecutionContext = TestUserExecutionContext
+            UserExecutionContext = UserExecutionContextTests
         
         # Performance baseline expectations (based on reasonable factory performance)
         baseline_expectations = {
@@ -457,13 +457,13 @@ class TestFactoryConsolidationPerformance884(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.user_execution_context import UserExecutionContext
         except ImportError:
-            class TestUserExecutionContext:
+            class UserExecutionContextTests:
                 def __init__(self, user_id: str, session_id: str, **kwargs):
                     self.user_id = user_id
                     self.session_id = session_id
                     for key, value in kwargs.items():
                         setattr(self, key, value)
-            UserExecutionContext = TestUserExecutionContext
+            UserExecutionContext = UserExecutionContextTests
         
         # Test different load levels
         load_levels = [1, 5, 10, 20]  # Concurrent users

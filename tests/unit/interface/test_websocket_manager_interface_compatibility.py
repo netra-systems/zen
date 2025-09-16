@@ -18,7 +18,7 @@ from unittest.mock import Mock, AsyncMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestUnifiedWebSocketManagerImportCompatibility(SSotAsyncTestCase):
+class UnifiedWebSocketManagerImportCompatibilityTests(SSotAsyncTestCase):
     """Test suite for validating UnifiedWebSocketManager import compatibility.
 
     These tests are designed to fail and demonstrate interface issues.
@@ -36,11 +36,11 @@ class TestUnifiedWebSocketManagerImportCompatibility(SSotAsyncTestCase):
         EXPECTED TO FAIL: Class may have been renamed or moved.
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
             self.assertIsNotNone(UnifiedWebSocketManager, "UnifiedWebSocketManager should be importable")
 
             # Test basic interface expectations using factory pattern
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             manager_instance = get_websocket_manager()
             self.assertTrue(hasattr(manager_instance, 'add_connection'),
                           "Manager should have add_connection method")
@@ -68,7 +68,7 @@ class TestUnifiedWebSocketManagerImportCompatibility(SSotAsyncTestCase):
             self.assertIsNotNone(WebSocketManager, "WebSocketManager should be importable")
 
             # Test if this is the same class or different using factory pattern
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             manager_instance = get_websocket_manager()
             self.assertTrue(hasattr(manager_instance, 'add_connection'),
                           "Manager should have add_connection method")
@@ -89,7 +89,7 @@ class TestUnifiedWebSocketManagerImportCompatibility(SSotAsyncTestCase):
 
         # Try to import both classes
         try:
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
             unified_manager_class = UnifiedWebSocketManager
         except ImportError:
             self.import_errors.append("UnifiedWebSocketManager not available")
@@ -122,7 +122,7 @@ class TestUnifiedWebSocketManagerImportCompatibility(SSotAsyncTestCase):
         """
         try:
             # Test for factory function
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             manager = get_websocket_manager()
             self.assertIsNotNone(manager, "Factory should return manager instance")
 
@@ -149,7 +149,7 @@ class TestUnifiedWebSocketManagerImportCompatibility(SSotAsyncTestCase):
 
         # Collect all available manager classes
         try:
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
             manager_classes.append(("UnifiedWebSocketManager", UnifiedWebSocketManager))
         except ImportError:
             pass
@@ -165,7 +165,7 @@ class TestUnifiedWebSocketManagerImportCompatibility(SSotAsyncTestCase):
 
         # Test factory pattern instead of direct construction
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             # Test default factory call
             manager = get_websocket_manager()
@@ -207,11 +207,11 @@ if __name__ == "__main__":
 
     # Run the async test
     loader = unittest.TestLoader()
-    suite = loader.loadTestsFromTestCase(TestUnifiedWebSocketManagerImportCompatibility)
+    suite = loader.loadTestsFromTestCase(UnifiedWebSocketManagerImportCompatibilityTests)
 
     async def run_tests():
         # Create test instances and run them
-        test_instance = TestUnifiedWebSocketManagerImportCompatibility()
+        test_instance = UnifiedWebSocketManagerImportCompatibilityTests()
         await test_instance.asyncSetUp()
 
         try:

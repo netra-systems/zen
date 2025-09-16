@@ -58,7 +58,7 @@ class PerformanceMetrics:
         return 0.0
 
 
-class TestThreadPerformanceIntegration(SSotAsyncTestCase):
+class ThreadPerformanceIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for thread operation performance and scalability.
     

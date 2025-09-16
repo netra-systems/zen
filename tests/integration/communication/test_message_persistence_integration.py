@@ -92,7 +92,7 @@ class MessageStore:
 
 
 @pytest.mark.integration
-class TestMessagePersistence(SSotBaseTestCase):
+class MessagePersistenceTests(SSotBaseTestCase):
     """
     Test message persistence patterns and storage reliability.
     
@@ -596,7 +596,7 @@ class TestMessagePersistence(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestMessageQueuing(SSotBaseTestCase):
+class MessageQueuingTests(SSotBaseTestCase):
     """
     Test message queuing patterns and delivery guarantees.
     

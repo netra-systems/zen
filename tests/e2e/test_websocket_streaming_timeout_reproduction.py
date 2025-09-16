@@ -178,7 +178,7 @@ class WebSocketStreamingTimeoutReproduction:
 @pytest.mark.asyncio
 @pytest.mark.e2e 
 @pytest.mark.critical
-class TestWebSocketStreamingTimeoutReproduction:
+class WebSocketStreamingTimeoutReproductionTests:
     """Test class for WebSocket streaming timeout reproduction"""
     
     async def test_user_id_validation_reproduction(self):

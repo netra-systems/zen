@@ -34,7 +34,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestExecutionEngineFactorySSotUniqueness1123(SSotBaseTestCase):
+class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
     """Test for detecting ExecutionEngine Factory SSOT uniqueness violations (Issue #1123)."""
     
     def setUp(self):

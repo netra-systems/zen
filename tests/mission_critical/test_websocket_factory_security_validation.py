@@ -47,7 +47,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
     get_websocket_manager_factory,
     create_websocket_manager
 )
-from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketConnection
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from shared.isolated_environment import get_env
@@ -169,7 +169,7 @@ def user_contexts():
 @pytest.fixture
 def real_websocket():
     """Create real WebSocket connection for testing."""
-    class TestWebSocketConnection:
+    class WebSocketConnectionTests:
         def __init__(self):
             self.messages_sent = []
             self.is_connected = True
@@ -187,10 +187,10 @@ def real_websocket():
         def get_messages(self) -> List[Dict]:
             return self.messages_sent.copy()
             
-    return TestWebSocketConnection()
+    return WebSocketConnectionTests()
 
 
-class TestFactoryIsolation:
+class FactoryIsolationTests:
     """Test complete isolation between user contexts."""
     
     async def test_factory_creates_isolated_instances(self, factory, user_contexts, security_tracker):
@@ -283,7 +283,7 @@ class TestFactoryIsolation:
         
         for i, context in enumerate(user_contexts[:3]):
             manager = factory.create_manager(context)
-            websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             
             connection = WebSocketConnection(
                 connection_id=context.websocket_connection_id,
@@ -329,7 +329,7 @@ class TestFactoryIsolation:
                                     isolation_confirmed=True)
 
 
-class TestConcurrencySafety:
+class ConcurrencySafetyTests:
     """Test concurrent access and race condition safety."""
     
     async def test_concurrent_manager_creation(self, factory, user_contexts, security_tracker):
@@ -387,7 +387,7 @@ class TestConcurrencySafety:
         
         for context in user_contexts[:5]:
             manager = factory.create_manager(context)
-            websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             
             connection = WebSocketConnection(
                 connection_id=context.websocket_connection_id,
@@ -458,7 +458,7 @@ class TestConcurrencySafety:
         # Create multiple connections for rapid add/remove
         connections = []
         for i in range(10):
-            websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             
             connection = WebSocketConnection(
                 connection_id=f"{context.websocket_connection_id}_{i}",
@@ -514,7 +514,7 @@ class TestConcurrencySafety:
                                     final_connection_count=len(manager._connections))
 
 
-class TestResourceManagement:
+class ResourceManagementTests:
     """Test resource cleanup and memory leak prevention."""
     
     async def test_connection_cleanup_on_manager_destruction(self, factory, user_contexts, security_tracker):
@@ -529,7 +529,7 @@ class TestResourceManagement:
         # Add multiple connections
         connections = []
         for i in range(5):
-            websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             
             connection = WebSocketConnection(
                 connection_id=f"{context.websocket_connection_id}_{i}",
@@ -667,7 +667,7 @@ class TestResourceManagement:
                 manager = factory.create_manager(unique_context)
                 
                 # Add a connection to each manager
-                websocket = TestWebSocketConnection()  # Real WebSocket implementation
+                websocket = WebSocketConnectionTests()  # Real WebSocket implementation
                 
                 connection = WebSocketConnection(
                     connection_id=unique_context.websocket_connection_id,
@@ -719,7 +719,7 @@ class TestResourceManagement:
                                     final_active_managers=factory_stats["factory_metrics"]["managers_active"])
 
 
-class TestPerformanceScaling:
+class PerformanceScalingTests:
     """Test performance and scaling characteristics."""
     
     async def test_linear_scaling_with_concurrent_users(self, factory, user_contexts, security_tracker):
@@ -740,7 +740,7 @@ class TestPerformanceScaling:
                 manager = factory.create_manager(context)
                 
                 # Add connection to each manager
-                websocket = TestWebSocketConnection()  # Real WebSocket implementation
+                websocket = WebSocketConnectionTests()  # Real WebSocket implementation
                 
                 connection = WebSocketConnection(
                     connection_id=context.websocket_connection_id,
@@ -817,7 +817,7 @@ class TestPerformanceScaling:
         
         for context in user_contexts[:10]:
             manager = factory.create_manager(context)
-            websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             
             connection = WebSocketConnection(
                 connection_id=context.websocket_connection_id,
@@ -884,7 +884,7 @@ class TestPerformanceScaling:
                                     cross_contamination_detected=cross_contamination_detected)
 
 
-class TestSecurityBoundaries:
+class SecurityBoundariesTests:
     """Test security boundary enforcement."""
     
     async def test_user_execution_context_enforcement(self, factory, security_tracker):
@@ -931,7 +931,7 @@ class TestSecurityBoundaries:
         manager = factory.create_manager(context)
         
         # Create legitimate connection
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        websocket = WebSocketConnectionTests()  # Real WebSocket implementation
         
         legitimate_connection = WebSocketConnection(
             connection_id=context.websocket_connection_id,
@@ -943,7 +943,7 @@ class TestSecurityBoundaries:
         await manager.add_connection(legitimate_connection)
         
         # Test connection with mismatched user_id (security violation)
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        websocket = WebSocketConnectionTests()  # Real WebSocket implementation
         
         malicious_connection = WebSocketConnection(
             connection_id="malicious_conn",
@@ -982,7 +982,7 @@ class TestSecurityBoundaries:
         manager = factory.create_manager(context)
         
         # Add connection
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        websocket = WebSocketConnectionTests()  # Real WebSocket implementation
         
         connection = WebSocketConnection(
             connection_id=context.websocket_connection_id,
@@ -1041,7 +1041,7 @@ class TestSecurityBoundaries:
 
 
 # Integration test that validates the complete security system
-class TestCompleteSecurityValidation:
+class CompleteSecurityValidationTests:
     """Comprehensive security validation test."""
     
     async def test_end_to_end_security_scenario(self, factory, user_contexts, security_tracker):
@@ -1054,7 +1054,7 @@ class TestCompleteSecurityValidation:
         
         for i, context in enumerate(user_contexts[:5]):
             manager = factory.create_manager(context)
-            websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             
             connection = WebSocketConnection(
                 connection_id=context.websocket_connection_id,
@@ -1164,7 +1164,7 @@ class TestCompleteSecurityValidation:
 
 
 # Performance monitoring test
-class TestSecurityPerformance:
+class SecurityPerformanceTests:
     """Test security performance and monitoring."""
     
     async def test_security_monitoring_overhead(self, factory, user_contexts, security_tracker):
@@ -1187,7 +1187,7 @@ class TestSecurityPerformance:
         message_tasks = []
         
         for manager in secured_managers:
-            websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            websocket = WebSocketConnectionTests()  # Real WebSocket implementation
             
             connection = WebSocketConnection(
                 connection_id=f"perf_{id(manager)}",

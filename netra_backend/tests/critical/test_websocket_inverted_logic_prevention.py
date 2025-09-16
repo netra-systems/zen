@@ -8,7 +8,7 @@ are in other test files in the WebSocket test directories.
 
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
@@ -16,7 +16,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
-class TestWebSocketInvertedLogicPrevention:
+class WebSocketInvertedLogicPreventionTests:
     """Placeholder tests for WebSocket inverted logic prevention."""
 
     @pytest.mark.asyncio

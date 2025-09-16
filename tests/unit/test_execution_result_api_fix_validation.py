@@ -21,7 +21,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.llm.llm_manager import LLMManager
 
 @pytest.mark.unit
-class TestExecutionResultAPIFixValidation(SSotAsyncTestCase):
+class ExecutionResultAPIFixValidationTests(SSotAsyncTestCase):
     """Validate that the ExecutionResult API fix resolves Issue #261 correctly."""
 
     def setup_method(self, method):

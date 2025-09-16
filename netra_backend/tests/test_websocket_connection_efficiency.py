@@ -7,11 +7,11 @@ This test validates WebSocket connection handling, cleanup, and resource managem
 import pytest
 import asyncio
 from fastapi.testclient import TestClient
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestWebSocketConnectionEfficiency:
+class WebSocketConnectionEfficiencyTests:
     """Test WebSocket connection efficiency."""
 
     def test_websocket_manager_importable(self):

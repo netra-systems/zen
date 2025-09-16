@@ -26,7 +26,7 @@ from typing import List, Dict, Set, Tuple
 
 
 @pytest.mark.unit
-class TestRedisImportSourceValidation(SSotBaseTestCase):
+class RedisImportSourceValidationTests(SSotBaseTestCase):
     """Unit tests validating Redis import SSOT compliance.
     
     These tests are designed to FAIL initially, proving the existence

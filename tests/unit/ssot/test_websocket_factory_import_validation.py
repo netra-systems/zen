@@ -17,7 +17,7 @@ from typing import List, Dict, Set, Tuple
 from pathlib import Path
 
 @pytest.mark.unit
-class TestWebSocketFactorySSOTImportValidation(unittest.TestCase):
+class WebSocketFactorySSOTImportValidationTests(unittest.TestCase):
     """Test WebSocket factory SSOT import compliance."""
 
     def setUp(self):

@@ -160,7 +160,7 @@ def url_tester():
     """Create URL alignment tester instance."""
     return ServiceURLAlignmentTester()
 
-class TestBasicServiceURLAlignment:
+class BasicServiceURLAlignmentTests:
     """Test suite for basic service URL alignment."""
 
     @pytest.mark.asyncio

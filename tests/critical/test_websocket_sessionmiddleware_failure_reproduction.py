@@ -33,7 +33,7 @@ from tests.e2e.staging_test_config import get_staging_config
 # Mark all tests as critical failure reproduction tests
 pytestmark = [pytest.mark.critical, pytest.mark.reproduction, pytest.mark.sessionmiddleware]
 
-class TestWebSocketSessionMiddlewareFailureReproduction:
+class WebSocketSessionMiddlewareFailureReproductionTests:
     """
     CRITICAL: Reproduce exact WebSocket SessionMiddleware failures from SESSION5
     

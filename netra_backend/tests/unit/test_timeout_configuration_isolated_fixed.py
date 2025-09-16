@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker, ExecutionState, TimeoutConfig, CircuitBreakerOpenError
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 
-class TestTimeoutConfigurationIssues(SSotAsyncTestCase):
+class TimeoutConfigurationIssuesTests(SSotAsyncTestCase):
     """Test to reproduce timeout configuration bugs."""
 
     def setup_method(self, method=None):

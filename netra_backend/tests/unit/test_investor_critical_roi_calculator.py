@@ -105,7 +105,7 @@ class ROICalculatorService:
         else:
             return {'enterprise_optimization': {'current_provider': LLMProvider.OPENAI, 'current_model': LLMModel.GEMINI_2_5_FLASH.value, 'optimized_provider': LLMProvider.GOOGLE, 'optimized_model': 'gemini-2.5-pro'}}
 
-class TestInvestorCriticalROICalculator:
+class InvestorCriticalROICalculatorTests:
     """INVESTOR CRITICAL: Tests for instant ROI calculation accuracy"""
 
     @pytest.fixture

@@ -28,7 +28,7 @@ from shared.isolated_environment import get_env
 from test_framework.ssot.base import BaseTestCase
 
 @pytest.mark.unit
-class TestEnvironmentConfigLoader:
+class EnvironmentConfigLoaderTests:
     """Test EnvironmentConfigLoader SSOT functionality."""
 
     def setup_method(self):
@@ -102,7 +102,7 @@ class TestEnvironmentConfigLoader:
         assert '6379' in redis_url, 'Default should use standard Redis port'
 
 @pytest.mark.unit
-class TestConfigurationValidator:
+class ConfigurationValidatorTests:
     """Test ConfigurationValidator SSOT functionality."""
 
     def setup_method(self):
@@ -189,7 +189,7 @@ class TestConfigurationValidator:
             assert is_invalid is False, f'Config missing {missing_key} should be invalid'
 
 @pytest.mark.unit
-class TestConfigurationManager:
+class ConfigurationManagerTests:
     """Test ConfigurationManager SSOT functionality."""
 
     def setup_method(self):
@@ -273,7 +273,7 @@ class TestConfigurationManager:
         assert hasattr(service, 'validate_config'), 'Should have ConfigurationManager methods'
 
 @pytest.mark.unit
-class TestConfigurationServiceIntegration:
+class ConfigurationServiceIntegrationTests:
     """Test integration between configuration service components."""
 
     def setup_method(self):
@@ -351,7 +351,7 @@ class TestConfigurationServiceIntegration:
             assert len(value) > 0, f'Critical config {config_key} should not be empty'
 
 @pytest.mark.unit
-class TestConfigurationServiceErrorHandling:
+class ConfigurationServiceErrorHandlingTests:
     """Test error handling and edge cases in configuration service."""
 
     def setup_method(self):
@@ -428,7 +428,7 @@ class TestConfigurationServiceErrorHandling:
             assert value is None, f'Value {i} should be cleared'
 
 @pytest.mark.unit
-class TestConfigurationServiceConcurrency:
+class ConfigurationServiceConcurrencyTests:
     """Test configuration service under concurrent access."""
 
     def setup_method(self):

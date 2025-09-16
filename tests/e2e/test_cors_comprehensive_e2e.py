@@ -28,7 +28,7 @@ import pytest
 import websockets
 
 
-class TestCORSValidationer:
+class CORSValidationerTests:
     """Helper class for CORS validation testing."""
     
     def __init__(self):
@@ -125,7 +125,7 @@ def cors_tester():
     return CORSValidationTester()
 
 
-class TestCORSComprehensiveE2E:
+class CORSComprehensiveE2ETests:
     """Comprehensive E2E tests for CORS configuration."""
     
     @pytest.mark.asyncio

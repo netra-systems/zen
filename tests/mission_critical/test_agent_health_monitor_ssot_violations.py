@@ -42,7 +42,7 @@ except ImportError:
     DEV_MONITORS_AVAILABLE = False
 
 
-class TestAgentHealthMonitorSSOTViolations(SSotAsyncTestCase):
+class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
     """
     Reproduction tests for AgentHealthMonitor SSOT violations.
     These tests SHOULD FAIL with current fragmented implementation.

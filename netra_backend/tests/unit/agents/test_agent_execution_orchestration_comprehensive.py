@@ -56,7 +56,7 @@ from netra_backend.app.schemas.agent import SubAgentLifecycle
 from shared.isolated_environment import get_env
 from netra_backend.app.core.config import get_config
 
-class TestRealAgentExecutionWithBusinessValue(SSotBaseTestCase):
+class RealAgentExecutionWithBusinessValueTests(SSotBaseTestCase):
     """
     REAL Agent Execution Tests - Phase 1: Critical Business Value Scenarios
     
@@ -237,7 +237,7 @@ class TestRealAgentExecutionWithBusinessValue(SSotBaseTestCase):
         self.record_metric('multi_agent_workflow_success', True)
         self.record_metric('end_to_end_business_value', 'comprehensive_optimization_plan')
 
-class TestExecutionTimingValidation(SSotBaseTestCase):
+class ExecutionTimingValidationTests(SSotBaseTestCase):
     """
     Validate test execution timing to prevent 0-second execution detection.
     

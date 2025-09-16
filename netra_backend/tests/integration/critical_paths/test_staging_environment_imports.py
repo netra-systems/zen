@@ -13,7 +13,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from netra_backend.app.core.environment_constants import Environment, EnvironmentVariables
 
-class TestStagingEnvironmentImports:
+class StagingEnvironmentImportsTests:
     """Test suite for staging environment module imports and initialization."""
 
     @pytest.fixture(autouse=True)

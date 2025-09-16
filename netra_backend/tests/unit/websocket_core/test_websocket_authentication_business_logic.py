@@ -38,7 +38,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from fastapi.websockets import WebSocketState
 from test_framework.base import BaseUnitTest
 
-class TestWebSocketAuthResultBusinessLogic(BaseUnitTest):
+class WebSocketAuthResultBusinessLogicTests(BaseUnitTest):
     """Test WebSocketAuthResult business logic for authentication result handling."""
 
     @pytest.mark.unit
@@ -75,7 +75,7 @@ class TestWebSocketAuthResultBusinessLogic(BaseUnitTest):
         assert result_dict['error_code'] == 'INVALID_TOKEN', 'Must include error code'
         assert 'user_id' not in result_dict or result_dict['user_id'] is None, 'Must not include user details on failure'
 
-class TestE2EContextExtractionBusinessLogic(BaseUnitTest):
+class E2EContextExtractionBusinessLogicTests(BaseUnitTest):
     """Test E2E context extraction business logic for testing environment detection."""
 
     def setUp(self):
@@ -147,7 +147,7 @@ class TestE2EContextExtractionBusinessLogic(BaseUnitTest):
         e2e_context = extract_e2e_context_from_websocket(mock_websocket)
         assert e2e_context is None, 'Must return None when exception occurs'
 
-class TestUnifiedWebSocketAuthenticatorBusinessLogic(BaseUnitTest):
+class UnifiedWebSocketAuthenticatorBusinessLogicTests(BaseUnitTest):
     """Test UnifiedWebSocketAuthenticator business logic for SSOT authentication."""
 
     def setUp(self):
@@ -341,7 +341,7 @@ class TestUnifiedWebSocketAuthenticatorBusinessLogic(BaseUnitTest):
         assert stats['connection_states_seen']['DISCONNECTED'] == 2, 'Must track disconnection states'
         assert 'timestamp' in stats, 'Must include timestamp'
 
-class TestGlobalWebSocketAuthFunctions(BaseUnitTest):
+class GlobalWebSocketAuthFunctionsTests(BaseUnitTest):
     """Test global WebSocket authentication functions and utilities."""
 
     @pytest.mark.unit

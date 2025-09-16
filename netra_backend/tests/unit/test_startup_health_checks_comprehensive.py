@@ -25,7 +25,7 @@ from netra_backend.app.startup_health_checks import (
 )
 
 
-class TestServiceStatusEnum(BaseIntegrationTest):
+class ServiceStatusEnumTests(BaseIntegrationTest):
     """Test ServiceStatus enum values and usage."""
     
     def test_service_status_enum_values(self):
@@ -43,7 +43,7 @@ class TestServiceStatusEnum(BaseIntegrationTest):
         assert ServiceStatus.NOT_CONFIGURED.value == "not_configured"
 
 
-class TestHealthCheckResultDataclass(BaseIntegrationTest):
+class HealthCheckResultDataclassTests(BaseIntegrationTest):
     """Test HealthCheckResult dataclass functionality."""
     
     def test_health_check_result_creation_minimal(self):
@@ -118,7 +118,7 @@ class TestHealthCheckResultDataclass(BaseIntegrationTest):
         assert result1 != result3  # Different status
 
 
-class TestStartupHealthCheckerInitialization(BaseIntegrationTest):
+class StartupHealthCheckerInitializationTests(BaseIntegrationTest):
     """Test StartupHealthChecker initialization and configuration."""
     
     def test_startup_health_checker_initialization(self):
@@ -162,7 +162,7 @@ class TestStartupHealthCheckerInitialization(BaseIntegrationTest):
         assert checker1.app != checker2.app
 
 
-class TestLLMManagerHealthCheck(BaseIntegrationTest):
+class LLMManagerHealthCheckTests(BaseIntegrationTest):
     """Test LLM manager health check functionality."""
     
     async def test_check_llm_manager_not_configured(self):
@@ -302,7 +302,7 @@ class TestLLMManagerHealthCheck(BaseIntegrationTest):
         assert "Critical error" in result.message
 
 
-class TestDatabaseHealthCheck(BaseIntegrationTest):
+class DatabaseHealthCheckTests(BaseIntegrationTest):
     """Test database health check functionality."""
     
     async def test_check_database_not_configured(self):
@@ -413,7 +413,7 @@ class TestDatabaseHealthCheck(BaseIntegrationTest):
         assert "Query timeout" in result.message
 
 
-class TestRedisHealthCheck(BaseIntegrationTest):
+class RedisHealthCheckTests(BaseIntegrationTest):
     """Test Redis health check functionality."""
     
     async def test_check_redis_manager_not_available(self):
@@ -554,7 +554,7 @@ class TestRedisHealthCheck(BaseIntegrationTest):
         assert "Redis manager exists but not connected" in result.message
 
 
-class TestClickHouseHealthCheck(BaseIntegrationTest):
+class ClickHouseHealthCheckTests(BaseIntegrationTest):
     """Test ClickHouse health check functionality."""
     
     async def test_check_clickhouse_successful_connection(self):
@@ -656,7 +656,7 @@ class TestClickHouseHealthCheck(BaseIntegrationTest):
         assert result.status == ServiceStatus.DEGRADED
 
 
-class TestHealthCheckOrchestration(BaseIntegrationTest):
+class HealthCheckOrchestrationTests(BaseIntegrationTest):
     """Test health check orchestration and aggregation."""
     
     async def test_run_all_health_checks_all_services(self):
@@ -816,7 +816,7 @@ class TestHealthCheckOrchestration(BaseIntegrationTest):
         mock_logger.error.assert_called()  # For unhealthy service
 
 
-class TestValidateStartup(BaseIntegrationTest):
+class ValidateStartupTests(BaseIntegrationTest):
     """Test startup validation orchestration."""
     
     async def test_validate_startup_all_healthy_success(self):
@@ -934,7 +934,7 @@ class TestValidateStartup(BaseIntegrationTest):
         assert result is True
 
 
-class TestConvenienceFunction(BaseIntegrationTest):
+class ConvenienceFunctionTests(BaseIntegrationTest):
     """Test validate_startup_health convenience function."""
     
     async def test_validate_startup_health_function_success(self):
@@ -1008,7 +1008,7 @@ class TestConvenienceFunction(BaseIntegrationTest):
         mock_checker.validate_startup.assert_called_once_with(fail_on_critical=False)
 
 
-class TestCriticalVsOptionalServiceBehavior(BaseIntegrationTest):
+class CriticalVsOptionalServiceBehaviorTests(BaseIntegrationTest):
     """Test the behavior difference between critical and optional services."""
     
     async def test_critical_services_block_startup(self):
@@ -1071,7 +1071,7 @@ class TestCriticalVsOptionalServiceBehavior(BaseIntegrationTest):
         assert len(overlap) == 0, f"Services listed as both critical and optional: {overlap}"
 
 
-class TestLatencyMeasurement(BaseIntegrationTest):
+class LatencyMeasurementTests(BaseIntegrationTest):
     """Test latency measurement in health checks."""
     
     async def test_latency_measurement_successful_check(self):
@@ -1113,7 +1113,7 @@ class TestLatencyMeasurement(BaseIntegrationTest):
         assert result.status == ServiceStatus.NOT_CONFIGURED
 
 
-class TestErrorHandlingAndLogging(BaseIntegrationTest):
+class ErrorHandlingAndLoggingTests(BaseIntegrationTest):
     """Test error handling and logging across all health checks."""
     
     async def test_exception_handling_preserves_service_name(self):

@@ -35,7 +35,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 from netra_backend.app.core.startup_validator import StartupValidator, ValidationStatus, ValidationResult, validate_startup, require_startup_validation
 
-class TestStartupValidator(SSotAsyncTestCase):
+class StartupValidatorTests(SSotAsyncTestCase):
     """Unit tests for StartupValidator following SSOT patterns."""
 
     def setup_method(self, method):
@@ -52,7 +52,7 @@ class TestStartupValidator(SSotAsyncTestCase):
         """Cleanup test method using SSOT patterns."""
         await super().teardown_method(method)
 
-class TestStartupValidatorInitialization(TestStartupValidator):
+class StartupValidatorInitializationTests(StartupValidatorTests):
     """Test startup validator initialization and basic properties."""
 
     async def test_validator_initialization(self):
@@ -85,7 +85,7 @@ class TestStartupValidatorInitialization(TestStartupValidator):
             assert status.value == expected_value
         self.logger.info('✓ ValidationStatus enum test passed')
 
-class TestValidateAllOrchestration(TestStartupValidator):
+class ValidateAllOrchestrationTests(StartupValidatorTests):
     """Test the main validate_all method orchestration."""
 
     async def test_validate_all_success_scenario(self):
@@ -141,7 +141,7 @@ class TestValidateAllOrchestration(TestStartupValidator):
         assert failed_result.error is not None
         self.logger.info('✓ Validate all exception handling test passed')
 
-class TestIdGenerationValidation(TestStartupValidator):
+class IdGenerationValidationTests(StartupValidatorTests):
     """Test ID generation validation logic."""
 
     async def test_id_generation_validation_success(self):
@@ -174,7 +174,7 @@ class TestIdGenerationValidation(TestStartupValidator):
         assert 'thread extraction failed' in message.lower()
         self.logger.info('✓ ID generation extraction failure test passed')
 
-class TestWebSocketComponentsValidation(TestStartupValidator):
+class WebSocketComponentsValidationTests(StartupValidatorTests):
     """Test WebSocket components validation logic."""
 
     async def test_websocket_components_validation_success(self):
@@ -207,7 +207,7 @@ class TestWebSocketComponentsValidation(TestStartupValidator):
         assert 'bridge extraction failed' in message.lower()
         self.logger.info('✓ WebSocket bridge extraction failure test passed')
 
-class TestThreadServiceValidation(TestStartupValidator):
+class ThreadServiceValidationTests(StartupValidatorTests):
     """Test thread service validation logic."""
 
     async def test_thread_service_validation_success(self):
@@ -250,7 +250,7 @@ class TestThreadServiceValidation(TestStartupValidator):
         assert '2-argument bug' in message.lower()
         self.logger.info('✓ Thread service 2-argument bug detection test passed')
 
-class TestRepositoriesValidation(TestStartupValidator):
+class RepositoriesValidationTests(StartupValidatorTests):
     """Test database repositories validation logic."""
 
     async def test_repositories_validation_success(self):
@@ -270,7 +270,7 @@ class TestRepositoriesValidation(TestStartupValidator):
             self.logger.info(f'Repositories validation result: {success}, {message}')
         self.logger.info('✓ Repositories import failure test passed')
 
-class TestImportsValidation(TestStartupValidator):
+class ImportsValidationTests(StartupValidatorTests):
     """Test import integrity validation logic."""
 
     async def test_imports_validation_success(self):
@@ -291,7 +291,7 @@ class TestImportsValidation(TestStartupValidator):
         assert 'import error' in message.lower()
         self.logger.info('✓ Imports validation failure test passed')
 
-class TestMethodSignaturesValidation(TestStartupValidator):
+class MethodSignaturesValidationTests(StartupValidatorTests):
     """Test method signatures validation logic."""
 
     async def test_method_signatures_validation_success(self):
@@ -303,7 +303,7 @@ class TestMethodSignaturesValidation(TestStartupValidator):
             self.logger.warning(f'Method signatures validation failed: {message}')
         self.logger.info('✓ Method signatures validation success test passed')
 
-class TestAgentRegistryValidation(TestStartupValidator):
+class AgentRegistryValidationTests(StartupValidatorTests):
     """Test agent registry validation logic."""
 
     async def test_agent_registry_validation_success(self):
@@ -324,7 +324,7 @@ class TestAgentRegistryValidation(TestStartupValidator):
         assert 'agent registry error' in message.lower()
         self.logger.info('✓ Agent registry import failure test passed')
 
-class TestConfigurationValidation(TestStartupValidator):
+class ConfigurationValidationTests(StartupValidatorTests):
     """Test configuration validation logic."""
 
     async def test_configuration_validation_success(self):
@@ -345,7 +345,7 @@ class TestConfigurationValidation(TestStartupValidator):
         assert 'configuration error' in message.lower()
         self.logger.info('✓ Configuration validation failure test passed')
 
-class TestValidationResultsAndReporting(TestStartupValidator):
+class ValidationResultsAndReportingTests(StartupValidatorTests):
     """Test validation results handling and reporting."""
 
     async def test_validation_timing_accuracy(self):
@@ -378,7 +378,7 @@ class TestValidationResultsAndReporting(TestStartupValidator):
             assert result.duration_ms >= 0
         self.logger.info('✓ Validation results completeness test passed')
 
-class TestPublicInterfaceFunctions(TestStartupValidator):
+class PublicInterfaceFunctionsTests(StartupValidatorTests):
     """Test public interface functions."""
 
     @patch('netra_backend.app.core.startup_validator.StartupValidator')
@@ -404,7 +404,7 @@ class TestPublicInterfaceFunctions(TestStartupValidator):
         assert result == 'success'
         self.logger.info('✓ Require startup validation decorator test passed')
 
-class TestErrorHandlingAndEdgeCases(TestStartupValidator):
+class ErrorHandlingAndEdgeCasesTests(StartupValidatorTests):
     """Test error handling and edge cases."""
 
     async def test_validation_with_missing_dependencies(self):

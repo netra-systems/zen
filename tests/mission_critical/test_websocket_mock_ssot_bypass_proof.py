@@ -30,14 +30,14 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from shared.isolated_environment import IsolatedEnvironment
 
 # Import production SSOT components
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
 
 # Import test mock infrastructure that violates SSOT
 from test_framework.fixtures.websocket_manager_mock import MockWebSocketManager
 
 
-class TestWebSocketMockSsotBypassProof(SSotAsyncTestCase):
+class WebSocketMockSsotBypassProofTests(SSotAsyncTestCase):
     """Prove that WebSocket mock infrastructure bypasses SSOT patterns."""
     
     async def asyncSetUp(self):

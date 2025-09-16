@@ -83,7 +83,7 @@ class ObservabilityEventCollector:
         """Analyze collected observability data."""
         return {'total_monitoring_events': len(self.monitoring_events), 'performance_metrics_collected': len(self.performance_metrics), 'observability_points': len(self.observability_data), 'monitoring_coverage': {'event_types': list(set((e['event_type'] for e in self.monitoring_events))), 'performance_tracking': len(self.performance_metrics) > 0, 'observability_enabled': len(self.observability_data) > 0}, 'enterprise_readiness': {'audit_trail_complete': len(self.monitoring_events) >= 5, 'performance_monitored': len(self.performance_metrics) > 0, 'comprehensive_observability': len(self.observability_data) > 0}}
 
-class TestWebSocketAgentExecutionMonitoringObservability(BaseIntegrationTest):
+class WebSocketAgentExecutionMonitoringObservabilityTests(BaseIntegrationTest):
 
     def setup_method(self):
         super().setup_method()

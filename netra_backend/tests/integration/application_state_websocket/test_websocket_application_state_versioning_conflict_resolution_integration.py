@@ -47,7 +47,7 @@ class StateVersion:
         }
 
 
-class TestWebSocketApplicationStateVersioningConflictResolution(BaseIntegrationTest):
+class WebSocketApplicationStateVersioningConflictResolutionTests(BaseIntegrationTest):
     """Test application state versioning and conflict resolution during concurrent WebSocket operations."""
     
     async def create_versioned_state(self, services, state_manager, key: str, initial_data: Dict[str, Any], user_id: str, connection_id: str) -> StateVersion:

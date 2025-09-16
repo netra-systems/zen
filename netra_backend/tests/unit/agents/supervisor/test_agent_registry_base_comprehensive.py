@@ -53,7 +53,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, UserAgentSession, AgentLifecycleManager, get_agent_registry
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestAgentRegistryInitialization(SSotAsyncTestCase):
+class AgentRegistryInitializationTests(SSotAsyncTestCase):
     """Test AgentRegistry initialization and basic configuration."""
 
     def setup_method(self, method=None):
@@ -123,7 +123,7 @@ class TestAgentRegistryInitialization(SSotAsyncTestCase):
         assert hasattr(registry, 'set_websocket_manager')
         self.record_metric('universal_registry_inheritance_validated', True)
 
-class TestUserAgentSessionManagement(SSotAsyncTestCase):
+class UserAgentSessionManagementTests(SSotAsyncTestCase):
     """Test UserAgentSession lifecycle management and isolation features."""
 
     def setup_method(self, method=None):
@@ -252,7 +252,7 @@ class TestUserAgentSessionManagement(SSotAsyncTestCase):
             await registry.cleanup_user_session(None)
         self.record_metric('cleanup_validation_working', True)
 
-class TestUserAgentSessionBehavior(SSotAsyncTestCase):
+class UserAgentSessionBehaviorTests(SSotAsyncTestCase):
     """Test UserAgentSession behavior and lifecycle management."""
 
     def setup_method(self, method=None):
@@ -345,7 +345,7 @@ class TestUserAgentSessionBehavior(SSotAsyncTestCase):
         assert 'test_agent' in user_session._execution_contexts
         self.record_metric('execution_context_creation_working', True)
 
-class TestWebSocketManagerIntegration(SSotAsyncTestCase):
+class WebSocketManagerIntegrationTests(SSotAsyncTestCase):
     """Test WebSocket manager integration and propagation."""
 
     def setup_method(self, method=None):
@@ -412,7 +412,7 @@ class TestWebSocketManagerIntegration(SSotAsyncTestCase):
             assert user_session._websocket_bridge is not None
         self.record_metric('user_websocket_integration_working', True)
 
-class TestAgentCreationAndManagement(SSotAsyncTestCase):
+class AgentCreationAndManagementTests(SSotAsyncTestCase):
     """Test agent creation, registration, and management."""
 
     def setup_method(self, method=None):
@@ -519,7 +519,7 @@ class TestAgentCreationAndManagement(SSotAsyncTestCase):
         assert result is False
         self.record_metric('nonexistent_removal_handled', True)
 
-class TestToolDispatcherIntegration(SSotAsyncTestCase):
+class ToolDispatcherIntegrationTests(SSotAsyncTestCase):
     """Test tool dispatcher creation and enhancement."""
 
     def setup_method(self, method=None):
@@ -602,7 +602,7 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
         assert registry.tool_dispatcher is None
         self.record_metric('legacy_dispatcher_setter_deprecated', True)
 
-class TestAgentFactoryRegistration(SSotAsyncTestCase):
+class AgentFactoryRegistrationTests(SSotAsyncTestCase):
     """Test agent factory registration and default agent setup."""
 
     def test_register_default_agents_sets_flag(self):
@@ -673,7 +673,7 @@ class TestAgentFactoryRegistration(SSotAsyncTestCase):
         assert 'Test error' in registry.registration_errors['failing_agent']
         self.record_metric('safe_registration_failure_handled', True)
 
-class TestRegistryHealthAndDiagnostics(SSotAsyncTestCase):
+class RegistryHealthAndDiagnosticsTests(SSotAsyncTestCase):
     """Test registry health monitoring and diagnostic methods."""
 
     def setup_method(self, method=None):
@@ -773,7 +773,7 @@ class TestRegistryHealthAndDiagnostics(SSotAsyncTestCase):
         assert status['global_state_eliminated'] is True
         self.record_metric('factory_status_complete', 11)
 
-class TestConcurrencyAndThreadSafety(SSotAsyncTestCase):
+class ConcurrencyAndThreadSafetyTests(SSotAsyncTestCase):
     """Test concurrent access and thread safety."""
 
     def setup_method(self, method=None):
@@ -831,7 +831,7 @@ class TestConcurrencyAndThreadSafety(SSotAsyncTestCase):
         assert registry.websocket_manager == mock_websocket_managers[-1]
         self.record_metric('concurrent_websocket_setting_safe', True)
 
-class TestMemoryLeakPrevention(SSotAsyncTestCase):
+class MemoryLeakPreventionTests(SSotAsyncTestCase):
     """Test memory leak prevention features."""
 
     def setup_method(self, method=None):
@@ -911,7 +911,7 @@ class TestMemoryLeakPrevention(SSotAsyncTestCase):
         assert memory_report['status'] in ['no_registry', 'no_session']
         self.record_metric('lifecycle_manager_functional', True)
 
-class TestBackwardCompatibility(SSotAsyncTestCase):
+class BackwardCompatibilityTests(SSotAsyncTestCase):
     """Test backward compatibility methods."""
 
     def test_list_agents_returns_registered_keys(self):
@@ -969,7 +969,7 @@ class TestBackwardCompatibility(SSotAsyncTestCase):
         assert reset_report['using_universal_registry'] is True
         self.record_metric('reset_all_agents_compatible', True)
 
-class TestModuleExports(SSotAsyncTestCase):
+class ModuleExportsTests(SSotAsyncTestCase):
     """Test module-level exports and factory functions."""
 
     def test_get_agent_registry_returns_registry_instance(self):
@@ -998,7 +998,7 @@ class TestModuleExports(SSotAsyncTestCase):
         assert isinstance(registry2, AgentRegistry)
         self.record_metric('global_registry_handling_working', True)
 
-class TestEdgeCasesAndErrorHandling(SSotAsyncTestCase):
+class EdgeCasesAndErrorHandlingTests(SSotAsyncTestCase):
     """Test edge cases and error handling scenarios."""
 
     def setup_method(self, method=None):

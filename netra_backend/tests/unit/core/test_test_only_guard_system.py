@@ -29,7 +29,7 @@ def test_imports_work():
     assert TestModeDetector is not None
 
 
-class TestTestModeDetector:
+class TestModeDetectorTests:
     """Test the test mode detection logic."""
     
     def setup_method(self):
@@ -97,7 +97,7 @@ class TestTestModeDetector:
             assert TestModeDetector._cached_test_mode is True
 
 
-class TestTestOnlyDecorator:
+class TestOnlyDecoratorTests:
     """Test the @test_only decorator functionality."""
     
     def setup_method(self):
@@ -193,7 +193,7 @@ class TestTestOnlyDecorator:
         assert get_test_only_reason(regular_func) is None
 
 
-class TestRequireTestMode:
+class RequireTestModeTests:
     """Test the require_test_mode standalone function."""
     
     def setup_method(self):
@@ -226,7 +226,7 @@ class TestRequireTestMode:
             assert custom_message in violation.reason
 
 
-class TestUniversalRegistryIntegration:
+class UniversalRegistryIntegrationTests:
     """Test integration with UniversalRegistry._create_mock_tool_dispatcher."""
     
     def setup_method(self):
@@ -260,7 +260,7 @@ class TestUniversalRegistryIntegration:
             assert "testing" in violation.reason.lower()
 
 
-class TestErrorMessagesAndSuggestions:
+class ErrorMessagesAndSuggestionsTests:
     """Test that error messages and suggestions are helpful."""
     
     def setup_method(self):

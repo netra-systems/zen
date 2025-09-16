@@ -15,7 +15,7 @@ from test_framework.fixtures.auth import create_real_jwt_token
 
 
 @pytest.mark.integration
-class TestJWTCallingPatternsComprehensive:
+class JWTCallingPatternsComprehensiveTests:
     """Comprehensive test of all JWT calling patterns affected by Issue #520."""
     
     def test_positional_args_pattern_reproduces_issue_520(self):
@@ -162,7 +162,7 @@ class TestJWTCallingPatternsComprehensive:
 
 
 @pytest.mark.integration
-class TestJWTCallingPatternsFixValidation:
+class JWTCallingPatternsFixValidationTests:
     """Test how all calling patterns should work after implementing fixes."""
     
     def test_optional_email_parameter_fix_approach_validation(self):

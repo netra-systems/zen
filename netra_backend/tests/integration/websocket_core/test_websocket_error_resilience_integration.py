@@ -18,13 +18,13 @@ from unittest.mock import AsyncMock, Mock, patch
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.websocket import WebSocketTestUtility
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.error_recovery_handler import WebSocketErrorRecoveryHandler
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 from netra_backend.app.models import User, Thread
 
 
-class TestWebSocketErrorResilienceIntegration(BaseIntegrationTest):
+class WebSocketErrorResilienceIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket error resilience."""
     
     @pytest.fixture

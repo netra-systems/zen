@@ -67,7 +67,7 @@ class MockServiceResponse:
     headers: Dict[str, str]
     response_time: float
 
-class TestSystemCoreIntegrationComprehensive(SSotAsyncTestCase):
+class SystemCoreIntegrationComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive system integration tests for Netra platform core functionality.
     

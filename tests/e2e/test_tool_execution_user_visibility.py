@@ -38,7 +38,7 @@ from netra_backend.app.core.tool_models import ToolExecutionResult
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from shared.types.core_types import UserID, ThreadID, RunID
 from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
@@ -100,7 +100,7 @@ class MockUserInterface:
         self.is_connected = False
 
 @pytest.mark.e2e
-class TestToolExecutionUserVisibilityE2E(SSotAsyncTestCase):
+class ToolExecutionUserVisibilityE2ETests(SSotAsyncTestCase):
     """E2E tests for complete tool execution user visibility flow.
     
     EXPECTED TO FAIL: These tests demonstrate missing confirmation functionality.
@@ -259,7 +259,7 @@ class TestToolExecutionUserVisibilityE2E(SSotAsyncTestCase):
             assert staging_visibility['gcp_websocket_healthy'] is True
 
 @pytest.mark.e2e
-class TestToolExecutionUserExperienceE2E(SSotAsyncTestCase):
+class ToolExecutionUserExperienceE2ETests(SSotAsyncTestCase):
     """E2E tests focused on user experience during tool execution.
     
     EXPECTED TO FAIL: User experience features depend on missing confirmation system.

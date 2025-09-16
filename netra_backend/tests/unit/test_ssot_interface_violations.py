@@ -32,7 +32,7 @@ from typing import get_type_hints
 from unittest.mock import Mock, MagicMock
 
 
-class TestAgentRegistryInterfaceViolations:
+class AgentRegistryInterfaceViolationsTests:
     """Test suite for AgentRegistry interface violations."""
 
     def test_websocket_parameter_type_violation(self):
@@ -197,7 +197,7 @@ class TestAgentRegistryInterfaceViolations:
             )
 
 
-class TestInterfaceContractCompliance:
+class InterfaceContractComplianceTests:
     """Test suite for validating proper interface contract compliance post-fix."""
 
     def test_websocket_interface_unified_compliance(self):
@@ -291,7 +291,7 @@ class TestInterfaceContractCompliance:
         assert backward_compatible, "Interface fix should maintain backward compatibility"
 
 
-class TestSSoTComplianceValidation:
+class SSoTComplianceValidationTests:
     """Test suite for comprehensive SSOT compliance validation."""
 
     def test_single_source_of_truth_enforcement(self):

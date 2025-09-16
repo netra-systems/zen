@@ -28,7 +28,7 @@ from netra_backend.app.db.transaction_errors import (
 )
 
 
-class TestClickHouseExceptionSpecificity:
+class ClickHouseExceptionSpecificityTests:
     """Test suite proving clickhouse.py uses broad exception handling instead of specific types."""
     
     @pytest.mark.unit
@@ -147,7 +147,7 @@ class TestClickHouseExceptionSpecificity:
                     await client.execute("SELECT * FROM huge_table ORDER BY random()")
 
 
-class TestClickHouseBusinessImpactOfBroadExceptions:
+class ClickHouseBusinessImpactOfBroadExceptionsTests:
     """Tests demonstrating business impact of broad ClickHouse exception handling."""
     
     @pytest.mark.unit

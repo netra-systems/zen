@@ -22,7 +22,7 @@ from typing import Dict, List, Any, Optional, Set
 from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestMissionCriticalDockerBypass(SSotBaseTestCase):
+class MissionCriticalDockerBypassTests(SSotBaseTestCase):
     """E2E tests for mission-critical Docker bypass mechanisms
 
     These tests validate that when Docker Alpine builds fail, the system

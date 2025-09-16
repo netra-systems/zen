@@ -27,7 +27,7 @@ from netra_backend.app.core.project_utils import (
 
 env = get_env()
 
-class TestProjectPathResolution:
+class ProjectPathResolutionTests:
     """Test project path resolution functions."""
     
     def test_get_project_root_returns_correct_path(self):
@@ -97,7 +97,7 @@ class TestProjectPathResolution:
         assert roots1 == roots2 == roots3
 
 
-class TestEnvironmentDetection:
+class EnvironmentDetectionTests:
     """Test test environment detection functionality."""
     
     def setup_method(self):
@@ -265,7 +265,7 @@ class TestEnvironmentDetection:
             assert is_test_environment() is False
 
 
-class TestPathResolutionEdgeCases:
+class PathResolutionEdgeCasesTests:
     """Test edge cases for path resolution."""
     
     def test_path_resolution_with_symlinks(self):
@@ -306,7 +306,7 @@ class TestPathResolutionEdgeCases:
             os.chdir(original_cwd)
 
 
-class TestSSotCompliance:
+class SSotComplianceTests:
     """Test Single Source of Truth compliance."""
     
     def test_functions_are_ssot(self):
@@ -338,7 +338,7 @@ class TestSSotCompliance:
                     f"Function {func.__name__} should document SSOT compliance"
 
 
-class TestIntegrationWithActualEnvironment:
+class IntegrationWithActualEnvironmentTests:
     """Integration tests with the actual development environment."""
     
     def test_project_structure_validation(self):
@@ -386,7 +386,7 @@ class TestIntegrationWithActualEnvironment:
 
 
 # Integration test for SSOT compliance
-class TestRealWorldUsage:
+class RealWorldUsageTests:
     """Test real-world usage scenarios."""
     
     def test_can_import_sibling_modules_using_project_root(self):

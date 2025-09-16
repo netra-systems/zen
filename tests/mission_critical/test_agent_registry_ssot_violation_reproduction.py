@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAgentRegistrySSoTViolationReproduction(SSotAsyncTestCase):
+class AgentRegistrySSoTViolationReproductionTests(SSotAsyncTestCase):
     """
     Reproduction tests for AgentRegistry SSOT violations.
     

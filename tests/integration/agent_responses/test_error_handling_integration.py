@@ -111,7 +111,7 @@ class ErrorInjector:
             self.disable_error(error_type)
 
 
-class TestErrorHandlingIntegration(SSotAsyncTestCase):
+class ErrorHandlingIntegrationTests(SSotAsyncTestCase):
     """Integration tests for agent error handling and recovery patterns."""
     
     async def async_setup_method(self, method=None):

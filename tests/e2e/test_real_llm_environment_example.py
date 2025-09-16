@@ -29,7 +29,7 @@ from test_framework.test_environment_setup import test_session_context
 
 
 @pytest.mark.e2e
-class TestRealLLMEnvironment:
+class RealLLMEnvironmentTests:
     """Test class demonstrating real LLM environment usage."""
 
     @pytest.mark.asyncio
@@ -269,7 +269,7 @@ class TestRealLLMEnvironment:
 
 @pytest.mark.skip_if_no_real_llm
 @pytest.mark.e2e
-class TestRealLLMIntegration:
+class RealLLMIntegrationTests:
     """Integration tests that require real LLM access."""
     
     @pytest.mark.asyncio

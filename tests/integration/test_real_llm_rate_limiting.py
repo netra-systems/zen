@@ -16,7 +16,7 @@ import asyncio
 
 @pytest.mark.slow
 @pytest.mark.real_llm
-class TestRealLlmRateLimiting:
+class RealLlmRateLimitingTests:
     pass
 
     @pytest.fixture
@@ -38,7 +38,7 @@ class TestRealLlmRateLimiting:
 
         # Mock the LLM client to raise a rate limit error twice, then succeed.
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-            websocket = TestWebSocketConnection()
+            websocket = WebSocketConnectionTests()
             mock_llm_client.generate.side_effect = [
             httpx.ReadTimeout("Rate limit exceeded"),
             httpx.ReadTimeout("Rate limit exceeded"),
@@ -73,7 +73,7 @@ class TestRealLlmRateLimiting:
                 )
 
 
-                class TestWebSocketConnection:
+                class WebSocketConnectionTests:
                     """Real WebSocket connection for testing instead of mocks."""
 
                     def __init__(self):

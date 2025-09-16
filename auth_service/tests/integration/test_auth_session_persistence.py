@@ -28,7 +28,7 @@ from auth_service.services.session_service import SessionService
 from auth_service.services.jwt_service import JWTService
 
 
-class TestSessionPersistenceIntegration(BaseIntegrationTest):
+class SessionPersistenceIntegrationTests(BaseIntegrationTest):
     """Integration tests for session persistence with real Redis service."""
     
     @pytest.fixture(autouse=True)

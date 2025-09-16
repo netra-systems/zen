@@ -69,7 +69,7 @@ class GoldenPathUser:
 
 
 @pytest.mark.e2e
-class TestIssue1116GoldenPathMultiUser(SSotAsyncTestCase):
+class Issue1116GoldenPathMultiUserTests(SSotAsyncTestCase):
     """
     E2E staging test suite proving singleton creates Golden Path multi-user vulnerabilities.
     

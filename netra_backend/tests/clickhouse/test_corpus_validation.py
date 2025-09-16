@@ -19,7 +19,7 @@ import pytest
 
 from netra_backend.app.services.corpus_service import CorpusService
 
-class TestValidationAndSafety:
+class ValidationAndSafetyTests:
     """Test validation and safety measures"""
 
     def test_prompt_response_length_validation(self):
@@ -83,7 +83,7 @@ class TestValidationAndSafety:
         assert db.execute.call_count == 1
 
 
-class TestCorpusCloning:
+class CorpusCloningTests:
     """Test corpus cloning functionality"""
 
     @pytest.mark.asyncio

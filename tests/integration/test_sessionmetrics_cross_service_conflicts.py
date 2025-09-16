@@ -17,7 +17,7 @@ from netra_backend.app.database.request_scoped_session_factory import SessionMet
 
 
 @pytest.mark.integration
-class TestCrossServiceSessionMetricsConflicts:
+class CrossServiceSessionMetricsConflictsTests:
     """Test how SSOT violations cause cross-service integration failures."""
 
     def test_websocket_manager_session_metrics_confusion(self):
@@ -351,7 +351,7 @@ class TestCrossServiceSessionMetricsConflicts:
 
 
 @pytest.mark.integration
-class TestSSOTViolationSystemImpacts:
+class SSOTViolationSystemImpactsTests:
     """Test system-wide impacts of SessionMetrics SSOT violations."""
 
     def test_monitoring_dashboard_data_inconsistency(self):

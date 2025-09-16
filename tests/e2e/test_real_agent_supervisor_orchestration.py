@@ -47,7 +47,7 @@ except ImportError:
     WEBSOCKET_SERVICES_AVAILABLE = False
 
 
-class TestRealAgentSupervisorOrchestration(BaseE2ETest):
+class RealAgentSupervisorOrchestrationTests(BaseE2ETest):
     """Test comprehensive supervisor orchestration with real services."""
 
     def setup_method(self):

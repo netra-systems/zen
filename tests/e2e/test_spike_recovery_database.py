@@ -38,7 +38,7 @@ class SpikeLoadMetrics:
     pass
 
 @pytest.mark.e2e
-class TestDatabaseConnectionPoolStress:
+class DatabaseConnectionPoolStressTests:
     """Test Case 5: Database Connection Pool Stress Testing"""
     
     @pytest.mark.e2e

@@ -36,7 +36,7 @@ from tests.e2e.websocket_message_guarantee_helpers import (
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestConcurrentMessageDeliveryGuarantees:
+class ConcurrentMessageDeliveryGuaranteesTests:
     """Test #5.1: Concurrent Message Delivery with Ordering."""
     
     @pytest.fixture
@@ -108,7 +108,7 @@ class TestConcurrentMessageDeliveryGuarantees:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestNetworkInterruptionResilience:
+class NetworkInterruptionResilienceTests:
     """Test #5.2: Network Interruption Handling."""
     
     @pytest.fixture
@@ -188,7 +188,7 @@ class TestNetworkInterruptionResilience:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAcknowledmentAndTrackingSystem:
+class AcknowledmentAndTrackingSystemTests:
     """Test #5.3: Message Acknowledgment System."""
     
     @pytest.fixture
@@ -254,7 +254,7 @@ class TestAcknowledmentAndTrackingSystem:
 
 @pytest.mark.asyncio 
 @pytest.mark.e2e
-class TestEndToEndMessageGuarantees:
+class EndToEndMessageGuaranteesTests:
     """Test #5.4: Complete End-to-End Message Delivery Guarantees."""
     
     @pytest.fixture

@@ -101,7 +101,7 @@ class PerformanceTestContext:
         """Get performance metrics from this test run."""
         return PerformanceMetrics(execution_time=self.end_time - self.start_time, memory_usage_mb=self.peak_memory - self.start_memory, peak_memory_mb=self.peak_memory, object_count=len(gc.get_objects()), gc_collections=gc.get_count()[0])
 
-class TestToolDispatcherPerformanceRegression(SSotAsyncTestCase):
+class ToolDispatcherPerformanceRegressionTests(SSotAsyncTestCase):
     """
     Performance Regression Prevention Tests for Tool Dispatcher SSOT Consolidation.
     

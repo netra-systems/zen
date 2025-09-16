@@ -30,7 +30,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.base.interface import ExecutionContext
 
 
-class TestSupervisorOrchestrationCompleteE2E(SSotAsyncTestCase):
+class SupervisorOrchestrationCompleteE2ETests(SSotAsyncTestCase):
     """E2E tests for complete supervisor orchestration workflow."""
 
     def setup_method(self, method):
@@ -397,7 +397,7 @@ class TestSupervisorOrchestrationCompleteE2E(SSotAsyncTestCase):
             assert supervisor is not None
 
 
-class TestGoldenPathBusinessValueValidation(SSotAsyncTestCase):
+class GoldenPathBusinessValueValidationTests(SSotAsyncTestCase):
     """Test Golden Path business value delivery through supervisor orchestration."""
 
     def setup_method(self, method):

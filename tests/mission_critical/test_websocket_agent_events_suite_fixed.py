@@ -36,7 +36,7 @@ from shared.isolated_environment import get_env, IsolatedEnvironment
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, create_agent_websocket_bridge
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.agent_class_registry import get_agent_class_registry
@@ -94,7 +94,7 @@ class FixedWebSocketEventCapture:
         self.start_time = time.time()
 
 
-class TestWebSocketAgentEventsFixed:
+class WebSocketAgentEventsFixedTests:
     """Fixed tests for WebSocket Agent Events validation."""
     
     @pytest.fixture(autouse=True)

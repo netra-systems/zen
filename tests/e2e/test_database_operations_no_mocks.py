@@ -229,7 +229,7 @@ async def real_db_test():
         await db_connections.disconnect_all()
 
 @pytest.mark.e2e
-class TestRealDatabaseOperations:
+class RealDatabaseOperationsTests:
     """Real database operations testing - NO MOCK FALLBACKS ALLOWED."""
 
     @pytest.mark.asyncio

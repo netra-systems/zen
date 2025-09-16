@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 """
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 import asyncio
@@ -245,7 +245,7 @@ class ScalabilityTester:
         return result
 
 @pytest.mark.performance
-class TestConcurrentUserPerformance:
+class ConcurrentUserPerformanceTests:
     """Test suite for concurrent user handling performance."""
 
     def setup_method(self):

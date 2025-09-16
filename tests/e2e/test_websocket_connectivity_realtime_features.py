@@ -59,7 +59,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class TestWebSocketMetrics:
+class WebSocketMetricsTests:
     """Comprehensive metrics for WebSocket connectivity and real-time features testing."""
     test_name: str
     start_time: float = field(default_factory=time.time)
@@ -134,7 +134,7 @@ class TestWebSocketMetrics:
 
 
 @dataclass
-class TestWebSocketConfig:
+class WebSocketConfigTests:
     """Configuration for WebSocket connectivity and real-time testing."""
     # Connection testing
     test_basic_connectivity: bool = True
@@ -183,7 +183,7 @@ class WebSocketConnection:
     is_authenticated: bool = False
 
 # Alias for naming consistency
-WebSocketTestConfig = TestWebSocketConfig
+WebSocketTestConfig = WebSocketConfigTests
 
 class WebSocketConnectivityTester:
     """Comprehensive WebSocket connectivity and real-time features tester."""
@@ -1376,7 +1376,7 @@ class WebSocketConnectivityTester:
 
 @pytest.mark.e2e
 @pytest.mark.asyncio
-class TestWebSocketConnectivityRealtimeFeatures:
+class WebSocketConnectivityRealtimeFeaturesTests:
     """Comprehensive WebSocket connectivity and real-time features test suite."""
     
     @pytest.fixture

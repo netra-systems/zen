@@ -45,7 +45,7 @@ class MockDatabaseTool:
 
 
 @pytest.mark.integration  
-class TestUnifiedToolExecutionRealServices:
+class UnifiedToolExecutionRealServicesTests:
     """Integration tests for unified tool execution with real services."""
     
     @pytest.mark.asyncio

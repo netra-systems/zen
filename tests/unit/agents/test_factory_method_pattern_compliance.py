@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 @pytest.mark.unit
-class TestFactoryMethodPatternCompliance(SSotAsyncTestCase):
+class FactoryMethodPatternComplianceTests(SSotAsyncTestCase):
     """
     Test suite validating proper factory method patterns in agent creation.
 

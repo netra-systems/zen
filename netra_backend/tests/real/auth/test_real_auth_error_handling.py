@@ -38,7 +38,7 @@ docker_manager = UnifiedDockerManager()
 @pytest.mark.error_handling
 @pytest.mark.reliability
 @pytest.mark.asyncio
-class TestRealAuthErrorHandling:
+class RealAuthErrorHandlingTests:
     """
     Real auth error handling tests using Docker services.
     

@@ -59,7 +59,7 @@ from netra_backend.app.services.unified_authentication_service import (
     AuthenticationContext
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
@@ -128,7 +128,7 @@ class MockAuthenticatedWebSocketConnection:
         return [msg for msg in self.sent_messages if msg.get("type") in business_event_types]
 
 
-class TestWebSocketAuthenticationMultiUserBusinessScenarios(SSotAsyncTestCase):
+class WebSocketAuthenticationMultiUserBusinessScenariosTests(SSotAsyncTestCase):
     """
     Comprehensive Integration Tests for Multi-User WebSocket Authentication Business Scenarios.
     

@@ -265,7 +265,7 @@ class MockAPIEndpoint:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAPIEndpointIntegrationComprehensive:
+class APIEndpointIntegrationComprehensiveTests:
     """Comprehensive API endpoint integration tests."""
     
     @pytest.fixture

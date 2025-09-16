@@ -23,7 +23,7 @@ from fastapi import WebSocket
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.unit
-class TestIssue508FixValidation(SSotAsyncTestCase):
+class Issue508FixValidationTests(SSotAsyncTestCase):
     """
     Validation Test Suite for Issue #508 Fix
     
@@ -143,7 +143,7 @@ class TestIssue508FixValidation(SSotAsyncTestCase):
         assert dict(query_params) == {'param': 'value', 'other': '123'}
 
 @pytest.mark.unit
-class TestIssue508StabilityValidation(SSotAsyncTestCase):
+class Issue508StabilityValidationTests(SSotAsyncTestCase):
     """
     System Stability Validation for Issue #508 Fix
     

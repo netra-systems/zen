@@ -16,7 +16,7 @@ from netra_backend.app.core.app_factory import create_app
 from netra_backend.app.core.middleware_setup import setup_middleware as ssot_setup_middleware, setup_gcp_auth_context_middleware
 from netra_backend.app.middleware.gcp_auth_context_middleware import GCPAuthContextMiddleware
 
-class TestSessionDependencyIntegration:
+class SessionDependencyIntegrationTests:
     """Integration tests for session middleware dependency violations."""
 
     def test_gcp_middleware_session_access_with_proper_order(self):
@@ -173,7 +173,7 @@ class TestSessionDependencyIntegration:
         print(f'Middleware processing order: {processing_order}')
         assert len(processing_order) > 0, 'Should have captured processing order'
 
-class TestGoldenPathBlockingScenarios:
+class GoldenPathBlockingScenariosTests:
     """Test scenarios that specifically block the Golden Path user flow."""
 
     def test_websocket_auth_context_golden_path_scenario(self):

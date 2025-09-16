@@ -58,7 +58,7 @@ from netra_backend.app.routes.websocket import WebSocketComponentError
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
 from netra_backend.app.config import get_config
 
-class TestWebSocketImportCollisionPrevention(SSotAsyncTestCase):
+class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
     """
     MISSION CRITICAL: Deployment gate for WebSocket coroutine error prevention.
     

@@ -451,7 +451,7 @@ class RealAgentExecutionValidator:
 
 
 @pytest.mark.e2e
-class TestRealAgentExecutionStaging:
+class RealAgentExecutionStagingTests:
     """MISSION CRITICAL: Real agent execution tests for staging environment"""
     
     @pytest.fixture

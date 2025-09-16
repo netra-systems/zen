@@ -87,7 +87,7 @@ class EnterpriseAnalysisModel(BaseModel):
     stakeholders: List[str] = []
 
 
-class TestLLMManagerComprehensiveFocused(SSotAsyncTestCase):
+class LLMManagerComprehensiveFocusedTests(SSotAsyncTestCase):
     """
     Comprehensive focused unit tests for LLMManager SSOT class.
     

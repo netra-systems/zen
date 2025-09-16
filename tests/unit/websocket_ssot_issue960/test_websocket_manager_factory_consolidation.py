@@ -52,7 +52,7 @@ import pytest
 from loguru import logger
 
 
-class TestWebSocketManagerFactoryConsolidation(SSotBaseTestCase):
+class WebSocketManagerFactoryConsolidationTests(SSotBaseTestCase):
     """Issue #960: WebSocket Manager Factory Consolidation Validation
 
     This test validates that factory patterns properly delegate to SSOT

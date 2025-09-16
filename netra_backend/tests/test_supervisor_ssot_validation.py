@@ -10,7 +10,7 @@ import pytest
 import asyncio
 from typing import Dict, Any
 from unittest.mock import MagicMock, AsyncMock, Mock, patch
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -25,7 +25,7 @@ from netra_backend.app.core.serialization.unified_json_handler import backend_js
 from netra_backend.app.core.unified_error_handler import agent_error_handler
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestSSOTCompliance:
+class SSOTComplianceTests:
     """Test SSOT compliance for all fixed components."""
 
     def test_json_handling_in_observability(self):
@@ -118,7 +118,7 @@ class TestSSOTCompliance:
         params = list(sig.parameters.keys())
         assert 'context' in params, '_emit_thinking should accept context parameter'
 
-class TestIntegrationPatterns:
+class IntegrationPatternsTests:
     """Test integration patterns between components."""
 
     @pytest.mark.asyncio
@@ -151,7 +151,7 @@ class TestIntegrationPatterns:
         source = inspect.getsource(actions_agent.__class__)
         assert 'ErrorContext(' in source, 'ActionsToMeetGoalsSubAgent should create ErrorContext'
 
-class TestBackwardCompatibility:
+class BackwardCompatibilityTests:
     """Test that backward compatibility is maintained where needed."""
 
     def test_agents_still_function_without_context(self):

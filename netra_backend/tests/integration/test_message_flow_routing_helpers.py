@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch, MagicMock
 
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -29,7 +29,7 @@ WebSocketMessage,
 # Removed unused import: from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
 from test_framework.websocket_helpers import MockWebSocketConnection
 
-class TestSyntaxFix:
+class SyntaxFixTests:
     """Test class for orphaned methods"""
 
     def setup_method(self):

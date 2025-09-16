@@ -26,7 +26,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestAgentExecutionCore(SSotAsyncTestCase):
+class AgentExecutionCoreTests(SSotAsyncTestCase):
     """Unit tests for AgentExecutionCore - Core agent execution with death detection."""
 
     def setup_method(self, method=None):

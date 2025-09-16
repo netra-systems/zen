@@ -5,7 +5,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 from netra_backend.app.agents.utils import extract_json_from_response, extract_partial_json, fix_common_json_errors, recover_truncated_json
 
-class TestJSONExtraction:
+class JSONExtractionTests:
     """Test cases for improved JSON extraction."""
 
     def test_extract_valid_json(self):
@@ -83,7 +83,7 @@ class TestJSONExtraction:
         fixed = fix_common_json_errors(json_str)
         assert '//' not in fixed
 
-class TestTruncatedJSONRecovery:
+class TruncatedJSONRecoveryTests:
     """Test cases for truncated JSON recovery functionality."""
 
     def test_recover_complete_json(self):
@@ -145,7 +145,7 @@ class TestTruncatedJSONRecovery:
         result = error_fixer.recover_truncated_json(None)
         assert result == None
 
-class TestPartialJSONExtraction:
+class PartialJSONExtractionTests:
     """Test cases for partial JSON extraction functionality."""
 
     def test_extract_partial_basic(self):
@@ -203,7 +203,7 @@ class TestPartialJSONExtraction:
         result = llm_parser.extract_partial_json(None)
         assert result == None
 
-class TestLargeResponseHandling:
+class LargeResponseHandlingTests:
     """Test cases for handling large JSON responses."""
 
     def test_extract_from_large_response(self):

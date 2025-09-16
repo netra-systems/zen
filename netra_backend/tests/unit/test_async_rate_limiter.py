@@ -9,7 +9,7 @@ and edge cases that could lead to cost overruns.
 
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
@@ -73,7 +73,7 @@ def create_expired_calls(limiter, count):
     limiter._calls = [old_time] * count
 
 # Core rate limiter functionality tests
-class TestRateLimiterInitialization:
+class RateLimiterInitializationTests:
     """Test rate limiter initialization and properties."""
 
     def test_rate_limiter_stores_max_calls(self, rate_limiter):
@@ -99,7 +99,7 @@ class TestRateLimiterInitialization:
         assert_max_calls(strict_limiter, 1)
         assert_time_window(strict_limiter, 0.5)
 
-class TestCallAcquisition:
+class CallAcquisitionTests:
     """Test call acquisition and tracking."""
 
     @pytest.mark.asyncio
@@ -141,7 +141,7 @@ class TestCallAcquisition:
         await rate_limiter.acquire()
         assert len(rate_limiter._calls) == initial_length + 1
 
-class TestTimeWindowBehavior:
+class TimeWindowBehaviorTests:
     """Test time window and call expiration."""
 
     @pytest.mark.asyncio
@@ -184,7 +184,7 @@ class TestTimeWindowBehavior:
         wait_time = rate_limiter._calculate_wait_time(old_time)
         assert 0.4 <= wait_time <= 0.6  # Account for timing variance
 
-class TestConcurrentAccess:
+class ConcurrentAccessTests:
     """Test thread safety and concurrent access."""
 
     @pytest.mark.asyncio
@@ -217,7 +217,7 @@ class TestConcurrentAccess:
         results = await asyncio.gather(*checks)
         assert all(result is False for result in results)
 
-class TestResetFunctionality:
+class ResetFunctionalityTests:
     """Test reset and cleanup functionality."""
 
     @pytest.mark.asyncio
@@ -253,7 +253,7 @@ class TestResetFunctionality:
         )
         assert_current_calls(rate_limiter, 0)
 
-class TestEdgeCases:
+class EdgeCasesTests:
     """Test edge cases and error conditions."""
 
     def test_zero_time_window_limiter(self):
@@ -301,7 +301,7 @@ class TestEdgeCases:
         # Should have waited for the window
         assert elapsed >= strict_limiter.time_window * 0.8
 
-class TestPropertiesAndState:
+class PropertiesAndStateTests:
     """Test property getters and state management."""
 
     def test_current_calls_property(self, rate_limiter):

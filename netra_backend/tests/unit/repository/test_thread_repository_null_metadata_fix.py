@@ -22,7 +22,7 @@ from netra_backend.app.services.database.thread_repository import ThreadReposito
 from netra_backend.app.db.models_postgres import Thread
 
 
-class TestThreadRepositoryNullMetadataFix:
+class ThreadRepositoryNullMetadataFixTests:
     """Unit tests for NULL metadata handling fix in ThreadRepository."""
     
     def setup_method(self):

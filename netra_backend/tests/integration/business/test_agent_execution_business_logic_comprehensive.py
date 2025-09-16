@@ -28,7 +28,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.business.agent_quality_validator import AgentQualityValidator
 from netra_backend.app.business.usage_tracker import UsageTracker
 
-class TestAgentExecutionBusinessLogicComprehensive(SSotBaseTestCase):
+class AgentExecutionBusinessLogicComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive agent execution business logic tests.
     

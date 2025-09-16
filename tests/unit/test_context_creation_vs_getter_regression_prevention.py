@@ -40,7 +40,7 @@ from netra_backend.app.dependencies import get_user_execution_context, create_us
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator, reset_global_counter
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestContextReuseRegressionPrevention(SSotBaseTestCase):
+class ContextReuseRegressionPreventionTests(SSotBaseTestCase):
     """
     CRITICAL: Context Reuse Regression Prevention Test - SSOT Compliant
     
@@ -166,7 +166,7 @@ class TestContextReuseRegressionPrevention(SSotBaseTestCase):
         self.record_metric('memory_test_creation_time', creation_time)
         self.record_metric('memory_efficiency_validated', True)
 
-class TestContextCreationVsGetterRegression(SSotBaseTestCase):
+class ContextCreationVsGetterRegressionTests(SSotBaseTestCase):
     """Legacy unit tests to prevent context creation vs getter pattern regression - SSOT Compliant."""
 
     def setup_method(self, method=None):
@@ -263,7 +263,7 @@ class TestContextCreationVsGetterRegression(SSotBaseTestCase):
             mock_ws.reset_mock()
             create_context = create_user_execution_context(user_id=user_id, thread_id='thd_websocket_pattern_123456')
 
-class TestAntiPatternDetection(SSotBaseTestCase):
+class AntiPatternDetectionTests(SSotBaseTestCase):
     """Unit tests to detect and prevent anti-patterns - SSOT Compliant."""
 
     def setup_method(self, method=None):
@@ -318,7 +318,7 @@ class TestAntiPatternDetection(SSotBaseTestCase):
         isolated_context2 = create_user_execution_context(user_id=user_id, thread_id=thread_id)
         assert isolated_context1.run_id != isolated_context2.run_id
 
-class TestWebSocketHandlerPatterns:
+class WebSocketHandlerPatternsTests:
     """Unit tests for WebSocket handler patterns to prevent regression."""
 
     def setup_method(self):
@@ -367,7 +367,7 @@ class TestWebSocketHandlerPatterns:
         assert context1.thread_id == context2.thread_id
         assert context1.run_id == context2.run_id
 
-class TestSessionManagerIntegration:
+class SessionManagerIntegrationTests:
     """Unit tests for session manager integration."""
 
     def setup_method(self):
@@ -410,7 +410,7 @@ class TestSessionManagerIntegration:
             assert context.websocket_client_id == 'test_ws_client_id'
 
 @pytest.mark.parametrize('thread_id,run_id,expected_behavior', [(None, None, 'creates_new_session'), ('existing_thread', None, 'continues_thread_new_run'), (None, 'existing_run', 'creates_thread_uses_run'), ('existing_thread', 'existing_run', 'uses_both_existing')])
-class TestParameterizedContextBehavior:
+class ParameterizedContextBehaviorTests:
     """Parametrized tests for different context parameter combinations."""
 
     def setup_method(self):
@@ -435,7 +435,7 @@ class TestParameterizedContextBehavior:
             assert context.thread_id == thread_id
             assert context.run_id == run_id
 
-class TestSpecificRegressionPattern(SSotBaseTestCase):
+class SpecificRegressionPatternTests(SSotBaseTestCase):
     """
     Comprehensive regression test with the EXACT pattern from requirements.
     
@@ -582,8 +582,8 @@ def test_ssot_compliance_validation():
     from netra_backend.app.dependencies import get_user_execution_context
     from shared.id_generation.unified_id_generator import UnifiedIdGenerator
     from test_framework.ssot.base_test_case import SSotBaseTestCase
-    assert issubclass(TestContextReuseRegressionPrevention, SSotBaseTestCase)
-    assert issubclass(TestSpecificRegressionPattern, SSotBaseTestCase)
+    assert issubclass(ContextReuseRegressionPreventionTests, SSotBaseTestCase)
+    assert issubclass(SpecificRegressionPatternTests, SSotBaseTestCase)
     assert hasattr(pytest.mark, 'unit')
     assert hasattr(pytest.mark, 'critical')
     assert hasattr(pytest.mark, 'mission_critical')

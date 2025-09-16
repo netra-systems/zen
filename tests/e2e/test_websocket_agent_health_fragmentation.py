@@ -31,9 +31,9 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 from netra_backend.app.core.agent_health_monitor import AgentHealthMonitor
 from netra_backend.app.core.agent_execution_tracker import ExecutionRecord, ExecutionState
 from netra_backend.app.core.agent_reliability_types import AgentError
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 try:
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     WEBSOCKET_MANAGER_AVAILABLE = True
 except ImportError:
     WEBSOCKET_MANAGER_AVAILABLE = False
@@ -44,7 +44,7 @@ except ImportError:
     EVENT_MONITOR_AVAILABLE = False
 
 @pytest.mark.e2e
-class TestWebSocketAgentHealthFragmentation(SSotAsyncTestCase):
+class WebSocketAgentHealthFragmentationTests(SSotAsyncTestCase):
     """
     Reproduction tests for WebSocket and agent health monitoring fragmentation.
     These tests SHOULD FAIL with current disconnected implementation.
@@ -201,7 +201,7 @@ class TestWebSocketAgentHealthFragmentation(SSotAsyncTestCase):
             self.fail(f"SSOT VIOLATION: Performance fragmentation from separate health monitoring. Agent health time: {performance_analysis['avg_agent_health_time']:.4f}s, WebSocket health time: {performance_analysis['avg_websocket_health_time']:.4f}s, Total overhead: {performance_analysis['performance_overhead_ms']:.2f}ms, Redundancy ratio: {performance_analysis['redundancy_ratio']:.2f}, Redundant checks: {performance_analysis['redundant_checks']}")
 
 @pytest.mark.skipif(not WEBSOCKET_MANAGER_AVAILABLE, reason='WebSocket manager not available')
-class TestWebSocketHealthIntegrationRequirements(SSotAsyncTestCase):
+class WebSocketHealthIntegrationRequirementsTests(SSotAsyncTestCase):
     """
     Additional tests that require WebSocket components to be available.
     These tests validate specific integration points.
@@ -213,7 +213,7 @@ class TestWebSocketHealthIntegrationRequirements(SSotAsyncTestCase):
         
         Expected to FAIL: No direct integration between WebSocket manager and agent health.
         """
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         health_monitor = AgentHealthMonitor()
         integration_analysis = {'websocket_has_health_monitor': hasattr(websocket_manager, 'agent_health_monitor'), 'websocket_has_health_check': hasattr(websocket_manager, 'check_agent_health'), 'websocket_has_health_callback': hasattr(websocket_manager, 'on_agent_health_change'), 'health_has_websocket_ref': hasattr(health_monitor, 'websocket_manager'), 'health_has_connection_callback': hasattr(health_monitor, 'notify_websocket_manager'), 'integration_methods_count': 0}

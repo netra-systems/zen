@@ -52,12 +52,12 @@ import pytest
 from loguru import logger
 
 # Import SSOT components
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestSSotWebSocketFactoryCompliance(SSotAsyncTestCase):
+class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
     """Mission Critical: SSOT WebSocket Factory Pattern Compliance Tests
     
     These tests validate that:

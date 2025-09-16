@@ -63,7 +63,7 @@ from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 
 
-class TestAuthServiceIntegration(BaseIntegrationTest):
+class AuthServiceIntegrationTests(BaseIntegrationTest):
     """Integration tests for authentication service with real services."""
     
     def setup_method(self):

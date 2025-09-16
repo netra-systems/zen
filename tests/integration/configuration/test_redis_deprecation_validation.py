@@ -29,7 +29,7 @@ from shared.configuration.redis_pattern_validator import RedisConfigurationPatte
 
 
 @pytest.mark.integration 
-class TestRedisDeprecationValidation(SSotBaseTestCase):
+class RedisDeprecationValidationTests(SSotBaseTestCase):
     """
     Integration tests that validate REDIS_URL deprecation warnings work correctly.
     

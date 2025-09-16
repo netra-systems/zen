@@ -223,7 +223,7 @@ class MockAgentForTesting(BaseAgent):
             raise
 
 
-class TestExecutionEngineComprehensiveRealServices(SSotAsyncTestCase):
+class ExecutionEngineComprehensiveRealServicesTests(SSotAsyncTestCase):
     """COMPREHENSIVE integration tests for ExecutionEngine with real services."""
     
     async def setup_method(self, method=None):

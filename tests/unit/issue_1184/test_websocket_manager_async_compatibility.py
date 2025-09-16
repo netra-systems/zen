@@ -13,7 +13,7 @@ These tests run without Docker and demonstrate the exact staging errors.
 import pytest
 import asyncio
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager, get_websocket_manager_async
 from shared.logging.unified_logging_ssot import get_logger
 
 logger = get_logger(__name__)
@@ -40,13 +40,38 @@ class TestWebSocketAsyncCompatibility(SSotAsyncTestCase):
         # This should FAIL with TypeError initially - demonstrates the exact issue
         # Many places in codebase incorrectly await this synchronous function
         try:
-            manager_async = get_websocket_manager(user_context=user_context)
+            manager_async = await get_websocket_manager(user_context=user_context)
             logger.error("❌ Unexpected: await on synchronous function did not fail")
             # If this doesn't fail, it means the function signature changed or there's wrapping
             assert False, "Expected TypeError when awaiting synchronous get_websocket_manager()"
         except TypeError as e:
             logger.info(f"✅ Expected TypeError when awaiting synchronous function: {e}")
             assert "can't be used in 'await' expression" in str(e) or "object is not awaitable" in str(e)
+
+    @pytest.mark.issue_1184
+    async def test_get_websocket_manager_async_works_correctly(self):
+        """
+        NEW TEST: Verify the new async function works correctly.
+
+        This test should PASS and demonstrates the correct usage pattern
+        for async contexts that need to await WebSocket manager creation.
+        """
+        user_context = {"user_id": "test-async-user-1184", "thread_id": "test-async-thread-1184"}
+
+        # This should work (proper async call)
+        manager_async = await get_websocket_manager_async(user_context=user_context)
+        assert manager_async is not None
+        logger.info(f"✅ Asynchronous WebSocket manager creation works: {type(manager_async)}")
+
+        # Verify it returns the same type as the sync version
+        manager_sync = get_websocket_manager(user_context=user_context)
+        assert type(manager_async) == type(manager_sync)
+
+        # For the same user context, should return the same instance (registry behavior)
+        manager_async_2 = await get_websocket_manager_async(user_context=user_context)
+        assert manager_async is manager_async_2, "Should return same instance from registry"
+
+        logger.info("✅ Async WebSocket manager creation test passed")
 
     @pytest.mark.issue_1184
     async def test_websocket_manager_initialization_timing(self):
@@ -99,7 +124,7 @@ class TestWebSocketAsyncCompatibility(SSotAsyncTestCase):
                 await asyncio.sleep(delay)
             # Incorrect usage that causes staging issues
             try:
-                return get_websocket_manager(user_context=ctx)
+                return await get_websocket_manager(user_context=ctx)
             except TypeError as e:
                 logger.info(f"Expected error from incorrect await usage: {e}")
                 # Return proper call as fallback

@@ -380,7 +380,7 @@ class ConfigurationValidator:
         )
 
 
-class TestAuthStartupConfiguration:
+class AuthStartupConfigurationTests:
     """
     Comprehensive auth service startup and configuration validation tests.
     

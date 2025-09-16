@@ -29,7 +29,7 @@ env = get_env()
 @pytest.mark.websocket
 @pytest.mark.load_balancing
 @skip_if_no_real_services
-class TestRealWebSocketLoadBalancing:
+class RealWebSocketLoadBalancingTests:
     """Test real WebSocket load balancing scenarios."""
     
     @pytest.fixture

@@ -74,7 +74,7 @@ class GCPErrorObjectValidationReport:
 
 
 @pytest.mark.integration
-class TestGCPErrorObjectValidation(SSotBaseTestCase):
+class GCPErrorObjectValidationTests(SSotBaseTestCase):
     """Integration tests for GCP Error object validation and compliance."""
     
     def setup_method(self, method):
@@ -725,6 +725,6 @@ class TestGCPErrorObjectValidation(SSotBaseTestCase):
 
 # Export test classes
 __all__ = [
-    'TestGCPErrorObjectValidation',
+    'GCPErrorObjectValidationTests',
     'GCPErrorObjectValidationReport'
 ]

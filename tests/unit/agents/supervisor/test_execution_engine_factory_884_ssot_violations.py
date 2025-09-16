@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.mark.unit
-class TestExecutionEngineFactorySSOTViolations884(SSotAsyncTestCase):
+class ExecutionEngineFactorySSOTViolations884Tests(SSotAsyncTestCase):
     """Phase 1 Unit Tests: Execution Engine Factory SSOT Violations
 
     These tests are designed to FAIL initially to demonstrate the factory

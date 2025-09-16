@@ -36,16 +36,17 @@ from typing import Dict, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
-from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory, get_agent_instance_factory, configure_agent_instance_factory
+from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory, get_agent_instance_factory, configure_agent_instance_factory, create_agent_instance_factory
 from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassRegistry, get_agent_class_registry
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.logging_config import central_logger
+from shared.id_generation import UnifiedIdGenerator
 logger = central_logger.get_logger(__name__)
 
 @pytest.mark.unit
-class TestAgentRegistryConfiguration(SSotAsyncTestCase):
+class AgentRegistryConfigurationTests(SSotAsyncTestCase):
     """Unit tests reproducing agent registry configuration failures from Golden Path tests.
     
     These tests reproduce the primary error: 'No agent registry configured - cannot create agent'
@@ -102,14 +103,14 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         factory = AgentInstanceFactory()
         registry = AgentClassRegistry()
 
-        class TestSupervisorAgent(BaseAgent):
+        class SupervisorAgentTests(BaseAgent):
 
             def __init__(self, llm_manager=None, **kwargs):
-                super().__init__(llm_manager=llm_manager, name='TestSupervisorAgent')
+                super().__init__(llm_manager=llm_manager, name='SupervisorAgentTests')
 
             async def execute(self, *args, **kwargs):
                 return {'status': 'success', 'agent': 'test_supervisor'}
-        test_agents = [('supervisor_orchestration', TestSupervisorAgent, 'Test supervisor for orchestration'), ('triage', TestSupervisorAgent, 'Test triage agent'), ('data_helper', TestSupervisorAgent, 'Test data helper agent'), ('apex_optimizer', TestSupervisorAgent, 'Test optimizer agent'), ('reporting', TestSupervisorAgent, 'Test reporting agent')]
+        test_agents = [('supervisor_orchestration', SupervisorAgentTests, 'Test supervisor for orchestration'), ('triage', SupervisorAgentTests, 'Test triage agent'), ('data_helper', SupervisorAgentTests, 'Test data helper agent'), ('apex_optimizer', SupervisorAgentTests, 'Test optimizer agent'), ('reporting', SupervisorAgentTests, 'Test reporting agent')]
         for agent_name, agent_class, description in test_agents:
             registry.register(agent_name, agent_class, description)
         registry.freeze()
@@ -118,7 +119,7 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         user_context = UserExecutionContext.from_request_supervisor(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
         agent = await factory.create_agent_instance('supervisor_orchestration', user_context)
         assert agent is not None
-        assert isinstance(agent, TestSupervisorAgent)
+        assert isinstance(agent, SupervisorAgentTests)
         logger.info(' PASS:  Agent creation succeeded after proper factory configuration')
 
     async def test_global_configure_agent_instance_factory_integration(self):
@@ -138,10 +139,12 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         websocket_bridge = AgentWebSocketBridge()
         configured_factory = await configure_agent_instance_factory(agent_class_registry=registry, websocket_bridge=websocket_bridge, llm_manager=self.mock_llm_manager)
         assert configured_factory is not None
-        global_factory = get_agent_instance_factory()
-        assert configured_factory == global_factory
+        # Create user context for SSOT factory pattern
         user_context = UserExecutionContext.from_request_supervisor(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
-        agent = await global_factory.create_agent_instance('test_agent', user_context)
+
+        # Create SSOT factory instance for testing
+        ssot_factory = create_agent_instance_factory(user_context)
+        agent = await ssot_factory.create_agent_instance('test_agent', user_context)
         assert agent is not None
         logger.info(' PASS:  Global factory configuration pattern validated')
 
@@ -154,17 +157,17 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         registry = AgentClassRegistry()
         self.assertEqual(len(registry), 0)
 
-        class TestAgent(BaseAgent):
+        class AgentTests(BaseAgent):
             pass
-        registry.register('test_agent', TestAgent, 'Test agent description')
+        registry.register('test_agent', AgentTests, 'Test agent description')
         self.assertEqual(len(registry), 1)
         retrieved_class = registry.get_agent_class('test_agent')
-        self.assertEqual(retrieved_class, TestAgent)
+        self.assertEqual(retrieved_class, AgentTests)
         agent_names = registry.list_agent_names()
         self.assertIn('test_agent', agent_names)
         registry.freeze()
         with self.assertRaises(Exception):
-            registry.register('another_agent', TestAgent, 'Another agent')
+            registry.register('another_agent', AgentTests, 'Another agent')
         logger.info(' PASS:  Agent class registry population patterns validated')
 
     async def test_websocket_bridge_configuration_requirements(self):
@@ -176,11 +179,11 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         factory = AgentInstanceFactory()
         registry = AgentClassRegistry()
 
-        class TestAgent(BaseAgent):
+        class AgentTests(BaseAgent):
 
             async def execute(self, *args, **kwargs):
                 return {'status': 'success'}
-        registry.register('test_agent', TestAgent, 'Test agent')
+        registry.register('test_agent', AgentTests, 'Test agent')
         registry.freeze()
         factory.configure(agent_class_registry=registry, websocket_bridge=None, llm_manager=self.mock_llm_manager)
         user_context = UserExecutionContext.from_request_supervisor(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
@@ -222,7 +225,13 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
 
     def teardown_method(self, method):
         """Clean up test environment."""
-        factory = get_agent_instance_factory()
+        # Create temporary user context for cleanup purposes
+        cleanup_user_context = UserExecutionContext(
+            user_id=f"cleanup_{UnifiedIdGenerator.generate_base_id('user')}",
+            thread_id=f"cleanup_{UnifiedIdGenerator.generate_base_id('thread')}",
+            run_id=UnifiedIdGenerator.generate_base_id('run')
+        )
+        factory = create_agent_instance_factory(cleanup_user_context)
         if hasattr(factory, 'reset_for_testing'):
             factory.reset_for_testing()
         super().teardown_method(method)

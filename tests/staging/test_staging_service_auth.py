@@ -18,7 +18,7 @@ from unittest.mock import patch, MagicMock
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from shared.isolated_environment import get_env
 
-class TestStagingServiceAuthentication:
+class StagingServiceAuthenticationTests:
     """Test service authentication configuration for staging environment."""
 
     @pytest.fixture(autouse=True)

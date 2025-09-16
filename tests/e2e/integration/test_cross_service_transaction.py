@@ -95,7 +95,7 @@ except ImportError:
         async def rollback_operation(self, operation): return True
 
 
-class TestCrossServiceTransactioner:
+class CrossServiceTransactionerTests:
     """E2E tester for atomic cross-service transactions."""
     
     def __init__(self):
@@ -226,7 +226,7 @@ async def transaction_tester():
     await tester.cleanup_test_environment()
 
 
-class TestCrossServiceTransaction:
+class CrossServiceTransactionTests:
     """E2E tests for atomic cross-service transactions."""
 
     @pytest.mark.asyncio
@@ -316,7 +316,7 @@ class TestCrossServiceTransaction:
         assert rollback_success, "Partial transaction rollback should succeed"
 
 
-class TestCrossServiceTransactionPerformance:
+class CrossServiceTransactionPerformanceTests:
     """Performance tests for cross-service transactions."""
 
     @pytest.mark.asyncio

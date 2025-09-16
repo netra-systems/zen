@@ -46,7 +46,7 @@ from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestWebSocketAgentEventsGoldenPath(SSotAsyncTestCase):
+class WebSocketAgentEventsGoldenPathTests(SSotAsyncTestCase):
     """Unit tests for WebSocket agent events in the golden path workflow."""
 
     def setup_method(self, method):

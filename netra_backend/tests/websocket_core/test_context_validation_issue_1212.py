@@ -34,7 +34,7 @@ from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmi
 from netra_backend.app.core.user_execution_context import UserExecutionContext
 
 
-class TestWebSocketContextValidationIssue1212:
+class WebSocketContextValidationIssue1212Tests:
     """Test suite specifically for Issue #1212 - WebSocket context validation warnings."""
 
     def setup_method(self):
@@ -379,7 +379,7 @@ class TestWebSocketContextValidationIssue1212:
                     assert "CONTEXT VALIDATION PASSED" in debug_msg
 
 
-class TestSuspiciousRunIdDetection:
+class SuspiciousRunIdDetectionTests:
     """Focused tests for the _is_suspicious_run_id method."""
 
     def setup_method(self):

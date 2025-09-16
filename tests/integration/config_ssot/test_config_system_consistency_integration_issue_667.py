@@ -32,7 +32,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.integration
-class TestConfigSystemConsistencyIntegrationIssue667(SSotAsyncTestCase, unittest.TestCase):
+class ConfigSystemConsistencyIntegrationIssue667Tests(SSotAsyncTestCase, unittest.TestCase):
     """Integration tests to validate configuration system consistency for Issue #667."""
     
     def setUp(self):

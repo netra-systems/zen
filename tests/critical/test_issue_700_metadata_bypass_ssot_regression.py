@@ -25,7 +25,7 @@ class MockExecutionState:
     """Minimal state for testing triage execution"""
     original_request: str
 
-class TestIssue700MetadataBypassSSoTRegression:
+class Issue700MetadataBypassSSoTRegressionTests:
     """Test suite to reproduce and validate Issue #700 metadata bypass regression"""
 
     def setup_method(self):
@@ -151,7 +151,7 @@ class TestIssue700MetadataBypassSSoTRegression:
                 triage_agent.store_metadata_result(self.real_context, key, value)
             assert 'metadata' in str(exc_info.value).lower(), f"Line with key '{key}' should fail due to missing metadata attribute"
 
-class TestIssue700FixValidation:
+class Issue700FixValidationTests:
     """Test suite to validate the fix for Issue #700"""
 
     def test_proposed_fix_with_agent_context_fallback(self):

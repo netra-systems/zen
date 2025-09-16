@@ -38,7 +38,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
-class TestWebSocketSSOTViolationsReproduction(SSotAsyncTestCase):
+class WebSocketSSOTViolationsReproductionTests(SSotAsyncTestCase):
     """
     Test suite that reproduces and demonstrates current SSOT violations.
     

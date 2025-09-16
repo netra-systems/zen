@@ -43,7 +43,7 @@ from netra_backend.app.websocket_core.context import WebSocketContext
 @pytest.mark.unit
 @pytest.mark.websocket
 @pytest.mark.issue_135
-class TestBasicTriageResponseUnit(SSotAsyncTestCase):
+class BasicTriageResponseUnitTests(SSotAsyncTestCase):
     """
     Unit tests for basic triage response processing without Docker dependencies.
     

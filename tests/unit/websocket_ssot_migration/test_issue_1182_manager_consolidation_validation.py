@@ -40,7 +40,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerConsolidationValidation(SSotBaseTestCase):
+class WebSocketManagerConsolidationValidationTests(SSotBaseTestCase):
     """
     CRITICAL: Tests for Issue #1182 WebSocket Manager SSOT consolidation.
     
@@ -372,7 +372,7 @@ class TestWebSocketManagerConsolidationValidation(SSotBaseTestCase):
             logger.info("✓ DemoWebSocketBridge imports successfully")
             
             # Test WebSocket manager compatibility with demo bridge
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Check if WebSocketManager can be used in demo context
             # This simulates the integration pattern used in demo_websocket.py

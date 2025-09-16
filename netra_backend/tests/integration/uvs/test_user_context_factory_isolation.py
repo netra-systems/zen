@@ -56,7 +56,7 @@ class IsolationTestResult:
     memory_address: int
     data_integrity: bool
 
-class TestUserContextFactoryIsolation(IntegrationTestBase):
+class UserContextFactoryIsolationTests(IntegrationTestBase):
     """Integration tests for UserContextFactory isolation patterns and thread safety."""
 
     def setUp(self):

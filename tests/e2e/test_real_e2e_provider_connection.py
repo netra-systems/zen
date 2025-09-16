@@ -171,7 +171,7 @@ class ProviderConnectionManager:
             new_preferences[key] = mapping.get(model, model)
         return new_preferences
 
-class TestRealE2EProviderConnection(BaseE2ETest):
+class RealE2EProviderConnectionTests(BaseE2ETest):
     """Test AI provider connection and integration."""
 
     def setup_method(self):

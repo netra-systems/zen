@@ -25,7 +25,7 @@ from netra_backend.tests.test_route_fixtures import (
     basic_test_client,
 )
 
-class TestQualityRoute:
+class QualityRouteTests:
     """Test quality metric endpoints and monitoring functionality."""
     
     def test_quality_metrics_retrieval(self, basic_test_client):

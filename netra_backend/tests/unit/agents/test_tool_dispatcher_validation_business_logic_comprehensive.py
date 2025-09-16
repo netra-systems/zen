@@ -31,7 +31,7 @@ from test_framework.unified import TestCategory
 from shared.isolated_environment import get_env
 
 
-class TestToolDispatcherValidationBusiness(SSotBaseTestCase):
+class ToolDispatcherValidationBusinessTests(SSotBaseTestCase):
     """Comprehensive unit tests for ToolDispatcherValidation business logic."""
 
     def setup_method(self, method):
@@ -435,7 +435,7 @@ class TestToolDispatcherValidationBusiness(SSotBaseTestCase):
         self.metrics.record_custom("business_decision_making_enabled", True)
 
 
-class TestToolDispatcherValidationBusinessScenarios(SSotBaseTestCase):
+class ToolDispatcherValidationBusinessScenariosTests(SSotBaseTestCase):
     """Business scenario tests for tool validation edge cases."""
 
     def test_enterprise_scale_parameter_validation(self):

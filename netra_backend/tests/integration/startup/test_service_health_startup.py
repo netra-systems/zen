@@ -47,7 +47,7 @@ class ServiceHealthMetrics:
 @pytest.mark.integration
 @pytest.mark.startup
 @pytest.mark.health_checks
-class TestServiceHealthStartup(ServiceOrchestrationIntegrationTest):
+class ServiceHealthStartupTests(ServiceOrchestrationIntegrationTest):
     """Integration tests for service health checks during startup."""
 
     async def async_setup(self):
@@ -259,7 +259,7 @@ class TestServiceHealthStartup(ServiceOrchestrationIntegrationTest):
 @pytest.mark.startup
 @pytest.mark.business_value
 @pytest.mark.monitoring
-class TestServiceHealthBusinessValue(ServiceOrchestrationIntegrationTest):
+class ServiceHealthBusinessValueTests(ServiceOrchestrationIntegrationTest):
     """Business value validation for service health startup."""
 
     async def test_health_monitoring_enables_business_continuity(self):

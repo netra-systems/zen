@@ -77,7 +77,7 @@ from netra_backend.app.core.configuration import get_configuration
 @pytest.mark.real_services
 @pytest.mark.mission_critical
 @pytest.mark.golden_path
-class TestServiceDependencyFailuresE2E(BaseE2ETest):
+class ServiceDependencyFailuresE2ETests(BaseE2ETest):
     """
     E2E tests for service dependency failures and graceful degradation.
     

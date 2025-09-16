@@ -26,7 +26,7 @@ from shared.id_generation.unified_id_generator import (
 )
 
 
-class TestIdGenerationValidation(BaseTestCase):
+class IdGenerationValidationTests(BaseTestCase):
     """Test ID generation delivers reliable isolation for business operations."""
     
     def setup_method(self):

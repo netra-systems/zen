@@ -26,7 +26,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.golden_path
 @pytest.mark.unit
-class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
+class AgentExecutionValidationBusinessLogicTests(SSotBaseTestCase):
     """
     Golden Path Unit Tests for Agent Execution Validation Business Logic.
     

@@ -154,7 +154,7 @@ def create_test_context(user_id: str = None, thread_id: str = None, run_id: str 
     )
 
 
-class TestUniversalRegistryWebSocketIntegration(BaseIntegrationTest):
+class UniversalRegistryWebSocketIntegrationTests(BaseIntegrationTest):
     """Test UniversalRegistry interactions with WebSocket systems."""
     
     @pytest.mark.integration

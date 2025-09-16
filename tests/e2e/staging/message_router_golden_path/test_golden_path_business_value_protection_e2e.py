@@ -29,7 +29,7 @@ from test_framework.ssot.real_websocket_connection_manager import RealWebSocketC
 from shared.isolated_environment import get_env
 
 
-class TestGoldenPathBusinessValueProtectionE2E(SSotAsyncTestCase):
+class GoldenPathBusinessValueProtectionE2ETests(SSotAsyncTestCase):
     """Test complete Golden Path business value in staging environment."""
 
     @pytest.fixture(scope="class")

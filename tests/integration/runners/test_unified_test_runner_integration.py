@@ -62,7 +62,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.orchestration import OrchestrationConfig
 
 @pytest.mark.integration
-class TestUnifiedTestRunnerIntegrationCore(SSotAsyncTestCase):
+class UnifiedTestRunnerIntegrationCoreTests(SSotAsyncTestCase):
     """Core integration tests for UnifiedTestRunner with real Docker and services"""
 
     @classmethod
@@ -143,7 +143,7 @@ class TestUnifiedTestRunnerIntegrationCore(SSotAsyncTestCase):
         return artifact_path
 
 @pytest.mark.integration
-class TestRealDockerOrchestration(TestUnifiedTestRunnerIntegrationCore):
+class RealDockerOrchestrationTests(UnifiedTestRunnerIntegrationCoreTests):
     """Integration tests with real Docker container orchestration"""
 
     async def test_docker_service_orchestration_lifecycle(self):
@@ -238,7 +238,7 @@ class TestRealDockerOrchestration(TestUnifiedTestRunnerIntegrationCore):
         self.assertNotIn('frontend_test_network', database_networks)
 
 @pytest.mark.integration
-class TestServiceCoordinationIntegration(TestUnifiedTestRunnerIntegrationCore):
+class ServiceCoordinationIntegrationTests(UnifiedTestRunnerIntegrationCoreTests):
     """Integration tests for multi-service coordination scenarios"""
 
     async def test_service_dependency_resolution_during_failures(self):
@@ -352,7 +352,7 @@ class TestServiceCoordinationIntegration(TestUnifiedTestRunnerIntegrationCore):
             self.assertIn('Request', load_logs)
 
 @pytest.mark.integration
-class TestPerformanceRegressionIntegration(TestUnifiedTestRunnerIntegrationCore):
+class PerformanceRegressionIntegrationTests(UnifiedTestRunnerIntegrationCoreTests):
     """Integration tests for performance regression detection"""
 
     async def test_test_execution_performance_benchmarking(self):

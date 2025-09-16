@@ -41,7 +41,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 
-class TestAuthLoopPrevention:
+class AuthLoopPreventionTests:
     """Test auth loop prevention mechanisms"""
     
     @pytest.mark.asyncio
@@ -192,7 +192,7 @@ class TestAuthLoopPrevention:
         pass
 
 
-class TestStagingAuthLoopScenarios:
+class StagingAuthLoopScenariosTests:
     """Test specific scenarios that could cause auth loops on staging"""
     
     @pytest.mark.asyncio

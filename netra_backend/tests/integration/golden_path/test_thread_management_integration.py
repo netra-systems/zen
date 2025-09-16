@@ -45,7 +45,7 @@ class ThreadManagementResult:
     error_message: Optional[str] = None
 
 
-class TestThreadManagementIntegration(BaseIntegrationTest):
+class ThreadManagementIntegrationTests(BaseIntegrationTest):
     """Test thread management with real PostgreSQL persistence."""
     
     def setup_method(self):

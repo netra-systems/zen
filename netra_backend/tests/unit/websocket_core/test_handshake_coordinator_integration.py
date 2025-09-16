@@ -35,7 +35,7 @@ from netra_backend.app.websocket_core.connection_state_machine import (
 )
 
 
-class TestHandshakeCoordinatorIntegration(SSotAsyncTestCase):
+class HandshakeCoordinatorIntegrationTests(SSotAsyncTestCase):
     """Test suite to validate HandshakeCoordinator integration with connection state."""
 
     async def test_handshake_coordinator_ready_but_connection_state_missing_bug(self):

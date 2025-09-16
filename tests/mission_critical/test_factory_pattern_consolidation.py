@@ -34,7 +34,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestFactoryPatternConsolidation(SSotBaseTestCase):
+class FactoryPatternConsolidationTests(SSotBaseTestCase):
     """Test ExecutionEngine factory pattern consolidation and SSOT compliance."""
     
     def setUp(self):

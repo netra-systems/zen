@@ -38,7 +38,7 @@ from deployment.secrets_config import SecretConfig, get_staging_secret, validate
 
 
 @pytest.mark.unit
-class TestSecretsConfigValidation(SSotBaseTestCase):
+class SecretsConfigValidationTests(SSotBaseTestCase):
     """
     Unit tests for SecretConfig validation logic.
     

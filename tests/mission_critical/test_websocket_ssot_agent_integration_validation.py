@@ -53,7 +53,7 @@ from loguru import logger
 
 # Import SSOT components for integration testing
 try:
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.agents.base_agent import BaseAgent
@@ -139,7 +139,7 @@ class MockAgent(BaseAgent if BaseAgent else object):
             return error_result
 
 
-class TestWebSocketSSotAgentIntegrationValidation(SSotAsyncTestCase):
+class WebSocketSSotAgentIntegrationValidationTests(SSotAsyncTestCase):
     """Mission Critical: WebSocket SSOT Agent Integration Validation
     
     This test validates that WebSocket SSOT consolidation maintains proper

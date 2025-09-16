@@ -63,7 +63,7 @@ class GoldenPathEvent:
     timestamp: float
 
 
-class TestGoldenPathQueueDisruption(SSotAsyncTestCase):
+class GoldenPathQueueDisruptionTests(SSotAsyncTestCase):
     """Test how queue fragmentation disrupts the Golden Path user flow."""
 
     def setup_method(self, method):

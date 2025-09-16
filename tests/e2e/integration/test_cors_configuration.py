@@ -116,7 +116,7 @@ class CORSValidator:
 
 
 @pytest.mark.e2e
-class TestCORSConfiguration:
+class CORSConfigurationTests:
     """Comprehensive CORS configuration tests."""
     
     @pytest.fixture

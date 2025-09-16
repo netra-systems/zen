@@ -50,7 +50,7 @@ class DatabaseSessionStats:
     max_concurrent: int = 0
 
 @pytest.mark.integration
-class TestDatabaseSessionLifecycle(SSotAsyncTestCase):
+class DatabaseSessionLifecycleTests(SSotAsyncTestCase):
     """Unit tests reproducing database session lifecycle issues from Issue #414."""
 
     def setup_method(self, method):

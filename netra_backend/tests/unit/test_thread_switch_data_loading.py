@@ -12,7 +12,7 @@ from unittest.mock import Mock, AsyncMock, MagicMock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.isolated_environment import IsolatedEnvironment
@@ -22,7 +22,7 @@ from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.thread_service import ThreadService
 
 
-class TestThreadSwitchDataLoading:
+class ThreadSwitchDataLoadingTests:
     """Test thread switching with data loading"""
     
     @pytest.fixture

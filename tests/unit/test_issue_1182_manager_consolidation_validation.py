@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestIssue1182ManagerConsolidationValidation(SSotBaseTestCase):
+class Issue1182ManagerConsolidationValidationTests(SSotBaseTestCase):
     """Unit tests to detect WebSocket Manager SSOT violations"""
 
     def test_websocket_manager_competing_implementations_detected(self):

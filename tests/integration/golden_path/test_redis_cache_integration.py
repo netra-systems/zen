@@ -34,7 +34,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, WebSocketID
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
-class TestRedisCacheIntegration(SSotAsyncTestCase):
+class RedisCacheIntegrationTests(SSotAsyncTestCase):
     """Test Redis cache integration with real Redis instance."""
 
     def setup_method(self, method=None):

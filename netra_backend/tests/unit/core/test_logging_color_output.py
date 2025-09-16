@@ -11,7 +11,7 @@ import pytest
 from unittest.mock import Mock, patch
 from contextlib import redirect_stderr
 from typing import Any, Dict
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -23,7 +23,7 @@ from netra_backend.app.core.logging_formatters import (
 )
 
 
-class TestLoggingColorOutput:
+class LoggingColorOutputTests:
     """Test proper color handling in logging output."""
 
     @pytest.fixture

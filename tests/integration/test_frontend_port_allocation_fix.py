@@ -66,7 +66,7 @@ class PortServer:
             self.thread.join(timeout=1)
 
 @pytest.mark.integration
-class TestFrontendPortAllocationFix:
+class FrontendPortAllocationFixTests:
     """Test the enhanced frontend port allocation system."""
 
     def test_basic_port_conflict_detection(self):

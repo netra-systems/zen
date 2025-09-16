@@ -107,7 +107,7 @@ class FactoryPerformanceMetrics:
             return True
         return False
 
-class TestUserIsolationFactoryPatternRegression(SSotBaseTestCase):
+class UserIsolationFactoryPatternRegressionTests(SSotBaseTestCase):
     """
     CRITICAL: User Isolation Factory Pattern Regression Test Suite
     
@@ -593,7 +593,7 @@ class TestUserIsolationFactoryPatternRegression(SSotBaseTestCase):
             logger.info(f'  Average creation time: {avg_time:.4f}s')
         if self.metrics.memory_usage_samples:
             logger.info(f'  Memory samples: {len(self.metrics.memory_usage_samples)}')
-__all__ = ['TestUserIsolationFactoryPatternRegression']
+__all__ = ['UserIsolationFactoryPatternRegressionTests']
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

@@ -40,7 +40,7 @@ from netra_backend.app.websocket_core.gcp_initialization_validator import (
 )
 
 
-class TestRedisManagerConcurrencyRaceConditions:
+class RedisManagerConcurrencyRaceConditionsTests:
     """Stress and race condition tests for Redis manager concurrency."""
     
     @pytest.fixture

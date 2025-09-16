@@ -8,12 +8,12 @@ from typing import Any, Dict
 import pytest
 from netra_backend.app.websocket_core.connection_info import ConnectionInfo
 from netra_backend.app.websocket_core.handlers import MessageRouter, get_message_router, UserMessageHandler, HeartbeatHandler, JsonRpcHandler, ErrorHandler
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as BroadcastManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as BroadcastManager
 from netra_backend.app.services.websocket.message_handler import MessageHandlerService
 from netra_backend.app.websocket_core.handlers import MessageRouter as ServiceMessageRouter
 
-class TestWebSocketExecutionEngineInitialization:
+class WebSocketExecutionEngineInitializationTests:
     """Test that all WebSocket components are properly initialized."""
 
     def test_message_handlers_initialization(self):
@@ -56,7 +56,7 @@ class TestWebSocketExecutionEngineInitialization:
                     assert hasattr(ws_manager, 'disconnect_user')
                     assert hasattr(ws_manager, 'send_message')
 
-                    class TestWebSocketMessageFlow:
+                    class WebSocketMessageFlowTests:
                         """Test end-to-end WebSocket message processing flow."""
 
                         @pytest.mark.asyncio
@@ -100,7 +100,7 @@ class TestWebSocketExecutionEngineInitialization:
                                         assert result['failed'] == 0
                                         mock_broadcast.assert_called_once()
 
-                                        class TestWebSocketErrorHandling:
+                                        class WebSocketErrorHandlingTests:
                                             """Test WebSocket error handling."""
 
                                             @pytest.mark.asyncio
@@ -126,13 +126,13 @@ class TestWebSocketExecutionEngineInitialization:
                                                     result = await router.route_message('user_000', mock_websocket, message)
                                                     assert result is True
 
-                                                    class TestCircularImportPrevention:
+                                                    class CircularImportPreventionTests:
                                                         """Test that circular imports are properly avoided."""
 
                                                         def test_websocket_imports_work_correctly(self):
                                                             """Test that WebSocket imports work without circular dependency."""
                                                             from netra_backend.app.websocket_core.handlers import MessageRouter, UserMessageHandler, get_message_router
-                                                            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as BroadcastManager
+                                                            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as BroadcastManager
                                                             from netra_backend.app.services.websocket.message_handler import MessageHandlerService
                                                             from netra_backend.app.websocket_core.handlers import MessageRouter as ServiceMessageRouter
                                                             mock_user_context = Mock(spec=UserExecutionContext)
@@ -143,7 +143,7 @@ class TestWebSocketExecutionEngineInitialization:
                                                             broadcast_manager = BroadcastManager()
                                                             assert all([ws_manager is not None, router is not None, handler is not None, broadcast_manager is not None])
 
-                                                            class TestMetricsCollectorResilience:
+                                                            class MetricsCollectorResilienceTests:
                                                                 """Test that metrics collector handles WebSocket connection manager issues."""
 
                                                                 @pytest.mark.asyncio

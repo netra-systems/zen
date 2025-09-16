@@ -37,7 +37,7 @@ docker_manager = UnifiedDockerManager()
 @pytest.mark.startup_validation
 @pytest.mark.critical
 @pytest.mark.asyncio
-class TestRealAuthStartupValidation:
+class RealAuthStartupValidationTests:
     """
     Real auth startup validation tests using Docker services.
     

@@ -239,7 +239,7 @@ class PartialWebSocketTestAgent(BaseAgent):
 
 
 @pytest.mark.asyncio
-class TestWebSocketEventGuarantees:
+class WebSocketEventGuaranteesTests:
     """CRITICAL tests that MUST FAIL if required WebSocket events are missing."""
     
     @pytest.fixture

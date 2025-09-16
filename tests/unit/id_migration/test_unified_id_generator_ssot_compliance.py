@@ -33,7 +33,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator, genera
 
 
 @pytest.mark.unit
-class TestUnifiedIdGeneratorSSotCompliance(unittest.TestCase):
+class UnifiedIdGeneratorSSotComplianceTests(unittest.TestCase):
     """Test SSOT compliance for ID generation across the system."""
     
     def setUp(self):
@@ -260,7 +260,7 @@ class TestUnifiedIdGeneratorSSotCompliance(unittest.TestCase):
 
 
 @pytest.mark.unit
-class TestProductionFileViolationDetection(unittest.TestCase):
+class ProductionFileViolationDetectionTests(unittest.TestCase):
     """Test suite to detect and catalog uuid.uuid4() violations in production code."""
     
     def setUp(self):

@@ -49,7 +49,7 @@ from netra_backend.app.logging_config import central_logger
 from shared.isolated_environment import get_env
 logger = central_logger.get_logger(__name__)
 
-class TestExecutionEngineFactoryIsolationIntegration(SSotAsyncTestCase):
+class ExecutionEngineFactoryIsolationIntegrationTests(SSotAsyncTestCase):
     """
     Comprehensive integration tests for ExecutionEngineFactory isolation in golden path.
     

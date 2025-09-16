@@ -36,9 +36,9 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.isolated_environment import get_env
 
 # WebSocket Core SSOT Imports
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 # SSOT imports - Issue #824 remediation  
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.unified_emitter import (
     UnifiedWebSocketEmitter, 
     AuthenticationWebSocketEmitter,
@@ -77,7 +77,7 @@ class RaceConditionTestResult:
     failed_operations: int = 0
 
 
-class TestWebSocketManagerRaceConditions(BaseTestCase):
+class WebSocketManagerRaceConditionsTests(BaseTestCase):
     """
     Comprehensive race condition tests for WebSocket manager components.
     

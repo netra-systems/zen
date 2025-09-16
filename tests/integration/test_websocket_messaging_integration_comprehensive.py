@@ -40,7 +40,7 @@ from test_framework.ssot.websocket import (
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, get_test_jwt_token
 
 
-class TestWebSocketConnectionManagement(SSotBaseTestCase):
+class WebSocketConnectionManagementTests(SSotBaseTestCase):
     """
     Test WebSocket connection establishment, lifecycle, and authentication.
     
@@ -164,7 +164,7 @@ class TestWebSocketConnectionManagement(SSotBaseTestCase):
                 self.record_metric("timeout_handling", elapsed)
 
 
-class TestWebSocketMessageHandling(SSotBaseTestCase):
+class WebSocketMessageHandlingTests(SSotBaseTestCase):
     """
     Test WebSocket message serialization, deserialization, and routing.
     
@@ -323,7 +323,7 @@ class TestWebSocketMessageHandling(SSotBaseTestCase):
             self.record_metric("message_validation", "tested")
 
 
-class TestWebSocketAgentIntegration(SSotBaseTestCase):
+class WebSocketAgentIntegrationTests(SSotBaseTestCase):
     """
     Test WebSocket integration with AI agents and the 5 critical events.
     
@@ -625,7 +625,7 @@ class TestWebSocketAgentIntegration(SSotBaseTestCase):
             assert self.get_websocket_events_count() >= 5
 
 
-class TestWebSocketMultiUserIsolation(SSotBaseTestCase):
+class WebSocketMultiUserIsolationTests(SSotBaseTestCase):
     """
     Test WebSocket multi-user isolation and security patterns.
     
@@ -762,7 +762,7 @@ class TestWebSocketMultiUserIsolation(SSotBaseTestCase):
             self.record_metric("concurrent_connections", connection_count)
 
 
-class TestWebSocketPerformanceAndResilience(SSotBaseTestCase):
+class WebSocketPerformanceAndResilienceTests(SSotBaseTestCase):
     """
     Test WebSocket performance characteristics and connection resilience.
     
@@ -910,7 +910,7 @@ class TestWebSocketPerformanceAndResilience(SSotBaseTestCase):
             self.record_metric("error_handling", "comprehensive")
 
 
-class TestWebSocketEventValidation(SSotBaseTestCase):
+class WebSocketEventValidationTests(SSotBaseTestCase):
     """
     Test WebSocket event validation and message integrity.
     
@@ -1055,7 +1055,7 @@ class TestWebSocketEventValidation(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestWebSocketConfigurationAndEnvironment(SSotBaseTestCase):
+class WebSocketConfigurationAndEnvironmentTests(SSotBaseTestCase):
     """
     Test WebSocket configuration and environment handling.
     

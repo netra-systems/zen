@@ -52,7 +52,7 @@ except ImportError as e:
     USER_CONTEXT_AVAILABLE = False
     USER_CONTEXT_ERROR = str(e)
 
-class TestWebSocketContextIntegrationRegression:
+class WebSocketContextIntegrationRegressionTests:
     """Integration tests for WebSocket context import regression.
     
     These tests verify that the regression breaks real integration patterns

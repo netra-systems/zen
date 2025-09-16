@@ -23,7 +23,7 @@ from tests.e2e.agent_orchestration_fixtures import (
 
 
 @pytest.mark.e2e
-class TestSupervisorRouting:
+class SupervisorRoutingTests:
     """Test supervisor agent routing decisions - BVJ: Correct agent selection"""
 
     @pytest.mark.asyncio
@@ -137,7 +137,7 @@ class TestSupervisorRouting:
 
 
 @pytest.mark.e2e
-class TestRoutingValidation:
+class RoutingValidationTests:
     """Test routing validation and error handling - BVJ: System reliability"""
 
     @pytest.mark.asyncio
@@ -184,7 +184,7 @@ class TestRoutingValidation:
 
 
 @pytest.mark.e2e
-class TestRoutingPerformance:
+class RoutingPerformanceTests:
     """Test routing performance characteristics - BVJ: Response time SLAs"""
 
     @pytest.mark.asyncio

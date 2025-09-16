@@ -16,7 +16,7 @@ import warnings
 from unittest.mock import MagicMock, AsyncMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestPhase4MigrationGuidanceValidation(SSotAsyncTestCase):
+class Phase4MigrationGuidanceValidationTests(SSotAsyncTestCase):
     """
     Phase 4: Validate migration guidance and backward compatibility
     These tests should pass, demonstrating migration patterns work correctly.

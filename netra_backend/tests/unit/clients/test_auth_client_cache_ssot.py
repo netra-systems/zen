@@ -30,7 +30,7 @@ from netra_backend.app.core.resilience.unified_circuit_breaker import (
 )
 
 
-class TestAuthClientCacheSSOT(SSotBaseTestCase):
+class AuthClientCacheSSOTTests(SSotBaseTestCase):
     """Unit tests for AuthCircuitBreakerManager SSOT delegation compliance."""
 
     @pytest.mark.unit

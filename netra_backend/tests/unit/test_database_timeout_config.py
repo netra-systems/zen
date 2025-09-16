@@ -14,7 +14,7 @@ from netra_backend.app.core.database_timeout_config import (
 )
 
 
-class TestDatabaseTimeoutConfig:
+class DatabaseTimeoutConfigTests:
     """Test database timeout configuration functionality."""
     
     def test_development_timeout_config(self):
@@ -32,8 +32,8 @@ class TestDatabaseTimeoutConfig:
         config = get_database_timeout_config("staging")
 
         # Staging should have Cloud SQL optimized timeouts
-        # CRITICAL: Balanced Cloud SQL connectivity with WebSocket performance (Issue #1229)
-        assert config["initialization_timeout"] == 20.0
+        # CRITICAL: Issue #1263 fix - Database Connection Timeout (increased from 20.0s to 35.0s)
+        assert config["initialization_timeout"] == 35.0
         assert config["table_setup_timeout"] == 10.0
         assert config["connection_timeout"] == 15.0
         assert config["pool_timeout"] == 15.0
@@ -77,7 +77,7 @@ class TestDatabaseTimeoutConfig:
         assert staging_lower == staging_upper == staging_mixed
 
 
-class TestCloudSQLOptimizedConfig:
+class CloudSQLOptimizedConfigTests:
     """Test Cloud SQL specific configuration optimizations."""
     
     def test_staging_cloud_sql_config(self):
@@ -123,7 +123,7 @@ class TestCloudSQLOptimizedConfig:
         assert pool_config["pool_timeout"] == 30.0  # Shorter than staging/production
 
 
-class TestCloudSQLEnvironmentDetection:
+class CloudSQLEnvironmentDetectionTests:
     """Test Cloud SQL environment detection."""
     
     def test_staging_is_cloud_sql_environment(self):
@@ -149,7 +149,7 @@ class TestCloudSQLEnvironmentDetection:
         assert is_cloud_sql_environment("PRODUCTION") is True
 
 
-class TestProgressiveRetryConfig:
+class ProgressiveRetryConfigTests:
     """Test progressive retry configuration for database connections."""
     
     def test_cloud_sql_retry_config(self):
@@ -179,7 +179,7 @@ class TestProgressiveRetryConfig:
         assert test_config == dev_config  # Same config for local environments
 
 
-class TestTimeoutConfigurationLogging:
+class TimeoutConfigurationLoggingTests:
     """Test timeout configuration logging functionality."""
     
     def test_log_timeout_configuration_does_not_raise(self):
@@ -204,7 +204,7 @@ class TestTimeoutConfigurationLogging:
 @pytest.mark.parametrize("environment,expected_init_timeout", [
     ("development", 30.0),
     ("test", 25.0),
-    ("staging", 20.0),  # CRITICAL: Issue #1229 fix - balanced Cloud SQL + WebSocket performance
+    ("staging", 35.0),  # CRITICAL: Issue #1263 fix - Database Connection Timeout (increased from 20.0s)
     ("production", 90.0),
     ("unknown", 30.0),  # Should default to development
 ])

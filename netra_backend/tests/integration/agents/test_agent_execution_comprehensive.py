@@ -95,7 +95,7 @@ class MockToolForIntegration:
         await asyncio.sleep(self.execution_time)
         return {'status': 'success', 'result': f'Tool {self.tool_name} executed successfully. Call #{self.call_count}', 'data': {'processed_items': self.call_count * 10}}
 
-class TestAgentExecutionComprehensive(BaseIntegrationTest):
+class AgentExecutionComprehensiveTests(BaseIntegrationTest):
     """
     Comprehensive integration tests for agent execution flows.
     
@@ -146,7 +146,7 @@ class TestAgentExecutionComprehensive(BaseIntegrationTest):
             agent = SupplyResearcherAgent()
         else:
 
-            class TestAgent(BaseAgent):
+            class AgentTests(BaseAgent):
 
                 async def execute_async(self, request: str, context: UserExecutionContext) -> Dict[str, Any]:
                     await self.send_websocket_event('agent_thinking', {'message': 'Processing request...'})
@@ -155,7 +155,7 @@ class TestAgentExecutionComprehensive(BaseIntegrationTest):
                     await self.send_websocket_event('tool_completed', {'tool': 'data_analyzer', 'result': tool_result})
                     llm_result = await self.mock_llm.complete_async([{'role': 'user', 'content': request}])
                     return {'response': llm_result['content'], 'tool_results': [tool_result], 'status': 'completed'}
-            agent = TestAgent()
+            agent = AgentTests()
         agent.llm_manager = self.mock_llm
         agent.user_context = user_context
         return agent

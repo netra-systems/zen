@@ -20,7 +20,7 @@ from typing import Dict, Any
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
-class TestJWTCrisisFailingProof(SSotBaseTestCase):
+class JWTCrisisFailingProofTests(SSotBaseTestCase):
     """Tests designed to FAIL initially, proving JWT configuration crisis exists."""
 
     def setUp(self):
@@ -164,7 +164,7 @@ class TestJWTCrisisFailingProof(SSotBaseTestCase):
                 else:
                     pytest.fail(f'Unexpected Golden Path error: {error_message}')
 
-class TestJWTCrisisBusinessImpactProof(SSotBaseTestCase):
+class JWTCrisisBusinessImpactProofTests(SSotBaseTestCase):
     """Tests proving business impact of JWT configuration crisis."""
 
     def test_FAILS_fifty_thousand_mrr_websocket_functionality(self):
@@ -188,7 +188,7 @@ class TestJWTCrisisBusinessImpactProof(SSotBaseTestCase):
                 from netra_backend.app.core.configuration.unified_secrets import get_jwt_secret
                 unified_secret = get_jwt_secret()
                 revenue_functionality_steps.append('Middleware integration available')
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 manager = WebSocketManager()
                 revenue_functionality_steps.append('Agent events infrastructure available')
                 logger.warning('UNEXPECTED: $50K MRR WebSocket functionality available')

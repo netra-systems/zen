@@ -50,7 +50,7 @@ logger = central_logger.get_logger(__name__)
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestStaging404ErrorReproduction:
+class Staging404ErrorReproductionTests:
     """
     Test suite to reproduce and validate fix for staging 404 "Thread not found" error.
     

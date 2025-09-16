@@ -165,7 +165,7 @@ class E2EPerformanceMonitor:
 @pytest.mark.real_services
 @pytest.mark.performance
 @pytest.mark.benchmark
-class TestCompleteUserWorkflowPerformance(BaseE2ETest):
+class CompleteUserWorkflowPerformanceTests(BaseE2ETest):
     """Test complete user workflow performance - highest business value validation."""
 
     @pytest.fixture
@@ -348,7 +348,7 @@ class TestCompleteUserWorkflowPerformance(BaseE2ETest):
 @pytest.mark.real_services
 @pytest.mark.performance
 @pytest.mark.benchmark
-class TestSystemScalabilityAndLoadE2E(BaseE2ETest):
+class SystemScalabilityAndLoadE2ETests(BaseE2ETest):
     """Test system scalability under realistic load conditions."""
 
     @pytest.mark.asyncio

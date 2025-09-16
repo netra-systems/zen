@@ -30,11 +30,11 @@ from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.core.managers.unified_lifecycle_manager import SystemLifecycle, SystemLifecycleFactory, LifecyclePhase, ComponentType, setup_application_lifecycle
 from netra_backend.app.db.database_manager import get_database_manager
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.agents.supervisor.agent_registry import get_agent_registry
 from netra_backend.app.services.redis_client import get_redis_client
 
-class TestSystemLifecycleRealWebSocketIntegration(SSotAsyncTestCase):
+class SystemLifecycleRealWebSocketIntegrationTests(SSotAsyncTestCase):
     """
     Test SystemLifecycle with real WebSocket service integration.
     
@@ -118,7 +118,7 @@ class TestSystemLifecycleRealWebSocketIntegration(SSotAsyncTestCase):
         self.record_metric('websocket_health_check_duration', time.time())
         self.record_metric('websocket_health_status', websocket_result.get('healthy', False))
 
-class TestSystemLifecycleRealDatabaseIntegration(SSotAsyncTestCase):
+class SystemLifecycleRealDatabaseIntegrationTests(SSotAsyncTestCase):
     """
     Test SystemLifecycle with real database service integration.
     
@@ -204,7 +204,7 @@ class TestSystemLifecycleRealDatabaseIntegration(SSotAsyncTestCase):
         except Exception as e:
             pytest.skip(f'Database shutdown test skipped: {e}')
 
-class TestSystemLifecycleMultiServiceCoordination(SSotAsyncTestCase):
+class SystemLifecycleMultiServiceCoordinationTests(SSotAsyncTestCase):
     """
     Test SystemLifecycle coordinating multiple real services.
     
@@ -372,7 +372,7 @@ class TestSystemLifecycleMultiServiceCoordination(SSotAsyncTestCase):
         self.record_metric('unhealthy_services_count', unhealthy_count)
         self.record_metric('overall_system_health', overall_healthy)
 
-class TestSystemLifecycleUserIsolationIntegration(SSotAsyncTestCase):
+class SystemLifecycleUserIsolationIntegrationTests(SSotAsyncTestCase):
     """
     Test SystemLifecycle user isolation with real services.
     
@@ -500,7 +500,7 @@ class TestSystemLifecycleUserIsolationIntegration(SSotAsyncTestCase):
         self.record_metric('concurrent_user_creation_count', user_count)
         self.record_metric('factory_thread_safety_validated', True)
 
-class TestSystemLifecyclePerformanceIntegration(SSotAsyncTestCase):
+class SystemLifecyclePerformanceIntegrationTests(SSotAsyncTestCase):
     """
     Test SystemLifecycle performance with real services.
     

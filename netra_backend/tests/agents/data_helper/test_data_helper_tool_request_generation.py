@@ -18,7 +18,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.tools.data_helper import DataHelper
 
 
-class TestDataHelperToolRequestGeneration(SSotAsyncTestCase):
+class DataHelperToolRequestGenerationTests(SSotAsyncTestCase):
     """Test suite for Data Helper tool request generation functionality."""
     
     async def setUp(self):

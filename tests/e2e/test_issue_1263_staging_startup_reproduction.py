@@ -36,7 +36,7 @@ from netra_backend.app.core.configuration.base import get_config
 logger = logging.getLogger(__name__)
 
 
-class TestIssue1263StagingStartupReproductionE2E(SSotAsyncTestCase):
+class Issue1263StagingStartupReproductionE2ETests(SSotAsyncTestCase):
     """E2E tests reproducing Issue #1263 in staging environment."""
 
     async def asyncSetUp(self):
@@ -461,7 +461,7 @@ class TestIssue1263StagingStartupReproductionE2E(SSotAsyncTestCase):
 
 @pytest.mark.e2e
 @pytest.mark.staging
-class TestIssue1263StagingEnvironmentSpecific(SSotAsyncTestCase):
+class Issue1263StagingEnvironmentSpecificTests(SSotAsyncTestCase):
     """Additional E2E tests specific to staging environment characteristics."""
 
     async def test_staging_vpc_connector_health_validation(self):

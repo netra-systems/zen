@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
@@ -40,7 +40,7 @@ env.set('USE_REAL_SERVICES', 'true', 'test')
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestFullStartupIntegration(SSotBaseTestCase):
+class FullStartupIntegrationTests(SSotBaseTestCase):
     """Integration tests for complete startup flow without Docker dependencies."""
 
     def setup_method(self, method):
@@ -152,7 +152,7 @@ class TestFullStartupIntegration(SSotBaseTestCase):
         mock_health = Mock()
         mock_health.state = 'ACTIVE'
         mock_bridge.health_check.return_value = mock_health
-        websocket = TestWebSocketConnection()
+        websocket = WebSocketConnectionTests()
 
         async def test_websocket_startup_sequence():
             await mock_websocket_manager.initialize()
@@ -202,7 +202,7 @@ class TestFullStartupIntegration(SSotBaseTestCase):
             app.state.startup_complete = True
             app.state.db_session_factory = Mock()
             app.state.redis_manager = Mock()
-            app.state.websocket = TestWebSocketConnection()
+            app.state.websocket = WebSocketConnectionTests()
 
             @app.get('/health')
             async def health():
@@ -232,7 +232,7 @@ class TestFullStartupIntegration(SSotBaseTestCase):
             asyncio.run(test_endpoints())
 
 @pytest.mark.integration
-class TestStartupFailureScenarios(SSotBaseTestCase):
+class StartupFailureScenariosTests(SSotBaseTestCase):
     """Integration tests for startup failure scenarios."""
 
     def setup_method(self, method):
@@ -250,7 +250,7 @@ class TestStartupFailureScenarios(SSotBaseTestCase):
             mock_postgres.side_effect = ConnectionError('Database connection failed')
             from fastapi import FastAPI
             app = FastAPI()
-            app.state.websocket = TestWebSocketConnection()
+            app.state.websocket = WebSocketConnectionTests()
             with self.expect_exception(Exception):
                 from netra_backend.app.db.postgres import initialize_postgres
                 initialize_postgres()
@@ -265,7 +265,7 @@ class TestStartupFailureScenarios(SSotBaseTestCase):
             mock_redis.side_effect = ConnectionError('Redis connection failed')
             from fastapi import FastAPI
             app = FastAPI()
-            app.state.websocket = TestWebSocketConnection()
+            app.state.websocket = WebSocketConnectionTests()
             with self.expect_exception(Exception):
                 from netra_backend.app.redis_manager import redis_manager
                 asyncio.run(redis_manager.initialize())
@@ -276,7 +276,7 @@ class TestStartupFailureScenarios(SSotBaseTestCase):
         """Test partial initialization is properly rolled back on failure."""
         from fastapi import FastAPI
         app = FastAPI()
-        app.state.websocket = TestWebSocketConnection()
+        app.state.websocket = WebSocketConnectionTests()
         initialized_components = []
 
         def init_database():
@@ -300,7 +300,7 @@ class TestStartupFailureScenarios(SSotBaseTestCase):
         assert len(initialized_components) == 0
 
 @pytest.mark.integration
-class TestServiceCoordinationIntegration(SSotBaseTestCase):
+class ServiceCoordinationIntegrationTests(SSotBaseTestCase):
     """Integration tests for multi-service coordination."""
 
     def setup_method(self, method):
@@ -348,7 +348,7 @@ class TestServiceCoordinationIntegration(SSotBaseTestCase):
         """Test system starts with degraded functionality when optional services fail."""
         from fastapi import FastAPI
         app = FastAPI()
-        app.state.websocket = TestWebSocketConnection()
+        app.state.websocket = WebSocketConnectionTests()
         service_status = {'database': 'healthy', 'redis': 'healthy', 'clickhouse': 'failed', 'analytics': 'failed'}
         if service_status['database'] == 'healthy':
             app.state.db_session_factory = Mock()
@@ -362,7 +362,7 @@ class TestServiceCoordinationIntegration(SSotBaseTestCase):
         assert app.state.degraded_mode, 'Should be in degraded mode'
 
 @pytest.mark.integration
-class TestStartupPerformance(SSotBaseTestCase):
+class StartupPerformanceTests(SSotBaseTestCase):
     """Integration tests for startup performance characteristics."""
 
     def setup_method(self, method):
@@ -378,7 +378,7 @@ class TestStartupPerformance(SSotBaseTestCase):
         with patch('netra_backend.app.db.postgres.initialize_postgres') as mock_postgres, patch('netra_backend.app.redis_manager.redis_manager.initialize') as mock_redis:
             from fastapi import FastAPI
             app = FastAPI()
-            app.state.websocket = TestWebSocketConnection()
+            app.state.websocket = WebSocketConnectionTests()
             mock_postgres.return_value = Mock()
             mock_redis.return_value = None
             app.state.db_session_factory = Mock()

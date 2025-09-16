@@ -40,7 +40,7 @@ from test_framework.helpers.auth_helpers import (
 @pytest.mark.critical
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAuthWebSocketPerformance:
+class AuthWebSocketPerformanceTests:
     """WebSocket Authentication Performance and Concurrent Connection Tests."""
     
     @pytest.fixture

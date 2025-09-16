@@ -146,7 +146,7 @@ class ConfigIsolationAnalyzer:
                             return True
         return False
 
-class TestConfigIsolationPatterns:
+class ConfigIsolationPatternsTests:
     """Test Suite 3: Validate Configuration Isolation Patterns"""
     
     @pytest.fixture

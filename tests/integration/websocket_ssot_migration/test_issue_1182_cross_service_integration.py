@@ -57,7 +57,7 @@ class IntegrationTestResult:
 
 
 @pytest.mark.integration
-class TestWebSocketCrossServiceIntegration(BaseIntegrationTest):
+class WebSocketCrossServiceIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for Issue #1182 WebSocket Manager SSOT cross-service compatibility.
     
@@ -92,7 +92,7 @@ class TestWebSocketCrossServiceIntegration(BaseIntegrationTest):
         try:
             # Test AgentWebSocketBridge import and initialization
             from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.core.unified_id_manager import UnifiedIDManager
             
             logger.info("✓ AgentWebSocketBridge and WebSocketManager imports successful")
@@ -225,7 +225,7 @@ class TestWebSocketCrossServiceIntegration(BaseIntegrationTest):
         try:
             # Test demo WebSocket service imports
             from netra_backend.app.routes.demo_websocket import execute_real_agent_workflow
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             logger.info("✓ Demo WebSocket service imports successful")
             
@@ -353,7 +353,7 @@ class TestWebSocketCrossServiceIntegration(BaseIntegrationTest):
         interface_contract_results = []
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Define expected interface contracts
             interface_contracts = [

@@ -147,7 +147,7 @@ class AuthUrlPatternValidator:
 
 
 @pytest.mark.unit
-class TestAuthUrlPatternRegression:
+class AuthUrlPatternRegressionTests:
     """Test suite to prevent auth URL pattern regression."""
     
     @pytest.fixture
@@ -290,7 +290,7 @@ class TestAuthUrlPatternRegression:
 
 
 @pytest.mark.unit
-class TestAuthUrlPatternDocumentation:
+class AuthUrlPatternDocumentationTests:
     """Test that URL patterns are properly documented."""
     
     def test_correct_patterns_documented(self):
@@ -322,7 +322,7 @@ class TestAuthUrlPatternDocumentation:
 def test_auth_url_pattern_regression_suite():
     """Main regression test suite for auth URL patterns."""
     validator = AuthUrlPatternValidator()
-    test_class = TestAuthUrlPatternRegression()
+    test_class = AuthUrlPatternRegressionTests()
     
     # Run core regression tests
     test_class.test_no_incorrect_auth_url_patterns_in_codebase(validator)

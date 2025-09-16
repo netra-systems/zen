@@ -277,7 +277,7 @@ class MockMessageRouter:
         }
 
 
-class TestMessageRouterUnit(SSotAsyncTestCase):
+class MessageRouterUnitTests(SSotAsyncTestCase):
     """Unit tests for message router functionality
     
     This test class validates the critical message routing capabilities that

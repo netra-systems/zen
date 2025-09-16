@@ -26,7 +26,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
-class TestCloudRunURLCompliance:
+class CloudRunURLComplianceTests:
     """Mission critical tests to prevent direct Cloud Run URL regression"""
     
     # FORBIDDEN: Direct Cloud Run URL patterns
@@ -282,4 +282,4 @@ class TestCloudRunURLCompliance:
 
 
 # Export for pytest discovery
-__all__ = ['TestCloudRunURLCompliance']
+__all__ = ['CloudRunURLComplianceTests']

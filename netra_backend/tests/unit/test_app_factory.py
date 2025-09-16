@@ -19,7 +19,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -37,7 +37,7 @@ from netra_backend.app.core.app_factory import (
 from netra_backend.app.core.exceptions_base import NetraException
 
 
-class TestFastAPIAppCreation:
+class FastAPIAppCreationTests:
     """Test FastAPI application creation."""
 
     @pytest.fixture
@@ -72,7 +72,7 @@ class TestFastAPIAppCreation:
                     assert app is not None
 
 
-class TestErrorHandlerRegistration:
+class ErrorHandlerRegistrationTests:
     """Test error handler registration."""
 
     @pytest.fixture
@@ -109,7 +109,7 @@ class TestErrorHandlerRegistration:
         assert HTTPException in exception_types
 
 
-class TestSecurityMiddleware:
+class SecurityMiddlewareTests:
     """Test security middleware setup."""
 
     @pytest.fixture
@@ -129,7 +129,7 @@ class TestSecurityMiddleware:
                 mock_headers.assert_called_once_with(mock_app)
 
 
-class TestRequestMiddleware:
+class RequestMiddlewareTests:
     """Test request middleware setup."""
 
     @pytest.fixture
@@ -163,7 +163,7 @@ class TestRequestMiddleware:
                 mock_request.assert_called_once_with(mock_app)
 
 
-class TestRouteRegistration:
+class RouteRegistrationTests:
     """Test API route registration."""
 
     @pytest.fixture
@@ -180,7 +180,7 @@ class TestRouteRegistration:
             mock_import.assert_called_once_with(mock_app)
 
 
-class TestRootEndpoint:
+class RootEndpointTests:
     """Test root endpoint setup."""
 
     @pytest.fixture
@@ -196,7 +196,7 @@ class TestRootEndpoint:
         mock_app.get.assert_called_once_with("/")
 
 
-class TestOAuthInitialization:
+class OAuthInitializationTests:
     """Test OAuth initialization."""
 
     @pytest.fixture
@@ -217,7 +217,7 @@ class TestOAuthInitialization:
         assert result is None  # Should return None (no-op)
 
 
-class TestIntegrationScenarios:
+class IntegrationScenariosTests:
     """Test integration scenarios and edge cases."""
 
     def test_full_app_creation_integration(self):

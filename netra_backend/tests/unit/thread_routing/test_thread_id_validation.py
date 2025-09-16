@@ -22,7 +22,7 @@ from netra_backend.app.services.user_execution_context import InvalidContextErro
 from shared.types import ThreadID, UserID, ensure_thread_id, ensure_user_id
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestThreadIDValidation(SSotBaseTestCase):
+class ThreadIDValidationTests(SSotBaseTestCase):
     """Test thread ID validation with SSOT patterns."""
 
     def setup_method(self, method=None) -> None:

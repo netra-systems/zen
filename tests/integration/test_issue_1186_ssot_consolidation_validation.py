@@ -69,7 +69,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 logger = get_logger(__name__)
 
 
-class TestIssue1186SSOTConsolidationValidation(SSotAsyncTestCase):
+class Issue1186SSOTConsolidationValidationTests(SSotAsyncTestCase):
     """
     Phase 2: SSOT Consolidation Validation for Issue #1186 UserExecutionEngine.
     
@@ -1024,9 +1024,9 @@ if __name__ == '__main__':
     # Run specific test if provided
     if len(sys.argv) > 1:
         test_name = sys.argv[1]
-        suite = unittest.TestLoader().loadTestsFromName(f'test_{test_name}', TestIssue1186SSOTConsolidationValidation)
+        suite = unittest.TestLoader().loadTestsFromName(f'test_{test_name}', Issue1186SSOTConsolidationValidationTests)
     else:
-        suite = unittest.TestLoader().loadTestsFromTestCase(TestIssue1186SSOTConsolidationValidation)
+        suite = unittest.TestLoader().loadTestsFromTestCase(Issue1186SSOTConsolidationValidationTests)
     
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)

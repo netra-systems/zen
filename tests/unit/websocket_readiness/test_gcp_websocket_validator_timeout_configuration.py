@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import BaseTestCase
 from test_framework.ssot.configuration_validator import ConfigurationValidator
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestGCPWebSocketValidatorTimeoutConfiguration(BaseTestCase):
+class GCPWebSocketValidatorTimeoutConfigurationTests(BaseTestCase):
     """Unit tests for GCP WebSocket validator timeout SSOT compliance.
     
     These tests validate that timeout configurations follow SSOT principles

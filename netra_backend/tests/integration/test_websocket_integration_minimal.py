@@ -6,7 +6,7 @@ import pytest
 import asyncio
 
 
-class TestWebSocketIntegrationMinimal:
+class WebSocketIntegrationMinimalTests:
     """Minimal WebSocket integration test class to validate pytest discovery."""
     
     @pytest.mark.asyncio

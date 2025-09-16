@@ -33,7 +33,7 @@ from netra_backend.app.database import get_db, DatabaseManager
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.fixtures.lightweight_services import lightweight_services_fixture
 
-class TestRequestScopedSessionFactoryErrorPaths(SSotBaseTestCase):
+class RequestScopedSessionFactoryErrorPathsTests(SSotBaseTestCase):
     """
     Integration tests for request-scoped session factory error handling.
     

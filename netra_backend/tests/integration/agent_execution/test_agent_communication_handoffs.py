@@ -148,7 +148,7 @@ class CommunicatingMockAgent(BaseAgent):
         }
 
 
-class TestAgentCommunicationHandoffs(BaseAgentExecutionTest):
+class AgentCommunicationHandoffsTests(BaseAgentExecutionTest):
     """Test agent communication and handoff patterns."""
     
     def create_communicating_agent_network(self, agent_names: List[str]) -> Dict[str, CommunicatingMockAgent]:

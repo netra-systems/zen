@@ -61,7 +61,7 @@ class InitializationPatternAnalysis:
     ssot_compliance_percentage: float
 
 @pytest.mark.unit
-class TestIssue989WebSocketFactoryDeprecationSSoT(SSotBaseTestCase):
+class Issue989WebSocketFactoryDeprecationSSoTTests(SSotBaseTestCase):
     """Mission Critical: Issue #989 WebSocket Factory Deprecation SSOT Violation Detection
 
     This test suite detects and validates SSOT violations related to deprecated
@@ -142,7 +142,7 @@ class TestIssue989WebSocketFactoryDeprecationSSoT(SSotBaseTestCase):
                 content = self.websocket_factory_path.read_text(encoding='utf-8')
                 lines = content.split('\n')
                 warning_patterns = ['warnings.warn', 'DeprecationWarning', 'deprecated', 'DEPRECATED']
-                ssot_redirect_patterns = ['from netra_backend.app.websocket_core.websocket_manager import', 'get_websocket_manager(', 'WebSocketManager(']
+                ssot_redirect_patterns = ['from netra_backend.app.websocket_core.canonical_import_patterns import', 'get_websocket_manager(', 'WebSocketManager(']
                 for line_num, line in enumerate(lines, 1):
                     line_lower = line.lower()
                     for pattern in warning_patterns:

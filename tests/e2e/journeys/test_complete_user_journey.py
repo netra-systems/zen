@@ -30,19 +30,19 @@ COMPREHENSIVE Test Coverage:
 # USAGE EXAMPLES:
 #
 # 1. Run all persona journeys:
-#    pytest tests/e2e/journeys/test_complete_user_journey.py::TestCompleteUserJourney::test_persona_complete_journey -v
+#    pytest tests/e2e/journeys/test_complete_user_journey.py::CompleteUserJourneyTests::test_persona_complete_journey -v
 #
 # 2. Test specific authentication methods:
-#    pytest tests/e2e/journeys/test_complete_user_journey.py::TestCompleteUserJourney::test_all_authentication_methods -v
+#    pytest tests/e2e/journeys/test_complete_user_journey.py::CompleteUserJourneyTests::test_all_authentication_methods -v
 #
 # 3. Test complete signup-to-AI-insights flow:
-#    pytest tests/e2e/journeys/test_complete_user_journey.py::TestCompleteUserJourney::test_signup_to_ai_insights_complete_flow -v
+#    pytest tests/e2e/journeys/test_complete_user_journey.py::CompleteUserJourneyTests::test_signup_to_ai_insights_complete_flow -v
 #
 # 4. Test MFA and security flows:
-#    pytest tests/e2e/journeys/test_complete_user_journey.py::TestCompleteUserJourney::test_mfa_and_security_flows -v
+#    pytest tests/e2e/journeys/test_complete_user_journey.py::CompleteUserJourneyTests::test_mfa_and_security_flows -v
 #
 # 5. Test concurrent multi-persona isolation:
-#    pytest tests/e2e/journeys/test_complete_user_journey.py::TestCompleteUserJourney::test_concurrent_multi_persona_isolation -v
+#    pytest tests/e2e/journeys/test_complete_user_journey.py::CompleteUserJourneyTests::test_concurrent_multi_persona_isolation -v
 #
 # 6. Run with real services (recommended):
 #    python tests/unified_test_runner.py --category e2e --real-services --test-pattern "*journey*"
@@ -606,7 +606,7 @@ class EnhancedAuthenticationHelper:
 
 @requires_services(["auth", "backend", "websocket", "database", "redis"], mode="either")
 @pytest.mark.e2e
-class TestCompleteUserJourney:
+class CompleteUserJourneyTests:
     """Comprehensive user journey integration tests covering all personas and auth methods."""
     
     @pytest.fixture

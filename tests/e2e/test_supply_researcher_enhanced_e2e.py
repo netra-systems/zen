@@ -338,7 +338,7 @@ async def enhanced_supply_researcher_tester(request):
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.real_llm
-class TestEnhancedSupplyResearcher:
+class EnhancedSupplyResearcherTests:
     """Test suite for enhanced supply research agent execution."""
 
     async def test_vendor_analysis_comprehensive(self, enhanced_supply_researcher_tester):

@@ -60,11 +60,11 @@ from typing import Dict, Any, List
 from shared.types.core_types import UserID, ensure_user_id
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, is_valid_id_format, is_valid_id_format_compatible, IDType
 from netra_backend.app.websocket_core.service_readiness_validator import ServiceReadinessValidator
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestRedisAsyncioEventLoopFix:
+class RedisAsyncioEventLoopFixTests:
     """Test suite for Redis asyncio event loop error fix"""
     
     @pytest.fixture
@@ -156,7 +156,7 @@ class TestRedisAsyncioEventLoopFix:
         assert test_result == "event_loop_functional"
 
 
-class TestGoogleOAuthUserIDValidation:
+class GoogleOAuthUserIDValidationTests:
     """Test suite for Google OAuth numeric user ID validation fix"""
     
     def test_google_oauth_numeric_user_ids_should_be_valid(self):
@@ -270,7 +270,7 @@ class TestGoogleOAuthUserIDValidation:
                 pytest.fail(f"Existing valid pattern should still work: {user_id}")
 
 
-class TestThreadIDConsistencyFix:
+class ThreadIDConsistencyFixTests:
     """Test suite for thread ID consistency fix"""
     
     def test_websocket_factory_run_id_format_consistency(self):
@@ -411,7 +411,7 @@ class TestThreadIDConsistencyFix:
                 assert not thread_id_valid, f"Malformed thread_id should be invalid: {thread_id}"
 
 
-class TestCriticalFixesIntegration:
+class CriticalFixesIntegrationTests:
     """Integration tests for all three critical fixes working together"""
     
     @pytest.mark.asyncio

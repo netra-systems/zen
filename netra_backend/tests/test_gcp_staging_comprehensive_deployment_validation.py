@@ -38,7 +38,7 @@ class ValidationResult:
     error_message: Optional[str] = None
     details: Optional[Dict[str, Any]] = None
 
-class TestComprehensiveSecretValidation:
+class ComprehensiveSecretValidationTests:
     """Test comprehensive secret validation across all services."""
 
     @pytest.mark.staging

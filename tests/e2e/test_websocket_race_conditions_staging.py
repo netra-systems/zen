@@ -32,7 +32,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketRaceConditionsStaging(BaseE2ETest):
+class WebSocketRaceConditionsStagingTests(BaseE2ETest):
     """
     E2E tests that reproduce WebSocket race conditions in GCP staging environment.
     

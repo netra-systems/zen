@@ -20,7 +20,7 @@ from netra_backend.app.websocket_core.types import MessageType, LEGACY_MESSAGE_T
 from netra_backend.app.websocket_core.handlers import MessageRouter
 
 @pytest.mark.unit
-class TestMessageTypeNormalizationUnit:
+class MessageTypeNormalizationUnitTests:
     """
     Unit tests for message type normalization functions.
     
@@ -137,7 +137,7 @@ class TestMessageTypeNormalizationUnit:
             print(f'     {key} -> {mapping}')
 
 @pytest.mark.unit
-class TestMessageTypeBusinessLogicUnit:
+class MessageTypeBusinessLogicUnitTests:
     """
     Unit tests for business logic related to message type handling.
     
@@ -221,7 +221,7 @@ class TestMessageTypeBusinessLogicUnit:
         print(f'   - Problem: Unknown check happens before normalization gets a chance')
 
 @pytest.mark.unit
-class TestChatMessageMappingSolution:
+class ChatMessageMappingSolutionTests:
     """
     Unit tests that define the expected solution for the 'chat_message' mapping issue.
     

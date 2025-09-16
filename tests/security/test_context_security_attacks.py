@@ -131,7 +131,7 @@ class SecurityAttackSimulator:
         })
 
 
-class TestContextSecurityAttacks:
+class ContextSecurityAttacksTests:
     """Test context security against various attack vectors."""
     
     def setup_method(self):

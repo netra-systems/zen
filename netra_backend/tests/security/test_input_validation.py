@@ -8,7 +8,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 from netra_backend.app.core.enhanced_input_validation import EnhancedInputValidator, SecurityThreat, ValidationLevel
 
-class TestInputValidation:
+class InputValidationTests:
     """Test enhanced input validation."""
 
     @pytest.fixture

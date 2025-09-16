@@ -22,7 +22,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 
 
-class TestOAuthProviderIntegration(BaseIntegrationTest):
+class OAuthProviderIntegrationTests(BaseIntegrationTest):
     """Test OAuth provider integration and management"""
 
     def setup_method(self):

@@ -28,7 +28,7 @@ from tests.e2e.utils.rapid_message_sender import RapidMessageSender
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.performance
-class TestRapidMessagePerformance:
+class RapidMessagePerformanceTests:
     """Performance benchmark tests for rapid message processing."""
     
     @pytest.mark.performance

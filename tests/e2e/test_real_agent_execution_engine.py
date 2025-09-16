@@ -69,7 +69,7 @@ CRITICAL_WEBSOCKET_EVENTS = [
 ]
 
 
-class TestRealAgentExecutionEngine(BaseE2ETest):
+class RealAgentExecutionEngineTests(BaseE2ETest):
     """Comprehensive E2E tests for agent execution engine with real services."""
     
     @pytest.fixture(autouse=True)

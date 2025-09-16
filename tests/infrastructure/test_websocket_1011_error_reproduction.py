@@ -44,7 +44,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 from shared.isolated_environment import get_env
 
 
-class TestWebSocket1011ErrorReproduction(BaseE2ETest):
+class WebSocket1011ErrorReproductionTests(BaseE2ETest):
     """Test WebSocket 1011 error reproduction and root cause analysis."""
     
     @pytest.fixture(autouse=True)

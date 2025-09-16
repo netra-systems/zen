@@ -21,7 +21,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 @pytest.mark.integration
-class TestCrossServiceWebSocketManagerConsistency(SSotAsyncTestCase):
+class CrossServiceWebSocketManagerConsistencyTests(SSotAsyncTestCase):
     """Test cross-service WebSocket manager consistency - SHOULD FAIL before consolidation."""
 
     def setUp(self):
@@ -39,7 +39,7 @@ class TestCrossServiceWebSocketManagerConsistency(SSotAsyncTestCase):
         logger.info('Testing agent registry WebSocket manager SSOT compliance - EXPECTING FAILURE')
         try:
             from netra_backend.app.agents.registry import AgentRegistry
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             user_context = {'user_id': 'registry_test_user', 'thread_id': 'registry_test_thread'}
             direct_websocket_manager = get_websocket_manager(user_context=user_context)
             agent_registry = AgentRegistry()
@@ -100,7 +100,7 @@ class TestCrossServiceWebSocketManagerConsistency(SSotAsyncTestCase):
         """
         logger.info('Testing cross-service WebSocket event delivery consistency - EXPECTING FAILURE')
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             user_context = {'user_id': 'cross_service_user', 'thread_id': 'cross_service_thread'}
             websocket_manager = get_websocket_manager(user_context=user_context)
             mock_websocket = MagicMock()
@@ -148,7 +148,7 @@ class TestCrossServiceWebSocketManagerConsistency(SSotAsyncTestCase):
                     self.instances = {}
 
                 async def get_websocket_manager(self, user_context):
-                    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                     return get_websocket_manager(user_context=user_context)
             injector = MockDependencyInjector()
             user_context = {'user_id': 'di_test_user', 'thread_id': 'di_test_thread'}
@@ -176,7 +176,7 @@ class TestCrossServiceWebSocketManagerConsistency(SSotAsyncTestCase):
         """
         logger.info('Testing cross-service WebSocket manager memory cleanup - EXPECTING FAILURE')
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             user_context = {'user_id': 'cleanup_test_user', 'thread_id': 'cleanup_test_thread'}
             websocket_manager = get_websocket_manager(user_context=user_context)
             if hasattr(websocket_manager, 'connections'):

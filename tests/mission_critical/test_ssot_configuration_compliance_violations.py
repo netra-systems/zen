@@ -68,7 +68,7 @@ class SsotComplianceResults:
     violation_files: int
 
 
-class TestSSotConfigurationComplianceViolations(SSotBaseTestCase):
+class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
     """CRITICAL: Test suite to detect Configuration Manager SSOT compliance violations."""
 
     def setup_method(self, method=None):

@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.llm.llm_manager import LLMManager
 
-class TestSupervisorOrchestrationSSOTValidation(SSotAsyncTestCase):
+class SupervisorOrchestrationSSOTValidationTests(SSotAsyncTestCase):
     """Unit tests validating SSOT patterns in supervisor orchestration."""
 
     def setup_method(self, method):
@@ -257,7 +257,7 @@ class TestSupervisorOrchestrationSSOTValidation(SSotAsyncTestCase):
             assert supervisor is not None
 
 
-class TestSupervisorOrchestrationFactoryPatterns(SSotAsyncTestCase):
+class SupervisorOrchestrationFactoryPatternsTests(SSotAsyncTestCase):
     """Test factory patterns used in supervisor orchestration."""
 
     def setup_method(self, method):

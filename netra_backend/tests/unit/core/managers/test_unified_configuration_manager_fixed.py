@@ -51,7 +51,7 @@ class ConfigTestMetrics:
         self.custom_metrics[name] = value
 
 
-class TestUnifiedConfigurationManagerBasicOperations:
+class UnifiedConfigurationManagerBasicOperationsTests:
     """Test basic configuration operations using real UnifiedConfigurationManager."""
     
     def setup_method(self):
@@ -220,7 +220,7 @@ class TestUnifiedConfigurationManagerBasicOperations:
         self.metrics.record("dict_operations", 2)
 
 
-class TestConfigurationValidationAndSecurity:
+class ConfigurationValidationAndSecurityTests:
     """Test configuration validation and security features with real manager."""
     
     def setup_method(self):
@@ -348,7 +348,7 @@ class TestConfigurationValidationAndSecurity:
         self.metrics.record("change_tracking_operations", 4)
 
 
-class TestMultiUserIsolationAndFactory:
+class MultiUserIsolationAndFactoryTests:
     """Test multi-user isolation and factory pattern with real managers."""
     
     def setup_method(self):
@@ -457,7 +457,7 @@ class TestMultiUserIsolationAndFactory:
         self.metrics.record("combined_managers_isolated", True)
 
 
-class TestThreadSafetyAndConcurrency:
+class ThreadSafetyAndConcurrencyTests:
     """Test thread safety and concurrent access with real managers."""
     
     def setup_method(self):
@@ -580,7 +580,7 @@ class TestThreadSafetyAndConcurrency:
 
 
 @pytest.mark.asyncio
-class TestWebSocketIntegrationAsync:
+class WebSocketIntegrationAsyncTests:
     """Test WebSocket integration with async operations."""
     
     async def test_websocket_notification_on_config_change(self):
@@ -615,7 +615,7 @@ class TestWebSocketIntegrationAsync:
         config_manager.clear_cache()
 
 
-class TestErrorHandlingAndEdgeCases:
+class ErrorHandlingAndEdgeCasesTests:
     """Test error handling and edge cases with real manager."""
     
     def setup_method(self):
@@ -706,7 +706,7 @@ class TestErrorHandlingAndEdgeCases:
         self.metrics.record("coercion_failure_handling", 3)
 
 
-class TestServiceSpecificConfigurations:
+class ServiceSpecificConfigurationsTests:
     """Test service-specific configuration methods."""
     
     def setup_method(self):
@@ -795,7 +795,7 @@ class TestServiceSpecificConfigurations:
         self.metrics.record("llm_config_tested", True)
 
 
-class TestPerformanceCharacteristics:
+class PerformanceCharacteristicsTests:
     """Test performance characteristics of configuration manager."""
     
     def setup_method(self):

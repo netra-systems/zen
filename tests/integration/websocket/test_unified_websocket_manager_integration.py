@@ -47,7 +47,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 # WebSocket Manager imports - SSOT verified paths
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketManagerMode, WebSocketConnection
 from netra_backend.app.websocket_core.types import WebSocketConnectionState, ConnectionInfo, MessageType
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
@@ -86,7 +86,7 @@ class MockWebSocketConnection:
         return self.messages_received.copy()
 
 
-class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
+class UnifiedWebSocketManagerIntegrationTests(SSotBaseTestCase):
     """
     Comprehensive integration tests for UnifiedWebSocketManager.
     

@@ -25,7 +25,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 @pytest.mark.unit
-class TestMemoryManagementFactoryPattern(SSotAsyncTestCase):
+class MemoryManagementFactoryPatternTests(SSotAsyncTestCase):
     """
     Test suite validating memory management in factory pattern implementation.
 

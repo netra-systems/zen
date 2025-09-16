@@ -92,7 +92,7 @@ class MockWebSocketManager:
         """Get all events of a specific type."""
         return [event for event in self.sent_events if event.event_type == event_type]
 
-class TestSsotToolDispatcherConsolidationValidation(SSotAsyncTestCase):
+class SsotToolDispatcherConsolidationValidationTests(SSotAsyncTestCase):
     """
     SSOT Migration Validation Tests for Tool Dispatcher Consolidation.
     

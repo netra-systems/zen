@@ -21,7 +21,7 @@ from netra_backend.app.routes.websocket_ssot import WebSocketSSOTRouter, WebSock
 from netra_backend.app.websocket_core.types import create_server_message
 
 
-class TestWebSocketErrorHandlingFix:
+class WebSocketErrorHandlingFixTests:
     """Test suite for Five Whys error handling fix."""
 
     @pytest.fixture
@@ -256,7 +256,7 @@ class TestWebSocketErrorHandlingFix:
 
 # Prevention Measures Test Suite
 
-class TestErrorHandlingPrevention:
+class ErrorHandlingPreventionTests:
     """Tests that verify systemic improvements to prevent similar errors."""
 
     def test_all_create_server_message_calls_have_data_argument(self):

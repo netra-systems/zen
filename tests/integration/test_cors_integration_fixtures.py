@@ -7,7 +7,7 @@ import os
 
 
 @pytest.mark.integration
-class TestSyntaxFix:
+class SyntaxFixTests:
     """Test class for orphaned methods"""
 
     def mock_backend_server_url(self):

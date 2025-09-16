@@ -328,7 +328,7 @@ class MockUserWebSocketEmitter:
 # COMPREHENSIVE WEBSOCKET INTEGRATION TESTS
 # =============================================================================
 
-class TestWebSocketIntegrationComprehensive(AsyncBaseTestCase):
+class WebSocketIntegrationComprehensiveTests(AsyncBaseTestCase):
     """Comprehensive tests for WebSocket integration components."""
     
     def setUp(self):
@@ -372,7 +372,7 @@ class TestWebSocketIntegrationComprehensive(AsyncBaseTestCase):
         await self.mock_ws_manager.add_connection(self.connection_2)
 
 
-class TestCriticalWebSocketEvents(TestWebSocketIntegrationComprehensive):
+class CriticalWebSocketEventsTests(WebSocketIntegrationComprehensiveTests):
     """Test all 5 critical WebSocket events that enable chat business value."""
     
     async def test_agent_started_event_generation(self):
@@ -541,7 +541,7 @@ class TestCriticalWebSocketEvents(TestWebSocketIntegrationComprehensive):
             assert "payload" in data, f"Event {i} must have payload"
 
 
-class TestUserIsolationDuringEventDelivery(TestWebSocketIntegrationComprehensive):
+class UserIsolationDuringEventDeliveryTests(WebSocketIntegrationComprehensiveTests):
     """Test that WebSocket events are properly isolated between users."""
     
     async def test_events_isolated_between_different_users(self):
@@ -620,7 +620,7 @@ class TestUserIsolationDuringEventDelivery(TestWebSocketIntegrationComprehensive
             assert data["run_id"] == self.user_context_2.run_id, "User 2 run_id must be consistent"
 
 
-class TestErrorHandlingAndResilience(TestWebSocketIntegrationComprehensive):
+class ErrorHandlingAndResilienceTests(WebSocketIntegrationComprehensiveTests):
     """Test error handling and resilience in WebSocket event delivery."""
     
     async def test_websocket_connection_failure_handling(self):
@@ -665,7 +665,7 @@ class TestErrorHandlingAndResilience(TestWebSocketIntegrationComprehensive):
                 "Exception should be related to size limits"
 
 
-class TestConcurrentWebSocketPerformance(TestWebSocketIntegrationComprehensive):
+class ConcurrentWebSocketPerformanceTests(WebSocketIntegrationComprehensiveTests):
     """Test performance under concurrent WebSocket operations."""
     
     async def test_high_concurrent_user_event_delivery(self):

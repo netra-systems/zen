@@ -48,7 +48,7 @@ class MockTool:
         return f"Mock async result: {kwargs}"
 
 
-class TestToolExecutionEngine(SSotAsyncTestCase):
+class ToolExecutionEngineTests(SSotAsyncTestCase):
     """Unit tests for ToolExecutionEngine - Reliable tool execution with error handling."""
 
     def setup_method(self, method=None):

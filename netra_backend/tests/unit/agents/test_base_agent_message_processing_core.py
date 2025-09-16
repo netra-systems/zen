@@ -40,7 +40,7 @@ from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 
-class TestBaseAgentMessageProcessingCore(SSotAsyncTestCase):
+class BaseAgentMessageProcessingCoreTests(SSotAsyncTestCase):
     """Comprehensive unit tests for BaseAgent message processing functionality."""
 
     def setup_method(self, method):

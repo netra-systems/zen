@@ -34,7 +34,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.mark.e2e
-class TestExecutionEngineFactoryGoldenPath884(SSotAsyncTestCase):
+class ExecutionEngineFactoryGoldenPath884Tests(SSotAsyncTestCase):
     """Phase 1 E2E Tests: Execution Engine Factory Golden Path
 
     These tests are designed to FAIL initially to demonstrate Golden Path

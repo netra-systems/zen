@@ -50,7 +50,7 @@ from netra_backend.app.llm.openai_manager import OpenAIManager
 # Import WebSocket core modules for chat flow testing  
 from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage, MessageType
 from netra_backend.app.websocket_core.context import WebSocketRequestContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 # Import SSOT UnifiedIdGenerator for proper chat flow IDs
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
@@ -61,7 +61,7 @@ from shared.types.core_types import UserID, ConnectionID, ThreadID, MessageID
 @pytest.mark.websocket
 @pytest.mark.chat_flow
 @pytest.mark.business_value
-class TestWebSocketIdChatFlowE2E(BaseE2ETest):
+class WebSocketIdChatFlowE2ETests(BaseE2ETest):
     """
     E2E tests that EXPOSE chat flow business value failures with uuid.uuid4().
     

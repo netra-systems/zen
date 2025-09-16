@@ -92,7 +92,7 @@ class SimpleDirectedGraph:
         return cycles
 
 
-class TestDatabaseImportDependencyResolution(SSotBaseTestCase):
+class DatabaseImportDependencyResolutionTests(SSotBaseTestCase):
     """
     Test suite to detect and validate database import dependency resolution.
     
@@ -302,7 +302,7 @@ class TestDatabaseImportDependencyResolution(SSotBaseTestCase):
         try:
             # Step 4: WebSocket components (if they exist)
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 logger.info("[U+2713] Step 4: WebSocket manager import")
                 self.record_metric("step4_websocket_manager_success", True)
             except ImportError:

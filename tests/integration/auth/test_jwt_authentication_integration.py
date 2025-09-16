@@ -41,7 +41,7 @@ import asyncpg
 import redis.asyncio as redis
 
 
-class TestJWTAuthenticationIntegration(BaseIntegrationTest):
+class JWTAuthenticationIntegrationTests(BaseIntegrationTest):
     """Integration tests for JWT Authentication - NO MOCKS, REAL SERVICES ONLY."""
     
     def setup_method(self):

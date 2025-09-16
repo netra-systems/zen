@@ -35,7 +35,7 @@ from auth_service.auth_core.models.auth_models import User
 from shared.isolated_environment import get_env
 
 
-class TestRefreshEndpointReal:
+class RefreshEndpointRealTests:
     """MOCK-FREE test suite for refresh endpoint using real services."""
     
     @pytest.mark.asyncio

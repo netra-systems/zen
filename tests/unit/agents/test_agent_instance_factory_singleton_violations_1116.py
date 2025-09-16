@@ -69,7 +69,7 @@ class MockAgent:
 
 
 @pytest.mark.unit
-class TestAgentInstanceFactorySingletonViolations1116(SSotAsyncTestCase):
+class AgentInstanceFactorySingletonViolations1116Tests(SSotAsyncTestCase):
     """
     Unit tests proving singleton pattern violations in AgentInstanceFactory.
     

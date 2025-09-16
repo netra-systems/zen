@@ -43,7 +43,7 @@ logger = central_logger.get_logger(__name__)
 
 @pytest.mark.staging
 @pytest.mark.e2e
-class TestWebSocketRouteConsolidationE2E(SSotAsyncTestCase):
+class WebSocketRouteConsolidationE2ETests(SSotAsyncTestCase):
     """
     E2E tests for WebSocket route consolidation in GCP staging.
 

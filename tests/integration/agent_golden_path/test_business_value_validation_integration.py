@@ -447,7 +447,7 @@ class BusinessValueAnalyzer:
         return context
 
 
-class TestBusinessValueValidationIntegration(SSotAsyncTestCase):
+class BusinessValueValidationIntegrationTests(SSotAsyncTestCase):
     """
     Business Value Validation Integration Tests.
     
@@ -871,7 +871,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_test():
-        test_instance = TestBusinessValueValidationIntegration()
+        test_instance = BusinessValueValidationIntegrationTests()
         test_instance.setup_method()
         await test_instance.test_comprehensive_business_value_delivery()
         print("Direct test execution completed successfully")

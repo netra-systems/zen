@@ -26,7 +26,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e
-class TestMessageRouterEndToEndStaging(SSotAsyncTestCase):
+class MessageRouterEndToEndStagingTests(SSotAsyncTestCase):
     """E2E tests for MessageRouter against staging environment."""
     
     async def asyncSetUp(self):

@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -28,7 +28,7 @@ from netra_backend.tests.test_route_fixtures import (
     agent_test_client,
 )
 
-class TestAgentRoute:
+class AgentRouteTests:
     """Test agent API message processing and streaming functionality."""
     
     def test_agent_message_processing(self, agent_test_client):

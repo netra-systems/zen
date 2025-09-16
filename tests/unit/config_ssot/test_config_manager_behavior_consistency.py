@@ -32,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestConfigManagerBehaviorConsistency(SSotBaseTestCase):
+class ConfigManagerBehaviorConsistencyTests(SSotBaseTestCase):
     """Unit tests to demonstrate configuration manager behavioral inconsistencies."""
 
     def setUp(self):

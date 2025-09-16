@@ -10,7 +10,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.health_checkers import HealthChecker
 
 
-class TestErrorHandlingResilience:
+class ErrorHandlingResilienceTests:
     """Test error handling and resilience patterns."""
     
     @pytest.mark.asyncio
@@ -114,7 +114,7 @@ class TestErrorHandlingResilience:
                         assert result['oauth']['healthy'] is True
 
 
-class TestSystemResourceErrorHandling:
+class SystemResourceErrorHandlingTests:
     """Test system resource monitoring error handling."""
     
     def test_system_resource_unavailable_handling(self):
@@ -152,7 +152,7 @@ class TestSystemResourceErrorHandling:
                     assert isinstance(result.success, bool)
 
 
-class TestDatabaseConnectionErrorHandling:
+class DatabaseConnectionErrorHandlingTests:
     """Test database connection error handling scenarios."""
     
     @pytest.mark.asyncio
@@ -184,7 +184,7 @@ class TestDatabaseConnectionErrorHandling:
             assert "sslmode" in result.error_message
 
 
-class TestCircuitBreakerErrorHandling:
+class CircuitBreakerErrorHandlingTests:
     """Test circuit breaker integration with error handling."""
     
     def test_circuit_breaker_error_classification(self):

@@ -87,7 +87,7 @@ class SupervisorCoordinationContext:
     sub_agent_executions: List[Dict[str, Any]] = field(default_factory=list)
 
 
-class TestAgentSupervisorWebSocketCoordination(SSotAsyncTestCase):
+class AgentSupervisorWebSocketCoordinationTests(SSotAsyncTestCase):
     """CRITICAL integration tests for supervisor agent WebSocket coordination."""
 
     @pytest.fixture

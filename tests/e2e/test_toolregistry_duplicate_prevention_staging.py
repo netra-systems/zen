@@ -89,7 +89,7 @@ class ToolRegistryAuditCapture:
 @pytest.mark.e2e
 @pytest.mark.staging
 @pytest.mark.toolregistry
-class TestToolRegistryDuplicatePreventionStaging(SSotBaseTestCase):
+class ToolRegistryDuplicatePreventionStagingTests(SSotBaseTestCase):
     """
     E2E tests for ToolRegistry duplicate registration prevention in staging environment.
     
@@ -492,7 +492,7 @@ class TestToolRegistryDuplicatePreventionStaging(SSotBaseTestCase):
 @pytest.mark.e2e
 @pytest.mark.staging 
 @pytest.mark.mission_critical
-class TestWebSocketToolRegistryCleanup(SSotBaseTestCase):
+class WebSocketToolRegistryCleanupTests(SSotBaseTestCase):
     """
     Mission critical tests for WebSocket connection cleanup and tool registry lifecycle.
     

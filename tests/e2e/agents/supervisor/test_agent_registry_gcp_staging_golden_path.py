@@ -40,7 +40,7 @@ from typing import Any, Dict, Optional, List
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, UserAgentSession, get_agent_registry
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.core.configuration.base import get_unified_config
@@ -52,7 +52,7 @@ from netra_backend.app.tools.search_tool import SearchTool
 from netra_backend.app.tools.data_analysis_tool import DataAnalysisTool
 
 @pytest.mark.e2e
-class TestGoldenPathAgentExecution(SSotAsyncTestCase):
+class GoldenPathAgentExecutionTests(SSotAsyncTestCase):
     """Test Suite 1: Golden Path Agent Execution (Protects $500K+ ARR core flow)
     
     Business Value: Validates complete user journey from authentication to AI response
@@ -185,7 +185,7 @@ class TestGoldenPathAgentExecution(SSotAsyncTestCase):
             return None
 
 @pytest.mark.e2e
-class TestMultiUserEnterpriseIsolation(SSotAsyncTestCase):
+class MultiUserEnterpriseIsolationTests(SSotAsyncTestCase):
     """Test Suite 2: Multi-User Enterprise Isolation (Protects $15K+ MRR per customer)
     
     Business Value: Validates complete isolation between enterprise customers in production
@@ -299,7 +299,7 @@ class TestMultiUserEnterpriseIsolation(SSotAsyncTestCase):
             return None
 
 @pytest.mark.e2e
-class TestProductionToolExecution(SSotAsyncTestCase):
+class ProductionToolExecutionTests(SSotAsyncTestCase):
     """Test Suite 3: Production Tool Execution (Protects agent capabilities)
     
     Business Value: Validates tools work correctly with actual GCP services
@@ -365,7 +365,7 @@ class TestProductionToolExecution(SSotAsyncTestCase):
             self.fail(f' ALERT:  Tool WebSocket notifications FAILED: {e}')
 
 @pytest.mark.e2e
-class TestProductionPerformanceValidation(SSotAsyncTestCase):
+class ProductionPerformanceValidationTests(SSotAsyncTestCase):
     """Test Suite 4: Production Performance Validation (Protects system scalability)
     
     Business Value: Validates registry performs well under production-like load

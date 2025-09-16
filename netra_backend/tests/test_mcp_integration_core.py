@@ -21,7 +21,7 @@ from netra_backend.app.services.mcp_service import (
     MCPToolExecution,
 )
 
-class TestSyntaxFix:
+class SyntaxFixTests:
     """Test class for orphaned methods"""
 
     def test_server_initialization(self):

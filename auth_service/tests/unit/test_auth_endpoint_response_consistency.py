@@ -15,7 +15,7 @@ from auth_service.auth_core.routes.auth_routes import router as auth_router
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAuthEndpointResponseFormats:
+class AuthEndpointResponseFormatsTests:
     """Test that auth endpoints return consistent, properly formatted responses."""
 
     @pytest.fixture
@@ -169,7 +169,7 @@ class TestAuthEndpointResponseFormats:
                                                     assert "logged out" in data["message"].lower()
 
 
-                                                    class TestAuthUtilityEndpointFormats:
+                                                    class AuthUtilityEndpointFormatsTests:
                                                         """Test response formats for utility endpoints (password, token operations)."""
 
                                                         @pytest.fixture
@@ -276,7 +276,7 @@ class TestAuthEndpointResponseFormats:
                                                                                         assert data["expires_in"] == 900
 
 
-                                                                                        class TestAuthStatusEndpointFormats:
+                                                                                        class AuthStatusEndpointFormatsTests:
                                                                                             """Test response formats for status and configuration endpoints."""
 
                                                                                             @pytest.fixture
@@ -339,7 +339,7 @@ class TestAuthEndpointResponseFormats:
                                                                                                                 assert "dev_login" in endpoints
 
 
-                                                                                                                class TestAuthErrorResponseFormats:
+                                                                                                                class AuthErrorResponseFormatsTests:
                                                                                                                     """Test that error responses from auth endpoints are properly formatted."""
 
                                                                                                                     @pytest.fixture

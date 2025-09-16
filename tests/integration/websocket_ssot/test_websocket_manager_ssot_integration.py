@@ -102,7 +102,7 @@ class MockWebSocket:
         return [msg for msg in self.messages_received if msg.get("type") == event_type]
 
 
-class TestWebSocketManagerSSOTIntegration(SSotAsyncTestCase):
+class WebSocketManagerSSOTIntegrationTests(SSotAsyncTestCase):
     """
     Test WebSocket Manager SSOT integration for Issue #996.
 

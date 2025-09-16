@@ -18,7 +18,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.core_types import UserID, ThreadID, RunID
 
 
-class TestAgentCoordinationDataContracts:
+class AgentCoordinationDataContractsTests:
     """Test agent coordination with real metadata contracts."""
 
     def setup_method(self):

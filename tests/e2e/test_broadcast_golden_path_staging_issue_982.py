@@ -193,7 +193,7 @@ class StagingWebSocketClient:
 
 
 @pytest.mark.e2e
-class TestGoldenPathBroadcastStaging(SSotAsyncTestCase):
+class GoldenPathBroadcastStagingTests(SSotAsyncTestCase):
     """E2E staging tests for Golden Path agent event delivery."""
 
     def setUp(self):

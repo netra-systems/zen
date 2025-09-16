@@ -37,7 +37,7 @@ from shared.isolated_environment import get_env
 env = get_env()
 
 
-class TestDockerManagerSSOTCompliance(SSotBaseTestCase):
+class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
     """
     Test suite to prove Docker Manager SSOT violation and validate fix.
 
@@ -351,7 +351,7 @@ class TestDockerManagerSSOTCompliance(SSotBaseTestCase):
                        f"Expected: Only correct import should work (SSOT compliance)")
 
 
-class TestDockerManagerMissionCriticalIntegration(SSotBaseTestCase):
+class DockerManagerMissionCriticalIntegrationTests(SSotBaseTestCase):
     """
     Mission critical tests for Docker Manager SSOT compliance.
 

@@ -16,7 +16,7 @@ from typing import Dict, Any, Optional
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from test_framework.base_integration_test import BaseIntegrationTest
 
-class TestConfigurationEnvironmentManagementUnit(BaseIntegrationTest):
+class ConfigurationEnvironmentManagementUnitTests(BaseIntegrationTest):
     """Test configuration environment management functionality."""
 
     @pytest.mark.unit
@@ -98,7 +98,7 @@ class TestConfigurationEnvironmentManagementUnit(BaseIntegrationTest):
         assert env.get_list('EMPTY_LIST') == [], 'Should return empty list for empty string'
         assert env.get_list('MISSING_LIST', ['default']) == ['default'], 'Should return default list'
 
-class TestEnvironmentSpecificConfigurationUnit(BaseIntegrationTest):
+class EnvironmentSpecificConfigurationUnitTests(BaseIntegrationTest):
     """Test environment-specific configuration handling."""
 
     @pytest.mark.unit
@@ -181,7 +181,7 @@ class TestEnvironmentSpecificConfigurationUnit(BaseIntegrationTest):
         assert env.get_bool('HTTPS_ONLY') is True, 'Must enforce HTTPS in production'
         assert env.get_bool('ENABLE_TRACING') is True, 'Should enable tracing in production'
 
-class TestEnvironmentConfigurationErrorHandlingUnit(BaseIntegrationTest):
+class EnvironmentConfigurationErrorHandlingUnitTests(BaseIntegrationTest):
     """Test environment configuration error handling and validation."""
 
     @pytest.mark.unit

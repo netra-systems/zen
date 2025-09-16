@@ -33,7 +33,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestWebSocketManagerFactorySsotConsolidation(SSotAsyncTestCase):
+class WebSocketManagerFactorySsotConsolidationTests(SSotAsyncTestCase):
     """Phase 2 SSOT Validation Test: Validate factory patterns are consolidated to SSOT."""
     
     def setup_method(self, method):
@@ -69,8 +69,8 @@ class TestWebSocketManagerFactorySsotConsolidation(SSotAsyncTestCase):
         logger.info("Validating single factory pattern consolidation (SSOT compliance)")
         
         # Import factory functions from different paths
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as factory1
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager as factory1
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerMode
         
         # Test that factory function creates properly isolated instances
         factory_instances = []
@@ -229,7 +229,7 @@ class TestWebSocketManagerFactorySsotConsolidation(SSotAsyncTestCase):
         """
         logger.info("Validating factory method consistency")
         
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         import inspect
         
         # Get factory function signature
@@ -312,7 +312,7 @@ class TestWebSocketManagerFactorySsotConsolidation(SSotAsyncTestCase):
         """
         logger.info("Validating factory concurrent instantiation safety")
         
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         # Create concurrent instantiation tasks
         async def create_manager_for_user(user_index):
@@ -395,7 +395,7 @@ class TestWebSocketManagerFactorySsotConsolidation(SSotAsyncTestCase):
         """
         logger.info("Validating factory parameter validation consistency")
         
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         # Test invalid parameter scenarios
         invalid_test_cases = [

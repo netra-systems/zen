@@ -25,7 +25,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 @pytest.mark.real_llm
 @pytest.mark.api_integration
 @pytest.mark.e2e
-class TestRealAPIIntegration:
+class RealAPIIntegrationTests:
     """Test real LLM API integration across providers."""
     
     @pytest.mark.asyncio
@@ -258,7 +258,7 @@ class TestRealAPIIntegration:
 @pytest.mark.real_llm
 @pytest.mark.api_integration
 @pytest.mark.e2e
-class TestAPIProviderSpecific:
+class APIProviderSpecificTests:
     """Test provider-specific API features."""
     
     @pytest.mark.asyncio

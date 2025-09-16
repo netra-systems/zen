@@ -56,7 +56,7 @@ services:
           - backend
     build:
       context: .
-      dockerfile: docker/backend.alpine.Dockerfile
+      dockerfile: dockerfiles/backend.Dockerfile
     environment:
       ENVIRONMENT: development
       POSTGRES_HOST: dev-postgres
@@ -93,7 +93,7 @@ services:
           - auth
     build:
       context: .
-      dockerfile: docker/auth.alpine.Dockerfile
+      dockerfile: dockerfiles/auth.Dockerfile
     environment:
       ENVIRONMENT: development
       POSTGRES_HOST: dev-postgres
@@ -120,7 +120,7 @@ services:
   dev-frontend:
     build:
       context: .
-      dockerfile: docker/frontend.alpine.Dockerfile
+      dockerfile: dockerfiles/frontend.Dockerfile
     environment:
       NEXT_PUBLIC_ENVIRONMENT: development
       NEXT_PUBLIC_API_BASE_URL: http://localhost:8000

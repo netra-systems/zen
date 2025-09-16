@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
@@ -46,7 +46,7 @@ from netra_backend.app.schemas.core_models import Message, ThreadMetadata
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 from netra_backend.app.schemas.llm_response_types import LLMResponse, LLMStreamChunk
 from netra_backend.app.schemas.websocket_models import BaseWebSocketPayload, StartAgentPayload, WebSocketMessage
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
@@ -145,7 +145,7 @@ async def chat_orchestrator_with_failures(mock_db_session, failing_llm_manager, 
     return orchestrator
 
 @pytest.mark.e2e
-class TestPromptSubmissionFlow:
+class PromptSubmissionFlowTests:
     """Test prompt submission and initial processing - designed to expose failures"""
 
     @pytest.mark.e2e
@@ -181,7 +181,7 @@ class TestPromptSubmissionFlow:
             await chat_orchestrator_with_failures.process_message(user_id=user_id, thread_id=None, content=oversized_prompt, message_type='user_message')
 
 @pytest.mark.e2e
-class TestAgentSelectionAndRouting:
+class AgentSelectionAndRoutingTests:
     """Test agent selection logic - designed to expose routing failures"""
 
     @pytest.mark.e2e
@@ -209,7 +209,7 @@ class TestAgentSelectionAndRouting:
             response = await chat_orchestrator_with_failures.process_message(user_id=user_id, thread_id=None, content=complex_prompt, message_type='user_message')
 
 @pytest.mark.e2e
-class TestLLMAPICallsAndResponseHandling:
+class LLMAPICallsAndResponseHandlingTests:
     """Test LLM API integration - designed to expose API call failures"""
 
     @pytest.mark.e2e
@@ -244,7 +244,7 @@ class TestLLMAPICallsAndResponseHandling:
             responses = await asyncio.gather(*tasks, return_exceptions=True)
 
 @pytest.mark.e2e
-class TestStreamingResponseDelivery:
+class StreamingResponseDeliveryTests:
     """Test streaming response functionality - designed to expose streaming failures"""
 
     @pytest.mark.e2e
@@ -283,7 +283,7 @@ class TestStreamingResponseDelivery:
             await failing_websocket_manager.send_message(user_id, message)
 
 @pytest.mark.e2e
-class TestTokenTrackingAndCostCalculation:
+class TokenTrackingAndCostCalculationTests:
     """Test token counting and cost calculation - designed to expose billing issues"""
 
     @pytest.mark.e2e
@@ -319,7 +319,7 @@ class TestTokenTrackingAndCostCalculation:
             assert total_tokens > 0
 
 @pytest.mark.e2e
-class TestErrorHandlingAndRecovery:
+class ErrorHandlingAndRecoveryTests:
     """Test error handling and recovery mechanisms - designed to expose resilience issues"""
 
     @pytest.mark.e2e
@@ -347,7 +347,7 @@ class TestErrorHandlingAndRecovery:
             response = await chat_orchestrator_with_failures.process_message(user_id=user_id, thread_id=None, content=prompt, message_type='user_message')
 
 @pytest.mark.e2e
-class TestResponseCachingAndOptimization:
+class ResponseCachingAndOptimizationTests:
     """Test response caching and optimization - designed to expose caching issues"""
 
     @pytest.mark.e2e
@@ -377,7 +377,7 @@ class TestResponseCachingAndOptimization:
                 responses.append(response)
 
 @pytest.mark.e2e
-class TestMultiAgentOrchestration:
+class MultiAgentOrchestrationTests:
     """Test multi-agent coordination - designed to expose orchestration issues"""
 
     @pytest.mark.e2e
@@ -406,7 +406,7 @@ class TestMultiAgentOrchestration:
             response = await chat_orchestrator_with_failures.process_message(user_id=user_id, thread_id=None, content=prompt, message_type='user_message')
 
 @pytest.mark.e2e
-class TestPerformanceUnderLoad:
+class PerformanceUnderLoadTests:
     """Test performance characteristics - designed to expose scaling issues"""
 
     @pytest.mark.e2e
@@ -443,7 +443,7 @@ class TestPerformanceUnderLoad:
                     raise TimeoutError('Response time degradation detected')
 
 @pytest.mark.e2e
-class TestMultiTurnConversationFlow:
+class MultiTurnConversationFlowTests:
     """Test multi-turn conversation handling - designed to expose context management issues"""
 
     @pytest.mark.e2e
@@ -479,7 +479,7 @@ class TestMultiTurnConversationFlow:
             response2 = await new_orchestrator.process_message(user_id=user_id, thread_id=thread_id, content='Continue the analysis', message_type='user_message')
 
 @pytest.mark.e2e
-class TestEndToEndIntegrationFailures:
+class EndToEndIntegrationFailuresTests:
     """End-to-end integration tests designed to expose system-wide issues"""
 
     @pytest.mark.e2e

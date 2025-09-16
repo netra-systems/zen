@@ -28,7 +28,7 @@ from netra_backend.app.services.database.message_repository import MessageReposi
 from netra_backend.app.db.models_postgres import Message
 
 
-class TestSSOTViolationDetection:
+class SSOTViolationDetectionTests:
     """
     Simple SSOT Violation Detection Test
     
@@ -140,7 +140,7 @@ class TestSSOTViolationDetection:
 
 if __name__ == "__main__":
     # Simple test runner
-    test_instance = TestSSOTViolationDetection()
+    test_instance = SSOTViolationDetectionTests()
     
     async def run_test():
         try:

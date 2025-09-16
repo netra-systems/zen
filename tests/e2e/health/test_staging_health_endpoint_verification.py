@@ -15,7 +15,7 @@ from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestStagingHealthEndpointVerification(SSotBaseTestCase):
+class StagingHealthEndpointVerificationTests(SSotBaseTestCase):
     """E2E test suite for staging health endpoint verification - Issue #894."""
 
     STAGING_BASE_URL = "https://api.staging.netrasystems.ai"

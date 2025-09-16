@@ -21,7 +21,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
-class TestSSotMigrationValidation(SSotAsyncTestCase):
+class SSotMigrationValidationTests(SSotAsyncTestCase):
     """Test suite to validate successful SSOT migration to UserExecutionEngine."""
 
     def test_single_execution_engine_import_source(self):
@@ -298,7 +298,7 @@ class TestSSotMigrationValidation(SSotAsyncTestCase):
         else:
             return AgentExecutionResult(success=True, agent_name='isolation_validation_agent', execution_time=0.8, data={'response': f'Processed {test_data}', 'user_id': user_context.user_id, 'test_data': test_data, 'user_secrets': user_context.metadata, 'isolated': True})
 
-class TestUserExecutionEngineSpecific(SSotAsyncTestCase):
+class UserExecutionEngineSpecificTests(SSotAsyncTestCase):
     """Test suite specifically for UserExecutionEngine features."""
 
     async def test_user_execution_engine_constructor(self):

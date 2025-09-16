@@ -16,7 +16,7 @@ from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestSupervisorAgentGoldenPathProtection(SSotAsyncTestCase):
+class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
     """Tests that ensure SSOT consolidation doesn't break Golden Path functionality.
 
     These tests protect the core business value - users login and get AI responses.

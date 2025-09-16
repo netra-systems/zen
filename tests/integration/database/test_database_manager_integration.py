@@ -64,7 +64,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.integration
-class TestDatabaseManagerMultiDatabaseConnections(SSotBaseTestCase):
+class DatabaseManagerMultiDatabaseConnectionsTests(SSotBaseTestCase):
     """
     Test multi-database connection management functionality.
     
@@ -242,7 +242,7 @@ class TestDatabaseManagerMultiDatabaseConnections(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestDatabaseManagerSSLVPCConnectivity(SSotBaseTestCase):
+class DatabaseManagerSSLVPCConnectivityTests(SSotBaseTestCase):
     """
     Test SSL/VPC connectivity and security configuration.
     
@@ -370,7 +370,7 @@ class TestDatabaseManagerSSLVPCConnectivity(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestDatabaseManagerConnectionPooling(SSotBaseTestCase):
+class DatabaseManagerConnectionPoolingTests(SSotBaseTestCase):
     """
     Test connection pool management and behavior under load.
     
@@ -535,7 +535,7 @@ class TestDatabaseManagerConnectionPooling(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestDatabaseManagerTransactionIsolation(SSotBaseTestCase):
+class DatabaseManagerTransactionIsolationTests(SSotBaseTestCase):
     """
     Test transaction isolation and ACID compliance.
     
@@ -718,7 +718,7 @@ class TestDatabaseManagerTransactionIsolation(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestDatabaseManagerSessionManagement(SSotBaseTestCase):
+class DatabaseManagerSessionManagementTests(SSotBaseTestCase):
     """
     Test database session lifecycle management.
     
@@ -861,7 +861,7 @@ class TestDatabaseManagerSessionManagement(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestDatabaseManagerPerformanceReliability(SSotBaseTestCase):
+class DatabaseManagerPerformanceReliabilityTests(SSotBaseTestCase):
     """
     Test performance and reliability under various conditions.
     

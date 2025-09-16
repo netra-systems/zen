@@ -19,7 +19,7 @@ from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeF
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestWebSocketNotifierInterfaceValidation(SSotBaseTestCase):
+class WebSocketNotifierInterfaceValidationTests(SSotBaseTestCase):
     """
     Test suite to validate WebSocketNotifier interface consistency.
 
@@ -183,7 +183,7 @@ class TestWebSocketNotifierInterfaceValidation(SSotBaseTestCase):
             assert score >= minimum_compliance, f'SSOT compliance failure for {aspect}: {score:.1%} compliance, expected {minimum_compliance:.1%}. Non-compliant implementations: {[impl for impl, result in ssot_compliance_results.items() if not result[aspect]]}'
         pytest.fail('Expected SSOT compliance issues - if this passes, implementations may be SSOT compliant')
 
-class TestWebSocketBridgeInterfaceIntegration(SSotBaseTestCase):
+class WebSocketBridgeInterfaceIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for WebSocket bridge interface compatibility.
 

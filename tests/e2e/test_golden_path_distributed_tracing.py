@@ -66,7 +66,7 @@ from test_framework.ssot.real_services_test_fixtures import real_services_fixtur
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestGoldenPathDistributedTracing(SsotBaseTestCase):
+class GoldenPathDistributedTracingTests(SsotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -485,7 +485,7 @@ class TestGoldenPathDistributedTracing(SsotBaseTestCase):
             assert len(auth_spans) == 0  # Should fail before implementation
 
 
-class TestGoldenPathPerformanceTracing(SsotBaseTestCase):
+class GoldenPathPerformanceTracingTests(SsotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -598,7 +598,7 @@ class TestGoldenPathPerformanceTracing(SsotBaseTestCase):
         assert max_concurrent < 120.0, f"Concurrent max {max_concurrent:.2f}s should be under 120s"
 
 
-class TestGoldenPathTraceValidation(SsotBaseTestCase):
+class GoldenPathTraceValidationTests(SsotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

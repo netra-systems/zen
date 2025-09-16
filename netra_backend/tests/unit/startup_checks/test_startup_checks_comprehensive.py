@@ -37,7 +37,7 @@ from netra_backend.app.startup_checks.environment_checks import EnvironmentCheck
 from netra_backend.app.startup_checks.service_checks import ServiceChecker
 from netra_backend.app.startup_checks.system_checks import SystemChecker
 
-class TestStartupChecksPackageStructure(BaseIntegrationTest):
+class StartupChecksPackageStructureTests(BaseIntegrationTest):
     """Test startup_checks package imports and structure."""
 
     def test_package_imports_work(self):
@@ -87,7 +87,7 @@ class TestStartupChecksPackageStructure(BaseIntegrationTest):
         assert ServiceClass is not None
         assert SystemClass is not None
 
-class TestStartupCheckResultDataModel(BaseIntegrationTest):
+class StartupCheckResultDataModelTests(BaseIntegrationTest):
     """Test StartupCheckResult data model functionality."""
 
     def test_startup_check_result_creation_basic(self):
@@ -132,7 +132,7 @@ class TestStartupCheckResultDataModel(BaseIntegrationTest):
         str_repr = str(result)
         assert 'repr_test' in str_repr or hasattr(result, '__dict__')
 
-class TestStartupCheckerOrchestration(BaseIntegrationTest):
+class StartupCheckerOrchestrationTests(BaseIntegrationTest):
     """Test StartupChecker main orchestration class."""
 
     def test_startup_checker_initialization(self):
@@ -258,7 +258,7 @@ class TestStartupCheckerOrchestration(BaseIntegrationTest):
             assert len(report['results']) == 3
             assert len(report['failures']) == 2
 
-class TestRunStartupChecksUtility(BaseIntegrationTest):
+class RunStartupChecksUtilityTests(BaseIntegrationTest):
     """Test run_startup_checks utility function."""
 
     async def test_run_startup_checks_basic_execution(self):
@@ -329,7 +329,7 @@ class TestRunStartupChecksUtility(BaseIntegrationTest):
                 await run_startup_checks(mock_app)
             assert 'Startup failed' in str(exc_info.value)
 
-class TestDatabaseCheckerConnectivity(BaseIntegrationTest):
+class DatabaseCheckerConnectivityTests(BaseIntegrationTest):
     """Test DatabaseChecker connectivity validation."""
 
     def test_database_checker_initialization(self):
@@ -439,7 +439,7 @@ class TestDatabaseCheckerConnectivity(BaseIntegrationTest):
             assert isinstance(metadata['capabilities'], list)
             assert len(metadata['capabilities']) > 0
 
-class TestEnvironmentCheckerValidation(BaseIntegrationTest):
+class EnvironmentCheckerValidationTests(BaseIntegrationTest):
     """Test EnvironmentChecker configuration validation."""
 
     def test_environment_checker_initialization(self):
@@ -545,7 +545,7 @@ class TestEnvironmentCheckerValidation(BaseIntegrationTest):
                 assert result.success is False
                 assert 'Test config error' in result.message
 
-class TestServiceCheckerConnectivity(BaseIntegrationTest):
+class ServiceCheckerConnectivityTests(BaseIntegrationTest):
     """Test ServiceChecker external service connectivity."""
 
     def test_service_checker_initialization(self):
@@ -654,7 +654,7 @@ class TestServiceCheckerConnectivity(BaseIntegrationTest):
             assert result.critical is False
             assert 'Redis connection failed' in result.message
 
-class TestSystemCheckerResources(BaseIntegrationTest):
+class SystemCheckerResourcesTests(BaseIntegrationTest):
     """Test SystemChecker resource validation."""
 
     async def test_system_checker_file_permissions_success(self):
@@ -788,7 +788,7 @@ class TestSystemCheckerResources(BaseIntegrationTest):
             assert 'Cannot reach' in result.message
             assert 'postgresql' in result.message
 
-class TestStartupChecksIntegration(BaseIntegrationTest):
+class StartupChecksIntegrationTests(BaseIntegrationTest):
     """Test startup checks integration scenarios."""
 
     async def test_startup_checks_full_integration_success(self):
@@ -903,7 +903,7 @@ class TestStartupChecksIntegration(BaseIntegrationTest):
                     MockServiceChecker.assert_called()
                     MockSystemChecker.assert_called()
 
-class TestStartupChecksComprehensiveComplete:
+class StartupChecksComprehensiveCompleteTests:
     """Marker class to complete todo item."""
 
     def test_comprehensive_test_suite_complete(self):

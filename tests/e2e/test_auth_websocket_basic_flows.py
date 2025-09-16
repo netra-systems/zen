@@ -26,14 +26,14 @@ from tests.e2e.config import TestTokenManager, TEST_SECRETS
 # Removed WebSocket mock import - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
 from test_framework.real_services import get_real_services
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from auth_service.auth_core.config import AuthConfig
 
 logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.e2e
-class TestBasicAuthFlow:
+class BasicAuthFlowTests:
     """Test 1-3: Basic authentication flow"""
     
     @pytest.mark.e2e
@@ -117,7 +117,7 @@ class TestBasicAuthFlow:
 
 
 @pytest.mark.e2e
-class TestBasicWebSocketConnection:
+class BasicWebSocketConnectionTests:
     """Test 4-6: Basic WebSocket connection flow"""
     
     @pytest.mark.e2e
@@ -182,7 +182,7 @@ class TestBasicWebSocketConnection:
 
 
 @pytest.mark.e2e
-class TestAuthWebSocketIntegration:
+class AuthWebSocketIntegrationTests:
     """Test 7-8: Auth + WebSocket integration"""
     
     @pytest.mark.e2e
@@ -272,7 +272,7 @@ class TestAuthWebSocketIntegration:
 
 
 @pytest.mark.e2e
-class TestCoreServiceCommunication:
+class CoreServiceCommunicationTests:
     """Test 9-10: Core service communication"""
     
     @pytest.mark.e2e

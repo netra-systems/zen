@@ -19,7 +19,7 @@ from netra_backend.tests.agents.helpers.shared_test_types import (
 TestErrorContext as SharedTestErrorContext
 )
 
-class TestErrorEnums:
+class ErrorEnumsTests:
     """Test error enumerations."""
 
     def test_error_severity_values(self):
@@ -47,7 +47,7 @@ class TestErrorEnums:
                 assert hasattr(strategy, '_retry_config')
                 assert hasattr(strategy, '_delay_config')
 
-                class TestErrorContext:
+                class ErrorContextTests:
                     """Test error context functionality with inheritance."""
 
                     def test_error_context_creation(self):

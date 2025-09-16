@@ -40,7 +40,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
 
-class TestDemoModeConfiguration(BaseE2ETest):
+class DemoModeConfigurationTests(BaseE2ETest):
     """Test demo mode configuration and security validation."""
     
     @pytest.fixture(autouse=True)

@@ -576,7 +576,7 @@ class WebSocketDeploymentTestSuite:
 
 @pytest.mark.asyncio
 @pytest.mark.deployment
-class TestWebSocketDeploymentValidation:
+class WebSocketDeploymentValidationTests:
     """Pytest test class for WebSocket deployment validation."""
     
     @pytest.fixture(scope="class")

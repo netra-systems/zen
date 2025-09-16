@@ -280,7 +280,7 @@ class WebSocketPerformanceEventCollector:
                 validation['overall_compliance'] = False
         return validation
 
-class TestWebSocketAgentExecutionPerformanceMonitoringIntegration(BaseIntegrationTest):
+class WebSocketAgentExecutionPerformanceMonitoringIntegrationTests(BaseIntegrationTest):
     """Integration test for agent execution performance monitoring through WebSocket events."""
 
     def setup_method(self):

@@ -211,7 +211,7 @@ class E2EMigrationDetectionUtility:
         return violations
 
 
-class TestE2EMigrationValidation(SSotBaseTestCase):
+class E2EMigrationValidationTests(SSotBaseTestCase):
     """
     CRITICAL: E2E Migration Validation Test Suite.
     

@@ -11,7 +11,7 @@ from pathlib import Path
 from shared.isolated_environment import IsolatedEnvironment
 from dev_launcher.database_connector import DatabaseConnector, DatabaseConnection, ConnectionStatus, DatabaseType, RetryConfig
 
-class TestDatabaseConnectorConsistency:
+class DatabaseConnectorConsistencyTests:
     """Test cases for consistent database connection status reporting."""
 
     @pytest.fixture
@@ -181,7 +181,7 @@ class TestDatabaseConnectorConsistency:
         assert 'main_clickhouse' in validated_connections
         assert result is False
 
-class TestDatabaseInitializationConsistency:
+class DatabaseInitializationConsistencyTests:
     """Test that database initialization reports status consistently."""
 
     @pytest.mark.asyncio

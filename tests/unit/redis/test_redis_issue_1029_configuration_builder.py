@@ -32,7 +32,7 @@ from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestRedisIssue1029ConfigurationBuilder(SSotBaseTestCase):
+class RedisIssue1029ConfigurationBuilderTests(SSotBaseTestCase):
     """
     Unit Test Suite: Redis Issue #1029 Configuration Builder
 
@@ -47,9 +47,9 @@ class TestRedisIssue1029ConfigurationBuilder(SSotBaseTestCase):
     - Environment-aware configuration building
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test fixtures for configuration builder testing."""
-        super().setUp()
+        super().setup_method(method)
         self.gcp_staging_config = {'ENVIRONMENT': 'staging', 'GCP_PROJECT_ID': 'netra-staging', 'REDIS_HOST': '10.45.240.3', 'REDIS_PORT': '6379', 'VPC_CONNECTOR': 'projects/netra-staging/locations/us-central1/connectors/vpc-connector', 'USE_GCP_SECRET_MANAGER': 'true'}
         self.local_dev_config = {'ENVIRONMENT': 'development', 'REDIS_HOST': 'localhost', 'REDIS_PORT': '6379'}
 

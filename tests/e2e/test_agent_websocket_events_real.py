@@ -24,11 +24,11 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from auth_service.auth_core.config import AuthConfig
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 logger = central_logger.get_logger(__name__)
 MINIMUM_EXECUTION_TIME = 0.1
 MISSION_CRITICAL_EVENTS = {'agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed'}
@@ -117,7 +117,7 @@ class RealWebSocketEventCollector:
         return {'total_events': len(self.events), 'unique_event_types': list(self.event_types), 'mission_critical_missing': list(missing_critical), 'all_missing_events': list(missing_all), 'event_sequence': self.event_sequence, 'valid_order': self.validate_event_order(), 'timing': self.timing, 'mission_critical_coverage': 1.0 - len(missing_critical) / len(MISSION_CRITICAL_EVENTS), 'total_coverage': 1.0 - len(missing_all) / len(ALL_REQUIRED_EVENTS), 'user_id': self.user_id, 'collection_duration': time.time() - self.start_time}
 
 @pytest.mark.e2e
-class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
+class AgentWebSocketEventsRealTests(SSotAsyncTestCase):
     """CLAUDE.md compliant agent WebSocket events tests using REAL services."""
 
     def setup_method(self, method=None):

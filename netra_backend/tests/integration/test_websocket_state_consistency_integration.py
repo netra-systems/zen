@@ -145,7 +145,7 @@ class WebSocketStateTracker:
         return inconsistencies
 
 
-class TestWebSocketStateConsistencyIntegration(BaseIntegrationTest):
+class WebSocketStateConsistencyIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for WebSocket state consistency across system components.
     

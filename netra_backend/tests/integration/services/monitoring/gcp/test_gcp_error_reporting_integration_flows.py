@@ -31,7 +31,7 @@ from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.error_codes import ErrorCode
 import httpx
 
-class TestGCPErrorReportingIntegrationFlows(SSotBaseTestCase):
+class GCPErrorReportingIntegrationFlowsTests(SSotBaseTestCase):
     """
     INTEGRATION: GCP Error Reporting Integration Flows Test Suite
     

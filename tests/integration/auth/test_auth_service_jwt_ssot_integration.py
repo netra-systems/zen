@@ -11,7 +11,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestAuthServiceJWTSSOTIntegration(SSotAsyncTestCase):
+class AuthServiceJWTSSOTIntegrationTests(SSotAsyncTestCase):
     """Integration tests validating JWT SSOT through real auth service calls"""
     
     def setup_method(self):

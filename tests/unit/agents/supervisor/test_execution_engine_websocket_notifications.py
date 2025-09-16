@@ -23,7 +23,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.unit
-class TestExecutionEngineWebSocketNotifications(SSotAsyncTestCase):
+class ExecutionEngineWebSocketNotificationsTests(SSotAsyncTestCase):
     """Test WebSocket notification behavior in agent execution success path."""
 
     async def asyncSetUp(self):
@@ -238,7 +238,7 @@ if __name__ == "__main__":
 
     # Create test suite with just the critical test
     suite = unittest.TestSuite()
-    suite.addTest(TestExecutionEngineWebSocketNotifications('test_notify_agent_completed_called_on_success'))
+    suite.addTest(ExecutionEngineWebSocketNotificationsTests('test_notify_agent_completed_called_on_success'))
 
     # Run the test
     runner = unittest.TextTestRunner(verbosity=2)

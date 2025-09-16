@@ -35,7 +35,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestUserSessionsAuthenticationE2E(BaseE2ETest):
+class UserSessionsAuthenticationE2ETests(BaseE2ETest):
     """
     E2E test that validates complete authentication flow requiring user_sessions table.
     
@@ -349,7 +349,7 @@ class TestUserSessionsAuthenticationE2E(BaseE2ETest):
         logger.info(" CELEBRATION:  SUCCESS: Authentication failure recovery scenarios work correctly")
 
 
-class TestUserSessionsDependentOperationsE2E(BaseE2ETest):
+class UserSessionsDependentOperationsE2ETests(BaseE2ETest):
     """
     E2E tests for operations that specifically depend on user_sessions table functionality.
     

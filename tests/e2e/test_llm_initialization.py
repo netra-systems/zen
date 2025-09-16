@@ -26,7 +26,7 @@ from tests.e2e.llm_initialization_helpers import (
 
 
 @pytest.mark.e2e
-class TestLLMInitialization:
+class LLMInitializationTests:
     """Core LLM initialization tests with real API integration"""
     
     def setup_method(self):
@@ -147,7 +147,7 @@ class TestLLMInitialization:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestLLMReliabilityPatterns:
+class LLMReliabilityPatternsTests:
     """Test advanced LLM reliability patterns for business continuity"""
     
     def setup_method(self):

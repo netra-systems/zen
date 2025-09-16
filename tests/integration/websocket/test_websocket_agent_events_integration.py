@@ -37,7 +37,7 @@ from netra_backend.app.websocket_core.types import (
     WebSocketConnectionState,
     create_standard_message
 )
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
@@ -95,7 +95,7 @@ class MockAgentForTesting:
         }
 
 
-class TestWebSocketAgentEventsIntegration(BaseIntegrationTest):
+class WebSocketAgentEventsIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket agent event emission - MISSION CRITICAL for business value."""
 
     async def async_setup(self):

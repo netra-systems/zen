@@ -47,7 +47,7 @@ class CostOptimizationResult:
     error_message: Optional[str] = None
 
 
-class TestCostOptimizationDataIntegration(BaseIntegrationTest):
+class CostOptimizationDataIntegrationTests(BaseIntegrationTest):
     """Test cost optimization with real PostgreSQL data persistence."""
     
     def setup_method(self):

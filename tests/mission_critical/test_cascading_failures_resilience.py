@@ -38,7 +38,7 @@ from shared.isolated_environment import IsolatedEnvironment
 # Core component imports - with error handling
 try:
     from netra_backend.app.redis_manager import redis_manager
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketConnection
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketConnection
     from netra_backend.app.services.websocket.message_queue import MessageQueue, QueuedMessage, MessagePriority, MessageStatus
     from netra_backend.app.core.resilience.unified_circuit_breaker import (
         UnifiedCircuitBreaker,
@@ -270,7 +270,7 @@ def resilience_validator():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-class TestCascadingFailuresResilience:
+class CascadingFailuresResilienceTests:
     """Comprehensive cascading failures resilience test suite"""
     
     async def test_redis_failure_websocket_message_recovery(
@@ -534,7 +534,7 @@ if __name__ == "__main__":
         resilience_validator = ResilienceValidator()
         
         # Create test instance
-        test_instance = TestCascadingFailuresResilience()
+        test_instance = CascadingFailuresResilienceTests()
         
         try:
             # Run specific test

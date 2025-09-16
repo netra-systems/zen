@@ -33,14 +33,14 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # WebSocket implementation imports
 from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.canonical_import_patterns import (
     create_test_user_context,
     create_test_fallback_manager,
     check_websocket_service_available
 )
 
 
-class TestIssue1199LocalValidation(SSotAsyncTestCase):
+class Issue1199LocalValidationTests(SSotAsyncTestCase):
     """LOCAL VALIDATION TESTS - Validate WebSocket event methods exist and have correct signatures
 
     These tests should PASS - they validate the development work is complete.
@@ -159,7 +159,7 @@ class TestIssue1199LocalValidation(SSotAsyncTestCase):
         ]
 
         # Import and verify the utilities exist
-        from netra_backend.app.websocket_core.websocket_manager import (
+        from netra_backend.app.websocket_core.canonical_import_patterns import (
             create_test_user_context,
             create_test_fallback_manager,
             check_websocket_service_available
@@ -178,7 +178,7 @@ class TestIssue1199LocalValidation(SSotAsyncTestCase):
         self.assertTrue(callable(check_websocket_service_available), "check_websocket_service_available not callable")
 
 
-class TestIssue1199StartupValidation(SSotAsyncTestCase):
+class Issue1199StartupValidationTests(SSotAsyncTestCase):
     """STARTUP TESTS - Verify WebSocket components load correctly"""
 
     def test_websocket_core_imports_successful(self):
@@ -203,7 +203,7 @@ class TestIssue1199StartupValidation(SSotAsyncTestCase):
 
     def test_websocket_factory_pattern_enforcement(self):
         """Test that WebSocket factory pattern is properly enforced."""
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
         # Test that direct instantiation is blocked
         with pytest.raises(RuntimeError) as exc_info:
@@ -221,7 +221,7 @@ class TestIssue1199StartupValidation(SSotAsyncTestCase):
         # Don't assert the value since service may or may not be running
 
 
-class TestIssue1199MockEventValidation(SSotAsyncTestCase):
+class Issue1199MockEventValidationTests(SSotAsyncTestCase):
     """MOCK EVENT TESTS - Validate event sending logic without requiring live connections"""
 
     def setup_method(self, method=None):
@@ -279,7 +279,7 @@ class TestIssue1199MockEventValidation(SSotAsyncTestCase):
         # This is tested in the async method test_event_method_signatures_without_bridge
 
 
-class TestIssue1199DeploymentValidation(SSotAsyncTestCase):
+class Issue1199DeploymentValidationTests(SSotAsyncTestCase):
     """DEPLOYMENT VALIDATION TESTS - These tests should initially FAIL until deployment resolved"""
 
     @pytest.mark.skipif(True, reason="Deployment tests - expected to fail until staging backend is fixed")
@@ -315,7 +315,7 @@ class TestIssue1199DeploymentValidation(SSotAsyncTestCase):
             self.fail(f"Staging WebSocket endpoint not reachable: {e}")
 
 
-class TestIssue1199E2EEventFlow(SSotAsyncTestCase):
+class Issue1199E2EEventFlowTests(SSotAsyncTestCase):
     """E2E EVENT FLOW TESTS - Test complete 5-event sequence (post-deployment)"""
 
     @pytest.mark.skipif(True, reason="E2E tests - expected to fail until deployment resolved")

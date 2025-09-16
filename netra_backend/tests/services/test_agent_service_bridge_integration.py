@@ -2,7 +2,7 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 '\nIntegration tests for AgentService with AgentWebSocketBridge.\n\nTests the complete integration between AgentService and the bridge,\nensuring clean boundaries and proper coordination.\n'
 import asyncio
 import pytest
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -10,7 +10,7 @@ from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, IntegrationState
 from netra_backend.app import schemas
 
-class TestAgentServiceBridgeIntegration:
+class AgentServiceBridgeIntegrationTests:
     """Integration tests for AgentService with bridge coordination."""
     pass
 
@@ -189,7 +189,7 @@ class TestAgentServiceBridgeIntegration:
                                                             assert hasattr(clean_service.message_handler, '_websocket_manager')
                                                             assert clean_service.message_handler._websocket_manager is clean_service._bridge._websocket_manager
 
-                                                            class TestAgentServiceLegacyCompatibility:
+                                                            class AgentServiceLegacyCompatibilityTests:
                                                                 """Tests ensuring backward compatibility during bridge integration."""
                                                                 pass
 

@@ -49,7 +49,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestSessionMiddlewareGoldenPath(SSotBaseTestCase):
+class SessionMiddlewareGoldenPathTests(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -108,7 +108,7 @@ class TestSessionMiddlewareGoldenPath(SSotBaseTestCase):
                 
     def test_golden_path_websocket_with_session_context(self):
         """Test WebSocket connection maintains session context for chat."""
-        from netra_backend.app.websocket_core.manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
         
         # Create WebSocket manager
         manager = UnifiedWebSocketManager()

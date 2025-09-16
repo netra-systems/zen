@@ -61,7 +61,7 @@ from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 
 
-class TestAgentExecutionPipeline(SSotAsyncTestCase):
+class AgentExecutionPipelineTests(SSotAsyncTestCase):
     """Integration tests for agent execution pipeline with real services."""
     
     def setup_method(self, method=None):

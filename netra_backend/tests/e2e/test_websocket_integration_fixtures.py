@@ -42,7 +42,7 @@ from netra_backend.app.websocket_core import (
 )
 
 
-class TestWebSocketFixturesE2E(BaseE2ETest):
+class WebSocketFixturesE2ETests(BaseE2ETest):
     """E2E tests validating WebSocket testing fixtures work with real authentication."""
     
     def setup_method(self):

@@ -52,7 +52,7 @@ from tests.unified_test_runner import UnifiedTestRunner
 
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerInitialization(SSotBaseTestCase):
+class UnifiedTestRunnerInitializationTests(SSotBaseTestCase):
     """Test core initialization and configuration of UnifiedTestRunner."""
     
     def setup_method(self, method=None):
@@ -218,7 +218,7 @@ class TestUnifiedTestRunnerInitialization(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerCategorySystem(SSotBaseTestCase):
+class UnifiedTestRunnerCategorySystemTests(SSotBaseTestCase):
     """Test category-based test discovery and organization functionality."""
     
     def setup_method(self, method=None):
@@ -375,7 +375,7 @@ class TestUnifiedTestRunnerCategorySystem(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerDockerIntegration(SSotBaseTestCase):
+class UnifiedTestRunnerDockerIntegrationTests(SSotBaseTestCase):
     """Test Docker service management and Alpine container support."""
     
     def setup_method(self, method=None):
@@ -479,7 +479,7 @@ class TestUnifiedTestRunnerDockerIntegration(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerOrchestration(SSotAsyncTestCase):
+class UnifiedTestRunnerOrchestrationTests(SSotAsyncTestCase):
     """Test orchestration agents and layer-based execution functionality."""
     
     async def setup_method(self, method=None):
@@ -578,7 +578,7 @@ class TestUnifiedTestRunnerOrchestration(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerProgressTracking(SSotBaseTestCase):
+class UnifiedTestRunnerProgressTrackingTests(SSotBaseTestCase):
     """Test progress tracking and reporting functionality."""
     
     def setup_method(self, method=None):
@@ -744,7 +744,7 @@ class TestUnifiedTestRunnerProgressTracking(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerCommandBuilding(SSotBaseTestCase):
+class UnifiedTestRunnerCommandBuildingTests(SSotBaseTestCase):
     """Test pytest and frontend command building functionality."""
     
     def setup_method(self, method=None):
@@ -910,7 +910,7 @@ class TestUnifiedTestRunnerCommandBuilding(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerEnvironmentConfiguration(SSotBaseTestCase):
+class UnifiedTestRunnerEnvironmentConfigurationTests(SSotBaseTestCase):
     """Test environment configuration and isolation functionality."""
     
     def setup_method(self, method=None):
@@ -1002,7 +1002,7 @@ class TestUnifiedTestRunnerEnvironmentConfiguration(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerCypressIntegration(SSotBaseTestCase):
+class UnifiedTestRunnerCypressIntegrationTests(SSotBaseTestCase):
     """Test Cypress test execution and frontend testing functionality."""
     
     def setup_method(self, method=None):
@@ -1072,7 +1072,7 @@ class TestUnifiedTestRunnerCypressIntegration(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerServiceAvailability(SSotBaseTestCase):
+class UnifiedTestRunnerServiceAvailabilityTests(SSotBaseTestCase):
     """Test service availability checking and validation."""
     
     def setup_method(self, method=None):
@@ -1117,7 +1117,7 @@ class TestUnifiedTestRunnerServiceAvailability(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerUtilities(SSotBaseTestCase):
+class UnifiedTestRunnerUtilitiesTests(SSotBaseTestCase):
     """Test utility functions and helper methods."""
     
     def setup_method(self, method=None):
@@ -1207,7 +1207,7 @@ class TestUnifiedTestRunnerUtilities(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerWindowsCompatibility(SSotBaseTestCase):
+class UnifiedTestRunnerWindowsCompatibilityTests(SSotBaseTestCase):
     """Test Windows-specific functionality and cross-platform compatibility."""
     
     def setup_method(self, method=None):
@@ -1285,7 +1285,7 @@ class TestUnifiedTestRunnerWindowsCompatibility(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerErrorHandling(SSotBaseTestCase):
+class UnifiedTestRunnerErrorHandlingTests(SSotBaseTestCase):
     """Test error handling and recovery mechanisms."""
     
     def setup_method(self, method=None):
@@ -1367,7 +1367,7 @@ class TestUnifiedTestRunnerErrorHandling(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerIntegrationPoints(SSotBaseTestCase):
+class UnifiedTestRunnerIntegrationPointsTests(SSotBaseTestCase):
     """Test integration with other system components."""
     
     def setup_method(self, method=None):
@@ -1447,7 +1447,7 @@ class TestUnifiedTestRunnerIntegrationPoints(SSotBaseTestCase):
 # === PERFORMANCE AND STRESS TESTS ===
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerPerformance(SSotBaseTestCase):
+class UnifiedTestRunnerPerformanceTests(SSotBaseTestCase):
     """Test performance characteristics and resource usage."""
     
     def setup_method(self, method=None):
@@ -1548,7 +1548,7 @@ class TestUnifiedTestRunnerPerformance(SSotBaseTestCase):
 # === COMPREHENSIVE INTEGRATION TESTS ===
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerComprehensiveIntegration(SSotAsyncTestCase):
+class UnifiedTestRunnerComprehensiveIntegrationTests(SSotAsyncTestCase):
     """Comprehensive integration tests for the unified test runner."""
     
     async def setup_method(self, method=None):
@@ -1685,7 +1685,7 @@ class TestUnifiedTestRunnerComprehensiveIntegration(SSotAsyncTestCase):
 # === FINAL VALIDATION TESTS ===
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerSSotCompliance(SSotBaseTestCase):
+class UnifiedTestRunnerSSotComplianceTests(SSotBaseTestCase):
     """Test SSOT compliance and architectural standards."""
     
     def setup_method(self, method=None):
@@ -1780,22 +1780,22 @@ class TestUnifiedTestRunnerSSotCompliance(SSotBaseTestCase):
         
         # This test suite should have comprehensive coverage
         test_classes_in_this_module = [
-            TestUnifiedTestRunnerInitialization,
-            TestUnifiedTestRunnerCategorySystem,
-            TestUnifiedTestRunnerDockerIntegration,
-            TestUnifiedTestRunnerOrchestration,
-            TestUnifiedTestRunnerProgressTracking,
-            TestUnifiedTestRunnerCommandBuilding,
-            TestUnifiedTestRunnerEnvironmentConfiguration,
-            TestUnifiedTestRunnerCypressIntegration,
-            TestUnifiedTestRunnerServiceAvailability,
-            TestUnifiedTestRunnerUtilities,
-            TestUnifiedTestRunnerWindowsCompatibility,
-            TestUnifiedTestRunnerErrorHandling,
-            TestUnifiedTestRunnerIntegrationPoints,
-            TestUnifiedTestRunnerPerformance,
-            TestUnifiedTestRunnerComprehensiveIntegration,
-            TestUnifiedTestRunnerSSotCompliance,
+            UnifiedTestRunnerInitializationTests,
+            UnifiedTestRunnerCategorySystemTests,
+            UnifiedTestRunnerDockerIntegrationTests,
+            UnifiedTestRunnerOrchestrationTests,
+            UnifiedTestRunnerProgressTrackingTests,
+            UnifiedTestRunnerCommandBuildingTests,
+            UnifiedTestRunnerEnvironmentConfigurationTests,
+            UnifiedTestRunnerCypressIntegrationTests,
+            UnifiedTestRunnerServiceAvailabilityTests,
+            UnifiedTestRunnerUtilitiesTests,
+            UnifiedTestRunnerWindowsCompatibilityTests,
+            UnifiedTestRunnerErrorHandlingTests,
+            UnifiedTestRunnerIntegrationPointsTests,
+            UnifiedTestRunnerPerformanceTests,
+            UnifiedTestRunnerComprehensiveIntegrationTests,
+            UnifiedTestRunnerSSotComplianceTests,
         ]
         
         # Calculate coverage metrics
@@ -1834,22 +1834,22 @@ def test_comprehensive_unit_test_suite_completion():
     """
     # Count total test methods across all classes
     test_classes = [
-        TestUnifiedTestRunnerInitialization,
-        TestUnifiedTestRunnerCategorySystem, 
-        TestUnifiedTestRunnerDockerIntegration,
-        TestUnifiedTestRunnerOrchestration,
-        TestUnifiedTestRunnerProgressTracking,
-        TestUnifiedTestRunnerCommandBuilding,
-        TestUnifiedTestRunnerEnvironmentConfiguration,
-        TestUnifiedTestRunnerCypressIntegration,
-        TestUnifiedTestRunnerServiceAvailability,
-        TestUnifiedTestRunnerUtilities,
-        TestUnifiedTestRunnerWindowsCompatibility,
-        TestUnifiedTestRunnerErrorHandling,
-        TestUnifiedTestRunnerIntegrationPoints,
-        TestUnifiedTestRunnerPerformance,
-        TestUnifiedTestRunnerComprehensiveIntegration,
-        TestUnifiedTestRunnerSSotCompliance,
+        UnifiedTestRunnerInitializationTests,
+        UnifiedTestRunnerCategorySystemTests, 
+        UnifiedTestRunnerDockerIntegrationTests,
+        UnifiedTestRunnerOrchestrationTests,
+        UnifiedTestRunnerProgressTrackingTests,
+        UnifiedTestRunnerCommandBuildingTests,
+        UnifiedTestRunnerEnvironmentConfigurationTests,
+        UnifiedTestRunnerCypressIntegrationTests,
+        UnifiedTestRunnerServiceAvailabilityTests,
+        UnifiedTestRunnerUtilitiesTests,
+        UnifiedTestRunnerWindowsCompatibilityTests,
+        UnifiedTestRunnerErrorHandlingTests,
+        UnifiedTestRunnerIntegrationPointsTests,
+        UnifiedTestRunnerPerformanceTests,
+        UnifiedTestRunnerComprehensiveIntegrationTests,
+        UnifiedTestRunnerSSotComplianceTests,
     ]
     
     total_test_methods = 0

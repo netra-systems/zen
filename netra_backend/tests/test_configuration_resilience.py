@@ -40,7 +40,7 @@ from shared.isolated_environment import get_env, IsolatedEnvironment
 from netra_backend.app.config import get_config
 from netra_backend.app.startup_module import initialize_logging
 
-class TestConfigurationResilience:
+class ConfigurationResilienceTests:
     """Test configuration loading resilience that currently fails."""
 
     def test_missing_database_url_should_use_safe_default(self):

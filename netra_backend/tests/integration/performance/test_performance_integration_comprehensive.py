@@ -273,7 +273,7 @@ class MockWebSocketPerformanceService:
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.performance
-class TestPerformanceIntegrationComprehensive:
+class PerformanceIntegrationComprehensiveTests:
     """Comprehensive performance integration tests."""
     
     @pytest.fixture

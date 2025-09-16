@@ -10,7 +10,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from fastapi import FastAPI
 
 
-class TestSessionMiddlewareInstallationOrder(SSotBaseTestCase):
+class SessionMiddlewareInstallationOrderTests(SSotBaseTestCase):
     """Test middleware installation order to prevent dependency issues."""
     
     def setUp(self):

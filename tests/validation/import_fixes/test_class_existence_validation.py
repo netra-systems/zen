@@ -16,7 +16,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestClassExistenceValidation(SSotBaseTestCase):
+class ClassExistenceValidationTests(SSotBaseTestCase):
     """
     Test class existence validation for collection error fixes.
     
@@ -36,7 +36,7 @@ class TestClassExistenceValidation(SSotBaseTestCase):
         Business Impact: WebSocket functionality must work for Golden Path
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Check required methods exist
             required_methods = [

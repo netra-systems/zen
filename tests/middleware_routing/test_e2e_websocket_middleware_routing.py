@@ -19,7 +19,7 @@ from starlette.websockets import WebSocketState
 from websockets import ConnectionClosed
 from shared.isolated_environment import get_env
 
-class TestWebSocketMiddlewareE2E:
+class WebSocketMiddlewareE2ETests:
     """E2E tests simulating real WebSocket usage patterns that trigger routing errors."""
 
     def setup_method(self, method=None):

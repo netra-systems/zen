@@ -27,7 +27,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.supervisor.execution_context import PipelineStep
 
 
-class TestAgentRollbackTransactionConsistency(BaseIntegrationTest):
+class AgentRollbackTransactionConsistencyTests(BaseIntegrationTest):
     """Integration tests for agent rollback and transaction consistency."""
 
     @pytest.mark.integration

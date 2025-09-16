@@ -57,7 +57,7 @@ from netra_backend.app.db.postgres import (
 )
 
 
-class TestPostgresConfigurationSSO:
+class PostgresConfigurationSSOTests:
     """Test PostgreSQL configuration as Single Source of Truth for connection management."""
     
     @pytest.fixture
@@ -106,7 +106,7 @@ class TestPostgresConfigurationSSO:
         assert "connect_timeout=10" in async_url
 
 
-class TestPostgresDatabaseCore:
+class PostgresDatabaseCoreTests:
     """Test core PostgreSQL database operations and connection management."""
     
     @pytest.fixture
@@ -192,7 +192,7 @@ class TestPostgresDatabaseCore:
             assert hasattr(database, '__class__')
 
 
-class TestPostgresSessionManagement:
+class PostgresSessionManagementTests:
     """Test PostgreSQL session management for user operations."""
     
     @pytest.mark.unit
@@ -295,7 +295,7 @@ class TestPostgresSessionManagement:
             mock_get_async_db.assert_called_once()
 
 
-class TestPostgresPoolManagement:
+class PostgresPoolManagementTests:
     """Test PostgreSQL connection pool management for performance and reliability."""
     
     @pytest.mark.unit
@@ -374,7 +374,7 @@ class TestPostgresPoolManagement:
             assert 'pool_size' in call_kwargs or 'poolclass' in call_kwargs
 
 
-class TestPostgresResiliencePatterns:
+class PostgresResiliencePatternsTests:
     """Test PostgreSQL resilience patterns for robust operations."""
     
     @pytest.mark.unit
@@ -456,7 +456,7 @@ class TestPostgresResiliencePatterns:
             assert "message" in status
 
 
-class TestPostgresBusinessScenarios:
+class PostgresBusinessScenariosTests:
     """Test business-critical PostgreSQL scenarios for golden path validation."""
     
     @pytest.mark.unit
@@ -626,7 +626,7 @@ class TestPostgresBusinessScenarios:
             mock_session.add.assert_called()
 
 
-class TestPostgresConnectionReliability:
+class PostgresConnectionReliabilityTests:
     """Test PostgreSQL connection reliability and recovery scenarios."""
     
     @pytest.mark.unit
@@ -692,7 +692,7 @@ class TestPostgresConnectionReliability:
 
 
 @pytest.mark.integration
-class TestPostgresSSotIntegration:
+class PostgresSSotIntegrationTests:
     """Integration tests for PostgreSQL SSOT compliance with real database operations."""
     
     @pytest.mark.real_database

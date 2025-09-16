@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 
-class TestWebSocketSSotImportViolations(SSotBaseTestCase, unittest.TestCase):
+class WebSocketSSotImportViolationsTests(SSotBaseTestCase, unittest.TestCase):
     """
     Test suite to detect and validate WebSocket SSOT import violations.
     
@@ -45,19 +45,19 @@ class TestWebSocketSSotImportViolations(SSotBaseTestCase, unittest.TestCase):
         
         # Test current import paths that should fail after consolidation
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             import_test_results['legacy_manager_import'] = True
         except ImportError:
             import_test_results['legacy_manager_import'] = False
             
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             import_test_results['websocket_manager_import'] = True
         except ImportError:
             import_test_results['websocket_manager_import'] = False
             
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             import_test_results['unified_manager_import'] = True
         except ImportError:
             import_test_results['unified_manager_import'] = False
@@ -91,9 +91,9 @@ class TestWebSocketSSotImportViolations(SSotBaseTestCase, unittest.TestCase):
         
         try:
             # Test import sequence that might cause circular dependencies
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as LegacyWebSocketManager
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as LegacyWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Check if same class is imported with different names
             manager_classes = [WebSocketManager, LegacyWebSocketManager, UnifiedWebSocketManager]
@@ -131,7 +131,7 @@ class TestWebSocketSSotImportViolations(SSotBaseTestCase, unittest.TestCase):
         
         # Test different alias patterns currently in use
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as ManagerAlias1
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as ManagerAlias1
             aliases_found['manager_websocketmanager'] = True
         except ImportError:
             aliases_found['manager_websocketmanager'] = False
@@ -143,7 +143,7 @@ class TestWebSocketSSotImportViolations(SSotBaseTestCase, unittest.TestCase):
             aliases_found['manager_unifiedwebsocketmanager'] = False
             
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WSMAlias
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WSMAlias
             aliases_found['websocket_manager_websocketmanager'] = True
         except ImportError:
             aliases_found['websocket_manager_websocketmanager'] = False

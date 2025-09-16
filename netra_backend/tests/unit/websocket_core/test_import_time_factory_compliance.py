@@ -8,7 +8,7 @@ import sys
 from unittest.mock import patch
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestImportTimeFactoryCompliance:
+class ImportTimeFactoryComplianceTests:
     """Test suite for WebSocket factory import-time compliance."""
 
     def test_agent_service_factory_imports_without_error(self):
@@ -28,7 +28,7 @@ class TestImportTimeFactoryCompliance:
 
     def test_websocket_manager_creation_requires_user_context(self):
         """Test that get_websocket_manager enforces user context requirement."""
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         with pytest.raises(ValueError, match='WebSocket manager creation requires valid UserExecutionContext'):
             get_websocket_manager()
         with pytest.raises(ValueError, match='WebSocket manager creation requires valid UserExecutionContext'):
@@ -36,7 +36,7 @@ class TestImportTimeFactoryCompliance:
 
     def test_websocket_manager_creation_with_valid_context(self):
         """Test that get_websocket_manager works with valid UserExecutionContext."""
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         user_context = UserExecutionContext.from_request(user_id='test-user-123', thread_id='test-thread-456', run_id='test-run-789')
         manager = get_websocket_manager(user_context)
         assert manager is not None

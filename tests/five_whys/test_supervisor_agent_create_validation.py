@@ -24,7 +24,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestSupervisorAgentCreateValidation:
+class SupervisorAgentCreateValidationTests:
     """
     Comprehensive validation tests for SupervisorAgent.create() method interface
     that specifically target the Five Whys error scenarios for WebSocket supervisor.

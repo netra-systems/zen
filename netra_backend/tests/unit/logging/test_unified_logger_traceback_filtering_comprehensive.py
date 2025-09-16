@@ -100,7 +100,7 @@ def capture_stderr():
     yield captured_output
     sys.stderr = old_stderr
 
-class TestUnifiedLoggerTracebackFiltering(SSotBaseTestCase):
+class UnifiedLoggerTracebackFilteringTests(SSotBaseTestCase):
     """
     Critical tests for traceback filtering issue in GCP staging logs.
     
@@ -211,7 +211,7 @@ class TestUnifiedLoggerTracebackFiltering(SSotBaseTestCase):
         self.record_metric('regular_formatter_multiline', '\n' in regular_result)
         self.record_metric('gcp_formatter_single_line', '\n' not in gcp_result)
 
-class TestUnifiedLoggerEnvironmentDetection(SSotBaseTestCase):
+class UnifiedLoggerEnvironmentDetectionTests(SSotBaseTestCase):
     """Test environment detection and behavior adaptation."""
 
     def test_gcp_environment_detection_k_service_present(self):
@@ -262,7 +262,7 @@ class TestUnifiedLoggerEnvironmentDetection(SSotBaseTestCase):
         assert gcp_enabled is True, 'Explicit enable should override environment detection'
         self.record_metric('explicit_gcp_enable', True)
 
-class TestUnifiedLoggerGCPIntegration(SSotBaseTestCase):
+class UnifiedLoggerGCPIntegrationTests(SSotBaseTestCase):
     """Test GCP Error Reporter integration and lazy initialization."""
 
     def test_gcp_reporter_lazy_initialization_success(self):
@@ -318,7 +318,7 @@ class TestUnifiedLoggerGCPIntegration(SSotBaseTestCase):
         mock_get_error_reporter.assert_not_called()
         self.record_metric('gcp_reporter_skip_if_disabled', True)
 
-class TestUnifiedLoggerLevelMapping(SSotBaseTestCase):
+class UnifiedLoggerLevelMappingTests(SSotBaseTestCase):
     """Test log level mapping to GCP severity levels."""
 
     def test_level_mapping_critical_to_gcp_severity(self):
@@ -378,7 +378,7 @@ class TestUnifiedLoggerLevelMapping(SSotBaseTestCase):
         assert severity == ErrorSeverity.ERROR, 'Unknown levels should default to ERROR'
         self.record_metric('unknown_level_default_mapping', True)
 
-class TestUnifiedLoggerContextBuilding(SSotBaseTestCase):
+class UnifiedLoggerContextBuildingTests(SSotBaseTestCase):
     """Test log context building and filtering functionality."""
 
     def test_context_building_includes_correlation_ids(self):
@@ -423,7 +423,7 @@ class TestUnifiedLoggerContextBuilding(SSotBaseTestCase):
         assert context['config']['debug'] is True
         self.record_metric('nested_sensitive_data_filtered', True)
 
-class TestUnifiedLoggerPerformance(SSotBaseTestCase):
+class UnifiedLoggerPerformanceTests(SSotBaseTestCase):
     """Test performance characteristics and thread safety."""
 
     def test_logging_performance_under_load(self):
@@ -506,7 +506,7 @@ class TestUnifiedLoggerPerformance(SSotBaseTestCase):
             assert 'test' in context, f'Thread {thread_id} should have custom data'
         self.record_metric('context_isolation_tested', True)
 
-class TestUnifiedLoggerErrorHandling(SSotBaseTestCase):
+class UnifiedLoggerErrorHandlingTests(SSotBaseTestCase):
     """Test error handling and edge cases."""
 
     def test_gcp_reporting_failure_does_not_break_logging(self):
@@ -571,7 +571,7 @@ class TestUnifiedLoggerErrorHandling(SSotBaseTestCase):
         except (ValueError, RecursionError):
             self.record_metric('circular_reference_exception_raised', True)
 
-class TestUnifiedLoggerIntegration(SSotBaseTestCase):
+class UnifiedLoggerIntegrationTests(SSotBaseTestCase):
     """Test integration with other components."""
 
     def test_integration_with_logging_context_correlation_ids(self):
@@ -613,7 +613,7 @@ class TestUnifiedLoggerIntegration(SSotBaseTestCase):
         assert result == 'test_result'
         self.record_metric('execution_decorator_integration', True)
 
-class TestUnifiedLoggerConfiguration(SSotBaseTestCase):
+class UnifiedLoggerConfigurationTests(SSotBaseTestCase):
     """Test configuration loading and fallback mechanisms."""
 
     def test_configuration_loading_with_unified_config(self):
@@ -687,7 +687,7 @@ class TestUnifiedLoggerConfiguration(SSotBaseTestCase):
         assert config['enable_json_logging'] is True, 'GCP environment should force JSON logging'
         self.record_metric('gcp_forces_json_logging', True)
 
-class TestGlobalLoggerInstance(SSotBaseTestCase):
+class GlobalLoggerInstanceTests(SSotBaseTestCase):
     """Test global logger instance and convenience functions."""
 
     def test_global_central_logger_instance(self):
@@ -726,7 +726,7 @@ class TestGlobalLoggerInstance(SSotBaseTestCase):
         assert result == 'test_result'
         self.record_metric('execution_time_decorator_function', True)
 
-class TestUnifiedLoggerAsyncSupport(SSotAsyncTestCase):
+class UnifiedLoggerAsyncSupportTests(SSotAsyncTestCase):
     """Test async support and context propagation."""
 
     async def test_async_logging_context_propagation(self):

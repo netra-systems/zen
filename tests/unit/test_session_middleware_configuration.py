@@ -14,7 +14,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestSessionMiddlewareConfiguration(SSotBaseTestCase):
+class SessionMiddlewareConfigurationTests(SSotBaseTestCase):
     """Test SessionMiddleware configuration and installation scenarios."""
     
     def setUp(self):

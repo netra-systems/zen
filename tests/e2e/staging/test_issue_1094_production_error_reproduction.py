@@ -28,7 +28,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.e2e
-class TestIssue1094ProductionErrorReproduction(BaseIntegrationTest):
+class Issue1094ProductionErrorReproductionTests(BaseIntegrationTest):
     """Staging environment tests to reproduce Issue #1094 production errors."""
 
     @pytest.mark.staging
@@ -98,7 +98,7 @@ class TestIssue1094ProductionErrorReproduction(BaseIntegrationTest):
         This test confirms that the proposed fix (using get_websocket_manager)
         works correctly in the staging environment.
         """
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         from netra_backend.app.services.user_execution_context import UserExecutionContext
 
         # Create proper user context

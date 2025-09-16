@@ -41,7 +41,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.e2e
 @pytest.mark.websocket
 @pytest.mark.auth
-class TestWebSocketTokenLifecycle(SSotBaseTestCase):
+class WebSocketTokenLifecycleTests(SSotBaseTestCase):
     """
     E2E WebSocket Token Lifecycle Tests.
     

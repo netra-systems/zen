@@ -84,7 +84,7 @@ class MockAgentForTesting(BaseAgent):
         return self._status
 
 
-class TestAgentRegistryInterplay(BaseIntegrationTest):
+class AgentRegistryInterplayTests(BaseIntegrationTest):
     """Integration tests for AgentRegistry SSOT interactions."""
     
     def setup_method(self):

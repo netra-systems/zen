@@ -44,7 +44,7 @@ from netra_backend.app.smd import (
 )
 
 
-class TestStartupPhaseEnum(BaseTestCase):
+class StartupPhaseEnumTests(BaseTestCase):
     """
     Test StartupPhase enum for deterministic startup sequence.
     
@@ -97,7 +97,7 @@ class TestStartupPhaseEnum(BaseTestCase):
         self.assertEqual(StartupPhase.FINALIZE.value, "finalize")
 
 
-class TestDeterministicStartupError(BaseTestCase):
+class DeterministicStartupErrorTests(BaseTestCase):
     """
     Test DeterministicStartupError exception handling.
     
@@ -130,7 +130,7 @@ class TestDeterministicStartupError(BaseTestCase):
             self.assertIsInstance(startup_error.__cause__, ValueError)
 
 
-class TestStartupOrchestratorInitialization(BaseTestCase):
+class StartupOrchestratorInitializationTests(BaseTestCase):
     """
     Test StartupOrchestrator initialization and state management.
     
@@ -185,7 +185,7 @@ class TestStartupOrchestratorInitialization(BaseTestCase):
         self.assertTrue(hasattr(orchestrator.logger, 'critical') or hasattr(orchestrator.logger, 'critical'))
 
 
-class TestPhaseTransitionAndTiming(BaseTestCase):
+class PhaseTransitionAndTimingTests(BaseTestCase):
     """
     Test phase transition logic and timing validation.
     
@@ -281,7 +281,7 @@ class TestPhaseTransitionAndTiming(BaseTestCase):
         self.assertGreater(self.orchestrator.phase_timings[StartupPhase.DATABASE]['duration'], 0.0)
 
 
-class TestCriticalServiceValidation(BaseTestCase):
+class CriticalServiceValidationTests(BaseTestCase):
     """
     Test critical service validation logic.
     
@@ -380,7 +380,7 @@ class TestCriticalServiceValidation(BaseTestCase):
         self.assertIn("tool_classes", str(context.exception))
 
 
-class TestDeterministicFailureScenarios(BaseTestCase):
+class DeterministicFailureScenariosTests(BaseTestCase):
     """
     Test deterministic failure scenarios with NO fallbacks or graceful degradation.
     
@@ -471,7 +471,7 @@ class TestDeterministicFailureScenarios(BaseTestCase):
         self.assertIn("Integration failed", str(context.exception))
 
 
-class TestChatInfrastructureProtection(BaseTestCase):
+class ChatInfrastructureProtectionTests(BaseTestCase):
     """
     Test chat infrastructure protection (90% of business value).
     
@@ -543,7 +543,7 @@ class TestChatInfrastructureProtection(BaseTestCase):
             self.assertIn("Chat functionality is BROKEN", str(context.exception))
 
 
-class TestWebSocketBridgeIntegration(BaseTestCase):
+class WebSocketBridgeIntegrationTests(BaseTestCase):
     """
     Test WebSocket bridge integration requirements for real-time agent events.
     
@@ -656,7 +656,7 @@ class TestWebSocketBridgeIntegration(BaseTestCase):
             self.assertIn("notify_agent_started", str(context.exception))
 
 
-class TestPerformanceAndTimingRequirements(BaseTestCase):
+class PerformanceAndTimingRequirementsTests(BaseTestCase):
     """
     Test performance requirements and timeout scenarios.
     
@@ -750,7 +750,7 @@ class TestPerformanceAndTimingRequirements(BaseTestCase):
         self.assertIn("database", str(context.exception))
 
 
-class TestConcurrentStartupScenarios(BaseTestCase):
+class ConcurrentStartupScenariosTests(BaseTestCase):
     """
     Test concurrent startup scenarios and race condition prevention.
     
@@ -812,7 +812,7 @@ class TestConcurrentStartupScenarios(BaseTestCase):
         self.assertEqual(self.app.state.startup_error, "Phase services failed: Service initialization failed")
 
 
-class TestEnvironmentConfigurationIsolation(BaseTestCase):
+class EnvironmentConfigurationIsolationTests(BaseTestCase):
     """
     Test environment configuration and isolation requirements.
     
@@ -865,7 +865,7 @@ class TestEnvironmentConfigurationIsolation(BaseTestCase):
         self.assertIn("Environment validation failed", str(context.exception))
 
 
-class TestStartupCompletionAndFailureHandling(BaseTestCase):
+class StartupCompletionAndFailureHandlingTests(BaseTestCase):
     """
     Test startup completion and comprehensive failure handling.
     
@@ -962,7 +962,7 @@ class TestStartupCompletionAndFailureHandling(BaseTestCase):
             self.assertIn("Foundation failed", str(context.exception))
 
 
-class TestAuthValidationAndSecurity(BaseTestCase):
+class AuthValidationAndSecurityTests(BaseTestCase):
     """
     Test auth validation and security requirements during startup.
     

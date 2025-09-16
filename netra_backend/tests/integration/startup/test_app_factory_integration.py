@@ -26,7 +26,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.integration
 @pytest.mark.startup
 @pytest.mark.app_factory
-class TestAppFactoryIntegration(BaseIntegrationTest):
+class AppFactoryIntegrationTests(BaseIntegrationTest):
     """Integration tests for app factory initialization during startup."""
 
     async def async_setup(self):
@@ -186,7 +186,7 @@ class TestAppFactoryIntegration(BaseIntegrationTest):
 @pytest.mark.integration
 @pytest.mark.startup
 @pytest.mark.business_value
-class TestAppFactoryBusinessValue(BaseIntegrationTest):
+class AppFactoryBusinessValueTests(BaseIntegrationTest):
     """Business value validation for app factory initialization."""
 
     def test_app_factory_enables_chat_infrastructure(self):

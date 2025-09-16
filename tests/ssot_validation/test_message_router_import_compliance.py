@@ -25,7 +25,7 @@ from collections import defaultdict
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestMessageRouterImportCompliance(SSotBaseTestCase, unittest.TestCase):
+class MessageRouterImportComplianceTests(SSotBaseTestCase, unittest.TestCase):
     """Test that all MessageRouter imports use canonical SSOT path."""
 
     def setUp(self):

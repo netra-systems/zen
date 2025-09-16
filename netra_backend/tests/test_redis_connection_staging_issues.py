@@ -8,7 +8,7 @@ import asyncio
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.core.configuration.base import get_unified_config
 
-class TestRedisConnectionStagingFailures:
+class RedisConnectionStagingFailuresTests:
     """Test Redis connection failures in staging environment."""
 
     @pytest.mark.asyncio
@@ -155,7 +155,7 @@ class TestRedisConnectionStagingFailures:
                 else:
                     raise
 
-class TestRedisConnectionScopingEdgeCases:
+class RedisConnectionScopingEdgeCasesTests:
     """Test edge cases related to Redis variable scoping issues."""
 
     def test_redis_manager_singleton_initialization_scoping_fails(self):

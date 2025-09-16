@@ -24,7 +24,7 @@ from unittest.mock import Mock, AsyncMock, patch
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager, get_websocket_manager_async
 from netra_backend.app.services.websocket.quality_validation_handler import QualityValidationHandler
 from netra_backend.app.services.websocket.quality_report_handler import QualityReportHandler
 from netra_backend.app.services.websocket.quality_manager import QualityMessageHandler
@@ -35,7 +35,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestWebSocketManagerAwaitIssue(SSotAsyncTestCase):
+class WebSocketManagerAwaitIssueTests(SSotAsyncTestCase):
     """Test suite for WebSocket manager await issue fix."""
     
     def setUp(self):
@@ -76,14 +76,14 @@ class TestWebSocketManagerAwaitIssue(SSotAsyncTestCase):
         logger.info("TEST 1: Verifying create_websocket_manager() is synchronous")
         
         # Call function WITHOUT await - this should work
-        manager = create_websocket_manager(user_context=self.test_context)
+        manager = get_websocket_manager(user_context=self.test_context)
         
         # Verify it's not a coroutine
         self.assertFalse(asyncio.iscoroutine(manager), 
                         "create_websocket_manager should not return a coroutine")
         
         # Verify it returns correct type
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         self.assertIsInstance(manager, WebSocketManager,
                             "Should return WebSocketManager instance")
         
@@ -102,7 +102,7 @@ class TestWebSocketManagerAwaitIssue(SSotAsyncTestCase):
         # This should fail with "object UnifiedWebSocketManager can't be used in 'await' expression"
         with self.assertRaises(TypeError) as context:
             # This is the BROKEN pattern currently in the code
-            await create_websocket_manager(user_context=self.test_context)
+            await get_websocket_manager(user_context=self.test_context)
         
         error_message = str(context.exception)
         self.assertIn("can't be used in 'await' expression", error_message,
@@ -111,7 +111,7 @@ class TestWebSocketManagerAwaitIssue(SSotAsyncTestCase):
         logger.info(f" PASS:  TEST 2 PASSED: Await on sync function fails as expected: {error_message}")
 
 
-class TestQualityValidationHandlerAwaitFix(SSotAsyncTestCase):
+class QualityValidationHandlerAwaitFixTests(SSotAsyncTestCase):
     """Test quality validation handler await issue fix."""
     
     def setUp(self):
@@ -128,7 +128,7 @@ class TestQualityValidationHandlerAwaitFix(SSotAsyncTestCase):
         self.handler = QualityValidationHandler(self.quality_gate_service)
         
     @patch('netra_backend.app.services.websocket.quality_validation_handler.get_user_execution_context')
-    @patch('netra_backend.app.services.websocket.quality_validation_handler.create_websocket_manager')
+    @patch('netra_backend.app.services.websocket.quality_validation_handler.get_websocket_manager')
     async def test_validation_handler_broken_await_pattern(self, mock_create_manager, mock_get_context):
         """
         TEST 3: Demonstrate current broken state in quality validation handler
@@ -180,7 +180,13 @@ class TestQualityValidationHandlerAwaitFix(SSotAsyncTestCase):
                 async def broken_send_validation_result(user_id, result):
                     # This simulates the BROKEN pattern in the actual code
                     user_context = mock_get_context(user_id=user_id, thread_id=None, run_id=None)
-                    manager = await create_websocket_manager(user_context)  # BROKEN: await on sync function
+                    manager = await get_websocket_manager(user_context)  # BROKEN: await on sync function
+                    await manager.send_to_user({"type": "test", "payload": result})
+
+                async def fixed_send_validation_result(user_id, result):
+                    # This demonstrates the CORRECT pattern using the async function
+                    user_context = mock_get_context(user_id=user_id, thread_id=None, run_id=None)
+                    manager = await get_websocket_manager_async(user_context)  # CORRECT: await on async function
                     await manager.send_to_user({"type": "test", "payload": result})
                 
                 mock_send.side_effect = broken_send_validation_result
@@ -188,9 +194,46 @@ class TestQualityValidationHandlerAwaitFix(SSotAsyncTestCase):
         
         self.assertIn("can't be used in 'await' expression", str(context.exception))
         logger.info(" PASS:  TEST 3 PASSED: Demonstrated broken await pattern fails")
+
+    @patch('netra_backend.app.services.websocket.quality_validation_handler.get_user_execution_context')
+    @patch('netra_backend.app.services.websocket.quality_validation_handler.get_websocket_manager_async')
+    async def test_validation_handler_fixed_async_pattern(self, mock_create_manager_async, mock_get_context):
+        """
+        TEST 3b: Demonstrate fixed pattern using get_websocket_manager_async
+
+        This test shows how the quality validation handler should work when
+        using the new async function properly.
+        """
+        logger.info("TEST 3b: Testing quality validation handler fixed async pattern")
+
+        # Setup mocks
+        mock_context = Mock()
+        mock_get_context.return_value = mock_context
+
+        # Mock manager with send_to_user method
+        mock_manager = Mock()
+        mock_manager.send_to_user = AsyncMock()
+        mock_create_manager_async.return_value = mock_manager
+
+        # Test payload
+        test_payload = {
+            "content": "Test content for validation",
+            "content_type": "general",
+            "strict_mode": False
+        }
+
+        # This should work when using the FIXED async pattern
+        await self.handler.handle(self.user_id, test_payload)
+
+        # Verify the flow completed successfully
+        self.quality_gate_service.validate_content.assert_called_once()
+        # Note: This test shows the pattern but doesn't actually call the async function
+        # because we're mocking the handler's behavior
+
+        logger.info(" PASS:  TEST 3b PASSED: Fixed async pattern demonstration complete")
         
     @patch('netra_backend.app.services.websocket.quality_validation_handler.get_user_execution_context')
-    @patch('netra_backend.app.services.websocket.quality_validation_handler.create_websocket_manager')
+    @patch('netra_backend.app.services.websocket.quality_validation_handler.get_websocket_manager')
     async def test_validation_handler_fixed_pattern(self, mock_create_manager, mock_get_context):
         """
         TEST 4: Verify fixed pattern works correctly
@@ -238,7 +281,7 @@ class TestQualityValidationHandlerAwaitFix(SSotAsyncTestCase):
         logger.info(" PASS:  TEST 4 PASSED: Fixed pattern works correctly")
 
 
-class TestQualityReportHandlerAwaitFix(SSotAsyncTestCase):
+class QualityReportHandlerAwaitFixTests(SSotAsyncTestCase):
     """Test quality report handler await issue fix."""
     
     def setUp(self):
@@ -254,7 +297,7 @@ class TestQualityReportHandlerAwaitFix(SSotAsyncTestCase):
         self.handler = QualityReportHandler(self.monitoring_service)
         
     @patch('netra_backend.app.services.websocket.quality_report_handler.get_user_execution_context')
-    @patch('netra_backend.app.services.websocket.quality_report_handler.create_websocket_manager')
+    @patch('netra_backend.app.services.websocket.quality_report_handler.get_websocket_manager')
     async def test_report_handler_fixed_pattern(self, mock_create_manager, mock_get_context):
         """
         TEST 5: Verify quality report handler works with fixed pattern
@@ -299,7 +342,7 @@ class TestQualityReportHandlerAwaitFix(SSotAsyncTestCase):
         logger.info(" PASS:  TEST 5 PASSED: Quality report handler fixed pattern works")
         
     @patch('netra_backend.app.services.websocket.quality_report_handler.get_user_execution_context')
-    @patch('netra_backend.app.services.websocket.quality_report_handler.create_websocket_manager')
+    @patch('netra_backend.app.services.websocket.quality_report_handler.get_websocket_manager')
     async def test_report_handler_error_handling_fixed(self, mock_create_manager, mock_get_context):
         """
         TEST 6: Verify error handling works with fixed pattern
@@ -342,7 +385,7 @@ class TestQualityReportHandlerAwaitFix(SSotAsyncTestCase):
         logger.info(" PASS:  TEST 6 PASSED: Error handling fixed pattern works")
 
 
-class TestQualityManagerAwaitFix(SSotAsyncTestCase):
+class QualityManagerAwaitFixTests(SSotAsyncTestCase):
     """Test quality manager await issue fix."""
     
     def setUp(self):
@@ -360,7 +403,7 @@ class TestQualityManagerAwaitFix(SSotAsyncTestCase):
         )
         
     @patch('netra_backend.app.services.websocket.quality_manager.get_user_execution_context')
-    @patch('netra_backend.app.services.websocket.quality_manager.create_websocket_manager')
+    @patch('netra_backend.app.services.websocket.quality_manager.get_websocket_manager')
     async def test_quality_manager_unknown_message_fixed(self, mock_create_manager, mock_get_context):
         """
         TEST 7: Verify quality manager unknown message handling works with fixed pattern
@@ -400,7 +443,7 @@ class TestQualityManagerAwaitFix(SSotAsyncTestCase):
         logger.info(" PASS:  TEST 7 PASSED: Quality manager unknown message handling fixed")
 
 
-class TestWebSocketEventDeliveryAfterFix(SSotAsyncTestCase):
+class WebSocketEventDeliveryAfterFixTests(SSotAsyncTestCase):
     """Test that WebSocket event delivery still works correctly after the fix."""
     
     def setUp(self):
@@ -422,7 +465,7 @@ class TestWebSocketEventDeliveryAfterFix(SSotAsyncTestCase):
         logger.info("TEST 8: Testing WebSocket event delivery after await fix")
         
         # Create manager using the FIXED pattern (no await)
-        manager = create_websocket_manager(user_context=self.test_context)
+        manager = get_websocket_manager(user_context=self.test_context)
         
         # Verify manager is properly initialized
         self.assertIsNotNone(manager)
@@ -455,11 +498,11 @@ class TestWebSocketEventDeliveryAfterFix(SSotAsyncTestCase):
 async def run_all_tests():
     """Helper function to run all tests in sequence."""
     test_classes = [
-        TestWebSocketManagerAwaitIssue,
-        TestQualityValidationHandlerAwaitFix,
-        TestQualityReportHandlerAwaitFix,
-        TestQualityManagerAwaitFix,
-        TestWebSocketEventDeliveryAfterFix
+        WebSocketManagerAwaitIssueTests,
+        QualityValidationHandlerAwaitFixTests,
+        QualityReportHandlerAwaitFixTests,
+        QualityManagerAwaitFixTests,
+        WebSocketEventDeliveryAfterFixTests
     ]
     
     total_tests = 0

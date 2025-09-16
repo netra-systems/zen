@@ -76,7 +76,7 @@ class ContaminationTestScenario:
     performance_requirements: Dict[str, int]
 
 
-class TestCrossUserContaminationPrevention(SSotAsyncTestCase):
+class CrossUserContaminationPreventionTests(SSotAsyncTestCase):
     """Unit tests for cross-user contamination prevention patterns"""
 
     def setup_method(self, method):

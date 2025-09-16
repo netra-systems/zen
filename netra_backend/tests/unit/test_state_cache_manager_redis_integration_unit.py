@@ -12,7 +12,7 @@ from unittest.mock import Mock, patch
 from netra_backend.app.services.state_persistence import StateCacheManager
 from shared.types import RunID, UserID
 
-class TestStateCacheManagerRedisIntegration:
+class StateCacheManagerRedisIntegrationTests:
     """Test that StateCacheManager should integrate with Redis for proper three-tier storage."""
 
     @pytest.fixture
@@ -113,7 +113,7 @@ class TestStateCacheManagerRedisIntegration:
             assert 'cache_hit_ratio' in stats, 'Should track cache performance metrics'
             (mock_redis.info.assert_called_with('memory'), 'Should query Redis memory information')
 
-class TestStateCacheManagerArchitecturalGaps:
+class StateCacheManagerArchitecturalGapsTests:
     """Test architectural gaps in current StateCacheManager implementation."""
 
     def test_current_implementation_uses_in_memory_dict(self):

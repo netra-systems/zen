@@ -9,7 +9,7 @@ Business Value: Prevents OAuth security breaches worth $500K+ per incident.
 
 import pytest
 from unittest.mock import MagicMock, AsyncMock, Mock, patch
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager as DatabaseTestManager
 # Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
@@ -17,7 +17,7 @@ from shared.isolated_environment import IsolatedEnvironment
 pytestmark = pytest.mark.skip(reason="oauth_security module has been removed/refactored")
 
 
-class TestOAuthSecurityVulnerabilities:
+class OAuthSecurityVulnerabilitiesTests:
     """Test OAuth security vulnerabilities that could lead to account compromise."""
 
     def setup_method(self):

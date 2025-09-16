@@ -47,7 +47,7 @@ from test_framework.ssot.orchestration import OrchestrationConfig
 
 @pytest.mark.integration
 @pytest.mark.database
-class TestMissingClickHouseExceptionTypesIntegration(SSotAsyncTestCase):
+class MissingClickHouseExceptionTypesIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests demonstrating the 5 missing ClickHouse schema exception types
     using real ClickHouse operations and realistic failure scenarios.

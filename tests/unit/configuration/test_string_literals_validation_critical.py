@@ -16,7 +16,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
 @pytest.mark.unit
-class TestStringLiteralsValidationCritical:
+class StringLiteralsValidationCriticalTests:
     """Test String Literals Index validation and critical configuration protection."""
 
     def test_critical_environment_variables_protection(self):
@@ -302,7 +302,7 @@ class TestStringLiteralsValidationCritical:
 
 
 @pytest.mark.unit
-class TestConfigurationCascadeFailurePrevention:
+class ConfigurationCascadeFailurePreventionTests:
     """Test configuration cascade failure detection and prevention mechanisms."""
 
     def test_cascade_failure_impact_mapping(self):

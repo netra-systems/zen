@@ -78,7 +78,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 @pytest.mark.integration
-class TestUser:
+class UserTests:
     """Test user for multi-user isolation testing."""
     user_id: str
     session_id: str
@@ -90,7 +90,7 @@ class TestUser:
 
 
 @pytest.mark.integration
-class TestMultiUserRegistryIsolation(SSotAsyncTestCase):
+class MultiUserRegistryIsolationTests(SSotAsyncTestCase):
     """
     Integration test suite for multi-user registry isolation.
 
@@ -102,7 +102,7 @@ class TestMultiUserRegistryIsolation(SSotAsyncTestCase):
         """Setup multi-user isolation testing environment."""
         super().setup_method(method)
         self.test_session_prefix = f"multiuser_{uuid.uuid4().hex[:8]}"
-        self.test_users: List[TestUser] = []
+        self.test_users: List[UserTests] = []
         self.registry_instances = []
         self.mock_factory = SSotMockFactory() if SSotMockFactory else None
 
@@ -135,9 +135,9 @@ class TestMultiUserRegistryIsolation(SSotAsyncTestCase):
         self.data_leakage_incidents.clear()
         await super().teardown_method(method)
 
-    def create_test_user(self, user_index: int) -> TestUser:
+    def create_test_user(self, user_index: int) -> UserTests:
         """Create a test user with unique identification."""
-        user = TestUser(
+        user = UserTests(
             user_id=f"{self.test_session_prefix}_user_{user_index}",
             session_id=f"{self.test_session_prefix}_session_{user_index}",
             agent_data={
@@ -314,7 +314,7 @@ class TestMultiUserRegistryIsolation(SSotAsyncTestCase):
 
                 async def simulate_user_activity(user_index: int) -> Dict[str, Any]:
                     """Simulate concurrent user activity."""
-                    user = TestUser(
+                    user = UserTests(
                         user_id=f"{self.test_session_prefix}_concurrent_{user_index}",
                         session_id=f"{self.test_session_prefix}_concurrent_session_{user_index}",
                         agent_data={
@@ -451,7 +451,7 @@ class TestMultiUserRegistryIsolation(SSotAsyncTestCase):
                 sensitive_users = []
 
                 for i in range(2):  # Test with 2 users to check for leakage
-                    user = TestUser(
+                    user = UserTests(
                         user_id=f"{self.test_session_prefix}_sensitive_{i}",
                         session_id=f"{self.test_session_prefix}_sensitive_session_{i}",
                         agent_data={
@@ -614,7 +614,7 @@ class TestMultiUserRegistryIsolation(SSotAsyncTestCase):
                 session_users = []
 
                 for i in range(3):
-                    user = TestUser(
+                    user = UserTests(
                         user_id=f"{self.test_session_prefix}_session_user_{i}",
                         session_id=f"{self.test_session_prefix}_session_boundary_{i}_{uuid.uuid4().hex[:8]}",
                         agent_data={

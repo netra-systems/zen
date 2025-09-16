@@ -20,7 +20,7 @@ from collections import defaultdict
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestEnvironmentAccessEnforcement(SSotBaseTestCase):
+class EnvironmentAccessEnforcementTests(SSotBaseTestCase):
     """
     Compliance tests that enforce SSOT environment access patterns.
 

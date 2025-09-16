@@ -71,7 +71,7 @@ class MockBusinessTool(BaseTool):
         await asyncio.sleep(0.001)
         return f'Business analysis result for: {query}'
 
-class TestUnifiedToolDispatcherRequestScoped(SSotAsyncTestCase):
+class UnifiedToolDispatcherRequestScopedTests(SSotAsyncTestCase):
     """Unit tests for request-scoped tool dispatcher patterns."""
 
     def setUp(self):

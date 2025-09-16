@@ -79,7 +79,7 @@ class FactoryTestContext:
 
 
 @pytest.mark.integration
-class TestAgentInstanceFactoryComprehensiveIntegration(SSotAsyncTestCase):
+class AgentInstanceFactoryComprehensiveIntegrationTests(SSotAsyncTestCase):
     """
     Agent Instance Factory Comprehensive Integration Tests - Issue #870 Phase 1
     

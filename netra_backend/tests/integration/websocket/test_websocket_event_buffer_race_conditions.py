@@ -142,7 +142,7 @@ class MockEventBuffer:
             self.flush_in_progress = False
 
 
-class TestWebSocketEventBufferRaceConditions(BaseIntegrationTest):
+class WebSocketEventBufferRaceConditionsTests(BaseIntegrationTest):
     """
     Test WebSocket event buffer race conditions that cause event loss and reordering.
     

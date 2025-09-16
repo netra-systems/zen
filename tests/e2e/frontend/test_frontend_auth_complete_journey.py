@@ -93,7 +93,7 @@ class FrontendAuthE2ETestSuite:
 
 @pytest.mark.e2e
 @pytest.mark.frontend
-class TestFrontendAuthCompleteJourney:
+class FrontendAuthCompleteJourneyTests:
     """Test complete authentication journey from frontend perspective"""
     
     @pytest.fixture(autouse=True)

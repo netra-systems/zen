@@ -37,7 +37,7 @@ from shared.isolated_environment import get_env
 
 from netra_backend.app.websocket.connection_handler import ConnectionHandler, ConnectionContext
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 
 
@@ -209,7 +209,7 @@ class RoutingRecoveryManager:
         }
 
 
-class TestRoutingFailureRecovery(BaseIntegrationTest):
+class RoutingFailureRecoveryTests(BaseIntegrationTest):
     """Test WebSocket routing failure recovery mechanisms."""
     
     @pytest.mark.integration

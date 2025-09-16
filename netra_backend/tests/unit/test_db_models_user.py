@@ -18,7 +18,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.db.models_user import User, Secret, ToolUsageLog
 
 
-class TestUserModel(SSotBaseTestCase):
+class UserModelTests(SSotBaseTestCase):
     """Test suite for User model following SSOT patterns."""
     
     def setup_method(self, method):
@@ -125,7 +125,7 @@ class TestUserModel(SSotBaseTestCase):
         self.record_metric("user_role_validation", "passed")
 
 
-class TestSecretModel(SSotBaseTestCase):
+class SecretModelTests(SSotBaseTestCase):
     """Test suite for Secret model following SSOT patterns."""
     
     def setup_method(self, method):
@@ -154,7 +154,7 @@ class TestSecretModel(SSotBaseTestCase):
         self.record_metric("secret_model_init", "passed")
 
 
-class TestToolUsageLogModel(SSotBaseTestCase):
+class ToolUsageLogModelTests(SSotBaseTestCase):
     """Test suite for ToolUsageLog model following SSOT patterns."""
     
     def setup_method(self, method):

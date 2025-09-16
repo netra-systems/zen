@@ -33,7 +33,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from shared.isolated_environment import get_env
 
 
-class TestSecretKeyValidation:
+class SecretKeyValidationTests:
     """Test SECRET_KEY configuration validation for security compliance."""
     
     def test_secret_key_minimum_length_requirement_current_staging_issue(self):
@@ -239,7 +239,7 @@ class TestSecretKeyValidation:
                 assert expected_reason_contains.lower() in reason.lower()
 
 
-class TestSecretKeyConfigurationIssues:
+class SecretKeyConfigurationIssuesTests:
     """Test SECRET_KEY configuration issues and edge cases."""
     
     def test_secret_key_environment_variable_loading(self):
@@ -326,7 +326,7 @@ class TestSecretKeyConfigurationIssues:
             )
 
 
-class TestSecretKeySecurityImplications:
+class SecretKeySecurityImplicationsTests:
     """Test SECRET_KEY security implications and attack vectors."""
     
     def test_staging_secret_key_patterns_fail_validation(self):

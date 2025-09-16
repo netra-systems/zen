@@ -20,12 +20,12 @@ import asyncio
 from datetime import datetime, timezone
 from typing import Dict, Any
 
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestWebSocketRealServices(BaseIntegrationTest):
+class WebSocketRealServicesTests(BaseIntegrationTest):
     """Test WebSocket integration with real services."""
     
     @pytest.mark.integration

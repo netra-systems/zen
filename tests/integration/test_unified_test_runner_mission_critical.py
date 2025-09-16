@@ -17,7 +17,7 @@ import pytest
 from typing import Dict, List
 from unittest.mock import patch, MagicMock
 
-class TestUnifiedTestRunnerMissionCritical:
+class UnifiedTestRunnerMissionCriticalTests:
     """Test suite for unified test runner mission-critical integration."""
 
     def test_unified_test_runner_discovers_mission_critical_tests(self):

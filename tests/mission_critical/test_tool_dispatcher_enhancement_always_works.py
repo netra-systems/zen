@@ -38,7 +38,7 @@ from netra_backend.app.factories.tool_dispatcher_factory import (
     create_tool_dispatcher,
     tool_dispatcher_scope
 )
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.agents.request_scoped_tool_dispatcher import RequestScopedToolDispatcher
 from langchain_core.tools import BaseTool
 
@@ -64,7 +64,7 @@ class MockTool(BaseTool):
         return f"Mock async result for: {query}"
 
 
-class TestToolDispatcherEnhancementAlwaysWorks:
+class ToolDispatcherEnhancementAlwaysWorksTests:
     """CRITICAL: Validate tool dispatcher ALWAYS uses proper factory patterns."""
 
     @pytest.fixture(autouse=True)
@@ -386,7 +386,7 @@ if __name__ == "__main__":
     import asyncio
 
     async def run_tests():
-        test_instance = TestToolDispatcherEnhancementAlwaysWorks()
+        test_instance = ToolDispatcherEnhancementAlwaysWorksTests()
         test_instance.setup_method()
 
         print("Running Tool Dispatcher Enhancement Always Works Tests...")

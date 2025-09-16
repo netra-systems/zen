@@ -35,7 +35,7 @@ env = get_env()
 @pytest.mark.websocket
 @pytest.mark.agent_events
 @skip_if_no_real_services
-class TestRealWebSocketAgentEvents:
+class RealWebSocketAgentEventsTests:
     """Test real agent events through WebSocket connections.
     
     CRITICAL: Tests the 5 required agent events per CLAUDE.md:

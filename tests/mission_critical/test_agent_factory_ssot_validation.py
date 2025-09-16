@@ -36,7 +36,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAgentFactorySsotValidation(SSotAsyncTestCase):
+class AgentFactorySsotValidationTests(SSotAsyncTestCase):
     """Mission critical validation of agent factory SSOT compliance."""
 
     def setUp(self):

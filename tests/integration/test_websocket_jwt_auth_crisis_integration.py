@@ -18,7 +18,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestWebSocketJWTAuthenticationCrisis(SSotAsyncTestCase):
+class WebSocketJWTAuthenticationCrisisTests(SSotAsyncTestCase):
     """Integration tests for WebSocket JWT authentication failures in staging."""
 
     async def asyncSetUp(self):
@@ -57,7 +57,7 @@ class TestWebSocketJWTAuthenticationCrisis(SSotAsyncTestCase):
         """
         mock_env = self._mock_staging_environment()
         with patch('shared.isolated_environment.get_env', return_value=mock_env):
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             with pytest.raises((ValueError, RuntimeError, Exception)) as exc_info:
                 manager = WebSocketManager()
                 await manager.initialize()
@@ -125,7 +125,7 @@ class TestWebSocketJWTAuthenticationCrisis(SSotAsyncTestCase):
         """
         mock_env = self._mock_staging_environment()
         with patch('shared.isolated_environment.get_env', return_value=mock_env):
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             with pytest.raises((ValueError, Exception)) as exc_info:
                 manager = WebSocketManager()
                 await manager.initialize()
@@ -142,7 +142,7 @@ class TestWebSocketJWTAuthenticationCrisis(SSotAsyncTestCase):
         mock_env = self._mock_staging_environment()
         with patch('shared.isolated_environment.get_env', return_value=mock_env):
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
                 manager = WebSocketManager()
                 await manager.initialize()
@@ -156,7 +156,7 @@ class TestWebSocketJWTAuthenticationCrisis(SSotAsyncTestCase):
                 logger.info(f'Golden Path correctly blocked by JWT config issue: {error_message}')
 
 @pytest.mark.integration
-class TestJWTConfigurationBusinessImpactIntegration(SSotAsyncTestCase):
+class JWTConfigurationBusinessImpactIntegrationTests(SSotAsyncTestCase):
     """Integration tests demonstrating business impact of JWT configuration failures."""
 
     async def test_websocket_revenue_functionality_integration(self):
@@ -172,7 +172,7 @@ class TestJWTConfigurationBusinessImpactIntegration(SSotAsyncTestCase):
             from netra_backend.app.core.configuration.unified_secrets import get_jwt_secret
             with pytest.raises(ValueError) as exc_info:
                 secret = get_jwt_secret()
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 manager = WebSocketManager()
                 await manager.initialize()
             error_message = str(exc_info.value)
@@ -194,7 +194,7 @@ class TestJWTConfigurationBusinessImpactIntegration(SSotAsyncTestCase):
                 from shared.jwt_secret_manager import get_unified_jwt_secret
                 secret = get_unified_jwt_secret()
                 validation_steps.append('JWT secret resolved')
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 manager = WebSocketManager()
                 await manager.initialize()
                 validation_steps.append('WebSocket manager initialized')
@@ -212,7 +212,7 @@ class TestJWTConfigurationBusinessImpactIntegration(SSotAsyncTestCase):
                 logger.warning(f'Staging deployment validation incomplete: {validation_steps}')
 
 @pytest.mark.integration
-class TestJWTSecretDeploymentScenarios(SSotAsyncTestCase):
+class JWTSecretDeploymentScenariosTests(SSotAsyncTestCase):
     """Integration tests for various JWT secret deployment scenarios."""
 
     async def test_environment_variable_jwt_secret_integration(self):
@@ -226,7 +226,7 @@ class TestJWTSecretDeploymentScenarios(SSotAsyncTestCase):
         mock_env.get.side_effect = lambda key, default=None: {'ENVIRONMENT': 'staging', 'TESTING': 'false', **jwt_config}.get(key, default)
         with patch('shared.isolated_environment.get_env', return_value=mock_env):
             from netra_backend.app.core.configuration.unified_secrets import get_jwt_secret
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             secret = get_jwt_secret()
             assert secret == 'environment-staging-jwt-secret-32-characters'
             manager = WebSocketManager()

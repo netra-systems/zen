@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 @pytest.mark.unit
-class TestAuthSessionUuid4Violations(SSotBaseTestCase):
+class AuthSessionUuid4ViolationsTests(SSotBaseTestCase):
     """Violation detection tests for auth.py session ID generation - EXPECT FAILURE"""
 
     def test_auth_py_line_160_uuid4_violation_EXPECT_FAILURE(self):

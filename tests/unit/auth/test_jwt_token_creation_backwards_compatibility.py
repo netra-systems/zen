@@ -15,7 +15,7 @@ from test_framework.fixtures.auth import create_real_jwt_token
 
 
 @pytest.mark.unit
-class TestJWTTokenCreationBackwardsCompatibility:
+class JWTTokenCreationBackwardsCompatibilityTests:
     """Test JWT token creation backwards compatibility issues."""
     
     def test_jwt_creation_missing_email_parameter_reproduces_issue_520(self):
@@ -92,7 +92,7 @@ class TestJWTTokenCreationBackwardsCompatibility:
 
 
 @pytest.mark.unit
-class TestJWTTokenCreationExpectedBehavior:
+class JWTTokenCreationExpectedBehaviorTests:
     """Test what the correct calling pattern should look like after fix."""
     
     def test_jwt_creation_with_required_email_parameter_should_work(self):

@@ -53,7 +53,7 @@ from loguru import logger
 
 # Import SSOT components for testing
 try:
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
     SSOT_WEBSOCKET_AVAILABLE = True
 except ImportError as e:
     logger.warning(f"[SSOT IMPORT] WebSocketManager not available: {str(e)}")
@@ -63,7 +63,7 @@ except ImportError as e:
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestWebSocketUserIsolationValidation(SSotAsyncTestCase):
+class WebSocketUserIsolationValidationTests(SSotAsyncTestCase):
     """
     Mission Critical: WebSocket User Context Isolation Validation
     

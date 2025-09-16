@@ -24,7 +24,7 @@ import pytest
 from netra_backend.app.websocket_core.unified_websocket_auth import extract_e2e_context_from_websocket
 
 
-class TestWebSocketAuthScoping(SSotBaseTestCase):
+class WebSocketAuthScopingTests(SSotBaseTestCase):
     """Test variable scoping fixes in WebSocket authentication."""
     
     def setUp(self):

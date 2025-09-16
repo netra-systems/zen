@@ -19,7 +19,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 
-class TestHandlerRegistrationGracePeriod:
+class HandlerRegistrationGracePeriodTests:
     """Test handler registration grace period functionality."""
 
     def test_message_router_has_startup_time_tracking(self):
@@ -173,7 +173,7 @@ class TestHandlerRegistrationGracePeriod:
 
 
 @pytest.mark.integration
-class TestGracePeriodIntegration:
+class GracePeriodIntegrationTests:
     """Integration tests for grace period with real startup scenarios."""
 
     def test_global_message_router_grace_period(self):

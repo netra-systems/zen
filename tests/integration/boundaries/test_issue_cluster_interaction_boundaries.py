@@ -39,7 +39,7 @@ except ImportError:
     CROSS_COMPONENT_IMPORTS_AVAILABLE = False
 
 
-class TestClusterBoundaries(SSotAsyncTestCase):
+class ClusterBoundariesTests(SSotAsyncTestCase):
     """Test boundary conditions where multiple cluster fixes interact."""
     
     def setUp(self):

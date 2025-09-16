@@ -13,7 +13,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-class TestSupervisorOrchestration(BaseTestCase):
+class SupervisorOrchestrationTests(BaseTestCase):
     """Basic SupervisorAgent orchestration tests."""
 
     def setUp(self):

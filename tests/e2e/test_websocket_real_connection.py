@@ -366,7 +366,7 @@ class AgentPipelineValidator:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.e2e
-class TestWebSocketRealConnection:
+class WebSocketRealConnectionTests:
     """CRITICAL: Real WebSocket Connection Test with Authentication & Agent Pipeline"""
     
     @pytest.fixture

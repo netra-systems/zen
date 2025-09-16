@@ -32,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.unit
-class TestWebSocketBridgePatternCompliance(SSotAsyncTestCase):
+class WebSocketBridgePatternComplianceTests(SSotAsyncTestCase):
     """
     Test suite for validating SSOT WebSocket bridge pattern compliance.
     
@@ -81,7 +81,7 @@ class TestWebSocketBridgePatternCompliance(SSotAsyncTestCase):
         if not bridge_factory_available:
             # Try the direct import (violation pattern)
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 direct_import_available = True
                 self.record_metric("direct_websocket_manager_available", True)
                 
@@ -132,7 +132,7 @@ class TestWebSocketBridgePatternCompliance(SSotAsyncTestCase):
                     user_websocket_instances[user["user_id"]] = websocket_instance
                 except ImportError:
                     # Fall back to direct import (violation pattern)
-                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                     websocket_instance = WebSocketManager()
                     websocket_instance.user_id = user["user_id"]  # Manual assignment
                     user_websocket_instances[user["user_id"]] = websocket_instance
@@ -286,7 +286,7 @@ class TestWebSocketBridgePatternCompliance(SSotAsyncTestCase):
                     
                     # Look for violation patterns
                     direct_import_violations = [
-                        "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+                        "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
                         "WebSocketManager(",
                         "websocket_manager = WebSocketManager"
                     ]
@@ -424,7 +424,7 @@ class TestWebSocketBridgePatternCompliance(SSotAsyncTestCase):
         except ImportError:
             try:
                 # Fallback to direct import (violation pattern)
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 manager = WebSocketManager()
                 return {"manager": manager, "user_id": user_id, "session_id": session_id}
             except ImportError:

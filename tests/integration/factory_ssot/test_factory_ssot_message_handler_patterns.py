@@ -70,7 +70,7 @@ class MockMessageHandlerFactory:
         self.created_handlers.clear()
 
 
-class TestMessageHandlerFactoryPatterns(BaseIntegrationTest):
+class MessageHandlerFactoryPatternsTests(BaseIntegrationTest):
     """Test SSOT violations in message handler factory patterns."""
 
     @pytest.mark.integration

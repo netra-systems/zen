@@ -31,7 +31,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInst
 logger = logging.getLogger(__name__)
 
 
-class TestAgentExecutionCoreRegistryInterface(SSotAsyncTestCase):
+class AgentExecutionCoreRegistryInterfaceTests(SSotAsyncTestCase):
     """Integration tests for AgentExecutionCore and AgentRegistryAdapter interaction."""
 
     def setUp(self):

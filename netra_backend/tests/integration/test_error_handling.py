@@ -139,7 +139,7 @@ class ErrorProneTestAgent(BaseAgent):
         """Get comprehensive error handling statistics."""
         return {'agent_name': self.name, 'total_executions': self.execution_count, 'total_errors': self.error_count, 'total_recoveries': self.recovery_count, 'error_rate': self.error_count / max(self.execution_count, 1), 'recovery_rate': self.recovery_count / max(self.error_count, 1) if self.error_count > 0 else 0, 'success_rate': (self.execution_count - self.error_count + self.recovery_count) / max(self.execution_count, 1), 'recovery_enabled': self.recovery_enabled, 'configured_failure_rate': self.failure_rate, 'execution_history_count': len(self.execution_history)}
 
-class TestErrorHandling(BaseIntegrationTest):
+class ErrorHandlingTests(BaseIntegrationTest):
     """Integration tests for error handling and recovery."""
 
     def setup_method(self):

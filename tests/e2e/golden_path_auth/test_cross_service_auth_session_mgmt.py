@@ -20,7 +20,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
-class TestCrossServiceAuthSessionMgmt(SSotAsyncTestCase):
+class CrossServiceAuthSessionMgmtTests(SSotAsyncTestCase):
     """
     E2E test validating cross-service authentication session management.
     Tests session consistency between auth service and backend services.

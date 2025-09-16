@@ -83,7 +83,7 @@ def fix_websocket_manager_access():
     
     try:
         # Import the correct factory function
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         print("✓ Found get_websocket_manager factory function")
         

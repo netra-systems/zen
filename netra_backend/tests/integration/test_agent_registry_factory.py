@@ -97,7 +97,7 @@ class MockWebSocketManager:
         return [event for event in self.events_sent if event.get("run_id") == run_id]
 
 
-class TestAgentRegistryFactory(SSotAsyncTestCase):
+class AgentRegistryFactoryTests(SSotAsyncTestCase):
     """Integration tests for Agent Registry and Factory patterns.
     
     Tests REAL component interactions without Docker dependencies.

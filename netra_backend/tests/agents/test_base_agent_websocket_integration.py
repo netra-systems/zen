@@ -81,7 +81,7 @@ class WebSocketTestAgent(BaseAgent):
         return final_response
 
 
-class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
+class BaseAgentWebSocketIntegrationTests(SSotAsyncTestCase):
     """Test BaseAgent WebSocket integration and real-time event patterns."""
 
     def setup_method(self, method):

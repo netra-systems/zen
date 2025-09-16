@@ -32,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, UserAgentSession, AgentLifecycleManager, get_agent_registry
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.base_agent import BaseAgent
 
 @pytest.fixture
@@ -88,7 +88,7 @@ def mock_agent():
     mock_agent.close = AsyncMock()
     return mock_agent
 
-class TestUserAgentSessionCreationAndInitialization(SSotBaseTestCase):
+class UserAgentSessionCreationAndInitializationTests(SSotBaseTestCase):
     """Test UserAgentSession creation and initialization patterns."""
 
     def test_user_agent_session_basic_initialization(self):
@@ -168,7 +168,7 @@ class TestUserAgentSessionCreationAndInitialization(SSotBaseTestCase):
         assert created_context.request_id.startswith(f'session_{user_id}')
         self.record_metric('default_context_creation_success', True)
 
-class TestUserAgentSessionAgentManagement(SSotBaseTestCase):
+class UserAgentSessionAgentManagementTests(SSotBaseTestCase):
     """Test agent management within UserAgentSession."""
 
     @pytest.mark.asyncio
@@ -239,7 +239,7 @@ class TestUserAgentSessionAgentManagement(SSotBaseTestCase):
             assert retrieved_agent == agents[i]
         self.record_metric('concurrent_agent_operations', len(agents))
 
-class TestUserAgentSessionCleanupAndLifecycle(SSotBaseTestCase):
+class UserAgentSessionCleanupAndLifecycleTests(SSotBaseTestCase):
     """Test UserAgentSession cleanup and lifecycle management."""
 
     @pytest.mark.asyncio
@@ -326,7 +326,7 @@ class TestUserAgentSessionCleanupAndLifecycle(SSotBaseTestCase):
         assert metrics['has_websocket_bridge'] is True
         self.record_metric('metrics_with_agents_success', True)
 
-class TestAgentRegistryUserAgentSessionIntegration(SSotBaseTestCase):
+class AgentRegistryUserAgentSessionIntegrationTests(SSotBaseTestCase):
     """Test AgentRegistry integration with UserAgentSession."""
 
     @pytest.mark.asyncio
@@ -470,7 +470,7 @@ class TestAgentRegistryUserAgentSessionIntegration(SSotBaseTestCase):
         assert len(new_session._agents) == 0
         self.record_metric('reset_user_agents_success', True)
 
-class TestAgentLifecycleManager(SSotBaseTestCase):
+class AgentLifecycleManagerTests(SSotBaseTestCase):
     """Test AgentLifecycleManager memory leak prevention."""
 
     @pytest.mark.asyncio
@@ -524,7 +524,7 @@ class TestAgentLifecycleManager(SSotBaseTestCase):
         assert lifecycle_manager._registry is not None
         self.record_metric('emergency_cleanup_integration_tested', True)
 
-class TestConcurrentOperationsAndMemoryManagement(SSotBaseTestCase):
+class ConcurrentOperationsAndMemoryManagementTests(SSotBaseTestCase):
     """Test concurrent operations and memory management."""
 
     @pytest.mark.asyncio

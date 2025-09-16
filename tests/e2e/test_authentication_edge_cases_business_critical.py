@@ -102,8 +102,8 @@ from netra_backend.app.clients.auth_client_core import (
 from shared.isolated_environment import get_env
 
 # SSOT WebSocket Infrastructure (verified from registry) 
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 # SSOT Database Models (verified from registry)
 from netra_backend.app.db.models_user import User
@@ -118,7 +118,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.e2e
 @pytest.mark.critical 
 @pytest.mark.asyncio
-class TestAuthenticationEdgeCasesBusinessCritical(SSotAsyncTestCase):
+class AuthenticationEdgeCasesBusinessCriticalTests(SSotAsyncTestCase):
     """
     Test authentication edge cases and network connectivity failures for business-critical scenarios.
     

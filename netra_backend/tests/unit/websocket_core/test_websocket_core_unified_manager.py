@@ -35,7 +35,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 from shared.types.core_types import UserID, ConnectionID, WebSocketID, ThreadID
 from shared.logging.unified_logging_ssot import get_logger
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketManagerMode, WebSocketConnection, _serialize_message_safely, _get_enum_key_representation
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketManagerMode, WebSocketConnection, _serialize_message_safely, _get_enum_key_representation
 from netra_backend.app.core.user_execution_context import UserExecutionContext
 logger = get_logger(__name__)
 
@@ -69,7 +69,7 @@ class MockWebSocket:
         self.close_reason = reason
         logger.debug(f'MockWebSocket closed with code {code}, reason: {reason}')
 
-class TestUnifiedWebSocketManager(SSotAsyncTestCase):
+class UnifiedWebSocketManagerTests(SSotAsyncTestCase):
     """Unit tests for UnifiedWebSocketManager following SSOT patterns."""
 
     def setup_method(self, method):
@@ -101,7 +101,7 @@ class TestUnifiedWebSocketManager(SSotAsyncTestCase):
         mock_websocket = MockWebSocket(state=websocket_state, user_id=user_id)
         return WebSocketConnection(user_id=user_id, connection_id=connection_id, websocket=mock_websocket, thread_id=self.test_thread_id, metadata={'test': True, 'created_at': datetime.now(timezone.utc).isoformat()})
 
-class TestWebSocketManagerInitialization(TestUnifiedWebSocketManager):
+class WebSocketManagerInitializationTests(UnifiedWebSocketManagerTests):
     """Test WebSocket manager initialization and configuration."""
 
     async def test_manager_initialization_unified_mode(self):
@@ -130,7 +130,7 @@ class TestWebSocketManagerInitialization(TestUnifiedWebSocketManager):
             UnifiedWebSocketManager(mode=WebSocketManagerMode.UNIFIED)
         logger.info('✓ Authorization token requirement test passed')
 
-class TestConnectionLifecycleManagement(TestUnifiedWebSocketManager):
+class ConnectionLifecycleManagementTests(UnifiedWebSocketManagerTests):
     """Test WebSocket connection lifecycle operations."""
 
     async def test_add_connection_success(self):
@@ -176,7 +176,7 @@ class TestConnectionLifecycleManagement(TestUnifiedWebSocketManager):
         await self.manager.remove_connection(fake_connection_id)
         logger.info('✓ Remove nonexistent connection graceful handling test passed')
 
-class TestUserIsolationAndSecurity(TestUnifiedWebSocketManager):
+class UserIsolationAndSecurityTests(UnifiedWebSocketManagerTests):
     """Test user isolation and multi-user security."""
 
     async def test_user_isolation_validation(self):
@@ -212,7 +212,7 @@ class TestUserIsolationAndSecurity(TestUnifiedWebSocketManager):
         assert token_1 != token_2
         logger.info('✓ Multiple users connection isolation test passed')
 
-class TestMessageSendingAndEventDelivery(TestUnifiedWebSocketManager):
+class MessageSendingAndEventDeliveryTests(UnifiedWebSocketManagerTests):
     """Test message sending and event delivery functionality."""
 
     async def test_send_to_user_success(self):
@@ -263,7 +263,7 @@ class TestMessageSendingAndEventDelivery(TestUnifiedWebSocketManager):
             assert 'System maintenance' in sent_message['content']
         logger.info('✓ Broadcast message to all users test passed')
 
-class TestConcurrencyAndThreadSafety(TestUnifiedWebSocketManager):
+class ConcurrencyAndThreadSafetyTests(UnifiedWebSocketManagerTests):
     """Test concurrency and thread safety of WebSocket operations."""
 
     async def test_concurrent_connection_additions(self):
@@ -302,7 +302,7 @@ class TestConcurrencyAndThreadSafety(TestUnifiedWebSocketManager):
         assert sent_message_ids == set(range(10))
         logger.info('✓ Concurrent message sending thread safety test passed')
 
-class TestErrorHandlingAndRecovery(TestUnifiedWebSocketManager):
+class ErrorHandlingAndRecoveryTests(UnifiedWebSocketManagerTests):
     """Test error handling and recovery mechanisms."""
 
     async def test_connection_cleanup_on_websocket_error(self):
@@ -329,7 +329,7 @@ class TestErrorHandlingAndRecovery(TestUnifiedWebSocketManager):
         assert len(connection.websocket.sent_messages) == 1
         logger.info('✓ Graceful degradation mode test passed')
 
-class TestMessageSerializationHelpers(TestUnifiedWebSocketManager):
+class MessageSerializationHelpersTests(UnifiedWebSocketManagerTests):
     """Test message serialization helper functions."""
 
     async def test_serialize_message_safely_with_datetime(self):
@@ -345,11 +345,11 @@ class TestMessageSerializationHelpers(TestUnifiedWebSocketManager):
         """Test enum key representation for WebSocket states."""
         from enum import Enum
 
-        class TestWebSocketState(Enum):
+        class WebSocketStateTests(Enum):
             OPEN = 'open'
             CLOSED = 'closed'
             CONNECTING = 'connecting'
-        open_state = TestWebSocketState.OPEN
+        open_state = WebSocketStateTests.OPEN
         key_repr = _get_enum_key_representation(open_state)
         assert key_repr == 'open'
         logger.info('✓ Enum key representation test passed')

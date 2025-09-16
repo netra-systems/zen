@@ -32,7 +32,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthH
 from shared.logging.unified_logging_ssot import get_logger
 
 
-class TestWebSocketLoggingIntegration(SSotAsyncTestCase):
+class WebSocketLoggingIntegrationTests(SSotAsyncTestCase):
     """Test WebSocket logging integration with real services."""
     
     def setup_method(self, method=None):

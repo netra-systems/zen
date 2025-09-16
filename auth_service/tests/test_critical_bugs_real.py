@@ -37,7 +37,7 @@ from httpx import AsyncClient
 from test_framework.environment_isolation import isolated_test_env
 from auth_service.main import app
 
-class TestAuthRequestHandlingReal:
+class AuthRequestHandlingRealTests:
     """Test auth request handling with real FastAPI behavior."""
 
     def test_real_request_body_handling(self, isolated_test_env):
@@ -76,7 +76,7 @@ class TestAuthRequestHandlingReal:
             except Exception as e:
                 assert isinstance(e, (ConnectionError, TimeoutError)) or 'connection' in str(e).lower(), f'Unexpected async error type: {type(e).__name__}: {e}'
 
-class TestRealAuthServiceIntegration:
+class RealAuthServiceIntegrationTests:
     """Test real auth service integration without mocks."""
 
     def test_real_auth_service_health(self, isolated_test_env):
@@ -164,7 +164,7 @@ class TestRealAuthServiceIntegration:
             except ImportError:
                 pass
 
-class TestRealServiceValidation:
+class RealServiceValidationTests:
     """Test real service validation without any mocks."""
 
     def test_real_fastapi_application_startup(self, isolated_test_env):

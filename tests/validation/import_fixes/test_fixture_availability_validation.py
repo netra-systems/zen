@@ -18,7 +18,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestFixtureAvailabilityValidation(SSotBaseTestCase):
+class FixtureAvailabilityValidationTests(SSotBaseTestCase):
     """
     Test fixture availability validation for collection error fixes.
     

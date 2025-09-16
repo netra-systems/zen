@@ -18,7 +18,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
 
 
-class TestErrorCodeClassification(BaseTestCase):
+class ErrorCodeClassificationTests(BaseTestCase):
     """Test error code classification delivers operational excellence for business reliability."""
     
     def setup_method(self):

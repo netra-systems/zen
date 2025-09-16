@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketSSOTDualPatternViolations(SSotBaseTestCase):
+class WebSocketSSOTDualPatternViolationsTests(SSotBaseTestCase):
     """Test WebSocket SSOT dual pattern violations detection."""
     
     def setup_method(self, method):

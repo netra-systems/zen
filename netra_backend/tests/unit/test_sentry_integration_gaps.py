@@ -12,7 +12,7 @@ import json
 from typing import Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestSentrySDKIntegration(SSotBaseTestCase):
+class SentrySDKIntegrationTests(SSotBaseTestCase):
     """Test backend Sentry SDK integration - expected to FAIL showing gaps"""
 
     def test_sentry_import_availability(self):
@@ -106,7 +106,7 @@ class TestSentrySDKIntegration(SSotBaseTestCase):
         except (ImportError, AttributeError):
             self.fail('Sentry performance monitoring should be configured')
 
-class TestSentryConfigurationValidation(SSotBaseTestCase):
+class SentryConfigurationValidationTests(SSotBaseTestCase):
     """Test Sentry configuration validation - expected to FAIL showing gaps"""
 
     def test_sentry_dsn_validation(self):
@@ -145,7 +145,7 @@ class TestSentryConfigurationValidation(SSotBaseTestCase):
         secret_names = [secret.name for secret in BACKEND_SECRETS_CONFIG]
         self.assertIn('sentry-dsn', secret_names, 'sentry-dsn should be in secret manager config')
 
-class TestSentryErrorHandling(SSotBaseTestCase):
+class SentryErrorHandlingTests(SSotBaseTestCase):
     """Test Sentry error handling integration - expected to FAIL showing gaps"""
 
     def test_automatic_error_capture(self):
@@ -189,7 +189,7 @@ class TestSentryErrorHandling(SSotBaseTestCase):
         except (ImportError, AttributeError):
             self.fail('Sentry error filtering should be configured')
 
-class TestSentryEnvironmentConfiguration(SSotBaseTestCase):
+class SentryEnvironmentConfigurationTests(SSotBaseTestCase):
     """Test environment-specific Sentry configuration - expected to FAIL showing gaps"""
 
     def test_staging_sentry_configuration(self):
@@ -226,7 +226,7 @@ class TestSentryEnvironmentConfiguration(SSotBaseTestCase):
             config = DevelopmentConfig()
             sentry_dsn = getattr(config, 'sentry_dsn', None)
 
-class TestSentryIntegrationReadiness(SSotBaseTestCase):
+class SentryIntegrationReadinessTests(SSotBaseTestCase):
     """Test overall Sentry integration readiness - expected to FAIL showing gaps"""
 
     def test_sentry_dependency_in_requirements(self):

@@ -38,7 +38,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestIssue932SSOTImportValidation(SSotBaseTestCase, unittest.TestCase):
+class Issue932SSOTImportValidationTests(SSotBaseTestCase, unittest.TestCase):
     """Unit tests to validate SSOT configuration imports for Issue #932."""
     
     def setUp(self):

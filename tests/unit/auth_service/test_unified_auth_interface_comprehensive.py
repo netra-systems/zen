@@ -40,7 +40,7 @@ from auth_service.auth_core.models.auth_models import (
 
 
 @pytest.mark.unit
-class TestUnifiedAuthInterfaceCore:
+class UnifiedAuthInterfaceCoreTests:
     """Core authentication interface functionality tests"""
     
     def test_initialization_creates_proper_components(self):
@@ -97,7 +97,7 @@ class TestUnifiedAuthInterfaceCore:
 
 
 @pytest.mark.unit
-class TestJWTTokenOperations:
+class JWTTokenOperationsTests:
     """Test JWT token operations - CRITICAL for $500K+ ARR security"""
     
     def test_create_access_token_with_user_data_dict(self):
@@ -209,7 +209,7 @@ class TestJWTTokenOperations:
 
 
 @pytest.mark.unit
-class TestTokenValidation:
+class TokenValidationTests:
     """Test token validation - critical for security"""
     
     def test_validate_token_success(self):
@@ -294,7 +294,7 @@ class TestTokenValidation:
 
 
 @pytest.mark.unit
-class TestTokenBlacklisting:
+class TokenBlacklistingTests:
     """Test token and user blacklisting functionality"""
     
     def test_blacklist_token(self):
@@ -347,7 +347,7 @@ class TestTokenBlacklisting:
 
 
 @pytest.mark.unit
-class TestUserAuthentication:
+class UserAuthenticationTests:
     """Test user authentication operations - protects user accounts"""
     
     @pytest.mark.asyncio
@@ -482,7 +482,7 @@ class TestUserAuthentication:
 
 
 @pytest.mark.unit
-class TestLoginLogoutOperations:
+class LoginLogoutOperationsTests:
     """Test login and logout operations"""
     
     @pytest.mark.asyncio
@@ -538,7 +538,7 @@ class TestLoginLogoutOperations:
 
 
 @pytest.mark.unit
-class TestSessionManagement:
+class SessionManagementTests:
     """Test session management functionality"""
     
     def test_create_session(self):
@@ -606,7 +606,7 @@ class TestSessionManagement:
 
 
 @pytest.mark.unit
-class TestAPIKeyValidation:
+class APIKeyValidationTests:
     """Test API key validation functionality"""
     
     def test_validate_api_key_placeholder(self):
@@ -620,7 +620,7 @@ class TestAPIKeyValidation:
 
 
 @pytest.mark.unit
-class TestSecurityUtilities:
+class SecurityUtilitiesTests:
     """Test security utility functions - prevents attacks"""
     
     def test_generate_secure_nonce(self):
@@ -709,7 +709,7 @@ class TestSecurityUtilities:
 
 
 @pytest.mark.unit
-class TestOAuthOperations:
+class OAuthOperationsTests:
     """Test OAuth integration functionality"""
     
     @pytest.mark.asyncio
@@ -728,7 +728,7 @@ class TestOAuthOperations:
 
 
 @pytest.mark.unit
-class TestErrorHandling:
+class ErrorHandlingTests:
     """Test error handling and edge cases"""
     
     def test_health_status_with_error(self):
@@ -774,7 +774,7 @@ class TestErrorHandling:
 
 
 @pytest.mark.unit
-class TestBusinessScenarios:
+class BusinessScenariosTests:
     """Test complete business scenarios - protects $500K+ ARR"""
     
     @pytest.mark.asyncio

@@ -39,7 +39,7 @@ from netra_backend.app.services.user_execution_context import (
 )
 
 
-class TestGoldenPathExecutionEngineProtection1146(SSotAsyncTestCase):
+class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
     """Protects Golden Path functionality during execution engine SSOT consolidation."""
 
     async def asyncSetUp(self):

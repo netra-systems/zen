@@ -27,7 +27,7 @@ from test_framework.ssot.websocket import WebSocketTestUtility, WebSocketMessage
 # Import production WebSocket components
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
@@ -131,7 +131,7 @@ def mock_user_context():
     return context
 
 
-class TestWebSocketEventDelivery:
+class WebSocketEventDeliveryTests:
     """Unit tests for core WebSocket event delivery functionality."""
     
     @pytest.mark.asyncio
@@ -306,7 +306,7 @@ class TestWebSocketEventDelivery:
         assert "timestamp" in message
 
 
-class TestAgentWebSocketBridge:
+class AgentWebSocketBridgeTests:
     """Unit tests for AgentWebSocketBridge event delivery."""
     
     @pytest.mark.asyncio
@@ -380,7 +380,7 @@ class TestAgentWebSocketBridge:
         failing_manager.send_to_thread.assert_called_once()
 
 
-class TestWebSocketEventValidation:
+class WebSocketEventValidationTests:
     """Unit tests for WebSocket event validation and formatting."""
     
     def test_websocket_event_type_validation(self):

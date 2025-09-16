@@ -53,7 +53,7 @@ from netra_backend.app.websocket_core.auth_remediation import WebSocketAuthInteg
 logger = logging.getLogger(__name__)
 
 
-class TestInfrastructureRemediationComprehensive(SSotAsyncTestCase):
+class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive test suite for infrastructure remediation implementation
     
@@ -492,7 +492,7 @@ async def run_mission_critical_infrastructure_remediation_test():
     """
     logger.info("[U+1F680] RUNNING MISSION CRITICAL INFRASTRUCTURE REMEDIATION TEST")
     
-    test_suite = TestInfrastructureRemediationComprehensive()
+    test_suite = InfrastructureRemediationComprehensiveTests()
     await test_suite.async_setup_method()
     
     try:

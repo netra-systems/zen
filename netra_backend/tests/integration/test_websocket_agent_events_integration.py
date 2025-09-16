@@ -46,14 +46,14 @@ from shared.isolated_environment import IsolatedEnvironment
 
 # Core WebSocket imports
 from netra_backend.app.websocket_core.types import MessageType, WebSocketConnectionState
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.message_handlers import MessageHandlerService
 
 
-class TestWebSocketAgentEventsIntegration(SSotAsyncTestCase):
+class WebSocketAgentEventsIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket agent event delivery with real connections."""
     
     async def async_setup_method(self):
@@ -948,7 +948,7 @@ class TestWebSocketAgentEventsIntegration(SSotAsyncTestCase):
         self.record_metric("event_timing_validated", True)
 
 
-class TestWebSocketAgentEventsRealServices(SSotAsyncTestCase):
+class WebSocketAgentEventsRealServicesTests(SSotAsyncTestCase):
     """
     Integration tests with real WebSocket services for agent events.
     

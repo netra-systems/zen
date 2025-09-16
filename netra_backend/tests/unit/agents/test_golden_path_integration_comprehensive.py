@@ -54,12 +54,12 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestGoldenPathIntegrationComprehensive(SSotAsyncTestCase):
+class GoldenPathIntegrationComprehensiveTests(SSotAsyncTestCase):
     """Comprehensive integration tests for the complete golden path workflow."""
 
     def setup_method(self, method):

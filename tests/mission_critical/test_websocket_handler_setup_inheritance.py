@@ -336,7 +336,7 @@ class WebSocketHandlerInheritanceAnalyzer:
         return mro
 
 
-class TestWebSocketHandlerSetupInheritance(SSotBaseTestCase):
+class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
     """
     MISSION CRITICAL: Test suite for detecting setup_method() inheritance violations.
     

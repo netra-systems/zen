@@ -35,7 +35,7 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import (
 )
 from netra_backend.app.core.tool_models import ToolExecutionResult, UnifiedTool
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from langchain_core.tools import BaseTool
 
 
@@ -178,7 +178,7 @@ class MockPermissionService:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestUnifiedToolDispatcherIntegrationComprehensive:
+class UnifiedToolDispatcherIntegrationComprehensiveTests:
     """Comprehensive tool dispatcher integration tests."""
     
     @pytest.fixture

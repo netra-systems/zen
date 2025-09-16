@@ -22,7 +22,7 @@ from netra_backend.app.core.config_validator import (
 )
 
 
-class TestConfigurationValidation(BaseTestCase):
+class ConfigurationValidationTests(BaseTestCase):
     """Test configuration validation delivers deployment reliability for business operations."""
     
     def setup_method(self):

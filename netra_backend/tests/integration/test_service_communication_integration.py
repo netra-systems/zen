@@ -2,7 +2,7 @@
 import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 
-class TestServiceCommunicationIntegration(BaseIntegrationTest):
+class ServiceCommunicationIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     def test_inter_service_communication(self):

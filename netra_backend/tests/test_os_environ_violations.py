@@ -128,7 +128,7 @@ class OSEnvironAnalyzer(ast.NodeVisitor):
                 self.getenv_violations + 
                 self.environ_get_violations)
 
-class TestOSEnvironViolations:
+class OSEnvironViolationsTests:
     """Test Suite 2: Detect and Validate OS Environment Access"""
     
     @pytest.fixture

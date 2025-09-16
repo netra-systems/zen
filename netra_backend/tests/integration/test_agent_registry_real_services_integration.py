@@ -28,7 +28,7 @@ from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from test_framework.ssot.real_services_test_fixtures import *
 
 
-class TestAgentRegistryRealServices:
+class AgentRegistryRealServicesTests:
     """Integration tests for agent registry with real services."""
     
     @pytest.mark.asyncio

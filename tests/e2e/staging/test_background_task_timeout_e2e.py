@@ -25,7 +25,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.e2e
-class TestBackgroundTaskTimeoutE2E(SSotBaseTestCase):
+class BackgroundTaskTimeoutE2ETests(SSotBaseTestCase):
     """E2E tests for background task timeout configuration in GCP staging.
     
     **CRITICAL TESTS**: These tests MUST FAIL initially to prove Issue #573 exists.

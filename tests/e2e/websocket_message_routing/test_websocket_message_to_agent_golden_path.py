@@ -144,7 +144,7 @@ class WebSocketEventCapture:
 
 
 @pytest.mark.e2e
-class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
+class WebSocketMessageToAgentGoldenPathTests(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -502,7 +502,7 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
 
 async def run_websocket_golden_path_test():
     """Standalone function to run the golden path test for debugging."""
-    test_instance = TestWebSocketMessageToAgentGoldenPath()
+    test_instance = WebSocketMessageToAgentGoldenPathTests()
     test_instance.setup_method()
     
     try:

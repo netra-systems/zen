@@ -67,7 +67,7 @@ def circuit_breaker_config():
     return CircuitBreakerConfig(failure_threshold=3, failure_rate_threshold=0.6, open_timeout_seconds=1, success_threshold=2)
 
 @pytest.mark.asyncio
-class TestEnvironmentAuthDetector:
+class EnvironmentAuthDetectorTests:
     """Test environment-based auth level detection."""
 
     def test_detector_initialization(self):
@@ -117,7 +117,7 @@ class TestEnvironmentAuthDetector:
         assert level == AuthPermissivenessLevel.EMERGENCY
 
 @pytest.mark.asyncio
-class TestAuthValidators:
+class AuthValidatorsTests:
     """Test individual auth validator implementations."""
 
     async def test_demo_validator_success(self, mock_websocket):
@@ -187,7 +187,7 @@ class TestAuthValidators:
             assert 'Using relaxed authentication' in '; '.join(result.security_warnings)
 
 @pytest.mark.asyncio
-class TestCircuitBreakerAuth:
+class CircuitBreakerAuthTests:
     """Test circuit breaker authentication functionality."""
 
     async def test_circuit_breaker_normal_operation(self, mock_websocket, circuit_breaker_config):
@@ -238,7 +238,7 @@ class TestCircuitBreakerAuth:
             assert result.success is True
 
 @pytest.mark.asyncio
-class TestPermissivenessIntegration:
+class PermissivenessIntegrationTests:
     """Test integration of permissiveness system with WebSocket auth."""
 
     async def test_authenticate_with_permissiveness_auto_detect(self, mock_websocket):
@@ -267,7 +267,7 @@ class TestPermissivenessIntegration:
         assert isinstance(initial_stats['success_rate_percent'], (int, float))
 
 @pytest.mark.asyncio
-class TestConfigurationSystem:
+class ConfigurationSystemTests:
     """Test authentication configuration system."""
 
     def test_config_loading(self):
@@ -308,7 +308,7 @@ class TestConfigurationSystem:
         assert isinstance(result, bool)
 
 @pytest.mark.asyncio
-class TestWebSocketIntegration:
+class WebSocketIntegrationTests:
     """Test integration with actual WebSocket SSOT system."""
 
     async def test_mock_websocket_permissive_auth_flow(self):
@@ -334,7 +334,7 @@ class TestWebSocketIntegration:
         assert context.connection_source == 'external'
 
 @pytest.mark.asyncio
-class TestPerformanceAndResilience:
+class PerformanceAndResilienceTests:
     """Test performance and resilience of auth permissiveness system."""
 
     async def test_concurrent_authentication_requests(self):

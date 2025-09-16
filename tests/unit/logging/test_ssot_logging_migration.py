@@ -40,7 +40,7 @@ class LegacyLoggingPattern:
     business_impact: str
 
 @pytest.mark.unit
-class TestSSotLoggingMigration(SSotBaseTestCase):
+class SSotLoggingMigrationTests(SSotBaseTestCase):
     """
     CRITICAL BUSINESS VALUE: Validates SSOT migration maintains Golden Path functionality.
     
@@ -533,7 +533,7 @@ class TestSSotLoggingMigration(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestSSotMigrationValidation(SSotBaseTestCase):
+class SSotMigrationValidationTests(SSotBaseTestCase):
     """
     Advanced validation tests for SSOT migration completeness and correctness.
     """

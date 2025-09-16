@@ -29,7 +29,7 @@ import ast
 import os
 
 
-class TestIssue1186SSotComplianceArchitectureValidation(unittest.TestCase):
+class Issue1186SSotComplianceArchitectureValidationTests(unittest.TestCase):
     """SSOT compliance test suite for UserExecutionEngine architecture validation.
 
     Focus: SSOT compliance verification and architectural consistency

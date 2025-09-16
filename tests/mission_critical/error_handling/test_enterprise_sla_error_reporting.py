@@ -38,7 +38,7 @@ import websockets
 
 logger = logging.getLogger(__name__)
 
-class TestEnterpriseErrorReporting(SSotBaseTestCase):
+class EnterpriseErrorReportingTests(SSotBaseTestCase):
     """
     MISSION CRITICAL: Enterprise SLA Error Reporting Test Suite
     

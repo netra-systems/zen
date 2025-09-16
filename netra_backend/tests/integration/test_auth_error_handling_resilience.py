@@ -34,7 +34,7 @@ from shared.types.core_types import UserID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
+class AuthErrorHandlingResilienceIntegrationTests(BaseIntegrationTest):
     """Integration tests for authentication error handling and resilience with real services."""
     
     @pytest.fixture(autouse=True)

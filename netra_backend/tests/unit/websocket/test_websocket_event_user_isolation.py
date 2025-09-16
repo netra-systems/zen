@@ -87,7 +87,7 @@ class MockConnectionPool:
         mock_ws = self.connections[connection_id]
         return ConnectionInfo(connection_id=connection_id, user_id=user_id, websocket=mock_ws, created_at=datetime.now(timezone.utc), last_activity=datetime.now(timezone.utc))
 
-class TestWebSocketEventUserIsolation(SSotBaseTestCase):
+class WebSocketEventUserIsolationTests(SSotBaseTestCase):
     """Test WebSocket event system maintains complete user isolation."""
 
     def setup_method(self):

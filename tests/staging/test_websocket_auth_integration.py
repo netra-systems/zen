@@ -67,7 +67,7 @@ class WebSocketAuthFailureReport:
         }
 
 
-class TestWebSocketAuthenticationIntegration(BaseIntegrationTest):
+class WebSocketAuthenticationIntegrationTests(BaseIntegrationTest):
     """Integration tests designed to expose WebSocket authentication infrastructure gaps."""
     
     def __init__(self):
@@ -653,7 +653,7 @@ if __name__ == "__main__":
         """Run tests directly for development and debugging."""
         print("Starting WebSocket Authentication Integration Tests...")
         
-        test_instance = TestWebSocketAuthenticationIntegration()
+        test_instance = WebSocketAuthenticationIntegrationTests()
         test_instance.setup_method()
         
         try:

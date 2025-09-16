@@ -81,7 +81,7 @@ class MockAgentInstanceFactory:
         self.configured_websocket_bridge = websocket_bridge
         self.configured_llm_manager = llm_manager
 
-class TestSupervisorAgentSSOTCore(BaseTestCase):
+class SupervisorAgentSSOTCoreTests(BaseTestCase):
     """Test core SSOT SupervisorAgent functionality - MISSION CRITICAL for chat delivery."""
 
     def setUp(self):
@@ -305,7 +305,7 @@ class TestSupervisorAgentSSOTCore(BaseTestCase):
         self.assertIn("pattern='SSOT'", repr_str)
         self.assertIn('factory_based=True', repr_str)
 
-class TestSupervisorAgentSSOTErrorScenarios(BaseTestCase):
+class SupervisorAgentSSOTErrorScenariosTests(BaseTestCase):
     """Test SSOT SupervisorAgent error scenarios and edge cases."""
 
     def setUp(self):
@@ -388,7 +388,7 @@ class TestSupervisorAgentSSOTErrorScenarios(BaseTestCase):
             mock_engine.cleanup.assert_called_once()
             self.assertEqual(len(cleanup_called), 1)
 
-class TestSupervisorAgentSSOTPerformance(BaseTestCase):
+class SupervisorAgentSSOTPerformanceTests(BaseTestCase):
     """Performance testing for SSOT SupervisorAgent."""
 
     def setUp(self):

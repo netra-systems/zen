@@ -78,7 +78,7 @@ class MockMessage:
     role: str
     created_at: datetime
 
-class TestDatabaseRepositoryCritical:
+class DatabaseRepositoryCriticalTests:
     """Critical database repository tests"""
     @pytest.mark.asyncio
     async def test_user_repository_crud(self):

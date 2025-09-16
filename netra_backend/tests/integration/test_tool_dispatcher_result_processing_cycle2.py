@@ -30,7 +30,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from shared.types import UserID, ThreadID, RunID
 from shared.isolated_environment import get_env
 
-class TestToolDispatcherResultProcessing(BaseIntegrationTest):
+class ToolDispatcherResultProcessingTests(BaseIntegrationTest):
     """Integration tests for tool dispatcher result processing with real services."""
     
     @pytest.mark.integration

@@ -25,7 +25,7 @@ except ImportError:
 
 
 @pytest.mark.unit
-class TestSSotEnvironmentAccessViolations(SSotAsyncTestCase):
+class SSotEnvironmentAccessViolationsTests(SSotAsyncTestCase):
     """Test suite to expose remaining SSOT environment access violations."""
 
     def setup_method(self):
@@ -263,7 +263,7 @@ if __name__ == '__main__':
     print("="*80)
 
     # Create test suite
-    test_suite = unittest.TestLoader().loadTestsFromTestCase(TestSSotEnvironmentAccessViolations)
+    test_suite = unittest.TestLoader().loadTestsFromTestCase(SSotEnvironmentAccessViolationsTests)
 
     # Run tests with detailed output
     runner = unittest.TextTestRunner(verbosity=2, stream=sys.stdout)

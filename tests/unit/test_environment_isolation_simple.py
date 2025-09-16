@@ -14,7 +14,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 @pytest.mark.unit
-class TestEnvironmentIsolation:
+class EnvironmentIsolationTests:
     """Test environment isolation functionality."""
     
     @pytest.fixture(autouse=True)

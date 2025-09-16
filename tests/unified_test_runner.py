@@ -922,10 +922,8 @@ class UnifiedTestRunner:
         self.docker_environment = None
         self.docker_ports = None
         
-        # Initialize Docker port discovery with test services by default (for backward compatibility)
-        self.port_discovery = DockerPortDiscovery(use_test_services=True)
-        
         # Test execution timeout fix for iterations 41-60
+        from shared.isolated_environment import get_env
         env = get_env()
         self.max_collection_size = int(env.get("MAX_TEST_COLLECTION_SIZE", "1000"))
         
@@ -951,6 +949,63 @@ class UnifiedTestRunner:
                 "command": "npm test"
             }
         }
+
+    def _detect_staging_environment(self, args) -> bool:
+        """Enhanced staging environment detection for GCP staging context.
+        
+        Properly identifies GCP staging environment using multiple environment variables
+        to ensure accurate staging detection and prevent false negatives.
+        
+        Args:
+            args: Command line arguments containing env parameter
+            
+        Returns:
+            bool: True if running in staging environment, False otherwise
+        """
+        from shared.isolated_environment import get_env
+        
+        env = get_env()
+        
+        # Primary check: explicit env argument
+        if hasattr(args, 'env') and args.env == 'staging':
+            return True
+            
+        # Enhanced GCP staging detection
+        environment_vars = [
+            env.get('ENVIRONMENT'),
+            env.get('NETRA_ENVIRONMENT'),
+            env.get('TEST_ENV')
+        ]
+        
+        # Check if any environment variable indicates staging
+        for env_var in environment_vars:
+            if env_var and env_var.lower() == 'staging':
+                return True
+                
+        # GCP project detection
+        gcp_project_vars = [
+            env.get('GCP_PROJECT_ID'),
+            env.get('GOOGLE_CLOUD_PROJECT'),
+            env.get('GCLOUD_PROJECT')
+        ]
+        
+        # Check if any GCP project variable indicates staging
+        for project_var in gcp_project_vars:
+            if project_var and 'staging' in project_var.lower():
+                return True
+                
+        # Additional GCP staging indicators
+        staging_indicators = [
+            env.get('STAGING_ENVIRONMENT'),
+            env.get('CLOUD_RUN_SERVICE') and 'staging' in env.get('CLOUD_RUN_SERVICE', '').lower(),
+            env.get('K_SERVICE') and 'staging' in env.get('K_SERVICE', '').lower()
+        ]
+        
+        for indicator in staging_indicators:
+            if indicator:
+                return True
+                
+        return False
     
     def _detect_python_command(self) -> str:
         """Detect the correct Python command for the current platform."""
@@ -1045,7 +1100,6 @@ class UnifiedTestRunner:
             self._configure_environment(args)
             
             # PERFORMANCE: Skip service orchestration for fast collection
-            print(f"[DEBUG] fast_collection = {getattr(args, 'fast_collection', None)}")
             if hasattr(args, 'fast_collection') and args.fast_collection:
                 print("[INFO] Fast collection mode - skipping service orchestration")
                 # Skip Docker and service setup
@@ -1055,7 +1109,12 @@ class UnifiedTestRunner:
                 if args.pattern:
                     results = {}
                     for category in categories_to_run:
-                        tests = self._fast_path_collect_tests(args.pattern, category)
+                        # Only apply pattern filtering for E2E categories
+                        if category in {'e2e', 'e2e_critical', 'cypress', 'e2e_full'}:
+                            tests = self._fast_path_collect_tests(args.pattern, category)
+                        else:
+                            # For non-E2E categories, ignore pattern and collect all tests
+                            tests = self._fast_path_collect_tests('*', category)
                         results[category] = {
                             "success": True,
                             "duration": 0.0,
@@ -1281,7 +1340,7 @@ class UnifiedTestRunner:
     def _initialize_docker_environment(self, args, running_e2e: bool):
         """Initialize Docker environment - automatically starts services if needed."""
         # Skip Docker for staging (uses remote services)
-        if args.env == "staging":
+        if self._detect_staging_environment(args):
             return
         
         # Skip Docker if explicitly disabled
@@ -1795,7 +1854,7 @@ class UnifiedTestRunner:
         running_e2e = bool(set(categories_to_run) & e2e_categories)
         
         # Auto-configure E2E bypass key for staging environment
-        if args.env == 'staging' and running_e2e:
+        if self._detect_staging_environment(args) and running_e2e:
             self._configure_staging_e2e_auth()
         
         # Real LLM should be enabled if:
@@ -1855,7 +1914,7 @@ class UnifiedTestRunner:
         self._initialize_docker_environment(args, running_e2e)
         
         # Configure services
-        if args.env == "staging":
+        if self._detect_staging_environment(args):
             # For staging, don't use Docker port discovery - use remote staging services
             # Configure test environment with discovered ports
             env = get_env()
@@ -1865,6 +1924,14 @@ class UnifiedTestRunner:
             env.set('ENVIRONMENT', 'staging', 'staging_config')
             env.set('NETRA_ENVIRONMENT', 'staging', 'staging_config')
             env.set('TEST_ENV', 'staging', 'staging_config')  # Required by environment_markers.py
+            
+            # CRITICAL FIX Issue #1270: Add staging-specific database environment guards
+            # Prevent ClickHouse cloud connection attempts during staging tests
+            env.set('CLICKHOUSE_MODE', 'mock', 'staging_database_guard')
+            env.set('CLICKHOUSE_REQUIRED', 'false', 'staging_database_guard')
+            env.set('DATABASE_CATEGORY_TEST_MODE', 'staging', 'staging_database_guard')
+            
+            print("[INFO] Issue #1270 Fix: Set staging database environment guards to prevent cloud connections")
             if self.docker_ports:
                 # Set discovered PostgreSQL URL
                 postgres_port = self.docker_ports.get('postgres', 5434)
@@ -2164,7 +2231,7 @@ class UnifiedTestRunner:
             # Add clickhouse if available in docker ports
             if hasattr(self, 'docker_ports') and self.docker_ports and 'clickhouse' in self.docker_ports:
                 required_services.append('clickhouse')
-        elif args.env == 'staging':
+        elif self._detect_staging_environment(args):
             print("[INFO] Staging environment: using remote staging services, skipping local service checks")
             
         # Per CLAUDE.md - real LLM is required for E2E and dev/staging
@@ -2185,7 +2252,7 @@ class UnifiedTestRunner:
                     required_services.append('docker')
             except (subprocess.SubprocessError, FileNotFoundError):
                 print("[WARNING] Docker not available - tests may fail if they require containerized services")
-        elif args.env == 'staging':
+        elif self._detect_staging_environment(args):
             print("[INFO] Staging environment: using remote staging services, Docker check skipped")
         
         if not required_services:
@@ -2196,7 +2263,7 @@ class UnifiedTestRunner:
         
         try:
             # Check services with appropriate timeout
-            timeout = 10.0 if args.env == 'staging' else 5.0
+            timeout = 10.0 if self._detect_staging_environment(args) else 5.0
             require_real_services(
                 services=required_services,
                 timeout=timeout
@@ -2227,11 +2294,11 @@ class UnifiedTestRunner:
         if hasattr(args, 'no_docker') and args.no_docker:
             print("[INFO] Docker explicitly disabled via --no-docker flag")
             # Special handling for staging environment with --prefer-staging
-            if args.env == 'staging' and hasattr(args, 'prefer_staging') and args.prefer_staging:
+            if self._detect_staging_environment(args) and hasattr(args, 'prefer_staging') and args.prefer_staging:
                 print("[INFO] Staging environment with --prefer-staging: using remote services instead of Docker")
                 return False
             # Special handling for staging environment  
-            elif args.env == 'staging':
+            elif self._detect_staging_environment(args):
                 print("[INFO] Staging environment: using remote staging services instead of Docker")
                 return False
             # For other environments with --no-docker, truly disable Docker
@@ -2243,7 +2310,7 @@ class UnifiedTestRunner:
         
         # E2E tests need Docker UNLESS running in staging with remote services
         if running_e2e:
-            if args.env == 'staging':
+            if self._detect_staging_environment(args):
                 print("[INFO] E2E tests in staging environment: using remote staging services")
                 return False
             return True
@@ -2251,7 +2318,7 @@ class UnifiedTestRunner:
         # Dev environments need Docker, staging can use remote services per Issue #548 fix
         if args.env == 'dev':
             return True
-        elif args.env == 'staging':
+        elif self._detect_staging_environment(args):
             print("[INFO] Staging environment: using remote staging services, Docker not required")
             return False
         
@@ -2346,13 +2413,23 @@ class UnifiedTestRunner:
                 # Fallback defaults: quick tests that should usually pass
                 categories = ["smoke", "unit", "integration"]
         
-        # Filter categories that exist in the system
-        valid_categories = [cat for cat in categories if cat in self.category_system.categories]
+        # Filter categories that exist in the system - enhanced for combined categories (Issue #1270)
+        def is_valid_category(category: str) -> bool:
+            """Check if a category (simple or combined) is valid."""
+            if '+' in category:
+                # Combined category: validate each part separately
+                parts = [part.strip() for part in category.split('+')]
+                return all(part in self.category_system.categories for part in parts)
+            else:
+                # Simple category: direct validation
+                return category in self.category_system.categories
+
+        valid_categories = [cat for cat in categories if is_valid_category(cat)]
         if valid_categories != categories:
             missing = set(categories) - set(valid_categories)
             if missing:
                 print(f"Warning: Categories not found: {missing}")
-        
+
         return valid_categories
     
     def _get_categories_for_service(self, service: str) -> List[str]:
@@ -3072,7 +3149,70 @@ class UnifiedTestRunner:
                 "errors": error_msg,
                 "category": "cypress"
             }
-    
+
+    def _should_category_use_pattern_filtering(self, category_name: str) -> bool:
+        """
+        Determine if a category should use pattern filtering (-k expressions).
+
+        Issue #1270 Fix: Enhanced pattern filtering logic to handle combined categories
+        and prevent WebSocket event routing breakdowns.
+
+        Categories that SHOULD use patterns:
+        - websocket: Uses -k "websocket or ws" by design
+        - security: Uses -k "auth or security" by design
+        - e2e: Pattern filtering can help narrow down e2e tests
+        - e2e_critical: Pattern filtering can help narrow down critical e2e tests
+        - agent: Pattern filtering useful for agent-related tests
+        - database: When combined with agent tests (agent+database), enables pattern filtering
+
+        Categories that should NOT use patterns (standalone):
+        - unit: Uses directory paths, should run all unit tests
+        - integration: Uses directory paths, should run all integration tests
+        - api: Uses specific test files, should run all API tests
+        - smoke: Uses markers, not patterns
+
+        Combined categories (e.g., agent+database):
+        - If ANY component supports pattern filtering, enable for the combination
+        - Special handling for WebSocket-aware patterns to prevent event routing issues
+        """
+        # Handle combined categories (e.g., "agent+database", "websocket+integration")
+        if '+' in category_name:
+            category_parts = [part.strip() for part in category_name.split('+')]
+
+            # Special case: WebSocket-aware pattern filtering
+            # If any part involves websocket, ensure WebSocket event routing works
+            has_websocket = any('websocket' in part.lower() or 'ws' in part.lower() for part in category_parts)
+
+            # Check if any component in the combination supports pattern filtering
+            pattern_enabled_categories = {
+                'websocket', 'security', 'e2e', 'e2e_critical', 'e2e_full',
+                'agent', 'performance', 'database'  # database now enabled for combinations
+            }
+
+            # If any part supports pattern filtering, enable for the whole combination
+            any_supports_patterns = any(part in pattern_enabled_categories for part in category_parts)
+
+            if has_websocket:
+                # For WebSocket combinations, always enable pattern filtering to ensure
+                # proper test selection and prevent event routing breakdowns
+                return True
+
+            return any_supports_patterns
+
+        # Single category logic
+        pattern_enabled_categories = {
+            'websocket',
+            'security',
+            'e2e',
+            'e2e_critical',
+            'e2e_full',
+            'agent',
+            'performance'  # Performance tests may benefit from pattern filtering
+            # Note: 'database' excluded for standalone use, but included in combinations
+        }
+
+        return category_name in pattern_enabled_categories
+
     def _build_pytest_command(self, service: str, category_name: str, args: argparse.Namespace) -> str:
         """Build pytest command for backend/auth services."""
         config = self.test_configs[service]
@@ -3161,7 +3301,7 @@ class UnifiedTestRunner:
         
         # Environment-aware timeout configuration - replaces global pyproject.toml timeout
         # This provides sophisticated timeout handling for different environments and test types
-        if args.env == 'staging':
+        if self._detect_staging_environment(args):
             # Staging environment needs longer timeouts due to network latency and GCP constraints
             if category_name == "unit":
                 cmd_parts.extend(["--timeout=300", "--timeout-method=thread"])  # 5min for staging unit tests
@@ -3178,12 +3318,17 @@ class UnifiedTestRunner:
         else:
             cmd_parts.extend(["--timeout=300", "--timeout-method=thread"])   # 5min for other test categories
         
-        # Add specific test pattern
-        if args.pattern:
+        # Add specific test pattern - only for categories that use pattern-based selection
+        # Issue #1270 Fix: Pattern filtering should not be applied to categories that use
+        # specific files (database, api, unit, integration) as it can cause test deselection
+        if args.pattern and self._should_category_use_pattern_filtering(category_name):
             # Clean up pattern - remove asterisks that are invalid for pytest -k expressions
             # pytest -k expects Python-like expressions, not glob patterns
             clean_pattern = args.pattern.strip('*')
             cmd_parts.extend(["-k", f'"{clean_pattern}"'])
+        elif args.pattern and not self._should_category_use_pattern_filtering(category_name):
+            # Pattern provided but filtering disabled for this category (e.g., database)
+            print(f"[INFO] Pattern filtering disabled for category '{category_name}' - pattern '{args.pattern}' ignored")
         
         return " ".join(cmd_parts)
     
@@ -4454,6 +4599,11 @@ def main():
         pattern = getattr(args, 'pattern', '*')
         if not pattern:
             pattern = '*'
+
+        # Only apply pattern filtering for E2E categories, ignore for others
+        category = getattr(args, 'category', None)
+        if pattern != '*' and category not in {'e2e', 'e2e_critical', 'cypress', 'e2e_full'}:
+            pattern = '*'  # Override pattern for non-E2E categories
 
         # Create proper glob pattern - avoid creating invalid patterns like "**.py"
         if pattern == '*':

@@ -39,7 +39,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 
-class TestIDMigrationComplianceEnhanced(SSotAsyncTestCase):
+class IDMigrationComplianceEnhancedTests(SSotAsyncTestCase):
     """Enhanced migration compliance tests covering all current failure scenarios."""
 
     def setUp(self):

@@ -19,7 +19,7 @@ from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestWebSocketBridgeSSOTDelegation(SSotBaseTestCase):
+class WebSocketBridgeSSOTDelegationTests(SSotBaseTestCase):
     """
     Tests that validate proper SSOT delegation in WebSocket bridge components.
     These tests should FAIL initially to prove delegation violations exist.

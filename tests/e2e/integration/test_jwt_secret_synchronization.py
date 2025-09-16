@@ -141,7 +141,7 @@ class JWTSecretSynchronizationValidator:
 
 @pytest.mark.critical
 @pytest.mark.e2e
-class TestJWTSecretSynchronization(JWTTestFixtures):
+class JWTSecretSynchronizationTests(JWTTestFixtures):
     """Critical JWT secret synchronization tests."""
 
     @pytest.fixture

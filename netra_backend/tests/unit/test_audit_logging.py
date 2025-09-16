@@ -243,7 +243,7 @@ class MockAuditLogger:
         }
 
 
-class TestAuditLogger(SSotBaseTestCase):
+class AuditLoggerTests(SSotBaseTestCase):
     """Test AuditLogger business logic and compliance features."""
     
     def setup_method(self, method):
@@ -593,7 +593,7 @@ class TestAuditLogger(SSotBaseTestCase):
         self.record_metric("retention_cleanup_validated", True)
 
 
-class TestAuditLoggerPerformance(SSotBaseTestCase):
+class AuditLoggerPerformanceTests(SSotBaseTestCase):
     """Test audit logger performance characteristics."""
     
     def setup_method(self, method):

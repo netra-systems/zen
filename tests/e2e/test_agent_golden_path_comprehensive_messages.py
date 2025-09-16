@@ -619,7 +619,7 @@ class AgentGoldenPathValidator:
         )
 
 
-class TestAgentGoldenPathComprehensiveMessages(SSotAsyncTestCase):
+class AgentGoldenPathComprehensiveMessagesTests(SSotAsyncTestCase):
     """
     Comprehensive E2E Tests for Agent Golden Path Message Processing.
     
@@ -925,7 +925,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_test():
-        test_instance = TestAgentGoldenPathComprehensiveMessages()
+        test_instance = AgentGoldenPathComprehensiveMessagesTests()
         test_instance.setup_method()
         await test_instance.test_comprehensive_golden_path_message_flows()
         print("Direct test execution completed successfully")

@@ -32,7 +32,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.quality.quality_gate_service import QualityGateService
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.schemas.user_plan import PlanTier
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
@@ -185,7 +185,7 @@ class AgentResponseFlowTester:
     data=["test_agents", "mock_llm_responses"]
 )
 @pytest.mark.e2e
-class TestAgentResponseFlow:
+class AgentResponseFlowTests:
     """E2E tests for agent response flow."""
     
     @pytest.fixture
@@ -320,7 +320,7 @@ class TestAgentResponseFlow:
 )
 @pytest.mark.critical
 @pytest.mark.e2e
-class TestCriticalResponseFlows:
+class CriticalResponseFlowsTests:
     """Critical response flow scenarios."""
     
     @pytest.mark.asyncio

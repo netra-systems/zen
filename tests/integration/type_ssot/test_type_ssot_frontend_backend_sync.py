@@ -49,7 +49,7 @@ class FrontendType:
         }
 
 
-class TestFrontendBackendTypeSync(BaseIntegrationTest):
+class FrontendBackendTypeSyncTests(BaseIntegrationTest):
     """Integration tests for frontend/backend type synchronization."""
     
     @pytest.mark.integration

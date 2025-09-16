@@ -18,7 +18,7 @@ import glob
 from typing import Dict, List, Tuple
 from unittest.mock import patch, MagicMock
 
-class TestMissionCriticalFrameworkIntegration:
+class MissionCriticalFrameworkIntegrationTests:
     """Test suite for mission-critical framework integration after syntax fixes."""
 
     def test_mission_critical_tests_integrate_with_ssot_base_test_case(self):

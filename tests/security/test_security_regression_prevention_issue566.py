@@ -16,7 +16,7 @@ import pytest
 import inspect
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestSecurityRegressionPreventionIssue566(SSotAsyncTestCase):
+class SecurityRegressionPreventionIssue566Tests(SSotAsyncTestCase):
     """
     REGRESSION PREVENTION: Ensure Issue #566 security vulnerabilities never return
     
@@ -107,7 +107,7 @@ class TestSecurityRegressionPreventionIssue566(SSotAsyncTestCase):
         smd._initialize_llm_manager()
         self.assertTrue(hasattr(test_app.state, 'llm_manager_factory'), 'SECURITY REGRESSION: smd.py missing llm_manager_factory. This is required for Issue #566 security fix.')
 
-class TestSecurityAwarenessDocumentation(SSotAsyncTestCase):
+class SecurityAwarenessDocumentationTests(SSotAsyncTestCase):
     """
     Documentation tests to ensure security awareness is maintained
     """

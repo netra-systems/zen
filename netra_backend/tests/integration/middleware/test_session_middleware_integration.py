@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 from starlette.middleware.sessions import SessionMiddleware
 
 
-class TestSessionMiddlewareIntegration(SSotBaseTestCase):
+class SessionMiddlewareIntegrationTests(SSotBaseTestCase):
     """Integration tests for SessionMiddleware in complete application."""
     
     def setUp(self):

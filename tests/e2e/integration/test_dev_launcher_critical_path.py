@@ -29,7 +29,7 @@ AUTH_URL = f'http://localhost:{AUTH_PORT}'
 WS_URL = f'ws://localhost:{BACKEND_PORT}/ws'
 
 @pytest.mark.e2e
-class TestDevLauncherCriticalPath:
+class DevLauncherCriticalPathTests:
     """
     Comprehensive test suite for dev launcher critical path.
     Tests are designed to FAIL initially to expose real issues.

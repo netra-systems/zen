@@ -75,7 +75,7 @@ class WebSocketAuthValidator:
 
 @pytest.mark.golden_path
 @pytest.mark.unit
-class TestWebSocketAuthBusinessLogic(SSotBaseTestCase):
+class WebSocketAuthBusinessLogicTests(SSotBaseTestCase):
     """
     Golden Path Unit Tests for WebSocket Authentication Business Logic.
     

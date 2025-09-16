@@ -114,7 +114,7 @@ class RetryPolicy:
     circuit_breaker_threshold: int = 5
 
 
-class TestComprehensiveServiceDependencyFailures(BaseIntegrationTest):
+class ComprehensiveServiceDependencyFailuresTests(BaseIntegrationTest):
     """Comprehensive test for all service dependency failure scenarios."""
     
     def setup_method(self):

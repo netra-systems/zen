@@ -65,7 +65,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 
 # Service and infrastructure imports
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, create_agent_websocket_bridge
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.redis_manager import RedisManager
 
@@ -89,7 +89,7 @@ class UserTestData:
             self.websocket_events = []
 
 
-class TestAgentRegistryFactoryIntegration(SSotAsyncTestCase):
+class AgentRegistryFactoryIntegrationTests(SSotAsyncTestCase):
     """Comprehensive integration tests for Agent Registry and Factory patterns."""
     
     @pytest.fixture

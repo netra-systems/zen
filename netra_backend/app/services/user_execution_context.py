@@ -2403,7 +2403,7 @@ class UserContextManager:
         """
         try:
             # Import WebSocket manager (avoid circular imports)
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Get WebSocket connection for user
             ws_manager = WebSocketManager()

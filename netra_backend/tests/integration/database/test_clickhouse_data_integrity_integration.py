@@ -19,7 +19,7 @@ from netra_backend.app.db.clickhouse import get_clickhouse_client, get_clickhous
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.configuration_validator import validate_test_config
 
-class TestClickHouseDataIntegrityIntegration(BaseIntegrationTest):
+class ClickHouseDataIntegrityIntegrationTests(BaseIntegrationTest):
     """Test ClickHouse data integrity and consistency features."""
 
     def setup_method(self):
@@ -136,7 +136,7 @@ class TestClickHouseDataIntegrityIntegration(BaseIntegrationTest):
         finally:
             await self.cleanup_table()
 
-class TestClickHouseDataValidationIntegration(BaseIntegrationTest):
+class ClickHouseDataValidationIntegrationTests(BaseIntegrationTest):
     """Test ClickHouse data validation and constraints."""
 
     def setup_method(self):

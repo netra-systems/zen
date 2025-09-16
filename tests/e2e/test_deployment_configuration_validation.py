@@ -25,7 +25,7 @@ from pathlib import Path
 
 
 @pytest.mark.e2e
-class TestDeploymentConfigurationFailures:
+class DeploymentConfigurationFailuresTests:
     """Test suite reproducing deployment configuration failures."""
     
     @pytest.mark.e2e
@@ -241,7 +241,7 @@ class TestDeploymentConfigurationFailures:
 
 
 @pytest.mark.e2e
-class TestServiceSpecificConfigurationFailures:
+class ServiceSpecificConfigurationFailuresTests:
     """Test suite for service-specific configuration failures."""
     
     @pytest.mark.e2e
@@ -338,7 +338,7 @@ class TestServiceSpecificConfigurationFailures:
 
 
 @pytest.mark.e2e
-class TestDeploymentValidationFailures:
+class DeploymentValidationFailuresTests:
     """Test suite for deployment validation failures."""
     
     @pytest.mark.e2e
@@ -434,7 +434,7 @@ class TestDeploymentValidationFailures:
 
 
 @pytest.mark.e2e
-class TestConfigurationIntegrationFailures:
+class ConfigurationIntegrationFailuresTests:
     """Test suite for cross-service configuration integration failures."""
     
     @pytest.mark.e2e

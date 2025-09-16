@@ -81,7 +81,7 @@ class ScenarioResult:
 @pytest.mark.agent_goldenpath
 @pytest.mark.advanced_scenarios
 @pytest.mark.enterprise
-class TestAdvancedUserScenariosE2E(SSotAsyncTestCase):
+class AdvancedUserScenariosE2ETests(SSotAsyncTestCase):
     """
     E2E tests for advanced user scenarios in agent golden path.
     

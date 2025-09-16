@@ -26,7 +26,7 @@ from netra_backend.app.database.connection_pool import ConnectionPool
 from netra_backend.app.database.retry_handler import DatabaseRetryHandler
 
 
-class TestDatabaseConnectionBusinessLogic:
+class DatabaseConnectionBusinessLogicTests:
     """Test database connection business logic patterns."""
     
     @pytest.fixture

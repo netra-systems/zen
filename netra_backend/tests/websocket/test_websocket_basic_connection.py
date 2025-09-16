@@ -23,12 +23,12 @@ import time
 from datetime import datetime, timezone
 from typing import Dict, Any
 from unittest.mock import MagicMock, AsyncMock, Mock, patch
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 import pytest
 pytestmark = [pytest.mark.env_test]
 
-class TestWebSocketBasicConnection:
+class WebSocketBasicConnectionTests:
     """Test basic WebSocket connectivity using mocked connections."""
 
     @pytest.mark.asyncio

@@ -145,7 +145,7 @@ class RealAgentBillingTestCore:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestRealAgentBillingFlow:
+class RealAgentBillingFlowTests:
     """Test complete agent billing flow with REAL services only."""
 
     @pytest_asyncio.fixture
@@ -265,7 +265,7 @@ class TestRealAgentBillingFlow:
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.stress
-class TestRealAgentBillingStress:
+class RealAgentBillingStressTests:
     """Stress tests for agent billing with real services."""
 
     @pytest_asyncio.fixture

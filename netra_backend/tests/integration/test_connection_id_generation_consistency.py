@@ -34,12 +34,12 @@ from shared.isolated_environment import get_env
 
 from netra_backend.app.websocket.connection_handler import ConnectionHandler, ConnectionContext
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.types.core_types import UserID, ThreadID, WebSocketID
 
 
-class TestConnectionIdGenerationConsistency(BaseIntegrationTest):
+class ConnectionIdGenerationConsistencyTests(BaseIntegrationTest):
     """Test connection ID generation consistency across WebSocket routing components."""
     
     @pytest.mark.integration

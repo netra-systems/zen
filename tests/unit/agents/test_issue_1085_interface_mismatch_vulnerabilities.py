@@ -19,7 +19,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHelpers
 
 @pytest.mark.unit
-class TestInterfaceMismatchVulnerabilities:
+class InterfaceMismatchVulnerabilitiesTests:
     """Test suite to reproduce confirmed interface mismatch vulnerabilities."""
 
     def test_deepagentstate_missing_create_child_context_method(self):
@@ -123,7 +123,7 @@ class TestInterfaceMismatchVulnerabilities:
                 print(f'    {method_name}: {status}')
 
 @pytest.mark.unit
-class TestSSotViolationVulnerabilities:
+class SSotViolationVulnerabilitiesTests:
     """Test suite to reproduce SSOT violations causing security vulnerabilities."""
 
     def test_multiple_deepagentstate_definitions_vulnerability(self):

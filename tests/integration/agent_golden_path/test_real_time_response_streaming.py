@@ -52,7 +52,7 @@ from shared.isolated_environment import get_env
 try:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
-    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
     from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
     from netra_backend.app.core.timeout_configuration import TimeoutTier, get_streaming_timeout
     from shared.types.core_types import UserID, ThreadID, RunID, MessageID
@@ -87,7 +87,7 @@ class StreamingSession:
     streaming_active: bool
     websocket_events: List[Dict]
 
-class TestRealTimeResponseStreaming(SSotAsyncTestCase):
+class RealTimeResponseStreamingTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Real-Time Response Streaming.
 

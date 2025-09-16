@@ -36,7 +36,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestWebSocketEventsFactoryConsolidation884(SSotAsyncTestCase):
+class WebSocketEventsFactoryConsolidation884Tests(SSotAsyncTestCase):
     """
     Integration Test: Validate WebSocket events work correctly with consolidated factory
     
@@ -101,7 +101,7 @@ class TestWebSocketEventsFactoryConsolidation884(SSotAsyncTestCase):
             
             # Import WebSocket components
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 websocket_manager = WebSocketManager()
             except ImportError:
                 # Create mock WebSocket manager for testing
@@ -111,13 +111,13 @@ class TestWebSocketEventsFactoryConsolidation884(SSotAsyncTestCase):
             try:
                 from netra_backend.app.agents.user_execution_context import UserExecutionContext
             except ImportError:
-                class TestUserExecutionContext:
+                class UserExecutionContextTests:
                     def __init__(self, user_id: str, session_id: str, **kwargs):
                         self.user_id = user_id
                         self.session_id = session_id
                         for key, value in kwargs.items():
                             setattr(self, key, value)
-                UserExecutionContext = TestUserExecutionContext
+                UserExecutionContext = UserExecutionContextTests
                 
         except Exception as e:
             pytest.skip(f"Required components not available: {e}")
@@ -218,13 +218,13 @@ class TestWebSocketEventsFactoryConsolidation884(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.user_execution_context import UserExecutionContext
         except ImportError:
-            class TestUserExecutionContext:
+            class UserExecutionContextTests:
                 def __init__(self, user_id: str, session_id: str, **kwargs):
                     self.user_id = user_id
                     self.session_id = session_id
                     for key, value in kwargs.items():
                         setattr(self, key, value)
-            UserExecutionContext = TestUserExecutionContext
+            UserExecutionContext = UserExecutionContextTests
         
         # Create multiple user contexts
         user_count = 3
@@ -425,13 +425,13 @@ class TestWebSocketEventsFactoryConsolidation884(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.user_execution_context import UserExecutionContext
         except ImportError:
-            class TestUserExecutionContext:
+            class UserExecutionContextTests:
                 def __init__(self, user_id: str, session_id: str, **kwargs):
                     self.user_id = user_id
                     self.session_id = session_id
                     for key, value in kwargs.items():
                         setattr(self, key, value)
-            UserExecutionContext = TestUserExecutionContext
+            UserExecutionContext = UserExecutionContextTests
         
         user_context = UserExecutionContext(
             user_id=f"perf_test_user_{uuid.uuid4().hex[:8]}",

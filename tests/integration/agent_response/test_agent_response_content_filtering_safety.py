@@ -43,7 +43,7 @@ logger = central_logger.get_logger(__name__)
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAgentResponseContentFilteringSafety(BaseIntegrationTest):
+class AgentResponseContentFilteringSafetyTests(BaseIntegrationTest):
     """Test agent response content filtering and safety mechanisms."""
     
     def setup_method(self):

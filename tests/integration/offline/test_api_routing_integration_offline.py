@@ -77,7 +77,7 @@ class MockDatabaseManager:
         """Check mock connection status."""
         return self.connected
 
-class TestAPIRoutingIntegrationOffline(SSotBaseTestCase):
+class APIRoutingIntegrationOfflineTests(SSotBaseTestCase):
     """Offline integration tests for API routing and middleware."""
 
     def setup_method(self, method=None):

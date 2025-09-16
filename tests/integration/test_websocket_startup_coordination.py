@@ -76,7 +76,7 @@ class StartupPhaseMonitor:
         return gaps
 
 @pytest.mark.integration
-class TestWebSocketStartupCoordination(SSotAsyncTestCase):
+class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket startup coordination."""
 
     async def test_startup_manager_websocket_coordination_gap(self):

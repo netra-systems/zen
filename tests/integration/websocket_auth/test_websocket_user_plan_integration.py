@@ -39,7 +39,7 @@ from netra_backend.app.core.redis_connection_handler import RedisConnectionHandl
 @pytest.mark.integration
 @pytest.mark.websocket_auth
 @pytest.mark.timeout(30)
-class TestWebSocketUserPlanIntegration(BaseTestCase):
+class WebSocketUserPlanIntegrationTests(BaseTestCase):
     """Integration tests for WebSocket user plan validation and enforcement"""
 
     @pytest.fixture(autouse=True)
@@ -242,7 +242,7 @@ class TestWebSocketUserPlanIntegration(BaseTestCase):
 @pytest.mark.integration  
 @pytest.mark.websocket_auth
 @pytest.mark.timeout(45)
-class TestWebSocketPlanFeatureValidation(BaseTestCase):
+class WebSocketPlanFeatureValidationTests(BaseTestCase):
     """Integration tests for plan feature flag and business requirement validation"""
     
     @pytest.fixture(autouse=True)

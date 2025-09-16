@@ -18,7 +18,7 @@ from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.e2e
-class TestGoldenPathWebSocketIssue567(SSotAsyncTestCase):
+class GoldenPathWebSocketIssue567Tests(SSotAsyncTestCase):
     """
     E2E staging test for Golden Path WebSocket event validation (Issue #567).
     

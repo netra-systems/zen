@@ -47,7 +47,7 @@ class ThreadAgentExecution:
     tools_used: List[str] = field(default_factory=list)
 
 
-class TestThreadStateAgentCoordination(BaseIntegrationTest):
+class ThreadStateAgentCoordinationTests(BaseIntegrationTest):
     """Integration tests for thread state coordination during agent execution."""
     
     @pytest.mark.integration

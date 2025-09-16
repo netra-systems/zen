@@ -31,7 +31,7 @@ from auth_service.auth_core.performance.jwt_performance import (
 )
 
 
-class TestJWTPerformanceOptimizer(SSotBaseTestCase):
+class JWTPerformanceOptimizerTests(SSotBaseTestCase):
     """Comprehensive unit tests for JWT performance optimization."""
 
     def setUp(self):
@@ -340,7 +340,7 @@ class TestJWTPerformanceOptimizer(SSotBaseTestCase):
         self.assertEqual(self.optimizer.metrics.successful_requests, 20)
 
 
-class TestConnectionPoolManager(SSotBaseTestCase):
+class ConnectionPoolManagerTests(SSotBaseTestCase):
     """Test connection pool management functionality."""
 
     def setUp(self):
@@ -386,7 +386,7 @@ class TestConnectionPoolManager(SSotBaseTestCase):
             self.assertIsNone(pool)
 
 
-class TestPerformanceDecorator(SSotBaseTestCase):
+class PerformanceDecoratorTests(SSotBaseTestCase):
     """Test the performance tracking decorator."""
 
     def setUp(self):
@@ -446,7 +446,7 @@ class TestPerformanceDecorator(SSotBaseTestCase):
         jwt_performance_optimizer.rate_limit_enabled = False
 
 
-class TestPerformanceMetrics(SSotBaseTestCase):
+class PerformanceMetricsTests(SSotBaseTestCase):
     """Test the PerformanceMetrics dataclass."""
 
     def setUp(self):
@@ -497,7 +497,7 @@ class TestPerformanceMetrics(SSotBaseTestCase):
         self.assertLessEqual(metrics.avg_response_time, 0.200)  # 200ms response time target
 
 
-class TestGlobalInstances(SSotBaseTestCase):
+class GlobalInstancesTests(SSotBaseTestCase):
     """Test global performance optimizer and connection pool instances."""
 
     def setUp(self):

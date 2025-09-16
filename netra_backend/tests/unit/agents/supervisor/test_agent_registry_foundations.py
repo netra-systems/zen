@@ -39,7 +39,7 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from collections import defaultdict
 
 
-class TestWebSocketManagerAdapter:
+class WebSocketManagerAdapterTests:
     """Unit tests for WebSocketManagerAdapter functionality with minimal dependencies."""
 
     def setup_method(self, method):
@@ -151,7 +151,7 @@ class TestWebSocketManagerAdapter:
         assert adapter.test_attribute == "test_value"
 
 
-class TestUserAgentSession:
+class UserAgentSessionTests:
     """Unit tests for UserAgentSession user isolation functionality."""
 
     def setup_method(self, method):
@@ -319,7 +319,7 @@ class TestUserAgentSession:
         # Session should not prevent cleanup
 
 
-class TestAgentRegistryIntegration:
+class AgentRegistryIntegrationTests:
     """Integration tests for agent registry components."""
 
     def setup_method(self, method):
@@ -431,7 +431,7 @@ class TestAgentRegistryIntegration:
                     assert session.user_id != other_session.user_id
 
 
-class TestAgentRegistryFoundations:
+class AgentRegistryFoundationsTests:
     """Test foundational registry patterns and architecture."""
 
     def test_registry_components_can_be_imported(self):

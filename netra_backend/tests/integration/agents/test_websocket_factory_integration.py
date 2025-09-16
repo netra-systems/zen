@@ -55,7 +55,7 @@ from netra_backend.app.agents.supervisor.user_execution_context import UserExecu
 
 # WebSocket core imports
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
 
 class MockWebSocketConnection:
@@ -205,7 +205,7 @@ class MockWebSocketManager:
         self.event_log.clear()
 
 
-class TestWebSocketFactoryIntegration(SSotAsyncTestCase):
+class WebSocketFactoryIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket factory integration and error scenarios."""
     
     @pytest.fixture

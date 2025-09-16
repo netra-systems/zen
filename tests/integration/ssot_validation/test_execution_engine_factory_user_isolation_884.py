@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestExecutionEngineFactoryUserIsolation884(SSotAsyncTestCase):
+class ExecutionEngineFactoryUserIsolation884Tests(SSotAsyncTestCase):
     """
     Integration Test: Validate factory maintains proper user isolation
     
@@ -112,14 +112,14 @@ class TestExecutionEngineFactoryUserIsolation884(SSotAsyncTestCase):
                     from netra_backend.app.core.user_execution_context import UserExecutionContext
                 except ImportError:
                     # Create test context if not available
-                    class TestUserExecutionContext:
+                    class UserExecutionContextTests:
                         def __init__(self, user_id: str, session_id: str, **kwargs):
                             self.user_id = user_id
                             self.session_id = session_id
                             self.trace_id = kwargs.get('trace_id', f"trace_{uuid.uuid4().hex[:8]}")
                             self.environment = kwargs.get('environment', 'test')
                             self.metadata = kwargs
-                    UserExecutionContext = TestUserExecutionContext
+                    UserExecutionContext = UserExecutionContextTests
             
         except Exception as e:
             pytest.skip(f"Required components not available: {e}")
@@ -340,14 +340,14 @@ class TestExecutionEngineFactoryUserIsolation884(SSotAsyncTestCase):
             from netra_backend.app.agents.user_execution_context import UserExecutionContext
         except ImportError:
             # Use test context
-            class TestUserExecutionContext:
+            class UserExecutionContextTests:
                 def __init__(self, user_id: str, session_id: str, **kwargs):
                     self.user_id = user_id
                     self.session_id = session_id
                     self.metadata = kwargs
                     for key, value in kwargs.items():
                         setattr(self, key, value)
-            UserExecutionContext = TestUserExecutionContext
+            UserExecutionContext = UserExecutionContextTests
         
         # Create two users with distinct data
         user1_secret = f"user1_secret_{uuid.uuid4().hex}"
@@ -423,13 +423,13 @@ class TestExecutionEngineFactoryUserIsolation884(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.user_execution_context import UserExecutionContext
         except ImportError:
-            class TestUserExecutionContext:
+            class UserExecutionContextTests:
                 def __init__(self, user_id: str, session_id: str, **kwargs):
                     self.user_id = user_id
                     self.session_id = session_id
                     for key, value in kwargs.items():
                         setattr(self, key, value)
-            UserExecutionContext = TestUserExecutionContext
+            UserExecutionContext = UserExecutionContextTests
         
         # Create and destroy multiple execution engines
         for i in range(10):  # Create/destroy cycle

@@ -26,7 +26,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.unit
-class TestExecutionEngineSSotMigrationIssue620(BaseIntegrationTest):
+class ExecutionEngineSSotMigrationIssue620Tests(BaseIntegrationTest):
     """Test SSOT compliance for ExecutionEngine migration (Issue #620)."""
     
     async def test_user_execution_engine_is_ssot_implementation(self):
@@ -272,7 +272,7 @@ class TestExecutionEngineSSotMigrationIssue620(BaseIntegrationTest):
 
 
 @pytest.mark.unit
-class TestExecutionEngineImportPatterns(BaseIntegrationTest):
+class ExecutionEngineImportPatternsTests(BaseIntegrationTest):
     """Test import patterns and SSOT compliance."""
     
     async def test_ssot_import_pattern_recommended(self):
@@ -313,7 +313,7 @@ class TestExecutionEngineImportPatterns(BaseIntegrationTest):
 
 
 @pytest.mark.unit
-class TestIssue565CompatibilityBridge(BaseIntegrationTest):
+class Issue565CompatibilityBridgeTests(BaseIntegrationTest):
     """Test the Issue #565 compatibility bridge specifically."""
     
     @pytest.mark.asyncio
@@ -391,7 +391,7 @@ class TestIssue565CompatibilityBridge(BaseIntegrationTest):
 
 
 @pytest.mark.unit
-class TestSSotComplianceValidation(BaseIntegrationTest):
+class SSotComplianceValidationTests(BaseIntegrationTest):
     """Validate overall SSOT compliance for execution engine migration."""
     
     async def test_single_source_of_truth_verification(self):
@@ -483,11 +483,11 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_manual_tests():
-        test_instance = TestExecutionEngineSSotMigrationIssue620()
+        test_instance = ExecutionEngineSSotMigrationIssue620Tests()
         await test_instance.test_user_execution_engine_is_ssot_implementation()
         await test_instance.test_deprecated_execution_engine_delegates_to_ssot()
         
-        ssot_instance = TestSSotComplianceValidation()
+        ssot_instance = SSotComplianceValidationTests()
         migration_status = await ssot_instance.test_migration_completion_status()
         definition_progress = await ssot_instance.test_issue_620_definition_of_done_progress()
         

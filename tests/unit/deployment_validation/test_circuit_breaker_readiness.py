@@ -9,7 +9,7 @@ import time
 import asyncio
 
 @pytest.mark.unit
-class TestCircuitBreakerReadiness:
+class CircuitBreakerReadinessTests:
     
     def test_circuit_breaker_staging_configuration(self):
         """UNIT: Validate staging-optimized circuit breaker configuration"""

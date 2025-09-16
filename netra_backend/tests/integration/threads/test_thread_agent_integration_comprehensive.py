@@ -62,7 +62,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 
-class TestThreadAgentIntegrationComprehensive(BaseIntegrationTest):
+class ThreadAgentIntegrationComprehensiveTests(BaseIntegrationTest):
     """
     Comprehensive thread-agent integration test suite.
     

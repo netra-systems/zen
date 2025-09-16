@@ -20,7 +20,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import create_we
 from netra_backend.app.websocket_core.utils import safe_websocket_close
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
-class TestSendAfterCloseRaceCondition:
+class SendAfterCloseRaceConditionTests:
     """Test WebSocket send-after-close race condition fix."""
 
     @pytest.fixture

@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestStagingAuthenticationConfigurationParity:
+class StagingAuthenticationConfigurationParityTests:
     """
     Environment parity tests for staging authentication configuration.
     

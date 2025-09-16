@@ -13,7 +13,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestConfigManagementIntegration(BaseIntegrationTest):
+class ConfigManagementIntegrationTests(BaseIntegrationTest):
     """Test configuration management integration."""
     
     @pytest.mark.integration

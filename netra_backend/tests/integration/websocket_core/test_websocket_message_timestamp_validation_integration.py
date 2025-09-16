@@ -27,7 +27,7 @@ from netra_backend.app.database.request_scoped_session_factory import get_isolat
 from test_framework.ssot.websocket import WebSocketTestHelper
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestWebSocketTimestampValidationIntegration:
+class WebSocketTimestampValidationIntegrationTests:
     """Integration tests for WebSocket timestamp validation with real services."""
 
     @pytest.fixture
@@ -157,7 +157,7 @@ class TestWebSocketTimestampValidationIntegration:
             assert any((keyword in error_str.lower() for keyword in ['timestamp', 'validation', 'float'])), f'Expected timestamp validation error in message buffer: {error_str}'
         await websocket_manager.remove_connection(connection_id)
 
-class TestTimestampValidationPerformanceIntegration:
+class TimestampValidationPerformanceIntegrationTests:
     """Performance integration tests for timestamp validation."""
 
     @pytest.fixture

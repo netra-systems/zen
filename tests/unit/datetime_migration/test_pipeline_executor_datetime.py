@@ -18,7 +18,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
-class TestPipelineExecutorDateTimeMigration(unittest.TestCase):
+class PipelineExecutorDateTimeMigrationTests(unittest.TestCase):
     """Test cases for agent pipeline executor datetime migration."""
 
     def setUp(self):
@@ -220,7 +220,7 @@ class TestPipelineExecutorDateTimeMigration(unittest.TestCase):
         self.assertTrue(log_new['timestamp'].endswith('+00:00'))
 
 
-class TestPipelineExecutorPerformance(unittest.TestCase):
+class PipelineExecutorPerformanceTests(unittest.TestCase):
     """Tests for pipeline executor performance tracking."""
 
     def test_step_timing_accuracy(self):

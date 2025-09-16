@@ -20,7 +20,7 @@ from collections import defaultdict
 
 
 @pytest.mark.unit
-class TestWebSocketSSOTComprehensiveValidation(unittest.TestCase):
+class WebSocketSSOTComprehensiveValidationTests(unittest.TestCase):
     """Comprehensive WebSocket SSOT compliance validation."""
 
     def setUp(self):

@@ -45,7 +45,7 @@ from shared.isolated_environment import get_env
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 
-class TestCompleteAgentChatFlowE2E(BaseE2ETest):
+class CompleteAgentChatFlowE2ETests(BaseE2ETest):
     """
     E2E test for complete agent chat flow using REAL services only.
     

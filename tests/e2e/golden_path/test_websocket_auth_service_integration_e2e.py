@@ -57,7 +57,7 @@ from shared.types.core_types import UserID, WebSocketID
 @pytest.mark.auth_service_integration
 @pytest.mark.asyncio
 @pytest.mark.websocket_auth
-class TestWebSocketAuthServiceIntegrationE2E(SSotAsyncTestCase):
+class WebSocketAuthServiceIntegrationE2ETests(SSotAsyncTestCase):
     """
     WebSocket Auth Service Integration Failure Detection Tests.
     

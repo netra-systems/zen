@@ -87,7 +87,7 @@ class CorpusClickHouseOperations:
             
         if not self._websocket_manager_created:
             try:
-                from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+                from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
                 self._websocket_manager = await create_websocket_manager(self.user_context)
                 self._websocket_manager_created = True
                 central_logger.info(

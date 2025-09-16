@@ -90,7 +90,7 @@ from netra_backend.app.db.transaction_errors import (
 
 @pytest.mark.database
 
-class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
+class MissingClickHouseExceptionTypesTests(SSotAsyncTestCase):
 
     """
 

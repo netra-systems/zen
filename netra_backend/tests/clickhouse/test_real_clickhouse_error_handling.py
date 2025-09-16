@@ -9,7 +9,7 @@ from netra_backend.tests.clickhouse.clickhouse_test_fixtures import get_clickhou
 from netra_backend.app.db.transaction_errors import ConnectionError
 
 
-class TestClickHouseErrorHandling:
+class ClickHouseErrorHandlingTests:
     """Test error handling and recovery"""
 
     @pytest.mark.asyncio

@@ -18,13 +18,13 @@ from datetime import datetime, timezone, timedelta
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.websocket import WebSocketTestUtility
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 from netra_backend.app.models import User, Thread
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestWebSocketRealTimeFeaturesIntegration(BaseIntegrationTest):
+class WebSocketRealTimeFeaturesIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket real-time features."""
     
     @pytest.fixture

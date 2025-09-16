@@ -24,7 +24,7 @@ from pathlib import Path
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestMissionCriticalWebSocketJWTSSOTViolations(SSotBaseTestCase):
+class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
     """
     Mission critical tests that detect P0 SSOT violations blocking Golden Path.
     These tests MUST FAIL initially to prove violations exist and justify SSOT consolidation.

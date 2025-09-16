@@ -40,7 +40,7 @@ class WorkflowStep:
     dependencies: List[str] = None
 
 
-class TestMultiAgentWorkflowCoordination(BaseIntegrationTest):
+class MultiAgentWorkflowCoordinationTests(BaseIntegrationTest):
     """Integration tests for multi-agent workflow coordination."""
 
     @pytest.mark.integration

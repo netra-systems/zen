@@ -19,7 +19,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker, ExecutionState, ExecutionRecord, AgentExecutionPhase
 from datetime import datetime, timezone
 
-class TestExecutionStateTransitionsBug(SSotBaseTestCase):
+class ExecutionStateTransitionsBugTests(SSotBaseTestCase):
     """Test to reproduce the ExecutionState transition bug."""
 
     def setup_method(self, method=None):

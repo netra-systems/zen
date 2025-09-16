@@ -76,7 +76,7 @@ class WebSocketEventTracker:
 
 
 @pytest.mark.e2e
-class TestWebSocketEventsBusinessCriticalStaging(SSotAsyncTestCase):
+class WebSocketEventsBusinessCriticalStagingTests(SSotAsyncTestCase):
     """
     Comprehensive validation of business-critical WebSocket events on staging.
     

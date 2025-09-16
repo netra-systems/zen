@@ -31,20 +31,20 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerSSotCompliance(SSotBaseTestCase):
+class WebSocketManagerSSotComplianceTests(SSotBaseTestCase):
     """Test suite to validate SSOT compliance for WebSocket Manager imports."""
 
     # CANONICAL SSOT import patterns (these are the ONLY allowed patterns)
     SSOT_IMPORT_PATTERNS = {
-        "unified_manager_import": "from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager",
-        "unified_manager_alias": "from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager"
+        "unified_manager_import": "from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager",
+        "unified_manager_alias": "from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager"
     }
 
     # PROHIBITED legacy import patterns
     PROHIBITED_IMPORT_PATTERNS = {
-        "websocket_manager_direct": "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+        "websocket_manager_direct": "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
         "websocket_manager_module": "from netra_backend.app.websocket_core import WebSocketManager",
-        "websocket_manager_star": "from netra_backend.app.websocket_core.websocket_manager import *",
+        "websocket_manager_star": "from netra_backend.app.websocket_core.canonical_import_patterns import *",
         "websocket_core_star": "from netra_backend.app.websocket_core import *"
     }
 

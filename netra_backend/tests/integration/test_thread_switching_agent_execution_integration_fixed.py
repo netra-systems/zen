@@ -46,7 +46,7 @@ class MockToolDispatcher:
         return {"result": f"Tool {tool_name} executed in thread {self.thread_id}"}
 
 
-class TestThreadSwitchingAgentExecutionIntegration(BaseIntegrationTest):
+class ThreadSwitchingAgentExecutionIntegrationTests(BaseIntegrationTest):
     """Integration tests for agent execution during thread switching"""
     
     # Tests 41-45: Agent Execution Context During Thread Switches

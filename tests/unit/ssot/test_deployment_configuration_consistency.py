@@ -34,7 +34,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestDeploymentConfigurationConsistency(SSotBaseTestCase):
+class DeploymentConfigurationConsistencyTests(SSotBaseTestCase):
     """
     Unit tests for deployment configuration consistency validation.
     

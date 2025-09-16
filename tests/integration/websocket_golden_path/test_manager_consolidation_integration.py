@@ -33,7 +33,7 @@ from typing import Any, Dict, List, Optional, Set
 from unittest.mock import Mock, AsyncMock, patch
 from dataclasses import dataclass
 import json
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 from netra_backend.app.logging_config import central_logger
 
@@ -59,7 +59,7 @@ class MockWebSocketConnection:
 
 
 @pytest.mark.integration
-class TestWebSocketManagerGoldenPathIntegration(SSotAsyncTestCase):
+class WebSocketManagerGoldenPathIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests to prove WebSocket manager consolidation violations break Golden Path.
     
@@ -143,7 +143,7 @@ class TestWebSocketManagerGoldenPathIntegration(SSotAsyncTestCase):
 
         # Test with alternative manager if factory fails
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # This should also fail due to constructor issues
             try:
@@ -200,7 +200,7 @@ class TestWebSocketManagerGoldenPathIntegration(SSotAsyncTestCase):
             event_violations.append(f"Factory manager unavailable: {e}")
             
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             direct_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             managers_to_test.append(('Direct-created', direct_manager, False))  # Direct instantiation
         except Exception as e:
@@ -431,7 +431,7 @@ class TestWebSocketManagerGoldenPathIntegration(SSotAsyncTestCase):
             error_recovery_violations.append(f"Factory manager unavailable: {e}")
             
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             direct_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             managers_to_test.append(('Direct', direct_manager, False))
         except Exception as e:

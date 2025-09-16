@@ -78,7 +78,7 @@ from shared.types import (
 )
 
 
-class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
+class UserContextTypeSafetyViolationsTests(SSotBaseTestCase):
     """
     CRITICAL FAILING TESTS: User Context Type Safety Violations
     
@@ -589,7 +589,7 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
         print(f"\n CHART:  Test Metrics: {test_metrics}")
 
 
-class TestUserContextTypeSafetyIntegration(SSotBaseTestCase):
+class UserContextTypeSafetyIntegrationTests(SSotBaseTestCase):
     """
     CRITICAL INTEGRATION TESTS: Multi-component type safety violations
     

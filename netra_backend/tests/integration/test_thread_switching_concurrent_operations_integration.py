@@ -27,7 +27,7 @@ from netra_backend.app.db.models_postgres import Thread, Message
 from netra_backend.app.websocket_core import create_websocket_manager
 
 
-class TestThreadSwitchingConcurrentOperations(BaseIntegrationTest):
+class ThreadSwitchingConcurrentOperationsTests(BaseIntegrationTest):
     """Integration tests for concurrent thread operations"""
     
     # Tests 61-65: Concurrent Thread Creation and Access

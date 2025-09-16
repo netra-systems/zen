@@ -8,7 +8,7 @@ from netra_backend.app.redis_manager import redis_manager
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestCostTracker:
+class CostTrackerTests:
     """Test cost tracking functionality."""
 
     def test_cost_tracker_initialization(self):

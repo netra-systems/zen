@@ -34,7 +34,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.integration
-class TestConfigurationConsolidationIntegration(SSotAsyncTestCase):
+class ConfigurationConsolidationIntegrationTests(SSotAsyncTestCase):
     """Integration tests for configuration consolidation across services."""
 
     def setup_method(self, method):

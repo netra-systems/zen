@@ -27,7 +27,7 @@ from datetime import datetime, timezone
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
-class TestExecutionTrackerSSotCompliance(SSotAsyncTestCase):
+class ExecutionTrackerSSotComplianceTests(SSotAsyncTestCase):
     """Test ExecutionTracker SSOT compliance across all implementations."""
 
     def setup_method(self):
@@ -257,7 +257,7 @@ class TestExecutionTrackerSSotCompliance(SSotAsyncTestCase):
 
 @pytest.mark.unit
 @pytest.mark.ssot_validation
-class TestExecutionTrackerConsolidationReadiness:
+class ExecutionTrackerConsolidationReadinessTests:
     """Test readiness for ExecutionTracker consolidation."""
 
     def test_execution_tracker_dependency_mapping(self):

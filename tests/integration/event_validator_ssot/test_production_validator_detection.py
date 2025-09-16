@@ -36,7 +36,7 @@ from collections import defaultdict
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.database_test_utilities import DatabaseTestUtilities
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 try:
     from netra_backend.app.services.websocket_error_validator import get_websocket_validator as get_production_validator, reset_websocket_validator as reset_production_validator
     production_validator_available = True
@@ -57,7 +57,7 @@ except ImportError as e:
     websocket_manager_import_error = str(e)
 
 @pytest.mark.integration
-class TestProductionValidatorDetection(SSotAsyncTestCase):
+class ProductionValidatorDetectionTests(SSotAsyncTestCase):
     """
     Integration tests for production EventValidator detection and analysis.
     

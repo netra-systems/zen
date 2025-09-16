@@ -37,7 +37,7 @@ from shared.isolated_environment import get_env
 
 from netra_backend.app.websocket.connection_handler import ConnectionHandler, ConnectionContext
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 
 
@@ -127,7 +127,7 @@ class RoutingTableValidator:
         return [entry for entry in self.entries if entry.is_stale(threshold_minutes)]
 
 
-class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
+class MessageRoutingTableAccuracyTests(BaseIntegrationTest):
     """Test message routing table accuracy and synchronization."""
     
     @pytest.mark.integration

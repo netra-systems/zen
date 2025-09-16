@@ -45,7 +45,7 @@ _postgresql_skip_reason = f"PostgreSQL unavailable: {_service_status['postgresql
 
 
 @pytest.mark.skipif(not _postgresql_available, reason=_postgresql_skip_reason)
-class TestStartupFinalizeDatabaseOperations(SSotBaseTestCase):
+class StartupFinalizeDatabaseOperationsTests(SSotBaseTestCase):
     """Integration tests for FINALIZE phase database system validation."""
     
     def setup_method(self, method):

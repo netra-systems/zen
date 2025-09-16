@@ -158,7 +158,7 @@ class MockBusinessTool:
         return base_result
 
 
-class TestToolDispatcherExecution(BaseIntegrationTest):
+class ToolDispatcherExecutionTests(BaseIntegrationTest):
     """Integration tests for tool dispatcher and execution functionality."""
     
     def setup_method(self):
@@ -1374,7 +1374,7 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
 
 # Additional helper test that validates the complete integration
 @pytest.mark.integration 
-class TestToolDispatcherSystemIntegration(BaseIntegrationTest):
+class ToolDispatcherSystemIntegrationTests(BaseIntegrationTest):
     """System-level integration tests for complete tool dispatcher functionality."""
     
     def setup_method(self):

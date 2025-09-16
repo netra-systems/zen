@@ -27,7 +27,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
 @pytest.mark.unit
-class TestJWTSecretStagingFailureReproduction:
+class JWTSecretStagingFailureReproductionTests:
     """Reproduce the exact JWT secret staging failures from GCP logs."""
 
     def setup_method(self):
@@ -365,7 +365,7 @@ class TestJWTSecretStagingFailureReproduction:
 
 
 @pytest.mark.unit
-class TestJWTSecretManagerEnvironmentIntegration:
+class JWTSecretManagerEnvironmentIntegrationTests:
     """Integration tests for JWT secret manager environment access patterns."""
 
     def setup_method(self):

@@ -30,7 +30,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import get_env
 
 
-class TestAuthServiceDelegation(BaseIntegrationTest):
+class AuthServiceDelegationTests(BaseIntegrationTest):
     """
     Integration tests for auth service delegation patterns.
     

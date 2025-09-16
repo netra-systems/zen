@@ -46,7 +46,7 @@ from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBr
 from shared.types.core_types import UserID, ThreadID, RunID
 
 @pytest.mark.integration
-class TestBaseAgentForIntegration(BaseAgent):
+class BaseAgentForIntegrationTests(BaseAgent):
     """Concrete test agent implementation for testing BaseAgent abstract patterns.
     
     This agent implements the modern UserExecutionContext pattern and provides
@@ -154,7 +154,7 @@ class TestBaseAgentForIntegration(BaseAgent):
             pass
 
 @pytest.mark.integration
-class TestBaseAgentIntegration(SSotAsyncTestCase):
+class BaseAgentIntegrationTests(SSotAsyncTestCase):
     """Integration tests for BaseAgent SSOT class functionality.
     
     Tests cover the complete BaseAgent lifecycle, LLM integration, WebSocket bridging,
@@ -198,7 +198,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_agent_state_transitions(self):
         """Test proper agent state transitions through lifecycle."""
-        agent = TestBaseAgentForIntegration()
+        agent = BaseAgentForIntegrationTests()
         self.assertEqual(agent.state, SubAgentLifecycle.PENDING)
         agent.set_state(SubAgentLifecycle.RUNNING)
         self.assertEqual(agent.state, SubAgentLifecycle.RUNNING)
@@ -212,7 +212,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_agent_execution_with_context_pattern(self):
         """Test agent execution using modern UserExecutionContext pattern."""
-        agent = TestBaseAgentForIntegration()
+        agent = BaseAgentForIntegrationTests()
         context = self._create_test_user_context(user_id=self.test_user_1, agent_context={'user_request': 'analyze data patterns'})
         start_time = time.time()
         result = await agent.execute(context=context, stream_updates=True)
@@ -234,7 +234,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_agent_reset_state_functionality(self):
         """Test agent state reset for safe reuse across requests."""
-        agent = TestBaseAgentForIntegration()
+        agent = BaseAgentForIntegrationTests()
         context1 = self._create_test_user_context(user_id=self.test_user_1, agent_context={'user_request': 'first request'})
         await agent.execute(context=context1)
         self.assertEqual(agent.execution_count, 1)
@@ -252,7 +252,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_agent_shutdown_graceful(self):
         """Test graceful agent shutdown and resource cleanup."""
-        agent = TestBaseAgentForIntegration()
+        agent = BaseAgentForIntegrationTests()
         context = self._create_test_user_context()
         await agent.execute(context=context)
         await agent.shutdown()
@@ -264,12 +264,12 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_llm_correlation_id_generation(self):
         """Test LLM correlation ID generation and consistency."""
-        agent = TestBaseAgentForIntegration()
+        agent = BaseAgentForIntegrationTests()
         correlation_id1 = agent.correlation_id
         self.assertIsNotNone(correlation_id1)
         self.assertTrue(isinstance(correlation_id1, str))
         self.assertGreater(len(correlation_id1), 10)
-        agent2 = TestBaseAgentForIntegration()
+        agent2 = BaseAgentForIntegrationTests()
         correlation_id2 = agent2.correlation_id
         self.assertNotEqual(correlation_id1, correlation_id2)
         context = self._create_test_user_context()
@@ -286,7 +286,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
         mock_llm_manager = AsyncMock()
         mock_llm_manager.generate_async.return_value = {'response': 'Test LLM response', 'token_usage': {'input_tokens': 10, 'output_tokens': 15}, 'model': 'test-model'}
         mock_llm_manager_class.return_value = mock_llm_manager
-        agent = TestBaseAgentForIntegration(llm_manager=mock_llm_manager)
+        agent = BaseAgentForIntegrationTests(llm_manager=mock_llm_manager)
         context = self._create_test_user_context(agent_context={'user_request': 'Generate creative content'})
         result = await agent.execute(context=context)
         self.assertEqual(result['status'], 'success')
@@ -299,7 +299,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_token_usage_tracking(self):
         """Test token usage tracking and cost optimization features."""
-        agent = TestBaseAgentForIntegration()
+        agent = BaseAgentForIntegrationTests()
         context = self._create_test_user_context()
         self.assertIsNotNone(agent.token_counter)
         summary = agent.get_token_usage_summary(context)
@@ -310,7 +310,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_llm_error_handling_patterns(self):
         """Test LLM error handling and fallback patterns."""
-        agent = TestBaseAgentForIntegration()
+        agent = BaseAgentForIntegrationTests()
         agent.set_failure_simulation('ConnectionError', 'LLM service unavailable')
         context = self._create_test_user_context()
         with self.expect_exception(ConnectionError, 'LLM service unavailable'):
@@ -327,7 +327,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_websocket_bridge_adapter_integration(self):
         """Test WebSocket bridge adapter integration for event emission."""
-        agent = TestBaseAgentForIntegration()
+        agent = BaseAgentForIntegrationTests()
         self.assertIsNotNone(agent._websocket_adapter)
         self.assertTrue(isinstance(agent._websocket_adapter, WebSocketBridgeAdapter))
         self.assertFalse(agent.has_websocket_context())
@@ -339,7 +339,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_websocket_event_emission_with_context(self):
         """Test WebSocket event emission with UserExecutionContext."""
-        agent = TestBaseAgentForIntegration()
+        agent = BaseAgentForIntegrationTests()
         context = self._create_test_user_context()
         agent.set_user_context(context)
         result = await agent.execute(context=context, stream_updates=True)
@@ -352,8 +352,8 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_websocket_user_isolation(self):
         """Test WebSocket event isolation between different users."""
-        agent1 = TestBaseAgentForIntegration()
-        agent2 = TestBaseAgentForIntegration()
+        agent1 = BaseAgentForIntegrationTests()
+        agent2 = BaseAgentForIntegrationTests()
         context1 = self._create_test_user_context(user_id=self.test_user_1)
         context2 = self._create_test_user_context(user_id=self.test_user_2)
         agent1.set_user_context(context1)
@@ -371,7 +371,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_websocket_error_emission(self):
         """Test WebSocket error event emission and handling."""
-        agent = TestBaseAgentForIntegration()
+        agent = BaseAgentForIntegrationTests()
         context = self._create_test_user_context()
         agent.set_failure_simulation('ValueError', 'Test error for WebSocket emission')
         with self.expect_exception(ValueError):
@@ -382,7 +382,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_unified_retry_handler_integration(self):
         """Test integration with UnifiedRetryHandler for resilience."""
-        agent = TestBaseAgentForIntegration(enable_reliability=True)
+        agent = BaseAgentForIntegrationTests(enable_reliability=True)
         self.assertIsNotNone(agent.unified_reliability_handler)
         self.assertTrue(isinstance(agent.unified_reliability_handler, UnifiedRetryHandler))
         cb_status = agent.get_circuit_breaker_status()
@@ -395,7 +395,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_agent_retry_with_transient_failures(self):
         """Test agent retry behavior with transient failures."""
-        agent = TestBaseAgentForIntegration()
+        agent = BaseAgentForIntegrationTests()
         context = self._create_test_user_context()
         agent.retry_attempts = 0
 
@@ -410,7 +410,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_circuit_breaker_behavior(self):
         """Test circuit breaker behavior under failure conditions."""
-        agent = TestBaseAgentForIntegration(enable_reliability=True)
+        agent = BaseAgentForIntegrationTests(enable_reliability=True)
         initial_status = agent.get_circuit_breaker_status()
         initial_state = initial_status.get('state', 'closed').lower()
         self.assertTrue(agent.circuit_breaker.can_execute())
@@ -422,7 +422,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_fallback_execution_patterns(self):
         """Test fallback execution patterns for service degradation."""
-        agent = TestBaseAgentForIntegration()
+        agent = BaseAgentForIntegrationTests()
         context = self._create_test_user_context()
         fallback_responses = {'connection': {'status': 'fallback', 'message': 'Using cached response'}, 'timeout': {'status': 'fallback', 'message': 'Request timed out, using default'}}
         agent.set_failure_simulation('ConnectionError', 'Service connection failed')
@@ -433,7 +433,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_user_execution_context_validation(self):
         """Test UserExecutionContext validation and isolation."""
-        agent = TestBaseAgentForIntegration()
+        agent = BaseAgentForIntegrationTests()
         valid_context = self._create_test_user_context()
         validated_context = validate_user_context(valid_context)
         self.assertEqual(validated_context.user_id, valid_context.user_id)
@@ -446,8 +446,8 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_concurrent_user_isolation(self):
         """Test that concurrent users maintain complete isolation."""
-        agent1 = TestBaseAgentForIntegration()
-        agent2 = TestBaseAgentForIntegration()
+        agent1 = BaseAgentForIntegrationTests()
+        agent2 = BaseAgentForIntegrationTests()
         context1 = self._create_test_user_context(user_id=self.test_user_1, agent_context={'user_request': 'user 1 request'})
         context2 = self._create_test_user_context(user_id=self.test_user_2, agent_context={'user_request': 'user 2 request'})
         results = await asyncio.gather(agent1.execute(context=context1), agent2.execute(context=context2), return_exceptions=True)
@@ -463,7 +463,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_session_isolation_validation(self):
         """Test database session isolation validation."""
-        agent = TestBaseAgentForIntegration()
+        agent = BaseAgentForIntegrationTests()
         agent._validate_session_isolation()
         validation = agent.validate_modern_implementation()
         self.assertTrue(validation['compliant'])
@@ -474,7 +474,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
 
     async def test_metadata_storage_isolation(self):
         """Test metadata storage isolation between contexts."""
-        agent = TestBaseAgentForIntegration()
+        agent = BaseAgentForIntegrationTests()
         context1 = self._create_test_user_context(user_id=self.test_user_1, agent_context={'test_key': 'user1_value', 'user_type': 'user1'})
         context2 = self._create_test_user_context(user_id=self.test_user_2, agent_context={'test_key': 'user2_value', 'user_type': 'user2'})
         value1 = agent.get_metadata_value(context1, 'test_key')

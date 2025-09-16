@@ -26,12 +26,12 @@ from shared.isolated_environment import IsolatedEnvironment
 
 # ABSOLUTE IMPORTS ONLY per Claude.md
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 
 
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestAuthenticationFlow:
+class AuthenticationFlowTests:
     """Test suite for real authentication flows protecting business value."""
 
     def get_service_urls(self) -> Dict[str, str]:
