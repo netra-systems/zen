@@ -1,0 +1,61 @@
+{
+  "start_time": "2025-09-15T23:34:51.714417",
+  "end_time": "2025-09-15T23:34:58.316612",
+  "total_duration": 6.602177858352661,
+  "overall_success": false,
+  "staging_environment": "https://*.staging.netrasystems.ai",
+  "test_results": {
+    "health": {
+      "test_staging_authentication_service_health.py": {
+        "success": false,
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "failed_tests": [],
+        "duration": 2.2298901081085205,
+        "output": "[CONFTEST] Synced JWT_SECRET_KEY from IsolatedEnvironment to os.environ\n[CONFTEST] Synced SERVICE_SECRET from IsolatedEnvironment to os.environ\n[CONFTEST] Synced AUTH_SERVICE_URL from IsolatedEnvironment to os.environ\n[CONFTEST] Synced POSTGRES_HOST from IsolatedEnvironment to os.environ\n[CONFTEST] Synced POSTGRES_PORT from IsolatedEnvironment to os.environ\n[CONFTEST] Synced POSTGRES_USER from IsolatedEnvironment to os.environ\n[CONFTEST] Synced POSTGRES_PASSWORD from IsolatedEnvironment to os.environ\n[CONFTEST] Synced REDIS_HOST from IsolatedEnvironment to os.environ\n[CONFTEST] Synced REDIS_PORT from IsolatedEnvironment to os.environ\n[CONFTEST] Synced GOOGLE_OAUTH_CLIENT_ID_TEST from IsolatedEnvironment to os.environ\n[CONFTEST] Synced GOOGLE_OAUTH_CLIENT_SECRET_TEST from IsolatedEnvironment to os.environ\n[CONFTEST] Set JWT_SECRET from JWT_SECRET_KEY for backward compatibility\n\n======================================================================\nSTAGING E2E TEST SESSION STARTED\nTime: 2025-09-15 23:34:53\nInfrastructure Status: UNAVAILABLE\n\u26a0\ufe0f  WARNING: Critical infrastructure services are unavailable\nTests may be skipped or run in fallback mode\n======================================================================\n============================= test session starts ==============================\nplatform darwin -- Python 3.13.7, pytest-8.4.2, pluggy-1.6.0 -- /opt/homebrew/opt/python@3.13/bin/python3.13\ncachedir: .pytest_cache\nmetadata: {'Python': '3.13.7', 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O', 'Packages': {'pytest': '8.4.2', 'pluggy': '1.6.0'}, 'Plugins': {'html': '4.1.1', 'asyncio': '1.1.0', 'xdist': '3.8.0', 'mock': '3.15.0', 'timeout': '2.4.0', 'metadata': '3.1.1', 'anyio': '4.10.0', 'Faker': '37.6.0', 'cov': '7.0.0', 'langsmith': '0.4.27'}}\nrootdir: /Users/anthony/Desktop/netra-apex\nconfigfile: pyproject.toml\nplugins: html-4.1.1, asyncio-1.1.0, xdist-3.8.0, mock-3.15.0, timeout-2.4.0, metadata-3.1.1, anyio-4.10.0, Faker-37.6.0, cov-7.0.0, langsmith-0.4.27\nasyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function\ncollecting ... collected 7 items\n\ntests/e2e/staging/test_staging_authentication_service_health.py::StagingAuthenticationServiceHealthTests::test_staging_auth_service_e2e_authentication_flow PASSED\ntests/e2e/staging/test_staging_authentication_service_health.py::StagingAuthenticationServiceHealthTests::test_staging_auth_service_health_comprehensive PASSED\ntests/e2e/staging/test_staging_authentication_service_health.py::StagingAuthenticationServiceHealthTests::test_staging_backend_api_service_health PASSED\ntests/e2e/staging/test_staging_authentication_service_health.py::StagingAuthenticationServiceHealthTests::test_staging_environment_readiness_summary PASSED\ntests/e2e/staging/test_staging_authentication_service_health.py::StagingAuthenticationServiceHealthTests::test_staging_service_dependencies_integration PASSED\ntests/e2e/staging/test_staging_authentication_service_health.py::StagingAuthenticationServiceHealthTests::test_staging_websocket_authenticated_connection PASSED\ntests/e2e/staging/test_staging_authentication_service_health.py::StagingAuthenticationServiceHealthTests::test_staging_websocket_service_basic_connectivity PASSED\nTest report saved to: /Users/anthony/Desktop/netra-apex/STAGING_TEST_REPORT_PYTEST.md\n\n=== Memory Usage Report ===\nLoaded fixture modules: base, mocks\nPeak memory usage: 220.5 MB\n\n\n======================== 7 passed, 15 warnings in 0.27s ========================\n",
+        "error": null
+      }
+    },
+    "websocket_events": {
+      "test_websocket_events_business_critical_staging.py": {
+        "success": false,
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "failed_tests": [],
+        "duration": 2.1836841106414795,
+        "output": "[CONFTEST] Synced JWT_SECRET_KEY from IsolatedEnvironment to os.environ\n[CONFTEST] Synced SERVICE_SECRET from IsolatedEnvironment to os.environ\n[CONFTEST] Synced AUTH_SERVICE_URL from IsolatedEnvironment to os.environ\n[CONFTEST] Synced POSTGRES_HOST from IsolatedEnvironment to os.environ\n[CONFTEST] Synced POSTGRES_PORT from IsolatedEnvironment to os.environ\n[CONFTEST] Synced POSTGRES_USER from IsolatedEnvironment to os.environ\n[CONFTEST] Synced POSTGRES_PASSWORD from IsolatedEnvironment to os.environ\n[CONFTEST] Synced REDIS_HOST from IsolatedEnvironment to os.environ\n[CONFTEST] Synced REDIS_PORT from IsolatedEnvironment to os.environ\n[CONFTEST] Synced GOOGLE_OAUTH_CLIENT_ID_TEST from IsolatedEnvironment to os.environ\n[CONFTEST] Synced GOOGLE_OAUTH_CLIENT_SECRET_TEST from IsolatedEnvironment to os.environ\n[CONFTEST] Set JWT_SECRET from JWT_SECRET_KEY for backward compatibility\n\n======================================================================\nSTAGING E2E TEST SESSION STARTED\nTime: 2025-09-15 23:34:55\nInfrastructure Status: UNAVAILABLE\n\u26a0\ufe0f  WARNING: Critical infrastructure services are unavailable\nTests may be skipped or run in fallback mode\n======================================================================\n============================= test session starts ==============================\nplatform darwin -- Python 3.13.7, pytest-8.4.2, pluggy-1.6.0 -- /opt/homebrew/opt/python@3.13/bin/python3.13\ncachedir: .pytest_cache\nmetadata: {'Python': '3.13.7', 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O', 'Packages': {'pytest': '8.4.2', 'pluggy': '1.6.0'}, 'Plugins': {'html': '4.1.1', 'asyncio': '1.1.0', 'xdist': '3.8.0', 'mock': '3.15.0', 'timeout': '2.4.0', 'metadata': '3.1.1', 'anyio': '4.10.0', 'Faker': '37.6.0', 'cov': '7.0.0', 'langsmith': '0.4.27'}}\nrootdir: /Users/anthony/Desktop/netra-apex\nconfigfile: pyproject.toml\nplugins: html-4.1.1, asyncio-1.1.0, xdist-3.8.0, mock-3.15.0, timeout-2.4.0, metadata-3.1.1, anyio-4.10.0, Faker-37.6.0, cov-7.0.0, langsmith-0.4.27\nasyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function\ncollecting ... collected 5 items\n\ntests/e2e/staging/test_websocket_events_business_critical_staging.py::WebSocketEventsBusinessCriticalStagingTests::test_all_business_critical_events_delivered_staging PASSED\ntests/e2e/staging/test_websocket_events_business_critical_staging.py::WebSocketEventsBusinessCriticalStagingTests::test_websocket_events_business_value_metrics PASSED\ntests/e2e/staging/test_websocket_events_business_critical_staging.py::WebSocketEventsBusinessCriticalStagingTests::test_websocket_events_content_quality_staging PASSED\ntests/e2e/staging/test_websocket_events_business_critical_staging.py::WebSocketEventsBusinessCriticalStagingTests::test_websocket_events_proper_sequence_staging PASSED\ntests/e2e/staging/test_websocket_events_business_critical_staging.py::WebSocketEventsBusinessCriticalStagingTests::test_websocket_events_reliability_under_staging_load PASSED\nTest report saved to: /Users/anthony/Desktop/netra-apex/STAGING_TEST_REPORT_PYTEST.md\n\n=== Memory Usage Report ===\nLoaded fixture modules: base, mocks\nPeak memory usage: 225.9 MB\n\n\n======================== 5 passed, 11 warnings in 0.25s ========================\n",
+        "error": null
+      }
+    },
+    "end_to_end": {
+      "test_golden_path_end_to_end_staging_validation.py": {
+        "success": false,
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "failed_tests": [],
+        "duration": 2.188436985015869,
+        "output": "[CONFTEST] Synced JWT_SECRET_KEY from IsolatedEnvironment to os.environ\n[CONFTEST] Synced SERVICE_SECRET from IsolatedEnvironment to os.environ\n[CONFTEST] Synced AUTH_SERVICE_URL from IsolatedEnvironment to os.environ\n[CONFTEST] Synced POSTGRES_HOST from IsolatedEnvironment to os.environ\n[CONFTEST] Synced POSTGRES_PORT from IsolatedEnvironment to os.environ\n[CONFTEST] Synced POSTGRES_USER from IsolatedEnvironment to os.environ\n[CONFTEST] Synced POSTGRES_PASSWORD from IsolatedEnvironment to os.environ\n[CONFTEST] Synced REDIS_HOST from IsolatedEnvironment to os.environ\n[CONFTEST] Synced REDIS_PORT from IsolatedEnvironment to os.environ\n[CONFTEST] Synced GOOGLE_OAUTH_CLIENT_ID_TEST from IsolatedEnvironment to os.environ\n[CONFTEST] Synced GOOGLE_OAUTH_CLIENT_SECRET_TEST from IsolatedEnvironment to os.environ\n[CONFTEST] Set JWT_SECRET from JWT_SECRET_KEY for backward compatibility\n\n======================================================================\nSTAGING E2E TEST SESSION STARTED\nTime: 2025-09-15 23:34:57\nInfrastructure Status: UNAVAILABLE\n\u26a0\ufe0f  WARNING: Critical infrastructure services are unavailable\nTests may be skipped or run in fallback mode\n======================================================================\n============================= test session starts ==============================\nplatform darwin -- Python 3.13.7, pytest-8.4.2, pluggy-1.6.0 -- /opt/homebrew/opt/python@3.13/bin/python3.13\ncachedir: .pytest_cache\nmetadata: {'Python': '3.13.7', 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O', 'Packages': {'pytest': '8.4.2', 'pluggy': '1.6.0'}, 'Plugins': {'html': '4.1.1', 'asyncio': '1.1.0', 'xdist': '3.8.0', 'mock': '3.15.0', 'timeout': '2.4.0', 'metadata': '3.1.1', 'anyio': '4.10.0', 'Faker': '37.6.0', 'cov': '7.0.0', 'langsmith': '0.4.27'}}\nrootdir: /Users/anthony/Desktop/netra-apex\nconfigfile: pyproject.toml\nplugins: html-4.1.1, asyncio-1.1.0, xdist-3.8.0, mock-3.15.0, timeout-2.4.0, metadata-3.1.1, anyio-4.10.0, Faker-37.6.0, cov-7.0.0, langsmith-0.4.27\nasyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function\ncollecting ... collected 7 items\n\ntests/e2e/staging/test_golden_path_end_to_end_staging_validation.py::GoldenPathEndToEndStagingValidationTests::test_golden_path_complete_user_message_to_ai_response_flow PASSED\ntests/e2e/staging/test_golden_path_end_to_end_staging_validation.py::GoldenPathEndToEndStagingValidationTests::test_golden_path_error_recovery_and_graceful_degradation PASSED\ntests/e2e/staging/test_golden_path_end_to_end_staging_validation.py::GoldenPathEndToEndStagingValidationTests::test_golden_path_multi_user_isolation_validation PASSED\ntests/e2e/staging/test_golden_path_end_to_end_staging_validation.py::GoldenPathEndToEndStagingValidationTests::test_golden_path_user_authentication_flow PASSED\ntests/e2e/staging/test_golden_path_end_to_end_staging_validation.py::GoldenPathEndToEndStagingValidationTests::test_golden_path_websocket_connection_with_auth PASSED\ntests/e2e/staging/test_golden_path_end_to_end_staging_validation.py::GoldenPathEndToEndStagingValidationTests::test_golden_path_websocket_event_delivery_under_load PASSED\ntests/e2e/staging/test_golden_path_end_to_end_staging_validation.py::GoldenPathEndToEndStagingValidationTests::test_staging_environment_health_check PASSED\nTest report saved to: /Users/anthony/Desktop/netra-apex/STAGING_TEST_REPORT_PYTEST.md\n\n=== Memory Usage Report ===\nLoaded fixture modules: base, mocks\nPeak memory usage: 226.3 MB\n\n\n======================== 7 passed, 15 warnings in 0.24s ========================\n",
+        "error": null
+      }
+    }
+  },
+  "summary": {
+    "total_categories": 3,
+    "passed_categories": 0,
+    "failed_categories": 3,
+    "total_tests": 0,
+    "passed_tests": 0,
+    "failed_tests": 0,
+    "golden_path_ready": false,
+    "blocking_issues": [],
+    "performance_warnings": [],
+    "success_rate": 0
+  },
+  "recommendations": [
+    "\ud83d\udea8 CRITICAL: Golden Path not ready for production deployment",
+    "\ud83d\udcc8 Improve test success rate from 0.0% to >90%"
+  ]
+}
