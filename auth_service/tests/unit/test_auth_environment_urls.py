@@ -77,7 +77,7 @@
 
         # REMOVED_SYNTAX_ERROR: assert auth_env.get_environment() == 'staging'
         # REMOVED_SYNTAX_ERROR: assert auth_env.get_frontend_url() == 'https://app.staging.netrasystems.ai'
-        # REMOVED_SYNTAX_ERROR: assert auth_env.get_backend_url() == 'https://backend.staging.netrasystems.ai'
+        # REMOVED_SYNTAX_ERROR: assert auth_env.get_backend_url() == 'https://api.staging.netrasystems.ai'
         # REMOVED_SYNTAX_ERROR: assert auth_env.get_auth_service_url() == 'https://auth.staging.netrasystems.ai'
         # REMOVED_SYNTAX_ERROR: assert auth_env.get_oauth_redirect_uri() == 'https://app.staging.netrasystems.ai/auth/callback'
 
@@ -126,7 +126,7 @@
         # Frontend is overridden
         # REMOVED_SYNTAX_ERROR: assert auth_env.get_frontend_url() == 'https://override.staging.com'
         # Backend uses staging default
-        # REMOVED_SYNTAX_ERROR: assert auth_env.get_backend_url() == 'https://backend.staging.netrasystems.ai'
+        # REMOVED_SYNTAX_ERROR: assert auth_env.get_backend_url() == 'https://api.staging.netrasystems.ai'
         # Auth uses staging default
         # REMOVED_SYNTAX_ERROR: assert auth_env.get_auth_service_url() == 'https://auth.staging.netrasystems.ai'
         # OAuth redirect uses overridden frontend
