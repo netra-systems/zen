@@ -8,7 +8,7 @@ import pickle
 import pytest
 import sys
 from unittest.mock import MagicMock, patch, AsyncMock
-from netra_backend.app.cache.redis_cache_manager import RedisCacheManager
+from netra_backend.app.redis_manager import RedisManager as RedisCacheManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 

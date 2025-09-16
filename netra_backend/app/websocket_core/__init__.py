@@ -118,12 +118,31 @@ try:
     from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
     from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
+
+    # REMEDIATION: Add missing exports for test compatibility (Issue #1176 Phase 2 Fix)
+    from netra_backend.app.websocket_core.types import create_server_message, create_error_message
 except ImportError as e:
     # FAIL FAST: Critical WebSocket components must be available
     raise ImportError(
         f"CRITICAL: Core WebSocket components import failed: {e}. "
         f"This indicates a dependency issue that must be resolved."
     ) from e
+
+# REMEDIATION: Optional imports for test compatibility (may not exist in all environments)
+try:
+    from netra_backend.app.websocket_core.connection_state_machine import ConnectionStateMachine
+except ImportError:
+    ConnectionStateMachine = None
+
+try:
+    from netra_backend.app.websocket_core.message_queue import MessageQueue
+except ImportError:
+    MessageQueue = None
+
+try:
+    from netra_backend.app.websocket_core.websocket_manager import websocket_manager
+except ImportError:
+    websocket_manager = None
 
 # SSOT COMPLIANCE: Factory pattern eliminated - use direct WebSocketManager import
 # from netra_backend.app.websocket_core.websocket_manager_factory import (
@@ -237,6 +256,10 @@ __all__ = [
     "UnifiedWebSocketEmitter",    # CANONICAL: unified_emitter.py
     "WebSocketManagerProtocol",   # CANONICAL: protocols.py
 
+    # REMEDIATION: Critical missing exports for test compatibility (Issue #1176 Phase 2 Fix)
+    "create_server_message",      # CANONICAL: types.py
+    "create_error_message",       # CANONICAL: types.py
+
     # Backward compatibility only - prefer direct imports
     "create_websocket_manager",
 
@@ -258,6 +281,18 @@ __all__ = [
     # from netra_backend.app.websocket_core.connection_state_machine import ConnectionStateMachine
     # etc.
 ]
+
+# REMEDIATION: Conditionally add optional exports if available
+# These components may not exist in all environments
+_optional_exports = []
+if ConnectionStateMachine is not None:
+    _optional_exports.append("ConnectionStateMachine")
+if MessageQueue is not None:
+    _optional_exports.append("MessageQueue")
+if websocket_manager is not None:
+    _optional_exports.append("websocket_manager")
+
+__all__.extend(_optional_exports)
 
 
 # GOLDEN PATH PHASE 3 FIX: Export get_websocket_manager for mission critical tests

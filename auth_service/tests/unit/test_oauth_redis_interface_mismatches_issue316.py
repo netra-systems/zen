@@ -38,7 +38,7 @@ from datetime import datetime, timezone, timedelta
 # Test existing SSOT OAuth classes (these should work)
 from auth_service.auth_core.oauth.oauth_business_logic import OAuthBusinessLogic, OAuthUserResult  
 from auth_service.auth_core.oauth_manager import OAuthManager
-from auth_service.auth_core.redis_manager import AuthRedisManager
+from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
 
 
 class OAuthRedisInterfaceMismatchesIssue316Tests:

@@ -169,7 +169,7 @@ class AuthDatabaseConnection:
         # Only add PostgreSQL-specific connection args for PostgreSQL databases
         if not database_url.startswith('sqlite'):
             connect_args = {
-                "command_timeout": 15,  # Command timeout for PostgreSQL/asyncpg
+                "command_timeout": 30,  # Command timeout for PostgreSQL/asyncpg - aligned with backend service
                 "server_settings": {
                     "application_name": f"netra_auth_{self.environment}",
                 }

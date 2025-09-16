@@ -10,7 +10,7 @@ import time
 from typing import Any, Dict, Optional
 
 # Temporarily disable Redis dependency for microservice independence
-# from auth_service.auth_core.redis_manager import auth_redis_manager
+# from netra_backend.app.redis_manager import redis_manager as auth_redis_manager
 
 logger = logging.getLogger(__name__)
 

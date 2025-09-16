@@ -28,7 +28,7 @@ from netra_backend.app.services.tool_permission_service import (
 )
 from netra_backend.app.services.tool_permissions.rate_limiter import RateLimiter
 from netra_backend.app.schemas.user_plan import PlanTier, PLAN_DEFINITIONS, UsageRecord
-from netra_backend.app.core.redis_connection_handler import RedisConnectionHandler
+from netra_backend.app.redis_manager import redis_manager as RedisConnectionHandler
 
 
 @pytest.mark.integration

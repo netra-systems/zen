@@ -87,8 +87,10 @@ class AuthenticatedCompleteUserJourneyBusinessValueTests(SSotAsyncTestCase):
         self._user_context = None
     
     @pytest.fixture(autouse=True)
-    async def auto_async_setup(self):
+    async def auto_async_setup(self, real_services_fixture):
         """Auto-executed async setup fixture - CRITICAL FIX for Issue #764."""
+        # Store real services fixture for use in test methods
+        self._real_services_fixture = real_services_fixture
         await self.async_setup_method()
         
     async def async_setup_method(self, method=None):
@@ -115,7 +117,7 @@ class AuthenticatedCompleteUserJourneyBusinessValueTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(90)  # Allow time for authenticated flows
     @pytest.mark.asyncio
-    async def test_complete_authenticated_user_journey_with_business_value(self, real_services_fixture):
+    async def test_complete_authenticated_user_journey_with_business_value(self):
         """
         PHASE 1 CRITICAL: Complete authenticated user journey with business value delivery.
         
@@ -397,7 +399,7 @@ class AuthenticatedCompleteUserJourneyBusinessValueTests(SSotAsyncTestCase):
         print(f"   [U+1F4C8] $500K+ ARR protection: VALIDATED")
 
     @pytest.mark.asyncio
-    async def test_authentication_failure_prevention(self, real_services_fixture):
+    async def test_authentication_failure_prevention(self):
         """
         PHASE 1 CRITICAL: Verify that operations fail without authentication.
         

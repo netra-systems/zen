@@ -11,6 +11,7 @@ ISSUE: ${1 : one recent open issue}
  
 If ISSUE is not a single literal number:
     Search git issues to determine most important issue to work on relative to ISSUE text.
+    Be mindful of dependency tags
     Then set ISSUE = to that number
 
 SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)

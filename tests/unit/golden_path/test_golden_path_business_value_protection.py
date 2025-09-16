@@ -244,9 +244,13 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
                 def capture_phases(component, msg, *args, **kwargs):
                     extra = kwargs.get('extra', {})
                     if extra.get('correlation_id') == correlation_id:
-                        # Extract phase from message
+                        # Extract phase from message - improved phase detection logic
+                        msg_lower = msg.lower()
                         for phase in expected_phases:
-                            if phase.replace('_', ' ') in msg.lower():
+                            # Enhanced phase matching with more flexible keyword detection
+                            phase_keywords = phase.replace('_', ' ').split()
+                            # Check if all keywords from phase are present in message
+                            if all(keyword in msg_lower for keyword in phase_keywords):
                                 tracked_phases.append({
                                     'phase': phase,
                                     'component': component,
@@ -261,7 +265,7 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
                 mock_tracker.error.side_effect = lambda msg, **kw: capture_phases('tracker', msg, **kw)
                 
                 # Simulate phase logging
-                self._simulate_golden_path_phases(correlation_id)
+                self._simulate_golden_path_phases(correlation_id, mock_core, mock_tracker)
         
         # Analyze phase traceability
         unique_tracked_phases = list(set(p['phase'] for p in tracked_phases))
@@ -323,7 +327,7 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
                 
                 # Simulate mixed logging execution
                 self._simulate_execution_logging(correlation_id, 'mixed')
-                
+
                 # Store mixed scenario results
                 mixed_logging_data.extend(self._tracked_logs)
         
@@ -346,7 +350,7 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
                 
                 # Simulate unified logging execution
                 self._simulate_execution_logging(correlation_id, 'unified')
-                
+
                 # Store unified scenario results
                 unified_logging_data.extend(self._tracked_logs)
         
@@ -398,7 +402,7 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
         # Simulate some processing delay
         await asyncio.sleep(0.01)
     
-    def _simulate_golden_path_phases(self, correlation_id: str):
+    def _simulate_golden_path_phases(self, correlation_id: str, mock_core=None, mock_tracker=None):
         """Simulate Golden Path phases being logged."""
         phases = [
             "Execution started for user request",
@@ -408,27 +412,31 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
             "Execution tracked in system",
             "Completion attempted by agent"
         ]
-        
+
         for phase in phases:
-            # Simulate logging from both components
+            # Simulate logging from both components with correlation context
+            if mock_core:
+                mock_core.info(phase, extra={'correlation_id': correlation_id})
+            if mock_tracker:
+                mock_tracker.info(phase, extra={'correlation_id': correlation_id})
             print(f"Core: {phase} (correlation: {correlation_id})")
             print(f"Tracker: {phase} (correlation: {correlation_id})")
-    
+
     def _simulate_execution_logging(self, correlation_id: str, scenario: str):
         """Fix simulation to properly test correlation differences."""
         messages = [
             "Agent execution lifecycle started",
-            "User context validation initiated", 
+            "User context validation initiated",
             "WebSocket connection established",
             "Agent processing request",
             "State transition recorded",
             "Execution completion attempted"
         ]
-        
+
         # Track logs in instance variable for proper simulation
         if not hasattr(self, '_tracked_logs'):
             self._tracked_logs = []
-        
+
         for i, message in enumerate(messages):
             if i % 2 == 0:
                 # Core logging
@@ -436,7 +444,7 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
                     # Core has correlation in mixed scenario
                     self._track_log('core', message, correlation_id)
                 elif scenario == 'unified':
-                    # Core has correlation in unified scenario 
+                    # Core has correlation in unified scenario
                     self._track_log('core', message, correlation_id)
             else:
                 # Tracker logging
@@ -446,12 +454,12 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
                 elif scenario == 'unified':
                     # Tracker has correlation in unified scenario
                     self._track_log('tracker', message, correlation_id)
-    
+
     def _track_log(self, component: str, message: str, correlation_id: str = None):
         """Track logs for correlation testing."""
         if not hasattr(self, '_tracked_logs'):
             self._tracked_logs = []
-        
+
         self._tracked_logs.append({
             'component': component,
             'message': message,

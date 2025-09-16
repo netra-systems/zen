@@ -36,7 +36,7 @@ from shared.types import (
     StronglyTypedUserExecutionContext, WebSocketConnectionInfo, SessionID
 )
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import create_websocket_manager
 from netra_backend.app.services.state_persistence import StateCacheManager
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 

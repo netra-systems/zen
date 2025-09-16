@@ -51,7 +51,8 @@ class SupplyResearchService:
         self.validation = SupplyValidation()
         
         try:
-            self.redis_manager = RedisManager()
+            from netra_backend.app.redis_manager import redis_manager
+            self.redis_manager = redis_manager
         except Exception as e:
             logger.warning(f"Redis not available for caching: {e}")
     

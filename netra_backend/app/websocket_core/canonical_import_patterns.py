@@ -26,8 +26,22 @@ from netra_backend.app.websocket_core.types import (
     WebSocketManagerMode,
     WebSocketConnection,
     _serialize_message_safely,
-    _get_enum_key_representation
+    _get_enum_key_representation,
+    create_server_message,
+    create_error_message
 )
+from netra_backend.app.websocket_core.protocols import (
+    WebSocketManagerProtocol,
+    WebSocketManagerProtocolValidator
+)
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+
+# Import protocol and emitter classes for test compatibility
+from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+
+# Create compatibility alias for WebSocketEventEmitter
+WebSocketEventEmitter = UnifiedWebSocketEmitter
 
 
 class CanonicalImportDeprecationWarning(UserWarning):
@@ -159,6 +173,9 @@ class UnifiedWebSocketManager(_UnifiedWebSocketManagerImplementation):
 
 # Type alias for backwards compatibility
 WebSocketManager = UnifiedWebSocketManager
+
+# Backwards compatibility alias for WebSocketEventEmitter
+WebSocketEventEmitter = UnifiedWebSocketEmitter
 
 
 # =============================================================================
@@ -349,6 +366,16 @@ __all__ = [
     'RegistryCompat',
     '_serialize_message_safely',
     '_get_enum_key_representation',
+    'create_server_message',
+    'create_error_message',
+
+    # Event emitter imports
+    'UnifiedWebSocketEmitter',
+    'WebSocketEventEmitter',
+
+    # Protocol and validation
+    'WebSocketManagerProtocol',
+    'WebSocketManagerProtocolValidator',
 
     # Pattern 3: Component Interfaces
     'get_component_interface',
@@ -358,6 +385,11 @@ __all__ = [
     'create_websocket_manager',
     'get_manager',
     'create_manager',
+
+    # Test Compatibility - Issue #1188: Add missing exports for unit tests
+    'WebSocketManagerProtocol',
+    'WebSocketEventEmitter',
+    'UnifiedWebSocketEmitter',
 
     # Utilities
     'get_migration_guide',

@@ -822,9 +822,10 @@ All test commands enforce the **NO MOCKS** policy from CLAUDE.md:
 - **[Golden Path User Flow Analysis](./GOLDEN_PATH_USER_FLOW_COMPLETE.md)** 🚀 - Critical user journey analysis ($500K+ ARR dependency)
 
 ### Claude Code Automation & Orchestration
-- **[Claude Instance Orchestrator](../README-claude-orchestrator.md)** 🤖 - **NEW** - Multi-instance Claude Code automation with SDK features
-- **[Claude Orchestration Plan](../claude-code-instances-plan.md)** 📋 - Architecture design and implementation strategy for parallel Claude execution
-- **[Claude Instance Orchestrator Script](../scripts/claude-instance-orchestrator.py)** ⚙️ - Python orchestrator for running multiple Claude Code instances concurrently
+- **[Netra Orchestrator Client Service](../netra_orchestrator_client/INDEX.md)** 🎛️ - **STANDALONE SERVICE** - Complete multi-instance Claude Code orchestration with scheduling, monitoring, and metrics
+- **[Orchestrator Documentation Hub](../netra_orchestrator_client/README.md)** 📖 - Service overview, quick start, and usage patterns
+- **[Orchestrator Script](../netra_orchestrator_client/claude_instance_orchestrator.py)** ⚙️ - Main orchestrator implementation with advanced features
+- **[CloudSQL Integration](../scripts/ORCHESTRATOR_CLOUDSQL_INTEGRATION.md)** 💾 - Database persistence and metrics tracking
 
 ### Cross-Referenced Documentation
 - **[Documentation Index](./index.md)** 📖 - Master documentation navigation hub (Updated 2025-09-15)

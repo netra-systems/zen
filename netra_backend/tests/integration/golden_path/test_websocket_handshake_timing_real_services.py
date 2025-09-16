@@ -40,7 +40,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.services.user_execution_context import (
     UserExecutionContext, validate_user_context
 )
-from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import create_websocket_manager
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 
 

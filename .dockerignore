@@ -100,8 +100,10 @@
 **/scripts/
 **/dev-tools/
 **/dev_launcher/
-**/monitoring/
 **/prometheus/
+
+# Keep netra_backend monitoring services (CRITICAL for GCP Error Reporting)
+!netra_backend/app/services/monitoring/
 
 # Claude Code and AI Tools
 **/.claude/

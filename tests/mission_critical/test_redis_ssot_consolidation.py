@@ -87,7 +87,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         BUSINESS IMPACT: Eliminates cache-related Redis connection conflicts.
         SUCCESS CRITERIA: Cache operations redirect to SSOT without conflicts.
         """
-        from netra_backend.app.cache.redis_cache_manager import default_redis_cache_manager
+        from netra_backend.app.redis_manager import redis_manager as default_redis_cache_manager
         
         # Test cache operations through compatibility layer  ->  SSOT
         test_key = "test:cache:ssot"
@@ -316,7 +316,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
     
     async def _perform_cache_operation(self, key: str, data: Dict[str, Any]) -> bool:
         """Helper to perform cache operation."""
-        from netra_backend.app.cache.redis_cache_manager import default_redis_cache_manager
+        from netra_backend.app.redis_manager import redis_manager as default_redis_cache_manager
         try:
             success = await default_redis_cache_manager.set(key, data, ttl=60)
             if success:
@@ -494,8 +494,8 @@ class RedisSSOTValidationTests(SSotAsyncTestCase):
             warnings.simplefilter("always")
             
             # Import compatibility layers
-            from netra_backend.app.cache.redis_cache_manager import RedisCacheManager
-            from auth_service.auth_core.redis_manager import AuthRedisManager
+            from netra_backend.app.redis_manager import RedisManager as RedisCacheManager
+            from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
             
             # Should have deprecation warnings
             deprecation_warnings = [w for w in warning_list if issubclass(w.category, DeprecationWarning)]

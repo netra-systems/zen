@@ -26,7 +26,7 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/next.config.js ./
 
 # Install production dependencies only
-RUN npm ci --legacy-peer-deps --production
+RUN npm ci --production --legacy-peer-deps
 
 # Set environment variables
 ENV NODE_ENV=production

@@ -30,7 +30,7 @@ from netra_backend.app.services.tool_permission_service import (
 from netra_backend.app.services.tool_permissions.permission_checker import PermissionChecker
 from netra_backend.app.services.tool_permissions.permission_definitions import PermissionDefinitions
 from netra_backend.app.schemas.user_plan import PlanTier, PLAN_DEFINITIONS
-from netra_backend.app.core.redis_connection_handler import RedisConnectionHandler
+from netra_backend.app.redis_manager import redis_manager as RedisConnectionHandler
 
 
 @pytest.mark.integration

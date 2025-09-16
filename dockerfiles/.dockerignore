@@ -76,6 +76,9 @@ reports/
 *.cache
 tmp/
 
+# Keep netra_backend monitoring services (CRITICAL for GCP Error Reporting)
+!netra_backend/app/services/monitoring/
+
 # Node (if frontend assets exist)
 node_modules/
 npm-debug.log

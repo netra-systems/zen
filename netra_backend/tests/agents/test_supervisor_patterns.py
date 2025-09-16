@@ -42,7 +42,7 @@ class ResourceManagementTests(BaseTestCase):
         mock_registry_func.return_value = self.mock_class_registry
         mock_factory_func.return_value = self.mock_instance_factory
         mock_internal_registry_func.return_value = self.mock_class_registry
-        self.supervisor = SupervisorAgent(llm_manager=self.llm_manager, websocket_bridge=self.websocket_bridge)
+        self.supervisor = SupervisorAgent(llm_manager=self.llm_manager, websocket_bridge=self.websocket_bridge, user_context=self.test_context)
         self.track_resource(self.supervisor)
 
     def tearDown(self):
@@ -114,7 +114,7 @@ class WorkflowPatternsTests(BaseTestCase):
         mock_registry_func.return_value = self.mock_class_registry
         mock_factory_func.return_value = self.mock_instance_factory
         mock_internal_registry_func.return_value = self.mock_class_registry
-        self.supervisor = SupervisorAgent(llm_manager=self.llm_manager, websocket_bridge=self.websocket_bridge)
+        self.supervisor = SupervisorAgent(llm_manager=self.llm_manager, websocket_bridge=self.websocket_bridge, user_context=self.test_context)
         self.track_resource(self.supervisor)
 
     def tearDown(self):

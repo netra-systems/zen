@@ -293,9 +293,10 @@ if SSOT_AVAILABLE:
     redis_manager = ssot_redis_manager
     logger.info("Using SSOT Redis manager for global compatibility instance")
 else:
-    # Fallback compatibility wrapper
-    redis_manager = RedisManager()
-    logger.warning("SSOT Redis manager not available - using compatibility fallback")
+    # SSOT pattern: Import from canonical location
+    from netra_backend.app.redis_manager import redis_manager as canonical_redis_manager
+    redis_manager = canonical_redis_manager
+    logger.warning("SSOT Redis manager not available - using canonical import")
 
 __all__ = [
     "RedisManager",

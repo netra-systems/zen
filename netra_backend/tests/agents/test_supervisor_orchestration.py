@@ -15,8 +15,8 @@ from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.tests.agents.test_supervisor_basic import SupervisorOrchestrationTests as TestSupervisorOrchestration
 from netra_backend.tests.agents.test_supervisor_patterns import (
-TestResourceManagement,
-TestWorkflowPatterns,
+ResourceManagementTests as TestResourceManagement,
+WorkflowPatternsTests as TestWorkflowPatterns,
 )
 
 # Re-export all test classes for pytest discovery

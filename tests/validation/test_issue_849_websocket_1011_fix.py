@@ -32,7 +32,7 @@ class Issue849WebSocket1011FixTests(SSotAsyncTestCase):
         """Test that Redis managers are properly consolidated to prevent conflicts."""
         from netra_backend.app.redis_manager import redis_manager as main_redis
         from netra_backend.app.core.redis_manager import redis_manager as core_redis
-        from netra_backend.app.db.redis_manager import get_redis_manager
+        from netra_backend.app.redis_manager import get_redis_manager
         self.assertIs(core_redis, main_redis, 'Core Redis manager should be same instance as main manager')
         db_redis = get_redis_manager()
         self.assertIs(db_redis, main_redis, 'DB Redis manager should return main manager instance')

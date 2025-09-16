@@ -132,13 +132,13 @@ class AuthDatabaseManagerURLConstructionTests:
             with patch('shared.database_url_builder.DatabaseURLBuilder') as mock_builder_class:
                 mock_builder = MagicMock()
                 mock_builder.validate.return_value = (True, None)
-                mock_builder.get_url_for_environment.return_value = "postgresql://test_user:test_pass@localhost:5432/test_db"
+                mock_builder.get_url_for_environment.return_value = "postgresql+asyncpg://test_user:test_pass@localhost:5432/test_db"
                 mock_builder.get_safe_log_message.return_value = "Connected to localhost:5432"
                 mock_builder_class.return_value = mock_builder
                 
                 url = AuthDatabaseManager.get_database_url()
                 
-                assert url == "postgresql://test_user:test_pass@localhost:5432/test_db"
+                assert url == "postgresql+asyncpg://test_user:test_pass@localhost:5432/test_db"
                 
                 # Verify builder was configured correctly
                 mock_builder_class.assert_called_once()

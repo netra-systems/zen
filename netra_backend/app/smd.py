@@ -1310,9 +1310,24 @@ class StartupOrchestrator:
         
         # Get environment-aware timeout configuration
         environment = get_env().get("ENVIRONMENT", "development")
+
+        # CRITICAL FIX: Ensure staging environment gets proper timeout configuration
+        # Issue #1278 root cause: Staging getting development timeouts causing 8.0s failures
+        if any(marker in environment.lower() for marker in ["staging", "stag"]) or \
+           get_env().get("GCP_PROJECT_ID", "").endswith("staging") or \
+           get_env().get("K_SERVICE", "").endswith("staging"):
+            environment = "staging"
+
         timeout_config = get_database_timeout_config(environment)
         
         self.logger.info(f"Initializing database for {environment} environment with timeout config: {timeout_config}")
+
+        # CRITICAL FIX: Log diagnostic information for timeout troubleshooting
+        self.logger.info(f"Environment detection - ENVIRONMENT={get_env().get('ENVIRONMENT')}, "
+                        f"GCP_PROJECT_ID={get_env().get('GCP_PROJECT_ID')}, "
+                        f"K_SERVICE={get_env().get('K_SERVICE')}, "
+                        f"final_environment={environment}")
+        self.logger.info(f"Database host will be: {get_env().get('POSTGRES_HOST', 'not_set')}")
         
         # Use environment-specific timeout - Cloud SQL needs more time than local PostgreSQL
         initialization_timeout = timeout_config["initialization_timeout"]

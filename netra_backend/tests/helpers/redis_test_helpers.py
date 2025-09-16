@@ -56,7 +56,8 @@ def setup_test_data(mock_client, key, value):
 
 def create_disabled_redis_manager():
     """Create disabled Redis manager for testing"""
-    manager = RedisManager()
+    from netra_backend.app.redis_manager import redis_manager
+    manager = redis_manager
     manager.enabled = False
     manager.redis_client = None
     return manager

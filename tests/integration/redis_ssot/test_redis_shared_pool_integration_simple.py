@@ -157,8 +157,8 @@ class RedisSharedPoolIntegrationSimpleTests(SSotBaseTestCase):
             "different_patterns": [
                 "from netra_backend.app.redis_manager import redis_manager",
                 "from netra_backend.app.redis_manager import RedisManager",
-                "from auth_service.auth_core.redis_manager import AuthRedisManager",
-                "from netra_backend.app.cache.redis_cache_manager import RedisCacheManager",
+                "from netra_backend.app.redis_manager import RedisManager as AuthRedisManager",
+                "from netra_backend.app.redis_manager import RedisManager as RedisCacheManager",
                 "from netra_backend.app.services.redis.session_manager import RedisSessionManager"
             ],
             "pattern_distribution": {

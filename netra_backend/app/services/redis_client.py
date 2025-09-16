@@ -24,7 +24,7 @@ except ImportError:
     redis = None
 
 from netra_backend.app.services.redis_service import redis_service
-from netra_backend.app.core.redis_connection_handler import RedisConnectionHandler
+from netra_backend.app.redis_manager import redis_manager as RedisConnectionHandler
 
 logger = logging.getLogger(__name__)
 
