@@ -120,12 +120,19 @@ class ClaudeInstanceOrchestrator:
         self.db_client = None
         self.optimizer = None
 
-        # Initialize budget manager if requested
+        # Initialize budget manager if any budget settings are provided
         self.budget_manager = TokenBudgetManager(
             overall_budget=overall_token_budget,
             enforcement_mode=budget_enforcement_mode
-        ) if overall_token_budget or budget_enforcement_mode != "warn" else None
+        ) if overall_token_budget is not None else None
         self.enable_budget_visuals = enable_budget_visuals
+
+        # Log budget configuration status
+        if self.budget_manager:
+            budget_msg = f"Overall: {overall_token_budget:,} tokens" if overall_token_budget else "No overall limit"
+            logger.info(f"🎯 Token budget tracking enabled - {budget_msg} | Mode: {budget_enforcement_mode.upper()}")
+        else:
+            logger.debug("Token budget tracking disabled (no budget specified)")
 
         # Configure CloudSQL if requested
         if use_cloud_sql:
@@ -312,15 +319,21 @@ class ClaudeInstanceOrchestrator:
             estimated_tokens = config.max_tokens_per_command or 1000  # Default estimate
             # CRITICAL: Use base command for budget checking
             base_command = config.command.split()[0] if config.command else config.command
-            if not self.budget_manager.check_budget(base_command, estimated_tokens):
-                message = f"Budget exceeded for instance {name}. Skipping."
+
+            logger.info(f"🎯 Budget check for {name}: command={base_command}, estimated={estimated_tokens} tokens")
+
+            can_run, reason = self.budget_manager.check_budget(base_command, estimated_tokens)
+            if not can_run:
+                message = f"Budget exceeded for instance {name}: {reason}. Skipping."
                 if self.budget_manager.enforcement_mode == "block":
-                    logger.error(f"BLOCK MODE: {message}")
+                    logger.error(f"🚫 BLOCK MODE: {message}")
                     status.status = "failed"
-                    status.error = "Blocked by budget limit"
+                    status.error = f"Blocked by budget limit - {reason}"
                     return False
                 else:  # warn mode
-                    logger.warning(f"WARN MODE: {message}")
+                    logger.warning(f"⚠️  WARN MODE: {message}")
+            else:
+                logger.info(f"✅ Budget check passed for {name}: {reason}")
 
         try:
             logger.info(f"Starting instance: {name}")
@@ -749,20 +762,27 @@ class ClaudeInstanceOrchestrator:
         # --- ADD BUDGET STATUS SECTION ---
         if self.budget_manager and self.enable_budget_visuals:
             bm = self.budget_manager
-            overall_budget = bm.overall_budget or 0
-            overall_bar = render_progress_bar(bm.total_usage, overall_budget)
             used_formatted = self._format_tokens(bm.total_usage)
-            total_formatted = self._format_tokens(overall_budget)
 
             print(f"║")
             print(f"╠═══ TOKEN BUDGET STATUS ═══╣")
-            print(f"║ Overall: {overall_bar} {used_formatted}/{total_formatted}")
+
+            if bm.overall_budget is not None:
+                overall_bar = render_progress_bar(bm.total_usage, bm.overall_budget)
+                total_formatted = self._format_tokens(bm.overall_budget)
+                print(f"║ Overall: {overall_bar} {used_formatted}/{total_formatted}")
+            else:
+                print(f"║ Overall: [UNLIMITED] {used_formatted} used")
 
             if bm.command_budgets:
                 print(f"║ Command Budgets:")
                 for name, budget_info in bm.command_budgets.items():
                     bar = render_progress_bar(budget_info.used, budget_info.limit)
-                    print(f"║   {name:<30} {bar}")
+                    limit_formatted = self._format_tokens(budget_info.limit)
+                    used_cmd_formatted = self._format_tokens(budget_info.used)
+                    print(f"║   {name:<20} {bar} {used_cmd_formatted}/{limit_formatted}")
+            else:
+                print(f"║ Command Budgets: None configured")
 
         print(f"║")
         
@@ -819,14 +839,76 @@ class ClaudeInstanceOrchestrator:
         self._update_budget_tracking(status, instance_name)
 
     def _update_budget_tracking(self, status: InstanceStatus, instance_name: str):
-        """Update budget tracking with token deltas"""
+        """Update budget tracking with token deltas and check for runtime budget violations"""
         if self.budget_manager and status.total_tokens > status._last_known_total_tokens:
             new_tokens = status.total_tokens - status._last_known_total_tokens
             # Extract base command without arguments
             command = self.instances[instance_name].command
             base_command = command.split()[0] if command else command
+
+            # Record the usage
             self.budget_manager.record_usage(base_command, new_tokens)
             status._last_known_total_tokens = status.total_tokens
+
+            # RUNTIME BUDGET ENFORCEMENT - Check if we've exceeded budgets during execution
+            self._check_runtime_budget_violation(status, instance_name, base_command)
+
+    def _check_runtime_budget_violation(self, status: InstanceStatus, instance_name: str, base_command: str):
+        """Check for budget violations during runtime and terminate instances if needed"""
+        if not self.budget_manager:
+            return
+
+        # Check if current usage violates any budget
+        violation_detected = False
+        violation_reason = ""
+
+        # Check overall budget
+        if (self.budget_manager.overall_budget is not None and
+            self.budget_manager.total_usage > self.budget_manager.overall_budget):
+            violation_detected = True
+            violation_reason = f"Overall budget exceeded: {self.budget_manager.total_usage}/{self.budget_manager.overall_budget} tokens"
+
+        # Check command budget (only if overall budget check didn't fail)
+        elif (base_command in self.budget_manager.command_budgets):
+            command_budget = self.budget_manager.command_budgets[base_command]
+            if command_budget.used > command_budget.limit:
+                violation_detected = True
+                violation_reason = f"Command '{base_command}' budget exceeded: {command_budget.used}/{command_budget.limit} tokens"
+
+        if violation_detected:
+            message = f"Runtime budget violation for {instance_name}: {violation_reason}"
+
+            if self.budget_manager.enforcement_mode == "block":
+                logger.error(f"🚫 RUNTIME TERMINATION: {message}")
+                self._terminate_instance(status, instance_name, f"Terminated due to budget violation - {violation_reason}")
+            else:  # warn mode
+                logger.warning(f"⚠️  RUNTIME WARNING: {message}")
+
+    def _terminate_instance(self, status: InstanceStatus, instance_name: str, reason: str):
+        """Terminate a running instance due to budget violation"""
+        try:
+            if status.pid and status.status == "running":
+                logger.info(f"Terminating instance {instance_name} (PID: {status.pid}): {reason}")
+
+                # Try graceful termination first
+                import signal
+                import os
+                try:
+                    os.kill(status.pid, signal.SIGTERM)
+                    logger.info(f"Sent SIGTERM to {instance_name} (PID: {status.pid})")
+                except (OSError, ProcessLookupError) as e:
+                    logger.warning(f"Could not send SIGTERM to {status.pid}: {e}")
+
+                # Update status
+                status.status = "failed"
+                status.error = reason
+                status.end_time = time.time()
+
+            else:
+                logger.warning(f"Cannot terminate {instance_name}: no PID or not running (status: {status.status})")
+
+        except Exception as e:
+            logger.error(f"Failed to terminate instance {instance_name}: {e}")
 
     def _try_parse_json_token_usage(self, line: str, status: InstanceStatus) -> bool:
         """Try to parse token usage from JSON format output"""
@@ -1569,6 +1651,28 @@ async def main():
         for name, config in orchestrator.instances.items():
             cmd = orchestrator.build_claude_command(config)
             print(f"{name}: {' '.join(cmd)}")
+
+        # Show budget configuration if enabled
+        if orchestrator.budget_manager:
+            from token_budget.visualization import render_progress_bar
+            bm = orchestrator.budget_manager
+            print(f"\n╔═══ TOKEN BUDGET CONFIGURATION ═══╗")
+
+            if bm.overall_budget:
+                print(f"║ Overall Budget: {bm.overall_budget:,} tokens")
+            else:
+                print(f"║ Overall Budget: Unlimited")
+
+            print(f"║ Enforcement Mode: {bm.enforcement_mode.upper()}")
+
+            if bm.command_budgets:
+                print(f"║ Command Budgets:")
+                for name, budget_info in bm.command_budgets.items():
+                    print(f"║   {name:<30} {budget_info.limit:,} tokens")
+            else:
+                print(f"║ Command Budgets: None configured")
+
+            print(f"╚══════════════════════════════════╝")
 
         # Show scheduled start time if provided
         if args.start_at:

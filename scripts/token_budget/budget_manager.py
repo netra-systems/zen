@@ -23,16 +23,22 @@ class TokenBudgetManager:
         if command_name in self.command_budgets:
             self.command_budgets[command_name].used += tokens
 
-    def check_budget(self, command_name: str, estimated_tokens: int) -> bool:
-        """Checks if a command can run based on its budget and the overall budget."""
-        # Check overall budget
+    def check_budget(self, command_name: str, estimated_tokens: int) -> tuple[bool, str]:
+        """Checks if a command can run based on its budget and the overall budget.
+
+        Returns:
+            tuple: (can_run: bool, reason: str) - reason explains which budget would be exceeded
+        """
+        # Check overall budget FIRST (takes precedence)
         if self.overall_budget is not None and (self.total_usage + estimated_tokens) > self.overall_budget:
-            return False
+            projected_total = self.total_usage + estimated_tokens
+            return False, f"Overall budget exceeded: {projected_total}/{self.overall_budget} tokens"
 
         # Check per-command budget
         if command_name in self.command_budgets:
             command_budget = self.command_budgets[command_name]
             if (command_budget.used + estimated_tokens) > command_budget.limit:
-                return False
+                projected_command = command_budget.used + estimated_tokens
+                return False, f"Command '{command_name}' budget exceeded: {projected_command}/{command_budget.limit} tokens"
 
-        return True
+        return True, "Within budget limits"
