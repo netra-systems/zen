@@ -144,6 +144,18 @@ try:
 except ImportError:
     websocket_manager = None
 
+# ISSUE #1176 PHASE 2 REMEDIATION: Add missing get_connection_monitor for test compatibility
+try:
+    from netra_backend.app.websocket_core.utils import get_connection_monitor
+except ImportError:
+    get_connection_monitor = None
+
+# ISSUE #1176 PHASE 2 REMEDIATION: Add missing get_websocket_manager for test compatibility
+try:
+    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+except ImportError:
+    get_websocket_manager = None
+
 # SSOT COMPLIANCE: Factory pattern eliminated - use direct WebSocketManager import
 # from netra_backend.app.websocket_core.websocket_manager_factory import (
 #     WebSocketManagerFactory,
@@ -288,6 +300,10 @@ if MessageQueue is not None:
     _optional_exports.append("MessageQueue")
 if websocket_manager is not None:
     _optional_exports.append("websocket_manager")
+if get_connection_monitor is not None:
+    _optional_exports.append("get_connection_monitor")
+if get_websocket_manager is not None:
+    _optional_exports.append("get_websocket_manager")
 
 __all__.extend(_optional_exports)
 
