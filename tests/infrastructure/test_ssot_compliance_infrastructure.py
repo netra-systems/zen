@@ -119,13 +119,13 @@ class TestSSotComplianceInfrastructure:
     def test_ssot_import_registry_accessible(self):
         """Verify SSOT Import Registry file exists and is readable."""
         project_root = Path(__file__).parent.parent.parent
-        registry_file = project_root / "SSOT_IMPORT_REGISTRY.md"
+        registry_file = project_root / "docs" / "SSOT_IMPORT_REGISTRY.md"
 
         assert registry_file.exists(), f"SSOT Import Registry not found: {registry_file}"
 
         # Try to read the file
         try:
-            content = registry_file.read_text()
+            content = registry_file.read_text(encoding='utf-8', errors='ignore')
             assert len(content) > 0, "SSOT Import Registry is empty"
             assert "SSOT" in content, "SSOT Import Registry doesn't contain SSOT references"
         except Exception as e:
@@ -142,7 +142,7 @@ class TestSSotComplianceInfrastructure:
     def test_isolated_environment_import(self):
         """Verify IsolatedEnvironment can be imported and instantiated."""
         try:
-            from dev_launcher.isolated_environment import IsolatedEnvironment
+            from shared.isolated_environment import IsolatedEnvironment
 
             # Try to create an instance
             env = IsolatedEnvironment()

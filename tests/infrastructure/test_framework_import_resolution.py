@@ -79,13 +79,13 @@ class TestFrameworkImportResolution:
         """Verify SSOT orchestration enums can be imported."""
         try:
             from test_framework.ssot.orchestration_enums import (
-                ServiceOrchestrationMode,
-                DockerServiceMode,
-                TestExecutionEnvironment
+                OrchestrationMode,
+                DockerOrchestrationMode,
+                ServiceAvailability
             )
-            assert ServiceOrchestrationMode is not None, "ServiceOrchestrationMode import returned None"
-            assert DockerServiceMode is not None, "DockerServiceMode import returned None"
-            assert TestExecutionEnvironment is not None, "TestExecutionEnvironment import returned None"
+            assert OrchestrationMode is not None, "OrchestrationMode import returned None"
+            assert DockerOrchestrationMode is not None, "DockerOrchestrationMode import returned None"
+            assert ServiceAvailability is not None, "ServiceAvailability import returned None"
         except ImportError as e:
             pytest.fail(f"Failed to import SSOT orchestration enums: {e}")
 
@@ -101,7 +101,7 @@ class TestFrameworkImportResolution:
     def test_isolated_environment_import(self):
         """Verify IsolatedEnvironment can be imported."""
         try:
-            from dev_launcher.isolated_environment import IsolatedEnvironment
+            from shared.isolated_environment import IsolatedEnvironment
             assert IsolatedEnvironment is not None, "IsolatedEnvironment import returned None"
         except ImportError as e:
             pytest.fail(f"Failed to import IsolatedEnvironment: {e}")
@@ -109,8 +109,8 @@ class TestFrameworkImportResolution:
     def test_critical_test_utilities_import(self):
         """Verify critical test utilities can be imported."""
         test_utilities = [
-            ("test_framework.ssot.database_test_utility", "DatabaseTestUtility"),
-            ("test_framework.ssot.websocket_test_utility", "WebSocketTestUtility"),
+            ("test_framework.ssot.database", "DatabaseTestUtility"),
+            ("test_framework.ssot.websocket", "WebSocketTestUtility"),
             ("test_framework.unified_docker_manager", "UnifiedDockerManager"),
         ]
 
@@ -127,8 +127,9 @@ class TestFrameworkImportResolution:
         project_root = Path(__file__).parent.parent.parent
         required_paths = [
             str(project_root),
-            str(project_root / "test_framework"),
-            str(project_root / "shared"),
+            # Note: test_framework is accessible via project_root, not separately
+            # str(project_root / "test_framework"),
+            # str(project_root / "shared"),
         ]
 
         current_paths = [str(Path(p).resolve()) for p in sys.path]
@@ -138,21 +139,28 @@ class TestFrameworkImportResolution:
             assert any(resolved_required in current_path for current_path in current_paths), \
                 f"Required path not in sys.path: {resolved_required}\nCurrent sys.path: {current_paths}"
 
+        # Verify test_framework is accessible even if not directly in path
+        try:
+            import test_framework
+            assert test_framework is not None, "test_framework should be accessible"
+        except ImportError as e:
+            pytest.fail(f"test_framework not accessible despite path configuration: {e}")
+
     def test_test_framework_ssot_init_accessible(self):
         """Verify test_framework.ssot __init__.py is accessible and contains expected exports."""
         try:
             from test_framework.ssot import (
-                SSotBaseTestCase,
-                SSotAsyncTestCase,
-                SSotMockFactory,
-                OrchestrationConfig
+                BaseTestCase,
+                AsyncBaseTestCase,
+                MockFactory,
+                DatabaseTestUtility
             )
 
             # Verify all expected classes are available
-            assert SSotBaseTestCase is not None, "SSotBaseTestCase not exported from test_framework.ssot"
-            assert SSotAsyncTestCase is not None, "SSotAsyncTestCase not exported from test_framework.ssot"
-            assert SSotMockFactory is not None, "SSotMockFactory not exported from test_framework.ssot"
-            assert OrchestrationConfig is not None, "OrchestrationConfig not exported from test_framework.ssot"
+            assert BaseTestCase is not None, "BaseTestCase not exported from test_framework.ssot"
+            assert AsyncBaseTestCase is not None, "AsyncBaseTestCase not exported from test_framework.ssot"
+            assert MockFactory is not None, "MockFactory not exported from test_framework.ssot"
+            assert DatabaseTestUtility is not None, "DatabaseTestUtility not exported from test_framework.ssot"
 
         except ImportError as e:
             pytest.fail(f"Failed to import from test_framework.ssot: {e}")

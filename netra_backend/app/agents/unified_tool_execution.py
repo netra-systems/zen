@@ -588,17 +588,18 @@ class UnifiedToolExecutionEngine:
         # NEW: Try per-user emitter first if user context is available
         if hasattr(self, 'user_context') and self.user_context:
             try:
-                user_emitter = await self._ensure_user_emitter(self.user_context)
-                if user_emitter:
-                    await user_emitter.notify_tool_executing(
+                # SSOT MIGRATION: Use WebSocket bridge instead of user_emitter
+                if self.websocket_bridge:
+                    await self.websocket_bridge.notify_tool_executing(
+                        self.user_context,
                         getattr(context, 'agent_name', 'ToolDispatcher'),
                         tool_name,
-                        {"summary": self._create_parameters_summary(tool_input)} if tool_input else None
+                        {"summary": self._create_parameters_summary(tool_input)} if tool_input else {}
                     )
-                    logger.debug(f"Tool executing sent via user emitter for user {self.user_context.user_id}: {tool_name}")
+                    logger.debug(f"Tool executing sent via SSOT WebSocket bridge for user {self.user_context.user_id}: {tool_name}")
                     return
             except Exception as e:
-                logger.debug(f"User emitter failed for tool_executing, falling back to bridge: {e}")
+                logger.debug(f"SSOT WebSocket bridge failed for tool_executing: {e}")
             
         if not self.websocket_bridge:
             error_msg = f"Tool {tool_name} executing for run_id {context.run_id} - EVENTS WILL BE LOST"
@@ -716,16 +717,18 @@ class UnifiedToolExecutionEngine:
                         if error_type:
                             result_dict["error_type"] = error_type
                     
-                    await user_emitter.notify_tool_completed(
-                        getattr(context, 'agent_name', 'ToolDispatcher'),
-                        tool_name,
-                        result_dict,
-                        duration_ms
-                    )
-                    logger.debug(f"Tool completed sent via user emitter for user {self.user_context.user_id}: {tool_name}")
-                    return
+                    # SSOT MIGRATION: Use WebSocket bridge instead of user_emitter
+                    if self.websocket_bridge:
+                        await self.websocket_bridge.notify_tool_completed(
+                            self.user_context,
+                            getattr(context, 'agent_name', 'ToolDispatcher'),
+                            tool_name,
+                            result_dict
+                        )
+                        logger.debug(f"Tool completed sent via SSOT WebSocket bridge for user {self.user_context.user_id}: {tool_name}")
+                        return
             except Exception as e:
-                logger.debug(f"User emitter failed for tool_completed, falling back to bridge: {e}")
+                logger.debug(f"SSOT WebSocket bridge failed for tool_completed: {e}")
             
         if not self.websocket_bridge:
             error_msg = f"Tool {tool_name} completed for run_id {context.run_id} - RESULTS WILL BE LOST"
