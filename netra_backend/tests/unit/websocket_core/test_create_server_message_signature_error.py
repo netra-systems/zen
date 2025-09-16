@@ -118,29 +118,39 @@ class CreateServerMessageSignatureErrorTests(SSotBaseTestCase):
 
     def test_handlers_import_resolution(self):
         """
-        Test that handlers.py imports the problematic types.py implementation.
+        Test that handlers.py imports the canonical types.py implementation.
         
-        This confirms which implementation is being used in the failing code.
+        This confirms the correct implementation is being used.
         """
         from netra_backend.app.websocket_core.types import create_server_message as handlers_import
         import inspect
         sig = inspect.signature(handlers_import)
         params = list(sig.parameters.keys())
-        assert 'msg_type' in params or 'data' in params, f'Should have types.py signature, got: {params}'
+        
+        # Validate signature has expected parameters
+        expected_params = ['msg_type_or_dict', 'data', 'correlation_id', 'content']
+        for expected in expected_params:
+            assert expected in params, f'Should have parameter {expected}, got: {params}'
+        
+        # Validate data parameter has default (None) for flexibility
         data_param = sig.parameters.get('data')
         if data_param:
-            assert data_param.default == inspect.Parameter.empty, 'data parameter should be required (no default)'
+            assert data_param.default is None, f'data parameter should have None default, got: {data_param.default}'
 
-    def test_specific_handler_error_reproduction(self):
+    def test_specific_handler_patterns_work(self):
         """
-        Reproduce specific errors from handlers.py lines mentioned in issue.
+        Test that handler patterns from mentioned lines work correctly.
         
-        Tests the actual failing patterns from lines 573, 697, 798, 852.
+        Tests the actual calling patterns from handlers.py work with canonical implementation.
         """
-        with pytest.raises(TypeError):
-            types_create_server_message(MessageType.AGENT_TASK_ACK)
-        with pytest.raises(TypeError):
-            types_create_server_message(MessageType.SYSTEM_MESSAGE)
+        # Test patterns that handlers.py uses - should work with flexible signature
+        result1 = types_create_server_message(MessageType.AGENT_TASK_ACK)
+        assert isinstance(result1, ServerMessage), 'Single MessageType call should work'
+        assert result1.type == MessageType.AGENT_TASK_ACK, 'Type should match'
+        
+        result2 = types_create_server_message(MessageType.SYSTEM_MESSAGE)
+        assert isinstance(result2, ServerMessage), 'System message call should work'
+        assert result2.type == MessageType.SYSTEM_MESSAGE, 'Type should match'
 
 class SignatureCompatibilityAnalysisTests(SSotBaseTestCase):
     """Additional tests for analyzing signature compatibility issues."""

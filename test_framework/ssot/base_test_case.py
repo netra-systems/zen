@@ -457,9 +457,9 @@ class SSotBaseTestCase:
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
             
-            # Run asyncSetUp
+            # Run asyncSetUp safely to avoid nested event loop issues
             try:
-                loop.run_until_complete(self.asyncSetUp())
+                self.safe_run_async(self.asyncSetUp())
             except Exception as e:
                 logger.error(f"asyncSetUp failed in {self.__class__.__name__}: {e}")
                 raise
@@ -1330,9 +1330,9 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
             
-            # Run asyncSetUp
+            # Run asyncSetUp safely to avoid nested event loop issues
             try:
-                loop.run_until_complete(self.asyncSetUp())
+                self.safe_run_async(self.asyncSetUp())
             except Exception as e:
                 logger.error(f"asyncSetUp failed in {self.__class__.__name__}: {e}")
                 raise
