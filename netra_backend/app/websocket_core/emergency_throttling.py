@@ -24,7 +24,6 @@ REMEDIATION APPROACH:
 """
 
 import asyncio
-import logging
 import time
 from dataclasses import dataclass, field
 from typing import Dict, Optional, Set, Callable, Any
@@ -32,7 +31,9 @@ from datetime import datetime, timedelta
 from enum import Enum
 import weakref
 
-logger = logging.getLogger(__name__)
+from shared.logging.unified_logging_ssot import get_logger
+
+logger = get_logger(__name__)
 
 
 class ThrottleReason(Enum):
