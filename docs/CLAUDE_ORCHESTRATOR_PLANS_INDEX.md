@@ -21,6 +21,36 @@ This index catalogs all planning documents related to the Claude Instance Orches
 - Dependent command chaining with DAG validation
 - Conditional logic and failure policies
 
+#### 2. [Token Budget V1 Plan](../claude-token-budget-v1-plan.md)
+**Status:** Ready for Implementation
+**Scope:** Minimal viable product for token budget management with parallel development strategy
+
+**Key Features:**
+- Per-command token limits with basic enforcement (warn/block modes)
+- Simple progress visualization with ASCII progress bars
+- CLI configuration with budget parameters
+- Real-time budget tracking during execution
+- 10 parallelizable git issues for efficient team development
+
+```mermaid
+graph TB
+    subgraph "V1 Token Budget System"
+        A[SimpleBudgetManager] --> B[Per-Command Tracking]
+        A --> C[Basic Enforcement]
+        A --> D[Simple Visualization]
+
+        E[InstanceConfig] --> F[Command Budget Field]
+        G[Orchestrator] --> A
+        H[Status Reports] --> D
+    end
+```
+
+**Development Strategy:**
+- Week 1: Foundation components (Issues #1, #2, #4) in parallel
+- Week 2-3: Core integration with sequential dependencies
+- Week 4: Polish and documentation in parallel
+- Explicitly defers advanced features (time-based budgets, cost tracking, analytics) to V2
+
 ```mermaid
 graph TD
     A[Phase 0: Discovery] --> B[Phase 1: Single Instance]
@@ -44,7 +74,7 @@ graph TD
     D --> D4[Conditional Logic]
 ```
 
-#### 2. [Universal CLI Orchestrator Enhancement Plan](../scripts/universal-cli-orchestrator-enhancement-plan.md)
+#### 3. [Universal CLI Orchestrator Enhancement Plan](../scripts/universal-cli-orchestrator-enhancement-plan.md)
 **Status:** Design Phase
 **Scope:** Universal CLI tool orchestration platform
 
@@ -91,7 +121,7 @@ graph LR
     P6 --> P9
 ```
 
-#### 3. [Modernization Summary](../scripts/claude-orchestrator-modernization-summary.md)
+#### 4. [Modernization Summary](../scripts/claude-orchestrator-modernization-summary.md)
 **Status:** Implementation Complete ✅
 **Scope:** JSON-first token parsing modernization with backward compatibility
 
@@ -139,7 +169,7 @@ graph TD
 
 ### B. Deployment & Distribution Plans
 
-#### 4. [Deployment Strategies Analysis](claude-orchestrator-deployment-strategies-plan.md)
+#### 5. [Deployment Strategies Analysis](claude-orchestrator-deployment-strategies-plan.md)
 **Status:** Comprehensive Analysis Complete
 **Scope:** Six deployment strategies with security and business impact analysis
 
@@ -177,7 +207,7 @@ graph TB
     D6 --> P3
 ```
 
-#### 5. [Deployment Strategy Plan](claude-orchestrator-deployment-strategy-plan.md)
+#### 6. [Deployment Strategy Plan](claude-orchestrator-deployment-strategy-plan.md)
 **Status:** Implementation Focused
 **Scope:** Tactical deployment decisions with timeline and dependencies
 
@@ -215,7 +245,7 @@ graph LR
 
 ### C. Netra Platform Integration Plans
 
-#### 6. [Netra Application Integration Plan](CLAUDE_INSTANCE_ORCHESTRATOR_NETRA_INTEGRATION_PLAN.md)
+#### 7. [Netra Application Integration Plan](CLAUDE_INSTANCE_ORCHESTRATOR_NETRA_INTEGRATION_PLAN.md)
 **Status:** Planning Phase
 **Scope:** Enterprise integration with Netra platform
 
@@ -262,7 +292,7 @@ graph TB
     D3 --> E[Production Ready]
 ```
 
-#### 7. [Chat Resilience Enhancement Plan](CHAT_RESILIENCE_ENHANCEMENT_PLAN.md)
+#### 8. [Chat Resilience Enhancement Plan](CHAT_RESILIENCE_ENHANCEMENT_PLAN.md)
 **Status:** Infrastructure Design
 **Scope:** Chat interface availability and resilience improvements
 
@@ -310,7 +340,7 @@ graph TB
 
 ### D. Business Critical & Remediation Plans
 
-#### 8. [Issue #1197 Golden Path Comprehensive Remediation Plan](ISSUE_1197_GOLDEN_PATH_COMPREHENSIVE_REMEDIATION_PLAN.md)
+#### 9. [Issue #1197 Golden Path Comprehensive Remediation Plan](ISSUE_1197_GOLDEN_PATH_COMPREHENSIVE_REMEDIATION_PLAN.md)
 **Status:** P0 - Business Critical
 **Scope:** $500K+ ARR Golden Path functionality validation and enterprise readiness
 
@@ -354,7 +384,7 @@ graph TB
     RS4 --> EO4
 ```
 
-#### 9. [Agent Modernization Plan](agents/AGENT_MODERNIZATION_PLAN.md)
+#### 10. [Agent Modernization Plan](agents/AGENT_MODERNIZATION_PLAN.md)
 **Status:** Architecture Alignment
 **Scope:** Standardize all agents to modern execution pattern
 
@@ -393,7 +423,7 @@ graph LR
     MS4 --> BA4
 ```
 
-#### 10. [SSOT Violations Remediation Plan - Issue #1065](SSOT_VIOLATIONS_REMEDIATION_PLAN_ISSUE_1065.md)
+#### 11. [SSOT Violations Remediation Plan - Issue #1065](SSOT_VIOLATIONS_REMEDIATION_PLAN_ISSUE_1065.md)
 **Status:** Comprehensive Remediation
 **Scope:** 27,944 SSOT violations across mock, infrastructure, and import patterns
 
@@ -433,7 +463,7 @@ graph TD
     RP4 --> EB4
 ```
 
-#### 11. [Unified Infrastructure Remediation Plan](UNIFIED_INFRASTRUCTURE_REMEDIATION_PLAN.md)
+#### 12. [Unified Infrastructure Remediation Plan](UNIFIED_INFRASTRUCTURE_REMEDIATION_PLAN.md)
 **Status:** Root Cause Remediation
 **Scope:** Infrastructure connectivity cluster issues (#395, #372, #367)
 
@@ -637,6 +667,9 @@ sequenceDiagram
 | Dependency Chaining | ✅ Enhancement + Universal | ➖ | ➖ | ➖ |
 | JSON Token Parsing | ✅ Modernization Complete | ➖ | ➖ | ➖ |
 | Backward Compatibility | ✅ Modernization 100% | ➖ | ➖ | ➖ |
+| Token Budget Management | ✅ Token Budget V1 Plan | ➖ | ➖ | ➖ |
+| Budget Enforcement | ✅ Token Budget V1 Plan | ➖ | ➖ | ➖ |
+| Budget Visualization | ✅ Token Budget V1 Plan | ➖ | ➖ | ➖ |
 | **Deployment & Security** ||||
 | Package Distribution | ➖ | ✅ 6 Strategies Analysis | ➖ | ➖ |
 | Container Strategy | ➖ | ✅ Security + Timeline | ➖ | ➖ |
@@ -674,6 +707,7 @@ gantt
     section Core Orchestrator
     Universal CLI Support   :foundation, 3, 5
     Single Instance Mode    :single, 3, 5
+    Token Budget V1         :budget-v1, 2, 6
     Container Security      :container, 4, 6
     Dependency Engine       :depends, 5, 7
     Graph Execution        :graph, 5, 7
@@ -840,6 +874,7 @@ graph TD
 |----------|----------|--------|--------------|--------------|
 | **Core Orchestrator Plans** |||||
 | **Enhancement Plan** | Core | ✅ Complete | 100% | Ready for implementation |
+| **Token Budget V1 Plan** | Core | ✅ Complete | 100% | 10 parallelizable issues ready |
 | **Universal CLI Plan** | Core | ✅ Complete | 100% | Dependent on package structure |
 | **Modernization Summary** | Core | ✅ Complete | 100% | Implementation complete |
 | **Deployment & Distribution Plans** |||||
