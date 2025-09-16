@@ -26,7 +26,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.state import OptimizationsResult, ActionPlanResult
-from netra_backend.app.schemas.shared_types import DataAnalysisResponse
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse, PerformanceMetrics
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from shared.isolated_environment import IsolatedEnvironment, get_env

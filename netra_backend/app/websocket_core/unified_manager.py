@@ -1621,23 +1621,21 @@ class _UnifiedWebSocketManagerImplementation:
         try:
             # Handle tool_executing events
             if event_type == "tool_executing":
-                payload = {
+                return {
+                    "type": event_type,
                     "tool_name": data.get("tool_name", data.get("name", "unknown_tool")),
                     "parameters": data.get("parameters", data.get("params", {})),
                     "timestamp": data.get("timestamp", time.time()),
                     "user_id": data.get("user_id"),
                     "thread_id": data.get("thread_id"),
                     # Preserve additional fields
-                    **{k: v for k, v in data.items() if k not in ["tool_name", "parameters", "timestamp"]}
-                }
-                return {
-                    "type": event_type,
-                    "payload": payload
+                    **{k: v for k, v in data.items() if k not in ["tool_name", "parameters", "timestamp", "user_id", "thread_id"]}
                 }
             
             # Handle tool_completed events
             elif event_type == "tool_completed":
-                payload = {
+                return {
+                    "type": event_type,
                     "tool_name": data.get("tool_name", data.get("name", "unknown_tool")),
                     "results": data.get("results", data.get("result", data.get("output", {}))),
                     "duration": data.get("duration", data.get("duration_ms", data.get("elapsed_time", 0))),
@@ -1646,11 +1644,7 @@ class _UnifiedWebSocketManagerImplementation:
                     "user_id": data.get("user_id"),
                     "thread_id": data.get("thread_id"),
                     # Preserve additional fields
-                    **{k: v for k, v in data.items() if k not in ["tool_name", "results", "duration", "timestamp", "success"]}
-                }
-                return {
-                    "type": event_type,
-                    "payload": payload
+                    **{k: v for k, v in data.items() if k not in ["tool_name", "results", "duration", "timestamp", "success", "user_id", "thread_id"]}
                 }
             
             # Handle agent_started events
