@@ -39,7 +39,8 @@ configure_cloud_run_logging()
 setup_exception_handler()
 
 # Import unified logging first to ensure interceptor is set up
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
+central_logger = get_logger(__name__)
 
 # Configure loggers after unified logging is initialized
 logging.getLogger("faker").setLevel(logging.WARNING)

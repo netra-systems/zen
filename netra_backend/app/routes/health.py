@@ -1265,3 +1265,178 @@ async def startup_health(request: Request, db: AsyncSession = Depends(get_reques
             status_code=503,
             headers={"Content-Type": "application/json"}
         )
+
+
+@router.get("/infrastructure")
+@router.head("/infrastructure")
+async def infrastructure_health(request: Request) -> Dict[str, Any]:
+    """
+    Infrastructure health endpoint for Issue #1278 monitoring.
+    
+    This endpoint provides infrastructure-specific health information
+    for monitoring during VPC connectivity and Cloud SQL timeout issues.
+    
+    Designed to be used by infrastructure monitoring scripts and supports
+    automated monitoring during infrastructure team remediation efforts.
+    """
+    from datetime import UTC, datetime
+    
+    # Handle CORS preflight requests
+    if request.method == "OPTIONS":
+        return {"status": "ok", "message": "CORS preflight"}
+    
+    config = unified_config_manager.get_config()
+    environment = config.environment
+    
+    infrastructure_status = {
+        "service": "infrastructure-monitoring",
+        "environment": environment,
+        "timestamp": datetime.now(UTC).isoformat(),
+        "issue_reference": "#1278",
+        "purpose": "Infrastructure monitoring during VPC/connectivity issues",
+        "status": "healthy",
+        "infrastructure_components": {},
+        "degraded_components": [],
+        "infrastructure_ready": True
+    }
+    
+    try:
+        # Database connectivity check (critical infrastructure)
+        try:
+            # Use the health interface to check database status
+            basic_health = await health_interface.get_health_status(HealthLevel.BASIC)
+            postgres_healthy = basic_health.get("checks", {}).get("postgres", False)
+            
+            infrastructure_status["infrastructure_components"]["database"] = {
+                "status": "healthy" if postgres_healthy else "degraded",
+                "component": "PostgreSQL",
+                "critical": True,
+                "issue_type": "connectivity" if not postgres_healthy else None
+            }
+            
+            if not postgres_healthy:
+                infrastructure_status["degraded_components"].append("database")
+                infrastructure_status["infrastructure_ready"] = False
+                
+        except Exception as db_error:
+            logger.warning(f"Database infrastructure check failed: {db_error}")
+            infrastructure_status["infrastructure_components"]["database"] = {
+                "status": "error",
+                "component": "PostgreSQL", 
+                "critical": True,
+                "error": str(db_error),
+                "issue_type": "connectivity"
+            }
+            infrastructure_status["degraded_components"].append("database")
+            infrastructure_status["infrastructure_ready"] = False
+        
+        # Redis connectivity check (infrastructure component)
+        try:
+            redis_healthy = basic_health.get("checks", {}).get("redis", False)
+            
+            infrastructure_status["infrastructure_components"]["redis"] = {
+                "status": "healthy" if redis_healthy else "degraded",
+                "component": "Redis",
+                "critical": False,  # Optional in staging per Issue #1263
+                "issue_type": "vpc_connectivity" if not redis_healthy else None
+            }
+            
+            if not redis_healthy and environment == "production":
+                infrastructure_status["degraded_components"].append("redis")
+                
+        except Exception as redis_error:
+            logger.warning(f"Redis infrastructure check failed: {redis_error}")
+            infrastructure_status["infrastructure_components"]["redis"] = {
+                "status": "error",
+                "component": "Redis",
+                "critical": False,
+                "error": str(redis_error),
+                "issue_type": "vpc_connectivity"
+            }
+            if environment == "production":
+                infrastructure_status["degraded_components"].append("redis")
+        
+        # WebSocket infrastructure readiness
+        try:
+            websocket_status = await _check_gcp_websocket_readiness()
+            websocket_ready = websocket_status.get("websocket_ready", False)
+            
+            infrastructure_status["infrastructure_components"]["websocket"] = {
+                "status": "healthy" if websocket_ready else "degraded",
+                "component": "WebSocket Infrastructure",
+                "critical": True,
+                "details": websocket_status.get("details", {}),
+                "issue_type": "load_balancer" if not websocket_ready else None
+            }
+            
+            if not websocket_ready:
+                infrastructure_status["degraded_components"].append("websocket")
+                infrastructure_status["infrastructure_ready"] = False
+                
+        except Exception as ws_error:
+            logger.warning(f"WebSocket infrastructure check failed: {ws_error}")
+            infrastructure_status["infrastructure_components"]["websocket"] = {
+                "status": "error",
+                "component": "WebSocket Infrastructure",
+                "critical": True,
+                "error": str(ws_error),
+                "issue_type": "load_balancer"
+            }
+            infrastructure_status["degraded_components"].append("websocket")
+            infrastructure_status["infrastructure_ready"] = False
+        
+        # VPC connectivity indicators (for Issue #1278)
+        vpc_indicators = {
+            "redis_connectivity": infrastructure_status["infrastructure_components"].get("redis", {}).get("status") == "healthy",
+            "database_connectivity": infrastructure_status["infrastructure_components"].get("database", {}).get("status") == "healthy",
+            "websocket_readiness": infrastructure_status["infrastructure_components"].get("websocket", {}).get("status") == "healthy"
+        }
+        
+        infrastructure_status["vpc_connectivity"] = {
+            "overall": all(vpc_indicators.values()),
+            "indicators": vpc_indicators,
+            "degraded_count": len([k for k, v in vpc_indicators.items() if not v])
+        }
+        
+        # Determine overall infrastructure status
+        critical_components_healthy = all(
+            comp.get("status") == "healthy" 
+            for comp in infrastructure_status["infrastructure_components"].values() 
+            if comp.get("critical", False)
+        )
+        
+        if not critical_components_healthy:
+            infrastructure_status["status"] = "degraded"
+            infrastructure_status["infrastructure_ready"] = False
+            
+        # Add infrastructure team guidance
+        if infrastructure_status["degraded_components"]:
+            infrastructure_status["infrastructure_team_actions"] = {
+                "vpc_connector": "Check staging-connector configuration and egress settings",
+                "cloud_sql": "Verify timeout settings and connection pooling",
+                "ssl_certificates": "Validate *.netrasystems.ai certificate configuration",
+                "load_balancer": "Review health check configuration for extended startup times"
+            }
+        
+        # Environment-specific status code determination
+        if environment == "staging" and len(infrastructure_status["degraded_components"]) > 0:
+            # In staging, infrastructure degradation is expected during Issue #1278
+            logger.info(f"Infrastructure monitoring: {len(infrastructure_status['degraded_components'])} components degraded (expected during Issue #1278)")
+            return infrastructure_status  # Return 200 with degraded status
+        elif not infrastructure_status["infrastructure_ready"]:
+            # Critical infrastructure failure
+            infrastructure_status["status"] = "unhealthy"
+            return _create_error_response(503, infrastructure_status)
+        else:
+            # All infrastructure healthy
+            return infrastructure_status
+            
+    except Exception as e:
+        logger.error(f"Infrastructure health check failed: {e}")
+        infrastructure_status.update({
+            "status": "error",
+            "error": f"Infrastructure monitoring failed: {str(e)}",
+            "infrastructure_ready": False
+        })
+        
+        return _create_error_response(503, infrastructure_status)
