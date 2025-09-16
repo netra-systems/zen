@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.logging_config import central_logger
 """
 Unified health check service managing all health checks.
 """

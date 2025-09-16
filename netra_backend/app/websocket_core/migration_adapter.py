@@ -1,3 +1,4 @@
+from netra_backend.app.logging_config import central_logger
 """
 WebSocket Manager Migration Adapter - Backward Compatibility Layer
 

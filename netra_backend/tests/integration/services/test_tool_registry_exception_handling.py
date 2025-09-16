@@ -1,3 +1,4 @@
+from netra_backend.app.logging_config import central_logger
 """
 Integration tests for tool registry exception handling across multiple components.
 

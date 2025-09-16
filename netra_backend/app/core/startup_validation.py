@@ -1,3 +1,4 @@
+from netra_backend.app.logging_config import central_logger
 """
 Startup Validation System - Ensures deterministic startup with proper component counts.
 

@@ -1,3 +1,4 @@
+from netra_backend.app.logging_config import central_logger
 """
 Enhanced Unit Tests for Startup Module - CRITICAL Business Infrastructure
 

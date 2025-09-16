@@ -9,6 +9,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 from netra_backend.app.logging_config import (
+from netra_backend.app.logging_config import central_logger
     central_logger,
     request_id_context,
     trace_id_context,
