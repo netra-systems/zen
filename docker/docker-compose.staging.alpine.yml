@@ -131,7 +131,7 @@ services:
         - BUILD_ENV=staging
       cache_from:
         - python:3.11-alpine3.19
-    image: netra-auth-staging:alpine
+    image: netra-auth:alpine
     environment:
       # Core Environment
       ENVIRONMENT: staging

@@ -109,7 +109,7 @@ if not oauth_security.validate_state_parameter(state, session_id):
     
     <prevention>
         <measure>
-            Use a shared domain for all services (e.g., *.netra.ai) to avoid cookie issues
+            Use a shared domain for all services (e.g., *.netrasystems.ai) to avoid cookie issues
         </measure>
         <measure>
             Consider using URL parameters or JWT tokens for state management instead of cookies

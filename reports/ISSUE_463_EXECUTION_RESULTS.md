@@ -39,7 +39,7 @@
 #### 1.3. Auth Service Deployment  
 ```bash
 ✅ Auth service deployment completed successfully:
-  - Service: netra-auth-staging
+  - Service: netra-auth
   - URL: https://auth.staging.netrasystems.ai
   - All critical secrets configured from Google Secret Manager
   - Health status: healthy ✅
@@ -125,7 +125,7 @@ All critical environment variables successfully deployed to staging:
 - ✅ `SECRET_KEY=secret-key-staging:latest`
 - ✅ `AUTH_SERVICE_URL=https://auth.staging.netrasystems.ai`
 
-**Auth Service (netra-auth-staging):**
+**Auth Service (netra-auth):**
 - ✅ `SERVICE_SECRET=service-secret-staging:latest`  
 - ✅ `JWT_SECRET_KEY=jwt-secret-staging:latest`
 - ✅ `SERVICE_ID=service-id-staging:latest`

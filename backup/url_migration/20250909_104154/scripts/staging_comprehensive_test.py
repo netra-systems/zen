@@ -252,7 +252,7 @@ class StagingTestSuite:
         backend_url = f"{STAGING_URLS['backend']}/health"
         
         headers = {
-            'Origin': 'https://app.netra.ai',
+            'Origin': 'https://app.netrasystems.ai',
             'Access-Control-Request-Method': 'GET',
             'Access-Control-Request-Headers': 'Content-Type,Authorization'
         }

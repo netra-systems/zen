@@ -400,7 +400,7 @@ python -m pytest tests/e2e/staging/test_jwt_ssot_staging_validation.py -v
 ### **Staging Environment Validation**
 ```bash
 # Test JWT consistency in real staging environment
-python -m pytest tests/e2e/staging/ -k "jwt_ssot" -v --staging-url=https://staging.netra.ai
+python -m pytest tests/e2e/staging/ -k "jwt_ssot" -v --staging-url=https://staging.netrasystems.ai
 ```
 
 ### **Generate Violation Report**

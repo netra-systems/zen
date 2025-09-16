@@ -325,7 +325,7 @@ ENABLE_OPTIMIZED_PERSISTENCE=true python unified_test_runner.py --category integ
 - **Frequency**: Every 30 seconds
 
 ### Dashboards
-- **Grafana**: `https://monitoring.netra.ai/dashboard/persistence`
+- **Grafana**: `https://monitoring.netrasystems.ai/dashboard/persistence`
 - **Metrics**: Latency, throughput, error rates, failover events
 
 ### Alerts

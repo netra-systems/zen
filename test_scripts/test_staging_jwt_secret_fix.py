@@ -157,7 +157,7 @@ def test_jwt_token_cross_validation(secret):
         'aud': 'netra-platform',
         'jti': str(uuid.uuid4()),
         'env': 'staging',
-        'email': 'staging_test@netra.ai',
+        'email': 'staging_test@netrasystems.ai',
         'permissions': ['read', 'write'],
         'service_signature': 'test_signature'
     }

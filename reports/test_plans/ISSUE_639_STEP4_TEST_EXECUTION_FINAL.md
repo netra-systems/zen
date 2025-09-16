@@ -39,7 +39,7 @@ python3 -m pytest tests/e2e/golden_path/test_complete_golden_path_e2e_staging.py
 ```
 ERROR at setup of TestCompleteGoldenPathE2EStaging.test_complete_golden_path_user_journey_staging
 tests/e2e/golden_path/test_complete_golden_path_e2e_staging.py:115: in setup_method
-    "base_url": get_env("STAGING_BASE_URL", "https://staging.netra.ai"),
+    "base_url": get_env("STAGING_BASE_URL", "https://staging.netrasystems.ai"),
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 E   TypeError: get_env() takes 0 positional arguments but 2 were given
 ```
@@ -53,11 +53,11 @@ E   TypeError: get_env() takes 0 positional arguments but 2 were given
 from shared.isolated_environment import get_env
 
 # This fails as expected
-result = get_env('STAGING_BASE_URL', 'https://staging.netra.ai')  # TypeError
+result = get_env('STAGING_BASE_URL', 'https://staging.netrasystems.ai')  # TypeError
 
 # This works correctly  
 env = get_env()
-result = env.get('STAGING_BASE_URL', 'https://staging.netra.ai')  # ✅ Works
+result = env.get('STAGING_BASE_URL', 'https://staging.netrasystems.ai')  # ✅ Works
 ```
 
 **Results:**
@@ -66,7 +66,7 @@ Testing get_env signature error reproduction...
 EXPECTED ERROR REPRODUCED: get_env() takes 0 positional arguments but 2 were given
 
 Testing correct get_env usage...
-CORRECT USAGE SUCCESS: https://staging.netra.ai
+CORRECT USAGE SUCCESS: https://staging.netrasystems.ai
 ```
 
 ### ✅ 4. Staging Test Class Analysis (CONFIRMED)
@@ -90,11 +90,11 @@ CORRECT USAGE SUCCESS: https://staging.netra.ai
 
 **Critical Error Locations:**
 ```
-Line 115: "base_url": get_env("STAGING_BASE_URL", "https://staging.netra.ai"),
-Line 116: "websocket_url": get_env("STAGING_WEBSOCKET_URL", "wss://staging.netra.ai/ws"),
-Line 117: "api_url": get_env("STAGING_API_URL", "https://staging.netra.ai/api"), 
-Line 118: "auth_url": get_env("STAGING_AUTH_URL", "https://staging.netra.ai/auth")
-Line 124: "email": get_env("TEST_USER_EMAIL", "test@netra.ai"),
+Line 115: "base_url": get_env("STAGING_BASE_URL", "https://staging.netrasystems.ai"),
+Line 116: "websocket_url": get_env("STAGING_WEBSOCKET_URL", "wss://staging.netrasystems.ai/ws"),
+Line 117: "api_url": get_env("STAGING_API_URL", "https://staging.netrasystems.ai/api"), 
+Line 118: "auth_url": get_env("STAGING_AUTH_URL", "https://staging.netrasystems.ai/auth")
+Line 124: "email": get_env("TEST_USER_EMAIL", "test@netrasystems.ai"),
 Line 125: "password": get_env("TEST_USER_PASSWORD", "test_password"),
 ```
 
@@ -127,7 +127,7 @@ def get_env() -> IsolatedEnvironment:
 ```python
 # ❌ INCORRECT - This causes TypeError
 config = {
-    "base_url": get_env("STAGING_BASE_URL", "https://staging.netra.ai"),
+    "base_url": get_env("STAGING_BASE_URL", "https://staging.netrasystems.ai"),
 }
 ```
 
@@ -136,7 +136,7 @@ config = {
 # ✅ CORRECT - This works properly
 env = get_env()
 config = {
-    "base_url": env.get("STAGING_BASE_URL", "https://staging.netra.ai"),
+    "base_url": env.get("STAGING_BASE_URL", "https://staging.netrasystems.ai"),
 }
 ```
 
@@ -186,10 +186,10 @@ config = {
 # Lines: 115-118, 124-125
 
 # Change from:
-"base_url": get_env("STAGING_BASE_URL", "https://staging.netra.ai"),
+"base_url": get_env("STAGING_BASE_URL", "https://staging.netrasystems.ai"),
 
 # Change to:
-"base_url": get_env().get("STAGING_BASE_URL", "https://staging.netra.ai"),
+"base_url": get_env().get("STAGING_BASE_URL", "https://staging.netrasystems.ai"),
 ```
 
 #### Phase 2: Mission Critical Tests Fix

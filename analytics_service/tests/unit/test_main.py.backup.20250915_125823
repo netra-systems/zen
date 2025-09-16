@@ -100,7 +100,7 @@ class TestAppFactory:
     def test_cors_middleware_configuration(self):
         """Test CORS middleware configuration."""
         env = get_env()
-        env.set("ANALYTICS_CORS_ORIGINS", "https://app.netra.ai,https://api.netra.ai")
+        env.set("ANALYTICS_CORS_ORIGINS", "https://app.netrasystems.ai,https://api.netrasystems.ai")
         
         app = create_app()
         

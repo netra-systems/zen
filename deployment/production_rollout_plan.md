@@ -99,7 +99,7 @@ python scripts/production_rollout_control.py emergency-rollback \
 ### Activation Commands
 
 ```bash
-# Enable for internal users (@netrasystems.ai, @netra.ai)
+# Enable for internal users (@netrasystems.ai, @netrasystems.ai)
 python scripts/production_rollout_control.py update-stage \
     --flag request_isolation \
     --stage internal \

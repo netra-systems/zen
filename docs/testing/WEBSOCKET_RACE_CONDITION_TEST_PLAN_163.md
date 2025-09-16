@@ -412,7 +412,7 @@ pytest tests/stress/test_*websocket*.py -v         # Stress tests: 100% pass
 ```yaml
 Environment: staging
 Project: netra-staging
-WebSocket Endpoint: wss://staging-backend.netra.ai/ws
+WebSocket Endpoint: wss://staging-api.netrasystems.ai/ws
 Authentication: Real JWT tokens via OAuth
 Load Balancer: GCP HTTP(S) Load Balancer
 Backend: Cloud Run instances

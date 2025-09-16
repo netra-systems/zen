@@ -1,0 +1,135 @@
+{
+  "infrastructure_metrics_summary": {
+    "total_execution_time": 2.0103540420532227,
+    "data_collection_timestamp": 1757977117.59032,
+    "metrics_collected": [
+      "test_execution_start",
+      "system_metrics",
+      "network_metrics",
+      "process_metrics",
+      "memory_metrics",
+      "staging_simulation_metrics",
+      "test_results"
+    ],
+    "test_pass_rate": 0.6,
+    "total_tests": 5,
+    "passed_tests": 3
+  },
+  "staging_environment_simulation": {
+    "cloud_sql_connections": {
+      "active_connections": 15,
+      "max_connections": 25,
+      "connection_pool_size": 10,
+      "connection_timeout_ms": 25000,
+      "failed_connections": 3
+    },
+    "vpc_connector_metrics": {
+      "throughput_mbps": 2.5,
+      "latency_ms": 45,
+      "packet_loss_percent": 0.2,
+      "capacity_utilization": 85
+    },
+    "container_runtime": {
+      "startup_time_ms": 31173,
+      "exit_code": 3,
+      "restart_count": 3,
+      "memory_limit_mb": 512,
+      "cpu_limit_cores": 0.5
+    },
+    "smd_phase_timings": {
+      "phase_1_init": 0.058,
+      "phase_2_dependencies": 31.115,
+      "phase_3_database": 20.0,
+      "phase_4_cache": null,
+      "phase_5_services": null,
+      "phase_6_websocket": null,
+      "phase_7_finalize": null
+    },
+    "timestamp": 1757977116.585293
+  },
+  "system_performance": {
+    "cpu_percent": 16.3,
+    "memory_percent": 81.8,
+    "disk_usage_percent": 1.5,
+    "load_average": [
+      3.0615234375,
+      5.03759765625,
+      4.34716796875
+    ],
+    "timestamp": 1757977117.590056
+  },
+  "process_performance": {
+    "memory_mb": 16.828125,
+    "cpu_percent": 0.0,
+    "num_threads": 1,
+    "open_files": 0,
+    "timestamp": 1757977117.590178
+  },
+  "network_performance": {
+    "bytes_sent": 992233472,
+    "bytes_recv": 939835392,
+    "packets_sent": 75618916,
+    "packets_recv": 76940655,
+    "errin": 0,
+    "errout": 0,
+    "timestamp": 1757977117.5903099
+  },
+  "test_execution_results": [
+    {
+      "test_name": "staging_startup_failure_reproduction",
+      "status": "PASSED",
+      "duration_seconds": 0.0002,
+      "timestamp": 1757977116.585283
+    },
+    {
+      "test_name": "staging_container_restart_cycle",
+      "status": "PASSED",
+      "duration_seconds": 0.08,
+      "timestamp": 1757977116.5852869
+    },
+    {
+      "test_name": "staging_log_pattern_analysis",
+      "status": "PASSED",
+      "duration_seconds": 0.03,
+      "timestamp": 1757977116.585289
+    },
+    {
+      "test_name": "unit_tests_smd_phase3_timeout",
+      "status": "FAILED",
+      "duration_seconds": 0.37,
+      "timestamp": 1757977116.58529
+    },
+    {
+      "test_name": "integration_tests_database_connectivity",
+      "status": "FAILED",
+      "duration_seconds": 0.09,
+      "timestamp": 1757977116.58529
+    }
+  ],
+  "staging_behavior_validation": {
+    "validation_timestamp": 1757977117.590313,
+    "staging_behavior_confirmed": true,
+    "validation_checks": [
+      {
+        "check": "cloud_sql_failures",
+        "status": "EXPECTED",
+        "details": "Found 3 failed connections (expected for Issue #1278)"
+      },
+      {
+        "check": "smd_phase3_timeout",
+        "status": "CONFIRMED",
+        "details": "Phase 3 timeout matches expected 20.0s value"
+      },
+      {
+        "check": "subsequent_phases_blocked",
+        "status": "CONFIRMED",
+        "details": "All 4 subsequent phases blocked as expected: ['phase_4_cache', 'phase_5_services', 'phase_6_websocket', 'phase_7_finalize']"
+      },
+      {
+        "check": "container_exit_code_3",
+        "status": "CONFIRMED",
+        "details": "Container exit code 3 matches expected behavior for dependency issues"
+      }
+    ]
+  }
+}

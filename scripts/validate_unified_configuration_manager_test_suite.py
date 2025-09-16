@@ -261,7 +261,7 @@ class UnifiedConfigurationManagerTestSuiteValidator:
         concurrent_enterprise_tests = [m for m in test_methods if "concurrent" in m.lower() and "enterprise" in m.lower()]
         
         # GCP-specific validation
-        gcp_patterns = ["gcp_staging", "Cloud SQL", "Cloud Redis", "gcp_region", "staging.netra.ai"]
+        gcp_patterns = ["gcp_staging", "Cloud SQL", "Cloud Redis", "gcp_region", "staging.netrasystems.ai"]
         gcp_integration_count = sum(1 for pattern in gcp_patterns if pattern in content)
         
         e2e_results = {

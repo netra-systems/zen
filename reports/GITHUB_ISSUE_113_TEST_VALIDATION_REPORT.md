@@ -81,7 +81,7 @@ The unit tests demonstrate a sophisticated understanding of the issue:
 def test_websocket_gcp_infrastructure_headers_filtered(self):
     """Simulates GCP Load Balancer stripping Authorization headers"""
     gcp_infrastructure_headers = {
-        "host": "staging.netra.ai",
+        "host": "staging.netrasystems.ai",
         "via": "1.1 google", 
         "x-forwarded-for": "203.0.113.1",
         "x-forwarded-proto": "https",

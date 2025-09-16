@@ -842,7 +842,7 @@ JSON Payload:
 Insert ID: 68c887030006889b093f8cd0
 Service: netra-backend-staging
 JSON Payload:
-  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai
+  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai
   error:
 
 ```
@@ -919,7 +919,7 @@ JSON Payload:
 Insert ID: 68c886cb000b64aecab540aa
 Service: netra-backend-staging
 JSON Payload:
-  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai
+  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai
   error:
 
 ```
@@ -996,7 +996,7 @@ JSON Payload:
 Insert ID: 68c8868f00096d568e0e2c5d
 Service: netra-backend-staging
 JSON Payload:
-  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai
+  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai
   error:
 
 ```
@@ -1084,7 +1084,7 @@ Text Payload:
 Insert ID: 68c8864c0002e6266f8be351
 Service: netra-backend-staging
 JSON Payload:
-  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai
+  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai
   error:
 
 ```
@@ -1161,7 +1161,7 @@ JSON Payload:
 Insert ID: 68c8860d0006a5552ac4b72b
 Service: netra-backend-staging
 JSON Payload:
-  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai
+  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai
   error:
 
 ```
@@ -1249,7 +1249,7 @@ Text Payload:
 Insert ID: 68c885c9000c72eee89465be
 Service: netra-backend-staging
 JSON Payload:
-  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai
+  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai
   error:
 
 ```
@@ -1337,7 +1337,7 @@ Text Payload:
 Insert ID: 68c88586000d4879546b15f5
 Service: netra-backend-staging
 JSON Payload:
-  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai
+  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai
   error:
 
 ```
@@ -1425,7 +1425,7 @@ Text Payload:
 Insert ID: 68c885430002f9bc9e86b2e2
 Service: netra-backend-staging
 JSON Payload:
-  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai
+  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai
   error:
 
 ```
@@ -1513,7 +1513,7 @@ Text Payload:
 Insert ID: 68c885020009ba5a7a240caa
 Service: netra-backend-staging
 JSON Payload:
-  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai
+  message:    WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai
   error:
 
 ```

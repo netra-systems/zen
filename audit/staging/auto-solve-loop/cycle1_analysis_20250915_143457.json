@@ -39,7 +39,7 @@
       "count": 17
     },
     {
-      "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+      "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
       "count": 15
     },
     {

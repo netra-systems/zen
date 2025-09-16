@@ -119,7 +119,7 @@ logger = logging.getLogger(__name__)
 
                                                                             # 2. POST request with test data
                                                                             # REMOVED_SYNTAX_ERROR: test_data = { )
-                                                                            # REMOVED_SYNTAX_ERROR: "email": "test@staging.netra.ai",
+                                                                            # REMOVED_SYNTAX_ERROR: "email": "test@staging.netrasystems.ai",
                                                                             # REMOVED_SYNTAX_ERROR: "password": "test_password_for_staging"
                                                                             
 
@@ -173,7 +173,7 @@ logger = logging.getLogger(__name__)
         # REMOVED_SYNTAX_ERROR: "aud": "netra-platform",      # Same as staging would use
         # REMOVED_SYNTAX_ERROR: "jti": str(uuid.uuid4()),
         # REMOVED_SYNTAX_ERROR: "env": "staging",             # Critical: staging environment
-        # REMOVED_SYNTAX_ERROR: "email": "staging.test@netra.ai",
+        # REMOVED_SYNTAX_ERROR: "email": "staging.test@netrasystems.ai",
         # REMOVED_SYNTAX_ERROR: "permissions": ["read", "write"],
         # REMOVED_SYNTAX_ERROR: "svc_id": "auth_service_staging"
         
