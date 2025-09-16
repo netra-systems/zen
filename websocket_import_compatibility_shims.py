@@ -198,7 +198,7 @@ def validate_compatibility_deployment():
         },
         {
             "test_name": "canonical import baseline", 
-            "import_statement": "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+            "import_statement": "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
             "expected_warning": False
         }
     ]
@@ -221,9 +221,9 @@ def generate_migration_instructions():
 WEBSOCKET MANAGER IMPORT MIGRATION GUIDE - Phase 1
 
 CANONICAL IMPORTS (Use these):
-✅ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+✅ from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 ✅ from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
-✅ from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+✅ from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 DEPRECATED IMPORTS (Being phased out):
 ⚠️  from netra_backend.app.websocket_core.manager import WebSocketManager

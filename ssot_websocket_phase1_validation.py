@@ -99,7 +99,7 @@ def validate_interface_standardization():
         # Test 6: Canonical Import Path Check
         print("\n🔍 Test 6: Canonical Import Path Validation")
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             is_alias = WebSocketManager == UnifiedWebSocketManager
             print(f"   ✅ Canonical import works: WebSocketManager -> UnifiedWebSocketManager")
             print(f"   ✅ Alias correct: {is_alias}")

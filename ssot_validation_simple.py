@@ -38,7 +38,7 @@ def validate_ssot_phase1():
     # Test 3: Canonical import path works
     total_tests += 1
     try:
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         print("[PASS] Test 3: Canonical import path works")
         tests_passed += 1
     except ImportError as e:

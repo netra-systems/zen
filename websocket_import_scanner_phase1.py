@@ -18,7 +18,7 @@ PURPOSE:
 4. Track progress toward single canonical SSOT import path
 
 CANONICAL TARGET:
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 """
 
 import os
@@ -50,7 +50,7 @@ class WebSocketImportScanner:
         
         # Define canonical SSOT import patterns
         self.canonical_patterns = {
-            "websocket_manager": "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+            "websocket_manager": "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
             "unified_manager": "from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation",
             "canonical_imports": "from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager",
         }

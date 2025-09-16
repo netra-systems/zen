@@ -24,7 +24,7 @@ def test_specific_module_imports_should_not_warn():
     
     test_imports = [
         "from netra_backend.app.websocket_core.event_validator import UnifiedEventValidator",
-        "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager", 
+        "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager", 
         "from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol",
         "from netra_backend.app.websocket_core.unified_emitter import UnifiedEmitter"
     ]

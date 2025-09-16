@@ -30,7 +30,7 @@ def investigate_warning_inconsistency():
         },
         {
             "description": "NEW: websocket_manager import",
-            "import": "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+            "import": "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
             "expected": "Should NOT warn (specific module)"
         },
         {

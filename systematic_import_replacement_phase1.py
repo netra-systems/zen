@@ -40,21 +40,21 @@ class SystematicImportReplacer:
             {
                 "name": "Legacy manager.py imports",
                 "pattern": r"from\s+netra_backend\.app\.websocket_core\.manager\s+import\s+(.*)",
-                "replacement": r"from netra_backend.app.websocket_core.websocket_manager import \1",
+                "replacement": r"from netra_backend.app.websocket_core.canonical_import_patterns import \1",
                 "priority": "high",
                 "risk": "low"
             },
             {
                 "name": "Unified manager direct imports", 
                 "pattern": r"from\s+netra_backend\.app\.websocket_core\.unified_manager\s+import\s+UnifiedWebSocketManager",
-                "replacement": r"from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+                "replacement": r"from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
                 "priority": "high",
                 "risk": "medium"
             },
             {
                 "name": "Package-level websocket_core imports",
                 "pattern": r"from\s+netra_backend\.app\.websocket_core\s+import\s+(get_websocket_manager|WebSocketManager)",
-                "replacement": r"from netra_backend.app.websocket_core.websocket_manager import \1",
+                "replacement": r"from netra_backend.app.websocket_core.canonical_import_patterns import \1",
                 "priority": "high", 
                 "risk": "low"
             },
