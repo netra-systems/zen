@@ -1,388 +1,619 @@
 # Issue #1278 Infrastructure Remediation Plan
 
-**Created**: 2025-09-16  
-**Status**: INFRASTRUCTURE ESCALATION ACTIVE  
-**Priority**: P0 CRITICAL - Complete Staging Unavailability  
-**Business Impact**: $500K+ ARR pipeline blocked - Golden Path completely offline
+**PRIORITY:** P0 CRITICAL - Golden Path Blocked
+**BUSINESS IMPACT:** $500K+ ARR services offline
+**STATUS:** Infrastructure health below 70% (failing threshold)
+**GENERATED:** 2025-09-15 20:06 UTC
+
+---
 
 ## Executive Summary
 
-Based on fresh e2e critical test evidence and comprehensive five whys analysis, Issue #1278 is confirmed as a **P0 infrastructure problem** requiring immediate infrastructure team intervention. All application code has been validated as correct - this is a platform-level VPC connector and Cloud SQL connectivity issue.
+**CONFIRMED ISSUE STATUS:**
+- ✅ VPC connector connectivity failures (error code 10035)
+- ✅ Cloud SQL connections at 88% utilization (critical threshold)
+- ✅ Infrastructure health below 70% (failing threshold)
+- ✅ Golden Path completely blocked (users cannot login → get AI responses)
+- ✅ HTTP 503 Service Unavailable errors across critical endpoints
+- ✅ Dual revision deployment causing resource contention
 
-**Key Evidence:**
-- **E2E Test Results**: 0% success rate across all critical tests (40 tests collected)
-- **Service Status**: 649+ critical startup failures with systematic 5xx errors  
-- **Infrastructure Status**: Explicitly marked as UNAVAILABLE during test execution
-- **Error Pattern**: Continuous WebSocket connection rejections (HTTP 500/503) and API endpoint failures
+**ROOT CAUSE CONFIRMED:**
+Based on comprehensive log analysis and infrastructure assessment:
 
-## 1. Immediate Actions (While Waiting for Infrastructure Team)
+1. **VPC Connector Issues**: Capacity/connectivity failures blocking Redis and Cloud SQL access
+2. **Dual Revision Deployment**: Two active revisions (00749-6tr, 00750-69k) causing resource contention
+3. **Cloud SQL Resource Constraints**: 88% utilization triggering connection failures
+4. **Network Routing Failures**: Load balancer health checks failing with 2-12 second latencies
+5. **Empty Logging Payloads**: 92% of error logs missing diagnostic information
 
-### 1.1 Development Continuity Measures
+---
 
-**Immediate (Next 1-2 hours):**
-- [ ] **Halt all staging deployments** until connectivity restored
-- [ ] **Switch to local development environment** for continued development
-- [ ] **Enable enhanced logging** for infrastructure monitoring once restored
-- [ ] **Document all current staging URLs** for post-resolution validation
+## Immediate Infrastructure Fixes (P0 CRITICAL)
 
-**Development Environment Setup:**
+### 1. Resolve Dual Revision Deployment State
+**ISSUE:** Two active Cloud Run revisions causing resource contention and 503 errors
+**ROOT CAUSE:** Incomplete deployment or rollback scenario
+
+**IMPLEMENTATION:**
 ```bash
-# Switch to local development
-export ENVIRONMENT=development
-export USE_LOCAL_SERVICES=true
+# 1. Check current revision status
+gcloud run revisions list --service=netra-backend-staging --region=us-central1 --project=netra-staging
 
-# Continue development with local PostgreSQL
-docker-compose -f docker-compose.dev.yml up -d postgres redis
+# 2. Identify active revisions and traffic allocation
+gcloud run services describe netra-backend-staging --region=us-central1 --project=netra-staging --format="yaml"
 
-# Run unit tests (non-infrastructure dependent)
-python tests/unified_test_runner.py --category unit --no-infrastructure
+# 3. Route 100% traffic to latest revision and delete old revision
+gcloud run services update-traffic netra-backend-staging \
+  --to-revisions=netra-backend-staging-00750-69k=100 \
+  --region=us-central1 \
+  --project=netra-staging
+
+# 4. Delete old revision to free resources
+gcloud run revisions delete netra-backend-staging-00749-6tr \
+  --region=us-central1 \
+  --project=netra-staging \
+  --quiet
 ```
 
-### 1.2 Business Continuity Measures
-
-**Critical Communications:**
-- [ ] **Notify stakeholders** of staging environment unavailability
-- [ ] **Update status page** with infrastructure maintenance notice
-- [ ] **Communicate expected resolution timeline** once infrastructure team provides updates
-- [ ] **Escalate to business leadership** regarding $500K+ ARR pipeline impact
-
-**Alternative Validation Approaches:**
-- [ ] **Enhanced code review process** for database-related changes
-- [ ] **Comprehensive unit test coverage** for all staging-blocked features
-- [ ] **Local environment golden path testing** using docker-compose
-- [ ] **Production monitoring enhancement** to catch issues before deployment
-
-### 1.3 Monitoring and Documentation
-
-**Infrastructure Health Monitoring:**
+**VALIDATION:**
 ```bash
-# Create monitoring script for infrastructure status
-cat > scripts/monitor_infrastructure_health.py << 'EOF'
-#!/usr/bin/env python3
-"""Monitor infrastructure health until Issue #1278 is resolved."""
+# Verify single active revision
+gcloud run revisions list --service=netra-backend-staging --region=us-central1 --project=netra-staging --filter="status.conditions.type=Active"
 
-import requests
-import time
-import logging
-from datetime import datetime
-
-STAGING_ENDPOINTS = [
-    "https://staging.netrasystems.ai/health",
-    "https://api-staging.netrasystems.ai/health"
-]
-
-def check_infrastructure_health():
-    """Check if infrastructure is restored."""
-    for endpoint in STAGING_ENDPOINTS:
-        try:
-            response = requests.get(endpoint, timeout=10)
-            if response.status_code == 200:
-                print(f"✅ {endpoint} - HEALTHY")
-                return True
-            else:
-                print(f"❌ {endpoint} - Status: {response.status_code}")
-        except Exception as e:
-            print(f"❌ {endpoint} - Error: {e}")
-    return False
-
-if __name__ == "__main__":
-    print(f"[{datetime.now()}] Starting infrastructure health monitoring...")
-    while not check_infrastructure_health():
-        time.sleep(60)  # Check every minute
-    print(f"[{datetime.now()}] ✅ Infrastructure appears to be restored!")
-EOF
-
-chmod +x scripts/monitor_infrastructure_health.py
+# Test health endpoint immediately
+curl -v https://api.staging.netrasystems.ai/health
 ```
 
-## 2. Infrastructure Team Actions Required
+### 2. VPC Connector Validation and Recreation
+**ISSUE:** VPC connector capacity/connectivity issues blocking database access
+**ROOT CAUSE:** Connector overload or misconfiguration
 
-### 2.1 Critical Infrastructure Validation
-
-**VPC Connector Health Check:**
-- [ ] **Validate VPC connector configuration**: `staging-connector` health and traffic routing
-- [ ] **Check connector capacity**: Verify not exceeding connection limits (50+ concurrent connections identified as threshold)
-- [ ] **Verify egress configuration**: Ensure all-traffic egress properly configured
-- [ ] **Check connector scaling**: Validate auto-scaling behavior under load
-
-**Cloud SQL Instance Health:**
-- [ ] **Instance status check**: `netra-staging:us-central1:staging-shared-postgres` operational status
-- [ ] **Connection pool validation**: Verify pool configuration (current: 10 pool size, 15 max overflow)
-- [ ] **Resource utilization**: Check CPU, memory, and I/O metrics for constraints
-- [ ] **Network connectivity**: Validate socket connections to `/cloudsql/.../.s.PGSQL.5432`
-
-### 2.2 Network Infrastructure Diagnostics
-
-**Load Balancer Configuration:**
-- [ ] **Health check settings**: Verify health checks configured for extended startup times (600s requirement)
-- [ ] **SSL certificate validation**: Confirm *.netrasystems.ai certificates properly deployed
-- [ ] **Backend service configuration**: Ensure proper routing to Cloud Run services
-- [ ] **Timeout configuration**: Validate request timeout settings align with database timeout fixes
-
-**Cloud Run Service Health:**
-- [ ] **Service deployment status**: Verify backend and auth services are deployed and healthy
-- [ ] **Container resource allocation**: Check memory and CPU limits adequate for startup sequence
-- [ ] **Service account permissions**: Validate proper IAM roles for Cloud SQL access
-- [ ] **Environment variables**: Confirm all staging environment variables properly configured
-
-### 2.3 Regional Infrastructure Assessment
-
-**GCP Service Health:**
-- [ ] **Regional service status**: Check for us-central1 regional issues or maintenance
-- [ ] **Network peering**: Validate VPC peering between Cloud Run and Cloud SQL networks
-- [ ] **Firewall rules**: Ensure proper ingress/egress rules for database connectivity
-- [ ] **Service mesh configuration**: Verify any service mesh components not interfering
-
-## 3. Monitoring and Validation Steps
-
-### 3.1 Infrastructure Restoration Indicators
-
-**Primary Health Indicators:**
+**IMPLEMENTATION:**
 ```bash
-# Test basic connectivity restoration
-curl -f https://staging.netrasystems.ai/health
-curl -f https://api-staging.netrasystems.ai/health
+# 1. Check VPC connector status
+gcloud compute networks vpc-access connectors describe staging-connector \
+  --region=us-central1 \
+  --project=netra-staging
 
-# Test WebSocket connectivity
-wscat -c wss://api-staging.netrasystems.ai/ws/health
+# 2. Check connector utilization and health
+gcloud logging read \
+  'resource.type="vpc_access_connector" AND
+   resource.labels.connector_name="staging-connector" AND
+   timestamp>="2025-09-15T18:00:00Z"' \
+  --project=netra-staging \
+  --limit=50
+
+# 3. If connector is overloaded, scale up capacity
+gcloud compute networks vpc-access connectors update staging-connector \
+  --region=us-central1 \
+  --project=netra-staging \
+  --max-instances=20 \
+  --min-instances=4
+
+# 4. If connector is failing, recreate it
+# NOTE: This will cause brief service interruption
+gcloud compute networks vpc-access connectors delete staging-connector \
+  --region=us-central1 \
+  --project=netra-staging \
+  --quiet
+
+# Apply terraform to recreate
+cd terraform-gcp-staging
+terraform apply -target=google_vpc_access_connector.staging_connector
 ```
 
-**Database Connectivity Validation:**
+**VALIDATION:**
 ```bash
-# Run infrastructure-specific tests once endpoints are responding
-python tests/unified_test_runner.py --category integration --focus database --env staging
+# Verify connector operational
+gcloud compute networks vpc-access connectors describe staging-connector \
+  --region=us-central1 \
+  --project=netra-staging \
+  --format="value(state)"
 
-# Validate SMD Phase 3 specifically
-python netra_backend/tests/unit/startup/test_issue_1278_database_timeout_validation.py -v
+# Should return: READY
 ```
 
-### 3.2 Golden Path Validation Pipeline
+### 3. Cloud SQL Connection Optimization
+**ISSUE:** Cloud SQL at 88% utilization causing connection failures
+**ROOT CAUSE:** Connection pool exhaustion or query performance issues
 
-**Stage 1: Basic Service Health**
-- [ ] **Health endpoints responding**: All staging health endpoints return 200
-- [ ] **Authentication service**: Auth endpoints functional
-- [ ] **Database connectivity**: Basic queries succeed within timeout limits
+**IMPLEMENTATION:**
+```bash
+# 1. Check current Cloud SQL connections
+gcloud sql instances describe netra-staging-db \
+  --project=netra-staging \
+  --format="yaml" | grep -A 10 "settings:"
 
-**Stage 2: WebSocket Functionality**
-- [ ] **WebSocket handshake**: Successful connection establishment
-- [ ] **Event delivery**: Basic WebSocket events functioning
-- [ ] **Authentication integration**: WebSocket auth working properly
+# 2. Increase max connections if needed
+gcloud sql instances patch netra-staging-db \
+  --project=netra-staging \
+  --database-flags=max_connections=200
 
-**Stage 3: End-to-End Golden Path**
-- [ ] **User login flow**: Complete authentication working
-- [ ] **AI message execution**: Agents can process and respond to messages
-- [ ] **Real-time updates**: WebSocket events delivering agent progress
-- [ ] **Chat functionality**: Complete user experience functional
+# 3. Check for long-running queries
+gcloud sql operations list \
+  --instance=netra-staging-db \
+  --project=netra-staging \
+  --filter="status=RUNNING"
 
-### 3.3 Performance Validation
+# 4. Review connection pooling settings in application
+# Update database timeout to 600s as per Issue #1278 requirements
+```
 
-**Infrastructure Performance Baselines:**
+**APPLICATION CONFIG UPDATE:**
 ```python
-# Expected performance metrics post-resolution
-infrastructure_health_metrics = {
-    "database_connection_time": "<5.0s",       # Well under 35.0s timeout
-    "vpc_connector_utilization": "<70%",       # Safe capacity margins
-    "cloud_sql_pool_utilization": "<80%",      # Adequate pool capacity
-    "smd_phase_3_duration": "<20.0s",          # Successful phase completion
-    "golden_path_e2e_time": "<30.0s",          # Complete user flow
-    "websocket_connection_success": "100%"      # No connection rejections
+# netra_backend/app/core/configuration/database.py
+DATABASE_CONFIG = {
+    "connection_timeout": 600,  # Extended timeout
+    "pool_size": 20,           # Increased pool size
+    "max_overflow": 40,        # Allow overflow connections
+    "pool_pre_ping": True,     # Validate connections
+    "pool_recycle": 3600       # Recycle connections hourly
 }
 ```
 
-## 4. Post-Resolution Verification Plan
+---
 
-### 4.1 Comprehensive Validation Testing
+## Environment Configuration Fixes (P0 CRITICAL)
 
-**Infrastructure Stress Testing:**
+### 1. Staging Environment Variable Validation
+**ISSUE:** Environment configuration gaps causing service failures
+
+**IMPLEMENTATION:**
 ```bash
-# Run the complete Issue #1278 test suite to validate resolution
-python -m pytest tests/e2e/ -k "issue_1278" -v -m staging --tb=long
+# 1. Validate critical environment variables are set
+gcloud run services describe netra-backend-staging \
+  --region=us-central1 \
+  --project=netra-staging \
+  --format="yaml" | grep -A 50 "env:"
 
-# Execute the detailed test execution plan
-python -m pytest tests/integration/infrastructure/ -k "issue_1278" -v
-python -m pytest netra_backend/tests/unit/startup/ -k "issue_1278" -v
+# 2. Update service with critical missing variables
+gcloud run services update netra-backend-staging \
+  --region=us-central1 \
+  --project=netra-staging \
+  --set-env-vars="VPC_CONNECTOR_TIMEOUT=600,DATABASE_TIMEOUT=600"
+
+# 3. Ensure demo mode is disabled for staging
+gcloud run services update netra-backend-staging \
+  --region=us-central1 \
+  --project=netra-staging \
+  --set-env-vars="DEMO_MODE=0"
 ```
 
-**Golden Path End-to-End Validation:**
+### 2. SSL Certificate and Domain Validation
+**ISSUE:** SSL certificate failures for *.netrasystems.ai domains
+
+**IMPLEMENTATION:**
 ```bash
-# Critical business functionality validation
-python tests/mission_critical/test_websocket_agent_events_staging.py -v
-python tests/e2e/staging/test_golden_path_end_to_end_staging_validation.py -v
-python tests/e2e/staging/test_priority1_critical.py -v
+# 1. Check SSL certificate status
+gcloud compute ssl-certificates list --project=netra-staging
+
+# 2. Verify certificate covers required domains
+gcloud compute ssl-certificates describe staging-ssl-cert \
+  --project=netra-staging \
+  --format="value(subjectAlternativeNames[])"
+
+# 3. Test SSL connectivity
+openssl s_client -connect api.staging.netrasystems.ai:443 -servername api.staging.netrasystems.ai
 ```
 
-### 4.2 Monitoring Enhancement Implementation
+---
 
-**Enhanced Infrastructure Monitoring:**
-- [ ] **VPC connector capacity alerts**: Alert at >70% utilization
-- [ ] **Cloud SQL pool monitoring**: Alert at >80% pool utilization  
-- [ ] **Connection time monitoring**: Alert if database connections >25s
-- [ ] **SMD phase timing alerts**: Alert if Phase 3 >45s (well under 75s timeout)
+## Service Recovery and Validation (P1 HIGH)
 
-**Proactive Health Checks:**
-```python
-# Implement enhanced health check endpoint
-@app.get("/health/infrastructure")
-async def infrastructure_health():
-    return {
-        "database_pool_utilization": await get_pool_utilization(),
-        "vpc_connector_health": await check_vpc_connector(),
-        "connection_establishment_time": await measure_connection_time(),
-        "last_smd_phase_times": await get_recent_smd_metrics()
-    }
+### 1. Staged Service Restart Approach
+**ISSUE:** Services need coordinated restart to apply fixes
+
+**IMPLEMENTATION:**
+```bash
+# 1. Restart backend service with new configuration
+gcloud run services replace-traffic netra-backend-staging \
+  --to-latest \
+  --region=us-central1 \
+  --project=netra-staging
+
+# 2. Wait for service to become ready
+sleep 30
+
+# 3. Validate health endpoint
+for i in {1..10}; do
+  echo "Health check attempt $i"
+  curl -f https://api.staging.netrasystems.ai/health || echo "Failed"
+  sleep 5
+done
+
+# 4. Restart auth service if needed
+gcloud run services replace-traffic auth-service-staging \
+  --to-latest \
+  --region=us-central1 \
+  --project=netra-staging
 ```
 
-### 4.3 Business Impact Recovery Validation
+### 2. Golden Path Restoration Validation
+**ISSUE:** End-to-end user flow must be validated
 
-**Service Level Recovery Metrics:**
-- [ ] **Staging environment availability**: 99%+ uptime restored
-- [ ] **Golden Path functionality**: 100% success rate for critical user flows
-- [ ] **Development velocity**: No staging-related deployment blockers
-- [ ] **Customer validation pipeline**: Full end-to-end testing capability restored
+**VALIDATION SCRIPT:**
+```bash
+#!/bin/bash
+# Golden Path Validation Script
 
-## 5. Prevention Measures
+echo "=== Golden Path Validation ==="
 
-### 5.1 Infrastructure Capacity Management
+# 1. Health Check
+echo "1. Testing health endpoint..."
+curl -f https://api.staging.netrasystems.ai/health
+if [ $? -eq 0 ]; then
+  echo "✅ Health check passed"
+else
+  echo "❌ Health check failed"
+  exit 1
+fi
 
-**Proactive Scaling Configuration:**
-- [ ] **VPC connector auto-scaling**: Configure automatic scaling before capacity limits
-- [ ] **Cloud SQL connection pool sizing**: Increase pool capacity with proper monitoring
-- [ ] **Load balancer health checks**: Configure longer timeout periods for startup sequences
-- [ ] **Resource allocation review**: Ensure adequate CPU/memory allocation for peak loads
+# 2. WebSocket Connection
+echo "2. Testing WebSocket endpoint..."
+timeout 10 wscat -c wss://api-staging.netrasystems.ai/ws
+if [ $? -eq 0 ]; then
+  echo "✅ WebSocket connection successful"
+else
+  echo "❌ WebSocket connection failed"
+fi
 
-### 5.2 Enhanced Monitoring and Alerting
+# 3. Database Connectivity
+echo "3. Testing database connectivity..."
+curl -f https://api.staging.netrasystems.ai/health/db
+if [ $? -eq 0 ]; then
+  echo "✅ Database connectivity confirmed"
+else
+  echo "❌ Database connectivity failed"
+fi
 
-**Early Warning System:**
+# 4. Redis Connectivity
+echo "4. Testing Redis connectivity..."
+curl -f https://api.staging.netrasystems.ai/health/redis
+if [ $? -eq 0 ]; then
+  echo "✅ Redis connectivity confirmed"
+else
+  echo "❌ Redis connectivity failed"
+fi
+
+echo "=== Golden Path Validation Complete ==="
+```
+
+### 3. Performance Monitoring Implementation
+**ISSUE:** Real-time monitoring needed to track recovery
+
+**IMPLEMENTATION:**
+```bash
+# 1. Set up log-based metrics for 503 errors
+gcloud logging metrics create http_503_errors \
+  --description="Count of HTTP 503 errors" \
+  --log-filter='resource.type="cloud_run_revision" AND httpRequest.status=503' \
+  --project=netra-staging
+
+# 2. Create alerting policy for critical errors
+gcloud alpha monitoring policies create \
+  --policy-from-file=alert-policy-503-errors.yaml \
+  --project=netra-staging
+
+# 3. Monitor VPC connector health
+gcloud logging metrics create vpc_connector_errors \
+  --description="VPC connector errors" \
+  --log-filter='resource.type="vpc_access_connector" AND severity>=ERROR' \
+  --project=netra-staging
+```
+
+---
+
+## Prevention Measures (P2 MEDIUM)
+
+### 1. Infrastructure Monitoring Improvements
+**IMPLEMENTATION:**
+
 ```yaml
-# Example monitoring configuration
-monitoring_rules:
-  - name: "VPC Connector Capacity Warning"
-    condition: "vpc_connector_utilization > 70%"
-    alert_duration: "5m"
-    severity: "warning"
-    
-  - name: "Cloud SQL Pool Capacity Critical"
-    condition: "cloud_sql_pool_utilization > 85%"
-    alert_duration: "2m"
-    severity: "critical"
-    
-  - name: "Database Connection Time Warning"
-    condition: "avg_database_connection_time > 25s"
-    alert_duration: "3m"
-    severity: "warning"
+# alert-policy-503-errors.yaml
+displayName: "HTTP 503 Error Rate Alert"
+conditions:
+  - displayName: "503 Error Rate > 5%"
+    conditionThreshold:
+      filter: 'resource.type="cloud_run_revision" AND httpRequest.status=503'
+      comparison: COMPARISON_GREATER_THAN
+      thresholdValue: 5
+      duration: "300s"
+alertStrategy:
+  autoClose: "86400s"
+notificationChannels:
+  - "projects/netra-staging/notificationChannels/EMAIL_ALERT"
 ```
 
-**Infrastructure Health Dashboard:**
-- [ ] **Real-time capacity monitoring**: VPC connector and Cloud SQL utilization
-- [ ] **Connection timing metrics**: Historical database connection performance
-- [ ] **SMD phase timing dashboard**: Monitor all 7-phase startup sequence performance
-- [ ] **Golden Path availability tracking**: End-to-end business functionality monitoring
+### 2. Capacity Planning Implementation
+**IMPLEMENTATION:**
 
-### 5.3 Incident Response Improvement
-
-**Automated Health Checks:**
 ```bash
-# Scheduled infrastructure health validation
-cron_schedule:
-  - "*/15 * * * * /usr/local/bin/check_infrastructure_health.sh"  # Every 15 minutes
-  - "0 */2 * * * /usr/local/bin/vpc_connector_capacity_check.sh"  # Every 2 hours
-  - "0 */4 * * * /usr/local/bin/cloud_sql_performance_check.sh"   # Every 4 hours
+# 1. Set up capacity monitoring dashboard
+gcloud monitoring dashboards create \
+  --config-from-file=infrastructure-capacity-dashboard.json \
+  --project=netra-staging
+
+# 2. Implement auto-scaling rules
+gcloud run services update netra-backend-staging \
+  --region=us-central1 \
+  --project=netra-staging \
+  --max-instances=100 \
+  --min-instances=2 \
+  --concurrency=80
 ```
 
-**Escalation Procedures:**
-- [ ] **Automated alerting**: Infrastructure team notification for capacity warnings
-- [ ] **Business impact assessment**: Automatic Golden Path availability monitoring
-- [ ] **Stakeholder communication**: Automated status updates for service degradation
-- [ ] **Recovery validation**: Automated post-incident testing procedures
-
-## 6. Success Criteria and Timeline
-
-### 6.1 Resolution Validation Criteria
-
-**Infrastructure Restoration Complete When:**
-1. **Health endpoints responding**: All staging health endpoints return 200 consistently
-2. **Database connectivity stable**: SMD Phase 3 completing successfully in <20s
-3. **WebSocket connections succeeding**: 100% WebSocket handshake success rate
-4. **Golden Path functional**: End-to-end user login → AI response flow working
-5. **E2E test suite passing**: Issue #1278 test suite showing resolved infrastructure
-
-### 6.2 Business Impact Recovery
-
-**Service Level Restoration:**
-- [ ] **$500K+ ARR pipeline**: Golden Path validation pipeline fully operational
-- [ ] **Staging environment**: 99%+ availability restored for development validation  
-- [ ] **Development velocity**: No infrastructure-related deployment blockers
-- [ ] **Customer experience**: Chat functionality completely functional in staging
-
-### 6.3 Expected Timeline
-
-**Phase 1: Infrastructure Diagnosis (Infrastructure Team - 2-4 hours)**
-- VPC connector and Cloud SQL health validation
-- Network connectivity troubleshooting
-- Resource allocation and configuration review
-
-**Phase 2: Infrastructure Resolution (Infrastructure Team - 4-8 hours)**
-- Apply necessary configuration changes or resource scaling
-- Validate connectivity restoration
-- Confirm service health across all components
-
-**Phase 3: Validation and Monitoring (Development Team - 1-2 hours)**
-- Execute comprehensive test suite validation
-- Implement enhanced monitoring
-- Confirm Golden Path fully functional
-
-**Total Expected Resolution Time: 8-12 hours** (infrastructure team dependent)
-
-## 7. Communication and Coordination
-
-### 7.1 Stakeholder Communication
-
-**Infrastructure Team Coordination:**
-- [ ] **Daily status updates** until resolution
-- [ ] **Real-time communication channel** for infrastructure progress
-- [ ] **Resolution timeline updates** as diagnosis progresses
-- [ ] **Post-resolution review** to prevent future occurrences
-
-**Business Stakeholder Updates:**
-- [ ] **Executive notification** of P0 infrastructure impact
-- [ ] **Customer success team** awareness of staging environment status
-- [ ] **Sales team notification** of potential demo environment limitations
-- [ ] **Support team briefing** on staging environment availability
-
-### 7.2 Documentation and Learning
-
-**Incident Documentation:**
-- [ ] **Complete incident timeline** from detection to resolution
-- [ ] **Root cause analysis** with infrastructure team findings
-- [ ] **Resolution steps documentation** for future reference
-- [ ] **Prevention measures implementation** plan and timeline
-
-**Knowledge Sharing:**
-- [ ] **Infrastructure team handoff** of monitoring and alerting improvements
-- [ ] **Development team training** on enhanced health monitoring
-- [ ] **Operations team briefing** on early warning indicators
-- [ ] **Business team education** on infrastructure impact assessment
+### 3. Alert Threshold Optimization
+**THRESHOLDS:**
+- HTTP 503 errors: Alert at >5% error rate over 5 minutes
+- Database connections: Alert at >75% utilization
+- VPC connector: Alert at >80% capacity
+- WebSocket failures: Alert at >10% failure rate
+- Response latency: Alert at >10 second P95
 
 ---
 
-## Conclusion
+## Execution Plan
 
-Issue #1278 is a confirmed infrastructure problem requiring immediate infrastructure team intervention. All application code has been validated as correct. The remediation plan focuses on:
+### Phase 1: Immediate Stabilization (0-30 minutes)
+```bash
+# Execute in order - DO NOT SKIP STEPS
 
-1. **Immediate business continuity** measures while infrastructure is being fixed
-2. **Clear infrastructure team action items** based on systematic diagnosis
-3. **Comprehensive validation procedures** for confirming resolution
-4. **Enhanced monitoring and prevention** measures for future infrastructure health
+# Step 1: Fix dual revision deployment
+echo "=== PHASE 1: IMMEDIATE STABILIZATION ==="
+echo "Step 1: Resolving dual revision deployment..."
+gcloud run services update-traffic netra-backend-staging \
+  --to-revisions=netra-backend-staging-00750-69k=100 \
+  --region=us-central1 \
+  --project=netra-staging
 
-**Next Steps:**
-1. **IMMEDIATE**: Infrastructure team validation of VPC connector and Cloud SQL connectivity
-2. **PARALLEL**: Development team implementation of business continuity measures
-3. **POST-RESOLUTION**: Comprehensive validation and enhanced monitoring implementation
+# Step 2: Delete old revision
+echo "Step 2: Removing old revision..."
+gcloud run revisions delete netra-backend-staging-00749-6tr \
+  --region=us-central1 \
+  --project=netra-staging \
+  --quiet
 
-**Critical Success Factor**: Infrastructure team resolution of platform-level connectivity issues - no code changes can resolve this infrastructure problem.
+# Step 3: Immediate health check
+echo "Step 3: Testing immediate recovery..."
+curl -f https://api.staging.netrasystems.ai/health
+```
+
+### Phase 2: Infrastructure Validation (30-60 minutes)
+```bash
+echo "=== PHASE 2: INFRASTRUCTURE VALIDATION ==="
+
+# Step 1: VPC connector health check
+echo "Step 1: Checking VPC connector..."
+gcloud compute networks vpc-access connectors describe staging-connector \
+  --region=us-central1 \
+  --project=netra-staging
+
+# Step 2: Scale VPC connector if needed
+echo "Step 2: Scaling VPC connector..."
+gcloud compute networks vpc-access connectors update staging-connector \
+  --region=us-central1 \
+  --project=netra-staging \
+  --max-instances=20 \
+  --min-instances=4
+
+# Step 3: Database optimization
+echo "Step 3: Optimizing database connections..."
+gcloud sql instances patch netra-staging-db \
+  --project=netra-staging \
+  --database-flags=max_connections=200
+```
+
+### Phase 3: Service Recovery (60-90 minutes)
+```bash
+echo "=== PHASE 3: SERVICE RECOVERY ==="
+
+# Step 1: Update service configuration
+echo "Step 1: Updating service configuration..."
+gcloud run services update netra-backend-staging \
+  --region=us-central1 \
+  --project=netra-staging \
+  --set-env-vars="VPC_CONNECTOR_TIMEOUT=600,DATABASE_TIMEOUT=600,DEMO_MODE=0"
+
+# Step 2: Restart services
+echo "Step 2: Restarting services..."
+gcloud run services replace-traffic netra-backend-staging \
+  --to-latest \
+  --region=us-central1 \
+  --project=netra-staging
+
+# Step 3: Comprehensive validation
+echo "Step 3: Running Golden Path validation..."
+./golden-path-validation.sh
+```
+
+### Phase 4: Monitoring Setup (90-120 minutes)
+```bash
+echo "=== PHASE 4: MONITORING SETUP ==="
+
+# Step 1: Create error metrics
+gcloud logging metrics create http_503_errors \
+  --description="Count of HTTP 503 errors" \
+  --log-filter='resource.type="cloud_run_revision" AND httpRequest.status=503' \
+  --project=netra-staging
+
+# Step 2: Set up alerting
+gcloud alpha monitoring policies create \
+  --policy-from-file=alert-policy-503-errors.yaml \
+  --project=netra-staging
+
+# Step 3: Validate monitoring
+echo "Step 3: Validating monitoring setup..."
+gcloud logging metrics list --project=netra-staging
+```
 
 ---
 
-**Generated with [Claude Code](https://claude.ai/code)**  
-**Co-Authored-By**: Claude <noreply@anthropic.com>  
-**Agent Session**: infrastructure-remediation-20250916
+## Rollback Procedures
+
+### If Phase 1 Fails (Dual Revision Fix)
+```bash
+# Rollback: Restore original traffic split
+gcloud run services update-traffic netra-backend-staging \
+  --to-revisions=netra-backend-staging-00749-6tr=50,netra-backend-staging-00750-69k=50 \
+  --region=us-central1 \
+  --project=netra-staging
+
+# Investigate why latest revision is failing
+gcloud logging read \
+  'resource.type="cloud_run_revision" AND
+   resource.labels.revision_name="netra-backend-staging-00750-69k" AND
+   severity>=ERROR' \
+  --project=netra-staging \
+  --limit=20
+```
+
+### If Phase 2 Fails (VPC Connector)
+```bash
+# Rollback: Restore original VPC connector settings
+gcloud compute networks vpc-access connectors update staging-connector \
+  --region=us-central1 \
+  --project=netra-staging \
+  --max-instances=10 \
+  --min-instances=2
+
+# If database changes fail
+gcloud sql instances patch netra-staging-db \
+  --project=netra-staging \
+  --database-flags=max_connections=100
+```
+
+### If Phase 3 Fails (Service Recovery)
+```bash
+# Rollback: Remove problematic environment variables
+gcloud run services update netra-backend-staging \
+  --region=us-central1 \
+  --project=netra-staging \
+  --remove-env-vars="VPC_CONNECTOR_TIMEOUT,DATABASE_TIMEOUT"
+
+# Force rollback to previous working revision
+gcloud run services update-traffic netra-backend-staging \
+  --to-revisions=netra-backend-staging-00749-6tr=100 \
+  --region=us-central1 \
+  --project=netra-staging
+```
+
+---
+
+## Success Criteria
+
+### Phase 1 Success Metrics
+- ✅ Single active Cloud Run revision
+- ✅ HTTP 503 errors eliminated
+- ✅ Health endpoint responding < 2 seconds
+- ✅ No revision-related resource contention
+
+### Phase 2 Success Metrics
+- ✅ VPC connector status: READY
+- ✅ Database connections < 75% utilization
+- ✅ No VPC connectivity errors in logs
+- ✅ SSL certificates valid for all domains
+
+### Phase 3 Success Metrics
+- ✅ WebSocket connections successful
+- ✅ Golden Path validation passes end-to-end
+- ✅ All health endpoints operational
+- ✅ No service startup errors
+
+### Phase 4 Success Metrics
+- ✅ Error monitoring active
+- ✅ Alert policies configured
+- ✅ Capacity thresholds established
+- ✅ Dashboard monitoring operational
+
+---
+
+## Post-Remediation Validation
+
+### Comprehensive Health Check
+```bash
+#!/bin/bash
+# Post-Remediation Validation Script
+
+echo "=== POST-REMEDIATION VALIDATION ==="
+
+# 1. Service Health
+echo "1. Checking service health..."
+HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://api.staging.netrasystems.ai/health)
+if [ "$HEALTH_STATUS" = "200" ]; then
+  echo "✅ Health endpoint: OK"
+else
+  echo "❌ Health endpoint: FAILED ($HEALTH_STATUS)"
+fi
+
+# 2. WebSocket Connectivity
+echo "2. Testing WebSocket connectivity..."
+timeout 10 wscat -c wss://api-staging.netrasystems.ai/ws -x '{"type":"ping"}' > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+  echo "✅ WebSocket: OK"
+else
+  echo "❌ WebSocket: FAILED"
+fi
+
+# 3. Database Connectivity
+echo "3. Testing database connectivity..."
+DB_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://api.staging.netrasystems.ai/health/db)
+if [ "$DB_STATUS" = "200" ]; then
+  echo "✅ Database: OK"
+else
+  echo "❌ Database: FAILED ($DB_STATUS)"
+fi
+
+# 4. VPC Connector Status
+echo "4. Checking VPC connector..."
+VPC_STATUS=$(gcloud compute networks vpc-access connectors describe staging-connector \
+  --region=us-central1 \
+  --project=netra-staging \
+  --format="value(state)" 2>/dev/null)
+if [ "$VPC_STATUS" = "READY" ]; then
+  echo "✅ VPC Connector: READY"
+else
+  echo "❌ VPC Connector: $VPC_STATUS"
+fi
+
+# 5. Error Rate Check
+echo "5. Checking recent error rates..."
+ERROR_COUNT=$(gcloud logging read \
+  'resource.type="cloud_run_revision" AND httpRequest.status=503 AND timestamp>="'$(date -u -d '5 minutes ago' '+%Y-%m-%dT%H:%M:%SZ')'"' \
+  --project=netra-staging \
+  --format="value(timestamp)" | wc -l)
+
+if [ "$ERROR_COUNT" -eq 0 ]; then
+  echo "✅ Error Rate: No 503 errors in last 5 minutes"
+else
+  echo "⚠️ Error Rate: $ERROR_COUNT 503 errors in last 5 minutes"
+fi
+
+echo "=== VALIDATION COMPLETE ==="
+```
+
+---
+
+## Contact and Escalation
+
+### Immediate Escalation Triggers
+- Any step fails with rollback unsuccessful
+- Service remains unavailable after Phase 1
+- VPC connector cannot be restored
+- Database connections remain above 90%
+
+### Success Confirmation
+Upon successful completion:
+1. All health endpoints responding < 2 seconds
+2. WebSocket connections successful
+3. Zero HTTP 503 errors for 10 minutes
+4. Database utilization < 75%
+5. Golden Path validation passes end-to-end
+
+**BUSINESS IMPACT RESOLUTION:** Successful execution restores $500K+ ARR services and unblocks Golden Path user flow (login → AI responses).
+
+---
+
+**Document Status:** READY FOR EXECUTION
+**Estimated Total Time:** 2 hours
+**Risk Level:** MEDIUM (with comprehensive rollback procedures)
+**Business Priority:** P0 CRITICAL
