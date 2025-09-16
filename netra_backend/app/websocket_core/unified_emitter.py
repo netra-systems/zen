@@ -550,6 +550,15 @@ class UnifiedWebSocketEmitter:
         else:
             max_attempts = self.MAX_CRITICAL_RETRIES if is_auth_event else self.MAX_RETRIES
         
+        # ISSUE #1039 FIX: Ensure tool_executing events have tool_name at top level
+        final_event_data = data.copy()
+        if event_type == 'tool_executing' and 'tool_name' in data:
+            # Promote tool_name to top level for frontend/validation compatibility
+            final_event_data = {
+                'tool_name': data['tool_name'],
+                **data  # Include all other fields
+            }
+        
         # Emit with retries
         last_error = None
         for attempt in range(max_attempts):
@@ -557,7 +566,7 @@ class UnifiedWebSocketEmitter:
                 await self.manager.emit_critical_event(
                     user_id=self.user_id,
                     event_type=event_type,
-                    data=data
+                    data=final_event_data
                 )
                 
                 # Success - log and return
@@ -686,12 +695,15 @@ class UnifiedWebSocketEmitter:
         if metadata is None:
             metadata = {}
         
-        await self.emit_tool_executing({
+        # ISSUE #1039 FIX: Ensure tool_name is available at top level for frontend/validation compatibility
+        event_data = {
             'tool_name': tool_name,
             'metadata': metadata,
             'status': 'executing',
             'timestamp': time.time()
-        })
+        }
+        
+        await self.emit_tool_executing(event_data)
     
     async def notify_tool_completed(self, tool_name: str, metadata: Dict[str, Any] = None):
         """
