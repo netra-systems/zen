@@ -45,10 +45,10 @@ from netra_backend.app.websocket_core import manager as websocket_manager_compat
 # Import expected components for validation
 from netra_backend.app.websocket_core.canonical_import_patterns import (
     WebSocketManager,
-    WebSocketConnection, 
-    WebSocketManagerProtocol,
+    WebSocketConnection,
     _serialize_message_safely
 )
+from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
 

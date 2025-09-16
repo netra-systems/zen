@@ -40,7 +40,7 @@ from test_framework.isolated_environment_fixtures import isolated_env
 from test_framework.websocket_helpers import WebSocketTestClient, WebSocketTestHelpers, assert_websocket_events, validate_websocket_message
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper, E2EAuthConfig, get_test_jwt_token
 from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
-from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.isolated_environment import get_env
 from shared.types import UserID, ThreadID, RunID, RequestID, WebSocketID

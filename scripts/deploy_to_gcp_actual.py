@@ -925,8 +925,10 @@ CMD ["npm", "start"]
                     if env_name == "POSTGRES_PORT":
                         env_vars[env_name] = "5432"
                     elif env_name == "POSTGRES_HOST":
-                        # For Cloud SQL, use the instance connection name
-                        env_vars[env_name] = f"/cloudsql/{self.project_id}:us-central1:staging-shared-postgres"
+                        # CRITICAL FIX: Use private IP through VPC connector, not Cloud SQL proxy socket
+                        # VPC connector allows direct private IP connections without proxy
+                        # This fixes the database timeout issue causing service startup failures
+                        env_vars[env_name] = "10.68.0.3"  # Private IP of staging-shared-postgres instance
                     elif env_name == "POSTGRES_DB":
                         env_vars[env_name] = "netra_staging"
                     else:

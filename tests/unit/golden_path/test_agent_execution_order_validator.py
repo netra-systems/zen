@@ -289,6 +289,8 @@ class AgentExecutionOrderValidatorTests(SSotAsyncTestCase):
         data_context.state = AgentExecutionState.STARTED
         data_context.state = AgentExecutionState.THINKING
         data_context.state = AgentExecutionState.EXECUTING_TOOLS
+        # Add small delay to ensure measurable duration in fast test environments
+        time.sleep(0.001)  # 1ms delay to ensure positive duration
         data_context.mark_completed()
         assert data_context.state == AgentExecutionState.COMPLETED, 'Should be completed'
         assert data_context.end_time is not None, 'Should have end time'

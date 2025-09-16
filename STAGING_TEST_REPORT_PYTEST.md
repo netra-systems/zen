@@ -1,17 +1,17 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-15 17:28:01
+**Generated:** 2025-09-15 18:45:56
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 6
-- **Passed:** 1 (16.7%)
-- **Failed:** 5 (83.3%)
+- **Total Tests:** 5
+- **Passed:** 0 (0.0%)
+- **Failed:** 5 (100.0%)
 - **Skipped:** 0
-- **Duration:** 89.11 seconds
-- **Pass Rate:** 16.7%
+- **Duration:** 14.36 seconds
+- **Pass Rate:** 0.0%
 
 ## Test Results by Priority
 
@@ -19,96 +19,100 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_staging_services_responding_fast | FAIL failed | 13.710s | test_infrastructure_improvements_e2e.py |
-| test_staging_deployment_health_comprehensive | FAIL failed | 4.482s | test_infrastructure_improvements_e2e.py |
-| test_staging_websocket_connectivity_improved | FAIL failed | 0.011s | test_infrastructure_improvements_e2e.py |
-| test_staging_container_resource_efficiency | PASS passed | 5.266s | test_infrastructure_improvements_e2e.py |
-| test_staging_deployment_stability_post_cleanup | FAIL failed | 41.507s | test_infrastructure_improvements_e2e.py |
-| test_staging_auth_service_performance | FAIL failed | 10.317s | test_infrastructure_improvements_e2e.py |
+| test_gcp_redis_websocket_readiness_assessment | FAIL failed | 0.000s | test_gcp_redis_websocket_golden_path_simple.py |
+| test_gcp_redis_websocket_1011_error_risk_prediction | FAIL failed | 0.000s | test_gcp_redis_websocket_golden_path_simple.py |
+| test_gcp_redis_websocket_chat_functionality_readiness | FAIL failed | 0.000s | test_gcp_redis_websocket_golden_path_simple.py |
+| test_gcp_redis_websocket_production_scalability_readiness | FAIL failed | 0.000s | test_gcp_redis_websocket_golden_path_simple.py |
+| test_gcp_redis_websocket_monitoring_observability_readiness | FAIL failed | 0.000s | test_gcp_redis_websocket_golden_path_simple.py |
 
 ## Failed Tests Details
 
-### FAILED: test_staging_services_responding_fast
-- **File:** C:\netra-apex\tests\e2e\staging\test_infrastructure_improvements_e2e.py
-- **Duration:** 13.710s
-- **Error:** tests\e2e\staging\test_infrastructure_improvements_e2e.py:63: in test_staging_services_responding_fast
-    assert len(failed_services) == 0, f"Services failed health checks: {failed_services}"
-E   AssertionError: Services failed health checks: ['backend', 'auth']
-E   assert 2 == 0
-E    +  where 2 = len(['backend', 'auth'])...
+### FAILED: test_gcp_redis_websocket_readiness_assessment
+- **File:** C:\netra-apex\tests\e2e\staging\test_gcp_redis_websocket_golden_path_simple.py
+- **Duration:** 0.000s
+- **Error:** tests\e2e\staging\test_gcp_redis_websocket_golden_path_simple.py:87: in test_gcp_redis_websocket_readiness_assessment
+    self.assertTrue(
+test_framework\ssot\base_test_case.py:641: in assertTrue
+    assert expr, msg or f"Expected True, got {expr}"
+           ^^^^
+E   AssertionError: CRITICAL: System not ready for GCP deployment:
+E     - Overall readiness: False
+E     - Redis SSOT score: 25/100
+E     - WebSocket stability: 30/100
+E     - Integration health: 20/100
+E     - Deployment blockers: ['...
 
-### FAILED: test_staging_deployment_health_comprehensive
-- **File:** C:\netra-apex\tests\e2e\staging\test_infrastructure_improvements_e2e.py
-- **Duration:** 4.482s
-- **Error:** tests\e2e\staging\test_infrastructure_improvements_e2e.py:83: in test_staging_deployment_health_comprehensive
-    assert response.status_code == 200, f"Backend health check failed: {response.status_code}"
-E   AssertionError: Backend health check failed: 503
-E   assert 503 == 200
-E    +  where 503 = <Response [503]>.status_code...
+### FAILED: test_gcp_redis_websocket_1011_error_risk_prediction
+- **File:** C:\netra-apex\tests\e2e\staging\test_gcp_redis_websocket_golden_path_simple.py
+- **Duration:** 0.000s
+- **Error:** tests\e2e\staging\test_gcp_redis_websocket_golden_path_simple.py:108: in test_gcp_redis_websocket_1011_error_risk_prediction
+    self.assertLess(
+test_framework\ssot\base_test_case.py:665: in assertLess
+    assert first < second, msg or f"Expected {first} < {second}"
+           ^^^^^^^^^^^^^^
+E   AssertionError: CRITICAL: High WebSocket 1011 error probability in GCP:
+E     - Error probability: 85%
+E     - Risk factors: ['Multiple Redis managers causing connection conflicts', 'Connection pool fra...
 
-### FAILED: test_staging_websocket_connectivity_improved
-- **File:** C:\netra-apex\tests\e2e\staging\test_infrastructure_improvements_e2e.py
-- **Duration:** 0.011s
-- **Error:** tests\e2e\staging\test_infrastructure_improvements_e2e.py:121: in test_websocket_connection
-    async with websockets.connect(
-C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:587: in __aenter__
-    return await self
-           ^^^^^^^^^^
-C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:541: in __await_impl__
-    self.connection = await self.create_connection()
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+### FAILED: test_gcp_redis_websocket_chat_functionality_readiness
+- **File:** C:\netra-apex\tests\e2e\staging\test_gcp_redis_websocket_golden_path_simple.py
+- **Duration:** 0.000s
+- **Error:** tests\e2e\staging\test_gcp_redis_websocket_golden_path_simple.py:129: in test_gcp_redis_websocket_chat_functionality_readiness
+    self.assertTrue(
+test_framework\ssot\base_test_case.py:641: in assertTrue
+    assert expr, msg or f"Expected True, got {expr}"
+           ^^^^
+E   AssertionError: CRITICAL: Chat functionality not ready for GCP production:
+E     - Chat readiness: False
+E     - User connection reliability: 65%
+E     - Agent execution reliability: 70%
+E     - State persistence reliabili...
 
-### FAILED: test_staging_deployment_stability_post_cleanup
-- **File:** C:\netra-apex\tests\e2e\staging\test_infrastructure_improvements_e2e.py
-- **Duration:** 41.507s
-- **Error:** tests\e2e\staging\test_infrastructure_improvements_e2e.py:223: in test_staging_deployment_stability_post_cleanup
-    assert success_rate >= 0.9, (
-E   AssertionError: Success rate too low: 0.00% (should be ≥90%)
-E   assert 0.0 >= 0.9...
+### FAILED: test_gcp_redis_websocket_production_scalability_readiness
+- **File:** C:\netra-apex\tests\e2e\staging\test_gcp_redis_websocket_golden_path_simple.py
+- **Duration:** 0.000s
+- **Error:** tests\e2e\staging\test_gcp_redis_websocket_golden_path_simple.py:151: in test_gcp_redis_websocket_production_scalability_readiness
+    self.assertGreaterEqual(
+test_framework\ssot\base_test_case.py:661: in assertGreaterEqual
+    assert first >= second, msg or f"Expected {first} >= {second}"
+           ^^^^^^^^^^^^^^^
+E   AssertionError: CRITICAL: System not ready for production scale:
+E     - Scalability score: 35/100
+E     - Connection pool efficiency: 25%
+E     - Resource utilization: 40%
+E   ...
 
-### FAILED: test_staging_auth_service_performance
-- **File:** C:\netra-apex\tests\e2e\staging\test_infrastructure_improvements_e2e.py
-- **Duration:** 10.317s
-- **Error:** C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\urllib3\connectionpool.py:534: in _make_request
-    response = conn.getresponse()
-               ^^^^^^^^^^^^^^^^^^
-C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\urllib3\connection.py:565: in getresponse
-    httplib_response = super().getresponse()
-                       ^^^^^^^^^^^^^^^^^^^^^
-C:\Users\antho\miniconda3\Lib\http\client.py:1428: in getresponse
-    response.begin()
-C:\Users\antho\miniconda3\Lib\http\client...
+### FAILED: test_gcp_redis_websocket_monitoring_observability_readiness
+- **File:** C:\netra-apex\tests\e2e\staging\test_gcp_redis_websocket_golden_path_simple.py
+- **Duration:** 0.000s
+- **Error:** tests\e2e\staging\test_gcp_redis_websocket_golden_path_simple.py:173: in test_gcp_redis_websocket_monitoring_observability_readiness
+    self.assertTrue(
+test_framework\ssot\base_test_case.py:641: in assertTrue
+    assert expr, msg or f"Expected True, got {expr}"
+           ^^^^
+E   AssertionError: CRITICAL: Monitoring not adequate for GCP production:
+E     - Monitoring coverage: 45%
+E     - Redis visibility: Poor - Multiple managers obscure metrics
+E     - WebSocket tracking: Incomplete - Missi...
 
 ## Pytest Output Format
 
-### Run 1 (16:50:20)
 ```
-test_priority1_critical.py::test_006_agent_configuration_real PASSED
+test_gcp_redis_websocket_golden_path_simple.py::test_gcp_redis_websocket_readiness_assessment FAILED
+test_gcp_redis_websocket_golden_path_simple.py::test_gcp_redis_websocket_1011_error_risk_prediction FAILED
+test_gcp_redis_websocket_golden_path_simple.py::test_gcp_redis_websocket_chat_functionality_readiness FAILED
+test_gcp_redis_websocket_golden_path_simple.py::test_gcp_redis_websocket_production_scalability_readiness FAILED
+test_gcp_redis_websocket_golden_path_simple.py::test_gcp_redis_websocket_monitoring_observability_readiness FAILED
 
 ==================================================
-1 passed, 0 failed in 43.27s
-```
-
-### Run 2 (16:53:31)
-```
-test_infrastructure_improvements_e2e.py::test_staging_services_responding_fast FAILED
-test_infrastructure_improvements_e2e.py::test_staging_deployment_health_comprehensive FAILED
-test_infrastructure_improvements_e2e.py::test_staging_websocket_connectivity_improved FAILED
-test_infrastructure_improvements_e2e.py::test_staging_container_resource_efficiency PASSED
-test_infrastructure_improvements_e2e.py::test_staging_deployment_stability_post_cleanup FAILED
-test_infrastructure_improvements_e2e.py::test_staging_auth_service_performance FAILED
-
-==================================================
-1 passed, 5 failed in 89.11s
+0 passed, 5 failed in 14.36s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| WebSocket | 1 | 0 | 1 | 0.0% |
-| Authentication | 1 | 0 | 1 | 0.0% |
-| Performance | 1 | 0 | 1 | 0.0% |
+| WebSocket | 5 | 0 | 5 | 0.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*

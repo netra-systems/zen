@@ -116,22 +116,9 @@ class AdvancedToolPipelineIntegrationTests(BaseIntegrationTest):
         auth_context = await create_authenticated_user_context("test_tool_chain_user")
         user_id = auth_context.user_id  # Use the same user_id from auth_context
         
-        # Initialize components with SSOT patterns
-        llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
-        agent_registry = AgentRegistry(llm_manager)
-        
-        # Create WebSocket bridge for proper ExecutionEngine instantiation
-        websocket_manager = WebSocketManager()
-        agent_registry.set_websocket_manager(websocket_manager)
-        websocket_bridge = create_agent_websocket_bridge()
-        
         # Use factory method for ExecutionEngine (SSOT compliance)
-        execution_engine = create_request_scoped_engine(
-            user_context=auth_context,
-            registry=agent_registry, 
-            websocket_bridge=websocket_bridge,
-            max_concurrent_executions=3
-        )
+        # The create_request_scoped_engine function handles all internal setup
+        execution_engine = await create_request_scoped_engine(auth_context)
         
         # Use factory method for proper user isolation
         tool_dispatcher_factory = get_tool_dispatcher_factory()
@@ -490,22 +477,9 @@ class AdvancedToolPipelineIntegrationTests(BaseIntegrationTest):
         auth_context = await create_authenticated_user_context("test_error_recovery_user")
         user_id = auth_context.user_id  # Use the same user_id from auth_context
         
-        # Initialize components with SSOT patterns
-        llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
-        agent_registry = AgentRegistry(llm_manager)
-        
-        # Create WebSocket bridge for proper ExecutionEngine instantiation
-        websocket_manager = WebSocketManager()
-        agent_registry.set_websocket_manager(websocket_manager)
-        websocket_bridge = create_agent_websocket_bridge()
-        
         # Use factory method for ExecutionEngine (SSOT compliance)
-        execution_engine = create_request_scoped_engine(
-            user_context=auth_context,
-            registry=agent_registry, 
-            websocket_bridge=websocket_bridge,
-            max_concurrent_executions=3
-        )
+        # The create_request_scoped_engine function handles all internal setup
+        execution_engine = await create_request_scoped_engine(auth_context)
         
         enhanced_tool_engine = UserExecutionEngine()
         
@@ -829,22 +803,9 @@ class AdvancedToolPipelineIntegrationTests(BaseIntegrationTest):
         auth_context = await create_authenticated_user_context("test_parallel_user")
         user_id = auth_context.user_id  # Use the same user_id from auth_context
         
-        # Initialize components with SSOT patterns
-        llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
-        agent_registry = AgentRegistry(llm_manager)
-        
-        # Create WebSocket bridge for proper ExecutionEngine instantiation
-        websocket_manager = WebSocketManager()
-        agent_registry.set_websocket_manager(websocket_manager)
-        websocket_bridge = create_agent_websocket_bridge()
-        
         # Use factory method for ExecutionEngine (SSOT compliance)
-        execution_engine = create_request_scoped_engine(
-            user_context=auth_context,
-            registry=agent_registry, 
-            websocket_bridge=websocket_bridge,
-            max_concurrent_executions=3
-        )
+        # The create_request_scoped_engine function handles all internal setup
+        execution_engine = await create_request_scoped_engine(auth_context)
         
         enhanced_tool_engine = UserExecutionEngine()
         
@@ -1190,22 +1151,9 @@ class AdvancedToolPipelineIntegrationTests(BaseIntegrationTest):
         auth_context = await create_authenticated_user_context("test_dynamic_user")
         user_id = auth_context.user_id  # Use the same user_id from auth_context
         
-        # Initialize components with SSOT patterns
-        llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
-        agent_registry = AgentRegistry(llm_manager)
-        
-        # Create WebSocket bridge for proper ExecutionEngine instantiation
-        websocket_manager = WebSocketManager()
-        agent_registry.set_websocket_manager(websocket_manager)
-        websocket_bridge = create_agent_websocket_bridge()
-        
         # Use factory method for ExecutionEngine (SSOT compliance)
-        execution_engine = create_request_scoped_engine(
-            user_context=auth_context,
-            registry=agent_registry, 
-            websocket_bridge=websocket_bridge,
-            max_concurrent_executions=3
-        )
+        # The create_request_scoped_engine function handles all internal setup
+        execution_engine = await create_request_scoped_engine(auth_context)
         
         enhanced_tool_engine = UserExecutionEngine()
         
@@ -1531,22 +1479,9 @@ class AdvancedToolPipelineIntegrationTests(BaseIntegrationTest):
         auth_context = await create_authenticated_user_context("test_timeout_user")
         user_id = auth_context.user_id  # Use the same user_id from auth_context
         
-        # Initialize components with SSOT patterns
-        llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
-        agent_registry = AgentRegistry(llm_manager)
-        
-        # Create WebSocket bridge for proper ExecutionEngine instantiation
-        websocket_manager = WebSocketManager()
-        agent_registry.set_websocket_manager(websocket_manager)
-        websocket_bridge = create_agent_websocket_bridge()
-        
         # Use factory method for ExecutionEngine (SSOT compliance)
-        execution_engine = create_request_scoped_engine(
-            user_context=auth_context,
-            registry=agent_registry, 
-            websocket_bridge=websocket_bridge,
-            max_concurrent_executions=3
-        )
+        # The create_request_scoped_engine function handles all internal setup
+        execution_engine = await create_request_scoped_engine(auth_context)
         
         enhanced_tool_engine = UserExecutionEngine()
         
