@@ -154,7 +154,9 @@ class WebSocketRoutesBasicTests:
     async def test_websocket_utility_functions(self):
         """Test websocket utility functions with mocks."""
         try:
-            from netra_backend.app.websocket_core import create_server_message, create_error_message, is_websocket_connected, MessageType
+            # SSOT COMPLIANCE FIX: Direct imports instead of __init__.py exports (Issue #1176)
+            from netra_backend.app.websocket_core.types import create_server_message, create_error_message, MessageType
+            from netra_backend.app.websocket_core.utils import is_websocket_connected
             server_msg = create_server_message(MessageType.SYSTEM_MESSAGE, {'test': 'data'})
             assert server_msg is not None
             error_msg = create_error_message('TEST_ERROR', 'Test error message')
