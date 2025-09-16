@@ -172,42 +172,23 @@ class UnifiedWebSocketAuthenticator:
         return None
     
     async def _validate_jwt_token(self, token: str, auth_method: str) -> WebSocketAuthResult:
-        """Validate JWT token using unified auth service"""
+        """
+        JWT Migration Phase 2: Validate JWT token using auth service APIs.
+        """
+        from shared.isolated_environment import get_env
+
         try:
-            # Fallback JWT validation if auth service not available
-            if self.auth_service is None:
-                return await self._fallback_jwt_validation(token, auth_method)
-            
-            # Use SSOT auth service for validation (correct method name)
-            from netra_backend.app.services.unified_authentication_service import AuthenticationContext, AuthenticationMethod
-            
-            auth_result = await self.auth_service.authenticate_token(
-                token=token,
-                context=AuthenticationContext.WEBSOCKET,
-                method=AuthenticationMethod.JWT_TOKEN
-            )
-            
-            if auth_result.success:
-                return WebSocketAuthResult(
-                    success=True,
-                    user_id=auth_result.user_id,
-                    email=auth_result.email,
-                    permissions=auth_result.permissions,
-                    auth_method=auth_method
-                )
+            env = get_env()
+            # Check Phase 2 migration feature flag
+            phase_2_enabled = env.get("ENABLE_JWT_MIGRATION_PHASE_2", "true").lower() == "true"
+
+            if phase_2_enabled:
+                logger.info(f"JWT PHASE 2: Using auth service APIs for {auth_method}")
+                return await self._validate_jwt_via_auth_service_apis(token, auth_method)
             else:
-                # If auth service is unreachable, fall back to local JWT validation
-                if "auth_service_unreachable" in str(auth_result.error):
-                    logger.info(f"🔄 Auth service unreachable, falling back to local JWT validation")
-                    return await self._fallback_jwt_validation(token, f"{auth_method}-fallback")
-                
-                logger.warning(f"⚠️ JWT validation failed via {auth_method}: {auth_result.error}")
-                return WebSocketAuthResult(
-                    success=False,
-                    error_message=f"JWT validation failed: {auth_result.error}",
-                    auth_method=auth_method
-                )
-                
+                logger.info(f"JWT PHASE 2: Using legacy unified auth service for {auth_method}")
+                return await self._validate_jwt_via_legacy_service(token, auth_method)
+
         except Exception as e:
             logger.error(f"❌ JWT validation error via {auth_method}: {str(e)}")
             return WebSocketAuthResult(
@@ -215,29 +196,154 @@ class UnifiedWebSocketAuthenticator:
                 error_message=f"JWT validation error: {str(e)}",
                 auth_method=auth_method
             )
+
+    async def _validate_jwt_via_auth_service_apis(self, token: str, auth_method: str) -> WebSocketAuthResult:
+        """Use auth service APIs for validation (Phase 2)."""
+        try:
+            # Use auth client validate_token_jwt API directly
+            from netra_backend.app.clients.auth_client_core import auth_client
+
+            validation_result = await auth_client.validate_token_jwt(token)
+
+            if validation_result and validation_result.get('valid'):
+                return WebSocketAuthResult(
+                    success=True,
+                    user_id=validation_result.get('user_id'),
+                    email=validation_result.get('email'),
+                    permissions=validation_result.get('permissions', []),
+                    auth_method=f"{auth_method}-phase2"
+                )
+            else:
+                # Fall back to legacy service on API failure
+                logger.warning(f"⚠️ Auth service API validation failed via {auth_method}, trying legacy service")
+                return await self._validate_jwt_via_legacy_service(token, auth_method)
+
+        except Exception as e:
+            logger.error(f"Auth service API validation error: {e}")
+            # Fall back to legacy service
+            return await self._validate_jwt_via_legacy_service(token, auth_method)
+
+    async def _validate_jwt_via_legacy_service(self, token: str, auth_method: str) -> WebSocketAuthResult:
+        """Use legacy unified auth service for validation."""
+        try:
+            # Fallback JWT validation if auth service not available
+            if self.auth_service is None:
+                return await self._fallback_jwt_validation(token, auth_method)
+
+            # Use SSOT auth service for validation (correct method name)
+            from netra_backend.app.services.unified_authentication_service import AuthenticationContext, AuthenticationMethod
+
+            auth_result = await self.auth_service.authenticate_token(
+                token=token,
+                context=AuthenticationContext.WEBSOCKET,
+                method=AuthenticationMethod.JWT_TOKEN
+            )
+
+            if auth_result.success:
+                return WebSocketAuthResult(
+                    success=True,
+                    user_id=auth_result.user_id,
+                    email=auth_result.email,
+                    permissions=auth_result.permissions,
+                    auth_method=f"{auth_method}-legacy"
+                )
+            else:
+                # If auth service is unreachable, fall back to JWT validation
+                if "auth_service_unreachable" in str(auth_result.error):
+                    logger.info(f"🔄 Auth service unreachable, falling back to JWT validation")
+                    return await self._fallback_jwt_validation(token, f"{auth_method}-fallback")
+
+                logger.warning(f"⚠️ JWT validation failed via {auth_method}: {auth_result.error}")
+                return WebSocketAuthResult(
+                    success=False,
+                    error_message=f"JWT validation failed: {auth_result.error}",
+                    auth_method=auth_method
+                )
+
+        except Exception as e:
+            logger.error(f"❌ Legacy service JWT validation error via {auth_method}: {str(e)}")
+            return WebSocketAuthResult(
+                success=False,
+                error_message=f"Legacy JWT validation error: {str(e)}",
+                auth_method=auth_method
+            )
     
     async def _fallback_jwt_validation(self, token: str, auth_method: str) -> WebSocketAuthResult:
-        """Fallback JWT validation when auth service is not available"""
+        """
+        JWT Migration Phase 2: Fallback validation using auth service APIs.
+
+        This method now uses auth service APIs instead of local JWT decoding.
+        """
+        from shared.isolated_environment import get_env
+
+        try:
+            env = get_env()
+            # Check Phase 2 migration feature flag
+            phase_2_enabled = env.get("ENABLE_JWT_MIGRATION_PHASE_2", "true").lower() == "true"
+
+            if phase_2_enabled:
+                logger.info(f"JWT PHASE 2 FALLBACK: Using auth service APIs for {auth_method}")
+                return await self._fallback_via_auth_service_apis(token, auth_method)
+            else:
+                logger.info(f"JWT PHASE 2 FALLBACK: Using legacy JWT decoding for {auth_method}")
+                return await self._fallback_via_legacy_jwt_decoding(token, auth_method)
+
+        except Exception as e:
+            logger.error(f"❌ Phase 2 fallback JWT validation failed: {str(e)}")
+            return WebSocketAuthResult(
+                success=False,
+                error_message=f"Phase 2 fallback JWT validation failed: {str(e)}",
+                auth_method=auth_method
+            )
+
+    async def _fallback_via_auth_service_apis(self, token: str, auth_method: str) -> WebSocketAuthResult:
+        """Use auth service APIs for fallback validation (Phase 2)."""
+        try:
+            # Try to get auth client and use validate_token_jwt API
+            from netra_backend.app.clients.auth_client_core import auth_client
+
+            validation_result = await auth_client.validate_token_jwt(token)
+
+            if validation_result and validation_result.get('valid'):
+                return WebSocketAuthResult(
+                    success=True,
+                    user_id=validation_result.get('user_id'),
+                    email=validation_result.get('email'),
+                    permissions=validation_result.get('permissions', []),
+                    auth_method=f"{auth_method}-phase2-fallback"
+                )
+            else:
+                # If auth service API fails, try legacy path as last resort
+                logger.warning(f"Auth service API fallback failed, trying legacy JWT decode")
+                return await self._fallback_via_legacy_jwt_decoding(token, auth_method)
+
+        except Exception as e:
+            logger.error(f"Auth service API fallback error: {e}")
+            # Fall back to legacy as last resort
+            return await self._fallback_via_legacy_jwt_decoding(token, auth_method)
+
+    async def _fallback_via_legacy_jwt_decoding(self, token: str, auth_method: str) -> WebSocketAuthResult:
+        """Legacy JWT decoding fallback (Phase 2 compatibility)."""
         try:
             import jwt
             from shared.jwt_secret_manager import get_unified_jwt_secret
-            
+
             secret = get_unified_jwt_secret()
             decoded = jwt.decode(token, secret, algorithms=['HS256'])
-            
+
             return WebSocketAuthResult(
                 success=True,
                 user_id=decoded.get('sub'),
                 email=decoded.get('email'),
                 permissions=decoded.get('permissions', []),
-                auth_method=f"{auth_method}-fallback"
+                auth_method=f"{auth_method}-legacy-fallback"
             )
-            
+
         except Exception as e:
-            logger.error(f"❌ Fallback JWT validation failed: {str(e)}")
+            logger.error(f"❌ Legacy JWT validation failed: {str(e)}")
             return WebSocketAuthResult(
                 success=False,
-                error_message=f"Fallback JWT validation failed: {str(e)}",
+                error_message=f"Legacy JWT validation failed: {str(e)}",
                 auth_method=auth_method
             )
     
