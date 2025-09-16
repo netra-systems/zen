@@ -66,7 +66,7 @@ class TestUserExecutionEngineImportFragmentation(SSotBaseTestCase):
     def setup_class(cls):
         """Set up class-level resources for import analysis."""
         super().setup_class()
-        cls.project_root = Path("/Users/anthony/Desktop/netra-apex")
+        cls.project_root = Path(__file__).parent.parent.parent.parent
         cls.target_patterns = [
             "UserExecutionEngine",
             "UserExecutionContext", 

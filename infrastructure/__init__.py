@@ -20,10 +20,23 @@ from .vpc_connectivity_fix import (
     get_vpc_connectivity_status
 )
 
+from .websocket_auth_remediation import (
+    WebSocketAuthManager,
+    WebSocketAuthResult,
+    AuthServiceHealthStatus,
+    WebSocketAuthenticationError,
+    WebSocketAuthHelpers
+)
+
 __all__ = [
     'VPCConnectivityValidator',
     'VPCConnectivityStatus',
     'VPCConnectivityFixer',
     'check_vpc_connectivity',
-    'get_vpc_connectivity_status'
+    'get_vpc_connectivity_status',
+    'WebSocketAuthManager',
+    'WebSocketAuthResult',
+    'AuthServiceHealthStatus',
+    'WebSocketAuthenticationError',
+    'WebSocketAuthHelpers'
 ]
