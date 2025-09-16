@@ -106,7 +106,7 @@
         # Expected URLs
         # REMOVED_SYNTAX_ERROR: expected = { )
         # REMOVED_SYNTAX_ERROR: 'frontend': 'https://app.staging.netrasystems.ai',
-        # REMOVED_SYNTAX_ERROR: 'backend': 'https://backend.staging.netrasystems.ai',
+        # REMOVED_SYNTAX_ERROR: 'backend': 'https://api.staging.netrasystems.ai',
         # REMOVED_SYNTAX_ERROR: 'auth': 'https://auth.staging.netrasystems.ai',
         # REMOVED_SYNTAX_ERROR: 'oauth': 'https://app.staging.netrasystems.ai/auth/callback'
         

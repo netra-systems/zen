@@ -27,7 +27,7 @@ class CORSConfigurationTests:
         """Test that staging environment has all required origins configured."""
         cors = CORSConfigurationBuilder({'ENVIRONMENT': 'staging'})
         allowed_origins = cors.origins.allowed
-        required_origins = ['https://staging.netrasystems.ai', 'https://app.staging.netrasystems.ai', 'https://auth.staging.netrasystems.ai', 'https://api.staging.netrasystems.ai', 'https://backend.staging.netrasystems.ai']
+        required_origins = ['https://staging.netrasystems.ai', 'https://app.staging.netrasystems.ai', 'https://auth.staging.netrasystems.ai', 'https://api.staging.netrasystems.ai', 'https://api.staging.netrasystems.ai']
         missing_origins = []
         for origin in required_origins:
             if origin not in allowed_origins:

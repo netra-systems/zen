@@ -87,7 +87,6 @@ function getStagingOrigins(): string[] {
     'https://app.staging.netrasystems.ai',
     'https://auth.staging.netrasystems.ai',
     'https://api.staging.netrasystems.ai',
-    'https://backend.staging.netrasystems.ai',
     
     // Cloud Run patterns for staging
     'https://netra-frontend-701982941522.us-central1.run.app',

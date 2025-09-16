@@ -19,8 +19,8 @@ from typing import Dict, Any, List, Optional
 from urllib.parse import urlparse
 
 # Test configuration
-STAGING_BACKEND_URL = "https://backend.staging.netrasystems.ai"
-STAGING_WEBSOCKET_URL = "wss://backend.staging.netrasystems.ai/ws"
+STAGING_BACKEND_URL = "https://api.staging.netrasystems.ai"
+STAGING_WEBSOCKET_URL = "wss://api.staging.netrasystems.ai/ws"
 STAGING_FRONTEND_URL = "https://staging.netrasystems.ai"
 
 # Test constants for Issue #1141

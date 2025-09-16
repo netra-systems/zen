@@ -466,12 +466,7 @@ def log_timeout_configuration(environment: str) -> None:
     timeout_config = get_database_timeout_config(environment)
     cloud_sql_config = get_cloud_sql_optimized_config(environment)
     retry_config = get_progressive_retry_config(environment)
-<<<<<<< HEAD
-
-=======
     vpc_config = get_vpc_connector_capacity_config(environment)
-    
->>>>>>> b7e0f383cead3f7a19649e62a1d232d823e826ae
     logger.info(f"Database Configuration Summary for {environment}:")
     logger.info(f"  Timeout Configuration: {timeout_config}")
     logger.info(f"  Cloud SQL Optimized: {is_cloud_sql_environment(environment)}")

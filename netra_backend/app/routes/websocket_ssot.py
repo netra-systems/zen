@@ -148,7 +148,8 @@ from netra_backend.app.core.timeout_configuration import (
     TimeoutTier
 )
 from shared.isolated_environment import get_env
-from netra_backend.app.auth_integration.auth import get_current_user
+# SSOT REMEDIATION: Use auth service instead of auth_integration wrapper
+# Removed deprecated auth_integration import
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 # Startup phase validation for Phase 2 remediation
@@ -170,7 +171,9 @@ async def get_current_user_401(credentials: HTTPAuthorizationCredentials = Depen
     
     # Delegate to the real auth system
     from netra_backend.app.dependencies import get_request_scoped_db_session as get_db
-    from netra_backend.app.auth_integration.auth import _validate_token_with_auth_service, _get_user_from_database
+    # SSOT REMEDIATION: Use auth service directly instead of auth_integration wrapper
+    from auth_service.auth_core.core.token_validator import TokenValidator
+    from auth_service.auth_core.core.user_manager import UserManager
     
     try:
         # Get a database session
@@ -178,8 +181,11 @@ async def get_current_user_401(credentials: HTTPAuthorizationCredentials = Depen
         db = await db_gen.__anext__()
         try:
             token = credentials.credentials
-            validation_result = await _validate_token_with_auth_service(token)
-            user = await _get_user_from_database(db, validation_result)
+            # SSOT REMEDIATION: Use auth service directly instead of wrapper functions
+            token_validator = TokenValidator()
+            validation_result = await token_validator.validate_token_async(token)
+            user_manager = UserManager()
+            user = await user_manager.get_user_from_database_async(db, validation_result)
             
             # SECURITY: Store JWT validation result on user object for admin functions
             if hasattr(user, '__dict__'):

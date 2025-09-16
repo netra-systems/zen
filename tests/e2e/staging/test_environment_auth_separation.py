@@ -49,7 +49,7 @@ class EnvironmentAuthSeparationTests(SSotAsyncTestCase):
         
         if self.current_env == "staging":
             self.auth_base_url = "https://auth.staging.netrasystems.ai"
-            self.backend_url = "https://backend.staging.netrasystems.ai" 
+            self.backend_url = "https://api.staging.netrasystems.ai" 
             self.expected_env_marker = "staging"
         elif self.current_env == "development":
             self.auth_base_url = "http://localhost:8081"

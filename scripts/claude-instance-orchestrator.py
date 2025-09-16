@@ -1,29 +1,5 @@
 #!/usr/bin/env python3
 """
-Claude Code Instance Orchestrator
-Simple orchestrator for running multiple Claude Code instances in headless mode,
-each executing specific slash commands with modern JSON parsing.
-
-**Modernized Token Parsing Features:**
-- JSON-first parsing for accurate token tracking from Claude Code output
-- Supports both stream-json (real-time) and json (batch) output formats
-- Structured parsing of usage statistics, tool calls, and cost information
-- Fallback regex parsing for backward compatibility with text-based output
-- Enhanced token breakdown: input/output/cached tokens with cache hit rates
-
-Multi-platform support with enhanced Mac compatibility for local directories.
-
-Mac-specific improvements:
-- Auto-detects Claude executable in common Homebrew paths (/opt/homebrew/bin, /usr/local/bin)
-- Adds Mac-specific paths to PATH environment automatically
-- Enhanced workspace directory validation with tilde expansion
-- Better error messages for Claude installation on Mac
-
-Auto runs a set of parallel claude code instance commands
-Saves having to manually sping up terminal windows
-Path towards integration and automation
-collects more data than human readable output, e.g. token use, tool use names etc
-
 Usage Examples:
   python3 claude-instance-orchestrator.py --workspace ~/my-project --dry-run
   python3 claude-instance-orchestrator.py --list-commands
@@ -38,22 +14,6 @@ Usage Examples:
   python3 claude-instance-orchestrator.py --start-at "1am"  # Start at 1 AM (today or tomorrow)
   python3 claude-instance-orchestrator.py --start-at "14:30"  # Start at 2:30 PM (today or tomorrow)
   python3 claude-instance-orchestrator.py --start-at "10:30pm"  # Start at 10:30 PM (today or tomorrow)
-
-Features:
-  - Scheduled orchestration: Start entire orchestration at specific time (2h from now, 1am, 14:30, etc.)
-  - Soft startup: Configurable delay between instance launches to prevent resource contention
-  - Rolling status reports: Periodic updates showing instance status, uptime, and token usage
-  - Modern JSON token parsing: Primary JSON parsing with regex fallback for reliability
-    * JSON-first approach for stream-json and json output formats
-    * Structured extraction of usage statistics, tool calls, and metadata
-    * Support for Claude Code's native JSON message formats
-    * Total tokens, input/output tokens, cached tokens, and cache hit rates
-    * Real-time token consumption monitoring across all instances
-  - Formatted output: Clear visual separation between instances with truncated lines
-  - Enhanced tool call tracking: Counts tool executions from both JSON and text patterns
-
-IDEAS
-    Record and contrast tool use by command 
 """
 
 import asyncio

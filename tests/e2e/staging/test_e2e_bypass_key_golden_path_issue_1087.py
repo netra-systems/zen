@@ -26,8 +26,8 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
 
         # Staging URLs - must use canonical staging URLs per CLAUDE.md
         self.staging_auth_url = "https://auth.staging.netrasystems.ai"
-        self.staging_backend_url = "https://backend.staging.netrasystems.ai"
-        self.staging_websocket_url = "wss://backend.staging.netrasystems.ai/ws"
+        self.staging_backend_url = "https://api.staging.netrasystems.ai"
+        self.staging_websocket_url = "wss://api.staging.netrasystems.ai/ws"
 
         self.test_user_email = f"e2e_golden_path_issue_1087_{self.generate_test_id()}@example.com"
         self.timeout = 30.0  # 30 second timeout for staging operations

@@ -194,7 +194,7 @@ class Issue1140SSOTWebSocketE2ETests(BaseE2ETest):
         
         # Staging configuration
         self.staging_base_url = "https://auth.staging.netrasystems.ai"
-        self.backend_url = "https://backend.staging.netrasystems.ai"
+        self.backend_url = "https://api.staging.netrasystems.ai"
         
         # Test configuration
         self.test_timeout = 60.0

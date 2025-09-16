@@ -89,9 +89,9 @@ class CompleteGoldenPathE2EStagingTests(SSotAsyncTestCase):
         if not staging_config['base_url']:
             # Use canonical staging domains as specified in CLAUDE.md
             staging_config.update({
-                'base_url': 'https://backend.staging.netrasystems.ai',
-                'websocket_url': 'wss://backend.staging.netrasystems.ai/ws',
-                'api_url': 'https://backend.staging.netrasystems.ai/api',
+                'base_url': 'https://api.staging.netrasystems.ai',
+                'websocket_url': 'wss://api.staging.netrasystems.ai/ws',
+                'api_url': 'https://api.staging.netrasystems.ai/api',
                 'auth_url': 'https://auth.staging.netrasystems.ai'
             })
             logger.info('Using canonical staging.netrasystems.ai domains')
@@ -103,7 +103,7 @@ class CompleteGoldenPathE2EStagingTests(SSotAsyncTestCase):
         Addresses Issue #677: Graceful degradation for missing configuration.
         """
         fallback_config = {}
-        staging_domains = ['backend.staging.netrasystems.ai', 'localhost:8000', '127.0.0.1:8000']
+        staging_domains = ['api.staging.netrasystems.ai', 'localhost:8000', '127.0.0.1:8000']
         for domain in staging_domains:
             try:
                 if 'localhost' in domain or '127.0.0.1' in domain:
@@ -121,7 +121,7 @@ class CompleteGoldenPathE2EStagingTests(SSotAsyncTestCase):
                 logger.debug(f'Fallback domain {domain} not available: {e}')
                 continue
         if not fallback_config:
-            fallback_config = {'base_url': 'https://backend.staging.netrasystems.ai', 'websocket_url': 'wss://backend.staging.netrasystems.ai/ws', 'api_url': 'https://backend.staging.netrasystems.ai/api', 'auth_url': 'https://auth.staging.netrasystems.ai'}
+            fallback_config = {'base_url': 'https://api.staging.netrasystems.ai', 'websocket_url': 'wss://api.staging.netrasystems.ai/ws', 'api_url': 'https://api.staging.netrasystems.ai/api', 'auth_url': 'https://auth.staging.netrasystems.ai'}
             logger.warning('Using ultimate fallback configuration - may not be reachable')
         return fallback_config
 

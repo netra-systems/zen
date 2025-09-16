@@ -117,7 +117,7 @@ async def test_health_endpoint() -> Tuple[bool, float, str]:
     try:
         import aiohttp
 
-        health_url = "https://backend.staging.netrasystems.ai/health"
+        health_url = "https://api.staging.netrasystems.ai/health"
         print(f"Testing health endpoint: {health_url}")
 
         start_time = time.time()
@@ -155,7 +155,7 @@ async def test_websocket_connection() -> Tuple[bool, float, str]:
         import websockets
         import ssl
 
-        ws_url = "wss://backend.staging.netrasystems.ai/ws"
+        ws_url = "wss://api.staging.netrasystems.ai/ws"
         print(f"Testing WebSocket connection: {ws_url}")
 
         # Create SSL context for staging

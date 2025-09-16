@@ -17,7 +17,7 @@ CRITICAL: These E2E tests validate race conditions in the actual GCP staging env
 where Cloud Run cold starts and network latency create real timing issues.
 
 STAGING ENVIRONMENT TARGETS:
-- WebSocket endpoint: wss://backend.staging.netrasystems.ai/ws
+- WebSocket endpoint: wss://api.staging.netrasystems.ai/ws
 - Auth endpoint: https://auth.staging.netrasystems.ai
 - Real network latency and Cloud Run startup patterns
 - Production-like service dependencies and timing
@@ -62,8 +62,8 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
         """Set up staging E2E test environment."""
         super().setUp()
         self.id_manager = UnifiedIDManager()
-        self.staging_base_url = "https://backend.staging.netrasystems.ai"
-        self.staging_ws_url = "wss://backend.staging.netrasystems.ai/ws"
+        self.staging_base_url = "https://api.staging.netrasystems.ai"
+        self.staging_ws_url = "wss://api.staging.netrasystems.ai/ws"
         self.staging_auth_url = "https://auth.staging.netrasystems.ai"
         self.race_conditions_detected = []
         self.staging_failures = []
