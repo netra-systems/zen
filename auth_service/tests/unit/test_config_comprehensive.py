@@ -292,7 +292,7 @@ class AuthConfigDatabaseTests(SSotBaseTestCase):
         assert 'asyncpg' not in raw_url
         assert 'aiosqlite' not in raw_url
         if 'postgresql' in raw_url:
-            assert 'postgresql:' in raw_url or 'postgresql+psycopg2:' in raw_url
+            assert 'postgresql:' in raw_url
         elif 'sqlite' in raw_url:
             assert 'sqlite:' in raw_url
 
@@ -303,7 +303,7 @@ class AuthConfigDatabaseTests(SSotBaseTestCase):
             mock_auth_env.return_value = mock_env
             mock_env.get_database_url.return_value = 'postgresql+asyncpg://user:pass@host/db'
             raw_url = AuthConfig.get_raw_database_url()
-            assert raw_url == 'postgresql://user:pass@host/db'
+            assert raw_url == 'postgresql+asyncpg://user:pass@host/db'
             mock_env.get_database_url.return_value = 'sqlite+aiosqlite:///path/to/db'
             raw_url = AuthConfig.get_raw_database_url()
             assert raw_url == 'sqlite:///path/to/db'
