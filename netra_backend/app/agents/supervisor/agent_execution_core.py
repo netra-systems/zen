@@ -822,6 +822,19 @@ class AgentExecutionCore:
                 f"Thread: {user_execution_context.thread_id}, Run ID: {context.run_id}. "
                 f"This indicates the agent may be stuck in processing or waiting for external resources."
             )
+            
+            # CRITICAL FIX: Send WebSocket error notification for timeout (Issue #463 remediation)
+            if self.websocket_bridge and hasattr(self.websocket_bridge, 'notify_agent_error'):
+                try:
+                    await self.websocket_bridge.notify_agent_error(
+                        context.run_id,
+                        context.agent_name,
+                        f"Agent '{context.agent_name}' execution timeout after {timeout_seconds}s"
+                    )
+                except Exception as notify_error:
+                    # Don't let notification failures break agent execution flow
+                    logger.error(f"Failed to send timeout notification: {notify_error}")
+            
             return AgentExecutionResult(
                 success=False,
                 agent_name=context.agent_name,
