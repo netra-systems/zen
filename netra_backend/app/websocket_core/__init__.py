@@ -150,6 +150,24 @@ try:
 except ImportError:
     websocket_manager = None
 
+# ISSUE #1176 PHASE 2 REMEDIATION: Add missing get_connection_monitor for test compatibility
+try:
+    from netra_backend.app.websocket_core.utils import get_connection_monitor
+except ImportError:
+    get_connection_monitor = None
+
+# REMEDIATION: Add missing WebSocketHeartbeat export for test compatibility
+try:
+    from netra_backend.app.websocket_core.utils import WebSocketHeartbeat
+except ImportError:
+    WebSocketHeartbeat = None
+
+# ISSUE #1176 PHASE 2 REMEDIATION: Add missing get_websocket_manager for test compatibility
+try:
+    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+except ImportError:
+    get_websocket_manager = None
+
 # SSOT COMPLIANCE: Factory pattern eliminated - use direct WebSocketManager import
 # from netra_backend.app.websocket_core.websocket_manager_factory import (
 #     WebSocketManagerFactory,
@@ -280,6 +298,9 @@ __all__ = [
 
     # Constants
     "CRITICAL_EVENTS",
+    
+    # GOLDEN PATH PHASE 3: Mission critical test compatibility
+    "get_websocket_manager",
 
     # NOTE: All other exports removed to eliminate import path fragmentation
     # COORDINATION FIX: Use direct imports for all other components:
@@ -300,11 +321,20 @@ if MessageQueue is not None:
     _optional_exports.append("MessageQueue")
 if websocket_manager is not None:
     _optional_exports.append("websocket_manager")
+if get_connection_monitor is not None:
+    _optional_exports.append("get_connection_monitor")
+if get_websocket_manager is not None:
+    _optional_exports.append("get_websocket_manager")
+if WebSocketHeartbeat is not None:
+    _optional_exports.append("WebSocketHeartbeat")
 
 __all__.extend(_optional_exports)
 
 
+# GOLDEN PATH PHASE 3 FIX: Export get_websocket_manager for mission critical tests
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+
 # Log consolidation
-from netra_backend.app.logging_config import central_logger
-logger = central_logger.get_logger(__name__)
+from shared.logging.unified_logging_ssot import get_logger
+logger = get_logger(__name__)
 logger.info("WebSocket SSOT loaded - CRITICAL SECURITY MIGRATION: Factory pattern available, singleton vulnerabilities mitigated")

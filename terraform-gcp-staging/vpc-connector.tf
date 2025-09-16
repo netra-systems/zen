@@ -26,7 +26,8 @@ resource "google_vpc_access_connector" "staging_connector" {
 
   # ISSUE #1177 FIX: Updated CIDR to align with Redis subnet routing
   # This ensures proper connectivity to Redis at 10.166.204.83:6379
-  ip_cidr_range = "10.166.0.0/28" # Aligned with Redis subnet for connectivity
+  # Redis is in 10.166.0.0/16 network, so using 10.2.0.0/28 for connector (non-overlapping)
+  ip_cidr_range = "10.2.0.0/28" # Non-overlapping CIDR for VPC connector routing to Redis network
 
   # Enhanced scaling configuration for production workloads
   min_instances = 3  # Increased for reliability

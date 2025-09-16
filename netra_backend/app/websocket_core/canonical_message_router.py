@@ -20,13 +20,14 @@ Created: 2025-09-15 (Issue #994 Phase 1)
 """
 
 import asyncio
-import logging
 from typing import Dict, Any, List, Optional, Callable, Union
 from dataclasses import dataclass
 from enum import Enum
 import json
 import time
 from contextlib import asynccontextmanager
+
+from shared.logging.unified_logging_ssot import get_logger
 
 from netra_backend.app.websocket_core.types import (
     WebSocketMessage,
@@ -49,7 +50,7 @@ class RoutingTarget:
     BROADCAST = "broadcast"
     AGENT = "agent"
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class MessageRoutingStrategy(Enum):

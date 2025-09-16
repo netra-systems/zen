@@ -119,7 +119,14 @@ class AgentResult(BaseModel):
 
 
 class DeepAgentState(BaseModel):
-    """Unified Deep Agent State - single source of truth (replaces old AgentState)."""
+    """Unified Deep Agent State - single source of truth (replaces old AgentState).
+    
+    PHASE 1 MIGRATION NOTE: This class is being gradually migrated to UserExecutionContext pattern.
+    See UserExecutionContextAdapter class below for the migration interface.
+    
+    DEPRECATION WARNING: Direct usage of DeepAgentState for new code is discouraged.
+    Use UserExecutionContext via the adapter pattern for proper user isolation.
+    """
     user_request: str = "default_request"  # Default for backward compatibility
     user_prompt: str = "default_request"   # SSOT MIGRATION FIX: Interface alignment for execution engines (Golden Path)
     chat_thread_id: Optional[str] = None
@@ -770,21 +777,23 @@ class DeepAgentState(BaseModel):
         self,
         operation_name: str,
         additional_context: Optional[Dict[str, Any]] = None,
-        additional_agent_context: Optional[Dict[str, Any]] = None
+        additional_agent_context: Optional[Dict[str, Any]] = None,
+        additional_audit_metadata: Optional[Dict[str, Any]] = None
     ) -> 'DeepAgentState':
-        """PHASE 1 INTERFACE COMPATIBILITY FIX: Create child context with dual parameter support.
+        """GOLDEN PATH INTERFACE COMPATIBILITY FIX: Create child context with complete UserExecutionContext compatibility.
 
-        CRITICAL ISSUE #1085 RESOLUTION: This method now supports BOTH parameter names to resolve
-        the interface mismatch that was blocking enterprise customers from adopting secure
-        UserExecutionContext patterns.
+        CRITICAL GOLDEN PATH RESOLUTION: This method now supports ALL UserExecutionContext parameters to resolve
+        the interface mismatch that was blocking the golden path user flow (Login → AI Responses).
 
-        DUAL PARAMETER SUPPORT:
+        COMPLETE PARAMETER SUPPORT:
         - additional_context: Legacy parameter name (backward compatibility)
         - additional_agent_context: Production parameter name (UserExecutionContext compatibility)
+        - additional_audit_metadata: Audit metadata parameter (UserExecutionContext compatibility)
 
         This fix enables:
+        - Golden Path user flow works without TypeError exceptions
         - Existing code using 'additional_context' continues to work
-        - Production code using 'additional_agent_context' now works with DeepAgentState
+        - Production code using UserExecutionContext interface now works with DeepAgentState
         - Enterprise customers can migrate to UserExecutionContext without breaking changes
         - $750K+ ARR business value protection through interface compatibility
 
@@ -792,6 +801,7 @@ class DeepAgentState(BaseModel):
             operation_name: Name of the sub-operation
             additional_context: Additional context data (legacy parameter name)
             additional_agent_context: Additional agent context data (production parameter name)
+            additional_audit_metadata: Additional audit metadata (UserExecutionContext compatibility)
 
         Returns:
             New DeepAgentState instance with child context data
@@ -799,10 +809,19 @@ class DeepAgentState(BaseModel):
         Raises:
             ValueError: If both parameters are provided with conflicting data
         """
-        # PHASE 1 COMPATIBILITY FIX: Reconcile dual parameter support
+        # GOLDEN PATH COMPATIBILITY FIX: Reconcile all parameter support
         final_additional_context = self._reconcile_child_context_parameters(
             additional_context, additional_agent_context
         )
+        
+        # GOLDEN PATH FIX: Handle additional_audit_metadata parameter
+        # For DeepAgentState, audit metadata is merged into the agent_context
+        if additional_audit_metadata:
+            if final_additional_context is None:
+                final_additional_context = {}
+            # Merge audit metadata into context with 'audit_' prefix to avoid conflicts
+            for key, value in additional_audit_metadata.items():
+                final_additional_context[f'audit_{key}'] = value
 
         enhanced_agent_context = self.agent_context.copy()
         if final_additional_context:
@@ -923,6 +942,189 @@ AgentState = DeepAgentState
 
 
 
+# PHASE 1 MIGRATION: UserExecutionContext Adapter
+class UserExecutionContextAdapter:
+    """Adapter class to bridge DeepAgentState and UserExecutionContext patterns.
+    
+    SECURITY CRITICAL: This adapter ensures proper user isolation during the migration
+    from DeepAgentState to UserExecutionContext, preventing cross-user data contamination.
+    
+    BUSINESS VALUE: Enables gradual migration while maintaining $500K+ ARR system stability.
+    
+    PHASE 1 USAGE:
+    - Factory methods to create UserExecutionContext from DeepAgentState
+    - Validation to ensure proper user isolation boundaries
+    - Backward compatibility for existing DeepAgentState code
+    
+    PHASE 2 PLAN: 
+    - Direct UserExecutionContext usage with DeepAgentState deprecation
+    - Complete removal of DeepAgentState references from production code
+    """
+    
+    @staticmethod
+    def create_user_context_from_deep_state(
+        deep_state: DeepAgentState,
+        websocket_client_id: Optional[str] = None,
+        operation_name: str = "agent_execution"
+    ) -> 'UserExecutionContext':
+        """Create UserExecutionContext from DeepAgentState with proper isolation.
+        
+        SECURITY FIX: Ensures proper user isolation by validating user_id boundaries
+        and preventing cross-user context creation.
+        
+        Args:
+            deep_state: Source DeepAgentState object
+            websocket_client_id: Optional WebSocket client ID for real-time updates
+            operation_name: Name of the operation for audit trail
+            
+        Returns:
+            UserExecutionContext with proper isolation guarantees
+            
+        Raises:
+            ValueError: If user_id is missing or invalid
+            ContextIsolationError: If user isolation cannot be guaranteed
+        """
+        # Import here to avoid circular imports
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+        
+        # SECURITY VALIDATION: Ensure user_id is present and valid
+        if not deep_state.user_id or deep_state.user_id.strip() == "":
+            raise ValueError("Cannot create UserExecutionContext: user_id is required for proper isolation")
+        
+        # SECURITY VALIDATION: Ensure thread_id is present (use chat_thread_id from DeepAgentState)
+        thread_id = deep_state.chat_thread_id or deep_state.thread_id
+        if not thread_id:
+            # Generate a new thread_id if missing to maintain isolation
+            thread_id = UnifiedIdGenerator.generate_base_id("thread")
+        
+        # SECURITY VALIDATION: Ensure run_id is present
+        run_id = deep_state.run_id
+        if not run_id:
+            # Generate a new run_id if missing to maintain isolation
+            run_id = UnifiedIdGenerator.generate_base_id("run")
+        
+        # Create agent_context from DeepAgentState fields
+        agent_context = {}
+        
+        # Merge existing agent_context from DeepAgentState
+        if deep_state.agent_context:
+            agent_context.update(deep_state.agent_context)
+        
+        # Add operation-specific context
+        agent_context.update({
+            'operation_name': operation_name,
+            'user_request': deep_state.user_request,
+            'user_prompt': deep_state.user_prompt,
+            'step_count': deep_state.step_count,
+            'current_step': deep_state.current_step
+        })
+        
+        # Create audit metadata from DeepAgentState metadata
+        audit_metadata = {
+            'source': 'DeepAgentState_migration',
+            'migration_phase': 'phase_1',
+            'original_metadata': deep_state.metadata.model_dump() if deep_state.metadata else {}
+        }
+        
+        # Add agent_input to audit metadata if present
+        if deep_state.agent_input:
+            audit_metadata['agent_input'] = deep_state.agent_input
+        
+        return UserExecutionContext(
+            user_id=deep_state.user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            websocket_client_id=websocket_client_id,
+            agent_context=agent_context,
+            audit_metadata=audit_metadata,
+            operation_depth=0  # Default for Phase 1 migration
+        )
+    
+    @staticmethod
+    def create_deep_state_from_user_context(
+        user_context: 'UserExecutionContext',
+        preserve_results: bool = True
+    ) -> DeepAgentState:
+        """Create DeepAgentState from UserExecutionContext for backward compatibility.
+        
+        BACKWARD COMPATIBILITY: Allows existing code that expects DeepAgentState
+        to work with UserExecutionContext during the migration period.
+        
+        Args:
+            user_context: Source UserExecutionContext object
+            preserve_results: Whether to preserve existing result data
+            
+        Returns:
+            DeepAgentState with data mapped from UserExecutionContext
+        """
+        # Extract data from UserExecutionContext
+        agent_context = user_context.agent_context or {}
+        
+        # Create DeepAgentState with mapped data
+        deep_state_data = {
+            'user_id': user_context.user_id,
+            'chat_thread_id': user_context.thread_id,
+            'run_id': user_context.run_id,
+            'user_request': agent_context.get('user_request', 'migrated_request'),
+            'user_prompt': agent_context.get('user_prompt', 'migrated_request'),
+            'step_count': agent_context.get('step_count', 0),
+            'current_step': agent_context.get('current_step', 0),
+            'agent_context': agent_context,
+            'agent_input': user_context.audit_metadata.get('agent_input')
+        }
+        
+        return DeepAgentState(**deep_state_data)
+    
+    @staticmethod
+    def validate_migration_compatibility(
+        deep_state: DeepAgentState,
+        user_context: 'UserExecutionContext'
+    ) -> bool:
+        """Validate that DeepAgentState and UserExecutionContext represent the same user session.
+        
+        SECURITY VALIDATION: Ensures that migration operations don't violate user isolation
+        by accidentally mixing contexts from different users.
+        
+        Args:
+            deep_state: DeepAgentState to validate
+            user_context: UserExecutionContext to validate against
+            
+        Returns:
+            True if contexts are compatible and belong to the same user session
+            
+        Raises:
+            ValueError: If user isolation would be violated
+        """
+        # Check user_id consistency
+        if deep_state.user_id != user_context.user_id:
+            raise ValueError(
+                f"SECURITY VIOLATION: User ID mismatch during migration validation. "
+                f"DeepAgentState user_id='{deep_state.user_id}', "
+                f"UserExecutionContext user_id='{user_context.user_id}'. "
+                f"Cross-user context mixing is prohibited."
+            )
+        
+        # Check thread_id consistency
+        deep_thread_id = deep_state.chat_thread_id or deep_state.thread_id
+        if deep_thread_id and deep_thread_id != user_context.thread_id:
+            raise ValueError(
+                f"Thread ID mismatch during migration validation. "
+                f"DeepAgentState thread_id='{deep_thread_id}', "
+                f"UserExecutionContext thread_id='{user_context.thread_id}'."
+            )
+        
+        # Check run_id consistency if both are present
+        if deep_state.run_id and deep_state.run_id != user_context.run_id:
+            raise ValueError(
+                f"Run ID mismatch during migration validation. "
+                f"DeepAgentState run_id='{deep_state.run_id}', "
+                f"UserExecutionContext run_id='{user_context.run_id}'."
+            )
+        
+        return True
+
+
 # Export all agent models
 __all__ = [
     "ToolResultData",
@@ -930,5 +1132,6 @@ __all__ = [
     "AgentResult", 
     "DeepAgentState",
     "AgentState",
-    "AgentExecutionMetrics"
+    "AgentExecutionMetrics",
+    "UserExecutionContextAdapter"
 ]

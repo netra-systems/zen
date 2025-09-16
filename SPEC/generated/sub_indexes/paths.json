@@ -2,9 +2,15 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
+<<<<<<< HEAD
     "generated_at": "2025-09-15T23:16:28.803704",
     "root_directory": "C:\\netra-apex",
     "total_literals": 1898
+=======
+    "generated_at": "2025-09-15T20:02:51.777537",
+    "root_directory": "C:\\GitHub\\netra-apex",
+    "total_literals": 1884
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
   },
   "literals": {
     "\"\n\n# Default to local build with checks\ncommand = [\n    sys.executable,\n    \"scripts/deploy_to_gcp.py\",\n    \"--project\", \"netra-staging\",\n    \"--build-local\",\n    \"--service-account\", SERVICE_ACCOUNT_KEY\n]\n\n# Add any additional arguments passed to this script\nif len(sys.argv) > 1:\n    command.extend(sys.argv[1:])\nelse:\n    # Default to running checks\n    command.append(\"--run-checks\")\n\n# Execute deployment\nsys.exit(subprocess.call(command))": {
@@ -488,7 +494,11 @@
         "scripts/verify_websocket_regression_tests.py:276",
         "shared/database_url_builder.py:68",
         "shared/port_discovery.py:210",
+<<<<<<< HEAD
         "shared/redis_configuration_builder.py:101"
+=======
+        "shared/redis_configuration_builder.py:67"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/.venv/": {
@@ -595,7 +605,11 @@
       "value": "/1000",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "netra_backend/app/websocket_core/unified_manager.py:3329"
+=======
+        "netra_backend/app/websocket_core/unified_manager.py:3300"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/100:": {
@@ -619,7 +633,11 @@
       "locations": [
         "netra_backend/app/redis_manager.py:156",
         "netra_backend/app/redis_manager.py:157",
+<<<<<<< HEAD
         "shared/redis_configuration_builder.py:412"
+=======
+        "shared/redis_configuration_builder.py:378"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/1k tokens)": {
@@ -727,14 +745,22 @@
       "value": "/5 startup fixes applied - some functionality may be degraded",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "netra_backend/app/smd.py:2014"
+=======
+        "netra_backend/app/smd.py:2044"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/5 startup fixes applied with": {
       "value": "/5 startup fixes applied with",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "netra_backend/app/smd.py:2012"
+=======
+        "netra_backend/app/smd.py:2042"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/5 successful": {
@@ -748,7 +774,11 @@
       "value": "/5 successful,",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "netra_backend/app/smd.py:1962"
+=======
+        "netra_backend/app/smd.py:1992"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/50+ tests)": {
@@ -769,7 +799,11 @@
       "value": "/7",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "netra_backend/app/smd.py:2231"
+=======
+        "netra_backend/app/smd.py:2261"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/8 tests": {
@@ -903,7 +937,11 @@
       "category": "paths",
       "locations": [
         "auth_service/auth_core/redis_config_builder.py:69",
+<<<<<<< HEAD
         "shared/redis_configuration_builder.py:412"
+=======
+        "shared/redis_configuration_builder.py:378"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/_next/static/": {
@@ -1241,7 +1279,11 @@
       "value": "/api/agents/run_agent_v2",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "netra_backend/app/smd.py:2153"
+=======
+        "netra_backend/app/smd.py:2183"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/api/agents/start": {
@@ -1271,21 +1313,33 @@
       "value": "/api/agents/v2/thread/{thread_id}/runs",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "netra_backend/app/smd.py:2156"
+=======
+        "netra_backend/app/smd.py:2186"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/api/agents/v2/{run_id}/state": {
       "value": "/api/agents/v2/{run_id}/state",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "netra_backend/app/smd.py:2155"
+=======
+        "netra_backend/app/smd.py:2185"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/api/agents/v2/{run_id}/status": {
       "value": "/api/agents/v2/{run_id}/status",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "netra_backend/app/smd.py:2154"
+=======
+        "netra_backend/app/smd.py:2184"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/api/auth": {
@@ -2277,7 +2331,11 @@
         "netra_backend/app/routes/auth_routes/config_handler.py:128",
         "auth_service/auth_core/routes/auth_routes.py:165",
         "auth_service/auth_core/routes/auth_routes.py:1468",
+<<<<<<< HEAD
         "scripts/verify_auth_config.py:34"
+=======
+        "scripts/verify_auth_config.py:33"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/auth/oauth/callback": {
@@ -2551,7 +2609,11 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/routes/mcp_client.py:359",
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:805"
+=======
+        "scripts/deploy_to_gcp_actual.py:801"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/cache/clear": {
@@ -2728,7 +2790,11 @@
         "auth_service/auth_core/database/staging_validation.py:334",
         "auth_service/auth_core/validation/pre_deployment_validator.py:103",
         "scripts/create_staging_secrets_complete.py:82",
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:995"
+=======
+        "scripts/deploy_to_gcp_actual.py:991"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/cloudsql/([^:]+):([^:]+):([^&/?]+)": {
@@ -2750,7 +2816,11 @@
       "category": "paths",
       "locations": [
         "scripts/create_tables.py:16",
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:1825",
+=======
+        "scripts/deploy_to_gcp_actual.py:1821",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
         "scripts/migrate_staging_postgres_secrets.py:64",
         "scripts/migrate_staging_postgres_secrets_auto.py:64"
       ]
@@ -2883,7 +2953,11 @@
       "value": "/connectors/staging-connector",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:1083"
+=======
+        "scripts/deploy_to_gcp_actual.py:1079"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/containers/": {
@@ -3823,7 +3897,11 @@
       "value": "/locations/",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:1083"
+=======
+        "scripts/deploy_to_gcp_actual.py:1079"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/login": {
@@ -4489,8 +4567,13 @@
         "shared/database_url_builder.py:74",
         "shared/port_discovery.py:211",
         "shared/port_discovery.py:212",
+<<<<<<< HEAD
         "shared/redis_configuration_builder.py:106",
         "shared/redis_configuration_builder.py:107"
+=======
+        "shared/redis_configuration_builder.py:72",
+        "shared/redis_configuration_builder.py:73"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "/profile": {
@@ -6730,6 +6813,13 @@
         "netra_backend/app/core/config_dependencies.py:269"
       ]
     },
+    "Database connectivity failed. Run scripts/issue_1264_config_audit.py to verify secrets and driver state.": {
+      "value": "Database connectivity failed. Run scripts/issue_1264_config_audit.py to verify secrets and driver state.",
+      "category": "paths",
+      "locations": [
+        "scripts/issue_1264_continuous_monitor.py:136"
+      ]
+    },
     "Debug script for reproducing uvicorn recursion errors.\n\nThis script was moved from tests/ to scripts/ to prevent pytest from\ndiscovering it during test collection, which was causing port binding conflicts.\n\nUsage: python scripts/debug_uvicorn_recursion.py": {
       "value": "Debug script for reproducing uvicorn recursion errors.\n\nThis script was moved from tests/ to scripts/ to prevent pytest from\ndiscovering it during test collection, which was causing port binding conflicts.\n\nUsage: python scripts/debug_uvicorn_recursion.py",
       "category": "paths",
@@ -6853,7 +6943,11 @@
       "value": "Example: python scripts/deploy_to_gcp.py --project {} --build-local",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:2515"
+=======
+        "scripts/deploy_to_gcp_actual.py:2511"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "Examples:\n    # Validate staging environment\n    python scripts/deployment_validation_integration.py --environment staging\n    \n    # Validate production with strict mode\n    python scripts/deployment_validation_integration.py --environment production --strict\n    \n    # Integration in deployment scripts:\n    from scripts.deployment_validation_integration import integrate_with_deployment_script\n    \n    if not integrate_with_deployment_script('staging'):\n        sys.exit(1)": {
@@ -7213,6 +7307,13 @@
         "scripts/env_checker.py:116"
       ]
     },
+    "Now run: python scripts/emergency_test_runner.py smoke --no-cov": {
+      "value": "Now run: python scripts/emergency_test_runner.py smoke --no-cov",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_critical_import_issues.py:281"
+      ]
+    },
     "OAuth Configuration Drift Prevention Script\n\nThis script helps prevent OAuth configuration drift by:\n1. Validating OAuth secrets exist in Secret Manager\n2. Checking auth service health  \n3. Creating configuration snapshot for drift detection\n4. Providing early warning system for configuration changes\n\nUsage:\n    python scripts/prevent_oauth_configuration_drift.py --environment staging\n    python scripts/prevent_oauth_configuration_drift.py --environment staging --create-snapshot": {
       "value": "OAuth Configuration Drift Prevention Script\n\nThis script helps prevent OAuth configuration drift by:\n1. Validating OAuth secrets exist in Secret Manager\n2. Checking auth service health  \n3. Creating configuration snapshot for drift detection\n4. Providing early warning system for configuration changes\n\nUsage:\n    python scripts/prevent_oauth_configuration_drift.py --environment staging\n    python scripts/prevent_oauth_configuration_drift.py --environment staging --create-snapshot",
       "category": "paths",
@@ -7266,7 +7367,11 @@
       "value": "Path to service account JSON key file (default: config/netra-staging-7a1059b7cf26.json)",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:2484"
+=======
+        "scripts/deploy_to_gcp_actual.py:2480"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "Please restore scripts/deploy_to_gcp_actual.py": {
@@ -7463,14 +7568,22 @@
       "value": "Run: python scripts/validate_secrets.py --environment staging --project",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:2068"
+=======
+        "scripts/deploy_to_gcp_actual.py:2064"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "Run: python scripts/validate_staging_urls.py --environment staging --fix": {
       "value": "Run: python scripts/validate_staging_urls.py --environment staging --fix",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:398"
+=======
+        "scripts/deploy_to_gcp_actual.py:394"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "SMD|smd\\.py": {
@@ -7592,21 +7705,33 @@
       "value": "See SPEC/gcp_deployment.xml for deployment guidelines.",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:490"
+=======
+        "scripts/deploy_to_gcp_actual.py:486"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "See SPEC/learnings/websocket_agent_integration_critical.xml for fix details.": {
       "value": "See SPEC/learnings/websocket_agent_integration_critical.xml for fix details.",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:485"
+=======
+        "scripts/deploy_to_gcp_actual.py:481"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "See: SPEC/frontend_deployment_critical.xml for documentation": {
       "value": "See: SPEC/frontend_deployment_critical.xml for documentation",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:339"
+=======
+        "scripts/deploy_to_gcp_actual.py:335"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "Setup E2E Bypass Key for Staging Environment\n\nThis script helps set up the E2E authentication bypass key in Google Secrets Manager\nfor the staging environment. It generates a secure key and stores it properly.\n\nUsage:\n    python scripts/setup_E2E_OAUTH_SIMULATION_KEY.py [--project PROJECT_ID]": {
@@ -7789,7 +7914,11 @@
       "value": "WARNING: [U+FE0F] Secret validation script not found (scripts/validate_secrets.py)",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:1801"
+=======
+        "scripts/deploy_to_gcp_actual.py:1797"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "WebSocket Event Compliance Validator\n\nValidates that the WebSocket implementation follows the specification from \nSPEC/learnings/websocket_agent_integration_critical.xml": {
@@ -9762,8 +9891,12 @@
       "locations": [
         "scripts/archived/migrate_websocket_to_unified.py:59",
         "scripts/migrate_websocket_imports_issue_960.py:252",
+<<<<<<< HEAD
         "scripts/migrate_websocket_imports_issue_960.py:378",
         "scripts/redis_ssot_remediation_priority1.py:111"
+=======
+        "scripts/migrate_websocket_imports_issue_960.py:378"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "netra_backend/app/websocket_core/performance_monitor_core.py": {
@@ -9978,6 +10111,13 @@
         "scripts/fix_execution_error_handler_calls.py:21"
       ]
     },
+    "netra_backend/tests/database/test_database_connections.py": {
+      "value": "netra_backend/tests/database/test_database_connections.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_critical_import_issues.py:155"
+      ]
+    },
     "netra_backend/tests/datetime_string_test_helpers.py": {
       "value": "netra_backend/tests/datetime_string_test_helpers.py",
       "category": "paths",
@@ -9997,6 +10137,13 @@
       "category": "paths",
       "locations": [
         "scripts/fix_duplicate_try_blocks.py:61"
+      ]
+    },
+    "netra_backend/tests/e2e/test_capacity_planning.py": {
+      "value": "netra_backend/tests/e2e/test_capacity_planning.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_critical_import_issues.py:172"
       ]
     },
     "netra_backend/tests/e2e/test_complete_real_pipeline_e2e.py": {
@@ -11306,7 +11453,11 @@
       "value": "python tests/post_deployment/test_auth_integration.py --environment",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:2241"
+=======
+        "scripts/deploy_to_gcp_actual.py:2237"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "python tests/unified_test_runner.py --categories smoke": {
@@ -11501,7 +11652,11 @@
       "value": "scripts/check_architecture_compliance.py",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:427",
+=======
+        "scripts/deploy_to_gcp_actual.py:423",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
         "scripts/execute_ssot_remediation_1076.py:328",
         "scripts/issue_358_deployment_execution.py:125",
         "scripts/team_updates_sync.py:86"
@@ -11642,7 +11797,11 @@
       "value": "scripts/scan_string_literals.py",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:432"
+=======
+        "scripts/deploy_to_gcp_actual.py:428"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "scripts/seed_dev_data.py": {
@@ -11677,7 +11836,11 @@
       "value": "scripts/validate_secrets.py",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:1780"
+=======
+        "scripts/deploy_to_gcp_actual.py:1776"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "scripts/validate_staging_config.py": {
@@ -13240,7 +13403,11 @@
       "value": "tests/mission_critical/test_final_validation.py",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:415"
+=======
+        "scripts/deploy_to_gcp_actual.py:411"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "tests/mission_critical/test_first_message_experience.py": {
@@ -13376,15 +13543,24 @@
         "scripts/fix_deepagentstate_imports.py:134",
         "scripts/issue_962_phase4_execution_validator.py:211",
         "scripts/migrate_mock_to_usercontext.py:146",
+<<<<<<< HEAD
         "scripts/redis_ssot_remediation_priority1.py:281",
         "scripts/run_critical_agent_tests.py:136"
+=======
+        "scripts/run_critical_agent_tests.py:136",
+        "scripts/update_websocket_notifier_imports.py:67"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "tests/mission_critical/test_websocket_agent_events_suite.py::TestRegressionPrevention": {
       "value": "tests/mission_critical/test_websocket_agent_events_suite.py::TestRegressionPrevention",
       "category": "paths",
       "locations": [
+<<<<<<< HEAD
         "scripts/deploy_to_gcp_actual.py:421"
+=======
+        "scripts/deploy_to_gcp_actual.py:417"
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
       ]
     },
     "tests/mission_critical/test_websocket_agent_performance_benchmarks.py": {

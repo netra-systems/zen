@@ -10,21 +10,25 @@ import time
 import json
 from datetime import datetime
 
-# Staging service endpoints from .env.staging.tests
+# Staging service endpoints - Updated to use correct staging domains (*.netrasystems.ai)
 STAGING_SERVICES = {
-    'backend': 'https://netra-backend-staging-pnovr5vsba-uc.a.run.app',
-    'auth': 'https://auth.staging.netrasystems.ai',
-    'frontend': 'https://frontend-701982941522.us-central1.run.app'
+    'backend': 'https://staging.netrasystems.ai',  # Load balanced backend
+    'auth': 'https://staging.netrasystems.ai',     # Same load balancer, different routes
+    'frontend': 'https://staging.netrasystems.ai', # Same load balancer
+    'websocket': 'https://api-staging.netrasystems.ai'  # WebSocket endpoint
 }
 
 async def check_service_health(service_name, base_url, session):
     """Check if a service is responding and not returning 503 errors"""
-    endpoints_to_test = [
-        '/health',
-        '/api/health',
-        '/status',
-        '/'  # Basic root endpoint
-    ]
+    # Service-specific endpoints based on service type
+    if service_name == 'websocket':
+        endpoints_to_test = ['/health', '/api/health']  # WebSocket endpoints
+    elif service_name == 'auth':
+        endpoints_to_test = ['/auth/health', '/health']  # Auth-specific endpoints
+    elif service_name == 'backend':
+        endpoints_to_test = ['/api/health', '/health']  # Backend API endpoints
+    else:
+        endpoints_to_test = ['/health', '/api/health', '/']  # Frontend and default
 
     results = {}
 

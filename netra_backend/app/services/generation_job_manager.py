@@ -18,12 +18,12 @@ settings = get_config()
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 from netra_backend.app.db.models_clickhouse import get_content_corpus_schema
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.schemas.corpus import ContentCorpus
 from netra_backend.app.services.job_store import job_store
 # WebSocket manager import moved to function level for security
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 async def update_job_status(job_id: str, status: str, user_context=None, **kwargs):

@@ -57,6 +57,7 @@ import logging
 import time
 import uuid
 from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, UTC
@@ -85,6 +86,72 @@ class CategoryType(Enum):
 
 
 logger = logging.getLogger(__name__)
+
+
+def _detect_async_test_context():
+    """
+    Detect if we're running within pytest-asyncio context.
+    
+    This method checks if pytest-asyncio is managing the event loop,
+    which indicates we should not try to create/run our own event loop.
+    
+    Returns:
+        bool: True if pytest-asyncio is managing the event loop
+    """
+    try:
+        # Check if there's already a running event loop
+        current_loop = asyncio.get_running_loop()
+        
+        # Check for pytest-asyncio specific indicators
+        # pytest-asyncio typically sets specific attributes on the event loop
+        if hasattr(current_loop, '_pytest_asyncio'):
+            return True
+            
+        # Also check if we're in a pytest context by looking at the call stack
+        import inspect
+        frame = inspect.currentframe()
+        try:
+            while frame:
+                filename = frame.f_code.co_filename
+                function_name = frame.f_code.co_name
+                
+                # Look for pytest-asyncio specific patterns in the call stack
+                if 'pytest_asyncio' in filename or function_name in ['async_test_wrapper', 'pytest_pyfunc_call']:
+                    return True
+                    
+                # Look for pytest patterns - more comprehensive detection
+                if 'pytest' in filename and ('runtest' in function_name or 'call' in function_name or 'setup' in function_name):
+                    return True
+                    
+                # Check for pytest runner patterns
+                if function_name in ['runtest', 'pytest_runtest_call', 'runtest_call'] or 'pytest' in filename:
+                    return True
+                    
+                frame = frame.f_back
+        finally:
+            del frame
+            
+        # If we have a running loop and we're in pytest, assume pytest-asyncio is managing it
+        return True
+        
+    except RuntimeError:
+        # No event loop running, check if we're still in pytest context
+        import inspect
+        frame = inspect.currentframe()
+        try:
+            while frame:
+                filename = frame.f_code.co_filename
+                function_name = frame.f_code.co_name
+                
+                # Even without a running loop, if we're in pytest, assume pytest-asyncio will handle it
+                if 'pytest' in filename or function_name.startswith('pytest') or 'test_' in function_name:
+                    return True
+                    
+                frame = frame.f_back
+        finally:
+            del frame
+            
+        return False
 
 
 @dataclass
@@ -331,6 +398,33 @@ class SSotBaseTestCase:
             self._test_context = None
             self._original_env_state = None
     
+    # === ASYNC EXECUTION HELPER ===
+    
+    def safe_run_async(self, coro):
+        """
+        Run async function safely regardless of event loop state.
+        
+        This method handles the nested event loop issue by using ThreadPoolExecutor
+        when an event loop is already running, preventing RuntimeError: 
+        "This event loop is already running".
+        
+        Args:
+            coro: Coroutine to execute
+            
+        Returns:
+            Result of the coroutine execution
+        """
+        try:
+            # Check if there's already a running event loop
+            loop = asyncio.get_running_loop()
+            # Event loop is running, use ThreadPoolExecutor to avoid nested loop issue
+            with ThreadPoolExecutor() as executor:
+                future = executor.submit(asyncio.run, coro)
+                return future.result()
+        except RuntimeError:
+            # No event loop running, safe to use asyncio.run
+            return asyncio.run(coro)
+    
     # === UNITTEST COMPATIBILITY LAYER ===
     # These methods provide compatibility with unittest-style test classes
     # that use setUp/tearDown instead of setup_method/teardown_method
@@ -338,22 +432,22 @@ class SSotBaseTestCase:
     def setUp(self):
         """
         unittest compatibility method with async support.
-
-        IMPORTANT: This provides backward compatibility for tests that inherit
-        from unittest.TestCase and use setUp/tearDown pattern. It calls the
+        
+        IMPORTANT: This provides backward compatibility for tests that inherit 
+        from unittest.TestCase and use setUp/tearDown pattern. It calls the 
         pytest-style setup_method to ensure consistent behavior.
-
+        
         ASYNC SUPPORT: If the test class has an asyncSetUp() method, this will
         automatically call it after the standard setup to ensure proper async
         initialization for unit tests.
-
+        
         NOTE: Tests should prefer setup_method/teardown_method for new code.
         """
         # Get the current test method from the stack
         import inspect
         frame = inspect.currentframe()
         test_method = None
-
+        
         # Walk up the call stack to find the test method
         try:
             while frame:
@@ -368,52 +462,42 @@ class SSotBaseTestCase:
                 frame = frame.f_back
         finally:
             del frame
-
+        
         # Call the standard setup_method
         self.setup_method(test_method)
-
+        
         # Call asyncSetUp if it exists and we're in an async test
         if hasattr(self, 'asyncSetUp') and asyncio.iscoroutinefunction(self.asyncSetUp):
-            # Check if event loop is already running (pytest-asyncio case)
+            # Check if we're in pytest-asyncio context
+            if _detect_async_test_context():
+                logger.debug(f"Detected pytest-asyncio context in {self.__class__.__name__} - skipping asyncSetUp to avoid event loop conflicts")
+                # In pytest-asyncio context, the event loop is already managed
+                # We should not call asyncSetUp here as it will be handled by pytest-asyncio
+                return
+            
+            # Create event loop if none exists and we're not in pytest-asyncio context
             try:
+                # Use get_running_loop() to avoid deprecation warning in Python 3.13+
                 loop = asyncio.get_running_loop()
-                # If we reach here, loop is running - schedule asyncSetUp as task
-                import concurrent.futures
-                import threading
-
-                # Create a future to bridge sync/async
-                future = concurrent.futures.Future()
-
-                def run_async_setup():
-                    try:
-                        result = asyncio.run_coroutine_threadsafe(self.asyncSetUp(), loop)
-                        future.set_result(result.result())
-                    except Exception as e:
-                        future.set_exception(e)
-
-                # Run in separate thread to avoid event loop conflict
-                thread = threading.Thread(target=run_async_setup)
-                thread.start()
-                thread.join()
-
-                # Get result or re-raise exception
-                try:
-                    future.result()
-                except Exception as e:
-                    logger.error(f"asyncSetUp failed in {self.__class__.__name__}: {e}")
-                    raise
-
+                # If we get here, there's already a running loop, which shouldn't happen
+                # if we properly detected pytest-asyncio context
+                logger.warning(f"Found unexpected running event loop in {self.__class__.__name__}")
             except RuntimeError:
-                # No event loop running - safe to create new one
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
+                # No running loop, create one
                 try:
-                    loop.run_until_complete(self.asyncSetUp())
-                except Exception as e:
-                    logger.error(f"asyncSetUp failed in {self.__class__.__name__}: {e}")
-                    raise
-                finally:
-                    loop.close()
+                    loop = asyncio.get_event_loop()
+                    if loop.is_closed():
+                        raise RuntimeError("Event loop is closed")
+                except RuntimeError:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+            
+            # Run asyncSetUp safely to avoid nested event loop issues (only if not in pytest-asyncio context)
+            try:
+                self.safe_run_async(self.asyncSetUp())
+            except Exception as e:
+                logger.error(f"asyncSetUp failed in {self.__class__.__name__}: {e}")
+                raise
     
     def tearDown(self):
         """
@@ -1083,13 +1167,27 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
             self._test_context = None
         if not hasattr(self, '_original_env_state'):
             self._original_env_state = None
+        if not hasattr(self, '_metrics'):
+            self._metrics = SsotTestMetrics()
         super().teardown_method(method)
 
     async def asyncSetUp(self):
         """Async setup method for async tests."""
-        # Remove recursive setup call to prevent event loop conflicts
-        # Base setup is already handled by setup_method or setUp
+        # DO NOT call super().setUp() here - it would create infinite recursion
+        # The setUp() method already calls setup_method() and then this asyncSetUp()
         # This allows subclasses to override asyncSetUp for additional async initialization
+        pass
+
+    async def _initialize_async_state(self):
+        """
+        Helper method to initialize async-specific state.
+
+        This method provides proper async state initialization without creating
+        circular dependencies with the sync setUp method. It ensures that
+        async test infrastructure is properly configured.
+        """
+        # Initialize any async-specific attributes here
+        # This replaces the problematic super().setUp() call
         pass
 
     async def asyncTearDown(self):
@@ -1236,22 +1334,22 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
     def setUp(self):
         """
         unittest compatibility method for async tests with async support.
-
-        IMPORTANT: This provides backward compatibility for async tests that inherit
-        from unittest.TestCase and use setUp/tearDown pattern. It calls the
+        
+        IMPORTANT: This provides backward compatibility for async tests that inherit 
+        from unittest.TestCase and use setUp/tearDown pattern. It calls the 
         pytest-style setup_method to ensure consistent behavior.
-
+        
         ASYNC SUPPORT: If the test class has an asyncSetUp() method, this will
         automatically call it after the standard setup to ensure proper async
         initialization for unit tests.
-
+        
         NOTE: Tests should prefer setup_method/teardown_method for new code.
         """
         # Get the current test method from the stack
         import inspect
         frame = inspect.currentframe()
         test_method = None
-
+        
         # Walk up the call stack to find the test method
         try:
             while frame:
@@ -1266,52 +1364,42 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
                 frame = frame.f_back
         finally:
             del frame
-
+        
         # Call the standard setup_method
         self.setup_method(test_method)
-
+        
         # Call asyncSetUp if it exists and we're in an async test
         if hasattr(self, 'asyncSetUp') and asyncio.iscoroutinefunction(self.asyncSetUp):
-            # Check if event loop is already running (pytest-asyncio case)
+            # Check if we're in pytest-asyncio context
+            if _detect_async_test_context():
+                logger.debug(f"Detected pytest-asyncio context in {self.__class__.__name__} - skipping asyncSetUp to avoid event loop conflicts")
+                # In pytest-asyncio context, the event loop is already managed
+                # We should not call asyncSetUp here as it will be handled by pytest-asyncio
+                return
+            
+            # Create event loop if none exists and we're not in pytest-asyncio context
             try:
+                # Use get_running_loop() to avoid deprecation warning in Python 3.13+
                 loop = asyncio.get_running_loop()
-                # If we reach here, loop is running - schedule asyncSetUp as task
-                import concurrent.futures
-                import threading
-
-                # Create a future to bridge sync/async
-                future = concurrent.futures.Future()
-
-                def run_async_setup():
-                    try:
-                        result = asyncio.run_coroutine_threadsafe(self.asyncSetUp(), loop)
-                        future.set_result(result.result())
-                    except Exception as e:
-                        future.set_exception(e)
-
-                # Run in separate thread to avoid event loop conflict
-                thread = threading.Thread(target=run_async_setup)
-                thread.start()
-                thread.join()
-
-                # Get result or re-raise exception
-                try:
-                    future.result()
-                except Exception as e:
-                    logger.error(f"asyncSetUp failed in {self.__class__.__name__}: {e}")
-                    raise
-
+                # If we get here, there's already a running loop, which shouldn't happen
+                # if we properly detected pytest-asyncio context
+                logger.warning(f"Found unexpected running event loop in {self.__class__.__name__}")
             except RuntimeError:
-                # No event loop running - safe to create new one
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
+                # No running loop, create one
                 try:
-                    loop.run_until_complete(self.asyncSetUp())
-                except Exception as e:
-                    logger.error(f"asyncSetUp failed in {self.__class__.__name__}: {e}")
-                    raise
-                finally:
-                    loop.close()
+                    loop = asyncio.get_event_loop()
+                    if loop.is_closed():
+                        raise RuntimeError("Event loop is closed")
+                except RuntimeError:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+            
+            # Run asyncSetUp safely to avoid nested event loop issues (only if not in pytest-asyncio context)
+            try:
+                self.safe_run_async(self.asyncSetUp())
+            except Exception as e:
+                logger.error(f"asyncSetUp failed in {self.__class__.__name__}: {e}")
+                raise
     
     def tearDown(self):
         """

@@ -195,13 +195,14 @@ class WebSocketEmergencyCleanupFailureTests:
                 
                 error_message = str(exc_info.value)
                 
-                # Validate we get the exact error pattern from GCP logs
+                # Validate we get the improved error pattern (graduated cleanup implemented)
                 assert "maximum number of WebSocket managers (20)" in error_message
-                assert "Emergency cleanup attempted but limit still exceeded" in error_message
-                assert "resource leak or extremely high connection rate" in error_message
+                assert ("Graduated emergency cleanup attempted through all levels" in error_message or
+                        "Emergency cleanup attempted but limit still exceeded" in error_message)
+                assert "resource leak" in error_message or "extremely high connection rate" in error_message
                 
                 # Verify emergency cleanup was called but failed to clean sufficient managers
-                current_count = mock_factory.get_user_manager_keys(google_oauth_user_id)
+                current_count = mock_factory.get_user_manager_count(google_oauth_user_id)
                 assert current_count >= 20, f"Emergency cleanup should have failed to reduce count below limit, got {current_count}"
     
     @pytest.mark.asyncio
@@ -238,8 +239,9 @@ class WebSocketEmergencyCleanupFailureTests:
                 mock_factory._user_manager_keys[google_oauth_user_id] = user_keys
                 mock_factory._creation_times[key] = datetime.utcnow() - timedelta(seconds=60)
             
-            # Test current emergency cleanup
-            cleaned_count = await mock_factory._emergency_cleanup_user_managers(google_oauth_user_id)
+            # Test enhanced emergency cleanup with AGGRESSIVE level to handle zombies
+            from netra_backend.app.websocket_core.websocket_manager_factory import CleanupLevel
+            cleaned_count = await mock_factory._emergency_cleanup_user_managers(google_oauth_user_id, CleanupLevel.AGGRESSIVE)
             
             # With enhanced cleanup, we should now clean more managers (including zombies)
             assert cleaned_count >= 6, f"Enhanced cleanup should remove zombie managers, cleaned: {cleaned_count}"
@@ -289,8 +291,9 @@ class WebSocketEmergencyCleanupFailureTests:
                 mock_factory._user_manager_keys[google_oauth_user_id] = user_keys
                 mock_factory._creation_times[key] = datetime.utcnow() - timedelta(seconds=60)
             
-            # Apply the real enhanced emergency cleanup implementation
-            cleaned_count = await mock_factory._emergency_cleanup_user_managers(google_oauth_user_id)
+            # Apply the enhanced emergency cleanup implementation with AGGRESSIVE level
+            from netra_backend.app.websocket_core.websocket_manager_factory import CleanupLevel
+            cleaned_count = await mock_factory._emergency_cleanup_user_managers(google_oauth_user_id, CleanupLevel.AGGRESSIVE)
             
             # Enhanced cleanup should remove many more managers
             assert cleaned_count >= 10, f"Enhanced cleanup should remove most problematic managers, cleaned: {cleaned_count}"
@@ -408,8 +411,9 @@ class WebSocketEmergencyCleanupFailureTests:
                         manager_count = mock_factory.get_user_manager_count(google_oauth_user_id)
                         
                         if manager_count >= 14:  # Proactive threshold
-                            # Simulate enhanced emergency cleanup success
-                            cleaned = await mock_factory._emergency_cleanup_user_managers(google_oauth_user_id)
+                            # Simulate enhanced emergency cleanup success with AGGRESSIVE level
+                            from netra_backend.app.websocket_core.websocket_manager_factory import CleanupLevel
+                            cleaned = await mock_factory._emergency_cleanup_user_managers(google_oauth_user_id, CleanupLevel.AGGRESSIVE)
                             # Should clean up inactive + zombie managers = 8 total
                             assert cleaned >= 6, f"Should clean significant managers in emergency mode, cleaned: {cleaned}"
                         

@@ -101,6 +101,11 @@
 **/dev-tools/
 **/dev_launcher/
 **/prometheus/
+# EMERGENCY FIX: Exclude general monitoring but allow netra_backend monitoring modules
+monitoring/
+deployment/monitoring/
+!netra_backend/app/monitoring/
+!netra_backend/app/services/monitoring/
 
 # Keep netra_backend monitoring services (CRITICAL for GCP Error Reporting)
 !netra_backend/app/services/monitoring/

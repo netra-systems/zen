@@ -52,7 +52,7 @@ from netra_backend.app.db.migration_utils import (
 )
 from netra_backend.app.db.postgres import initialize_postgres
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.services.key_manager import KeyManager
 from netra_backend.app.services.security_service import SecurityService
@@ -317,7 +317,7 @@ async def _run_index_optimization_background(logger: logging.Logger) -> None:
 def initialize_logging() -> Tuple[float, logging.Logger]:
     """Initialize startup logging and timing."""
     start_time = time.time()
-    logger = central_logger.get_logger(__name__)
+    logger = get_logger(__name__)
     logger.info("Starting Netra Backend...")
     return start_time, logger
 
@@ -497,7 +497,7 @@ async def _async_initialize_postgres(logger: logging.Logger):
 
 async def setup_database_connections(app: FastAPI) -> None:
     """Setup PostgreSQL connection factory (critical service) with timeout protection."""
-    logger = central_logger.get_logger(__name__)
+    logger = get_logger(__name__)
     logger.debug("Setting up database connections...")
     config = get_config()
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
@@ -944,9 +944,9 @@ def _create_tool_dispatcher(tool_registry):
     """
     import warnings
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-    from netra_backend.app.logging_config import central_logger
+    from shared.logging.unified_logging_ssot import get_logger
     
-    logger = central_logger.get_logger(__name__)
+    logger = get_logger(__name__)
     
     # Emit deprecation warning
     warnings.warn(
@@ -1050,10 +1050,10 @@ async def _validate_staging_readiness(app: FastAPI, logger) -> None:
 
 def _create_agent_supervisor(app: FastAPI) -> None:
     """Create agent supervisor - CRITICAL for chat functionality with enhanced error handling."""
-    from netra_backend.app.logging_config import central_logger
+    from shared.logging.unified_logging_ssot import get_logger
     from shared.isolated_environment import get_env
     import asyncio
-    logger = central_logger.get_logger(__name__)
+    logger = get_logger(__name__)
     
     environment = get_env().get("ENVIRONMENT", "development").lower()
     
@@ -1151,8 +1151,8 @@ def _create_agent_supervisor(app: FastAPI) -> None:
 def _build_supervisor_agent(app: FastAPI):
     """Build supervisor agent instance."""
     from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-    from netra_backend.app.logging_config import central_logger
-    logger = central_logger.get_logger(__name__)
+    from shared.logging.unified_logging_ssot import get_logger
+    logger = get_logger(__name__)
     
     # Log current app.state attributes for debugging
     logger.debug("Checking supervisor dependencies in app.state...")
@@ -1412,7 +1412,7 @@ async def initialize_monitoring_integration(handlers: dict = None) -> bool:
         bool: True if integration successful, False if integration failed but components
               are still operating independently
     """
-    logger = central_logger.get_logger(__name__)
+    logger = get_logger(__name__)
     
     try:
         # ARCHITECTURE CLARIFICATION: WebSocket handlers are registered per-connection, not during startup
@@ -1505,7 +1505,7 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
     # Initialize logger FIRST - before any logic to ensure it's always available in all scopes
     logger = None
     try:
-        logger = central_logger.get_logger(__name__)
+        logger = get_logger(__name__)
     except Exception as e:
         # Fallback logger initialization if central_logger fails
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

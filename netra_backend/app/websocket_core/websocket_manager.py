@@ -210,9 +210,8 @@ class _WebSocketManagerFactory:
 # This enforces factory pattern usage and prevents direct instantiation
 WebSocketManager = _WebSocketManagerFactory
 
-# ISSUE #1184 REMEDIATION: Export UnifiedWebSocketManager for compatibility
-# Direct access to implementation for type checking and existing imports
-UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation
+# SSOT PHASE 2 FIX: Remove UnifiedWebSocketManager alias to eliminate duplication
+# CANONICAL LOCATION: Use 'from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager'
 # For runtime usage, use get_websocket_manager() factory function
 
 # ISSUE #1182 REMEDIATION COMPLETED: WebSocketManagerFactory consolidated into get_websocket_manager()
@@ -808,8 +807,14 @@ def _validate_ssot_compliance():
                         'websocket' in attr_name.lower() and
                         'manager' in attr_name.lower() and
                         attr != WebSocketManager and
-                        # COORDINATION FIX: Exclude legitimate SSOT classes
-                        attr_name not in ['UnifiedWebSocketManager', 'IsolatedWebSocketManager']):
+                        # SSOT PHASE 2 FIX: Exclude canonical SSOT classes and imported types
+                        attr_name not in [
+                            'UnifiedWebSocketManager',  # Canonical alias
+                            'IsolatedWebSocketManager', # Legacy variant
+                            '_UnifiedWebSocketManagerImplementation',  # Canonical implementation
+                            'WebSocketManagerMode',  # Imported from types.py (canonical)
+                            'WebSocketManagerProtocol',  # Imported from protocols.py (canonical)
+                        ]):
                         websocket_manager_classes.append(f"{module_name}.{attr_name}")
             except (AttributeError, TypeError, ImportError) as e:
                 # Silently skip problematic modules during SSOT validation
@@ -1153,7 +1158,7 @@ def create_websocket_manager_sync(user_context: Optional[Any] = None, mode: WebS
 # Export the protocol for type checking and SSOT compliance
 __all__ = [
     'WebSocketManager',  # SSOT: Canonical WebSocket Manager import
-    'UnifiedWebSocketManager',  # SSOT: Direct access to implementation
+    # SSOT PHASE 2 FIX: Removed 'UnifiedWebSocketManager' - import from unified_manager.py (canonical)
     'WebSocketConnectionManager',  # SSOT: Backward compatibility alias (Issue #824)
     'WebSocketManagerFactory',  # ISSUE #1182: Legacy factory interface (consolidated)
     'WebSocketConnection',

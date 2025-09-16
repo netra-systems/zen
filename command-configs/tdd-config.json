@@ -1,0 +1,16 @@
+{
+  "instances": [
+    {
+      "command": "/tdd; The TOKEN_BUDGET_IMPLEMENTATION_PLAN.md is ready for implementation. Spawn multiple sub-agents for the implementation process. The first sub agent should take care of creating the necessary scripts. Spawn a second subagent to follow the process and criticize the first subagent. The second subagent is an obsessive and nagging boss who keeps on instructing the first subagent to follow all the codebase guidelines. It is the second sub agent's responsibility to keep the first sub agent from over-engineering at any step. Spawn a third subagent who reviews the team work of the first two subagents. The third subagent is highly unbiased and ensures the team follows all the project and codebase guidelines strictly. The sub agents are scored based on the review by the third subagent regularly. Finally, it is the third sub agent's responsibility to ensure that the code created by the team has minimum complexity and is NOT overengineered. Once the third subagent agrees, a fourth subagent is spawnwed to document the entire work. If the third subagent is not happy with the team's work, it will ask them to redo the entire process until it is satisfactory and functioning.",
+      "name": "tdd",
+      "description": "Test-driven development workflow with GCP staging environment",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": ["/clear"]
+    }
+  ]
+}

@@ -1080,9 +1080,10 @@ CMD ["npm", "start"]
         # Add VPC connector and network annotations for all services (Infrastructure Remediation #395)
         if service.name in ["backend", "auth"]:
             # CRITICAL: VPC connector required for Redis, Cloud SQL, and service-to-service connectivity
-            vpc_connector_name = f"projects/{self.project_id}/locations/{self.region}/connectors/staging-connector"
+            # ISSUE #1177 FIX: Use updated VPC connector with proper CIDR range for Redis connectivity
+            vpc_connector_name = f"projects/{self.project_id}/locations/{self.region}/connectors/staging-connector-v2"
             cmd.extend([
-                "--vpc-connector", "staging-connector",
+                "--vpc-connector", "staging-connector-v2",
                 "--vpc-egress", "all-traffic"  # Route all traffic through VPC to fix ClickHouse connectivity
             ])
             

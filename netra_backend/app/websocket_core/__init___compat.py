@@ -43,11 +43,11 @@ __all__ = ['WebSocketManager', 'get_websocket_manager', 'UnifiedWebSocketManager
 
 def _validate_compatibility_usage():
     """Track usage of deprecated import paths for migration planning."""
-    import logging
-    logger = logging.getLogger(__name__)
+    from shared.logging.unified_logging_ssot import get_logger
+    logger = get_logger(__name__)
     logger.warning(
         f"COMPATIBILITY: Deprecated WebSocket import path used. "
-        f"Please migrate to canonical import from {canonical_source}"
+        f"Please migrate to canonical import from netra_backend.app.websocket_core.canonical_import_patterns"
     )
 
 # Call validation on import

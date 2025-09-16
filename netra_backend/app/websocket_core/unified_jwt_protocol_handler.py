@@ -13,11 +13,12 @@ Technical Impact: Eliminates protocol mismatch between frontend and backend JWT 
 """
 
 import base64
-import logging
 from typing import Optional, Tuple, Dict, Any, List
 from fastapi import WebSocket
 
-logger = logging.getLogger(__name__)
+from shared.logging.unified_logging_ssot import get_logger
+
+logger = get_logger(__name__)
 
 
 class UnifiedJWTProtocolHandler:

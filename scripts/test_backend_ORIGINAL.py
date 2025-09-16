@@ -132,7 +132,7 @@ def _check_redis_service(status):
     """Check Redis service availability"""
     try:
         import redis
-        r = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6379, socket_connect_timeout=1)
+        r = redis.Redis(host='localhost', port=6379, socket_connect_timeout=1)  # FIXED: Removed await from non-async function
         r.ping()
         status["redis"] = True
     except:

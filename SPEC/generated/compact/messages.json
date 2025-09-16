@@ -37,6 +37,7 @@
     "\"\"\"Test factories for unit tests.\"\"\"\n\nfrom tests.e2e.test_data_factory import TestDataFactory\n\n# Re-export for compatibility\n__all__ = ['TestDataFactory']",
     "\"\"\"Test helpers package.\"\"\"",
     "\"\"\"Test module:",
+    "\"\"\"Test stub for compatibility\"\"\"\nimport pytest",
     "\", \"request_scoped\": true}",
     "\", \"resource\": \"",
     "\", \"user_id\": \"",
@@ -242,6 +243,7 @@
     "# Payment Processing",
     "# Performance Benchmarking\nbaseline = {baseline}\ncurrent = {current}\nimprovement = ((current - baseline) / baseline) * 100\nrelative_performance = current / baseline",
     "# Performance Test Report",
+    "# Platform-specific resource import (Unix vs Windows)\ntry:\n    import resource  # Unix/Linux only\nexcept ImportError:\n    # Windows fallback - provide stub implementation\n    class MockResource:\n        RUSAGE_SELF = 0\n        def getrusage(self, who):\n            return type('Usage', (), {'ru_maxrss': 0, 'ru_utime': 0, 'ru_stime': 0})()\n    resource = MockResource()",
     "# Possibly broken comprehension",
     "# PostgreSQL Configuration",
     "# PostgreSQL container\n        containers[\"postgres\"] = {\n            \"url\": \"postgresql://test:test@localhost:5433/netra_test\",\n            \"max_connections\": 200,\n            \"pool_size\": 20\n        }",
@@ -1461,6 +1463,7 @@
     "(timestamp) as time_bucket,\n            avg(latency_ms) as avg_latency,\n            count() as request_count,\n            max(latency_ms) as max_latency\n        FROM metrics_table \n        WHERE user_id =",
     "(today|yesterday|this week|last week|this month|last month)",
     "(too many open files|resource temporarily unavailable|EMFILE|ENFILE)",
+    "(total cleaned:",
     "(total delay:",
     "(total fixed:",
     "(try|if [^:]*|for [^:]*|while [^:]*|with [^:]*|async def [^:]*|def [^:]*):$\\n([^\\s])",
@@ -1555,11 +1558,19 @@
     "). Close existing connections to create new ones.",
     "). Consider truncating context.",
     "). Context: user_id=",
+<<<<<<< HEAD
     "). Current:",
     "). Emergency cleanup attempted but limit still exceeded. This may indicate a resource leak or extremely high connection rate. Current count:",
     "). Event will be sent but flagged for monitoring.",
     "). Execution exceeded maximum allowed time, possibly due to complex processing or external resource delays. User:",
     "). Please try again later.",
+=======
+    "). Current count:",
+    "). Current:",
+    "). Event will be sent but flagged for monitoring.",
+    "). Execution exceeded maximum allowed time, possibly due to complex processing or external resource delays. User:",
+    "). Graduated emergency cleanup attempted through all levels but limit still exceeded. Cleanup attempts made:",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "). Please wait for existing tasks to complete.",
     "). Review error logs and implement fixes.",
     "). System context cannot emit user events!",
@@ -3209,6 +3220,7 @@
     ". This indicates a fundamental streaming infrastructure issue that prevents investor demo functionality.",
     ". This indicates a race condition in connection setup. Returning existing machine to prevent state corruption.",
     ". This indicates a system configuration issue with SSOT ID generation.",
+    ". This indicates either zombie managers that cannot be cleaned, extremely high connection rate, or a resource leak requiring investigation.",
     ". This indicates improper context initialization.",
     ". This indicates improper session injection.",
     ". This indicates the agent may be stuck in processing or waiting for external resources.",
@@ -4655,6 +4667,7 @@
     "=== Indentation Errors Found ===",
     "=== Issue #1227 Import Path Correction Script ===",
     "=== Issue #1227 Remediation Complete ===",
+    "=== Issue #1264 Staging Database Audit ===",
     "=== Iteration",
     "=== Key Findings ===",
     "=== Metadata Tracking System Status ===",
@@ -5129,6 +5142,7 @@
     "ALERT: [U+1F480] CRITICAL: Cannot notify agent death - WebSocket manager unavailable (run_id=",
     "ALERT: [U+1F480] CRITICAL: Cannot resolve thread_id for agent death notification (run_id=",
     "ALERT: [U+1F480] FAILED to notify agent death:",
+    "ALL IMPORT FIXES SUCCESSFUL!",
     "ALL PERFORMANCE TARGETS MET!",
     "ALL VALIDATIONS PASSED!",
     "ALL VERIFICATIONS PASSED - Database session safety fixes are working!",
@@ -5335,6 +5349,10 @@
     "Add token to blacklist for immediate invalidation\n    \n    Requires service authentication.",
     "Add: from shared.isolated_environment import get_env",
     "Add: from test_framework.ssot.websocket_connection_test_utility import TestWebSocketConnection",
+<<<<<<< HEAD
+=======
+    "Added EngineConfig to user_execution_engine.py",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Added automated alerts for startup sequence failures",
     "Added connection event callback, total callbacks:",
     "Added database connection '",
@@ -5591,6 +5609,7 @@
     "All functionality preserved. Auto-redirecting to canonical source...",
     "All imports now reference netra_backend.app.database (Single Source of Truth)",
     "All imports successfully fixed!",
+    "All infrastructure components are operational.",
     "All logs are clean!",
     "All message operations are performed at /api/chat/messages",
     "All microservices are properly independent.",
@@ -6229,6 +6248,7 @@
     "Backend authentication integration class for SSOT compliance.\n    \n    This class provides a unified interface for backend authentication operations,\n    wrapping the existing auth service client functionality in a testable interface.\n    \n    SSOT COMPLIANCE:\n    - Wraps existing AuthServiceClient functionality\n    - Provides integration testing interface\n    - Maintains service boundaries (auth service is external)\n    - Uses existing dependency injection patterns",
     "Backend expects: protocol.startswith('jwt.')",
     "Backend health check failed (status",
+    "Backend health endpoint failing despite successful PostgreSQL connection. Likely Issue #1263 backend startup regression.",
     "Backend main.py exists",
     "Backend main.py missing",
     "Backend port (default: 8000)",
@@ -8175,6 +8195,7 @@
     "Configuration loaded (env:",
     "Configuration loaded (not cached) for test environment:",
     "Configuration matches the proven working setup.",
+    "Configuration snapshot looks consistent with expected staging settings.",
     "Configuration valid (",
     "Configuration validation failed: DatabaseURLBuilder could not construct valid URL from environment variables. Check POSTGRES_* environment variables format and values.",
     "Configuration validation failed: Invalid database configuration format:",
@@ -8271,7 +8292,10 @@
     "ConnectionManager as alias -> WebSocketManager as alias",
     "ConnectionStateMachine not available, using transport-only validation",
     "Connections notify events, events need connection info",
+<<<<<<< HEAD
     "Conservative cleanup - only clearly inactive managers",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Consider adding ssl=require for production security",
     "Consider addressing them during future refactoring.",
     "Consider closing other applications.",
@@ -9239,6 +9263,7 @@
     "Database connection: FAILED (",
     "Database connectivity is required for all operations",
     "Database connectivity issues suggest need for better health check dependencies",
+    "Database connectivity succeeded but health endpoint is down -> investigate backend deployment (Issue #1263).",
     "Database connectivity validation not yet implemented",
     "Database connectivity: ✓",
     "Database creation error is retryable - circuit breaker may allow retry",
@@ -9246,6 +9271,7 @@
     "Database engine not available for schema validation",
     "Database engine not initialized, skipping schema validation",
     "Database engine/bind is None",
+    "Database error (bypassed):",
     "Database error is retryable - circuit breaker remains closed",
     "Database exceptions - compliant with 25-line function limit.",
     "Database has no users. Run 'python create_test_user.py'",
@@ -9813,6 +9839,11 @@
     "EMERGENCY AUTH: Emergency mode explicitly enabled via EMERGENCY_MODE=1",
     "EMERGENCY AUTH: Enabling emergency mode - auth_service_available=",
     "EMERGENCY AUTH: Performing emergency authentication bypass",
+<<<<<<< HEAD
+=======
+    "EMERGENCY BYPASS ACTIVATED: Starting without Redis connection",
+    "EMERGENCY BYPASS ACTIVATED: Starting without database connection",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "EMERGENCY CIRCUIT BREAKER ACTIVATED: Critical user isolation violation detected between users",
     "EMERGENCY FIX MODE: Applying JWT secret consistency fix...",
     "EMERGENCY ISOLATION CLEANUP: Initiating cleanup for user",
@@ -9889,7 +9920,11 @@
     "Emergency cleanup of all user sessions.\n        \n        CRITICAL: Use only in emergency situations to prevent system crash.\n        \n        Returns:\n            Cleanup report",
     "Emergency cleanup of resources.\n        \n        Args:\n            user_id: If specified, clean up only this user's resources\n            \n        Returns:\n            Cleanup statistics",
     "Emergency cleanup of user managers with graduated response levels\n\n        Args:\n            user_id: User ID to clean up managers for\n            cleanup_level: Cleanup aggressiveness level\n\n        Returns:\n            Number of managers cleaned up",
+<<<<<<< HEAD
     "Emergency configuration manager initialized - normal operation mode",
+=======
+    "Emergency cleanup recorded: level=",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Emergency database table creation for staging 503 fix",
     "Emergency disable all isolation feature flags.",
     "Emergency fallback triggered [",
@@ -10004,6 +10039,7 @@
     "Enhanced base service classes using the new service interfaces.",
     "Enhanced cleanup with Phase 2 optimizations.",
     "Enhanced compliance reporter with 4-tier severity system and business-aligned categorization.",
+    "Enhanced conservative cleanup - inactive managers + clearly dysfunctional zombies",
     "Enhanced deep health checks registered successfully",
     "Enhanced dispatch with uvicorn compatibility and Cloud Run optimization.\n        \n        CRITICAL FIX for Issue #449: Enhanced WebSocket protection with uvicorn\n        protocol validation and Cloud Run load balancer compatibility.",
     "Enhanced health check error reporting with specific diagnostics",
@@ -10990,7 +11026,11 @@
     "Expected: All tests PASS (fixes are now active in staging)",
     "Expected: All tests PASS (fixes are ready for deployment)",
     "Expected: All tests PASS proving Issue #962 resolved",
+<<<<<<< HEAD
     "Expected: PASS after fix, FAIL before fix",
+=======
+    "Expected: PASS once backend recovers; database configuration is already validated via asyncpg.",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Expected: Some tests FAIL (proving deployment gap exists)",
     "Expected: Tests should FAIL (proving vulnerability exists)",
     "Expected: Tests should initially FAIL, proving duplication exists",
@@ -11314,6 +11354,7 @@
     "FALLBACK: Creating tables directly (bypassing migrations)",
     "FATAL:  database \\\".*\\\" does not exist",
     "FERNET_KEY required in staging/production for encryption.",
+    "FIXES APPLIED (",
     "FROM metrics_table\n        WHERE user_id =",
     "FROM netra_audit_events\n            WHERE user_id != ''\n            GROUP BY user_id, toDate(timestamp)",
     "FROM netra_performance_metrics\n            GROUP BY metric_type, toStartOfHour(timestamp)",
@@ -11858,8 +11899,10 @@
     "GCP Error Reporter not initialized for enhanced reporting",
     "GCP Health Diagnostics - Detailed Analysis Tool\n\nBusiness Value: Provides detailed diagnostic information for failed services,\nhelping to identify root causes and estimate recovery times.",
     "GCP Health Monitoring System for Netra Apex Platform\n\nBusiness Value: Ensures continuous monitoring of GCP services health,\ndetecting and reporting issues before they impact customers.\nProvides real-time status dashboard and recovery tracking.\n\nThis script monitors all GCP services continuously until they are 100% healthy.",
+    "GCP Log Collector for Specific Time Range\nCollects logs from netra-backend-staging service for the requested time period\nTime Range: 2025-09-15 18:00:00 PDT to 2025-09-15 19:06:58 PDT",
     "GCP Logging Handler installed for Python logging integration",
     "GCP Logs Audit Loop with Auto-Debug\nContinuously monitors GCP Cloud Run services and automatically debugs errors",
+    "GCP Logs HTTP Collector\nAlternative method to collect logs using HTTP API when gcloud CLI is not available",
     "GCP OAuth Log Audit Script\nAnalyzes OAuth flow issues in GCP Cloud Logging\n\nThis script:\n1. Fetches OAuth-related logs from GCP\n2. Analyzes token generation, validation, and errors\n3. Tracks OAuth flow from initiation to completion\n4. Identifies common OAuth issues and failures",
     "GCP Project ID (e.g., netra-staging)",
     "GCP Region (default: us-central1)",
@@ -13725,7 +13768,10 @@
     "Infrastructure ready!",
     "Infrastructure reliability validated for $2M+ ARR protection",
     "Infrastructure team may need to apply additional fixes",
+<<<<<<< HEAD
     "Infrastructure team should scale VPC connector capacity immediately",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Ingest batch with retry mechanism for error recovery",
     "Ingest log data into ClickHouse.\n        \n        Args:\n            logs: List of log entry dictionaries\n            \n        Returns:\n            Ingestion result with status and count",
     "Ingest metrics data in batches.\n        \n        Args:\n            metrics: List of metric data dictionaries\n            batch_size: Size of each batch for processing\n            \n        Returns:\n            Batch ingestion result with status and count",
@@ -13935,6 +13981,7 @@
     "Insert a batch of records efficiently.",
     "Insert a log entry into ClickHouse.",
     "Insert batch data with optional user context inclusion.\n        \n        Args:\n            table_name: Target table name\n            data: List of records to insert\n            include_user_context: If True, adds user_id to each record",
+    "Insert batch of data into ClickHouse table.",
     "Insert batch of data into ClickHouse table.\n\n        Args:\n            table_name: Name of the table to insert into\n            data: List of dictionaries representing rows to insert\n            user_id: Optional user identifier for context and logging\n\n        Returns:\n            bool: True if insertion successful, False otherwise",
     "Insert batch of data into ClickHouse table.\n        \n        Args:\n            table_name: Target table name\n            data: List of records to insert",
     "Insert completed agent state into ClickHouse for analytics.\n    \n    Args:\n        run_id: Agent run identifier\n        state_data: Final state data from agent execution\n        metadata: Additional execution metadata",
@@ -14106,7 +14153,13 @@
     "Issue #1024 Emergency Syntax Fix Script\n\nCRITICAL: Emergency script to fix the most critical syntax errors blocking\ntest collection and Golden Path validation.\n\nThis script fixes:\n1. Unterminated string literals\n2. Unexpected indentation errors\n3. Malformed code blocks from failed migrations\n\nFocus: Mission critical tests and core infrastructure files only.",
     "Issue #1146 ToolExecutionEngine consolidation to UserExecutionEngine",
     "Issue #1264 Indicators:",
+<<<<<<< HEAD
     "Issue #1264 may not be fully resolved",
+=======
+    "Issue #1264 appears resolved; database connection times are within acceptable range.",
+    "Issue #1264 may not be fully resolved.",
+    "Issue #1264 runtime configuration audit.\n\nValidates that the staging backend service is wired to the expected Cloud SQL\nPostgreSQL instance and that DatabaseURLBuilder still emits asyncpg URLs.",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Issue #1264 successfully resolved and validated",
     "Issue #1278 fix identified:",
     "Issue #128 WebSocket Connectivity Deployment Validation Test Runner",
@@ -15309,6 +15362,7 @@
     "No issues found.",
     "No issues to create (no errors found)",
     "No login, no authentication, users cannot access system",
+    "No logs found for the specified time range and criteria.",
     "No logs to enrich and cluster.",
     "No matching logs found.",
     "No migrations applied (files may not exist or already migrated)",
@@ -16195,7 +16249,9 @@
     "POSTGRES_DB not specified, will use default database name",
     "POSTGRES_HOST (if provided) cannot be localhost/127.0.0.1 in staging/production. Cloud SQL Unix sockets (/cloudsql/...) are allowed. Alternative: Use #removed-legacyfor Cloud SQL connections.",
     "POSTGRES_HOST cannot be 'localhost' in staging - should be Cloud SQL connection",
+    "POSTGRES_HOST does not target staging-shared-postgres instance",
     "POSTGRES_HOST doesn't appear to be a staging database",
+    "POSTGRES_HOST missing /cloudsql/ prefix",
     "POSTGRES_PASSWORD (if provided) must be 8+ characters and not use common defaults. Alternative: Use #removed-legacyfor Cloud SQL connections.",
     "POSTGRES_PASSWORD contains 'dev' - verify this is not development password",
     "POSTGRES_PASSWORD is only numbers and too short - needs complexity",
@@ -16204,6 +16260,7 @@
     "POSTGRES_PASSWORD is using insecure default - must be secure for staging",
     "POSTGRES_PASSWORD must be explicitly set in production",
     "POSTGRES_PASSWORD must be explicitly set in staging",
+    "POSTGRES_PORT expected 5432, got",
     "POSTGRES_USER is '",
     "PR.AC - Identity Management and Access Control",
     "PRD-${Math.floor(Math.random() * 10000)}",
@@ -16241,6 +16298,7 @@
     "Parsed Redis URL components: host=",
     "Parsing research request...",
     "Partial report generation failed, falling back to guidance:",
+    "Partial success - some Issue #1264 indicators remain.",
     "Partially update a reference.",
     "Pass UserExecutionContext to all WebSocket operations",
     "Pass UserExecutionContext to task '",
@@ -17338,6 +17396,7 @@
     "Redis degradation: WebSocket will use local session management",
     "Redis disabled in dev mode - skipping Redis validation",
     "Redis disabled in staging environment (optional service)",
+    "Redis error (bypassed):",
     "Redis error is retryable - circuit breaker remains closed",
     "Redis health check skipped - skip_redis_init=True",
     "Redis health check: GET mismatch - expected '",
@@ -17427,8 +17486,11 @@
     "Register a fallback service for when primary services are unavailable.",
     "Register a health check.",
     "Register a new WebSocket connection for routing\n\n        Args:\n            connection_id: Unique connection identifier\n            user_id: User ID for isolation\n            session_id: Optional session identifier\n            metadata: Additional connection metadata\n\n        Returns:\n            bool: Success status",
+<<<<<<< HEAD
     "Register a new WebSocket connection.",
     "Register a new WebSocket connection.\n\n        Args:\n            user_id: User who owns the connection\n            connection_id: Unique connection identifier",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Register a new execution and return its record.\n        \n        Args:\n            run_id: Original run ID from agent execution\n            agent_name: Name of the executing agent\n            context: Optional context metadata\n            \n        Returns:\n            ExecutionRecord: The created execution record\n            \n        Raises:\n            ValueError: If run_id or agent_name is invalid",
     "Register a new external MCP server.",
     "Register a new health check.",
@@ -18433,7 +18495,11 @@
     "SLO Monitoring Decorators and Integration Helpers\n\nProvides easy-to-use decorators for integrating SLO monitoring into existing code.",
     "SMTP not configured - password reset emails will not work",
     "SOC2, HIPAA, GDPR compliant",
+<<<<<<< HEAD
     "SOLUTION: Improved validation logic that understands functional SSOT patterns",
+=======
+    "SOME FIXES FAILED - Manual intervention may be needed",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "SPAN-${Math.random().toString(36).substr(2, 9)}",
     "SPEC Compliance Scoring Module - Analyzes code compliance with specifications.",
     "SPECIAL FOCUS: Authentication, permissions, and security issues",
@@ -18565,12 +18631,14 @@
     "SUCCESS: All tests FAILED with broken implementation (they catch the bugs!)",
     "SUCCESS: All tests PASSED with fixed implementation!",
     "SUCCESS: All tests failed as expected, confirming readiness validation issues exist",
+    "SUCCESS: All validation tests passed.",
     "SUCCESS: Cancelled task handled safely without InvalidStateError",
     "SUCCESS: Demo completed successfully!",
     "SUCCESS: Environment management compliance achieved!",
     "SUCCESS: ExecutionEngine SSOT consolidation completed!",
     "SUCCESS: Failed task handled correctly with exception retrieval",
     "SUCCESS: GOLDEN PATH TESTS PASSED!",
+    "SUCCESS: Graduated emergency cleanup created space for user",
     "SUCCESS: Has method '",
     "SUCCESS: Logging configured for UTF-8 compatibility",
     "SUCCESS: No DeepAgentState usage found - migration complete!",
@@ -18836,7 +18904,10 @@
     "Send agent thinking notification via user emitter.",
     "Send agent update via WebSocket.",
     "Send agent-specific events.",
+<<<<<<< HEAD
     "Send agent_completed event - CRITICAL for Golden Path.",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Send agent_completed event - CRITICAL for chat value delivery.\n        \n        Args:\n            agent_name: Name of the agent that completed\n            metadata: Additional event metadata (preferred)\n            result: Agent result data (legacy compatibility)\n            execution_time_ms: Execution time in milliseconds",
     "Send agent_completed event via SSOT WebSocket manager.",
     "Send agent_started event - CRITICAL for Golden Path.",
@@ -19047,6 +19118,7 @@
     "Service discovery failed: ${response.status}",
     "Service discovery initialized (test compatibility mode)",
     "Service discovery utilities for development environment.",
+    "Service env (cached values):",
     "Service factory functions for dependency injection.\n\nProvides factory functions to create service instances.\nFollows 450-line limit with 25-line function limit.",
     "Service group '",
     "Service health check failed, revision:",
@@ -19556,7 +19628,10 @@
     "Start JWT secret drift monitoring.\n    \n    Args:\n        config: Optional monitoring configuration\n        \n    Returns:\n        JWTSecretDriftMonitor instance",
     "Start Server-Sent Events stream for real-time updates.",
     "Start VPC connector capacity monitoring.\n    \n    Args:\n        environment: Environment name",
+<<<<<<< HEAD
     "Start VPC connector monitoring.",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Start a background task with monitoring and automatic restart.",
     "Start a background task.",
     "Start a data processing pipeline.\n        \n        Args:\n            source_table: Source table name\n            destination_table: Destination table name  \n            processing_rules: List of processing rules to apply\n            test_prefix: Optional test prefix for isolation\n            \n        Returns:\n            Pipeline ID for tracking",
@@ -19744,7 +19819,10 @@
     "Starting full Docker remediation system (max",
     "Starting goal triage analysis...",
     "Starting graceful shutdown of WebSocket manager (timeout:",
+<<<<<<< HEAD
     "Starting improved WebSocket compliance validation...",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Starting intelligent summary extraction from your data",
     "Starting intelligent tool discovery for your request...",
     "Starting lifecycle-managed application startup...",
@@ -20747,6 +20825,7 @@
     "This is 5-10x faster than Cloud Build...",
     "This is NOT an authentication issue - credentials are working.",
     "This is a CRITICAL issue. Focus on:\n1. Immediate stabilization steps\n2. Quick workarounds if needed\n3. Root cause identification\n4. Permanent fix implementation",
+    "This is a P0 emergency mode for infrastructure debugging only",
     "This is a breaking change. Update all callers to match new async pattern.",
     "This is a breaking change. Update all callers.",
     "This is a critical error that prevents OAuth validation.\nDeployment MUST NOT proceed.\n\nStack trace available in logs.\n[CRITICAL][CRITICAL][CRITICAL][CRITICAL][CRITICAL][CRITICAL][CRITICAL][CRITICAL][CRITICAL][CRITICAL][CRITICAL][CRITICAL][CRITICAL][CRITICAL][CRITICAL][CRITICAL][CRITICAL][CRITICAL][CRITICAL]",
@@ -20855,6 +20934,7 @@
     "ThreadCleanupManager test completed successfully!",
     "ThreadRunRegistry initialized with TTL=",
     "ThreadService._prepare_run_data failed",
+    "Time Range: 2025-09-15 18:00:00 PDT to 2025-09-15 19:06:58 PDT",
     "Time Series Aggregation Functions\n\nExtracted from time_series.py to maintain 450-line limit.\nProvides aggregation and statistical analysis for time-series data.",
     "Time period '",
     "Time period to analyze (default: last_day)",
@@ -21178,6 +21258,7 @@
     "USER AUTHENTICATION FAILURE: Token validation failed:",
     "USER FLOW VALIDATION SUMMARY (CORRECTED)",
     "USR-${Math.floor(Math.random() * 100000)}",
+    "UTC Range: 2025-09-16 01:00:00 UTC to 2025-09-16 02:06:58 UTC",
     "UVS Test Suite Validation Script\n\nThis script validates the 100+ comprehensive UVS integration tests to ensure\nthey are syntactically correct and can be imported properly.",
     "UVS plan generation for run_id=",
     "UVS-Enhanced ActionPlanBuilder for guaranteed value delivery.\n\nThis module extends the ActionPlanBuilder with Unified User Value System (UVS) \ncapabilities to ensure action plans ALWAYS deliver value, even with:\n- Zero data available\n- Failed triage results\n- Partial information\n- LLM failures\n\nCORE UVS PRINCIPLES:\n- ALWAYS_DELIVER_VALUE: Never return empty/error responses\n- DYNAMIC_WORKFLOW: Adapt based on available data\n- CHAT_IS_KING: Every response must provide substantive value",
@@ -21293,7 +21374,10 @@
     "Unregister a WebSocket connection\n\n        Args:\n            connection_id: Connection to unregister\n\n        Returns:\n            bool: Success status",
     "Unregister a WebSocket connection from lifecycle management.",
     "Unregister a WebSocket connection.",
+<<<<<<< HEAD
     "Unregister a WebSocket connection.\n\n        Args:\n            user_id: User who owns the connection\n            connection_id: Unique connection identifier",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Unregister a component from lifecycle management.",
     "Unregister a health check.",
     "Unregister a schema mapping.",
@@ -21689,6 +21773,7 @@
     "Utils module for Netra backend applications.",
     "VALIDATE: Running type validation with mypy...",
     "VALIDATING DataHelperAgent migration...",
+    "VALIDATION FAILED: Some tests did not pass.",
     "VALIDATION SCRIPT: Critical Logging Fixes for Priority 1 Gaps\nValidates that all 4 Priority 1 logging fixes are working correctly.",
     "VALUES (1, 'data');",
     "VERIFICATION FAILED: Issues detected - see report above",
@@ -21699,12 +21784,18 @@
     "VIOLATIONS DETECTED: The backend contains JWT operations that violate",
     "VPC Connector Capacity Monitoring for Issue #1278\n\nThis module provides VPC connector capacity monitoring and automatic\ntimeout adjustment to prevent Issue #1278 recurrence.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal\n- Business Goal: Staging Environment Reliability  \n- Value Impact: Prevent cascading startup failures worth $500K+ ARR impact\n- Strategic Impact: Enable reliable database connections under VPC capacity pressure",
     "VPC auto-fixing capability essential for maintaining Golden Path uptime",
+<<<<<<< HEAD
     "VPC connector '",
     "VPC connector monitoring disabled for environment: {self.environment}",
     "VPC connector monitoring only applies to Cloud SQL environments",
     "VPC connector scaling event detected - applying timeout buffers",
     "VPC connector state is '",
     "VPC validation skipped for development/test environments",
+=======
+    "VPC connector monitoring disabled for environment: {self.environment}",
+    "VPC connector monitoring only applies to Cloud SQL environments",
+    "VPC connector scaling event detected - applying timeout buffers",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "VULNERABILITY CONFIRMED [U+2713]",
     "Valid UserExecutionContext required for dispatcher creation",
     "Validate .env files existence and content.",
@@ -21777,7 +21868,10 @@
     "Validate SSOT compliance for created execution engine.\n        \n        Args:\n            engine: Created execution engine\n            context: User execution context\n            \n        Raises:\n            SSOTValidationError: If SSOT compliance validation fails",
     "Validate SSOT factory health by attempting to create test instances.\n        \n        Returns:\n            Health status dictionary with SSOT compliance metrics",
     "Validate Service Independence Script\nEnsures microservices are truly independent from the main application",
+<<<<<<< HEAD
     "Validate VPC connectivity for Redis in staging/production environments.\n\n        Returns:\n            Tuple of (is_connected, error_message)",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Validate VPC connector capacity and scaling (addresses Issue #1278)",
     "Validate WebSocket Service business requirements.",
     "Validate WebSocket Service health with real-time communication readiness.",
@@ -22063,6 +22157,7 @@
     "Validate that UserContextManager integrates properly with Golden Path functionality.\n        Tests endpoints that would use UserContextManager for security isolation.",
     "Validate that WebSocket agent events can be sent to users.",
     "Validate that a connection belongs to this user.\n        \n        Args:\n            connection_id: Connection ID to validate\n            \n        Returns:\n            bool: True if connection belongs to this user",
+    "Validate that a manager can actually process requests (enhanced zombie detection)\n\n        Args:\n            manager: Manager instance to validate\n\n        Returns:\n            True if manager is functional, False if it's a zombie",
     "Validate that agent exists in metrics collector.",
     "Validate that all critical events are logged.",
     "Validate that all critical events were received for a session.",
@@ -23562,6 +23657,7 @@
     "[ClickHouse Dev Config] Using host=",
     "[ClickHouse NoOp] Simulated disconnect",
     "[ClickHouse NoOp] Simulated query execution:",
+    "[ClickHouse Production Config] Failed to load password:",
     "[ClickHouse Production Config] GCP Secret Manager access denied:",
     "[ClickHouse Production Config] Invalid secret configuration:",
     "[ClickHouse Production Config] Loaded password from GCP Secret Manager",
@@ -23573,6 +23669,7 @@
     "[ClickHouse Service] Initialized with NoOp client for testing environment",
     "[ClickHouse Service] Initializing with REAL client",
     "[ClickHouse Service] Timeout in optional service, continuing without ClickHouse",
+    "[ClickHouse Staging Config] Could not load password from secrets:",
     "[ClickHouse Staging Config] GCP Secret Manager access denied:",
     "[ClickHouse Staging Config] Invalid secret configuration:",
     "[ClickHouse Staging Config] Loaded password from GCP Secret Manager",
@@ -23608,6 +23705,7 @@
     "[ClickHouse] Configuration error:",
     "[ClickHouse] Connecting to instance at",
     "[ClickHouse] Connection failed in",
+    "[ClickHouse] Connection manager failed, falling back to direct connection:",
     "[ClickHouse] Connection manager method missing, using direct connection:",
     "[ClickHouse] Connection manager module not available, using direct connection:",
     "[ClickHouse] Connection manager not available, using direct connection",
@@ -26883,6 +26981,7 @@
     "[yellow]No command specified. Use --help for usage.[/yellow]",
     "[yellow]Some workflows have issues[/yellow]",
     "[yellow][U+2796] Stable[/yellow]",
+    "[✓] Using service account credentials:",
     "[🔑] USER AUTO-CREATED: Created user",
     "[🚫] Rejecting WebSocket connection (Issue #449 protection) - State:",
     "\\\n    --add-cloudsql-instances",
@@ -27362,6 +27461,11 @@
     "class MetadataArchiver:\n    \"\"\"Archives metadata to audit log\"\"\"\n    \n    def __init__(self):\n        self.db_path = Path.cwd() / \"metadata_tracking.db\"",
     "class MetadataValidator:\n    \"\"\"Validates metadata headers in files\"\"\"\n    \n    REQUIRED_FIELDS = [\n        \"Timestamp\",\n        \"Agent\", \n        \"Context\",\n        \"Git\",\n        \"Change\",\n        \"Session\",\n        \"Review\"\n    ]\n    \n    def __init__(self):\n        self.errors = []\n        self.warnings = []",
     "class MockWebSocketConnection[:\\(]",
+<<<<<<< HEAD
+=======
+    "class TestCapacityPlanningWorkflows:\n    \"\"\"Stub for test compatibility - Capacity planning workflows.\"\"\"\n\n    def test_capacity_planning_basic(self):\n        \"\"\"Basic capacity planning test.\"\"\"\n        pytest.skip(\"Capacity planning workflows not implemented yet\")",
+    "class TestClickHouseConnectionPool:\n    \"\"\"Stub for test compatibility - ClickHouse connection pool tests.\"\"\"\n\n    def test_connection_pool_basic(self):\n        \"\"\"Basic connection pool test.\"\"\"\n        pytest.skip(\"ClickHouse connection pool not implemented yet\")\n\n    def test_connection_pool_concurrent(self):\n        \"\"\"Concurrent connection pool test.\"\"\"\n        pytest.skip(\"ClickHouse connection pool not implemented yet\")",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "class TestWebSocketConnection[:\\(]",
     "class UniversalRegistry[T](Generic[T]):",
     "class WebSocketConnectionMock[:\\(]",
@@ -27399,6 +27503,7 @@
     "connection_manager import(s)",
     "connections still active.",
     "connections) - rejecting connection",
+    "connections, 0 responsive)",
     "connections, no violations",
     "connectivity essential for Golden Path service-to-service communication",
     "consecutive failures)",
@@ -28032,7 +28137,10 @@
     "from netra_backend.app.websocket_core import WebSocketManager as ConnectionManager",
     "from netra_backend.app.websocket_core import WebSocketManager as \\1",
     "from netra_backend.app.websocket_core.",
+<<<<<<< HEAD
     "from netra_backend.app.websocket_core.canonical_import_patterns import",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "from netra_backend.app.websocket_core.canonical_import_patterns import ICoreConnectionManager",
     "from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager",
     "from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as ConnectionScopedWebSocketManager",
@@ -28053,7 +28161,10 @@
     "from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitter",
     "from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory as WebSocketEventEmitterFactory",
     "from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterPool",
+<<<<<<< HEAD
     "from netra_backend.app.websocket_core.unified_manager import",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager",
     "from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation",
     "from netra_backend.search_filter_helpers",
@@ -28582,6 +28693,7 @@
     "local key = KEYS[1]\n                local token_data = redis.call('GET', key)\n                if token_data then\n                    local data = cjson.decode(token_data)\n                    if not data.used then\n                        data.used = true\n                        redis.call('SET', key, cjson.encode(data), 'KEEPTTL')\n                        return 1\n                    end\n                end\n                return 0",
     "localhost origins (OK for staging):",
     "locations in websocket_ssot.py",
+    "log entries...",
     "log lines...",
     "logger.info(f\"Auto-created user from JWT:",
     "logger\\.warning.*[Ff]alling back",
@@ -28596,9 +28708,15 @@
     "m-4 p-4 bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200",
     "manager = create_websocket_manager(ctx)  # DEPRECATED",
     "manager = get_websocket_manager(user_context=ctx)",
+<<<<<<< HEAD
+=======
+    "managers cleaned, current count:",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "managers compliant (",
     "mark_activity() called on compatibility wrapper - operation ignored",
     "marked as sent (attempt",
+    "marked as zombie due to low health score (",
+    "marked as zombie due to unresponsive connections (",
     "max-age=31536000; includeSubDomains",
     "max-age=31536000; includeSubDomains; preload",
     "max-age=86400; includeSubDomains",
@@ -29010,6 +29128,7 @@
     "resource.type=\"cloud_run_job\" AND resource.labels.job_name=\"",
     "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"",
     "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"auth-service\" AND (textPayload:\"OAuth\" OR textPayload:\"token\" OR textPayload:\"callback\")",
+    "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"netra-backend-staging\" AND severity>=WARNING AND timestamp>=\"2025-09-16T01:00:00Z\" AND timestamp<=\"2025-09-16T02:06:58Z\"",
     "resource.type=\"http_load_balancer\" AND httpRequest.requestUrl=~\"/auth/callback\" AND (httpRequest.status=200 OR httpRequest.status=302) AND timestamp>=\"",
     "resource.type=\"http_load_balancer\" AND httpRequest.requestUrl=~\"/auth/callback\" AND timestamp>=\"",
     "resource.type=\"http_load_balancer\" AND jsonPayload.enforcedSecurityPolicy.preconfiguredExprIds=\"",
@@ -29068,7 +29187,10 @@
     "s (Exit Code:",
     "s (accommodates cold starts)",
     "s (allows complex processing)",
+<<<<<<< HEAD
     "s (avg response:",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "s (circuit:",
     "s (cloud-optimized)",
     "s (consecutive_failures:",
@@ -29120,7 +29242,10 @@
     "s), forcing closure",
     "s), increasing check interval to",
     "s). Cloud Run startup may need more time for service initialization. Timeout was",
+<<<<<<< HEAD
     "s). This may indicate network connectivity issues or database overload in",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "s, Attributes checked:",
     "s, Buffer utilization:",
     "s, Business_impact: Silent failure prevented, user will be notified, Recovery_action: Marking as DEAD and triggering cleanup",
@@ -29393,6 +29518,7 @@
     "text-xs text-primary hover:text-primary/80 underline mt-1",
     "text-xs text-purple-600 truncate mt-0.5",
     "text-yellow-600 hover:text-yellow-800 px-3 py-1 text-xs font-medium transition-colors",
+    "textPayload: \"",
     "textPayload:\"failed\" OR textPayload:\"timeout\" OR textPayload:\"exception\"",
     "the auth service SSOT pattern. These must be removed to prevent:",
     "think about\\s+improving",
@@ -29752,6 +29878,7 @@
     "• Expected Failures:",
     "• Tests Detecting Violations:",
     "• Tests with Quality Issues:",
+    "• Total logs collected:",
     "ℹ️  No critical secrets defined for",
     "ℹ️  No migration needed:",
     "ℹ️ No recent logs found",
@@ -29809,14 +29936,20 @@
     "⚠️  Syntax validation error:",
     "⚠️  Syntax validation failed - manual review needed",
     "⚠️  WARNING: Connection time",
+<<<<<<< HEAD
     "⚠️  WARNINGS:",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "⚠️  create_execution_engine() is DEPRECATED in Issue #884. This scattered factory function contributes to execution engine factory proliferation. MIGRATION: Use 'from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory' instead.",
     "⚠️  pyproject.toml not found, creating minimal pytest config",
     "⚠️  unified_test_runner.py not found",
     "⚠️ Business Impact: Golden Path still at risk from configuration fragmentation",
+<<<<<<< HEAD
     "⚠️ Could not parse Terraform outputs",
     "⚠️ Could not parse logs",
     "⚠️ Could not parse service description",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "⚠️ Deprecated patterns detected:",
     "⚠️ EXCEPTION WARNING:",
     "⚠️ Error creating",
@@ -29827,8 +29960,11 @@
     "⚠️ INCOMPLETE",
     "⚠️ INCOMPLETE: Issue #962 remediation requires additional work",
     "⚠️ Migration Warnings:",
+<<<<<<< HEAD
     "⚠️ NEEDS ATTENTION",
     "⚠️ VPC CRITICAL ALERT:",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "⚠️ WARNING:",
     "⚠️ WebSocket connection failure for user",
     "⚠️ WebSocket exclusion middleware not detected - WebSocket connections may experience routing issues",
@@ -29858,7 +29994,10 @@
     "✅ All Passed",
     "✅ All critical secrets are valid and available",
     "✅ All remediation validation passed!",
+<<<<<<< HEAD
     "✅ All required secrets are valid",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "✅ All tests completed successfully!",
     "✅ Analysis complete:",
     "✅ Applied pattern:",
@@ -29938,9 +30077,15 @@
     "✅ Queued WebSocket connections processed after startup completion",
     "✅ Queued connection",
     "✅ REMEDIATION SCRIPT COMPLETED",
+<<<<<<< HEAD
     "✅ Redis Memory Store operational",
     "✅ Redis secrets configured in deployment",
     "✅ Restored:",
+=======
+    "✅ Redis secrets configured in deployment",
+    "✅ Restored:",
+    "✅ Retrieved",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "✅ SSL valid for",
     "✅ SSOT SCOPED: Created scoped dispatcher via ToolDispatcherFactory for user",
     "✅ SSOT SupervisorAgent import validation passed",
@@ -29954,11 +30099,18 @@
     "✅ Successfully migrated:",
     "✅ Tests are effectively detecting SSOT violations - ready for remediation planning",
     "✅ Total claims:",
+<<<<<<< HEAD
     "✅ USE_REAL_SERVICES=true set",
     "✅ Usage patterns commented:",
     "✅ VPC connector configuration is valid",
     "✅ VPC connector configuration present",
     "✅ VPC connector deployed",
+=======
+    "✅ Total collected:",
+    "✅ USE_REAL_SERVICES=true set",
+    "✅ Usage patterns commented:",
+    "✅ VPC connector configuration present",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "✅ Validated:",
     "✅ Validating fixes...",
     "✅ WebSocket SSOT migration completed successfully",
@@ -29981,7 +30133,10 @@
     "✓ Import fixed and validated in",
     "✓ Issue #1264 appears to be RESOLVED",
     "✓ LLMManager imports correctly",
+<<<<<<< HEAD
     "✓ Manager Compatibility Layer:",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "✓ Phase 1 complete:",
     "✓ Phase 1 migrated:",
     "✓ Phase 2 complete:",
@@ -29989,14 +30144,20 @@
     "✓ PostgreSQL Database class available",
     "✓ PostgreSQL available as alternative state storage",
     "✓ PostgreSQL session management available",
+<<<<<<< HEAD
     "✓ Protocol Definitions:",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "✓ Removed deprecated file:",
     "✓ SSOT compatibility layer added to websocket_manager.py",
     "✓ State persistence service available - may not require Redis",
     "✓ SupervisorAgent factory creation working",
     "✓ SupervisorAgent imports correctly",
     "✓ Test framework files backed up",
+<<<<<<< HEAD
     "✓ Type Definitions:",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "✓ WebSocket core files backed up",
     "✓ WebSocket manager created successfully via factory",
     "✗ Agent orchestration issue:",
@@ -30019,6 +30180,7 @@
     "❌ CRITICAL FAIL:",
     "❌ CRITICAL FAILURES:",
     "❌ Claim rejected:",
+    "❌ Could not obtain access token. Falling back to existing log analysis.",
     "❌ Critical secret issues found:",
     "❌ ERROR: Secret validation failed:",
     "❌ EXCEPTION:",
@@ -30030,14 +30192,23 @@
     "❌ Error checking gcloud auth:",
     "❌ Error creating fast collection wrapper:",
     "❌ Error creating memory optimization:",
+    "❌ Error fetching logs via HTTP API:",
     "❌ Error fixing",
+    "❌ Error getting access token:",
     "❌ Error implementing collection caching:",
     "❌ Error optimizing collection timeouts:",
     "❌ Error optimizing import performance:",
     "❌ Error optimizing pytest configuration:",
     "❌ Errors encountered:",
+<<<<<<< HEAD
     "❌ FAILED (exit code:",
     "❌ FALSE POSITIVES",
+=======
+    "❌ FAIL: Error fetching logs:",
+    "❌ FAIL: No GCP credentials found",
+    "❌ FAIL: google-cloud-logging not installed",
+    "❌ FAILED (exit code:",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "❌ Failed to queue WebSocket connection",
     "❌ Found deprecated domains:",
     "❌ Frontend check failed:",
@@ -30063,7 +30234,15 @@
     "❌ Missing secrets (",
     "❌ Missing secrets:",
     "❌ Monitoring import failed:",
+<<<<<<< HEAD
+=======
+    "❌ No access token available and no existing log analysis found.",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "❌ No backup found for",
+    "❌ No logs found via API and no existing analysis available.",
+    "❌ No logs retrieved",
+    "❌ No logs retrieved via API. Checking existing analysis...",
+    "❌ PyJWT library not available. Cannot get access token.",
     "❌ Queued connection",
     "❌ REMEDIATION SCRIPT FAILED:",
     "❌ Red items indicate problems that need immediate attention",
@@ -30074,23 +30253,31 @@
     "❌ SSOT import validation failed:",
     "❌ SSOT infrastructure incomplete - fix infrastructure first",
     "❌ SYSTEM NOT READY: Critical issues need resolution",
+    "❌ Service account key not found",
     "❌ Service group validation FAILED:",
     "❌ Service validation failed!",
     "❌ Setup failed:",
     "❌ Some Failed",
     "❌ Some SSOT violation tests still failing",
     "❌ Staging environment has issues - fix before Golden Path validation",
+<<<<<<< HEAD
     "❌ Staging tfvars file not found:",
     "❌ System health tests failing",
     "❌ Terraform configuration invalid!",
     "❌ Terraform directory not found:",
     "❌ Terraform initialization failed!",
     "❌ Terraform planning failed!",
+=======
+    "❌ System health tests failing",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "❌ Test evidence execution failed:",
     "❌ Tests not detecting enough violations - improve test coverage before proceeding",
     "❌ UNHEALTHY",
     "❌ VALIDATION FAILED - Issue #1264 may not be resolved",
+<<<<<<< HEAD
     "❌ VALIDATION FAILED: Some tests did not pass",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "❌ VALIDATION FAILURES DETECTED",
     "❌ Validation '",
     "❌ Validation errors (",
@@ -30104,12 +30291,18 @@
     "🌐 Category 6: WebSocket and Golden Path",
     "🌐 Opening browser to",
     "🌐 Validating domain configuration...",
+<<<<<<< HEAD
     "🌐 WebSocket Compliance Validation Comparison",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "🎉 $500K+ ARR Golden Path fully protected with 100% SSOT compliance",
     "🎉 ALL VALIDATIONS PASSED! Golden Path tests should now work.",
     "🎉 All phases completed successfully!",
     "🎉 INFRASTRUCTURE FIX DETECTED!",
+<<<<<<< HEAD
     "🎉 Infrastructure deployment completed successfully!",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "🎉 Infrastructure fix detected: Database connection time improved from",
     "🎉 Infrastructure fix detected: Health status improved from unhealthy to healthy",
     "🎉 Infrastructure fix detected: Significant connection time improvement (",
@@ -30124,7 +30317,10 @@
     "🎉 SUCCESS: Issue #1264 RESOLVED!",
     "🎉 SUCCESS: Issue #962 Configuration SSOT remediation COMPLETE!",
     "🎉 VALIDATION SUCCESSFUL - Issue #1264 appears resolved!",
+<<<<<<< HEAD
     "🎛️ Emergency feature flags active (",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "🎭 DEMO MODE: Applied default role '",
     "🎭 DEMO MODE: Auto-creating user with demo configuration (email:",
     "🎭 DEMO MODE: Using relaxed circuit breaker configuration for '",
@@ -30138,10 +30334,14 @@
     "🎯 Issue #800 remediation: supervisor_consolidated → supervisor_ssot",
     "🎯 MIGRATION SUMMARY",
     "🎯 NEXT STEPS DECISION MATRIX:",
+<<<<<<< HEAD
     "🎯 PRIORITY BREAKDOWN:",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "🎯 Running specific failing tests...",
     "🎯 SIMPLIFICATION SUMMARY",
     "🎯 Setting project to",
+    "🎯 Severity: WARNING and ERROR levels",
     "🎯 TEST QUALITY ANALYSIS:",
     "🎯 Target: Eliminate all",
     "🏃 CLOUD RUN SERVICES STATUS",
@@ -30152,7 +30352,10 @@
     "🏗️ SSOT INFRASTRUCTURE:",
     "🏥 Running Golden Path Staging Health Check...",
     "🏥 Running quick staging health check...",
+<<<<<<< HEAD
     "🏥 Validating infrastructure health...",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "🏥 Validating service health...",
     "👋 Stopping local frontend server...",
     "💚 Category 8: Service Health Checks",
@@ -30171,10 +30374,13 @@
     "📁 Full Results:",
     "📁 Test Files:",
     "📂 Searching",
+    "📄 Formatted logs saved to:",
     "📄 Migration report saved:",
     "📄 Migration report:",
+    "📄 Reading existing log analysis:",
     "📄 Report saved to:",
     "📄 Sample affected files:",
+    "📅 Time range:",
     "📈 Average score:",
     "📈 IMPROVEMENT:",
     "📈 Improve test success rate from",
@@ -30184,6 +30390,7 @@
     "📊 Analyzing violations...",
     "📊 BUSINESS IMPACT:",
     "📊 CONFIGURATION MANAGER SSOT VIOLATIONS - TEST EXECUTION SUMMARY",
+    "📊 Collected",
     "📊 DEPRECATED PATTERN ANALYSIS",
     "📊 Detailed Information:",
     "📊 EVENT_TRACKED:",
@@ -30192,17 +30399,22 @@
     "📊 Generating report from previous run...",
     "📊 Health Check Summary:",
     "📊 IMPORT COMPLEXITY ANALYSIS",
+<<<<<<< HEAD
     "📊 INFRASTRUCTURE VALIDATION SUMMARY",
     "📊 Infrastructure Health Summary:",
     "📊 Infrastructure Outputs:",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "📊 Infrastructure readiness:",
     "📊 Metrics saved to CloudSQL",
     "📊 Migration Summary:",
     "📊 No Redis import violations found!",
     "📊 OVERALL METRICS:",
     "📊 Optimization Summary:",
+    "📊 Raw JSON saved to:",
     "📊 Redis Migration Phase 1 Results:",
     "📊 SSOT compliance score:",
+<<<<<<< HEAD
     "📊 Secret validation:",
     "📊 Startup queue processing complete:",
     "📊 Total affected files:",
@@ -30210,14 +30422,24 @@
     "📊 VPC LOAD ALERT:",
     "📊 VPC connector monitoring started (interval:",
     "📊 VPC connector monitoring stopped",
+=======
+    "📊 Startup queue processing complete:",
+    "📊 Total affected files:",
+    "📊 VALIDATION SUMMARY",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "📊 Validating monitoring exports...",
     "📊 Validation Results:",
     "📊 WebSocket SSOT Migration Report:",
     "📋 CATEGORY BREAKDOWN:",
     "📋 Categories:",
+<<<<<<< HEAD
     "📋 Checking Terraform status...",
     "📋 Checking previously skipped tests...",
     "📋 Detailed report saved:",
+=======
+    "📋 Checking previously skipped tests...",
+    "📋 Collecting log entries...",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "📋 Evidence pieces:",
     "📋 Fix Summary:",
     "📋 Migration Plan:",
@@ -30271,9 +30493,14 @@
     "🔍 BEFORE: Original SSOT Validation Logic",
     "🔍 Checking Cloud Run Services...",
     "🔍 Checking Cloud Run services...",
+<<<<<<< HEAD
     "🔍 Checking Cloud SQL Instance...",
     "🔍 Checking Secret Manager Secrets...",
     "🔍 Checking VPC Connector...",
+=======
+    "🔍 Collecting logs from netra-backend-staging",
+    "🔍 Fetching logs via HTTP API...",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "🔍 GCP WebSocket readiness validation started (requested:",
     "🔍 Issue #674 Fix Script - UserExecutionContext.create_for_user() → from_request()",
     "🔍 MONITORING STARTED - Issue #1264 Infrastructure Fix Detection",
@@ -30286,7 +30513,10 @@
     "🔍 Scanning for Redis import violations...",
     "🔍 Scanning for deprecated Redis patterns...",
     "🔍 Starting comprehensive UUID violation analysis...",
+<<<<<<< HEAD
     "🔍 VPC Connector Monitor initialized (estimated capacity:",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "🔍 Validating WebSocket SSOT migration...",
     "🔍 Validating migrated imports...",
     "🔍 Validating secrets for ALL services",
@@ -30300,7 +30530,10 @@
     "🔒 Category 5: Security Configuration",
     "🔒 Validating SSL certificates...",
     "🔗 Validating VPC connector configuration...",
+<<<<<<< HEAD
     "🔥 IMMEDIATE: Fix",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "🔧 Applying test collection performance optimizations...",
     "🔧 Converting to async Redis patterns in:",
     "🔧 FIX SUGGESTIONS:",
@@ -30334,6 +30567,8 @@
     "🚀 Running complete Golden Path validation...",
     "🚀 Starting Complete Infrastructure Validation for Issue #1278",
     "🚀 Starting Configuration Manager SSOT Violations Test Execution",
+    "🚀 Starting GCP Log Collection for Specific Time Range",
+    "🚀 Starting GCP Log Collection via HTTP API",
     "🚀 Starting Golden Path Staging Validation",
     "🚀 Starting Next.js development server...",
     "🚀 Starting Phase 1: SSOT compatibility layer migration",

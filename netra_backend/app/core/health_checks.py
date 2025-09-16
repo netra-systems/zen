@@ -18,9 +18,9 @@ from enum import Enum
 from datetime import datetime, timedelta
 import traceback
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class HealthStatus(Enum):

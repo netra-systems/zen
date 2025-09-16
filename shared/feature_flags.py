@@ -24,6 +24,7 @@ import json
 import time
 import hashlib
 import logging
+import redis
 from typing import Dict, Optional, Any, List, Tuple, Union
 from dataclasses import dataclass, asdict
 from enum import Enum
@@ -118,14 +119,15 @@ class ProductionFeatureFlags:
                         redis_host = self.env.get("REDIS_HOST", "localhost")
                         redis_port = int(self.env.get("REDIS_PORT", "6379"))
                         redis_db = int(self.env.get("REDIS_DB", "0"))
-                        self._redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
+                        import redis
+                        self._redis_client = redis.Redis(
                             host=redis_host,
                             port=redis_port,
                             db=redis_db,
                             decode_responses=True,
                             socket_connect_timeout=5,
                             socket_timeout=5
-                        )
+                        )  # FIXED: Restored proper Redis client initialization in non-async method
                     else:
                         self._redis_client = redis.from_url(
                             redis_url,

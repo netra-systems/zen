@@ -1,11 +1,12 @@
 """
 Issue #1264 Continuous Monitoring Script
 
-This script continuously monitors the staging environment to detect when the
-infrastructure team applies the Cloud SQL PostgreSQL configuration fix.
+This script continuously monitors the staging environment to confirm the
+PostgreSQL/asyncpg configuration remains healthy and to detect when the
+backend service recovers from the Issue #1263 startup failure.
 
-When the fix is detected, it automatically runs the comprehensive validation
-suite and reports the results.
+When the infrastructure recovers, it automatically runs the comprehensive
+validation suite and reports the results.
 
 Business Value Justification (BVJ):
 - Segment: Platform/Infrastructure
@@ -49,10 +50,10 @@ logger = logging.getLogger(__name__)
 
 class Issue1264ContinuousMonitor:
     """
-    Continuous monitor for Issue #1264 infrastructure fix detection.
+    Continuous monitor for Issue #1264 regression signals.
 
-    Monitors staging environment health and automatically validates
-    when the PostgreSQL configuration fix is applied.
+    Monitors staging environment health, keeps watch on asyncpg/PostgreSQL
+    connectivity, and highlights when backend recovery (Issue #1263) occurs.
     """
 
     def __init__(self, check_interval: int = 60, max_checks: int = 1440):
@@ -132,7 +133,11 @@ class Issue1264ContinuousMonitor:
             # Add error details if any
             if not db_result.success:
                 health_check["database_error"] = db_result.error_message
-            if not health_result.success:
+                logger.warning("Database connectivity failed. Run scripts/issue_1264_config_audit.py to verify secrets and driver state.")
+            if db_result.success and not health_result.success:
+                health_check["health_endpoint_error"] = health_result.error_message
+                logger.error("Backend health endpoint failing despite successful PostgreSQL connection. Likely Issue #1263 backend startup regression.")
+            elif not health_result.success:
                 health_check["health_endpoint_error"] = health_result.error_message
 
             return health_check

@@ -262,10 +262,17 @@ def get_database_timeout_config(environment: str) -> Dict[str, float]:
             # Cloud SQL resource constraints: 25s delay under concurrent connection pressure
             # Network latency amplification: 10s additional delay during infrastructure stress
             # Safety margin for cascading failures: 15s buffer
+<<<<<<< HEAD
             # URGENT UPDATE: Auth service was failing with 15s timeout - now aligned with auth service 90s
             "initialization_timeout": 90.0,    # CRITICAL: Aligned with auth service validation timeout (increased from 75.0)
             "table_setup_timeout": 35.0,       # Extended for schema operations under load (increased from 25.0)
             "connection_timeout": 50.0,        # Extended for VPC connector peak scaling delays (increased from 35.0)
+=======
+            # PHASE 1 FIX: Extended timeouts based on test evidence from Issue #1278 Phase 1 remediation
+            "initialization_timeout": 95.0,    # CRITICAL: Extended to handle compound VPC+CloudSQL delays (increased from 75.0)
+            "table_setup_timeout": 25.0,       # Extended for schema operations under load (increased from 15.0)
+            "connection_timeout": 45.0,        # Extended for VPC connector peak scaling delays (increased from 35.0)
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
             "pool_timeout": 60.0,              # Extended for connection pool exhaustion + VPC delays (increased from 45.0)
             "health_check_timeout": 30.0,      # Extended for compound infrastructure health checks (increased from 20.0)
         },
@@ -319,7 +326,7 @@ def get_cloud_sql_optimized_config(environment: str) -> Dict[str, any]:
             "pool_config": {
                 "pool_size": 10,              # Reduced to respect Cloud SQL connection limits (reduced from 15)
                 "max_overflow": 15,           # Reduced to stay within 80% of Cloud SQL capacity (reduced from 25)
-                "pool_timeout": 90.0,         # Extended for VPC connector + Cloud SQL delays (increased from 60.0)
+                "pool_timeout": 90.0,         # Extended for VPC connector + Cloud SQL delays (already optimized at 90.0s)
                 "pool_recycle": 3600,         # 1 hour recycle for stability
                 "pool_pre_ping": True,        # Always verify connections
                 "pool_reset_on_return": "rollback",  # Safe connection resets

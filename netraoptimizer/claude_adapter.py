@@ -120,7 +120,10 @@ def parse_claude_output(output: str) -> Dict[str, any]:
                 usage = data['usage']
                 metrics['input_tokens'] = usage.get('input_tokens', 0)
                 metrics['output_tokens'] = usage.get('output_tokens', 0)
-                metrics['cached_tokens'] = usage.get('cache_read_input_tokens', 0)
+                metrics['cached_tokens'] = (
+                    usage.get('cache_read_input_tokens', 0) +
+                    usage.get('cache_creation_input_tokens', 0)
+                )
                 metrics['total_tokens'] = (
                     metrics['input_tokens'] +
                     metrics['output_tokens'] +

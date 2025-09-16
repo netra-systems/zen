@@ -16,7 +16,7 @@ from netra_backend.app import schemas
 from netra_backend.app.agents.supervisor_ssot import (
     SupervisorAgent as Supervisor,
 )
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.message_handlers import MessageHandlerService
@@ -30,7 +30,7 @@ from netra_backend.app.websocket_core.canonical_import_patterns import get_webso
 from shared.id_generation import UnifiedIdGenerator
 from netra_backend.app.dependencies import get_user_session_context
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class AgentService(IAgentService):

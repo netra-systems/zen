@@ -1037,6 +1037,7 @@
     "APIRateLimitConfig",
     "APIRateLimiter",
     "APP STATE CONTRACT COMPLIANCE REPORT",
+    "APPLYING CRITICAL IMPORT FIXES",
     "APPLYING FIXES",
     "ARCHITECTURE COMPLIANCE REPORT",
     "ARCHITECTURE HEALTH DASHBOARD",
@@ -2131,10 +2132,12 @@
     "Apply relevance feedback to improve search",
     "Apply search filters to corpus operations",
     "Apply strict validation",
+    "Applying",
     "Applying WebSocket upgrade protection for uvicorn",
     "Applying automated fix:",
     "Applying remediation for",
     "Applying startup fix:",
+    "Applying:",
     "ApprovalRequirements",
     "ApprovalWorkflow",
     "Approve a change request by ID",
@@ -2329,6 +2332,8 @@
     "Audit logging initialized",
     "Audit metadata creation error:",
     "Audit report generation failed:",
+    "Audit result: FAIL",
+    "Audit result: PASS",
     "Audit scope",
     "Audit search failed:",
     "Audit secrets configuration",
@@ -3494,6 +3499,7 @@
     "CLICKHOUSE_PORT:",
     "CLIHandler",
     "CMD",
+    "COLLECTION COMPLETE",
     "COMMAND:",
     "COMPATIBILITY: QueryOptimizer initialized via performance_optimization_manager",
     "COMPLETE MESSAGE DELIVERY FAILURE: All",
@@ -3976,11 +3982,15 @@
     "Canonical implementation properly maintained at:",
     "Canonical implementation verified",
     "Canonical import pattern used:",
+<<<<<<< HEAD
     "Canonical import patterns file missing",
     "Canonical imports found:",
     "Canonical patterns not importing protocols",
     "Canonical patterns not importing types",
     "Canonical patterns not importing unified manager",
+=======
+    "Canonical imports found:",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Canonical schemas found:",
     "CanonicalMessageRouter",
     "CanonicalMessageRouter initialized with",
@@ -4524,6 +4534,7 @@
     "Cleanup cancelled",
     "Cleanup cancelled by user",
     "Cleanup complete:",
+    "Cleanup completed:",
     "Cleanup error",
     "Cleanup error:",
     "Cleanup failed for user",
@@ -6006,7 +6017,10 @@
     "Could not store metrics:",
     "Could not validate",
     "Could not validate Redis configuration",
+<<<<<<< HEAD
     "Could not validate execution engine integration",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Could not validate table",
     "Could not verify pytest:",
     "Could you provide:",
@@ -6218,6 +6232,7 @@
     "Created snapshot for",
     "Created span:",
     "Created streaming response for context:",
+    "Created stub file:",
     "Created supervisor execution context for user",
     "Created supplementary table:",
     "Created table:",
@@ -7138,6 +7153,9 @@
     "DatabaseTestManager Fix",
     "DatabaseURLBuilder failed to construct URL for",
     "DatabaseURLBuilder failed to generate URL for",
+    "DatabaseURLBuilder output:",
+    "DatabaseURLBuilder produced empty URL",
+    "DatabaseURLBuilder validation FAILED:",
     "Dataset details:",
     "Date",
     "Date for this data point",
@@ -7791,7 +7809,10 @@
     "Domain Configuration",
     "Domain Configuration:",
     "Domain Routing",
+<<<<<<< HEAD
     "Domain URL cannot be empty",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Domain configuration clean",
     "Domain expert for",
     "Domain focus for generation",
@@ -8189,6 +8210,7 @@
     "Engine missing user context",
     "Engine should be set after setup_test_session",
     "EngineConfig",
+    "EngineConfig already exists",
     "Engineering",
     "EngineeringExpert",
     "Enhance caching infrastructure",
@@ -8207,6 +8229,7 @@
     "Enhanced Timing Collector",
     "Enhanced WebSocket supervisor creation failed:",
     "Enhanced agent execution failed for user",
+    "Enhanced conservative cleanup removed manager:",
     "Enhanced error recovery system shutdown",
     "Enhanced error recovery system started",
     "Enhanced execution agent temporarily unavailable:",
@@ -9420,6 +9443,8 @@
     "Errors:",
     "Escalate to on-call if persistent",
     "Escalate to on-call team",
+    "Escalating to",
+    "Escalation",
     "Escalation Level:",
     "Escalation attempt",
     "Escalation level",
@@ -11229,7 +11254,9 @@
     "Failed to find resource access:",
     "Failed to find servers by user:",
     "Failed to fix",
+    "Failed to fix EngineConfig:",
     "Failed to fix agent schema imports in",
+    "Failed to fix resource module:",
     "Failed to fix schemas in",
     "Failed to fix staging authentication issues:",
     "Failed to fix syntax errors in",
@@ -11761,7 +11788,10 @@
     "Failed to save enhanced compose config:",
     "Failed to save message to thread",
     "Failed to save metrics to database for",
+<<<<<<< HEAD
     "Failed to save migration log:",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Failed to save monitoring configuration:",
     "Failed to save primary state:",
     "Failed to save results:",
@@ -12449,6 +12479,7 @@
     "Fixed OAuth credentials and auth configuration",
     "Fixed URL:",
     "Fixed WebSocket imports",
+    "Fixed Windows resource module import",
     "Fixed agent schema imports",
     "Fixed array access:",
     "Fixed data_sub_agent imports in",
@@ -12720,7 +12751,10 @@
     "FunctionMetrics",
     "FunctionOptimizationContext",
     "FunctionTool",
+<<<<<<< HEAD
     "Functional SSOT Analysis:",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Functionality Preserved:",
     "Functionality Validation for",
     "Functionality test error:",
@@ -12766,6 +12800,7 @@
     "GCP Error Reporting client initialized",
     "GCP Error Reporting middleware installed",
     "GCP Health Monitoring System",
+    "GCP LOGS COLLECTION REPORT",
     "GCP Library Available:",
     "GCP Load Balancer Configuration Validator",
     "GCP Logging Handler failed to report error:",
@@ -12805,6 +12840,8 @@
     "GCP region",
     "GCP secret:",
     "GCP staging auto-detection",
+    "GCP-HTTP-LOGS-",
+    "GCP-LOG-GARDENER-WORKLOG-last-1-hour-",
     "GCP-Specific Validation:",
     "GCPAuthContextMiddleware",
     "GCPClientManager",
@@ -13475,6 +13512,7 @@
     "HTML dashboard output path",
     "HTTP 502 - Backend service unavailable",
     "HTTP 5xx:",
+    "HTTP Request:",
     "HTTP URL mismatch:",
     "HTTP check failed:",
     "HTTP connection failed for",
@@ -13977,6 +14015,7 @@
     "IMMEDIATE: Verify WebSocket connection integrity",
     "IMPACT:",
     "IMPORT ANALYSIS REPORT",
+    "IMPORT FIX RESULTS",
     "IMPORT MANAGEMENT SETUP",
     "IMPORTANT NOTES:",
     "IMPORTANT:",
@@ -14441,6 +14480,7 @@
     "Install pre-commit hooks",
     "Install websockets library: pip install websockets",
     "Install with:",
+    "Install with: pip install google-cloud-logging",
     "Install with: pip install websockets",
     "Installation Summary",
     "Installation completed with:",
@@ -14918,6 +14958,7 @@
     "JS - Client ID",
     "JS - Session Duration",
     "JS - Timestamp",
+    "JSON Payload:",
     "JSON Report exported:",
     "JSON Report:",
     "JSON Schema for inputs",
@@ -15962,6 +16003,7 @@
     "Manager",
     "Manager Type:",
     "Manager environment:",
+    "Manager functionality validation failed:",
     "Manager is None",
     "Manager is already AgentWebSocketBridge",
     "Manager not initialized",
@@ -16447,6 +16489,7 @@
     "Missing ClickHouse tables:",
     "Missing ClickHouseService class",
     "Missing Dockerfiles:",
+    "Missing EngineConfig",
     "Missing Events:",
     "Missing Golden Path event tracking",
     "Missing Golden Path event:",
@@ -16593,6 +16636,7 @@
     "Missing subprotocol parameter:",
     "Missing tables in database:",
     "Missing tables:",
+    "Missing test dependencies",
     "Missing test method:",
     "Missing timeout for:",
     "Missing tool_name",
@@ -16777,7 +16821,10 @@
     "Monetization opportunity analysis error:",
     "Monitor Docker container resource usage",
     "Monitor OAuth health and Cloud Armor blocks",
+<<<<<<< HEAD
     "Monitor VPC connector load trends",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Monitor VPC connector performance over next hour",
     "Monitor all backend containers",
     "Monitor and record current resource usage",
@@ -17193,7 +17240,10 @@
     "No available models for consensus",
     "No available ports found in range",
     "No backend configuration found",
+<<<<<<< HEAD
     "No backup found for",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "No baseline found for",
     "No benchmark results available",
     "No build output directory found",
@@ -19064,17 +19114,25 @@
     "POST data:",
     "POST-CLEANUP VERIFICATION",
     "POST-DEPLOYMENT INTERPRETATION:",
+    "POSTGRES_DB is empty",
     "POSTGRES_DB must be explicitly set in production",
     "POSTGRES_DB must be explicitly set in staging",
+    "POSTGRES_DB:",
     "POSTGRES_HOST must be explicitly set in production",
     "POSTGRES_HOST must be explicitly set in staging",
+    "POSTGRES_HOST:",
+    "POSTGRES_PASSWORD is empty",
     "POSTGRES_PASSWORD is not set",
+    "POSTGRES_PASSWORD:",
     "POSTGRES_PORT must be a valid integer in",
     "POSTGRES_PORT must be explicitly set in production",
     "POSTGRES_PORT must be explicitly set in staging",
+    "POSTGRES_PORT:",
+    "POSTGRES_USER is empty",
     "POSTGRES_USER is not set",
     "POSTGRES_USER must be explicitly set in production",
     "POSTGRES_USER must be explicitly set in staging",
+    "POSTGRES_USER:",
     "PR Number:",
     "PR comment update",
     "PR is",
@@ -19483,8 +19541,11 @@
     "Phase 1 failed:",
     "Phase 1 fixes are ready for production:",
     "Phase 1 migration failed for",
+<<<<<<< HEAD
     "Phase 1 validation failed:",
     "Phase 1 validation passed",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Phase 1: Environment Preparation",
     "Phase 1: Marking service as unhealthy",
     "Phase 1: Service Dependency Validation",
@@ -19509,6 +19570,10 @@
     "Phase 3: Starting health monitoring",
     "Phase 3: Test Suite Execution",
     "Phase 4 assessment failed:",
+<<<<<<< HEAD
+=======
+    "Phase 4 cache setup failed - Redis is critical:",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Phase 4 failed:",
     "Phase 4: Completing agent tasks",
     "Phase 4: Results Analysis",
@@ -20891,7 +20956,10 @@
     "Redis operations:",
     "Redis password is required in production",
     "Redis persistence failed for",
+<<<<<<< HEAD
     "Redis ping check failed:",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "Redis ping failed",
     "Redis ping failed during initialization",
     "Redis ping failed:",
@@ -21541,6 +21609,7 @@
     "Resource manager cleaned up",
     "Resource metrics not available",
     "Resource metrics not available for validation",
+    "Resource module import already handled",
     "Resource monitor started",
     "Resource monitor stopped",
     "Resource monitoring already active",
@@ -22311,6 +22380,7 @@
     "SETUP SUMMARY",
     "SEVERITY BREAKDOWN",
     "SEVERITY DISTRIBUTION:",
+    "SEVERITY SUMMARY:",
     "SHARED BASE TYPES",
     "SHOW DATABASES",
     "SHOW TABLES",
@@ -22854,6 +22924,7 @@
     "SecretType",
     "Secrets Loaded:",
     "Secrets Validation:",
+    "Secrets snapshot:",
     "Secrets string length:",
     "Secrets validated:",
     "Secrets:",
@@ -23270,6 +23341,7 @@
     "Service:",
     "Service: Configuration validation failed",
     "Service: Insecure JWT algorithm",
+    "Service: netra-backend-staging",
     "ServiceAuditLog",
     "ServiceAuthValidator",
     "ServiceCacheConfig",
@@ -23532,6 +23604,8 @@
     "Severity Breakdown:",
     "Severity mismatch for",
     "Severity:",
+    "Severity: WARNING and ERROR",
+    "Severity: WARNING and ERROR levels",
     "Share",
     "Share any cost concerns or budget constraints",
     "Share any specific concerns about your AI costs",
@@ -25261,6 +25335,8 @@
     "TestAgentExecutionErrorPropagation",
     "TestAnalysis",
     "TestAuthenticationErrorFlows",
+    "TestCapacityPlanningWorkflows",
+    "TestClickHouseConnectionPool",
     "TestContext",
     "TestCoverage",
     "TestCoverageAnalyzer",
@@ -25355,6 +25431,7 @@
     "Tests passed:",
     "Tests that appear valid:",
     "Tests:",
+    "Text Payload:",
     "TextContent",
     "Textarea",
     "The",
@@ -25970,6 +26047,7 @@
     "Total Components Analyzed:",
     "Total Duration",
     "Total Duration:",
+    "Total Entries:",
     "Total Errors Found:",
     "Total Errors:",
     "Total Execution Time:",
@@ -26145,6 +26223,7 @@
     "Total: 200 tokens consumed",
     "Trace and telemetry data",
     "Trace context propagated:",
+    "Trace:",
     "TraceCollector",
     "TraceCollector initialized for distributed tracing",
     "TraceContext",
@@ -26447,6 +26526,7 @@
     "Unexpected Services",
     "Unexpected auth error for",
     "Unexpected close code:",
+    "Unexpected driver:",
     "Unexpected error",
     "Unexpected error acquiring migration lock:",
     "Unexpected error adding api_keys foreign key:",
@@ -27427,7 +27507,10 @@
     "VPC Connector Configuration:",
     "VPC Connector Related:",
     "VPC Connector Status:",
+<<<<<<< HEAD
     "VPC Connectors:",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "VPC Performance Issues:",
     "VPC connectivity check failed:",
     "VPC connectivity configured",
@@ -27439,6 +27522,7 @@
     "VPC connectivity health check failed:",
     "VPC connectivity issue:",
     "VPC connectivity test failed:",
+<<<<<<< HEAD
     "VPC connectivity timeout to Redis",
     "VPC connectivity to Redis",
     "VPC connectivity validated",
@@ -27463,6 +27547,18 @@
     "VPCAlert",
     "VPCConnectorMonitor",
     "VPCLoadLevel",
+=======
+    "VPC connector capacity issue detected:",
+    "VPC connector capacity monitoring started",
+    "VPC connector for external database access",
+    "VPC connector for internal communication",
+    "VPC connector monitoring error:",
+    "VPC connector monitoring started",
+    "VPC connector not configured",
+    "VPC connector performance issue:",
+    "VPC connector properly configured",
+    "VPC connector state:",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "VPS",
     "VS Code configuration created successfully",
     "Valid",
@@ -28152,7 +28248,10 @@
     "WebSocket connection requested for client",
     "WebSocket connection state error during send:",
     "WebSocket connection successful",
+<<<<<<< HEAD
     "WebSocket connection throttling is now active",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "WebSocket connection timeout",
     "WebSocket connection unhealthy for user",
     "WebSocket connection validation error:",
@@ -28222,6 +28321,8 @@
     "WebSocket health excellent:",
     "WebSocket health poor:",
     "WebSocket heartbeat timeout",
+    "WebSocket import mismatches",
+    "WebSocket import still failing:",
     "WebSocket in invalid state for authentication:",
     "WebSocket infrastructure consolidated - Version:",
     "WebSocket infrastructure error:",
@@ -28579,6 +28680,7 @@
     "Windows",
     "Windows TCP dynamic port range:",
     "Windows port lookup failed:",
+    "Windows resource module",
     "Windows-safe patterns functional test failed:",
     "WindowsAsyncioSafePatterns",
     "WindowsProactorEventLoopPolicy",
@@ -30281,6 +30383,7 @@
     "assert False",
     "assert_critical_events_received",
     "assert_user_critical_events_received",
+    "assertion",
     "assertion_error",
     "assess",
     "assess alternatives",
@@ -30433,7 +30536,10 @@
     "auth-service",
     "auth-service-staging",
     "auth-service-url",
+<<<<<<< HEAD
     "auth-staging",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "auth0",
     "auth:",
     "auth:blacklist:",
@@ -31688,7 +31794,10 @@
     "canonical_files",
     "canonical_files_checked",
     "canonical_import",
+<<<<<<< HEAD
     "canonical_import_patterns",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "canonical_import_patterns.create_test_fallback_manager",
     "canonical_import_patterns.get_websocket_manager",
     "canonical_imports_available",
@@ -31696,8 +31805,11 @@
     "canonical_message_router",
     "canonical_module",
     "canonical_patterns_defined",
+<<<<<<< HEAD
     "canonical_patterns_detected",
     "canonical_patterns_validated",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "canonical_schema_mapping",
     "canonical_schemas_found",
     "capabilities",
@@ -31706,7 +31818,10 @@
     "capability readiness",
     "capability_analysis",
     "capacity",
+<<<<<<< HEAD
     "capacity pressure",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "capacity_aware_timeouts",
     "capacity_headroom",
     "capacity_management",
@@ -32013,6 +32128,7 @@
     "clarity_score",
     "class",
     "class ClickHouseService",
+    "class EngineConfig",
     "class Test",
     "class TestSyntaxFix:",
     "class WebSocketManager",
@@ -32069,6 +32185,7 @@
     "cleanup callbacks for context",
     "cleanup complete - Total time:",
     "cleanup completed",
+    "cleanup for user",
     "cleanup warning:",
     "cleanup_all_connections",
     "cleanup_all_factories",
@@ -32439,6 +32556,7 @@
     "completed tasks older than",
     "completed unexpectedly - attempting restart",
     "completed with",
+    "completed:",
     "completedAt",
     "completed_agents",
     "completed_logs",
@@ -33038,6 +33156,7 @@
     "context",
     "context cannot be None",
     "context window",
+    "context:",
     "context_",
     "context_access_denied",
     "context_accessed",
@@ -35270,6 +35389,7 @@
     "emergency_bypass_active",
     "emergency_cleanups",
     "emergency_completed",
+    "emergency_degraded",
     "emergency_disable",
     "emergency_disable_flags",
     "emergency_exception",
@@ -36367,6 +36487,7 @@
     "failed readiness validation after",
     "failed session isolation validation:",
     "failed to become healthy",
+    "failed to build URL:",
     "failed to connect within",
     "failed to connect within 30 seconds",
     "failed to deliver for",
@@ -37624,6 +37745,11 @@
     "get_connection_info",
     "get_connection_manager",
     "get_connection_monitor",
+<<<<<<< HEAD
+=======
+    "get_connection_monitor import verified working",
+    "get_connection_monitor still not available",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "get_connection_stats",
     "get_connections",
     "get_context",
@@ -38667,6 +38793,7 @@
     "http.user_agent",
     "http:",
     "httpRequest",
+    "httpRequest:",
     "http_",
     "http_5xx",
     "http_context",
@@ -38835,6 +38962,7 @@
     "import numpy",
     "import openai",
     "import pytest",
+    "import resource",
     "import signal",
     "import stable",
     "import successful",
@@ -39243,7 +39371,10 @@
     "interface violations",
     "interface_changes",
     "interface_compliance",
+<<<<<<< HEAD
     "interface_contract",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "interface_contract_validation",
     "interface_evolution_governance",
     "interface_files",
@@ -39452,6 +39583,7 @@
     "is_admin",
     "is_admin_mode",
     "is_agent_message",
+    "is_alive",
     "is_allowed",
     "is_anonymous_user",
     "is_async",
@@ -39582,6 +39714,10 @@
     "is_validation_error",
     "is_verified",
     "is_vpc_connector_related",
+<<<<<<< HEAD
+=======
+    "is_zombie",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "isinstance",
     "iso27001",
     "iso_27001",
@@ -39764,6 +39900,7 @@
     "jsm",
     "json",
     "jsonPayload",
+    "jsonPayload:",
     "json_injection",
     "json_output",
     "json_payload",
@@ -39895,6 +40032,7 @@
     "l3_test",
     "label",
     "labels",
+    "labels:",
     "lacks admin permissions in database record",
     "lag",
     "lambda",
@@ -39953,7 +40091,10 @@
     "last_error",
     "last_error_time",
     "last_error_type",
+<<<<<<< HEAD
     "last_error_types",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "last_event_test",
     "last_event_time",
     "last_event_timestamp",
@@ -40428,6 +40569,7 @@
     "log",
     "log analysis",
     "log entries",
+    "log-gardener",
     "log:",
     "log_access",
     "log_agent_communication",
@@ -40602,10 +40744,18 @@
     "manager_results",
     "manager_status",
     "manager_type",
+<<<<<<< HEAD
+=======
+    "managers",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "managers cleaned",
     "managers cleaned in",
     "managers removed at",
     "managers removed in",
+<<<<<<< HEAD
+=======
+    "managers removed using",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "managers:",
     "managers_by_status",
     "managers_by_user",
@@ -40639,6 +40789,8 @@
     "marked as failed due to database timeout",
     "marked as ready",
     "marked as sent",
+    "marked as zombie due to explicit flag",
+    "marked as zombie due to non-functional status",
     "marked_skip",
     "marked_xfail",
     "markers",
@@ -40707,6 +40859,10 @@
     "max_concurrent_requests",
     "max_concurrent_respected",
     "max_concurrent_sessions",
+<<<<<<< HEAD
+=======
+    "max_concurrent_tools must be at least 1",
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "max_connection_time",
     "max_connections",
     "max_connections_per_pool",
@@ -41360,6 +41516,7 @@
     "missing_assertion",
     "missing_await_on_async_function",
     "missing_business_justification",
+    "missing_class",
     "missing_classes",
     "missing_client_secret",
     "missing_columns",
@@ -42779,6 +42936,7 @@
     "order",
     "order by",
     "order by clause",
+    "orderBy",
     "order_by",
     "order_by_expression",
     "order_direction",
@@ -42996,6 +43154,7 @@
     "packets_recv",
     "packets_sent",
     "page",
+    "pageSize",
     "page_reload",
     "page_size",
     "page_token",
@@ -44328,6 +44487,8 @@
     "raw_connection",
     "raw_data",
     "raw_input",
+    "raw_logs_",
+    "raw_logs_http_",
     "raw_message_preview",
     "raw_message_size",
     "raw_response",
@@ -44424,7 +44585,10 @@
     "recent_24h_cycles",
     "recent_24h_drift_incidents",
     "recent_alerts",
+<<<<<<< HEAD
     "recent_attempts",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "recent_average_connection_time",
     "recent_average_health_score",
     "recent_averages",
@@ -45354,6 +45518,7 @@
     "response_ttl",
     "response_type",
     "responses",
+    "responsive",
     "rest",
     "rest_api",
     "restart",
@@ -45776,7 +45941,10 @@
     "safe_database_name",
     "safe_demo",
     "safe_failure_mode",
+<<<<<<< HEAD
     "safe_log_message",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "safe_mode",
     "safe_patterns_implemented",
     "safe_retry",
@@ -46817,6 +46985,7 @@
     "spades",
     "spam",
     "span",
+    "spanId",
     "span_added",
     "span_kind",
     "span_name",
@@ -47348,6 +47517,7 @@
     "structured_args",
     "structured_items",
     "structured_llm",
+    "stub_code",
     "stub_functions",
     "stuck",
     "stuck agents",
@@ -48721,6 +48891,7 @@
     "timeout_metrics",
     "timeout_rate",
     "timeout_seconds",
+    "timeout_seconds must be at least 1",
     "timeout_seconds must be positive",
     "timeout_seconds must be positive integer",
     "timeout_status",
@@ -48739,6 +48910,7 @@
     "times_used",
     "timeseries:",
     "timestamp",
+    "timestamp desc",
     "timestamp_iso",
     "timestamp_to_iso",
     "timestamp_utc",
@@ -49970,6 +50142,7 @@
     "url_type",
     "url_valid",
     "urls_configured",
+    "urn:ietf:params:oauth:grant-type:jwt-bearer",
     "us-central1",
     "us-east",
     "us-east-1",
@@ -50742,7 +50915,10 @@
     "volumes_removed",
     "vpc",
     "vpc connector",
+<<<<<<< HEAD
     "vpc-access",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "vpc_connectivity",
     "vpc_connectivity_",
     "vpc_connectivity_degraded",
@@ -50753,10 +50929,13 @@
     "vpc_connector_capacity_buffer",
     "vpc_connector_performance",
     "vpc_connector_required",
+<<<<<<< HEAD
     "vpc_egress",
     "vpc_load_",
     "vpc_load_reduction",
     "vpc_validated",
+=======
+>>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
     "vs Med",
     "vs_baseline",
     "vue",

@@ -35,7 +35,7 @@ def get_env(key: str, default: str = '') -> str:
 from netra_backend.app.core.project_utils import get_project_root as _get_project_root
 from netra_backend.app.config import get_config, settings
 from netra_backend.app.services.backend_health_config import setup_backend_health_service
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
 
 class StartupPhase(Enum):
@@ -163,7 +163,7 @@ class StartupOrchestrator:
     
     def __init__(self, app: FastAPI):
         self.app = app
-        self.logger = central_logger.get_logger(__name__)
+        self.logger = get_logger(__name__)
         self.start_time = time.time()
         
         # ISSUE #601 FIX: Initialize thread cleanup management with test environment detection
@@ -459,31 +459,72 @@ class StartupOrchestrator:
             # CRITICAL FIX Issue #1278: NO GRACEFUL DEGRADATION in deterministic startup
             # Database is essential for chat functionality - if database fails, startup MUST fail
             self.logger.error(f"Database setup failed: {e}")
-            
+
             # Track the phase failure properly
             if hasattr(self, 'current_phase') and self.current_phase == StartupPhase.DATABASE:
                 self._fail_phase(StartupPhase.DATABASE, e)
                 self.logger.error(f"Phase {StartupPhase.DATABASE.value} marked as failed due to database setup failure")
-            
-            # Check if this is a timeout-related failure (Issue #1278 pattern)  
+
+            # Check if this is a timeout-related failure (Issue #1278 pattern)
             timeout_occurred = "timeout" in str(e).lower()
             enhanced_error_msg = f"Phase 3 database setup failed - deterministic startup requires functional database: {e}"
-            
+
             if timeout_occurred:
                 enhanced_error_msg = f"Phase 3 database timeout failure - Issue #1278 pattern detected: {e}"
-            
+
+            # EMERGENCY P0 BYPASS: Allow degraded startup for infrastructure debugging
+            # This is a temporary fix to debug VPC connector issues while maintaining service availability
+            emergency_bypass = get_env("EMERGENCY_ALLOW_NO_DATABASE", "false").lower() == "true"
+            if emergency_bypass:
+                self.logger.warning("EMERGENCY BYPASS ACTIVATED: Starting without database connection")
+                self.logger.warning("This is a P0 emergency mode for infrastructure debugging only")
+                self.logger.warning(f"Database error (bypassed): {e}")
+
+                # Set degraded state and minimal required state for startup continuation
+                self.app.state.database_available = False
+                self.app.state.startup_mode = "emergency_degraded"
+
+                # Set minimal database state to prevent downstream startup failures
+                self.app.state.db_session_factory = None  # Explicitly set to None with bypass flag
+                self.app.state.emergency_database_bypassed = True
+                self.logger.info("  [⚠️] Step 7: Database bypassed in emergency mode")
+                self.logger.info("  [⚠️] Step 8: Database schema validation bypassed in emergency mode")
+                return  # Continue to Phase 4
+
             # NO GRACEFUL DEGRADATION - Database is critical for chat
             raise DeterministicStartupError(enhanced_error_msg, original_error=e, phase=StartupPhase.DATABASE) from e
     
     async def _phase4_cache_setup(self) -> None:
         """Phase 4: CACHE - Redis and caching systems."""
         self.logger.info("PHASE 4: CACHE - Redis Setup")
-        
-        # Step 9: Redis connection (CRITICAL)
-        await self._initialize_redis()
-        if not hasattr(self.app.state, 'redis_manager') or self.app.state.redis_manager is None:
-            raise DeterministicStartupError("Redis initialization failed - redis_manager is None")
-        self.logger.info("  [U+2713] Step 9: Redis connected")
+
+        try:
+            # Step 9: Redis connection (CRITICAL)
+            await self._initialize_redis()
+            if not hasattr(self.app.state, 'redis_manager') or self.app.state.redis_manager is None:
+                raise DeterministicStartupError("Redis initialization failed - redis_manager is None")
+            self.logger.info("  [U+2713] Step 9: Redis connected")
+        except Exception as e:
+            # EMERGENCY P0 BYPASS: Allow degraded startup for infrastructure debugging
+            # This is a temporary fix to debug VPC connector issues while maintaining service availability
+            emergency_bypass = get_env("EMERGENCY_ALLOW_NO_DATABASE", "false").lower() == "true"
+            if emergency_bypass:
+                self.logger.warning("EMERGENCY BYPASS ACTIVATED: Starting without Redis connection")
+                self.logger.warning("This is a P0 emergency mode for infrastructure debugging only")
+                self.logger.warning(f"Redis error (bypassed): {e}")
+
+                # Set degraded state and minimal required state for startup continuation
+                self.app.state.redis_available = False
+                self.app.state.startup_mode = "emergency_degraded"
+
+                # Set minimal Redis state to prevent downstream startup failures
+                self.app.state.redis_manager = None  # Explicitly set to None with bypass flag
+                self.app.state.emergency_redis_bypassed = True
+                self.logger.info("  [⚠️] Step 9: Redis bypassed in emergency mode")
+                return  # Continue to Phase 5
+
+            # Redis is critical for chat functionality - if Redis fails, startup MUST fail
+            raise DeterministicStartupError(f"Phase 4 cache setup failed - Redis is critical: {e}", original_error=e, phase=StartupPhase.CACHE) from e
     
     async def _phase5_services_setup(self) -> None:
         """Phase 5: SERVICES - Chat Pipeline and critical services."""
