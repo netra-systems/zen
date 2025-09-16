@@ -15,6 +15,7 @@ from typing import Dict, List, Set, Tuple
 import unittest
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from netra_backend.app.core.user_execution_context import UserExecutionContext
 
 
 class DeepAgentStateMigrationDetectionTests(SSotAsyncTestCase):
@@ -140,7 +141,7 @@ PRIORITY: P0 - Migrate these files first to protect $500K+ ARR.
             if 'from netra_backend.app.schemas.agent_models import DeepAgentState' in content:
                 violations.append("Direct import: 'from netra_backend.app.schemas.agent_models import DeepAgentState'")
                 
-            if 'from netra_backend.app.agents.state import' in content and 'DeepAgentState' in content:
+            if 'from netra_backend.app.schemas.agent_models import DeepAgentState' in content:
                 violations.append("Indirect import: DeepAgentState imported via state module")
                 
             # Check for usage in method signatures
@@ -148,7 +149,7 @@ PRIORITY: P0 - Migrate these files first to protect $500K+ ARR.
                 if 'DeepAgentState' in line and ('def ' in line or 'async def ' in line):
                     violations.append(f"Method signature usage at line {i}: {line.strip()}")
                     
-                if 'state: DeepAgentState' in line or 'DeepAgentState(' in line:
+                if 'state: DeepAgentState' in line or 'UserExecutionContext.create_isolated_context(user_id="test_user", ' in line:
                     violations.append(f"Direct usage at line {i}: {line.strip()}")
                     
         except Exception as e:

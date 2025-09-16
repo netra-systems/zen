@@ -24,7 +24,7 @@ from netra_backend.app.core.configuration.validator_environment import (
 from netra_backend.app.core.configuration.validator_llm import LLMValidator
 from netra_backend.app.core.configuration.validator_types import ValidationResult
 from netra_backend.app.core.environment_constants import get_current_environment
-from netra_backend.app.logging_config import central_logger as logger
+from shared.logging.unified_logging_ssot import get_logger as logger
 from netra_backend.app.schemas.config import AppConfig
 
 
@@ -50,7 +50,7 @@ class ConfigurationValidator:
     
     def __init__(self):
         """Initialize configuration validator."""
-        self._logger = logger
+        self._logger = logger(__name__)
         self._environment = self._get_environment()
         self._validation_rules = self._load_validation_rules()
         self._critical_fields = self._load_critical_fields()

@@ -67,14 +67,19 @@ class SSOTRegressionPreventionTests:
         # Initialize REAL service connections for isolation testing
         self.env = IsolatedEnvironment()
         self.db_manager = DatabaseManager()
-        # Use sync redis client for non-async functions
+        # Use SSOT Redis client for compliance
         from shared.isolated_environment import get_env_var as get_env
-        import redis
-        self.redis_client = redis.Redis(
-            host=get_env('REDIS_HOST', 'localhost'),
-            port=int(get_env('REDIS_PORT', '6379')),
-            decode_responses=True
-        )
+        from netra_backend.app.services.redis_client import get_redis_client_sync
+        try:
+            self.redis_client = get_redis_client_sync()
+        except Exception as e:
+            # Fallback for test isolation
+            import redis
+            self.redis_client = redis.Redis(
+                host=get_env('REDIS_HOST', 'localhost'),
+                port=int(get_env('REDIS_PORT', '6379')),
+                decode_responses=True
+            )
         self.test_context = TestContext(user_id=f"test_user_{self.test_id}")
         
         # Create isolated test environment

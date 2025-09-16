@@ -190,11 +190,11 @@ class GCPErrorReporter:
     async def report_error(self, 
                           error: Exception, 
                           context: Optional[Dict[str, Any]] = None) -> bool:
-        """Report an error to GCP Error Reporting with enhanced client manager integration.
+        """Report an error to GCP Error Reporting with enhanced Issue #1278 context.
         
         Args:
             error: The exception to report
-            context: Business context including user_id, error_type, etc.
+            context: Business context including user_id, error_type, infrastructure details, etc.
             
         Returns:
             bool: True if error was reported successfully, False otherwise
@@ -229,11 +229,18 @@ class GCPErrorReporter:
                 # Copy all context as extra context
                 extra_context.update(context)
             
-            # Add enhanced context for client manager integration
-            extra_context['client_source'] = 'client_manager' if self.client_manager else 'direct'
-            extra_context['integration_version'] = 'v2_enhanced'
+            # Add enhanced Issue #1278 infrastructure context
+            extra_context.update({
+                'client_source': 'client_manager' if self.client_manager else 'direct',
+                'integration_version': 'v3_issue_1278_enhanced',
+                'issue_reference': '#1278',
+                'infrastructure_monitoring': True
+            })
             
-            # Report the exception with context
+            # Add infrastructure-specific context for Issue #1278
+            extra_context.update(self._extract_infrastructure_context(error, context))
+            
+            # Report the exception with enhanced context
             self.report_exception(
                 exception=error,
                 user=user_id,
@@ -241,12 +248,91 @@ class GCPErrorReporter:
                 extra_context=extra_context
             )
             
-            logger.debug(f"Successfully reported error to GCP: {type(error).__name__}")
+            logger.debug(f"Successfully reported error to GCP with Issue #1278 context: {type(error).__name__}")
             return True
             
         except Exception as e:
             logger.error(f"Failed to report error to GCP: {e}")
             return False
+
+    def _extract_infrastructure_context(self, error: Exception, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Extract infrastructure-specific context for Issue #1278 error reporting."""
+        infra_context = {}
+        
+        # Analyze error message for infrastructure patterns
+        error_str = str(error).lower()
+        error_type = type(error).__name__
+        
+        # Infrastructure issue categorization
+        if any(pattern in error_str for pattern in ['connection refused', 'network unreachable', 'no route to host']):
+            infra_context.update({
+                'infrastructure_issue_type': 'vpc_connectivity',
+                'remediation_hint': 'Check VPC connector configuration and firewall rules',
+                'severity': 'critical',
+                'infrastructure_component': 'vpc_network'
+            })
+        
+        elif any(pattern in error_str for pattern in ['timeout', 'timed out', 'connection timeout']):
+            infra_context.update({
+                'infrastructure_issue_type': 'cloud_sql_timeout',
+                'remediation_hint': 'Increase database timeout settings and check VPC connectivity',
+                'severity': 'high',
+                'infrastructure_component': 'cloud_sql'
+            })
+        
+        elif any(pattern in error_str for pattern in ['name or service not known', 'dns', 'resolution']):
+            infra_context.update({
+                'infrastructure_issue_type': 'dns_resolution',
+                'remediation_hint': 'Verify DNS configuration for *.netrasystems.ai domains',
+                'severity': 'critical',
+                'infrastructure_component': 'dns'
+            })
+        
+        elif any(pattern in error_str for pattern in ['ssl', 'certificate', 'handshake']):
+            infra_context.update({
+                'infrastructure_issue_type': 'ssl_certificate',
+                'remediation_hint': 'Check SSL certificate validity for *.netrasystems.ai',
+                'severity': 'high',
+                'infrastructure_component': 'ssl'
+            })
+        
+        elif any(pattern in error_str for pattern in ['502', 'bad gateway', '503', 'service unavailable']):
+            infra_context.update({
+                'infrastructure_issue_type': 'load_balancer',
+                'remediation_hint': 'Check load balancer health checks and backend configuration',
+                'severity': 'critical',
+                'infrastructure_component': 'load_balancer'
+            })
+        
+        # Add specific Issue #1278 context if available
+        if context:
+            # Check for deprecated domain usage
+            domain_context = context.get('domain') or context.get('url', '')
+            if 'staging.netrasystems.ai' in domain_context and 'staging.staging.netrasystems.ai' in domain_context:
+                infra_context.update({
+                    'deprecated_domain_detected': True,
+                    'correct_domain_pattern': '*.netrasystems.ai',
+                    'issue_1278_remediation': 'Replace deprecated domain with correct pattern'
+                })
+            
+            # Infrastructure monitoring specific context
+            if context.get('infrastructure_monitoring'):
+                infra_context.update({
+                    'monitoring_context': True,
+                    'check_type': context.get('check_type', 'unknown'),
+                    'endpoint': context.get('endpoint', 'unknown')
+                })
+        
+        # Add environment context
+        import os
+        infra_context.update({
+            'environment': os.getenv('ENVIRONMENT', 'unknown'),
+            'cloud_run_service': os.getenv('K_SERVICE', 'unknown'),
+            'gcp_project': os.getenv('GCP_PROJECT', 'unknown'),
+            'vpc_connector': os.getenv('VPC_CONNECTOR', 'unknown')
+        })
+        
+        return infra_context
 
 
 class GCPErrorLoggingHandler(logging.Handler):

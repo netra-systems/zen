@@ -37,6 +37,26 @@ if not _env.get("GOOGLE_OAUTH_CLIENT_ID_TEST"):
 if not _env.get("GOOGLE_OAUTH_CLIENT_SECRET_TEST"):
     _env.set("GOOGLE_OAUTH_CLIENT_SECRET_TEST", "test-oauth-client-secret-for-automated-testing", source="main_conftest_oauth_fix")
 
+# CRITICAL FIX: Sync IsolatedEnvironment variables to os.environ for tests
+# This addresses the discrepancy where IsolatedEnvironment has values but os.environ doesn't
+_critical_env_vars = [
+    "JWT_SECRET_KEY", "JWT_SECRET", "SERVICE_SECRET", "AUTH_SERVICE_URL", 
+    "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_USER", "POSTGRES_PASSWORD",
+    "REDIS_HOST", "REDIS_PORT", "GOOGLE_OAUTH_CLIENT_ID_TEST", "GOOGLE_OAUTH_CLIENT_SECRET_TEST"
+]
+
+for var_name in _critical_env_vars:
+    isolated_value = _env.get(var_name)
+    if isolated_value and not os.environ.get(var_name):
+        os.environ[var_name] = isolated_value
+        print(f"[CONFTEST] Synced {var_name} from IsolatedEnvironment to os.environ")
+
+# BACKWARD COMPATIBILITY: Ensure JWT_SECRET exists if JWT_SECRET_KEY is set
+# Some legacy code still looks for JWT_SECRET (deprecated)
+if not os.environ.get("JWT_SECRET") and os.environ.get("JWT_SECRET_KEY"):
+    os.environ["JWT_SECRET"] = os.environ["JWT_SECRET_KEY"] 
+    print("[CONFTEST] Set JWT_SECRET from JWT_SECRET_KEY for backward compatibility")
+
 # Import mock fixtures (lightweight, good for most unit tests)
 from tests.conftest_mocks import *
 

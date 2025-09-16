@@ -2354,8 +2354,28 @@ class CanonicalMessageRouter:
                           f"This interface is designed for quality message compatibility.")
 
 
-# SSOT Type Alias for backward compatibility
-MessageRouter = CanonicalMessageRouter
+# === SSOT CONSOLIDATED MESSAGE ROUTER ===
+
+class MessageRouter(CanonicalMessageRouter):
+    """
+    SSOT Compatibility adapter for existing MessageRouter usage.
+
+    This class extends CanonicalMessageRouter to maintain full backward compatibility
+    while consolidating all routing functionality. All existing code using MessageRouter
+    will continue to work unchanged.
+
+    Business Impact: Eliminates fragmentation while preserving $500K+ ARR functionality.
+    SSOT Compliance: Issue #220 - Ensures both MessageRouter and QualityMessageRouter 
+    inherit from the same CanonicalMessageRouter.
+    """
+
+    def __init__(self, websocket_manager=None, quality_gate_service=None, monitoring_service=None):
+        """Initialize MessageRouter with backward compatibility."""
+        super().__init__(websocket_manager, quality_gate_service, monitoring_service)
+        logger.info("MessageRouter SSOT compatibility adapter initialized - all functionality consolidated")
+
+    # All methods are inherited from CanonicalMessageRouter
+    # This maintains 100% API compatibility
 
 # Global message router instance
 _message_router: Optional[MessageRouter] = None
@@ -2426,25 +2446,7 @@ async def send_system_message(websocket: WebSocket, content: str,
 
 
 # === CONSOLIDATION COMPATIBILITY ADAPTER ===
-
-class MessageRouter(CanonicalMessageRouter):
-    """
-    Compatibility adapter for existing MessageRouter usage.
-
-    This class extends CanonicalMessageRouter to maintain full backward compatibility
-    while consolidating all routing functionality. All existing code using MessageRouter
-    will continue to work unchanged.
-
-    Business Impact: Eliminates fragmentation while preserving $500K+ ARR functionality.
-    """
-
-    def __init__(self, websocket_manager=None, quality_gate_service=None, monitoring_service=None):
-        """Initialize MessageRouter with backward compatibility."""
-        super().__init__(websocket_manager, quality_gate_service, monitoring_service)
-        logger.info("MessageRouter compatibility adapter initialized - all functionality consolidated")
-
-    # All methods are inherited from CanonicalMessageRouter
-    # This maintains 100% API compatibility
+# MessageRouter class definition moved up to resolve forward reference issues
 
 
 # Legacy aliases for backward compatibility

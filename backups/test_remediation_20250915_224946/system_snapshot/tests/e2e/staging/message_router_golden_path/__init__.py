@@ -1,0 +1,1 @@
+# Message Router Golden Path E2E Tests Module

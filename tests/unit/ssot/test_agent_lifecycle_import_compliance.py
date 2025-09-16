@@ -2,7 +2,7 @@
 Test 1: SSOT Import Compliance Test for agent_lifecycle.py (Issue #877)
 
 PURPOSE: Validates agent_lifecycle.py uses correct SSOT imports for DeepAgentState
-REGRESSION: agent_lifecycle.py still imports deprecated DeepAgentState from agents.state
+REGRESSION: agent_lifecycle.py still from netra_backend.app.schemas.agent_models import DeepAgentState
 
 This test MUST FAIL initially to prove the regression exists.
 After fix, it will PASS when agent_lifecycle.py uses SSOT UserExecutionContext.
@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Tuple
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
+from netra_backend.app.core.user_execution_context import UserExecutionContext
 
 @pytest.mark.unit
 class AgentLifecycleImportComplianceTests(SSotBaseTestCase):

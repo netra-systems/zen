@@ -29,12 +29,12 @@ from netra_backend.app.core.agent_execution_tracker import (
     initialize_tracker as _ssot_initialize_tracker,
     shutdown_tracker as _ssot_shutdown_tracker
 )
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 import warnings
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 # BACKWARD COMPATIBILITY ALIAS: ExecutionState -> SSOT ExecutionState
 # The SSOT implementation has 9 states (vs 6 here) for comprehensive tracking

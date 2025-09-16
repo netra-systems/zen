@@ -122,19 +122,20 @@ class AgentExecutionCoreUnitTests(SSotBaseTestCase):
 
     @pytest.fixture
     def sample_state(self):
-        """Real DeepAgentState for security-compliant testing.
+        """Real UserExecutionContext for security-compliant testing.
 
-        CRITICAL: Uses real DeepAgentState instead of Mock to pass security validation
-        in _ensure_user_execution_context(). Mock objects fail isinstance() checks
-        which are required for Issue #159 security compliance.
+        CRITICAL: Uses UserExecutionContext instead of deprecated DeepAgentState
+        to pass security validation. DeepAgentState is forbidden due to user
+        isolation risks. See Issue #271 remediation plan.
         """
-        from netra_backend.app.schemas.agent_models import DeepAgentState
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-        state = DeepAgentState(
-            user_id=str(UserID("test-user-456")),
-            thread_id=str(ThreadID("test-thread-123")),
-            user_request="test_request",
-            chat_thread_id="test-thread-123"
+        state = UserExecutionContext(
+            user_id="test-user-456",
+            thread_id="test-thread-123",
+            run_id="test-run-789",
+            agent_context={"user_request": "test_request"},
+            audit_metadata={"test": True}
         )
         return state
 

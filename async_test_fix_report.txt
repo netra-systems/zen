@@ -1,0 +1,13 @@
+
+Async Test Pattern Fix Report
+Generated: 2025-09-15T22:50:43.583897
+Mode: DRY RUN
+
+Summary:
+- Files processed: 5970
+- Files with async issues: 253
+- Total issues found: 684
+- Automatic fixes applied: 684
+- Files needing manual review: 0
+
+Manual Review Required:

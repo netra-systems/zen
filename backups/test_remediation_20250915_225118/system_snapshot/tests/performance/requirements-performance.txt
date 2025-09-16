@@ -1,0 +1,33 @@
+# Performance Testing Dependencies
+# For UserExecutionContext Migration Performance Validation
+
+# Core testing framework
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+pytest-html>=3.1.0
+pytest-benchmark>=4.0.0
+
+# Memory profiling and monitoring
+psutil>=5.9.0
+memory-profiler>=0.60.0
+pympler>=0.9
+
+# Async testing utilities
+aiofiles>=22.0.0
+httpx>=0.24.0
+
+# Performance metrics and reporting
+matplotlib>=3.5.0
+numpy>=1.21.0
+pandas>=1.5.0
+seaborn>=0.11.0
+
+# Load testing (optional - for extended testing)
+locust>=2.0.0
+
+# System monitoring
+py-cpuinfo>=9.0.0
+
+# JSON processing for reports
+jsonschema>=4.17.0
