@@ -91,7 +91,8 @@ class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
         """
         # Test both real and fallback implementations
         from netra_backend.app.websocket_core.types import create_error_message as real_impl
-        from netra_backend.app.websocket_core import create_error_message as fallback_impl
+        # SSOT COMPLIANCE FIX: Direct import instead of __init__.py export (Issue #1176)
+        from netra_backend.app.websocket_core.types import create_error_message as fallback_impl
         
         for scenario in self.critical_error_scenarios:
             error_code = scenario["error_code"]
@@ -342,11 +343,13 @@ class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
         """
         # Test create_error_message function compatibility
         from netra_backend.app.websocket_core.types import create_error_message as real_error
-        from netra_backend.app.websocket_core import create_error_message as fallback_error
+        # SSOT COMPLIANCE FIX: Direct import instead of __init__.py export (Issue #1176)  
+        from netra_backend.app.websocket_core.types import create_error_message as fallback_error
         
         # Test create_server_message function compatibility  
         from netra_backend.app.websocket_core.types import create_server_message as real_server
-        from netra_backend.app.websocket_core import create_server_message as fallback_server
+        # SSOT COMPLIANCE FIX: Direct import instead of __init__.py export (Issue #1176)
+        from netra_backend.app.websocket_core.types import create_server_message as fallback_server
         
         compatibility_matrix = [
             {
