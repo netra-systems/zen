@@ -497,7 +497,7 @@ class AgentExecutionCoreBusinessTests(SSotBaseTestCase):
 class AgentExecutionCoreBusinessScenariosTests(SSotBaseTestCase):
     """Business scenario tests for agent execution edge cases."""
 
-    async def test_concurrent_agent_execution_isolation(self):
+    def test_concurrent_agent_execution_isolation(self):
         """Test that concurrent agent executions are properly isolated."""
         # BUSINESS VALUE: Multi-user system must isolate user contexts
         
@@ -521,7 +521,7 @@ class AgentExecutionCoreBusinessScenariosTests(SSotBaseTestCase):
             metrics = SsotTestMetrics()
             metrics.record_custom("user_isolation_verified", True)
 
-    async def test_enterprise_vs_free_tier_execution_parity(self):
+    def test_enterprise_vs_free_tier_execution_parity(self):
         """Test that agent execution works consistently across user tiers."""
         # BUSINESS VALUE: All user segments should receive reliable service
         
