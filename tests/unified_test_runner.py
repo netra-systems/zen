@@ -508,7 +508,7 @@ class JsonVerbosityController:
             }
             # Include failure information if present
             if not details.get("success", True):
-                filtered[name]["error"] = details.get("error", "Unknown error")
+                filtered[name]["error"] = details.get("errors", "Unknown error")
         return filtered
 
     def _filter_detailed_results(self, detailed_results: List) -> List:
@@ -2447,13 +2447,17 @@ class UnifiedTestRunner:
         # Filter categories that exist in the system - enhanced for combined categories (Issue #1270)
         def is_valid_category(category: str) -> bool:
             """Check if a category (simple or combined) is valid."""
-            if '+' in category:
-                # Combined category: validate each part separately
-                parts = [part.strip() for part in category.split('+')]
-                return all(part in self.category_system.categories for part in parts)
-            else:
-                # Simple category: direct validation
-                return category in self.category_system.categories
+            try:
+                if '+' in category:
+                    # Combined category: validate each part separately
+                    parts = [part.strip() for part in category.split('+')]
+                    return all(self.category_system.get_category(part) is not None for part in parts)
+                else:
+                    # Simple category: direct validation
+                    return self.category_system.get_category(category) is not None
+            except Exception as e:
+                logger.warning(f"Category validation error for '{category}': {e}")
+                return False
 
         valid_categories = [cat for cat in categories if is_valid_category(cat)]
         if valid_categories != categories:
