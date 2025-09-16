@@ -1083,15 +1083,37 @@ CMD ["npm", "start"]
             # CRITICAL: VPC connector required for Redis, Cloud SQL, and service-to-service connectivity
             # ISSUE #1177 FIX: Use updated VPC connector with proper CIDR range for Redis connectivity
             vpc_connector_name = f"projects/{self.project_id}/locations/{self.region}/connectors/staging-connector-v2"
+            
+            # ⚠️  CRITICAL VPC EGRESS CONFIGURATION WARNING ⚠️
+            # 
+            # REGRESSION DOCUMENTED: commit 2acf46c8a (Sept 15, 2025)
+            # Changed from "private-ranges-only" → "all-traffic" to fix ClickHouse
+            # UNINTENDED CONSEQUENCE: Broke Cloud SQL Unix socket connections
+            # 
+            # TECHNICAL DETAILS:
+            # - Cloud SQL Unix sockets (/cloudsql/...) require DIRECT proxy access
+            # - "all-traffic" forces everything through VPC connector → BLOCKS Cloud SQL
+            # - Result: 15-second database timeouts, auth/backend services fail to start
+            #
+            # CURRENT SOLUTION OPTIONS:
+            # 1. RECOMMENDED: Use Cloud NAT + private-ranges-only (see vpc_clickhouse_proxy_solutions.xml)
+            # 2. Switch Cloud SQL to TCP connections instead of Unix sockets
+            # 3. Selective VPC routing per service
+            #
+            # LEARNING DOCS:
+            # - /SPEC/learnings/vpc_egress_cloud_sql_regression_critical.xml
+            # - /SPEC/learnings/vpc_clickhouse_proxy_solutions.xml
+            #
+            # DO NOT CHANGE THIS WITHOUT FULL REGRESSION TESTING!
             cmd.extend([
                 "--vpc-connector", "staging-connector-v2",
-                "--vpc-egress", "all-traffic"  # Route all traffic through VPC to fix ClickHouse connectivity
+                "--vpc-egress", "private-ranges-only"  # ✅ FIXED: Cloud NAT enables external access while preserving Cloud SQL
             ])
             
             # CRITICAL: Service annotations for enhanced VPC connectivity
             vpc_annotations = [
                 f"run.googleapis.com/vpc-access-connector={vpc_connector_name}",
-                "run.googleapis.com/vpc-access-egress=all-traffic",
+                "run.googleapis.com/vpc-access-egress=private-ranges-only",
                 "run.googleapis.com/network-interfaces=[{\"network\":\"default\",\"subnetwork\":\"default\"}]"
             ]
             

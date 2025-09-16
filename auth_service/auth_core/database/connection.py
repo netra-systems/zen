@@ -102,9 +102,35 @@ class AuthDatabaseConnection:
                     timeout=validation_timeout
                 )
             except asyncio.TimeoutError:
+                # CRITICAL: VPC Egress Regression Detection (Sept 15, 2025)
+                # See: SPEC/learnings/vpc_egress_cloud_sql_regression_critical.xml
+                database_url = AuthDatabaseManager.get_database_url()
+                is_cloud_sql_unix = database_url and "/cloudsql/" in database_url
+                
+                if is_cloud_sql_unix and validation_timeout >= 15:
+                    # This exact pattern indicates VPC egress all-traffic regression
+                    logger.critical(
+                        "🚨 VPC EGRESS REGRESSION DETECTED 🚨\n"
+                        f"Cloud SQL Unix socket connection timeout ({validation_timeout}s) detected!\n"
+                        f"Database URL pattern: /cloudsql/... (Unix socket)\n"
+                        f"Environment: {self.environment}\n"
+                        f"\n"
+                        f"ROOT CAUSE: VPC egress 'all-traffic' blocks Cloud SQL Unix socket connections.\n"
+                        f"Cloud SQL proxy requires DIRECT access, not through VPC connector.\n"
+                        f"\n"
+                        f"SOLUTION: Change VPC egress to 'private-ranges-only' + implement Cloud NAT\n"
+                        f"DOCUMENTATION: /SPEC/learnings/vpc_egress_cloud_sql_regression_critical.xml\n"
+                        f"LEARNING TIMELINE: /docs/infrastructure/vpc-egress-regression-timeline.md\n"
+                        f"\n"
+                        f"This issue was introduced in commit 2acf46c8a (Sept 15, 2025)\n"
+                        f"when VPC egress was changed from 'private-ranges-only' to 'all-traffic'\n"
+                        f"to fix ClickHouse connectivity but broke Cloud SQL."
+                    )
+                
                 raise RuntimeError(
                     f"Database connection validation timeout exceeded ({validation_timeout}s). "
                     f"This may indicate network connectivity issues or database overload in {self.environment} environment."
+                    f"{' 🚨 VPC EGRESS REGRESSION SUSPECTED - Check logs above!' if is_cloud_sql_unix and validation_timeout >= 15 else ''}"
                 )
             except Exception as e:
                 # Enhanced error message for authentication failures

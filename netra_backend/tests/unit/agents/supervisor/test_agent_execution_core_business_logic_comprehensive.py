@@ -259,49 +259,31 @@ class AgentExecutionCoreBusinessTests(SSotBaseTestCase):
         # Verify error was communicated to user via WebSocket
         execution_core.websocket_bridge.notify_agent_error.assert_called()
         
-<<<<<<< HEAD
         # Verify execution was marked as failed for monitoring using SSOT API
         # The implementation uses update_execution_state (SSOT) instead of complete_execution (legacy)
-        args, kwargs = execution_core.execution_tracker.update_execution_state.call_args
-        
-        # Verify ExecutionState.FAILED was passed
-        failed_state_passed = (
-            (len(args) >= 2 and args[1] == ExecutionState.FAILED) or 
-            kwargs.get('state') == ExecutionState.FAILED
-        )
-        assert failed_state_passed, f"Expected ExecutionState.FAILED, got args={args}, kwargs={kwargs}"
-        
-        # Verify error message was provided
-        error_provided = (
-            (len(args) >= 3 and args[2] is not None) or 
-            kwargs.get('error') is not None
-        )
-        assert error_provided, f"Expected error message to be provided, got args={args}, kwargs={kwargs}"
-=======
-        # Verify execution was marked as failed for monitoring
-<<<<<<< HEAD
-        # Note: complete_execution may not be called if execution_tracker.update_execution_state is used instead
-        if execution_core.execution_tracker.complete_execution.call_args is not None:
-            args, kwargs = execution_core.execution_tracker.complete_execution.call_args
-            assert "error" in kwargs or len(args) > 1
-        else:
-            # Alternative: verify update_execution_state was called with failure
-            execution_core.execution_tracker.update_execution_state.assert_called()
-            # Check that state was updated with error information
-            call_args = execution_core.execution_tracker.update_execution_state.call_args
-            if call_args:
-                args, kwargs = call_args
-                # Verify the call includes error information or failure state
-                assert len(args) >= 2 or "state" in kwargs or "error" in kwargs
-=======
-        if execution_core.execution_tracker.complete_execution.call_args:
+        if execution_core.execution_tracker.update_execution_state.call_args is not None:
+            args, kwargs = execution_core.execution_tracker.update_execution_state.call_args
+            
+            # Verify ExecutionState.FAILED was passed
+            failed_state_passed = (
+                (len(args) >= 2 and args[1] == ExecutionState.FAILED) or 
+                kwargs.get('state') == ExecutionState.FAILED
+            )
+            assert failed_state_passed, f"Expected ExecutionState.FAILED, got args={args}, kwargs={kwargs}"
+            
+            # Verify error message was provided
+            error_provided = (
+                (len(args) >= 3 and args[2] is not None) or 
+                kwargs.get('error') is not None
+            )
+            assert error_provided, f"Expected error message to be provided, got args={args}, kwargs={kwargs}"
+        elif execution_core.execution_tracker.complete_execution.call_args:
+            # Fallback to legacy complete_execution if update_execution_state not called
             args, kwargs = execution_core.execution_tracker.complete_execution.call_args
             assert "error" in kwargs or len(args) > 1
         else:
             # If complete_execution wasn't called, ensure the failure was handled another way
             assert result.success is False, "Agent death should be detected even if complete_execution not called"
->>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
->>>>>>> 05c6be3dfb1dc6976637367390a12e4d2c3f76d2
         
         # Record failure metrics
         self.metrics.record_custom("agent_deaths_detected", 1)
@@ -532,12 +514,8 @@ class AgentExecutionCoreBusinessTests(SSotBaseTestCase):
 class AgentExecutionCoreBusinessScenariosTests(SSotBaseTestCase):
     """Business scenario tests for agent execution edge cases."""
 
-<<<<<<< HEAD
-    def test_concurrent_agent_execution_isolation(self):
-=======
     @pytest.mark.asyncio
     async def test_concurrent_agent_execution_isolation(self):
->>>>>>> 05c6be3dfb1dc6976637367390a12e4d2c3f76d2
         """Test that concurrent agent executions are properly isolated."""
         # BUSINESS VALUE: Multi-user system must isolate user contexts
         
@@ -561,12 +539,8 @@ class AgentExecutionCoreBusinessScenariosTests(SSotBaseTestCase):
             metrics = SsotTestMetrics()
             metrics.record_custom("user_isolation_verified", True)
 
-<<<<<<< HEAD
-    def test_enterprise_vs_free_tier_execution_parity(self):
-=======
     @pytest.mark.asyncio
     async def test_enterprise_vs_free_tier_execution_parity(self):
->>>>>>> 05c6be3dfb1dc6976637367390a12e4d2c3f76d2
         """Test that agent execution works consistently across user tiers."""
         # BUSINESS VALUE: All user segments should receive reliable service
         

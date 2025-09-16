@@ -232,7 +232,7 @@ class TestLevel1QuickHealthChecks:
                         logger.warning(f"Request {i+1}: Error - {e}")
 
                 # Small delay between requests
-                await asyncio.sleep(0.5)
+                time.sleep(0.5)
 
             # Analyze load balancer consistency
             load_balancer_results[service] = {

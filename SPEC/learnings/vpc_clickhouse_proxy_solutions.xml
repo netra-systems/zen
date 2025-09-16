@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning_document>
+    <metadata>
+        <title>VPC Proxy Solutions for ClickHouse Access with private-ranges-only</title>
+        <date_created>2025-09-16</date_created>
+        <severity>HIGH</severity>
+        <category>Infrastructure/VPC/Networking</category>
+        <business_impact>CRITICAL_PATH_ENABLER</business_impact>
+        <tags>vpc-proxy, clickhouse, private-ranges-only, cloud-nat, tcp-proxy</tags>
+    </metadata>
+
+    <executive_summary>
+        <goal>
+            Enable ClickHouse Cloud access while maintaining vpc-egress private-ranges-only 
+            to preserve Cloud SQL Unix socket connections.
+        </goal>
+        
+        <approach>
+            Use VPC-internal proxy mechanisms to access external ClickHouse Cloud service,
+            avoiding the need for all-traffic VPC egress.
+        </approach>
+        
+        <business_value>
+            - Restores Cloud SQL connectivity immediately
+            - Maintains ClickHouse access for analytics
+            - Prevents future VPC egress conflicts
+            - Enables both critical dependencies simultaneously
+        </business_value>
+    </executive_summary>
+
+    <solution_analysis>
+        <option1 recommended="true">
+            <name>Cloud NAT Gateway</name>
+            <description>
+                Create Cloud NAT gateway in staging-vpc to provide outbound internet access
+                for private resources while maintaining private-ranges-only egress.
+            </description>
+            
+            <implementation>
+                <step1>Create Cloud Router in staging-vpc/us-central1</step1>
+                <step2>Create Cloud NAT gateway on the router</step2>
+                <step3>Configure NAT for staging-subnet outbound traffic</step3>
+                <step4>Update VPC egress back to private-ranges-only</step4>
+                <step5>ClickHouse access flows: Cloud Run → VPC → NAT → Internet → ClickHouse</step5>
+            </implementation>
+            
+            <pros>
+                - Preserves private-ranges-only VPC egress
+                - Enables external service access through VPC
+                - Standard GCP pattern for private-to-internet access
+                - No code changes required
+                - Maintains Cloud SQL Unix socket compatibility
+            </pros>
+            
+            <cons>
+                - Additional infrastructure component
+                - Slight increase in latency (negligible for analytics)
+                - Monthly Cloud NAT costs (~$45/month)
+            </cons>
+            
+            <gcp_commands>
+                <create_router>
+                    gcloud compute routers create staging-nat-router \
+                        --network=staging-vpc \
+                        --region=us-central1 \
+                        --project=netra-staging
+                </create_router>
+                
+                <create_nat_gateway>
+                    gcloud compute routers nats create staging-nat-gateway \
+                        --router=staging-nat-router \
+                        --router-region=us-central1 \
+                        --nat-all-subnet-ip-ranges \
+                        --auto-allocate-nat-external-ips \
+                        --project=netra-staging
+                </create_nat_gateway>
+            </gcp_commands>
+        </option1>
+
+        <option2>
+            <name>TCP Proxy Load Balancer</name>
+            <description>
+                Create internal TCP load balancer that proxies to external ClickHouse,
+                making it appear as internal service.
+            </description>
+            
+            <implementation>
+                <step1>Create managed instance group with ClickHouse proxy VMs</step1>
+                <step2>Configure internal TCP load balancer</step2>
+                <step3>Point ClickHouse URL to internal LB IP</step3>
+                <step4>Proxy forwards to external ClickHouse Cloud</step4>
+            </implementation>
+            
+            <pros>
+                - ClickHouse appears as internal service
+                - Full control over proxy configuration
+                - Can add authentication/logging layers
+            </pros>
+            
+            <cons>
+                - Complex setup and maintenance
+                - Requires proxy VM management
+                - Higher costs (VMs + load balancer)
+                - Single point of failure without HA setup
+            </cons>
+        </option2>
+
+        <option3>
+            <name>Private Service Connect</name>
+            <description>
+                Use Private Service Connect to access ClickHouse through private endpoint
+                (if ClickHouse Cloud supports it).
+            </description>
+            
+            <implementation>
+                <step1>Check if ClickHouse Cloud offers Private Service Connect</step1>
+                <step2>Create private endpoint in staging-vpc</step2>
+                <step3>Configure DNS resolution for private endpoint</step3>
+            </implementation>
+            
+            <pros>
+                - Native private connectivity
+                - No proxy maintenance required
+                - Lowest latency
+                - Most secure option
+            </pros>
+            
+            <cons>
+                - Requires ClickHouse Cloud support (unknown availability)
+                - Vendor-specific implementation
+                - May require plan upgrade
+            </cons>
+        </option3>
+
+        <option4>
+            <name>HTTP(S) Proxy in Cloud Run</name>
+            <description>
+                Deploy lightweight HTTP proxy service in Cloud Run that forwards to ClickHouse.
+            </description>
+            
+            <implementation>
+                <step1>Create minimal proxy service (nginx/envoy)</step1>
+                <step2>Deploy to Cloud Run with internal ingress</step2>
+                <step3>Configure proxy to forward to ClickHouse Cloud</step3>
+                <step4>Update application to use internal proxy URL</step4>
+            </implementation>
+            
+            <pros>
+                - Serverless proxy (scales to zero)
+                - Easy to deploy and maintain
+                - Can add authentication/monitoring
+                - Cost-effective
+            </pros>
+            
+            <cons>
+                - Additional service to maintain
+                - Requires code changes to use proxy URL
+                - Potential single point of failure
+            </cons>
+        </option4>
+    </solution_analysis>
+
+    <recommended_implementation>
+        <solution>Cloud NAT Gateway (Option 1)</solution>
+        <rationale>
+            - Zero code changes required
+            - Standard GCP pattern for private-to-internet access
+            - Preserves existing architecture
+            - Enables immediate rollback to private-ranges-only
+            - Cost-effective and reliable
+        </rationale>
+        
+        <implementation_steps>
+            <step1>
+                <action>Create Cloud NAT infrastructure</action>
+                <commands>
+                    # Create router for NAT
+                    gcloud compute routers create staging-nat-router \
+                        --network=staging-vpc \
+                        --region=us-central1 \
+                        --project=netra-staging
+                    
+                    # Create NAT gateway
+                    gcloud compute routers nats create staging-nat-gateway \
+                        --router=staging-nat-router \
+                        --router-region=us-central1 \
+                        --nat-all-subnet-ip-ranges \
+                        --auto-allocate-nat-external-ips \
+                        --project=netra-staging
+                </commands>
+                <expected_time>5 minutes</expected_time>
+            </step1>
+            
+            <step2>
+                <action>Revert VPC egress to private-ranges-only</action>
+                <file>scripts/deploy_to_gcp_actual.py</file>
+                <change>
+                    # FROM:
+                    "--vpc-egress", "all-traffic"
+                    
+                    # TO:
+                    "--vpc-egress", "private-ranges-only"  # Cloud NAT handles external access
+                </change>
+                <expected_time>1 minute</expected_time>
+            </step2>
+            
+            <step3>
+                <action>Redeploy services with private-ranges-only</action>
+                <command>
+                    python scripts/deploy_to_gcp.py --project netra-staging --build-local
+                </command>
+                <expected_time>15 minutes</expected_time>
+            </step3>
+            
+            <step4>
+                <action>Validate both Cloud SQL and ClickHouse connectivity</action>
+                <tests>
+                    - Auth service database connection (should be &lt;1 second)
+                    - Backend service startup (should succeed)
+                    - ClickHouse query from backend (should work through NAT)
+                </tests>
+                <expected_time>5 minutes</expected_time>
+            </step4>
+        </implementation_steps>
+        
+        <total_implementation_time>30 minutes</total_implementation_time>
+        <rollback_plan>
+            If issues occur, can quickly revert to all-traffic VPC egress while 
+            investigating NAT configuration issues.
+        </rollback_plan>
+    </recommended_implementation>
+
+    <cost_analysis>
+        <cloud_nat_costs>
+            <base_gateway_cost>$45.00/month</base_gateway_cost>
+            <data_processing>$0.045/GB processed</data_processing>
+            <estimated_monthly_clickhouse_data>100GB</estimated_monthly_clickhouse_data>
+            <estimated_monthly_total>$49.50/month</estimated_monthly_total>
+        </cloud_nat_costs>
+        
+        <cost_benefit>
+            <current_cost_all_traffic>$0 (but breaks Cloud SQL)</current_cost_all_traffic>
+            <proposed_cost_cloud_nat>$49.50/month</proposed_cost_cloud_nat>
+            <value_gained>Both Cloud SQL and ClickHouse working</value_gained>
+            <business_impact>Critical: Enables Golden Path functionality</business_impact>
+        </cost_benefit>
+    </cost_analysis>
+
+    <monitoring_and_validation>
+        <nat_gateway_monitoring>
+            <metric>Cloud NAT gateway utilization</metric>
+            <metric>NAT translation errors</metric>
+            <metric>External IP allocation</metric>
+        </nat_gateway_monitoring>
+        
+        <application_monitoring>
+            <database_connections>
+                <metric>Auth service database connection time (&lt;1s expected)</metric>
+                <metric>Backend service startup success rate</metric>
+            </database_connections>
+            
+            <clickhouse_connectivity>
+                <metric>ClickHouse query response time</metric>
+                <metric>ClickHouse connection success rate</metric>
+            </clickhouse_connectivity>
+        </application_monitoring>
+        
+        <validation_tests>
+            <test name="golden_path_e2e">
+                <description>Full user journey including database and analytics</description>
+                <frequency>Post-deployment and daily</frequency>
+            </test>
+            
+            <test name="vpc_egress_validation">
+                <description>Verify private-ranges-only still allows external access via NAT</description>
+                <frequency>Post-deployment</frequency>
+            </test>
+        </validation_tests>
+    </monitoring_and_validation>
+
+    <documentation_updates_required>
+        <file path="scripts/deploy_to_gcp_actual.py">
+            <change>Add detailed comments explaining Cloud NAT dependency</change>
+            <change>Document VPC egress decision matrix</change>
+        </file>
+        
+        <file path="terraform-gcp-staging/vpc-nat.tf">
+            <change>Create new Terraform file for Cloud NAT infrastructure</change>
+        </file>
+        
+        <file path="docs/infrastructure/vpc-architecture.md">
+            <change>Document Cloud NAT gateway for external service access</change>
+        </file>
+        
+        <file path="SPEC/learnings/vpc_egress_cloud_sql_regression_critical.xml">
+            <change>Update with chosen solution and implementation details</change>
+        </file>
+    </documentation_updates_required>
+
+    <related_learnings>
+        <learning_doc path="SPEC/learnings/vpc_egress_cloud_sql_regression_critical.xml">
+            Root cause analysis of VPC egress conflict
+        </learning_doc>
+        
+        <learning_doc path="SPEC/learnings/database_connectivity_architecture.xml">
+            Cloud SQL connection patterns and requirements
+        </learning_doc>
+        
+        <learning_doc path="SPEC/learnings/clickhouse_connectivity_patterns.xml">
+            ClickHouse access patterns and configurations
+        </learning_doc>
+    </related_learnings>
+
+    <success_criteria>
+        <immediate>
+            <criterion>Auth service starts successfully with &lt;5 second database connection</criterion>
+            <criterion>Backend service starts without import errors</criterion>
+            <criterion>ClickHouse queries work from backend service</criterion>
+            <criterion>VPC egress setting is private-ranges-only</criterion>
+        </immediate>
+        
+        <ongoing>
+            <criterion>No database connection timeouts in production logs</criterion>
+            <criterion>ClickHouse analytics pipeline operates normally</criterion>
+            <criterion>Cloud NAT gateway shows healthy metrics</criterion>
+            <criterion>Golden Path E2E tests pass consistently</criterion>
+        </ongoing>
+    </success_criteria>
+</learning_document>

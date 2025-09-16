@@ -137,21 +137,14 @@ class AgentExecutionCoreUnitTests(SSotBaseTestCase):
         from netra_backend.app.services.user_execution_context import UserExecutionContext
 
         state = UserExecutionContext(
-<<<<<<< HEAD
-            user_id="test-user-456",
-            thread_id="test-thread-123",
-            run_id="test-run-789",
-            agent_context={"user_request": "test_request"},
-            audit_metadata={"test": True}
-=======
             user_id=str(UserID("test-user-456")),
             thread_id=str(ThreadID("test-thread-123")),
             run_id=str(RunID("test-run-456")),
             agent_context={
                 "user_request": "test_request",
                 "chat_thread_id": "test-thread-123"
-            }
->>>>>>> 05c6be3dfb1dc6976637367390a12e4d2c3f76d2
+            },
+            audit_metadata={"test": True}
         )
         return state
 

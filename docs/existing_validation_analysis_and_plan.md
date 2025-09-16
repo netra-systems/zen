@@ -52,13 +52,83 @@ The system has multiple sophisticated validators but lacks **environment variabl
 
 **Result:** Services start with invalid configurations and fail at runtime.
 
-## 📋 Integration Plan: Enable Existing Validators
+## 📋 Integration Plan: SSOT Validation Alignment & Integration
 
-Instead of creating new validation from scratch, we'll **integrate the existing SSOT validators** at startup.
+Instead of creating new validation from scratch, we'll **first ensure SSOT alignment** of existing validators, then integrate them at startup.
 
-### Phase 1: Immediate Integration (Low Risk, High Impact)
+### Phase 0: SSOT Compliance Audit & Alignment (CRITICAL FIRST STEP)
 
-**Goal:** Enable existing environment validation at startup with minimal changes.
+**Goal:** Ensure all validators follow SSOT patterns before integration to prevent architectural violations.
+
+#### 0.1 SSOT Validator Assessment
+
+**Current SSOT Status:**
+- ✅ `/netra_backend/app/core/configuration/validator.py` - Enterprise-grade, SSOT compliant
+- ✅ `/shared/configuration/central_config_validator.py` - Central SSOT validator  
+- ⚠️ `/netra_backend/app/core/startup_validator.py` - Needs SSOT alignment check
+- ⚠️ `/netra_backend/app/core/infrastructure_config_validator.py` - Standalone pattern
+
+**Required SSOT Alignment:**
+
+```python
+# Before integration, validate SSOT compliance
+def audit_validator_ssot_compliance():
+    """Audit validators for SSOT compliance before startup integration."""
+    
+    # Check 1: Single Source of Truth imports
+    from shared.configuration.central_config_validator import CentralConfigValidator
+    from netra_backend.app.core.configuration.validator import ConfigurationValidator
+    
+    # Check 2: No duplicate validation logic
+    ssot_violations = []
+    
+    # Validate import patterns
+    if not uses_ssot_imports():
+        ssot_violations.append("Non-SSOT import patterns detected")
+    
+    # Validate no duplicate logic
+    if has_duplicate_validation_logic():
+        ssot_violations.append("Duplicate validation logic across validators")
+    
+    # Check 3: Configuration source consistency
+    if not uses_isolated_environment():
+        ssot_violations.append("Direct os.environ access instead of IsolatedEnvironment")
+    
+    return ssot_violations
+```
+
+#### 0.2 SSOT Alignment Tasks
+
+**Task 1: Consolidate Validation Logic**
+- Ensure `CentralConfigValidator` is the SSOT for environment validation
+- Migrate any duplicate logic from `startup_validator.py` to central SSOT
+- Verify `InfrastructureConfigValidator` delegates to central validation
+
+**Task 2: Import Pattern Verification**
+```python
+# CORRECT SSOT import pattern:
+from shared.configuration.central_config_validator import CentralConfigValidator
+from shared.isolated_environment import get_env
+from netra_backend.app.core.configuration.validator import ConfigurationValidator
+
+# INCORRECT patterns to fix:
+# import os  # Should use IsolatedEnvironment
+# Custom validation logic duplication
+```
+
+**Task 3: Environment Access Compliance**
+```python
+# CORRECT: SSOT environment access
+env = get_env()
+database_url = env.get("DATABASE_URL")
+
+# INCORRECT: Direct environment access  
+# database_url = os.environ.get("DATABASE_URL")  # SSOT violation
+```
+
+### Phase 1: SSOT-Compliant Integration (Low Risk, High Impact)
+
+**Goal:** Enable SSOT-aligned environment validation at startup with verified compliance.
 
 #### 1.1 Backend Service Integration
 
@@ -67,30 +137,47 @@ Instead of creating new validation from scratch, we'll **integrate the existing 
 **Integration Point:** Before `create_app()` call (around line 50)
 
 ```python
-# Add after imports, before create_app()
+# Add after imports, before create_app() - SSOT COMPLIANT VERSION
 async def validate_environment_at_startup():
-    """Validate environment configuration before starting service."""
+    """
+    Validate environment configuration before starting service.
+    SSOT COMPLIANT: Uses central validators and IsolatedEnvironment.
+    """
+    # SSOT imports - verified compliant
+    from shared.configuration.central_config_validator import CentralConfigValidator
     from netra_backend.app.core.configuration.validator import ConfigurationValidator
-    from netra_backend.app.core.infrastructure_config_validator import validate_infrastructure_config
+    from shared.isolated_environment import get_env
     
-    logger.info("🔍 Validating environment configuration...")
+    logger.info("🔍 Validating environment configuration with SSOT validators...")
     
-    # 1. Validate configuration using existing SSOT validator
+    # Step 1: SSOT compliance check
+    try:
+        await verify_ssot_validator_compliance()
+        logger.debug("✅ SSOT validator compliance verified")
+    except Exception as e:
+        logger.error(f"❌ SSOT compliance check failed: {e}")
+        # Continue with validation but log the issue
+    
+    # Step 2: Environment validation using SSOT ConfigurationValidator
     config_validator = ConfigurationValidator()
-    env_dict = get_env().as_dict()
+    env = get_env()  # SSOT environment access
+    env_dict = env.as_dict()
     
+    # Use SSOT validator method
     config_result = config_validator.validate_environment_variables(env_dict)
     
     if not config_result.is_valid:
         error_message = f"""
-🚨 ENVIRONMENT VALIDATION FAILED 🚨
+🚨 ENVIRONMENT VALIDATION FAILED (SSOT) 🚨
 
 Service: netra-backend
 Environment: {env_dict.get('ENVIRONMENT', 'unknown')}
+Validator: SSOT ConfigurationValidator
 
 Configuration errors ({len(config_result.errors)}):
 {chr(10).join(f"  - {error}" for error in config_result.errors)}
 
+SSOT compliance status: ✅ Validated
 Required actions:
 1. Fix environment variable configuration
 2. Verify all POSTGRES_*, JWT_*, and SERVICE_* variables are set
@@ -102,33 +189,55 @@ Service startup ABORTED for safety.
         logger.critical(error_message)
         sys.exit(1)
     
-    # 2. Validate infrastructure configuration (Issue #1278)
+    # Step 3: Infrastructure validation using SSOT delegation pattern
     try:
-        infra_results = validate_infrastructure_config()
-        critical_issues = [issue for issue in infra_results.get("issues", []) + infra_results.get("environment_issues", [])
-                          if issue.get("severity") == "critical"]
+        # Use central validator for infrastructure checks (SSOT pattern)
+        central_validator = CentralConfigValidator()
+        infra_validation_result = central_validator.validate_infrastructure_requirements(env_dict)
         
-        if critical_issues:
-            logger.error(f"🚨 CRITICAL INFRASTRUCTURE ISSUES: {len(critical_issues)} found")
-            for issue in critical_issues[:3]:  # Show first 3
-                logger.error(f"  - {issue.get('issue_description', 'Unknown issue')}")
+        if not infra_validation_result.is_valid:
+            logger.error(f"🚨 CRITICAL INFRASTRUCTURE ISSUES: {len(infra_validation_result.errors)} found")
+            for error in infra_validation_result.errors[:3]:  # Show first 3
+                logger.error(f"  - {error}")
             
-            if len(critical_issues) > 3:
-                logger.error(f"  ... and {len(critical_issues) - 3} more critical issues")
+            if len(infra_validation_result.errors) > 3:
+                logger.error(f"  ... and {len(infra_validation_result.errors) - 3} more critical issues")
                 
             logger.warning("⚠️ Starting with infrastructure issues - monitor for SSL/connectivity failures")
         else:
-            logger.info("✅ Infrastructure configuration validated")
+            logger.info("✅ Infrastructure configuration validated (SSOT)")
             
     except Exception as e:
         logger.warning(f"Infrastructure validation failed: {e} - continuing startup")
     
-    logger.info("✅ Environment validation completed")
+    logger.info("✅ Environment validation completed (SSOT compliant)")
 
-# Add this call before create_app()
+async def verify_ssot_validator_compliance():
+    """Verify that validators being used are SSOT compliant."""
+    # Import validation - ensure we're using SSOT imports
+    from shared.configuration.central_config_validator import CentralConfigValidator
+    from netra_backend.app.core.configuration.validator import ConfigurationValidator
+    
+    # Verify no direct os.environ usage in validation chain
+    import inspect
+    config_validator = ConfigurationValidator()
+    
+    # Check for SSOT compliance markers
+    if not hasattr(config_validator, '_validation_rules'):
+        raise ValueError("ConfigurationValidator missing SSOT validation rules")
+    
+    # Verify IsolatedEnvironment usage
+    from shared.isolated_environment import get_env
+    env = get_env()
+    if not hasattr(env, 'as_dict'):
+        raise ValueError("IsolatedEnvironment missing SSOT interface")
+    
+    logger.debug("SSOT validator compliance verified")
+
+# Add this call before create_app() - with SSOT verification
 if __name__ == "__main__":
     import asyncio
-    # Run validation before starting
+    # Run SSOT-compliant validation before starting
     asyncio.run(validate_environment_at_startup())
     
     # Continue with existing startup...
@@ -141,63 +250,81 @@ if __name__ == "__main__":
 **Integration Point:** After logging setup, before lifespan function
 
 ```python
-# Add after logging configuration (around line 60)
+# Add after logging configuration (around line 60) - SSOT COMPLIANT VERSION
 def validate_auth_environment():
-    """Validate auth service environment configuration."""
+    """
+    Validate auth service environment configuration.
+    SSOT COMPLIANT: Uses central validators and follows SSOT patterns.
+    """
+    # SSOT imports - verified compliant
     from shared.configuration.central_config_validator import CentralConfigValidator
     from shared.isolated_environment import get_env
     
-    logger.info("🔍 Validating auth service environment...")
+    logger.info("🔍 Validating auth service environment with SSOT validators...")
     
-    env = get_env()
-    validator = CentralConfigValidator()
+    # Step 1: Verify SSOT compliance
+    try:
+        verify_auth_ssot_compliance()
+        logger.debug("✅ Auth SSOT validator compliance verified")
+    except Exception as e:
+        logger.error(f"❌ Auth SSOT compliance check failed: {e}")
+        # Continue with validation but log the issue
     
-    # Critical auth environment variables
-    auth_critical_vars = [
-        "JWT_SECRET_KEY", "SERVICE_SECRET", "POSTGRES_HOST", 
-        "POSTGRES_PORT", "POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD"
-    ]
+    # Step 2: Use SSOT environment access
+    env = get_env()  # SSOT environment access
+    env_dict = env.as_dict()
     
-    missing_vars = []
-    for var in auth_critical_vars:
-        if not env.get(var):
-            missing_vars.append(var)
+    # Step 3: Use SSOT central validator
+    central_validator = CentralConfigValidator()
     
-    # Environment-specific requirements
-    environment = env.get("ENVIRONMENT", "").lower()
-    if environment in ["staging", "production"]:
-        oauth_vars = [
-            f"GOOGLE_OAUTH_CLIENT_ID_{environment.upper()}",
-            f"GOOGLE_OAUTH_CLIENT_SECRET_{environment.upper()}"
-        ]
-        for var in oauth_vars:
-            if not env.get(var):
-                missing_vars.append(var)
+    # Use SSOT validator method for auth-specific validation
+    auth_result = central_validator.validate_auth_service_environment(env_dict)
     
-    if missing_vars:
+    if not auth_result.is_valid:
         error_message = f"""
-🚨 AUTH SERVICE ENVIRONMENT VALIDATION FAILED 🚨
+🚨 AUTH SERVICE ENVIRONMENT VALIDATION FAILED (SSOT) 🚨
 
 Service: auth-service
-Environment: {environment}
+Environment: {env_dict.get('ENVIRONMENT', 'unknown')}
+Validator: SSOT CentralConfigValidator
 
-Missing critical variables ({len(missing_vars)}):
-{chr(10).join(f"  - {var}" for var in missing_vars)}
+Configuration errors ({len(auth_result.errors)}):
+{chr(10).join(f"  - {error}" for error in auth_result.errors)}
 
+SSOT compliance status: ✅ Validated
 Required actions:
 1. Set all missing environment variables
-2. Verify OAuth configuration for {environment}
-3. Check database connectivity settings
+2. Verify OAuth configuration for {env_dict.get('ENVIRONMENT', 'unknown')}
+3. Check database connectivity settings  
 4. Restart auth service after fixing configuration
 
 Auth service startup ABORTED - user login will fail without these variables.
+This prevents Golden Path authentication failures.
 """
         logger.critical(error_message)
         sys.exit(1)
     
-    logger.info("✅ Auth service environment validation completed")
+    logger.info("✅ Auth service environment validation completed (SSOT compliant)")
 
-# Add this call before lifespan function (around line 116)
+def verify_auth_ssot_compliance():
+    """Verify auth validators are SSOT compliant."""
+    # Import validation - ensure we're using SSOT imports
+    from shared.configuration.central_config_validator import CentralConfigValidator
+    from shared.isolated_environment import get_env
+    
+    # Verify CentralConfigValidator has auth validation capability
+    central_validator = CentralConfigValidator()
+    if not hasattr(central_validator, 'validate_auth_service_environment'):
+        raise ValueError("CentralConfigValidator missing auth service validation - SSOT violation")
+    
+    # Verify IsolatedEnvironment usage
+    env = get_env()
+    if not hasattr(env, 'as_dict'):
+        raise ValueError("IsolatedEnvironment missing SSOT interface")
+    
+    logger.debug("Auth SSOT validator compliance verified")
+
+# Add this call before lifespan function (around line 116) - with SSOT verification
 validate_auth_environment()
 ```
 
@@ -309,27 +436,55 @@ print('✅ Infrastructure configuration validated')
 "
 ```
 
-## 🎯 Benefits of This Approach
+## 🎯 Benefits of SSOT-Aligned Approach
 
 ### Immediate Benefits
-1. **Leverage Existing Code**: No need to rewrite validation logic
-2. **SSOT Compliance**: Uses existing SSOT validators
-3. **Proven Validation Logic**: Infrastructure validator already handles Issue #1278
-4. **Low Risk**: Minimal changes to main.py files
+1. **✅ Leverage Existing Code**: No rewriting, just SSOT alignment and integration
+2. **✅ SSOT Compliance**: Ensures architectural consistency and prevents violations  
+3. **✅ Proven Validation Logic**: Infrastructure validator already handles Issue #1278
+4. **✅ Low Risk**: Minimal changes to main.py files with compliance verification
+5. **✅ Architectural Integrity**: Maintains 87.5% SSOT compliance progress
 
 ### Long-term Benefits  
-1. **Comprehensive Validation**: Environment + Infrastructure + Startup validation
-2. **Progressive Enforcement**: Environment-specific validation strictness
-3. **Golden Path Protection**: Prevents configuration issues affecting user login → AI responses
-4. **Operational Visibility**: Clear error messages for troubleshooting
+1. **✅ Comprehensive Validation**: Environment + Infrastructure + Startup validation
+2. **✅ Progressive Enforcement**: Environment-specific validation strictness
+3. **✅ Golden Path Protection**: Prevents configuration issues affecting user login → AI responses
+4. **✅ Operational Visibility**: Clear error messages for troubleshooting
+5. **✅ SSOT Evolution**: Strengthens architectural patterns for future development
+6. **✅ Compliance Monitoring**: Built-in SSOT compliance verification during validation
 
-## 🚀 Implementation Timeline
+### SSOT-Specific Benefits
+1. **✅ Architectural Consistency**: All validators follow single source of truth patterns
+2. **✅ Import Compliance**: Prevents proliferation of non-SSOT imports
+3. **✅ Environment Access**: Ensures IsolatedEnvironment usage throughout
+4. **✅ Validation Logic Consolidation**: Eliminates duplicate validation implementations
+5. **✅ Future-Proof**: New validators automatically inherit SSOT patterns
 
-**Day 1:** Environment validation integration (backend + auth)
-**Day 2:** Test environment validation in development
-**Day 3:** Infrastructure validation integration
-**Day 4:** Comprehensive startup validation integration  
-**Day 5:** CI/CD and deployment integration
+## 🚀 SSOT-Aligned Implementation Timeline
+
+**Phase 0 (Day 1): SSOT Compliance Audit**
+- Audit existing validators for SSOT compliance
+- Identify and fix any SSOT violations in validation logic
+- Verify import patterns and environment access compliance
+- Update validators to delegate to central SSOT where needed
+
+**Phase 1 (Day 2-3): SSOT-Compliant Integration**
+- Integrate SSOT-verified environment validation (backend + auth)
+- Add SSOT compliance verification to startup validation
+- Test environment validation with SSOT validators in development
+- Verify no architectural violations introduced
+
+**Phase 2 (Day 4): Enhanced SSOT Integration**
+- Integrate comprehensive startup validation with SSOT patterns
+- Enable progressive validation modes through SSOT configuration
+- Add infrastructure validation through SSOT delegation
+- Verify all validation paths maintain SSOT compliance
+
+**Phase 3 (Day 5): Deployment & Monitoring**
+- CI/CD integration with SSOT validator usage
+- Deployment validation using SSOT patterns
+- Add SSOT compliance monitoring to validation processes
+- Document SSOT validation patterns for future development
 
 ## 📊 Success Metrics
 

@@ -2215,6 +2215,10 @@ class StartupOrchestrator:
             # Log factory initialization summary
             status = factory_adapter.get_migration_status()
             self.logger.info("     CHART:  Factory Pattern Migration Status:")
+            
+        except Exception as e:
+            self.logger.error(f" FAIL:  Factory initialization failed: {e}")
+            raise
 
     async def _initialize_infrastructure_resilience(self) -> None:
         """Initialize infrastructure resilience monitoring and circuit breakers - CRITICAL for Issue #1278."""
