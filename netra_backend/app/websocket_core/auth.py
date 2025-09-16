@@ -20,12 +20,12 @@ Key Features:
 """
 
 import asyncio
-import logging
 from typing import Optional, Dict, Any
 from dataclasses import dataclass
 
 # SSOT imports
 from shared.isolated_environment import get_env
+from shared.logging.unified_logging_ssot import get_logger
 from shared.types.core_types import UserID, ConnectionID
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
@@ -46,7 +46,7 @@ class WebSocketAuthenticator:
     """
 
     def __init__(self):
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
         self._ssot_authenticator = UnifiedWebSocketAuthenticator()
 
         # Add user_id attribute for AgentWebSocketBridge compatibility
@@ -207,7 +207,7 @@ class AuthHandler:
     """
 
     def __init__(self):
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
         self.logger.info("AuthHandler compatibility layer initialized")
 
     async def connect(self, client_id: str, user_id: Optional[str] = None) -> Optional[str]:
