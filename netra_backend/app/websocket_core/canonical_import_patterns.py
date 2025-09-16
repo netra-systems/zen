@@ -29,6 +29,13 @@ from netra_backend.app.websocket_core.types import (
     _get_enum_key_representation
 )
 
+# Import protocol and emitter classes for test compatibility
+from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+
+# Create compatibility alias for WebSocketEventEmitter
+WebSocketEventEmitter = UnifiedWebSocketEmitter
+
 
 class CanonicalImportDeprecationWarning(UserWarning):
     """Warning for deprecated import patterns during migration."""
@@ -358,6 +365,11 @@ __all__ = [
     'create_websocket_manager',
     'get_manager',
     'create_manager',
+
+    # Test Compatibility - Issue #1188: Add missing exports for unit tests
+    'WebSocketManagerProtocol',
+    'WebSocketEventEmitter',
+    'UnifiedWebSocketEmitter',
 
     # Utilities
     'get_migration_guide',

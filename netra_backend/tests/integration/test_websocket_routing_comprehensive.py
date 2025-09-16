@@ -55,13 +55,14 @@ from netra_backend.app.websocket_core.utils import (
 
 # WebSocket management components
 from netra_backend.app.websocket_core import (
-    WebSocketManager, get_websocket_manager, safe_websocket_send, safe_websocket_close,
-    WebSocketHeartbeat, get_connection_monitor
+    WebSocketManager, WebSocketHeartbeat, get_connection_monitor
 )
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.utils import safe_websocket_send, safe_websocket_close
 
 # Authentication and user context
 from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
-from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # Logging
