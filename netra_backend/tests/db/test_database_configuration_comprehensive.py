@@ -675,12 +675,15 @@ class DatabaseConfigurationBusinessScenariosTests:
         ]
         
         for scenario in test_scenarios:
+            # Clear cache between scenarios to ensure fresh configuration loading
+            manager.clear_cache()
+
             mock_config = Mock()
             mock_config.database_url = scenario['database_url']
-            
+
             with patch('netra_backend.app.core.configuration.database.get_unified_config',
                       return_value=mock_config):
-                
+
                 is_valid = manager.validate_database_config()
                 assert is_valid == scenario['expected_valid'], f"Scenario {scenario['name']} failed"
     
@@ -750,7 +753,16 @@ class DatabaseConfigurationBusinessScenariosTests:
                 config = manager.populate_database_config(env)
                 
                 # Verify environment-specific consistency
-                assert env in config['postgresql']['url'] or 'localhost' in config['postgresql']['url']
+                url = config['postgresql']['url']
+                # For development, should contain 'dev' or 'localhost'
+                # For staging, should contain 'staging'
+                # For production, should contain 'prod'
+                if env == 'development':
+                    assert 'dev' in url or 'localhost' in url
+                elif env == 'staging':
+                    assert 'staging' in url
+                elif env == 'production':
+                    assert 'prod' in url
                 assert config['redis']['host'] == f"{env}-redis"
                 assert config['redis']['ssl'] == (env in ['staging', 'production'])
                 assert config['postgresql']['valid'] == True

@@ -67,7 +67,16 @@ class DatabaseConfigManager:
         """Initialize database configuration manager."""
         self._config = None
         self._cached_config = {}
-    
+
+    def clear_cache(self):
+        """Clear the configuration cache.
+
+        This method is useful for testing when you need to ensure
+        fresh configuration loading with different mocked values.
+        """
+        self._config = None
+        self._cached_config = {}
+
     def get_config(self) -> AppConfig:
         """Get the current application configuration."""
         if self._config is None:
