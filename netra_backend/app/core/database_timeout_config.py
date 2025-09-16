@@ -248,7 +248,7 @@ def get_database_timeout_config(environment: str) -> Dict[str, float]:
             "health_check_timeout": 10.0,      # Health check queries
         },
         "test": {
-            "initialization_timeout": 25.0,    # Memory DB or test containers
+            "initialization_timeout": 20.0,    # Issue #1278: Optimized from 25s to 20s for better budget balance
             "table_setup_timeout": 10.0,       # Test operations should be fast
             "connection_timeout": 15.0,        # Test connections
             "pool_timeout": 20.0,              # Minimal pool operations

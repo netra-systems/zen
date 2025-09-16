@@ -19,19 +19,42 @@ class LogAnalyzer:
     def load_logs(self):
         """Load logs from JSON file"""
         with open(self.log_file, 'r', encoding='utf-8') as f:
-            self.logs = json.load(f)
+            data = json.load(f)
 
-        # Filter error/warning logs
-        self.error_logs = [
-            log for log in self.logs
-            if log.get('severity') in ['ERROR', 'WARNING', 'CRITICAL']
-        ]
+        # Handle different log file formats
+        if isinstance(data, dict) and any(key in ['ERROR', 'WARNING', 'INFO', 'NOTICE'] for key in data.keys()):
+            # New format: separated by severity
+            self.logs = []
+            self.error_logs = []
+            for severity, logs in data.items():
+                self.logs.extend(logs)
+                if severity in ['ERROR', 'WARNING', 'CRITICAL']:
+                    self.error_logs.extend(logs)
+        else:
+            # Old format: flat list
+            self.logs = data
+            self.error_logs = [
+                log for log in self.logs
+                if log.get('severity') in ['ERROR', 'WARNING', 'CRITICAL']
+            ]
 
         print(f"Loaded {len(self.logs)} total logs, {len(self.error_logs)} error/warning logs")
 
     def extract_error_message(self, log):
         """Extract meaningful error message from log entry"""
-        # Try jsonPayload.message first
+        # Try json_payload.message first (new format)
+        if 'json_payload' in log:
+            jp = log['json_payload']
+            if jp and 'message' in jp:
+                return jp['message']
+            elif jp and 'error' in jp:
+                error = jp['error']
+                if isinstance(error, dict):
+                    return error.get('message', str(error))
+                else:
+                    return str(error)
+
+        # Try legacy jsonPayload format
         if 'jsonPayload' in log:
             jp = log['jsonPayload']
             if 'message' in jp:
@@ -43,11 +66,25 @@ class LogAnalyzer:
                 else:
                     return str(error)
 
-        # Fall back to textPayload
+        # Fall back to text_payload (new format)
+        if 'text_payload' in log and log['text_payload']:
+            return log['text_payload']
+
+        # Fall back to textPayload (legacy format)
         if 'textPayload' in log:
             return log['textPayload']
 
-        return str(log)
+        # Check for HTTP request details
+        if 'http_request' in log and log['http_request']:
+            req = log['http_request']
+            if req.get('status'):
+                return f"HTTP {req.get('method', 'Unknown')} {req.get('url', 'Unknown')} returned {req.get('status')} (latency: {req.get('latency', 'Unknown')})"
+
+        # If we can't find meaningful content, use a descriptive message
+        if log.get('severity') in ['ERROR', 'WARNING']:
+            return f"{log.get('severity', 'Unknown')} log with empty content at {log.get('timestamp', 'unknown time')}"
+
+        return "Empty log entry"
 
     def cluster_errors(self):
         """Cluster errors by pattern"""
@@ -292,7 +329,9 @@ class LogAnalyzer:
         return "\n".join(report)
 
 def main():
-    analyzer = LogAnalyzer('gcp_logs_last_hour_20250915_175001.json')
+    # Use the most recently collected log file
+    log_file = 'gcp_logs_raw_20250915_200344.json'
+    analyzer = LogAnalyzer(log_file)
     analyzer.load_logs()
     analyzer.cluster_errors()
 
@@ -305,10 +344,49 @@ def main():
 
     print(f"Analysis complete! Report saved to: {report_file}")
     print(f"Found {len(analyzer.clusters)} distinct error clusters")
-    print("\n" + "="*60)
-    print("TOP 5 ISSUE CLUSTERS:")
-    print("="*60)
 
+    # Print detailed summary for immediate analysis
+    print("\n" + "="*60)
+    print("DETAILED LOG ANALYSIS SUMMARY:")
+    print("="*60)
+    print(f"Time Range: 2025-09-16 02:03:41 to 03:03:41 UTC")
+    print(f"Total Logs: {len(analyzer.logs)}")
+    print(f"Error/Warning Logs: {len(analyzer.error_logs)}")
+
+    # Show severity breakdown
+    severity_counts = {}
+    for log in analyzer.logs:
+        severity = log.get('severity', 'UNKNOWN')
+        severity_counts[severity] = severity_counts.get(severity, 0) + 1
+
+    print(f"\nSeverity Breakdown:")
+    for severity, count in sorted(severity_counts.items()):
+        print(f"  {severity}: {count}")
+
+    # Show HTTP errors specifically
+    http_errors = []
+    for log in analyzer.error_logs:
+        if log.get('http_request', {}).get('status'):
+            http_errors.append(log)
+
+    print(f"\nHTTP Errors: {len(http_errors)}")
+    if http_errors:
+        status_counts = {}
+        for log in http_errors:
+            status = log['http_request'].get('status', 'Unknown')
+            status_counts[status] = status_counts.get(status, 0) + 1
+
+        print("HTTP Status Codes:")
+        for status, count in sorted(status_counts.items()):
+            print(f"  {status}: {count} occurrences")
+
+        # Show sample HTTP errors
+        print(f"\nSample HTTP Errors:")
+        for i, log in enumerate(http_errors[:5]):
+            req = log['http_request']
+            print(f"  {i+1}. {req.get('method', 'Unknown')} {req.get('url', 'Unknown')} -> {req.get('status', 'Unknown')} ({req.get('latency', 'Unknown')})")
+
+    print(f"\nTOP ERROR CLUSTERS:")
     for i, (cluster_name, cluster_logs) in enumerate(list(analyzer.clusters.items())[:5], 1):
         print(f"{i}. {cluster_name}: {len(cluster_logs)} incidents")
 

@@ -23,7 +23,7 @@ from tests.e2e.integration.unified_e2e_harness import (
 from tests.e2e.integration.user_journey_executor import TestUser
 from test_framework.http_client import ClientConfig, ConnectionState
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
-from tests.e2e.test_environment_config import TestEnvironmentType
+from tests.e2e.test_environment_config import EnvironmentTypeTests
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 class StagingWebSocketerTests:
@@ -60,7 +60,7 @@ StagingWebSocketTester = StagingWebSocketerTests
 @pytest.fixture
 async def staging_harness() -> UnifiedE2ETestHarness:
     """Create staging E2E test harness."""
-    harness = create_e2e_harness(environment=TestEnvironmentType.STAGING)
+    harness = create_e2e_harness(environment=EnvironmentTypeTests.STAGING)
     async with harness.test_environment():
         yield harness
 
@@ -470,7 +470,7 @@ class StagingWebSocketErrorHandlingTests:
     # # Run specific test for development
     # async def run_single_test():
     # """Run a single test for development purposes."""
-    # harness = create_e2e_harness(environment=TestEnvironmentType.STAGING)
+    # harness = create_e2e_harness(environment=EnvironmentTypeTests.STAGING)
     # async with harness.test_environment():
     # tester = StagingWebSocketTester(harness)
     # user = await harness.create_test_user()

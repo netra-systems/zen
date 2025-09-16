@@ -1,0 +1,364 @@
+# GCP Monitoring Configuration for Issue #1278 Remediation
+# Infrastructure monitoring and alerting setup
+
+# Alert Policy for HTTP 503 Errors
+alert_policy_503_errors:
+  displayName: "Issue #1278 - HTTP 503 Service Unavailable Alert"
+  documentation:
+    content: |
+      This alert triggers when HTTP 503 error rate exceeds acceptable thresholds.
+      Related to Issue #1278 infrastructure remediation.
+
+      IMMEDIATE ACTIONS:
+      1. Check Cloud Run service health
+      2. Verify VPC connector status
+      3. Check database connections
+      4. Review recent deployments
+
+      ESCALATION:
+      - If >10% error rate: Page on-call
+      - If persistent: Execute rollback procedures
+    mimeType: "text/markdown"
+  conditions:
+    - displayName: "503 Error Rate > 5%"
+      conditionThreshold:
+        filter: |
+          resource.type="cloud_run_revision" AND
+          resource.labels.service_name="netra-backend-staging" AND
+          httpRequest.status=503
+        comparison: COMPARISON_GREATER_THAN
+        thresholdValue: 5
+        duration: "300s"
+        aggregations:
+          - alignmentPeriod: "60s"
+            perSeriesAligner: ALIGN_RATE
+            crossSeriesReducer: REDUCE_SUM
+            groupByFields:
+              - "resource.labels.service_name"
+  alertStrategy:
+    autoClose: "86400s"  # 24 hours
+  enabled: true
+  severity: "CRITICAL"
+
+---
+
+# Alert Policy for VPC Connector Issues
+alert_policy_vpc_connector:
+  displayName: "Issue #1278 - VPC Connector Health Alert"
+  documentation:
+    content: |
+      VPC connector health monitoring for staging environment.
+      Critical for database and Redis connectivity.
+
+      TROUBLESHOOTING:
+      1. Check connector state: gcloud compute networks vpc-access connectors describe staging-connector
+      2. Review connector logs for capacity issues
+      3. Scale connector if needed
+      4. Verify Cloud Run annotations
+    mimeType: "text/markdown"
+  conditions:
+    - displayName: "VPC Connector Errors"
+      conditionThreshold:
+        filter: |
+          resource.type="vpc_access_connector" AND
+          resource.labels.connector_name="staging-connector" AND
+          severity>=ERROR
+        comparison: COMPARISON_GREATER_THAN
+        thresholdValue: 1
+        duration: "180s"
+        aggregations:
+          - alignmentPeriod: "60s"
+            perSeriesAligner: ALIGN_RATE
+            crossSeriesReducer: REDUCE_SUM
+  alertStrategy:
+    autoClose: "3600s"  # 1 hour
+  enabled: true
+  severity: "WARNING"
+
+---
+
+# Alert Policy for Database Connection Issues
+alert_policy_database_connections:
+  displayName: "Issue #1278 - Database Connection Health Alert"
+  documentation:
+    content: |
+      Database connectivity monitoring for Cloud SQL instance.
+      Monitors for connection failures and high utilization.
+
+      RESPONSE ACTIONS:
+      1. Check Cloud SQL instance state
+      2. Review connection pool settings
+      3. Check for long-running queries
+      4. Verify max_connections setting
+    mimeType: "text/markdown"
+  conditions:
+    - displayName: "Database Health Check Failures"
+      conditionThreshold:
+        filter: |
+          resource.type="cloud_run_revision" AND
+          httpRequest.requestUrl=~".*\/health\/db" AND
+          httpRequest.status!=200
+        comparison: COMPARISON_GREATER_THAN
+        thresholdValue: 3
+        duration: "300s"
+        aggregations:
+          - alignmentPeriod: "60s"
+            perSeriesAligner: ALIGN_RATE
+            crossSeriesReducer: REDUCE_SUM
+  alertStrategy:
+    autoClose: "7200s"  # 2 hours
+  enabled: true
+  severity: "WARNING"
+
+---
+
+# Log-based Metric for HTTP 503 Errors
+log_metric_503_errors:
+  name: "http_503_error_rate"
+  description: "Rate of HTTP 503 Service Unavailable errors"
+  filter: |
+    resource.type="cloud_run_revision" AND
+    resource.labels.service_name="netra-backend-staging" AND
+    httpRequest.status=503
+  metricDescriptor:
+    metricKind: "GAUGE"
+    valueType: "INT64"
+    displayName: "HTTP 503 Error Rate"
+  labelExtractors:
+    service_name: "EXTRACT(resource.labels.service_name)"
+    revision_name: "EXTRACT(resource.labels.revision_name)"
+    endpoint: "EXTRACT(httpRequest.requestUrl)"
+
+---
+
+# Log-based Metric for WebSocket Connection Failures
+log_metric_websocket_failures:
+  name: "websocket_connection_failures"
+  description: "WebSocket connection failures and timeouts"
+  filter: |
+    resource.type="cloud_run_revision" AND
+    (jsonPayload.message=~".*websocket.*" AND severity>=ERROR) OR
+    (httpRequest.requestUrl=~".*\/ws" AND httpRequest.status!=101)
+  metricDescriptor:
+    metricKind: "GAUGE"
+    valueType: "INT64"
+    displayName: "WebSocket Connection Failures"
+  labelExtractors:
+    service_name: "EXTRACT(resource.labels.service_name)"
+    error_type: "EXTRACT(jsonPayload.error_type)"
+
+---
+
+# Log-based Metric for VPC Connector Issues
+log_metric_vpc_connector_errors:
+  name: "vpc_connector_error_rate"
+  description: "VPC connector errors and capacity issues"
+  filter: |
+    resource.type="vpc_access_connector" AND
+    resource.labels.connector_name="staging-connector" AND
+    severity>=ERROR
+  metricDescriptor:
+    metricKind: "GAUGE"
+    valueType: "INT64"
+    displayName: "VPC Connector Error Rate"
+  labelExtractors:
+    connector_name: "EXTRACT(resource.labels.connector_name)"
+    error_type: "EXTRACT(jsonPayload.error_type)"
+
+---
+
+# Dashboard Configuration
+dashboard_infrastructure_health:
+  displayName: "Issue #1278 - Infrastructure Health Dashboard"
+  mosaicLayout:
+    tiles:
+      - width: 6
+        height: 4
+        widget:
+          title: "HTTP 503 Error Rate"
+          xyChart:
+            dataSets:
+              - timeSeriesQuery:
+                  timeSeriesFilter:
+                    filter: 'metric.type="logging.googleapis.com/user/http_503_error_rate"'
+                    aggregation:
+                      alignmentPeriod: "60s"
+                      perSeriesAligner: "ALIGN_RATE"
+                      crossSeriesReducer: "REDUCE_SUM"
+                plotType: "LINE"
+            yAxis:
+              label: "Errors per minute"
+              scale: "LINEAR"
+            timeshiftDuration: "0s"
+
+      - width: 6
+        height: 4
+        xPos: 6
+        widget:
+          title: "WebSocket Connection Health"
+          xyChart:
+            dataSets:
+              - timeSeriesQuery:
+                  timeSeriesFilter:
+                    filter: 'metric.type="logging.googleapis.com/user/websocket_connection_failures"'
+                    aggregation:
+                      alignmentPeriod: "60s"
+                      perSeriesAligner: "ALIGN_RATE"
+                      crossSeriesReducer: "REDUCE_SUM"
+                plotType: "LINE"
+            yAxis:
+              label: "Failures per minute"
+              scale: "LINEAR"
+
+      - width: 12
+        height: 4
+        yPos: 4
+        widget:
+          title: "Response Time Percentiles"
+          xyChart:
+            dataSets:
+              - timeSeriesQuery:
+                  timeSeriesFilter:
+                    filter: 'metric.type="loadbalancing.googleapis.com/https/request_latencies"'
+                    aggregation:
+                      alignmentPeriod: "60s"
+                      perSeriesAligner: "ALIGN_DELTA"
+                      crossSeriesReducer: "REDUCE_PERCENTILE_95"
+                plotType: "LINE"
+            yAxis:
+              label: "Latency (ms)"
+              scale: "LINEAR"
+
+      - width: 6
+        height: 4
+        yPos: 8
+        widget:
+          title: "VPC Connector Health"
+          scorecard:
+            timeSeriesQuery:
+              timeSeriesFilter:
+                filter: 'metric.type="logging.googleapis.com/user/vpc_connector_error_rate"'
+                aggregation:
+                  alignmentPeriod: "300s"
+                  perSeriesAligner: "ALIGN_RATE"
+                  crossSeriesReducer: "REDUCE_SUM"
+            gaugeView:
+              lowerBound: 0
+              upperBound: 10
+
+      - width: 6
+        height: 4
+        xPos: 6
+        yPos: 8
+        widget:
+          title: "Active Cloud Run Revisions"
+          scorecard:
+            timeSeriesQuery:
+              timeSeriesFilter:
+                filter: 'metric.type="run.googleapis.com/container/instance_count"'
+                aggregation:
+                  alignmentPeriod: "60s"
+                  perSeriesAligner: "ALIGN_MEAN"
+                  crossSeriesReducer: "REDUCE_SUM"
+                  groupByFields:
+                    - "resource.labels.revision_name"
+
+---
+
+# Notification Channels
+notification_channels:
+  email_critical:
+    type: "email"
+    displayName: "Critical Infrastructure Alerts"
+    description: "Email notifications for P0 infrastructure issues"
+    labels:
+      email_address: "infrastructure-alerts@netrasystems.ai"
+    enabled: true
+
+  slack_warnings:
+    type: "slack"
+    displayName: "Infrastructure Warnings"
+    description: "Slack notifications for infrastructure warnings"
+    labels:
+      channel_name: "#infrastructure-alerts"
+      url: "https://hooks.slack.com/services/YOUR_SLACK_WEBHOOK"
+    enabled: true
+
+---
+
+# SLO Configuration for Golden Path
+slo_golden_path_availability:
+  displayName: "Golden Path Availability SLO"
+  serviceLevelIndicator:
+    requestBased:
+      distributionCut:
+        range:
+          min: 0
+          max: 200  # HTTP status codes 0-200 considered good
+  goal: 0.995  # 99.5% availability
+  rollingPeriod: "30d"  # 30-day rolling window
+
+slo_golden_path_latency:
+  displayName: "Golden Path Latency SLO"
+  serviceLevelIndicator:
+    requestBased:
+      distributionCut:
+        range:
+          min: 0
+          max: 2000  # 2 seconds max response time
+  goal: 0.95  # 95% of requests under 2s
+  rollingPeriod: "7d"  # 7-day rolling window
+
+---
+
+# Uptime Check Configuration
+uptime_check_health_endpoint:
+  displayName: "Health Endpoint Uptime Check"
+  monitoredResource:
+    type: "uptime_url"
+    labels:
+      project_id: "netra-staging"
+      host: "api.staging.netrasystems.ai"
+  httpCheck:
+    path: "/health"
+    port: 443
+    useSsl: true
+    validateSsl: true
+    requestMethod: "GET"
+  timeout: "10s"
+  period: "60s"  # Check every minute
+  selectedRegions:
+    - "USA_OREGON"
+    - "USA_VIRGINIA"
+    - "EUROPE_LONDON"
+
+uptime_check_websocket:
+  displayName: "WebSocket Endpoint Uptime Check"
+  monitoredResource:
+    type: "uptime_url"
+    labels:
+      project_id: "netra-staging"
+      host: "api-staging.netrasystems.ai"
+  tcpCheck:
+    port: 443
+  timeout: "10s"
+  period: "300s"  # Check every 5 minutes
+  selectedRegions:
+    - "USA_OREGON"
+    - "USA_VIRGINIA"
+
+---
+
+# Deployment Commands for this configuration:
+
+# Create log-based metrics:
+# gcloud logging metrics create http_503_error_rate --description="Rate of HTTP 503 Service Unavailable errors" --log-filter="resource.type=\"cloud_run_revision\" AND httpRequest.status=503"
+
+# Create alert policies:
+# gcloud alpha monitoring policies create --policy-from-file=alert-policy-503-errors.yaml
+
+# Create dashboard:
+# gcloud monitoring dashboards create --config-from-file=dashboard-infrastructure-health.json
+
+# Create uptime checks:
+# gcloud monitoring uptime create --config-from-file=uptime-check-health.yaml

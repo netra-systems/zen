@@ -160,12 +160,12 @@ class VPCConnectorMonitor:
         if not self.vpc_config.get("capacity_aware_timeouts", False):
             return base_timeout
         
-        # Adjustment factors based on VPC connector state
+        # Adjustment factors based on VPC connector state (Issue #1278: Enhanced based on infrastructure failures)
         state_adjustments = {
             VPCConnectorState.NORMAL: 1.0,         # No adjustment
-            VPCConnectorState.CAPACITY_PRESSURE: 1.3,  # 30% increase
-            VPCConnectorState.SCALING: 1.5,        # 50% increase
-            VPCConnectorState.OVERLOADED: 2.0,     # 100% increase
+            VPCConnectorState.CAPACITY_PRESSURE: 1.4,  # Issue #1278: Increased from 30% to 40%
+            VPCConnectorState.SCALING: 1.8,        # Issue #1278: Increased from 50% to 80% (more aggressive scaling buffer)
+            VPCConnectorState.OVERLOADED: 2.5,     # Issue #1278: Increased from 100% to 150% (higher overload tolerance)
         }
         
         adjustment_factor = state_adjustments.get(self.current_state, 1.0)

@@ -1,36 +1,98 @@
-## Status: RESOLVED ✅
+## 🚨 P0 REGRESSION: HTTP 503 Service Unavailable Cluster Issue
 
-**Root Cause:** Missing `validate_token` import in auth service caused test failures during SSOT consolidation migration.
+**Status:** ACTIVE REGRESSION affecting production services
+**Impact:** Service availability and WebSocket connectivity
+**Priority:** P0 - Critical infrastructure failure
+**Generated:** 2025-09-15 by Claude Code automated monitoring
 
-**Fix Applied:** Added backward compatibility shim in `auth_service/auth_core/user_auth_service.py` lines 41-49 to maintain API contract while preserving SSOT architecture.
+### Problem Summary
 
-## Five Whys Analysis
+Multiple HTTP 503 Service Unavailable errors detected across health check and WebSocket endpoints, indicating a cluster-wide service availability issue affecting critical infrastructure.
 
-1. **WHY 1:** Tests failed due to missing `validate_token` import
-2. **WHY 2:** Function was removed during SSOT consolidation
-3. **WHY 3:** Test infrastructure wasn't updated during migration
-4. **WHY 4:** The function has been restored as backward compatibility shim
-5. **WHY 5:** Issue is now resolved and tests pass
+### Impact Assessment
 
-## Test Results ✅
+**Business Impact:**
+- Health check endpoints returning 503 errors
+- WebSocket connectivity potentially affected
+- Service discovery and load balancing may be impaired
+- User experience degradation for real-time features
 
-- **Import test:** SUCCESS - `validate_token` can be imported
-- **Unit test:** PASSED - `test_validate_token_function_alias_success`
-- **File verification:** CONFIRMED - Function exists in `user_auth_service.py` lines 41-49
+**Technical Impact:**
+- Multiple service endpoints unavailable
+- Health check failures may trigger cascading effects
+- Load balancer may be removing healthy instances
+- WebSocket connections failing or unstable
 
-## Technical Details
+### Evidence
 
-**Files Modified:**
-- `auth_service/auth_core/user_auth_service.py` - Added compatibility alias
-
-**Solution:**
-```python
-def validate_token(token: str) -> dict:
-    """Backward compatibility alias for token validation."""
-    from .token_validator import validate_jwt_token
-    return validate_jwt_token(token)
+**Error Pattern:**
+```
+HTTP 503 Service Unavailable
+- Health check endpoints
+- WebSocket endpoints
+- Multiple timestamp clusters
 ```
 
-**Business Value:** Maintains SSOT architecture while preserving test compatibility, ensuring auth service reliability for $500K+ ARR customer base.
+**Affected Components:**
+- Health check endpoints (`/health`, `/readiness`)
+- WebSocket endpoints (`/ws/*`)
+- Service discovery mechanisms
+- Load balancer health checks
 
-**Next Action:** Issue closed - no further action required.
+### Investigation Required
+
+**Immediate Actions:**
+1. **Service Status Check:** Verify all GCP services are running
+2. **Load Balancer Analysis:** Check load balancer configuration and health
+3. **VPC Connector Status:** Verify VPC connector for service communication
+4. **Resource Availability:** Check CPU, memory, and connection limits
+5. **Service Dependencies:** Verify Redis, PostgreSQL, and external service availability
+
+**Root Cause Analysis:**
+1. **Traffic Patterns:** Analyze request volume and patterns leading to 503s
+2. **Resource Exhaustion:** Check for memory, CPU, or connection pool exhaustion
+3. **Configuration Drift:** Verify GCP configuration matches expected state
+4. **Dependency Failures:** Check upstream service health and connectivity
+5. **Scaling Issues:** Verify auto-scaling configuration and limits
+
+### Technical Context
+
+**Architecture Context:**
+- Multi-service GCP deployment
+- Load balancer with health check configuration
+- VPC connector for internal service communication
+- WebSocket real-time communication requirements
+
+**Related Systems:**
+- GCP Cloud Run services
+- Load balancer health checks
+- VPC networking and connectors
+- Redis and PostgreSQL dependencies
+
+### Acceptance Criteria
+
+- [ ] All health check endpoints return 200 OK consistently
+- [ ] WebSocket endpoints respond without 503 errors
+- [ ] Service availability restored to >99.9%
+- [ ] Root cause identified and documented
+- [ ] Preventive measures implemented
+- [ ] Monitoring enhanced to detect similar issues earlier
+
+### Priority Justification
+
+**P0 Classification Rationale:**
+- Service availability directly impacts customer experience
+- Health check failures can cascade to service removal from load balancer
+- WebSocket connectivity critical for real-time user interactions
+- Cluster-wide issue suggests infrastructure-level problem
+
+### Next Steps
+
+1. **Immediate Investigation:** Service status and resource analysis
+2. **Escalation Path:** Infrastructure team for GCP-specific issues
+3. **Monitoring Enhancement:** Add specific 503 error tracking
+4. **Documentation:** Record findings and resolution steps
+
+**Generated by:** Claude Code automated issue detection
+**Contact:** Development team for technical details
+**Related Docs:** Service availability runbooks, GCP deployment guides

@@ -1,7 +1,7 @@
 {
   "total_violations": 15,
-  "compliance_score": 98.70466321243524,
-  "timestamp": "2025-09-15 18:57:19",
+  "compliance_score": 98.70578084555652,
+  "timestamp": "2025-09-15 20:44:44",
   "violations_by_type": {
     "clickhouse_ssot_violation": 3,
     "test_file_size": 12
@@ -134,7 +134,7 @@
       "category": null
     },
     {
-      "file_path": "tests\\mission_critical\\test_staging_auth_cross_service_validation.py",
+      "file_path": "backup\\url_migration\\tests\\mission_critical\\test_staging_auth_cross_service_validation.py",
       "violation_type": "test_file_size",
       "severity": "high",
       "line_number": null,
@@ -148,7 +148,7 @@
       "category": null
     },
     {
-      "file_path": "backup\\url_migration\\tests\\mission_critical\\test_staging_auth_cross_service_validation.py",
+      "file_path": "tests\\mission_critical\\test_staging_auth_cross_service_validation.py",
       "violation_type": "test_file_size",
       "severity": "high",
       "line_number": null,
@@ -219,11 +219,11 @@
     }
   ],
   "summary": {
-    "total_files_checked": 1158,
+    "total_files_checked": 1159,
     "files_with_violations": 15,
     "max_file_lines": 500,
     "max_function_lines": 25,
-    "compliance_score": 98.70466321243524
+    "compliance_score": 98.70578084555652
   },
   "category_scores": {
     "real_system": {
@@ -235,8 +235,8 @@
     "test_files": {
       "violations": 12,
       "files_with_violations": 12,
-      "total_files": 292,
-      "score": 95.8904109589041
+      "total_files": 293,
+      "score": 95.90443686006826
     },
     "other": {
       "violations": 3,

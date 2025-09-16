@@ -26,7 +26,7 @@ from test_framework.environment_markers import env, env_requires, staging_only
 from tests.e2e.integration.unified_e2e_harness import UnifiedE2ETestHarness
 from tests.e2e.real_services_manager import RealServicesManager
 from tests.e2e.staging_test_helpers import StagingTestResult
-from tests.e2e.test_environment_config import TestEnvironmentType
+from tests.e2e.test_environment_config import EnvironmentTypeTests
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class StagingE2ESuiteTests:
     
     def __init__(self):
         """Initialize staging test suite."""
-        self.harness = UnifiedE2ETestHarness(environment=TestEnvironmentType.STAGING)
+        self.harness = UnifiedE2ETestHarness(environment=EnvironmentTypeTests.STAGING)
         self.services_manager = RealServicesManager()
         self.test_results: List[StagingTestResult] = []
         self.session: Optional[aiohttp.ClientSession] = None

@@ -36,6 +36,9 @@ from netra_backend.app.websocket_core.protocols import (
 )
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 
+# ISSUE #1286 FIX: Add missing create_test_user_context import for test compatibility
+from netra_backend.app.websocket_core.websocket_manager import create_test_user_context
+
 # Import protocol and emitter classes for test compatibility
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
@@ -390,6 +393,9 @@ __all__ = [
     'WebSocketManagerProtocol',
     'WebSocketEventEmitter',
     'UnifiedWebSocketEmitter',
+
+    # ISSUE #1286 FIX: Add missing create_test_user_context export for test compatibility
+    'create_test_user_context',
 
     # Utilities
     'get_migration_guide',

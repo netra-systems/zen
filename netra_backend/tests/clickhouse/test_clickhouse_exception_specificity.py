@@ -49,13 +49,13 @@ class ClickHouseExceptionSpecificityTests(SSotAsyncTestCase):
     4. transaction_errors.py classification is not used
     """
     
-    @pytest.fixture
-    def clickhouse_client(self):
-        """Create ClickHouse service for testing."""
-        return ClickHouseService()
+    def setup_method(self, method=None):
+        """Setup method for each test - initialize ClickHouse client."""
+        super().setup_method(method)
+        self.clickhouse_client = ClickHouseService()
 
     @pytest.mark.asyncio
-    async def test_query_execution_lacks_connection_error_classification(self, clickhouse_client):
+    async def test_query_execution_lacks_connection_error_classification(self):
         """
         EXPECTED TO FAIL: Test demonstrates query errors not classified as connection errors.
         
@@ -66,21 +66,21 @@ class ClickHouseExceptionSpecificityTests(SSotAsyncTestCase):
         classify connection errors using TransactionConnectionError.
         """
         # Mock ClickHouse client to raise connection error
-        with patch.object(clickhouse_client, '_client') as mock_client:
+        with patch.object(self.clickhouse_client, '_client') as mock_client:
             mock_client.execute.side_effect = OperationalError(
                 "connection timeout", None, None
             )
             
             # This should raise TransactionConnectionError but currently raises generic Exception
             with pytest.raises(TransactionConnectionError) as exc_info:
-                await clickhouse_client.execute_query("SELECT 1", user_id="test_user")
+                await self.clickhouse_client.execute_query("SELECT 1", user_id="test_user")
             
             # This assertion should FAIL because current code doesn't classify connection errors
             assert isinstance(exc_info.value, TransactionConnectionError)
             assert "connection timeout" in str(exc_info.value)
 
     @pytest.mark.asyncio
-    async def test_invalid_query_lacks_specific_error_type(self, clickhouse_client):
+    async def test_invalid_query_lacks_specific_error_type(self):
         """
         EXPECTED TO FAIL: Test demonstrates invalid queries don't get specific error types.
         
@@ -91,15 +91,15 @@ class ClickHouseExceptionSpecificityTests(SSotAsyncTestCase):
         provide specific exception types for different query failures.
         """
         # Mock ClickHouse client to raise table not found error
-        with patch.object(clickhouse_client, '_client') as mock_client:
+        with patch.object(self.clickhouse_client, '_client') as mock_client:
             mock_client.execute.side_effect = OperationalError(
                 "Table 'non_existent_table' doesn't exist", None, None
             )
             
             # This should raise a specific TableNotFoundError but currently raises generic Exception
             with pytest.raises(Exception) as exc_info:
-                await clickhouse_client.execute_query(
-                    "SELECT * FROM non_existent_table", 
+                await self.clickhouse_client.execute_query(
+                    "SELECT * FROM non_existent_table",
                     user_id="test_user"
                 )
             
@@ -111,7 +111,7 @@ class ClickHouseExceptionSpecificityTests(SSotAsyncTestCase):
             assert "non_existent_table" in error_message
             
     @pytest.mark.asyncio
-    async def test_schema_operations_lack_diagnostic_context(self, clickhouse_client):
+    async def test_schema_operations_lack_diagnostic_context(self):
         """
         EXPECTED TO FAIL: Test demonstrates schema operations lack diagnostic context.
         
@@ -122,7 +122,7 @@ class ClickHouseExceptionSpecificityTests(SSotAsyncTestCase):
         don't include enough diagnostic information.
         """
         # Mock schema operation failure
-        with patch.object(clickhouse_client, '_client') as mock_client:
+        with patch.object(self.clickhouse_client, '_client') as mock_client:
             mock_client.execute.side_effect = OperationalError(
                 "Column 'invalid_column' already exists", None, None
             )
@@ -136,7 +136,7 @@ class ClickHouseExceptionSpecificityTests(SSotAsyncTestCase):
             """
             
             with pytest.raises(Exception) as exc_info:
-                await clickhouse_client.execute_query(schema_query, user_id="test_user")
+                await self.clickhouse_client.execute_query(schema_query, user_id="test_user")
             
             error_message = str(exc_info.value)
             
@@ -147,7 +147,7 @@ class ClickHouseExceptionSpecificityTests(SSotAsyncTestCase):
             assert "Suggestion:" in error_message, "Should include suggestion for fix"
 
     @pytest.mark.asyncio
-    async def test_bulk_insert_errors_not_classified_by_cause(self, clickhouse_client):
+    async def test_bulk_insert_errors_not_classified_by_cause(self):
         """
         EXPECTED TO FAIL: Test demonstrates bulk insert errors lack classification.
         
@@ -163,14 +163,14 @@ class ClickHouseExceptionSpecificityTests(SSotAsyncTestCase):
             {"id": 2, "name": "test2"},
         ]
         
-        with patch.object(clickhouse_client, '_client') as mock_client:
+        with patch.object(self.clickhouse_client, '_client') as mock_client:
             mock_client.execute.side_effect = OperationalError(
                 "deadlock detected during bulk insert", None, None
             )
             
             # This should raise DeadlockError but currently raises generic Exception
             with pytest.raises(DeadlockError) as exc_info:
-                await clickhouse_client.insert_data("test_table", test_data, user_id="test_user")
+                await self.clickhouse_client.insert_data("test_table", test_data, user_id="test_user")
             
             # This assertion should FAIL because current code doesn't classify deadlock errors
             assert isinstance(exc_info.value, DeadlockError)
@@ -198,7 +198,7 @@ class ClickHouseExceptionSpecificityTests(SSotAsyncTestCase):
             "ClickHouse module should import TransactionError base class"
 
     @pytest.mark.asyncio
-    async def test_query_retry_logic_using_retryable_classification(self, clickhouse_client):
+    async def test_query_retry_logic_using_retryable_classification(self):
         """
         Test validates query retry logic uses proper error classification.
 
@@ -209,14 +209,14 @@ class ClickHouseExceptionSpecificityTests(SSotAsyncTestCase):
         error classification is working correctly.
         """
         # Mock retryable connection error
-        with patch.object(clickhouse_client, '_client') as mock_client:
+        with patch.object(self.clickhouse_client, '_client') as mock_client:
             mock_client.execute.side_effect = DisconnectionError(
                 "network error", None, None
             )
             
             # Test that query execution properly raises classified connection errors
             try:
-                result = await clickhouse_client.execute_query(
+                result = await self.clickhouse_client.execute_query(
                     "SELECT 1", user_id="test_user"
                 )
                 # Should not reach here with network error
@@ -231,7 +231,7 @@ class ClickHouseExceptionSpecificityTests(SSotAsyncTestCase):
                 ), f"Network error should be retryable: {e}"
 
     @pytest.mark.asyncio
-    async def test_cache_operations_lack_error_specificity(self, clickhouse_client):
+    async def test_cache_operations_lack_error_specificity(self):
         """
         EXPECTED TO FAIL: Test demonstrates cache operations lack error specificity.
         
@@ -247,7 +247,7 @@ class ClickHouseExceptionSpecificityTests(SSotAsyncTestCase):
             
             # This should raise a specific CacheError but currently raises generic Exception
             with pytest.raises(Exception) as exc_info:
-                result = await clickhouse_client.execute_query(
+                result = await self.clickhouse_client.execute_query(
                     "SELECT * FROM large_table", user_id="test_user"
                 )
             
@@ -259,7 +259,7 @@ class ClickHouseExceptionSpecificityTests(SSotAsyncTestCase):
             assert "Cache operation failed" in error_message or "Cache connection failed" in error_message
 
     @pytest.mark.asyncio  
-    async def test_performance_errors_not_classified_properly(self, clickhouse_client):
+    async def test_performance_errors_not_classified_properly(self):
         """
         EXPECTED TO FAIL: Test demonstrates performance errors lack proper classification.
         
@@ -270,14 +270,14 @@ class ClickHouseExceptionSpecificityTests(SSotAsyncTestCase):
         classify performance-related query failures.
         """
         # Mock performance-related error
-        with patch.object(clickhouse_client, '_client') as mock_client:
+        with patch.object(self.clickhouse_client, '_client') as mock_client:
             mock_client.execute.side_effect = OperationalError(
                 "Query execution timeout exceeded", None, None
             )
             
             # This should raise TimeoutError but currently raises generic Exception
             with pytest.raises(Exception) as exc_info:
-                await clickhouse_client.execute_query(
+                await self.clickhouse_client.execute_query(
                     "SELECT * FROM huge_table WHERE complex_computation()", 
                     user_id="test_user"
                 )
