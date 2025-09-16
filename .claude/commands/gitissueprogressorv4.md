@@ -1,5 +1,5 @@
 ---
-description: "Git Issue progressor V3 SINGLE for use with orchestration"
+description: "Git Issue progressor V4 SINGLE for use with orchestration"
 argument-hint: "[focus area, defaults to latest]"
 ---
 
@@ -12,27 +12,28 @@ Context:
     6.  **CRITICAL BRANCH SAFETY POLICY:**
         - ALWAYS stay on Branch = develop-long-lived
         - **All work performed on**: develop-long-lived
-        - **PR target**: develop-long-lived (current working branch) - NEVER main
+        - No PR, issue creation is the log and all work is done directly on the dev branch.
     7.  Issue Exclusion List (IEL): generally do not create issues for the following cases: merge conflicts, local env specific issues
+    8. AGENT_SESSION_ID = agent-session-{datetime}
 
 
 PROCESS INSTRUCTIONS START:
-
-AGENT_SESSEION_ID = agent-session-{datetime}
 
 0) Init: SNST: 
 
     Verify current branch is develop-long-lived: `git branch --show-current`
     If not on develop-long-lived, STOP and switch: `git checkout develop-long-lived`
     Record branch state for safety monitoring throughout process.
-    pull latest, and handle merge conflicts
+
+    Clean working state:
+        git commit, pull latest, and handle merge conflicts
 
     If ISSUE is not a single literal number:
         Search git issues to determine most important issue to work on relative to ISSUE text.
         Be mindful of dependency tags
         ISSUE = to that number
 
-    add a tags to the issue: actively-being-worked-on, AGENT_SESSEION_ID
+    add a tags to the issue: actively-being-worked-on, AGENT_SESSION_ID
     return ISSUE number to master
 
 1) Research and review : SNST :
@@ -62,7 +63,7 @@ AGENT_SESSEION_ID = agent-session-{datetime}
         AUDIT the current codebase and linked PRs (closed and open) with FIVE WHYS approach and assess the current state of the issue.
 
     1.15 UPDATE Comment:
-        Make or UPDATE a comment on the ISSUE with your learnings following @GITHUB_STYLE_GUIDE.md .
+        Make or UPDATE a comment on the ISSUE with your learnings.
         OUTPUT the comment ID here:
 
     1.16 STATUS DECISION:
@@ -80,6 +81,8 @@ Master:
     Make a new "Master plan"
     Deeply think and plan out what to do based on the content of the issue.
 
+    Define the scope of the issue and overall definition of done.
+
     Give holistic consideration to the overall resolution approaches:
         1. Infra or config
         2. Code
@@ -96,7 +99,7 @@ Master:
     and all of the latest testing best practices as per claude.md
     ONLY RUN tests that don't require docker, such as unit, integration (no docker), or e2e on staging gcp remote.
     
-    UPDATE the comment on the ISSUE with the TEST PLAN following @GITHUB_STYLE_GUIDE.md.
+    UPDATE the comment on the ISSUE with the PLANs
 
 3) Action the plans: SNST :
     
@@ -126,7 +129,7 @@ Master:
     otherwise go back and ensure that any code changes exclusively add value as one atomic package of commit and
     do not introduce new problems.
     5.1)  Run startup tests (non docker) fix import or other types of startup issues related to this change.
-    5.2) UPDATE a comment on the ISSUE with PROOF  following @GITHUB_STYLE_GUIDE.md  .
+    5.2) UPDATE a comment on the ISSUE with PROOF
 
 *Skip step 6 if recently deployed*
 6) Staging Deploy SNST :  Spawn a sub agent PROVE THAT THE CHANGES WORK OR FAIL IN STAGING.
@@ -135,22 +138,13 @@ Master:
     6.2) WAIT for service revision success or failure.
     6.3) Read service logs to audit no net new breaking changes
     6.4) Run relevant tests on staging gcp (either newly created tests and relevant existing e2e tests related to this)
-    6.5) UPDATE a comment with Staging deploy information  following @GITHUB_STYLE_GUIDE.md  .
+    6.5) UPDATE a comment with Staging deploy information.
     6.6) IF new directly related and significant issues introduced log them and exit process, restart process from 1) (exit this agent and go back to main loop so it can spawn new agents)
 
-7) PR AND CLOSURE: SNST:
-7.1) Git commit remaining related work in conceptual batches. 
-7.2) **SAFE PR CREATION**: Create PR WITHOUT changing current branch:
-    - Record current branch (should be develop-long-lived): `git branch --show-current`
-    - pull latest, and handle merge conflicts
-    - Create feature branch remotely: `git push origin HEAD:feature/issue-${ISSUE_NUMBER}-$(date +%s)`
-    - Create PR from feature branch to current branch: `gh pr create --base develop-long-lived --head feature/issue-${ISSUE_NUMBER}-$(date +%s) --title "Fix: Issue #${ISSUE_NUMBER}" --body "Closes #${ISSUE_NUMBER}"`
-    - VERIFY current branch unchanged: `git branch --show-current`
-    - **CRITICAL**: Never checkout different branches - work stays on develop-long-lived
-    - **PR MERGES TO**: Current working branch (develop-long-lived) - NEVER main
-7.3) Cross link the prior generated issue so it will close on PR merge.
-7.4) **PR TARGET VALIDATION**: Ensure PR merges back to current working branch (develop-long-lived)
-7.5) Do a final update for this loop
-    If closing issue: remove label: actively-being-worked-on
+7) Wrap up: SNST:
+    7.1) Git commit remaining related work in conceptual batches. 
+    7.2) Do a final update for this loop,
+    especially linking created docs and related commits
+    7.3) If closing issue: remove label: actively-being-worked-on
 
 END PROCESS INSTRUCTIONS
