@@ -402,11 +402,12 @@ class SSotBaseTestCase:
     
     def safe_run_async(self, coro):
         """
-        Run async function safely regardless of event loop state.
+        Run async function safely regardless of event loop state with Issue #1278 infrastructure timeout handling.
         
         This method handles the nested event loop issue by using ThreadPoolExecutor
         when an event loop is already running, preventing RuntimeError: 
         "This event loop is already running".
+        Enhanced for Issue #1278 to handle infrastructure delays in staging/production environments.
         
         Args:
             coro: Coroutine to execute
@@ -420,10 +421,28 @@ class SSotBaseTestCase:
             # Event loop is running, use ThreadPoolExecutor to avoid nested loop issue
             with ThreadPoolExecutor() as executor:
                 future = executor.submit(asyncio.run, coro)
-                return future.result()
+                # Issue #1278: Infrastructure-aware timeout for staging/production
+                env = self.env_manager.get("ENVIRONMENT", "development").lower()
+                if env in ["staging", "production"]:
+                    timeout = 60.0  # Extended timeout for infrastructure delays
+                else:
+                    timeout = 30.0  # Standard timeout for local/test
+                return future.result(timeout=timeout)
         except RuntimeError:
             # No event loop running, safe to use asyncio.run
-            return asyncio.run(coro)
+            # Issue #1278: Apply infrastructure-aware timeout here too
+            try:
+                env = self.env_manager.get("ENVIRONMENT", "development").lower()
+                if env in ["staging", "production"]:
+                    # Infrastructure-aware async execution with timeout
+                    async def run_with_timeout():
+                        return await asyncio.wait_for(coro, timeout=60.0)
+                    return asyncio.run(run_with_timeout())
+                else:
+                    return asyncio.run(coro)
+            except Exception:
+                # Fallback to basic asyncio.run
+                return asyncio.run(coro)
     
     # === UNITTEST COMPATIBILITY LAYER ===
     # These methods provide compatibility with unittest-style test classes
