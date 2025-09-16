@@ -1,12 +1,5 @@
-#!/bin/bash
+# GitHub Issue #398 Update - NEW EVIDENCE (2025-09-16)
 
-# GitHub Issue Update Script for Issue #398 - SERVICE_ID Sanitization (CLUSTER 3)
-# Repository: netra-systems/netra-apex
-
-echo "Updating GitHub issue #398 with CLUSTER 3 SERVICE_ID whitespace findings..."
-
-gh issue comment 398 \
-  --body "$(cat <<'EOF'
 ## 🔄 **CLUSTER 3 Update: SERVICE_ID Whitespace Issue Persists - NEW EVIDENCE**
 
 ### **Latest Evidence (2025-09-16T16:00:00Z)**
@@ -93,8 +86,3 @@ def validate_service_configuration():
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)"
-
-echo "Issue #398 update comment posted successfully."
-echo "Please verify the comment was added to: https://github.com/netra-systems/netra-apex/issues/398"
