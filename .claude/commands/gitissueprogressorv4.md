@@ -81,9 +81,11 @@ PROCESS INSTRUCTIONS START:
 
     1.16 STATUS DECISION:
         IF the issue appears to already be resolved:
-            close the issue and repeat PROCESS loop, otherwise continue to the next step.
-            If closing issue: remove label: actively-being-worked-on
-            update the existing comment on the ISSUE with your learnings
+            start close the issue process, otherwise continue to the next step.
+            If closing issue: 
+                remove label: actively-being-worked-on
+                update the existing comment on the ISSUE with your learnings
+                close the issue
 
 Master:
     Pull latest, and handle merge conflicts
