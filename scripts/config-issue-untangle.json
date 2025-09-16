@@ -1,34 +1,79 @@
 {
-  "original_issue": 1029,
-  "title": "CRITICAL: GCP Staging Redis Connection Failure Breaking Chat Functionality",
-  "analysis_complete": true,
-  "root_cause": "Circular dependency in startup validation, not Redis connectivity",
-  "status": "Resolved with workaround, architectural improvements needed",
-  "new_issues": [
+  "instances": [
     {
-      "title": "Redesign Startup Validation Architecture to Prevent Circular Dependencies",
-      "priority": "high",
-      "labels": ["enhancement", "architecture", "high-priority"],
-      "effort": "3-5 days"
+      "command": "/issue_untangle 864",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
     },
     {
-      "title": "Create Comprehensive Startup Sequence Documentation and Diagrams",
-      "priority": "medium-high",
-      "labels": ["documentation", "enhancement"],
-      "effort": "2-3 days"
+      "command": "/issue_untangle 894",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
     },
     {
-      "title": "Implement Advanced Startup Monitoring and Circular Dependency Detection",
-      "priority": "high",
-      "labels": ["enhancement", "monitoring", "high-priority"],
-      "effort": "3-4 days"
+      "command": "/issue_untangle 899",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
     },
     {
-      "title": "Clean Up Misleading Error Messages and Improve Error Attribution",
-      "priority": "medium",
-      "labels": ["enhancement", "developer-experience"],
-      "effort": "2-3 days"
+      "command": "/issue_untangle 930",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/issue_untangle 960",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/issue_untangle 1016",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/issue_untangle 1029",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/issue_untangle 1049",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/issue_untangle 1171",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/issue_untangle 1174",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/issue_untangle 1176",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/issue_untangle 1184",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/issue_untangle 1201",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/issue_untangle 1208",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/issue_untangle 1283",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
     }
-  ],
-  "recommendation": "Close #1029 as resolved, open new focused issues for remaining work"
+  ]
 }
