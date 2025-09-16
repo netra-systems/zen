@@ -264,6 +264,6 @@ __all__ = [
 from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 # Log consolidation
-from netra_backend.app.logging_config import central_logger
-logger = central_logger.get_logger(__name__)
+from shared.logging.unified_logging_ssot import get_logger
+logger = get_logger(__name__)
 logger.info("WebSocket SSOT loaded - CRITICAL SECURITY MIGRATION: Factory pattern available, singleton vulnerabilities mitigated")
