@@ -36,8 +36,14 @@ from uuid import uuid4, UUID
 
 # Add token budget imports with proper path handling
 sys.path.insert(0, str(Path(__file__).parent))
-from token_budget.budget_manager import TokenBudgetManager
-from token_budget.visualization import render_progress_bar
+try:
+    from token_budget.budget_manager import TokenBudgetManager
+    from token_budget.visualization import render_progress_bar
+except ImportError as e:
+    # Graceful fallback if token budget package is not available
+    TokenBudgetManager = None
+    render_progress_bar = None
+    logger.warning(f"Token budget features not available: {e}")
 
 # Optional NetraOptimizer imports
 DatabaseClient = None
@@ -90,9 +96,22 @@ class InstanceStatus:
     total_tokens: int = 0
     input_tokens: int = 0
     output_tokens: int = 0
-    cached_tokens: int = 0
+    cached_tokens: int = 0  # Backward compatibility - sum of cache_read + cache_creation
+    cache_read_tokens: int = 0      # NEW: Separate cache read tracking
+    cache_creation_tokens: int = 0  # NEW: Separate cache creation tracking
     tool_calls: int = 0
     _last_known_total_tokens: int = 0  # For delta tracking in budget management
+
+    # NEW: Message ID deduplication tracking
+    processed_message_ids: set = None  # Will be initialized as empty set
+
+    # NEW: Authoritative cost from SDK when available
+    total_cost_usd: Optional[float] = None
+
+    def __post_init__(self):
+        """Initialize fields that need special handling"""
+        if self.processed_message_ids is None:
+            self.processed_message_ids = set()
 
 class ClaudeInstanceOrchestrator:
     """Orchestrator for managing multiple Claude Code instances"""
@@ -121,10 +140,13 @@ class ClaudeInstanceOrchestrator:
         self.optimizer = None
 
         # Initialize budget manager if any budget settings are provided
-        self.budget_manager = TokenBudgetManager(
-            overall_budget=overall_token_budget,
-            enforcement_mode=budget_enforcement_mode
-        ) if overall_token_budget is not None else None
+        if TokenBudgetManager and overall_token_budget is not None:
+            self.budget_manager = TokenBudgetManager(
+                overall_budget=overall_token_budget,
+                enforcement_mode=budget_enforcement_mode
+            )
+        else:
+            self.budget_manager = None
         self.enable_budget_visuals = enable_budget_visuals
 
         # Log budget configuration status
@@ -476,11 +498,22 @@ class ClaudeInstanceOrchestrator:
             logger.warning(f"Failed to save metrics to database for {name}: {e}")
 
     def _calculate_cost(self, status: InstanceStatus) -> float:
-        """Calculate cost based on token usage (Claude 3.5 Sonnet pricing)"""
-        input_cost = (status.input_tokens / 1_000_000) * 3.00  # $3 per M input tokens
+        """Calculate cost with current Claude 3.5 Sonnet pricing and proper cache handling"""
+
+        # Use authoritative cost if available (preferred)
+        if status.total_cost_usd is not None:
+            return status.total_cost_usd
+
+        # Fallback calculation with current pricing
+        # Claude 3.5 Sonnet current rates (as of 2024-2025)
+        input_cost = (status.input_tokens / 1_000_000) * 3.00    # $3 per M input tokens
         output_cost = (status.output_tokens / 1_000_000) * 15.00  # $15 per M output tokens
-        cache_cost = (status.cached_tokens / 1_000_000) * 0.30  # Assume cache read cost
-        return input_cost + output_cost + cache_cost
+
+        # Cache costs (differentiated by type)
+        cache_read_cost = (status.cache_read_tokens / 1_000_000) * 0.30      # $0.30 per M cache read
+        cache_creation_cost = (status.cache_creation_tokens / 1_000_000) * 0.75  # 25% of input rate for cache creation
+
+        return input_cost + output_cost + cache_read_cost + cache_creation_cost
 
     async def _stream_output(self, name: str, process):
         """Stream output in real-time for stream-json format (DEPRECATED - use _stream_output_parallel)"""
@@ -760,12 +793,12 @@ class ClaudeInstanceOrchestrator:
         print(f"║ Tokens: {self._format_tokens(total_tokens_all)} total, {self._format_tokens(total_cached_all)} cached | Median: {median_str} | Tools: {total_tools_all}")
 
         # --- ADD BUDGET STATUS SECTION ---
-        if self.budget_manager and self.enable_budget_visuals:
+        if self.budget_manager and self.enable_budget_visuals and render_progress_bar:
             bm = self.budget_manager
             used_formatted = self._format_tokens(bm.total_usage)
 
-            print(f"║")
-            print(f"╠═══ TOKEN BUDGET STATUS ═══╣")
+            print(f"|")
+            print(f"| TOKEN BUDGET STATUS |")
 
             if bm.overall_budget is not None:
                 overall_bar = render_progress_bar(bm.total_usage, bm.overall_budget)
@@ -910,101 +943,103 @@ class ClaudeInstanceOrchestrator:
         except Exception as e:
             logger.error(f"Failed to terminate instance {instance_name}: {e}")
 
+    def _extract_message_id(self, json_data: dict) -> Optional[str]:
+        """Extract message ID from JSON data for deduplication tracking"""
+        # Try multiple common locations where message ID might be stored
+        message_id = (
+            json_data.get('id') or
+            json_data.get('message_id') or
+            (json_data.get('message', {}).get('id') if isinstance(json_data.get('message'), dict) else None) or
+            (json_data.get('response', {}).get('id') if isinstance(json_data.get('response'), dict) else None)
+        )
+        return message_id
+
+    def _update_cache_tokens_for_compatibility(self, status: InstanceStatus):
+        """Update legacy cached_tokens field for backward compatibility"""
+        # Maintain backward compatibility by updating the combined cached_tokens field
+        status.cached_tokens = status.cache_read_tokens + status.cache_creation_tokens
+
     def _try_parse_json_token_usage(self, line: str, status: InstanceStatus) -> bool:
-        """Try to parse token usage from JSON format output"""
+        """SDK-compliant token usage parsing with message ID deduplication"""
         line = line.strip()
         if not line.startswith('{'):
             return False
-            
+
         try:
             json_data = json.loads(line)
-            
-            # Look for different JSON message types from Claude Code
-            
-            # Type 1: Token usage summary message
-            if 'tokens' in json_data:
-                token_data = json_data['tokens']
-                if isinstance(token_data, dict):
-                    # Structured token data
-                    if 'total' in token_data:
-                        total = int(token_data['total'])
-                        if total > status.total_tokens:
-                            status.total_tokens = total
-                    if 'input' in token_data:
-                        status.input_tokens += int(token_data['input'])
-                    if 'output' in token_data:
-                        status.output_tokens += int(token_data['output'])
-                    if 'cached' in token_data:
-                        status.cached_tokens += int(token_data['cached'])
-                elif isinstance(token_data, (int, float)):
-                    # Simple token count
-                    status.total_tokens += int(token_data)
-                return True
-            
-            # Type 2a: Check if usage is nested in message (common Claude Code format)
-            if 'message' in json_data and isinstance(json_data['message'], dict):
-                message = json_data['message']
-                if 'usage' in message:
-                    usage = message['usage']
-                    if isinstance(usage, dict):
-                        if 'input_tokens' in usage:
-                            status.input_tokens += int(usage['input_tokens'])
-                        if 'output_tokens' in usage:
-                            status.output_tokens += int(usage['output_tokens'])
-                        if 'cache_read_input_tokens' in usage:
-                            status.cached_tokens += int(usage['cache_read_input_tokens'])
-                        if 'cache_creation_input_tokens' in usage:
-                            status.cached_tokens += int(usage['cache_creation_input_tokens'])
-                        # Calculate total if not explicitly provided
-                        if 'total_tokens' in usage:
-                            total = int(usage['total_tokens'])
-                            if total > status.total_tokens:
-                                status.total_tokens = total
-                        else:
-                            # Calculate total from all components
-                            cache_creation = int(usage.get('cache_creation_input_tokens', 0))
-                            cache_read = int(usage.get('cache_read_input_tokens', 0))
-                            input_tokens = int(usage.get('input_tokens', 0))
-                            output_tokens = int(usage.get('output_tokens', 0))
-                            calculated_total = input_tokens + output_tokens + cache_creation + cache_read
-                            if calculated_total > status.total_tokens:
-                                status.total_tokens = calculated_total
+
+            # Extract message ID for deduplication
+            message_id = self._extract_message_id(json_data)
+
+            if message_id:
+                # SDK Rule: Skip if already processed this message ID
+                if message_id in status.processed_message_ids:
+                    logger.debug(f"Skipping duplicate message ID: {message_id}")
                     return True
-                    
-            # Type 2b: Usage statistics from Claude Code response (root level)
+
+                # Mark as processed
+                status.processed_message_ids.add(message_id)
+
+            # Process usage data (only once per message ID)
+            usage_data = None
             if 'usage' in json_data:
-                usage = json_data['usage']
-                if isinstance(usage, dict):
-                    if 'input_tokens' in usage:
-                        status.input_tokens += int(usage['input_tokens'])
-                    if 'output_tokens' in usage:
-                        status.output_tokens += int(usage['output_tokens'])
-                    if 'cache_read_input_tokens' in usage:
-                        status.cached_tokens += int(usage['cache_read_input_tokens'])
-                    if 'cache_creation_input_tokens' in usage:
-                        status.cached_tokens += int(usage['cache_creation_input_tokens'])
-                    # Calculate total if not explicitly provided
-                    if 'total_tokens' in usage:
-                        total = int(usage['total_tokens'])
-                        if total > status.total_tokens:
-                            status.total_tokens = total
-                    else:
-                        # Calculate total from all components
-                        cache_creation = int(usage.get('cache_creation_input_tokens', 0))
-                        cache_read = int(usage.get('cache_read_input_tokens', 0))
-                        input_tokens = int(usage.get('input_tokens', 0))
-                        output_tokens = int(usage.get('output_tokens', 0))
-                        calculated_total = input_tokens + output_tokens + cache_creation + cache_read
-                        if calculated_total > status.total_tokens:
-                            status.total_tokens = calculated_total
+                usage_data = json_data['usage']
+            elif 'message' in json_data and isinstance(json_data['message'], dict) and 'usage' in json_data['message']:
+                usage_data = json_data['message']['usage']
+            elif 'tokens' in json_data and isinstance(json_data['tokens'], dict):
+                # Handle structured token data format
+                usage_data = json_data['tokens']
+
+            if usage_data and isinstance(usage_data, dict):
+                # Use max() instead of += to handle same-ID messages correctly
+                if 'input_tokens' in usage_data:
+                    status.input_tokens = max(status.input_tokens, int(usage_data['input_tokens']))
+                elif 'input' in usage_data:  # Alternative format
+                    status.input_tokens = max(status.input_tokens, int(usage_data['input']))
+
+                if 'output_tokens' in usage_data:
+                    status.output_tokens = max(status.output_tokens, int(usage_data['output_tokens']))
+                elif 'output' in usage_data:  # Alternative format
+                    status.output_tokens = max(status.output_tokens, int(usage_data['output']))
+
+                # Separate cache types for accurate billing
+                if 'cache_read_input_tokens' in usage_data:
+                    status.cache_read_tokens = max(status.cache_read_tokens, int(usage_data['cache_read_input_tokens']))
+                if 'cache_creation_input_tokens' in usage_data:
+                    status.cache_creation_tokens = max(status.cache_creation_tokens, int(usage_data['cache_creation_input_tokens']))
+
+                # Handle legacy cached field
+                if 'cached' in usage_data:
+                    # If we don't have separate cache data, use the combined field
+                    if 'cache_read_input_tokens' not in usage_data and 'cache_creation_input_tokens' not in usage_data:
+                        cached_total = int(usage_data['cached'])
+                        status.cache_read_tokens = max(status.cache_read_tokens, cached_total)
+
+                # Use authoritative total when available
+                if 'total_tokens' in usage_data:
+                    total = int(usage_data['total_tokens'])
+                    status.total_tokens = max(status.total_tokens, total)
+                elif 'total' in usage_data:  # Alternative format
+                    total = int(usage_data['total'])
+                    status.total_tokens = max(status.total_tokens, total)
+
+                # Store authoritative cost if available
+                if 'total_cost_usd' in usage_data:
+                    status.total_cost_usd = max(status.total_cost_usd or 0, float(usage_data['total_cost_usd']))
+
+                # Update backward compatibility field
+                self._update_cache_tokens_for_compatibility(status)
+
                 return True
-            
-            # Type 3: Tool execution messages
+
+            # Handle tool calls with same ID deduplication
             if 'type' in json_data:
                 if json_data['type'] in ['tool_use', 'tool_call', 'tool_execution']:
-                    status.tool_calls += 1
+                    if message_id:
+                        # Only count tools once per message ID
+                        status.tool_calls += 1
                     return True
-                if json_data['type'] == 'message' and 'tool_calls' in json_data:
+                elif json_data['type'] == 'message' and 'tool_calls' in json_data:
                     # Count tool calls in message
                     tool_calls = json_data['tool_calls']
                     if isinstance(tool_calls, list):
@@ -1012,50 +1047,31 @@ class ClaudeInstanceOrchestrator:
                     elif isinstance(tool_calls, (int, float)):
                         status.tool_calls += int(tool_calls)
                     return True
-            
-            # Type 4: Claude Code specific metrics
-            if 'metrics' in json_data:
-                metrics = json_data['metrics']
-                if isinstance(metrics, dict):
-                    for key, value in metrics.items():
-                        if 'token' in key.lower() and isinstance(value, (int, float)):
-                            if 'total' in key.lower():
-                                total = int(value)
-                                if total > status.total_tokens:
-                                    status.total_tokens = total
-                            elif 'input' in key.lower():
-                                status.input_tokens += int(value)
-                            elif 'output' in key.lower():
-                                status.output_tokens += int(value)
-                            elif 'cached' in key.lower() or 'cache' in key.lower():
-                                status.cached_tokens += int(value)
-                        elif 'tool' in key.lower() and isinstance(value, (int, float)):
-                            status.tool_calls += int(value)
-                return True
-            
-            # Type 5: Direct token fields at root level
+
+            # Handle direct token fields at root level (without message ID - always accumulate)
             token_fields_found = False
-            if 'input_tokens' in json_data:
-                status.input_tokens += int(json_data['input_tokens'])
-                token_fields_found = True
-            if 'output_tokens' in json_data:
-                status.output_tokens += int(json_data['output_tokens'])
-                token_fields_found = True
-            if 'cached_tokens' in json_data:
-                status.cached_tokens += int(json_data['cached_tokens'])
-                token_fields_found = True
-            if 'total_tokens' in json_data:
-                total = int(json_data['total_tokens'])
-                if total > status.total_tokens:
-                    status.total_tokens = total
-                token_fields_found = True
-            if 'tool_calls' in json_data:
-                if isinstance(json_data['tool_calls'], (int, float)):
+            if not message_id:  # Only process these if no message ID (prevents double counting)
+                if 'input_tokens' in json_data:
+                    status.input_tokens = max(status.input_tokens, int(json_data['input_tokens']))
+                    token_fields_found = True
+                if 'output_tokens' in json_data:
+                    status.output_tokens = max(status.output_tokens, int(json_data['output_tokens']))
+                    token_fields_found = True
+                if 'cached_tokens' in json_data:
+                    cached_total = int(json_data['cached_tokens'])
+                    status.cache_read_tokens = max(status.cache_read_tokens, cached_total)
+                    self._update_cache_tokens_for_compatibility(status)
+                    token_fields_found = True
+                if 'total_tokens' in json_data:
+                    total = int(json_data['total_tokens'])
+                    status.total_tokens = max(status.total_tokens, total)
+                    token_fields_found = True
+                if 'tool_calls' in json_data and isinstance(json_data['tool_calls'], (int, float)):
                     status.tool_calls += int(json_data['tool_calls'])
                     token_fields_found = True
-            
+
             return token_fields_found
-            
+
         except (json.JSONDecodeError, ValueError, KeyError, TypeError) as e:
             # Not valid JSON or doesn't contain expected fields
             logger.debug(f"JSON parsing failed for line: {e}")
@@ -1087,12 +1103,18 @@ class ClaudeInstanceOrchestrator:
         # Pattern 2b: Cached tokens
         cached_match = re.search(r'cached[:\s]+(\d+)\s+tokens?', line_lower)
         if cached_match:
-            status.cached_tokens += int(cached_match.group(1))
-        
+            # Add to cache_read_tokens and update backward compatibility
+            cached_tokens = int(cached_match.group(1))
+            status.cache_read_tokens = max(status.cache_read_tokens, cached_tokens)
+            self._update_cache_tokens_for_compatibility(status)
+
         # Pattern 2c: Cache hit patterns
         cache_hit_match = re.search(r'cache\s+hit[:\s]+(\d+)\s+tokens?', line_lower)
         if cache_hit_match:
-            status.cached_tokens += int(cache_hit_match.group(1))
+            # Add to cache_read_tokens and update backward compatibility
+            cached_tokens = int(cache_hit_match.group(1))
+            status.cache_read_tokens = max(status.cache_read_tokens, cached_tokens)
+            self._update_cache_tokens_for_compatibility(status)
         
         # Pattern 3: Total token counts "Total: X tokens"
         total_match = re.search(r'total[:\s]+(\d+)\s+tokens?', line_lower)
@@ -1175,17 +1197,20 @@ class ClaudeInstanceOrchestrator:
         if not isinstance(usage_data, dict):
             return
             
-        # Standard Claude API usage fields
+        # Standard Claude API usage fields (use max to handle same message IDs)
         if 'input_tokens' in usage_data:
-            status.input_tokens += int(usage_data['input_tokens'])
+            status.input_tokens = max(status.input_tokens, int(usage_data['input_tokens']))
         if 'output_tokens' in usage_data:
-            status.output_tokens += int(usage_data['output_tokens'])
+            status.output_tokens = max(status.output_tokens, int(usage_data['output_tokens']))
         if 'cache_read_input_tokens' in usage_data:
-            status.cached_tokens += int(usage_data['cache_read_input_tokens'])
-        
-        # Handle cache_creation_input_tokens (also counts as cached)
+            status.cache_read_tokens = max(status.cache_read_tokens, int(usage_data['cache_read_input_tokens']))
+
+        # Handle cache_creation_input_tokens separately
         if 'cache_creation_input_tokens' in usage_data:
-            status.cached_tokens += int(usage_data['cache_creation_input_tokens'])
+            status.cache_creation_tokens = max(status.cache_creation_tokens, int(usage_data['cache_creation_input_tokens']))
+
+        # Update backward compatibility field
+        self._update_cache_tokens_for_compatibility(status)
         
         # Calculate or use provided total
         if 'total_tokens' in usage_data:
@@ -1213,7 +1238,9 @@ class ClaudeInstanceOrchestrator:
             if 'output' in token_data:
                 status.output_tokens += int(token_data['output'])
             if 'cached' in token_data:
-                status.cached_tokens += int(token_data['cached'])
+                cached_tokens = int(token_data['cached'])
+                status.cache_read_tokens = max(status.cache_read_tokens, cached_tokens)
+                self._update_cache_tokens_for_compatibility(status)
         elif isinstance(token_data, (int, float)):
             # Simple token count
             status.total_tokens += int(token_data)
@@ -1596,8 +1623,10 @@ async def main():
         for budget_str in args.command_budget:
             try:
                 command_name, limit = budget_str.split('=', 1)
-                orchestrator.budget_manager.set_command_budget(command_name.strip(), int(limit))
-                logger.info(f"Set budget for {command_name.strip()} to {limit} tokens.")
+                # Keep command name as is - don't let it be expanded as path
+                command_name = command_name.strip()
+                orchestrator.budget_manager.set_command_budget(command_name, int(limit))
+                logger.info(f"Set budget for {command_name} to {limit} tokens.")
             except ValueError:
                 logger.error(f"Invalid format for --command-budget: '{budget_str}'. Use '/command=limit'.")
 
@@ -1656,23 +1685,23 @@ async def main():
         if orchestrator.budget_manager:
             from token_budget.visualization import render_progress_bar
             bm = orchestrator.budget_manager
-            print(f"\n╔═══ TOKEN BUDGET CONFIGURATION ═══╗")
+            print(f"\n=== TOKEN BUDGET CONFIGURATION ===")
 
             if bm.overall_budget:
-                print(f"║ Overall Budget: {bm.overall_budget:,} tokens")
+                print(f"Overall Budget: {bm.overall_budget:,} tokens")
             else:
-                print(f"║ Overall Budget: Unlimited")
+                print(f"Overall Budget: Unlimited")
 
-            print(f"║ Enforcement Mode: {bm.enforcement_mode.upper()}")
+            print(f"Enforcement Mode: {bm.enforcement_mode.upper()}")
 
             if bm.command_budgets:
-                print(f"║ Command Budgets:")
+                print(f"Command Budgets:")
                 for name, budget_info in bm.command_budgets.items():
-                    print(f"║   {name:<30} {budget_info.limit:,} tokens")
+                    print(f"  {name:<30} {budget_info.limit:,} tokens")
             else:
-                print(f"║ Command Budgets: None configured")
+                print(f"Command Budgets: None configured")
 
-            print(f"╚══════════════════════════════════╝")
+            print(f"=====================================\n")
 
         # Show scheduled start time if provided
         if args.start_at:
