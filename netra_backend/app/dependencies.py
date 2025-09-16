@@ -44,10 +44,8 @@ from netra_backend.app.agents.supervisor.execution_engine_factory import (
 )
 # SSOT COMPLIANCE: Use standard UserExecutionContext (no duplicate imports)
 # ExecutionFactoryConfig and FactoryUserExecutionContext aliases removed - use SSOT patterns
-from netra_backend.app.services.websocket_bridge_factory import (
-    WebSocketBridgeFactory,
-    WebSocketFactoryConfig
-)
+# SSOT PHASE 2 FIX: Import from SSOT agent websocket bridge instead of deprecated factory
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.websocket_connection_pool import (
     WebSocketConnectionPool
 )
@@ -1686,34 +1684,34 @@ def get_execution_engine_factory_from_request(request: Request) -> ExecutionEngi
         )
 
 
-def get_websocket_bridge_factory(request: Request) -> WebSocketBridgeFactory:
-    """Get WebSocketBridgeFactory from app state.
+def get_agent_websocket_bridge(request: Request) -> AgentWebSocketBridge:
+    """Get AgentWebSocketBridge from app state.
     
     The factory should be initialized during app startup and configured
     with infrastructure components (connection_pool, agent_registry, health_monitor).
     
     Returns:
-        WebSocketBridgeFactory: Configured factory for creating isolated WebSocket emitters
+        AgentWebSocketBridge: Configured factory for creating isolated WebSocket emitters
         
     Raises:
         HTTPException: If factory not configured
     """
     try:
-        factory = getattr(request.app.state, 'websocket_bridge_factory', None)
+        factory = getattr(request.app.state, 'agent_websocket_bridge', None)
         if not factory:
-            logger.error("WebSocketBridgeFactory not found in app state - ensure it's configured during startup")
+            logger.error("AgentWebSocketBridge not found in app state - ensure it's configured during startup")
             raise HTTPException(
                 status_code=500,
-                detail="WebSocketBridgeFactory unavailable (startup initialization failed or configuration invalid)"
+                detail="AgentWebSocketBridge unavailable (startup initialization failed or configuration invalid)"
             )
         
         return factory
         
     except Exception as e:
-        logger.error(f"Failed to get WebSocketBridgeFactory: {e}")
+        logger.error(f"Failed to get AgentWebSocketBridge: {e}")
         raise HTTPException(
             status_code=500,
-            detail=f"WebSocketBridgeFactory error: {str(e)}"
+            detail=f"AgentWebSocketBridge error: {str(e)}"
         )
 
 
@@ -1828,7 +1826,7 @@ async def get_factory_websocket_emitter(
     """
     try:
         # Get factory from app state
-        factory = get_websocket_bridge_factory(request)
+        factory = get_agent_websocket_bridge(request)
         
         # SSOT COMPLIANCE FIX: Generate connection ID using UnifiedIdGenerator
         if not connection_id:
@@ -1952,7 +1950,7 @@ async def get_adaptive_websocket_bridge(
 # Type aliases for dependency injection
 # PHASE 2A CONSOLIDATION: ExecutionEngineFactoryDep already defined above (line 1212)
 # Duplicate removed to prevent SSOT violations
-WebSocketBridgeFactoryDep = Annotated[WebSocketBridgeFactory, Depends(get_websocket_bridge_factory)]
+AgentWebSocketBridgeDep = Annotated[AgentWebSocketBridge, Depends(get_agent_websocket_bridge)]
 FactoryAdapterDep = Annotated[FactoryAdapter, Depends(get_factory_adapter)]
 
 
@@ -2077,9 +2075,9 @@ async def configure_factory_dependencies(app) -> None:
         # This prevents factory duplication violations (Issue #1196)
         execution_factory = await get_execution_engine_factory("default_app_startup")
         
-        # Create WebSocketBridgeFactory
-        websocket_factory_config = WebSocketFactoryConfig.from_env()
-        websocket_factory = WebSocketBridgeFactory(websocket_factory_config)
+        # Create AgentWebSocketBridge
+        websocket_factory_config = dict.from_env()
+        websocket_factory = AgentWebSocketBridge(websocket_factory_config)
         
         # Create WebSocket connection pool
         connection_pool = WebSocketConnectionPool()
@@ -2094,7 +2092,7 @@ async def configure_factory_dependencies(app) -> None:
         # Configure execution factory
         execution_factory.configure(
             agent_registry=getattr(app.state, 'agent_registry', None),
-            websocket_bridge_factory=websocket_factory,
+            agent_websocket_bridge=websocket_factory,
             db_connection_pool=getattr(app.state, 'db_pool', None)
         )
         
@@ -2104,7 +2102,7 @@ async def configure_factory_dependencies(app) -> None:
         
         # Store in app state
         app.state.execution_engine_factory = execution_factory
-        app.state.websocket_bridge_factory = websocket_factory
+        app.state.agent_websocket_bridge = websocket_factory
         app.state.websocket_connection_pool = connection_pool
         app.state.factory_adapter = factory_adapter
         
@@ -2151,9 +2149,9 @@ def get_factory_health_status(request: Request) -> Dict[str, Any]:
         except Exception as e:
             status['execution_factory']['error'] = str(e)
         
-        # Check WebSocketBridgeFactory
+        # Check AgentWebSocketBridge
         try:
-            factory = get_websocket_bridge_factory(request)
+            factory = get_agent_websocket_bridge(request)
             status['websocket_factory']['configured'] = True
             metrics = factory.get_factory_metrics()
             status['websocket_factory']['healthy'] = True
