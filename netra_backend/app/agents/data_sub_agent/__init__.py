@@ -15,13 +15,14 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.data_sub_agent.models import (
     AnomalyDetectionResponse,
     CorrelationAnalysis,
-    DataAnalysisResponse,
     DataQualityMetrics,
     PerformanceInsights,
     PerformanceMetrics,
     UsageAnalysisResponse,
     UsagePattern,
 )
+# Import SSOT DataAnalysisResponse from shared_types
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse
 
 
 class DataSubAgent(BaseAgent):
@@ -76,7 +77,7 @@ __all__ = [
     "DataSubAgent",
     "AnomalyDetectionResponse",
     "CorrelationAnalysis", 
-    "DataAnalysisResponse",
+    "DataAnalysisResponse",  # SSOT version from shared_types
     "DataQualityMetrics",
     "PerformanceInsights",
     "PerformanceMetrics",
