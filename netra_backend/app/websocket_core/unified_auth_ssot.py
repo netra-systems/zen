@@ -27,6 +27,26 @@ class WebSocketAuthResult:
     permissions: Optional[list] = None
     error_message: Optional[str] = None
     auth_method: Optional[str] = None  # "jwt-auth-subprotocol", "authorization-header", "query-param-fallback"
+    
+    # Aliases for backward compatibility
+    @property
+    def is_authenticated(self) -> bool:
+        """Alias for success for backward compatibility"""
+        return self.success
+    
+    @property
+    def error_code(self) -> Optional[str]:
+        """Alias for error_message for backward compatibility"""
+        return self.error_message
+    
+    @property
+    def bypass_reason(self) -> Optional[str]:
+        """Bypass reason (used in permissive mode)"""
+        return getattr(self, '_bypass_reason', None)
+        
+    def set_bypass_reason(self, reason: str):
+        """Set bypass reason for permissive mode"""
+        self._bypass_reason = reason
 
 class UnifiedWebSocketAuthenticator:
     """
@@ -253,15 +273,110 @@ class UnifiedWebSocketAuthenticator:
             )
         
         return WebSocketAuthResult(success=False, error_message="E2E bypass not configured", auth_method="e2e-bypass")
+    
+    async def authenticate_manual(
+        self, 
+        token: Optional[str],
+        headers: Dict[str, Any],
+        environment: Optional[str],
+        permissive: bool = False
+    ) -> WebSocketAuthResult:
+        """
+        Manual authentication for testing and validation purposes.
+        
+        This method supports authentication without a WebSocket connection,
+        useful for unit tests and validation scenarios.
+        """
+        try:
+            if not token:
+                if permissive and self._should_allow_bypass():
+                    logger.warning("🚨 PERMISSIVE MODE: Allowing authentication without token")
+                    result = WebSocketAuthResult(
+                        success=True,
+                        user_id="test-user-permissive",
+                        email="test@permissive.local",
+                        permissions=["read", "write", "chat", "websocket", "agent:execute"],
+                        auth_method="permissive-bypass"
+                    )
+                    result.set_bypass_reason("no-token-permissive-mode")
+                    return result
+                
+                return WebSocketAuthResult(
+                    success=False,
+                    error_message="No token provided",
+                    auth_method="manual"
+                )
+            
+            # Validate token with auth service
+            auth_result = await self.auth_service.validate_token(token)
+            
+            if auth_result["valid"]:
+                return WebSocketAuthResult(
+                    success=True,
+                    user_id=auth_result["user_id"],
+                    email=auth_result.get("email"),
+                    permissions=auth_result.get("permissions", ["read", "write", "chat", "websocket", "agent:execute"]),
+                    auth_method="manual-jwt"
+                )
+            else:
+                return WebSocketAuthResult(
+                    success=False,
+                    error_message=auth_result.get("error", "Token validation failed"),
+                    auth_method="manual-jwt"
+                )
+                
+        except Exception as e:
+            logger.error(f"Manual authentication error: {e}")
+            
+            if permissive and self._should_allow_bypass():
+                logger.warning(f"🚨 PERMISSIVE MODE: Allowing failed authentication - {str(e)}")
+                result = WebSocketAuthResult(
+                    success=True,
+                    user_id="test-user-error-bypass",
+                    email="error@permissive.local",
+                    permissions=["read", "write", "chat", "websocket", "agent:execute"],
+                    auth_method="permissive-error-bypass"
+                )
+                result.set_bypass_reason(f"error-bypass: {str(e)}")
+                return result
+            
+            return WebSocketAuthResult(
+                success=False,
+                error_message=f"Authentication error: {str(e)}",
+                auth_method="manual-error"
+            )
 
 # SSOT EXPORT: Single authenticator instance
 websocket_authenticator = UnifiedWebSocketAuthenticator()
 
-async def authenticate_websocket(websocket: WebSocket) -> WebSocketAuthResult:
+async def authenticate_websocket(
+    websocket: WebSocket = None,
+    token: Optional[str] = None,
+    headers: Optional[Dict[str, Any]] = None,
+    environment: Optional[str] = None,
+    permissive: bool = False
+) -> WebSocketAuthResult:
     """
     SSOT FUNCTION: Primary entry point for all WebSocket authentication
     
     This function should be used by all WebSocket routes and handlers.
     Replaces all other authentication methods.
+    
+    Args:
+        websocket: WebSocket connection (if available)
+        token: JWT token for authentication
+        headers: HTTP headers dict
+        environment: Environment name for permissive mode logic
+        permissive: Enable permissive mode for testing
     """
-    return await websocket_authenticator.authenticate_websocket_connection(websocket)
+    if websocket is not None:
+        # Use WebSocket-based authentication (primary path)
+        return await websocket_authenticator.authenticate_websocket_connection(websocket)
+    else:
+        # Use manual authentication (for testing/validation)
+        return await websocket_authenticator.authenticate_manual(
+            token=token,
+            headers=headers or {},
+            environment=environment,
+            permissive=permissive
+        )
