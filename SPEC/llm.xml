@@ -108,14 +108,19 @@ response = await structured_llm.ainvoke(prompt)
                     </code>
         </example>
         <example name="data-agent">
-          <description>Data agent using structured output for analysis results</description>
+          <description>Data agent using SSOT structured output for analysis results</description>
           <code>
+# Import SSOT schema
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse, PerformanceMetrics
+
+# SSOT DataAnalysisResponse schema:
 class DataAnalysisResponse(BaseModel):
-    query: str
-    results: List[Dict[str, Any]]
-    metadata: Dict[str, Any]
-    error: Optional[str] = None
-    execution_time_ms: float
+    analysis_id: str
+    status: str
+    results: Dict[str, Any]
+    metrics: PerformanceMetrics
+    created_at: float
+    completed_at: Optional[float] = None
     
 # In data_sub_agent.py
 structured_llm = llm.with_structured_output(DataAnalysisResponse)

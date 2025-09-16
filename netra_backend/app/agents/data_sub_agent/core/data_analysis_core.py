@@ -218,8 +218,8 @@ class DataAnalysisCore:
     async def cleanup(self) -> None:
         """Clean up resources and connections."""
         try:
-            if self.session_manager:
-                await self.session_manager.close()
+            # SSOT: Removed close() call - SessionManager stub has no close method
+            # Database cleanup happens automatically via context.db_session lifecycle
             
             if self.data_access:
                 # Data access capabilities have their own cleanup

@@ -148,52 +148,102 @@ class UserContextExtractor:
     
     async def validate_and_decode_jwt(self, token: str, fast_path_enabled: bool = False) -> Optional[Dict[str, Any]]:
         """
-        SSOT JWT validation - Pure delegation to auth service.
-        
-        SSOT REMEDIATION: This method now provides pure delegation to the auth service
-        without any local JWT validation logic. All JWT operations are consolidated
-        in the auth service SSOT (JWTHandler.validate_token()).
-        
+        JWT Migration Phase 2: Pure delegation to auth service APIs.
+
+        This method now uses the Phase 1 auth service APIs instead of local JWT validation.
+        Feature flag ENABLE_JWT_MIGRATION_PHASE_2 controls whether to use new auth service
+        APIs or maintain backward compatibility.
+
         Args:
             token: JWT token string
             fast_path_enabled: If True, use optimized validation for E2E tests
-            
+
         Returns:
             Decoded JWT payload if valid, None otherwise
         """
         from shared.isolated_environment import get_env
-        
+
         env = get_env()
         environment = env.get("ENVIRONMENT", "development").lower()
-        
-        logger.info(f"SSOT JWT: Delegating token validation to auth service (env: {environment})")
-        
+
+        # Check Phase 2 migration feature flag
+        phase_2_enabled = env.get("ENABLE_JWT_MIGRATION_PHASE_2", "true").lower() == "true"
+
+        if phase_2_enabled:
+            logger.info(f"JWT PHASE 2: Using auth service APIs for token validation (env: {environment})")
+            return await self._validate_jwt_via_auth_service_apis(token, environment)
+        else:
+            logger.info(f"JWT PHASE 2: Using legacy auth service client (env: {environment})")
+            return await self._validate_jwt_legacy_path(token, environment)
+
+    async def _validate_jwt_via_auth_service_apis(self, token: str, environment: str) -> Optional[Dict[str, Any]]:
+        """
+        JWT Migration Phase 2: Use auth service APIs for validation.
+        """
         try:
-            # SSOT COMPLIANCE: Pure delegation to auth service
-            validation_result = await self.auth_service.validate_token(token)
-            
+            # Use auth service validate_token_jwt API (Phase 1)
+            validation_result = await self.auth_service.validate_token_jwt(token)
+
             if not validation_result or not validation_result.get('valid'):
-                logger.warning(f"SSOT JWT: Auth service validation failed (env: {environment})")
+                logger.warning(f"JWT PHASE 2: Auth service API validation failed (env: {environment})")
                 return None
-                
+
+            # Extract claims from validation result
+            user_id = validation_result.get("user_id")
+            if not user_id or user_id == "None":
+                logger.warning("JWT PHASE 2: Token missing valid user ID claim")
+                return None
+
+            # Convert auth service response to legacy payload format for compatibility
+            payload = {
+                "sub": user_id,
+                "email": validation_result.get("email"),
+                "role": validation_result.get("role"),
+                "permissions": validation_result.get("permissions", []),
+                "exp": validation_result.get("expires_at"),
+                "iat": validation_result.get("issued_at"),
+                "source": "auth_service_apis_phase2"
+            }
+
+            logger.info(f"JWT PHASE 2: Validation successful for user {user_id[:8]}... (env: {environment})")
+            return payload
+
+        except Exception as e:
+            logger.error(f"JWT PHASE 2: Auth service API validation error - {e} (type: {type(e).__name__})")
+            # Fallback to legacy path on API failure
+            logger.warning("JWT PHASE 2: Falling back to legacy validation path")
+            return await self._validate_jwt_legacy_path(token, environment)
+
+    async def _validate_jwt_legacy_path(self, token: str, environment: str) -> Optional[Dict[str, Any]]:
+        """
+        JWT Migration Phase 2: Legacy auth service client validation path.
+        """
+        try:
+            # SSOT COMPLIANCE: Pure delegation to auth service client
+            validation_result = await self.auth_service.validate_token(token)
+
+            if not validation_result or not validation_result.get('valid'):
+                logger.warning(f"JWT LEGACY: Auth service validation failed (env: {environment})")
+                return None
+
             # Extract payload from validation result - SSOT compliance: Use auth service payload directly
             payload = validation_result.get('payload', {})
             if not payload:
-                logger.error("SSOT JWT: Auth service returned no payload - validation incomplete")
+                logger.error("JWT LEGACY: Auth service returned no payload - validation incomplete")
                 return None
-            
+
             # Basic validation
             user_id = payload.get("sub")
             if not user_id or user_id == "None":
-                logger.warning("SSOT JWT: Token missing valid user ID claim")
+                logger.warning("JWT LEGACY: Token missing valid user ID claim")
                 return None
-            
-            logger.info(f"SSOT JWT: Validation successful for user {user_id[:8]}... (env: {environment})")
-            payload["source"] = "auth_service_ssot"
+
+            logger.info(f"JWT LEGACY: Validation successful for user {user_id[:8]}... (env: {environment})")
+            payload["source"] = "auth_service_legacy"
             return payload
-            
+
         except Exception as e:
-            logger.error(f"SSOT JWT: Validation error - {e} (type: {type(e).__name__})")
+            logger.error(f"JWT LEGACY: Validation error - {e} (type: {type(e).__name__})")
             return None
     
     # SSOT COMPLIANCE: All fallback validation methods eliminated

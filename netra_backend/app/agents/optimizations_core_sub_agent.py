@@ -194,14 +194,13 @@ class OptimizationsCoreSubAgent(BaseAgent):
             if stream_updates:
                 await self._emit_error(context, error_msg, "OptimizationError")
             
-            # Ensure session is rolled back on error
-            if session_manager:
-                await session_manager.rollback()
+            # SSOT: Removed rollback() call - SessionManager stub has no rollback method
+            # Database rollback happens automatically via context.db_session lifecycle
             raise
         finally:
-            # Ensure session is closed
-            if session_manager:
-                await session_manager.close()
+            # SSOT: Removed close() call - SessionManager stub has no close method
+            # Database cleanup happens automatically via context.db_session lifecycle
+            pass
     
     async def _execute_optimization_workflow(self, context: UserExecutionContext, 
                                            session_manager: Any, 

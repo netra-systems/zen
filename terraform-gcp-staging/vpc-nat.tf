@@ -30,8 +30,8 @@ locals {
   nat_router_name  = "staging-nat-router"
   nat_gateway_name = "staging-nat-gateway"
   
-  # VPC network reference
-  vpc_network_name = "staging-vpc"
+  # VPC network reference - must match the created VPC name
+  vpc_network_name = "${var.environment}-vpc"
   
   # Tags for resource organization
   common_tags = {
@@ -47,9 +47,10 @@ locals {
 # Cloud Router for NAT Gateway
 # This router enables the NAT gateway to route traffic from private VPC to internet
 resource "google_compute_router" "staging_nat_router" {
+  count   = var.enable_private_ip ? 1 : 0
   name    = local.nat_router_name
   region  = local.region
-  network = local.vpc_network_name
+  network = google_compute_network.vpc[0].name
   project = local.project_id
 
   description = "Cloud Router for NAT gateway - enables external service access while preserving Cloud SQL Unix socket compatibility"
@@ -67,9 +68,10 @@ resource "google_compute_router" "staging_nat_router" {
 # This NAT provides outbound internet access for private VPC resources
 # while maintaining VPC egress private-ranges-only setting
 resource "google_compute_router_nat" "staging_nat_gateway" {
-  name   = local.nat_gateway_name
-  router = google_compute_router.staging_nat_router.name
-  region = local.region
+  count   = var.enable_private_ip ? 1 : 0
+  name    = local.nat_gateway_name
+  router  = google_compute_router.staging_nat_router[0].name
+  region  = local.region
   project = local.project_id
 
   # Route ALL subnet IP ranges through NAT for external access
@@ -101,38 +103,46 @@ resource "google_compute_router_nat" "staging_nat_gateway" {
 # Output values for reference by other configurations
 output "nat_router_name" {
   description = "Name of the Cloud NAT router"
-  value       = google_compute_router.staging_nat_router.name
+  value       = var.enable_private_ip ? google_compute_router.staging_nat_router[0].name : null
 }
 
 output "nat_gateway_name" {
   description = "Name of the Cloud NAT gateway"
-  value       = google_compute_router_nat.staging_nat_gateway.name
+  value       = var.enable_private_ip ? google_compute_router_nat.staging_nat_gateway[0].name : null
 }
 
 output "nat_router_self_link" {
   description = "Self-link of the Cloud NAT router"
-  value       = google_compute_router.staging_nat_router.self_link
+  value       = var.enable_private_ip ? google_compute_router.staging_nat_router[0].self_link : null
 }
 
-# Data source to verify VPC network exists
+# Data source to verify VPC network exists (only when private IP is enabled)
 data "google_compute_network" "staging_vpc" {
+  count   = var.enable_private_ip ? 1 : 0
   name    = local.vpc_network_name
   project = local.project_id
 }
 
-# Validation: Ensure VPC exists before creating NAT
+# Validation: Ensure VPC exists before creating NAT (only when private IP is enabled)
 resource "null_resource" "vpc_validation" {
+  count = var.enable_private_ip ? 1 : 0
   # This resource validates the VPC exists
   triggers = {
-    vpc_network_id = data.google_compute_network.staging_vpc.id
+    vpc_network_id = data.google_compute_network.staging_vpc[0].id
   }
-  
+
   provisioner "local-exec" {
     command = "echo 'VPC ${local.vpc_network_name} validated for NAT deployment'"
   }
 }
 
-# Variable definitions (should be defined in variables.tf or passed in)
+# Variable definitions for enable_private_ip (should be defined in variables.tf or passed in)
+variable "enable_private_ip" {
+  description = "Enable private IP for Cloud SQL - also determines if VPC resources are created"
+  type        = bool
+  default     = true
+}
+
 variable "project_id" {
   description = "GCP Project ID"
   type        = string
@@ -143,6 +153,12 @@ variable "region" {
   description = "GCP Region"
   type        = string
   default     = "us-central1"
+}
+
+variable "environment" {
+  description = "Environment name"
+  type        = string
+  default     = "staging"
 }
 
 # Resource monitoring and alerting (optional)
@@ -213,14 +229,15 @@ resource "null_resource" "documentation" {
   }
 }
 
-# Resource dependencies to ensure proper creation order
+# Resource dependencies to ensure proper creation order (only when private IP is enabled)
 resource "null_resource" "deployment_order" {
+  count = var.enable_private_ip ? 1 : 0
   depends_on = [
     data.google_compute_network.staging_vpc,
     google_compute_router.staging_nat_router,
     google_compute_router_nat.staging_nat_gateway
   ]
-  
+
   provisioner "local-exec" {
     command = "echo 'Cloud NAT infrastructure deployed successfully'"
   }
