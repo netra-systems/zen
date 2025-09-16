@@ -20,7 +20,9 @@ from unittest.mock import patch, MagicMock
 from typing import Dict, Any
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.websocket_core.types import create_server_message as types_create_server_message
-from netra_backend.app.websocket_core import create_server_message as init_create_server_message
+# SSOT COMPLIANCE FIX: Direct import instead of expecting __init__.py export
+# Issue #1176 Phase 2 removed __init__.py exports to force canonical imports
+# Since SSOT consolidation eliminated dual implementations, we test the canonical one
 from netra_backend.app.websocket_core.types import MessageType, ServerMessage
 
 class CreateServerMessageSignatureErrorTests(SSotBaseTestCase):
@@ -32,23 +34,25 @@ class CreateServerMessageSignatureErrorTests(SSotBaseTestCase):
         from netra_backend.app.logging_config import central_logger
         self.logger = central_logger.get_logger(self.__class__.__name__)
 
-    def test_dual_implementation_detection(self):
+    def test_ssot_compliance_validation(self):
         """
-        CRITICAL: Test that detects SSOT violation of dual create_server_message implementations.
+        CRITICAL: Test that validates SSOT compliance for create_server_message.
         
-        This test should FAIL initially to prove the signature error exists.
+        Post-Issue #1176: Validates that SSOT consolidation eliminated dual implementations.
+        Now tests the canonical implementation works correctly.
         """
-        assert callable(types_create_server_message), 'types.py implementation should exist'
-        assert callable(init_create_server_message), 'init.py implementation should exist'
+        assert callable(types_create_server_message), 'Canonical types.py implementation should exist'
         import inspect
         types_sig = inspect.signature(types_create_server_message)
-        init_sig = inspect.signature(init_create_server_message)
         types_params = list(types_sig.parameters.keys())
-        init_params = list(init_sig.parameters.keys())
-        self.logger.info(f'types.py signature: {types_params}')
-        self.logger.info(f'init.py signature: {init_params}')
-        with pytest.raises(AssertionError, match='SSOT violation detected'):
-            assert types_params == init_params, 'SSOT violation detected: Different signatures for same function'
+        self.logger.info(f'Canonical SSOT signature: {types_params}')
+        
+        # SSOT COMPLIANCE: Validate canonical signature supports required patterns
+        expected_params = ['msg_type_or_dict', 'data', 'correlation_id', 'content']
+        for param in expected_params:
+            assert param in types_params, f'SSOT signature missing required parameter: {param}'
+        
+        self.logger.info('SSOT compliance validated: Single canonical implementation confirmed')
 
     def test_incorrect_call_pattern_failure(self):
         """
@@ -86,16 +90,25 @@ class CreateServerMessageSignatureErrorTests(SSotBaseTestCase):
         assert result.data['status'] == 'test'
         assert result.correlation_id == 'test-123'
 
-    def test_init_implementation_compatibility(self):
+    def test_canonical_implementation_behavior(self):
         """
-        Test that init.py implementation has different behavior.
+        Test that canonical implementation has expected behavior.
         
-        This shows that init.py actually imports from types.py, not using fallback.
+        Post-SSOT: Validates the single canonical implementation works correctly.
         """
-        self.logger.info('Testing that init import is same as types import')
-        assert init_create_server_message is types_create_server_message, 'Both imports should reference the same function from types.py'
+        self.logger.info('Testing canonical SSOT implementation behavior')
+        
+        # Test that insufficient parameters raise TypeError (validates strict signature)
         with pytest.raises(TypeError):
-            init_create_server_message(MessageType.SYSTEM_MESSAGE)
+            types_create_server_message(MessageType.SYSTEM_MESSAGE)
+        
+        # Test that proper parameters work correctly
+        result = types_create_server_message(
+            MessageType.SYSTEM_MESSAGE, 
+            {'status': 'test'}, 
+            correlation_id='test-123'
+        )
+        assert isinstance(result, ServerMessage), 'Should return ServerMessage instance'
 
     def test_handlers_import_resolution(self):
         """

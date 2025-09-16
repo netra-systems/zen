@@ -57,6 +57,7 @@ import logging
 import time
 import uuid
 from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, UTC
@@ -1062,9 +1063,8 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
 
     async def asyncSetUp(self):
         """Async setup method for async tests."""
-        # Call parent sync setup to ensure all base attributes are initialized
-        if hasattr(super(), 'setUp'):
-            super().setUp()
+        # DO NOT call super().setUp() here - it would create infinite recursion
+        # The setUp() method already calls setup_method() and then this asyncSetUp()
         # This allows subclasses to override asyncSetUp for additional async initialization
         pass
 
