@@ -249,6 +249,9 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         onReconnect: () => {
           logger.debug('[WebSocketProvider] WebSocket reconnecting with fresh authentication');
           connectionStateRef.current = 'connecting';
+          
+          // Clear ticket cache to ensure fresh authentication on reconnect
+          unifiedAuthService.clearTicketCache();
         },
         heartbeatInterval: getEnvironmentHeartbeatInterval(), // Environment-aware heartbeat interval
         rateLimit: {

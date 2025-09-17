@@ -1323,9 +1323,9 @@ class IsolatedEnvironment:
         # Check for staging URL patterns (domain standardization fix)
         staging_url_indicators = [
             "staging.netrasystems.ai",
-            "api.staging.netrasystems.ai",
-            "auth.staging.netrasystems.ai",  # Legacy pattern support
-            "api.staging.netrasystems.ai",   # Legacy pattern support
+            "api-staging.netrasystems.ai",
+            "auth-staging.netrasystems.ai",  # Legacy pattern support
+            "api-staging.netrasystems.ai",   # Legacy pattern support
             "app.staging.netrasystems.ai"    # Legacy pattern support
         ]
 
@@ -1872,7 +1872,7 @@ class EnvironmentValidator:
         # Check for incorrect staging patterns
         incorrect_patterns = [
             ("localhost", "Localhost URLs not allowed in staging"),
-            ("staging.netrasystems.ai", "Should use api.staging.netrasystems.ai subdomain"),
+            ("staging.netrasystems.ai", "Should use api-staging.netrasystems.ai subdomain"),
             ("http://", "Should use HTTPS in staging")
         ]
         
