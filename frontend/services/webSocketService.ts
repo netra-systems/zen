@@ -4,6 +4,8 @@ import { WebSocketStatus, WebSocketState, WebSocketServiceError } from '../types
 import { config } from '@/config';
 import { logger } from '@/lib/logger';
 import { isWindowsPlatform, shouldUseWindowsStagingFallback } from '@/lib/unified-api-config';
+import { websocketTicketService } from './websocketTicketService';
+import type { TicketRequestResult } from '@/types/websocket-ticket';
 
 interface JWTPayload {
   exp: number;
@@ -43,10 +45,9 @@ interface WebSocketOptions {
   onChunkedMessage?: (data: any) => void;
   heartbeatInterval?: number;
   rateLimit?: RateLimitConfig;
-  // Ticket authentication options
+  // Ticket authentication options (Method 4 in auth chain)
   useTicketAuth?: boolean;
-  getTicket?: () => Promise<TicketRequestResult>;
-  clearTicketCache?: () => void;
+  ticketTtl?: number; // TTL in seconds for ticket requests
   // JWT authentication options (fallback)
   token?: string;
   refreshToken?: () => Promise<string | null>;
@@ -1584,15 +1585,18 @@ class WebSocketService {
   }
 
   /**
-   * Creates a ticket-authenticated WebSocket connection
+   * Creates a ticket-authenticated WebSocket connection using the integrated ticket service
    */
   private async createTicketAuthenticatedWebSocket(url: string, options: WebSocketOptions): Promise<WebSocket> {
-    if (!options.getTicket) {
-      throw new Error('Ticket authentication requested but getTicket function not provided');
-    }
-
     try {
-      const ticketResult = await options.getTicket();
+      const ttlSeconds = options.ticketTtl || 300; // Default 5 minutes
+      logger.debug('Requesting WebSocket ticket', {
+        component: 'WebSocketService',
+        action: 'ticket_request',
+        metadata: { ttlSeconds }
+      });
+
+      const ticketResult = await websocketTicketService.acquireTicket(ttlSeconds);
       
       if (ticketResult.success && ticketResult.ticket) {
         // Add ticket to WebSocket URL as query parameter
@@ -1602,7 +1606,11 @@ class WebSocketService {
         logger.debug('Creating WebSocket with ticket authentication', {
           component: 'WebSocketService',
           action: 'ticket_auth',
-          ticketExpiry: new Date(ticketResult.ticket.expires_at).toISOString()
+          metadata: {
+            ticketLength: ticketResult.ticket.ticket.length,
+            ticketExpiry: new Date(ticketResult.ticket.expires_at).toISOString(),
+            hasUrl: !!ticketResult.ticket.websocket_url
+          }
         });
         
         return new WebSocket(wsUrl.toString());
@@ -1610,7 +1618,10 @@ class WebSocketService {
         logger.warn('Ticket authentication failed, falling back to JWT', {
           component: 'WebSocketService',
           action: 'ticket_auth_failed',
-          error: ticketResult.error
+          metadata: { 
+            error: ticketResult.error,
+            recoverable: ticketResult.recoverable 
+          }
         });
         
         // Fallback to JWT authentication
@@ -1976,9 +1987,7 @@ class WebSocketService {
         logger.debug('WebSocket closed due to ticket expiry, clearing cache and retrying');
         
         // Clear ticket cache to force fresh ticket generation
-        if (options.clearTicketCache) {
-          options.clearTicketCache();
-        }
+        websocketTicketService.clearTicketCache();
         
         // Attempt reconnection with fresh ticket
         if (this.authRetryCount < this.MAX_AUTH_RETRIES) {
@@ -2137,14 +2146,14 @@ class WebSocketService {
    */
   private async attemptTokenRefreshAndReconnect(): Promise<void> {
     // If using ticket auth, attempt ticket refresh
-    if (this.options.useTicketAuth && this.options.getTicket) {
+    if (this.options.useTicketAuth) {
       try {
-        // Clear ticket cache to force fresh ticket
-        if (this.options.clearTicketCache) {
-          this.options.clearTicketCache();
-        }
+        // Clear ticket cache to force fresh ticket generation
+        websocketTicketService.clearTicketCache();
         
-        const freshTicket = await this.options.getTicket();
+        const ttlSeconds = this.options.ticketTtl || 300;
+        const freshTicket = await websocketTicketService.acquireTicket(ttlSeconds);
+        
         if (freshTicket.success) {
           logger.debug('Ticket refreshed after auth failure, reconnecting');
           
@@ -2159,9 +2168,10 @@ class WebSocketService {
           return;
         } else {
           logger.warn('Failed to refresh ticket, falling back to JWT', {
-            error: freshTicket.error
+            error: freshTicket.error,
+            recoverable: freshTicket.recoverable
           });
-          // Fall through to JWT refresh
+          // Fall through to JWT refresh if ticket refresh fails
         }
       } catch (error) {
         logger.error('Ticket refresh failed, attempting JWT fallback', error as Error);

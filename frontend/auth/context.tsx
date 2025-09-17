@@ -11,6 +11,7 @@ import { logger } from '@/lib/logger';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
 import { monitorAuthState, createAtomicAuthUpdate, applyAtomicAuthUpdate, attemptEnhancedAuthRecovery } from '@/lib/auth-validation';
 import { useUnifiedChatStore } from '@/store/unified-chat';
+import { ticketAuthProvider } from '@/lib/ticket-auth-provider';
 export interface AuthContextType {
   user: User | null;
   login: (forceOAuth?: boolean) => Promise<void> | void;
@@ -79,8 +80,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         full_name: userData.full_name || (userData as any).name,
         role: (userData as any).role
       }, tokenData);
+      
+      // Update ticket auth provider with new token
+      ticketAuthProvider.updateAuthToken(tokenData);
     } else {
       authStore.logout();
+      
+      // Clear ticket auth provider when logging out
+      ticketAuthProvider.updateAuthToken(null);
     }
   }, [authStore]);
 

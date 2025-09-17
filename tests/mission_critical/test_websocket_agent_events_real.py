@@ -586,7 +586,16 @@ class WebSocketPerformanceRealTests:
 
 
 if __name__ == '__main__':
-    # Run the mission critical tests
-    # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution
+    # Execute SSOT mission critical WebSocket tests
+    import asyncio
+    import pytest
+    
+    # Run comprehensive WebSocket agent event tests
+    pytest.main([
+        __file__,
+        "-v",
+        "--tb=short",
+        "--asyncio-mode=auto",
+        "-x",  # Stop on first failure for mission critical tests
+        "--disable-warnings"
+    ])
