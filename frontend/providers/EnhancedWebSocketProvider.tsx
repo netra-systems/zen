@@ -24,6 +24,8 @@ import React, {
 import { logger } from '@/lib/logger';
 import { AuthContext } from '@/auth/context';
 import type { WebSocketMessage } from '@/types/domains/websocket';
+import { websocketTicketService } from '@/services/websocketTicketService';
+import type { WebSocketTicket } from '@/types/websocket-ticket';
 
 // Types
 export type WebSocketStatus = 'CONNECTING' | 'CONNECTED' | 'DISCONNECTING' | 'DISCONNECTED' | 'RECONNECTING' | 'ERROR';
@@ -231,11 +233,19 @@ export const EnhancedWebSocketProvider: React.FC<WebSocketProviderProps> = ({
     }
   }, []);
 
-  // WebSocket URL builder (secure, no token in URL)
-  const buildWebSocketUrl = useCallback((config: WebSocketConfig): string => {
+  // WebSocket URL builder with ticket authentication
+  const buildWebSocketUrl = useCallback((config: WebSocketConfig, ticket?: WebSocketTicket): string => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     const wsUrl = apiUrl.replace(/^http/, 'ws');
     const endpoint = config.endpoints?.websocket || '/ws'; // Use unified endpoint
+    
+    // If ticket is provided, use it in URL parameters (preferred method)
+    if (ticket?.ticket) {
+      const separator = endpoint.includes('?') ? '&' : '?';
+      return `${wsUrl}${endpoint}${separator}ticket=${ticket.ticket}`;
+    }
+    
+    // Fallback to base URL without ticket
     return `${wsUrl}${endpoint}`;
   }, []);
 
@@ -417,19 +427,27 @@ export const EnhancedWebSocketProvider: React.FC<WebSocketProviderProps> = ({
       }
       setConfig(wsConfig);
 
-      // Step 2: Build WebSocket URL (without token for security)
-      const wsUrl = buildWebSocketUrl(wsConfig);
-      logger.info('[WebSocket] Connecting to:', wsUrl);
+      // Step 2: Acquire authentication ticket for secure WebSocket connection
+      logger.info('[WebSocket] Acquiring authentication ticket...');
+      const ticketResult = await websocketTicketService.acquireTicket(300); // 5 minutes TTL
+      
+      if (!ticketResult.success || !ticketResult.ticket) {
+        // If ticket acquisition fails, log detailed error and attempt fallback
+        const errorMsg = ticketResult.error || 'Failed to acquire WebSocket ticket';
+        logger.error('[WebSocket] Ticket acquisition failed:', errorMsg);
+        
+        // For Issue #1295, we prioritize ticket auth but provide informative error
+        throw new Error(`WebSocket ticket authentication failed: ${errorMsg}`);
+      }
+      
+      logger.info('[WebSocket] Ticket acquired successfully, establishing connection');
 
-      // Step 3: Create WebSocket connection with JWT subprotocol for secure auth
-      // Ensure token has Bearer prefix for proper authentication
-      const bearerToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-      // Encode the JWT token to make it safe for subprotocol use
-      const cleanToken = bearerToken.startsWith('Bearer ') ? bearerToken.substring(7) : bearerToken;
-      // Base64URL encode the token to ensure it's safe for subprotocol
-      const encodedToken = btoa(cleanToken).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-      const protocols = [`jwt-auth`, `jwt.${encodedToken}`];
-      const ws = new WebSocket(wsUrl, protocols);
+      // Step 3: Build WebSocket URL with secure ticket authentication
+      const wsUrl = buildWebSocketUrl(wsConfig, ticketResult.ticket);
+      logger.info('[WebSocket] Connecting with ticket authentication');
+
+      // Step 4: Create WebSocket connection (no subprotocols needed with ticket auth)
+      const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       // Connection timeout
@@ -517,27 +535,27 @@ export const EnhancedWebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
         // Handle authentication errors specifically
         if (event.code === 1008) {
-          const isSecurityViolation = event.reason && (
-            event.reason.includes('Use Authorization header') ||
-            event.reason.includes('Sec-WebSocket-Protocol') ||
-            event.reason.includes('security')
+          const isTicketError = event.reason && (
+            event.reason.includes('ticket') ||
+            event.reason.includes('authentication') ||
+            event.reason.includes('unauthorized')
           );
           
           handleError({
-            code: isSecurityViolation ? 'SECURITY_VIOLATION' : 'AUTHENTICATION_FAILED',
-            message: isSecurityViolation 
-              ? 'Security violation: Using deprecated authentication method'
-              : 'Authentication failed: Invalid or expired token',
+            code: isTicketError ? 'TICKET_AUTHENTICATION_FAILED' : 'AUTHENTICATION_FAILED',
+            message: isTicketError 
+              ? 'Ticket authentication failed: Invalid, expired, or consumed ticket'
+              : 'Authentication failed: Unable to authenticate connection',
             timestamp: Date.now(),
-            recoverable: !isSecurityViolation,
-            help: isSecurityViolation 
-              ? 'Please upgrade to secure authentication methods'
+            recoverable: true, // Ticket errors are recoverable with new ticket
+            help: isTicketError 
+              ? 'A new authentication ticket will be acquired automatically'
               : 'Please check your login status and try again'
           });
           
-          // Don't retry for security violations
-          if (isSecurityViolation) {
-            return;
+          // Clear ticket cache on authentication failure to force refresh
+          if (isTicketError) {
+            websocketTicketService.clearTicketCache();
           }
         }
 
@@ -559,18 +577,23 @@ export const EnhancedWebSocketProvider: React.FC<WebSocketProviderProps> = ({
         
         // Distinguish between connection and authentication errors
         const errorMessage = token 
-          ? 'WebSocket authentication error - check token validity'
+          ? 'WebSocket connection error - check network and authentication'
           : 'WebSocket connection error - no authentication token';
           
         handleError({
-          code: token ? 'AUTH_ERROR' : 'CONNECTION_ERROR',
+          code: token ? 'CONNECTION_ERROR' : 'NO_AUTH_TOKEN',
           message: errorMessage,
           timestamp: Date.now(),
           recoverable: !!token,
           help: token 
-            ? 'Check if your session is still valid'
+            ? 'Connection will be retried automatically with a new ticket'
             : 'Please log in to establish a secure connection'
         });
+        
+        // Clear ticket cache on connection error to force fresh ticket on retry
+        if (token) {
+          websocketTicketService.clearTicketCache();
+        }
       };
 
     } catch (error) {
