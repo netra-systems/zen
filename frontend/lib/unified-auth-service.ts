@@ -28,16 +28,8 @@ export interface AuthValidationResult {
   error?: string;
 }
 
-export interface WebSocketTicket {
-  ticket: string;
-  expires_at: number;
-}
-
-export interface TicketRequestResult {
-  success: boolean;
-  ticket?: WebSocketTicket;
-  error?: string;
-}
+// Import from dedicated ticket service
+import type { WebSocketTicket, TicketRequestResult } from '@/types/websocket-ticket';
 
 /**
  * Unified authentication service that integrates all auth functionality

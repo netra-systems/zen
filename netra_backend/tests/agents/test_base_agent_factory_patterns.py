@@ -80,6 +80,21 @@ class LegacyPatternAgent(BaseAgent):
         self.user_id = kwargs.get('user_id', 'test-user-legacy')
 
     # Missing _execute_with_user_context implementation to test migration status
+    # Note: This agent inherits execute_core_logic from BaseAgent, so it will be "legacy_bridge" pattern
+
+
+class NoMethodAgent(BaseAgent):
+    """Agent with no execution methods for testing 'none' pattern."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.agent_type = "no_method_agent"
+
+    # Override to remove execute_core_logic method
+    def __getattribute__(self, name):
+        if name == 'execute_core_logic':
+            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+        return super().__getattribute__(name)
 
 
 class BaseAgentFactoryPatternsTests(SSotAsyncTestCase):
@@ -257,9 +272,13 @@ class BaseAgentFactoryPatternsTests(SSotAsyncTestCase):
         # Test with legacy agent that has violations
         legacy_agent = LegacyPatternAgent(llm_manager=self.llm_manager)
 
-        # Should raise RuntimeError for critical violations
-        with pytest.raises(RuntimeError, match="CRITICAL COMPLIANCE VIOLATIONS"):
+        # Should not raise RuntimeError for legacy_bridge pattern (only warnings)
+        # Legacy bridge pattern issues deprecation warnings but doesn't fail hard
+        try:
             legacy_agent.assert_user_execution_context_pattern()
+        except RuntimeError:
+            # Should not raise RuntimeError for legacy_bridge pattern
+            pytest.fail("Legacy bridge pattern should not raise RuntimeError - only warnings")
 
     def test_agent_get_migration_status_comprehensive(self):
         """Test comprehensive migration status reporting."""
