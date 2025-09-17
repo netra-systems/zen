@@ -44,7 +44,7 @@ PROCESS INSTRUCTIONS START:
     0.4: add a tags to the issue: actively-being-worked-on, AGENT_SESSION_ID
 
     0.5: Is the issue actually clearly complete?
-        If so close it and report to master (and suggest master breaks entire process)
+        If so close the github issue (gh) and report to master (and suggest master breaks entire process)
 
     0.6: Audit the current state of the issue to determine
         1) Is there enough research (including comments) or does the issue need to be researched?
