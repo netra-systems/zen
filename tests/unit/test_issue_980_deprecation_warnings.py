@@ -98,8 +98,8 @@ class TestIssue980DeprecationWarnings(unittest.TestCase):
                 self.assertTrue("BaseExecutionEngine" in str(e) or "executor" in str(e),
                               f"Expected import error for deprecated BaseExecutionEngine: {e}")
 
-    def test_migration_files_still_import_baseexecutionengine(self):
-        """Test that target migration files currently import BaseExecutionEngine"""
+    def test_migration_files_no_longer_import_baseexecutionengine(self):
+        """Test that target migration files no longer import BaseExecutionEngine"""
         target_files = [
             'netra_backend/app/agents/base_agent.py',
             'netra_backend/app/agents/mcp_integration/execution_orchestrator.py',
@@ -113,14 +113,39 @@ class TestIssue980DeprecationWarnings(unittest.TestCase):
             try:
                 with open(f"C:\\netra-apex\\{file_path}", 'r', encoding='utf-8') as f:
                     content = f.read()
-                    if 'BaseExecutionEngine' in content:
+                    # Look for actual import statements, not just comments
+                    if 'from netra_backend.app.agents.base.executor import BaseExecutionEngine' in content:
                         files_with_import.append(file_path)
             except FileNotFoundError:
                 # File doesn't exist, skip
                 continue
 
-        self.assertGreater(len(files_with_import), 0,
-                         f"At least one target file should still import BaseExecutionEngine. Found in: {files_with_import}")
+        self.assertEqual(len(files_with_import), 0,
+                        f"No target files should import BaseExecutionEngine after migration. Still found in: {files_with_import}")
+
+    def test_migration_files_now_import_userexecutionengine(self):
+        """Test that target migration files now import UserExecutionEngine"""
+        target_files = [
+            'netra_backend/app/agents/base_agent.py',
+            'netra_backend/app/agents/mcp_integration/execution_orchestrator.py',
+            'netra_backend/app/agents/mcp_integration/base_mcp_agent.py',
+            'netra_backend/app/agents/synthetic_data_sub_agent_modern.py'
+        ]
+
+        files_with_import = []
+
+        for file_path in target_files:
+            try:
+                with open(f"C:\\netra-apex\\{file_path}", 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    if 'from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine' in content:
+                        files_with_import.append(file_path)
+            except FileNotFoundError:
+                # File doesn't exist, skip
+                continue
+
+        self.assertEqual(len(files_with_import), 4,
+                        f"All target files should import UserExecutionEngine after migration. Found in: {files_with_import}")
 
 if __name__ == '__main__':
     unittest.main()

@@ -3,35 +3,35 @@
 
 import pytest
 from unittest.mock import Mock, AsyncMock
-from test_framework.ssot.mock_factory import SSotMockFactory
+from test_framework.real_service_setup import setup_real_database_test, setup_real_websocket_test, setup_real_agent_test
 from netra_backend.app.agents.chat_orchestrator_main import ChatOrchestrator
 
 def test_debug_behavior():
     """Debug the test behavior to understand why it's passing"""
 
-    print("Creating SSOT mocks...")
-    mock_db_session = SSotMockFactory.create_database_session_mock()
-    mock_llm_manager = SSotMockFactory.create_mock_llm_manager()
-    mock_websocket_manager = SSotMockFactory.create_websocket_manager_mock()
+    print("Creating real service setup...")
+    db_setup = setup_real_database_test()
+    websocket_setup = setup_real_websocket_test()
+    agent_setup = setup_real_agent_test()
 
-    # Create simple tool dispatcher mock (not available in SSOT factory yet)
+    # Create simple tool dispatcher mock (tool dispatcher will be set up with real services in future)
     mock_tool_dispatcher = AsyncMock()
     mock_tool_dispatcher.execute = AsyncMock()
     mock_tool_dispatcher.get_available_tools = AsyncMock(return_value=[])
 
     mock_cache_manager = Mock()
 
-    print("Created mocks successfully")
+    print("Created real service setup successfully")
 
-    print("Attempting ChatOrchestrator initialization...")
+    print("Attempting ChatOrchestrator initialization with real services...")
 
     # Try with pytest.raises to see what happens
     try:
         with pytest.raises(AttributeError) as exc_info:
             orchestrator = ChatOrchestrator(
-                db_session=mock_db_session,
-                llm_manager=mock_llm_manager,
-                websocket_manager=mock_websocket_manager,
+                db_session=db_setup,  # Real database setup
+                llm_manager=agent_setup,  # Real agent setup contains LLM manager equivalent
+                websocket_manager=websocket_setup,  # Real WebSocket setup
                 tool_dispatcher=mock_tool_dispatcher,
                 cache_manager=mock_cache_manager,
                 semantic_cache_enabled=True
@@ -48,9 +48,9 @@ def test_debug_behavior():
         # Try direct initialization to see what happens
         try:
             orchestrator = ChatOrchestrator(
-                db_session=mock_db_session,
-                llm_manager=mock_llm_manager,
-                websocket_manager=mock_websocket_manager,
+                db_session=db_setup,  # Real database setup
+                llm_manager=agent_setup,  # Real agent setup
+                websocket_manager=websocket_setup,  # Real WebSocket setup
                 tool_dispatcher=mock_tool_dispatcher,
                 cache_manager=mock_cache_manager,
                 semantic_cache_enabled=True

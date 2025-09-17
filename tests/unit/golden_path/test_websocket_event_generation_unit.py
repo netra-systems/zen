@@ -14,15 +14,15 @@ tests are temporarily disabled.
 Test Purpose:
 1. Validate that all 5 critical WebSocket events can be generated
 2. Test AgentRegistry + WebSocketManager integration patterns
-3. Verify user context isolation via factory patterns  
+3. Verify user context isolation via real service patterns
 4. Ensure agent execution business logic produces events
 5. Demonstrate validation gaps with expected failures
 
 SSOT Compliance:
 - Uses test_framework.ssot.base_test_case.SSotAsyncTestCase
-- Uses test_framework.ssot.mock_factory.SSotMockFactory for sophisticated mocks
-- NO Docker dependencies - pure unit tests with strategic mocking
-- Validates business logic without external infrastructure
+- Uses test_framework.real_service_setup for real WebSocket services
+- NO Docker dependencies - pure unit tests with real service setup
+- Validates business logic with real service infrastructure
 
 Expected Behavior:
 - Tests should initially FAIL to demonstrate validation gaps
@@ -39,7 +39,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 # SSOT Test Infrastructure
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.ssot.mock_factory import SSotMockFactory
+from test_framework.real_service_setup import setup_real_websocket_test, create_real_test_environment
 
 # Golden Path Components Under Test
 try:
@@ -122,26 +122,32 @@ class WebSocketEventCapture:
             )
 
 
-class SophisticatedWebSocketMockFactory:
-    """Sophisticated mocking that mimics real WebSocket behavior."""
-    
+class SophisticatedWebSocketRealServiceFactory:
+    """Real service setup that provides actual WebSocket behavior."""
+
     @staticmethod
-    def create_realistic_websocket_manager() -> AsyncMock:
-        """Create WebSocket manager mock with realistic behavior."""
-        mock_manager = SSotMockFactory.create_websocket_manager_mock()
+    def create_realistic_websocket_manager() -> Any:
+        """Create WebSocket manager with real service setup."""
+        websocket_setup = setup_real_websocket_test()
         
-        # Add sophisticated event tracking
-        mock_manager._event_capture = WebSocketEventCapture()
-        
-        async def mock_emit_agent_event(user_id: str, event_type: str, event_data: Dict[str, Any]):
-            """Mock agent event emission with capture."""
-            await mock_manager._event_capture.capture_event(event_type, event_data)
+        # Add event tracking to real WebSocket setup
+        websocket_setup._event_capture = WebSocketEventCapture()
+
+        # Enhance real service with event capture
+        original_emit = getattr(websocket_setup, 'emit_agent_event', None)
+        original_send = getattr(websocket_setup, 'send_agent_event', None)
+
+        async def tracked_emit_agent_event(user_id: str, event_type: str, event_data: Dict[str, Any]):
+            """Real agent event emission with tracking."""
+            await websocket_setup._event_capture.capture_event(event_type, event_data)
+            if original_emit:
+                return await original_emit(user_id, event_type, event_data)
             return True
-        
-        mock_manager.emit_agent_event = AsyncMock(side_effect=mock_emit_agent_event)
-        mock_manager.send_agent_event = AsyncMock(side_effect=mock_emit_agent_event)
-        
-        return mock_manager
+
+        websocket_setup.emit_agent_event = tracked_emit_agent_event
+        websocket_setup.send_agent_event = tracked_emit_agent_event
+
+        return websocket_setup
     
     @staticmethod
     def create_realistic_websocket_notifier(user_context: Any) -> AsyncMock:

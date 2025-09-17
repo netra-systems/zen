@@ -71,7 +71,7 @@ def _check_direct_import_and_warn():
                             # This is a direct import - issue warning
                             warnings.warn(
                                 f"ISSUE #1144: Direct import from 'netra_backend.app.websocket_core' is deprecated. "
-                                f"Use specific module imports like 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager'. "
+                                f"Use specific module imports like 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'. "
                                 f"This import path will be removed in Phase 2 of SSOT consolidation.",
                                 DeprecationWarning,
                                 stacklevel=2
@@ -92,7 +92,7 @@ _check_direct_import_and_warn()
 # DECISION: Remove __init__.py exports to force consistent direct imports from specific modules
 
 # DEPRECATION NOTICE: __init__.py imports are deprecated in favor of direct module imports
-# Use: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+# Use: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 # Use: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 import warnings
 
@@ -101,7 +101,7 @@ def _emit_deprecation_warning():
     warnings.warn(
         "ISSUE #1176 Phase 2: Importing from websocket_core.__init__ is deprecated. "
         "Use direct imports from specific modules: "
-        "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
+        "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
         DeprecationWarning,
         stacklevel=3
     )
@@ -285,10 +285,10 @@ __all__ = [
     "create_error_message",       # CANONICAL: types.py
 
     # ISSUE #1286 FIX: Add missing get_websocket_manager export for test compatibility
-    "get_websocket_manager",      # CANONICAL: canonical_import_patterns.py
+    "get_websocket_manager",      # CANONICAL: websocket_manager.py
 
     # ISSUE #1286 FIX: Add missing create_test_user_context export for test compatibility
-    "create_test_user_context",   # CANONICAL: canonical_import_patterns.py
+    "create_test_user_context",   # CANONICAL: websocket_manager.py
 
     # Backward compatibility only - prefer direct imports
     "create_websocket_manager",
