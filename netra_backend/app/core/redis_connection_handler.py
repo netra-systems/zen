@@ -10,15 +10,15 @@ Critical for session persistence and caching performance.
 Each function  <= 8 lines, file  <= 300 lines.
 """
 
-import logging
 from typing import Dict, Any, Optional
 
 # MIGRATED: Use SSOT Redis import pattern
 from shared.isolated_environment import get_env
+from shared.logging.unified_logging_ssot import get_logger
 
 from netra_backend.app.config import get_config
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class RedisConnectionError(Exception):

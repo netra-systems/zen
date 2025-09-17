@@ -12,9 +12,9 @@ for comprehensive configuration management and legacy variable tracking.
 from typing import Dict, List, Tuple, Optional, Any
 from enum import Enum
 from datetime import datetime
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ConfigImpactLevel(Enum):

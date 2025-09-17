@@ -12,14 +12,14 @@ Business Value Justification (BVJ):
 """
 
 from typing import Dict, Optional, Callable, Any
-import logging
 import time
 import threading
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from collections import deque
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass

@@ -8,19 +8,19 @@ immediate startup failure to prevent auth vulnerabilities in production.
 CRITICAL: This is the SSOT for auth validation - all auth checks must be here.
 """
 
-import logging
 import os
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
 from enum import Enum
 
 from shared.isolated_environment import get_env
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.clients.auth_client_config import OAuthConfigGenerator
 from netra_backend.app.core.environment_constants import get_current_environment, Environment
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class AuthValidationError(Exception):
