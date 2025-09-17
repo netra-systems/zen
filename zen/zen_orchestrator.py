@@ -111,7 +111,7 @@ class InstanceStatus:
     total_cost_usd: Optional[float] = None
 
     # NEW: Model tracking for transparency
-    model_used: str = "claude-3-5-sonnet"  # Default model
+    model_used: str = "claude-sonnet-4"  # Default model
 
     # NEW: Tool usage details
     tool_details: Dict[str, int] = None  # Tool name -> usage count

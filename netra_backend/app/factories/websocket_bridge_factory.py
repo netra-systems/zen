@@ -198,11 +198,35 @@ def create_websocket_bridge_with_context(
     )
 
 
+# Global factory instance for singleton pattern support
+_websocket_bridge_factory: Optional[WebSocketBridgeFactory] = None
+
+
+def get_websocket_bridge_factory() -> WebSocketBridgeFactory:
+    """Get or create the singleton WebSocketBridgeFactory instance.
+    
+    This function provides global access to the WebSocketBridgeFactory following
+    the singleton pattern. It ensures that only one factory instance exists
+    globally while providing thread-safe access.
+    
+    Returns:
+        WebSocketBridgeFactory: The singleton factory instance
+        
+    Business Value: Enables global factory access pattern required by 
+    supervisor factory and other system components for WebSocket bridge creation.
+    """
+    global _websocket_bridge_factory
+    if _websocket_bridge_factory is None:
+        _websocket_bridge_factory = WebSocketBridgeFactory()
+    return _websocket_bridge_factory
+
+
 # Export all public classes and functions
 __all__ = [
     "StandardWebSocketBridge",
     "WebSocketBridgeAdapter",
     "WebSocketBridgeFactory",
+    "get_websocket_bridge_factory",
     "create_standard_websocket_bridge",
     "create_agent_bridge_adapter",
     "create_websocket_bridge_for_testing",
