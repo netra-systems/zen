@@ -122,7 +122,7 @@ def create_test_fallback_manager(user_context):
         _ssot_authorization_token=secrets.token_urlsafe(32)  # Stronger token for security
     )
 
-class _WebSocketManagerFactory:
+class _WSFactory:
     """
     Factory wrapper that enforces SSOT factory pattern usage.
 

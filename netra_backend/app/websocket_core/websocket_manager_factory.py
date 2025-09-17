@@ -678,17 +678,17 @@ class EnhancedWSFactory:
 
 
 # Global factory instance
-_enhanced_factory_instance: Optional[EnhancedWebSocketManagerFactory] = None
+_enhanced_factory_instance: Optional[EnhancedWSFactory] = None
 _factory_lock = threading.Lock()
 
 
-def get_enhanced_websocket_factory() -> EnhancedWebSocketManagerFactory:
+def get_enhanced_websocket_factory() -> EnhancedWSFactory:
     """Get the global enhanced WebSocket manager factory instance"""
     global _enhanced_factory_instance
 
     with _factory_lock:
         if _enhanced_factory_instance is None:
-            _enhanced_factory_instance = EnhancedWebSocketManagerFactory()
+            _enhanced_factory_instance = EnhancedWSFactory()
             logger.info("Enhanced WebSocket Manager Factory initialized")
 
         return _enhanced_factory_instance

@@ -9,7 +9,7 @@ that properly emits all required agent events without authentication.
 import asyncio
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from netra_backend.app.logging_config import central_logger
@@ -34,7 +34,7 @@ class WebSocketAdapter:
         """Send WebSocket event to client"""
         await self.websocket.send_json({
             "type": event_type,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             **data
         })
         logger.info(f"Demo WebSocket sent {event_type}: {data.get('run_id', 'unknown')}")
@@ -247,7 +247,7 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
         try:
             await websocket.send_json({
                 "type": "agent_error",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "error": str(e),
                 "message": "Sorry, there was an issue processing your request. Please try again."
             })
@@ -266,7 +266,7 @@ class DemoAgentSimulator:
         """Send a WebSocket event to the client"""
         message = {
             "type": event_type,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             **data
         }
         await websocket.send_json(message)
@@ -443,7 +443,7 @@ async def demo_health_check():
     return {
         "status": "healthy",
         "service": "demo_websocket",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "features": {
             "authentication_required": False,
             "agent_events": ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"],
