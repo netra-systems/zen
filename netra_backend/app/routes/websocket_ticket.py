@@ -120,8 +120,8 @@ async def generate_websocket_ticket(
         )
         
         # Construct WebSocket URL with ticket parameter
-        # Note: This should be updated to use the actual WebSocket endpoint URL
-        websocket_url = f"wss://api.example.com/ws?ticket={ticket.ticket_id}"
+        # Using staging domain as per CLAUDE.md staging requirements
+        websocket_url = f"wss://api-staging.netrasystems.ai/ws?ticket={ticket.ticket_id}"
         
         logger.info(f"Successfully generated ticket {ticket.ticket_id} for user {user_id}")
         
