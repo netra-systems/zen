@@ -989,7 +989,8 @@ class ClaudeInstanceOrchestrator:
 
         # Extract command information
         command = self.instances[instance_name].command
-        base_command = command.split()[0] if command else command
+        # Clean the command by removing trailing semicolons and splitting on first space
+        base_command = command.rstrip(';').split()[0] if command else command
 
         # ENHANCED DEBUG: Log budget tracking state
         logger.debug(f"🔍 BUDGET DEBUG [{instance_name}]: command='{base_command}', current_tokens={current_billable_tokens}, last_known={status._last_known_total_tokens}")
@@ -1579,112 +1580,238 @@ class ClaudeInstanceOrchestrator:
             status.total_tokens += int(token_data)
 
     def _extract_tool_name_from_result(self, tool_result: dict, tool_use_id: str) -> str:
-        """Extract meaningful tool name from tool result data"""
-        # Try to extract tool name from tool_use_id if it follows a pattern
-        if tool_use_id.startswith('toolu_'):
-            # Claude Code tool_use_id format: toolu_[hash]
-            # Check if content has clues about tool name
+        """Extract meaningful tool name from tool result using comprehensive Claude Code tool patterns"""
+        try:
             content = tool_result.get('content', '')
+
             if isinstance(content, str):
-                # Look for common tool patterns in the output
+                # Handle empty content first (successful commands with no output)
+                if content == "" or content.strip() == "":
+                    return 'Bash'
+
                 content_lower = content.lower()
 
-                # MCP tools
-                if 'claude requested permissions' in content_lower:
-                    if 'mcp__' in content:
-                        # Extract MCP tool name from permission message
-                        import re
-                        mcp_match = re.search(r'mcp__[a-zA-Z_]+__[a-zA-Z_]+', content)
-                        if mcp_match:
-                            return mcp_match.group(0)
+                # =============================================================================
+                # PRIORITY PATTERNS - Check these FIRST before other tool patterns
+                # =============================================================================
+
+                # Permission/MCP Tools - Check this FIRST before other patterns that might match
+                if any(pattern in content_lower for pattern in [
+                    'claude requested permissions', 'haven\'t granted it yet',
+                    'but you haven\'t granted it yet'
+                ]):
                     return 'permission_request'
 
-                # Todo management
-                elif 'todos have been modified' in content_lower or 'todo list' in content_lower:
-                    return 'TodoWrite'
+                # =============================================================================
+                # CLAUDE CODE OFFICIAL TOOLS - Comprehensive Detection Patterns
+                # =============================================================================
 
-                # Task/Agent spawning
-                elif 'agent' in content_lower and ('completed' in content_lower or 'spawned' in content_lower):
+                # Task Tool - Agent spawning and management
+                if any(pattern in content_lower for pattern in [
+                    'agent', 'subagent', 'spawned', 'task completed', 'agent completed',
+                    'general-purpose', 'statusline-setup', 'output-style-setup'
+                ]):
                     return 'Task'
 
-                # File operations
-                elif 'file created successfully' in content_lower or 'file written' in content_lower:
-                    return 'Write'
-                elif content.startswith('#!/usr/bin/env') or 'import ' in content or 'def ' in content:
-                    return 'Read'
-                elif 'list_dir' in content_lower or ('total ' in content and '\n-' in content):
-                    return 'Glob'  # Often directory listing
-                elif 'rw-r--r--' in content or 'drwxr-xr-x' in content:
-                    return 'Bash'  # ls command output
-                elif content.startswith('total ') and '\n-rw' in content:
-                    return 'Bash'  # ls command
-
-                # Search operations
-                elif 'matches found' in content_lower or 'pattern' in content_lower:
-                    return 'Grep'
-                elif 'searched' in content_lower or 'found' in content_lower:
-                    return 'Search'
-
-                # Web operations
-                elif content.startswith('<!DOCTYPE') or content.startswith('<html'):
-                    return 'WebFetch'
-                elif 'http' in content_lower and ('request' in content_lower or 'response' in content_lower):
-                    return 'WebFetch'
-
-                # Command execution
-                elif 'command' in content_lower or 'executed' in content_lower or content.startswith('$'):
-                    return 'Bash'
-
-                # Git command outputs
-                elif any(git_pattern in content_lower for git_pattern in [
+                # Bash Tool - Command execution (most comprehensive patterns)
+                if (any(pattern in content_lower for pattern in [
+                    # Git operations
                     'on branch', 'nothing to commit', 'git pull', 'working tree clean',
                     'commit', 'staged', 'untracked files', 'changes not staged',
-                    'your branch', 'ahead of', 'behind', 'diverged'
-                ]):
+                    'your branch', 'ahead of', 'behind', 'diverged',
+                    'file changed', 'insertions', 'deletions', 'files changed',
+                    'develop-', 'main-', 'feature-', 'bugfix-',
+                    # Command outputs
+                    'command', 'executed', 'permission denied', 'no such file or directory',
+                    'command not found', 'usage:', 'process completed', 'exit code',
+                    'killed', 'terminated',
+                    # File system outputs
+                    'rw-r--r--', 'drwxr-xr-x'
+                ]) or content.startswith('$') or
+                (content.startswith('total ') and '\n-rw' in content)):
                     return 'Bash'
 
-                # Other common command outputs
-                elif any(cmd_pattern in content_lower for cmd_pattern in [
-                    'permission denied', 'no such file or directory', 'command not found',
-                    'usage:', 'process completed', 'exit code', 'killed', 'terminated'
-                ]):
-                    return 'Bash'
-
-                # Code execution results
-                elif 'traceback' in content_lower or 'error:' in content_lower:
-                    return 'Execute'
-
-                # Notebook operations
-                elif 'cell' in content_lower and ('executed' in content_lower or 'output' in content_lower):
-                    return 'NotebookEdit'
-
-                # Edit operations
-                elif 'file has been updated' in content_lower or 'result of running' in content_lower:
-                    return 'Edit'
-                elif 'edit' in content_lower and ('success' in content_lower or 'updated' in content_lower):
-                    return 'Edit'
-
-                # Multi-edit operations
-                elif 'edits have been applied' in content_lower or 'multi' in content_lower and 'edit' in content_lower:
-                    return 'MultiEdit'
-
-                # Glob operations (file pattern matching)
-                elif 'files found' in content_lower or content.count('\n') > 10 and '/' in content:
+                # Glob Tool - File pattern matching
+                if (any(pattern in content_lower for pattern in [
+                    'files found', 'pattern matching', 'glob', 'file pattern'
+                ]) or (
+                    # Single file path results (like "zen/zen_orchestrator.py")
+                    len(content.strip()) < 200 and '/' in content and content.count('\n') == 0 and
+                    not content.startswith('/') and any(content.endswith(ext) for ext in [
+                        '.py', '.js', '.ts', '.json', '.md', '.txt', '.html', '.css', '.yml', '.yaml'
+                    ])
+                ) or (
+                    # Multiple file listings
+                    content.count('\n') > 5 and '/' in content and
+                    not content.startswith('<!DOCTYPE') and not content.startswith('<html')
+                )):
                     return 'Glob'
 
-                # Generic file operations
-                elif len(content) > 1000 and any(word in content_lower for word in ['function', 'class', 'import', 'def']):
-                    return 'Read'
-                elif len(content) > 500:
-                    return 'Read'  # Likely file content
+                # Grep Tool - Search operations
+                if any(pattern in content_lower for pattern in [
+                    'matches found', 'pattern', 'searched', 'grep', 'ripgrep', 'no matches',
+                    'search', 'found', 'regex'
+                ]):
+                    return 'Grep'
 
-            # Check for error indicators that might suggest the tool type
+                # LS Tool - Directory listings
+                if (any(pattern in content_lower for pattern in [
+                    'list_dir', 'directory listing', 'listing files'
+                ]) or (content.startswith('total ') and '\n-rw' in content and 'drwx' in content)):
+                    return 'LS'
+
+                # Read Tool - File reading (comprehensive patterns)
+                if (content.startswith('#!/usr/bin/env') or
+                    any(pattern in content for pattern in [
+                        'import ', 'def ', 'class ', 'function', 'const ', 'var ', 'let ',
+                        'export ', 'module.exports', 'require(', '#include', 'package ',
+                        'use ', 'fn ', 'struct ', 'impl ', 'trait '
+                    ]) or
+                    (len(content) > 1000 and any(word in content_lower for word in [
+                        'function', 'class', 'import', 'def', 'module', 'export', 'const'
+                    ])) or
+                    (len(content) > 500 and not any(pattern in content_lower for pattern in [
+                        'html', 'http', 'www', 'commit', 'staged', 'branch'
+                    ]))):
+                    return 'Read'
+
+                # Edit Tool - File editing
+                if (any(pattern in content_lower for pattern in [
+                    'file has been updated', 'result of running', 'has been updated successfully'
+                ]) or (
+                    'edit' in content_lower and any(pattern in content_lower for pattern in [
+                        'success', 'updated', 'modified', 'changed'
+                    ])
+                )):
+                    return 'Edit'
+
+                # MultiEdit Tool - Multiple file edits
+                if any(pattern in content_lower for pattern in [
+                    'edits have been applied', 'multiple edits', 'multiedit'
+                ]) and 'edit' in content_lower:
+                    return 'MultiEdit'
+
+                # Write Tool - File creation
+                if any(pattern in content_lower for pattern in [
+                    'file created successfully', 'file written', 'written to', 'created successfully'
+                ]):
+                    return 'Write'
+
+                # NotebookEdit Tool - Jupyter operations
+                if any(pattern in content_lower for pattern in [
+                    'notebook', 'jupyter', 'ipynb'
+                ]) or (
+                    'cell' in content_lower and any(pattern in content_lower for pattern in [
+                        'executed', 'output', 'edit', 'code', 'markdown'
+                    ])
+                ):
+                    return 'NotebookEdit'
+
+                # WebFetch Tool - Web content fetching
+                if (content.startswith('<!DOCTYPE') or content.startswith('<html') or
+                    any(pattern in content_lower for pattern in [
+                        'http://', 'https://', 'web content', 'webpage', 'url', 'website'
+                    ]) or (
+                        any(pattern in content_lower for pattern in ['http', 'web', 'fetch', 'url']) and
+                        any(pattern in content_lower for pattern in ['request', 'response', 'content', 'page'])
+                    )):
+                    return 'WebFetch'
+
+                # TodoWrite Tool - Task management (already has good patterns)
+                if any(pattern in content_lower for pattern in [
+                    'todos have been modified', 'todo list', 'task list', 'progress',
+                    'todo', 'task', 'completed', 'in_progress', 'pending'
+                ]):
+                    return 'TodoWrite'
+
+                # WebSearch Tool - Web searching
+                if any(pattern in content_lower for pattern in [
+                    'search results', 'web search', 'search query', 'internet search'
+                ]) and any(pattern in content_lower for pattern in ['web', 'search', 'internet', 'query']):
+                    return 'WebSearch'
+
+                # BashOutput Tool - Background shell output
+                if any(pattern in content_lower for pattern in [
+                    'shell output', 'background', 'stdout', 'stderr', 'bash output'
+                ]):
+                    return 'BashOutput'
+
+                # KillBash Tool - Shell termination
+                if any(pattern in content_lower for pattern in [
+                    'shell killed', 'terminated', 'killed shell', 'bash killed'
+                ]):
+                    return 'KillBash'
+
+                # ExitPlanMode Tool - Plan mode exit
+                if any(pattern in content_lower for pattern in [
+                    'exit plan', 'plan mode', 'ready to code', 'plan', 'implementation'
+                ]):
+                    return 'ExitPlanMode'
+
+                # MCP Tools - Model Context Protocol tools
+                if 'mcp__' in content:
+                    import re
+                    mcp_match = re.search(r'mcp__[a-zA-Z_]+__[a-zA-Z_]+', content)
+                    if mcp_match:
+                        return mcp_match.group(0)
+
+
+                # Code execution results
+                if any(pattern in content_lower for pattern in [
+                    'traceback', 'error:', 'exception', 'stack trace'
+                ]):
+                    return 'Execute'
+
+                # Error-specific tool identification
+                if any(pattern in content_lower for pattern in [
+                    'eisdir: illegal operation on a directory', 'directory, read',
+                    'is a directory', 'illegal operation on a directory'
+                ]):
+                    return 'Read'  # Read tool trying to read directory
+
+                # Command approval/permission errors (often from Task tools)
+                if any(pattern in content_lower for pattern in [
+                    'this command requires approval', 'requires approval',
+                    'command contains multiple operations'
+                ]):
+                    return 'Bash'
+
+                # File size limit errors (Read tool)
+                if any(pattern in content_lower for pattern in [
+                    'file content', 'exceeds maximum allowed tokens',
+                    'use offset and limit parameters'
+                ]):
+                    return 'Read'
+
+                # =============================================================================
+                # DEFAULT FALLBACK - Try to infer from content characteristics
+                # =============================================================================
+
+                # Very long text content - likely Read
+                if len(content) > 3000:
+                    return 'Read'
+
+                # Medium text with code patterns - likely Read
+                elif len(content) > 200 and any(pattern in content for pattern in [
+                    '{', '}', '[', ']', '(', ')', ';', '=', '->', '=>'
+                ]):
+                    return 'Read'
+
+                # Short technical content - likely command output (Bash)
+                elif len(content) < 100 and any(char in content for char in ['$', '/', '-', '=']):
+                    return 'Bash'
+
+            # Check for error indicators
             if tool_result.get('is_error'):
                 error_content = tool_result.get('content', '')
                 if 'permission' in error_content.lower():
                     return 'permission_denied'
                 elif 'not found' in error_content.lower():
                     return 'file_not_found'
+
+        except Exception as e:
+            # If pattern matching fails, fall back to tool_use_id
+            pass
 
         # Fallback to generic name with partial tool_use_id for tracking
         short_id = tool_use_id[-8:] if len(tool_use_id) > 8 else tool_use_id
