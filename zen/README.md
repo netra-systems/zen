@@ -1,8 +1,15 @@
-# ZEN - Multi-Instance Claude Orchestrator
+# Zen User Guide
 
-ZEN orchestrates multiple Claude Code CLI instances for parallel task execution with token budget management and real-time monitoring.
+Zen runs multiple Code CLI instances for peaceful parallel task execution.
 
-## Quick Start
+## What is Zen?
+
+Zen allows you to:
+- Run multiple Claude Code CLI instances simultaneously (Codex support coming soon)
+- Calm results (status, time, token usage)
+- Relax token fears with easy token budget limits
+
+## Quick Start (TBD replaced with path command)
 
 ```bash
 # Install dependencies
