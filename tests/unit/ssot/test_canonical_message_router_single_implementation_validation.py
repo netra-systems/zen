@@ -68,7 +68,8 @@ class TestCanonicalMessageRouterSSOTValidation(unittest.TestCase):
         self.skip_dirs = {
             ".git", ".venv", "venv", "__pycache__", ".pytest_cache",
             "node_modules", ".mypy_cache", ".tox", "build", "dist",
-            ".idea", ".vscode", "backups", "backup"
+            ".idea", ".vscode", "backups", "backup",
+            ".test_venv", "test_venv", "google-cloud-sdk"
         }
         
         # File patterns to skip

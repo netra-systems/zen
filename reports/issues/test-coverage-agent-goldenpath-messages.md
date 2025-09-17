@@ -71,6 +71,42 @@ Critical unit test coverage gaps identified in agent golden path message handlin
 - ✅ Real testing: No cheating, proper validation, isolated unit tests
 - ✅ Business value coverage: Tests protect $500K+ ARR chat functionality
 
+#### Detailed Test Coverage
+
+**A. `tests/unit/services/websocket/test_message_handler.py` (18 tests)**
+- User message serialization/deserialization with validation
+- Agent message validation (required fields, user_request handling)
+- Message type routing (START_AGENT, USER_MESSAGE, CHAT, unknown types)
+- Concurrent message handling without interference
+- Error recovery in message processing
+- Complex payload serialization with nested data structures
+- Handler statistics tracking and WebSocket context validation
+
+**B. `tests/unit/websocket_core/test_agent_events.py` (12 tests)**
+- agent_started event structure with business data validation
+- agent_thinking event with reasoning content and progress tracking
+- tool_executing event with tool parameters and execution context
+- tool_completed event with comprehensive result formatting
+- agent_completed event with final response data and business impact
+- Event delivery confirmation tracking for all 5 critical events
+- Edge case handling and concurrent event delivery isolation
+
+**C. `tests/unit/services/websocket/test_message_queue.py` (15 tests)**
+- Message prioritization (HIGH, MEDIUM, LOW, CRITICAL) with correct ordering
+- Retry mechanism with exponential backoff and max retry limits
+- Message persistence during queue processing and state transitions
+- Concurrency controls for multiple enqueuers and simultaneous flush operations
+- Queue overflow protection and registry operations
+- Message aging/expiration and connection state integration
+
+**D. `tests/unit/websocket_core/test_message_router.py` (16 tests)**
+- Routing user messages to agent handlers with context validation
+- Routing agent commands to supervisor handlers
+- Handling unknown message types and invalid message structures
+- Multiple routing strategies (BROADCAST_ALL, USER_SPECIFIC, SESSION_SPECIFIC, PRIORITY_BASED)
+- Handler registration/removal with priority ordering and legacy compatibility
+- Connection management operations and concurrent routing with data integrity
+
 ## Success Metrics
 
 - [x] **Agent Message Handling: 15% → 85% coverage achieved** (18 comprehensive unit tests)

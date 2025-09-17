@@ -110,17 +110,51 @@ Create a JSON file with your tasks:
 - [Pricing Strategy](docs/pricing_strategy.md) - Token calculation and cost transparency
 - [Changelog](docs/changelog.md) - Version history and changes
 
-## Project Structure
-
+## Zen --help
+`zen --help`
+yields:
 ```
-zen/
-├── zen_orchestrator.py          # Main orchestrator
-├── config_example.json          # Configuration template
-├── agent_interface/             # Agent interfaces
-├── token_budget/               # Budget management
-├── token_transparency/         # Cost tracking
-├── tests/                      # Test suite
-└── docs/                       # User documentation
+usage: zen [-h] [--workspace WORKSPACE] [--config CONFIG] [--dry-run] [--list-commands] [--inspect-command INSPECT_COMMAND]
+           [--output-format {json,stream-json}] [--timeout TIMEOUT] [--max-console-lines MAX_CONSOLE_LINES] [--quiet]
+           [--startup-delay STARTUP_DELAY] [--max-line-length MAX_LINE_LENGTH] [--status-report-interval STATUS_REPORT_INTERVAL]
+           [--start-at START_AT] [--use-cloud-sql] [--overall-token-budget OVERALL_TOKEN_BUDGET] [--command-budget COMMAND_BUDGET]
+           [--budget-enforcement-mode {warn,block}] [--disable-budget-visuals]
+
+Claude Code Instance Orchestrator
+
+options:
+  -h, --help            show this help message and exit
+  --workspace WORKSPACE
+                        Workspace directory (default: current directory)
+  --config CONFIG       Custom instance configuration file
+  --dry-run             Show commands without running
+  --list-commands       List all available slash commands and exit
+  --inspect-command INSPECT_COMMAND
+                        Inspect a specific slash command and exit
+  --output-format {json,stream-json}
+                        Output format for Claude instances (default: stream-json)
+  --timeout TIMEOUT     Timeout in seconds for each instance (default: 10000)
+  --max-console-lines MAX_CONSOLE_LINES
+                        Maximum recent lines to show per instance on console (default: 5)
+  --quiet               Minimize console output, show only errors and final summaries
+  --startup-delay STARTUP_DELAY
+                        Delay in seconds between launching each instance (default: 5.0)
+  --max-line-length MAX_LINE_LENGTH
+                        Maximum characters per line in console output (default: 500)
+  --status-report-interval STATUS_REPORT_INTERVAL
+                        Seconds between rolling status reports (default: 5)
+  --start-at START_AT   Schedule orchestration to start at specific time. Examples: '2h' (2 hours from now), '30m' (30 minutes),
+                        '14:30' (2:30 PM today), '1am' (1 AM today/tomorrow)
+  --use-cloud-sql       Save metrics to CloudSQL database (NetraOptimizer integration)
+  --overall-token-budget OVERALL_TOKEN_BUDGET
+                        Global token budget for the entire session.
+  --command-budget COMMAND_BUDGET
+                        Per-command budget in format: '/command_name=limit'. Can be used multiple times.
+  --budget-enforcement-mode {warn,block}
+                        Action to take when a budget is exceeded: 'warn' (log and continue) or 'block' (prevent new instances).
+  --disable-budget-visuals
+                        Disable budget visualization in status reports
+
 ```
 
 ## Requirements
