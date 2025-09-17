@@ -60,9 +60,9 @@ def require_docker_services() -> None:
     try:
         manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
         if not manager.is_docker_available():
-            pytest.fail(Docker services required but not available. Start Docker and run: docker compose -f docker-compose.alpine-test.yml up -d")"
+            pytest.fail("Docker services required but not available. Start Docker and run: docker compose -f docker-compose.alpine-test.yml up -d")"
     except Exception as e:
-        pytest.fail(fDocker services check failed: {e}. Ensure Docker is running.)
+        pytest.fail(f"Docker services check failed: {e}. Ensure Docker is running.")
 
 
 def require_docker_services_smart() -> None:
@@ -90,7 +90,7 @@ def require_docker_services_smart() -> None:
 
         # Phase 0: Windows Docker bypass detection (Issue #860)
         if is_windows:
-            logger.info(🪟 Windows platform detected - checking Docker bypass options)
+            logger.info("Windows platform detected - checking Docker bypass options")
 
             # Check for explicit Docker bypass flag
             docker_bypass = env.get('DOCKER_BYPASS', 'false').lower() == 'true'
