@@ -1,4 +1,4 @@
-# CRITICAL: Import path conf"iguration for direct test execution
+# CRITICAL: Import path configuration for direct test execution
 # Ensures tests work both directly and through unified_test_runner.py
 import sys
 import os
@@ -150,46 +150,46 @@ class MissionCriticalEventValidator:
             return False
 
         # First event must be agent_started
-        if self.event_timeline[0][1] != "agent_started":"
-            self.errors.append(f"First event was {self.event_timeline[0][1]}", not agent_started)
+        if self.event_timeline[0][1] != "agent_started":
+            self.errors.append(f"First event was {self.event_timeline[0][1]}, not agent_started")
             return False
 
         # Last event should be completion
         last_event = self.event_timeline[-1][1]
-        if last_event not in [agent_completed, f"inal_report]:
+        if last_event not in ["agent_completed", "final_report"]:
             # Accept any completion event for now
-            self.warnings.append(fLast event was {last_event}", expected completion event")"
+            self.warnings.append(f"Last event was {last_event}, expected completion event")
 
         return True
 
     def _validate_paired_events(self) -> bool:
-        Ensure tool events are properly paired."
+        """Ensure tool events are properly paired."""
         tool_starts = self.event_counts.get("tool_executing", 0)
         tool_ends = self.event_counts.get("tool_completed", 0)
 
         if tool_starts != tool_ends:
-            self.errors.append(f"Tool event mismatch: {tool_starts} starts", {tool_ends} completions")"
+            self.errors.append(f"Tool event mismatch: {tool_starts} starts, {tool_ends} completions")
             return False
 
         return True
 
 
 class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
-
+    """
     MISSION CRITICAL: WebSocket Agent Events Tests - SSOT Implementation
-    
+
     Business Value: $500K+ ARR Golden Path Protection
     Critical Path: WebSocket Events → Agent Integration → Chat Functionality
-    
+
     Tests the 5 required WebSocket events that enable substantive chat functionality:
     1. agent_started - User sees agent began processing
-    2. agent_thinking - Real-time reasoning visibility  
+    2. agent_thinking - Real-time reasoning visibility
     3. tool_executing - Tool usage transparency
     4. tool_completed - Tool results display
     5. agent_completed - User knows response is ready
-    
+
     SSOT Compliance: Uses real WebSocket connections, real agent execution, NO MOCKS
-    ""
+    """
     
     @pytest.fixture(autouse=True)
     async def setup_websocket_agent_test_environment(self):
