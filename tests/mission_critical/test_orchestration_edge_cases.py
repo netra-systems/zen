@@ -111,28 +111,28 @@ class TestNetworkPartitionChaos:
     @pytest.fixture
     def multi_region_topology(self):
         """Create a multi-region topology for partition testing."""
-        return { )
-        "regions": { )
-        "us-east-1": { )
+        return {
+            "regions": {
+                "us-east-1": {
         "services": ["api-gateway-1", "user-service-1", "order-service-1", "database-primary"],
         "connections": ["us-west-2", "eu-central-1"],
         "is_primary": True,
         "consensus_weight": 3
         },
-        "us-west-2": { )
+        "us-west-2": {
         "services": ["api-gateway-2", "user-service-2", "order-service-2", "database-replica-1"],
         "connections": ["us-east-1", "eu-central-1"],
         "is_primary": False,
         "consensus_weight": 2
         },
-        "eu-central-1": { )
+        "eu-central-1": {
         "services": ["user-service-3", "order-service-3", "database-replica-2"],
         "connections": ["us-east-1", "us-west-2"],
         "is_primary": False,
         "consensus_weight": 1
     
         },
-        "consensus_nodes": { )
+        "consensus_nodes": {
         "node-1": {"region": "us-east-1", "role": "leader", "priority": 100},
         "node-2": {"region": "us-west-2", "role": "follower", "priority": 90},
         "node-3": {"region": "eu-central-1", "role": "follower", "priority": 80},
@@ -149,20 +149,20 @@ class TestNetworkPartitionChaos:
 
     # Simulate split-brain scenario
         partition_scenarios = [ )
-        { )
+        {
         "name": "classic_split_brain",
         "partition_1": ["us-east-1", "us-west-2"],
         "partition_2": ["eu-central-1"],
         "expected_leader_partition": "partition_1"  # Majority
         },
-        { )
+        {
         "name": "three_way_split",
         "partition_1": ["us-east-1"],
         "partition_2": ["us-west-2"],
         "partition_3": ["eu-central-1"],
         "expected_leader_partition": "partition_1"  # Primary region
         },
-        { )
+        {
         "name": "minority_isolation",
         "partition_1": ["us-east-1"],
         "partition_2": ["us-west-2", "eu-central-1"],
@@ -296,19 +296,19 @@ class TestNetworkPartitionChaos:
 
     # Simulate partition and recovery
         partition_recovery_tests = [ )
-        { )
+        {
         "partition_duration": 30,  # seconds
         "isolated_regions": ["eu-central-1"],
         "expected_recovery_time": 15,  # seconds
         "convergence_threshold": 0.95  # 95% of nodes must agree
         },
-        { )
+        {
         "partition_duration": 60,
         "isolated_regions": ["us-west-2"],
         "expected_recovery_time": 20,
         "convergence_threshold": 0.9
         },
-        { )
+        {
         "partition_duration": 120,
         "isolated_regions": ["us-east-1"],  # Primary region
         "expected_recovery_time": 30,
@@ -556,21 +556,21 @@ class TestResourceExhaustionChaos:
         pass
     # CPU-intensive workload simulation
         cpu_starvation_scenarios = [ )
-        { )
+        {
         "name": "cpu_bomb_attack",
         "malicious_processes": 10,
         "cpu_consumption_per_process": 0.8,
         "duration_seconds": 30,
         "expected_recovery_time": 15
         },
-        { )
+        {
         "name": "gradual_cpu_degradation",
         "malicious_processes": 5,
         "cpu_consumption_per_process": 0.6,
         "duration_seconds": 60,
         "expected_recovery_time": 10
         },
-        { )
+        {
         "name": "resource_leak_simulation",
         "malicious_processes": 3,
         "cpu_consumption_per_process": 0.9,
@@ -748,17 +748,17 @@ class TestByzantineFaultTolerance:
 
     # Byzantine attack strategies
         byzantine_strategies = [ )
-        { )
+        {
         "name": "conflicting_votes",
         "behavior": "send_different_votes_to_different_nodes",
         "nodes": ["node-07", "node-08"]
         },
-        { )
+        {
         "name": "vote_withholding",
         "behavior": "randomly_withhold_votes",
         "nodes": ["node-07"]
         },
-        { )
+        {
         "name": "message_corruption",
         "behavior": "corrupt_message_contents",
         "nodes": ["node-08"]
@@ -938,7 +938,7 @@ class TestSecurityAttackResilience:
         """CRITICAL: Test DDoS attack mitigation and service availability."""
     # DDoS attack simulation parameters
         attack_scenarios = [ )
-        { )
+        {
         "name": "volumetric_flood",
         "attack_type": "volume",
         "requests_per_second": 10000,
@@ -946,7 +946,7 @@ class TestSecurityAttackResilience:
         "source_ips": 1000,
         "request_size_bytes": 1024
         },
-        { )
+        {
         "name": "slowloris_attack",
         "attack_type": "application_layer",
         "requests_per_second": 100,
@@ -954,7 +954,7 @@ class TestSecurityAttackResilience:
         "connection_hold_time": 300,
         "incomplete_requests": True
         },
-        { )
+        {
         "name": "amplification_attack",
         "attack_type": "reflection",
         "requests_per_second": 5000,

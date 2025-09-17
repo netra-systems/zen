@@ -73,8 +73,8 @@ logger = logging.getLogger(__name__)
             # Windows console compatibility
 import sys
 if sys.platform == "win32":
-import os
-os.system("chcp 65001 > nul 2>&1")  # Set UTF-8 encoding
+    import os
+    os.system("chcp 65001 > nul 2>&1")  # Set UTF-8 encoding
 
 @dataclass
 class UserJourneyMetrics:

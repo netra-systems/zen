@@ -10,7 +10,7 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+            raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = "Normal closure"):
@@ -19,7 +19,7 @@ class TestWebSocketConnection:
         self._closed = True
         self.is_connected = False
 
-    def get_messages(self) -> list:
+    async def get_messages(self) -> list:
         """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()
