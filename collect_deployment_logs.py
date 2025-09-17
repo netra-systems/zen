@@ -5,7 +5,7 @@ Collect recent logs from GCP staging services to diagnose deployment issues.
 import subprocess
 import json
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 def run_gcloud_command(command, timeout=30):
     """Run a gcloud command and return the output."""
@@ -33,7 +33,7 @@ def collect_service_logs(service_name, minutes_back=15, max_entries=50):
     print('='*60)
 
     # Calculate timestamp
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     start_time = now - timedelta(minutes=minutes_back)
     start_timestamp = start_time.strftime('%Y-%m-%dT%H:%M:%SZ')
 

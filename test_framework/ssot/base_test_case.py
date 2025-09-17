@@ -67,13 +67,21 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 import unittest
 
-# Resilient imports with proper error handling
+# PHASE 1 FIX: Enhanced resilient imports with Windows console error handling
 try:
     from shared.isolated_environment import IsolatedEnvironment, get_env
 except ImportError as e:
     # Create minimal fallback for isolated environment if not available
-    print(f"[WARNING] IsolatedEnvironment not available: {e}")
-    print("[WARNING] Using fallback environment handling")
+    try:
+        print(f"[WARNING] IsolatedEnvironment not available: {e}")
+        print("[WARNING] Using fallback environment handling")
+    except (OSError, UnicodeEncodeError) as console_error:
+        # Windows console output issues - fail silently to prevent test collection failure
+        import sys
+        try:
+            sys.stderr.write(f"[WARNING] Console output error during import: {console_error}\n")
+        except:
+            pass  # Ultimate fallback - completely silent
 
     class IsolatedEnvironment:
         """Fallback environment handler for tests when shared module unavailable."""
@@ -399,8 +407,12 @@ class SSotBaseTestCase:
         self._env.set("TEST_ID", self._test_context.test_id, "ssot_base_test_case")
         self._env.set("TRACE_ID", self._test_context.trace_id, "ssot_base_test_case")
         
-        # Log test start
-        logger.info(f"Starting test: {self._test_context.test_id}")
+        # Log test start with console error protection
+        try:
+            logger.info(f"Starting test: {self._test_context.test_id}")
+        except (OSError, UnicodeEncodeError):
+            # Windows console encoding issues - continue without logging
+            pass
         self._test_started = True
     
     def teardown_method(self, method=None):
@@ -427,12 +439,16 @@ class SSotBaseTestCase:
                 for var in test_vars:
                     self._env.delete(var, "ssot_base_test_case_cleanup")
             
-            # Log test completion with metrics
+            # Log test completion with metrics and console error protection
             if self._test_context:
-                logger.info(
-                    f"Completed test: {self._test_context.test_id} "
-                    f"(duration: {self._metrics.execution_time:.3f}s)"
-                )
+                try:
+                    logger.info(
+                        f"Completed test: {self._test_context.test_id} "
+                        f"(duration: {self._metrics.execution_time:.3f}s)"
+                    )
+                except (OSError, UnicodeEncodeError):
+                    # Windows console encoding issues - continue without logging
+                    pass
             
             self._test_completed = True
             

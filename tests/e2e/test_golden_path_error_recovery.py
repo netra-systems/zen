@@ -713,7 +713,7 @@ class GoldenPathErrorRecoveryTests(SSotAsyncTestCase):
         self,
         subprotocols: List[str],
         timeout: float
-    ) -> Optional[websockets.WebSocketClientProtocol]:
+    ) -> Optional[websockets.ClientConnection]:
         """Establish connection for error recovery testing"""
         try:
             ssl_context = ssl.create_default_context()

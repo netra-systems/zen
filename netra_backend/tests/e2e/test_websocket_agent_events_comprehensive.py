@@ -27,6 +27,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import pytest
 try:
     import websockets
+from websockets import ClientConnection as WebSocketClientProtocol
     from websockets.asyncio.client import ClientConnection
     WebSocketClientProtocol = ClientConnection
 except ImportError:

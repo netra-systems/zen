@@ -287,7 +287,7 @@ class GoldenPathCompleteStagingTests(SSotAsyncTestCase):
                     error_text = await response.text()
                     return {'success': False, 'error': f'Auth service returned {response.status}: {error_text}'}
 
-    async def _establish_staging_websocket_connection(self, test_user: Dict[str, Any]) -> Optional[websockets.WebSocketClientProtocol]:
+    async def _establish_staging_websocket_connection(self, test_user: Dict[str, Any]) -> Optional[websockets.ClientConnection]:
         """Establish WebSocket connection to staging environment"""
         access_token = test_user.get('access_token', 'mock_token')
         encoded_token = base64.urlsafe_b64encode(access_token.encode()).decode().rstrip('=')

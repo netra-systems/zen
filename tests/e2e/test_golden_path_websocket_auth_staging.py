@@ -377,7 +377,7 @@ class WebSocketAuthGoldenPathStagingTests(SSotAsyncTestCase):
             if connection and (not connection.closed):
                 await connection.close()
 
-    async def _attempt_staging_websocket_connection(self, subprotocols: List[str], timeout: int, connection_description: str) -> Optional[websockets.WebSocketClientProtocol]:
+    async def _attempt_staging_websocket_connection(self, subprotocols: List[str], timeout: int, connection_description: str) -> Optional[websockets.ClientConnection]:
         """
         Attempt WebSocket connection to staging environment
         

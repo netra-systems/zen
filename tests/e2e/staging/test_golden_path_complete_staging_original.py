@@ -253,7 +253,7 @@ class GoldenPathCompleteStagingTests(SSotAsyncTestCase):
         except Exception as e:
             return {'success': False, 'error': f'Auth request failed: {e}'}
 
-    async def _establish_staging_websocket_connection(self, test_user: Dict[str, Any]) -> Optional[websockets.WebSocketClientProtocol]:
+    async def _establish_staging_websocket_connection(self, test_user: Dict[str, Any]) -> Optional[websockets.ClientConnection]:
         """Establish WebSocket connection to staging environment"""
         try:
             access_token = test_user.get('access_token', 'mock_token')
