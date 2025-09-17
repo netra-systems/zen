@@ -1,4 +1,5 @@
 """
+"""
 Mission Critical Test: Decorator Import Error Blocking Issue #268A
 
 BUSINESS VALUE JUSTIFICATION:
@@ -8,8 +9,10 @@ BUSINESS VALUE JUSTIFICATION:
 - Revenue Impact: Prevents regression testing gaps that could impact all customer segments
 
 """
+"""
 This test validates that the experimental_test decorator import issue
 is resolved and that unit test discovery works properly.
+"
 "
 
 import pytest
@@ -23,25 +26,29 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 class DecoratorImportBlockingIssue268ATests(SSotBaseTestCase):
     "
+    "
     MISSION CRITICAL: Test that reproduces and validates fix for decorator import issue.
     
     This issue blocks discovery of 7,474 unit tests, representing 85% of testing capability.
 "
+"
     
     def test_experimental_test_decorator_import_fails_before_fix(self):
+    "
     "
         REPRODUCTION TEST: Demonstrates the exact import failure blocking unit test discovery.
         
         This test MUST FAIL before the fix and PASS after the fix.
         BVJ: Platform | Testing Infrastructure | Critical for unit test execution
         "
+        "
         # This test is designed to FAIL before fix and PASS after fix
         try:
-            # This is the exact import that's failing in unit tests
+            # This is the exact import that's failing in unit tests'
             from test_framework.decorators import experimental_test
             
             # If we get here, the import succeeded
-            self.assertIsNotNone(experimental_test, experimental_test decorator should be importable")
+            self.assertIsNotNone(experimental_test, experimental_test decorator should be importable")"
             self.assertTrue(callable(experimental_test), experimental_test should be callable)
             
             # Test that the decorator can be used
@@ -58,12 +65,15 @@ class DecoratorImportBlockingIssue268ATests(SSotBaseTestCase):
         except ImportError as e:
             # This is the expected failure BEFORE the fix
             self.fail(fEXPECTED FAILURE BEFORE FIX: Cannot import experimental_test: {e})"
+            self.fail(fEXPECTED FAILURE BEFORE FIX: Cannot import experimental_test: {e})"
     
     def test_all_required_decorators_available_for_unit_tests(self):
+    "
     "
         COMPREHENSIVE TEST: Validates all decorators needed by unit tests are importable.
         
         BVJ: Platform | Testing Infrastructure | Ensures complete decorator availability
+        "
         "
         required_decorators = [
             'experimental_test',  # The main blocker
@@ -81,7 +91,7 @@ class DecoratorImportBlockingIssue268ATests(SSotBaseTestCase):
         for decorator_name in required_decorators:
             try:
                 # Test import from package interface
-                exec(ffrom test_framework.decorators import {decorator_name}")
+                exec(ffrom test_framework.decorators import {decorator_name}")"
             except ImportError:
                 missing_decorators.append(decorator_name)
         
@@ -90,16 +100,19 @@ class DecoratorImportBlockingIssue268ATests(SSotBaseTestCase):
     
     def test_unit_test_discovery_count_validation(self):
         "
+        "
         VALIDATION TEST: Verifies that fixing imports enables discovery of expected test count.
         
         BVJ: Platform | Testing Infrastructure | Validates test discovery capability
+"
 "
         # Run test discovery to count discoverable tests
         try:
             cmd = [
                 sys.executable, 
                 tests/unified_test_runner.py,"
-                --no-docker",
+                tests/unified_test_runner.py,"
+                --no-docker","
                 --category, unit,
                 "--no-dependencies,"
                 --show-category-stats
@@ -134,16 +147,19 @@ class DecoratorImportBlockingIssue268ATests(SSotBaseTestCase):
             self.fail(Test discovery timed out - may indicate import errors)
         except Exception as e:
             self.fail(fTest discovery failed: {e})"
+            self.fail(fTest discovery failed: {e})"
     
     def test_specific_failing_unit_test_files_now_discoverable(self):
+    "
     "
         TARGETED TEST: Validates specific files that were failing are now discoverable.
         
         BVJ: Platform | Testing Infrastructure | Ensures problematic files are fixed
         "
+        "
         # These are examples of files that use experimental_test and were failing
         problematic_files = [
-            netra_backend/tests/unit/test_feature_flags_example.py",
+            netra_backend/tests/unit/test_feature_flags_example.py","
             netra_backend/tests/examples/test_tdd_workflow_demo.py, 
             netra_backend/tests/examples/test_feature_flag_environment_demo.py""
         ]
@@ -162,7 +178,7 @@ class DecoratorImportBlockingIssue268ATests(SSotBaseTestCase):
                     self.fail(fFile {file_path} still has import issues: {e})
     
     def test_decorator_package_consistency(self):
-        
+        pass
         REGRESSION PREVENTION: Ensures decorator package exports match available decorators.
         
         BVJ: Platform | Code Quality | Prevents future import inconsistencies
@@ -192,7 +208,9 @@ class DecoratorImportBlockingIssue268ATests(SSotBaseTestCase):
 
 class PostFixValidationTests(SSotBaseTestCase):
     "
+    "
     POST-FIX VALIDATION: Tests that run AFTER the fix to validate success.
+"
 "
     
     @pytest.mark.integration  
@@ -207,7 +225,8 @@ class PostFixValidationTests(SSotBaseTestCase):
             cmd = [
                 sys.executable,
                 tests/unified_test_runner.py, "
-                "--no-docker,
+                tests/unified_test_runner.py, "
+                "--no-docker,"
                 --category, unit,
                 --fast-fail",  # Stop on first failure for quick feedback"
                 --no-coverage  # Focus on discovery, not coverage
@@ -223,8 +242,9 @@ class PostFixValidationTests(SSotBaseTestCase):
             
             # Validate test collection succeeded (return code 0 for collection)
             if result.returncode != 0:
-                # Check if it's a collection error vs test failure
+                # Check if it's a collection error vs test failure'
                 if 'ImportError' in result.stderr or 'cannot import' in result.stderr:
+                    self.fail(fImport errors still present: {result.stderr})"
                     self.fail(fImport errors still present: {result.stderr})"
                 else:
                     # Test failures are acceptable, import errors are not
@@ -244,3 +264,5 @@ class PostFixValidationTests(SSotBaseTestCase):
             self.fail("Unit test execution timed out)"
         except Exception as e:
             self.fail(fUnit test execution failed: {e}")"
+
+)

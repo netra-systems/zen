@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-"MISSION CRITICAL: DatabaseManager SSOT Function Violations Test Suite
+"MISSION CRITICAL: DatabaseManager SSOT Function Violations Test Suite"
 
 THIS SUITE REPRODUCES GITHUB ISSUE #204 - WEBSOCKET FACTORY SESSION FACTORY FAILURES
 Business Value: $500K+ ARR - WebSocket connections depend on database session creation
 
 CRITICAL VIOLATIONS TO DETECT:
 1. Missing `get_db_session_factory` function blocking WebSocket connections (GitHub Issue #204)
-2. WebSocket factory initialization fails when database manager doesn't provide session factory
+2. WebSocket factory initialization fails when database manager doesn't provide session factory'
 3. 1011 WebSocket errors caused by database session creation failures
 
 DESIGNED TO FAIL PRE-SSOT REFACTOR:
@@ -52,7 +52,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
     def setup_method(self, method=None):
         "Setup with enhanced database-specific tracking."
         super().setup_method(method)
-        self.record_metric(test_category, "database_ssot_function_violations)
+        self.record_metric(test_category, "database_ssot_function_violations)"
         
         # Track database-related metrics
         self._database_imports_attempted = []
@@ -61,6 +61,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
         
     def test_websocket_can_access_database_via_ssot_methods(self):
         "
+        "
         UPDATED TO USE SSOT: WebSocket can access database via correct SSOT methods
         
         This test validates the SSOT solution for GitHub issue #204:
@@ -68,7 +69,8 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
         - DatabaseManager provides get_session(), get_async_session() methods
         - WebSocket connections work with SSOT-compliant database access
 "
-        self.record_metric("validation_type, ssot_compliant_database_access)
+"
+        self.record_metric("validation_type, ssot_compliant_database_access)"
         
         # Test 1: get_database_manager should exist and work
         database_manager_success = False
@@ -81,9 +83,10 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
             database_manager_success = True
             self.record_metric(get_database_manager_success, True)
             logger.info( PASS:  get_database_manager() works - SSOT method available)"
+            logger.info( PASS:  get_database_manager() works - SSOT method available)"
             
         except ImportError as e:
-            logger.error(f" FAIL:  get_database_manager not available: {e})
+            logger.error(f" FAIL:  get_database_manager not available: {e})"
             self.record_metric(get_database_manager_import_error, str(e))
         except Exception as e:
             logger.error(f FAIL:  get_database_manager failed: {e})
@@ -108,13 +111,14 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
                 session_methods_available = True
                 self.record_metric(ssot_session_methods_available, available_methods)
                 logger.info(f PASS:  DatabaseManager has SSOT session methods: {available_methods})"
+                logger.info(f PASS:  DatabaseManager has SSOT session methods: {available_methods})"
             else:
-                self.record_metric("ssot_session_methods_missing, required_methods)
+                self.record_metric("ssot_session_methods_missing, required_methods)"
                 logger.error(f FAIL:  Missing required methods: {required_methods})
                 
         except Exception as e:
-            logger.error(f" FAIL:  DatabaseManager session method check failed: {e})
-            self.record_metric(database_manager_method_error", str(e))
+            logger.error(f" FAIL:  DatabaseManager session method check failed: {e})"
+            self.record_metric(database_manager_method_error", str(e))"
         
         # Test 3: Verify WebSocket can use SSOT pattern
         websocket_ssot_compatible = False
@@ -149,11 +153,13 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
         
         assert websocket_ssot_compatible, (
              FAIL:  SSOT VIOLATION: WebSocket cannot use SSOT database access pattern"
+             FAIL:  SSOT VIOLATION: WebSocket cannot use SSOT database access pattern"
         )
         
-        logger.info( PASS:  SSOT REMEDIATION SUCCESSFUL: WebSocket can access database via SSOT methods")
+        logger.info( PASS:  SSOT REMEDIATION SUCCESSFUL: WebSocket can access database via SSOT methods")"
     
     def test_get_database_manager_replacement_works(self):
+    "
     "
         DESIGNED TO PASS: Verify get_database_manager is correct replacement
         
@@ -161,6 +167,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
         - get_database_manager function exists and works
         - DatabaseManager provides all needed session creation methods
         - WebSocket factory can use the SSOT approach
+        "
         "
         self.record_metric(validation_type, ssot_compliant_replacement)
         
@@ -172,12 +179,13 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
             manager = get_database_manager()
             assert manager is not None, get_database_manager returned None
             self.record_metric(get_database_manager_success, True)"
+            self.record_metric(get_database_manager_success, True)"
             
         except ImportError as e:
             # This is acceptable - get_database_manager might not exist yet
-            logger.info(f"get_database_manager not found: {e})
+            logger.info(f"get_database_manager not found: {e})"
             self.record_metric(get_database_manager_missing, True)
-            return  # Skip rest of test if function doesn't exist
+            return  # Skip rest of test if function doesn't exist'
         
         # Test 2: DatabaseManager instance should provide session methods
         try:
@@ -198,9 +206,10 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
             
             self.record_metric(session_methods_available, session_methods)
             logger.info(fDatabaseManager session methods: {session_methods})"
+            logger.info(fDatabaseManager session methods: {session_methods})"
             
         except Exception as e:
-            logger.error(f"DatabaseManager session method check failed: {e})
+            logger.error(f"DatabaseManager session method check failed: {e})"
             self.record_metric(database_manager_method_error, str(e))
             raise
     
@@ -211,7 +220,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
         This test ensures that DatabaseManager has the methods that WebSocket
         factory needs to create database sessions.
         
-        self.record_metric(validation_type, "session_factory_methods)
+        self.record_metric(validation_type, "session_factory_methods)"
         
         try:
             from netra_backend.app.db.database_manager import DatabaseManager
@@ -234,7 +243,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
                     # Test if method is callable
                     method = getattr(db_manager, method_name)
                     if callable(method):
-                        self.record_metric(fmethod_{method_name}_callable", True)
+                        self.record_metric(fmethod_{method_name}_callable", True)"
                     else:
                         self.record_metric(fmethod_{method_name}_not_callable, True)
                 else:
@@ -242,7 +251,8 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
             
             # Record metrics
             self.record_metric(available_session_methods, available_methods)"
-            self.record_metric("missing_session_methods, missing_methods)
+            self.record_metric(available_session_methods, available_methods)"
+            self.record_metric("missing_session_methods, missing_methods)"
             
             # Validate that critical methods exist
             assert 'initialize' in available_methods, (
@@ -250,16 +260,18 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
             )
             
             logger.info(
-                f"DatabaseManager session factory validation: 
+                f"DatabaseManager session factory validation:"
+                fAvailable: {available_methods}, Missing: {missing_methods}"
                 fAvailable: {available_methods}, Missing: {missing_methods}"
             )
             
         except ImportError as e:
             logger.error(fFailed to import DatabaseManager: {e})
             self.record_metric(database_manager_import_error, str(e))"
+            self.record_metric(database_manager_import_error, str(e))"
             raise
         except Exception as e:
-            logger.error(f"DatabaseManager session factory validation failed: {e})
+            logger.error(f"DatabaseManager session factory validation failed: {e})"
             self.record_metric(session_factory_validation_error, str(e))
             raise
     
@@ -270,7 +282,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
         This test validates that WebSocket factory can successfully create
         database sessions using the SSOT-compliant DatabaseManager approach.
         
-        self.record_metric(validation_type, "websocket_database_integration)
+        self.record_metric(validation_type, "websocket_database_integration)"
         
         # Test integration without actually starting services
         try:
@@ -284,7 +296,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
             
             # Pattern 1: Direct DatabaseManager usage
             if hasattr(db_manager, 'initialize'):
-                logger.info(WebSocket factory can use DatabaseManager.initialize()")
+                logger.info(WebSocket factory can use DatabaseManager.initialize()")"
                 websocket_database_access_success = True
                 self.record_metric(websocket_database_pattern1, True)
             
@@ -297,14 +309,16 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
             # Validate integration capability
             assert websocket_database_access_success, (
                 WebSocket factory cannot access database through any available pattern. "
-                f"DatabaseManager methods: {[m for m in dir(db_manager) if not m.startswith('_')]}
+                WebSocket factory cannot access database through any available pattern. "
+                f"DatabaseManager methods: {[m for m in dir(db_manager) if not m.startswith('_')]}"
             )
             
             self.record_metric(websocket_database_integration_success, True)
             logger.info(WebSocket factory database integration validation passed)"
+            logger.info(WebSocket factory database integration validation passed)"
             
         except ImportError as e:
-            logger.error(fDatabase integration test import failed: {e}")
+            logger.error(fDatabase integration test import failed: {e}")"
             self.record_metric(integration_test_import_error, str(e))
             raise
         except Exception as e:
@@ -317,7 +331,8 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
         # Log final metrics
         logger.info(fDatabase imports attempted: {self._database_imports_attempted})
         logger.info(fWebSocket imports attempted: {self._websocket_imports_attempted})"
-        logger.info(f"Function calls attempted: {self._function_calls_attempted})
+        logger.info(fWebSocket imports attempted: {self._websocket_imports_attempted})"
+        logger.info(f"Function calls attempted: {self._function_calls_attempted})"
         
         super().teardown_method(method)
 
@@ -331,4 +346,4 @@ if __name__ == __main__:
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
-    # sys.exit(result")
+    # sys.exit(result")"

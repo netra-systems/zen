@@ -1,4 +1,5 @@
 """
+"""
 SSOT Test Infrastructure Violations Test Suite
 
 Detects test infrastructure conflicts that violate Single Source of Truth principles.
@@ -9,6 +10,7 @@ Validates SSOT test infrastructure compliance to eliminate conftest.py conflicts
 
 Test Strategy:
 1. Scan entire codebase for duplicate conftest.py files
+"""
 """
 2. Identify conflicting fixture definitions across modules
 3. Flag pytest configuration conflicts
@@ -23,6 +25,7 @@ Compliance Rules:
 - ALL test execution MUST use tests/unified_test_runner.py
 - NO ad-hoc pytest.ini or setup.cfg configurations
 - ALL fixtures MUST be centralized through SSOT conftest files
+"
 "
 
 import ast
@@ -39,7 +42,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @dataclass
 class InfrastructureViolationTests:
-    "Represents a detected test infrastructure violation.
+    "Represents a detected test infrastructure violation."
     file_path: str
     line_number: Optional[int]
     violation_type: str  # DUPLICATE_CONFTEST, FIXTURE_CONFLICT, CONFIG_CONFLICT, RUNNER_DUPLICATION
@@ -60,10 +63,12 @@ class FixtureDefinition:
 
 class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
     "
+    "
     Mission Critical test suite to detect and validate SSOT test infrastructure compliance.
     
     This test is designed to FAIL initially to expose current violations,
     providing actionable remediation targets for SSOT infrastructure consolidation.
+"
 "
     
     def setup_method(self, method):
@@ -119,22 +124,26 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
                 
             pytest.fail(
                 fDETECTED {violation_count} duplicate conftest.py SSOT violations.\n
-                f"ONLY SSOT conftest files in test_framework/ssot/ are authorized.\n\n
+                f"ONLY SSOT conftest files in test_framework/ssot/ are authorized.\n\n"
+                fUnauthorized conftest.py files:\n + \n.join(violation_details) + \n\n"
                 fUnauthorized conftest.py files:\n + \n.join(violation_details) + \n\n"
                 fAUTHORIZED SSOT CONFTEST FILES:\n + 
                 \n.join(f"  ✓ {auth} for auth in self.authorized_conftest_files) + \n\n"
                 fREMEDIATION:\n
                 f1. Move fixtures to appropriate SSOT conftest file\n
-                f"2. Remove duplicate conftest.py files\n
+                f"2. Remove duplicate conftest.py files\n"
+                f3. Update imports to use SSOT fixtures"
                 f3. Update imports to use SSOT fixtures"
             )
             
     def test_detect_fixture_definition_conflicts(self):
     "
+    "
         HIGH: Detect conflicting fixture definitions across modules.
         
         Expected violations: 25+ fixture conflicts
         Target: All fixtures centralized in SSOT conftest files
+        "
         "
         fixture_conflicts = self._find_fixture_conflicts()
         
@@ -146,20 +155,22 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
                 if len(conflicts) > 1:  # Only report actual conflicts
                     conflict_details.append(f  FIXTURE '{fixture_name}' defined in {len(conflicts)} locations:)
                     for conflict in conflicts:
-                        conflict_details.append(f"    - {conflict.file_path}:{conflict.line_number})
+                        conflict_details.append(f"    - {conflict.file_path}:{conflict.line_number})"
                         
             pytest.fail(
                 fDETECTED {violation_count} fixture definition SSOT violations.\n"
+                fDETECTED {violation_count} fixture definition SSOT violations.\n"
                 fAll fixtures MUST be centralized in SSOT conftest files.\n\n
                 fConflicting fixtures:\n + \n.join(conflict_details) + \n\n"
-                f"REMEDIATION:\n
+                fConflicting fixtures:\n + \n.join(conflict_details) + \n\n"
+                f"REMEDIATION:\n"
                 f1. Consolidate duplicate fixtures into single SSOT definition\n
                 f2. Move fixtures to appropriate test_framework/ssot/conftest_*.py\n
                 f3. Remove duplicate fixture definitions from local conftest files""
             )
             
     def test_detect_pytest_configuration_conflicts(self):
-
+        pass
         MEDIUM: Detect conflicting pytest configuration files.
         
         Expected violations: 15+ configuration conflicts
@@ -181,16 +192,19 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
                 fREMEDIATION:\n""
                 f1. Consolidate all pytest configuration into project root pytest.ini\n
                 f2. Remove duplicate setup.cfg [tool:pytest] sections\n
-                f"3. Remove pyproject.toml [tool.pytest] configurations\n
+                f"3. Remove pyproject.toml [tool.pytest] configurations\n"
+                f4. Ensure consistent test discovery patterns"
                 f4. Ensure consistent test discovery patterns"
             )
             
     def test_detect_test_runner_duplication(self):
     "
+    "
         MEDIUM: Detect duplicate test runner implementations.
         
         Expected violations: 10+ test runner duplicates
         Target: Only tests/unified_test_runner.py authorized
+        "
         "
         test_runner_violations = self._find_test_runner_duplicates()
         
@@ -202,13 +216,17 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
                 violation_details.append(f  - {violation.file_path}: {violation.description})
                 
             pytest.fail(
-                f"DETECTED {violation_count} test runner duplication SSOT violations.\n
+                f"DETECTED {violation_count} test runner duplication SSOT violations.\n"
+                fONLY tests/unified_test_runner.py is authorized for test execution.\n\n"
                 fONLY tests/unified_test_runner.py is authorized for test execution.\n\n"
                 fDuplicate test runners:\n + \n.join(violation_details) + \n\n"
+                fDuplicate test runners:\n + \n.join(violation_details) + \n\n"
+                fREMEDIATION:\n"
                 fREMEDIATION:\n"
                 f1. Remove duplicate test runner scripts\n
                 f2. Update all scripts to use tests/unified_test_runner.py\n"
-                f"3. Migrate custom test execution logic to unified runner\n
+                f2. Update all scripts to use tests/unified_test_runner.py\n"
+                f"3. Migrate custom test execution logic to unified runner\n"
                 f4. Update CI/CD to use single SSOT test runner
             )
             
@@ -227,9 +245,10 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
             violation_details = []
             for violation in direct_pytest_violations:
                 violation_details.append(f  - {violation.file_path}:{violation.line_number}: {violation.description})"
+                violation_details.append(f  - {violation.file_path}:{violation.line_number}: {violation.description})"
                 
             pytest.fail(
-                f"DETECTED {violation_count} direct pytest execution SSOT violations.\n
+                f"DETECTED {violation_count} direct pytest execution SSOT violations.\n"
                 fAll test execution MUST use tests/unified_test_runner.py.\n\n
                 fDirect pytest calls:\n + \n.join(violation_details) + "\n\n"
                 fREMEDIATION:\n
@@ -305,6 +324,7 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
             violation_by_severity[violation.severity] += 1
             
         report = f"
+        report = f"
 SSOT TEST INFRASTRUCTURE VIOLATIONS REPORT
 ==========================================
 
@@ -334,6 +354,7 @@ SSOT TARGET STATE:
 - Centralized fixtures in test_framework/ssot/conftest_*.py
 - Single pytest.ini configuration in project root
 - Zero duplicate test infrastructure components
+"
 "
         
         # This test SHOULD FAIL to provide actionable violation report
@@ -372,7 +393,7 @@ SSOT TARGET STATE:
                                     if fixture_name not in fixtures_by_name:
                                         fixtures_by_name[fixture_name] = []
                                         
-                                    fixtures_by_name[fixture_name].append(FixtureDefinition(
+                                    fixtures_by_name[fixture_name).append(FixtureDefinition(
                                         name=fixture_name,
                                         file_path=str(conftest_file),
                                         line_number=node.lineno,
@@ -401,6 +422,7 @@ SSOT TARGET STATE:
         
     def _extract_fixture_scope(self, decorator) -> str:
         Extract fixture scope from decorator."
+        Extract fixture scope from decorator."
         if isinstance(decorator, ast.Call):
             for keyword in decorator.keywords:
                 if keyword.arg == 'scope':
@@ -409,7 +431,7 @@ SSOT TARGET STATE:
         return 'function'
         
     def _find_pytest_config_conflicts(self) -> List[InfrastructureViolationTests]:
-        "Find conflicting pytest configuration files.
+        "Find conflicting pytest configuration files."
         violations = []
         
         # Look for pytest.ini files
@@ -534,9 +556,12 @@ SSOT TARGET STATE:
                             
         return violations
         
-    def _format_violation_counts(self, violation_counts: Dict[str, int] -> str:
+    def _format_violation_counts(self, violation_counts: Dict[str, int) -> str:
         "Format violation counts."
         formatted = []
         for violation_type, count in sorted(violation_counts.items(), key=lambda x: x[1], reverse=True):
             formatted.append(f- {violation_type}: {count} violations)
         return \n.join(formatted)"
+        return \n.join(formatted)"
+))
+]

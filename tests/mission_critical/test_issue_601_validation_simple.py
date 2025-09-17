@@ -1,4 +1,5 @@
 """
+"""
 Simple Issue #601 Validation Test - Strategic Validation Mocking
 
 This test validates the core fix for Issue #601 without complex infrastructure dependencies.
@@ -6,7 +7,10 @@ It demonstrates that strategic mocking of _run_comprehensive_validation prevents
 
 Business Value: $500K+ ARR platform reliability protection
 """
+"""
 
+"""
+"""
 """
 """
 import asyncio
@@ -20,7 +24,7 @@ from fastapi import FastAPI
 
 # Simple test without complex SSOT dependencies
 class Issue601ValidationFixTests:
-    "Simple validation of Issue #601 fix without infrastructure dependencies.
+    "Simple validation of Issue #601 fix without infrastructure dependencies."
 
     def setup_method(self):
         "Set up test environment."
@@ -66,14 +70,14 @@ class Issue601ValidationFixTests:
             nonlocal validation_mocked
             validation_mocked = True
             app.state.startup_complete = True
-            await asyncio.sleep(0.01)  # Minimal delay
+            await asyncio.sleep(0.1)  # Minimal delay
 
         # Mock the problematic validation method
         orchestrator._run_comprehensive_validation = mock_validation_method
 
         # Mock all startup phases to be lightweight
         async def lightweight_phase():
-            await asyncio.sleep(0.01)
+            await asyncio.sleep(0.1)
 
         orchestrator._phase1_foundation = lightweight_phase
         orchestrator._phase2_core_services = lightweight_phase
@@ -121,12 +125,12 @@ class Issue601ValidationFixTests:
             # Apply the same strategic mocking as the fix
             async def mock_validation():
                 app.state.startup_complete = True
-                await asyncio.sleep(0.01)
+                await asyncio.sleep(0.1)
 
             async def lightweight_phase():
                 # Simulate some memory allocation
                 temp_data = [0] * 1000  # Small allocation
-                await asyncio.sleep(0.01)
+                await asyncio.sleep(0.1)
                 del temp_data
 
             # Apply mocks
@@ -174,7 +178,7 @@ class Issue601ValidationFixTests:
 
         # Mock phases but DO NOT mock the validation (this should hang)
         async def lightweight_phase():
-            await asyncio.sleep(0.01)
+            await asyncio.sleep(0.1)
 
         orchestrator._phase1_foundation = lightweight_phase
         orchestrator._phase2_core_services = lightweight_phase
@@ -184,7 +188,7 @@ class Issue601ValidationFixTests:
         orchestrator._phase6_websocket_setup = lightweight_phase
         orchestrator._phase7_finalization = lightweight_phase
 
-        # DON'T mock _run_comprehensive_validation - this should cause hang
+        # DON'T mock _run_comprehensive_validation - this should cause hang'
         
         # This should timeout, proving the original issue exists
         start_time = time.time()
@@ -200,9 +204,10 @@ class Issue601ValidationFixTests:
 
 # Direct execution for quick validation
 if __name__ == __main__:"
+if __name__ == __main__:"
     import unittest
     
-    print("Issue #601 Simple Validation Test)
+    print("Issue #601 Simple Validation Test)"
     print(= * 50")"
     
     # Run specific test
@@ -213,4 +218,5 @@ if __name__ == __main__:"
     if result.wasSuccessful():
         print(✅ Issue #601 fix validation PASSED)
     else:
+        print(❌ Issue #601 fix validation FAILED"")"
         print(❌ Issue #601 fix validation FAILED"")"

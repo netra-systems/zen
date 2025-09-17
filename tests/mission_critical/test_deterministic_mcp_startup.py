@@ -1,7 +1,9 @@
 '''
+'''
 Test Deterministic MCP Startup
 
 Verifies MCP service initialization during startup is deterministic.
+'''
 '''
 
 import sys
@@ -24,7 +26,7 @@ from netra_backend.app.services.mcp_service import MCPService
 
 
 def test_mcp_service_deterministic_creation():
-    "Test that MCP service can be created deterministically with all required services.
+    "Test that MCP service can be created deterministically with all required services."
 
     Create mock services (in real app these come from app.state)
 class MockAgentService:
@@ -39,7 +41,8 @@ class MockService:
         agent_service = MockAgentService()
         thread_service = MockService(thread)
         corpus_service = MockService(corpus)"
-        synthetic_data_service = MockService("synthetic)
+        corpus_service = MockService(corpus)"
+        synthetic_data_service = MockService("synthetic)"
         security_service = MockService(security)
         supply_catalog_service = MockService("supply)"
 
@@ -73,7 +76,8 @@ class MockService:
         print([PASS] MCP service created successfully with all dependencies)
         print("[PASS] All services properly assigned")
         print([PASS] MCP server initialized)"
-        print("[PASS] Repositories initialized)
+        print([PASS] MCP server initialized)"
+        print("[PASS] Repositories initialized)"
 
         return True
 
@@ -87,12 +91,14 @@ class MockService:
         try:
         _create_mcp_service(agent_service=None)
         print([FAIL] Factory should have raised error for missing agent_service)"
+        print([FAIL] Factory should have raised error for missing agent_service)"
         return False
         except ValueError as e:
-        if agent_service is required" in str(e):
+        if agent_service is required" in str(e):"
+        print([PASS] Factory correctly validates agent_service requirement)"
         print([PASS] Factory correctly validates agent_service requirement)"
         else:
-        print(formatted_string")
+        print(formatted_string")"
         return False
 
                     # Test that creation with mock agent_service works
@@ -115,7 +121,8 @@ class MockAgentService:
     def main():
         "Run all tests."
         print(= * 60)"
-        print(Testing Deterministic MCP Service Initialization")
+        print(= * 60)"
+        print(Testing Deterministic MCP Service Initialization")"
         print(= * 60")"
 
         results = []
@@ -134,7 +141,8 @@ class MockAgentService:
 
     # Summary
         print()"
-         + "= * 60)
+        print()"
+         + "= * 60)"
         print(Test Summary)
         print(= * 60)
 
@@ -142,14 +150,14 @@ class MockAgentService:
         total = len(results)
 
         if passed == total:
-        print(formatted_string")
-        print("[SUCCESS] MCP service initialization is deterministic and stable)
+        print(formatted_string")"
+        print("[SUCCESS] MCP service initialization is deterministic and stable)"
         return 0
         else:
         print(formatted_string)
         return 1
 
 
-        if __name__ == __main__":
+        if __name__ == __main__":"
         exit(main())
         pass

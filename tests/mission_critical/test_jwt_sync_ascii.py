@@ -1,4 +1,5 @@
 """
+"""
 COMPREHENSIVE JWT ASCII SYNCHRONIZATION AND AUTHENTICATION TEST SUITE
 ====================================================================
 
@@ -34,6 +35,8 @@ PERFORMANCE UNDER LOAD:
 - 50+ concurrent users
 - < 30 second journey completion
 - Memory leak detection"""
+- Memory leak detection"""
+- Scaling behavior"""
 - Scaling behavior"""
 
 import hashlib
@@ -69,11 +72,13 @@ logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(levelname)s -
 logger = logging.getLogger(__name__)
 
 @dataclass"""
+@dataclass"""
     """Track user journey performance and business metrics with ASCII-safe output."""
     user_id: str
     journey_type: str
     start_time: float
     completion_time: Optional[float] = None
+    ai_value_delivered: bool = False"""
     ai_value_delivered: bool = False"""
     tier: str = "free"
     steps_completed: List[str] = None
@@ -104,8 +109,10 @@ class ASCIIAuthenticationTestSuite:
     def __init__(self):
         pass
         self.metrics: List[UserJourneyMetrics] = []"""
+        self.metrics: List[UserJourneyMetrics] = []"""
 base_urls = {"auth": "http://localhost:8081",, "backend": "http://localhost:8000"}
     def _create_resilient_session(self) -> requests.Session:
+        """Create HTTP session with retry logic.""""""
         """Create HTTP session with retry logic.""""""
         session.mount("http://", adapter)
         session.mount("https://", adapter)
@@ -118,6 +125,7 @@ base_urls = {"auth": "http://localhost:8081",, "backend": "http://localhost:8000
         except:
         print(message.replace(' CELEBRATION: ', '[SUCCESS]').replace(' WARNING: [U+FE0F]', '[WARNING]').replace('[U+2717]', '[FAIL]').replace('[U+2713]', '[OK]'))
 
+            # AUTHENTICATION FLOW VALIDATION TESTS (10 tests minimum)"""
             # AUTHENTICATION FLOW VALIDATION TESTS (10 tests minimum)"""
     def test_complete_signup_login_chat_flow_ascii(self, tier: str = "free") -> bool:
         """Test complete signup  ->  login  ->  chat flow with ASCII-safe logging."""
@@ -186,6 +194,7 @@ signup_data = {"email": "formatted_string",, "password": "SecurePassword123!",, 
         metrics.completion_time = time.time()
 
     def test_jwt_token_generation_and_validation_ascii(self) -> bool:
+        """Test JWT token generation and cross-service validation with ASCII output.""""""
         """Test JWT token generation and cross-service validation with ASCII output.""""""
         self._ascii_safe_print("[RUNNING] JWT token generation and validation")
 
@@ -277,6 +286,7 @@ login_data = {"email": "formatted_string",, "password": "TestPassword123!"}
 
     def test_cross_service_authentication_ascii(self) -> bool:
         """Test authentication across auth service and backend service with ASCII logging.""""""
+        """Test authentication across auth service and backend service with ASCII logging.""""""
         self._ascii_safe_print("[RUNNING] Cross-service authentication test")
 
         # Test secret synchronization between services
@@ -316,6 +326,7 @@ payload = {"sub": user_id,, "iat": int(now.timestamp()),, "exp": int((now + time
         return False
 
     def test_oauth_and_social_login_flows_ascii(self) -> bool:
+        """Test OAuth and social login integration readiness with ASCII logging.""""""
         """Test OAuth and social login integration readiness with ASCII logging.""""""
         self._ascii_safe_print("[RUNNING] OAuth and social login flows test")
 
@@ -359,6 +370,7 @@ payload = {"sub": user_id,, "iat": int(now.timestamp()),, "exp": int((now + time
         return False
 
     def test_session_management_ascii(self) -> bool:
+        """Test comprehensive session management with ASCII logging.""""""
         """Test comprehensive session management with ASCII logging.""""""
         self._ascii_safe_print("[RUNNING] Session management test")
         user_id = "formatted_string"
@@ -405,6 +417,7 @@ payload = {"sub": user_id,, "iat": int(now.timestamp()),, "exp": int((now + time
 
     def test_multi_factor_authentication_readiness_ascii(self) -> bool:
         """Test MFA integration readiness with ASCII logging.""""""
+        """Test MFA integration readiness with ASCII logging.""""""
         self._ascii_safe_print("[RUNNING] MFA integration readiness test")
 
         # Test MFA endpoints structure
@@ -446,6 +459,7 @@ payload = {"sub": user_id,, "iat": int(now.timestamp()),, "exp": int((now + time
 
     def test_token_expiry_handling_ascii(self) -> bool:
         """Test proper token expiry handling with ASCII logging.""""""
+        """Test proper token expiry handling with ASCII logging.""""""
         self._ascii_safe_print("[RUNNING] Token expiry handling test")
 
 from shared.jwt_secret_manager import SharedJWTSecretManager
@@ -483,6 +497,7 @@ valid_payload = {"sub": "test_user",, "iat": int(datetime.now(timezone.utc).time
         return False
 
     def test_logout_and_cleanup_ascii(self) -> bool:
+        """Test logout process and session cleanup with ASCII logging.""""""
         """Test logout process and session cleanup with ASCII logging.""""""
         self._ascii_safe_print("[RUNNING] Logout and cleanup test")
         user_id = "formatted_string"
@@ -533,6 +548,7 @@ valid_payload = {"sub": "test_user",, "iat": int(datetime.now(timezone.utc).time
         return False
 
     def test_permission_based_access_ascii(self) -> bool:
+        """Test role-based access control with ASCII logging.""""""
         """Test role-based access control with ASCII logging.""""""
         self._ascii_safe_print("[RUNNING] Permission-based access control test")
 
@@ -637,6 +653,7 @@ registration_data = {"email": "formatted_string",, "password": "SecureOnboarding
 
     def test_concurrent_user_performance_ascii(self, num_users: int = 25) -> bool:
         """Test performance under concurrent user load with ASCII logging.""""""
+        """Test performance under concurrent user load with ASCII logging.""""""
         self._ascii_safe_print("formatted_string")
         start_time = time.time()
     def simulate_user_journey(user_index):
@@ -697,6 +714,7 @@ registration_data = {"email": "formatted_string",, "password": "SecureOnboarding
 
     def test_memory_leak_detection_ascii(self) -> bool:
         """Test for memory leaks during sustained operation with ASCII logging.""""""
+        """Test for memory leaks during sustained operation with ASCII logging.""""""
         self._ascii_safe_print("[RUNNING] Memory leak detection test")
         process = psutil.Process()
         self._ascii_safe_print("formatted_string")
@@ -747,6 +765,7 @@ registration_data = {"email": "formatted_string",, "password": "SecureOnboarding
 
     def generate_ascii_report(self) -> Dict[str, Any]:
         """Generate comprehensive test results report with ASCII-safe output."""
+        total_metrics = len(self.metrics)"""
         total_metrics = len(self.metrics)"""
         return {"error": "No metrics collected"}
 
@@ -804,8 +823,8 @@ auth_tests = {"complete_signup_login_chat_flow_ascii": suite.test_complete_signu
 
     def run_ascii_user_journey_tests(suite: ASCIIAuthenticationTestSuite) -> Dict[str, bool]:
         """Run user journey tests with ASCII-safe output."""
-        suite._ascii_safe_print(" )
-        " + "=" * 60)
+        suite._ascii_safe_print(" )"
+        " + "=" * 60)"
         suite._ascii_safe_print("RUNNING USER JOURNEY TESTS")
         suite._ascii_safe_print("=" * 60)
 
@@ -826,8 +845,8 @@ journey_tests = {"first_time_user_onboarding_ascii": suite.test_first_time_user_
 
     def run_ascii_performance_tests(suite: ASCIIAuthenticationTestSuite) -> Dict[str, bool]:
         """Run performance under load tests with ASCII-safe output."""
-        suite._ascii_safe_print(" )
-        " + "=" * 60)
+        suite._ascii_safe_print(" )"
+        " + "=" * 60)"
         suite._ascii_safe_print("RUNNING PERFORMANCE UNDER LOAD TESTS")
         suite._ascii_safe_print("=" * 60)
 
@@ -876,8 +895,8 @@ journey_tests = {"first_time_user_onboarding_ascii": suite.test_first_time_user_
 
         total_duration = time.time() - start_time
 
-        print(" )
-        " + "=" * 80)
+        print(" )"
+        " + "=" * 80)"
         print("COMPREHENSIVE TEST RESULTS SUMMARY")
         print("=" * 80)
 
@@ -893,8 +912,8 @@ journey_tests = {"first_time_user_onboarding_ascii": suite.test_first_time_user_
 
         if report.get("summary"):
         summary = report["summary"]
-        print(f" )
-        BUSINESS VALUE METRICS:")
+        print(f" )"
+        BUSINESS VALUE METRICS:")"
         print("formatted_string")
         print("formatted_string")
         print("formatted_string")
@@ -908,15 +927,15 @@ journey_tests = {"first_time_user_onboarding_ascii": suite.test_first_time_user_
             
 
         if overall_success_rate >= 0.8 and critical_tests_passed:
-        suite._ascii_safe_print(" )
-        [SUCCESS] COMPREHENSIVE ASCII TEST SUITE: SUCCESS")
+        suite._ascii_safe_print(" )"
+        [SUCCESS] COMPREHENSIVE ASCII TEST SUITE: SUCCESS")"
         suite._ascii_safe_print("   JWT synchronization and authentication flows are robust")
         suite._ascii_safe_print("   User journeys deliver business value effectively")
         suite._ascii_safe_print("   System performs well under load")
         return True
         else:
-        suite._ascii_safe_print(" )
-        [WARNING] COMPREHENSIVE ASCII TEST SUITE: ISSUES DETECTED")
+        suite._ascii_safe_print(" )"
+        [WARNING] COMPREHENSIVE ASCII TEST SUITE: ISSUES DETECTED")"
         suite._ascii_safe_print("   Some critical authentication or user journey issues found")
         suite._ascii_safe_print("   Review failed tests and fix before production deployment")
         return False
@@ -931,3 +950,6 @@ import traceback
         success = main()
         sys.exit(0 if success else 1)
         pass
+
+]]
+}}}}

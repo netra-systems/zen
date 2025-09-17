@@ -1,7 +1,9 @@
 """
+"""
 Issue #519: Pytest Configuration Conflicts - Mission Critical Test Suite
 
 This test suite reproduces and validates pytest configuration conflicts that are blocking
+"""
 """
 the Mission Critical WebSocket Test Suite from running properly.
 
@@ -13,6 +15,7 @@ Root Cause Analysis:
 Business Impact: HIGH - Blocking $500K+ ARR validation through Mission Critical tests
 Priority: P0 - Must resolve to protect business value
 "
+"
 
 import subprocess
 import sys
@@ -22,7 +25,7 @@ from typing import List, Dict, Any, Optional
 
 
 class PytestConfigConflictsTests:
-    "Test suite for reproducing pytest configuration conflicts.
+    "Test suite for reproducing pytest configuration conflicts."
     
     def test_phase1_reproduce_duplicate_option_conflict(self):
         "PHASE 1: Reproduce the duplicate --analyze-service-deps option conflict."
@@ -33,9 +36,10 @@ class PytestConfigConflictsTests:
         2. Wildcard import in conftest.py importing the same plugin
         3. Both registering the same command-line option
         "
+        "
         # Attempt to run pytest with help to trigger option parsing
         cmd = [
-            sys.executable, -m", pytest, 
+            sys.executable, -m", pytest,"
             --help,
             "-p, test_framework.ssot.pytest_no_docker_plugin"
         ]
@@ -62,9 +66,10 @@ class PytestConfigConflictsTests:
         This test should FAIL initially, confirming that the Mission Critical
         WebSocket tests cannot run due to pytest configuration conflicts.
         "
+        "
         # Try to collect Mission Critical WebSocket tests
         cmd = [
-            sys.executable, -m", pytest,
+            sys.executable, -m", pytest,"
             tests/mission_critical/test_websocket_agent_events_suite.py,
             "--collect-only,"
             --analyze-service-deps  # This should trigger the conflict
@@ -86,31 +91,33 @@ class PytestConfigConflictsTests:
             fSTDERR: {result.stderr}
         )
         
-        # Verify it's specifically an option conflict
+        # Verify it's specifically an option conflict'
         assert any(keyword in result.stderr.lower() for keyword in [
             "already added, conflict", duplicate, option
-        ], (
+        ), (
             fExpected option conflict error in stderr, but got:\n
             fSTDERR: {result.stderr}""
         )
 
     def test_phase1_reproduce_wildcard_import_issue(self):
         PHASE 1: Reproduce wildcard import causing plugin conflicts."
+        PHASE 1: Reproduce wildcard import causing plugin conflicts."
         
         The issue is in /tests/conftest.py line 58:
         from test_framework.ssot.pytest_no_docker_plugin import *
         
         This imports pytest_addoption function which conflicts with
-        pytest's plugin auto-discovery also loading the same module.
+        pytest's plugin auto-discovery also loading the same module.'
+        "
         "
         # Check if the problematic wildcard import exists
         conftest_path = Path(__file__).parent.parent / conftest.py
-        assert conftest_path.exists(), f"Main conftest.py not found at {conftest_path}
+        assert conftest_path.exists(), f"Main conftest.py not found at {conftest_path}"
         
         conftest_content = conftest_path.read_text()
         
         # Verify wildcard import exists (this confirms the issue)
-        assert from test_framework.ssot.pytest_no_docker_plugin import *" in conftest_content, (
+        assert from test_framework.ssot.pytest_no_docker_plugin import *" in conftest_content, ("
             Wildcard import from pytest_no_docker_plugin not found in conftest.py. 
             Issue may have been already fixed or structure changed.""
         )
@@ -118,9 +125,10 @@ class PytestConfigConflictsTests:
         # Verify the plugin defines pytest_addoption
         plugin_path = Path(__file__).parent.parent.parent / test_framework/ssot/pytest_no_docker_plugin.py
         assert plugin_path.exists(), fPlugin file not found at {plugin_path}"
+        assert plugin_path.exists(), fPlugin file not found at {plugin_path}"
         
         plugin_content = plugin_path.read_text()
-        assert "def pytest_addoption(parser): in plugin_content, (
+        assert "def pytest_addoption(parser): in plugin_content, ("
             pytest_addoption function not found in no_docker_plugin. 
             "Issue structure may have changed."
         )
@@ -140,6 +148,8 @@ class PytestConfigConflictsTests:
             sys.executable, -m", "pytest, 
             --trace-config,
             --collect-only,"
+            --collect-only,"
+            -q"
             -q"
         ]
         
@@ -186,7 +196,8 @@ class PytestConfigDeprecationTests:
         if has_collect_ignore:
             pytest.fail(
                 Found deprecated collect_ignore in pyproject.toml. "
-                "This can cause pytest configuration conflicts. 
+                Found deprecated collect_ignore in pyproject.toml. "
+                "This can cause pytest configuration conflicts."
                 Should use norecursedirs instead.
             )
         
@@ -195,14 +206,16 @@ class PytestConfigDeprecationTests:
         assert has_norecursedirs, (
             Neither collect_ignore nor norecursedirs found in pyproject.toml. 
             Need proper file exclusion configuration."
+            Need proper file exclusion configuration."
         )
         
     def test_phase1_validate_current_config_structure(self):
-        "PHASE 1: Validate current pytest configuration structure.
+        "PHASE 1: Validate current pytest configuration structure."
         
         Documents the current configuration to understand conflicts.
 "
-        pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml
+"
+        pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
         pyproject_content = pyproject_path.read_text()
         
         # Extract pytest configuration
@@ -254,17 +267,18 @@ class EnvironmentConflictsTests:
         "PHASE 1: Check virtual environment plugin isolation."
         import sys
         
-        # Check if we're in a virtual environment
+        # Check if we're in a virtual environment'
         in_venv = hasattr(sys, 'real_prefix') or (
             hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix
         )
         
         if not in_venv:
             pytest.skip(Not running in virtual environment - plugin isolation not applicable)"
+            pytest.skip(Not running in virtual environment - plugin isolation not applicable)"
         
         # In venv, plugins should be isolated
         venv_path = Path(sys.prefix)
-        site_packages = venv_path / "lib / fpython{sys.version_info.major}.{sys.version_info.minor} / site-packages
+        site_packages = venv_path / "lib / fpython{sys.version_info.major}.{sys.version_info.minor} / site-packages"
         
         if not site_packages.exists():
             pytest.skip(fSite-packages not found at expected location: {site_packages}")"
@@ -278,3 +292,6 @@ class EnvironmentConflictsTests:
         print(fPytest plugins found: {[p.name for p in pytest_plugins]}")"
         
         assert True, "Virtual environment plugin isolation documented"
+
+)
+]

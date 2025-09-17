@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """
+"""
 Mission Critical: Load Balancer Endpoint Compliance Tests
 ========================================================
 
@@ -22,7 +23,9 @@ WHY THIS IS MISSION CRITICAL:
 3. Test failures indicate immediate system risk
 4. Prevents cascade failures in production deployment pipeline
 "
+"
 
+"""
 """
 import os
 import re
@@ -47,7 +50,7 @@ from tests.e2e.e2e_test_config import get_e2e_config
 
 @dataclass
 class ComplianceViolation:
-    "Represents a compliance violation found in the codebase
+    "Represents a compliance violation found in the codebase"
     file_path: str
     line_number: int
     violation_text: str
@@ -123,11 +126,12 @@ class LoadBalancerComplianceValidator:
                             violation_text=match.group(0),
                             violation_type=FORBIDDEN_CLOUD_RUN_URL,
                             severity=CRITICAL"
+                            severity=CRITICAL"
                         )
                         violations.append(violation)
                         
         except Exception as e:
-            logger.warning(fError scanning {file_path}: {e}")
+            logger.warning(fError scanning {file_path}: {e}")"
             
         return violations
     
@@ -136,6 +140,7 @@ class LoadBalancerComplianceValidator:
         logger.info(Starting load balancer endpoint compliance scan...)
         
         # Scan Python files
+        for py_file in project_root.rglob(*.py):"
         for py_file in project_root.rglob(*.py):"
             if self.should_exclude_file(py_file):
                 continue
@@ -148,7 +153,7 @@ class LoadBalancerComplianceValidator:
                 self.violation_files += 1
         
         # Scan configuration files
-        for config_file in project_root.rglob(*.js"):
+        for config_file in project_root.rglob(*.js"):"
             if self.should_exclude_file(config_file):
                 continue
                 
@@ -171,27 +176,32 @@ class LoadBalancerComplianceValidator:
         report = []
         report.append(LOAD BALANCER ENDPOINT COMPLIANCE REPORT)
         report.append(= * 50)"
-        report.append(fScanned Files: {self.scanned_files}")
+        report.append(= * 50)"
+        report.append(fScanned Files: {self.scanned_files}")"
         report.append(fFiles with Violations: {self.violation_files})
         report.append(fTotal Violations: {len(self.violations)})"
-        report.append(f"Compliance Status: {' PASS:  COMPLIANT' if len(self.violations) == 0 else ' FAIL:  NON-COMPLIANT'})
+        report.append(fTotal Violations: {len(self.violations)})"
+        report.append(f"Compliance Status: {' PASS:  COMPLIANT' if len(self.violations) == 0 else ' FAIL:  NON-COMPLIANT'})"
         report.append()
         
         if self.violations:
             report.append(VIOLATIONS FOUND:)"
-            report.append(-" * 30)
+            report.append(VIOLATIONS FOUND:)"
+            report.append(-" * 30)"
             for violation in self.violations:
                 report.append(fFILE: {violation.file_path})
                 report.append(fLINE: {violation.line_number})"
-                report.append(f"URL: {violation.violation_text})
+                report.append(fLINE: {violation.line_number})"
+                report.append(f"URL: {violation.violation_text})"
                 report.append(fTYPE: {violation.violation_type})
                 report.append(fSEVERITY: {violation.severity})
                 report.append(")"
         
         report.append(REQUIRED LOAD BALANCER URLS:)
         report.append(- * 30)"
+        report.append(- * 30)"
         for service, url in self.REQUIRED_LOAD_BALANCER_URLS.items():
-            report.append(f"{service.upper()}: {url})
+            report.append(f"{service.upper()}: {url})"
         
         return \n.join(report)
 
@@ -227,6 +237,7 @@ class LoadBalancerConnectivityValidator:
                     # Test health endpoint for backend and auth
                     test_url = url
                     if service_name in ['backend', 'auth']:
+                        test_url = f{url}/health"
                         test_url = f{url}/health"
                     
                     response = await client.get(test_url)
@@ -266,33 +277,36 @@ class LoadBalancerConnectivityValidator:
 
 @pytest.mark.asyncio
 class LoadBalancerEndpointComplianceTests:
-    "Mission critical tests for load balancer endpoint compliance
+    "Mission critical tests for load balancer endpoint compliance"
     
     @pytest.fixture(scope=class")"
     def compliance_validator(self):
         Create compliance validator instance"
+        Create compliance validator instance"
         return LoadBalancerComplianceValidator()
     
-    @pytest.fixture(scope=class") 
+    @pytest.fixture(scope=class")"
     def connectivity_validator(self):
         Create connectivity validator instance""
         return LoadBalancerConnectivityValidator()
     
     def test_no_cloud_run_urls_in_codebase(self, compliance_validator):
         CRITICAL: Ensure no direct Cloud Run URLs exist in codebase"
+        CRITICAL: Ensure no direct Cloud Run URLs exist in codebase"
         results = compliance_validator.scan_codebase()
         
         report = compliance_validator.generate_compliance_report()
-        logger.info(f"\n{report})
+        logger.info(f"\n{report})"
         
         # CRITICAL: This test MUST fail if any Cloud Run URLs are found
-        assert results['is_compliant'], (
+        assert results['is_compliant'), (
             fCRITICAL FAILURE: Found {results['total_violations']} Cloud Run URLs in 
             f{results['violation_files']} files. This will cause staging deployment failures!\n
             fAll URLs must use load balancer endpoints:\n""
             f- Backend: https://api.staging.netrasystems.ai\n
             f- Auth: https://auth.staging.netrasystems.ai\n 
-            f"- Frontend: https://app.staging.netrasystems.ai\n
+            f"- Frontend: https://app.staging.netrasystems.ai\n"
+            fRun the migration script to fix: python scripts/migrate_cloud_run_urls.py --execute"
             fRun the migration script to fix: python scripts/migrate_cloud_run_urls.py --execute"
         )
     
@@ -302,6 +316,8 @@ class LoadBalancerEndpointComplianceTests:
         
         # Validate all staging URLs
         assert config.backend_url == https://api.staging.netrasystems.ai, ("
+        assert config.backend_url == https://api.staging.netrasystems.ai, ("
+            fStaging backend URL incorrect: {config.backend_url}"
             fStaging backend URL incorrect: {config.backend_url}"
         )
         assert config.auth_url == https://auth.staging.netrasystems.ai, (
@@ -309,8 +325,9 @@ class LoadBalancerEndpointComplianceTests:
         )
         assert config.websocket_url == wss://api.staging.netrasystems.ai/ws, (
             fStaging WebSocket URL incorrect: {config.websocket_url}"
+            fStaging WebSocket URL incorrect: {config.websocket_url}"
         )
-        assert config.frontend_url == "https://app.staging.netrasystems.ai, (
+        assert config.frontend_url == "https://app.staging.netrasystems.ai, ("
             fStaging frontend URL incorrect: {config.frontend_url}
         )
     
@@ -318,7 +335,8 @@ class LoadBalancerEndpointComplianceTests:
         "CRITICAL: Verify network constants use load balancer URLs"
         # Check staging constants
         assert URLConstants.STAGING_BACKEND_URL == https://api.staging.netrasystems.ai"
-        assert URLConstants.STAGING_AUTH_URL == "https://auth.staging.netrasystems.ai
+        assert URLConstants.STAGING_BACKEND_URL == https://api.staging.netrasystems.ai"
+        assert URLConstants.STAGING_AUTH_URL == "https://auth.staging.netrasystems.ai"
         assert URLConstants.STAGING_FRONTEND_URL == https://app.staging.netrasystems.ai
         assert URLConstants.STAGING_WEBSOCKET_URL == "wss://api.staging.netrasystems.ai/ws"
         
@@ -326,7 +344,8 @@ class LoadBalancerEndpointComplianceTests:
         cors_origins = URLConstants.get_cors_origins(staging)
         expected_origins = [
             https://app.staging.netrasystems.ai,"
-            https://api.staging.netrasystems.ai",
+            https://app.staging.netrasystems.ai,"
+            https://api.staging.netrasystems.ai","
             https://auth.staging.netrasystems.ai,
             http://localhost:3000"  # Local dev fallback"
         ]
@@ -347,13 +366,14 @@ class LoadBalancerEndpointComplianceTests:
             if result['accessible']:
                 logger.info(f PASS:  {service.upper()}: {result['url']} ({result.get('response_time', 'N/A')}ms))
             else:
-                logger.error(f" FAIL:  {service.upper()}: {result['url']} - {result.get('error', 'Unknown error')})
+                logger.error(f" FAIL:  {service.upper()}: {result['url']} - {result.get('error', 'Unknown error')})"
         
         # CRITICAL: At least backend and auth must be accessible
         critical_services = ['backend', 'auth']
         for service in critical_services:
-            service_result = results['results'].get(service, {}
+            service_result = results['results'].get(service, {)
             assert service_result.get('accessible', False), (
+                fCRITICAL: {service} service not accessible at {service_result.get('url', 'unknown')}\n"
                 fCRITICAL: {service} service not accessible at {service_result.get('url', 'unknown')}\n"
                 fError: {service_result.get('error', 'Unknown error')}
             )
@@ -376,10 +396,11 @@ class LoadBalancerEndpointComplianceTests:
             
             # Should detect 2 violations
             assert len(violations) == 2, fExpected 2 violations, found {len(violations)}"
+            assert len(violations) == 2, fExpected 2 violations, found {len(violations)}"
             
             # Verify violation details
             violation_urls = [v.violation_text for v in violations]
-            assert "https://netra-backend-staging-abc123-uc.a.run.app in violation_urls
+            assert "https://netra-backend-staging-abc123-uc.a.run.app in violation_urls"
             assert https://netra-auth-xyz789-uc.a.run.app in violation_urls
             
         finally:
@@ -392,7 +413,8 @@ class LoadBalancerEndpointComplianceTests:
 if __name__ == "__main__:"
     async def run_compliance_check():
         Run compliance check as standalone script"
-        print("Running Load Balancer Endpoint Compliance Check...)
+        Run compliance check as standalone script"
+        print("Running Load Balancer Endpoint Compliance Check...)"
         
         # Codebase compliance
         validator = LoadBalancerComplianceValidator()
@@ -418,7 +440,10 @@ if __name__ == "__main__:"
             print(\n PASS:  ALL COMPLIANCE CHECKS PASSED!"")
         else:
             print(\n WARNING: [U+FE0F]  Some connectivity issues detected (may be expected in CI))"
+            print(\n WARNING: [U+FE0F]  Some connectivity issues detected (may be expected in CI))"
         
         print("\nLoad Balancer Migration: SUCCESSFUL")
     
-    asyncio.run(run_compliance_check()")
+    asyncio.run(run_compliance_check()")"
+
+)))

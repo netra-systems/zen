@@ -1,4 +1,5 @@
 """
+"""
 Test SSOT Config Manager Violations - Issue #667
 
 EXPECTED TO FAIL - Reproduces Current SSOT Violations
@@ -21,7 +22,9 @@ Test Coverage:
 CRITICAL: This test protects $500K+ ARR by detecting configuration management
 failures that prevent user login and AI chat functionality.
 "
+"
 
+"""
 """
 import pytest
 import sys
@@ -35,7 +38,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
-    "Test suite to reproduce and validate config manager SSOT violations.
+    "Test suite to reproduce and validate config manager SSOT violations."
 
     def test_config_manager_import_conflicts_detected(self):
     ""
@@ -48,6 +51,7 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
         config_managers = [
             netra_backend.app.core.configuration.base.UnifiedConfigManager","
             netra_backend.app.core.configuration.base.UnifiedConfigManager,
+            netra_backend.app.services.configuration_service.ConfigurationManager"
             netra_backend.app.services.configuration_service.ConfigurationManager"
         ]
 
@@ -66,7 +70,7 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
                     'methods': [m for m in dir(manager_class) if not m.startswith('_')]
                 }
             except ImportError as e:
-                import_errors.append(f"Failed to import {manager_path}: {str(e)})
+                import_errors.append(f"Failed to import {manager_path}: {str(e)})"
             except AttributeError as e:
                 import_errors.append(fClass not found in {manager_path}: {str(e)})
 
@@ -136,22 +140,24 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
         assert len(method_conflicts) == 0, (
             fSSOT VIOLATION: Method signature conflicts detected: {method_conflicts}. 
             fDifferent config managers have incompatible method signatures, 
-            f"causing runtime errors in Golden Path auth flow.
+            f"causing runtime errors in Golden Path auth flow."
         )
 
     def test_environment_access_ssot_violations_detected(self):
+        "
         "
         EXPECTED TO FAIL - Detect direct os.environ access violations in config managers.
 
         Config managers should use IsolatedEnvironment, not direct os.environ access.
         This test scans for violations that cause environment detection failures.
 "
+"
         import os
         import ast
         from pathlib import Path
 
         config_manager_files = [
-            "netra_backend/app/core/configuration/base.py,
+            "netra_backend/app/core/configuration/base.py,"
             netra_backend/app/core/configuration/base.py,
             "netra_backend/app/services/configuration_service.py"
         ]
@@ -205,7 +211,7 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
         )
 
     def test_auth_configuration_conflicts_affect_golden_path(self):
-        
+        pass
         EXPECTED TO FAIL - Demonstrate auth config conflicts blocking Golden Path.
 
         Different config managers may return different auth configurations,
@@ -270,15 +276,17 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
         assert len(config_conflicts) == 0, (
             fSSOT VIOLATION: Auth configuration conflicts detected: {config_conflicts}. 
             fDifferent config managers return different auth settings, 
-            f"causing Golden Path login failures worth $500K+ ARR protection.
+            f"causing Golden Path login failures worth $500K+ ARR protection."
         )
 
     def test_config_manager_singleton_vs_factory_pattern_conflicts(self):
+        "
         "
         EXPECTED TO FAIL - Detect singleton vs factory pattern conflicts.
 
         Mixed singleton and factory patterns in config managers create
         race conditions and state sharing issues in multi-user scenarios.
+"
 "
         singleton_managers = []
         factory_managers = []
@@ -326,7 +334,7 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
         has_mixed_patterns = len(singleton_managers) > 0 and len(factory_managers) > 0
 
         assert not has_mixed_patterns, (
-            f"SSOT VIOLATION: Mixed singleton/factory patterns detected. 
+            f"SSOT VIOLATION: Mixed singleton/factory patterns detected."
             fSingleton managers: {singleton_managers}, Factory managers: {factory_managers}. 
             fThis creates race conditions and state sharing issues in Golden Path multi-user scenarios.
         )
@@ -337,3 +345,5 @@ if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+))))))

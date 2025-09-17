@@ -1,4 +1,5 @@
 """
+"""
 WebSocket Event Typo Prevention - Mission Critical Tests
 
 Business Value Justification (BVJ):
@@ -8,6 +9,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: MISSION CRITICAL - These tests protect the primary revenue stream
 
 Mission: Prevent typos in critical WebSocket event names that would cause silent failures,
+"""
 """
 blocking users from seeing AI value delivery and resulting in immediate revenue loss.
 
@@ -25,6 +27,7 @@ These tests MUST catch:
 4. Cross-user contamination when events are misrouted due to typos
 
 REVENUE PROTECTION: Each test failure represents a potential revenue loss incident.
+"
 "
 
 import asyncio
@@ -55,7 +58,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 
 @dataclass
 class TypoTestCase:
-    "Test case for typo detection.
+    "Test case for typo detection."
     correct_event: str
     typo_variations: List[str]
     expected_behavior: str  # "block or warn" or pass
@@ -65,6 +68,7 @@ class TypoTestCase:
 
 class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
     "
+    "
     Mission Critical Tests for WebSocket Event Typo Prevention.
     
     These tests protect $500K+ ARR by ensuring event name typos are detected
@@ -73,6 +77,7 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
     Focus: Comprehensive typo detection, business impact assessment, performance.
     Coverage: All critical event typos, edge cases, failure scenarios.
 "
+"
     
     def setup_method(self, method=None):
         Setup for each test method with revenue protection context.""
@@ -80,7 +85,8 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
         
         # Business context setup
         self.test_user_id = frevenue_user_{uuid.uuid4().hex[:8]}
-        self.test_thread_id = f"revenue_thread_{uuid.uuid4().hex[:8]}
+        self.test_thread_id = f"revenue_thread_{uuid.uuid4().hex[:8]}"
+        self.test_connection_id = frevenue_conn_{uuid.uuid4().hex[:8]}"
         self.test_connection_id = frevenue_conn_{uuid.uuid4().hex[:8]}"
         self.test_run_id = frevenue_run_{uuid.uuid4().hex[:8]}
         
@@ -89,7 +95,8 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
             user_id=UserID(self.test_user_id),
             thread_id=ThreadID(self.test_thread_id),
             run_id=RunID(frun_{uuid.uuid4().hex[:8]}),"
-            request_id=RequestID(f"req_{uuid.uuid4().hex[:8]})
+            run_id=RunID(frun_{uuid.uuid4().hex[:8]}),"
+            request_id=RequestID(f"req_{uuid.uuid4().hex[:8]})"
         )
         
         # Initialize strict validator for revenue protection
@@ -103,38 +110,44 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
         self.typo_test_cases = [
             TypoTestCase(
                 correct_event=agent_started,"
+                correct_event=agent_started,"
                 typo_variations=[
-                    agnt_started",     # Missing 'e' - COMMON PRODUCTION TYPO
+                    agnt_started",     # Missing 'e' - COMMON PRODUCTION TYPO"
                     agent_stared,     # Missing 't' - KEYBOARD SLIP  
                     agent_start",      # Missing 'ed' - INCOMPLETE TYPING"
                     agentstarted,     # Missing underscore - STYLE INCONSISTENCY
                     Agent_Started,    # Wrong capitalization - CASE SENSITIVITY"
-                    "agent_starting,   # Wrong tense - LOGIC CONFUSION
+                    Agent_Started,    # Wrong capitalization - CASE SENSITIVITY"
+                    "agent_starting,   # Wrong tense - LOGIC CONFUSION"
                     agent_statred,    # Transposed letters - TYPING ERROR
                     "agent_startd,     # Missing vowel - FAST TYPING"
                     aget_started,     # Missing 'n' - KEYBOARD MISS
                     agent_sarted      # Missing 't' in middle - PRODUCTION CASE"
+                    agent_sarted      # Missing 't' in middle - PRODUCTION CASE"
                 ],
-                expected_behavior=block",
-                business_impact=Users don't see AI agent initialization - appears broken,
+                expected_behavior=block","
+                business_impact=Users don't see AI agent initialization - appears broken,'
                 revenue_risk=HIGH - First impression failure leads to immediate churn""
             ),
             TypoTestCase(
                 correct_event=agent_thinking,
                 typo_variations=[
                     agent_thinkng,    # Missing 'i' - COMMON PRODUCTION TYPO"
-                    "agent_thinkiing,  # Doubled 'i' - OVERTYPE ERROR
+                    agent_thinkng,    # Missing 'i' - COMMON PRODUCTION TYPO"
+                    "agent_thinkiing,  # Doubled 'i' - OVERTYPE ERROR"
                     agentthinking,    # Missing underscore - STYLE MISTAKE
                     "agent_thinkign,   # Transposed letters - TYPING SPEED ERROR"
                     agent_thinkin,    # Missing 'g' - INCOMPLETE
                     agent_thinkingg,  # Extra 'g' - OVERTYPE  "
-                    agent_thining",    # Missing 'k' - KEYBOARD SKIP
+                    agent_thinkingg,  # Extra 'g' - OVERTYPE  "
+                    agent_thining",    # Missing 'k' - KEYBOARD SKIP"
                     agent_hinking,    # Wrong first letter - ADJACENT KEY
                     agnet_thinking",   # Transposed in 'agent' - SPEED TYPO"
                     agent_thkning     # Missing vowel - CONSONANT CLUSTER
                 ],
                 expected_behavior=block,"
-                business_impact="Users don't see AI reasoning progress - appears stalled, 
+                expected_behavior=block,"
+                business_impact="Users don't see AI reasoning progress - appears stalled,"
                 revenue_risk=CRITICAL - Users assume AI is broken and abandon session
             ),
             TypoTestCase(
@@ -142,17 +155,21 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
                 typo_variations=[
                     tool_executng,    # Missing 'i' - FREQUENT PRODUCTION ERROR
                     toolexecuting,    # Missing underscore - CONCATENATION"
-                    tool_execute",     # Missing 'ing' - WRONG FORM
+                    toolexecuting,    # Missing underscore - CONCATENATION"
+                    tool_execute",     # Missing 'ing' - WRONG FORM"
                     tool_executeing,  # Extra 'e' - DOUBLE TYPING
                     tool_exeucting",   # Transposed letters - SPEED ERROR"
                     tool_executingg,  # Extra 'g' - OVERTYPE
                     tol_executing,    # Missing 'o' - KEYBOARD MISS"
-                    "tool_executnig,   # Transposed ending - COMMON PATTERN
+                    tol_executing,    # Missing 'o' - KEYBOARD MISS"
+                    "tool_executnig,   # Transposed ending - COMMON PATTERN"
                     too_executing,    # Wrong letter - ADJACENT KEY
                     "tool_execuing     # Missing 't' - CONSONANT SKIP"
                 ],
                 expected_behavior=block, 
                 business_impact=Users don't see tool usage - AI appears inactive,"
+                business_impact=Users don't see tool usage - AI appears inactive,"
+                revenue_risk=HIGH - Tool transparency critical for user trust"
                 revenue_risk=HIGH - Tool transparency critical for user trust"
             ),
             TypoTestCase(
@@ -161,31 +178,36 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
                     tool_completd",    # Missing 'e' - COMMON OMISSION"
                     toolcompleted,    # Missing underscore - CONCATENATION ERROR
                     tool_complete,    # Missing 'd' - WRONG TENSE"
-                    "tool_completeed,  # Extra 'e' - DOUBLE TYPE
+                    tool_complete,    # Missing 'd' - WRONG TENSE"
+                    "tool_completeed,  # Extra 'e' - DOUBLE TYPE"
                     tool_complted,    # Missing 'e' in middle - SPEED ERROR
                     "tool_compelted,   # Transposed letters - TYPING MISTAKE"
                     tol_completed,    # Missing 'o' - KEYBOARD SKIP
                     tool_compleetd,   # Multiple errors - FAST TYPING"
-                    tool_comleted",    # Missing 'p' - CONSONANT CLUSTER
+                    tool_compleetd,   # Multiple errors - FAST TYPING"
+                    tool_comleted",    # Missing 'p' - CONSONANT CLUSTER"
                     tool_completde    # Transposed ending - PATTERN ERROR
                 ],
                 expected_behavior=block","
-                business_impact=Users don't see tool results - AI appears to fail,
+                business_impact=Users don't see tool results - AI appears to fail,'
+                revenue_risk=CRITICAL - Tool completion signals value delivery"
                 revenue_risk=CRITICAL - Tool completion signals value delivery"
             ),
             TypoTestCase(
-                correct_event="agent_completed,
+                correct_event="agent_completed,"
                 typo_variations=[
                     agent_completd,   # Missing 'e' - CONSISTENT WITH TOOL_COMPLETED
                     "agentcompleted,   # Missing underscore - CONCATENATION  "
                     agent_complete,   # Missing 'd' - TENSE CONFUSION
                     agent_completeed, # Extra 'e' - OVERTYPE ERROR"
-                    agent_complted",   # Missing 'e' in middle - SPEED TYPO
+                    agent_completeed, # Extra 'e' - OVERTYPE ERROR"
+                    agent_complted",   # Missing 'e' in middle - SPEED TYPO"
                     agent_compelted,  # Transposed letters - MUSCLE MEMORY
                     agnet_completed",  # Transposed in 'agent' - PREFIX ERROR"
                     agent_compleetd,  # Multiple vowel errors - FAST TYPING
                     agent_comleted,   # Missing 'p' - CONSONANT SKIP  "
-                    "agent_completde   # Transposed ending - SUFFIX PATTERN
+                    agent_comleted,   # Missing 'p' - CONSONANT SKIP  "
+                    "agent_completde   # Transposed ending - SUFFIX PATTERN"
                 ],
                 expected_behavior=block,
                 business_impact="Users never know AI finished - session appears hung,"
@@ -215,7 +237,8 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
                     "run_id: self.test_run_id,"
                     agent_name: TypoTestAgent,
                     timestamp: datetime.now(timezone.utc).isoformat(),"
-                    "payload: {status: test, typo_test: True}
+                    timestamp: datetime.now(timezone.utc).isoformat(),"
+                    "payload: {status: test, typo_test: True}"
                 }
                 
                 # Validate event - typo should NOT be classified as mission critical
@@ -236,10 +259,10 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
                         
                         # Verify business value score reflects missing critical event
                         self.assertLess(validation_result.business_value_score, 100.0,
-                                       f"Typo '{typo}' should reduce business value score)
+                                       f"Typo '{typo}' should reduce business value score)"
                     else:
                         # CRITICAL FAILURE: Typo was treated as mission critical (revenue risk)
-                        self.record_metric(fREVENUE_RISK_typo_missed_{test_case.correct_event}", typo)
+                        self.record_metric(fREVENUE_RISK_typo_missed_{test_case.correct_event}", typo)"
                         assert False, fREVENUE RISK: Typo '{typo}' for '{test_case.correct_event}' was treated as mission critical!
                 else:
                     # Event validation failed completely - also counts as typo detection
@@ -251,20 +274,22 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
         
         self.assertEqual(total_typos_detected, total_typos_tested,
                         fALL typos must be detected! Detected {total_typos_detected}/{total_typos_tested} ({detection_rate:.1f}%))"
+                        fALL typos must be detected! Detected {total_typos_detected}/{total_typos_tested} ({detection_rate:.1f}%))"
         
         # Record comprehensive metrics
-        self.record_metric("total_typos_tested, total_typos_tested)
+        self.record_metric("total_typos_tested, total_typos_tested)"
         self.record_metric(typo_detection_rate, detection_rate)
         self.record_metric("revenue_protection_effective, detection_rate == 100.0)"
         
     def test_typo_vs_correct_event_classification(self):
+        Test typos vs correct events have different classification - BEHAVIORAL VERIFICATION."
         Test typos vs correct events have different classification - BEHAVIORAL VERIFICATION."
         classification_tests = []
         
         for test_case in self.typo_test_cases:
             # Test correct event
             correct_event = {
-                "type: test_case.correct_event,
+                "type: test_case.correct_event,"
                 run_id: self.test_run_id,
                 "agent_name: CorrectTestAgent",
                 timestamp: datetime.now(timezone.utc).isoformat(),
@@ -281,7 +306,8 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
                 run_id": self.test_run_id,"
                 agent_name: TypoTestAgent, 
                 timestamp: datetime.now(timezone.utc).isoformat(),"
-                payload": {status: typo_test}
+                timestamp: datetime.now(timezone.utc).isoformat(),"
+                payload": {status: typo_test}"
             }
             
             typo_result = self.revenue_validator.validate_event(
@@ -293,7 +319,8 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
                 "correct_event: test_case.correct_event,"
                 typo: test_case.typo_variations[0],
                 correct_critical: correct_result.criticality == EventCriticality.MISSION_CRITICAL,"
-                typo_critical": typo_result.criticality == EventCriticality.MISSION_CRITICAL if typo_result.is_valid else False,
+                correct_critical: correct_result.criticality == EventCriticality.MISSION_CRITICAL,"
+                typo_critical": typo_result.criticality == EventCriticality.MISSION_CRITICAL if typo_result.is_valid else False,"
                 correct_business_score: correct_result.business_value_score,
                 typo_business_score": typo_result.business_value_score if typo_result.is_valid else 0.0"
             }
@@ -309,24 +336,25 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
                 
                 # Business value should be different
                 self.assertGreater(correct_result.business_value_score, typo_result.business_value_score,
-                                  f"Correct event should have higher business value than typo)
+                                  f"Correct event should have higher business value than typo)"
                                   
         # Record classification metrics
-        self.record_metric(classification_tests_performed", len(classification_tests))
+        self.record_metric(classification_tests_performed", len(classification_tests))"
         
-        correct_classified = sum(1 for test in classification_tests if test[correct_critical]
-        typo_misclassified = sum(1 for test in classification_tests if test[typo_critical"]"
+        correct_classified = sum(1 for test in classification_tests if test[correct_critical)
+        typo_misclassified = sum(1 for test in classification_tests if test[typo_critical")"
         
         self.record_metric(correct_events_classified_critical, correct_classified)
         self.record_metric(typos_misclassified_critical, typo_misclassified)"
+        self.record_metric(typos_misclassified_critical, typo_misclassified)"
         
         # MISSION CRITICAL: No typos should be misclassified as critical
-        self.assertEqual(typo_misclassified, 0, "No typos should be misclassified as mission critical)
+        self.assertEqual(typo_misclassified, 0, "No typos should be misclassified as mission critical)"
         
     # === SILENT FAILURE PREVENTION TESTS ===
     
     def test_typo_events_prevent_silent_business_value_loss(self):
-        Test typo events don't silently contribute to business value - REVENUE PROTECTION.""
+        Test typo events don't silently contribute to business value - REVENUE PROTECTION.""'
         # Create complete set of correct events
         correct_events = create_mock_critical_events(
             user_id=self.test_user_id,
@@ -338,8 +366,8 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
         typo_events = []
         for event in correct_events:
             event_dict = event.to_dict()
-            if event_dict[type] == "agent_completed:
-                event_dict[type"] = agent_completd  # TYPO
+            if event_dict[type] == "agent_completed:"
+                event_dict[type"] = agent_completd  # TYPO"
             typo_events.append(event_dict)
             
         # Test with sequence validator for business value scoring
@@ -369,10 +397,11 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
                         "Correct events should give 100% business value)"
         self.assertEqual(correct_result.revenue_impact, NONE,
                         Correct events should have no revenue impact)"
+                        Correct events should have no revenue impact)"
         
         # Typo set should have reduced business value
         self.assertLess(typo_result.business_value_score, correct_result.business_value_score,
-                       Typo events should reduce business value score")
+                       Typo events should reduce business value score")"
         
         # agent_completed typo should cause CRITICAL revenue impact
         if agent_completd in [event[type] for event in typo_events]:
@@ -382,7 +411,8 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
         # Record revenue protection metrics
         business_value_loss = correct_result.business_value_score - typo_result.business_value_score
         self.record_metric(business_value_loss_prevented, business_value_loss)"
-        self.record_metric(revenue_impact_escalation", typo_result.revenue_impact)
+        self.record_metric(business_value_loss_prevented, business_value_loss)"
+        self.record_metric(revenue_impact_escalation", typo_result.revenue_impact)"
         self.silent_failures_prevented += 1
         
     def test_typo_events_excluded_from_critical_event_count(self):
@@ -398,21 +428,23 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
             # Create mixed set: 4 correct events + 1 typo (instead of 5 correct)
             mixed_events = []
             
-            # Add 4 correct critical events (excluding the one we'll replace with typo)
+            # Add 4 correct critical events (excluding the one we'll replace with typo)'
             for event_type in critical_event_types:
                 if event_type != correct_event_type:
                     event = {
                         type: event_type,
                         run_id: self.test_run_id,"
-                        agent_name": MixedTestAgent,
+                        run_id: self.test_run_id,"
+                        agent_name": MixedTestAgent,"
                         timestamp: datetime.now(timezone.utc).isoformat(),
+                        "data: {agent": MixedTestAgent, status: correct}"
                         "data: {agent": MixedTestAgent, status: correct}"
                     }
                     mixed_events.append(event)
                     
             # Add typo event instead of correct event
             typo_event = {
-                type": test_case.typo_variations[0],  # First typo
+                type": test_case.typo_variations[0],  # First typo"
                 run_id: self.test_run_id,
                 agent_name": "MixedTestAgent,
                 timestamp: datetime.now(timezone.utc).isoformat(),
@@ -440,19 +472,19 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
                          fTypo replacement should show '{correct_event_type}' as missing)
                          
             # Record counting protection
-            self.record_metric(f"counting_protection_{correct_event_type}, effective)
+            self.record_metric(f"counting_protection_{correct_event_type}, effective)"
             break  # Test one case for performance
             
     # === PERFORMANCE IMPACT TESTS ===
     
     def test_typo_validation_performance_impact(self):
-        "Test typo validation doesn't significantly impact performance - SLA PROTECTION.
+        "Test typo validation doesn't significantly impact performance - SLA PROTECTION."
         # Performance baseline with correct events
         correct_event = {
             type": "agent_started,
             run_id: self.test_run_id,
-            agent_name: PerformanceAgent",
-            "timestamp: datetime.now(timezone.utc).isoformat(),
+            agent_name: PerformanceAgent","
+            "timestamp: datetime.now(timezone.utc).isoformat(),"
             payload: {status: started"}"
         }
         
@@ -475,7 +507,8 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
         typo_event = {
             type: agnt_started,  # Typo
             run_id: self.test_run_id,"
-            agent_name": PerformanceAgent,
+            run_id: self.test_run_id,"
+            agent_name": PerformanceAgent,"
             timestamp: datetime.now(timezone.utc).isoformat(),
             "payload: {status": started}
         }
@@ -494,18 +527,20 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
         
         # PERFORMANCE ASSERTIONS
         self.assertLess(baseline_avg_ms, 1.0, fBaseline validation should be under 1ms, got {baseline_avg_ms:.3f}ms)"
-        self.assertLess(typo_avg_ms, 2.0, f"Typo validation should be under 2ms, got {typo_avg_ms:.3f}ms) 
+        self.assertLess(baseline_avg_ms, 1.0, fBaseline validation should be under 1ms, got {baseline_avg_ms:.3f}ms)"
+        self.assertLess(typo_avg_ms, 2.0, f"Typo validation should be under 2ms, got {typo_avg_ms:.3f}ms)"
         self.assertLess(performance_impact, 100.0, fTypo validation overhead should be under 100%, got {performance_impact:.1f}%)
         
         # Record performance metrics
         self.record_metric(baseline_validation_ms, baseline_avg_ms)"
-        self.record_metric(typo_validation_ms", typo_avg_ms)
+        self.record_metric(baseline_validation_ms, baseline_avg_ms)"
+        self.record_metric(typo_validation_ms", typo_avg_ms)"
         self.record_metric(performance_impact_percent, performance_impact)
         
     # === CROSS-USER CONTAMINATION PREVENTION ===
     
     def test_typo_events_prevent_cross_user_contamination(self):
-        ""Test typos don't cause cross-user event contamination - SECURITY PROTECTION.
+        ""Test typos don't cause cross-user event contamination - SECURITY PROTECTION.'
         # Create two different users
         user_a_id = fuser_a_{uuid.uuid4().hex[:8]}
         user_b_id = fuser_b_{uuid.uuid4().hex[:8]}""
@@ -514,14 +549,16 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
         typo_event_for_user_a = {
             type: agnt_started,  # Typo that might bypass user validation
             run_id: self.test_run_id,"
-            agent_name": ContaminationTestAgent,
+            run_id: self.test_run_id,"
+            agent_name": ContaminationTestAgent,"
             user_id: user_b_id,  # Event claims to be for user B
             "timestamp: datetime.now(timezone.utc).isoformat(),"
-            payload: {status: started, "contamination_test: True}
+            payload: {status: started, "contamination_test: True}"
         }
         
         # Validate for user A (should fail due to user mismatch + typo)
         validation_result = self.revenue_validator.validate_event(
+            typo_event_for_user_a, user_a_id, fconn_{user_a_id}"
             typo_event_for_user_a, user_a_id, fconn_{user_a_id}"
         )
         
@@ -544,33 +581,34 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
             {
                 scenario: Developer fast typing in production deployment,
                 "events: ["
-                    {type: agent_started, status: "correct},
-                    {type": agent_thinkng, status: typo_missing_i},  # Fast typing typo
+                    {type: agent_started, status: "correct},"
+                    {type": agent_thinkng, status: typo_missing_i},  # Fast typing typo"
                     {type": "tool_executing, status: correct},
                     {type: "tool_completd, status": typo_missing_e},  # Common omission
                     {type: agent_completed, status": "correct}
                 ],
                 expected_critical_count: 3,  # 3 correct, 2 typos
                 expected_business_score: 60.0  # 3/5 = 60%"
+                expected_business_score: 60.0  # 3/5 = 60%"
             },
             {
-                scenario": Copy-paste error with concatenation,
+                scenario": Copy-paste error with concatenation,"
                 events: [
                     {"type: agentstarted", status: concatenation_typo},  # Missing underscore
                     {type: agent_thinking", "status: correct},
                     {type: toolexecuting, "status: concatenation_typo"},  # Missing underscore  
-                    {type: tool_completed, status: correct"},
-                    {"type: agentcompleted, status: concatenation_typo}  # Missing underscore
+                    {type: tool_completed, status: correct"},"
+                    {"type: agentcompleted, status: concatenation_typo}  # Missing underscore"
                 ],
                 "expected_critical_count: 2,  # Only 2 correct"
                 expected_business_score: 40.0  # 2/5 = 40%
             },
             {
-                scenario: Keyboard layout confusion (QWERTY adjacent keys)",
-                "events: [
+                scenario: Keyboard layout confusion (QWERTY adjacent keys)","
+                "events: ["
                     {type: agent_started, status": "correct},
-                    {type: agent_thinking, status: "correct}, 
-                    {type": tiol_executing, status: adjacent_key_typo},  # 'o' instead of 'o'
+                    {type: agent_thinking, status: "correct},"
+                    {type": tiol_executing, status: adjacent_key_typo},  # 'o' instead of 'o'"
                     {type": "tool_completed, status: correct},
                     {type: "agent_completed, status": correct}
                 ],
@@ -586,8 +624,8 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
             events = []
             for event_spec in scenario[events]:
                 event = {
-                    type: event_spec[type"],
-                    "run_id: fscenario_{scenarios_protected},
+                    type: event_spec[type"],"
+                    "run_id: fscenario_{scenarios_protected},"
                     agent_name: ProductionScenarioAgent,
                     "timestamp: datetime.now(timezone.utc).isoformat(),"
                     data: {scenario: scenario[scenario], "status: event_spec[status"]}
@@ -605,11 +643,11 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
             )
             
             # Verify expected business impact
-            self.assertEqual(result.business_value_score, scenario[expected_business_score"],"
+            self.assertEqual(result.business_value_score, scenario[expected_business_score"),"
                            fScenario '{scenario['scenario']}' should have {scenario['expected_business_score']}% business value)
             
             # Record scenario protection
-            self.record_metric(fproduction_scenario_protected, scenario[scenario]
+            self.record_metric(fproduction_scenario_protected, scenario[scenario)
             scenarios_protected += 1
             
         # MISSION CRITICAL: All production scenarios should be properly handled
@@ -620,14 +658,16 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
     
     def test_typo_detection_comprehensive_report(self):
         Generate comprehensive typo detection report - AUDIT TRAIL."
+        Generate comprehensive typo detection report - AUDIT TRAIL."
         report = {
-            test_execution": {
+            test_execution": {"
                 timestamp: datetime.now(timezone.utc).isoformat(),
                 user_context": self.test_user_id,"
                 validator_mode: realtime_strict
             },
             typo_coverage: {},"
-            detection_results": {},
+            typo_coverage: {},"
+            detection_results": {},"
             business_impact_analysis: {},
             performance_metrics": {},"
             revenue_protection_summary: {}
@@ -640,7 +680,8 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
         for test_case in self.typo_test_cases:
             event_report = {
                 correct_event: test_case.correct_event,"
-                "typo_count: len(test_case.typo_variations),
+                correct_event: test_case.correct_event,"
+                "typo_count: len(test_case.typo_variations),"
                 detected_typos: [],
                 "missed_typos: [],"
                 business_risk: test_case.revenue_risk
@@ -652,10 +693,12 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
                 # Test typo detection
                 typo_event = {
                     type: typo,"
-                    run_id": freport_{total_typos_tested},
+                    type: typo,"
+                    run_id": freport_{total_typos_tested},"
                     agent_name: ReportAgent,
                     timestamp: datetime.now(timezone.utc).isoformat(),"
-                    "payload: {report_test: True}
+                    timestamp: datetime.now(timezone.utc).isoformat(),"
+                    "payload: {report_test: True}"
                 }
                 
                 result = self.revenue_validator.validate_event(
@@ -665,41 +708,45 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
                 if result.is_valid and result.criticality != EventCriticality.MISSION_CRITICAL:
                     # Typo detected (not classified as mission critical)
                     total_typos_detected += 1
-                    event_report[detected_typos].append({
+                    event_report[detected_typos).append({
                         typo": typo,"
                         classification: result.criticality.value,
+                        business_score: result.business_value_score"
                         business_score: result.business_value_score"
                     }
                 elif not result.is_valid:
                     # Typo caused validation failure (also detected)
                     total_typos_detected += 1
-                    event_report["detected_typos].append({
+                    event_report["detected_typos).append({"
                         typo: typo,
                         "classification: validation_failed",
                         error: result.error_message
                     }
                 else:
                     # CRITICAL: Typo was missed (treated as mission critical)
-                    event_report[missed_typos].append({"
-                        "typo: typo,
+                    event_report[missed_typos).append({"
+                    event_report[missed_typos).append({"
+                        "typo: typo,"
                         classification: result.criticality.value,
                         "business_score: result.business_value_score,"
                         REVENUE_RISK: HIGH
                     }
                     
             report[typo_coverage][test_case.correct_event] = event_report"
+            report[typo_coverage][test_case.correct_event] = event_report"
             
         # Calculate overall metrics
         detection_rate = (total_typos_detected / total_typos_tested) * 100 if total_typos_tested > 0 else 0
         
-        report["detection_results] = {
+        report["detection_results] = {"
             total_typos_tested: total_typos_tested,
             "total_typos_detected: total_typos_detected,"
             detection_rate_percent: detection_rate,
             missed_typos_count: total_typos_tested - total_typos_detected"
+            missed_typos_count: total_typos_tested - total_typos_detected"
         }
         
-        report[revenue_protection_summary"] = {
+        report[revenue_protection_summary"] = {"
             revenue_incidents_prevented: self.revenue_incidents_prevented,
             silent_failures_prevented": self.silent_failures_prevented,"
             detection_effective: detection_rate >= 95.0,
@@ -719,19 +766,21 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
     
     def teardown_method(self, method=None):
         Record final revenue protection metrics."
+        Record final revenue protection metrics."
         # Calculate final protection metrics
         if hasattr(self, 'revenue_validator'):
             stats = self.revenue_validator.get_validation_stats()
             
             # Calculate revenue protection effectiveness
-            total_validations = stats.get(total_validations", 0)
+            total_validations = stats.get(total_validations", 0)"
             failed_validations = stats.get(failed_validations, 0)
             success_rate = ((total_validations - failed_validations) / total_validations * 100) if total_validations > 0 else 0
             
             self.record_metric(final_validation_success_rate", success_rate)"
             self.record_metric(final_typos_detected, self.typos_detected)
             self.record_metric(final_silent_failures_prevented, self.silent_failures_prevented)"
-            self.record_metric("final_revenue_incidents_prevented, self.revenue_incidents_prevented)
+            self.record_metric(final_silent_failures_prevented, self.silent_failures_prevented)"
+            self.record_metric("final_revenue_incidents_prevented, self.revenue_incidents_prevented)"
             
         # Final revenue protection assessment
         protection_effective = (
@@ -762,15 +811,16 @@ class WebSocketEventTypoProductionSimulationTests(SSotAsyncTestCase):
         
     async def test_high_traffic_typo_detection_simulation(self):
         Simulate high traffic conditions with random typos - LOAD TESTING."
+        Simulate high traffic conditions with random typos - LOAD TESTING."
         import random
         
         # Common typos observed in production
         production_typos = [
-            (agent_started", [agnt_started, agent_stared, agentstarted],
-            (agent_thinking", ["agent_thinkng, agentthinking, agent_thinkin],
-            (tool_executing, ["tool_executng, toolexecuting", tool_execute],
-            (tool_completed, [tool_completd, toolcompleted", "tool_complete],
-            (agent_completed, [agent_completd, agentcompleted, "agent_complete]
+            (agent_started", [agnt_started, agent_stared, agentstarted),"
+            (agent_thinking", ["agent_thinkng, agentthinking, agent_thinkin),
+            (tool_executing, ["tool_executng, toolexecuting", tool_execute),
+            (tool_completed, [tool_completd, toolcompleted", "tool_complete),
+            (agent_completed, [agent_completd, agentcompleted, "agent_complete)"
         ]
         
         # Simulate high traffic with random typos
@@ -796,7 +846,7 @@ class WebSocketEventTypoProductionSimulationTests(SSotAsyncTestCase):
                 
             # Create event
             event = {
-                type": event_type,
+                type": event_type,"
                 run_id: fload_test_{i},
                 "agent_name: LoadTestAgent",
                 timestamp: datetime.now(timezone.utc).isoformat(),
@@ -825,12 +875,14 @@ class WebSocketEventTypoProductionSimulationTests(SSotAsyncTestCase):
         
         # Performance and detection assertions
         self.assertGreater(detection_rate, 90.0, fShould detect >90% of typos in high traffic, got {detection_rate:.1f}%)"
-        self.assertLess(avg_performance, 2.0, f"Average validation should be under 2ms, got {avg_performance:.3f}ms)
+        self.assertGreater(detection_rate, 90.0, fShould detect >90% of typos in high traffic, got {detection_rate:.1f}%)"
+        self.assertLess(avg_performance, 2.0, f"Average validation should be under 2ms, got {avg_performance:.3f}ms)"
         
         # Record load test metrics
         self.record_metric(load_test_events, events_processed)
         self.record_metric(load_test_typo_detection_rate, detection_rate)"
-        self.record_metric(load_test_avg_performance_ms", avg_performance)
+        self.record_metric(load_test_typo_detection_rate, detection_rate)"
+        self.record_metric(load_test_avg_performance_ms", avg_performance)"
 
 
 # === TEST COLLECTION AND EXECUTION ===
@@ -854,3 +906,6 @@ if __name__ == __main__":"
     # Allow direct execution for debugging
     import unittest
     unittest.main()
+
+))))))))))))
+}

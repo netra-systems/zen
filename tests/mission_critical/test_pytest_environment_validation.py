@@ -14,7 +14,7 @@ class TestSyntaxFix:
 Issue #519: Pytest Environment Validation Tests - Phase 3
 
 This test suite validates the pytest execution environment to ensure
-it's properly configured for Mission Critical test execution without conflicts.
+it's properly configured for Mission Critical test execution without conflicts.'
 
 Focus Areas:
 - Python environment consistency
@@ -38,9 +38,10 @@ from typing import List, Dict, Any, Optional, Set, Tuple
 
 class PythonEnvironmentConsistencyTests:
     Test Python environment setup for consistent pytest execution."
+    Test Python environment setup for consistent pytest execution."
     
     def test_phase3_python_version_consistency(self):
-        "PHASE 3: Validate Python version consistency across execution contexts.
+        "PHASE 3: Validate Python version consistency across execution contexts."
         
         Different Python versions can have different plugin loading behaviors.
         This test should PASS but documents environment state.
@@ -51,7 +52,7 @@ class PythonEnvironmentConsistencyTests:
         current_version = f{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}
         
         # Run pytest in subprocess to see if version is consistent
-        cmd = [sys.executable, -c, import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}')"]
+        cmd = [sys.executable, -c, import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}')"]"
         
         result = subprocess.run(
             cmd,
@@ -63,7 +64,7 @@ class PythonEnvironmentConsistencyTests:
         subprocess_version = result.stdout.strip()
         
         assert current_version == subprocess_version, (
-            f"Python version inconsistency detected:\n
+            f"Python version inconsistency detected:\n"
             f  Current process: {current_version}\n 
             f  Subprocess: {subprocess_version}\n
             fThis can cause pytest plugin loading issues.""
@@ -71,22 +72,25 @@ class PythonEnvironmentConsistencyTests:
         
         # Also validate that pytest is using the same Python
         cmd = [sys.executable, -m, pytest, --version]"
+        cmd = [sys.executable, -m, pytest, --version]"
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
         
         if result.returncode != 0:
-            pytest.fail(fpytest --version failed: {result.stderr}")
+            pytest.fail(fpytest --version failed: {result.stderr}")"
         
         print(fPython version: {current_version})
         print(fPytest version info: {result.stdout.strip()}")"
         
     def test_phase3_virtual_environment_isolation(self):
         PHASE 3: Validate virtual environment provides proper isolation."
+        PHASE 3: Validate virtual environment provides proper isolation."
         
         Should FAIL if venv isolation is broken, allowing system packages to interfere.
         "
+        "
         import sys
         
-        # Check if we're in a virtual environment
+        # Check if we're in a virtual environment'
         in_venv = (
             hasattr(sys, 'real_prefix') or  # virtualenv
             (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix)  # venv
@@ -101,7 +105,8 @@ class PythonEnvironmentConsistencyTests:
         
         if not site_packages_paths:
             pytest.fail(
-                f"Virtual environment site-packages not found in sys.path.\n
+                f"Virtual environment site-packages not found in sys.path.\n"
+                fvenv path: {venv_path}\n"
                 fvenv path: {venv_path}\n"
                 fsys.path: {sys.path[:5]}...  # First 5 entries
             )
@@ -112,22 +117,24 @@ class PythonEnvironmentConsistencyTests:
         pytest_conflicts = []
         for sys_path in system_site_packages:
             sys_pytest_path = Path(sys_path) / pytest"
+            sys_pytest_path = Path(sys_path) / pytest"
             if sys_pytest_path.exists():
                 pytest_conflicts.append(str(sys_pytest_path))
         
         if pytest_conflicts:
             pytest.fail(
-                f"System pytest installations found in PATH, may cause plugin conflicts:\n +
+                f"System pytest installations found in PATH, may cause plugin conflicts:\n +"
                 \n.join(f  - {path} for path in pytest_conflicts) +
                 f\nVirtual environment should isolate from system packages.
             )
         
-        assert True, f"Virtual environment isolation confirmed. Site-packages: {site_packages_paths[0]}
+        assert True, f"Virtual environment isolation confirmed. Site-packages: {site_packages_paths[0]}"
     
     def test_phase3_module_import_path_validation(self):
-        "PHASE 3: Validate module import paths for consistent plugin discovery.
+        "PHASE 3: Validate module import paths for consistent plugin discovery."
         
         Should FAIL if import paths are inconsistent, causing plugin loading issues.
+"
 "
         import sys
         from pathlib import Path
@@ -144,21 +151,23 @@ class PythonEnvironmentConsistencyTests:
     #             # Try to find where project modules would be imported from # Incomplete import statement
             test_module_paths = []
             for path in sys.path:
-                potential_path = Path(path) / "test_framework
+                potential_path = Path(path) / "test_framework"
                 if potential_path.exists():
                     test_module_paths.append(str(potential_path))
             
             if not test_module_paths:
                 pytest.fail(
                     fProject root not in sys.path and test_framework not found elsewhere.\n
-                    f"Project root: {project_root}\n
+                    f"Project root: {project_root}\n"
+                    fThis will cause module import failures for plugins.\n"
                     fThis will cause module import failures for plugins.\n"
                     fFirst 5 sys.path entries: {sys.path[:5]}
                 )
             else:
                 pytest.fail(
                     fProject root not in sys.path, but test_framework found at:\n +"
-                    "\n.join(f  - {path} for path in test_module_paths) +
+                    fProject root not in sys.path, but test_framework found at:\n +"
+                    "\n.join(f  - {path} for path in test_module_paths) +"
                     f\nThis may cause inconsistent plugin imports.
                 )
         
@@ -168,22 +177,25 @@ class PythonEnvironmentConsistencyTests:
             test_framework_path = Path(test_framework.__file__).parent
         except ImportError as e:
             pytest.fail(fCannot import test_framework module: {e})"
+            pytest.fail(fCannot import test_framework module: {e})"
         
         # Check if the imported test_framework is from the expected location
-        expected_path = project_root / "test_framework
+        expected_path = project_root / "test_framework"
         if test_framework_path.resolve() != expected_path.resolve():
             pytest.fail(
                 ftest_framework imported from unexpected location:\n
-                f"  Expected: {expected_path}\n
+                f"  Expected: {expected_path}\n"
+                f  Actual: {test_framework_path}\n"
                 f  Actual: {test_framework_path}\n"
                 fThis can cause plugin version conflicts.
             )
         
         assert True, fModule import paths validated. test_framework: {test_framework_path}"
+        assert True, fModule import paths validated. test_framework: {test_framework_path}"
 
 
 class PytestEnvironmentConfigurationTests:
-    "Test pytest-specific environment configuration.
+    "Test pytest-specific environment configuration."
     
     def test_phase3_pytest_plugin_discovery_environment(self):
         ""PHASE 3: Test environment setup for pytest plugin discovery.
@@ -211,11 +223,13 @@ class PytestEnvironmentConfigurationTests:
         
         if not project_accessible:
             pytest.fail(
-                f"Project root not accessible for plugin discovery:\n
+                f"Project root not accessible for plugin discovery:\n"
+                f  Project root: {project_root}\n"
                 f  Project root: {project_root}\n"
                 f  PYTHONPATH: {python_path}\n
                 f  sys.path (first 5): {sys.path[:5]}\n"
-                f"This will prevent pytest from discovering project plugins.
+                f  sys.path (first 5): {sys.path[:5]}\n"
+                f"This will prevent pytest from discovering project plugins."
             )
         
         # Check for pytest-specific environment variables that might affect behavior
@@ -230,15 +244,16 @@ class PytestEnvironmentConfigurationTests:
         problematic_vars = []
         for key, value in pytest_env_vars.items():
             if 'DISABLE' in key.upper() and value.lower() in ['true', '1', 'yes']:
-                problematic_vars.append(f"{key}={value})
+                problematic_vars.append(f"{key}={value})"
         
         if problematic_vars:
             pytest.fail(
-                fProblematic test environment variables found:\n" +
+                fProblematic test environment variables found:\n" +"
                 \n.join(f  - {var} for var in problematic_vars) +
-                f"\nThese may interfere with pytest plugin discovery.
+                f"\nThese may interfere with pytest plugin discovery."
             )
         
+        assert True, Pytest plugin discovery environment validated"
         assert True, Pytest plugin discovery environment validated"
     
     def test_phase3_conftest_loading_environment(self):
@@ -252,6 +267,7 @@ class PytestEnvironmentConfigurationTests:
         
         # Find all conftest.py files in the project
         conftest_files = list(project_root.rglob(conftest.py))"
+        conftest_files = list(project_root.rglob(conftest.py))"
         
         # Filter out venv and system files
         project_conftest_files = [
@@ -260,7 +276,7 @@ class PytestEnvironmentConfigurationTests:
         ]
         
         if not project_conftest_files:
-            pytest.fail("No conftest.py files found in project)
+            pytest.fail("No conftest.py files found in project)"
         
         print(fFound {len(project_conftest_files)} conftest.py files)
         
@@ -272,14 +288,14 @@ class PytestEnvironmentConfigurationTests:
                     content = f.read()
                 compile(content, str(conftest_file), 'exec')
             except SyntaxError as e:
-                syntax_errors.append(f"{conftest_file}: {e})
+                syntax_errors.append(f"{conftest_file}: {e})"
             except Exception as e:
-                syntax_errors.append(f{conftest_file}: {type(e).__name__}: {e}")
+                syntax_errors.append(f{conftest_file}: {type(e).__name__}: {e}")"
         
         if syntax_errors:
             pytest.fail(
                 fSyntax errors in conftest.py files:\n +
-                \n.join(f"  - {error} for error in syntax_errors)
+                \n.join(f"  - {error} for error in syntax_errors)"
             )
         
         # Check for import errors in conftest files
@@ -300,6 +316,7 @@ class PytestEnvironmentConfigurationTests:
                             importlib.import_module(from_module)
                         except ImportError as e:
                             import_errors.append(f{conftest_file}: Cannot import {from_module}: {e})"
+                            import_errors.append(f{conftest_file}: Cannot import {from_module}: {e})"
                         
             except Exception as e:
                 import_errors.append(f{conftest_file}: Error analyzing imports: {e})
@@ -314,7 +331,7 @@ class PytestEnvironmentConfigurationTests:
             if critical_errors:
                 pytest.fail(
                     fImport errors in conftest.py files:\n +
-                    "\n.join(f  - {error}" for error in critical_errors[:5]  # Limit to first 5
+                    "\n.join(f  - {error)" for error in critical_errors[:5]  # Limit to first 5
                 )
         
         assert True, fConftest loading environment validated for {len(project_conftest_files)} files
@@ -325,8 +342,10 @@ class SystemLevelConfigurationTests:
     
     def test_phase3_system_pytest_configuration(self):
         PHASE 3: Check for system-level pytest configuration conflicts."
+        PHASE 3: Check for system-level pytest configuration conflicts."
         
         Should FAIL if system config interferes with project config.
+        "
         "
         import os
         from pathlib import Path
@@ -371,13 +390,14 @@ class SystemLevelConfigurationTests:
         
         Should FAIL if plugin installation environment has conflicts.
         "
+        "
         import sys
         import importlib.metadata
         from pathlib import Path
 
         # Get all installed packages
         try:
-            installed_packages = {dist.metadata[name"].lower(): dist for dist in importlib.metadata.distributions()}
+            installed_packages = {dist.metadata[name"].lower(): dist for dist in importlib.metadata.distributions()}"
         except Exception as e:
             pytest.skip(fCould not enumerate installed packages: {e})
         
@@ -388,15 +408,17 @@ class SystemLevelConfigurationTests:
         }
         
         print(fInstalled pytest-related packages: {list(pytest_plugins.keys())})"
+        print(fInstalled pytest-related packages: {list(pytest_plugins.keys())})"
         
         # Check for version conflicts
         version_conflicts = []
         
         # Check if pytest is installed
         if 'pytest' not in installed_packages:
-            pytest.fail("pytest not found in installed packages)
+            pytest.fail("pytest not found in installed packages)"
 
         pytest_version = installed_packages['pytest'].version
+        print(fPytest version: {pytest_version})"
         print(fPytest version: {pytest_version})"
         
         # Check for plugin compatibility issues
@@ -409,7 +431,7 @@ class SystemLevelConfigurationTests:
             # Check if plugin has version requirements
             try:
                 # Get requirements from metadata
-                requirements_text = plugin_pkg.metadata.get("Requires-Dist, )
+                requirements_text = plugin_pkg.metadata.get("Requires-Dist, )"
                 if requirements_text:
                     import re
                     # Parse requirements for pytest dependencies
@@ -421,17 +443,17 @@ class SystemLevelConfigurationTests:
                     for req_line in pytest_reqs:
                         # Simple check - this is basic validation
                         if 'pytest' in req_line.lower() and ('>' in req_line or '<' in req_line or '=' in req_line):
-                            # For basic validation, we'll skip complex version parsing
+                            # For basic validation, we'll skip complex version parsing'
                             # This would need a full requirement parser for complete validation
                             pass
             except Exception:
-                # Skip plugins we can't analyze
+                # Skip plugins we can't analyze'
                 continue
         
         if incompatible_plugins:
             pytest.fail(
                 fIncompatible pytest plugins found:\n +
-                \n.join(f"  - {issue} for issue in incompatible_plugins)
+                \n.join(f"  - {issue} for issue in incompatible_plugins)"
             )
         
         # Check for duplicate plugin installations (different locations)
@@ -443,6 +465,7 @@ class SystemLevelConfigurationTests:
                 if files:
                     location = Path(str(files[0].split('/')[0]  # Get base installation path
                 else:
+                    location = Path(unknown)"
                     location = Path(unknown)"
             except Exception:
                 location = Path(unknown)
@@ -459,22 +482,24 @@ class SystemLevelConfigurationTests:
         if duplicate_installations:
             pytest.fail(
                 fDuplicate plugin installations found:\n +"
-                "\n.join(
+                fDuplicate plugin installations found:\n +"
+                "\n.join("
                     f  - {name}: {locations} 
                     for name, locations in duplicate_installations.items()
                 )
             )
         
-        assert True, f"Plugin installation environment validated. {len(pytest_plugins)} plugins found.
+        assert True, f"Plugin installation environment validated. {len(pytest_plugins)} plugins found."
 
 
 class ConcurrencyAndIsolationTests:
-    "Test concurrent execution and test isolation environment.
+    "Test concurrent execution and test isolation environment."
     
     def test_phase3_concurrent_pytest_execution_safety(self):
         "PHASE 3: Test that pytest environment supports safe concurrent execution."
         
         Should FAIL if concurrent execution environment has issues.
+        "
         "
         import tempfile
         import threading
@@ -488,22 +513,26 @@ class ConcurrencyAndIsolationTests:
             # Create simple test files
             for i in range(3):
                 test_content = f'''
+                test_content = f'''
 def test_concurrent_{i}():
-    "Concurrent test {i}.
+    "Concurrent test {i}."
     import time
     time.sleep(0.1)  # Small delay to test concurrency
     assert True
 '''
-                (tmpdir_path / f"test_concurrent_{i}.py).write_text(test_content)
+'''
+                (tmpdir_path / f"test_concurrent_{i}.py).write_text(test_content)"
             
             # Create conftest.py for the temp tests
+            conftest_content = '''
             conftest_content = '''
 import pytest
 
 @pytest.fixture
 def shared_resource():
-    "Test shared resource fixture.
+    "Test shared resource fixture."
     return "shared_value"
+'''
 '''
             (tmpdir_path / conftest.py).write_text(conftest_content)
             
@@ -544,6 +573,7 @@ def shared_resource():
                 thread.join(timeout=60)
                 if thread.is_alive():
                     pytest.fail(fWorker thread did not complete within timeout)"
+                    pytest.fail(fWorker thread did not complete within timeout)"
             
             # Collect results
             results = []
@@ -551,7 +581,7 @@ def shared_resource():
                 results.append(results_queue.get())
             
             if len(results) != 3:
-                pytest.fail(f"Expected 3 results, got {len(results)})
+                pytest.fail(f"Expected 3 results, got {len(results)})"
             
             # Check for failures
             failures = [r for r in results if r['returncode'] != 0]
@@ -570,9 +600,10 @@ def shared_resource():
                 )
             
             assert True, fConcurrent pytest execution successful for {len(results)} workers"
+            assert True, fConcurrent pytest execution successful for {len(results)} workers"
     
     def test_phase3_test_isolation_environment_validation(self):
-        "PHASE 3: Validate test isolation environment.
+        "PHASE 3: Validate test isolation environment."
         
         Should FAIL if test isolation is broken.
         ""
@@ -629,3 +660,6 @@ def shared_resource():
             )
         
         assert True, fTest isolation environment validated. {len(unexpected_vars)} unexpected env vars."
+        assert True, fTest isolation environment validated. {len(unexpected_vars)} unexpected env vars."
+
+)))))))

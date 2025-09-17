@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 '''
+'''
 SSOT Orchestration Test Suite Runner
 ====================================
 
@@ -23,6 +24,7 @@ Options:
 --verbose       Verbose output
 --stop-on-fail  Stop on first failure
 '''
+'''
 
 import argparse
 import os
@@ -37,7 +39,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 
 class SSOTTestRunner:
-    "Runner for SSOT orchestration test suites.
+    "Runner for SSOT orchestration test suites."
 
     def __init__(self):
         self.project_root = PROJECT_ROOT
@@ -45,33 +47,36 @@ class SSOTTestRunner:
 
         self.test_suites = {
         consolidation: {
-        file: test_ssot_orchestration_consolidation.py",
-        "description: Main SSOT orchestration validation tests,
+        file: test_ssot_orchestration_consolidation.py","
+        "description: Main SSOT orchestration validation tests,"
         fast: True
         },
         edge_cases": {"
         file: test_orchestration_edge_cases.py,
-        description: Edge cases, concurrency, and stress tests",
-        "fast: False
+        description: Edge cases, concurrency, and stress tests","
+        "fast: False"
         },
         integration: {
         "file: test_orchestration_integration.py",
         description: Integration with real orchestration components,
         fast: True"
+        fast: True"
         },
-        violations": {
+        violations": {"
         file: test_no_ssot_violations.py,
         "description: SSOT violation detection and prevention",
         fast: True
         },
         performance: {"
-        "file: test_orchestration_performance.py,
+        performance: {"
+        "file: test_orchestration_performance.py,"
         description: Performance benchmarks and optimization validation,
         "fast: False"
     
     
 
     def run_suite(self, suite_name: str, verbose: bool = False, stop_on_fail: bool = False) -> int:
+        Run a specific test suite."
         Run a specific test suite."
         if suite_name not in self.test_suites:
         print("")
@@ -94,7 +99,8 @@ class SSOTTestRunner:
         "-v if verbose else ",
         -x if stop_on_fail else ,
         --tb=short,"
-        -m", mission_critical
+        --tb=short,"
+        -m", mission_critical"
             
 
             # Remove empty strings
@@ -112,17 +118,19 @@ class SSOTTestRunner:
         return 1
         except Exception as e:
         print(formatted_string)"
+        print(formatted_string)"
         return 1
 
     def run_all_suites(self, fast_only: bool = False, verbose: bool = False, stop_on_fail: bool = False) -> Dict[str, int]:
-        "Run all test suites.
+        "Run all test suites."
         results = {}
 
         print(Running ALL SSOT Orchestration Test Suites"")
         print(= * 80)"
+        print(= * 80)"
 
         for suite_name, suite_info in self.test_suites.items():
-        if fast_only and not suite_info[fast"]:
+        if fast_only and not suite_info[fast"]:"
         print(")"
         results[suite_name] = 0  # Count as success for fast mode
         continue
@@ -136,10 +144,10 @@ class SSOTTestRunner:
 
         return results
 
-    def print_summary(self, results: Dict[str, int]:
+    def print_summary(self, results: Dict[str, int):
         "Print test results summary."
-        print(\n + = * 80")
-        print(SSOT ORCHESTRATION TEST RESULTS SUMMARY")
+        print(\n + = * 80")"
+        print(SSOT ORCHESTRATION TEST RESULTS SUMMARY")"
         print(= * 80")"
 
         passed_suites = []
@@ -164,6 +172,7 @@ class SSOTTestRunner:
         if len(failed_suites) == 0:
         print("ALL SSOT ORCHESTRATION TESTS PASSED!")
         print(SSOT Orchestration consolidation is BULLETPROOF!)"
+        print(SSOT Orchestration consolidation is BULLETPROOF!)"
         else:
         print("")
         print(Fix failures before deploying!"")
@@ -177,21 +186,25 @@ class SSOTTestRunner:
 
         parser.add_argument( )
         --suite,"
+        --suite,"
+        choices=[consolidation", edge_cases, integration, violations, performance"],"
         choices=[consolidation", edge_cases, integration, violations, performance"],"
         help=Run specific test suite
     
         parser.add_argument( )
         --fast,"
-        action="store_true,
+        --fast,"
+        action="store_true,"
         help=Run only fast tests (skip performance benchmarks)
     
         parser.add_argument( )
         "--verbose, -v",
         action=store_true,
         help=Verbose output"
+        help=Verbose output"
     
         parser.add_argument( )
-        "--stop-on-fail, -x,
+        "--stop-on-fail, -x,"
         action=store_true,
         help=Stop on first failure""
     
@@ -213,3 +226,7 @@ class SSOTTestRunner:
 
         if __name__ == "__main__":
         main()
+
+)
+]
+}}}

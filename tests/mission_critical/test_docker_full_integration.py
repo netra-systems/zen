@@ -1,4 +1,5 @@
 '''
+'''
 MISSION CRITICAL: Docker Full Integration & System Validation Suite
 BUSINESS IMPACT: VALIDATES $2M+ ARR PLATFORM END-TO-END DOCKER OPERATIONS
 
@@ -23,6 +24,7 @@ INTEGRATION VALIDATION SCOPE:
 - Failure recovery across all components
 - End-to-end resource lifecycle management
 - Performance under realistic load patterns
+'''
 '''
 
 import asyncio
@@ -80,7 +82,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class IntegrationTestResult:
-    "Result of an integration test scenario.
+    "Result of an integration test scenario."
     scenario_name: str
     success: bool
     start_time: datetime
@@ -209,15 +211,16 @@ class DockerIntegrationFramework:
         continue
         else:
         raise RuntimeError("
+        raise RuntimeError("
         else:
         allocated_ports[container_port] = host_port
 
         return allocated_ports
 
     def create_network(self, network_name: str) -> bool:
-        "Create Docker network with error handling.
+        "Create Docker network with error handling."
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'network', 'create', '--driver', 'bridge', network_name
         
         if result.returncode == 0:
@@ -233,19 +236,22 @@ class DockerIntegrationFramework:
     def create_volume(self, volume_name: str) -> bool:
         "Create Docker volume with error handling."
         try:
-        result = execute_docker_command(['docker', 'volume', 'create', volume_name]
+        result = execute_docker_command(['docker', 'volume', 'create', volume_name)
         if result.returncode == 0:
         self.test_volumes.append(volume_name)
         return True
         else:
         logger.warning(formatted_string)"
+        logger.warning(formatted_string)"
         return False
         except Exception as e:
+        logger.error("
         logger.error("
         return False
 
     def deploy_service(self, service_config: ServiceConfiguration) -> bool:
         "Deploy a service with complete configuration."
+        logger.info("
         logger.info("
 
         try:
@@ -256,27 +262,28 @@ class DockerIntegrationFramework:
         for network in service_config.networks:
         network_exists = False
         try:
-        result = execute_docker_command(['docker', 'network', 'inspect', network]
+        result = execute_docker_command(['docker', 'network', 'inspect', network)
         network_exists = result.returncode == 0
         except:
         pass
 
         if not network_exists:
         if not self.create_network(network):
-        logger.error(formatted_string")
+        logger.error(formatted_string")"
         return False
 
                             # Create required volumes
         for volume in service_config.volumes:
         volume_exists = False
         try:
-        result = execute_docker_command(['docker', 'volume', 'inspect', volume]
+        result = execute_docker_command(['docker', 'volume', 'inspect', volume)
         volume_exists = result.returncode == 0
         except:
         pass
 
         if not volume_exists:
         if not self.create_volume(volume):
+        logger.error("
         logger.error("
         return False
 
@@ -285,28 +292,28 @@ class DockerIntegrationFramework:
 
                                                 # Add port mappings
         for container_port, host_port in allocated_ports.items():
-        run_cmd.extend(['-p', 'formatted_string']
+        run_cmd.extend(['-p', 'formatted_string')
 
                                                     # Add environment variables
         for env_key, env_value in service_config.environment.items():
-        run_cmd.extend(['-e', 'formatted_string']
+        run_cmd.extend(['-e', 'formatted_string')
 
                                                         # Add volume mounts
         for volume in service_config.volumes:
-        run_cmd.extend(['-v', 'formatted_string']
+        run_cmd.extend(['-v', 'formatted_string')
 
                                                             # Add networks (first network in create, others via connect)
         if service_config.networks:
-        run_cmd.extend(['--network', service_config.networks[0]]
+        run_cmd.extend(['--network', service_config.networks[0))
 
                                                                 # Add image
         run_cmd.append(service_config.image)
 
                                                                 # Add health check if specified
         if service_config.health_check:
-        health_cmd = service_config.health_check.get('test', []
+        health_cmd = service_config.health_check.get('test', [)
         if health_cmd and len(health_cmd) > 1:
-        run_cmd.extend(['--health-cmd', ' '.join(health_cmd[1:]]
+        run_cmd.extend(['--health-cmd', ' '.join(health_cmd[1:))
         run_cmd.extend(['--health-interval', service_config.health_check.get('interval', '30s')]
         run_cmd.extend(['--health-timeout', service_config.health_check.get('timeout', '10s')]
         run_cmd.extend(['--health-retries', str(service_config.health_check.get('retries', 3))]
@@ -314,7 +321,7 @@ class DockerIntegrationFramework:
                                                                         # Create container
         result = execute_docker_command(run_cmd)
         if result.returncode != 0:
-        logger.error(formatted_string")
+        logger.error(formatted_string")"
         return False
 
         self.test_containers.append(service_config.name)
@@ -322,10 +329,11 @@ class DockerIntegrationFramework:
                                                                             # Connect to additional networks
         for network in service_config.networks[1:]:
         try:
-        execute_docker_command([]
+        execute_docker_command([)
         'docker', 'network', 'connect', network, service_config.name
                                                                                     
         except Exception as e:
+        logger.warning("
         logger.warning("
 
                                                                                         # Store service info
@@ -335,27 +343,28 @@ class DockerIntegrationFramework:
         'start_time': datetime.now()
                                                                                         
 
-        logger.info(formatted_string")
+        logger.info(formatted_string")"
         return True
 
         except Exception as e:
         logger.error("
+        logger.error("
         return False
 
     def wait_for_service_health(self, service_name: str, timeout: int = 60) -> bool:
-        "Wait for service to become healthy.
+        "Wait for service to become healthy."
         logger.info(""
 
         start_time = time.time()
         while time.time() - start_time < timeout:
         try:
-        result = execute_docker_command(['docker', 'container', 'inspect', service_name]
+        result = execute_docker_command(['docker', 'container', 'inspect', service_name)
         if result.returncode == 0:
         inspect_data = json.loads(result.stdout)[0]
-        state = inspect_data.get('State', {}
+        state = inspect_data.get('State', {)
 
         if state.get('Status') == 'running':
-        health = state.get('Health', {}
+        health = state.get('Health', {)
         if health.get('Status') == 'healthy':
         logger.info(formatted_string)
         return True
@@ -379,6 +388,7 @@ class DockerIntegrationFramework:
     def run_integration_scenario(self, scenario_name: str, scenario_func) -> IntegrationTestResult:
         "Run an integration test scenario and collect results."
         logger.info(formatted_string)"
+        logger.info(formatted_string)"
 
         start_time = datetime.now()
         operations_completed = 0
@@ -400,8 +410,8 @@ class DockerIntegrationFramework:
         operations_failed = scenario_result.get('operations_failed', 0)
         services_deployed = scenario_result.get('services_deployed', 0)
         resources_created = scenario_result.get('resources_created', 0)
-        error_messages = scenario_result.get('error_messages', []
-        performance_metrics = scenario_result.get('performance_metrics', {}
+        error_messages = scenario_result.get('error_messages', [)
+        performance_metrics = scenario_result.get('performance_metrics', {)
         success = scenario_result.get('success', False)
         else:
         success = bool(scenario_result)
@@ -414,6 +424,7 @@ class DockerIntegrationFramework:
         success = False
         operations_failed += 1
         error_messages.append(str(e))
+        logger.error("
         logger.error("
 
         end_time = datetime.now()
@@ -443,8 +454,8 @@ class DockerIntegrationFramework:
         self.test_results.append(result)
         self.update_metrics(result)
 
-        status =  PASS:  SUCCESS if success else " FAIL:  FAILED
-        logger.info(formatted_string")
+        status =  PASS:  SUCCESS if success else " FAIL:  FAILED"
+        logger.info(formatted_string")"
 
         return result
 
@@ -455,8 +466,8 @@ class DockerIntegrationFramework:
     # Stop and remove containers
         for container in list(self.test_containers):
         try:
-        execute_docker_command(['docker', 'container', 'stop', container]
-        execute_docker_command(['docker', 'container', 'rm', container]
+        execute_docker_command(['docker', 'container', 'stop', container)
+        execute_docker_command(['docker', 'container', 'rm', container)
         cleaned_count += 1
         except:
         pass
@@ -464,7 +475,7 @@ class DockerIntegrationFramework:
                 # Remove networks
         for network in list(self.test_networks):
         try:
-        execute_docker_command(['docker', 'network', 'rm', network]
+        execute_docker_command(['docker', 'network', 'rm', network)
         cleaned_count += 1
         except:
         pass
@@ -472,7 +483,7 @@ class DockerIntegrationFramework:
                             # Remove volumes
         for volume in list(self.test_volumes):
         try:
-        execute_docker_command(['docker', 'volume', 'rm', volume]
+        execute_docker_command(['docker', 'volume', 'rm', volume)
         cleaned_count += 1
         except:
         pass
@@ -486,6 +497,7 @@ class DockerIntegrationFramework:
         return cleaned_count
 
     def update_metrics(self, result: IntegrationTestResult):
+        Update overall integration metrics."
         Update overall integration metrics."
         self.metrics['total_scenarios'] += 1
         if result.success:
@@ -509,7 +521,7 @@ class DockerIntegrationFramework:
             
 
     def get_integration_summary(self) -> Dict[str, Any]:
-        "Get comprehensive integration test summary.
+        "Get comprehensive integration test summary."
         pass
         success_rate = (self.metrics['successful_scenarios'] / self.metrics['total_scenarios'] * 100 )
         if self.metrics['total_scenarios'] > 0 else 0)
@@ -554,7 +566,7 @@ class TestDockerMultiServiceIntegration:
 
         try:
         # Deploy database tier
-        if integration_framework.deploy_service(integration_framework.service_configs['postgres_db']:
+        if integration_framework.deploy_service(integration_framework.service_configs['postgres_db'):
         operations_completed += 1
         services_deployed += 1
 
@@ -563,12 +575,13 @@ class TestDockerMultiServiceIntegration:
         else:
         operations_failed += 1
         error_messages.append(PostgreSQL health check failed)"
+        error_messages.append(PostgreSQL health check failed)"
         else:
         operations_failed += 1
-        error_messages.append("PostgreSQL deployment failed)
+        error_messages.append("PostgreSQL deployment failed)"
 
                         # Deploy cache tier
-        if integration_framework.deploy_service(integration_framework.service_configs['redis_cache']:
+        if integration_framework.deploy_service(integration_framework.service_configs['redis_cache'):
         operations_completed += 1
         services_deployed += 1
 
@@ -582,7 +595,7 @@ class TestDockerMultiServiceIntegration:
         error_messages.append("Redis deployment failed)"
 
                                         # Deploy web tier
-        if integration_framework.deploy_service(integration_framework.service_configs['nginx_web']:
+        if integration_framework.deploy_service(integration_framework.service_configs['nginx_web'):
         operations_completed += 1
         services_deployed += 1
 
@@ -594,6 +607,7 @@ class TestDockerMultiServiceIntegration:
         else:
         operations_failed += 1
         error_messages.append(Nginx deployment failed)"
+        error_messages.append(Nginx deployment failed)"
 
                                                         # Test inter-service connectivity
         connectivity_tests = 0
@@ -601,7 +615,7 @@ class TestDockerMultiServiceIntegration:
 
                                                         # Test database connectivity
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'exec', 'postgres_db',
         'psql', '-U', 'test_user', '-d', 'test_db', '-c', 'SELECT 1;'
                                                             
@@ -611,10 +625,11 @@ class TestDockerMultiServiceIntegration:
         operations_completed += 1
         else:
         operations_failed += 1
-        error_messages.append(Database connectivity test failed")
+        error_messages.append(Database connectivity test failed")"
         except Exception as e:
         connectivity_tests += 1
         operations_failed += 1
+        error_messages.append("
         error_messages.append("
 
         success = (operations_failed == 0 and services_deployed >= 3 and )
@@ -643,7 +658,7 @@ class TestDockerMultiServiceIntegration:
                                                                             
 
         result = integration_framework.run_integration_scenario( )
-        Three-Tier Application Deployment",
+        Three-Tier Application Deployment","
         three_tier_scenario
                                                                             
 
@@ -653,9 +668,10 @@ class TestDockerMultiServiceIntegration:
         assert result.operations_failed <= 1, formatted_string
 
         logger.info(formatted_string)"
+        logger.info(formatted_string)"
 
     def test_service_dependency_resolution(self, integration_framework):
-        "Test proper service dependency resolution and startup ordering.
+        "Test proper service dependency resolution and startup ordering."
         pass
         logger.info([U+1F517] Testing service dependency resolution")"
 
@@ -674,7 +690,7 @@ class TestDockerMultiServiceIntegration:
         for service_name in dependency_order:
         start_time = time.time()
 
-        if integration_framework.deploy_service(integration_framework.service_configs[service_name]:
+        if integration_framework.deploy_service(integration_framework.service_configs[service_name):
         deploy_time = time.time() - start_time
         deployment_times[service_name] = deploy_time
         operations_completed += 1
@@ -699,7 +715,7 @@ class TestDockerMultiServiceIntegration:
         if 'app_backend' in integration_framework.active_services:
         try:
                                     # Create a simple connectivity test
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'exec', 'app_backend',
         'sh', '-c', 'nc -z postgres_db 5432'
                                     
@@ -713,6 +729,7 @@ class TestDockerMultiServiceIntegration:
         except Exception as e:
         dependency_tests += 1
         operations_failed += 1
+        error_messages.append(formatted_string)"
         error_messages.append(formatted_string)"
 
         success = (services_deployed == len(dependency_order) and )
@@ -741,7 +758,7 @@ class TestDockerMultiServiceIntegration:
                                                     
 
         result = integration_framework.run_integration_scenario( )
-        "Service Dependency Resolution,
+        "Service Dependency Resolution,"
         dependency_scenario
                                                     
 
@@ -757,9 +774,10 @@ class TestDockerMultiServiceIntegration:
 
 class TestDockerCIPipelineSimulation:
         Simulate complete CI/CD pipeline scenarios with Docker."
+        Simulate complete CI/CD pipeline scenarios with Docker."
 
     def test_parallel_build_and_test_simulation(self, integration_framework):
-        "Simulate parallel build and test operations like in CI/CD.
+        "Simulate parallel build and test operations like in CI/CD."
         logger.info([U+1F3ED] Simulating parallel CI/CD build and test operations")"
 
     def ci_pipeline_scenario():
@@ -776,7 +794,7 @@ class TestDockerCIPipelineSimulation:
 
         try:
         # Simulate build container
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'run', '--name', container_name,
         '--rm', 'alpine:latest',
         'sh', '-c', 'formatted_string'
@@ -789,10 +807,11 @@ class TestDockerCIPipelineSimulation:
         return True, build_time, formatted_string
         else:
         return False, build_time, formatted_string"
+        return False, build_time, formatted_string"
 
         except Exception as e:
         build_time = time.time() - start_time
-        return False, build_time, "formatted_string
+        return False, build_time, "formatted_string"
 
         try:
                         # Launch parallel builds
@@ -827,7 +846,7 @@ class TestDockerCIPipelineSimulation:
                                                 # Deploy test services for integration testing simulation
         test_services = ['redis_cache', 'postgres_db']
         for service_name in test_services:
-        if integration_framework.deploy_service(integration_framework.service_configs[service_name]:
+        if integration_framework.deploy_service(integration_framework.service_configs[service_name):
         services_deployed += 1
         operations_completed += 1
 
@@ -882,8 +901,10 @@ class TestDockerCIPipelineSimulation:
 
         build_success_rate = result.performance_metrics.get('build_success_rate', 0)
         assert build_success_rate >= 75, formatted_string"
+        assert build_success_rate >= 75, formatted_string"
 
         parallel_throughput = result.performance_metrics.get('parallel_throughput', 0)
+        assert parallel_throughput > 2.0, formatted_string"
         assert parallel_throughput > 2.0, formatted_string"
 
         logger.info(formatted_string )
@@ -891,8 +912,9 @@ class TestDockerCIPipelineSimulation:
 
     def test_rolling_deployment_simulation(self, integration_framework):
         Simulate rolling deployment scenario with zero downtime."
+        Simulate rolling deployment scenario with zero downtime."
         pass
-        logger.info( CYCLE:  Simulating rolling deployment with zero downtime")
+        logger.info( CYCLE:  Simulating rolling deployment with zero downtime")"
 
     def rolling_deployment_scenario():
         pass
@@ -905,7 +927,7 @@ class TestDockerCIPipelineSimulation:
         # Deploy initial version of services
         initial_services = ['nginx_web']
         for service_name in initial_services:
-        if integration_framework.deploy_service(integration_framework.service_configs[service_name]:
+        if integration_framework.deploy_service(integration_framework.service_configs[service_name):
         services_deployed += 1
         operations_completed += 1
 
@@ -914,9 +936,10 @@ class TestDockerCIPipelineSimulation:
         else:
         operations_failed += 1
         error_messages.append("
+        error_messages.append("
         else:
         operations_failed += 1
-        error_messages.append(formatted_string")
+        error_messages.append(formatted_string")"
 
                             # Simulate rolling update
         if services_deployed > 0:
@@ -938,7 +961,7 @@ class TestDockerCIPipelineSimulation:
 
         if new_port:
                                                         # Deploy new version
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'run', '-d', '--name', new_service_name,
         '-p', 'formatted_string',
         'nginx:alpine'
@@ -961,7 +984,7 @@ class TestDockerCIPipelineSimulation:
 
                                                                 # Simulate traffic switch (stop old version)
         time.sleep(1)
-        execute_docker_command(['docker', 'container', 'stop', 'nginx_web']
+        execute_docker_command(['docker', 'container', 'stop', 'nginx_web')
         operations_completed += 1
 
         else:
@@ -973,9 +996,11 @@ class TestDockerCIPipelineSimulation:
         else:
         operations_failed += 1
         error_messages.append(Could not allocate port for new version)"
+        error_messages.append(Could not allocate port for new version)"
 
         except Exception as e:
         operations_failed += 1
+        error_messages.append("
         error_messages.append("
 
         success = (operations_failed <= 1 and services_deployed >= 2)
@@ -1002,11 +1027,12 @@ class TestDockerCIPipelineSimulation:
 
         result = integration_framework.run_integration_scenario( )
         Rolling Deployment Simulation,"
+        Rolling Deployment Simulation,"
         rolling_deployment_scenario
                                                                                     
 
                                                                                     # Assertions
-        assert result.success, "formatted_string
+        assert result.success, "formatted_string"
         assert result.services_deployed >= 2, formatted_string
 
         deployment_success_rate = result.performance_metrics.get('deployment_success_rate', 0)
@@ -1036,7 +1062,7 @@ class TestDockerInfrastructureServiceStartup:
         for service_name in services_to_deploy:
         service_start_time = time.time()
 
-        if integration_framework.deploy_service(integration_framework.service_configs[service_name]:
+        if integration_framework.deploy_service(integration_framework.service_configs[service_name):
         service_deploy_time = time.time() - service_start_time
         startup_times.append(service_deploy_time)
         services_deployed += 1
@@ -1048,8 +1074,10 @@ class TestDockerInfrastructureServiceStartup:
         else:
         operations_failed += 1
         error_messages.append(formatted_string)"
+        error_messages.append(formatted_string)"
         else:
         operations_failed += 1
+        error_messages.append("
         error_messages.append("
 
         total_startup_time = time.time() - overall_start_time
@@ -1084,10 +1112,11 @@ class TestDockerInfrastructureServiceStartup:
 
         result = integration_framework.run_integration_scenario( )
         Rapid Multi-Service Startup Sequence,"
+        Rapid Multi-Service Startup Sequence,"
         startup_sequence_scenario
                                 
 
-        assert result.success, "formatted_string
+        assert result.success, "formatted_string"
         assert result.services_deployed >= 3, formatted_string
 
         avg_startup = result.performance_metrics.get('average_startup_time', 999)
@@ -1120,7 +1149,7 @@ class TestDockerInfrastructureServiceStartup:
         for container_name, image in alpine_containers:
         start_time = time.time()
 
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
         '--memory', '256m', image
             
@@ -1150,7 +1179,7 @@ class TestDockerInfrastructureServiceStartup:
         for container_name, image in regular_containers:
         start_time = time.time()
 
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
         '--memory', '256m', image
                                 
@@ -1203,8 +1232,9 @@ class TestDockerInfrastructureServiceStartup:
 
         avg_alpine = result.performance_metrics.get('average_alpine_startup', 999)
         assert avg_alpine < 15, formatted_string"
+        assert avg_alpine < 15, formatted_string"
 
-        logger.info(formatted_string")
+        logger.info(formatted_string")"
 
     def test_concurrent_service_startup_load(self, integration_framework):
         Test concurrent startup of multiple services under load.""
@@ -1220,11 +1250,12 @@ class TestDockerInfrastructureServiceStartup:
     def deploy_service_concurrently(service_info):
         service_name, image = service_info
         container_name = formatted_string"
+        container_name = formatted_string"
 
         try:
         start_time = time.time()
 
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
         '--memory', '128m', '--cpus', '0.5', image, 'sleep', '60'
         
@@ -1236,6 +1267,7 @@ class TestDockerInfrastructureServiceStartup:
         'container_name': container_name,
         'success': True,
         'deploy_time': deploy_time,
+        'message': formatted_string"
         'message': formatted_string"
             
         else:
@@ -1280,7 +1312,7 @@ class TestDockerInfrastructureServiceStartup:
         if result_data['success']:
         operations_completed += 1
         services_deployed += 1
-        integration_framework.test_containers.append(result_data['container_name']
+        integration_framework.test_containers.append(result_data['container_name')
 
                                         # Check if deployment was fast enough
         if result_data['deploy_time'] < 30:
@@ -1290,7 +1322,7 @@ class TestDockerInfrastructureServiceStartup:
         error_messages.append(
         else:
         operations_failed += 1
-        error_messages.append(result_data['message']
+        error_messages.append(result_data['message')
 
         except Exception as e:
         operations_failed += 1
@@ -1332,9 +1364,10 @@ class TestDockerInfrastructureServiceStartup:
                                                             
 
         assert result.success, formatted_string"
+        assert result.success, formatted_string"
 
         success_rate = result.performance_metrics.get('concurrent_success_rate', 0)
-        assert success_rate >= 80, "formatted_string
+        assert success_rate >= 80, "formatted_string"
 
         avg_time = result.performance_metrics.get('average_concurrent_deploy_time', 999)
         assert avg_time < 30, formatted_string
@@ -1368,6 +1401,7 @@ class TestDockerInfrastructureServiceStartup:
 
         for service_name, image, memory_limit in constrained_services:
         container_name = formatted_string"
+        container_name = formatted_string"
         memory_mb = int(memory_limit.replace('m', ''))
         total_memory_allocated += memory_mb
 
@@ -1375,7 +1409,7 @@ class TestDockerInfrastructureServiceStartup:
         if total_memory_allocated <= 500:
         start_time = time.time()
 
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
         '--memory', memory_limit,
         '--memory-reservation', memory_limit,
@@ -1391,7 +1425,7 @@ class TestDockerInfrastructureServiceStartup:
         memory_usage.append(memory_mb)
 
                     # Verify memory limit is enforced
-        inspect_result = execute_docker_command([]
+        inspect_result = execute_docker_command([)
         'docker', 'inspect', container_name, '--format', '{{.HostConfig.Memory}}'
                     
 
@@ -1404,6 +1438,7 @@ class TestDockerInfrastructureServiceStartup:
         else:
         operations_failed += 1
         error_messages.append("
+        error_messages.append("
 
                                 # Check startup time under constraints
         if deploy_time < 30:
@@ -1411,9 +1446,11 @@ class TestDockerInfrastructureServiceStartup:
         else:
         operations_failed += 1
         error_messages.append(formatted_string)"
+        error_messages.append(formatted_string)"
 
         else:
         operations_failed += 1
+        error_messages.append("
         error_messages.append("
         else:
         break  # Would exceed 500MB limit
@@ -1450,10 +1487,11 @@ class TestDockerInfrastructureServiceStartup:
 
         result = integration_framework.run_integration_scenario( )
         Resource-Constrained Service Startup,"
+        Resource-Constrained Service Startup,"
         resource_constrained_scenario
                                                     
 
-        assert result.success, "formatted_string
+        assert result.success, "formatted_string"
 
         memory_used = result.performance_metrics.get('total_memory_allocated_mb', 999)
         assert memory_used <= 500, formatted_string
@@ -1497,18 +1535,18 @@ class TestDockerInfrastructureServiceStartup:
         recovery_start_time = time.time()
 
             # Create initial container that will cause conflict
-        first_result = execute_docker_command([]
+        first_result = execute_docker_command([)
         'docker', 'run', '-d', '--name', test_case['first_container'],
         '-p', "formatted_string if 'nginx' in test_case['image'] else formatted_string",
         test_case['image'], 'sleep', '30'
             
 
         if first_result.returncode == 0:
-        integration_framework.test_containers.append(test_case['first_container']
+        integration_framework.test_containers.append(test_case['first_container')
         operations_completed += 1
 
                 # Now try to create second container (should initially fail due to port conflict)
-        second_result = execute_docker_command([]
+        second_result = execute_docker_command([)
         'docker', 'run', '-d', '--name', test_case['second_container'],
         '-p', formatted_string if 'nginx' in test_case['image'] else formatted_string,
         test_case['image'], 'sleep', '30'
@@ -1519,9 +1557,10 @@ class TestDockerInfrastructureServiceStartup:
 
                 # Simulate recovery by using different port
         recovery_port = str(int(test_case['port'] + 100)
-        recovery_result = execute_docker_command([]
+        recovery_result = execute_docker_command([)
         'docker', 'run', '-d', '--name', formatted_string,"
-        '-p', formatted_string" if 'nginx' in test_case['image'] else formatted_string,
+        'docker', 'run', '-d', '--name', formatted_string,"
+        '-p', formatted_string" if 'nginx' in test_case['image'] else formatted_string,"
         test_case['image'], 'sleep', '30'
                 
 
@@ -1531,7 +1570,7 @@ class TestDockerInfrastructureServiceStartup:
         integration_framework.test_containers.append(formatted_string)
         services_deployed += 1
         operations_completed += 1
-        recovery_attempts.append({}
+        recovery_attempts.append({)
         'test_name': test_case['name'],
         'recovery_time': recovery_time,
         'success': True
@@ -1539,14 +1578,14 @@ class TestDockerInfrastructureServiceStartup:
         else:
         operations_failed += 1
         error_messages.append(""
-        recovery_attempts.append({}
+        recovery_attempts.append({)
         'test_name': test_case['name'],
         'recovery_time': recovery_time,
         'success': False
                         
         else:
                             # Unexpected success - clean up second container
-        integration_framework.test_containers.append(test_case['second_container']
+        integration_framework.test_containers.append(test_case['second_container')
         services_deployed += 1
         operations_completed += 1
         else:
@@ -1594,18 +1633,22 @@ class TestDockerInfrastructureServiceStartup:
 
         recovery_rate = result.performance_metrics.get('recovery_success_rate', 0)
         assert recovery_rate >= 80, formatted_string"
+        assert recovery_rate >= 80, formatted_string"
 
         recovery_time = result.performance_metrics.get('average_recovery_time', 999)
         assert recovery_time < 10, formatted_string"
+        assert recovery_time < 10, formatted_string"
 
+        logger.info("
         logger.info("
 
 
 class TestDockerInfrastructureHealthMonitoring:
-        "Test Docker infrastructure health monitoring scenarios - 5 comprehensive tests.
+        "Test Docker infrastructure health monitoring scenarios - 5 comprehensive tests."
 
     def test_comprehensive_health_check_validation(self, integration_framework):
         "Test comprehensive health check mechanisms across all services."
+        logger.info([U+1F3E5] Testing comprehensive health check validation)"
         logger.info([U+1F3E5] Testing comprehensive health check validation)"
 
     def health_check_scenario():
@@ -1639,16 +1682,16 @@ class TestDockerInfrastructureHealthMonitoring:
         
 
         for service_config in health_check_services:
-        container_name = "formatted_string
+        container_name = "formatted_string"
 
             # Deploy with health check
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
         '-p', formatted_string,
         '--health-cmd', service_config['health_cmd'],
         '--health-interval', service_config['health_interval'],
         '--health-timeout', service_config['health_timeout'],
-        '--health-retries', str(service_config['health_retries'],
+        '--health-retries', str(service_config['health_retries'),
         service_config['image']
             
 
@@ -1662,7 +1705,7 @@ class TestDockerInfrastructureHealthMonitoring:
         max_health_wait = 30
 
         while time.time() - health_start_time < max_health_wait:
-        inspect_result = execute_docker_command([]
+        inspect_result = execute_docker_command([)
         'docker', 'inspect', container_name, '--format',
         '{{.State.Health.Status}} {{.State.Running}}'
                     
@@ -1674,7 +1717,7 @@ class TestDockerInfrastructureHealthMonitoring:
 
         if health_status == 'healthy':
         health_check_time = time.time() - health_start_time
-        health_results.append({}
+        health_results.append({)
         'service': service_config['name'],
         'health_status': 'healthy',
         'health_check_time': health_check_time,
@@ -1683,7 +1726,7 @@ class TestDockerInfrastructureHealthMonitoring:
         operations_completed += 1
         break
         elif health_status == 'unhealthy':
-        health_results.append({}
+        health_results.append({)
         'service': service_config['name'],
         'health_status': 'unhealthy',
         'health_check_time': time.time() - health_start_time,
@@ -1700,7 +1743,7 @@ class TestDockerInfrastructureHealthMonitoring:
                                         # Timeout waiting for health check
         operations_failed += 1
         error_messages.append(formatted_string)
-        health_results.append({}
+        health_results.append({)
         'service': service_config['name'],
         'health_status': 'timeout',
         'health_check_time': max_health_wait,
@@ -1754,8 +1797,9 @@ class TestDockerInfrastructureHealthMonitoring:
 
         avg_time = result.performance_metrics.get('average_health_check_time', 999)
         assert avg_time < 20, formatted_string"
+        assert avg_time < 20, formatted_string"
 
-        logger.info(formatted_string")
+        logger.info(formatted_string")"
 
     def test_uptime_monitoring_99_99_percent(self, integration_framework):
         Test uptime monitoring to achieve 99.99% uptime requirement.""
@@ -1779,8 +1823,9 @@ class TestDockerInfrastructureHealthMonitoring:
 
         for service_name, image in uptime_services:
         container_name = formatted_string"
+        container_name = formatted_string"
 
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
         '--restart', 'unless-stopped',
         '--memory', '256m',
@@ -1805,7 +1850,7 @@ class TestDockerInfrastructureHealthMonitoring:
         check_start = time.time()
 
                     # Check if container is running
-        inspect_result = execute_docker_command([]
+        inspect_result = execute_docker_command([)
         'docker', 'inspect', container_name, '--format', '{{.State.Running}}'
                     
 
@@ -1815,12 +1860,12 @@ class TestDockerInfrastructureHealthMonitoring:
         successful_checks += 1
         operations_completed += 1
         else:
-        downtime_events.append({}
+        downtime_events.append({)
         'time': time.time(),
         'duration': check_interval
                             
         operations_failed += 1
-        error_messages.append(formatted_string")
+        error_messages.append(formatted_string")"
 
                             # Wait for next check
         elapsed = time.time() - check_start
@@ -1830,7 +1875,7 @@ class TestDockerInfrastructureHealthMonitoring:
         uptime_percentage = (successful_checks / uptime_checks * 100) if uptime_checks > 0 else 0
         total_downtime = sum(event['duration'] for event in downtime_events)
 
-        uptime_metrics.append({}
+        uptime_metrics.append({)
         'service': service_name,
         'uptime_percentage': uptime_percentage,
         'total_downtime_seconds': total_downtime,
@@ -1844,9 +1889,10 @@ class TestDockerInfrastructureHealthMonitoring:
         else:
         operations_failed += 1
         error_messages.append("
+        error_messages.append("
         else:
         operations_failed += 1
-        error_messages.append(formatted_string")
+        error_messages.append(formatted_string")"
 
         avg_uptime = (sum(m['uptime_percentage'] for m in uptime_metrics) / )
         len(uptime_metrics) if uptime_metrics else 0)
@@ -1891,7 +1937,9 @@ class TestDockerInfrastructureHealthMonitoring:
 
         downtime = result.performance_metrics.get('total_downtime_seconds', 999)
         assert downtime == 0, formatted_string"
+        assert downtime == 0, formatted_string"
 
+        logger.info("
         logger.info("
 
     def test_zero_port_conflict_monitoring(self, integration_framework):
@@ -1929,7 +1977,7 @@ class TestDockerInfrastructureHealthMonitoring:
         container_name = formatted_string""
 
                             # Deploy service with allocated port
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
         '-p', 'formatted_string',
         'nginx:alpine'
@@ -1940,7 +1988,7 @@ class TestDockerInfrastructureHealthMonitoring:
         services_deployed += 1
         operations_completed += 1
 
-        port_allocations.append({}
+        port_allocations.append({)
         'container': container_name,
         'requested_base': base_port,
         'allocated_port': allocated_port,
@@ -2011,10 +2059,11 @@ class TestDockerInfrastructureHealthMonitoring:
 
         result = integration_framework.run_integration_scenario( )
         Zero Port Conflict Monitoring,"
+        Zero Port Conflict Monitoring,"
         port_conflict_scenario
                                                                     
 
-        assert result.success, "formatted_string
+        assert result.success, "formatted_string"
 
         zero_conflicts = result.performance_metrics.get('zero_port_conflicts', False)
         assert zero_conflicts, Port conflicts detected - should be zero
@@ -2047,7 +2096,7 @@ class TestDockerInfrastructureHealthMonitoring:
         for service_name, image in monitoring_services:
         container_name = ""
 
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
         '--memory', '256m',
         '--cpus', '0.5',
@@ -2072,7 +2121,7 @@ class TestDockerInfrastructureHealthMonitoring:
 
         while time.time() - monitoring_start < monitoring_duration:
                     # Get container stats
-        stats_result = execute_docker_command([]
+        stats_result = execute_docker_command([)
         'docker', 'stats', container_name, '--no-stream', '--format',
         'table {{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}'
                     
@@ -2114,18 +2163,18 @@ class TestDockerInfrastructureHealthMonitoring:
 
                                                         # Calculate performance metrics
         if service_metrics['cpu_samples'] and service_metrics['memory_samples']:
-        avg_cpu = sum(service_metrics['cpu_samples'] / len(service_metrics['cpu_samples']
-        max_cpu = max(service_metrics['cpu_samples']
-        avg_memory = sum(service_metrics['memory_samples'] / len(service_metrics['memory_samples']
-        max_memory = max(service_metrics['memory_samples']
+        avg_cpu = sum(service_metrics['cpu_samples') / len(service_metrics['cpu_samples')
+        max_cpu = max(service_metrics['cpu_samples')
+        avg_memory = sum(service_metrics['memory_samples') / len(service_metrics['memory_samples')
+        max_memory = max(service_metrics['memory_samples')
 
-        performance_data.append({}
+        performance_data.append({)
         'service': service_name,
         'avg_cpu_percent': avg_cpu,
         'max_cpu_percent': max_cpu,
         'avg_memory_mb': avg_memory,
         'max_memory_mb': max_memory,
-        'samples_collected': len(service_metrics['cpu_samples']
+        'samples_collected': len(service_metrics['cpu_samples')
                                                             
 
                                                             # Validate performance within limits
@@ -2183,8 +2232,10 @@ class TestDockerInfrastructureHealthMonitoring:
                                                                             
 
         assert result.success, formatted_string"
+        assert result.success, formatted_string"
 
         samples = result.performance_metrics.get('total_performance_samples', 0)
+        assert samples >= 10, formatted_string"
         assert samples >= 10, formatted_string"
 
         cpu_avg = result.performance_metrics.get('average_cpu_percent', 999)
@@ -2197,6 +2248,7 @@ class TestDockerInfrastructureHealthMonitoring:
 
     def test_health_monitoring_under_load(self, integration_framework):
         ""Test health monitoring system under load conditions.
+        logger.info([U+1F3CB][U+FE0F] Testing health monitoring under load conditions)"
         logger.info([U+1F3CB][U+FE0F] Testing health monitoring under load conditions)"
 
     def health_under_load_scenario():
@@ -2215,11 +2267,12 @@ class TestDockerInfrastructureHealthMonitoring:
 
         for service_name, image in load_services:
         container_name = formatted_string"
+        container_name = formatted_string"
 
             # Deploy with health check
         health_cmd = 'curl -f http://localhost:80 || exit 1' if 'nginx' in image else 'redis-cli ping'
 
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
         '--memory', '128m',
         '--cpus', '0.3',
@@ -2247,7 +2300,7 @@ class TestDockerInfrastructureHealthMonitoring:
         else:
         load_cmd = 'formatted_string'
 
-        load_result = execute_docker_command([]
+        load_result = execute_docker_command([)
         'docker', 'run', '-d', '--name', load_generator_name,
         '--link', container_name,
         'alpine:latest', 'sh', '-c', 'formatted_string'
@@ -2266,7 +2319,7 @@ class TestDockerInfrastructureHealthMonitoring:
         unhealthy_checks = 0
 
         while time.time() - monitoring_start < load_monitoring_duration:
-        inspect_result = execute_docker_command([]
+        inspect_result = execute_docker_command([)
         'docker', 'inspect', container_name, '--format',
         '{{.State.Health.Status}} {{.State.Running}}'
                                 
@@ -2290,7 +2343,7 @@ class TestDockerInfrastructureHealthMonitoring:
 
         health_success_rate = (healthy_checks / health_checks * 100) if health_checks > 0 else 0
 
-        load_test_results.append({}
+        load_test_results.append({)
         'service': service_name,
         'health_success_rate': health_success_rate,
         'total_health_checks': health_checks,
@@ -2347,9 +2400,10 @@ class TestDockerInfrastructureHealthMonitoring:
                                                         
 
         assert result.success, formatted_string"
+        assert result.success, formatted_string"
 
         health_rate = result.performance_metrics.get('average_health_success_rate_under_load', 0)
-        assert health_rate >= 90, "formatted_string
+        assert health_rate >= 90, "formatted_string"
 
         total_checks = result.performance_metrics.get('total_health_checks_under_load', 0)
         assert total_checks >= 20, formatted_string
@@ -2385,8 +2439,12 @@ class TestDockerInfrastructureHealthMonitoring:
         PASS:  Docker Full Integration Test Suite completed successfully)
 
         except Exception as e:
-        logger.error(")
+        logger.error(")"
         raise
         finally:
         framework.cleanup_scenario_resources()
         pass
+
+))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+]]]]]]]]]
+}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}

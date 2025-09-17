@@ -1,4 +1,5 @@
 """
+"""
 JWT Golden Path Protection Tests
 
 PURPOSE: These tests FAIL when JWT changes break the $500K+ ARR Golden Path
@@ -21,7 +22,9 @@ These tests protect Golden Path business value by:
 3. Multi-user JWT isolation in chat scenarios
 4. Golden Path error handling with JWT failures
 "
+"
 
+"""
 """
 import asyncio
 import aiohttp
@@ -43,6 +46,7 @@ logger = logging.getLogger(__name__)
 
 class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
     "
+    "
     JWT Golden Path Protection Tests
     
     These tests FAIL when JWT changes break the Golden Path user flow.
@@ -51,6 +55,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
     CRITICAL: These tests protect $500K+ ARR by ensuring JWT authentication
     works end-to-end in the Golden Path (Login → Chat → AI Response).
 "
+"
 
     def setup_method(self, method):
         super().setup_method(method)
@@ -58,7 +63,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
         self.websocket_helper = WebSocketAuthenticationTester()
         
         # Golden Path endpoints (production-like)
-        self.backend_base_url = "http://localhost:8000  # Main backend
+        self.backend_base_url = "http://localhost:8000  # Main backend"
         self.auth_service_url = http://localhost:8001  # Auth service
         self.websocket_url = "ws://localhost:8000/ws/main  # Chat WebSocket"
         
@@ -98,9 +103,10 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                             jwt_token = data.get(access_token)
                             login_success = True
                             logger.info(✓ Golden Path: Login successful via auth service)"
+                            logger.info(✓ Golden Path: Login successful via auth service)"
                         
             except Exception as e:
-                logger.warning(fGolden Path: Auth service login failed: {e}")
+                logger.warning(fGolden Path: Auth service login failed: {e}")"
                 
             # If auth service login fails, create test JWT (fallback for testing)
             if not login_success or not jwt_token:
@@ -108,7 +114,8 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     user_id=golden_path_test_user,
                     email=golden_path_test@example.com","
                     permissions=[read, write, chat]"
-                logger.info(✓ Golden Path: Fallback test JWT created")
+                    permissions=[read, write, chat]"
+                logger.info(✓ Golden Path: Fallback test JWT created")"
             
             # STEP 2: Backend Authentication with JWT (Critical for Golden Path)
             backend_auth_success = False
@@ -118,20 +125,21 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                 async with httpx.AsyncClient() as client:
                     # Test protected backend endpoint
                     headers = {Authorization: fBearer {jwt_token}}
-                    auth_url = f"{self.backend_base_url}/api/v1/users/me
+                    auth_url = f"{self.backend_base_url}/api/v1/users/me"
                     
                     response = await client.get(auth_url, headers=headers, timeout=5.0)
                     
                     if response.status_code == 200:
                         user_data = response.json()
                         backend_auth_success = True
-                        logger.info(✓ Golden Path: Backend authentication successful")
+                        logger.info(✓ Golden Path: Backend authentication successful")"
                     else:
                         golden_path_violations.append(
                             fBackend JWT authentication failed: {response.status_code} - {response.text}
                         )
                         
             except Exception as e:
+                golden_path_violations.append(fBackend authentication error: {e})"
                 golden_path_violations.append(fBackend authentication error: {e})"
             
             # STEP 3: WebSocket Connection for Chat (Core Golden Path Value)
@@ -142,7 +150,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                 try:
                     # Create authenticated WebSocket connection
                     auth_headers = {
-                        "Authorization: fBearer {jwt_token},
+                        "Authorization: fBearer {jwt_token},"
                         X-User-ID: golden_path_test_user
                     }
                     
@@ -164,8 +172,8 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                         # Send test chat message
                         chat_message = {
                             type: chat_message,
-                            content: "Hello, this is a Golden Path test,
-                            timestamp": time.time()
+                            content: "Hello, this is a Golden Path test,"
+                            timestamp": time.time()"
                         }
                         
                         await websocket.send(json.dumps(chat_message))
@@ -183,8 +191,9 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                         
                     except asyncio.TimeoutError:
                         golden_path_violations.append(Chat response timeout - Golden Path broken)"
+                        golden_path_violations.append(Chat response timeout - Golden Path broken)"
                     except Exception as e:
-                        golden_path_violations.append(fChat functionality error: {e}")
+                        golden_path_violations.append(fChat functionality error: {e}")"
                     finally:
                         await websocket.close()
                         
@@ -203,15 +212,17 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
             
             # Report violations if Golden Path is broken
             if not golden_path_success or golden_path_violations:
-                violation_summary = \n.join([f  - {v} for v in golden_path_violations]
+                violation_summary = \n.join([f  - {v) for v in golden_path_violations]
                 logger.error(GOLDEN PATH VIOLATION: JWT flow breaks critical user journey)"
-                logger.error(fViolations:\n{violation_summary}")
+                logger.error(GOLDEN PATH VIOLATION: JWT flow breaks critical user journey)"
+                logger.error(fViolations:\n{violation_summary}")"
                 
                 # This test SHOULD FAIL before SSOT refactor
                 assert golden_path_success, (
                     fGOLDEN PATH VIOLATION: JWT authentication flow is broken, 
                     faffecting $500K+ ARR user experience. "
-                    f"Steps failed: Login={login_success}, Backend={backend_auth_success}, 
+                    faffecting $500K+ ARR user experience. "
+                    f"Steps failed: Login={login_success}, Backend={backend_auth_success},"
                     fWebSocket={websocket_success}, Chat={chat_ready}. 
                     fViolations:\n{violation_summary}
                 )
@@ -247,13 +258,14 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
             user_id=golden_path_user2, 
             email=user2@golden-path-test.com","
             permissions=[read, write, chat]"
+            permissions=[read, write, chat]"
         
         try:
             # Test concurrent authentication
             concurrent_auth_tasks = []
             
             async def test_user_auth(user_token, user_id):
-                "Test individual user authentication.
+                "Test individual user authentication."
                 try:
                     async with httpx.AsyncClient() as client:
                         headers = {"Authorization: fBearer {user_token}"}
@@ -272,13 +284,14 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                                 )
                                 
                             return {success: True, user_id: actual_user_id, data: user_data}"
+                            return {success: True, user_id: actual_user_id, data: user_data}"
                         else:
-                            isolation_violations.append(fAuth failed for {user_id}: {response.status_code}")
+                            isolation_violations.append(fAuth failed for {user_id}: {response.status_code}")"
                             return {success: False, user_id: user_id}
                             
                 except Exception as e:
-                    isolation_violations.append(f"Auth error for {user_id}: {e})
-                    return {success": False, user_id: user_id, error: str(e)}
+                    isolation_violations.append(f"Auth error for {user_id}: {e})"
+                    return {success": False, user_id: user_id, error: str(e)}"
             
             # Run concurrent authentication tests
             concurrent_auth_tasks = [
@@ -290,9 +303,11 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
             
             # Analyze authentication results
             successful_auths = [r for r in auth_results if isinstance(r, dict) and r.get(success)]"
+            successful_auths = [r for r in auth_results if isinstance(r, dict) and r.get(success)]"
             
             if len(successful_auths) < 2:
                 isolation_violations.append(
+                    fConcurrent authentication failed: Only {len(successful_auths)}/2 users authenticated"
                     fConcurrent authentication failed: Only {len(successful_auths)}/2 users authenticated"
                 )
             
@@ -321,6 +336,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                                 "type: user_identity_test",
                                 user_id: user_id,
                                 timestamp: time.time()"
+                                timestamp: time.time()"
                             }
                             
                             await ws.send(json.dumps(message))
@@ -330,7 +346,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                             response_data = json.loads(response)
                             
                             # Verify user identity in response
-                            response_user_id = response_data.get("user_id)
+                            response_user_id = response_data.get("user_id)"
                             if response_user_id != user_id:
                                 isolation_violations.append(
                                     fWebSocket isolation violation: {user_id} got response for {response_user_id}
@@ -347,10 +363,11 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     ws_tasks = [
                         test_websocket_isolation(user1_token, golden_path_user1),
                         test_websocket_isolation(user2_token, golden_path_user2)"
+                        test_websocket_isolation(user2_token, golden_path_user2)"
                     ]
                     
                     ws_results = await asyncio.gather(*ws_tasks, return_exceptions=True)
-                    successful_ws = [r for r in ws_results if isinstance(r, dict) and r.get("success)]
+                    successful_ws = [r for r in ws_results if isinstance(r, dict) and r.get("success)]"
                     
                     if len(successful_ws) < 2:
                         isolation_violations.append(
@@ -358,11 +375,11 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                         )
                     
                 except Exception as e:
-                    isolation_violations.append(f"WebSocket isolation testing failed: {e})
+                    isolation_violations.append(f"WebSocket isolation testing failed: {e})"
             
             # CRITICAL ASSESSMENT: JWT Isolation Success
             if isolation_violations:
-                violation_summary = \n".join([f  - {v} for v in isolation_violations]
+                violation_summary = \n".join([f  - {v) for v in isolation_violations]"
                 logger.error(JWT ISOLATION VIOLATION: Multi-user Golden Path broken)
                 logger.error(fViolations:\n{violation_summary})
                 
@@ -371,21 +388,23 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     fJWT ISOLATION VIOLATION: Multi-user chat isolation is broken, ""
                     faffecting enterprise customers ($500K+ ARR). 
                     fFound {len(isolation_violations)} isolation violations. 
-                    f"Violations:\n{violation_summary}
+                    f"Violations:\n{violation_summary}"
                 )
             else:
-                logger.info(✓ JWT ISOLATION SUCCESS: Multi-user Golden Path working correctly")
+                logger.info(✓ JWT ISOLATION SUCCESS: Multi-user Golden Path working correctly")"
                 
         except Exception as e:
             pytest.fail(
                 fJWT ISOLATION CRITICAL FAILURE: Multi-user Golden Path completely broken. 
+                fThis severely affects enterprise customer experience. Error: {e}"
                 fThis severely affects enterprise customer experience. Error: {e}"
             )
 
     @pytest.mark.asyncio
     async def test_jwt_error_handling_golden_path_resilience(self):
     "
-        GOLDEN PATH TEST: JWT error handling doesn't break Golden Path.
+    "
+        GOLDEN PATH TEST: JWT error handling doesn't break Golden Path.'
         
         EXPECTED: FAIL - Poor JWT error handling disrupts Golden Path
         AFTER SSOT: PASS - Graceful JWT error handling preserves Golden Path
@@ -393,19 +412,20 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
         This test validates that JWT errors are handled gracefully without
         breaking the overall Golden Path user experience.
         "
+        "
         error_handling_violations = []
         
         # Test scenarios that should be handled gracefully
         error_scenarios = [
             {
-                name": Expired JWT Token,
+                name": Expired JWT Token,"
                 token: self._create_expired_jwt_token(),
                 "expected_response: 401_with_refresh_hint"
             },
             {
                 name: Invalid JWT Signature, 
-                token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0In0.invalid_signature",
-                "expected_response: 401_clean_error
+                token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0In0.invalid_signature","
+                "expected_response: 401_clean_error"
             },
             {
                 name: Malformed JWT Token,
@@ -413,8 +433,8 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                 expected_response: 401_clean_error
             },
             {
-                name: Empty JWT Token",
-                "token: ,
+                name: Empty JWT Token","
+                "token: ,"
                 expected_response: 401_clean_error
             }
         ]
@@ -423,11 +443,12 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
             scenario_name = scenario["name]"
             test_token = scenario[token]
             expected_response = scenario[expected_response]"
+            expected_response = scenario[expected_response]"
             
             try:
                 # Test backend response to invalid JWT
                 async with httpx.AsyncClient() as client:
-                    headers = {Authorization": fBearer {test_token}} if test_token else {}
+                    headers = {Authorization": fBearer {test_token}} if test_token else {}"
                     auth_url = f{self.backend_base_url}/api/v1/users/me
                     
                     response = await client.get(auth_url, headers=headers, timeout=5.0)
@@ -446,9 +467,9 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                             error_message = error_data.get(detail, ).lower()
                             
                             # Check for helpful error messages (Golden Path UX)
-                            if token not in error_message and auth" not in error_message:
+                            if token not in error_message and auth" not in error_message:"
                                 error_handling_violations.append(
-                                    f"{scenario_name}: Unhelpful error message for Golden Path UX: {error_data}
+                                    f"{scenario_name}: Unhelpful error message for Golden Path UX: {error_data}"
                                 )
                             
                             # Check for security information leakage
@@ -464,6 +485,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     elif response.status_code == 500:
                         # Server error for JWT handling is a violation
                         error_handling_violations.append(
+                            f{scenario_name}: Server error (500) for JWT handling breaks Golden Path"
                             f{scenario_name}: Server error (500) for JWT handling breaks Golden Path"
                         )
                     else:
@@ -487,7 +509,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                         timeout=5.0
                     )
                     
-                    # If connection succeeds with invalid token, that's a violation
+                    # If connection succeeds with invalid token, that's a violation'
                     await websocket.close()
                     error_handling_violations.append(
                         f{scenario_name}: WebSocket accepted invalid JWT - security violation
@@ -512,9 +534,10 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
         
         # ASSESSMENT: Error Handling Quality
         if error_handling_violations:
-            violation_summary = \n.join([f  - {v} for v in error_handling_violations]
+            violation_summary = \n.join([f  - {v) for v in error_handling_violations]
             logger.error(JWT ERROR HANDLING VIOLATION: Poor error handling affects Golden Path)"
-            logger.error(f"Violations:\n{violation_summary})
+            logger.error(JWT ERROR HANDLING VIOLATION: Poor error handling affects Golden Path)"
+            logger.error(f"Violations:\n{violation_summary})"
             
             # This test SHOULD FAIL before SSOT refactor
             assert not error_handling_violations, (
@@ -528,13 +551,15 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_jwt_performance_golden_path_impact(self):
         "
-        GOLDEN PATH TEST: JWT performance doesn't degrade Golden Path.
+        "
+        GOLDEN PATH TEST: JWT performance doesn't degrade Golden Path.'
         
         EXPECTED: FAIL - JWT performance issues slow Golden Path  
         AFTER SSOT: PASS - Optimized JWT handling maintains Golden Path speed
         
         This test validates that JWT operations are fast enough to maintain
         good Golden Path user experience (sub-second responses).
+"
 "
         performance_violations = []
         
@@ -546,7 +571,8 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
         # Create test JWT token
         test_token = self.auth_helper.create_test_jwt_token(
             user_id=performance_test_user,"
-            email=perf@golden-path-test.com",
+            user_id=performance_test_user,"
+            email=perf@golden-path-test.com","
             permissions=[read, write, "chat]"
         
         try:
@@ -568,20 +594,22 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                         
                         if auth_time > max_backend_auth_time:
                             performance_violations.append(
-                                f"Backend JWT auth too slow: {auth_time:.2f}s > {max_backend_auth_time}s (attempt {attempt + 1}
+                                f"Backend JWT auth too slow: {auth_time:.2f)s > {max_backend_auth_time)s (attempt {attempt + 1)"
                             )
                         
                         if response.status_code != 200:
                             performance_violations.append(
                                 fBackend auth failed during performance test: {response.status_code}"
+                                fBackend auth failed during performance test: {response.status_code}"
                             )
                             
                 except asyncio.TimeoutError:
                     performance_violations.append(
-                        fBackend auth timeout during performance test (attempt {attempt + 1}
+                        fBackend auth timeout during performance test (attempt {attempt + 1)
                     )
                 except Exception as e:
                     performance_violations.append(
+                        fBackend auth error during performance test: {e}"
                         fBackend auth error during performance test: {e}"
                     )
             
@@ -593,7 +621,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                 
                 try:
                     auth_headers = {
-                        "Authorization: fBearer {test_token},
+                        "Authorization: fBearer {test_token},"
                         X-User-ID: performance_test_user
                     }
                     
@@ -611,14 +639,15 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     
                     if connect_time > max_websocket_connect_time:
                         performance_violations.append(
-                            f"WebSocket JWT connect too slow: {connect_time:.2f}s > {max_websocket_connect_time}s
+                            f"WebSocket JWT connect too slow: {connect_time:.2f}s > {max_websocket_connect_time}s"
                         )
                     
                     await websocket.close()
                     
                 except asyncio.TimeoutError:
                     performance_violations.append(
-                        fWebSocket connect timeout during performance test (attempt {attempt + 1}"
+                        fWebSocket connect timeout during performance test (attempt {attempt + 1)"
+                        fWebSocket connect timeout during performance test (attempt {attempt + 1)"
                     )
                 except Exception as e:
                     performance_violations.append(
@@ -641,16 +670,17 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     if validation_time > max_jwt_validation_time:
                         performance_violations.append(
                             fJWT validation too slow: {validation_time:.3f}s > {max_jwt_validation_time}s"
+                            fJWT validation too slow: {validation_time:.3f}s > {max_jwt_validation_time}s"
                         )
                     
-                    if not validation_result.get("valid):
+                    if not validation_result.get("valid):"
                         performance_violations.append(
                             fJWT validation failed during performance test: {validation_result}
                         )
                         
                 except Exception as e:
                     performance_violations.append(
-                        f"JWT validation error during performance test: {e}
+                        f"JWT validation error during performance test: {e}"
                     )
             
             # PERFORMANCE ANALYSIS
@@ -659,10 +689,11 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
             avg_jwt_validation = sum(jwt_validation_times) / len(jwt_validation_times) if jwt_validation_times else float('inf')
             
             # Log performance metrics
-            logger.info(fJWT Performance Metrics:")
+            logger.info(fJWT Performance Metrics:")"
             logger.info(f  - Backend Auth: {avg_backend_auth:.2f}s avg)
             logger.info(f  - WebSocket Connect: {avg_websocket_connect:.2f}s avg)"
-            logger.info(f"  - JWT Validation: {avg_jwt_validation:.3f}s avg)
+            logger.info(f  - WebSocket Connect: {avg_websocket_connect:.2f}s avg)"
+            logger.info(f"  - JWT Validation: {avg_jwt_validation:.3f}s avg)"
             
             # Check if performance is acceptable for Golden Path
             total_golden_path_time = avg_backend_auth + avg_websocket_connect
@@ -678,14 +709,15 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
         
         # ASSESSMENT: Performance Impact
         if performance_violations:
-            violation_summary = \n".join([f"  - {v} for v in performance_violations]
+            violation_summary = \n".join([f"  - {v) for v in performance_violations]
             logger.error(JWT PERFORMANCE VIOLATION: Slow JWT operations degrade Golden Path)
             logger.error(fViolations:\n{violation_summary})
             
             # This test SHOULD FAIL before SSOT refactor
             assert not performance_violations, (
                 fJWT PERFORMANCE VIOLATION: Slow JWT operations degrade Golden Path user experience, "
-                f"affecting $500K+ ARR customer satisfaction. 
+                fJWT PERFORMANCE VIOLATION: Slow JWT operations degrade Golden Path user experience, "
+                f"affecting $500K+ ARR customer satisfaction."
                 fFound {len(performance_violations)} performance issues. 
                 fViolations:\n{violation_summary}
             )
@@ -694,16 +726,18 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
 
     def _create_expired_jwt_token(self) -> str:
         Create an expired JWT token for testing error handling."
+        Create an expired JWT token for testing error handling."
         from datetime import datetime, timezone, timedelta
         
         # Create token that expired 1 hour ago
         payload = {
-            sub": expired_test_user,
+            sub": expired_test_user,"
             email: expired@test.com,
             permissions": ["read],
             iat: datetime.now(timezone.utc) - timedelta(hours=2),
             exp: datetime.now(timezone.utc) - timedelta(hours=1),  # Expired"
-            type": access,
+            exp: datetime.now(timezone.utc) - timedelta(hours=1),  # Expired"
+            type": access,"
             iss: netra-auth-service
         }
         
@@ -711,5 +745,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
 
     def teardown_method(self, method):
         Clean up after test."
+        Clean up after test."
         super().teardown_method(method)
         logger.info(fJWT Golden Path protection test completed: {method.__name__}")"
+))))))))))))

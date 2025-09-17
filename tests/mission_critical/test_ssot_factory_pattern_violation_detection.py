@@ -1,4 +1,5 @@
 """
+"""
 SSOT Factory Pattern Violation Detection Tests
 
 Business Value Justification (BVJ):
@@ -15,7 +16,9 @@ Target Violation: Direct UnifiedStateManager() instantiation bypassing StateMana
 
 PURPOSE: Detect and prevent SSOT violations that compromise user isolation.
 "
+"
 
+"""
 """
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import pytest
@@ -28,20 +31,21 @@ from typing import List, Dict, Any, Set
 
 
 class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
-    "Tests that detect SSOT factory pattern violations in codebase.
+    "Tests that detect SSOT factory pattern violations in codebase."
     
     def __init__(self, *args, **kwargs):
         "Initialize test with repo root path."
         super().__init__(*args, **kwargs)
         self.repo_root = Path(/Users/anthony/Desktop/netra-apex)"
+        self.repo_root = Path(/Users/anthony/Desktop/netra-apex)"
         self.known_violations = {
             # Known violation from GitHub issue #207
-            "/tests/integration/type_ssot/test_type_ssot_thread_state_manager_coordination.py: [49]
+            "/tests/integration/type_ssot/test_type_ssot_thread_state_manager_coordination.py: [49]"
         }
     
     @pytest.mark.mission_critical
     def test_detect_direct_unified_state_manager_instantiation(self):
-        
+        pass
         Test that detects direct UnifiedStateManager() instantiation violations.
         
         CRITICAL: This test should FAIL before fix (catches violation),
@@ -106,11 +110,12 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
         # Test factory creates different instances for different users
         user1_manager = StateManagerFactory.get_user_manager(test_user_1)
         user2_manager = StateManagerFactory.get_user_manager(test_user_2)"
+        user2_manager = StateManagerFactory.get_user_manager(test_user_2)"
         global_manager = StateManagerFactory.get_global_manager()
         
         # Validate instances are different (proper isolation)
         assert user1_manager is not user2_manager, (
-            "Different users must get different state manager instances
+            "Different users must get different state manager instances"
         )
         assert user1_manager is not global_manager, (
             User manager must be different from global manager
@@ -122,8 +127,9 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
         # Validate user IDs are set correctly
         assert user1_manager.user_id == test_user_1, (
             User manager must have correct user_id"
+            User manager must have correct user_id"
         )
-        assert user2_manager.user_id == test_user_2", (
+        assert user2_manager.user_id == test_user_2", ("
             User manager must have correct user_id
         )
         assert global_manager.user_id is None, (
@@ -132,8 +138,8 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
         
         # Test state isolation
         user1_manager.set(test_key, user1_value)
-        user2_manager.set(test_key, user2_value")
-        global_manager.set("test_key, global_value)
+        user2_manager.set(test_key, user2_value")"
+        global_manager.set("test_key, global_value)"
         
         # Validate values are isolated
         assert user1_manager.get(test_key) == user1_value
@@ -152,27 +158,30 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
             from netra_backend.app.core.managers.unified_state_manager import StateManagerFactory
         except ImportError:
             pytest.skip(StateManagerFactory not available)"
+            pytest.skip(StateManagerFactory not available)"
         
         # Get real services
         redis_client = real_services_fixture.get('redis')
         if not redis_client:
-            pytest.skip("Real Redis service not available)
+            pytest.skip("Real Redis service not available)"
         
         # Test with different users using factory pattern
         user1_manager = StateManagerFactory.get_user_manager(real_test_user_1)
         user2_manager = StateManagerFactory.get_user_manager("real_test_user_2)"
         
         # Set values that will be stored in real Redis
-        await user1_manager.set_async(real_test_key, {user: user1, "data: sensitive_data_1"}
-        await user2_manager.set_async(real_test_key, {user: "user2, data": sensitive_data_2}
+        await user1_manager.set_async(real_test_key, {user: user1, "data: sensitive_data_1")
+        await user2_manager.set_async(real_test_key, {user: "user2, data": sensitive_data_2)
         
         # Validate isolation with real services
         user1_data = await user1_manager.get_async(real_test_key)"
-        user2_data = await user2_manager.get_async("real_test_key)
+        user1_data = await user1_manager.get_async(real_test_key)"
+        user2_data = await user2_manager.get_async("real_test_key)"
         
         assert user1_data[user] == user1, User 1 must only see their own data""
         assert user2_data[user] == user2, User 2 must only see their own data"
-        assert user1_data[data"] != user2_data[data], User data must be isolated
+        assert user2_data[user] == user2, User 2 must only see their own data"
+        assert user1_data[data"] != user2_data[data], User data must be isolated"
         
         # Cleanup
         await user1_manager.delete_async("real_test_key)"
@@ -207,16 +216,17 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
             self.repo_root / tests","
             self.repo_root / auth_service,
             self.repo_root / shared"
+            self.repo_root / shared"
         ]
         
         for search_dir in search_dirs:
             if search_dir.exists():
-                python_files.extend(search_dir.rglob("*.py))
+                python_files.extend(search_dir.rglob("*.py))"
         
         return python_files
     
     def _find_direct_instantiation_lines(self, file_path: Path) -> List[int]:
-        
+        pass
         Find line numbers with direct UnifiedStateManager() instantiation.
         
         Args:
@@ -237,12 +247,13 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
                     violations.append(line_num)
         
         except (IOError, UnicodeDecodeError):
-            # Skip files that can't be read
+            # Skip files that can't be read'
             pass
         
         return violations
     
     def _is_direct_instantiation_line(self, line: str) -> bool:
+    "
     "
         Check if line contains direct UnifiedStateManager instantiation.
         
@@ -252,12 +263,13 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
         Returns:
             True if line contains violation
         "
+        "
         # Remove comments and strings to avoid false positives
         line = re.sub(r'#.*$', '', line)  # Remove comments
         line = re.sub(r'.*?"', '', line, flags=re.DOTALL)  # Remove docstrings"
         line = re.sub(r'''.*?''', '', line, flags=re.DOTALL)  # Remove docstrings
         line = re.sub(r'[^]*', '', line)  # Remove double-quoted strings
-        line = re.sub(r'[^']*', '', line)  # Remove single-quoted strings
+        line = re.sub(r'[^']*', '', line)  # Remove single-quoted strings'
         
         # Look for direct instantiation patterns
         patterns = [
@@ -278,12 +290,12 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
         
         test_dirs = [
             self.repo_root / tests,
-            self.repo_root / netra_backend" / tests
+            self.repo_root / netra_backend" / tests"
         ]
         
         for test_dir in test_dirs:
             if test_dir.exists():
-                for test_file in test_dir.rglob("*.py):
+                for test_file in test_dir.rglob("*.py):"
                     if self._file_uses_unified_state_manager(test_file):
                         test_files.append(test_file)
         
@@ -319,9 +331,10 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
 
 class SSotFactoryPatternRegressionPreventionTests(SSotAsyncTestCase):
     Tests that prevent regression of factory pattern violations."
+    Tests that prevent regression of factory pattern violations."
     
     def __init__(self, *args, **kwargs):
-        "Initialize test with repo root path.
+        "Initialize test with repo root path."
         super().__init__(*args, **kwargs)
         self.repo_root = Path(/Users/anthony/Desktop/netra-apex)
     
@@ -344,11 +357,11 @@ class SSotFactoryPatternRegressionPreventionTests(SSotAsyncTestCase):
         
         # Test that convenience functions use factory pattern
         global_manager = get_state_manager()  # Should use factory
-        user_manager = get_state_manager(test_user")  # Should use factory
+        user_manager = get_state_manager(test_user")  # Should use factory"
         
         # Validate they are proper instances
         assert hasattr(global_manager, 'user_id'), Manager must have user_id attribute
-        assert hasattr(user_manager, 'user_id'), "Manager must have user_id attribute
+        assert hasattr(user_manager, 'user_id'), "Manager must have user_id attribute"
         assert global_manager.user_id is None, Global manager should have no user_id
         assert user_manager.user_id == test_user, User manager should have correct user_id
     
@@ -392,9 +405,11 @@ class SSotFactoryPatternRegressionPreventionTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     def test_known_violation_specific_detection(self):
         "
+        "
         Test that specifically detects the known violation in GitHub issue #207.
         
         CRITICAL: This test targets the exact file and line number from the issue.
+        "
         "
         violation_file = self.repo_root / tests/integration/type_ssot/test_type_ssot_thread_state_manager_coordination.py
         violation_line = 49
@@ -441,10 +456,10 @@ class SSotFactoryPatternRegressionPreventionTests(SSotAsyncTestCase):
         
         # Remove comments and strings to avoid false positives
         line = re.sub(r'#.*$', '', line)  # Remove comments
-        line = re.sub(r'.*?"', '', line, flags=re.DOTALL)  # Remove docstrings
-        line = re.sub(r"'''.*?''', '', line, flags=re.DOTALL)  # Remove docstrings
+        line = re.sub(r'.*?"', '', line, flags=re.DOTALL)  # Remove docstrings"
+        line = re.sub(r"'''.*?''', '', line, flags=re.DOTALL)  # Remove docstrings"
         line = re.sub(r'[^]*', '', line)  # Remove double-quoted strings
-        line = re.sub(r"'[^']*'", '', line)  # Remove single-quoted strings
+        line = re.sub(r"'[^']*'", '', line)  # Remove single-quoted strings'
         
         # Look for direct instantiation patterns
         patterns = [
@@ -458,3 +473,5 @@ class SSotFactoryPatternRegressionPreventionTests(SSotAsyncTestCase):
                 return True
         
         return False
+
+))))))

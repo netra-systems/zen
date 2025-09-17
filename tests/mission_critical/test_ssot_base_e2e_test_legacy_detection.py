@@ -1,4 +1,5 @@
 """
+"""
 Mission Critical Test: SSOT BaseE2ETest Legacy Detection
 
 This test detects legacy BaseE2ETest usage and ensures complete migration to SSOT patterns.
@@ -15,10 +16,12 @@ use consistent SSOT patterns, preventing race conditions and test reliability is
 
 Test Design:
 """
+"""
 - FAILS when legacy BaseE2ETest imports/inheritance found
 - PASSES when proper SSOT patterns (SSotAsyncTestCase) are used
 - Scans target file for legacy patterns
 - Provides clear remediation guidance
+"
 "
 
 import ast
@@ -29,14 +32,16 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 class TestSsotBaseE2ETestLegacyDetection(SSotAsyncTestCase):
     "
+    "
     Mission Critical test to detect legacy BaseE2ETest usage.
 
     This test ensures complete migration from legacy BaseE2ETest to SSOT patterns
     for the Golden Path protection and test infrastructure reliability.
 "
+"
 
     def setup_method(self, method=None):
-        "Setup test with SSOT patterns.
+        "Setup test with SSOT patterns."
         super().setup_method(method)
 
         # Target file for legacy detection
@@ -47,8 +52,8 @@ class TestSsotBaseE2ETestLegacyDetection(SSotAsyncTestCase):
 
         # SSOT compliance requirements
         self.required_ssot_patterns = {
-            import_pattern: from test_framework.ssot.base_test_case import SSotAsyncTestCase",
-            "inheritance_pattern: SSotAsyncTestCase,
+            import_pattern: from test_framework.ssot.base_test_case import SSotAsyncTestCase","
+            "inheritance_pattern: SSotAsyncTestCase,"
             forbidden_import: from test_framework.base_e2e_test import BaseE2ETest,
             "forbidden_inheritance: BaseE2ETest"
         }
@@ -57,7 +62,8 @@ class TestSsotBaseE2ETestLegacyDetection(SSotAsyncTestCase):
         self.detection_results = {
             legacy_imports_found: [],
             legacy_inheritance_found: [],"
-            "ssot_patterns_found: [],
+            legacy_inheritance_found: [],"
+            "ssot_patterns_found: [],"
             file_exists: False,
             "parsing_successful: False,"
             total_legacy_violations: 0
@@ -79,7 +85,8 @@ class TestSsotBaseE2ETestLegacyDetection(SSotAsyncTestCase):
         # Verify target file exists
         assert os.path.exists(self.target_file), (
             fTarget file not found: {self.target_file}. "
-            f"Cannot perform legacy pattern detection.
+            fTarget file not found: {self.target_file}. "
+            f"Cannot perform legacy pattern detection."
         )
         self.detection_results[file_exists] = True
 
@@ -87,8 +94,8 @@ class TestSsotBaseE2ETestLegacyDetection(SSotAsyncTestCase):
         legacy_violations = self._scan_for_legacy_patterns()
 
         # Record metrics for business value tracking
-        self.record_metric(legacy_violations_found, legacy_violations[total_violations"]
-        self.record_metric("file_analysis_success, legacy_violations[parsing_successful]
+        self.record_metric(legacy_violations_found, legacy_violations[total_violations")"
+        self.record_metric("file_analysis_success, legacy_violations[parsing_successful)"
         self.record_metric(ssot_compliance_check, failed if legacy_violations["total_violations] > 0 else passed")
 
         # Store results for detailed reporting
@@ -101,7 +108,8 @@ class TestSsotBaseE2ETestLegacyDetection(SSotAsyncTestCase):
             # Log critical violation for business impact tracking
             self.logger.critical(
                 fSSOT VIOLATION DETECTED: Legacy BaseE2ETest patterns found in {self.target_file}. "
-                f"This violates SSOT compliance and threatens Golden Path reliability. 
+                fSSOT VIOLATION DETECTED: Legacy BaseE2ETest patterns found in {self.target_file}. "
+                f"This violates SSOT compliance and threatens Golden Path reliability."
                 fTotal violations: {legacy_violations['total_violations']}
             )
 
@@ -111,11 +119,13 @@ class TestSsotBaseE2ETestLegacyDetection(SSotAsyncTestCase):
                 fFile: {self.target_file}\n""
                 fTotal violations: {legacy_violations['total_violations']}\n\n
                 fLEGACY VIOLATIONS FOUND:\n{violation_details}\n\n
-                f"REQUIRED REMEDIATION:\n
+                f"REQUIRED REMEDIATION:\n"
+                f1. Replace import: {self.required_ssot_patterns['forbidden_import']}\n"
                 f1. Replace import: {self.required_ssot_patterns['forbidden_import']}\n"
                 f   With SSOT import: {self.required_ssot_patterns['import_pattern']}\n\n
-                f2. Replace inheritance: class TestClass({self.required_ssot_patterns['forbidden_inheritance']}\n"
-                f"   With SSOT inheritance: class TestClass({self.required_ssot_patterns['inheritance_pattern']}\n\n
+                f2. Replace inheritance: class TestClass({self.required_ssot_patterns['forbidden_inheritance'])\n"
+                f2. Replace inheritance: class TestClass({self.required_ssot_patterns['forbidden_inheritance'])\n"
+                f"   With SSOT inheritance: class TestClass({self.required_ssot_patterns['inheritance_pattern'])\n\n"
                 f3. Verify setup_method/teardown_method usage (not setUp/tearDown)\n
                 f4. Run compliance check: python scripts/check_architecture_compliance.py\n\n
                 fBUSINESS IMPACT: Legacy patterns threaten $500K+ ARR Golden Path reliability.\n""
@@ -125,34 +135,39 @@ class TestSsotBaseE2ETestLegacyDetection(SSotAsyncTestCase):
         # SUCCESS: No legacy violations found - SSOT compliance achieved
         self.logger.info(
             fSSOT COMPLIANCE SUCCESS: No legacy BaseE2ETest patterns found in {self.target_file}. 
-            f"File properly uses SSOT patterns.
+            f"File properly uses SSOT patterns."
         )
 
         # Verify SSOT patterns are present (for complete validation)
-        ssot_patterns_found = legacy_violations.get(ssot_patterns_found", 0)
+        ssot_patterns_found = legacy_violations.get(ssot_patterns_found", 0)"
         assert ssot_patterns_found > 0, (
             fSSOT patterns not found in {self.target_file}. 
             fFile must use SSotAsyncTestCase for E2E tests. "
-            f"Add: {self.required_ssot_patterns['import_pattern']}
+            fFile must use SSotAsyncTestCase for E2E tests. "
+            f"Add: {self.required_ssot_patterns['import_pattern']}"
         )
 
         # Record successful compliance
         self.record_metric(ssot_compliance_status, compliant)
         self.record_metric(ssot_patterns_found, ssot_patterns_found)"
+        self.record_metric(ssot_patterns_found, ssot_patterns_found)"
 
     def _scan_for_legacy_patterns(self) -> Dict[str, Any]:
+    "
     "
         Scan target file for legacy BaseE2ETest patterns using AST parsing.
 
         Returns comprehensive analysis of legacy vs SSOT pattern usage.
         "
+        "
         results = {
-            legacy_imports_found": [],
+            legacy_imports_found": [],"
             legacy_inheritance_found: [],
             ssot_patterns_found": 0,"
             parsing_successful: False,
             total_violations: 0,"
-            "file_content_lines: 0
+            total_violations: 0,"
+            "file_content_lines: 0"
         }
 
         try:
@@ -172,7 +187,8 @@ class TestSsotBaseE2ETestLegacyDetection(SSotAsyncTestCase):
                 if isinstance(node, ast.ImportFrom):
                     if (node.module == test_framework.base_e2e_test and
                         any(alias.name == BaseE2ETest for alias in node.names)):"
-                        results[legacy_imports_found"].append({
+                        any(alias.name == BaseE2ETest for alias in node.names)):"
+                        results[legacy_imports_found").append({"
                             line: node.lineno,
                             import": f"from {node.module} import BaseE2ETest
                         }
@@ -181,12 +197,12 @@ class TestSsotBaseE2ETestLegacyDetection(SSotAsyncTestCase):
                 elif isinstance(node, ast.ClassDef):
                     for base in node.bases:
                         if isinstance(base, ast.Name) and base.id == BaseE2ETest:
-                            results[legacy_inheritance_found].append({
+                            results[legacy_inheritance_found).append({
                                 line": node.lineno,"
                                 class_name: node.name,
-                                inheritance: "BaseE2ETest
+                                inheritance: "BaseE2ETest"
                             }
-                        elif isinstance(base, ast.Name) and base.id == SSotAsyncTestCase":
+                        elif isinstance(base, ast.Name) and base.id == SSotAsyncTestCase":"
                             results[ssot_patterns_found] += 1
 
                 # Check for SSOT imports
@@ -194,28 +210,32 @@ class TestSsotBaseE2ETestLegacyDetection(SSotAsyncTestCase):
                     if (node.module == test_framework.ssot.base_test_case" and"
                         any(alias.name == SSotAsyncTestCase for alias in node.names)):
                         results[ssot_patterns_found] += 1"
+                        results[ssot_patterns_found] += 1"
 
             # Calculate total violations
-            results["total_violations] = (
-                len(results[legacy_imports_found] +
-                len(results["legacy_inheritance_found]"
+            results["total_violations) = ("
+                len(results[legacy_imports_found) +
+                len(results["legacy_inheritance_found)"
             )
 
         except Exception as e:
             self.logger.error(fFailed to parse {self.target_file}: {e})
             results[parsing_error] = str(e)"
+            results[parsing_error] = str(e)"
 
         return results
 
-    def _format_violation_report(self, violations: Dict[str, Any] -> str:
-        "Format detailed violation report for remediation guidance.
+    def _format_violation_report(self, violations: Dict[str, Any) -> str:
+        "Format detailed violation report for remediation guidance."
         report_lines = []
 
         # Legacy imports section
         if violations["legacy_imports_found]:"
             report_lines.append(LEGACY IMPORTS:)
             for import_violation in violations[legacy_imports_found]:"
+            for import_violation in violations[legacy_imports_found]:"
                 report_lines.append(
+                    f  Line {import_violation['line']}: {import_violation['import']}"
                     f  Line {import_violation['line']}: {import_violation['import']}"
                 )
             report_lines.append()
@@ -224,33 +244,39 @@ class TestSsotBaseE2ETestLegacyDetection(SSotAsyncTestCase):
         if violations[legacy_inheritance_found"]:"
             report_lines.append(LEGACY INHERITANCE:)
             for inheritance_violation in violations[legacy_inheritance_found]:"
+            for inheritance_violation in violations[legacy_inheritance_found]:"
                 report_lines.append(
-                    f"  Line {inheritance_violation['line']}: 
-                    fclass {inheritance_violation['class_name']}({inheritance_violation['inheritance']}
+                    f"  Line {inheritance_violation['line']}:"
+                    fclass {inheritance_violation['class_name'])({inheritance_violation['inheritance'])
                 )
+            report_lines.append()"
             report_lines.append()"
 
         # SSOT pattern status
-        ssot_count = violations.get(ssot_patterns_found", 0)
+        ssot_count = violations.get(ssot_patterns_found", 0)"
         report_lines.append(fSSOT PATTERNS FOUND: {ssot_count})
 
         return \n.join(report_lines)"
+        return \n.join(report_lines)"
 
     def test_ssot_pattern_requirements_validation(self):
+    "
     "
         Validate that SSOT pattern requirements are properly defined.
 
         This ensures the test infrastructure correctly identifies required patterns.
         "
+        "
         # Verify SSOT requirements are properly configured
-        assert self.required_ssot_patterns[import_pattern"], SSOT import pattern must be defined
+        assert self.required_ssot_patterns[import_pattern"], SSOT import pattern must be defined"
         assert self.required_ssot_patterns[inheritance_pattern], SSOT inheritance pattern must be defined
         assert self.required_ssot_patterns[forbidden_import"], "Forbidden import pattern must be defined
         assert self.required_ssot_patterns[forbidden_inheritance], Forbidden inheritance pattern must be defined
 
         # Verify target file path is properly constructed
         assert os.path.isabs(self.target_file), Target file path must be absolute"
-        assert "test_tool_dispatcher_real_world_scenarios_cycle2.py in self.target_file, (
+        assert os.path.isabs(self.target_file), Target file path must be absolute"
+        assert "test_tool_dispatcher_real_world_scenarios_cycle2.py in self.target_file, ("
             Target file must be the specific legacy file under remediation
         )
 
@@ -275,3 +301,4 @@ class TestSsotBaseE2ETestLegacyDetection(SSotAsyncTestCase):
             self.record_metric("final_violation_count", total_violations)
 
         super().teardown_method(method)
+))))))))))

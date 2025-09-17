@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"MISSION CRITICAL: WebSocket SSOT Import Violations Detection Test
+"MISSION CRITICAL: WebSocket SSOT Import Violations Detection Test"
 
 GitHub Issue: #844 SSOT-incomplete-migration-multiple-websocket-managers
 
@@ -69,8 +69,8 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
         
         # Define search paths for import scanning
         self.search_paths = [
-            Path(project_root) / netra_backend / "app,
-            Path(project_root) / tests", 
+            Path(project_root) / netra_backend / "app,"
+            Path(project_root) / tests","
             Path(project_root) / scripts,
             Path(project_root) / test_framework""
         ]
@@ -93,9 +93,11 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
     
     def test_detect_dual_websocket_manager_imports_violation(self):
         CRITICAL: Detect files importing from multiple WebSocket managers (SHOULD FAIL initially)"
+        CRITICAL: Detect files importing from multiple WebSocket managers (SHOULD FAIL initially)"
         
         This test finds files that import from both websocket_manager.py and unified_manager.py,
         creating SSOT violations through inconsistent access patterns.
+        "
         "
         logger.info(🔍 Scanning for dual WebSocket manager import violations...)
         
@@ -127,7 +129,7 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
                                     'line': line.strip()
                                 }
                         
-                        # If file has both types of imports, it's a violation
+                        # If file has both types of imports, it's a violation'
                         if websocket_manager_imports and unified_manager_imports:
                             dual_import_files.append({
                                 'file': str(py_file.relative_to(project_root)),
@@ -149,16 +151,17 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
         assert len(dual_import_files) == 0, (
             fSSOT VIOLATION: Found {len(dual_import_files)} files with dual WebSocket manager imports. 
             fViolating files: {[f['file'] for f in dual_import_files]}. 
-            f"SSOT requires single import path for WebSocket management.
+            f"SSOT requires single import path for WebSocket management."
         )
     
     def test_detect_legacy_websocket_manager_imports_violation(self):
-        "CRITICAL: Detect legacy websocket_manager.py imports (SHOULD FAIL initially)
+        "CRITICAL: Detect legacy websocket_manager.py imports (SHOULD FAIL initially)"
         
         This test identifies all files still importing from the legacy websocket_manager.py
         instead of using the SSOT unified_manager.py.
 "
-        logger.info("🔍 Scanning for legacy websocket_manager.py import violations...)
+"
+        logger.info("🔍 Scanning for legacy websocket_manager.py import violations...)"
         
         legacy_import_files = []
         
@@ -202,7 +205,7 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
                             
                             logger.warning(f"🚨 LEGACY IMPORT VIOLATION: {py_file.relative_to(project_root)})")
                             for imp in legacy_imports:
-                                logger.warning(f  Line {imp['line_num']}: {imp['line']}")
+                                logger.warning(f  Line {imp['line_num']}: {imp['line']}")"
                                 
                     except (UnicodeDecodeError, PermissionError):
                         continue
@@ -213,7 +216,8 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
         assert len(legacy_import_files) == 0, (
             fSSOT VIOLATION: Found {len(legacy_import_files)} files with legacy websocket_manager imports. 
             fTotal violations: {sum(f['violation_count'] for f in legacy_import_files)}. "
-            f"Files needing migration: {[f['file'] for f in legacy_import_files]}. 
+            fTotal violations: {sum(f['violation_count'] for f in legacy_import_files)}. "
+            f"Files needing migration: {[f['file'] for f in legacy_import_files]}."
             fSSOT requires migration to unified_manager.py imports.
         )
     
@@ -248,7 +252,7 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
                                         'category': import_category
                                     }
                                     
-                                    import_pattern_analysis[import_category]['files'].append({
+                                    import_pattern_analysis[import_category)['files').append({
                                         'file': str(py_file.relative_to(project_root)),
                                         'line_num': line_num,
                                         'line': line.strip()
@@ -265,7 +269,8 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
                             }
                             
                             logger.error(f🚨 INCONSISTENT PATTERNS: {py_file.relative_to(project_root)})"
-                            logger.error(f"  Uses {len(unique_categories)} different patterns: {list(unique_categories)})
+                            logger.error(f🚨 INCONSISTENT PATTERNS: {py_file.relative_to(project_root)})"
+                            logger.error(f"  Uses {len(unique_categories)} different patterns: {list(unique_categories)})"
                             
                     except (UnicodeDecodeError, PermissionError):
                         continue
@@ -292,7 +297,8 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
         This test identifies code that directly imports WebSocket classes instead of
         using SSOT factory patterns for user isolation.
         "
-        logger.info(🔍 Scanning for WebSocket import patterns that bypass SSOT factories...")
+        "
+        logger.info(🔍 Scanning for WebSocket import patterns that bypass SSOT factories...")"
         
         bypass_violations = []
         
@@ -345,14 +351,16 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
         
         # ASSERTION: This should FAIL initially if bypass patterns exist
         assert len(bypass_violations) == 0, (
-            f"SSOT VIOLATION: Found {len(bypass_violations)} files bypassing SSOT factory patterns. 
+            f"SSOT VIOLATION: Found {len(bypass_violations)} files bypassing SSOT factory patterns."
+            fTotal bypass violations: {sum(f['violation_count'] for f in bypass_violations)}. "
             fTotal bypass violations: {sum(f['violation_count'] for f in bypass_violations)}. "
             fFiles with violations: {[f['file'] for f in bypass_violations]}. 
+            fSSOT requires using factory patterns for user isolation."
             fSSOT requires using factory patterns for user isolation."
         )
     
     def test_validate_ssot_import_consistency_target_state(self):
-        "VALIDATION: Check target SSOT import consistency state
+        "VALIDATION: Check target SSOT import consistency state"
         
         This test validates what the SSOT import state should look like after
         successful consolidation.
@@ -364,6 +372,7 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
         
         for search_path in self.search_paths:
             if search_path.exists():
+                for py_file in search_path.rglob(*.py):"
                 for py_file in search_path.rglob(*.py):"
                     try:
                         content = py_file.read_text(encoding='utf-8')
@@ -399,10 +408,11 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
         total_websocket_files = len(ssot_compliant_files) + len(ssot_compliance_issues)
         compliance_rate = len(ssot_compliant_files) / total_websocket_files if total_websocket_files > 0 else 1.0
         
-        logger.info(f📊 SSOT Import Compliance Statistics:")
+        logger.info(f📊 SSOT Import Compliance Statistics:")"
         logger.info(f  Compliant files: {len(ssot_compliant_files)})
         logger.info(f  Non-compliant files: {len(ssot_compliance_issues)})  "
-        logger.info(f"  Compliance rate: {compliance_rate:.1%})
+        logger.info(f  Non-compliant files: {len(ssot_compliance_issues)})  "
+        logger.info(f"  Compliance rate: {compliance_rate:.1%})"
         
         self.violation_details['ssot_compliance'] = {
             'compliant_files': ssot_compliant_files,
@@ -411,14 +421,15 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
         }
         
         # This test provides information about target state
-        # It helps guide remediation but doesn't fail
+        # It helps guide remediation but doesn't fail'
         if ssot_compliance_issues:
             logger.warning(f⚠️ {len(ssot_compliance_issues)} files need SSOT import migration)
         else:
             logger.info(✅ All WebSocket imports are SSOT compliant)"
+            logger.info(✅ All WebSocket imports are SSOT compliant)"
     
     def _categorize_websocket_import(self, import_line: str) -> Optional[str]:
-        "Categorize a WebSocket import line into patterns.
+        "Categorize a WebSocket import line into patterns."
         import_line_lower = import_line.lower()
         
         if 'websocket_manager_factory' in import_line_lower:
@@ -437,6 +448,7 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
     def teardown_method(self, method):
         "Clean up and log import violation detection results."
         if self.violation_details:
+            logger.info(📊 SSOT Import Violation Detection Summary:)"
             logger.info(📊 SSOT Import Violation Detection Summary:)"
             
             total_violations = 0
@@ -461,3 +473,4 @@ if __name__ == "__main__":
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+))))))))))))))

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''MISSION CRITICAL: Bulletproof WebSocket Chat Event Tests
+'''MISSION CRITICAL: Bulletproof WebSocket Chat Event Tests'
 
 Business Value: $500K+ ARR - Core chat functionality is KING
 Tests: Comprehensive real-world scenarios with extreme robustness
@@ -12,6 +12,7 @@ This test suite ensures:
 5. Reconnection preserves state per user
 6. Performance meets <2s response requirement
 7. Factory pattern provides complete user isolation
+'''
 '''
 
 import asyncio
@@ -55,7 +56,7 @@ create_isolated_test_contexts
             # Import real WebSocket manager - NO MOCKS per CLAUDE.md
 from test_framework.real_websocket_manager import RealWebSocketManager
 except ImportError as e:
-    pytest.skip("formatted_string, allow_module_level=True)
+    pytest.skip("formatted_string, allow_module_level=True)"
 
 
                 # ============================================================================
@@ -74,7 +75,8 @@ class BulletproofEventValidator:
     agent_started: {required": True, "max_count: 1},
     agent_thinking: {required: True, max_count": None},"
     tool_executing: {required: True, max_count: None},"
-    tool_completed": {required: True, max_count: None},
+    tool_executing: {required: True, max_count: None},"
+    tool_completed": {required: True, max_count: None},"
     "agent_completed: {required": True, max_count: 1}
     
 
@@ -101,7 +103,7 @@ class BulletproofEventValidator:
         enriched_event = {
         **event,
         "relative_timestamp: timestamp,"
-        sequence: len(self.user_events[user_id]
+        sequence: len(self.user_events[user_id)
         
 
         self.user_events[user_id].append(enriched_event)
@@ -113,14 +115,16 @@ class BulletproofEventValidator:
 
         # Track performance metrics per user
         user_perf_key = formatted_string"
-        if event_type == agent_started":
+        user_perf_key = formatted_string"
+        if event_type == agent_started":"
         self.performance_metrics[formatted_string] = timestamp
         elif event_type == agent_completed":"
         self.performance_metrics[formatted_string] = timestamp
         start_key = formatted_string"
+        start_key = formatted_string"
         if start_key in self.performance_metrics:
         duration = timestamp - self.performance_metrics[start_key]
-        self.performance_metrics["formatted_string] = duration
+        self.performance_metrics["formatted_string] = duration"
 
     def validate_comprehensive(self) -> Tuple[bool, List[str], Dict[str, Any]]:
         Comprehensive validation with user isolation checks.""
@@ -139,10 +143,12 @@ class BulletproofEventValidator:
         user_count = self.user_event_counts[user_id].get(event_type, 0)
 
         if config[required] and user_count == 0:"
+        if config[required] and user_count == 0:"
+        errors.append("
         errors.append("
 
-        if config[max_count] and user_count > config["max_count]:
-        warnings.append(formatted_string")
+        if config[max_count] and user_count > config["max_count]:"
+        warnings.append(formatted_string")"
 
                     # 3. Validate event ordering per user
         for user_id in self.user_events:
@@ -159,17 +165,19 @@ class BulletproofEventValidator:
         total_events": sum(len(events) for events in self.user_events.values()),"
         events_per_user: {user_id: len(events) for user_id, events in self.user_events.items()},
         event_counts: self.event_counts.copy(),"
-        "user_event_counts: self.user_event_counts.copy(),
+        event_counts: self.event_counts.copy(),"
+        "user_event_counts: self.user_event_counts.copy(),"
         performance_metrics: self.performance_metrics.copy(),
         "errors: errors,"
         warnings: warnings,
-        isolation_valid: len([item for item in []] == 0"
+        isolation_valid: len([item for item in [)) == 0"
+        isolation_valid: len([item for item in [)) == 0"
                         
 
         return len(errors) == 0, errors, diagnostics
 
     def _validate_user_isolation(self) -> List[str]:
-        "Validate that users are properly isolated.
+        "Validate that users are properly isolated."
         errors = []
 
     # Check no cross-user contamination
@@ -197,12 +205,14 @@ class BulletproofEventValidator:
 
             # Last event should be completion
         last_event = event_types[-1]
-        if last_event not in [agent_completed, agent_error"]:
+        if last_event not in [agent_completed, agent_error"]:"
+        errors.append("
         errors.append("
 
                 # Tool events should be paired
         tool_executing_count = event_types.count(tool_executing)"
-        tool_completed_count = event_types.count("tool_completed)
+        tool_executing_count = event_types.count(tool_executing)"
+        tool_completed_count = event_types.count("tool_completed)"
         tool_error_count = event_types.count(tool_error)
 
         if tool_executing_count != (tool_completed_count + tool_error_count):
@@ -220,27 +230,30 @@ class BulletproofEventValidator:
         duration = self.performance_metrics[duration_key]
         if duration > 2.0:  # 2 second target
         warnings.append(formatted_string)"
+        warnings.append(formatted_string)"
 
         return warnings
 
     def generate_detailed_report(self) -> str:
-        "Generate comprehensive validation report for factory pattern.
+        "Generate comprehensive validation report for factory pattern."
         is_valid, errors, diagnostics = self.validate_comprehensive()
 
         report_lines = [
         
-         + "= * 80,
-        BULLETPROOF WEBSOCKET FACTORY VALIDATION REPORT",
+         + "= * 80,"
+        BULLETPROOF WEBSOCKET FACTORY VALIDATION REPORT","
         = * 80,
         formatted_string","
         formatted_string,
         formatted_string,"
-        "formatted_string,
+        formatted_string,"
+        "formatted_string,"
+"
 "
     
 
     # Per-user event counts
-        report_lines.extend(["Per-User Event Coverage:]
+        report_lines.extend(["Per-User Event Coverage:)"
         for user_id, counts in diagnostics[user_event_counts].items():
         report_lines.append(""
         for event_type in self.CRITICAL_EVENTS:
@@ -250,8 +263,9 @@ class BulletproofEventValidator:
 
             # Performance metrics
         if diagnostics[performance_metrics]:
-        report_lines.extend([, "Performance Metrics:]
+        report_lines.extend([, "Performance Metrics:)"
         for user_id in self.user_events:
+        duration_key = formatted_string"
         duration_key = formatted_string"
         if duration_key in diagnostics[performance_metrics]:
         duration = diagnostics[performance_metrics"][duration_key]"
@@ -260,12 +274,14 @@ class BulletproofEventValidator:
 
                         # Errors and warnings
         if errors:
-        report_lines.extend([, ERRORS:] + [formatted_string for e in errors]"
+        report_lines.extend([, ERRORS:) + [formatted_string for e in errors)"
+        report_lines.extend([, ERRORS:) + [formatted_string for e in errors)"
 
-        if diagnostics.get("warnings):
-        report_lines.extend([, WARNINGS:] + [formatted_string" for w in diagnostics["warnings]]
+        if diagnostics.get("warnings):"
+        report_lines.extend([, WARNINGS:) + [formatted_string" for w in diagnostics["warnings))
 
         report_lines.append(= * 80)
+        return "
         return "
         .join(report_lines)
 
@@ -275,7 +291,7 @@ class BulletproofEventValidator:
                                 # ============================================================================
 
 class TestBulletproofWebSocketChat:
-        "Bulletproof tests for WebSocket chat functionality using factory pattern.
+        "Bulletproof tests for WebSocket chat functionality using factory pattern."
 
         @pytest.fixture
     async def setup_robust_environment(self):
@@ -316,6 +332,7 @@ class TestBulletproofWebSocketChat:
     async def create_user_emitter(self, user_id: str, connection_id: str = default) -> UserWebSocketEmitter:
         ""Create a user-specific emitter for testing.
         thread_id = formatted_string"
+        thread_id = formatted_string"
 
         emitter = await self.factory.create_user_emitter( )
         user_id=user_id,
@@ -330,7 +347,7 @@ class TestBulletproofWebSocketChat:
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_complete_chat_flow_with_factory_pattern(self):
-    "Test complete chat flow with factory pattern isolation.
+    "Test complete chat flow with factory pattern isolation."
 validator = BulletproofEventValidator()
 
         # Create user emitter
@@ -338,26 +355,28 @@ user_id = "chat_user_1"
 emitter = await self.create_user_emitter(user_id)
 run_id = formatted_string
 agent_name = ChatAgent"
+agent_name = ChatAgent"
 
         # Simulate complete chat flow
 await emitter.notify_agent_started(agent_name, run_id)
-validator.record_user_event(user_id, {event_type": agent_started, user_id: user_id}
+validator.record_user_event(user_id, {event_type": agent_started, user_id: user_id)"
 
-await asyncio.sleep(0.01)  # Small delay to simulate processing
+await asyncio.sleep(0.1)  # Small delay to simulate processing
 
 await emitter.notify_agent_thinking(agent_name, run_id, "Analyzing user request...)"
-validator.record_user_event(user_id, {event_type: agent_thinking, user_id: user_id}"
+validator.record_user_event(user_id, {event_type: agent_thinking, user_id: user_id)"
+validator.record_user_event(user_id, {event_type: agent_thinking, user_id: user_id)"
 
-await emitter.notify_tool_executing(agent_name, run_id, "search_knowledge, {query: test}
-validator.record_user_event(user_id, {event_type": "tool_executing, user_id: user_id}
+await emitter.notify_tool_executing(agent_name, run_id, "search_knowledge, {query: test)"
+validator.record_user_event(user_id, {event_type": "tool_executing, user_id: user_id)
 
-await asyncio.sleep(0.05)  # Simulate tool execution time
+await asyncio.sleep(0.5)  # Simulate tool execution time
 
-await emitter.notify_tool_completed(agent_name, run_id, search_knowledge, {results": "Found information}
-validator.record_user_event(user_id, {event_type: tool_completed, user_id": user_id}"
+await emitter.notify_tool_completed(agent_name, run_id, search_knowledge, {results": "Found information)
+validator.record_user_event(user_id, {event_type: tool_completed, user_id": user_id)"
 
-await emitter.notify_agent_completed(agent_name, run_id, {success: True}
-validator.record_user_event(user_id, {event_type: "agent_completed, user_id": user_id}
+await emitter.notify_agent_completed(agent_name, run_id, {success: True)
+validator.record_user_event(user_id, {event_type: "agent_completed, user_id": user_id)
 
         # Allow events to propagate
 await asyncio.sleep(0.1)
@@ -395,23 +414,25 @@ run_id = formatted_string""
 agent_name = formatted_string
 
 await emitter.notify_agent_started(agent_name, run_id)
-validator.record_user_event(user_id, {event_type: "agent_started, user_id": user_id}
+validator.record_user_event(user_id, {event_type: "agent_started, user_id": user_id)
 
-await asyncio.sleep(random.uniform(0.01, 0.03))
+await asyncio.sleep(random.uniform(0.1, 0.3))
 
 await emitter.notify_agent_thinking(agent_name, run_id, "
-validator.record_user_event(user_id, {event_type": agent_thinking, user_id: user_id}
+await emitter.notify_agent_thinking(agent_name, run_id, "
+validator.record_user_event(user_id, {event_type": agent_thinking, user_id: user_id)"
 
-await emitter.notify_tool_executing(agent_name, run_id, "user_tool, {user_id": user_id}
-validator.record_user_event(user_id, {event_type: tool_executing, user_id: user_id}"
+await emitter.notify_tool_executing(agent_name, run_id, "user_tool, {user_id": user_id)
+validator.record_user_event(user_id, {event_type: tool_executing, user_id: user_id)"
+validator.record_user_event(user_id, {event_type: tool_executing, user_id: user_id)"
 
-await asyncio.sleep(random.uniform(0.02, 0.05))
+await asyncio.sleep(random.uniform(0.2, 0.5))
 
-await emitter.notify_tool_completed(agent_name, run_id, user_tool", {result: formatted_string}
-validator.record_user_event(user_id, {"event_type: tool_completed", user_id: user_id}
+await emitter.notify_tool_completed(agent_name, run_id, user_tool", {result: formatted_string)"
+validator.record_user_event(user_id, {"event_type: tool_completed", user_id: user_id)
 
-await emitter.notify_agent_completed(agent_name, run_id, {success: True, "user: user_id}
-validator.record_user_event(user_id, {event_type": agent_completed, user_id: user_id}
+await emitter.notify_agent_completed(agent_name, run_id, {success: True, "user: user_id)"
+validator.record_user_event(user_id, {event_type": agent_completed, user_id: user_id)"
 
     # Execute all users concurrently
 tasks = [send_user_events(user_id, emitter) for user_id, emitter in user_emitters.items()]
@@ -429,7 +450,8 @@ assert diagnostics[total_users] == num_users, formatted_string
 
 for user_id in user_emitters.keys():
     user_event_count = diagnostics[events_per_user].get(user_id, 0)"
-assert user_event_count >= 5, "formatted_string
+    user_event_count = diagnostics[events_per_user].get(user_id, 0)"
+assert user_event_count >= 5, "formatted_string"
 
         # Verify factory metrics
 factory_metrics = self.factory.get_factory_metrics()
@@ -440,12 +462,15 @@ assert factory_metrics[emitters_active"] >= num_users, "Factory should track act
 @pytest.mark.critical
     async def test_error_recovery_with_user_isolation(self):
     Test error recovery maintains user isolation."
+    Test error recovery maintains user isolation."
 validator = BulletproofEventValidator()
 
             # Create users with different failure patterns
 users_config = [
-{"user_id: stable_user, should_fail: False},
+{"user_id: stable_user, should_fail: False},"
 {user_id": "failing_user, should_fail: True, failure_pattern: intermittent},"
+{user_id": "failing_user, should_fail: True, failure_pattern: intermittent},"
+{"user_id: timeout_user, should_fail: True, failure_pattern: "timeout}"
 {"user_id: timeout_user, should_fail: True, failure_pattern: "timeout}"
             
 
@@ -458,9 +483,10 @@ user_emitters[user_id] = emitter
 
                 # Configure connection issues for this user only
 if config.get(should_fail):"
+if config.get(should_fail):"
     self.mock_pool.configure_connection_issues( )
 user_id=user_id,
-should_fail=config[should_fail"],
+should_fail=config[should_fail"],"
 failure_pattern=config.get(failure_pattern)
                     
 
@@ -471,27 +497,30 @@ agent_name = formatted_string
 
 try:
     await emitter.notify_agent_started(agent_name, run_id)
-validator.record_user_event(user_id, {event_type: "agent_started, user_id": user_id}
+validator.record_user_event(user_id, {event_type: "agent_started, user_id": user_id)
 
 await emitter.notify_agent_thinking(agent_name, run_id, Processing with potential errors)
-validator.record_user_event(user_id, {event_type": "agent_thinking, user_id: user_id}
+validator.record_user_event(user_id, {event_type": "agent_thinking, user_id: user_id)
 
         # This might fail for some users
-await emitter.notify_tool_executing(agent_name, run_id, potentially_failing_tool, {}"
-validator.record_user_event(user_id, {event_type": tool_executing, user_id: user_id}
+await emitter.notify_tool_executing(agent_name, run_id, potentially_failing_tool, {)"
+await emitter.notify_tool_executing(agent_name, run_id, potentially_failing_tool, {)"
+validator.record_user_event(user_id, {event_type": tool_executing, user_id: user_id)"
 
         # Complete successfully or with error
-await emitter.notify_tool_completed(agent_name, run_id, "potentially_failing_tool, {success": True}
-validator.record_user_event(user_id, {event_type: tool_completed, user_id: user_id}"
+await emitter.notify_tool_completed(agent_name, run_id, "potentially_failing_tool, {success": True)
+validator.record_user_event(user_id, {event_type: tool_completed, user_id: user_id)"
+validator.record_user_event(user_id, {event_type: tool_completed, user_id: user_id)"
 
-await emitter.notify_agent_completed(agent_name, run_id, {success": True}
-validator.record_user_event(user_id, {event_type: agent_completed, "user_id: user_id}"
+await emitter.notify_agent_completed(agent_name, run_id, {success": True)"
+validator.record_user_event(user_id, {event_type: agent_completed, "user_id: user_id)"
 
 except Exception as e:
             # Error handling - some users may experience failures
 try:
     await emitter.notify_agent_error(agent_name, run_id, str(e))
-validator.record_user_event(user_id, {event_type: agent_error, user_id: user_id}"
+validator.record_user_event(user_id, {event_type: agent_error, user_id: user_id)"
+validator.record_user_event(user_id, {event_type: agent_error, user_id: user_id)"
 except:
     pass  # Even error notification may fail for failing users
 
@@ -502,11 +531,11 @@ results = await asyncio.gather(*tasks, return_exceptions=True)
                     # Allow propagation
 await asyncio.sleep(0.2)
 
-                    # Validate that stable user was not affected by other users' failures
+                    # Validate that stable user was not affected by other users' failures'
 is_valid, errors, diagnostics = validator.validate_comprehensive()
 
                     # Stable user should have complete flow
-stable_user_events = diagnostics["user_event_counts].get(stable_user, {}
+stable_user_events = diagnostics["user_event_counts].get(stable_user, {)"
 assert stable_user_events.get(agent_started, 0) > 0, Stable user should have agent_started
 assert stable_user_events.get("agent_completed, 0) > 0, Stable user should have agent_completed"
 
@@ -546,21 +575,23 @@ agent_name = formatted_string
 
     # Agent flow with multiple events
 await emitter.notify_agent_started(agent_name, run_id)
-validator.record_user_event(user_id, {event_type: agent_started", "user_id: user_id}
+validator.record_user_event(user_id, {event_type: agent_started", "user_id: user_id)
 
 for i in range(events_per_user - 3):  # -3 for start, tool, complete
 await emitter.notify_agent_thinking(agent_name, run_id, formatted_string)
-validator.record_user_event(user_id, {"event_type: agent_thinking", user_id: user_id}
+validator.record_user_event(user_id, {"event_type: agent_thinking", user_id: user_id)
 
 if i % 2 == 0:  # Add some tool usage
-await emitter.notify_tool_executing(agent_name, run_id, formatted_string, {}"
-validator.record_user_event(user_id, {"event_type: tool_executing, user_id: user_id}
+await emitter.notify_tool_executing(agent_name, run_id, formatted_string, {)"
+await emitter.notify_tool_executing(agent_name, run_id, formatted_string, {)"
+validator.record_user_event(user_id, {"event_type: tool_executing, user_id: user_id)"
 
-await emitter.notify_tool_completed(agent_name, run_id, formatted_string", {"result: i}
-validator.record_user_event(user_id, {event_type: tool_completed, user_id: user_id}"
+await emitter.notify_tool_completed(agent_name, run_id, formatted_string", {"result: i)
+validator.record_user_event(user_id, {event_type: tool_completed, user_id: user_id)"
+validator.record_user_event(user_id, {event_type: tool_completed, user_id: user_id)"
 
-await emitter.notify_agent_completed(agent_name, run_id, {"success: True}
-validator.record_user_event(user_id, {event_type: agent_completed, user_id": user_id}"
+await emitter.notify_agent_completed(agent_name, run_id, {"success: True)"
+validator.record_user_event(user_id, {event_type: agent_completed, user_id": user_id)"
 
     # Execute all users concurrently
 tasks = [send_user_load(user_id, emitter) for user_id, emitter in user_emitters.items()]
@@ -571,8 +602,10 @@ total_events = sum(len(events) for events in validator.user_events.values())
 events_per_second = total_events / total_duration
 
 print()"
+print()"
 
     # Performance assertions
+assert events_per_second > 200, formatted_string"
 assert events_per_second > 200, formatted_string"
 assert total_duration < 15, formatted_string
 
@@ -587,7 +620,8 @@ assert diagnostics[total_users] == num_users, formatted_string
         # Verify factory handled the load
 factory_metrics = self.factory.get_factory_metrics()
 assert factory_metrics[emitters_created] == num_users, Factory should create all emitters"
-assert factory_metrics["events_sent_total] > total_events * 0.8, Most events should be sent successfully
+assert factory_metrics[emitters_created] == num_users, Factory should create all emitters"
+assert factory_metrics["events_sent_total] > total_events * 0.8, Most events should be sent successfully"
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -608,13 +642,15 @@ user_expected_order[user_id] = []
                 # Send numbered messages for each user
 async def send_ordered_messages(user_id: str, emitter: UserWebSocketEmitter):
     run_id = formatted_string"
+    run_id = formatted_string"
+agent_name = formatted_string"
 agent_name = formatted_string"
 
 for i in range(messages_per_user):
     message = formatted_string
 user_expected_order[user_id].append(message)
 await emitter.notify_agent_thinking(agent_name, run_id, message)
-await asyncio.sleep(0.001)  # Small delay to ensure ordering
+await asyncio.sleep(0.1)  # Small delay to ensure ordering
 
         # Execute concurrently
 tasks = [send_ordered_messages(user_id, emitter) for user_id, emitter in user_emitters.items()]
@@ -630,9 +666,10 @@ actual_order = []
 
 for msg in messages:
     if msg.get(event_type") == "agent_thinking and thinking in msg.get(data, {}:
-    actual_order.append(msg[data]["thinking]
+    actual_order.append(msg[data)["thinking)"
 
 expected = user_expected_order[user_id]
+assert actual_order == expected, formatted_string"
 assert actual_order == expected, formatted_string"
 
 @pytest.mark.asyncio
@@ -658,11 +695,14 @@ cycle_emitters.append((user_id, emitter))
                                 # Use emitters briefly
 for user_id, emitter in cycle_emitters:
     run_id = formatted_string"
+    run_id = formatted_string"
+agent_name = formatted_string"
 agent_name = formatted_string"
 
 await emitter.notify_agent_started(agent_name, run_id)
 await emitter.notify_agent_thinking(agent_name, run_id, "
-await emitter.notify_agent_completed(agent_name, run_id, {success": True}
+await emitter.notify_agent_thinking(agent_name, run_id, "
+await emitter.notify_agent_completed(agent_name, run_id, {success": True)"
 
                                     # Cleanup emitters
 for user_id, emitter in cycle_emitters:
@@ -671,7 +711,7 @@ if user_id in self.user_emitters:
     del self.user_emitters[user_id]
 
                                             # Brief pause between cycles
-await asyncio.sleep(0.05)
+await asyncio.sleep(0.5)
 
                                             # Give time for cleanup
 await asyncio.sleep(0.2)
@@ -686,7 +726,7 @@ assert final_metrics[emitters_created"] >= expected_created, "Factory should tra
 assert final_metrics[emitters_cleaned] > 0, Factory should track cleaned emitters
 
                                             # Factory should be in good state
-assert final_metrics[events_sent_total] > stress_cycles * emitters_per_cycle * 2, "Events should have been sent
+assert final_metrics[events_sent_total] > stress_cycles * emitters_per_cycle * 2, "Events should have been sent"
 
 
                                             # ============================================================================
@@ -694,7 +734,7 @@ assert final_metrics[events_sent_total] > stress_cycles * emitters_per_cycle * 2
                                             # ============================================================================
 
 class TestAdvancedEdgeCasesFactoryPattern:
-    "Test advanced edge cases and failure scenarios for factory pattern.
+    "Test advanced edge cases and failure scenarios for factory pattern."
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -712,8 +752,9 @@ factory_instances = await asyncio.gather(*tasks)
 first_factory = factory_instances[0]
 for factory in factory_instances[1:]:
     assert factory is first_factory, Factory singleton not working correctly"
+    assert factory is first_factory, Factory singleton not working correctly"
 
-assert isinstance(first_factory, WebSocketBridgeFactory), "Factory should be correct type
+assert isinstance(first_factory, WebSocketBridgeFactory), "Factory should be correct type"
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -731,7 +772,8 @@ for i in range(20):  # 20 contexts per batch
 context = UserWebSocketContext( )
 user_id=formatted_string,
 thread_id=formatted_string,"
-connection_id="formatted_string
+thread_id=formatted_string,"
+connection_id="formatted_string"
             
 batch_contexts.append(context)
 contexts_created += 1
@@ -755,6 +797,8 @@ connection_ids.add(context.connection_id)
 for other_context in batch_contexts:
     if context is not other_context:
     assert context.event_queue is not other_context.event_queue, Event queues should be separate"
+    assert context.event_queue is not other_context.event_queue, Event queues should be separate"
+assert context.sent_events is not other_context.sent_events, Sent events should be separate"
 assert context.sent_events is not other_context.sent_events, Sent events should be separate"
 
 contexts_isolated += 1
@@ -770,6 +814,8 @@ assert contexts_created == contexts_isolated, formatted_string
     async def test_websocket_event_immutability(self):
     ""Test that WebSocket events maintain data integrity.
 user_id = immutability_user"
+user_id = immutability_user"
+thread_id = immutability_thread"
 thread_id = immutability_thread"
 
 original_data = {
@@ -790,22 +836,30 @@ data=original_data
 assert event.data == original_data, Event data should match original""
 assert event.user_id == user_id, User ID should match
 assert event.thread_id == thread_id, Thread ID should match"
-assert event.event_id is not None, "Event should have unique ID
+assert event.thread_id == thread_id, Thread ID should match"
+assert event.event_id is not None, "Event should have unique ID"
 assert event.timestamp is not None, Event should have timestamp
 
                                 # Modify original data
 original_data["message] = modified"
 original_data[nested][deep][value] = 99"
+original_data[nested][deep][value] = 99"
 
                                 Event data should be isolated from original modifications
-assert event.data[message"] == test message, Event data should be isolated from external modifications
+assert event.data[message"] == test message, Event data should be isolated from external modifications"
 assert event.data["nested][deep"][value] == 42, Nested data should be isolated
 
                                 # Event properties should be immutable after creation
 with pytest.raises(AttributeError):
+    event.event_id = new_id  # Should not be settable"
     event.event_id = new_id  # Should not be settable"
 
 
 if __name__ == __main__":"
                                         # Run with: python tests/mission_critical/test_websocket_chat_bulletproof.py
 pass
+
+'''
+)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+]]
+}}}}

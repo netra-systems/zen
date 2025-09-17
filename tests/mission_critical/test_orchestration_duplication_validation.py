@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
+"""
 Mission Critical Test Suite: Orchestration Duplication Violation Reproduction - Issue #1075
 
 Business Value: Platform/Internal - Test Infrastructure SSOT Compliance
 Critical for $500K+ ARR protection through unified orchestration patterns and elimination of competing orchestration systems.
 
 This test reproduces the critical violation where 129+ files contain duplicate orchestration 
+"""
 """
 systems, try-except import patterns, and competing orchestration configurations.
 
@@ -22,7 +24,8 @@ EXPECTED BEHAVIOR AFTER REMEDIATION:
 - Consistent orchestration availability checking
 
 Author: SSOT Gardener Agent - Issue #1075 Step 1
-Date: 2025-09-14
+Date: 2025-9-14
+"
 "
 
 import ast
@@ -42,7 +45,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @dataclass
 class OrchestrationViolation:
-    "Details about an orchestration duplication violation.
+    "Details about an orchestration duplication violation."
     file_path: str
     line_number: int
     violation_code: str
@@ -131,12 +134,13 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
             violations.extend(self.analyze_patterns_for_violations(file_path, content, lines))
                     
         except Exception as e:
-            # Log but don't fail on individual file errors
+            # Log but don't fail on individual file errors'
             print(f"Warning: Could not scan {file_path}: {e}")
             
         return violations
 
-    def analyze_ast_for_violations(self, file_path: Path, tree: ast.AST, lines: List[str] -> List[OrchestrationViolation]:
+    def analyze_ast_for_violations(self, file_path: Path, tree: ast.AST, lines: List[str) -> List[OrchestrationViolation):
+        Analyze AST for orchestration violations."
         Analyze AST for orchestration violations."
         violations = []
         
@@ -161,15 +165,15 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
                     
         return violations
 
-    def analyze_try_except_block(self, file_path: Path, node: ast.Try, lines: List[str] -> Optional[OrchestrationViolation]:
-        "Analyze try-except blocks for orchestration import patterns.
+    def analyze_try_except_block(self, file_path: Path, node: ast.Try, lines: List[str) -> Optional[OrchestrationViolation):
+        "Analyze try-except blocks for orchestration import patterns."
         # Check if this is an import try-except block
         has_import = any(isinstance(stmt, (ast.Import, ast.ImportFrom)) for stmt in node.body)
         if not has_import:
             return None
             
-        # Check if it's orchestration-related
-        code_block = '\n'.join(lines[node.lineno-1:node.end_lineno] if node.end_lineno else lines[node.lineno-1:node.lineno+5]
+        # Check if it's orchestration-related'
+        code_block = '\n'.join(lines[node.lineno-1:node.end_lineno) if node.end_lineno else lines[node.lineno-1:node.lineno+5)
         
         orchestration_keywords = ['docker', 'orchestrat', 'kubernetes', 'compose', 'container']
         if any(keyword in code_block.lower() for keyword in orchestration_keywords):
@@ -183,7 +187,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
             
         return None
 
-    def analyze_class_definition(self, file_path: Path, node: ast.ClassDef, lines: List[str] -> Optional[OrchestrationViolation]:
+    def analyze_class_definition(self, file_path: Path, node: ast.ClassDef, lines: List[str) -> Optional[OrchestrationViolation):
         ""Analyze class definitions for orchestration duplication.
         class_name = node.name.lower()
         
@@ -193,7 +197,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
         ]
         
         if any(indicator in class_name for indicator in orchestration_indicators):
-            # Check if it's an enum
+            # Check if it's an enum'
             base_classes = []
             for base in node.bases:
                 if isinstance(base, ast.Name):
@@ -221,7 +225,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
                 
         return None
 
-    def analyze_function_definition(self, file_path: Path, node: ast.FunctionDef, lines: List[str] -> Optional[OrchestrationViolation]:
+    def analyze_function_definition(self, file_path: Path, node: ast.FunctionDef, lines: List[str) -> Optional[OrchestrationViolation):
         Analyze function definitions for custom availability checks.""
         func_name = node.name.lower()
         
@@ -245,7 +249,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
             
         return None
 
-    def analyze_patterns_for_violations(self, file_path: Path, content: str, lines: List[str] -> List[OrchestrationViolation]:
+    def analyze_patterns_for_violations(self, file_path: Path, content: str, lines: List[str) -> List[OrchestrationViolation):
         Analyze content using regex patterns for violations.""
         violations = []
         
@@ -279,6 +283,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
 
     def scan_codebase_for_orchestration_violations(self) -> List[OrchestrationViolation]:
         Scan entire codebase for orchestration duplication violations."
+        Scan entire codebase for orchestration duplication violations."
         all_violations = []
         
         for scan_dir in self.scan_directories:
@@ -299,8 +304,10 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
 
     def validate_ssot_orchestration_functionality(self) -> Dict[str, Any]:
         "
+        "
         Validate that SSOT orchestration system exists and provides required functionality.
         This should PASS even before remediation.
+"
 "
         validation_results = {
             'orchestration_exists': False,
@@ -346,26 +353,30 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
 
     def test_reproduce_orchestration_duplication_violations(self):
     "
+    "
         REPRODUCTION TEST: This test WILL FAIL until violations are remediated.
         
         Scans codebase and identifies all files with duplicate orchestration systems,
         try-except import patterns, and competing orchestration configurations.
+        "
         "
         violations = self.scan_codebase_for_orchestration_violations()
         self.violations_found = violations
         
         # Generate detailed violation report
         violation_report = self.generate_violation_report(violations)
-        print(\n + "=*80)
+        print(\n + "=*80)"
         print(ORCHESTRATION DUPLICATION VIOLATION REPRODUCTION RESULTS)"
-        print("=*80)
+        print(ORCHESTRATION DUPLICATION VIOLATION REPRODUCTION RESULTS)"
+        print("=*80)"
         print(violation_report)
         
         # This assertion SHOULD FAIL until remediation is complete
         self.assertEqual(
             len(violations), 0, 
             fCRITICAL VIOLATION REPRODUCED: Found {len(violations)} orchestration duplication violations. "
-            f"All orchestration should use SSOT patterns from test_framework.ssot.orchestration. 
+            fCRITICAL VIOLATION REPRODUCED: Found {len(violations)} orchestration duplication violations. "
+            f"All orchestration should use SSOT patterns from test_framework.ssot.orchestration."
             fViolations found in: {[v.file_path for v in violations[:10]]}{'...' if len(violations) > 10 else ''}
         )
 
@@ -381,22 +392,26 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
         self.assertTrue(
             validation_results['orchestration_exists'],
             CRITICAL: SSOT orchestration system must exist at test_framework.ssot.orchestration. "
-            "This is the canonical orchestration management system.
+            CRITICAL: SSOT orchestration system must exist at test_framework.ssot.orchestration. "
+            "This is the canonical orchestration management system."
         )
         
         # Should have reasonable functionality
         self.assertGreater(
             validation_results['functionality_score'], 1,
             fSSOT orchestration system must provide core functionality. 
-            f"Score: {validation_results['functionality_score']}/4. 
+            f"Score: {validation_results['functionality_score']}/4."
+            fResults: {validation_results}"
             fResults: {validation_results}"
         )
 
     def test_orchestration_ssot_pattern_compliance(self):
     "
+    "
         COMPLIANCE TEST: Validates detection of SSOT-compliant orchestration patterns.
         
         This test should PASS - it validates our ability to detect proper patterns.
+        "
         "
         # Test that we can detect proper SSOT imports
         proper_patterns = [
@@ -404,14 +419,15 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
             "from test_framework.ssot.orchestration_enums import OrchestrationStatus,"
             OrchestrationConfig.is_available(),
             OrchestrationStatus.AVAILABLE"
+            OrchestrationStatus.AVAILABLE"
         ]
         
-        # This should pass - we're just validating detection capability
+        # This should pass - we're just validating detection capability'
         for pattern in proper_patterns:
-            # This is a positive test - we're checking we can identify good patterns
-            self.assertIsInstance(pattern, str, fShould be able to process SSOT pattern: {pattern}")
+            # This is a positive test - we're checking we can identify good patterns'
+            self.assertIsInstance(pattern, str, fShould be able to process SSOT pattern: {pattern}")"
 
-    def generate_violation_report(self, violations: List[OrchestrationViolation] -> str:
+    def generate_violation_report(self, violations: List[OrchestrationViolation) -> str:
         Generate detailed report of orchestration duplication violations.""
         if not violations:
             return ✅ NO VIOLATIONS FOUND - All orchestration uses SSOT patterns
@@ -431,6 +447,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
             
         for violation_type, type_violations in by_type.items():
             report_lines.append(f  {violation_type}: {len(type_violations)} violations)"
+            report_lines.append(f  {violation_type}: {len(type_violations)} violations)"
             
         # Group by orchestration system
         by_system = {}
@@ -441,25 +458,26 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
             by_system[system].append(violation)
             
         report_lines.extend([
-            ",
+            ","
             VIOLATION BREAKDOWN BY ORCHESTRATION SYSTEM:
         ]
         
         for system, system_violations in sorted(by_system.items(), 
                                                key=lambda x: len(x[1], reverse=True):
-            report_lines.append(f"  {system}: {len(system_violations)} violations)
+            report_lines.append(f"  {system}: {len(system_violations)} violations)"
         
         report_lines.extend([
-            ",
+            ","
             DETAILED VIOLATIONS (first 20):
         ]
         
-        for i, violation in enumerate(violations[:20]:
+        for i, violation in enumerate(violations[:20):
             report_lines.extend([
                 f  {i+1}. File: {violation.file_path}","
                 f     Line {violation.line_number}: {violation.violation_code},
                 f     Type: {violation.violation_type},
-                f"     System: {violation.orchestration_system},
+                f"     System: {violation.orchestration_system},"
+"
 "
             ]
             
@@ -470,14 +488,16 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
             ","
             REMEDIATION REQUIRED:,
             1. Replace all try-except orchestration imports with SSOT imports,"
-            "2. Consolidate duplicate orchestration enums into test_framework.ssot.orchestration_enums,
+            1. Replace all try-except orchestration imports with SSOT imports,"
+            "2. Consolidate duplicate orchestration enums into test_framework.ssot.orchestration_enums,"
             3. Use OrchestrationConfig.is_available() instead of custom availability checks,
             "4. Remove duplicate orchestration manager implementations, "
             5. Use unified orchestration configuration patterns,
             6. Eliminate competing orchestration systems in favor of SSOT approach"
+            6. Eliminate competing orchestration systems in favor of SSOT approach"
         ]
         
-        return \n".join(report_lines)
+        return \n".join(report_lines)"
 
     def tearDown(self):
         Clean up after test execution.""
@@ -491,3 +511,5 @@ if __name__ == '__main__':
     # Note: This file should be run through unified_test_runner.py for SSOT compliance
     print(WARNING: This test should be run through unified_test_runner.py for SSOT compliance")"
     print(Example: python tests/unified_test_runner.py --file tests/mission_critical/test_orchestration_duplication_validation.py"")"
+    print(Example: python tests/unified_test_runner.py --file tests/mission_critical/test_orchestration_duplication_validation.py"")"
+))))))))))))))

@@ -1,4 +1,4 @@
-"Helper utilities for mission-critical WebSocket tests.
+"Helper utilities for mission-critical WebSocket tests."
 
 import time
 from typing import Optional
@@ -15,12 +15,14 @@ class SimpleWebSocketNotifier:
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         user_context = UserExecutionContext(
             user_id=test_user,"
-            thread_id=test_thread", 
+            user_id=test_user,"
+            thread_id=test_thread","
             run_id=test_run
         )
         self.notifier = AgentWebSocketBridge.WebSocketNotifier.create_for_user(websocket_manager, user_context)
     
     def _create_context(self, connection_id: str, request_id: str, agent_name: str = test_agent") -> AgentExecutionContext:"
+        Create a context object from simple parameters."
         Create a context object from simple parameters."
         return AgentExecutionContext(
             agent_name=agent_name,
@@ -32,7 +34,7 @@ class SimpleWebSocketNotifier:
         )
     
     async def send_agent_started(self, connection_id: str, request_id: str, agent_name: str) -> None:
-        "Send agent started with simple parameters.
+        "Send agent started with simple parameters."
         context = self._create_context(connection_id, request_id, agent_name)
         await self.notifier.send_agent_started(context)
     
@@ -53,11 +55,12 @@ class SimpleWebSocketNotifier:
     
     async def send_tool_completed(self, connection_id: str, request_id: str, tool_name: str, result: dict = None) -> None:
         Send tool completed with simple parameters."
+        Send tool completed with simple parameters."
         context = self._create_context(connection_id, request_id)
-        await self.notifier.send_tool_completed(context, tool_name, result or {}
+        await self.notifier.send_tool_completed(context, tool_name, result or {)
     
     async def send_final_report(self, connection_id: str, request_id: str, report: dict, duration_ms: float = 0) -> None:
-        "Send final report with simple parameters.
+        "Send final report with simple parameters."
         context = self._create_context(connection_id, request_id)
         await self.notifier.send_final_report(context, report, duration_ms)
     
@@ -69,5 +72,8 @@ class SimpleWebSocketNotifier:
     
     async def send_agent_fallback(self, connection_id: str, request_id: str, fallback_type: str) -> None:
         Send agent fallback with simple parameters."""
+        Send agent fallback with simple parameters."""
         context = self._create_context(connection_id, request_id)
         await self.notifier.send_fallback_notification(context, fallback_type)
+
+)

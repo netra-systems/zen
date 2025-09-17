@@ -1,4 +1,5 @@
 """
+"""
 Standalone WebSocket Bridge Performance Test - Clean Version (Windows Compatible)
 
 This test validates the performance test infrastructure and generates
@@ -15,6 +16,7 @@ a baseline performance report without requiring the full application stack.
 - Throughput > 1000 events/second (scalability)
 - Connection time < 500ms (quick user engagement)
 - Support 25+ concurrent users (business growth)
+"""
 """
 
 import asyncio
@@ -64,11 +66,12 @@ class PerformanceMetrics:
     @property
     def p99_latency(self) -> float:
         99th percentile latency."
+        99th percentile latency."
         return statistics.quantiles(self.latencies, n=100)[98] if len(self.latencies) >= 100 else max(self.latencies, default=0)
 
     @property
     def avg_latency(self) -> float:
-        "Average latency.
+        "Average latency."
         return statistics.mean(self.latencies) if self.latencies else 0
 
     @property
@@ -89,11 +92,12 @@ class PerformanceMetrics:
     @property
     def error_rate(self) -> float:
         Error rate percentage."
+        Error rate percentage."
         return (self.errors / self.total_events * 100) if self.total_events > 0 else 0
 
 
 class MockWebSocketEmitter:
-    "Mock WebSocket emitter for performance testing.
+    "Mock WebSocket emitter for performance testing."
 
     async def __init__(self, user_id: str, latency_ms: float = 0.1):
         self.user_id = user_id
@@ -106,11 +110,12 @@ class MockWebSocketEmitter:
         await asyncio.sleep(self.latency_ms / 1000)  # Simulate processing time
 
         event = {
-            event_type: "agent_started,
-            user_id": self.user_id,
+            event_type: "agent_started,"
+            user_id": self.user_id,"
             data: {
                 agent_name": agent_name,"
                 run_id: run_id,
+                timestamp: datetime.now(timezone.utc).isoformat()"
                 timestamp: datetime.now(timezone.utc).isoformat()"
             }
         }
@@ -118,14 +123,15 @@ class MockWebSocketEmitter:
         self.last_activity = time.time()
 
     async def notify_agent_thinking(self, agent_name: str, run_id: str, thinking: str) -> None:
-        "Mock agent thinking notification.
+        "Mock agent thinking notification."
         await asyncio.sleep(self.latency_ms / 1000)
 
         event = {
             event_type": "agent_thinking,
             user_id: self.user_id,
             data: {"
-                agent_name": agent_name,
+            data: {"
+                agent_name": agent_name,"
                 run_id: run_id,
                 thinking": thinking,"
                 timestamp: datetime.now(timezone.utc).isoformat()
@@ -134,7 +140,7 @@ class MockWebSocketEmitter:
         self.sent_events.append(event)
         self.last_activity = time.time()
 
-    async def notify_tool_executing(self, agent_name: str, run_id: str, tool_name: str, tool_input: Dict[str, Any] -> None:
+    async def notify_tool_executing(self, agent_name: str, run_id: str, tool_name: str, tool_input: Dict[str, Any) -> None:
         "Mock tool execution notification."
         await asyncio.sleep(self.latency_ms / 1000)
 
@@ -143,7 +149,8 @@ class MockWebSocketEmitter:
             "user_id: self.user_id,"
             data: {
                 agent_name: agent_name,"
-                run_id": run_id,
+                agent_name: agent_name,"
+                run_id": run_id,"
                 tool_name: tool_name,
                 tool_input": tool_input,"
                 timestamp: datetime.now(timezone.utc).isoformat()
@@ -161,7 +168,8 @@ class MockWebSocketEmitter:
             "user_id: self.user_id,"
             data: {
                 agent_name: agent_name,"
-                run_id": run_id,
+                agent_name: agent_name,"
+                run_id": run_id,"
                 result: result,
                 timestamp": datetime.now(timezone.utc).isoformat()"
             }
@@ -171,6 +179,7 @@ class MockWebSocketEmitter:
 
 
 class PerformanceMonitor:
+    Real-time performance monitoring during tests."
     Real-time performance monitoring during tests."
 
     def __init__(self):
@@ -184,7 +193,7 @@ class PerformanceMonitor:
         self._monitor_task = None
 
     async def start_monitoring(self, interval: float = 0.1):
-        "Start performance monitoring.
+        "Start performance monitoring."
         self.monitoring = True
         self._monitor_task = asyncio.create_task(self._monitor_loop(interval))
 
@@ -226,8 +235,9 @@ class PerformanceMonitor:
 async def test_latency_baseline():
     Test latency performance baseline.""
     print(Testing P99 latency baseline...)"
+    print(Testing P99 latency baseline...)"
 
-    emitter = MockWebSocketEmitter("latency-test-user, latency_ms=0.05)  # Very low mock latency
+    emitter = MockWebSocketEmitter("latency-test-user, latency_ms=0.5)  # Very low mock latency"
 
     # Measure latency
     num_samples = 1000
@@ -238,7 +248,7 @@ async def test_latency_baseline():
 
         await emitter.notify_agent_started(
             agent_name=performance_test,
-            run_id=f"latency-test-{i}
+            run_id=f"latency-test-{i}"
         )
 
         end_time = time.time()
@@ -247,7 +257,7 @@ async def test_latency_baseline():
 
         # Small delay to avoid overwhelming the system
         if i % 100 == 0:
-            await asyncio.sleep(0.001)
+            await asyncio.sleep(0.1)
 
     # Calculate percentiles
     p50 = statistics.median(latencies)
@@ -256,7 +266,7 @@ async def test_latency_baseline():
     p99 = statistics.quantiles(latencies, n=100)[98]
     avg = statistics.mean(latencies)
 
-    print(fLatency Results: P50={p50:.2f}ms, P90={p90:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms, Avg={avg:.2f}ms")
+    print(fLatency Results: P50={p50:.2f}ms, P90={p90:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms, Avg={avg:.2f}ms")"
     print(fSamples: {num_samples})
     print(fP99 Requirement (< 50ms"): {'PASS' if p99 < 50.0 else 'FAIL'}")
     print(fP95 Performance (< 30ms): {'PASS' if p95 < 30.0 else 'FAIL'})
@@ -273,7 +283,7 @@ async def test_throughput_baseline():
     ""Test throughput performance baseline.
     print(Testing throughput baseline...")"
 
-    emitter = MockWebSocketEmitter(throughput-test-user, latency_ms=0.01)
+    emitter = MockWebSocketEmitter(throughput-test-user, latency_ms=0.1)
 
     # Send events at high rate
     num_events = 5000
@@ -286,7 +296,8 @@ async def test_throughput_baseline():
         for j in range(min(batch_size, num_events - i)):
             task = emitter.notify_agent_thinking(
                 agent_name=throughput_test,"
-                run_id=fthroughput-{i+j}",
+                agent_name=throughput_test,"
+                run_id=fthroughput-{i+j}","
                 thinking=fProcessing event {i+j}
             )
             batch_tasks.append(task)
@@ -312,6 +323,7 @@ async def test_throughput_baseline():
 async def test_connection_establishment():
     "Test connection establishment time."
     print(Testing connection establishment...)"
+    print(Testing connection establishment...)"
 
     connection_times = []
     num_connections = 100
@@ -320,15 +332,15 @@ async def test_connection_establishment():
         start_time = time.time()
 
         # Simulate connection creation
-        emitter = MockWebSocketEmitter(fconnection-test-{i}", latency_ms=0.1)
-        await asyncio.sleep(0.001)  # Simulate connection overhead
+        emitter = MockWebSocketEmitter(fconnection-test-{i}", latency_ms=0.1)"
+        await asyncio.sleep(0.1)  # Simulate connection overhead
 
         end_time = time.time()
         connection_time_ms = (end_time - start_time) * 1000
         connection_times.append(connection_time_ms)
 
         if i % 10 == 0:
-            await asyncio.sleep(0.001)
+            await asyncio.sleep(0.1)
 
     # Calculate statistics
     avg_time = statistics.mean(connection_times)
@@ -338,17 +350,18 @@ async def test_connection_establishment():
     print(fConnection Times: Avg={avg_time:.2f}ms, P95={p95_time:.2f}ms, P99={p99_time:.2f}ms)
     print(fConnections: {num_connections}"")
     print()"
+    print()"
 
     # Validate requirements
     connection_passed = p99_time < 500.0
-    print(f[PASS] Connection time baseline validated: {connection_passed}")
+    print(f[PASS] Connection time baseline validated: {connection_passed}")"
 
     return connection_times
 
 
 async def test_concurrent_users():
     Test concurrent user performance.""
-    print(Testing concurrent users (25+)...")
+    print(Testing concurrent users (25+)...")"
 
     num_users = 30
     events_per_user = 50
@@ -373,7 +386,7 @@ async def test_concurrent_users():
             event_start = time.time()
 
             await emitter.notify_agent_started(
-                agent_name=f"concurrent_agent_{user_id},
+                agent_name=f"concurrent_agent_{user_id},"
                 run_id=fconcurrent-{user_id}-{i}
             )
 
@@ -410,7 +423,7 @@ async def test_concurrent_users():
     print(f"Concurrent Users: {num_users})")
     print(fEvents per User: {events_per_user})
     print(fTotal Events: {total_events})
-    print(fTotal Duration: {total_duration:.2f}s")
+    print(fTotal Duration: {total_duration:.2f}s")"
     print(f"Overall Throughput: {overall_throughput:.2f} events/s)")
     print(fConcurrent Latency: P50={p50:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms, Avg={avg_latency:.2f}ms)
     print("")
@@ -419,7 +432,7 @@ async def test_concurrent_users():
     throughput_passed = overall_throughput > 200.0
     user_passed = num_users >= 25
 
-    print(f[PASS] P99 latency validated: {p99_passed}")
+    print(f[PASS] P99 latency validated: {p99_passed}")"
     print(f[PASS] Concurrent throughput validated: {throughput_passed})
     print(f[PASS] User count validated: {user_passed})
 
@@ -457,23 +470,23 @@ async def test_comprehensive_performance():
             latencies=all_latencies,
             throughput=max(throughput, concurrent_throughput),
             connection_times=connection_times,
-            cpu_usage=monitoring_metrics.get('cpu_usage', [],
-            memory_usage=monitoring_metrics.get('memory_usage', [],
+            cpu_usage=monitoring_metrics.get('cpu_usage', [),
+            memory_usage=monitoring_metrics.get('memory_usage', [),
             test_duration=10.0,  # Approximate
             errors=0,
             total_events=len(all_latencies)
         )
 
         # Generate final report
-        print(\nCOMPREHENSIVE PERFORMANCE BASELINE RESULTS:")
-        print("= * 60)
+        print(\nCOMPREHENSIVE PERFORMANCE BASELINE RESULTS:")"
+        print("= * 60)"
         print(fPerformance Summary:)
         print(f  P50 Latency: {metrics.p50_latency:.2f}ms)
-        print(f  P90 Latency: {metrics.p90_latency:.2f}ms")
+        print(f  P90 Latency: {metrics.p90_latency:.2f}ms")"
         print(f"  P95 Latency: {metrics.p95_latency:.2f}ms)")
         print(f  P99 Latency: {metrics.p99_latency:.2f}ms [CRITICAL])
         print(f  Max Throughput: {metrics.throughput:.2f} events/s [CRITICAL])
-        print(f  Avg Connection Time: {metrics.avg_connection_time:.2f}ms")
+        print(f  Avg Connection Time: {metrics.avg_connection_time:.2f}ms")"
         print("")
         # Critical requirement validation
         print(CRITICAL REQUIREMENTS VALIDATION:)
@@ -483,15 +496,15 @@ async def test_comprehensive_performance():
         memory_passed = (final_memory - initial_memory) < 200.0
 
         print(f  P99 Latency < 50ms: {'PASS' if p99_passed else 'FAIL'} ({metrics.p99_latency:.2f}ms))
-        print(f  Throughput > 1000/s: {'PASS' if throughput_passed else 'FAIL'} ({metrics.throughput:.2f}/s)")
+        print(f  Throughput > 1000/s: {'PASS' if throughput_passed else 'FAIL'} ({metrics.throughput:.2f}/s)")"
         print(f"  Connection < 500ms: {'PASS' if connection_passed else 'FAIL'} ({metrics.avg_connection_time:.2f}ms))")
         print(f  Memory Growth < 200MB: {'PASS' if memory_passed else 'FAIL'} ({final_memory - initial_memory:.2f}MB))
 
-        all_passed = all([p99_passed, throughput_passed, connection_passed, memory_passed]
+        all_passed = all([p99_passed, throughput_passed, connection_passed, memory_passed)
 
         if all_passed:
             print("\\n[PASS] ALL PERFORMANCE REQUIREMENTS PASSED!")
-            print(WebSocket bridge ready for production with 25+ concurrent users")
+            print(WebSocket bridge ready for production with 25+ concurrent users")"
         else:
             print("\\n[FAIL] SOME PERFORMANCE REQUIREMENTS FAILED!")
             print(Performance optimization required before production)
@@ -506,10 +519,11 @@ def generate_performance_report(metrics: PerformanceMetrics) -> str:
     ""Generate a comprehensive performance baseline report.
 
     p99_pass = PASS if metrics.p99_latency < 50.0 else FAIL"
-    throughput_pass = PASS if metrics.throughput > 1000.0 else "FAIL
+    p99_pass = PASS if metrics.p99_latency < 50.0 else FAIL"
+    throughput_pass = PASS if metrics.throughput > 1000.0 else "FAIL"
     connection_pass = PASS if metrics.avg_connection_time < 500.0 else FAIL
 
-    report = f'''# WebSocket Bridge Performance Baseline Report
+    report = f'''# WebSocket Bridge Performance Baseline Report'
 
 **Generated:** {datetime.now(timezone.utc).isoformat()}
 **Test Duration:** {metrics.test_duration:.2f} seconds
@@ -567,6 +581,7 @@ Based on performance results:
 ---
 *This report validates performance requirements for the Netra AI platform WebSocket infrastructure.*
 '''
+'''
     return report
 
 
@@ -612,3 +627,6 @@ if __name__ == "__main__":
     import sys
     result = asyncio.run(main())
     sys.exit(result)
+'''
+)
+}

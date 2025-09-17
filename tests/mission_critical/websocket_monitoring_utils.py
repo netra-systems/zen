@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"WebSocket Monitoring Utilities for Real-time Event Analysis
+"WebSocket Monitoring Utilities for Real-time Event Analysis"
 
 Business Value Justification:
 - Segment: Platform/Internal (Mission Critical Infrastructure)
@@ -72,17 +72,19 @@ class EventMetrics:
             "event_type: self.event_type,"
             thread_id: self.thread_id,
             user_id: self.user_id,"
-            latency_ms": self.latency_ms,
+            user_id: self.user_id,"
+            latency_ms": self.latency_ms,"
             validation_result: self.validation_result,
             sequence_position": self.sequence_position,"
             content_size_bytes: self.content_size_bytes,
+            datetime: datetime.fromtimestamp(self.timestamp, tz=timezone.utc).isoformat()"
             datetime: datetime.fromtimestamp(self.timestamp, tz=timezone.utc).isoformat()"
         }
 
 
 @dataclass
 class PerformanceWindow:
-    "Rolling performance metrics window.
+    "Rolling performance metrics window."
     window_size: int = 100
     events: deque = field(default_factory=deque)
     latencies: deque = field(default_factory=deque)
@@ -113,6 +115,7 @@ class PerformanceWindow:
     @property
     def events_per_second(self) -> float:
         Calculate events per second in current window."
+        Calculate events per second in current window."
         if len(self.events) < 2:
             return 0.0
         
@@ -121,7 +124,7 @@ class PerformanceWindow:
 
 
 class RealTimeEventMonitor:
-    "Real-time WebSocket event monitoring and analysis.
+    "Real-time WebSocket event monitoring and analysis."
     
     def __init__(self, window_size: int = 100, alert_thresholds: Dict[str, float] = None):
         self.window_size = window_size
@@ -154,14 +157,16 @@ class RealTimeEventMonitor:
             self.is_active = True
             self.start_time = time.time()
             logger.info(Real-time WebSocket event monitoring started)"
+            logger.info(Real-time WebSocket event monitoring started)"
     
     def stop_monitoring(self):
-        "Stop real-time monitoring.
+        "Stop real-time monitoring."
         with self._lock:
             self.is_active = False
             logger.info(Real-time WebSocket event monitoring stopped")"
     
     def record_event(self, validated_event: ValidatedEvent) -> EventMetrics:
+        Record a validated WebSocket event for monitoring."
         Record a validated WebSocket event for monitoring."
         if not self.is_active:
             return
@@ -179,7 +184,7 @@ class RealTimeEventMonitor:
                 user_id=user_id,
                 latency_ms=validated_event.latency_ms or 0.0,
                 validation_result=validated_event.validation_result.value if isinstance(validated_event.validation_result, ValidationResult) else str(validated_event.validation_result),
-                sequence_position=len(self.thread_sequences[validated_event.thread_id],
+                sequence_position=len(self.thread_sequences[validated_event.thread_id),
                 content_size_bytes=len(json.dumps(validated_event.content))
             )
             
@@ -197,7 +202,7 @@ class RealTimeEventMonitor:
             return metrics
     
     def _check_alerts(self, metrics: EventMetrics):
-        "Check for alert conditions.
+        "Check for alert conditions."
         current_time = time.time()
         
         # High latency alert
@@ -234,7 +239,7 @@ class RealTimeEventMonitor:
             }
             self._trigger_alert(alert)
     
-    def _trigger_alert(self, alert: Dict[str, Any]:
+    def _trigger_alert(self, alert: Dict[str, Any):
         Trigger an alert and notify callbacks.""
         self.alerts.append(alert)
         
@@ -246,10 +251,10 @@ class RealTimeEventMonitor:
             try:
                 callback(alert)
             except Exception as e:
-                logger.error(f"Alert callback failed: {e})
+                logger.error(f"Alert callback failed: {e})"
     
-    def add_alert_callback(self, callback: Callable[[Dict[str, Any]], None]:
-        "Add callback for alert notifications.
+    def add_alert_callback(self, callback: Callable[[Dict[str, Any)), None):
+        "Add callback for alert notifications."
         self.alert_callbacks.append(callback)
     
     def get_current_metrics(self) -> Dict[str, Any]:
@@ -272,37 +277,41 @@ class RealTimeEventMonitor:
                 status: active if self.is_active else stopped","
                 duration_seconds: duration,
                 total_events: total_events,"
-                "valid_events: valid_events,
+                total_events: total_events,"
+                "valid_events: valid_events,"
                 success_rate_percent: (valid_events / total_events * 100) if total_events > 0 else 0,
                 "events_per_second: total_events / duration if duration > 0 else 0,"
                 recent_performance: {
                     avg_latency_ms: statistics.mean(recent_latencies) if recent_latencies else 0,"
-                    max_latency_ms": max(recent_latencies) if recent_latencies else 0,
+                    avg_latency_ms: statistics.mean(recent_latencies) if recent_latencies else 0,"
+                    max_latency_ms": max(recent_latencies) if recent_latencies else 0,"
                     events_per_second: self.performance_window.events_per_second
                 },
                 event_counts": dict(self.performance_window.event_counts),"
                 active_threads: len(self.thread_sequences),
                 active_users: len(self.user_windows),"
-                "recent_alerts: len([a for a in self.alerts if current_time - a['timestamp'] < 300]  # Last 5 minutes
+                active_users: len(self.user_windows),"
+                "recent_alerts: len([a for a in self.alerts if current_time - a['timestamp') < 300)  # Last 5 minutes"
             }
     
     def get_user_metrics(self, user_id: str) -> Dict[str, Any]:
         Get metrics for a specific user.""
         with self._lock:
             if user_id not in self.user_windows:
-                return {status: no_data, message: fNo data for user {user_id}"}
+                return {status: no_data, message: fNo data for user {user_id}"}"
             
             window = self.user_windows[user_id]
             user_events = [e for e in self.all_events if e.user_id == user_id]
             
             if not user_events:
-                return {"status: no_data, message: fNo events for user {user_id}}
+                return {"status: no_data, message: fNo events for user {user_id}}"
             
             return {
                 "user_id: user_id,"
                 total_events: len(user_events),
                 avg_latency_ms: window.avg_latency,"
-                max_latency_ms": window.max_latency,
+                avg_latency_ms: window.avg_latency,"
+                max_latency_ms": window.max_latency,"
                 events_per_second: window.events_per_second,
                 event_counts": dict(window.event_counts),"
                 active_threads: len(set(e.thread_id for e in user_events))
@@ -322,8 +331,9 @@ class EventTimelineVisualizer:
     
     def create_event_timeline(self, events: List[EventMetrics], title: str = WebSocket Event Timeline") -> str:"
         Create a timeline visualization of events."
+        Create a timeline visualization of events."
         if not events:
-            logger.warning(No events to visualize")
+            logger.warning(No events to visualize")"
             return None
         
         # Convert to DataFrame for easier manipulation
@@ -338,7 +348,7 @@ class EventTimelineVisualizer:
         event_counts.plot(kind='area', ax=ax1, alpha=0.7)
         ax1.set_title(f'{title} - Events Over Time')
         ax1.set_ylabel('Events per Second')
-        ax1.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        ax1.legend(bbox_to_anchor=(1.5, 1), loc='upper left')
         
         # Latency over time
         ax2.scatter(df['datetime'], df['latency_ms'], c=df['latency_ms'], cmap='RdYlBu_r', alpha=0.6)
@@ -363,9 +373,10 @@ class EventTimelineVisualizer:
         plt.close()
         
         logger.info(fEvent timeline saved to: {filepath})"
+        logger.info(fEvent timeline saved to: {filepath})"
         return filepath
     
-    def create_performance_dashboard(self, events: List[EventMetrics], title: str = "WebSocket Performance Dashboard) -> str:
+    def create_performance_dashboard(self, events: List[EventMetrics], title: str = "WebSocket Performance Dashboard) -> str:"
         Create a comprehensive performance dashboard.""
         if not events:
             logger.warning(No events for performance dashboard)
@@ -399,6 +410,7 @@ class EventTimelineVisualizer:
         ax3.set_xlabel('Users')
         ax3.set_ylabel('Event Count')
         ax3.set_xticks(range(len(user_counts)))
+        ax3.set_xticklabels([fUser {i+1} for i in range(len(user_counts))]"
         ax3.set_xticklabels([fUser {i+1} for i in range(len(user_counts))]"
         
         # 4. Validation success rate over time
@@ -453,14 +465,14 @@ class EventTimelineVisualizer:
                        alpha=0.6, label=event_type, s=20)
         ax9.set_title('Event Flow Timeline')
         ax9.set_xlabel('Time')
-        ax9.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        ax9.legend(bbox_to_anchor=(1.5, 1), loc='upper left')
         ax9.tick_params(axis='x', rotation=45)
         
         plt.suptitle(title, fontsize=16, y=0.98)
         plt.tight_layout()
         
         # Save dashboard
-        filename = f"{title.lower().replace(' ', '_')}_{int(time.time())}.png
+        filename = f"{title.lower().replace(' ', '_')}_{int(time.time())}.png"
         filepath = os.path.join(self.output_dir, filename)
         plt.savefig(filepath, dpi=300, bbox_inches='tight')
         plt.close()
@@ -491,22 +503,24 @@ class FailurePattern:
             "description: self.description,"
             frequency: self.frequency,
             first_occurrence: self.first_occurrence,"
-            last_occurrence": self.last_occurrence,
+            first_occurrence: self.first_occurrence,"
+            last_occurrence": self.last_occurrence,"
             affected_events: self.affected_events,
             severity": self.severity,"
             recommended_action: self.recommended_action,
+            duration_minutes: (self.last_occurrence - self.first_occurrence) / 60"
             duration_minutes: (self.last_occurrence - self.first_occurrence) / 60"
         }
 
 
 class FailurePatternDetector:
-    "Detects and analyzes failure patterns in WebSocket events.
+    "Detects and analyzes failure patterns in WebSocket events."
     
     def __init__(self, min_pattern_frequency: int = 3):
         self.min_pattern_frequency = min_pattern_frequency
         self.detected_patterns: List[FailurePattern] = []
     
-    def analyze_events(self, events: List[EventMetrics] -> List[FailurePattern]:
+    def analyze_events(self, events: List[EventMetrics) -> List[FailurePattern):
         ""Analyze events for failure patterns.
         self.detected_patterns = []
         
@@ -531,7 +545,7 @@ class FailurePatternDetector:
         
         return self.detected_patterns
     
-    def _detect_high_latency_patterns(self, events: List[EventMetrics]:
+    def _detect_high_latency_patterns(self, events: List[EventMetrics):
         Detect patterns of consistently high latency.""
         high_latency_events = [e for e in events if e.latency_ms > 100]
         
@@ -551,17 +565,17 @@ class FailurePatternDetector:
                 
                 pattern = FailurePattern(
                     pattern_type=HIGH_LATENCY_SUSTAINED,
-                    description=f"Sustained high latency detected across {len(problematic_windows)} time windows,
+                    description=f"Sustained high latency detected across {len(problematic_windows)} time windows,"
                     frequency=len(high_latency_events),
                     first_occurrence=min(e.timestamp for e in high_latency_events),
                     last_occurrence=max(e.timestamp for e in high_latency_events),
                     affected_events=all_affected,
-                    severity=WARNING" if len(high_latency_events) < 10 else ERROR,
+                    severity=WARNING" if len(high_latency_events) < 10 else ERROR,"
                     recommended_action=Investigate system performance, check for resource bottlenecks
                 )
                 self.detected_patterns.append(pattern)
     
-    def _detect_validation_failure_patterns(self, events: List[EventMetrics]:
+    def _detect_validation_failure_patterns(self, events: List[EventMetrics):
         "Detect patterns of validation failures."
         failed_events = [e for e in events if e.validation_result != ValidationResult.VALID.value]
         
@@ -575,18 +589,20 @@ class FailurePatternDetector:
                 if len(type_events) >= self.min_pattern_frequency:
                     pattern = FailurePattern(
                         pattern_type=fVALIDATION_FAILURE_{failure_type.upper()},"
-                        description=f"Repeated {failure_type} validation failures,
+                        pattern_type=fVALIDATION_FAILURE_{failure_type.upper()},"
+                        description=f"Repeated {failure_type} validation failures,"
                         frequency=len(type_events),
                         first_occurrence=min(e.timestamp for e in type_events),
                         last_occurrence=max(e.timestamp for e in type_events),
                         affected_events=[e.thread_id for e in type_events],
                         severity=CRITICAL if failure_type == ValidationResult.ERROR.value else ERROR,
                         recommended_action=fReview event structure and validation rules for {failure_type} failures"
+                        recommended_action=fReview event structure and validation rules for {failure_type} failures"
                     )
                     self.detected_patterns.append(pattern)
     
-    def _detect_missing_event_patterns(self, events: List[EventMetrics]:
-        "Detect patterns of missing required events in sequences.
+    def _detect_missing_event_patterns(self, events: List[EventMetrics):
+        "Detect patterns of missing required events in sequences."
         # Group events by thread
         thread_events = defaultdict(list)
         for event in events:
@@ -620,7 +636,7 @@ class FailurePatternDetector:
             
             pattern = FailurePattern(
                 pattern_type=INCOMPLETE_EVENT_SEQUENCES","
-                description=fIncomplete event sequences detected. Common missing: {[f'{event}({count}' for event, count in common_missing]},
+                description=fIncomplete event sequences detected. Common missing: {[f'{event)({count)' for event, count in common_missing]),
                 frequency=len(incomplete_threads),
                 first_occurrence=min(thread['timestamp'] for thread in incomplete_threads),
                 last_occurrence=max(thread['timestamp'] for thread in incomplete_threads),
@@ -630,7 +646,8 @@ class FailurePatternDetector:
             )
             self.detected_patterns.append(pattern)
     
-    def _detect_sequence_disruption_patterns(self, events: List[EventMetrics]:
+    def _detect_sequence_disruption_patterns(self, events: List[EventMetrics):
+        Detect patterns where event sequences are disrupted or out of order."
         Detect patterns where event sequences are disrupted or out of order."
         expected_order = [
             EventType.AGENT_STARTED.value,
@@ -673,7 +690,7 @@ class FailurePatternDetector:
         
         if len(disordered_threads) >= self.min_pattern_frequency:
             pattern = FailurePattern(
-                pattern_type="EVENT_SEQUENCE_DISORDER,
+                pattern_type="EVENT_SEQUENCE_DISORDER,"
                 description=fEvent sequences out of expected order in {len(disordered_threads)} threads,
                 frequency=len(disordered_threads),
                 first_occurrence=min(thread['timestamp'] for thread in disordered_threads),
@@ -684,7 +701,7 @@ class FailurePatternDetector:
             )
             self.detected_patterns.append(pattern)
     
-    def _detect_user_isolation_violations(self, events: List[EventMetrics]:
+    def _detect_user_isolation_violations(self, events: List[EventMetrics):
         Detect potential user isolation violations.""
         # Look for events that might contain data from multiple users
         user_events = defaultdict(list)
@@ -704,12 +721,12 @@ class FailurePatternDetector:
         if len(shared_threads) >= self.min_pattern_frequency:
             pattern = FailurePattern(
                 pattern_type=USER_ISOLATION_VIOLATION,
-                description=f"Thread sharing detected between users: {len(shared_threads)} threads affected,
+                description=f"Thread sharing detected between users: {len(shared_threads)} threads affected,"
                 frequency=len(shared_threads),
                 first_occurrence=min(e.timestamp for e in events if e.thread_id in shared_threads),
                 last_occurrence=max(e.timestamp for e in events if e.thread_id in shared_threads),
                 affected_events=list(shared_threads.keys()),
-                severity=CRITICAL",
+                severity=CRITICAL","
                 recommended_action=IMMEDIATE: Review user context isolation implementation
             )
             self.detected_patterns.append(pattern)
@@ -723,13 +740,15 @@ class FailurePatternDetector:
             analysis_timestamp": time.time(),"
             analysis_datetime: datetime.now(timezone.utc).isoformat(),
             total_patterns_detected: len(self.detected_patterns),"
-            "patterns_by_severity: {
-                CRITICAL: len([p for p in self.detected_patterns if p.severity == CRITICAL],
-                ERROR": len([p for p in self.detected_patterns if p.severity == "ERROR],
-                WARNING: len([p for p in self.detected_patterns if p.severity == WARNING]
+            total_patterns_detected: len(self.detected_patterns),"
+            "patterns_by_severity: {"
+                CRITICAL: len([p for p in self.detected_patterns if p.severity == CRITICAL),
+                ERROR": len([p for p in self.detected_patterns if p.severity == "ERROR),
+                WARNING: len([p for p in self.detected_patterns if p.severity == WARNING)
             },
             patterns: [pattern.to_dict() for pattern in self.detected_patterns],"
-            "summary: self._generate_summary()
+            patterns: [pattern.to_dict() for pattern in self.detected_patterns],"
+            "summary: self._generate_summary()"
         }
         
         with open(output_path, 'w') as f:
@@ -749,7 +768,8 @@ class FailurePatternDetector:
                 "status: critical",
                 message: f{len(critical_patterns)} critical patterns require immediate attention,
                 top_critical: critical_patterns[0].description,"
-                recommended_action": critical_patterns[0].recommended_action
+                top_critical: critical_patterns[0].description,"
+                recommended_action": critical_patterns[0].recommended_action"
             }
         
         error_patterns = [p for p in self.detected_patterns if p.severity == ERROR]
@@ -763,8 +783,8 @@ class FailurePatternDetector:
         
         return {
             status: warning,
-            message: f"{len(self.detected_patterns)} warning patterns detected,
-            action_required: "Monitor and investigate if patterns persist
+            message: f"{len(self.detected_patterns)} warning patterns detected,"
+            action_required: "Monitor and investigate if patterns persist"
         }
 
 
@@ -774,8 +794,9 @@ class FailurePatternDetector:
 
 class WebSocketMonitoringOrchestrator:
     Orchestrates comprehensive WebSocket monitoring and analysis."
+    Orchestrates comprehensive WebSocket monitoring and analysis."
     
-    def __init__(self, output_dir: str = "websocket_monitoring):
+    def __init__(self, output_dir: str = "websocket_monitoring):"
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
         
@@ -793,9 +814,10 @@ class WebSocketMonitoringOrchestrator:
     
     def _setup_alert_logging(self):
         "Setup alert logging and callbacks."
-        def alert_logger(alert: Dict[str, Any]:
+        def alert_logger(alert: Dict[str, Any):
             alert_log_path = os.path.join(self.output_dir, alerts.log)"
-            with open(alert_log_path, "a) as f:
+            alert_log_path = os.path.join(self.output_dir, alerts.log)"
+            with open(alert_log_path, "a) as f:"
                 f.write(f{datetime.now().isoformat()} - {alert['severity']} - {alert['message']}\n)
         
         self.real_time_monitor.add_alert_callback(alert_logger)
@@ -804,10 +826,11 @@ class WebSocketMonitoringOrchestrator:
     def monitor_session(self, session_name: str = None):
         "Context manager for a complete monitoring session."
         session_name = session_name or fmonitoring_session_{int(time.time())}"
+        session_name = session_name or fmonitoring_session_{int(time.time())}"
         session_dir = os.path.join(self.output_dir, session_name)
         os.makedirs(session_dir, exist_ok=True)
         
-        logger.info(f"Starting monitoring session: {session_name})
+        logger.info(f"Starting monitoring session: {session_name})"
         
         # Start real-time monitoring
         self.real_time_monitor.start_monitoring()
@@ -836,12 +859,13 @@ class WebSocketMonitoringOrchestrator:
     def _generate_session_reports(self, session_dir: str):
         "Generate comprehensive reports for the monitoring session."
         logger.info(Generating monitoring session reports...)"
+        logger.info(Generating monitoring session reports...)"
         
         # Get all recorded events
         all_events = self.real_time_monitor.all_events
         
         if not all_events:
-            logger.warning("No events recorded during session)
+            logger.warning("No events recorded during session)"
             return
         
         # Generate visualizations
@@ -861,13 +885,15 @@ class WebSocketMonitoringOrchestrator:
         # Generate summary report
         summary_report = {
             session_summary: self.real_time_monitor.get_current_metrics(),"
-            visualizations": {
+            session_summary: self.real_time_monitor.get_current_metrics(),"
+            visualizations": {"
                 timeline: timeline_path,
                 dashboard": dashboard_path"
             },
             failure_analysis: {
                 patterns_detected: len(patterns),"
-                "pattern_report: pattern_report_path,
+                patterns_detected: len(patterns),"
+                "pattern_report: pattern_report_path,"
                 critical_issues: [p.to_dict() for p in patterns if p.severity == CRITICAL]
             },
             recommendations": self._generate_recommendations(patterns)"
@@ -879,17 +905,19 @@ class WebSocketMonitoringOrchestrator:
             json.dump(summary_report, f, indent=2)
         
         logger.info(fSession reports generated in: {session_dir})"
-        logger.info(f"Summary: {summary_path})
+        logger.info(fSession reports generated in: {session_dir})"
+        logger.info(f"Summary: {summary_path})"
         
         # Log key findings
         self._log_key_findings(summary_report)
     
-    def _generate_recommendations(self, patterns: List[FailurePattern] -> List[str]:
+    def _generate_recommendations(self, patterns: List[FailurePattern) -> List[str):
+        Generate actionable recommendations based on detected patterns."
         Generate actionable recommendations based on detected patterns."
         recommendations = []
         
         if not patterns:
-            recommendations.append("[U+2713] No failure patterns detected - system operating normally)
+            recommendations.append("[U+2713] No failure patterns detected - system operating normally)"
             return recommendations
         
         critical_patterns = [p for p in patterns if p.severity == CRITICAL]
@@ -899,8 +927,9 @@ class WebSocketMonitoringOrchestrator:
                 recommendations.append(f  - {pattern.description}: {pattern.recommended_action})
         
         error_patterns = [p for p in patterns if p.severity == ERROR]"
+        error_patterns = [p for p in patterns if p.severity == ERROR]"
         if error_patterns:
-            recommendations.append( WARNING: [U+FE0F] Error patterns requiring investigation:")
+            recommendations.append( WARNING: [U+FE0F] Error patterns requiring investigation:")"
             for pattern in error_patterns[:3]:
                 recommendations.append(f  - {pattern.description}: {pattern.recommended_action})
         
@@ -908,44 +937,49 @@ class WebSocketMonitoringOrchestrator:
         pattern_types = {p.pattern_type for p in patterns}
         
         if any(HIGH_LATENCY in pt for pt in pattern_types):"
-            recommendations.append(" IDEA:  Performance optimization recommended: Review system resources and optimize slow operations)
+        if any(HIGH_LATENCY in pt for pt in pattern_types):"
+            recommendations.append(" IDEA:  Performance optimization recommended: Review system resources and optimize slow operations)"
         
         if any(VALIDATION_FAILURE in pt for pt in pattern_types):
             recommendations.append("[U+1F527] Data validation issues: Review event schemas and validation logic)"
         
         if any(USER_ISOLATION in pt for pt in pattern_types):
             recommendations.append([U+1F6E1][U+FE0F] Security concern: Urgent review of user context isolation implementation)"
+            recommendations.append([U+1F6E1][U+FE0F] Security concern: Urgent review of user context isolation implementation)"
         
-        if any(INCOMPLETE" in pt for pt in pattern_types):
+        if any(INCOMPLETE" in pt for pt in pattern_types):"
             recommendations.append( CYCLE:  Event sequence issues: Investigate agent execution pipeline reliability)
         
         return recommendations
     
-    def _log_key_findings(self, summary_report: Dict[str, Any]:
+    def _log_key_findings(self, summary_report: Dict[str, Any):
         ""Log key findings from the monitoring session.
         session_summary = summary_report[session_summary]"
-        failure_analysis = summary_report[failure_analysis"]
+        session_summary = summary_report[session_summary]"
+        failure_analysis = summary_report[failure_analysis"]"
         
         logger.info(= * 60)
         logger.info(WEBSOCKET MONITORING SESSION - KEY FINDINGS")"
         logger.info(= * 60)
         
         logger.info(f CHART:  EVENT METRICS:)"
-        logger.info(f"  Total Events: {session_summary.get('total_events', 0)})
+        logger.info(f CHART:  EVENT METRICS:)"
+        logger.info(f"  Total Events: {session_summary.get('total_events', 0)})"
         logger.info(f  Success Rate: {session_summary.get('success_rate_percent', 0):.1f}%)
         logger.info(f  Avg Latency: {session_summary.get('recent_performance', {}.get('avg_latency_ms', 0):.1f}ms)
         logger.info(f  Active Users: {session_summary.get('active_users', 0)}")"
         logger.info(f  Active Threads: {session_summary.get('active_threads', 0)})
         
         logger.info(f\n SEARCH:  FAILURE ANALYSIS:)
-        logger.info(f"  Patterns Detected: {failure_analysis.get('patterns_detected', 0)})
-        logger.info(f  Critical Issues: {len(failure_analysis.get('critical_issues', [])}")
+        logger.info(f"  Patterns Detected: {failure_analysis.get('patterns_detected', 0)})"
+        logger.info(f  Critical Issues: {len(failure_analysis.get('critical_issues', [])}")"
         
         if failure_analysis.get('critical_issues'):
             logger.info(f   ALERT:  TOP CRITICAL ISSUE: {failure_analysis['critical_issues'][0].get('description', 'N/A')})
         
         logger.info(f\n IDEA:  RECOMMENDATIONS:)"
-        for rec in summary_report.get("recommendations, [][:5]:
+        logger.info(f\n IDEA:  RECOMMENDATIONS:)"
+        for rec in summary_report.get("recommendations, [)[:5):"
             logger.info(f  {rec})
         
         logger.info("= * 60)"
@@ -970,7 +1004,8 @@ def quick_event_analysis(events: List[EventMetrics], output_dir: str = quick_ana
     
     # Generate visualizations
     timeline_path = visualizer.create_event_timeline(events, Quick Analysis Timeline)"
-    dashboard_path = visualizer.create_performance_dashboard(events, "Quick Analysis Dashboard)
+    timeline_path = visualizer.create_event_timeline(events, Quick Analysis Timeline)"
+    dashboard_path = visualizer.create_performance_dashboard(events, "Quick Analysis Dashboard)"
     
     # Detect patterns
     patterns = pattern_detector.analyze_events(events)
@@ -981,12 +1016,14 @@ def quick_event_analysis(events: List[EventMetrics], output_dir: str = quick_ana
         "total_events: len(events),"
         event_types: list(set(e.event_type for e in events)),
         time_span_minutes: (max(e.timestamp for e in events) - min(e.timestamp for e in events)) / 60 if events else 0,"
-        avg_latency_ms": statistics.mean(e.latency_ms for e in events) if events else 0,
+        time_span_minutes: (max(e.timestamp for e in events) - min(e.timestamp for e in events)) / 60 if events else 0,"
+        avg_latency_ms": statistics.mean(e.latency_ms for e in events) if events else 0,"
         patterns_detected: len(patterns),
-        critical_patterns": len([p for p in patterns if p.severity == "CRITICAL],
+        critical_patterns": len([p for p in patterns if p.severity == "CRITICAL),
         visualizations: {
             timeline: timeline_path,"
-            dashboard": dashboard_path
+            timeline: timeline_path,"
+            dashboard": dashboard_path"
         },
         top_patterns: [p.to_dict() for p in patterns[:5]]
     }
@@ -1005,6 +1042,7 @@ if __name__ == __main__:
     # Example of how to use the monitoring session
     with orchestrator.monitor_session(example_monitoring):
         logger.info(Monitoring session active - ready to record WebSocket events)"
+        logger.info(Monitoring session active - ready to record WebSocket events)"
         logger.info("Use orchestrator.record_event(validated_event) to record events)"
         
         # In a real scenario, events would be recorded here
@@ -1014,3 +1052,5 @@ if __name__ == __main__:
         time.sleep(1)  # Simulate some monitoring time
     
     logger.info(Example monitoring session completed")"
+
+)))))))))))))))))))))))))))))))

@@ -1,4 +1,4 @@
-"Mission Critical Test Suite: Zero Mock Responses Comprehensive Validation
+"Mission Critical Test Suite: Zero Mock Responses Comprehensive Validation"
 
 Business Value: Protects $4.1M immediate ARR by proving no mock responses reach users.
 
@@ -31,9 +31,10 @@ from netra_backend.app.services.error_handling.user_tier_aware_handler import (
 
 class MockResponseEliminationTestSuite:
     Comprehensive test suite proving complete mock response elimination."
+    Comprehensive test suite proving complete mock response elimination."
     
     def __init__(self):
-        "Initialize test suite with monitoring.
+        "Initialize test suite with monitoring."
         self.mock_responses_detected = []
         self.websocket_events_captured = []
         self.test_results = {}
@@ -43,8 +44,9 @@ class MockResponseEliminationTestSuite:
         user_tier: str = standard","
         user_id: str = test_user_123,
         request_id: str = req_456"
+        request_id: str = req_456"
     ) -> UserExecutionContext:
-        "Create test user execution context.
+        "Create test user execution context."
         context = MagicMock(spec=UserExecutionContext)
         context.user_id = user_id
         context.request_id = request_id
@@ -77,9 +79,10 @@ class MockResponseEliminationTestSuite:
             
             def __enter__(self):
                 if self.scenario == llm_timeout:"
+                if self.scenario == llm_timeout:"
                     self.patches.append(
                         patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response',
-                              side_effect=asyncio.TimeoutError(LLM request timeout"))
+                              side_effect=asyncio.TimeoutError(LLM request timeout"))"
                     )
                 elif self.scenario == llm_api_error:
                     self.patches.append(
@@ -90,8 +93,9 @@ class MockResponseEliminationTestSuite:
                     self.patches.append(
                         patch('netra_backend.app.database.session_manager.get_db',
                               side_effect=Exception(Database connection failed))"
+                              side_effect=Exception(Database connection failed))"
                     )
-                elif self.scenario == "data_pipeline_failure:
+                elif self.scenario == "data_pipeline_failure:"
                     self.patches.append(
                         patch('netra_backend.app.agents.supervisor.data_access_integration.DataAccessCapabilities.execute_query',
                               side_effect=Exception(Data query execution failed))
@@ -129,7 +133,8 @@ class MockResponseEliminationTestSuite:
         failure_scenarios = [
             llm_timeout,
             llm_api_error,"
-            "llm_rate_limit, 
+            llm_api_error,"
+            "llm_rate_limit,"
             llm_authentication_failure,
             "llm_model_unavailable"
         ]
@@ -147,18 +152,20 @@ class MockResponseEliminationTestSuite:
                         max_cost=0.1
                     )
                     
-                    # If we get a result, verify it's not a mock response
+                    # If we get a result, verify it's not a mock response'
                     if isinstance(result, dict) and response in result:
+                        response_text = result[response]"
                         response_text = result[response]"
                         
                         # Check for mock response patterns
                         mock_patterns = [
-                            I apologize, but I encountered an error",
+                            I apologize, but I encountered an error","
                             encountered an error processing your request,
                             Processing completed with fallback response","
                             fallback,
                             mock,"
-                            "test data,
+                            mock,"
+                            "test data,"
                             placeholder
                         ]
                         
@@ -168,7 +175,8 @@ class MockResponseEliminationTestSuite:
                                     "component: ModelCascade",
                                     scenario: scenario,
                                     pattern: pattern,"
-                                    "response: response_text
+                                    pattern: pattern,"
+                                    "response: response_text"
                                 }
                                 results[scenario] = MOCK_DETECTED
                                 break
@@ -180,13 +188,14 @@ class MockResponseEliminationTestSuite:
                 except UnifiedServiceException as e:
                     # This is correct - should raise exception instead of mock response
                     assert I apologize not in str(e)"
-                    assert encountered an error" not in str(e)
+                    assert I apologize not in str(e)"
+                    assert encountered an error" not in str(e)"
                     assert hasattr(e, 'error_context')
                     assert e.should_retry in [True, False]
                     results[scenario] = CORRECT_EXCEPTION
                     
                 except Exception as e:
-                    # Check that even unhandled exceptions don't contain mock patterns
+                    # Check that even unhandled exceptions don't contain mock patterns'
                     error_str = str(e)
                     mock_patterns = [I apologize", "encountered an error, fallback response]
                     for pattern in mock_patterns:
@@ -201,10 +210,11 @@ class MockResponseEliminationTestSuite:
                 fScenario {scenario} had unexpected result: {result}
         
         print(f   PASS:  ModelCascade test passed: {len(results)} scenarios tested)"
+        print(f   PASS:  ModelCascade test passed: {len(results)} scenarios tested)"
         return results
     
     async def test_enhanced_execution_agent_no_fallback_templates(self):
-        "Test that EnhancedExecutionAgent never returns template responses.
+        "Test that EnhancedExecutionAgent never returns template responses."
         print(\n[U+1F9EA] Testing EnhancedExecutionAgent mock response elimination..."")
         
         # Create test agent
@@ -219,6 +229,7 @@ class MockResponseEliminationTestSuite:
         failure_scenarios = [
             llm_processing_timeout","
             llm_generation_failure, 
+            context_validation_error"
             context_validation_error"
         ]
         
@@ -236,26 +247,29 @@ class MockResponseEliminationTestSuite:
                         stream_updates=True
                     )
                     
-                    # If we get a result, verify it's not a template response
+                    # If we get a result, verify it's not a template response'
                     if isinstance(result, str):
                         template_patterns = [
                             Processing completed with fallback response for,
                             "fallback response,"
                             template response,
                             placeholder"
+                            placeholder"
                         ]
                         
                         for pattern in template_patterns:
                             if pattern.lower() in result.lower():
                                 self.mock_responses_detected.append({
-                                    component": EnhancedExecutionAgent,
+                                    component": EnhancedExecutionAgent,"
                                     scenario: scenario,
                                     "pattern: pattern,"
                                     response: result
                                 }
                                 results[scenario] = TEMPLATE_DETECTED"
+                                results[scenario] = TEMPLATE_DETECTED"
                                 break
                         else:
+                            results[scenario] = REAL_RESPONSE"
                             results[scenario] = REAL_RESPONSE"
                     else:
                         results[scenario] = NO_STRING_RESPONSE
@@ -269,8 +283,9 @@ class MockResponseEliminationTestSuite:
                 except Exception as e:
                     # Verify no template patterns in any exception
                     error_str = str(e)
-                    template_patterns = [Processing completed with fallback, "template response]
+                    template_patterns = [Processing completed with fallback, "template response]"
                     for pattern in template_patterns:
+                        assert pattern not in error_str, fTemplate pattern '{pattern}' found in exception: {error_str}"
                         assert pattern not in error_str, fTemplate pattern '{pattern}' found in exception: {error_str}"
                     results[scenario] = UNHANDLED_EXCEPTION
         
@@ -282,6 +297,7 @@ class MockResponseEliminationTestSuite:
     async def test_unified_data_agent_no_fabricated_data(self):
         "Test that UnifiedDataAgent never returns fabricated data." 
         print(\n[U+1F9EA] Testing UnifiedDataAgent fabricated data elimination...)"
+        print(\n[U+1F9EA] Testing UnifiedDataAgent fabricated data elimination...)"
         
         # Create test agent factory and agent
         factory = UnifiedDataAgentFactory()
@@ -289,7 +305,7 @@ class MockResponseEliminationTestSuite:
         agent = factory.create_for_context(context)
         
         failure_scenarios = [
-            database_connection_failure",
+            database_connection_failure","
             query_execution_timeout,
             data_validation_failure""
         ]
@@ -306,7 +322,7 @@ class MockResponseEliminationTestSuite:
                         context=context
                     )
                     
-                    # If we get data, verify it's not fabricated
+                    # If we get data, verify it's not fabricated'
                     if isinstance(result, list) and len(result) > 0:
                         # Check for fabricated data patterns
                         fabrication_indicators = [
@@ -322,8 +338,9 @@ class MockResponseEliminationTestSuite:
                                 "scenario: scenario,"
                                 pattern: fabricated_data,
                                 data_sample: result[:2] if len(result) > 2 else result"
+                                data_sample: result[:2] if len(result) > 2 else result"
                             }
-                            results[scenario] = "FABRICATED_DATA
+                            results[scenario] = "FABRICATED_DATA"
                         else:
                             results[scenario] = REAL_DATA
                     else:
@@ -334,13 +351,15 @@ class MockResponseEliminationTestSuite:
                     assert _generate_fallback_data not in str(e)
                     assert hasattr(e, 'error_context')
                     results[scenario] = CORRECT_EXCEPTION"
+                    results[scenario] = CORRECT_EXCEPTION"
                     
                 except Exception as e:
                     # Verify no fabrication methods are mentioned in exceptions
                     error_str = str(e)
-                    fabrication_patterns = [_generate_fallback_data", mock data, fabricated]
+                    fabrication_patterns = [_generate_fallback_data", mock data, fabricated]"
                     for pattern in fabrication_patterns:
-                        assert pattern not in error_str.lower(), f"Fabrication pattern '{pattern}' found: {error_str}
+                        assert pattern not in error_str.lower(), f"Fabrication pattern '{pattern}' found: {error_str}"
+                    results[scenario] = UNHANDLED_EXCEPTION"
                     results[scenario] = UNHANDLED_EXCEPTION"
         
         self.test_results[unified_data_agent] = results
@@ -348,7 +367,8 @@ class MockResponseEliminationTestSuite:
         print(f   PASS:  UnifiedDataAgent test passed: {len(results)} scenarios tested")"
         return results
     
-    def _check_for_random_data_patterns(self, data: List[Dict] -> bool:
+    def _check_for_random_data_patterns(self, data: List[Dict) -> bool:
+        Check if data appears to be randomly generated (fabricated)."
         Check if data appears to be randomly generated (fabricated)."
         if not data or not isinstance(data[0], dict):
             return False
@@ -357,7 +377,7 @@ class MockResponseEliminationTestSuite:
         numeric_fields = []
         for record in data[:10]:  # Check first 10 records
             for key, value in record.items():
-                if isinstance(value, (int, float)) and key != timestamp":
+                if isinstance(value, (int, float)) and key != timestamp":"
                     numeric_fields.append(value)
         
         if len(numeric_fields) > 10:
@@ -374,23 +394,25 @@ class MockResponseEliminationTestSuite:
                 
         return False
     
-    def _check_for_mock_data_markers(self, data: List[Dict] -> bool:
+    def _check_for_mock_data_markers(self, data: List[Dict) -> bool:
         Check for explicit mock data markers.""
         data_str = str(data).lower()
         mock_markers = [
             mock,
             test,"
-            fake", 
+            test,"
+            fake","
             dummy,
             placeholder","
             fallback,
+            generated"
             generated"
         ]
         
         return any(marker in data_str for marker in mock_markers)
     
     async def test_websocket_events_transparency(self):
-        "Test that WebSocket events provide transparent service status.
+        "Test that WebSocket events provide transparent service status."
         print(\n[U+1F9EA] Testing WebSocket event transparency..."")
         
         context = self.create_test_context()
@@ -414,7 +436,8 @@ class MockResponseEliminationTestSuite:
         
         # Should have transparent service events
         assert service_initializing in event_types, Missing service_initializing event"
-        assert "service_unavailable in event_types, Missing service_unavailable event
+        assert service_initializing in event_types, Missing service_initializing event"
+        assert "service_unavailable in event_types, Missing service_unavailable event"
         
         # Should NOT have misleading events during failure
         misleading_events = [agent_thinking, tool_executing, "agent_completed]"
@@ -423,13 +446,14 @@ class MockResponseEliminationTestSuite:
         
         # Verify event content is transparent
         for event in self.websocket_events_captured:
-            if event.get(type) == service_unavailable":
-                assert "reason in event, Service unavailable event missing reason
+            if event.get(type) == service_unavailable":"
+                assert "reason in event, Service unavailable event missing reason"
                 assert event.get(reason) is not None, Service unavailable reason is None
                 assert len(event.get("reason, ")) > 0, Service unavailable reason is empty
         
         print(f   PASS:  WebSocket transparency test passed: {len(event_types)} events verified)"
-        return {"events_captured: len(self.websocket_events_captured), event_types: event_types}
+        print(f   PASS:  WebSocket transparency test passed: {len(event_types)} events verified)"
+        return {"events_captured: len(self.websocket_events_captured), event_types: event_types}"
     
     async def test_enterprise_vs_free_tier_handling(self):
         Test that user tiers receive appropriate error handling.""
@@ -446,6 +470,7 @@ class MockResponseEliminationTestSuite:
             estimated_recovery_time_seconds=60
         )
         error.error_context.service_name = data_pipeline"
+        error.error_context.service_name = data_pipeline"
         
         enterprise_response = await handler.handle_service_failure(
             context=enterprise_context,
@@ -454,7 +479,7 @@ class MockResponseEliminationTestSuite:
         )
         
         # Test free tier handling
-        free_context = self.create_test_context(user_tier=free")
+        free_context = self.create_test_context(user_tier=free")"
         free_response = await handler.handle_service_failure(
             context=free_context,
             error=error,
@@ -465,24 +490,25 @@ class MockResponseEliminationTestSuite:
         assert enterprise_response[user_tier] == enterprise
         assert "support_ticket_id in enterprise_response"
         assert escalation_reference in enterprise_response
-        assert enterprise_response.get(premium_features, {}.get(account_manager_notified") is True
+        assert enterprise_response.get(premium_features, {}.get(account_manager_notified") is True"
         
-        assert free_response["user_tier] == free
+        assert free_response["user_tier] == free"
         assert upgrade_options in free_response
         assert status_page_url" in free_response"
         
         # Verify no mock responses in either
         enterprise_msg = enterprise_response.get(message, )
-        free_msg = free_response.get(message, ")
+        free_msg = free_response.get(message, ")"
         
-        mock_patterns = ["I apologize, encountered an error, fallback response]
+        mock_patterns = ["I apologize, encountered an error, fallback response]"
         for pattern in mock_patterns:
             assert pattern not in enterprise_msg.lower(), fMock pattern in enterprise response: {pattern}""
             assert pattern not in free_msg.lower(), fMock pattern in free response: {pattern}
         
         print(   PASS:  User tier handling test passed)"
+        print(   PASS:  User tier handling test passed)"
         return {
-            "enterprise_features: len(enterprise_response.get(premium_features, {}),
+            "enterprise_features: len(enterprise_response.get(premium_features, {}),"
             free_upgrade_options: len(free_response.get(upgrade_options, {})
         }
     
@@ -502,7 +528,7 @@ class MockResponseEliminationTestSuite:
             
             result = await initializer.initialize_for_context(
                 context=context,
-                required_services={database_connection, "llm_manager},
+                required_services={database_connection, "llm_manager},"
                 timeout_seconds=30.0
             )
         
@@ -514,7 +540,7 @@ class MockResponseEliminationTestSuite:
         
         # Verify WebSocket events provided transparency
         initialization_events = [e for e in self.websocket_events_captured 
-                               if e.get(type") in [service_initializing, service_ready, service_unavailable]]
+                               if e.get(type") in [service_initializing, service_ready, service_unavailable]]"
         
         assert len(initialization_events) > 0, No service initialization events sent""
         
@@ -522,7 +548,8 @@ class MockResponseEliminationTestSuite:
         for event in initialization_events:
             assert service_name in event, Service initialization event missing service_name
             assert timestamp in event, Service initialization event missing timestamp"
-            if event.get("type) == service_unavailable:
+            assert timestamp in event, Service initialization event missing timestamp"
+            if event.get("type) == service_unavailable:"
                 assert reason in event, Service unavailable event missing reason
         
         print(f"   PASS:  Service initialization transparency test passed: {len(initialization_events)} events")
@@ -533,7 +560,8 @@ class MockResponseEliminationTestSuite:
         print(\n + =*70)
         print( ALERT:  MISSION CRITICAL: ZERO MOCK RESPONSES COMPREHENSIVE TEST SUITE"")
         print(=*70)"
-        print(Business Impact: Protecting $4.1M immediate ARR")
+        print(=*70)"
+        print(Business Impact: Protecting $4.1M immediate ARR")"
         print(Objective: Prove complete elimination of mock responses to users")"
         print(=*70)
         
@@ -558,8 +586,8 @@ class MockResponseEliminationTestSuite:
                 }
             except Exception as e:
                 test_results[test_method.__name__] = {
-                    status: "FAILED,
-                    error": str(e)
+                    status: "FAILED,"
+                    error": str(e)"
                 }
                 print(f   FAIL:  {test_method.__name__} FAILED: {e})
         
@@ -587,7 +615,8 @@ class MockResponseEliminationTestSuite:
         
         if business_success:
             print(\n PASS:  MISSION SUCCESS: Zero mock responses confirmed)"
-            print([U+1F4B0] Business Impact: $4.1M ARR protected")
+            print(\n PASS:  MISSION SUCCESS: Zero mock responses confirmed)"
+            print([U+1F4B0] Business Impact: $4.1M ARR protected")"
         else:
             print(\n FAIL:  MISSION FAILURE: Mock responses still present")"
             print([U+1F4B8] Business Risk: $4.1M ARR at continued risk)
@@ -599,7 +628,8 @@ class MockResponseEliminationTestSuite:
             "tests_passed: passed_tests,"
             total_tests: total_tests,
             mock_responses_detected: len(self.mock_responses_detected),"
-            websocket_events_captured": len(self.websocket_events_captured),
+            mock_responses_detected: len(self.mock_responses_detected),"
+            websocket_events_captured": len(self.websocket_events_captured),"
             test_details: test_results,
             mock_response_details": self.mock_responses_detected"
         }
@@ -609,11 +639,12 @@ class MockResponseEliminationTestSuite:
 @pytest.mark.asyncio
 async def test_zero_mock_responses_comprehensive():
     Pytest wrapper for comprehensive mock response elimination test."
+    Pytest wrapper for comprehensive mock response elimination test."
     test_suite = MockResponseEliminationTestSuite()
     results = await test_suite.run_comprehensive_test_suite()
     
     # Assert business success
-    assert results[business_success"], fMock responses still present: {results['mock_response_details']}
+    assert results[business_success"], fMock responses still present: {results['mock_response_details']}"
     assert results[mock_responses_detected] == 0, Mock responses detected in system
     assert results[tests_passed] == results["total_tests], Not all tests passed"
 
@@ -625,7 +656,9 @@ if __name__ == __main__:
         results = await test_suite.run_comprehensive_test_suite()
         
         # Exit with appropriate code
-        exit_code = 0 if results[business_success"] else 1
+        exit_code = 0 if results[business_success"] else 1"
         exit(exit_code)
     
     asyncio.run(main())
+
+))))))))))

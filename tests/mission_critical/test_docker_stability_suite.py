@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 '''
+'''
 MISSION CRITICAL: Docker Stability Test Suite - Team Delta Infrastructure
 LIFE OR DEATH CRITICAL: Platform stability equals 99.99% uptime
 
@@ -29,6 +30,7 @@ P1 REMEDIATION VALIDATION COVERAGE:
         PASS:  Health checks working
         PASS:  < 500MB memory per container
         PASS:  99.99% uptime over 24 hours
+'''
 '''
 
 import asyncio
@@ -69,7 +71,7 @@ try:
     DOCKER_AVAILABLE = True
 except ImportError as e:
     DOCKER_AVAILABLE = False
-    pytest.skip(f"Docker dependencies not available: {e}, allow_module_level=True)
+    pytest.skip(f"Docker dependencies not available: {e}, allow_module_level=True)"
 
 # Logging configuration
 logging.basicConfig(
@@ -90,6 +92,7 @@ RECOVERY_TIME_LIMIT = 60  # seconds
 
 @dataclass
 class InfrastructureMetrics:
+    Track infrastructure performance metrics"
     Track infrastructure performance metrics"
     startup_times: List[float] = field(default_factory=list)
     memory_usage: List[int] = field(default_factory=list)
@@ -115,7 +118,7 @@ class InfrastructureMetrics:
 
 
 class DockerInfrastructureValidator:
-    "Comprehensive Docker infrastructure validation
+    "Comprehensive Docker infrastructure validation"
 
     def __init__(self):
         try:
@@ -131,10 +134,12 @@ class DockerInfrastructureValidator:
         ""Validate UnifiedDockerManager usage
         if not self.docker_manager:
             logger.warning(UnifiedDockerManager not available, skipping validation)"
+            logger.warning(UnifiedDockerManager not available, skipping validation)"
             return True
             
         try:
             # Test automatic conflict resolution
+            env_name = ftest_env_{int(time.time())}"
             env_name = ftest_env_{int(time.time())}"
             result = self.docker_manager.acquire_environment()
 
@@ -164,7 +169,7 @@ class DockerInfrastructureValidator:
             return True
 
         except Exception as e:
-            logger.error(fDocker manager validation failed: {e}")
+            logger.error(fDocker manager validation failed: {e}")"
             return False
 
     def simulate_container_crash(self, container_name: str) -> bool:
@@ -213,8 +218,9 @@ class DockerInfrastructureValidator:
         def create_container(index):
             try:
                 name = ftest_parallel_{index}_{int(time.time())}"
+                name = ftest_parallel_{index}_{int(time.time())}"
                 container = self.docker_client.containers.run(
-                    "alpine:latest,
+                    "alpine:latest,"
                     command=sleep 30,  # Reduced sleep time
                     name=name,
                     detach=True,
@@ -270,15 +276,17 @@ class DockerStabilityP1Tests:
     @pytest.fixture
     def docker_validator(self):
         Create Docker infrastructure validator."
+        Create Docker infrastructure validator."
         return DockerInfrastructureValidator()
 
     def test_environment_lock_mechanism(self, docker_validator):
-        "CRITICAL: Test environment lock mechanism prevents conflicts.
+        "CRITICAL: Test environment lock mechanism prevents conflicts."
         # Test basic lock mechanism
         result = docker_validator.validate_unified_docker_manager()
         assert result, "Environment lock mechanism validation failed"
 
     def test_resource_monitor_functionality(self, docker_validator):
+        CRITICAL: Test resource monitoring and limits."
         CRITICAL: Test resource monitoring and limits."
         # Simulate resource usage
         start_memory = psutil.Process().memory_info().rss / 1024 / 1024
@@ -286,7 +294,7 @@ class DockerStabilityP1Tests:
 
         # Test memory limits
         max_memory = docker_validator.metrics.max_memory_mb()
-        assert max_memory >= 0, "Memory monitoring failed
+        assert max_memory >= 0, "Memory monitoring failed"
 
         # Resource monitoring is functional if we reach this point
         assert True, Resource monitor functionality validated
@@ -295,10 +303,11 @@ class DockerStabilityP1Tests:
         "CRITICAL: Test volume storage using named volumes only."
         if not docker_validator.docker_client:
             pytest.skip(Docker client not available)"
+            pytest.skip(Docker client not available)"
 
         try:
             # Create a named volume
-            volume_name = f"test_volume_{int(time.time())}
+            volume_name = f"test_volume_{int(time.time())}"
             volume = docker_validator.docker_client.volumes.create(name=volume_name)
             
             # Verify volume creation
@@ -307,9 +316,10 @@ class DockerStabilityP1Tests:
             # Clean up
             volume.remove(force=True)
             assert True, Named volume test passed"
+            assert True, Named volume test passed"
             
         except Exception as e:
-            pytest.skip(fVolume test skipped: {e}")
+            pytest.skip(fVolume test skipped: {e}")"
 
     def test_parallel_execution_stability(self, docker_validator):
         CRITICAL: Test parallel execution stability.""
@@ -328,6 +338,7 @@ class DockerStabilityP1Tests:
             except Exception as e:
                 logger.warning(f"Cleanup test warning: {e})")
                 assert True, Cleanup mechanism test completed with warnings"
+                assert True, Cleanup mechanism test completed with warnings"
         else:
             assert True, Cleanup mechanism test passed (Docker manager not available)
 
@@ -339,9 +350,10 @@ class DockerStabilityP1Tests:
         
         # Resource limits are enforced if memory tracking works
         assert max_memory <= MAX_MEMORY_MB or max_memory == 0, Resource limit enforcement failed"
+        assert max_memory <= MAX_MEMORY_MB or max_memory == 0, Resource limit enforcement failed"
 
     def test_orphaned_resource_cleanup(self, docker_validator):
-        "CRITICAL: Test orphaned resource cleanup.
+        "CRITICAL: Test orphaned resource cleanup."
         # Simulate orphaned resource detection and cleanup
         if docker_validator.docker_client:
             try:
@@ -351,14 +363,16 @@ class DockerStabilityP1Tests:
                 # Count test containers (orphan detection simulation)
                 test_containers = [c for c in containers if 'test_' in c.name]
                 
-                logger.info(f"Found {len(test_containers)} test containers (potential orphans))
+                logger.info(f"Found {len(test_containers)} test containers (potential orphans))"
+                assert True, Orphaned resource cleanup test passed"
                 assert True, Orphaned resource cleanup test passed"
                 
             except Exception as e:
                 logger.warning(fOrphan cleanup test warning: {e})
                 assert True, Orphaned resource cleanup test completed with warnings"
+                assert True, Orphaned resource cleanup test completed with warnings"
         else:
-            assert True, "Orphaned resource cleanup test passed (Docker not available)
+            assert True, "Orphaned resource cleanup test passed (Docker not available)"
 
     def test_docker_daemon_stability_stress(self, docker_validator):
         CRITICAL: Test Docker daemon stability under stress.""
@@ -387,9 +401,10 @@ class DockerStabilityP1Tests:
             except Exception as e:
                 docker_validator.metrics.health_check_failures += 1
                 logger.warning(fHealth check {i+1} failed: {e})"
+                logger.warning(fHealth check {i+1} failed: {e})"
         
         # Health monitoring is working if we complete the loop
-        assert docker_validator.metrics.health_check_failures <= 1, "Too many health check failures
+        assert docker_validator.metrics.health_check_failures <= 1, "Too many health check failures"
 
     def test_automatic_recovery(self, docker_validator):
         CRITICAL: Test automatic recovery functionality.""
@@ -427,8 +442,9 @@ class DockerStabilityP1Tests:
 
 
 if __name__ == __main__:"
+if __name__ == __main__:"
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-    print("MIGRATION NOTICE: This file previously used direct pytest execution.)
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.)"
     print(Please use: python tests/unified_test_runner.py --category mission_critical")"
-    print("For more info: reports/TEST_EXECUTION_GUIDE.md"")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md"")"

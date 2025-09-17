@@ -1,5 +1,5 @@
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.
+    "Real WebSocket connection for testing instead of mocks."
     def __init__(self):
         pass
         self.messages_sent = []
@@ -9,16 +9,19 @@ class TestWebSocketConnection:
         ""Send JSON message.
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
-    async def close(self, code: int = 1000, reason: str = Normal closure"):
+    async def close(self, code: int = 1000, reason: str = Normal closure"):"
         Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
     async def get_messages(self) -> list:
         Get all sent messages."
+        Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
+        '''
         '''
         Mission Critical: UnifiedIDManager Comprehensive Validation Tests
         This test suite ensures UnifiedIDManager works correctly and catches:
@@ -28,6 +31,7 @@ class TestWebSocketConnection:
         4. Deprecated function confusion
         5. Thread safety and concurrent usage
         CRITICAL: These tests use REAL implementations, NO MOCKS.
+        '''
         '''
         import pytest
         import asyncio
@@ -50,18 +54,20 @@ class TestWebSocketConnection:
         extract_thread_id_from_run_id  # Deprecated function
         
 class TestMethodSignatures:
-        "Test that method signatures are correct and catch wrong usage.
+        "Test that method signatures are correct and catch wrong usage."
     def test_generate_run_id_accepts_only_one_argument(self):
         ""CRITICAL: Test that generate_run_id only accepts thread_id.
     # This should work
         thread_id = test_thread"
+        thread_id = test_thread"
         run_id = UnifiedIDManager.generate_run_id(thread_id)
-        assert run_id.startswith(thread_test_thread_run_")
+        assert run_id.startswith(thread_test_thread_run_")"
     # This should fail - the bug we fixed
         with pytest.raises(TypeError) as exc_info:
         UnifiedIDManager.generate_run_id(thread_id, extra_context)
         assert takes 1 positional argument but 2 were given" in str(exc_info.value)"
     def test_deprecated_function_signature_confusion(self):
+        Test that deprecated function signature doesn't match class method."
         Test that deprecated function signature doesn't match class method."
         pass
     # Get signatures
@@ -72,7 +78,7 @@ class TestMethodSignatures:
         assert len(deprecated_sig.parameters) == 2  # thread_id and context
     # Deprecated function should warn
         with patch('netra_backend.app.core.unified_id_manager.logger') as mock_logger:
-        _ = generate_run_id(test", context)
+        _ = generate_run_id(test", context)"
         mock_logger.warning.assert_called_with( )
         generate_run_id() is deprecated, use UnifiedIDManager.generate_run_id()
         
@@ -85,8 +91,9 @@ class TestMethodSignatures:
                 # Should be a static method
         assert isinstance(inspect.getattr_static(UnifiedIDManager, name), staticmethod), \
         formatted_string"
+        formatted_string"
 class TestImportValidation:
-        "Test that imports work correctly and catch lazy loading issues.
+        "Test that imports work correctly and catch lazy loading issues."
     def test_import_from_different_contexts(self):
         ""Test UnifiedIDManager can be imported in various ways.
     # Direct import
@@ -102,9 +109,10 @@ class TestImportValidation:
     # All should work
         for UID in [UID1, UID2, UID3]:
         run_id = UID.generate_run_id(test_import)"
+        run_id = UID.generate_run_id(test_import)"
         assert UID.validate_run_id(run_id)
     def test_lazy_import_in_function_works(self):
-        "Test pattern used in run_repository, interfaces_observability, etc.
+        "Test pattern used in run_repository, interfaces_observability, etc."
         pass
     def lazy_import_function(thread_id: str) -> str:
     # This pattern is used in several files
@@ -136,8 +144,10 @@ class TestRealIntegration:
 @pytest.mark.asyncio
     async def test_thread_service_integration(self):
     Test ThreadService uses UnifiedIDManager correctly."
+    Test ThreadService uses UnifiedIDManager correctly."
 from netra_backend.app.services.thread_service import ThreadService
 service = ThreadService()
+thread_id = integration_test_thread"
 thread_id = integration_test_thread"
 assistant_id = test_assistant
 model = gpt-4""
@@ -150,7 +160,8 @@ thread_id, assistant_id, model, instructions
 assert UnifiedIDManager.validate_run_id(run_id)
 assert UnifiedIDManager.extract_thread_id(run_id) == thread_id
 assert run_data[thread_id] == thread_id"
-assert run_data["id] == run_id
+assert run_data[thread_id] == thread_id"
+assert run_data["id] == run_id"
 @pytest.mark.asyncio
     async def test_websocket_bridge_integration(self):
     Test AgentWebSocketBridge uses UnifiedIDManager correctly.""
@@ -161,7 +172,8 @@ bridge = AgentWebSocketBridge()
 run_id = UnifiedIDManager.generate_run_id(websocket_test)
 thread_id = bridge.extract_thread_id(run_id)
 assert thread_id == websocket_test"
-assert bridge.get_format_info(run_id)["thread_id] == websocket_test
+assert thread_id == websocket_test"
+assert bridge.get_format_info(run_id)["thread_id] == websocket_test"
 def test_all_production_files_use_correct_signature(self):
     Scan production files that use UnifiedIDManager.""
 production_files = [
@@ -180,8 +192,9 @@ except TypeError as e:
         pytest.fail(""
 class TestConcurrentUsage:
         Test UnifiedIDManager under concurrent load."
+        Test UnifiedIDManager under concurrent load."
     def test_thread_safe_id_generation(self):
-        "Test concurrent ID generation doesn't cause conflicts.
+        "Test concurrent ID generation doesn't cause conflicts."
     async def generate_ids(prefix: str, count: int) -> List[str]:
         await asyncio.sleep(0)
         return [
@@ -208,11 +221,12 @@ class TestConcurrentUsage:
 pass
 async def generate_id_async(thread_id: str) -> str:
     # Simulate async context switching
-await asyncio.sleep(0.001)
+await asyncio.sleep(0.1)
 await asyncio.sleep(0)
 return UnifiedIDManager.generate_run_id(thread_id)
     # Generate IDs concurrently
 tasks = [
+generate_id_async("
 generate_id_async("
 for i in range(100)
     
@@ -222,14 +236,15 @@ assert len(ids) == len(set(ids))
 for run_id in ids:
     assert UnifiedIDManager.validate_run_id(run_id)
 class TestErrorScenarios:
-        "Test error handling and edge cases.
+        "Test error handling and edge cases."
     def test_none_arguments_handled(self):
         "Test None arguments are rejected properly."
         with pytest.raises(ValueError) as exc_info:
         UnifiedIDManager.generate_run_id(None)
         assert cannot be empty or None in str(exc_info.value)"
+        assert cannot be empty or None in str(exc_info.value)"
     def test_empty_string_rejected(self):
-        "Test empty strings are rejected.
+        "Test empty strings are rejected."
         pass
         with pytest.raises(ValueError) as exc_info:
         UnifiedIDManager.generate_run_id(")"
@@ -244,10 +259,12 @@ class TestErrorScenarios:
         pass
         with pytest.raises(ValueError) as exc_info:
         UnifiedIDManager.generate_run_id(thread_run_invalid)"
-        assert cannot contain reserved sequence" in str(exc_info.value)
+        UnifiedIDManager.generate_run_id(thread_run_invalid)"
+        assert cannot contain reserved sequence" in str(exc_info.value)"
 class TestStartupValidation:
         Tests that would catch issues at startup.""
     def test_critical_methods_exist(self):
+        Test all critical methods exist with correct signatures."
         Test all critical methods exist with correct signatures."
         critical_methods = [
         ('generate_run_id', 1),  # method_name, expected_arg_count
@@ -261,11 +278,11 @@ class TestStartupValidation:
     
         for method_name, expected_args in critical_methods:
         assert hasattr(UnifiedIDManager, method_name), \
-        "formatted_string
+        "formatted_string"
         method = getattr(UnifiedIDManager, method_name)
         sig = inspect.signature(method)
         # Subtract 'self' if it's there (shouldn't be for static methods)
-        param_count = len(]
+        param_count = len()
         p for p in sig.parameters.values()
         if p.default == inspect.Parameter.empty
         
@@ -275,6 +292,7 @@ class TestStartupValidation:
         "Basic smoke test that should run at startup."
         pass
     # Generate a test ID
+        test_thread = startup_validation_test"
         test_thread = startup_validation_test"
         run_id = UnifiedIDManager.generate_run_id(test_thread)
     # Validate it
@@ -289,6 +307,7 @@ class TestStartupValidation:
     # Validate thread_id
         assert UnifiedIDManager.validate_thread_id(test_thread)
     # Test normalization
+        normalized = UnifiedIDManager.normalize_thread_id("
         normalized = UnifiedIDManager.normalize_thread_id("
         assert normalized == test_thread
 class TestDeprecationPath:
@@ -333,4 +352,6 @@ class TestDeprecationPath:
         PASS:  All startup validations passed!)
         except Exception as e:
         print("")
-        sys.exit(1")
+        sys.exit(1")"
+)))))
+]]]]]

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """
+"""
 MISSION CRITICAL: SSOT Test Execution Compliance Validation
 
 CRITICAL MISSION: Detect and prevent fragmented test execution patterns that bypass
@@ -16,12 +17,14 @@ TARGET VIOLATIONS:
 SSOT REQUIREMENTS ENFORCED:
 - ALL test execution must go through tests/unified_test_runner.py
 """
+"""
 - ALL tests must inherit from SSOT BaseTestCase
 - NO direct pytest execution allowed in production test files
 - NO fragmented test execution patterns outside unified infrastructure
 
 PURPOSE: These tests MUST FAIL initially to detect current SSOT violations,
 then pass after remediation to protect ongoing SSOT compliance.
+"
 "
 
 import sys
@@ -41,7 +44,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @dataclass
 class SSOTViolation:
-    "SSOT violation detected in test file.
+    "SSOT violation detected in test file."
     file_path: str
     violation_type: str
     description: str
@@ -49,7 +52,7 @@ class SSOTViolation:
     severity: str = "HIGH"
 
 class SSOTExecutionComplianceTests(SSotBaseTestCase):
-    
+    pass
     MISSION CRITICAL: Test SSOT execution compliance across all test files.
     
     This test suite MUST detect violations where test files bypass the unified
@@ -58,16 +61,17 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
     
     def setup_method(self, method):
         Setup for SSOT execution compliance testing."
+        Setup for SSOT execution compliance testing."
         super().setup_method(method)
         self.violations: List[SSOTViolation] = []
         self.known_violating_files = [
-            test_plans/rollback/test_emergency_rollback_validation.py",
+            test_plans/rollback/test_emergency_rollback_validation.py","
             test_plans/phase5/test_golden_path_protection_validation.py, 
             test_plans/phase3/test_critical_configuration_drift_detection.py""
         ]
     
     def test_no_direct_pytest_main_execution_in_test_files(self):
-
+        pass
         CRITICAL: Test files must NOT execute # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution directly.
@@ -92,28 +96,31 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
         if violations:
             violation_details = \n.join([
                 f  - {v.file_path}:{v.line_number} - {v.description}"
+                f  - {v.file_path}:{v.line_number} - {v.description}"
                 for v in violations
             ]
             assert False, (
-                f"SSOT VIOLATION DETECTED: {len(violations)} files bypass unified test runner:\n
+                f"SSOT VIOLATION DETECTED: {len(violations)} files bypass unified test runner:\n"
                 f{violation_details}\n\n
                 fREMEDIATION REQUIRED:\n
                 f1. Remove direct test execution calls from test files\n""
                 f2. Execute tests through: python tests/unified_test_runner.py\n
                 f3. Use SSOT test execution patterns only\n\n
-                f"BUSINESS IMPACT: Fragmented test execution threatens $500K+ ARR Golden Path stability
+                f"BUSINESS IMPACT: Fragmented test execution threatens $500K+ ARR Golden Path stability"
             )
     
     def test_all_test_classes_inherit_from_ssot_base_test_case(self):
+        "
         "
         CRITICAL: All test classes must inherit from SSOT BaseTestCase.
         
         This ensures consistent test infrastructure and prevents test duplication.
 "
+"
         violations = self._scan_for_non_ssot_test_inheritance()
         
         # Check that we detect inheritance violations in known files
-        inheritance_violations = [v for v in violations if "BaseTestCase not in v.description or SSOT not in v.description]
+        inheritance_violations = [v for v in violations if "BaseTestCase not in v.description or SSOT not in v.description]"
         
         if inheritance_violations:
             violation_details = \n.join([
@@ -121,17 +128,19 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
                 for v in inheritance_violations
             ]
             assert False, (
-                fSSOT INHERITANCE VIOLATION: {len(inheritance_violations)} test classes don't use SSOT BaseTestCase:\n
+                fSSOT INHERITANCE VIOLATION: {len(inheritance_violations)} test classes don't use SSOT BaseTestCase:\n'
                 f{violation_details}\n\n
-                f"REMEDIATION REQUIRED:\n
+                f"REMEDIATION REQUIRED:\n"
+                f1. Import: from test_framework.ssot.base_test_case import SSotBaseTestCase\n"
                 f1. Import: from test_framework.ssot.base_test_case import SSotBaseTestCase\n"
                 f2. Change: class MyTest(unittest.TestCase) → class MyTest(SSotBaseTestCase)\n
                 f3. Update setUp/tearDown to setup_method/teardown_method patterns\n\n"
-                f"BUSINESS IMPACT: Non-SSOT test patterns create infrastructure debt and instability
+                f3. Update setUp/tearDown to setup_method/teardown_method patterns\n\n"
+                f"BUSINESS IMPACT: Non-SSOT test patterns create infrastructure debt and instability"
             )
     
     def test_no_fragmented_test_execution_patterns(self):
-        
+        pass
         CRITICAL: Detect fragmented test execution patterns that bypass SSOT infrastructure.
         
         Includes direct subprocess calls to pytest, standalone test runners, etc.
@@ -141,25 +150,28 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
         if violations:
             violation_details = \n.join([
                 f  - {v.file_path}:{v.line_number} - {v.description}"
+                f  - {v.file_path}:{v.line_number} - {v.description}"
                 for v in violations
             ]
             assert False, (
-                f"FRAGMENTED EXECUTION DETECTED: {len(violations)} files use non-SSOT execution:\n
+                f"FRAGMENTED EXECUTION DETECTED: {len(violations)} files use non-SSOT execution:\n"
                 f{violation_details}\n\n
                 fREMEDIATION REQUIRED:\n
                 f1. Remove direct subprocess calls to pytest\n""
                 f2. Remove standalone test execution patterns\n
                 f3. Use unified_test_runner.py for ALL test execution\n\n
-                f"BUSINESS IMPACT: Fragmented execution prevents proper test orchestration and monitoring
+                f"BUSINESS IMPACT: Fragmented execution prevents proper test orchestration and monitoring"
             )
     
     def test_unified_test_runner_is_canonical_entry_point(self):
+        "
         "
         CRITICAL: Verify unified_test_runner.py is the canonical test execution entry point.
         
         No other test runners should exist that bypass this SSOT infrastructure.
 "
-        canonical_runner = PROJECT_ROOT / "tests / unified_test_runner.py
+"
+        canonical_runner = PROJECT_ROOT / "tests / unified_test_runner.py"
         
         # Verify canonical runner exists and is functional
         assert canonical_runner.exists(), (
@@ -171,7 +183,8 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
         
         if alternative_runners:
             runner_details = \n.join(["
-                f"  - {runner.file_path} - {runner.description}
+            runner_details = \n.join(["
+                f"  - {runner.file_path} - {runner.description}"
                 for runner in alternative_runners
             ]
             assert False, (
@@ -180,15 +193,18 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
                 fREMEDIATION REQUIRED:\n""
                 f1. Consolidate all test execution through tests/unified_test_runner.py\n
                 f2. Remove or refactor alternative test runners\n
-                f"3. Update CI/CD to use canonical runner only\n\n
+                f"3. Update CI/CD to use canonical runner only\n\n"
+                fBUSINESS IMPACT: Multiple test runners create inconsistent test execution and reporting"
                 fBUSINESS IMPACT: Multiple test runners create inconsistent test execution and reporting"
             )
     
     def test_detect_specific_known_violating_files(self):
     "
+    "
         CRITICAL: Explicitly test detection of the 3 specific files identified in Issue #1145.
         
         This ensures our detection system works correctly for the actual violations.
+        "
         "
         for file_path in self.known_violating_files:
             full_path = PROJECT_ROOT / file_path
@@ -200,7 +216,8 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
             file_violations = self._analyze_single_file_for_violations(full_path)
             
             assert file_violations, (
-                f"DETECTION FAILURE: No SSOT violations detected in known violator: {file_path}\n
+                f"DETECTION FAILURE: No SSOT violations detected in known violator: {file_path}\n"
+                fThis indicates the compliance detection system is not working correctly."
                 fThis indicates the compliance detection system is not working correctly."
             )
     
@@ -221,17 +238,19 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
                         violations.append(SSOTViolation(
                             file_path=str(test_file.relative_to(PROJECT_ROOT)),
                             violation_type=DIRECT_PYTEST_EXECUTION,"
-                            description="Direct pytest.main execution bypasses unified test runner,
+                            violation_type=DIRECT_PYTEST_EXECUTION,"
+                            description="Direct pytest.main execution bypasses unified test runner,"
                             line_number=line_num,
                             severity=CRITICAL
                         )) 
             except Exception as e:
-                # Log but don't fail on file reading errors
+                # Log but don't fail on file reading errors'
                 print(f"Warning: Could not analyze {test_file}: {e})")
         
         return violations
     
-    def _scan_for_non_ssot_test_inheritance(self") -> List[SSOTViolation]:
+    def _scan_for_non_ssot_test_inheritance(self") -> List[SSOTViolation]:"
+        Scan for test classes that don't inherit from SSOT BaseTestCase."
         Scan for test classes that don't inherit from SSOT BaseTestCase."
         violations = []
         
@@ -263,7 +282,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
                     if (node.name.startswith('Test') or 
                         any(method.name.startswith('test_') for method in node.body 
                             if isinstance(method, ast.FunctionDef))):
-                        
+                                pass
                         # Check inheritance
                         base_names = []
                         for base in node.bases:
@@ -283,8 +302,9 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
                             violations.append(SSOTViolation(
                                 file_path=str(test_file.relative_to(PROJECT_ROOT)),
                                 violation_type=NON_SSOT_INHERITANCE,
-                                description=f"Test class '{node.name}' inherits from {base_names} instead of SSOT BaseTestCase,
+                                description=f"Test class '{node.name}' inherits from {base_names} instead of SSOT BaseTestCase,"
                                 line_number=node.lineno,
+                                severity=HIGH"
                                 severity=HIGH"
                             ))
         
@@ -317,8 +337,10 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
                             violations.append(SSOTViolation(
                                 file_path=str(test_file.relative_to(PROJECT_ROOT)),
                                 violation_type=FRAGMENTED_EXECUTION,"
+                                violation_type=FRAGMENTED_EXECUTION,"
                                 description=description,
                                 line_number=line_num,
+                                severity=HIGH"
                                 severity=HIGH"
                             ))
                             
@@ -333,7 +355,8 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
         
         # Look for Python files that might be alternative test runners
         for py_file in PROJECT_ROOT.rglob(*.py):"
-            if py_file.name == unified_test_runner.py":
+        for py_file in PROJECT_ROOT.rglob(*.py):"
+            if py_file.name == unified_test_runner.py":"
                 continue  # Skip the canonical runner
             
             try:
@@ -364,18 +387,19 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
         
         return violations
     
-    def _find_test_files(self") -> List[Path]:
+    def _find_test_files(self") -> List[Path]:"
+        Find all test files in the project."
         Find all test files in the project."
         test_files = []
         
         # Look in common test directories
         test_dirs = [
-            PROJECT_ROOT / "tests,
+            PROJECT_ROOT / "tests,"
             PROJECT_ROOT / test_plans, 
             PROJECT_ROOT / "netra_backend / tests",
             PROJECT_ROOT / auth_service / tests,
-            PROJECT_ROOT / frontend / tests",
-            PROJECT_ROOT / "test_framework / tests
+            PROJECT_ROOT / frontend / tests","
+            PROJECT_ROOT / "test_framework / tests"
         ]
         
         for test_dir in test_dirs:
@@ -391,8 +415,11 @@ if __name__ == __main__:
     print(MIGRATION NOTICE: This file previously used direct pytest execution.")"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)
     print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
     # sys.exit(result)
     pass  # TODO: Replace with appropriate SSOT test execution
+)))
+]

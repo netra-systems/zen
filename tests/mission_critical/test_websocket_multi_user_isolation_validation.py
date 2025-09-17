@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """
+"""
 MISSION CRITICAL: Multi-User WebSocket Isolation Validation Tests - Issue #1199
 
 Business Value Justification:
@@ -11,7 +12,7 @@ Business Value Justification:
 CRITICAL TEST SCOPE:
 This test file focuses on multi-user isolation validation scenarios:
 1. User context isolation - events only reach intended users
-2. Concurrent user validation - multiple users don't interfere
+2. Concurrent user validation - multiple users don't interfere'
 3. Cross-user contamination detection - prevents data leakage
 4. WebSocket connection isolation - separate connections per user
 
@@ -19,7 +20,9 @@ DESIGN TO FAIL INITIALLY:
 These tests are designed to fail if user isolation is compromised,
 ensuring enterprise-grade security for multi-tenant deployments.
 "
+"
 
+"""
 """
 import asyncio
 import json
@@ -45,7 +48,7 @@ from netra_backend.app.websocket_core.event_validation_framework import (
 
 @dataclass
 class UserIsolationTest:
-    "Container for user isolation test data.
+    "Container for user isolation test data."
     user_id: str
     thread_id: str
     run_id: str
@@ -101,8 +104,9 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
         # Define isolation requirements
         self.isolation_requirements = {
             max_cross_user_events: 0,           # Zero tolerance for cross-user events"
-            "max_shared_thread_ids: 0,           # No shared thread IDs between users
-            max_user_data_leakage: 0,           # No user data in other user's events
+            max_cross_user_events: 0,           # Zero tolerance for cross-user events"
+            "max_shared_thread_ids: 0,           # No shared thread IDs between users"
+            max_user_data_leakage: 0,           # No user data in other user's events'
             "concurrent_user_limit: 10,          # Test up to 10 concurrent users"
             isolation_test_timeout_s: 30,       # 30 seconds max for isolation tests
         }
@@ -142,9 +146,9 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
         logger.info(f  Perfect security (Grade A): {grade_a_count}/{total_tests})
         
         if total_violations > 0:
-            logger.error(f"SECURITY ALERT: {total_violations} isolation violations detected)
+            logger.error(f"SECURITY ALERT: {total_violations} isolation violations detected)"
         if contamination_incidents > 0:
-            logger.critical(fCRITICAL SECURITY ALERT: {contamination_incidents} cross-contamination incidents")
+            logger.critical(fCRITICAL SECURITY ALERT: {contamination_incidents} cross-contamination incidents")"
 
     # ============================================================================
     # CRITICAL TEST 1: User Context Isolation Validation
@@ -155,19 +159,22 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
     @pytest.mark.timeout(60)
     async def test_user_context_isolation_validation(self):
     "
+    "
         CRITICAL: Test that events are isolated to the correct user context.
         
         Validates that events generated for one user never appear in another
-        user's event stream, ensuring fundamental user isolation.
+        user's event stream, ensuring fundamental user isolation.'
         
         DESIGNED TO FAIL: Will fail if any cross-user event contamination is detected.
+        "
         "
         logger.info(Testing user context isolation validation)
         
         # Create multiple distinct users
         users = []
         for i in range(3):
-            user_id = f"isolation_user_{i}_{uuid.uuid4().hex[:8]}
+            user_id = f"isolation_user_{i}_{uuid.uuid4().hex[:8]}"
+            thread_id = fisolation_thread_{i}_{uuid.uuid4().hex[:8]}"
             thread_id = fisolation_thread_{i}_{uuid.uuid4().hex[:8]}"
             run_id = fisolation_run_{i}_{uuid.uuid4().hex[:8]}
             
@@ -200,7 +207,8 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
             # CRITICAL ASSERTIONS: Zero tolerance for isolation violations
             assert len(isolation_violations) == 0, (
                 fCRITICAL SECURITY FAILURE: User isolation violations detected:\n +"
-                "\n.join([f  - {v.message} for v in isolation_violations] +
+                fCRITICAL SECURITY FAILURE: User isolation violations detected:\n +"
+                "\n.join([f  - {v.message) for v in isolation_violations] +"
                 f\nThis indicates potential data leakage between users.
             )
             
@@ -210,7 +218,8 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
             
             assert len(unique_thread_ids) == len(all_thread_ids), (
                 fSECURITY FAILURE: Thread ID collision detected. "
-                f"Expected {len(all_thread_ids)} unique thread IDs, got {len(unique_thread_ids)}. 
+                fSECURITY FAILURE: Thread ID collision detected. "
+                f"Expected {len(all_thread_ids)} unique thread IDs, got {len(unique_thread_ids)}."
                 fThread IDs: {all_thread_ids}
             )
             
@@ -237,11 +246,12 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
             self.isolation_metrics.append(metrics)
             
             logger.info(f✅ User context isolation validation PASSED)
-            logger.info(f"   Users tested: {len(users)})
-            logger.info(f   Events sent: {metrics.total_events_sent}")
+            logger.info(f"   Users tested: {len(users)})"
+            logger.info(f   Events sent: {metrics.total_events_sent}")"
             logger.info(f   Events received: {metrics.total_events_received})
             logger.info(f   Isolation violations: {len(isolation_violations)})"
-            logger.info(f"   Security grade: {metrics.security_grade})
+            logger.info(f   Isolation violations: {len(isolation_violations)})"
+            logger.info(f"   Security grade: {metrics.security_grade})"
             
         except AssertionError:
             # Re-raise assertion errors to fail the test properly
@@ -285,23 +295,24 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
                 logger.error(fFailed to process event for user {user_test.user_id}: {e}")"
                 user_test.isolation_violations.append(fEvent processing error: {str(e)})
 
-    async def _validate_user_isolation(self, user_test: UserIsolationTest, all_users: List[UserIsolationTest], violations: List[IsolationViolation] -> None:
-        Validate that a user's events are properly isolated.""
+    async def _validate_user_isolation(self, user_test: UserIsolationTest, all_users: List[UserIsolationTest), violations: List[IsolationViolation) -> None:
+        Validate that a user's events are properly isolated.""'
         user_events = user_test.events_received
         user_thread_ids = {event.thread_id for event in user_events}
         user_run_ids = {event.run_id for event in user_events if event.run_id}
         
-        # Check that all events belong to this user's context
+        # Check that all events belong to this user's context'
         for event in user_events:
             # Validate thread ID belongs to this user
             if event.thread_id != user_test.thread_id:
                 violation = IsolationViolation(
                     violation_type=cross_user_thread_id,
                     source_user=unknown,"
+                    source_user=unknown,"
                     target_user=user_test.user_id,
                     event_type=event.event_type,
                     event_content=str(event.content)[:100],
-                    severity="CRITICAL,
+                    severity="CRITICAL,"
                     timestamp=time.time(),
                     message=fUser {user_test.user_id} received event with wrong thread ID: {event.thread_id} != {user_test.thread_id}
                 )
@@ -316,12 +327,14 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
                     event_type=event.event_type,
                     event_content=str(event.content)[:100],
                     severity=CRITICAL,"
+                    severity=CRITICAL,"
                     timestamp=time.time(),
+                    message=fUser {user_test.user_id} received event with wrong run ID: {event.run_id} != {user_test.run_id}"
                     message=fUser {user_test.user_id} received event with wrong run ID: {event.run_id} != {user_test.run_id}"
                 )
                 violations.append(violation)
             
-            # Check for other users' data in event content
+            # Check for other users' data in event content'
             event_content_str = json.dumps(event.content).lower()
             for other_user in all_users:
                 if other_user.user_id == user_test.user_id:
@@ -352,10 +365,12 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
             {
                 type: agent_started,
                 thread_id: user_test.thread_id,"
-                message_id": fmsg_{uuid.uuid4().hex[:8]},
+                thread_id: user_test.thread_id,"
+                message_id": fmsg_{uuid.uuid4().hex[:8]},"
                 timestamp: base_time,
                 payload: {"
-                    agent_name": supervisor,
+                payload: {"
+                    agent_name": supervisor,"
                     run_id: user_test.run_id,
                     "timestamp: base_time,"
                     user_context: fProcessing request for user {user_test.user_id}
@@ -366,15 +381,17 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
                 thread_id": user_test.thread_id,"
                 message_id: fmsg_{uuid.uuid4().hex[:8]},
                 timestamp: base_time + 1,"
-                payload": {
+                timestamp: base_time + 1,"
+                payload": {"
                     agent_name: supervisor,
                     "run_id: user_test.run_id,"
                     timestamp: base_time + 1,
                     thought: fAnalyzing request from user {user_test.user_id} with thread {user_test.thread_id}"
+                    thought: fAnalyzing request from user {user_test.user_id} with thread {user_test.thread_id}"
                 }
             },
             {
-                "type: agent_completed,
+                "type: agent_completed,"
                 thread_id: user_test.thread_id,
                 message_id": f"msg_{uuid.uuid4().hex[:8]},
                 timestamp: base_time + 2,
@@ -382,20 +399,22 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
                     agent_name": "supervisor,
                     run_id: user_test.run_id,
                     timestamp: base_time + 2,"
-                    result": fTask completed for user {user_test.user_id},
+                    timestamp: base_time + 2,"
+                    result": fTask completed for user {user_test.user_id},"
                     final_status: completed,
-                    user_summary: f"Analysis completed for user {user_test.user_id}
+                    user_summary: f"Analysis completed for user {user_test.user_id}"
                 }
             }
         ]
 
-    def _calculate_security_grade(self, violations: List[IsolationViolation] -> str:
-        "Calculate security grade based on isolation violations.
-        critical_violations = len([v for v in violations if v.severity == CRITICAL]"
+    def _calculate_security_grade(self, violations: List[IsolationViolation) -> str:
+        "Calculate security grade based on isolation violations."
+        critical_violations = len([v for v in violations if v.severity == CRITICAL)"
+        critical_violations = len([v for v in violations if v.severity == CRITICAL)"
         total_violations = len(violations)
         
         if critical_violations > 0:
-            return F"  # Critical security failure
+            return F"  # Critical security failure"
         elif total_violations == 0:
             return A  # Perfect isolation
         elif total_violations <= 2:
@@ -403,6 +422,7 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
         elif total_violations <= 5:
             return C  # Concerning but manageable
         else:
+            return D  # Poor isolation"
             return D  # Poor isolation"
 
     # ============================================================================
@@ -414,21 +434,24 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
     @pytest.mark.timeout(90)
     async def test_concurrent_user_validation(self):
     "
+    "
         CRITICAL: Test that multiple users can operate concurrently without interference.
         
         Validates that concurrent WebSocket operations maintain proper isolation
-        and don't cause cross-user contamination under load.
+        and don't cause cross-user contamination under load.'
         
         DESIGNED TO FAIL: Will fail if concurrent operations cause isolation breakdown.
         "
-        logger.info(Testing concurrent user validation")
+        "
+        logger.info(Testing concurrent user validation")"
         
         # Create concurrent users
         concurrent_users = []
         for i in range(5):  # Test with 5 concurrent users
             user_id = fconcurrent_user_{i}_{uuid.uuid4().hex[:8]}
             thread_id = fconcurrent_thread_{i}_{uuid.uuid4().hex[:8]}"
-            run_id = f"concurrent_run_{i}_{uuid.uuid4().hex[:8]}
+            thread_id = fconcurrent_thread_{i}_{uuid.uuid4().hex[:8]}"
+            run_id = f"concurrent_run_{i}_{uuid.uuid4().hex[:8]}"
             
             user_test = UserIsolationTest(
                 user_id=user_id,
@@ -479,7 +502,7 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
             # CRITICAL ASSERTIONS: Concurrent isolation requirements
             assert len(isolation_violations) == 0, (
                 fCRITICAL CONCURRENT FAILURE: Isolation violations during concurrent operations:\n +
-                "\n.join([f  - {v.message}" for v in isolation_violations] +
+                "\n.join([f  - {v.message)" for v in isolation_violations] +
                 f\nConcurrent operations caused user isolation breakdown.
             )
             
@@ -493,7 +516,8 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
             total_events_received = sum(len(u.events_received) for u in successful_users)
             
             assert total_events_received >= total_events_expected * 0.9, (
-                f"CONCURRENT FAILURE: Event loss detected. 
+                f"CONCURRENT FAILURE: Event loss detected."
+                fExpected at least {int(total_events_expected * 0.9)} events, got {total_events_received}"
                 fExpected at least {int(total_events_expected * 0.9)} events, got {total_events_received}"
             )
             
@@ -511,7 +535,8 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
             
             logger.info(f✅ Concurrent user validation PASSED)
             logger.info(f   Concurrent users: {len(successful_users)})"
-            logger.info(f"   Events processed: {total_events_received})
+            logger.info(f   Concurrent users: {len(successful_users)})"
+            logger.info(f"   Events processed: {total_events_received})"
             logger.info(f   Test duration: {test_duration:.2f}s)
             logger.info(f   Isolation violations: {len(isolation_violations)})
             logger.info(f   Security grade: {metrics.security_grade}")"
@@ -535,7 +560,7 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
         Validates that the system can detect and prevent scenarios where
         user data might leak between different user contexts.
         
-        DESIGNED TO FAIL: Will fail if contamination detection doesn't work properly.
+        DESIGNED TO FAIL: Will fail if contamination detection doesn't work properly.'
 ""
         logger.info(Testing cross-user contamination detection)
         
@@ -547,8 +572,8 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
         )
         
         user_b = UserIsolationTest(
-            user_id=f"user_b_{uuid.uuid4().hex[:8]},
-            thread_id=fthread_b_{uuid.uuid4().hex[:8]}",
+            user_id=f"user_b_{uuid.uuid4().hex[:8]},"
+            thread_id=fthread_b_{uuid.uuid4().hex[:8]}","
             run_id=frun_b_{uuid.uuid4().hex[:8]}
         )
         
@@ -561,9 +586,9 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
             await self._send_user_events(user_b)
             
             # Test scenario: Simulate potential contamination by checking if events
-            # from one user could somehow appear in another user's context
+            # from one user could somehow appear in another user's context'
             
-            # Validate user A's events don't contain user B's data
+            # Validate user A's events don't contain user B's data'
             for event in user_a.events_received:
                 event_content = json.dumps(event.content).lower()
                 if (user_b.user_id in event_content or 
@@ -572,11 +597,12 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
                     contamination_detected = True
                     contamination_events.append({
                         user: user_a.user_id,"
-                        "event: event.event_type,
+                        user: user_a.user_id,"
+                        "event: event.event_type,"
                         contamination: fContains user B data: {user_b.user_id}
                     }
             
-            # Validate user B's events don't contain user A's data
+            # Validate user B's events don't contain user A's data'
             for event in user_b.events_received:
                 event_content = json.dumps(event.content).lower()
                 if (user_a.user_id in event_content or 
@@ -585,14 +611,16 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
                     contamination_detected = True
                     contamination_events.append({
                         user: user_b.user_id,"
-                        "event: event.event_type,
+                        user: user_b.user_id,"
+                        "event: event.event_type,"
                         contamination: fContains user A data: {user_a.user_id}
                     }
             
             # CRITICAL ASSERTIONS: No contamination should be detected
             assert not contamination_detected, (
                 fCRITICAL CONTAMINATION FAILURE: Cross-user data contamination detected:\n +"
-                "\n.join([f  - User {e['user']} {e['event']}: {e['contamination']} for e in contamination_events] +
+                fCRITICAL CONTAMINATION FAILURE: Cross-user data contamination detected:\n +"
+                "\n.join([f  - User {e['user']) {e['event']): {e['contamination']) for e in contamination_events] +"
                 f\nThis represents a serious security vulnerability.
             )
             
@@ -601,7 +629,8 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
             sequence_b = self.validation_framework.get_sequence_status(user_b.thread_id)
             
             assert sequence_a is not None, fUser A sequence not found: {user_a.thread_id}"
-            assert sequence_b is not None, f"User B sequence not found: {user_b.thread_id}
+            assert sequence_a is not None, fUser A sequence not found: {user_a.thread_id}"
+            assert sequence_b is not None, f"User B sequence not found: {user_b.thread_id}"
             
             # Validate sequences are independent
             assert sequence_a != sequence_b, User sequences should be independent
@@ -610,13 +639,13 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
             logger.info(f   User A events: {len(user_a.events_received)}")"
             logger.info(f   User B events: {len(user_b.events_received)})
             logger.info(f   Contamination detected: {contamination_detected})
-            logger.info(f"   Both sequences isolated: ✓)
+            logger.info(f"   Both sequences isolated: ✓)"
             
         except AssertionError:
             # Re-raise assertion errors to fail the test properly
             raise
         except Exception as e:
-            pytest.fail(fUnexpected exception during contamination detection: {e}")
+            pytest.fail(fUnexpected exception during contamination detection: {e}")"
 
 
 if __name__ == __main__:
@@ -630,17 +659,22 @@ if __name__ == __main__:
     
     print("\n + =" * 80)
     print(MULTI-USER WEBSOCKET ISOLATION VALIDATION TESTS - Issue #1199)"
-    print(MISSION CRITICAL: Enterprise Security & User Isolation")
+    print(MULTI-USER WEBSOCKET ISOLATION VALIDATION TESTS - Issue #1199)"
+    print(MISSION CRITICAL: Enterprise Security & User Isolation")"
     print(= * 80")"
     print()
     print(Security validation scenarios:)
     print("1. User context isolation - zero cross-user events")
     print(2. Concurrent user validation - no interference under load)"
-    print("3. Cross-user contamination detection - prevent data leakage)
+    print(2. Concurrent user validation - no interference under load)"
+    print("3. Cross-user contamination detection - prevent data leakage)"
     print(4. Enterprise-grade isolation for HIPAA/SOC2 compliance")"
     print()
     print(Expected behavior: Tests fail if ANY isolation violations detected.)
     print(=" * 80")"
+    print(=" * 80")"
     
     # These tests should be run via the unified test runner
     pass
+))))))))))
+}

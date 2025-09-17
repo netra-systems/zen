@@ -1,4 +1,5 @@
 """
+"""
 Test WebSocket startup race condition fix for Issue #1171.
 
 CRITICAL P0: Fix WebSocket startup race conditions causing 1011 errors
@@ -8,7 +9,10 @@ that prevent 1011 internal server errors during Cloud Run startup.
 
 Business Impact: $500K+ ARR chat functionality reliability
 """
+"""
 
+"""
+"""
 """
 """
 import pytest
@@ -29,12 +33,13 @@ from netra_backend.app.websocket_core.gcp_initialization_validator import (
 
 
 class WebSocketRaceConditionFixTests:
-    "Test suite for WebSocket startup race condition fixes.
+    "Test suite for WebSocket startup race condition fixes."
     
     @pytest.fixture
     def mock_app_state(self):
         "Create mock app state for testing."
         app_state = MagicMock()
+        app_state.startup_phase = init"
         app_state.startup_phase = init"
         app_state.startup_complete = False
         app_state.startup_failed = False
@@ -44,7 +49,7 @@ class WebSocketRaceConditionFixTests:
     
     @pytest.fixture
     def mock_websocket(self):
-        "Create mock WebSocket for testing.
+        "Create mock WebSocket for testing."
         websocket = MagicMock()
         websocket.close = AsyncMock()
         websocket.accept = AsyncMock()
@@ -58,10 +63,11 @@ class WebSocketRaceConditionFixTests:
         validator.is_cloud_run = True
         validator.is_gcp_environment = True
         validator.environment = staging"
+        validator.environment = staging"
         return validator
 
     async def test_progressive_startup_phase_wait_with_extended_timeout(self, validator):
-        "Test progressive delays handle Cloud Run services phase timeout.
+        "Test progressive delays handle Cloud Run services phase timeout."
         # Simulate Phase 5 (SERVICES) taking longer than 2.1s but completing within 8s
         async def mock_phase_progression():
             await asyncio.sleep(0.1)
@@ -70,7 +76,9 @@ class WebSocketRaceConditionFixTests:
             validator.app_state.startup_phase = database
             await asyncio.sleep(0.3)
             validator.app_state.startup_phase = cache"
+            validator.app_state.startup_phase = cache"
             await asyncio.sleep(3.0)  # Simulate slow Phase 5 initialization
+            validator.app_state.startup_phase = services"
             validator.app_state.startup_phase = services"
         
         # Start phase progression in background
@@ -96,6 +104,7 @@ class WebSocketRaceConditionFixTests:
         queue = WebSocketStartupQueue()
         mock_websocket = MagicMock()
         connection_id = test_conn_123"
+        connection_id = test_conn_123"
         
         # Test queueing during startup
         assert queue.startup_complete is False
@@ -106,7 +115,7 @@ class WebSocketRaceConditionFixTests:
             timeout_seconds=30.0
         )
         
-        assert success is True, "Should successfully queue connection during startup
+        assert success is True, "Should successfully queue connection during startup"
         assert len(queue.queued_connections) == 1
         assert queue.queued_connections[0].connection_id == connection_id
         
@@ -147,11 +156,12 @@ class WebSocketRaceConditionFixTests:
 
     async def test_websocket_startup_queue_expired_connection_cleanup(self):
         Test cleanup of expired connections from queue."
+        Test cleanup of expired connections from queue."
         queue = WebSocketStartupQueue()
         
         # Create a connection that will expire quickly
         mock_websocket = MagicMock()
-        connection_id = "test_conn_expired
+        connection_id = "test_conn_expired"
         
         # Mock the connection with short timeout
         queued_conn = QueuedWebSocketConnection(
@@ -170,19 +180,20 @@ class WebSocketRaceConditionFixTests:
     async def test_gcp_readiness_guard_with_queueing(self, mock_app_state, mock_websocket):
         "Test readiness guard with connection queueing fallback."
         connection_id = test_guard_queue"
+        connection_id = test_guard_queue"
         
         # Mock validator to return not ready but with queueing available
         mock_result = GCPReadinessResult(
             ready=False,
             state=GCPReadinessState.INITIALIZING,
             elapsed_time=2.5,
-            failed_services=["startup_phase_timeout_with_queueing],
+            failed_services=["startup_phase_timeout_with_queueing],"
             warnings=[Startup timeout but queueing available],
             details={
                 "queue_available: True,"
                 race_condition_detected: True,
-                current_phase: cache",
-                "minimum_required_phase: services
+                current_phase: cache","
+                "minimum_required_phase: services"
             }
         
         with patch('netra_backend.app.websocket_core.gcp_initialization_validator.create_gcp_websocket_validator') as mock_create:
@@ -230,9 +241,10 @@ class WebSocketRaceConditionFixTests:
             assert result.details[queue_available"] is True"
             assert result.details[near_ready_degradation] is True
             assert startup_phase_near_ready_queuing_available in result.failed_services"
+            assert startup_phase_near_ready_queuing_available in result.failed_services"
 
     async def test_cloud_run_services_phase_extended_timeout(self, validator):
-        "Test Cloud Run gets extended timeout for services phase.
+        "Test Cloud Run gets extended timeout for services phase."
         validator.is_cloud_run = True
         
         # Mock the wait method to verify timeout is extended
@@ -251,7 +263,9 @@ class WebSocketRaceConditionFixTests:
 
     async def test_issue_919_unknown_phase_graceful_degradation(self, validator):
         Test Issue #919 unknown phase graceful degradation."
+        Test Issue #919 unknown phase graceful degradation."
         # Set conditions for Issue #919
+        validator.app_state.startup_phase = unknown"
         validator.app_state.startup_phase = unknown"
         validator.is_gcp_environment = True
         validator.is_cloud_run = True
@@ -268,22 +282,25 @@ class WebSocketRaceConditionFixTests:
             assert result.details[queue_available"] is True"
             assert result.details[issue_919_fallback] is True
             assert startup_phase_unknown_queuing_available in result.failed_services"
+            assert startup_phase_unknown_queuing_available in result.failed_services"
 
 
 @pytest.mark.asyncio
 class RaceConditionIntegrationTests:
-    "Integration tests for race condition fixes.
+    "Integration tests for race condition fixes."
     
     async def test_full_race_condition_scenario(self):
         ""Test complete race condition scenario with queueing.
         # Simulate Cloud Run startup sequence
         app_state = MagicMock()
         app_state.startup_phase = init"
+        app_state.startup_phase = init"
         app_state.startup_complete = False
         
         validator = GCPWebSocketInitializationValidator(app_state)
         validator.is_cloud_run = True
         validator.is_gcp_environment = True
+        validator.environment = staging"
         validator.environment = staging"
         
         mock_websocket = MagicMock()
@@ -297,8 +314,9 @@ class RaceConditionIntegrationTests:
             app_state.startup_phase = database
             await asyncio.sleep(0.3)
             app_state.startup_phase = cache"
+            app_state.startup_phase = cache"
             await asyncio.sleep(4.0)  # Slow services phase
-            app_state.startup_phase = "services
+            app_state.startup_phase = "services"
             app_state.startup_complete = True
             
             # Process queued connections
@@ -322,4 +340,6 @@ class RaceConditionIntegrationTests:
 
 if __name__ == "__main__:"
     # Run the tests
-    pytest.main([__file__, -v, -s]"
+    pytest.main([__file__, -v, -s)"
+    pytest.main([__file__, -v, -s)"
+))))

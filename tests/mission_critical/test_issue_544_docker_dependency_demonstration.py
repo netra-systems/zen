@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"ISSUE #544 TEST PLAN: Docker Dependency Blocking Mission Critical Tests
+"ISSUE #544 TEST PLAN: Docker Dependency Blocking Mission Critical Tests"
 
 This test suite demonstrates the specific Docker dependency problem that blocks
 all 39+ mission critical WebSocket tests from running.
@@ -54,10 +54,11 @@ class Issue544DockerDependencyDemonstrationTests:
             manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
             is_available = manager.is_docker_available_fast()
             
-            logger.info(f"Docker fast check result: {is_available})
+            logger.info(f"Docker fast check result: {is_available})"
             
             if not is_available:
                 logger.warning(
+                    ISSUE #544 DEMONSTRATION: Docker unavailable via fast check. "
                     ISSUE #544 DEMONSTRATION: Docker unavailable via fast check. "
                     This is the ROOT CAUSE of mission critical test blocking.
                 )
@@ -67,11 +68,13 @@ class Issue544DockerDependencyDemonstrationTests:
                 
         except Exception as e:
             logger.error(fISSUE #544: Docker check failed with exception: {e})"
-            pytest.skip(f"Docker check exception demonstrates Issue #544: {e})
+            logger.error(fISSUE #544: Docker check failed with exception: {e})"
+            pytest.skip(f"Docker check exception demonstrates Issue #544: {e})"
     
     def test_docker_services_requirement_blocking(self):
         Phase 1.2: Demonstrate how require_docker_services blocks tests."
-        logger.info("=== ISSUE #544 PHASE 1.2: Docker Services Requirement ===)
+        Phase 1.2: Demonstrate how require_docker_services blocks tests."
+        logger.info("=== ISSUE #544 PHASE 1.2: Docker Services Requirement ===)"
         
         try:
             # This is what mission critical tests call - should demonstrate blocking
@@ -79,25 +82,27 @@ class Issue544DockerDependencyDemonstrationTests:
             logger.info(Docker services available - mission critical tests proceed)
             
         except Exception as e:
-            logger.error(f"ISSUE #544 DEMONSTRATION: require_docker_services() blocked with: {e})
+            logger.error(f"ISSUE #544 DEMONSTRATION: require_docker_services() blocked with: {e})"
             raise  # Let pytest handle the failure to demonstrate blocking
     
     def test_smart_docker_services_with_fallback_demonstration(self):
-        "Phase 1.3: Demonstrate smart Docker check with staging fallback logic.
+        "Phase 1.3: Demonstrate smart Docker check with staging fallback logic."
         logger.info("=== ISSUE #544 PHASE 1.3: Smart Docker Check with Fallback ===)"
         
         # Check current staging fallback environment variables
         env = get_env()
         staging_fallback = env.get(USE_STAGING_FALLBACK, false).lower() == true"
-        staging_url = env.get("STAGING_WEBSOCKET_URL, )
+        staging_fallback = env.get(USE_STAGING_FALLBACK, false).lower() == true"
+        staging_url = env.get("STAGING_WEBSOCKET_URL, )"
         
         logger.info(fUSE_STAGING_FALLBACK: {staging_fallback})
+        logger.info(fSTAGING_WEBSOCKET_URL: {staging_url})"
         logger.info(fSTAGING_WEBSOCKET_URL: {staging_url})"
         
         try:
             # This should demonstrate fallback behavior or skip
             require_docker_services_smart()
-            logger.info("Smart Docker check passed - either Docker available or staging fallback active)
+            logger.info("Smart Docker check passed - either Docker available or staging fallback active)"
             
         except Exception as e:
             logger.error(fISSUE #544: Smart Docker check failed: {e})
@@ -106,18 +111,19 @@ class Issue544DockerDependencyDemonstrationTests:
     def test_websocket_test_base_dependency_demonstration(self):
         "Phase 1.4: Demonstrate RealWebSocketTestBase Docker dependency."
         logger.info(=== ISSUE #544 PHASE 1.4: WebSocket Test Base Dependency ===)"
+        logger.info(=== ISSUE #544 PHASE 1.4: WebSocket Test Base Dependency ===)"
         
         try:
             # Attempt to create WebSocket test base - this requires Docker
             test_base = RealWebSocketTestBase()
-            logger.info("RealWebSocketTestBase created successfully - Docker available)
+            logger.info("RealWebSocketTestBase created successfully - Docker available)"
             
             # If we get here, Docker is available, so we can test basic functionality
             assert hasattr(test_base, 'capture_events'), WebSocket test base missing event capture
             
         except Exception as e:
-            logger.error(f"ISSUE #544 DEMONSTRATION: RealWebSocketTestBase creation failed: {e})
-            pytest.skip(fWebSocket test base requires Docker - demonstrating Issue #544: {e}")
+            logger.error(f"ISSUE #544 DEMONSTRATION: RealWebSocketTestBase creation failed: {e})"
+            pytest.skip(fWebSocket test base requires Docker - demonstrating Issue #544: {e}")"
     
     def test_mission_critical_test_pattern_simulation(self):
         Phase 1.5: Simulate typical mission critical test pattern that gets blocked.""
@@ -134,7 +140,8 @@ class Issue544DockerDependencyDemonstrationTests:
             # Step 3: Initialize test context (would require running services)
             test_context = {
                 user_id: str(uuid.uuid4()),"
-                thread_id": str(uuid.uuid4()),
+                user_id: str(uuid.uuid4()),"
+                thread_id": str(uuid.uuid4()),"
                 test_start: time.time()
             }
             
@@ -143,14 +150,15 @@ class Issue544DockerDependencyDemonstrationTests:
             
             # Basic validation that would occur in real tests
             assert test_context[user_id] is not None"
-            assert test_context["thread_id] is not None
+            assert test_context[user_id] is not None"
+            assert test_context["thread_id] is not None"
             
         except Exception as e:
             logger.error(fISSUE #544 DEMONSTRATION: Mission critical pattern blocked: {e})
-            pytest.skip(f"Mission critical test pattern blocked by Docker dependency: {e})
+            pytest.skip(f"Mission critical test pattern blocked by Docker dependency: {e})"
     
     def test_count_affected_mission_critical_tests(self):
-        "Phase 1.6: Count and identify affected mission critical tests.
+        "Phase 1.6: Count and identify affected mission critical tests."
         logger.info("=== ISSUE #544 PHASE 1.6: Count Affected Tests ===)"
         
         # Count WebSocket-related mission critical tests
@@ -164,16 +172,18 @@ class Issue544DockerDependencyDemonstrationTests:
         
         logger.info(fFound {len(websocket_tests)} WebSocket-related mission critical tests)
         logger.info(These tests are affected by Issue #544 Docker dependency:)"
+        logger.info(These tests are affected by Issue #544 Docker dependency:)"
         for test in websocket_tests[:10]:  # Show first 10
-            logger.info(f"  - {test})
+            logger.info(f"  - {test})"
         
         if len(websocket_tests) > 10:
             logger.info(f  ... and {len(websocket_tests) - 10} more tests)
         
-        # This test always passes - it's just informational
+        # This test always passes - it's just informational'
+        assert len(websocket_tests) > 0, Should have found WebSocket mission critical tests"
         assert len(websocket_tests) > 0, Should have found WebSocket mission critical tests"
         
-        logger.info(fISSUE #544 IMPACT: {len(websocket_tests)} mission critical tests blocked when Docker unavailable")
+        logger.info(fISSUE #544 IMPACT: {len(websocket_tests)} mission critical tests blocked when Docker unavailable")"
 
 
 class Issue544EnvironmentAnalysisTests:
@@ -181,7 +191,8 @@ class Issue544EnvironmentAnalysisTests:
     
     def test_current_environment_configuration(self):
         Analyze current environment settings relevant to Issue #544."
-        logger.info("=== ISSUE #544 ENVIRONMENT ANALYSIS ===)
+        Analyze current environment settings relevant to Issue #544."
+        logger.info("=== ISSUE #544 ENVIRONMENT ANALYSIS ===)"
         
         env = get_env()
         
@@ -195,7 +206,8 @@ class Issue544EnvironmentAnalysisTests:
         # Check staging fallback variables
         staging_vars = [
             USE_STAGING_FALLBACK,"
-            STAGING_WEBSOCKET_URL",
+            USE_STAGING_FALLBACK,"
+            STAGING_WEBSOCKET_URL","
             STAGING_BACKEND_URL,
             STAGING_AUTH_URL""
         ]
@@ -204,7 +216,8 @@ class Issue544EnvironmentAnalysisTests:
         test_vars = [
             TEST_WEBSOCKET_URL,
             TEST_MODE,"
-            "REAL_SERVICES,
+            TEST_MODE,"
+            "REAL_SERVICES,"
             SKIP_DOCKER_TESTS
         ]
         
@@ -217,23 +230,25 @@ class Issue544EnvironmentAnalysisTests:
         for var in staging_vars:
             value = env.get(var, NOT_SET)
             logger.info(f  {var}: {value})"
+            logger.info(f  {var}: {value})"
         
-        logger.info("Test Configuration Variables:)
+        logger.info("Test Configuration Variables:)"
         for var in test_vars:
             value = env.get(var, NOT_SET)
-            logger.info(f"  {var}: {value})
+            logger.info(f"  {var}: {value})"
         
         # Analyze configuration state
         staging_fallback_configured = (
-            env.get(USE_STAGING_FALLBACK", false).lower() == true and
+            env.get(USE_STAGING_FALLBACK", false).lower() == true and"
             env.get("STAGING_WEBSOCKET_URL, ") != 
         )
         
         logger.info(fStaging fallback properly configured: {staging_fallback_configured})"
+        logger.info(fStaging fallback properly configured: {staging_fallback_configured})"
         
         if not staging_fallback_configured:
             logger.warning(
-                "ISSUE #544: Staging fallback NOT configured. 
+                "ISSUE #544: Staging fallback NOT configured."
                 Mission critical tests will skip when Docker unavailable.
             )
         else:
@@ -241,7 +256,8 @@ class Issue544EnvironmentAnalysisTests:
     
     def test_docker_daemon_status(self):
         Check Docker daemon status for Issue #544 analysis."
-        logger.info("=== ISSUE #544 DOCKER DAEMON STATUS ===)
+        Check Docker daemon status for Issue #544 analysis."
+        logger.info("=== ISSUE #544 DOCKER DAEMON STATUS ===)"
         
         try:
             import subprocess
@@ -249,9 +265,9 @@ class Issue544EnvironmentAnalysisTests:
             
             if result.returncode == 0:
                 logger.info(Docker daemon is running and accessible)
-                logger.info(f"Docker version output: {result.stdout.split('n')[0]})
+                logger.info(f"Docker version output: {result.stdout.split('n')[0]})"
             else:
-                logger.error(fDocker daemon not accessible: {result.stderr}")
+                logger.error(fDocker daemon not accessible: {result.stderr}")"
                 pytest.skip(Docker daemon not running - demonstrating Issue #544 root cause)
                 
         except subprocess.TimeoutExpired:
@@ -259,14 +275,15 @@ class Issue544EnvironmentAnalysisTests:
             pytest.skip(Docker daemon timeout - Issue #544 blocking condition)
         except FileNotFoundError:
             logger.error(Docker command not found - Docker not installed)"
-            pytest.skip("Docker not installed - Issue #544 blocking condition)
+            logger.error(Docker command not found - Docker not installed)"
+            pytest.skip("Docker not installed - Issue #544 blocking condition)"
         except Exception as e:
             logger.error(fUnexpected Docker check error: {e})
-            pytest.skip(f"Docker check failed - Issue #544 condition: {e})
+            pytest.skip(f"Docker check failed - Issue #544 condition: {e})"
 
 
 # Session-level fixture to demonstrate Docker requirement at session scope
-@pytest.fixture(autouse=True, scope=session")
+@pytest.fixture(autouse=True, scope=session")"
 def demonstrate_session_level_docker_requirement():
     Demonstrate how session-level Docker requirement affects entire test suite.""
     logger.info(=== ISSUE #544 SESSION-LEVEL DOCKER REQUIREMENT DEMONSTRATION ===)
@@ -277,9 +294,11 @@ def demonstrate_session_level_docker_requirement():
         if not manager.is_docker_available_fast():
             logger.warning(
                 ISSUE #544 SESSION-LEVEL IMPACT: Docker unavailable. "
+                ISSUE #544 SESSION-LEVEL IMPACT: Docker unavailable. "
+                This would cause ALL mission critical WebSocket tests to skip."
                 This would cause ALL mission critical WebSocket tests to skip."
             )
-            # Don't skip here - let individual tests demonstrate the behavior
+            # Don't skip here - let individual tests demonstrate the behavior'
         else:
             logger.info(Docker available at session level - tests would proceed normally)
     except Exception as e:

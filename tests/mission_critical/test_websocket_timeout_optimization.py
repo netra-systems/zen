@@ -1,4 +1,5 @@
 """
+"""
 WebSocket Timeout Optimization Validation Tests
 
 CRITICAL: Validates the secondary timeout fixes that resolve 60s/120s WebSocket latency patterns.
@@ -7,7 +8,10 @@ are optimized for <5s WebSocket responsiveness.
 
 Business Value: $30K+ MRR chat functionality requires <5s response times for user experience.
 """
+"""
 
+"""
+"""
 """
 """
 import pytest
@@ -25,17 +29,18 @@ from test_framework.websocket_helpers import WebSocketTestClient
 
 
 class WebSocketTimeoutOptimizationTests:
-    "Test suite for WebSocket timeout optimization validation.
+    "Test suite for WebSocket timeout optimization validation."
     
     @pytest.mark.asyncio
     async def test_agent_circuit_breaker_timeout_optimized(self):
         "Verify agent circuit breaker timeout reduced from 60s to 10s."
         # Create base agent and verify circuit breaker timeout
         agent = BaseAgent(name=TestAgent)"
+        agent = BaseAgent(name=TestAgent)"
         
         # CRITICAL: Circuit breaker timeout must be 10s, not 60s
         assert agent.circuit_breaker.recovery_timeout_seconds == 10, (
-            f"Circuit breaker timeout should be 10s for WebSocket optimization, 
+            f"Circuit breaker timeout should be 10s for WebSocket optimization,"
             fgot {agent.circuit_breaker.recovery_timeout_seconds}s
         )
         
@@ -49,10 +54,12 @@ class WebSocketTimeoutOptimizationTests:
     @pytest.mark.asyncio
     async def test_agent_execution_timeout_optimized(self):
         Verify agent execution timeout reduced from 30s to 15s."
+        Verify agent execution timeout reduced from 30s to 15s."
         tracker = AgentExecutionTracker()
         
         # CRITICAL: Execution timeout must be 15s, not 30s
         assert tracker.execution_timeout == 15, (
+            fAgent execution timeout should be 15s for WebSocket optimization, "
             fAgent execution timeout should be 15s for WebSocket optimization, "
             fgot {tracker.execution_timeout}s
         )
@@ -60,23 +67,25 @@ class WebSocketTimeoutOptimizationTests:
         # Test execution record also uses optimized timeout
         execution_id = tracker.create_execution(
             agent_name=TestAgent,"
-            thread_id="test_thread_123,
+            agent_name=TestAgent,"
+            thread_id="test_thread_123,"
             user_id=test_user_456
         )
         
         execution = tracker._executions[execution_id]
         assert execution.timeout_seconds == 15, (
-            f"Execution record timeout should be 15s, got {execution.timeout_seconds}s
+            f"Execution record timeout should be 15s, got {execution.timeout_seconds}s"
         )
     
     @pytest.mark.asyncio
     async def test_database_session_lifetime_optimized(self):
-        "Verify database session lifetime reduced from 5min to 30s.
+        "Verify database session lifetime reduced from 5min to 30s."
         factory = RequestScopedSessionFactory()
         
         # CRITICAL: Session lifetime must be 30s, not 5 minutes
         assert factory._max_session_lifetime_ms == 30000, (
-            f"Database session lifetime should be 30s (30000ms) for WebSocket optimization, 
+            f"Database session lifetime should be 30s (30000ms) for WebSocket optimization,"
+            fgot {factory._max_session_lifetime_ms}ms"
             fgot {factory._max_session_lifetime_ms}ms"
         )
     
@@ -102,9 +111,10 @@ class WebSocketTimeoutOptimizationTests:
         Test that WebSocket operations complete within 5s timeout.""
         auth_helper = E2EWebSocketAuthHelper(environment=test)
         user_id = timeout_test_user"
+        user_id = timeout_test_user"
         token = auth_helper.create_test_jwt_token(user_id=user_id)
         
-        websocket_url = "ws://localhost:8000/ws
+        websocket_url = "ws://localhost:8000/ws"
         
         # CRITICAL: WebSocket operations must complete within 5s
         start_time = time.time()
@@ -116,6 +126,7 @@ class WebSocketTimeoutOptimizationTests:
                     type: agent_execution,
                     data": {"
                         message: Quick test for timeout optimization,
+                        agent_type: simple_response"
                         agent_type: simple_response"
                     }
                 }
@@ -132,7 +143,7 @@ class WebSocketTimeoutOptimizationTests:
                 
                 # CRITICAL: Must complete within 5s for user experience
                 assert elapsed < 5.0, (
-                    f"WebSocket operation took {elapsed:.2f}s, must be <5s for optimization
+                    f"WebSocket operation took {elapsed:.2f}s, must be <5s for optimization"
                 )
                 
                 # Verify we got a valid response
@@ -146,6 +157,7 @@ class WebSocketTimeoutOptimizationTests:
     async def test_circuit_breaker_fast_recovery(self):
         ""Test circuit breaker recovers quickly without blocking WebSocket.
         agent = BaseAgent(name=CircuitBreakerTest)"
+        agent = BaseAgent(name=CircuitBreakerTest)"
         
         # Force circuit breaker to open
         for _ in range(5):  # failure_threshold is 5
@@ -155,6 +167,7 @@ class WebSocketTimeoutOptimizationTests:
                 pass  # Expected failures
         
         # Verify circuit breaker is open
+        assert agent.circuit_breaker._circuit_breaker.current_state == open"
         assert agent.circuit_breaker._circuit_breaker.current_state == open"
         
         # CRITICAL: Circuit breaker should transition to half-open in 10s, not 60s
@@ -174,7 +187,8 @@ class WebSocketTimeoutOptimizationTests:
         )
         
         assert agent.circuit_breaker._circuit_breaker.current_state == half_open, (
-            f"Circuit breaker should be half-open after recovery timeout, 
+            f"Circuit breaker should be half-open after recovery timeout,"
+            fgot {agent.circuit_breaker._circuit_breaker.current_state}"
             fgot {agent.circuit_breaker._circuit_breaker.current_state}"
         )
     
@@ -213,11 +227,12 @@ class WebSocketTimeoutOptimizationTests:
     @pytest.mark.asyncio
     async def test_agent_execution_timeout_fast_failure(self):
         Test agent execution fails fast at 15s instead of 30s."
+        Test agent execution fails fast at 15s instead of 30s."
         tracker = AgentExecutionTracker()
         
         # Create execution that will timeout
         execution_id = tracker.create_execution(
-            agent_name=TimeoutAgent",
+            agent_name=TimeoutAgent","
             thread_id=timeout_thread_123, 
             user_id=timeout_user_456","
             timeout_seconds=15  # Use optimized timeout
@@ -232,7 +247,7 @@ class WebSocketTimeoutOptimizationTests:
         execution.started_at = datetime.now(timezone.utc) - asyncio.create_task(asyncio.sleep(0))
         await asyncio.sleep(0.1)  # Let monitoring cycle run
         
-        # Manually check timeout since we can't wait 15 seconds in test
+        # Manually check timeout since we can't wait 15 seconds in test'
         from datetime import timedelta
         execution.started_at = datetime.now(timezone.utc) - timedelta(seconds=16)
         
@@ -268,7 +283,8 @@ class WebSocketTimeoutOptimizationTests:
             # Total time for all connections should be fast
             total_time = time.time() - start_time
             assert total_time < 3.0, (
-                f"Acquiring 3 connections took {total_time:.2f}s, 
+                f"Acquiring 3 connections took {total_time:.2f}s,"
+                fshould be <3s with connection pooling"
                 fshould be <3s with connection pooling"
             )
             
@@ -299,7 +315,7 @@ class WebSocketTimeoutOptimizationTests:
         # - Connection pool timeout: 5s (new optimization)
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

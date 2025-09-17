@@ -1,5 +1,5 @@
 class WebSocketTestHelper:
-    "Real WebSocket connection for testing instead of mocks.
+    "Real WebSocket connection for testing instead of mocks."
     
     def __init__(self):
         self.messages_sent = []
@@ -10,17 +10,20 @@ class WebSocketTestHelper:
         ""Send JSON message.
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
         
-    async def close(self, code: int = 1000, reason: str = Normal closure"):
+    async def close(self, code: int = 1000, reason: str = Normal closure"):"
         Close WebSocket connection.""
         self._closed = True
         self.is_connected = False
         
     def get_messages(self) -> list:
         Get all sent messages."
+        Get all sent messages."
         return self.messages_sent.copy()
 
+"
 "
 Comprehensive test for the critical agent_handler async context manager fix.
 
@@ -29,6 +32,7 @@ Tests the actual message flow through the agent handler to ensure:
 2. Messages are properly routed
 3. WebSocket events are sent
 4. Database sessions are properly managed
+"
 "
 
 import pytest
@@ -52,7 +56,7 @@ from shared.isolated_environment import get_env
 
 @pytest.mark.asyncio
 class AgentHandlerComprehensiveFixTests:
-    "Comprehensive test suite for agent handler fix.
+    "Comprehensive test suite for agent handler fix."
 
     async def test_agent_handler_with_real_flow(self):
         "Test the complete flow with the fixed async context manager pattern."
@@ -63,8 +67,8 @@ class AgentHandlerComprehensiveFixTests:
         start_agent_message = WebSocketMessage(
             type=MessageType.START_AGENT,
             payload={
-                agent_name: "triage,
-                user_request": Help me debug my application
+                agent_name: "triage,"
+                user_request": Help me debug my application"
             }
         
         # Mock WebSocket
@@ -98,7 +102,8 @@ class AgentHandlerComprehensiveFixTests:
                     websocket = WebSocketTestHelper()
                     mock_service.handle_start_agent = AsyncMock(return_value={
                         success: True,"
-                        "run_id: run_test_456,
+                        success: True,"
+                        "run_id: run_test_456,"
                         agent: triage,
                         "message: Triage agent started successfully"
                     }
@@ -118,7 +123,8 @@ class AgentHandlerComprehensiveFixTests:
                     mock_service.handle_start_agent.assert_called_once()
                     call_args = mock_service.handle_start_agent.call_args
                     assert call_args[1]['agent_name'] == triage"
-                    assert call_args[1]['user_request'] == "Help me debug my application
+                    assert call_args[1]['agent_name'] == triage"
+                    assert call_args[1]['user_request'] == "Help me debug my application"
                     
                     # Verify thread association was updated
                     mock_ws_manager.update_connection_thread.assert_called()
@@ -132,8 +138,8 @@ class AgentHandlerComprehensiveFixTests:
         handler = AgentMessageHandler()
         
         message_types_to_test = [
-            (MessageType.START_AGENT, {agent_name: triage, user_request: test"},
-            (MessageType.USER_MESSAGE, {"message: Hello agent, thread_id: thread_123},
+            (MessageType.START_AGENT, {agent_name: triage, user_request: test"),"
+            (MessageType.USER_MESSAGE, {"message: Hello agent, thread_id: thread_123),"
         ]
         
         for msg_type, payload in message_types_to_test:
@@ -156,11 +162,11 @@ class AgentHandlerComprehensiveFixTests:
                         mock_service.handle_start_agent = AsyncMock(return_value={
                             "success: True,"
                             run_id: test_run,
-                            agent: payload["agent_name]
+                            agent: payload["agent_name]"
                         }
                     elif msg_type == MessageType.USER_MESSAGE:
                         mock_service.handle_user_message = AsyncMock(return_value={
-                            success": True,
+                            success": True,"
                             message: Response to user
                         }
                     
@@ -168,7 +174,7 @@ class AgentHandlerComprehensiveFixTests:
                     
                     # Should not raise async for error
                     result = await handler.handle_message(
-                        user_id=f"user_{msg_type.value},
+                        user_id=f"user_{msg_type.value},"
                         message=message,
                         websocket=mock_websocket
                     )
@@ -177,7 +183,7 @@ class AgentHandlerComprehensiveFixTests:
                     assert result is not None
 
     async def test_error_handling_with_fixed_pattern(self):
-        "Test that errors in message handling are properly caught.
+        "Test that errors in message handling are properly caught."
         
         handler = AgentMessageHandler()
         
@@ -199,12 +205,13 @@ class AgentHandlerComprehensiveFixTests:
                 websocket = WebSocketTestHelper()
                 mock_service.handle_start_agent = AsyncMock(
                     side_effect=Exception(Service error)"
+                    side_effect=Exception(Service error)"
                 )
                 mock_service_class.return_value = mock_service
                 
                 # Should handle the error gracefully
                 result = await handler.handle_message(
-                    user_id=error_test_user",
+                    user_id=error_test_user","
                     message=message,
                     websocket=mock_websocket
                 )
@@ -239,7 +246,7 @@ class AgentHandlerComprehensiveFixTests:
                     mock_service.handle_start_agent = AsyncMock(return_value={
                         success: True,
                         run_id": f"run_{msg_id},
-                        agent: f"agent_{msg_id}
+                        agent: f"agent_{msg_id}"
                     }
                     mock_service_class.return_value = mock_service
                     
@@ -259,3 +266,5 @@ class AgentHandlerComprehensiveFixTests:
         
         # Stats should be updated
         assert handler.processing_stats[MessageType.START_AGENT] >= 5
+
+))))))))))

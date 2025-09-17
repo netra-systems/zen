@@ -1,11 +1,12 @@
 """
+"""
 Redis SSOT Compliance Test Suite - Mission Critical Validation
 
 BUSINESS VALUE JUSTIFICATION:
 - Segment: Platform/Internal
 - Business Goal: Chat Functionality Stability (90% of platform value)
 - Value Impact: Prevents WebSocket 1011 errors that break chat reliability
-- Strategic Impact: Protects $500K+ ARR by ensuring Redis operations don't conflict
+- Strategic Impact: Protects $500K+ ARR by ensuring Redis operations don't conflict'
 
 This test suite validates that:
 1. SSOT Redis Manager is the only active Redis implementation
@@ -16,7 +17,9 @@ This test suite validates that:
 
 CRITICAL: Uses REAL Redis services (non-Docker) as specified in requirements
 "
+"
 
+"""
 """
 import asyncio
 import pytest
@@ -43,7 +46,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestRedisSSOTCompliance(SSotAsyncTestCase):
-    "Test Redis SSOT compliance and architecture validation.
+    "Test Redis SSOT compliance and architecture validation."
     
     async def asyncSetUp(self):
         "Set up test environment for Redis SSOT validation."
@@ -51,8 +54,8 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         
         # Ensure test environment variables are set
         self.test_env = {
-            TESTING: "true,
-            ENVIRONMENT": test,
+            TESTING: "true,"
+            ENVIRONMENT": test,"
             TEST_DISABLE_REDIS: false,
             REDIS_URL": "redis://localhost:6381/0  # Test Redis port
         }
@@ -69,10 +72,11 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         self.original_state = {
             connected: self.redis_manager.is_connected,
             client: self.redis_manager._client"
+            client: self.redis_manager._client"
         }
     
     async def asyncTearDown(self):
-        "Clean up Redis test state.
+        "Clean up Redis test state."
         try:
             # Clean up any test data
             if self.redis_manager.is_connected:
@@ -108,7 +112,8 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
     
     async def test_ssot_redis_operations_basic(self):
         Test basic Redis operations work through SSOT manager."
-        test_key = "test:ssot:basic
+        Test basic Redis operations work through SSOT manager."
+        test_key = "test:ssot:basic"
         test_value = ssot_test_value
         
         # Test set operation
@@ -122,10 +127,11 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         # Test exists operation
         exists = await self.redis_manager.exists(test_key)
         self.assertTrue(exists, Key should exist after setting)"
+        self.assertTrue(exists, Key should exist after setting)"
         
         # Test delete operation
         deleted = await self.redis_manager.delete(test_key)
-        self.assertTrue(deleted, Key should be deleted successfully")
+        self.assertTrue(deleted, Key should be deleted successfully")"
         
         # Verify key is gone
         exists_after_delete = await self.redis_manager.exists(test_key)
@@ -136,7 +142,8 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         # Get circuit breaker status
         status = self.redis_manager._circuit_breaker.get_status()
         self.assertIn(state, status)"
-        self.assertIn(failure_count", status)
+        self.assertIn(state, status)"
+        self.assertIn(failure_count", status)"
         
         # Test that circuit breaker can be checked
         can_execute = self.redis_manager._circuit_breaker.can_execute()
@@ -161,7 +168,8 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         # In test environment, reconnection should work
         if original_connected:
             self.assertTrue(reconnect_success, Force reconnection should succeed)"
-            self.assertTrue(self.redis_manager.is_connected, "Should be connected after force reconnect)
+            self.assertTrue(reconnect_success, Force reconnection should succeed)"
+            self.assertTrue(self.redis_manager.is_connected, "Should be connected after force reconnect)"
         else:
             # If originally not connected, reconnection might fail in test env
             logger.info(Redis not connected in test environment - this is expected)
@@ -170,8 +178,8 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         "Test advanced Redis operations through SSOT manager."
         # Test multi-get/multi-set
         test_data = {
-            test:mset:1: "value1,
-            test:mset:2": value2,
+            test:mset:1: "value1,"
+            test:mset:2": value2,"
             test:mset:3: value3
         }
         
@@ -195,17 +203,19 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
     
     async def test_ssot_redis_auth_service_compatibility(self):
         Test auth service compatibility methods."
+        Test auth service compatibility methods."
+        session_id = test_session_123"
         session_id = test_session_123"
         session_data = {
             user_id: test_user,
             "permissions: [read", write],
-            created_at: "2025-09-16T10:00:00Z
+            created_at: "2025-9-16T10:0:00Z"
         }
         
         # Test session storage
         stored = await self.redis_manager.store_session(session_id, session_data, 60)
         if self.redis_manager.is_connected:
-            self.assertTrue(stored, Session should be stored successfully")
+            self.assertTrue(stored, Session should be stored successfully")"
             
             # Test session retrieval
             retrieved_session = await self.redis_manager.get_session(session_id)
@@ -232,10 +242,11 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         set_result = await user_cache.set_user_cache(user_id, cache_key, cache_value, ttl=30)
         if self.redis_manager.is_connected:
             self.assertTrue(set_result, User cache set should succeed)"
+            self.assertTrue(set_result, User cache set should succeed)"
             
             # Test user cache get
             retrieved_value = await user_cache.get_user_cache(user_id, cache_key)
-            self.assertEqual(retrieved_value, cache_value, "Retrieved cache value should match)
+            self.assertEqual(retrieved_value, cache_value, "Retrieved cache value should match)"
             
             # Test user cache clear
             cleared = await user_cache.clear_user_cache(user_id, cache_key)
@@ -248,12 +259,14 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         # Verify all required status fields are present
         required_fields = [
             connected,"
-            "client_available, 
+            connected,"
+            "client_available,"
             consecutive_failures,
             "current_retry_delay,"
             max_reconnect_attempts,
             last_health_check,"
-            background_tasks",
+            last_health_check,"
+            background_tasks","
             circuit_breaker
         ]
         
@@ -263,7 +276,8 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         # Verify background tasks status structure
         bg_tasks = status[background_tasks]
         self.assertIn(reconnect_task_active, bg_tasks)"
-        self.assertIn("health_monitor_active, bg_tasks)
+        self.assertIn(reconnect_task_active, bg_tasks)"
+        self.assertIn("health_monitor_active, bg_tasks)"
         
         # Verify circuit breaker status structure
         cb_status = status[circuit_breaker]
@@ -281,14 +295,14 @@ class TestRedisLegacyCompatibility(SSotAsyncTestCase):
         
         # Set test environment
         self.set_env_var(TESTING, true)
-        self.set_env_var(ENVIRONMENT, test")
+        self.set_env_var(ENVIRONMENT, test")"
         
         # Initialize deprecated manager for testing
         self.deprecated_manager = DeprecatedRedisManager()
         await self.deprecated_manager.connect()
     
     async def asyncTearDown(self):
-        "Clean up legacy compatibility test state.
+        "Clean up legacy compatibility test state."
         try:
             await self.deprecated_manager.disconnect()
         except Exception as e:
@@ -298,6 +312,7 @@ class TestRedisLegacyCompatibility(SSotAsyncTestCase):
     
     def test_legacy_manager_redirects_to_ssot(self):
         Test that deprecated Redis manager redirects to SSOT implementation."
+        Test that deprecated Redis manager redirects to SSOT implementation."
         # Check that deprecated manager has SSOT manager reference
         self.assertIsNotNone(self.deprecated_manager._ssot_manager)
         
@@ -306,7 +321,7 @@ class TestRedisLegacyCompatibility(SSotAsyncTestCase):
         self.assertIs(self.deprecated_manager._ssot_manager, canonical_manager)
     
     async def test_legacy_operations_redirect_to_ssot(self):
-        "Test that legacy operations properly redirect to SSOT manager.
+        "Test that legacy operations properly redirect to SSOT manager."
         test_key = "test:legacy:redirect"
         test_value = legacy_test_value
         
@@ -315,10 +330,11 @@ class TestRedisLegacyCompatibility(SSotAsyncTestCase):
         
         if self.deprecated_manager._ssot_manager and self.deprecated_manager._ssot_manager.is_connected:
             self.assertTrue(result, Legacy set should succeed via SSOT redirect)"
+            self.assertTrue(result, Legacy set should succeed via SSOT redirect)"
             
             # Test get operation through legacy interface
             retrieved_value = await self.deprecated_manager.get(test_key)
-            self.assertEqual(retrieved_value, test_value, Legacy get should work via SSOT redirect")
+            self.assertEqual(retrieved_value, test_value, Legacy get should work via SSOT redirect")"
             
             # Verify data is actually in SSOT manager
             ssot_value = await self.deprecated_manager._ssot_manager.get(test_key)
@@ -330,10 +346,11 @@ class TestRedisLegacyCompatibility(SSotAsyncTestCase):
     
     def test_legacy_deprecation_warning_issued(self):
         Test that importing legacy manager issues deprecation warning."
+        Test that importing legacy manager issues deprecation warning."
         import warnings
         
         with warnings.catch_warnings(record=True) as warning_list:
-            warnings.simplefilter(always")
+            warnings.simplefilter(always")"
             
             # Import should trigger deprecation warning
             from netra_backend.app.core.redis_manager import RedisManager as TestDeprecatedManager
@@ -357,7 +374,7 @@ class TestRedisMultiUserIsolation(SSotAsyncTestCase):
         
         # Set test environment
         self.set_env_var(TESTING, true)
-        self.set_env_var(ENVIRONMENT, "test)
+        self.set_env_var(ENVIRONMENT, "test)"
         
         # Create multiple Redis manager instances to simulate multi-user
         self.user1_manager = RedisManager()
@@ -367,7 +384,7 @@ class TestRedisMultiUserIsolation(SSotAsyncTestCase):
         await self.user2_manager.initialize()
     
     async def asyncTearDown(self):
-        "Clean up multi-user isolation test state.
+        "Clean up multi-user isolation test state."
         try:
             # Clean up test data for both users
             for manager in [self.user1_manager, self.user2_manager]:
@@ -393,6 +410,8 @@ class TestRedisMultiUserIsolation(SSotAsyncTestCase):
         cache_key = agent_state
         
         user1_value = user1_processing"
+        user1_value = user1_processing"
+        user2_value = user2_idle"
         user2_value = user2_idle"
         
         # Set cache for both users
@@ -411,13 +430,14 @@ class TestRedisMultiUserIsolation(SSotAsyncTestCase):
             user1_cannot_access_user2 = await user1_cache.get_user_cache(user2_id, cache_key)
             user2_cannot_access_user1 = await user2_cache.get_user_cache(user1_id, cache_key)
             
-            # Users should be able to access each other's data by design (same Redis)
+            # Users should be able to access each other's data by design (same Redis)'
             # but the keys should be different due to user_id prefixing
             self.assertEqual(user1_cannot_access_user2, user2_value, Users share Redis but use different keys)
             self.assertEqual(user2_cannot_access_user1, user1_value, Users share Redis but use different keys)"
+            self.assertEqual(user2_cannot_access_user1, user1_value, Users share Redis but use different keys)"
     
     async def test_concurrent_user_operations_no_conflicts(self):
-        "Test concurrent operations from multiple users don't conflict.
+        "Test concurrent operations from multiple users don't conflict."
         if not self.user1_manager.is_connected:
             self.skipTest(Redis not connected - skipping concurrent test")"
         
@@ -425,45 +445,49 @@ class TestRedisMultiUserIsolation(SSotAsyncTestCase):
         async def user1_operations():
             for i in range(10):
                 await self.user1_manager.set(ftest:user:1:key_{i}, fuser1_value_{i})
-                await asyncio.sleep(0.01)  # Small delay to allow interleaving
+                await asyncio.sleep(0.1)  # Small delay to allow interleaving
         
         async def user2_operations():
             for i in range(10):
                 await self.user2_manager.set(ftest:user:2:key_{i}, fuser2_value_{i})
-                await asyncio.sleep(0.01)  # Small delay to allow interleaving
+                await asyncio.sleep(0.1)  # Small delay to allow interleaving
         
         # Run operations concurrently
         await asyncio.gather(user1_operations(), user2_operations())
         
         # Verify all data was set correctly
         for i in range(10):
-            user1_value = await self.user1_manager.get(f"test:user:1:key_{i})
-            user2_value = await self.user2_manager.get(ftest:user:2:key_{i}")
+            user1_value = await self.user1_manager.get(f"test:user:1:key_{i})"
+            user2_value = await self.user2_manager.get(ftest:user:2:key_{i}")"
             
             self.assertEqual(user1_value, fuser1_value_{i}, fUser 1 key {i} should have correct value)
-            self.assertEqual(user2_value, fuser2_value_{i}, fUser 2 key {i} should have correct value")
+            self.assertEqual(user2_value, fuser2_value_{i}, fUser 2 key {i} should have correct value")"
     
     async def test_websocket_state_isolation(self):
-        "Test WebSocket state isolation between users.
+        "Test WebSocket state isolation between users."
         # Simulate WebSocket run IDs for different users
         user1_run_id = run_user1_12345""
         user2_run_id = run_user2_67890
         
         user1_state = {agent: "processing, step": 1, tools: [search]}
         user2_state = {"agent: waiting", step: 3, tools: [calculator]}"
+        user2_state = {"agent: waiting", step: 3, tools: [calculator]}"
         
         if self.user1_manager.is_connected:
             # Store WebSocket state for each user
-            await self.user1_manager.set(fwebsocket_state:{user1_run_id}", json.dumps(user1_state))
+            await self.user1_manager.set(fwebsocket_state:{user1_run_id}", json.dumps(user1_state))"
             await self.user2_manager.set(fwebsocket_state:{user2_run_id}, json.dumps(user2_state))
             
             # Retrieve and verify isolation
             user1_retrieved = await self.user1_manager.get(fwebsocket_state:{user1_run_id})"
-            user2_retrieved = await self.user2_manager.get(f"websocket_state:{user2_run_id})
+            user1_retrieved = await self.user1_manager.get(fwebsocket_state:{user1_run_id})"
+            user2_retrieved = await self.user2_manager.get(f"websocket_state:{user2_run_id})"
             
             self.assertEqual(json.loads(user1_retrieved), user1_state, User 1 WebSocket state should be isolated)
+            self.assertEqual(json.loads(user2_retrieved), user2_state, User 2 WebSocket state should be isolated)"
             self.assertEqual(json.loads(user2_retrieved), user2_state, User 2 WebSocket state should be isolated)"
 
 
 if __name__ == __main__":"
-    pytest.main([__file__, "-v, --tb=short"]
+    pytest.main([__file__, "-v, --tb=short")
+)

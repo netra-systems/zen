@@ -1,4 +1,5 @@
 """
+"""
 Redis WebSocket 1011 Regression Test Suite - Mission Critical
 
 BUSINESS VALUE JUSTIFICATION:
@@ -15,13 +16,15 @@ This test suite specifically targets the WebSocket 1011 error that was caused by
 
 CRITICAL ISSUE #849 VALIDATION:
 - Ensures SSOT Redis Manager prevents competing implementations
-- Validates WebSocket connections don't fail with 1011 errors
+- Validates WebSocket connections don't fail with 1011 errors'
 - Tests race condition scenarios that previously caused failures
 - Verifies chat functionality remains reliable under load
 
 GOLDEN PATH PROTECTION: Users login → get AI responses
 "
+"
 
+"""
 """
 import asyncio
 import pytest
@@ -55,7 +58,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestWebSocket1011Regression(SSotAsyncTestCase):
-    "Test WebSocket 1011 error regression scenarios.
+    "Test WebSocket 1011 error regression scenarios."
     
     async def asyncSetUp(self):
         "Set up test environment for WebSocket 1011 regression testing."
@@ -63,12 +66,12 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
         
         # Configure test environment to simulate production scenarios
         self.test_env = {
-            TESTING: "true,
-            ENVIRONMENT": test,
+            TESTING: "true,"
+            ENVIRONMENT": test,"
             TEST_DISABLE_REDIS: false,
             REDIS_URL": "redis://localhost:6381/0,
             WEBSOCKET_HOST: localhost,
-            WEBSOCKET_PORT: "8001
+            WEBSOCKET_PORT: "8001"
         }
         
         for key, value in self.test_env.items():
@@ -78,6 +81,7 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
         await ssot_redis_manager.initialize()
         
         # Track test session
+        self.test_session_id = fregression_{uuid.uuid4().hex[:8]}"
         self.test_session_id = fregression_{uuid.uuid4().hex[:8]}"
         self.websocket_connections = []
         
@@ -102,11 +106,12 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
             
         except Exception as e:
             logger.debug(fRegression cleanup error (non-critical): {e})"
+            logger.debug(fRegression cleanup error (non-critical): {e})"
         
         await super().asyncTearDown()
     
     async def test_no_competing_redis_managers_prevent_1011(self):
-        "Test that SSOT Redis Manager prevents competing implementations.
+        "Test that SSOT Redis Manager prevents competing implementations."
         # CRITICAL: Verify legacy manager redirects to SSOT
         self.assertIs(
             legacy_redis_manager,
@@ -124,15 +129,16 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
             SSOT and legacy Redis managers should be the same instance
         )
         
-        # Test that multiple imports don't create competing instances
+        # Test that multiple imports don't create competing instances'
         from netra_backend.app.redis_manager import redis_manager as import1
         from netra_backend.app.core.redis_manager import redis_manager as import2
         
         self.assertIs(import1, import2, Multiple imports should return same Redis manager instance)"
-        self.assertIs(import1, ssot_redis_manager, "All imports should reference SSOT manager)
+        self.assertIs(import1, import2, Multiple imports should return same Redis manager instance)"
+        self.assertIs(import1, ssot_redis_manager, "All imports should reference SSOT manager)"
     
     async def test_websocket_handshake_redis_race_condition_prevention(self):
-        Test WebSocket handshake doesn't race with Redis operations.""
+        Test WebSocket handshake doesn't race with Redis operations.""'
         if not ssot_redis_manager.is_connected:
             self.skipTest(Redis not connected - skipping race condition test)
         
@@ -149,8 +155,10 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
                     session_id": self.test_session_id,"
                     status: connecting,
                     timestamp: time.time()"
+                    timestamp: time.time()"
                 }
                 
+                state_key = fregression:{self.test_session_id}:ws:{connection_id}"
                 state_key = fregression:{self.test_session_id}:ws:{connection_id}"
                 
                 # This operation should not race with other connections
@@ -174,7 +182,7 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
                     return False
                     
             except Exception as e:
-                logger.error(fRace condition in connection {connection_id}: {e}")
+                logger.error(fRace condition in connection {connection_id}: {e}")"
                 return False
         
         # Run multiple connection attempts concurrently
@@ -193,19 +201,20 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
             successful_connections,
             connection_attempts,
             fAll {connection_attempts} WebSocket connections should succeed without race conditions"
+            fAll {connection_attempts} WebSocket connections should succeed without race conditions"
         )
         
         # Verify all connection states are stored correctly
         for connection_id in connection_ids:
-            state_key = f"regression:{self.test_session_id}:ws:{connection_id}
+            state_key = f"regression:{self.test_session_id}:ws:{connection_id}"
             stored_state_json = await ssot_redis_manager.get(state_key)
             
             self.assertIsNotNone(stored_state_json, fConnection {connection_id} state should be stored)
             stored_state = json.loads(stored_state_json)
-            self.assertEqual(stored_state[status], connected")
+            self.assertEqual(stored_state[status], connected")"
     
     async def test_redis_circuit_breaker_prevents_1011_errors(self):
-        "Test Redis circuit breaker prevents cascading failures that cause 1011 errors.
+        "Test Redis circuit breaker prevents cascading failures that cause 1011 errors."
         # Check initial circuit breaker state
         initial_status = ssot_redis_manager._circuit_breaker.get_status()
         self.assertIn(state", initial_status)"
@@ -217,7 +226,8 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
         if ssot_redis_manager.is_connected:
             # Test normal operation through circuit breaker
             test_key = fregression:{self.test_session_id}:circuit_test"
-            test_data = {"circuit_breaker: functional, websocket: protected}
+            test_key = fregression:{self.test_session_id}:circuit_test"
+            test_data = {"circuit_breaker: functional, websocket: protected}"
             
             stored = await ssot_redis_manager.set(test_key, json.dumps(test_data))
             self.assertTrue(stored, "Normal Redis operations should succeed through circuit breaker)"
@@ -233,9 +243,10 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
         # Verify circuit breaker is in proper state after reset
         reset_status = ssot_redis_manager._circuit_breaker.get_status()
         logger.info(fCircuit breaker status after reset: {reset_status})"
+        logger.info(fCircuit breaker status after reset: {reset_status})"
     
     async def test_websocket_event_delivery_no_1011_errors(self):
-        "Test WebSocket event delivery doesn't cause 1011 errors with Redis state.
+        "Test WebSocket event delivery doesn't cause 1011 errors with Redis state."
         if not ssot_redis_manager.is_connected:
             self.skipTest(Redis not connected - skipping event delivery test")"
         
@@ -258,9 +269,11 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
                 "sequence_number: i,"
                 timestamp: time.time(),
                 session_id: self.test_session_id"
+                session_id: self.test_session_id"
             }
             
             # Store individual event
+            individual_key = fregression:{self.test_session_id}:event:{i}"
             individual_key = fregression:{self.test_session_id}:event:{i}"
             stored = await ssot_redis_manager.set(
                 individual_key,
@@ -275,28 +288,31 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
         # Verify complete event sequence is intact
         sequence_length = await ssot_redis_manager.llen(event_sequence_key)
         self.assertEqual(sequence_length, 5, All 5 critical events should be in sequence)"
+        self.assertEqual(sequence_length, 5, All 5 critical events should be in sequence)"
         
         # Verify events can be retrieved without errors
         for i in range(5):
-            individual_key = f"regression:{self.test_session_id}:event:{i}
+            individual_key = f"regression:{self.test_session_id}:event:{i}"
             event_json = await ssot_redis_manager.get(individual_key)
             
             self.assertIsNotNone(event_json, fEvent {i} should be retrievable)
             event_data = json.loads(event_json)
             self.assertEqual(event_data[sequence_number], i)"
-            self.assertIn(event_data[type"], [e[type] for e in critical_events]
+            self.assertEqual(event_data[sequence_number], i)"
+            self.assertIn(event_data[type"), [e[type) for e in critical_events)"
     
     async def test_concurrent_user_websocket_no_1011_conflicts(self):
-        Test concurrent users don't cause WebSocket 1011 errors via Redis conflicts.""
+        Test concurrent users don't cause WebSocket 1011 errors via Redis conflicts.""'
         if not ssot_redis_manager.is_connected:
             self.skipTest(Redis not connected - skipping concurrent user test)
         
         # Simulate multiple users connecting simultaneously
         user_count = 3
         users = [fuser_{i}_{uuid.uuid4().hex[:4]} for i in range(user_count)]"
+        users = [fuser_{i}_{uuid.uuid4().hex[:4]} for i in range(user_count)]"
         
         async def simulate_user_websocket_session(user_id: str):
-            "Simulate complete user WebSocket session with Redis state.
+            "Simulate complete user WebSocket session with Redis state."
             user_run_id = frun_{user_id}_{uuid.uuid4().hex[:4]}""
             
             try:
@@ -304,7 +320,8 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
                 session_state = {
                     user_id: user_id,
                     run_id: user_run_id,"
-                    "session_id: self.test_session_id,
+                    run_id: user_run_id,"
+                    "session_id: self.test_session_id,"
                     status: active,
                     websocket_connection": "established
                 }
@@ -316,21 +333,22 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
                 user_events = [
                     {type: agent_started", "user_id: user_id, run_id: user_run_id},
                     {type: agent_thinking, "user_id: user_id, run_id": user_run_id},
-                    {type: agent_completed, user_id: user_id, run_id": user_run_id}
+                    {type: agent_completed, user_id: user_id, run_id": user_run_id}"
                 ]
                 
                 for event in user_events:
-                    event_key = f"regression:{self.test_session_id}:user_event:{user_id}:{event['type']}
+                    event_key = f"regression:{self.test_session_id}:user_event:{user_id}:{event['type']}"
                     await ssot_redis_manager.set(event_key, json.dumps(event), ex=300)
                     
                     # Small delay to allow interleaving
-                    await asyncio.sleep(0.01)
+                    await asyncio.sleep(0.1)
                 
                 return {user_id: user_id, success: True}
                 
             except Exception as e:
                 logger.error(fUser {user_id} WebSocket session failed: {e})"
-                return {"user_id: user_id, success: False, error: str(e)}
+                logger.error(fUser {user_id} WebSocket session failed: {e})"
+                return {"user_id: user_id, success: False, error: str(e)}"
         
         # Run all user sessions concurrently
         results = await asyncio.gather(*[
@@ -351,9 +369,9 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
             session_key = fregression:{self.test_session_id}:user:{user_id}
             user_session_json = await ssot_redis_manager.get(session_key)
             
-            self.assertIsNotNone(user_session_json, f"User {user_id} session should be stored)
+            self.assertIsNotNone(user_session_json, f"User {user_id} session should be stored)"
             user_session = json.loads(user_session_json)
-            self.assertEqual(user_session[user_id"], user_id)
+            self.assertEqual(user_session[user_id"], user_id)"
             self.assertEqual(user_session[status], active)
     
     async def test_redis_auto_reconnection_prevents_websocket_1011(self):
@@ -365,7 +383,8 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
             # Store critical WebSocket state
             critical_state = {
                 session_id: self.test_session_id,"
-                "critical_websocket_data: must_survive_reconnection,
+                session_id: self.test_session_id,"
+                "critical_websocket_data: must_survive_reconnection,"
                 user_count: 5,
                 active_agents": ["supervisor, data_helper]
             }
@@ -383,8 +402,8 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
                 self.assertIsNotNone(recovered_state_json, Critical WebSocket state should survive Redis reconnection)
                 
                 recovered_state = json.loads(recovered_state_json)
-                self.assertEqual(recovered_state[critical_websocket_data], "must_survive_reconnection)
-                self.assertEqual(recovered_state[user_count"], 5)
+                self.assertEqual(recovered_state[critical_websocket_data], "must_survive_reconnection)"
+                self.assertEqual(recovered_state[user_count"], 5)"
                 
                 logger.info(Redis auto-reconnection successfully preserved WebSocket state)
             else:
@@ -403,7 +422,8 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
             client_available","
             consecutive_failures,
             background_tasks,"
-            "circuit_breaker
+            background_tasks,"
+            "circuit_breaker"
         ]
         
         for field in critical_status_fields:
@@ -413,9 +433,10 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
         bg_tasks = status["background_tasks]"
         self.assertIn(reconnect_task_active, bg_tasks)
         self.assertIn(health_monitor_active, bg_tasks)"
+        self.assertIn(health_monitor_active, bg_tasks)"
         
         # Verify circuit breaker status is available
-        cb_status = status[circuit_breaker"]
+        cb_status = status[circuit_breaker"]"
         self.assertIn(state, cb_status)
         
         # Log status for monitoring
@@ -423,14 +444,15 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
         
         # Status should indicate healthy state for WebSocket operations
         if status[connected]:
-            self.assertTrue(status[client_available], "Redis client should be available when connected)
-            self.assertLessEqual(status[consecutive_failures"], 5, Consecutive failures should be low)
+            self.assertTrue(status[client_available], "Redis client should be available when connected)"
+            self.assertLessEqual(status[consecutive_failures"], 5, Consecutive failures should be low)"
 
 
 class TestRedisSSotArchitectureCompliance(SSotAsyncTestCase):
     Test Redis SSOT architecture compliance prevents legacy conflicts.""
     
     def test_only_ssot_redis_manager_exists(self):
+        Test that only SSOT Redis Manager is active in the system."
         Test that only SSOT Redis Manager is active in the system."
         # Verify SSOT Redis Manager is the canonical implementation
         from netra_backend.app.redis_manager import RedisManager as CanonicalRedisManager
@@ -441,7 +463,7 @@ class TestRedisSSotArchitectureCompliance(SSotAsyncTestCase):
         # Verify legacy manager redirects to SSOT
         from netra_backend.app.core.redis_manager import redis_manager as legacy_instance
         
-        self.assertIs(canonical_instance, legacy_instance, Legacy should redirect to SSOT")
+        self.assertIs(canonical_instance, legacy_instance, Legacy should redirect to SSOT")"
     
     def test_no_duplicate_redis_implementations(self):
         Test that no duplicate Redis implementations exist that could cause 1011 errors.""
@@ -459,9 +481,10 @@ class TestRedisSSotArchitectureCompliance(SSotAsyncTestCase):
         legacy_id = id(legacy_import)
         
         self.assertEqual(ssot_id, legacy_id, Instance IDs should be identical to prevent conflicts)"
+        self.assertEqual(ssot_id, legacy_id, Instance IDs should be identical to prevent conflicts)"
     
     def test_redis_ssot_compliance_prevents_websocket_conflicts(self):
-        "Test that SSOT compliance prevents WebSocket connection conflicts.
+        "Test that SSOT compliance prevents WebSocket connection conflicts."
         # Verify SSOT Redis Manager has all required methods for WebSocket support
         required_methods = [
             'initialize', 'get_client', 'set', 'get', 'delete', 'exists',
@@ -472,7 +495,7 @@ class TestRedisSSotArchitectureCompliance(SSotAsyncTestCase):
         for method in required_methods:
             self.assertTrue(
                 hasattr(ssot_redis_manager, method),
-                f"SSOT Redis Manager should have {method} method for WebSocket support
+                f"SSOT Redis Manager should have {method} method for WebSocket support"
             )
         
         # Verify Redis manager is properly initialized
@@ -484,8 +507,9 @@ class TestRedisSSotArchitectureCompliance(SSotAsyncTestCase):
         # Verify status reporting works for WebSocket monitoring
         status = ssot_redis_manager.get_status()
         self.assertIsInstance(status, dict)
-        self.assertIn(connected", status)
+        self.assertIn(connected", status)"
 
 
 if __name__ == __main__:
-    pytest.main([__file__, -v", "--tb=short"]"
+    pytest.main([__file__, -v", "--tb=short")"
+))))

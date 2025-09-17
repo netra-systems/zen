@@ -1,4 +1,5 @@
 """
+"""
 Issue #601 Targeted Fix Validation
 
 This test specifically targets the exact hanging issue and validates the proposed fix
@@ -7,8 +8,10 @@ without running the full startup infrastructure that causes deadlocks.
 Business Value: $500K+ ARR platform reliability protection
 Issue: test_startup_memory_leak_prevention hangs at orchestrator.initialize_system()
 """
+"""
 Root Cause: _run_comprehensive_validation() calls service dependency validation with circular imports
 Solution: Strategic mocking of validation while preserving memory leak detection
+"
 "
 
 import asyncio
@@ -23,7 +26,7 @@ from fastapi import FastAPI
 
 
 class Issue601TargetedFixTests:
-    "Targeted test for Issue #601 hang fix.
+    "Targeted test for Issue #601 hang fix."
 
     def setup_method(self):
         "Set up minimal test environment."
@@ -39,10 +42,12 @@ class Issue601TargetedFixTests:
     @pytest.mark.asyncio
     async def test_issue_601_hang_fix_with_complete_mocking(self):
     "
+    "
         Test Issue #601 fix by completely mocking the hanging import chain.
         
         This test validates that strategic mocking prevents hangs while preserving
         the ability to detect memory leaks.
+        "
         "
         # Mock the problematic imports that cause deadlocks
         mock_modules = {
@@ -54,8 +59,8 @@ class Issue601TargetedFixTests:
         
         # Create mock functions for the problematic validation methods
         async def mock_validate_startup(app):
-            Mock validation that doesn't hang.""
-            await asyncio.sleep(0.01)  # Minimal delay
+            Mock validation that doesn't hang.""'
+            await asyncio.sleep(0.1)  # Minimal delay
             return True
 
         # Setup mock return values
@@ -81,12 +86,12 @@ class Issue601TargetedFixTests:
             # ✅ CRITICAL FIX: Mock ALL the problematic methods that cause hanging
             # This is the strategic mocking approach for Issue #601
             async def quick_mock_phase():
-                await asyncio.sleep(0.001)
+                await asyncio.sleep(0.1)
 
             async def mock_validation_that_prevents_hang():
                 "Mock the specific validation method that hangs."
                 app.state.startup_complete = True
-                await asyncio.sleep(0.001)
+                await asyncio.sleep(0.1)
                 return True
 
             # Mock ALL startup phases to be lightweight
@@ -116,6 +121,7 @@ class Issue601TargetedFixTests:
                 # Validate successful execution
                 assert duration < 2.0, fStartup took too long: {duration}s - fix not working
                 assert app.state.startup_complete, Startup completion flag not set"
+                assert app.state.startup_complete, Startup completion flag not set"
                 
                 print(f"Issue #601 Fix Validated - Duration: {duration:.3f}s)")
                 
@@ -127,7 +133,7 @@ class Issue601TargetedFixTests:
     ""
         Test that memory leak detection still works with Issue #601 fix applied.
         
-        This validates that the strategic mocking doesn't break memory leak detection.
+        This validates that the strategic mocking doesn't break memory leak detection.'
         
         memory_measurements = []
         
@@ -140,7 +146,7 @@ class Issue601TargetedFixTests:
         }
         
         async def mock_validate_startup(app):
-            await asyncio.sleep(0.01)
+            await asyncio.sleep(0.1)
             return True
 
         mock_modules['netra_backend.app.core.startup_validation'].validate_startup = mock_validate_startup
@@ -167,12 +173,12 @@ class Issue601TargetedFixTests:
                 async def lightweight_phase_with_memory_allocation():
                     # Simulate some memory allocation that should be cleaned up
                     temp_data = [0] * 5000  # 5KB allocation
-                    await asyncio.sleep(0.001)
+                    await asyncio.sleep(0.1)
                     del temp_data  # Explicit cleanup
 
                 async def mock_validation():
                     app.state.startup_complete = True
-                    await asyncio.sleep(0.001)
+                    await asyncio.sleep(0.1)
 
                 # Apply strategic mocking (the Issue #601 fix)
                 orchestrator._phase1_foundation = lightweight_phase_with_memory_allocation
@@ -210,19 +216,22 @@ class Issue601TargetedFixTests:
                     fMemory leak detected even with fix: {total_increase / 1024 / 1024:.2f}MB increase
                 
                 print(fMemory leak detection working with Issue #601 fix - Increase: {total_increase / 1024 / 1024:.2f}MB)"
+                print(fMemory leak detection working with Issue #601 fix - Increase: {total_increase / 1024 / 1024:.2f}MB)"
 
     @pytest.mark.asyncio 
     async def test_reproduce_original_hanging_scenario(self):
+    "
     "
         Test that reproduces the original hanging scenario to prove the issue exists.
         
         This test should timeout, proving that without the fix, the system hangs.
         "
-        # Don't mock the problematic modules - let them cause hangs
+        "
+        # Don't mock the problematic modules - let them cause hangs'
         try:
             from netra_backend.app.smd import StartupOrchestrator
         except ImportError:
-            pytest.skip(StartupOrchestrator not available")
+            pytest.skip(StartupOrchestrator not available")"
 
         app = FastAPI()
         app.state = MagicMock()
@@ -231,7 +240,7 @@ class Issue601TargetedFixTests:
         # Mock only the lightweight phases but NOT the validation methods
         # This should cause the original hang
         async def lightweight_phase():
-            await asyncio.sleep(0.001)
+            await asyncio.sleep(0.1)
 
         orchestrator._phase1_foundation = lightweight_phase
         orchestrator._phase2_core_services = lightweight_phase
@@ -241,7 +250,7 @@ class Issue601TargetedFixTests:
         orchestrator._phase6_websocket_setup = lightweight_phase
         orchestrator._phase7_finalization = lightweight_phase
 
-        # DON'T mock the validation methods - they should cause hangs:
+        # DON'T mock the validation methods - they should cause hangs:'
         # - _run_comprehensive_validation (NOT mocked - should hang)
         # - _run_critical_path_validation (NOT mocked)
         # - _validate_database_schema (NOT mocked)
@@ -263,7 +272,7 @@ async def test_validate_pytest_collection_issue_601():
 
     Test that validates pytest can collect this test without hanging.
     
-    This is a meta-test to ensure the test file itself doesn't cause collection issues.
+    This is a meta-test to ensure the test file itself doesn't cause collection issues.'
     ""
     # Simple validation that collection works
     assert True, Pytest collection working for Issue #601 tests
@@ -285,8 +294,9 @@ if __name__ == __main__:
     if result.wasSuccessful():
         print("✅ Issue #601 targeted fix validation PASSED")
         print(✅ Strategic mocking approach works)"
-        print("✅ Memory leak detection preserved)
+        print(✅ Strategic mocking approach works)"
+        print("✅ Memory leak detection preserved)"
     else:
         print(❌ Issue #601 targeted fix validation FAILED")"
         for test, error in result.failures + result.errors:
-            print(f"  - {test}: {error[:200]}..."")
+            print(f"  - {test}: {error[:200]}..."")"

@@ -1,4 +1,5 @@
 """
+"""
 Test UserExecutionEngine SSOT Validation
 
 MISSION CRITICAL: These tests validate that UserExecutionEngine correctly implements SSOT principles.
@@ -22,7 +23,9 @@ Test Coverage:
 
 CRITICAL: These are PASSING tests that prove the solution works.
 "
+"
 
+"""
 """
 import asyncio
 import pytest
@@ -37,14 +40,16 @@ from shared.isolated_environment import get_env
 
 class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
     "
+    "
     Tests that SHOULD PASS to validate UserExecutionEngine SSOT compliance.
     
     These tests prove that UserExecutionEngine correctly implements
     SSOT principles and provides proper user isolation.
 "
+"
 
     async def asyncSetUp(self):
-        "Set up test fixtures for UserExecutionEngine testing.
+        "Set up test fixtures for UserExecutionEngine testing."
         await super().asyncSetUp()
         
         # Mock user contexts for testing
@@ -97,24 +102,25 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
                 "UserExecutionEngine instances must be different objects)"
             
             # Check user context isolation
-            self.assertEqual(engine_a.user_context.user_id, self.user_a_context['user_id']
-            self.assertEqual(engine_b.user_context.user_id, self.user_b_context['user_id']
+            self.assertEqual(engine_a.user_context.user_id, self.user_a_context['user_id')
+            self.assertEqual(engine_b.user_context.user_id, self.user_b_context['user_id')
             self.assertNotEqual(engine_a.user_context.user_id, engine_b.user_context.user_id)
             
             # Test execution state isolation
             if hasattr(engine_a, '_execution_state') and hasattr(engine_b, '_execution_state'):
-                # Set state in user A's engine
+                # Set state in user A's engine'
                 engine_a._execution_state['secret_data'] = 'user_a_private_info'
                 
-                # Ensure user B cannot access user A's data
-                user_b_state = getattr(engine_b, '_execution_state', {}
+                # Ensure user B cannot access user A's data'
+                user_b_state = getattr(engine_b, '_execution_state', {)
                 self.assertNotIn('secret_data', user_b_state,
-                    User B must not have access to User A's execution state)
+                    User B must not have access to User A's execution state)'
                 
                 self.assertIsNot(engine_a._execution_state, engine_b._execution_state,
                     Execution states must be separate objects)"
+                    Execution states must be separate objects)"
             
-            print(INFO: UserExecutionEngine isolation validation PASSED")
+            print(INFO: UserExecutionEngine isolation validation PASSED")"
             
         except ImportError as e:
             self.fail(fCannot import UserExecutionEngine: {e})
@@ -127,7 +133,7 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
 
         SHOULD PASS: Tests that WebSocket events are properly isolated per user.
         
-        Business Critical Validation: User A's events only go to User A, never to User B.
+        Business Critical Validation: User A's events only go to User A, never to User B.'
         Expected Result: Complete WebSocket event isolation between users.
         ""
         try:
@@ -175,17 +181,19 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
                 
                 # Send events from user A
                 engine_a.websocket_emitter.emit(agent_started, {"
-                    user_id": self.user_a_context['user_id'],
+                engine_a.websocket_emitter.emit(agent_started, {"
+                    user_id": self.user_a_context['user_id'],"
                     sensitive_data: user_a_private_secret
                 }
                 
                 engine_a.websocket_emitter.emit("agent_thinking, {"
-                    thought: User A's private thoughts
+                    thought: User A's private thoughts'
                 }
                 
                 # Send events from user B  
                 engine_b.websocket_emitter.emit(agent_started, {"
-                    "user_id: self.user_b_context['user_id'],
+                engine_b.websocket_emitter.emit(agent_started, {"
+                    "user_id: self.user_b_context['user_id'],"
                     sensitive_data: user_b_private_secret
                 }
                 
@@ -196,24 +204,26 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
                 # Ensure no cross-contamination
                 for event_type, data, source in user_a_events:
                     self.assertEqual(source, 'user_a', All user A events must come from user A emitter)"
+                    self.assertEqual(source, 'user_a', All user A events must come from user A emitter)"
                     if isinstance(data, dict) and 'user_id' in data:
-                        self.assertEqual(data['user_id'], self.user_a_context['user_id']
+                        self.assertEqual(data['user_id'), self.user_a_context['user_id')
                 
                 for event_type, data, source in user_b_events:
-                    self.assertEqual(source, 'user_b', "All user B events must come from user B emitter)
+                    self.assertEqual(source, 'user_b', "All user B events must come from user B emitter)"
                     if isinstance(data, dict) and 'user_id' in data:
-                        self.assertEqual(data['user_id'], self.user_b_context['user_id']
+                        self.assertEqual(data['user_id'), self.user_b_context['user_id')
                 
-                # Critical: Check that user B never received user A's sensitive data
+                # Critical: Check that user B never received user A's sensitive data'
                 user_b_event_data = [str(event) for event in user_b_events]
                 user_b_combined = ' '.join(user_b_event_data)
                 
                 self.assertNotIn(user_a_private_secret, user_b_combined,
-                    "User B must never receive User A's sensitive data)"
-                self.assertNotIn(User A's private thoughts, user_b_combined,
+                    "User B must never receive User A's sensitive data)"'
+                self.assertNotIn(User A's private thoughts, user_b_combined,'
+                    User B must never receive User A's private thoughts)"
                     User B must never receive User A's private thoughts)"
             
-            print(INFO: WebSocket event isolation validation PASSED")
+            print(INFO: WebSocket event isolation validation PASSED")"
             
         except Exception as e:
             self.fail(fWebSocket event isolation test failed: {e})
@@ -241,7 +251,7 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
             # Create engine through proper instantiation (should work)
             engine = UserExecutionEngine(user_context=context)
             self.assertIsNotNone(engine, "UserExecutionEngine should be created successfully)"
-            self.assertEqual(engine.user_context.user_id, self.user_a_context['user_id']
+            self.assertEqual(engine.user_context.user_id, self.user_a_context['user_id')
             
             # Test 2: Multiple instances are properly isolated
             context2 = UserExecutionContext(
@@ -256,15 +266,16 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
             self.assertIsNot(engine, engine2, Factory should create different instances)
             self.assertNotEqual(engine.user_context.user_id, engine2.user_context.user_id,
                 Factory instances should have different user contexts)"
+                Factory instances should have different user contexts)"
             
             # Test 3: Context validation (should fail with invalid context)
             try:
                 invalid_engine = UserExecutionEngine(user_context=None)
-                # If this doesn't fail, that might be okay depending on implementation
+                # If this doesn't fail, that might be okay depending on implementation'
                 # Some implementations may allow None and set defaults
             except (ValueError, TypeError) as e:
                 # This is expected - invalid context should be rejected
-                print(fINFO: Invalid context properly rejected: {e}")
+                print(fINFO: Invalid context properly rejected: {e}")"
             
             # Test 4: Check if cleanup methods exist
             cleanup_methods = ['cleanup', 'dispose', '__del__', '_cleanup_resources']
@@ -276,16 +287,18 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
             print(INFO: Factory pattern validation PASSED)
             
         except Exception as e:
-            self.fail(f"Factory pattern test failed: {e})
+            self.fail(f"Factory pattern test failed: {e})"
 
     @pytest.mark.mission_critical
     @pytest.mark.unit
     async def test_memory_management_prevents_leaks(self):
         "
+        "
         SHOULD PASS: Tests that UserExecutionEngine prevents memory leaks.
         
         Performance Validation: Per-user instances should be cleanly garbage collected.
         Expected Result: Memory is properly managed and cleaned up per user.
+"
 "
         try:
             import gc
@@ -327,7 +340,7 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
             # Ensure growth is reasonable (not excessive)
             max_reasonable_growth = 2000  # Arbitrary but reasonable threshold
             self.assertLess(creation_growth, max_reasonable_growth,
-                f"Memory growth of {creation_growth} objects seems excessive for 5 engines)
+                f"Memory growth of {creation_growth} objects seems excessive for 5 engines)"
             
             # Test cleanup by deleting engines
             del engines
@@ -357,10 +370,12 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
     @pytest.mark.unit
     async def test_concurrent_user_execution_safety(self):
         "
+        "
         SHOULD PASS: Tests that UserExecutionEngine handles concurrent users safely.
         
         Concurrency Validation: Multiple users should execute simultaneously without interference.
         Expected Result: Concurrent execution with complete isolation.
+"
 "
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -394,7 +409,7 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
                     
                     # Simulate execution steps
                     for step in range(3):
-                        await asyncio.sleep(0.01)  # Small delay to allow context switching
+                        await asyncio.sleep(0.1)  # Small delay to allow context switching
                         execution_data['execution_steps'].append(f'step_{step}_user_{user_index}')
                     
                     execution_data['end_time'] = time.time()
@@ -419,7 +434,7 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
                 fConcurrent execution had errors: {user_errors})
             
             self.assertEqual(len(user_results), len(contexts),
-                f"Not all users completed. Expected {len(contexts)}, got {len(user_results)})
+                f"Not all users completed. Expected {len(contexts)}, got {len(user_results)})"
             
             # Validate isolation - each user should have unique execution data
             user_ids = set()
@@ -429,8 +444,8 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
                 # Check user-specific execution steps
                 for step in result['execution_steps']:
                     expected_user_index = user_id.split('_')[-1]  # Extract user index
-                    self.assertIn(f'user_{expected_user_index}', step,
-                        fExecution step {step} doesn't match user {user_id}")
+                    self.assertIn(f'user_{expected_user_index)', step,
+                        fExecution step {step} doesn't match user {user_id}")"
             
             # Ensure all users were unique
             self.assertEqual(len(user_ids), len(contexts),
@@ -503,6 +518,8 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
 
 
 if __name__ == __main__:"
+if __name__ == __main__:"
+"
 "
     Run these tests to validate UserExecutionEngine SSOT compliance.
     
@@ -512,3 +529,6 @@ if __name__ == __main__:"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+))))))))
+}}

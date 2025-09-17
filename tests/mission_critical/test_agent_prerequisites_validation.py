@@ -1,4 +1,4 @@
-"Mission Critical Test: Agent Execution Prerequisites Validation
+"Mission Critical Test: Agent Execution Prerequisites Validation"
 
 PURPOSE: Validates that all prerequisites for agent execution are checked BEFORE execution starts.
 
@@ -46,6 +46,7 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
     
     async def asyncSetUp(self):
         Set up test fixtures."
+        Set up test fixtures."
         await super().asyncSetUp()
         
         # Test data
@@ -55,7 +56,7 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
         
         # Mock execution context
         self.execution_context = AgentExecutionContext(
-            agent_name=test_agent",
+            agent_name=test_agent","
             user_id=self.user_id,
             thread_id=self.thread_id,
             run_id=self.run_id,
@@ -70,9 +71,10 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
         self.user_context = UserExecutionContext(
             user_id=self.user_id,
             session_id=test_session,"
+            session_id=test_session,"
             thread_id=self.thread_id,
             run_id=self.run_id,
-            execution_metadata={test": True}
+            execution_metadata={test": True}"
     
     async def test_websocket_connection_prerequisite_validation_missing(self):
         FAILING TEST: Should validate WebSocket connection before agent execution.""
@@ -95,14 +97,15 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
         mock_websocket_manager = Mock()
         mock_websocket_manager.is_connected = Mock(return_value=False)
         mock_websocket_manager.send_event = Mock(side_effect=ConnectionError(WebSocket not connected))"
+        mock_websocket_manager.send_event = Mock(side_effect=ConnectionError(WebSocket not connected))"
         
         # Try to execute agent with broken WebSocket - should detect prerequisite failure
         with patch('netra_backend.app.websocket_core.websocket_manager.get_websocket_manager', 
                   return_value=mock_websocket_manager):
             
             # THIS SHOULD FAIL: Currently no prerequisite validation for WebSocket connection
-            with pytest.raises(AssertionError, match="Prerequisites validation should prevent execution):
-                # The execution should fail with prerequisite validation, but it doesn't exist yet
+            with pytest.raises(AssertionError, match="Prerequisites validation should prevent execution):"
+                # The execution should fail with prerequisite validation, but it doesn't exist yet'
                 try:
                     await execution_engine.execute_agent(
                         context=self.execution_context,
@@ -118,15 +121,17 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
                     raise AssertionError(
                         Agent execution started without WebSocket prerequisite validation - 
                         validation should happen BEFORE execution starts"
+                        validation should happen BEFORE execution starts"
                     )
     
     async def test_database_availability_prerequisite_validation_missing(self):
-        "FAILING TEST: Should validate database availability before agent execution.
+        "FAILING TEST: Should validate database availability before agent execution."
         
         Currently, agent execution can start without checking database connectivity,
         leading to execution failures and poor user experience.
         
         Expected to FAIL: No prerequisite validation exists for database availability.
+"
 "
         # Create execution engine with proper dependencies
         mock_agent_factory = Mock()
@@ -142,7 +147,7 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
                   return_value=False):
             
             # THIS SHOULD FAIL: Currently no prerequisite validation for database
-            with pytest.raises(AssertionError, match="Prerequisites validation should prevent execution):
+            with pytest.raises(AssertionError, match="Prerequisites validation should prevent execution):"
                 try:
                     await execution_engine.execute_agent(
                         context=self.execution_context,
@@ -158,6 +163,8 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
                         # This means execution started and failed later, not at prerequisite validation
                         raise AssertionError(
                             Agent execution started without database prerequisite validation - "
+                            Agent execution started without database prerequisite validation - "
+                            validation should happen BEFORE execution starts"
                             validation should happen BEFORE execution starts"
                         )
                     else:
@@ -185,12 +192,13 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
         mock_registry = Mock()
         mock_registry.is_initialized = Mock(return_value=False)
         mock_registry.get_agent = Mock(side_effect=RuntimeError(Registry not initialized))"
+        mock_registry.get_agent = Mock(side_effect=RuntimeError(Registry not initialized))"
         
         with patch('netra_backend.app.agents.supervisor.agent_registry.get_agent_registry',
                   return_value=mock_registry):
             
             # THIS SHOULD FAIL: Currently no prerequisite validation for agent registry
-            with pytest.raises(AssertionError, match="Prerequisites validation should prevent execution):
+            with pytest.raises(AssertionError, match="Prerequisites validation should prevent execution):"
                 try:
                     await execution_engine.execute_agent(
                         context=self.execution_context,
@@ -206,6 +214,8 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
                         # This means execution started and failed later, not at prerequisite validation
                         raise AssertionError(
                             Agent execution started without registry prerequisite validation - "
+                            Agent execution started without registry prerequisite validation - "
+                            validation should happen BEFORE execution starts"
                             validation should happen BEFORE execution starts"
                         )
                     else:
@@ -232,7 +242,8 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
         with patch('netra_backend.app.agents.supervisor.agent_execution_validator.AgentExecutionValidator.get_resource_limits') as mock_limits:
             mock_limits.return_value = {
                 daily_execution_limit: 10,"
-                "concurrent_execution_limit: 1,
+                daily_execution_limit: 10,"
+                "concurrent_execution_limit: 1,"
                 current_daily_executions: 15,  # Exceeded!
                 "current_concurrent_executions: 0"
             }
@@ -247,6 +258,8 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
                     # If we reach here, prerequisite validation is missing
                     raise AssertionError(
                         Prerequisites validation should prevent execution when limits exceeded, "
+                        Prerequisites validation should prevent execution when limits exceeded, "
+                        but agent execution was attempted without validation"
                         but agent execution was attempted without validation"
                     )
                 except Exception as e:
@@ -260,12 +273,13 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
                         raise
     
     async def test_user_context_validity_prerequisite_validation_missing(self):
-        "FAILING TEST: Should validate user context integrity before execution.
+        "FAILING TEST: Should validate user context integrity before execution."
         
         Currently, agent execution can start with invalid/corrupted user context,
         leading to security issues and execution failures.
         
         Expected to FAIL: No prerequisite validation exists for user context integrity.
+"
 "
         # Create execution engine with proper dependencies
         mock_agent_factory = Mock()
@@ -280,9 +294,10 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
         corrupted_context = UserExecutionContext(
             user_id=self.user_id,
             session_id=test_session,"
+            session_id=test_session,"
             thread_id=self.thread_id,
             run_id=self.run_id,
-            execution_metadata={corrupted": True}
+            execution_metadata={corrupted": True}"
         
         # Corrupt the context internally
         corrupted_context._user_id = None  # Simulate corruption
@@ -300,9 +315,10 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
                     but agent execution was attempted without validation
                 )
             except Exception as e:
-                if context in str(e).lower() or "user_id in str(e).lower():
+                if context in str(e).lower() or "user_id in str(e).lower():"
                     # This means execution started and failed later, not at prerequisite validation
                     raise AssertionError(
+                        Agent execution started without user context prerequisite validation - "
                         Agent execution started without user context prerequisite validation - "
                         validation should happen BEFORE execution starts
                     )
@@ -312,7 +328,7 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
     async def test_comprehensive_prerequisites_validation_function_missing(self):
         ""FAILING TEST: Should have a comprehensive prerequisite validation function.
         
-        This test demonstrates that there's no single function to validate all prerequisites
+        This test demonstrates that there's no single function to validate all prerequisites'
         before agent execution starts.
         
         Expected to FAIL: No comprehensive prerequisite validation function exists.
@@ -333,17 +349,19 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
             
             if not hasattr(validation_result, 'is_valid'):
                 raise AssertionError(
-                    "Prerequisites validation function exists but doesn't return proper result structure"
+                    "Prerequisites validation function exists but doesn't return proper result structure"'
                 )
                 
         except ImportError:
-            # This is expected - the prerequisite validation module doesn't exist yet
+            # This is expected - the prerequisite validation module doesn't exist yet'
             raise AssertionError(
                 Prerequisites validation module/function does not exist - 
+                need to implement: netra_backend.app.agents.supervisor.prerequisites_validator"
                 need to implement: netra_backend.app.agents.supervisor.prerequisites_validator"
             )
         except Exception as e:
             raise AssertionError(
+                fPrerequisites validation function has issues: {e}"
                 fPrerequisites validation function has issues: {e}"
             )
     
@@ -382,12 +400,13 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
                     raise AssertionError(
                         Agent execution proceeded despite failed prerequisites validation - 
                         integration of prerequisite validation into execution flow is missing"
+                        integration of prerequisite validation into execution flow is missing"
                     )
                 except ImportError:
-                    # Prerequisites validation module doesn't exist yet
+                    # Prerequisites validation module doesn't exist yet'
                     raise AssertionError(
-                        "Prerequisites validation integration is missing - 
-                        execution flow doesn't check prerequisites before starting
+                        "Prerequisites validation integration is missing -"
+                        execution flow doesn't check prerequisites before starting'
                     )
                 except Exception as e:
                     if "prerequisite in str(e).lower():"
@@ -400,7 +419,9 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
                         )
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+))

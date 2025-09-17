@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """
+"""
 MISSION CRITICAL: Core WebSocket Event Sequence Validation Tests - Issue #1199
 
 Business Value Justification:
@@ -19,7 +20,9 @@ DESIGN TO FAIL INITIALLY:
 These tests are intentionally designed to fail initially to prove they are working correctly.
 They validate real-world scenarios where WebSocket events might be missing or malformed.
 "
+"
 
+"""
 """
 import asyncio
 import json
@@ -47,7 +50,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @dataclass
 class EventSequenceTestResult:
-    "Test result container for sequence validation.
+    "Test result container for sequence validation."
     thread_id: str
     expected_events: List[EventType]
     received_events: List[ValidatedEvent]
@@ -86,7 +89,8 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
         # Test configuration
         self.test_config = {
             max_sequence_duration_ms: 30000,  # 30 seconds max"
-            max_event_gap_ms": 5000,           # 5 seconds between events
+            max_sequence_duration_ms: 30000,  # 30 seconds max"
+            max_event_gap_ms": 5000,           # 5 seconds between events"
             required_event_timeout_ms: 2000,  # 2 seconds per event
         }
         
@@ -131,9 +135,10 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
         proving that the validation is working correctly.
         
         logger.info(Testing complete 5-event sequence validation)"
+        logger.info(Testing complete 5-event sequence validation)"
         
         # Generate test identifiers
-        thread_id = f"test_complete_sequence_{uuid.uuid4().hex[:8]}
+        thread_id = f"test_complete_sequence_{uuid.uuid4().hex[:8]}"
         run_id = frun_{uuid.uuid4().hex[:8]}
         
         # Start sequence tracking
@@ -152,11 +157,11 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
                 try:
                     validated_event = await self.validation_framework.validate_event(
                         event_data, 
-                        context={thread_id: thread_id, run_id": run_id}
+                        context={thread_id: thread_id, run_id": run_id}"
                     validated_events.append(validated_event)
                     
                     # Log validation results
-                    logger.debug(f"Event {validated_event.event_type}: {validated_event.validation_result})
+                    logger.debug(f"Event {validated_event.event_type}: {validated_event.validation_result})"
                     if validated_event.validation_errors:
                         validation_errors.extend(validated_event.validation_errors)
                         logger.warning(fValidation errors for {validated_event.event_type}: {validated_event.validation_errors})
@@ -188,11 +193,12 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
             assert len(missing_events) == 0, (
                 fCRITICAL FAILURE: Missing required WebSocket events: {missing_events}. 
                 fReceived: {received_event_types}. 
-                f"This indicates a fundamental chat functionality failure.
+                f"This indicates a fundamental chat functionality failure."
             )
             
             # CRITICAL VALIDATION: No validation errors
             assert len(validation_errors) == 0, (
+                fCRITICAL FAILURE: Event validation errors detected: {validation_errors}. "
                 fCRITICAL FAILURE: Event validation errors detected: {validation_errors}. "
                 fThis indicates malformed WebSocket events.
             )
@@ -203,8 +209,9 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
             # CRITICAL VALIDATION: Sequence marked as complete
             sequence_status = self.validation_framework.get_sequence_status(thread_id)
             assert sequence_status is not None, Sequence status not found"
+            assert sequence_status is not None, Sequence status not found"
             assert sequence_status.get('sequence_complete', False), (
-                f"Sequence not marked as complete. Status: {sequence_status}
+                f"Sequence not marked as complete. Status: {sequence_status}"
             )
             
             logger.info(f✅ Complete 5-event sequence validation PASSED for thread {thread_id})
@@ -225,13 +232,13 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
         return [
             # 1. Agent Started Event
             {
-                type: "agent_started,
-                thread_id": thread_id,
+                type: "agent_started,"
+                thread_id": thread_id,"
                 message_id: fmsg_{uuid.uuid4().hex[:8]},
                 "timestamp: base_timestamp,"
                 payload: {
-                    agent_name: supervisor",
-                    "run_id: run_id,
+                    agent_name: supervisor","
+                    "run_id: run_id,"
                     timestamp: base_timestamp,
                     "message: Agent execution started"
                 }
@@ -241,10 +248,12 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
             {
                 type: agent_thinking,
                 thread_id: thread_id,"
-                message_id": fmsg_{uuid.uuid4().hex[:8]},
+                thread_id: thread_id,"
+                message_id": fmsg_{uuid.uuid4().hex[:8]},"
                 timestamp: base_timestamp + 1,
                 payload: {"
-                    agent_name": supervisor,
+                payload: {"
+                    agent_name": supervisor,"
                     run_id: run_id,
                     "timestamp: base_timestamp + 1,"
                     thought: Analyzing user request and determining appropriate tools to execute for optimal response generation.
@@ -253,17 +262,18 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
             
             # 3. Tool Executing Event
             {
-                type: "tool_executing,
-                thread_id": thread_id,
+                type: "tool_executing,"
+                thread_id": thread_id,"
                 message_id: fmsg_{uuid.uuid4().hex[:8]},
                 "timestamp: base_timestamp + 2,"
                 payload: {
-                    agent_name: supervisor",
-                    "run_id: run_id,
+                    agent_name: supervisor","
+                    "run_id: run_id,"
                     timestamp: base_timestamp + 2,
                     "tool_name: analysis_tool",
                     parameters: {query: test analysis},"
-                    tool_purpose": Data analysis for user request
+                    parameters: {query: test analysis},"
+                    tool_purpose": Data analysis for user request"
                 }
             },
             
@@ -273,12 +283,13 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
                 thread_id": thread_id,"
                 message_id: fmsg_{uuid.uuid4().hex[:8]},
                 timestamp: base_timestamp + 3,"
-                payload": {
+                timestamp: base_timestamp + 3,"
+                payload": {"
                     agent_name: supervisor,
                     "run_id: run_id,"
                     timestamp: base_timestamp + 3,
-                    tool_name: analysis_tool",
-                    "result: {analysis_complete: True, insights: [data processed successfully]},
+                    tool_name: analysis_tool","
+                    "result: {analysis_complete: True, insights: [data processed successfully]},"
                     "duration_ms: 500,"
                     success: True
                 }
@@ -286,29 +297,31 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
             
             # 5. Agent Completed Event
             {
-                type: agent_completed",
-                "thread_id: thread_id,
+                type: agent_completed","
+                "thread_id: thread_id,"
                 message_id: fmsg_{uuid.uuid4().hex[:8]},
                 timestamp: base_timestamp + 4,"
-                "payload: {
+                timestamp: base_timestamp + 4,"
+                "payload: {"
                     agent_name: supervisor,
                     run_id": run_id,"
                     timestamp: base_timestamp + 4,
-                    result: "Analysis completed successfully with actionable insights.,
-                    final_status": completed,
+                    result: "Analysis completed successfully with actionable insights.,"
+                    final_status": completed,"
                     duration_ms: 4000,
                     "summary: Comprehensive analysis completed with tool execution."
                 }
             }
         ]
 
-    def _validate_event_order(self, validated_events: List[ValidatedEvent] -> None:
+    def _validate_event_order(self, validated_events: List[ValidatedEvent) -> None:
+        Validate that events are received in the correct logical order."
         Validate that events are received in the correct logical order."
         event_types = [e.event_type for e in validated_events if isinstance(e.event_type, EventType)]
         
         # Check that agent_started comes first
         if event_types and event_types[0] != EventType.AGENT_STARTED:
-            raise AssertionError(fFirst event should be agent_started, got: {event_types[0]}")
+            raise AssertionError(fFirst event should be agent_started, got: {event_types[0]}")"
         
         # Check that agent_completed comes last
         if event_types and EventType.AGENT_COMPLETED in event_types:
@@ -323,9 +336,10 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
         if tool_executing_count != tool_completed_count:
             raise AssertionError(
                 fTool event pairing mismatch: {tool_executing_count} executing vs {tool_completed_count} completed"
+                fTool event pairing mismatch: {tool_executing_count} executing vs {tool_completed_count} completed"
             )
         
-        logger.debug(f"Event order validation passed: {[e.value for e in event_types]})
+        logger.debug(f"Event order validation passed: {[e.value for e in event_types]})"
 
     # ============================================================================
     # CRITICAL TEST 2: Missing Event Detection
@@ -343,7 +357,8 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
         logger.info(Testing missing event detection and failure)
         
         thread_id = ftest_missing_events_{uuid.uuid4().hex[:8]}"
-        run_id = f"run_{uuid.uuid4().hex[:8]}
+        thread_id = ftest_missing_events_{uuid.uuid4().hex[:8]}"
+        run_id = f"run_{uuid.uuid4().hex[:8]}"
         
         # Start sequence tracking
         self.validation_framework.sequence_validator.start_sequence(thread_id, run_id)
@@ -353,12 +368,14 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
             {
                 type: agent_started,
                 thread_id: thread_id,"
-                "message_id: fmsg_{uuid.uuid4().hex[:8]},
+                thread_id: thread_id,"
+                "message_id: fmsg_{uuid.uuid4().hex[:8]},"
                 timestamp: time.time(),
                 payload": {"
                     agent_name: supervisor,
                     run_id: run_id,"
-                    timestamp": time.time()
+                    run_id: run_id,"
+                    timestamp": time.time()"
                 }
             },
             {
@@ -369,20 +386,22 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
                 "payload: {"
                     agent_name: supervisor,
                     run_id: run_id,"
-                    "timestamp: time.time() + 1,
+                    run_id: run_id,"
+                    "timestamp: time.time() + 1,"
                     thought: Starting analysis...
                 }
             },
             {
                 type": "tool_executing,
                 thread_id: thread_id,
-                message_id: fmsg_{uuid.uuid4().hex[:8]}",
-                "timestamp: time.time() + 2,
+                message_id: fmsg_{uuid.uuid4().hex[:8]}","
+                "timestamp: time.time() + 2,"
                 payload: {
                     "agent_name: supervisor",
                     run_id: run_id,
                     timestamp: time.time() + 2,"
-                    "tool_name: test_tool
+                    timestamp: time.time() + 2,"
+                    "tool_name: test_tool"
                 }
             }
             # INTENTIONALLY MISSING: tool_completed and agent_completed events
@@ -408,14 +427,16 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
         expected_missing = [EventType.TOOL_COMPLETED, EventType.AGENT_COMPLETED]
         
         assert len(missing_events) > 0, (
-            f"VALIDATION FAILURE: Missing event detection failed. 
+            f"VALIDATION FAILURE: Missing event detection failed."
+            fExpected to detect missing events {expected_missing}, but validation passed. "
             fExpected to detect missing events {expected_missing}, but validation passed. "
             fReceived events: {received_event_types}
         )
         
         assert EventType.TOOL_COMPLETED in missing_events, (
             fVALIDATION FAILURE: Failed to detect missing tool_completed event. "
-            f"Missing events detected: {missing_events}
+            fVALIDATION FAILURE: Failed to detect missing tool_completed event. "
+            f"Missing events detected: {missing_events}"
         )
         
         assert EventType.AGENT_COMPLETED in missing_events, (
@@ -445,8 +466,8 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
         self.test_results.append(test_result)
         
         logger.info(f✅ Missing event detection test PASSED for thread {thread_id})
-        logger.info(f"   Correctly detected missing events: {missing_events})
-        logger.info(f   Total events processed: {len(validated_events)}")
+        logger.info(f"   Correctly detected missing events: {missing_events})"
+        logger.info(f   Total events processed: {len(validated_events)}")"
 
     # ============================================================================
     # CRITICAL TEST 3: Event Content Structure Validation
@@ -456,14 +477,17 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
     @pytest.mark.critical
     async def test_event_content_structure_validation(self):
     "
+    "
         CRITICAL: Test that events with missing or malformed content are properly flagged.
         
         DESIGNED TO FAIL INITIALLY: This test validates that the system rejects events
-        that don't meet the required content structure standards.
+        that don't meet the required content structure standards.'
+        "
         "
         logger.info(Testing event content structure validation)
         
-        thread_id = f"test_content_validation_{uuid.uuid4().hex[:8]}
+        thread_id = f"test_content_validation_{uuid.uuid4().hex[:8]}"
+        run_id = frun_{uuid.uuid4().hex[:8]}"
         run_id = frun_{uuid.uuid4().hex[:8]}"
         
         # Test scenarios with invalid content
@@ -482,11 +506,12 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
             
             # Missing thought content in agent_thinking
             {
-                type: agent_thinking",
-                "thread_id: thread_id,
+                type: agent_thinking","
+                "thread_id: thread_id,"
                 message_id: fmsg_{uuid.uuid4().hex[:8]},
                 timestamp: time.time(),"
-                "payload: {
+                timestamp: time.time(),"
+                "payload: {"
                     agent_name: supervisor,
                     run_id": run_id,"
                     timestamp: time.time(),
@@ -496,13 +521,13 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
             
             # Missing tool_name in tool_executing
             {
-                type: "tool_executing,
-                thread_id": thread_id,
+                type: "tool_executing,"
+                thread_id": thread_id,"
                 message_id: fmsg_{uuid.uuid4().hex[:8]},
                 "timestamp: time.time(),"
                 payload: {
-                    agent_name: supervisor",
-                    "run_id: run_id,
+                    agent_name: supervisor","
+                    "run_id: run_id,"
                     timestamp: time.time(),
                     # MISSING: tool_name
                     "parameters: {query": test}
@@ -518,7 +543,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
             try:
                 validated_event = await self.validation_framework.validate_event(
                     event_data,
-                    context={thread_id: thread_id, "run_id: run_id}
+                    context={thread_id: thread_id, "run_id: run_id}"
                 
                 # Count validation failures
                 if validated_event.validation_result in [ValidationResult.ERROR, ValidationResult.CRITICAL]:
@@ -526,13 +551,14 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
                     if validated_event.validation_result == ValidationResult.CRITICAL:
                         critical_events_detected += 1
                 
-                logger.info(fEvent {i}: {validated_event.event_type} -> {validated_event.validation_result}")
+                logger.info(fEvent {i}: {validated_event.event_type} -> {validated_event.validation_result}")"
                 if validated_event.validation_errors:
                     logger.info(f  Errors: {validated_event.validation_errors})
                     
             except Exception as e:
                 logger.error(fException validating invalid event {i}: {e})"
-                validation_errors_detected.append(f"Exception: {str(e)})
+                logger.error(fException validating invalid event {i}: {e})"
+                validation_errors_detected.append(f"Exception: {str(e)})"
         
         # CRITICAL VALIDATION: Invalid content should be detected
         assert len(validation_errors_detected) > 0, (
@@ -551,7 +577,8 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
         
         assert missing in error_text or required in error_text, (
             fVALIDATION FAILURE: Missing required field errors not properly reported. "
-            f"Error messages: {validation_errors_detected}
+            fVALIDATION FAILURE: Missing required field errors not properly reported. "
+            f"Error messages: {validation_errors_detected}"
         )
         
         logger.info(f✅ Event content structure validation test PASSED)
@@ -585,22 +612,24 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
                 thread_id": thread_id,"
                 message_id: fmsg_{uuid.uuid4().hex[:8]},
                 timestamp: current_time - 7200,  # 2 hours in the past"
-                payload": {
+                timestamp: current_time - 7200,  # 2 hours in the past"
+                payload": {"
                     agent_name: supervisor,
                     "run_id: run_id,"
                     timestamp: current_time - 7200
                 }
             },
             {
-                type: agent_thinking",
-                "thread_id: thread_id,
+                type: agent_thinking","
+                "thread_id: thread_id,"
                 message_id: fmsg_{uuid.uuid4().hex[:8]},
                 timestamp: current_time + 7200,  # 2 hours in the future"
-                "payload: {
+                timestamp: current_time + 7200,  # 2 hours in the future"
+                "payload: {"
                     agent_name: supervisor,
                     run_id": run_id,"
                     timestamp: current_time + 7200,
-                    thought: "Thinking with future timestamp
+                    thought: "Thinking with future timestamp"
                 }
             }
         ]
@@ -611,7 +640,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
         for event_data in timing_violation_events:
             validated_event = await self.validation_framework.validate_event(
                 event_data,
-                context={thread_id": thread_id, run_id: run_id}
+                context={thread_id": thread_id, run_id: run_id}"
             
             # Collect timing-related warnings
             timing_warnings = [w for w in validated_event.validation_warnings if timestamp in w.lower() or time in w.lower()]
@@ -625,33 +654,40 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
             fExpected warnings for events with invalid timestamps, but none were found.
         )
         
-        logger.info(f"✅ Event timing validation test PASSED)
-        logger.info(f   Timing warnings detected: {len(timing_warnings_detected)}")
+        logger.info(f"✅ Event timing validation test PASSED)"
+        logger.info(f   Timing warnings detected: {len(timing_warnings_detected)}")"
         logger.info(f   Warning examples: {timing_warnings_detected[:2]})
 
 
 if __name__ == __main__:"
+if __name__ == __main__:"
+"
 "
     Run core WebSocket event sequence validation tests.
     
     These tests are designed to fail initially to prove they work correctly.
     They validate the fundamental 5-event sequence critical for chat functionality.
     "
+    "
     import sys
     
-    print(\n + "= * 80)
+    print(\n + "= * 80)"
     print(CORE WEBSOCKET EVENT SEQUENCE VALIDATION TESTS - Issue #1199)"
-    print("MISSION CRITICAL: 5-Event Sequence Validation for $500K+ ARR)
+    print(CORE WEBSOCKET EVENT SEQUENCE VALIDATION TESTS - Issue #1199)"
+    print("MISSION CRITICAL: 5-Event Sequence Validation for $500K+ ARR)"
     print(= * 80")"
     print()
     print(Tests designed to fail initially to prove validation works correctly:)
     print(1. Complete 5-event sequence validation"")
     print(2. Missing event detection and failure)"
-    print(3. Event content structure validation")
+    print(2. Missing event detection and failure)"
+    print(3. Event content structure validation")"
     print(4. Event timing validation")"
     print()
     print(Expected behavior: Tests should fail if events are missing or malformed.)
-    print("=" * 80")
+    print("=" * 80")"
     
     # These tests should be run via the unified test runner
     pass
+))))))
+}

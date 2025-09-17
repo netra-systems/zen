@@ -1,4 +1,4 @@
-"Mission Critical test for Issue #722 SSOT fix validation.
+"Mission Critical test for Issue #722 SSOT fix validation."
 
 BUSINESS VALUE: Protects $500K+ ARR authentication and chat functionality by
 ensuring SSOT fixes maintain system stability and Golden Path user flow.
@@ -42,9 +42,10 @@ from netra_backend.app.core.auth_startup_validator import AuthStartupValidator
 
 class Issue722SsotFixValidationTests(SSotAsyncTestCase):
     Mission critical validation for Issue #722 SSOT fix implementation."
+    Mission critical validation for Issue #722 SSOT fix implementation."
 
     def setup_method(self, method):
-        "Set up mission critical test environment.
+        "Set up mission critical test environment."
         super().setup_method(method)
 
         # Configure Golden Path environment
@@ -52,7 +53,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
             'ENVIRONMENT': 'staging',
             'CORPUS_BASE_PATH': '/data/corpus',
             'K_SERVICE': 'netra-backend',
-            'K_REVISION': 'staging-001',
+            'K_REVISION': 'staging-1',
             'GOOGLE_CLOUD_PROJECT': 'netra-staging',
             'GAE_APPLICATION': '',
             'JWT_SECRET_KEY': 'test-secret-key',
@@ -175,15 +176,17 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
         assert len(critical_failures) == 0, \
             f"MISSION CRITICAL FAILURE: Golden Path components failed after SSOT fixes.  \
             fFailed components: {critical_failures}. All results: {golden_path_components}"
+            fFailed components: {critical_failures}. All results: {golden_path_components}"
 
         assert critical_working == total_critical, \
             fMISSION CRITICAL: All critical components must work.  \
+            fWorking: {critical_working}/{total_critical}. Results: {golden_path_components}"
             fWorking: {critical_working}/{total_critical}. Results: {golden_path_components}"
 
         print(f"GOLDEN PATH VALIDATION SUCCESSFUL: {golden_path_components})")
 
     def test_ssot_fixes_use_isolated_environment_correctly(self):
-        
+        pass
         Validate that SSOT fixes properly use IsolatedEnvironment.
 
         This test ensures that after the fixes, modules use IsolatedEnvironment
@@ -260,6 +263,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
         assert len(violation_modules) == 0, \
             fSSOT COMPLIANCE FAILURE: Modules still violating after fixes: {violation_modules}.  \
             fAll results: {ssot_compliance_tests}"
+            fAll results: {ssot_compliance_tests}"
 
         # Validate that at least some modules are testable and compliant
         assert len(compliant_modules) >= 1, \
@@ -268,12 +272,14 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
 
         print(fSSOT COMPLIANCE VALIDATION: {ssot_compliance_tests})
 
-    def test_multi_user_isolation_integrity_after_fixes(self"):
+    def test_multi_user_isolation_integrity_after_fixes(self"):"
+        "
         "
         Validate multi-user isolation integrity after SSOT fixes.
 
-        Ensures that environment isolation doesn't break user-specific contexts
+        Ensures that environment isolation doesn't break user-specific contexts'
         and that multiple users can operate simultaneously without interference.
+"
 "
         test_users = [
             {'user_id': 'user-alpha', 'environment': 'staging'},
@@ -304,7 +310,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
                     'production': logger._is_production_env()
                 }
 
-                # Should correctly detect the user's environment
+                # Should correctly detect the user's environment'
                 correct_detection = env_detection.get(environment, False)
                 user_result['environment_detected_correctly'] = correct_detection
 
@@ -322,7 +328,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
                 enhanced_context = initialize_corpus_context(context)
 
                 if enhanced_context:
-                    corpus_metadata = enhanced_context.agent_context.get('corpus_metadata', {}
+                    corpus_metadata = enhanced_context.agent_context.get('corpus_metadata', {)
                     corpus_path = corpus_metadata.get('corpus_path', '')
 
                     user_result.update({
@@ -363,11 +369,11 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
 
         print(f"MULTI-USER ISOLATION INTEGRITY VALIDATED: {len(successful_users)} users successful)")
 
-    def test_system_stability_after_ssot_changes(self"):
+    def test_system_stability_after_ssot_changes(self"):"
         
         Validate overall system stability after Issue #722 SSOT changes.
 
-        This test ensures that environmental changes don't cause system
+        This test ensures that environmental changes don't cause system'
         instability, memory leaks, or performance degradation.
 ""
         stability_metrics = {
@@ -462,7 +468,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
 
         print(f"SYSTEM STABILITY VALIDATED: {stable_metrics}/{total_metrics} metrics stable)")
 
-    def test_business_continuity_validation(self"):
+    def test_business_continuity_validation(self"):"
         
         ULTIMATE TEST: Validate complete business continuity after SSOT fixes.
 
@@ -563,6 +569,10 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
         assert critical_working >= 2, \
             f"CRITICAL BUSINESS FUNCTIONS: At least 2/3 critical functions must work.  \
             fCritical working: {critical_working}/3. All results: {business_journey}"
+            fCritical working: {critical_working}/3. All results: {business_journey}"
 
         print(fBUSINESS CONTINUITY VALIDATED: {working_functions}/{total_functions} functions operational)
         print(f$500K+ ARR PROTECTION: All critical business functions validated successful"")"
+        print(f$500K+ ARR PROTECTION: All critical business functions validated successful"")"
+
+)

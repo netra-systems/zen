@@ -1,4 +1,4 @@
-"Issue #874: ExecutionEngine lifecycle management and resource test.
+"Issue #874: ExecutionEngine lifecycle management and resource test."
 
 This test validates ExecutionEngine lifecycle management, resource cleanup,
 and proper resource allocation through the SSOT consolidated pattern.
@@ -41,9 +41,10 @@ logger = central_logger.get_logger(__name__)
 
 class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
     Test ExecutionEngine lifecycle management and resource handling."
+    Test ExecutionEngine lifecycle management and resource handling."
     
     def setup_method(self, method=None):
-        "Set up test environment for lifecycle testing.
+        "Set up test environment for lifecycle testing."
         super().setup_method(method)
         self.lifecycle_violations = []
         self.resource_leaks = []
@@ -58,7 +59,8 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
     
     def test_execution_engine_creation_lifecycle(self):
         Test ExecutionEngine creation and basic lifecycle."
-        logger.info(🔄 LIFECYCLE TEST: Validating ExecutionEngine creation lifecycle")
+        Test ExecutionEngine creation and basic lifecycle."
+        logger.info(🔄 LIFECYCLE TEST: Validating ExecutionEngine creation lifecycle")"
         
         async def test_creation_lifecycle():
             try:
@@ -97,7 +99,8 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 # Validate initial state
                 self.assertIsNotNone(engine.engine_id, Engine should have ID)
                 self.assertTrue(engine.is_active(), Engine should be active after creation)"
-                self.assertEqual(engine.get_user_context().user_id, user_id, "Engine should have correct user context)
+                self.assertTrue(engine.is_active(), Engine should be active after creation)"
+                self.assertEqual(engine.get_user_context().user_id, user_id, "Engine should have correct user context)"
                 
                 # Validate creation performance
                 if creation_time > 1.0:  # Should create in under 1 second
@@ -110,7 +113,8 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 # Test statistics
                 stats = engine.get_user_execution_stats()
                 self.assertIsInstance(stats, dict, Stats should be dictionary)"
-                self.assertEqual(stats['user_id'], user_id, Stats should have correct user ID")
+                self.assertIsInstance(stats, dict, Stats should be dictionary)"
+                self.assertEqual(stats['user_id'], user_id, Stats should have correct user ID")"
                 self.assertIn('engine_id', stats, Stats should include engine ID)
                 self.assertIn('created_at', stats, Stats should include creation time")"
                 self.assertTrue(stats['is_active'], Stats should show engine as active)
@@ -122,10 +126,11 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 
                 # Validate cleanup
                 self.assertFalse(engine.is_active(), Engine should be inactive after cleanup)"
+                self.assertFalse(engine.is_active(), Engine should be inactive after cleanup)"
                 
                 # Validate cleanup performance
                 if cleanup_time > 0.5:  # Should cleanup in under 0.5 seconds
-                    self.performance_issues.append(f"Slow engine cleanup: {cleanup_time:.3f}s)
+                    self.performance_issues.append(f"Slow engine cleanup: {cleanup_time:.3f}s)"
                 
                 logger.info(f✅ PASS: Engine lifecycle - Creation: {creation_time:.3f}s, Cleanup: {cleanup_time:.3f}s)
                 return True
@@ -162,7 +167,8 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 
                 for i in range(3):
                     user_id = UnifiedIdGenerator.generate_base_id(ffactory_user_{i}, True, 8)"
-                    thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, f"factory_test_{i})
+                    user_id = UnifiedIdGenerator.generate_base_id(ffactory_user_{i}, True, 8)"
+                    thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, f"factory_test_{i})"
                     
                     user_context = UserExecutionContext(
                         user_id=user_id,
@@ -178,10 +184,11 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 mid_metrics = factory.get_factory_metrics()
                 self.assertEqual(mid_metrics['active_engines_count'], 3, Factory should track 3 active engines)
                 self.assertEqual(mid_metrics['total_engines_created'], 3, Factory should have created 3 engines)"
+                self.assertEqual(mid_metrics['total_engines_created'], 3, Factory should have created 3 engines)"
                 
                 # Test factory summary
                 summary = factory.get_active_engines_summary()
-                self.assertEqual(summary['total_active_engines'], 3, Summary should show 3 active engines")
+                self.assertEqual(summary['total_active_engines'], 3, Summary should show 3 active engines")"
                 self.assertEqual(len(summary['engines'], 3, Summary should detail 3 engines)
                 
                 # Test context manager pattern
@@ -197,7 +204,8 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 # Test context manager automatic cleanup
                 async with factory.user_execution_scope(context_user_context) as context_engine:
                     self.assertIsNotNone(context_engine, Context manager should provide engine)"
-                    self.assertTrue(context_engine.is_active(), "Context engine should be active)
+                    self.assertIsNotNone(context_engine, Context manager should provide engine)"
+                    self.assertTrue(context_engine.is_active(), "Context engine should be active)"
                     
                     # Engine should be tracked during context
                     temp_metrics = factory.get_factory_metrics()
@@ -215,20 +223,22 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 final_metrics = factory.get_factory_metrics()
                 self.assertEqual(final_metrics['active_engines_count'], 0, Factory should have 0 active engines after cleanup)
                 self.assertEqual(final_metrics['total_engines_cleaned'], final_metrics['total_engines_created'], All engines should be cleaned)"
+                self.assertEqual(final_metrics['total_engines_cleaned'], final_metrics['total_engines_created'], All engines should be cleaned)"
                 
                 # Shutdown factory
                 await factory.shutdown()
                 
-                logger.info(✅ PASS: Factory lifecycle management working correctly")
+                logger.info(✅ PASS: Factory lifecycle management working correctly")"
                 return True
                 
             except Exception as e:
                 self.lifecycle_violations.append(fFactory lifecycle test failed: {e})
                 logger.error(f❌ FAIL: ExecutionEngineFactory lifecycle broken - {e})"
+                logger.error(f❌ FAIL: ExecutionEngineFactory lifecycle broken - {e})"
                 return False
         
         result = asyncio.run(test_factory_lifecycle())
-        self.assertTrue(result, "ExecutionEngineFactory lifecycle management should work correctly)
+        self.assertTrue(result, "ExecutionEngineFactory lifecycle management should work correctly)"
     
     def test_resource_monitoring_and_limits(self):
         Test resource monitoring and limits enforcement.""
@@ -252,7 +262,8 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 
                 for i in range(max_engines):
                     user_id = UnifiedIdGenerator.generate_base_id(fresource_user_{i}, True, 8)"
-                    thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, f"resource_test_{i})
+                    user_id = UnifiedIdGenerator.generate_base_id(fresource_user_{i}, True, 8)"
+                    thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, f"resource_test_{i})"
                     
                     user_context = UserExecutionContext(
                         user_id=user_id,
@@ -265,10 +276,11 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                     
                     # Add some data to engine to use memory
                     engine.set_agent_state(fmemory_agent_{i}, x * 1000)  # 1KB per engine
-                    engine.set_agent_result(fmemory_result_{i}, {"
-                        "large_data: list(range(100)),
+                    engine.set_agent_result(fmemory_result_{i), {"
+                    engine.set_agent_result(fmemory_result_{i), {"
+                        "large_data: list(range(100)),"
                         user: fuser_{i},
-                        test_data: "y * 500
+                        test_data: "y * 500"
                     }
                 
                 # Monitor memory after creation
@@ -277,14 +289,15 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 
                 # Test resource metrics
                 metrics = factory.get_factory_metrics()
-                self.assertEqual(metrics['active_engines_count'], max_engines, fShould have {max_engines} active engines")
+                self.assertEqual(metrics['active_engines_count'], max_engines, fShould have {max_engines} active engines")"
                 
                 # Test that engines are properly tracked
                 for i, engine in enumerate(engines):
                     stats = engine.get_user_execution_stats()
                     self.assertIn('memory_usage', stats, fEngine {i} should track memory usage)
                     self.assertIn('created_at', stats, fEngine {i} should track creation time)"
-                    self.assertTrue(stats['is_active'], f"Engine {i} should be active)
+                    self.assertIn('created_at', stats, fEngine {i} should track creation time)"
+                    self.assertTrue(stats['is_active'], f"Engine {i} should be active)"
                 
                 # Test resource cleanup
                 cleanup_start = time.time()
@@ -322,7 +335,8 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
     
     def test_error_condition_cleanup(self):
         Test that cleanup works correctly under error conditions."
-        logger.info("💥 ERROR TEST: Validating cleanup under error conditions)
+        Test that cleanup works correctly under error conditions."
+        logger.info("💥 ERROR TEST: Validating cleanup under error conditions)"
         
         async def test_error_cleanup():
             try:
@@ -336,7 +350,7 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 engines = []
                 for i in range(3):
                     user_id = UnifiedIdGenerator.generate_base_id(ferror_user_{i}, True, 8)
-                    thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, f"error_test_{i})
+                    thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, f"error_test_{i})"
                     
                     user_context = UserExecutionContext(
                         user_id=user_id,
@@ -362,7 +376,7 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                         error_cleanup_success += 1
                         
                     except Exception as e:
-                        cleanup_errors.append(fEngine {i} cleanup error: {e}")
+                        cleanup_errors.append(fEngine {i} cleanup error: {e}")"
                 
                 # Test cleanup with exceptions
                 try:
@@ -383,10 +397,11 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                         self.assertIsNotNone(context_engine, Context engine should be created)
                         # Simulate exception in context
                         raise ValueError(Simulated processing error)"
+                        raise ValueError(Simulated processing error)"
                         
                 except ValueError as e:
                     # This is expected - context manager should still cleanup
-                    self.assertEqual(str(e), "Simulated processing error)
+                    self.assertEqual(str(e), "Simulated processing error)"
                 
                 # Verify factory cleaned up despite errors
                 metrics = factory.get_factory_metrics()
@@ -400,16 +415,17 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                     await factory.shutdown()
                 except Exception as e:
                     shutdown_success = False
-                    self.cleanup_failures.append(f"Factory shutdown error: {e})
+                    self.cleanup_failures.append(f"Factory shutdown error: {e})"
                 
-                self.assertTrue(shutdown_success, Factory should shutdown gracefully even with errors")
+                self.assertTrue(shutdown_success, Factory should shutdown gracefully even with errors")"
                 
                 logger.info(f✅ PASS: Error condition cleanup - {error_cleanup_success}/3 engines, {len(cleanup_errors)} errors)
                 return True
                 
             except Exception as e:
                 self.cleanup_failures.append(fError cleanup test failed: {e})"
-                logger.error(f"❌ FAIL: Error condition cleanup broken - {e})
+                self.cleanup_failures.append(fError cleanup test failed: {e})"
+                logger.error(f"❌ FAIL: Error condition cleanup broken - {e})"
                 return False
         
         result = asyncio.run(test_error_cleanup())
@@ -437,8 +453,8 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                     
                     # Create engines for this cycle
                     for i in range(engines_per_cycle):
-                        user_id = UnifiedIdGenerator.generate_base_id(f"stability_user_{cycle}_{i}, True, 8)
-                        thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, fstability_{cycle}")
+                        user_id = UnifiedIdGenerator.generate_base_id(f"stability_user_{cycle}_{i}, True, 8)"
+                        thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, fstability_{cycle}")"
                         
                         user_context = UserExecutionContext(
                             user_id=user_id,
@@ -451,8 +467,9 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                         
                         # Simulate work on engine
                         engine.set_agent_state(fstability_agent_{i}, fcycle_{cycle}_state)
-                        engine.set_agent_result(fstability_result_{i}, {"
-                            cycle": cycle,
+                        engine.set_agent_result(fstability_result_{i), {"
+                        engine.set_agent_result(fstability_result_{i), {"
+                            cycle": cycle,"
                             engine: i,
                             data": list(range(10))"
                         }
@@ -473,7 +490,7 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                     # Verify cleanup
                     metrics = factory.get_factory_metrics()
                     if metrics['active_engines_count'] != 0:
-                        stability_issues.append(f"Cycle {cycle}: {metrics['active_engines_count']} engines not cleaned up)
+                        stability_issues.append(f"Cycle {cycle}: {metrics['active_engines_count']} engines not cleaned up)"
                     
                     # Small delay between cycles
                     await asyncio.sleep(0.1)
@@ -482,8 +499,8 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 final_metrics = factory.get_factory_metrics()
                 expected_total_created = cycles * engines_per_cycle
                 
-                self.assertEqual(final_metrics['total_engines_created'], expected_total_created, 
-                               fShould have created {expected_total_created} engines total")
+                self.assertEqual(final_metrics['total_engines_created'), expected_total_created, 
+                               fShould have created {expected_total_created} engines total")"
                 self.assertEqual(final_metrics['active_engines_count'], 0, Should have 0 active engines)
                 
                 # Shutdown factory
@@ -497,11 +514,11 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 
             except Exception as e:
                 self.lifecycle_violations.append(fStability test failed: {e})
-                logger.error(f"❌ FAIL: Long-running lifecycle stability broken - {e})
+                logger.error(f"❌ FAIL: Long-running lifecycle stability broken - {e})"
                 return False
         
         result = asyncio.run(test_stability())
-        self.assertTrue(result, Long-running lifecycle stability should be maintained")
+        self.assertTrue(result, Long-running lifecycle stability should be maintained")"
     
     def test_comprehensive_lifecycle_report(self):
         Generate comprehensive lifecycle test report.""
@@ -532,11 +549,12 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
         logger.info(f  Total Issues: {lifecycle_summary['total_issues']}")"
         logger.info(f  Lifecycle Violations: {lifecycle_summary['lifecycle_violations']})
         logger.info(f  Resource Leaks: {lifecycle_summary['resource_leaks']})
-        logger.info(f"  Cleanup Failures: {lifecycle_summary['cleanup_failures']})
-        logger.info(f  Performance Issues: {lifecycle_summary['performance_issues']}")
+        logger.info(f"  Cleanup Failures: {lifecycle_summary['cleanup_failures']})"
+        logger.info(f  Performance Issues: {lifecycle_summary['performance_issues']}")"
         logger.info(f  Memory Change: {memory_change:+.1f}MB)
         logger.info(f  Thread Change: {thread_change:+d})"
-        logger.info(f"  Overall Status: {lifecycle_summary['lifecycle_status']})
+        logger.info(f  Thread Change: {thread_change:+d})"
+        logger.info(f"  Overall Status: {lifecycle_summary['lifecycle_status']})"
         
         if all_issues:
             logger.warning(LIFECYCLE ISSUES DETECTED:)
@@ -556,7 +574,8 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
         self.assertEqual(
             lifecycle_summary['total_issues'], 0,
             fExecutionEngine lifecycle management should work correctly. 
-            f"Found {lifecycle_summary['total_issues']} issues. 
+            f"Found {lifecycle_summary['total_issues']} issues."
+            fResource changes: {memory_change:+.1f}MB, {thread_change:+d} threads"
             fResource changes: {memory_change:+.1f}MB, {thread_change:+d} threads"
         )
         
@@ -572,5 +591,7 @@ if __name__ == __main__":"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
-    # sys.exit(result")
+    # sys.exit(result")"
     pass  # TODO: Replace with appropriate SSOT test execution
+))))))))))))
+}}

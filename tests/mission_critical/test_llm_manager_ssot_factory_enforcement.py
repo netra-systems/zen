@@ -1,4 +1,5 @@
 """
+"""
 LLM Manager SSOT Factory Pattern Enforcement Tests
 
 These tests are DESIGNED TO FAIL initially to prove SSOT violations exist.
@@ -15,7 +16,9 @@ Test Categories:
 IMPORTANT: These tests use static analysis and real code inspection
 to detect SSOT violations that could cause user data mixing.
 "
+"
 
+"""
 """
 import ast
 import inspect
@@ -33,7 +36,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
-    "Test 1: Factory Pattern Enforcement - Detect direct LLMManager() violations
+    "Test 1: Factory Pattern Enforcement - Detect direct LLMManager() violations"
     
     def test_llm_manager_factory_pattern_only(self):
         "DESIGNED TO FAIL: Scan codebase for direct LLMManager() instantiation violations."
@@ -48,9 +51,11 @@ class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
         
         Business Impact: Direct instantiation can cause user conversation mixing
         "
+        "
         factory_violations = []
         
         # Define the search root
+        search_root = Path(__file__).parent.parent.parent / netra_backend"
         search_root = Path(__file__).parent.parent.parent / netra_backend"
         
         # Files to exclude from factory pattern enforcement
@@ -59,10 +64,11 @@ class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
             test_",           # Test files (prefix match)"
             __init__.py,     # Init files
             dependencies.py, # Factory definition file"
+            dependencies.py, # Factory definition file"
         }
         
         def should_exclude_file(file_path: Path) -> bool:
-            "Check if file should be excluded from factory enforcement
+            "Check if file should be excluded from factory enforcement"
             file_name = file_path.name
             return any(excluded in file_name for excluded in excluded_files)
         
@@ -106,7 +112,7 @@ class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
                         if node.module and 'llm_manager' in node.module:
                             for alias in node.names:
                                 if alias.name == 'LLMManager':
-                                    # Check if it's imported for direct use
+                                    # Check if it's imported for direct use'
                                     violations.append({
                                         'type': 'direct_import_for_instantiation',
                                         'line': node.lineno,
@@ -139,11 +145,11 @@ class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
             )
         
         logger.info(fScanned {scanned_files} files for factory pattern violations)
-        logger.info(f"Found {len(all_violations)} factory pattern violations)
+        logger.info(f"Found {len(all_violations)} factory pattern violations)"
         
         # Add specific violations we expect to find
         expected_violation_patterns = [
-            Direct LLMManager() instantiation in agent files",
+            Direct LLMManager() instantiation in agent files","
             Import LLMManager for direct use instead of factory,
             Non-factory creation patterns bypassing user isolation""
         ]
@@ -153,13 +159,15 @@ class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
             factory_violations.extend([
                 EXPECTED: Direct LLMManager() calls in agent execution,
                 EXPECTED: Import patterns bypassing factory in utilities, "
-                "EXPECTED: Non-factory instantiation in supervisor agent
+                EXPECTED: Import patterns bypassing factory in utilities, "
+                "EXPECTED: Non-factory instantiation in supervisor agent"
             ]
         
         # This test should FAIL - we expect factory pattern violations
         assert len(factory_violations) > 0, (
             fExpected LLMManager factory pattern violations, but found none. 
-            f"This indicates proper factory patterns may already be implemented. 
+            f"This indicates proper factory patterns may already be implemented."
+            fScanned {scanned_files} files."
             fScanned {scanned_files} files."
         )
         
@@ -168,9 +176,10 @@ class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
             logger.error(fFactory Pattern Violation: {violation})
             
         pytest.fail(fFactory Pattern Violations Detected ({len(factory_violations)} issues): {factory_violations[:5]}...)"
+        pytest.fail(fFactory Pattern Violations Detected ({len(factory_violations)} issues): {factory_violations[:5]}...)"
 
     def test_no_deprecated_get_llm_manager(self):
-        "DESIGNED TO FAIL: Detect deprecated get_llm_manager() usage patterns.
+        "DESIGNED TO FAIL: Detect deprecated get_llm_manager() usage patterns."
         
         The get_llm_manager() function may not provide proper user isolation.
         Modern SSOT pattern should use dedicated factory functions.
@@ -197,7 +206,7 @@ class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
                 for line_num, line in enumerate(lines, 1):
                     # Look for get_llm_manager calls
                     if 'get_llm_manager' in line:
-                        # Check if it's a function call (not import)
+                        # Check if it's a function call (not import)'
                         if 'get_llm_manager(' in line:
                             violations.append({
                                 'type': 'deprecated_function_call',
@@ -256,10 +265,12 @@ class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
             if 'user_id' not in get_llm_manager_source:
                 deprecated_violations.append(
                     CRITICAL: get_llm_manager() function lacks user_id parameter for isolation"
+                    CRITICAL: get_llm_manager() function lacks user_id parameter for isolation"
                 )
             
             if 'cache' in get_llm_manager_source.lower():
                 deprecated_violations.append(
+                    HIGH: get_llm_manager() may use shared caching without user isolation"
                     HIGH: get_llm_manager() may use shared caching without user isolation"
                 )
                 
@@ -270,14 +281,16 @@ class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
         if len(deprecated_violations) == 0:
             deprecated_violations.extend([
                 EXPECTED: get_llm_manager() calls without user context,"
-                "EXPECTED: Shared LLM manager instances in agent code,
+                EXPECTED: get_llm_manager() calls without user context,"
+                "EXPECTED: Shared LLM manager instances in agent code,"
                 EXPECTED: Missing user isolation in dependencies.py
             ]
         
-        logger.info(f"Found {len(all_violations)} deprecated pattern violations)
+        logger.info(f"Found {len(all_violations)} deprecated pattern violations)"
         
         # This test should FAIL - we expect deprecated pattern usage
         assert len(deprecated_violations) > 0, (
+            fExpected deprecated get_llm_manager() usage violations, but found none. "
             fExpected deprecated get_llm_manager() usage violations, but found none. "
             fThis may indicate proper factory patterns are already implemented.
         )
@@ -285,8 +298,9 @@ class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
         # Log violations
         for violation in deprecated_violations:
             logger.error(fDeprecated Pattern Violation: {violation})"
+            logger.error(fDeprecated Pattern Violation: {violation})"
             
-        pytest.fail(f"Deprecated Pattern Violations Detected ({len(deprecated_violations)} issues): {deprecated_violations[:5]}...)
+        pytest.fail(f"Deprecated Pattern Violations Detected ({len(deprecated_violations)} issues): {deprecated_violations[:5]}...)"
 
     def test_startup_factory_compliance(self):
         DESIGNED TO FAIL: Validate startup modules use factory pattern only.
@@ -305,7 +319,8 @@ class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
         startup_files = [
             netra_backend/app/dependencies.py,
             netra_backend/app/main.py, "
-            "netra_backend/app/core/startup.py,
+            netra_backend/app/main.py, "
+            "netra_backend/app/core/startup.py,"
             netra_backend/app/routes/,  # Route handlers
             "netra_backend/app/agents/supervisor/,  # Supervisor agent startup"
         ]
@@ -313,6 +328,7 @@ class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
         root_path = Path(__file__).parent.parent.parent
         
         def analyze_startup_file(file_path: Path) -> List[Dict]:
+            Analyze startup files for factory compliance"
             Analyze startup files for factory compliance"
             violations = []
             
@@ -323,7 +339,7 @@ class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
                 if file_path.is_file():
                     files_to_check = [file_path]
                 else:
-                    files_to_check = list(file_path.rglob("*.py))
+                    files_to_check = list(file_path.rglob("*.py))"
                     
                 for py_file in files_to_check:
                     with open(py_file, 'r', encoding='utf-8') as f:
@@ -377,10 +393,11 @@ class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
         # Process violations
         for violation in all_violations:
             startup_violations.append(
-                f"{violation['severity']}: {violation['type']} in {violation['file']}:{violation['line']} - {violation['content'][:80]}
+                f"{violation['severity']}: {violation['type']} in {violation['file']}:{violation['line']} - {violation['content'][:80]}"
             )
         
         # Check dependencies.py specifically for factory pattern compliance
+        dependencies_path = root_path / netra_backend/app/dependencies.py"
         dependencies_path = root_path / netra_backend/app/dependencies.py"
         if dependencies_path.exists():
             try:
@@ -422,16 +439,19 @@ class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
         for violation in startup_violations:
             logger.error(fStartup Factory Compliance Violation: {violation})
             
-        pytest.fail(f"Startup Factory Compliance Violations Detected ({len(startup_violations)} issues): {startup_violations[:5]}...)
+        pytest.fail(f"Startup Factory Compliance Violations Detected ({len(startup_violations)} issues): {startup_violations[:5]}...)"
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print(MIGRATION NOTICE: This file previously used direct pytest execution.)"
-    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")
-    print(For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print(MIGRATION NOTICE: This file previously used direct pytest execution.)"
+    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")"
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md")"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
-    # sys.exit(result")
+    # sys.exit(result")"
+
+))))))))))))))

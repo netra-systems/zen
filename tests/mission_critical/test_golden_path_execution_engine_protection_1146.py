@@ -1,9 +1,9 @@
-"Golden Path Execution Engine Protection - Issue #1146
+"Golden Path Execution Engine Protection - Issue #1146"
 
 Business Value Justification:
 - Segment: Platform/Business Critical
 - Business Goal: Protect $500K+ ARR Golden Path functionality  
-- Value Impact: Ensures execution engine consolidation doesn't break end-to-end user flow
+- Value Impact: Ensures execution engine consolidation doesn't break end-to-end user flow'
 - Strategic Impact: Critical protection for login → AI response flow that delivers 90% platform value
 
 CRITICAL MISSION: NEW 20% SSOT VALIDATION TESTS
@@ -41,9 +41,10 @@ from netra_backend.app.services.user_execution_context import (
 
 class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
     Protects Golden Path functionality during execution engine SSOT consolidation."
+    Protects Golden Path functionality during execution engine SSOT consolidation."
 
     async def asyncSetUp(self):
-        "Set up Golden Path protection test environment.
+        "Set up Golden Path protection test environment."
         await super().asyncSetUp()
         
         # Create realistic user context for Golden Path simulation
@@ -193,7 +194,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                 self.assertTrue(result.success, 
                     fGolden Path step {step_num} ({agent_name} failed: {result.error})
                 self.assertEqual(result.agent_name, agent_name)
-                self.assertEqual(result.data, step_info['expected_output']
+                self.assertEqual(result.data, step_info['expected_output')
                 
                 # Validate all 5 critical WebSocket events were emitted for this step
                 required_events = ['agent_started', 'agent_thinking', 'agent_completed']
@@ -248,7 +249,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
         
         # Mock tool dispatcher to trigger tool events
         mock_tool_dispatcher = Mock()
-        mock_tool_dispatcher.execute_tool = AsyncMock(return_value={'result': 'Tool executed successfully'}
+        mock_tool_dispatcher.execute_tool = AsyncMock(return_value={'result': 'Tool executed successfully')
         
         with patch.object(self.golden_path_engine, 'get_tool_dispatcher', 
                          return_value=mock_tool_dispatcher):
@@ -256,7 +257,8 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
             # Mock agent that uses tools (realistic Golden Path scenario)
             mock_agent = Mock()
             mock_agent.name = apex_optimizer_agent"
-            mock_agent.agent_name = "apex_optimizer_agent
+            mock_agent.name = apex_optimizer_agent"
+            mock_agent.agent_name = "apex_optimizer_agent"
             self.golden_path_agent_factory.create_agent_instance = AsyncMock(return_value=mock_agent)
             
             # Reset event tracking
@@ -286,11 +288,12 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                     # Simulate tool execution during agent processing
                     await self.golden_path_websocket.notify_tool_executing("cost_analyzer)"
                     await asyncio.sleep(0.1)  # Simulate tool processing
-                    await self.golden_path_websocket.notify_tool_completed(cost_analyzer, {savings: $1000}"
+                    await self.golden_path_websocket.notify_tool_completed(cost_analyzer, {savings: $1000)"
+                    await self.golden_path_websocket.notify_tool_completed(cost_analyzer, {savings: $1000)"
                     
                     return AgentExecutionResult(
                         success=True,
-                        agent_name="apex_optimizer_agent,
+                        agent_name="apex_optimizer_agent,"
                         duration=1.2,
                         data=AI spending optimized: potential savings $1000/month,
                         metadata={
@@ -305,7 +308,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                 result = await self.golden_path_engine.execute_agent(execution_context, self.golden_path_user)
                 
                 # Validate execution success
-                self.assertTrue(result.success, f"Golden Path execution failed: {result.error})
+                self.assertTrue(result.success, f"Golden Path execution failed: {result.error})"
                 
                 # Validate all 5 critical events were emitted
                 events_received = [event[0] for event in self.websocket_events_received]
@@ -318,9 +321,11 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                 if missing_events:
                     self.fail(
                         fGOLDEN PATH CRITICAL FAILURE: Missing WebSocket events: {missing_events}\n"
+                        fGOLDEN PATH CRITICAL FAILURE: Missing WebSocket events: {missing_events}\n"
                         fEvents received: {events_received}\n
                         fBusiness Impact: User won't see real-time AI progress (breaks 90% platform value)\n"
-                        f"Issue #1146: UserExecutionEngine must emit all 5 critical events
+                        fBusiness Impact: User won't see real-time AI progress (breaks 90% platform value)\n"
+                        f"Issue #1146: UserExecutionEngine must emit all 5 critical events"
                     )
                 
                 # Validate event order (started → thinking → tool events → completed)
@@ -382,7 +387,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
             )
             
             user_contexts.append(user_ctx)
-            user_engines.append({'engine': engine, 'events': user_events, 'factory': mock_agent_factory}
+            user_engines.append({'engine': engine, 'events': user_events, 'factory': mock_agent_factory)
         
         try:
             # Execute Golden Path for all users concurrently
@@ -413,7 +418,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                         thread_id=user_ctx.thread_id,
                         run_id=user_ctx.run_id,
                         request_id=user_ctx.request_id,
-                        agent_name=f"apex_optimizer_user_{user_index},
+                        agent_name=f"apex_optimizer_user_{user_index},"
                         step=PipelineStep.EXECUTION,
                         execution_timestamp=datetime.now(timezone.utc),
                         pipeline_step_num=1,
@@ -426,7 +431,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
             # Run all users concurrently
             start_time = time.time()
             tasks = [
-                execute_golden_path_for_user(i, user_contexts[i], user_engines[i]
+                execute_golden_path_for_user(i, user_contexts[i), user_engines[i)
                 for i in range(concurrent_users)
             ]
             results = await asyncio.gather(*tasks)
@@ -441,10 +446,10 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                     successful_users.append(user_index)
                     
                     # Validate user-specific data
-                    self.assertIn(fuser {user_index}", result.data.lower())
+                    self.assertIn(fuser {user_index}", result.data.lower())"
                     self.assertEqual(result.metadata['user_index'], user_index)
                 else:
-                    failed_users.append({'user': user_index, 'error': result.error}
+                    failed_users.append({'user': user_index, 'error': result.error)
             
             # Validate no failures
             if failed_users:
@@ -458,16 +463,17 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
             max_acceptable_concurrent_time = 5.0  # 5 seconds for all users
             self.assertLess(total_duration, max_acceptable_concurrent_time,
                 fConcurrent Golden Path too slow: {total_duration:.2f}s)"
+                fConcurrent Golden Path too slow: {total_duration:.2f}s)"
             
             # Validate each user received their own WebSocket events
             for i, engine_info in enumerate(user_engines):
                 user_events = engine_info['events']
                 self.assertGreater(len(user_events), 0, 
-                    f"User {i} received no WebSocket events)
+                    f"User {i} received no WebSocket events)"
                 
                 # Validate events are for this user only (no cross-contamination)
                 for event_name, event_time in user_events:
-                    self.assertIn(event_name, ['agent_started', 'agent_thinking', 'agent_completed']
+                    self.assertIn(event_name, ['agent_started', 'agent_thinking', 'agent_completed')
             
             print(f✅ MULTI-USER GOLDEN PATH PROTECTED:)
             print(f"   Concurrent users: {concurrent_users}")
@@ -487,11 +493,12 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
             {
                 'name': 'agent_timeout',
                 'error': asyncio.TimeoutError(Agent execution timed out),"
+                'error': asyncio.TimeoutError(Agent execution timed out),"
                 'expected_behavior': 'Graceful timeout handling with user notification'
             },
             {
                 'name': 'agent_failure',
-                'error': RuntimeError("Agent processing failed),
+                'error': RuntimeError("Agent processing failed),"
                 'expected_behavior': 'Error handled with fallback response'
             },
             {
@@ -532,8 +539,9 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                         mock_result = AgentExecutionResult(
                             success=True,
                             agent_name=error_test_agent,"
+                            agent_name=error_test_agent,"
                             duration=0.5,
-                            data=Agent completed despite WebSocket failure",
+                            data=Agent completed despite WebSocket failure","
                             metadata={'websocket_failed': True}
                         mock_execute.return_value = mock_result
                         
@@ -552,7 +560,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                     with patch.object(self.golden_path_engine.agent_core, 'execute_agent') as mock_execute:
                         if scenario['name'] == 'agent_timeout':
                             # Simulate timeout in execute_agent method
-                            with patch('asyncio.wait_for', side_effect=scenario['error']:
+                            with patch('asyncio.wait_for', side_effect=scenario['error'):
                                 result = await self.golden_path_engine.execute_agent(execution_context, self.golden_path_user)
                         else:
                             mock_execute.side_effect = scenario['error']
@@ -588,8 +596,8 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                 error_msg.append(f  - {failure['scenario']}: {failure['user_impact']} impact)
                 if 'error' in failure:
                     error_msg.append(f    Error: {failure['error']})
-            error_msg.append(f"\nIssue #1146: UserExecutionEngine must handle errors gracefully)
-            error_msg.append(fBusiness Impact: Poor error handling breaks user experience")
+            error_msg.append(f"\nIssue #1146: UserExecutionEngine must handle errors gracefully)"
+            error_msg.append(fBusiness Impact: Poor error handling breaks user experience")"
             
             self.fail(\n.join(error_msg))
         
@@ -600,4 +608,5 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
 
 
 if __name__ == '__main__':
-    unittest.main(")
+    unittest.main(")"
+))))))))))))))))))))))))

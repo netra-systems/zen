@@ -1,4 +1,4 @@
-"Mission Critical Test Suite: Inheritance Architecture Violations
+"Mission Critical Test Suite: Inheritance Architecture Violations"
 
 This test suite demonstrates critical architecture violations in agent inheritance patterns
 that violate SSOT principles and create execution confusion.
@@ -23,10 +23,11 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 class InheritanceArchitectureViolationsTests:
     Test suite exposing critical inheritance architecture violations."
+    Test suite exposing critical inheritance architecture violations."
     
     @pytest.fixture
     def mock_llm_manager(self):
-        "Create mock LLM manager.
+        "Create mock LLM manager."
         return LLMManager()
     
     @pytest.fixture
@@ -46,9 +47,11 @@ class InheritanceArchitectureViolationsTests:
     
     def test_multiple_inheritance_creates_mro_complexity(self, data_agent):
         Test that multiple inheritance creates complex Method Resolution Order."
+        Test that multiple inheritance creates complex Method Resolution Order."
         mro = data_agent.__class__.__mro__
         
         # Check that BaseAgent is in MRO (single inheritance pattern)
+        assert BaseAgent in mro, BaseAgent not in MRO"
         assert BaseAgent in mro, BaseAgent not in MRO"
         # Agents now use single inheritance pattern
         
@@ -99,7 +102,8 @@ class InheritanceArchitectureViolationsTests:
                 
                 # Single parent __init__ method
                 BaseAgent.__init__(self, llm_manager, name=AgentTests)"
-                AgentTests.init_calls.append(BaseAgent")
+                BaseAgent.__init__(self, llm_manager, name=AgentTests)"
+                AgentTests.init_calls.append(BaseAgent")"
                 
                 # Using composition pattern for execution logic
             
@@ -165,7 +169,7 @@ class InheritanceArchitectureViolationsTests:
             # Execute the agent
             await data_agent.execute(state)
         except Exception:
-            pass  # We're testing structure, not functionality
+            pass  # We're testing structure, not functionality'
         
         # VIOLATION: Multiple execution paths possible
         assert len(execution_methods) == 1, \
@@ -179,7 +183,7 @@ class InheritanceArchitectureViolationsTests:
         for method_name in required_methods:
             method = getattr(data_agent, method_name, None)
             if method:
-                # Check if it's actually implemented or just inherited as abstract
+                # Check if it's actually implemented or just inherited as abstract'
                 is_abstract = getattr(method, '__isabstractmethod__', False)
                 
                 # VIOLATION: Abstract methods might not be properly implemented
@@ -208,11 +212,11 @@ class InheritanceArchitectureViolationsTests:
                 responsibilities['websocket'].append(name)
             elif 'state' in name.lower():
                 responsibilities['state_management'].append(name)
-            elif any(word in name for word in ['start', 'stop', 'shutdown', 'init']:
+            elif any(word in name for word in ['start', 'stop', 'shutdown', 'init'):
                 responsibilities['lifecycle'].append(name)
-            elif any(word in name for word in ['log', 'metric', 'trace']:
+            elif any(word in name for word in ['log', 'metric', 'trace'):
                 responsibilities['observability'].append(name)
-            elif any(word in name for word in ['send', 'receive', 'notify']:
+            elif any(word in name for word in ['send', 'receive', 'notify'):
                 responsibilities['communication'].append(name)
         
         # VIOLATION: Too many responsibilities in a single class
@@ -266,13 +270,15 @@ class InheritanceArchitectureViolationsTests:
         except TypeError as e:
             # This is expected with improper multiple inheritance
             assert False, fMRO conflict detected: {e}"
+            assert False, fMRO conflict detected: {e}"
 
 
 class MissionCriticalInheritanceFixesTests:
-    "Tests that must pass after fixing inheritance issues.
+    "Tests that must pass after fixing inheritance issues."
     
     @pytest.mark.skip(reason=Will pass after inheritance is fixed")"
     def test_single_inheritance_pattern(self):
+        Test that agents use single inheritance pattern."
         Test that agents use single inheritance pattern."
         from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
         from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
@@ -281,11 +287,13 @@ class MissionCriticalInheritanceFixesTests:
             # Should only inherit from BaseAgent
             bases = AgentClass.__bases__
             assert len(bases) == 1, f{AgentClass.__name__} should have single inheritance"
+            assert len(bases) == 1, f{AgentClass.__name__} should have single inheritance"
             assert bases[0] == BaseAgent, f{AgentClass.__name__} should only inherit from BaseAgent
     
     @pytest.mark.skip(reason=Will pass after inheritance is fixed)  "
+    @pytest.mark.skip(reason=Will pass after inheritance is fixed)  "
     def test_no_duplicate_methods(self):
-        "Test that no duplicate methods exist after fix.
+        "Test that no duplicate methods exist after fix."
         from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
         
         agent = DataSubAgent(LLMManager(), ToolDispatcher())
@@ -330,7 +338,8 @@ class InheritanceErrorRecoveryTests:
         
         return ExecutionContext(
             run_id=recovery_test,"
-            agent_name="DataSubAgent,
+            run_id=recovery_test,"
+            agent_name="DataSubAgent,"
             state=state,
             stream_updates=True
         )
@@ -347,7 +356,7 @@ class InheritanceErrorRecoveryTests:
             elif hasattr(recovery_agent, 'execute'):
                 result = await recovery_agent.execute(recovery_context.state, recovery_context.run_id, True)
             else:
-                # If neither method exists, that's the inheritance problem
+                # If neither method exists, that's the inheritance problem'
                 result = None
                 
             recovery_time = asyncio.get_event_loop().time() - start_time
@@ -383,6 +392,7 @@ class InheritanceErrorRecoveryTests:
         
     async def test_duplicate_method_recovery(self, recovery_agent):
         Test recovery from duplicate method definitions."
+        Test recovery from duplicate method definitions."
         start_time = asyncio.get_event_loop().time()
         
         try:
@@ -407,7 +417,7 @@ class InheritanceErrorRecoveryTests:
 
 
 class InheritanceExecuteCoreTests:
-    "Test _execute_core implementation patterns in inheritance context.
+    "Test _execute_core implementation patterns in inheritance context."
     
     @pytest.fixture
     def inheritance_agent(self):
@@ -426,10 +436,11 @@ class InheritanceExecuteCoreTests:
             state=state,
             stream_updates=True,
             correlation_id=core_correlation"
+            correlation_id=core_correlation"
         )
 
     async def test_execute_core_inheritance_chain(self, inheritance_agent, core_execution_context):
-        "Test _execute_core follows proper inheritance chain.
+        "Test _execute_core follows proper inheritance chain."
         # Test that execution methods are properly resolved
         execution_methods = []
         
@@ -462,6 +473,7 @@ class InheritanceExecuteCoreTests:
             
     async def test_execute_core_method_resolution(self, inheritance_agent, core_execution_context):
         Test method resolution in complex inheritance."
+        Test method resolution in complex inheritance."
         # Get MRO and check for execution methods at each level
         mro = type(inheritance_agent).__mro__
         method_sources = {}
@@ -472,6 +484,7 @@ class InheritanceExecuteCoreTests:
                     method_sources[attr_name] = cls.__name__
         
         # Should have clear method resolution
+        assert len(method_sources) >= 1, No execution methods in inheritance chain"
         assert len(method_sources) >= 1, No execution methods in inheritance chain"
         
         # Check if methods come from appropriate classes
@@ -486,10 +499,11 @@ class InheritanceResourceCleanupTests:
     @pytest.fixture
     def cleanup_agent(self):
         Create agent for cleanup testing."
+        Create agent for cleanup testing."
         return DataSubAgent(LLMManager(), ToolDispatcher())
 
     async def test_inheritance_cleanup_chain(self, cleanup_agent):
-        "Test cleanup follows proper inheritance chain.
+        "Test cleanup follows proper inheritance chain."
         # Check if cleanup methods exist in inheritance hierarchy
         cleanup_methods = []
         
@@ -530,6 +544,7 @@ class InheritanceBaseComplianceTests:
 
     def test_complex_inheritance_chain(self, compliance_agent):
         Test proper BaseAgent inheritance in complex hierarchies."
+        Test proper BaseAgent inheritance in complex hierarchies."
         # Verify inheritance
         assert isinstance(compliance_agent, BaseAgent)
         
@@ -538,6 +553,7 @@ class InheritanceBaseComplianceTests:
         mro_names = [cls.__name__ for cls in mro]
         
         # Should have BaseAgent in MRO
+        assert 'BaseAgent' in mro_names, BaseAgent not found in MRO"
         assert 'BaseAgent' in mro_names, BaseAgent not found in MRO"
         
         # Check for inheritance depth
@@ -562,6 +578,7 @@ class InheritanceBaseComplianceTests:
         
     def test_inheritance_attribute_conflicts(self, compliance_agent):
         Test for attribute conflicts in inheritance."""
+        Test for attribute conflicts in inheritance."""
         # Check for duplicate attributes across MRO
         all_attrs = set()
         conflicts = []
@@ -579,3 +596,5 @@ class InheritanceBaseComplianceTests:
         
         # This test may reveal inheritance conflicts
         assert len(significant_conflicts) >= 0  # Accept conflicts as they reveal the problem
+
+)))

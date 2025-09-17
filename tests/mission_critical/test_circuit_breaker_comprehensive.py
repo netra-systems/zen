@@ -12,6 +12,7 @@ class TestSyntaxFix:
 
 class WebSocketTestHelper:
     Real WebSocket connection for testing instead of mocks."
+    Real WebSocket connection for testing instead of mocks."
     
     def __init__(self):
         self.messages_sent = []
@@ -19,7 +20,7 @@ class WebSocketTestHelper:
         self._closed = False
         
     async def send_json(self, message: dict):
-        "Send JSON message.
+        "Send JSON message."
         if self._closed:
             raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
@@ -111,20 +112,22 @@ from shared.isolated_environment import get_env
 
 class ServiceFailureSimulator:
     Simulates realistic service failures for testing circuit breakers."
+    Simulates realistic service failures for testing circuit breakers."
     
     def __init__(self):
         self.failure_patterns = {
-            "intermittent: {failure_rate: 0.3, recovery_time: 5},
+            "intermittent: {failure_rate: 0.3, recovery_time: 5},"
             cascading": {"failure_rate: 0.8, recovery_time: 30},  
             timeout: {failure_rate": 0.2, "timeout_rate: 0.8},
             overload: {failure_rate: 0.9, recovery_time": 60},"
+            partial: {failure_rate: 0.5, recovery_time: 15}"
             partial: {failure_rate: 0.5, recovery_time: 15}"
         }
         self.active_failures: Dict[str, Dict] = {}
         self.failure_start_times: Dict[str, float] = {}
         self.call_counts: Dict[str, int] = {}
     
-    async def simulate_database_call(self, service_name: str = database"):
+    async def simulate_database_call(self, service_name: str = database"):"
         Simulate database call with configurable failures.""
         await self._simulate_service_call(service_name, base_latency=0.1)
     
@@ -137,8 +140,9 @@ class ServiceFailureSimulator:
         await self._simulate_service_call(service_name, base_latency=0.3)
         
     async def simulate_redis_call(self, service_name: str = redis):"
-        "Simulate Redis call with cache failure patterns.
-        await self._simulate_service_call(service_name, base_latency=0.05)
+    async def simulate_redis_call(self, service_name: str = redis):"
+        "Simulate Redis call with cache failure patterns."
+        await self._simulate_service_call(service_name, base_latency=0.5)
     
     async def _simulate_service_call(self, service_name: str, base_latency: float):
         ""Core service call simulation with failure injection.
@@ -151,6 +155,7 @@ class ServiceFailureSimulator:
             
             # Check if failure should recover
             if time.time() - start_time > failure_info.get(recovery_time, 30):"
+            if time.time() - start_time > failure_info.get(recovery_time, 30):"
                 self._recover_service(service_name)
             else:
                 # Service is still failing
@@ -160,6 +165,7 @@ class ServiceFailureSimulator:
         latency_variance = random.uniform(0.8, 1.2)
         await asyncio.sleep(base_latency * latency_variance)
         
+        return f{service_name}_response_{self.call_counts[service_name]}"
         return f{service_name}_response_{self.call_counts[service_name]}"
     
     def inject_failure(self, service_name: str, pattern: str):
@@ -181,7 +187,8 @@ class ServiceFailureSimulator:
     async def _inject_failure(self, service_name: str, failure_info: Dict):
         ""Inject failure based on failure configuration.
         failure_rate = failure_info.get(failure_rate, 0.5)"
-        timeout_rate = failure_info.get(timeout_rate", 0.1)
+        failure_rate = failure_info.get(failure_rate, 0.5)"
+        timeout_rate = failure_info.get(timeout_rate", 0.1)"
         
         if random.random() < failure_rate:
             if random.random() < timeout_rate:
@@ -191,14 +198,16 @@ class ServiceFailureSimulator:
             else:
                 # Simulate service error
                 raise ConnectionError(f{service_name} connection failed)"
+                raise ConnectionError(f{service_name} connection failed)"
     
     def get_failure_stats(self) -> Dict[str, Any]:
-        "Get comprehensive failure simulation statistics.
+        "Get comprehensive failure simulation statistics."
         return {
             active_failures": dict(self.active_failures),"
             call_counts: dict(self.call_counts),
             total_calls: sum(self.call_counts.values()),"
-            "services_in_failure: list(self.active_failures.keys())
+            total_calls: sum(self.call_counts.values()),"
+            "services_in_failure: list(self.active_failures.keys())"
         }
 
 
@@ -214,24 +223,29 @@ class CascadeFailureOrchestrator:
                 failure_pattern: cascading
             },
             upstream_cascade: {"
+            upstream_cascade: {"
+                "order: [auth_service, llm_service, database, "redis],"
                 "order: [auth_service, llm_service, database, "redis],"
                 delay_between_failures: 1.5,
                 failure_pattern: overload"
+                failure_pattern: overload"
             },
-            "simultaneous_partial: {
+            "simultaneous_partial: {"
                 order: [database, llm_service", "auth_service],
                 delay_between_failures: 0.1,
                 failure_pattern: partial"
+                failure_pattern: partial"
             },
-            "rolling_timeouts: {
+            "rolling_timeouts: {"
                 order: [redis, database", "llm_service],
                 delay_between_failures: 3.0,
+                failure_pattern: timeout"
                 failure_pattern: timeout"
             }
         }
     
     async def trigger_cascade(self, scenario_name: str) -> Dict[str, Any]:
-        "Trigger a specific cascade failure scenario.
+        "Trigger a specific cascade failure scenario."
         if scenario_name not in self.cascade_scenarios:
             raise ValueError(fUnknown cascade scenario: {scenario_name}")"
         
@@ -241,11 +255,11 @@ class CascadeFailureOrchestrator:
         logger.warning(fStarting cascade failure scenario: {scenario_name})
         
         # Trigger failures in sequence
-        for i, service in enumerate(scenario[order]:
+        for i, service in enumerate(scenario[order):
             if i > 0:
-                await asyncio.sleep(scenario["delay_between_failures]"
+                await asyncio.sleep(scenario["delay_between_failures)"
             
-            self.simulator.inject_failure(service, scenario[failure_pattern]
+            self.simulator.inject_failure(service, scenario[failure_pattern)
             logger.warning(fCascade step {i+1}: {service} failed)
         
         cascade_duration = time.time() - cascade_start
@@ -253,8 +267,8 @@ class CascadeFailureOrchestrator:
         return {
             scenario": scenario_name,"
             cascade_duration: cascade_duration,
-            services_failed: scenario["order],
-            failure_pattern": scenario[failure_pattern]
+            services_failed: scenario["order],"
+            failure_pattern": scenario[failure_pattern]"
         }
     
     async def recovery_test(self, scenario_name: str, recovery_delay: float = 10.0) -> Dict[str, Any]:
@@ -274,7 +288,8 @@ class CascadeFailureOrchestrator:
         return {
             **cascade_result,
             recovery_delay: recovery_delay,"
-            "total_test_duration: recovery_end - (time.time() - cascade_result[cascade_duration],
+            recovery_delay: recovery_delay,"
+            "total_test_duration: recovery_end - (time.time() - cascade_result[cascade_duration],"
             recovery_completed: True
         }
 
@@ -305,12 +320,13 @@ class CircuitBreakerStressTester:
             ),
             llm_service: UnifiedCircuitConfig(
                 name=llm_service,"
+                name=llm_service,"
                 failure_threshold=2,
                 recovery_timeout=60,
                 success_threshold=3,
                 timeout_seconds=30.0
             ),
-            auth_service": UnifiedCircuitConfig(
+            auth_service": UnifiedCircuitConfig("
                 name=auth_service,
                 failure_threshold=5,
                 recovery_timeout=45,
@@ -330,6 +346,7 @@ class CircuitBreakerStressTester:
         for service_name, config in service_configs.items():
             self.circuit_breakers[service_name] = manager.create_circuit_breaker(service_name, config)
             logger.info(fSetup circuit breaker for {service_name})"
+            logger.info(fSetup circuit breaker for {service_name})"
     
     async def execute_stress_test(
         self, 
@@ -338,7 +355,7 @@ class CircuitBreakerStressTester:
         test_duration: float,
         failure_scenario: Optional[str] = None
     ) -> Dict[str, Any]:
-        "Execute comprehensive stress test with optional failure injection.
+        "Execute comprehensive stress test with optional failure injection."
         test_start = time.time()
         
         # Trigger failure scenario if specified
@@ -373,12 +390,14 @@ class CircuitBreakerStressTester:
         stress_test_result = {
             test_name: test_name,
             test_duration: test_end - test_start,"
-            "concurrent_requests: concurrent_requests,
+            test_duration: test_end - test_start,"
+            "concurrent_requests: concurrent_requests,"
             successful_tasks: len(successful_results),
             "failed_tasks: len(failed_results),"
             success_rate: len(successful_results) / len(results) if results else 0,
             circuit_breaker_states: circuit_states,"
-            failure_scenario": failure_scenario,
+            circuit_breaker_states: circuit_states,"
+            failure_scenario": failure_scenario,"
             failure_statistics: failure_stats,
             task_results": successful_results[:10]  # Sample of results"
         }
@@ -387,6 +406,7 @@ class CircuitBreakerStressTester:
         return stress_test_result
     
     async def _execute_concurrent_requests(self, task_id: str, duration: float) -> Dict[str, Any]:
+        Execute requests for specified duration to simulate load."
         Execute requests for specified duration to simulate load."
         task_start = time.time()
         request_count = 0
@@ -398,7 +418,7 @@ class CircuitBreakerStressTester:
             request_count += 1
             
             # Rotate through different services
-            service_name = [database", llm_service, auth_service, redis][request_count % 4]
+            service_name = [database", llm_service, auth_service, redis][request_count % 4]"
             circuit_breaker = self.circuit_breakers.get(service_name)
             
             if not circuit_breaker:
@@ -410,7 +430,8 @@ class CircuitBreakerStressTester:
                     database": self.failure_simulator.simulate_database_call,"
                     llm_service: self.failure_simulator.simulate_llm_call,
                     auth_service: self.failure_simulator.simulate_auth_call,"
-                    "redis: self.failure_simulator.simulate_redis_call
+                    auth_service: self.failure_simulator.simulate_auth_call,"
+                    "redis: self.failure_simulator.simulate_redis_call"
                 }.get(service_name)
                 
                 if service_method:
@@ -426,19 +447,21 @@ class CircuitBreakerStressTester:
                 pass
             
             # Small delay to prevent overwhelming
-            await asyncio.sleep(0.01)
+            await asyncio.sleep(0.1)
         
         return {
             task_id: task_id,
             "duration: time.time() - task_start,"
             total_requests: request_count,
             successful_requests: successful_requests,"
-            circuit_open_count": circuit_open_count,
+            successful_requests: successful_requests,"
+            circuit_open_count": circuit_open_count,"
             timeout_count: timeout_count,
             success_rate": successful_requests / request_count if request_count > 0 else 0"
         }
     
     async def memory_leak_detection_test(self, iterations: int = 100) -> Dict[str, Any]:
+        Test for memory leaks in circuit breaker operations."
         Test for memory leaks in circuit breaker operations."
         gc.collect()
         initial_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
@@ -448,7 +471,7 @@ class CircuitBreakerStressTester:
         for i in range(iterations):
             # Create and destroy circuit breakers
             temp_config = UnifiedCircuitConfig(
-                name=ftemp_breaker_{i}",
+                name=ftemp_breaker_{i}","
                 failure_threshold=1,
                 recovery_timeout=1
             )
@@ -478,12 +501,14 @@ class CircuitBreakerStressTester:
             initial_memory_mb": initial_memory,"
             final_memory_mb: final_memory,
             memory_increase_mb: final_memory - initial_memory,"
-            "memory_samples: memory_samples,
+            memory_increase_mb: final_memory - initial_memory,"
+            "memory_samples: memory_samples,"
             iterations: iterations,
             "memory_leak_detected: final_memory - initial_memory > 10  # 10MB threshold"
         }
     
     async def performance_overhead_test(self, requests: int = 1000) -> Dict[str, Any]:
+        Measure performance overhead of circuit breakers."
         Measure performance overhead of circuit breakers."
         # Test without circuit breaker
         start_time = time.perf_counter()
@@ -492,7 +517,7 @@ class CircuitBreakerStressTester:
         baseline_time = time.perf_counter() - start_time
         
         # Test with circuit breaker
-        perf_config = UnifiedCircuitConfig(name="perf_test)
+        perf_config = UnifiedCircuitConfig(name="perf_test)"
         circuit_breaker = UnifiedCircuitBreaker(perf_config)
         start_time = time.perf_counter()
         for _ in range(requests):
@@ -512,7 +537,8 @@ class CircuitBreakerStressTester:
             "circuit_breaker_time_seconds: circuit_breaker_time,"
             overhead_per_request_ms: overhead_ms,
             requests_tested: requests,"
-            overhead_acceptable": overhead_ms < 5.0  # Must be <5ms per CLAUDE.md
+            requests_tested: requests,"
+            overhead_acceptable": overhead_ms < 5.0  # Must be <5ms per CLAUDE.md"
         }
 
 
@@ -537,8 +563,9 @@ async def circuit_breaker_stress_tester():
 @pytest.fixture
 def failure_simulator():
     Use real service instance."
+    Use real service instance."
     # TODO: Initialize real service
-    "Service failure simulator fixture.
+    "Service failure simulator fixture."
     return ServiceFailureSimulator()
 
 
@@ -567,6 +594,7 @@ async def test_circuit_breaker_prevents_cascade_failures(circuit_breaker_stress_
         concurrent_requests=20,
         test_duration=30.0,
         failure_scenario=downstream_cascade"
+        failure_scenario=downstream_cascade"
     )
     
     # CRITICAL ASSERTIONS: Circuit breakers must prevent total system failure
@@ -581,8 +609,10 @@ async def test_circuit_breaker_prevents_cascade_failures(circuit_breaker_stress_
     # System should not be completely down
     assert result[successful_tasks] > result["failed_tasks] * 0.5, \
         Too many tasks failed - cascade failure not properly contained"
+        Too many tasks failed - cascade failure not properly contained"
     
-    logger.info(fCascade prevention test: {result['success_rate']:.2f} success rate, 
+    logger.info(fCascade prevention test: {result['success_rate']:.2f) success rate, 
+                f{len(open_breakers)} breakers opened)"
                 f{len(open_breakers)} breakers opened)"
 
 
@@ -590,7 +620,7 @@ async def test_circuit_breaker_prevents_cascade_failures(circuit_breaker_stress_
 @pytest.mark.critical
 @pytest.mark.timeout(180)
 async def test_circuit_breaker_recovery_coordination(circuit_breaker_stress_tester):
-    "CRITICAL: Test coordinated recovery of circuit breakers after failures.
+    "CRITICAL: Test coordinated recovery of circuit breakers after failures."
     tester = circuit_breaker_stress_tester
     
     # First, trigger cascade failure
@@ -604,9 +634,10 @@ async def test_circuit_breaker_recovery_coordination(circuit_breaker_stress_test
     open_breakers_initial = [name for name, state in initial_states.items() if state == open]
     
     assert len(open_breakers_initial) > 0, Circuit breakers should be open after cascade failure"
+    assert len(open_breakers_initial) > 0, Circuit breakers should be open after cascade failure"
     
     # Force service recovery
-    for service in cascade_result["services_failed]:
+    for service in cascade_result["services_failed]:"
         tester.failure_simulator._recover_service(service)
     
     # Execute recovery test load
@@ -630,14 +661,14 @@ async def test_circuit_breaker_recovery_coordination(circuit_breaker_stress_test
         fRecovery success rate too low: {recovery_result['success_rate']:.2f}
     
     logger.info(fRecovery test: {len(closed_breakers_final)}/{len(initial_states)} breakers recovered, 
-                f"{recovery_result['success_rate']:.2f} success rate)
+                f"{recovery_result['success_rate']:.2f} success rate)"
 
 
 @pytest.mark.asyncio
 @pytest.mark.critical
 @pytest.mark.timeout(90) 
 async def test_high_concurrency_circuit_breaker_performance(circuit_breaker_stress_tester):
-    "CRITICAL: Test circuit breaker performance under extreme concurrent load.
+    "CRITICAL: Test circuit breaker performance under extreme concurrent load."
     tester = circuit_breaker_stress_tester
     
     # Execute high concurrency stress test
@@ -650,6 +681,8 @@ async def test_high_concurrency_circuit_breaker_performance(circuit_breaker_stre
     
     # CRITICAL PERFORMANCE ASSERTIONS
     assert result[test_duration] < 60.0, \"
+    assert result[test_duration] < 60.0, \"
+        fTest took too long: {result['test_duration']:.2f}s. Performance degradation detected."
         fTest took too long: {result['test_duration']:.2f}s. Performance degradation detected."
     
     # System should maintain reasonable success rate under high load
@@ -657,26 +690,28 @@ async def test_high_concurrency_circuit_breaker_performance(circuit_breaker_stre
         fSuccess rate under high load too low: {result['success_rate']:.2f}""
     
     # At least 80% of concurrent tasks should complete (not hang)
-    completion_rate = (result[successful_tasks] + result[failed_tasks] / result[concurrent_requests]"
+    completion_rate = (result[successful_tasks) + result[failed_tasks) / result[concurrent_requests)"
+    completion_rate = (result[successful_tasks) + result[failed_tasks) / result[concurrent_requests)"
     assert completion_rate > 0.8, \
+        fToo many tasks hung: {completion_rate:.2f} completion rate"
         fToo many tasks hung: {completion_rate:.2f} completion rate"
     
     # Check individual task performance
-    sample_results = result.get(task_results, []
+    sample_results = result.get(task_results, [)
     if sample_results:
         avg_task_success_rate = statistics.mean([r.get(success_rate", 0) for r in sample_results]"
         assert avg_task_success_rate > 0.3, \
             fIndividual task success rate too low: {avg_task_success_rate:.2f}
     
-    logger.info(fHigh concurrency test: {result['concurrent_requests']} tasks, 
-                f"{result['success_rate']:.2f} success rate, {completion_rate:.2f} completion rate)
+    logger.info(fHigh concurrency test: {result['concurrent_requests']) tasks, 
+                f"{result['success_rate']:.2f} success rate, {completion_rate:.2f} completion rate)"
 
 
 @pytest.mark.asyncio
 @pytest.mark.critical
 @pytest.mark.timeout(60)
 async def test_memory_leak_prevention_circuit_breakers(circuit_breaker_stress_tester):
-    "CRITICAL: Test that circuit breakers don't cause memory leaks under stress.
+    "CRITICAL: Test that circuit breakers don't cause memory leaks under stress."
     tester = circuit_breaker_stress_tester
     
     # Run memory leak detection test
@@ -687,23 +722,25 @@ async def test_memory_leak_prevention_circuit_breakers(circuit_breaker_stress_te
         fMemory leak detected: {memory_result['memory_increase_mb']:.2f}MB increase over {memory_result['iterations']} iterations
     
     assert memory_result[memory_increase_mb] < 50, \"
+    assert memory_result[memory_increase_mb] < 50, \"
+        fMemory usage increased too much: {memory_result['memory_increase_mb']:.2f}MB"
         fMemory usage increased too much: {memory_result['memory_increase_mb']:.2f}MB"
     
     # Memory should be relatively stable across samples
-    if len(memory_result[memory_samples] > 5:
-        memory_variance = statistics.variance(memory_result[memory_samples"]"
+    if len(memory_result[memory_samples) > 5:
+        memory_variance = statistics.variance(memory_result[memory_samples")"
         assert memory_variance < 100, \
             fMemory usage too volatile: {memory_variance:.2f} variance
     
-    logger.info(fMemory leak test: {memory_result['memory_increase_mb']:.2f}MB increase over 
-                f"{memory_result['iterations']} iterations - {' PASS:  PASSED' if not memory_result['memory_leak_detected'] else ' FAIL:  FAILED'})
+    logger.info(fMemory leak test: {memory_result['memory_increase_mb']:.2f)MB increase over 
+                f"{memory_result['iterations']} iterations - {' PASS:  PASSED' if not memory_result['memory_leak_detected'] else ' FAIL:  FAILED'})"
 
 
 @pytest.mark.asyncio
 @pytest.mark.critical
 @pytest.mark.timeout(30)
 async def test_circuit_breaker_performance_overhead(circuit_breaker_stress_tester):
-    "CRITICAL: Ensure circuit breaker overhead is <5ms as required by CLAUDE.md.
+    "CRITICAL: Ensure circuit breaker overhead is <5ms as required by CLAUDE.md."
     tester = circuit_breaker_stress_tester
     
     # Run performance overhead test
@@ -714,14 +751,17 @@ async def test_circuit_breaker_performance_overhead(circuit_breaker_stress_teste
         fCircuit breaker overhead too high: {perf_result['overhead_per_request_ms']:.3f}ms (must be <5ms)
     
     assert perf_result[overhead_per_request_ms] < 5.0, \"
+    assert perf_result[overhead_per_request_ms] < 5.0, \"
+        fPerformance requirement violated: {perf_result['overhead_per_request_ms']:.3f}ms overhead per request"
         fPerformance requirement violated: {perf_result['overhead_per_request_ms']:.3f}ms overhead per request"
     
     # Overhead should be minimal compared to baseline
     overhead_ratio = perf_result[circuit_breaker_time_seconds] / perf_result[baseline_time_seconds]
     assert overhead_ratio < 1.5, \
-        f"Circuit breaker adds too much overhead: {overhead_ratio:.2f}x baseline time
+        f"Circuit breaker adds too much overhead: {overhead_ratio:.2f}x baseline time"
     
-    logger.info(fPerformance overhead test: {perf_result['overhead_per_request_ms']:.3f}ms per request "
+    logger.info(fPerformance overhead test: {perf_result['overhead_per_request_ms']:.3f)ms per request "
+    logger.info(fPerformance overhead test: {perf_result['overhead_per_request_ms']:.3f)ms per request "
                 f({overhead_ratio:.2f}x baseline) - {' PASS:  PASSED' if perf_result['overhead_acceptable'] else ' FAIL:  FAILED'})
 
 
@@ -745,8 +785,9 @@ async def test_simultaneous_service_failures_isolation(circuit_breaker_stress_te
     
     # Circuit breakers should isolate failing services
     open_or_half_open = [name for name, state in circuit_states.items() 
-                        if state in [open, "half_open]]
+                        if state in [open, "half_open]]"
     assert len(open_or_half_open) >= 2, \
+        fExpected multiple circuit breakers to activate, only {len(open_or_half_open)} did"
         fExpected multiple circuit breakers to activate, only {len(open_or_half_open)} did"
     
     # System should maintain partial functionality
@@ -756,13 +797,14 @@ async def test_simultaneous_service_failures_isolation(circuit_breaker_stress_te
     # Some requests should still succeed (healthy services working)
     assert result[successful_tasks] > 0, \
         No tasks succeeded - isolation failed, cascade failure occurred"
+        No tasks succeeded - isolation failed, cascade failure occurred"
     
     # Failure should be contained (not 100% failure)
     assert result["success_rate] < 0.9, \
         fSuccess rate too high: {result['success_rate']:.2f} - failures not properly simulated
     
-    logger.info(f"Simultaneous failures test: {len(open_or_half_open)} breakers activated, 
-                f{result['success_rate']:.2f} success rate maintained")
+    logger.info(f"Simultaneous failures test: {len(open_or_half_open)} breakers activated,"
+                f{result['success_rate']:.2f} success rate maintained")"
 
 
 @pytest.mark.asyncio
@@ -777,10 +819,11 @@ async def test_circuit_breaker_state_transitions_under_load(circuit_breaker_stre
     
     async def monitor_states():
         Monitor circuit breaker states throughout test."
+        Monitor circuit breaker states throughout test."
         for _ in range(30):  # Monitor for 30 seconds
             states = {name: cb.state.value for name, cb in tester.circuit_breakers.items()}
             state_history.append({
-                "timestamp: time.time(),
+                "timestamp: time.time(),"
                 states: states.copy()
             }
             await asyncio.sleep(1.0)
@@ -799,11 +842,12 @@ async def test_circuit_breaker_state_transitions_under_load(circuit_breaker_stre
     
     # CRITICAL STATE TRANSITION ASSERTIONS
     assert len(state_history) > 20, Insufficient state monitoring data"
+    assert len(state_history) > 20, Insufficient state monitoring data"
     
     # Analyze state transitions
     transitions_detected = {}
     for service_name in tester.circuit_breakers.keys():
-        service_states = [entry[states"].get(service_name) for entry in state_history]
+        service_states = [entry[states"].get(service_name) for entry in state_history]"
         unique_states = set(service_states)
         transitions_detected[service_name] = len(unique_states)
     
@@ -820,12 +864,13 @@ async def test_circuit_breaker_state_transitions_under_load(circuit_breaker_stre
     # Final state should show some recovery
     final_states = state_history[-1][states]
     closed_breakers_final = sum(1 for state in final_states.values() if state == closed)"
+    closed_breakers_final = sum(1 for state in final_states.values() if state == closed)"
     assert closed_breakers_final > 0, \
-        "No circuit breakers recovered to closed state
+        "No circuit breakers recovered to closed state"
     
-    logger.info(fState transitions test: {services_with_transitions} services with transitions, 
-                f"{complex_transitions} with complex transitions, 
-                f{closed_breakers_final} recovered to closed")
+    logger.info(fState transitions test: {services_with_transitions) services with transitions, 
+                f"{complex_transitions} with complex transitions,"
+                f{closed_breakers_final} recovered to closed")"
 
 
 # ============================================================================
@@ -851,6 +896,7 @@ async def test_circuit_breaker_websocket_notifications():
     
     websocket_config = UnifiedCircuitConfig(
         name=websocket_test_service,"
+        name=websocket_test_service,"
         failure_threshold=2,
         recovery_timeout=1,
         timeout_seconds=1.0
@@ -863,7 +909,7 @@ async def test_circuit_breaker_websocket_notifications():
         try:
             if i < 3:  # First 3 calls fail
                 failures += 1
-                await breaker.call(lambda: exec('raise Exception(Service failure")'))
+                await breaker.call(lambda: exec('raise Exception(Service failure")'))"
             else:  # Next calls succeed
                 await breaker.call(lambda: success)
         except:
@@ -878,7 +924,8 @@ async def test_circuit_breaker_websocket_notifications():
             await websocket_notifier.send_agent_status_changed(
                 context=AsyncMock(thread_id=test_thread),
                 agent_id=circuit_test, "
-                old_status=running",
+                agent_id=circuit_test, "
+                old_status=running","
                 new_status=circuit_open,
                 metadata={circuit_breaker": breaker.name, "state: current_state}
     
@@ -886,10 +933,11 @@ async def test_circuit_breaker_websocket_notifications():
     assert websocket_manager.send_to_thread.call_count > 0, WebSocket notifications should be sent for circuit state changes
     
     logger.info( PASS:  Circuit breaker WebSocket notifications validated)"
+    logger.info( PASS:  Circuit breaker WebSocket notifications validated)"
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_websocket_event_sequence():
-    "Test proper sequence of WebSocket events during circuit breaker lifecycle.
+    "Test proper sequence of WebSocket events during circuit breaker lifecycle."
     try:
         from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
@@ -905,7 +953,8 @@ async def test_circuit_breaker_websocket_event_sequence():
             websocket_events.append({
                 thread_id: args[0],
                 message: args[1],"
-                timestamp": asyncio.get_event_loop().time()
+                message: args[1],"
+                timestamp": asyncio.get_event_loop().time()"
             }
     
     websocket_manager.send_to_thread.side_effect = capture_websocket_event
@@ -922,25 +971,26 @@ async def test_circuit_breaker_websocket_event_sequence():
     lifecycle_events = [closed", "open, half_open, closed]
     
     for expected_state in lifecycle_events:
-        if expected_state == closed and breaker.state == "closed:
+        if expected_state == closed and breaker.state == "closed:"
             # Initial state - send notification
             await websocket_notifier.send_agent_thinking(
-                context=AsyncMock(thread_id=lifecycle_test"),
+                context=AsyncMock(thread_id=lifecycle_test"),"
                 message=fCircuit breaker in {expected_state} state
             )
+        elif expected_state == open:"
         elif expected_state == open:"
             # Trigger failures to open circuit
             for _ in range(3):
                 try:
-                    await breaker.call(lambda: exec('raise Exception("Failure)'))
+                    await breaker.call(lambda: exec('raise Exception("Failure)'))"
                 except:
                     pass
             
             await websocket_notifier.send_agent_thinking(
                 context=AsyncMock(thread_id=lifecycle_test),
-                message=f"Circuit breaker opened after failures
+                message=f"Circuit breaker opened after failures"
             )
-        elif expected_state == half_open":
+        elif expected_state == half_open":"
             # Wait for recovery timeout
             await asyncio.sleep(0.6)
             
@@ -952,20 +1002,21 @@ async def test_circuit_breaker_websocket_event_sequence():
             # Successful call to close circuit
             try:
                 await breaker.call(lambda: success)"
+                await breaker.call(lambda: success)"
             except:
                 pass
             
             await websocket_notifier.send_agent_thinking(
-                context=AsyncMock(thread_id="lifecycle_test),
+                context=AsyncMock(thread_id="lifecycle_test),"
                 message=Circuit breaker closed after successful recovery
             )
     
     # Verify event sequence
     assert len(websocket_events) >= len(lifecycle_events), \
-        f"Should have events for each lifecycle state: got {len(websocket_events)} events
+        f"Should have events for each lifecycle state: got {len(websocket_events)} events"
     
     # Events should be ordered by timestamp
-    timestamps = [event[timestamp"] for event in websocket_events]
+    timestamps = [event[timestamp"] for event in websocket_events]"
     assert timestamps == sorted(timestamps), WebSocket events should be in chronological order
     
     logger.info(f PASS:  Circuit breaker WebSocket event sequence validated: {len(websocket_events)} events")"
@@ -973,12 +1024,13 @@ async def test_circuit_breaker_websocket_event_sequence():
 @pytest.mark.asyncio
 async def test_circuit_breaker_websocket_error_notifications():
     Test WebSocket error notifications during circuit breaker failures."
+    Test WebSocket error notifications during circuit breaker failures."
     try:
         from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
-        pytest.skip(Required components not available")
+        pytest.skip(Required components not available")"
     
     websocket_manager = AsyncMock(spec=WebSocketManager)
     error_notifications = []
@@ -994,6 +1046,7 @@ async def test_circuit_breaker_websocket_error_notifications():
     
     error_config = UnifiedCircuitConfig(
         name=error_notification_service,"
+        name=error_notification_service,"
         failure_threshold=2,
         recovery_timeout=1
     )
@@ -1001,7 +1054,7 @@ async def test_circuit_breaker_websocket_error_notifications():
     
     # Simulate different types of failures with error notifications
     error_scenarios = [
-        {error_type": timeout, message: Service timeout},
+        {error_type": timeout, message: Service timeout},"
         {error_type": "connection, message: Connection failed},
         {error_type: "processing, message": Processing error},
         {error_type: resource, message": "Resource unavailable}
@@ -1014,7 +1067,8 @@ async def test_circuit_breaker_websocket_error_notifications():
             # Send error notification via WebSocket
             await websocket_notifier.send_agent_thinking(
                 context=AsyncMock(thread_id=error_test),"
-                message=f"Circuit breaker error: {scenario['error_type']} - {str(e)}
+                context=AsyncMock(thread_id=error_test),"
+                message=f"Circuit breaker error: {scenario['error_type']} - {str(e)}"
             )
     
     # Verify error notifications
@@ -1032,6 +1086,7 @@ async def test_circuit_breaker_websocket_concurrent_notifications():
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
         pytest.skip(Required components not available)"
+        pytest.skip(Required components not available)"
     
     websocket_manager = AsyncMock(spec=WebSocketManager)
     concurrent_notifications = []
@@ -1040,7 +1095,7 @@ async def test_circuit_breaker_websocket_concurrent_notifications():
     async def thread_safe_capture(*args, **kwargs):
         async with notification_lock:
             concurrent_notifications.append({
-                timestamp": asyncio.get_event_loop().time(),
+                timestamp": asyncio.get_event_loop().time(),"
                 args: args,
                 kwargs": kwargs"
             }
@@ -1066,13 +1121,13 @@ async def test_circuit_breaker_websocket_concurrent_notifications():
                 if attempt < 2:  # First 2 fail
                     await breaker.call(lambda: exec('raise Exception(Concurrent failure)'))
                 else:  # Next succeed
-                    await breaker.call(lambda: f"success_{breaker_id}_{attempt})
+                    await breaker.call(lambda: f"success_{breaker_id}_{attempt})"
             except:
                 pass
             
             # Send notification for each attempt
             await websocket_notifier.send_agent_thinking(
-                context=AsyncMock(thread_id=fconcurrent_{breaker_id}"),
+                context=AsyncMock(thread_id=fconcurrent_{breaker_id}"),"
                 message=fBreaker {breaker_id} attempt {attempt}
             )
             
@@ -1090,9 +1145,10 @@ async def test_circuit_breaker_websocket_concurrent_notifications():
     total_expected = len(breakers) * 5  # 3 breakers * 5 attempts each
     assert len(concurrent_notifications) >= total_expected, \
         fShould have notifications from all concurrent operations: got {len(concurrent_notifications)}, expected {total_expected}"
+        fShould have notifications from all concurrent operations: got {len(concurrent_notifications)}, expected {total_expected}"
     
     # Verify notifications are properly ordered by timestamp
-    timestamps = [notif["timestamp] for notif in concurrent_notifications]
+    timestamps = [notif["timestamp] for notif in concurrent_notifications]"
     sorted_timestamps = sorted(timestamps)
     
     # Allow for some minor timing variations
@@ -1102,7 +1158,7 @@ async def test_circuit_breaker_websocket_concurrent_notifications():
     assert timing_errors < len(timestamps) * 0.1, \
         fToo many timing errors in concurrent notifications: {timing_errors}/{len(timestamps)}
     
-    logger.info(f" PASS:  Circuit breaker concurrent WebSocket notifications validated: {len(concurrent_notifications)} notifications)
+    logger.info(f" PASS:  Circuit breaker concurrent WebSocket notifications validated: {len(concurrent_notifications)} notifications)"
 
 
 # ============================================================================
@@ -1111,7 +1167,7 @@ async def test_circuit_breaker_websocket_concurrent_notifications():
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_execute_core_integration():
-    "Test circuit breaker integration with _execute_core pattern.
+    "Test circuit breaker integration with _execute_core pattern."
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
@@ -1137,7 +1193,8 @@ async def test_circuit_breaker_execute_core_integration():
             async def protected_operation():
                 # Simulate operation that might fail
                 if context.run_id.endswith(_fail) and self.execution_count <= 2:"
-                    raise Exception(fExecute core failure #{self.execution_count}")
+                if context.run_id.endswith(_fail) and self.execution_count <= 2:"
+                    raise Exception(fExecute core failure #{self.execution_count}")"
                 
                 return {
                     status: success,
@@ -1151,8 +1208,8 @@ async def test_circuit_breaker_execute_core_integration():
                 return result
             except Exception as e:
                 return {
-                    status: circuit_breaker_blocked",
-                    "error: str(e),
+                    status: circuit_breaker_blocked","
+                    "error: str(e),"
                     circuit_state: self.circuit_breaker.state,
                     "execution_count: self.execution_count"
                 }
@@ -1162,12 +1219,13 @@ async def test_circuit_breaker_execute_core_integration():
     # Test successful execution
     success_context = ExecutionContext(
         run_id=execute_core_success,"
+        run_id=execute_core_success,"
         agent_name=agent.name,
         state=DeepAgentState()
     )
     
     result = await agent.execute_core_logic(success_context)
-    assert result[status"] == success
+    assert result[status"] == success"
     assert result[circuit_state] == closed
     
     # Test failure scenarios that trigger circuit breaker
@@ -1184,6 +1242,7 @@ async def test_circuit_breaker_execute_core_integration():
         ),
         ExecutionContext(
             run_id=execute_core_fail_3,"
+            run_id=execute_core_fail_3,"
             agent_name=agent.name,
             state=DeepAgentState()
         )
@@ -1196,17 +1255,18 @@ async def test_circuit_breaker_execute_core_integration():
     
     # Verify circuit breaker behavior
     # First two failures should execute but fail
-    assert results[0]["status] == circuit_breaker_blocked
+    assert results[0]["status] == circuit_breaker_blocked"
     assert results[1][status] == circuit_breaker_blocked
     
     # Third should be blocked by open circuit
     assert "circuit in results[2][status"] or results[2][circuit_state] == open
     
     logger.info( PASS:  Circuit breaker execute_core integration validated)"
+    logger.info( PASS:  Circuit breaker execute_core integration validated)"
 
 @pytest.mark.asyncio
 async def test_execute_core_circuit_breaker_recovery_patterns():
-    "Test _execute_core pattern with circuit breaker recovery scenarios.
+    "Test _execute_core pattern with circuit breaker recovery scenarios."
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
@@ -1232,8 +1292,9 @@ async def test_execute_core_circuit_breaker_recovery_patterns():
             async def recovery_operation():
                 # Simulate recovery pattern
                 if context.run_id == recovery_transient_failures:"
+                if context.run_id == recovery_transient_failures:"
                     if self.attempt_count <= 3:  # First 3 attempts fail
-                        raise Exception(fTransient failure #{self.attempt_count}")
+                        raise Exception(fTransient failure #{self.attempt_count}")"
                     else:  # Then succeed
                         return {status: recovered, "attempts: self.attempt_count}"
                 elif context.run_id == recovery_immediate_success:
@@ -1250,7 +1311,8 @@ async def test_execute_core_circuit_breaker_recovery_patterns():
                 return {
                     status: failed,
                     error: str(e),"
-                    "circuit_state: self.circuit_breaker.state,
+                    error: str(e),"
+                    "circuit_state: self.circuit_breaker.state,"
                     attempts: self.attempt_count
                 }
     
@@ -1270,11 +1332,11 @@ async def test_execute_core_circuit_breaker_recovery_patterns():
         recovery_results.append(result)
         
         # Wait for recovery timeout if circuit is open
-        if result.get(circuit_state) == open":
+        if result.get(circuit_state) == open":"
             await asyncio.sleep(0.6)  # Longer than recovery timeout
     
     # Should eventually recover
-    successful_recoveries = [r for r in recovery_results if r["status] == recovered]
+    successful_recoveries = [r for r in recovery_results if r["status] == recovered]"
     assert len(successful_recoveries) > 0, Should have successful recoveries after transient failures
     
     # Test immediate success recovery
@@ -1286,8 +1348,8 @@ async def test_execute_core_circuit_breaker_recovery_patterns():
     )
     
     success_result = await success_agent.execute_core_logic(success_context)
-    assert success_result[status] == "immediate_success
-    assert success_result[circuit_state"] == closed
+    assert success_result[status] == "immediate_success"
+    assert success_result[circuit_state"] == closed"
     
     logger.info( PASS:  Execute core circuit breaker recovery patterns validated)
 
@@ -1301,6 +1363,7 @@ async def test_execute_core_circuit_breaker_timing():
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
         pytest.skip(Required components not available)"
+        pytest.skip(Required components not available)"
     
     import time
     
@@ -1308,7 +1371,7 @@ async def test_execute_core_circuit_breaker_timing():
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
             timing_config = UnifiedCircuitConfig(
-                name="timing_service,
+                name="timing_service,"
                 failure_threshold=2,
                 recovery_timeout=1
             )
@@ -1321,13 +1384,14 @@ async def test_execute_core_circuit_breaker_timing():
                 if context.run_id.endswith(_slow):
                     await asyncio.sleep(0.5)  # Slow operation
                 elif context.run_id.endswith("_fast):"
-                    await asyncio.sleep(0.05)  # Fast operation  
+                    await asyncio.sleep(0.5)  # Fast operation  
                 elif context.run_id.endswith(_fail):
+                    raise Exception(Timing failure)"
                     raise Exception(Timing failure)"
                 else:
                     await asyncio.sleep(0.1)  # Normal operation
                 
-                return {operation": completed}
+                return {operation": completed}"
             
             try:
                 result = await self.circuit_breaker.call(timed_operation)
@@ -1344,8 +1408,8 @@ async def test_execute_core_circuit_breaker_timing():
             except Exception as e:
                 end_time = time.time()
                 return {
-                    status: failed",
-                    "error: str(e),
+                    status: failed","
+                    "error: str(e),"
                     timing: {
                         "execution_time: end_time - start_time,"
                         circuit_state: self.circuit_breaker.state
@@ -1353,10 +1417,11 @@ async def test_execute_core_circuit_breaker_timing():
                 }
     
     timing_agent = TimingAgent(name=TimingTestAgent)"
+    timing_agent = TimingAgent(name=TimingTestAgent)"
     
     # Test different timing scenarios
     timing_tests = [
-        {run_id": timing_fast, expected_max_time: 0.2},
+        {run_id": timing_fast, expected_max_time: 0.2},"
         {"run_id: timing_normal", expected_max_time: 0.3},
         {run_id: "timing_slow, expected_max_time": 0.8},
     ]
@@ -1376,10 +1441,11 @@ async def test_execute_core_circuit_breaker_timing():
         
         assert result[timing"]["circuit_state] == closed, \
             Circuit should remain closed for successful operations"
+            Circuit should remain closed for successful operations"
     
     # Test failure timing
     fail_context = ExecutionContext(
-        run_id=timing_fail",
+        run_id=timing_fail","
         agent_name=timing_agent.name,
         state=DeepAgentState()
     )
@@ -1388,9 +1454,9 @@ async def test_execute_core_circuit_breaker_timing():
     fail_time = fail_result[timing][execution_time]
     
     # Failure should be fast (not waiting for timeout)
-    assert fail_time < 0.1, f"Failure handling should be fast: {fail_time:.3f}s
+    assert fail_time < 0.1, f"Failure handling should be fast: {fail_time:.3f}s"
     
-    logger.info( PASS:  Execute core circuit breaker timing validated")
+    logger.info( PASS:  Execute core circuit breaker timing validated")"
 
 @pytest.mark.asyncio
 async def test_execute_core_circuit_breaker_resource_management():
@@ -1408,6 +1474,7 @@ async def test_execute_core_circuit_breaker_resource_management():
             super().__init__(**kwargs)
             resource_config = UnifiedCircuitConfig(
                 name=resource_service,"
+                name=resource_service,"
                 failure_threshold=2,
                 recovery_timeout=1
             )
@@ -1421,7 +1488,7 @@ async def test_execute_core_circuit_breaker_resource_management():
                 await self._allocate_resources(5)
                 
                 try:
-                    if context.run_id.endswith(_resource_fail"):
+                    if context.run_id.endswith(_resource_fail"):"
                         raise Exception(Resource operation failed)
                     
                     # Simulate resource-intensive work
@@ -1431,7 +1498,8 @@ async def test_execute_core_circuit_breaker_resource_management():
                         status": "success,
                         resources: {
                             allocated: self.resources_allocated,"
-                            freed": self.resources_freed
+                            allocated: self.resources_allocated,"
+                            freed": self.resources_freed"
                         }
                     }
                     
@@ -1449,7 +1517,8 @@ async def test_execute_core_circuit_breaker_resource_management():
                     status": "circuit_blocked,
                     error: str(e),
                     circuit_state: self.circuit_breaker.state,"
-                    resources": {
+                    circuit_state: self.circuit_breaker.state,"
+                    resources": {"
                         allocated: self.resources_allocated,
                         freed": self.resources_freed"
                     }
@@ -1457,23 +1526,24 @@ async def test_execute_core_circuit_breaker_resource_management():
         
         async def _allocate_resources(self, amount):
             self.resources_allocated += amount
-            await asyncio.sleep(0.01)  # Simulate allocation time
+            await asyncio.sleep(0.1)  # Simulate allocation time
         
         async def _free_resources(self, amount):
             self.resources_freed += amount
-            await asyncio.sleep(0.01)  # Simulate cleanup time
+            await asyncio.sleep(0.1)  # Simulate cleanup time
     
     resource_agent = ResourceAgent(name=ResourceTestAgent)
     
     # Test successful resource management
     success_context = ExecutionContext(
         run_id=resource_success,"
+        run_id=resource_success,"
         agent_name=resource_agent.name,
         state=DeepAgentState()
     )
     
     success_result = await resource_agent.execute_core_logic(success_context)
-    assert success_result["status] == success
+    assert success_result["status] == success"
     assert success_result[resources][allocated] == success_result["resources][freed"], \
         Resources should be properly freed after successful execution
     
@@ -1482,6 +1552,7 @@ async def test_execute_core_circuit_breaker_resource_management():
     initial_freed = resource_agent.resources_freed
     
     fail_context = ExecutionContext(
+        run_id=resource_resource_fail,"
         run_id=resource_resource_fail,"
         agent_name=resource_agent.name,
         state=DeepAgentState()
@@ -1497,7 +1568,7 @@ async def test_execute_core_circuit_breaker_resource_management():
     free_delta = final_freed - initial_freed
     
     assert allocation_delta == free_delta, \
-        f"Resource leak detected: allocated {allocation_delta}, freed {free_delta}
+        f"Resource leak detected: allocated {allocation_delta}, freed {free_delta}"
     
     logger.info( PASS:  Execute core circuit breaker resource management validated)
 
@@ -1535,12 +1606,13 @@ async def test_execute_core_circuit_breaker_state_consistency():
                 if context.run_id.endswith(_state_fail):
                     # Failure should maintain state consistency
                     raise Exception(State consistency failure)"
+                    raise Exception(State consistency failure)"
                 
                 # Complete successfully
                 self.set_state(SubAgentLifecycle.COMPLETED)
                 
                 return {
-                    status": success,
+                    status": success,"
                     state_transitions: running -> completed
                 }
             
@@ -1555,7 +1627,8 @@ async def test_execute_core_circuit_breaker_state_consistency():
                     state_consistency": {"
                         agent_state: {
                             initial: initial_agent_state,"
-                            "final: final_agent_state
+                            initial: initial_agent_state,"
+                            "final: final_agent_state"
                         },
                         circuit_state: {
                             "initial: initial_circuit_state,"
@@ -1575,13 +1648,14 @@ async def test_execute_core_circuit_breaker_state_consistency():
                 self.set_state(SubAgentLifecycle.FAILED)
                 
                 return {
-                    status: failed",
-                    "error: str(e),
+                    status: failed","
+                    "error: str(e),"
                     state_consistency: {
                         "agent_state: {"
                             initial: initial_agent_state,
                             error: error_agent_state,"
-                            final": self.get_state()
+                            error: error_agent_state,"
+                            final": self.get_state()"
                         },
                         circuit_state: {
                             initial": initial_circuit_state,"
@@ -1591,10 +1665,11 @@ async def test_execute_core_circuit_breaker_state_consistency():
                 }
     
     consistency_agent = StateConsistencyAgent(name=StateConsistencyAgent)"
+    consistency_agent = StateConsistencyAgent(name=StateConsistencyAgent)"
     
     # Test successful state consistency
     success_context = ExecutionContext(
-        run_id="state_success,
+        run_id="state_success,"
         agent_name=consistency_agent.name,
         state=DeepAgentState()
     )
@@ -1607,8 +1682,8 @@ async def test_execute_core_circuit_breaker_state_consistency():
     assert agent_states[final] == SubAgentLifecycle.COMPLETED
     
     # Circuit should remain closed for successful operations
-    circuit_states = success_result[state_consistency][circuit_state"]
-    assert circuit_states["final] == closed
+    circuit_states = success_result[state_consistency][circuit_state"]"
+    assert circuit_states["final] == closed"
     
     # Test failure state consistency
     fail_context = ExecutionContext(
@@ -1623,8 +1698,9 @@ async def test_execute_core_circuit_breaker_state_consistency():
     # Verify failure state handling
     fail_agent_states = fail_result[state_consistency][agent_state]
     assert fail_agent_states[final] == SubAgentLifecycle.FAILED"
+    assert fail_agent_states[final] == SubAgentLifecycle.FAILED"
     
-    logger.info(" PASS:  Execute core circuit breaker state consistency validated)
+    logger.info(" PASS:  Execute core circuit breaker state consistency validated)"
 
 @pytest.mark.asyncio
 async def test_execute_core_circuit_breaker_concurrent_safety():
@@ -1641,6 +1717,7 @@ async def test_execute_core_circuit_breaker_concurrent_safety():
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
             concurrent_config = UnifiedCircuitConfig(
+                name=concurrent_service,"
                 name=concurrent_service,"
                 failure_threshold=3,  # Higher threshold for concurrent testing
                 recovery_timeout=1
@@ -1663,12 +1740,12 @@ async def test_execute_core_circuit_breaker_concurrent_safety():
                     # Simulate concurrent work
                     await asyncio.sleep(0.1)
                     
-                    if context.run_id.endswith(f"_fail_{execution_id}) and execution_id <= 2:
+                    if context.run_id.endswith(f"_fail_{execution_id}) and execution_id <= 2:"
                         raise Exception(fConcurrent failure #{execution_id})
                     
                     return {
-                        status: success",
-                        "execution_id: execution_id
+                        status: success","
+                        "execution_id: execution_id"
                     }
                 finally:
                     async with self.lock:
@@ -1681,8 +1758,9 @@ async def test_execute_core_circuit_breaker_concurrent_safety():
                         "execution_id: execution_id,"
                         current_concurrent: self.concurrent_count,
                         max_concurrent: self.max_concurrent"
+                        max_concurrent: self.max_concurrent"
                     },
-                    circuit_state": self.circuit_breaker.state
+                    circuit_state": self.circuit_breaker.state"
                 }
                 return result
                 
@@ -1692,7 +1770,8 @@ async def test_execute_core_circuit_breaker_concurrent_safety():
                     "execution_id: execution_id,"
                     error: str(e),
                     concurrency_stats: {"
-                        execution_id": execution_id,
+                    concurrency_stats: {"
+                        execution_id": execution_id,"
                         current_concurrent: self.concurrent_count,
                         max_concurrent": self.max_concurrent"
                     },
@@ -1700,12 +1779,13 @@ async def test_execute_core_circuit_breaker_concurrent_safety():
                 }
     
     concurrent_agent = ConcurrentAgent(name=ConcurrentTestAgent)"
+    concurrent_agent = ConcurrentAgent(name=ConcurrentTestAgent)"
     
     # Test concurrent executions
     concurrent_contexts = []
     for i in range(10):
         context = ExecutionContext(
-            run_id=f"concurrent_test_{i},
+            run_id=f"concurrent_test_{i},"
             agent_name=concurrent_agent.name,
             state=DeepAgentState()
         )
@@ -1721,10 +1801,11 @@ async def test_execute_core_circuit_breaker_concurrent_safety():
     
     # Analyze concurrent execution results
     successful_executions = [r for r in results if not isinstance(r, Exception) and r.get(status) == success]
-    failed_executions = [r for r in results if not isinstance(r, Exception) and r.get(status) == "failed]
+    failed_executions = [r for r in results if not isinstance(r, Exception) and r.get(status) == "failed]"
     exceptions = [r for r in results if isinstance(r, Exception)]
     
     # Should have some successful executions
+    assert len(successful_executions) > 0, Should have successful concurrent executions"
     assert len(successful_executions) > 0, Should have successful concurrent executions"
     
     # Verify concurrency tracking
@@ -1736,14 +1817,17 @@ async def test_execute_core_circuit_breaker_concurrent_safety():
     # Circuit breaker should handle concurrent failures appropriately
     total_handled = len(successful_executions) + len(failed_executions)
     assert total_handled > len(exceptions), Circuit breaker should handle most operations"
+    assert total_handled > len(exceptions), Circuit breaker should handle most operations"
     
     logger.info(f PASS:  Execute core circuit breaker concurrent safety validated: "
+    logger.info(f PASS:  Execute core circuit breaker concurrent safety validated: "
                 f{len(successful_executions)} successful, {len(failed_executions)} failed, 
+                f{len(exceptions)} exceptions)"
                 f{len(exceptions)} exceptions)"
 
 @pytest.mark.asyncio
 async def test_execute_core_circuit_breaker_error_propagation():
-    "Test _execute_core pattern error propagation through circuit breaker.
+    "Test _execute_core pattern error propagation through circuit breaker."
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
@@ -1767,8 +1851,9 @@ async def test_execute_core_circuit_breaker_error_propagation():
         async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
             async def error_prone_operation():
                 operation_type = context.run_id.split(_)[-1]"
+                operation_type = context.run_id.split(_)[-1]"
                 
-                if operation_type == "timeout:
+                if operation_type == "timeout:"
                     # Simulate timeout error
                     await asyncio.sleep(2.0)  # Long operation
                     raise TimeoutError(Operation timed out)
@@ -1776,13 +1861,15 @@ async def test_execute_core_circuit_breaker_error_propagation():
                     # Simulate validation error
                     raise ValueError(Invalid input data)
                 elif operation_type == resource:"
+                elif operation_type == resource:"
                     # Simulate resource error
-                    raise RuntimeError(Resource unavailable")
+                    raise RuntimeError(Resource unavailable")"
                 elif operation_type == network:
                     # Simulate network error
                     raise ConnectionError(Network connection failed")"
                 else:
                     # Success case
+                    return {status: success, operation_type: operation_type}"
                     return {status: success, operation_type: operation_type}"
             
             try:
@@ -1790,7 +1877,7 @@ async def test_execute_core_circuit_breaker_error_propagation():
                 
                 # Log successful operation
                 error_propagation_log.append({
-                    type": success,
+                    type": success,"
                     context_id: context.run_id,
                     "circuit_state: self.circuit_breaker.state"
                 }
@@ -1801,8 +1888,8 @@ async def test_execute_core_circuit_breaker_error_propagation():
             except Exception as e:
                 # Log error details with circuit state
                 error_info = {
-                    type: error",
-                    "context_id: context.run_id,
+                    type: error","
+                    "context_id: context.run_id,"
                     error_type: type(e).__name__,
                     "error_message: str(e),"
                     circuit_state: self.circuit_breaker.state
@@ -1810,21 +1897,23 @@ async def test_execute_core_circuit_breaker_error_propagation():
                 error_propagation_log.append(error_info)
                 
                 return {
-                    status: error_propagated",
-                    "error_type: type(e).__name__,
+                    status: error_propagated","
+                    "error_type: type(e).__name__,"
                     error_message: str(e),
                     "circuit_state: self.circuit_breaker.state,"
                     propagation_info: error_info
                 }
     
     propagation_agent = ErrorPropagationAgent(name=ErrorPropagationAgent)"
+    propagation_agent = ErrorPropagationAgent(name=ErrorPropagationAgent)"
     
     # Test different error types
     error_scenarios = [
-        error_propagation_timeout",
+        error_propagation_timeout","
         error_propagation_validation, 
         error_propagation_resource","
         error_propagation_network,
+        error_propagation_success"
         error_propagation_success"
     ]
     
@@ -1840,11 +1929,12 @@ async def test_execute_core_circuit_breaker_error_propagation():
         results.append(result)
     
     # Analyze error propagation
-    error_results = [r for r in results if r["status] == error_propagated]
+    error_results = [r for r in results if r["status] == error_propagated]"
     success_results = [r for r in results if r[status] == success]
     
     # Should have proper error propagation
-    assert len(error_results) == 4, f"Should have 4 error propagations, got {len(error_results)}
+    assert len(error_results) == 4, f"Should have 4 error propagations, got {len(error_results)}"
+    assert len(success_results) == 1, fShould have 1 success, got {len(success_results)}"
     assert len(success_results) == 1, fShould have 1 success, got {len(success_results)}"
     
     # Verify error types are preserved
@@ -1853,9 +1943,10 @@ async def test_execute_core_circuit_breaker_error_propagation():
     
     for expected_type in expected_types:
         assert expected_type in error_types, fMissing error type: {expected_type}"
+        assert expected_type in error_types, fMissing error type: {expected_type}"
     
     # Verify error propagation log
-    logged_errors = [entry for entry in error_propagation_log if entry["type] == error]
+    logged_errors = [entry for entry in error_propagation_log if entry["type] == error]"
     assert len(logged_errors) == 4, Should log all error propagations
     
     # Circuit breaker should track state changes
@@ -1864,10 +1955,12 @@ async def test_execute_core_circuit_breaker_error_propagation():
     assert closed in unique_states, Should start with closed state
     
     # After multiple failures, circuit should open
-    if len([s for s in circuit_states if s == open] > 0:"
-        logger.info(Circuit breaker opened after repeated failures")
+    if len([s for s in circuit_states if s == open) > 0:"
+    if len([s for s in circuit_states if s == open) > 0:"
+        logger.info(Circuit breaker opened after repeated failures")"
     
     logger.info(f PASS:  Execute core circuit breaker error propagation validated: 
+                f{len(error_results)} errors propagated, {len(success_results)} successes)"
                 f{len(error_results)} errors propagated, {len(success_results)} successes)"
 
 
@@ -1876,3 +1969,6 @@ if __name__ == "__main__":
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+)))))))))))))))))))
+}}

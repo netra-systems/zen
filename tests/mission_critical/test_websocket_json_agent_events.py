@@ -1,5 +1,5 @@
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.
+    "Real WebSocket connection for testing instead of mocks."
 
     def __init__(self):
         pass
@@ -11,9 +11,10 @@ class TestWebSocketConnection:
         ""Send JSON message.
         if self._closed:
         raise RuntimeError(WebSocket is closed)"
+        raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = Normal closure"):
+    async def close(self, code: int = 1000, reason: str = Normal closure"):"
         Close WebSocket connection.""
         pass
         self._closed = True
@@ -21,9 +22,11 @@ class TestWebSocketConnection:
 
     async def get_messages(self) -> list:
         Get all sent messages."
+        Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
+        '''
         '''
         MISSION CRITICAL: WebSocket JSON Agent Events Test Suite
 
@@ -48,6 +51,7 @@ class TestWebSocketConnection:
         - Business Goal: System Stability (prevents chat UI from appearing broken)
         - Value Impact: Ensures 90% of value delivery channel remains functional
         - Strategic Impact: WebSocket events are the primary user feedback mechanism
+        '''
         '''
 
         import asyncio
@@ -88,7 +92,7 @@ AgentCompleted, StreamChunk, StreamComplete
 
 
 class TestWebSocketJSONAgentEvents:
-    "Test WebSocket JSON serialization for all critical agent events using factory patterns.
+    "Test WebSocket JSON serialization for all critical agent events using factory patterns."
     pass
 
     @pytest.fixture
@@ -102,14 +106,15 @@ class MockWebSocketConnection:
         self.sent_events = []
         self.is_connected = True
 
-    async def send_json(self, data: Dict[str, Any] -> None:
+    async def send_json(self, data: Dict[str, Any) -> None:
         if not self.is_connected:
+        raise ConnectionError(WebSocket disconnected)"
         raise ConnectionError(WebSocket disconnected)"
         self.sent_events.append(data)
 
     async def send_text(self, data: str) -> None:
         if not self.is_connected:
-        raise ConnectionError(WebSocket disconnected")
+        raise ConnectionError(WebSocket disconnected")"
 
     async def ping(self) -> None:
         if not self.is_connected:
@@ -158,7 +163,8 @@ class MockConnectionPool:
         return {
         'user_id': formatted_string,
         'thread_id': formatted_string,"
-        'connection_id': formatted_string",
+        'thread_id': formatted_string,"
+        'connection_id': formatted_string","
         'run_id': formatted_string
     
 
@@ -168,7 +174,8 @@ class MockConnectionPool:
         pass
         optimizations = OptimizationsResult( )
         optimization_type=cost_optimization,"
-        recommendations=[Reduce instance sizes", Use spot instances],
+        optimization_type=cost_optimization,"
+        recommendations=[Reduce instance sizes", Use spot instances],"
         cost_savings=1250.75,
         performance_improvement=15.5,
         confidence_score=0.92
@@ -181,16 +188,18 @@ class MockConnectionPool:
         actions=[
         {id: 1, "action: Analyze current usage", priority: high},
         {"id: 2, action": Implement changes, priority: medium}"
+        {"id: 2, action": Implement changes, priority: medium}"
         ],
         execution_timeline=[
-        {week": 1, tasks: [Analysis, Planning]},
+        {week": 1, tasks: [Analysis, Planning]},"
         {week": 2, "tasks: [Implementation, Testing]}
     
     
 
         return DeepAgentState( )
         user_request=Optimize our cloud infrastructure costs,"
-        chat_thread_id="thread-67890,
+        user_request=Optimize our cloud infrastructure costs,"
+        chat_thread_id="thread-67890,"
         user_id=user-test,
         run_id="run-12345,"
         optimizations_result=optimizations,
@@ -206,6 +215,7 @@ class MockConnectionPool:
 @pytest.mark.asyncio
     async def test_factory_agent_started_json_serialization(self, websocket_factory, mock_connection_pool, test_user_context):
     Test agent_started event JSON serialization using factory pattern."
+    Test agent_started event JSON serialization using factory pattern."
         # Create emitter
 emitter = await websocket_factory.create_user_emitter( )
 user_id=test_user_context['user_id'],
@@ -214,7 +224,7 @@ connection_id=test_user_context['connection_id']
         
 
         # Send agent started notification
-await emitter.notify_agent_started("TestAgent, test_user_context['run_id']
+await emitter.notify_agent_started("TestAgent, test_user_context['run_id')"
 await asyncio.sleep(0.1)  # Allow processing
 
         # Get sent events
@@ -270,8 +280,8 @@ json_str = json.dumps(event)
 deserialized = json.loads(json_str)
 
 assert deserialized[event_type] == agent_thinking
-assert deserialized[data]["thinking] == thinking_text
-assert deserialized[data"][run_id] == test_user_context['run_id']
+assert deserialized[data]["thinking] == thinking_text"
+assert deserialized[data"][run_id] == test_user_context['run_id']"
 
 await emitter.cleanup()
 
@@ -322,12 +332,14 @@ connection_id=test_user_context['connection_id']
                     
 
 tool_name = cost_analyzer_tool"
+tool_name = cost_analyzer_tool"
 tool_result = {
-analysis": Found 3 optimization opportunities,
+analysis": Found 3 optimization opportunities,"
 cost_savings: 1250.75,
 "recommendations: [Use spot instances", Reduce storage]
                     
 
+await emitter.notify_tool_completed(TestAgent, test_user_context['run_id'], tool_name, tool_result)"
 await emitter.notify_tool_completed(TestAgent, test_user_context['run_id'], tool_name, tool_result)"
 await asyncio.sleep(0.1)
 
@@ -345,10 +357,10 @@ event = sent_events[0]
 json_str = json.dumps(event)
 deserialized = json.loads(json_str)
 
-assert deserialized["event_type] == tool_completed
+assert deserialized["event_type] == tool_completed"
 assert deserialized[data][tool_name] == tool_name
 assert deserialized["data][tool_output"][cost_savings] == 1250.75
-assert len(deserialized[data]["tool_output][recommendations"] == 2
+assert len(deserialized[data)["tool_output)[recommendations") == 2
 
 await emitter.cleanup()
 
@@ -363,8 +375,8 @@ connection_id=test_user_context['connection_id']
 
 completion_result = {
 status: success,
-summary: "Cost optimization analysis complete,
-total_savings": 1250.75,
+summary: "Cost optimization analysis complete,"
+total_savings": 1250.75,"
 recommendations_count: 5
                         
 
@@ -414,7 +426,7 @@ sent_events = mock_conn.sent_events
 
 assert len(sent_events) > 0
 
-                            # Verify it's JSON serializable
+                            # Verify it's JSON serializable'
 event = sent_events[0]
 json_str = json.dumps(event)
 deserialized = json.loads(json_str)
@@ -422,8 +434,8 @@ deserialized = json.loads(json_str)
                             # Verify complex nested objects are serialized
 result_data = deserialized[data"]["result]
 assert result_data[user_request] == Optimize our cloud infrastructure costs
-assert result_data[run_id] == "run-12345
-assert result_data[step_count"] == 5
+assert result_data[run_id] == "run-12345"
+assert result_data[step_count"] == 5"
 
 await emitter.cleanup()
 
@@ -460,6 +472,7 @@ await asyncio.sleep(0.1)
 
                                     # Verify it was sent and is JSON serializable
 assert len(mock_conn.sent_events) > 0, formatted_string"
+assert len(mock_conn.sent_events) > 0, formatted_string"
 
 event = mock_conn.sent_events[0]
 
@@ -467,15 +480,16 @@ event = mock_conn.sent_events[0]
 try:
     json_str = json.dumps(event)
 deserialized = json.loads(json_str)
-assert deserialized[event_type"] == event_name
+assert deserialized[event_type"] == event_name"
 except (TypeError, ValueError) as e:
+    pytest.fail("
     pytest.fail("
 
 await emitter.cleanup()
 
 @pytest.mark.asyncio
     async def test_factory_special_characters_handling(self, websocket_factory, mock_connection_pool, test_user_context):
-    "Test factory WebSocket handling of special characters and unicode.
+    "Test factory WebSocket handling of special characters and unicode."
 pass
 emitter = await websocket_factory.create_user_emitter( )
 user_id=test_user_context['user_id'],
@@ -484,7 +498,7 @@ connection_id=test_user_context['connection_id']
                                                 
 
                                                 # Message with various special characters and unicode
-special_thinking = "Hello [U+1F31F] Special chars: [U+00E1][U+00E9][U+00ED][U+00F3][U+00FA] [U+00F1] [U+00E7][U+00C7] [U+4E2D][U+6587] pucck[U+0438][U+0439] [U+0627][U+0644][U+0639][U+0631][U+0628][U+064A][U+0629]"
+special_thinking = "Hello [U+1F31F] Special chars: [U+00E1][U+00E9][U+00ED][U+00F3][U+00FA] [U+00F1] [U+00E7][U+00C7] [U+4E2D][U+6587] pucck[U+438][U+439] [U+627][U+644][U+639][U+631][U+628][U+064A][U+629]"
 
 await emitter.notify_agent_thinking(TestAgent, test_user_context['run_id'], special_thinking)
 await asyncio.sleep(0.1)
@@ -511,13 +525,14 @@ await emitter.cleanup()
 @pytest.mark.asyncio
     async def test_factory_concurrent_serialization(self, websocket_factory, mock_connection_pool):
     Test concurrent serialization doesn't cause issues with factory pattern."
+    Test concurrent serialization doesn't cause issues with factory pattern."
                                                     # Create multiple emitters for different users
 user_contexts = []
 emitters = []
 
 for i in range(5):
     user_context = {
-'user_id': formatted_string",
+'user_id': formatted_string","
 'thread_id': formatted_string,
 'connection_id': formatted_string","
 'run_id': formatted_string
@@ -534,7 +549,8 @@ emitters.append(emitter)
                                                         Send events concurrently from all emitters
 tasks = []
 for i, emitter in enumerate(emitters):
-    task = emitter.notify_agent_started(formatted_string, user_contexts[i]['run_id']"
+    task = emitter.notify_agent_started(formatted_string, user_contexts[i)['run_id')"
+    task = emitter.notify_agent_started(formatted_string, user_contexts[i)['run_id')"
 tasks.append(task)
 
 await asyncio.gather(*tasks)
@@ -548,7 +564,7 @@ user_context['connection_id']
                                                                 
 sent_events = mock_conn.sent_events
 
-assert len(sent_events) > 0, "formatted_string
+assert len(sent_events) > 0, "formatted_string"
 
 event = sent_events[0]
 json_str = json.dumps(event)
@@ -571,11 +587,13 @@ connection_id=test_user_context['connection_id']
                                                                     
 
                                                                     # Send sequence of messages that must maintain order
-await emitter.notify_agent_started(TestAgent, test_user_context['run_id']
+await emitter.notify_agent_started(TestAgent, test_user_context['run_id')
 await emitter.notify_agent_thinking("TestAgent, test_user_context['run_id'], step 1")
-await emitter.notify_tool_executing(TestAgent, test_user_context['run_id'], analyzer, {step: 2}"
-await emitter.notify_tool_completed(TestAgent", test_user_context['run_id'], analyzer, {result: done, step": 3}"
-await emitter.notify_agent_completed(TestAgent, test_user_context['run_id'], {status: success, step": 4}
+await emitter.notify_tool_executing(TestAgent, test_user_context['run_id'], analyzer, {step: 2)"
+await emitter.notify_tool_executing(TestAgent, test_user_context['run_id'], analyzer, {step: 2)"
+await emitter.notify_tool_completed(TestAgent", test_user_context['run_id'], analyzer, {result: done, step": 3)"
+await emitter.notify_tool_completed(TestAgent", test_user_context['run_id'], analyzer, {result: done, step": 3)"
+await emitter.notify_agent_completed(TestAgent, test_user_context['run_id'], {status: success, step": 4)"
 
 await asyncio.sleep(0.2)  # Allow all events to process
 
@@ -585,7 +603,7 @@ test_user_context['connection_id']
                                                                     
 sent_events = mock_conn.sent_events
 
-assert len(sent_events) == 5, "formatted_string
+assert len(sent_events) == 5, "formatted_string"
 
                                                                     # Verify order is preserved and all are JSON serializable
 expected_types = [agent_started, agent_thinking, tool_executing", "tool_completed, agent_completed]
@@ -594,12 +612,13 @@ for i, event in enumerate(sent_events):
     json_str = json.dumps(event)
 deserialized = json.loads(json_str)
 assert deserialized[event_type] == expected_types[i]"
+assert deserialized[event_type] == expected_types[i]"
 
 await emitter.cleanup()
 
 @pytest.mark.asyncio
     async def test_factory_large_message_handling(self, websocket_factory, mock_connection_pool, test_user_context):
-    "Test factory handling of large messages.
+    "Test factory handling of large messages."
 emitter = await websocket_factory.create_user_emitter( )
 user_id=test_user_context['user_id'],
 thread_id=test_user_context['thread_id'],
@@ -611,7 +630,8 @@ large_result = {
 "analysis: x" * 10000,  # 10KB of data
 detailed_recommendations: [rec_ + y * 1000 for _ in range(50)],  # 50KB more
 metadata: {"
-"size: large,
+metadata: {"
+"size: large,"
 processing_time: 5000.0,
 confidence": 0.95"
                                                                             
@@ -635,13 +655,14 @@ assert len(json_str) > 50000  # Should be large
 
                                                                             # Verify content is preserved
 deserialized = json.loads(json_str)
-assert len(deserialized[data][tool_output"]["analysis] == 10000
-assert len(deserialized[data][tool_output][detailed_recommendations"] == 50"
+assert len(deserialized[data)[tool_output")["analysis) == 10000
+assert len(deserialized[data)[tool_output)[detailed_recommendations") == 50"
 
 await emitter.cleanup()
 
 @pytest.mark.asyncio
     async def test_factory_error_handling_json_serialization(self, websocket_factory, mock_connection_pool, test_user_context):
+    Test that error scenarios still produce valid JSON through factory pattern."
     Test that error scenarios still produce valid JSON through factory pattern."
 pass
 emitter = await websocket_factory.create_user_emitter( )
@@ -651,6 +672,7 @@ connection_id=test_user_context['connection_id']
                                                                                 
 
                                                                                 # Send error notification
+error_details = TimeoutError: Tool execution exceeded 30 seconds"
 error_details = TimeoutError: Tool execution exceeded 30 seconds"
 
 await emitter.notify_agent_error(TestAgent, test_user_context['run_id'], error_details)
@@ -671,17 +693,19 @@ deserialized = json.loads(json_str)
 
 assert deserialized[event_type"] == "agent_error
 assert TimeoutError in deserialized[data][error]"
+assert TimeoutError in deserialized[data][error]"
 
 await emitter.cleanup()
 
 def test_websocket_event_structure_validation(self):
-    "Test WebSocketEvent structure validation.
+    "Test WebSocketEvent structure validation."
     # Test valid event creation
 event = WebSocketEvent( )
 event_type=agent_started","
 user_id=test_user,
 thread_id=test_thread,"
-data={"agent_name: TestAgent, run_id: run_123}
+thread_id=test_thread,"
+data={"agent_name: TestAgent, run_id: run_123}"
     
 
     # Verify all required fields exist
@@ -707,4 +731,9 @@ deserialized = json.loads(json_str)
 assert deserialized['event_type'] == "agent_started"
 assert deserialized['thread_id'] == test_thread
 assert deserialized['data']['agent_name'] == TestAgent"
+assert deserialized['data']['agent_name'] == TestAgent"
 pass
+
+)))))))))))))))))))
+]]]
+}}}}}}}}

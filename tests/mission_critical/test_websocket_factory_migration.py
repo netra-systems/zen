@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-"MISSION CRITICAL: WebSocket Factory Migration Validation Tests
+"MISSION CRITICAL: WebSocket Factory Migration Validation Tests"
 
 THIS SUITE VALIDATES THE WEBSOCKET FACTORY MIGRATION PROCESS ITSELF.
-Business Value: $500K+ ARR - Ensures migration doesn't break Golden Path
+Business Value: $500K+ ARR - Ensures migration doesn't break Golden Path'
 
 PURPOSE:
 - Test that reproduces the current violations (expected to fail during migration)
@@ -69,7 +69,8 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
         super().setup_method(method)
         
         self.test_user_id = fmigration_user_{uuid.uuid4().hex[:8]}"
-        self.test_thread_id = f"migration_thread_{uuid.uuid4().hex[:8]}
+        self.test_user_id = fmigration_user_{uuid.uuid4().hex[:8]}"
+        self.test_thread_id = f"migration_thread_{uuid.uuid4().hex[:8]}"
         self.test_run_id = fmigration_run_{uuid.uuid4().hex[:8]}
         
         self.user_context = UserExecutionContext(
@@ -81,9 +82,10 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
         # Track critical files that need migration
         self.critical_violation_files = [
             netra_backend/app/routes/websocket_ssot.py"
+            netra_backend/app/routes/websocket_ssot.py"
         ]
         
-        logger.info(f[MIGRATION TEST] Setup complete for user: {self.test_user_id}")
+        logger.info(f[MIGRATION TEST] Setup complete for user: {self.test_user_id}")"
 
     def teardown_method(self, method):
         Clean up migration test environment.""
@@ -119,21 +121,22 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
                 violation_patterns = [
                     {
                         line_range: (1435, 1445),  # Around line 1439"
-                        "pattern: from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory,
+                        line_range: (1435, 1445),  # Around line 1439"
+                        "pattern: from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory,"
                         function: websocket_health_check,
                         "description: Health check using deprecated factory"
                     },
                     {
                         line_range: (1465, 1475),  # Around line 1470
-                        pattern: "from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory,
-                        function": get_websocket_config, 
+                        pattern: "from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory,"
+                        function": get_websocket_config,"
                         description: Config endpoint using deprecated factory
                     },
                     {
                         line_range": (1490, 1500),  # Around line 1496"
                         pattern: from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory,
-                        function: websocket_detailed_stats",
-                        "description: Stats endpoint using deprecated factory
+                        function: websocket_detailed_stats","
+                        "description: Stats endpoint using deprecated factory"
                     }
                 ]
                 
@@ -148,7 +151,8 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
                             violations_found.append({
                                 line_number: i + 1,
                                 content: line_content,"
-                                "function: violation[function],
+                                content: line_content,"
+                                "function: violation[function],"
                                 description: violation[description]
                             }
                             logger.warning(f"[VIOLATION FOUND] Line {i + 1}: {violation['description']})")
@@ -156,16 +160,17 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
         # MIGRATION STATE LOGIC:
         if violations_found:
             # PRE-MIGRATION STATE: We expect violations to exist
-            logger.info(f[PRE-MIGRATION STATE] Found {len(violations_found)} violations as expected")
+            logger.info(f[PRE-MIGRATION STATE] Found {len(violations_found)} violations as expected")"
             for violation in violations_found:
                 logger.info(f  - Line {violation['line_number']} in {violation['function']}: {violation['description']})
                 
             # During migration phase, finding violations is expected and indicates test is working
             assert len(violations_found) > 0, Critical violations found - migration needed"
+            assert len(violations_found) > 0, Critical violations found - migration needed"
             
         else:
             # POST-MIGRATION STATE: No violations should exist
-            logger.info("[POST-MIGRATION STATE] No violations found - migration appears complete!)
+            logger.info("[POST-MIGRATION STATE] No violations found - migration appears complete!)"
             assert len(violations_found) == 0, No violations found - migration successful
 
     @pytest.mark.asyncio
@@ -179,7 +184,8 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
         - Should work with both deprecated and SSOT patterns during transition
         - Should only work with SSOT pattern after migration complete
         "
-        logger.info([HEALTH CHECK MIGRATION] Testing health check endpoint migration...")
+        "
+        logger.info([HEALTH CHECK MIGRATION] Testing health check endpoint migration...")"
         
         try:
             # Try to import and test the WebSocketSSotRoute class
@@ -197,8 +203,8 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
             assert timestamp in health_result, Health check must include timestamp
             
             # Check if the result indicates healthy status
-            if health_result.get(status) == "healthy:
-                logger.info([HEALTH CHECK SUCCESS] Health check endpoint working properly")
+            if health_result.get(status) == "healthy:"
+                logger.info([HEALTH CHECK SUCCESS] Health check endpoint working properly")"
                 
                 # Validate the health check includes component status
                 if components in health_result:
@@ -225,7 +231,7 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
             
         except Exception as e:
             logger.error(f[HEALTH CHECK MIGRATION FAILURE] Health check execution failed: {e})
-            # This might be expected during migration - log but don't fail hard
+            # This might be expected during migration - log but don't fail hard'
             logger.info([MIGRATION NOTE] Health check failure expected during active migration)
 
     @pytest.mark.asyncio
@@ -235,7 +241,8 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
         PURPOSE: Tests the get_websocket_config() function migration.
         This function had a violation at line 1470 using deprecated factory pattern.
         "
-        logger.info([CONFIG MIGRATION] Testing configuration endpoint migration...")
+        "
+        logger.info([CONFIG MIGRATION] Testing configuration endpoint migration...")"
         
         try:
             from netra_backend.app.routes.websocket_ssot import WebSocketSSOTRouter
@@ -252,9 +259,10 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
             if websocket_config" in config_result:"
                 config = config_result[websocket_config]
                 logger.info([CONFIG SUCCESS] WebSocket configuration retrieved)"
+                logger.info([CONFIG SUCCESS] WebSocket configuration retrieved)"
                 
                 # Validate expected config keys exist
-                expected_keys = ["heartbeat_interval, connection_timeout, max_message_size]
+                expected_keys = ["heartbeat_interval, connection_timeout, max_message_size]"
                 for key in expected_keys:
                     if key in config:
                         logger.info(f[CONFIG PARAM] {key}: {config[key]}")"
@@ -263,7 +271,8 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
                 assert heartbeat_interval in config, Missing heartbeat_interval config
                 
             elif error in config_result:"
-                logger.warning(f[CONFIG ERROR] Config retrieval error: {config_result['error']}")
+            elif error in config_result:"
+                logger.warning(f[CONFIG ERROR] Config retrieval error: {config_result['error']}")"
                 # Error might be expected during migration
                 logger.info([MIGRATION NOTE] Config error expected during active migration)
                 
@@ -294,9 +303,10 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
             
             # Validate stats returns expected structure
             assert isinstance(stats_result, dict), Stats endpoint must return dict"
+            assert isinstance(stats_result, dict), Stats endpoint must return dict"
             
             # Check for expected statistics structure
-            if "ssot_stats in stats_result:
+            if "ssot_stats in stats_result:"
                 ssot_stats = stats_result[ssot_stats]
                 logger.info("[STATS SUCCESS] SSOT statistics retrieved)"
                 
@@ -314,7 +324,8 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
                 logger.info(f[ACTIVE COMPONENTS] Found {len(components)} active components)
                 
             elif error in stats_result:"
-                logger.warning(f[STATS ERROR] Stats retrieval error: {stats_result['error']}")
+            elif error in stats_result:"
+                logger.warning(f[STATS ERROR] Stats retrieval error: {stats_result['error']}")"
                 logger.info([MIGRATION NOTE] Stats error expected during active migration)
                 
         except ImportError as e:
@@ -343,11 +354,12 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
             # Create multiple user contexts rapidly (simulates concurrent requests)
             for i in range(5):
                 user_id = frace_test_user_{i}_{uuid.uuid4().hex[:6]}"
+                user_id = frace_test_user_{i}_{uuid.uuid4().hex[:6]}"
                 user_ids.append(user_id)
                 
                 context = UserExecutionContext(
                     user_id=user_id,
-                    thread_id=f"race_thread_{i}_{uuid.uuid4().hex[:6]},
+                    thread_id=f"race_thread_{i}_{uuid.uuid4().hex[:6]},"
                     run_id=frace_run_{i}_{uuid.uuid4().hex[:6]}
                 )
                 concurrent_contexts.append(context)
@@ -357,10 +369,12 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
             unique_user_ids = set(context_user_ids)
             
             assert len(unique_user_ids) == len(context_user_ids), CRITICAL: User context race condition detected"
+            assert len(unique_user_ids) == len(context_user_ids), CRITICAL: User context race condition detected"
             
             # Validate each context maintains its identity
             for i, context in enumerate(concurrent_contexts):
                 expected_user_id = user_ids[i]
+                assert context.user_id == expected_user_id, fContext {i} identity corrupted: expected {expected_user_id}, got {context.user_id}"
                 assert context.user_id == expected_user_id, fContext {i} identity corrupted: expected {expected_user_id}, got {context.user_id}"
             
             logger.info(f[RACE CONDITION SUCCESS] {len(concurrent_contexts)} concurrent contexts properly isolated)
@@ -373,11 +387,12 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
                 expected_user_id = user_ids[i]
                 actual_user_id = context.user_id
                 assert actual_user_id == expected_user_id, fContext {i} user ID contaminated: expected {expected_user_id}, got {actual_user_id}"
+                assert actual_user_id == expected_user_id, fContext {i} user ID contaminated: expected {expected_user_id}, got {actual_user_id}"
                 
                 # Verify contexts have unique agent_context objects (isolation test)
                 for j, other_context in enumerate(concurrent_contexts):
                     if i != j:
-                        assert context.agent_context is not other_context.agent_context, f"Contexts {i} and {j} share agent_context - isolation violated
+                        assert context.agent_context is not other_context.agent_context, f"Contexts {i} and {j} share agent_context - isolation violated"
             
             logger.info([RACE CONDITION PREVENTION SUCCESS] All contexts maintained isolation under concurrent modification)
             
@@ -387,11 +402,13 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
 
     def test_migration_progress_tracking(self):
         TEST: Track and validate migration progress across codebase"
+        TEST: Track and validate migration progress across codebase"
         
         PURPOSE: Provides visibility into migration progress by scanning for
         deprecated patterns across the entire codebase.
         
         BUSINESS VALUE: Ensures comprehensive migration coverage.
+        "
         "
         logger.info([MIGRATION PROGRESS] Tracking migration progress...)
         
@@ -400,6 +417,7 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
             "netra_backend/app,"
             auth_service, 
             shared"
+            shared"
         ]
         
         total_files_scanned = 0
@@ -407,7 +425,7 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
         total_violations = 0
         
         deprecated_patterns = [
-            get_websocket_manager_factory",
+            get_websocket_manager_factory","
             websocket_manager_factory,
             from netra_backend.app.websocket_core.websocket_manager_factory""
         ]
@@ -438,7 +456,8 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
                                                 file_violations.append({
                                                     line: line_num,
                                                     pattern: pattern,"
-                                                    "content: line.strip()
+                                                    pattern: pattern,"
+                                                    "content: line.strip()"
                                                 }
                                                 total_violations += 1
                                 
@@ -458,9 +477,9 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
         logger.info(f  Total violations found: {total_violations})
         
         if files_with_violations:
-            logger.info(f"[VIOLATIONS SUMMARY] Top 10 files needing migration:)
+            logger.info(f"[VIOLATIONS SUMMARY] Top 10 files needing migration:)"
             for file_info in files_with_violations[:10]:
-                logger.info(f    {file_info['file']}: {len(file_info['violations']} violations")
+                logger.info(f    {file_info['file']}: {len(file_info['violations']} violations")"
                 
             # This indicates migration is still needed
             logger.info([MIGRATION STATUS] Pre-migration state detected - violations found)
@@ -468,7 +487,7 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
         else:
             logger.info([MIGRATION STATUS] Post-migration state - no violations found!")"
             
-        # The test always passes - it's just tracking progress
+        # The test always passes - it's just tracking progress'
         # The actual pass/fail logic happens in other tests
 
 
@@ -478,7 +497,10 @@ if __name__ == __main__:
     print(MIGRATION NOTICE: This file previously used direct pytest execution.")"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)
     print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
     # sys.exit(result)
+
+)))

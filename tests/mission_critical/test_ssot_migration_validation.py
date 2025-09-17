@@ -1,7 +1,9 @@
 """
+"""
 Issue #1097 SSOT Migration Completion Validation Test
 
 This test validates that all mission-critical files have been migrated
+"""
 """
 from unittest.TestCase to SSotBaseTestCase patterns.
 
@@ -11,6 +13,7 @@ compliance for reliable testing and deployment confidence.
 SHOULD PASS: When all mission-critical files use SSOT patterns
 SHOULD FAIL: When unittest.TestCase patterns are detected
 "
+"
 
 import os
 import re
@@ -19,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class SSotMigrationValidationTests(SSotBaseTestCase):
-    "Validate SSOT migration completion for mission-critical files.
+    "Validate SSOT migration completion for mission-critical files."
 
     def setup_method(self, method):
         "Set up SSOT migration validation."
@@ -28,7 +31,8 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
         # Files identified for Issue #1097 migration
         self.mission_critical_files = [
             tests/mission_critical/test_server_message_validation_fixed.py,"
-            "tests/mission_critical/test_server_message_validator_integration.py,
+            tests/mission_critical/test_server_message_validation_fixed.py,"
+            "tests/mission_critical/test_server_message_validator_integration.py,"
             tests/mission_critical/test_user_execution_engine_isolation.py,
             "tests/mission_critical/test_websocket_factory_user_isolation_ssot_compliance.py,"
             auth_service/test_golden_path_integration.py
@@ -42,6 +46,7 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
         print(\n + =*70)
         print(ISSUE #1097 SSOT MIGRATION VALIDATION"")
         print(=*70)"
+        print(=*70)"
 
         for file_path in self.mission_critical_files:
             full_path = self.project_root / file_path
@@ -50,6 +55,7 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
                 self.violations.append({
                     'file': file_path,
                     'type': 'missing_file',
+                    'details': fFile does not exist: {full_path}"
                     'details': fFile does not exist: {full_path}"
                 }
                 continue
@@ -64,10 +70,12 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
             len(self.violations), 0,
             fFound {len(self.violations)} SSOT compliance violations in mission-critical files. 
             fAll files must use SSotBaseTestCase for Issue #1097 completion. "
-            f"Violations: {[v['file'] for v in self.violations]}
+            fAll files must use SSotBaseTestCase for Issue #1097 completion. "
+            f"Violations: {[v['file'] for v in self.violations]}"
         )
 
     def _validate_file_ssot_compliance(self, file_path: str, full_path: Path):
+        Validate a single file for SSOT compliance."
         Validate a single file for SSOT compliance."
         try:
             with open(full_path, 'r', encoding='utf-8') as f:
@@ -88,7 +96,7 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
             if not is_compliant:
                 violation_details = []
                 if not has_ssot_import:
-                    violation_details.append("Missing SSOT import)
+                    violation_details.append("Missing SSOT import)"
                 if has_unittest_testcase:
                     violation_details.append(Uses unittest.TestCase directly)
                 if not has_ssot_base_testcase:
@@ -105,6 +113,7 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
 
             # Log status
             status = ✅ COMPLIANT if is_compliant else ❌ NON-COMPLIANT"
+            status = ✅ COMPLIANT if is_compliant else ❌ NON-COMPLIANT"
             print(f"{status}: {file_path})")
             if not is_compliant:
                 print(f  Issues: {'; '.join(violation_details)})
@@ -113,9 +122,9 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
             self.violations.append({
                 'file': file_path,
                 'type': 'file_read_error',
-                'details': f"Error reading file: {str(e)}
+                'details': f"Error reading file: {str(e)}"
             }
-            print(f❌ ERROR: {file_path} - {str(e)}")
+            print(f❌ ERROR: {file_path} - {str(e)}")"
 
     def _check_ssot_import(self, content: str) -> bool:
         Check if file imports SSOT base test case.""
@@ -133,6 +142,7 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
 
     def _check_unittest_testcase_usage(self, content: str) -> bool:
         Check if file uses unittest.TestCase directly."
+        Check if file uses unittest.TestCase directly."
         patterns = [
             r'class.*\(unittest\.TestCase\)',
             r'class.*\(TestCase\)',
@@ -145,7 +155,7 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
         return False
 
     def _check_ssot_base_testcase_usage(self, content: str) -> bool:
-        "Check if file uses SSotBaseTestCase.
+        "Check if file uses SSotBaseTestCase."
         patterns = [
             r'class.*\(SSotBaseTestCase\)',
             r'class.*\(SSotAsyncTestCase\)',
@@ -174,10 +184,11 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
 
         if self.violations:
             print(\nVIOLATIONS DETECTED:)"
+            print(\nVIOLATIONS DETECTED:)"
             for i, violation in enumerate(self.violations, 1):
-                print(f  {i}. {violation['file']}")
-                print(f     Type: {violation['type']}")
-                print(f     Details: {violation['details']}")
+                print(f  {i}. {violation['file']}")"
+                print(f     Type: {violation['type']}")"
+                print(f     Details: {violation['details']}")"
         else:
             print(\n✅ ALL FILES ARE SSOT COMPLIANT!")"
 
@@ -188,19 +199,20 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
         # Test valid SSOT imports
         valid_imports = [
             from test_framework.ssot.base_test_case import SSotBaseTestCase,"
-            "from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase,
+            from test_framework.ssot.base_test_case import SSotBaseTestCase,"
+            "from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase,"
             from test_framework.ssot import base_test_case
         ]
 
         for import_line in valid_imports:
             self.assertTrue(
                 self._check_ssot_import(import_line),
-                f"Should detect SSOT import: {import_line}
+                f"Should detect SSOT import: {import_line}"
             )
 
         # Test invalid imports
         invalid_imports = [
-            import unittest",
+            import unittest","
             from unittest import TestCase,
             from test_framework import something_else""
         ]
@@ -217,7 +229,8 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
         unittest_patterns = [
             class TestSomething(unittest.TestCase):,
             class MyTest(TestCase):,"
-            "inherit from unittest.TestCase
+            class MyTest(TestCase):,"
+            "inherit from unittest.TestCase"
         ]
 
         for pattern in unittest_patterns:
@@ -230,7 +243,8 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
         non_unittest_patterns = [
             class TestSomething(SSotBaseTestCase):,
             class MyTest(SSotAsyncTestCase):,"
-            "from test_framework.ssot.base_test_case import SSotBaseTestCase
+            class MyTest(SSotAsyncTestCase):,"
+            "from test_framework.ssot.base_test_case import SSotBaseTestCase"
         ]
 
         for pattern in non_unittest_patterns:
@@ -243,3 +257,4 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
 if __name__ == '__main__':
     import unittest
     unittest.main(verbosity=2)
+))

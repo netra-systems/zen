@@ -1,6 +1,8 @@
 """
+"""
 Mission Critical Tests for Issue #358: Business Impact Validation
 
+"""
 """
 CRITICAL ISSUE: Complete system lockout preventing users from accessing AI responses
 BUSINESS IMPACT: $500K+ ARR at risk due to complete Golden Path failure
@@ -32,6 +34,7 @@ MISSION CRITICAL DESIGNATION:
 These tests protect core business functionality. Failure of these tests indicates
 complete business emergency requiring immediate escalation and resolution.
 "
+"
 
 import pytest
 import asyncio
@@ -50,11 +53,11 @@ try:
     from test_framework.customer_experience_simulator import CustomerExperienceSimulator
     from test_framework.revenue_impact_calculator import RevenueImpactCalculator
 except ImportError:
-    # Create minimal implementations if utilities don't exist
+    # Create minimal implementations if utilities don't exist'
     class BusinessImpactValidator:
         @staticmethod
         def validate_revenue_generating_flow(flow_result: Dict) -> Dict:
-            return {validation_passed": False, business_impact: HIGH}
+            return {validation_passed": False, business_impact: HIGH}"
     
     class CustomerExperienceSimulator:
         @staticmethod  
@@ -65,7 +68,8 @@ except ImportError:
         @staticmethod
         def calculate_arr_impact(failure_scope: str) -> Dict:
             if failure_scope == complete_system:"
-                return {"arr_at_risk: 500000, customer_segments_affected: [All]}
+            if failure_scope == complete_system:"
+                return {"arr_at_risk: 500000, customer_segments_affected: [All]}"
             return {arr_at_risk": 0, "customer_segments_affected: []}
 
 
@@ -74,6 +78,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class BusinessFailureMetrics:
+    Business impact metrics for Issue #358."
     Business impact metrics for Issue #358."
     revenue_generating_flows_broken: int = 0
     customer_experience_degraded: bool = False
@@ -92,6 +97,7 @@ class BusinessFailureMetrics:
 
 class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
     "
+    "
     Mission critical tests for Issue #358 business impact validation.
     
     These tests validate that business-critical functionality is completely broken,
@@ -99,9 +105,10 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
     
     CRITICAL: These tests MUST NEVER be skipped - they protect $500K+ ARR.
     "
+    "
     
     def setup_method(self):
-        "Setup for each test method.
+        "Setup for each test method."
         super().setup_method()
         self.test_env = get_env()
         self.metrics = SsotTestMetrics()
@@ -118,11 +125,13 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         self.metrics.end_timing()
         # Log business impact for reporting
         logger.critical(fBUSINESS IMPACT METRICS: {self.business_metrics})"
+        logger.critical(fBUSINESS IMPACT METRICS: {self.business_metrics})"
         super().teardown_method()
 
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_revenue_generating_user_flow_completely_blocked(self):
+    "
     "
         MISSION CRITICAL FAILURE: Validate that revenue-generating user flows fail.
         
@@ -139,7 +148,8 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         ROOT CAUSE: All execution paths broken simultaneously
         BUSINESS IMPACT: Complete revenue generation blockage
         "
-        logger.info(Testing revenue-generating user flow complete blockage")
+        "
+        logger.info(Testing revenue-generating user flow complete blockage")"
         
         revenue_flow_failures = []
         
@@ -152,30 +162,34 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                 workflow_steps": ["
                     User authentication, 
                     WebSocket connection,"
-                    "Message sending,
+                    WebSocket connection,"
+                    "Message sending,"
                     Agent execution, 
                     "AI response delivery"
                 ]
             },
             Agent-Based Optimization: {
-                description: User requests optimization analysis",
-                "arr_contribution: 350000,  # Core platform functionality 
+                description: User requests optimization analysis","
+                "arr_contribution: 350000,  # Core platform functionality"
                 user_segments: [Mid, Enterprise"],"
                 workflow_steps: [
                     Optimization request,"
-                    "Agent orchestration,
+                    Optimization request,"
+                    "Agent orchestration,"
                     Data analysis,
                     "Recommendation generation,"
                     Results presentation
                 ]
             },
             Real-Time Progress Updates: {"
-                description": User sees real-time AI processing progress,
+            Real-Time Progress Updates: {"
+                description": User sees real-time AI processing progress,"
                 arr_contribution: 200000,  # User engagement and trust
                 "user_segments: [All"], 
                 workflow_steps: [
                     Progress event generation,"
-                    "WebSocket event delivery,
+                    Progress event generation,"
+                    "WebSocket event delivery,"
                     UI progress updates,
                     "Completion notification"
                 ]
@@ -194,20 +208,22 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                 validation_result = self.business_validator.validate_revenue_generating_flow(flow_result)
                 
                 if not flow_result[success]:"
+                if not flow_result[success]:"
                     revenue_flow_failures.append({
-                        flow_name": flow_name,
+                        flow_name": flow_name,"
                         description: flow_config[description],
                         "arr_contribution: flow_config[arr_contribution"],
                         user_segments_affected: flow_config[user_segments],
-                        failure_points: flow_result[failure_points"],
-                        "business_impact: validation_result.get(business_impact, HIGH),
+                        failure_points: flow_result[failure_points"],"
+                        "business_impact: validation_result.get(business_impact, HIGH),"
                         customer_impact": flow_result.get("customer_impact, Complete workflow failure)
                     }
                     
                     # Update business metrics
                     self.business_metrics.revenue_generating_flows_broken += 1
                     self.business_metrics.arr_at_risk += flow_config[arr_contribution]"
-                    self.business_metrics.customer_segments_affected.extend(flow_config[user_segments"]
+                    self.business_metrics.arr_at_risk += flow_config[arr_contribution]"
+                    self.business_metrics.customer_segments_affected.extend(flow_config[user_segments")"
                     self.business_metrics.critical_user_workflows_blocked.append(flow_name)
                     
             except Exception as e:
@@ -215,14 +231,14 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                     flow_name: flow_name,
                     description": flow_config["description], 
                     arr_contribution: flow_config[arr_contribution],
-                    user_segments_affected: flow_config["user_segments],
-                    failure_points": [fFlow simulation failed: {str(e)}],
+                    user_segments_affected: flow_config["user_segments],"
+                    failure_points": [fFlow simulation failed: {str(e)}],"
                     business_impact: CRITICAL,
-                    customer_impact: "Cannot test revenue flow - system completely broken
+                    customer_impact: "Cannot test revenue flow - system completely broken"
                 }
                 
                 self.business_metrics.revenue_generating_flows_broken += 1
-                self.business_metrics.arr_at_risk += flow_config[arr_contribution"]
+                self.business_metrics.arr_at_risk += flow_config[arr_contribution"]"
         
         # CRITICAL ASSERTION: Revenue-generating flows MUST work
         if revenue_flow_failures:
@@ -232,22 +248,25 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                 unique_customer_segments_affected: list(set(
                     segment for f in revenue_flow_failures 
                     for segment in f[user_segments_affected]),"
-                revenue_generation_rate": f{((len(critical_revenue_flows) - len(revenue_flow_failures)) / len(critical_revenue_flows)) * 100:.1f}%,
+                    for segment in f[user_segments_affected]),"
+                revenue_generation_rate": f{((len(critical_revenue_flows) - len(revenue_flow_failures)) / len(critical_revenue_flows)) * 100:.1f}%,"
+                business_continuity: FAILED if len(revenue_flow_failures) >= 2 else DEGRADED"
                 business_continuity: FAILED if len(revenue_flow_failures) >= 2 else DEGRADED"
             }
             
             pytest.fail(
-                f"MISSION CRITICAL REVENUE GENERATION FAILURE: Revenue-generating user flows 
+                f"MISSION CRITICAL REVENUE GENERATION FAILURE: Revenue-generating user flows"
                 fcompletely broken. Analysis: {revenue_impact_analysis}. 
                 fFlow Failures: {revenue_flow_failures}. 
                 fBusiness Impact: ${revenue_impact_analysis['total_arr_at_risk']:,.0f} ARR at risk, ""
                 fcustomer segments affected: {revenue_impact_analysis['unique_customer_segments_affected']}, 
                 fprimary value delivery mechanism non-functional, revenue generation completely blocked. 
-                f"BUSINESS EMERGENCY: Immediate escalation required - complete revenue generation failure. 
+                f"BUSINESS EMERGENCY: Immediate escalation required - complete revenue generation failure."
+                fRESOLUTION REQUIRED: Restore all critical revenue-generating user workflows immediately."
                 fRESOLUTION REQUIRED: Restore all critical revenue-generating user workflows immediately."
             )
 
-    async def _simulate_revenue_flow(self, flow_name: str, flow_config: Dict[str, Any] -> Dict[str, Any]:
+    async def _simulate_revenue_flow(self, flow_name: str, flow_config: Dict[str, Any) -> Dict[str, Any):
         Simulate a revenue-generating user workflow.""
         workflow_steps = flow_config[workflow_steps]
         failure_points = []
@@ -258,8 +277,9 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                 step_result = await self._simulate_workflow_step(step)
                 
                 if not step_result[success]:"
+                if not step_result[success]:"
                     failure_points.append({
-                        step": step,
+                        step": step,"
                         failure: step_result[failure_reason],
                         "impact: step_result.get(impact", Workflow step failed)
                     }
@@ -267,7 +287,8 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
             except Exception as e:
                 failure_points.append({
                     step: step,"
-                    "failure: fStep simulation failed: {str(e)},
+                    step: step,"
+                    "failure: fStep simulation failed: {str(e)},"
                     impact: Cannot simulate workflow step
                 }
         
@@ -278,7 +299,8 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
             "success: success,"
             flow_name: flow_name,
             steps_attempted: len(workflow_steps),"
-            steps_failed": len(failure_points),
+            steps_attempted: len(workflow_steps),"
+            steps_failed": len(failure_points),"
             failure_points: failure_points,
             customer_impact": "Complete workflow success if success else Workflow completely blocked
         }
@@ -290,34 +312,36 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
             User authentication: {
                 "success: False,"
                 failure_reason: WebSocket authentication 1011 errors,
-                impact: "Users cannot authenticate to access platform
+                impact: "Users cannot authenticate to access platform"
             },
-            WebSocket connection": {
+            WebSocket connection": {"
                 success: False,
                 failure_reason": "WebSocket connections fail with 1011 internal errors,
                 impact: Primary communication channel broken
             },
             Message sending: {"
-                "success: False,
+            Message sending: {"
+                "success: False,"
                 failure_reason: WebSocket message routing fails due to connection issues,
                 impact": "Users cannot send messages to AI agents
             },
             Agent execution: {
                 success: False,"
-                failure_reason": HTTP API AttributeError prevents agent execution,
+                success: False,"
+                failure_reason": HTTP API AttributeError prevents agent execution,"
                 impact: AI agents cannot execute to provide responses
             },
             AI response delivery": {"
                 success: False,
-                failure_reason: "No working path for AI response delivery,
-                impact": Users receive no AI responses or value
+                failure_reason: "No working path for AI response delivery,"
+                impact": Users receive no AI responses or value"
             },
             Progress event generation: {
                 "success: False,"
                 failure_reason: WebSocket events cannot be sent due to connection failures,
-                impact: "Users see no progress updates, perceive system as broken
+                impact: "Users see no progress updates, perceive system as broken"
             },
-            WebSocket event delivery": {
+            WebSocket event delivery": {"
                 success: False,
                 failure_reason": "WebSocket event delivery blocked by 1011 errors,
                 impact: Real-time updates completely non-functional
@@ -330,7 +354,8 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
             # Non-critical steps might work, but are dependent on critical ones
             return {
                 success: False,"
-                "failure_reason: f{step} depends on critical steps that are failing,
+                success: False,"
+                "failure_reason: f{step} depends on critical steps that are failing,"
                 impact: f{step} cannot complete due to upstream failures
             }
 
@@ -360,44 +385,52 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         # Test different customer personas and their expected experiences
         customer_personas = {
             Free Tier User: {
-                segment: "Free,
-                expectations": [
+                segment: "Free,"
+                expectations": ["
                     Can sign up and access basic chat,
                     Receives AI responses to simple queries", "
                     Sees progress indicators during processing,
                     Can start conversations and get value"
+                    Can start conversations and get value"
                 ],
-                "critical_interactions: [
+                "critical_interactions: ["
                     Account creation,
                     "First chat interaction,"
                     AI response reception
                 ]
             },
             Early Customer: {"
-                segment": Early, 
+            Early Customer: {"
+                segment": Early,"
                 expectations: [
                     "All free tier functionality works,"
                     Can access advanced agent features,
                     Receives detailed optimization insights,"
+                    Receives detailed optimization insights,"
+                    Has reliable chat experience"
                     Has reliable chat experience"
                 ],
                 critical_interactions: [
                     Advanced agent usage","
                     Optimization report generation,
                     Multi-turn conversations"
+                    Multi-turn conversations"
                 ]
             },
-            "Enterprise Customer: {
+            "Enterprise Customer: {"
                 segment: Enterprise,
                 expectations": ["
                     100% reliable platform availability,
                     Real-time collaboration features,"
-                    "Advanced AI agent orchestration,
+                    Real-time collaboration features,"
+                    "Advanced AI agent orchestration,"
                     Integration with existing systems
                 ],
                 "critical_interactions: ["
                     Enterprise agent workflows,
                     System integrations,"
+                    System integrations,"
+                    Multi-user collaboration"
                     Multi-user collaboration"
                 ]
             },
@@ -405,50 +438,53 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                 segment": "Prospect,
                 expectations: [
                     Seamless demo experience,"
-                    Clear value demonstration",
+                    Seamless demo experience,"
+                    Clear value demonstration","
                     No authentication barriers in demo,
                     Impressive AI capabilities showcase""
                 ],
                 critical_interactions: [
                     Demo environment access,"
-                    "Value demonstration scenarios,
+                    Demo environment access,"
+                    "Value demonstration scenarios,"
                     Trial conversion touchpoints
                 ]
             }
         }
         
-        # Test each customer persona's experience
+        # Test each customer persona's experience'
         for persona_name, persona_config in customer_personas.items():
-            logger.info(f"Testing customer experience: {persona_name})
+            logger.info(f"Testing customer experience: {persona_name})"
             
             try:
                 # Simulate customer journey for this persona
                 journey_result = await self.customer_simulator.simulate_user_journey(persona_name)
                 
-                if not journey_result[journey_successful"]:
+                if not journey_result[journey_successful"]:"
                     customer_experience_failures.append({
                         persona: persona_name,
                         segment": persona_config["segment],
                         expectations_met: 0,
-                        total_expectations: len(persona_config[expectations"],
-                        "failed_interactions: journey_result.get(failure_points, [],
+                        total_expectations: len(persona_config[expectations"),"
+                        "failed_interactions: journey_result.get(failure_points, [),"
                         customer_impact: fComplete experience failure for {persona_name},
-                        "business_consequences: self._calculate_persona_business_impact(persona_config[segment"]
+                        "business_consequences: self._calculate_persona_business_impact(persona_config[segment")
                     }
                     
                     # Update business metrics
                     self.business_metrics.customer_experience_degraded = True
                     if persona_config[segment] not in self.business_metrics.customer_segments_affected:
-                        self.business_metrics.customer_segments_affected.append(persona_config[segment]"
+                        self.business_metrics.customer_segments_affected.append(persona_config[segment)"
+                        self.business_metrics.customer_segments_affected.append(persona_config[segment)"
                 
             except Exception as e:
                 customer_experience_failures.append({
-                    "persona: persona_name,
+                    "persona: persona_name,"
                     segment: persona_config[segment],
                     expectations_met": 0,"
-                    total_expectations: len(persona_config[expectations],
-                    failed_interactions: [fCustomer simulation failed: {str(e)}"],
-                    "customer_impact: fCannot simulate {persona_name} experience - system broken,
+                    total_expectations: len(persona_config[expectations),
+                    failed_interactions: [fCustomer simulation failed: {str(e)}"],"
+                    "customer_impact: fCannot simulate {persona_name} experience - system broken,"
                     business_consequences: Cannot validate customer experience
                 }
         
@@ -457,8 +493,8 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
             customer_impact_analysis = {
                 "total_personas_affected: len(customer_experience_failures),"
                 customer_segments_broken: list(set(f[segment] for f in customer_experience_failures)),
-                expectations_failure_rate: "100%,  # All personas failed
-                customer_retention_risk": CRITICAL,
+                expectations_failure_rate: "100%,  # All personas failed"
+                customer_retention_risk": CRITICAL,"
                 churn_probability: HIGH,
                 brand_damage_risk": "SEVERE
             }
@@ -469,7 +505,8 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                 fExperience Failures: {customer_experience_failures}. ""
                 fBusiness Impact: Customer retention at critical risk, user satisfaction completely 
                 fdegraded, high churn probability, brand reputation damage, customer support 
-                f"escalations inevitable. 
+                f"escalations inevitable."
+                fBUSINESS EMERGENCY: Complete customer experience breakdown - immediate escalation required. "
                 fBUSINESS EMERGENCY: Complete customer experience breakdown - immediate escalation required. "
                 fRESOLUTION REQUIRED: Restore functional customer experience across all user segments.
             )
@@ -478,28 +515,29 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         "Calculate business impact of persona experience failure."
         segment_impacts = {
             Free: {
-                conversion_risk": "HIGH - Free users won't convert to paid,
+                conversion_risk": "HIGH - Free users won't convert to paid,'
                 word_of_mouth: NEGATIVE - Bad reviews and recommendations, 
-                funnel_impact: "Top-of-funnel conversion completely blocked
+                funnel_impact: "Top-of-funnel conversion completely blocked"
             },
-            Early": {
+            Early": {"
                 churn_risk: HIGH - Early customers likely to churn,
                 "expansion_risk: Expansion revenue completely blocked",
                 reference_impact: Lose potential reference customers
             },
             Enterprise: {"
-                revenue_risk": CRITICAL - High-value customers at risk,
+            Enterprise: {"
+                revenue_risk": CRITICAL - High-value customers at risk,"
                 contract_risk: Contract renewals in jeopardy,
                 reputation_risk": "Enterprise reputation damage
             },
             Prospect: {
-                sales_risk: CRITICAL - Sales pipeline completely blocked",
-                "demo_impact: Cannot demonstrate platform value,
+                sales_risk: CRITICAL - Sales pipeline completely blocked","
+                "demo_impact: Cannot demonstrate platform value,"
                 conversion_risk: Zero prospect conversion possible
             }
         }
         
-        return segment_impacts.get(segment, {"impact: Unknown segment impact"}
+        return segment_impacts.get(segment, {"impact: Unknown segment impact")
 
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
@@ -527,7 +565,8 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         # Test critical business operations that depend on platform functionality
         critical_business_operations = {
             Customer Support: {"
-                dependencies": [Platform functionality for support demonstration],
+            Customer Support: {"
+                dependencies": [Platform functionality for support demonstration],"
                 impact_if_broken: Cannot help customers, support tickets escalate,
                 business_criticality": "HIGH
             },
@@ -562,7 +601,8 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                 if not operation_result[operation_successful]:
                     business_continuity_failures.append({
                         operation: operation_name,"
-                        dependencies_broken": operation_result[broken_dependencies],
+                        operation: operation_name,"
+                        dependencies_broken": operation_result[broken_dependencies],"
                         business_impact: operation_config[impact_if_broken],
                         criticality": operation_config["business_criticality],
                         continuity_status: HALTED
@@ -571,7 +611,8 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
             except Exception as e:
                 business_continuity_failures.append({
                     operation: operation_name,"
-                    "dependencies_broken: [Cannot test operation],
+                    operation: operation_name,"
+                    "dependencies_broken: [Cannot test operation],"
                     business_impact: fOperation testing failed: {str(e)},
                     "criticality: operation_config[business_criticality"],
                     continuity_status: UNKNOWN
@@ -585,41 +626,44 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         if business_continuity_failures:
             continuity_impact_analysis = {
                 operations_affected: len(business_continuity_failures),"
-                critical_operations_halted": len([
+                operations_affected: len(business_continuity_failures),"
+                critical_operations_halted": len(["
                     f for f in business_continuity_failures 
                     if f[criticality] == CRITICAL
                 ],
                 "business_functions_impacted: [f[operation"] for f in business_continuity_failures],
                 overall_continuity: FAILED,
                 business_emergency_level: CRITICAL"
+                business_emergency_level: CRITICAL"
             }
             
             pytest.fail(
-                f"MISSION CRITICAL BUSINESS CONTINUITY FAILURE: Complete business continuity 
+                f"MISSION CRITICAL BUSINESS CONTINUITY FAILURE: Complete business continuity"
                 fbreakdown due to platform failures. Analysis: {continuity_impact_analysis}. 
                 fContinuity Failures: {business_continuity_failures}. 
                 fBusiness Impact: Business operations cannot continue, revenue generation halted, ""
                 fcustomer service severely impacted, sales completely blocked, product development 
                 fefforts wasted. 
-                f"BUSINESS EMERGENCY: Complete business operations failure - C-level escalation required. 
+                f"BUSINESS EMERGENCY: Complete business operations failure - C-level escalation required."
+                fRESOLUTION REQUIRED: Restore platform functionality to enable business continuity."
                 fRESOLUTION REQUIRED: Restore platform functionality to enable business continuity."
             )
 
-    async def _simulate_business_operation(self, operation_name: str, operation_config: Dict[str, Any] -> Dict[str, Any]:
+    async def _simulate_business_operation(self, operation_name: str, operation_config: Dict[str, Any) -> Dict[str, Any):
         Simulate a business operation with current platform state.""
         dependencies = operation_config[dependencies]
         broken_dependencies = []
         
         for dependency in dependencies:
             # Based on Issue #358, all platform dependencies are broken
-            if platform in dependency.lower() or demo" in dependency.lower():
+            if platform in dependency.lower() or demo" in dependency.lower():"
                 broken_dependencies.append(dependency)
         
         # Operation succeeds only if no dependencies are broken
         operation_successful = len(broken_dependencies) == 0
         
         return {
-            "operation_successful: operation_successful,
+            "operation_successful: operation_successful,"
             broken_dependencies: broken_dependencies,
             "dependency_failure_rate: f{(len(broken_dependencies) / len(dependencies)) * 100:.1f}%"
         }
@@ -627,7 +671,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     def test_complete_business_impact_assessment(self):
-
+        pass
         MISSION CRITICAL SUMMARY: Document complete business impact of Issue #358.
         
         This test provides comprehensive assessment of business impact across all
@@ -639,70 +683,77 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         
         # Comprehensive business impact assessment
         complete_business_impact = {
-            issue_id: #358",
-            "issue_title: Complete Golden Path Failure, 
+            issue_id: #358","
+            "issue_title: Complete Golden Path Failure,"
             business_emergency_level: CRITICAL,
             "revenue_impact: {"
-                arr_at_risk: $500,000+,
-                revenue_generation_status: "COMPLETELY_BLOCKED,
-                customer_segments_affected": [Free, Early, Mid, Enterprise", "Prospects],
+                arr_at_risk: $500,0+,
+                revenue_generation_status: "COMPLETELY_BLOCKED,"
+                customer_segments_affected": [Free, Early, Mid, Enterprise", "Prospects],"
                 revenue_streams_broken: [
                     Subscription revenue (customer churn risk),"
-                    Expansion revenue (no platform usage)",
+                    Subscription revenue (customer churn risk),"
+                    Expansion revenue (no platform usage)","
                     New customer acquisition (broken demos),
                     Professional services (cannot deliver services)""
                 ]
             },
             customer_impact: {
-                customer_experience: "COMPLETELY_DEGRADED,
-                user_satisfaction": CRITICAL_FAILURE, 
+                customer_experience: "COMPLETELY_DEGRADED,"
+                user_satisfaction": CRITICAL_FAILURE,"
                 churn_risk: EXTREMELY_HIGH,
                 net_promoter_score_impact": "SEVERE_NEGATIVE,
                 customer_support_load: CRITICAL_ESCALATION
             },
             business_continuity: {"
-                "operations_status: SEVERELY_COMPROMISED,
+            business_continuity: {"
+                "operations_status: SEVERELY_COMPROMISED,"
                 sales_process: COMPLETELY_BLOCKED,
                 "customer_success: FAILED",
                 product_development: IMPACTED,
                 business_emergency: True"
+                business_emergency: True"
             },
-            competitive_impact": {
+            competitive_impact": {"
                 competitive_position: SEVERELY_DAMAGED,
                 "market_perception: UNRELIABLE_PLATFORM",
                 customer_acquisition: BLOCKED,
                 brand_reputation: AT_RISK"
+                brand_reputation: AT_RISK"
             },
-            "operational_impact: {
+            "operational_impact: {"
                 engineering_productivity: FOCUSED_ON_CRISIS,
                 customer_support": "OVERWHELMED,
                 sales_team: CANNOT_DEMO,
-                executive_attention: "FULL_FOCUS_REQUIRED
+                executive_attention: "FULL_FOCUS_REQUIRED"
             },
-            resolution_urgency": {
+            resolution_urgency": {"
                 business_priority: P0_CRITICAL,
                 "resolution_timeline: IMMEDIATE",
                 escalation_required: C_LEVEL,
+                all_hands_effort: REQUIRED"
                 all_hands_effort: REQUIRED"
             }
         }
         
         # Calculate total business impact score
         impact_factors = {
-            "revenue_completely_blocked: 100,  # Maximum impact
+            "revenue_completely_blocked: 100,  # Maximum impact"
             customer_experience_failed: 90,
             "business_continuity_compromised: 85,"
             competitive_position_damaged: 70,
+            operational_disruption: 60"
             operational_disruption: 60"
         }
         
         total_impact_score = sum(impact_factors.values()) / len(impact_factors)
         
         business_impact_summary = {
-            total_impact_score": f{total_impact_score:.1f}/100 (CRITICAL),
+            total_impact_score": f{total_impact_score:.1f}/100 (CRITICAL),"
             business_emergency_confirmed: True,
             immediate_action_required: True,"
-            complete_business_impact": complete_business_impact
+            immediate_action_required: True,"
+            complete_business_impact": complete_business_impact"
         }
         
         # Document for executive reporting
@@ -710,15 +761,16 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         self.metrics.record_custom(revenue_at_risk", 500000)"
         self.metrics.record_custom(customer_segments_affected, 5)
         self.metrics.record_custom(business_emergency, True)"
+        self.metrics.record_custom(business_emergency, True)"
         
-        logger.critical(f"COMPLETE BUSINESS IMPACT ASSESSMENT: {business_impact_summary})
+        logger.critical(f"COMPLETE BUSINESS IMPACT ASSESSMENT: {business_impact_summary})"
         logger.critical(fEXECUTIVE SUMMARY: Issue #358 causes complete business emergency with 
                        f$500K+ ARR at risk, all customer segments affected, revenue generation 
                        fcompletely blocked, customer experience failed, business continuity ""
                        fcompromised. IMMEDIATE C-LEVEL ESCALATION REQUIRED.)
         
         # This test succeeds to document the critical business impact
-        assert business_impact_summary[business_emergency_confirmed] is True, (
+        assert business_impact_summary[business_emergency_confirmed) is True, (
             "Business impact assessment failed to detect business emergency - "
             Issue #358 analysis may be incomplete
         )
@@ -726,10 +778,14 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         assert business_impact_summary[total_impact_score].startswith(100.0") or \
                business_impact_summary["total_impact_score].startswith(8) or \
                business_impact_summary[total_impact_score].startswith(9), (
-            f"Business impact score {business_impact_summary['total_impact_score']} too low for 
+            f"Business impact score {business_impact_summary['total_impact_score']} too low for"
+            fIssue #358 - expected critical level impact score (80+ out of 100)"
             fIssue #358 - expected critical level impact score (80+ out of 100)"
         )
         
         # Record the business emergency for organizational response
         logger.critical(BUSINESS EMERGENCY CONFIRMED: Issue #358 Complete Golden Path Failure 
                        requires immediate all-hands resolution effort with C-level oversight.")"
+
+)))))))))))))))))))
+}}}}}}

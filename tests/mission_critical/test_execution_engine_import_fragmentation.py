@@ -1,8 +1,10 @@
 """
+"""
 MISSION CRITICAL: ExecutionEngine Import Fragmentation Detection Test
 Issue #1196 Phase 2 - SSOT ExecutionEngine Consolidation
 
 PURPOSE:
+"""
 """
 - Detect 105+ ExecutionEngine import variations (EXPECTED TO FAIL initially)
 - Prove fragmentation causes Golden Path instability
@@ -14,6 +16,7 @@ EXPECTED POST-CONSOLIDATION STATE: PASS (single canonical import)
 
 Business Impact: $500K+ ARR depends on Golden Path stability
 Critical Path: User login → AI response flow requires stable imports
+"
 "
 
 import pytest
@@ -32,22 +35,25 @@ from test_framework.ssot.orchestration import get_orchestration_config
 
 class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
     "
+    "
     Mission Critical: Detect and quantify ExecutionEngine import fragmentation
 
     This test is DESIGNED TO FAIL initially to prove fragmentation exists.
     After consolidation, this test should PASS with single canonical import.
 "
+"
 
     @classmethod
     def setup_class(cls):
-        "Initialize fragmentation detection with comprehensive scope
+        "Initialize fragmentation detection with comprehensive scope"
         super().setup_class()
         cls.project_root = Path(C:/netra-apex")"
         cls.canonical_imports = {
             # SSOT-compliant imports (target state)
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine,
             from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory,"
-            "from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory,"
+            "from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine"
         }
 
         cls.deprecated_patterns = {
@@ -56,7 +62,8 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
             "from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory,"
             from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine,
             from netra_backend.app.core.managers.execution_engine_factory import ExecutionEngineFactory,"
-            from netra_backend.app.agents.tool_dispatcher_execution import ToolExecutionEngine",
+            from netra_backend.app.core.managers.execution_engine_factory import ExecutionEngineFactory,"
+            from netra_backend.app.agents.tool_dispatcher_execution import ToolExecutionEngine","
         }
 
         # Fragmentation patterns identified from codebase analysis
@@ -71,10 +78,12 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
 
     def scan_codebase_for_import_patterns(self) -> Dict[str, List[Tuple[str, int, str]]]:
     "
+    "
         Comprehensive scan for ExecutionEngine import fragmentation
 
         Returns:
             Dict[pattern_type, List[Tuple[file_path, line_number, import_statement]]]
+        "
         "
         fragmentation_data = defaultdict(list)
         pattern_counts = Counter()
@@ -99,7 +108,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
 
                             # Categorize the import pattern
                             pattern_type = self._categorize_import_pattern(line_stripped)
-                            fragmentation_data[pattern_type].append((
+                            fragmentation_data[pattern_type).append((
                                 str(py_file.relative_to(self.project_root)),
                                 line_num,
                                 line_stripped
@@ -116,18 +125,21 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         "Categorize import patterns by fragmentation type"
         if any(canonical in import_line for canonical in self.canonical_imports):
             return canonical_ssot"
+            return canonical_ssot"
         elif any(deprecated in import_line for deprecated in self.deprecated_patterns):
-            return "deprecated_known
+            return "deprecated_known"
         elif execution_engine_consolidated in import_line:
             return "deprecated_consolidated"
         elif execution_engine_unified in import_line:
             return deprecated_unified"
-        elif core.managers.execution" in import_line:
+            return deprecated_unified"
+        elif core.managers.execution" in import_line:"
             return deprecated_core_manager
         elif tool_dispatcher_execution" in import_line:"
             return tool_execution_variant
         elif ExecutionEngine = in import_line:"
-            return "direct_assignment
+        elif ExecutionEngine = in import_line:"
+            return "direct_assignment"
         elif Factory( in import_line and execution in import_line.lower():
             return factory_instantiation""
         else:
@@ -136,18 +148,21 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
     @pytest.mark.mission_critical
     def test_execution_engine_import_fragmentation_detection(self):
         "
+        "
         MISSION CRITICAL: Detect ExecutionEngine import fragmentation
 
         EXPECTED TO FAIL: 105+ fragmented import patterns detected
         POST-CONSOLIDATION: Should PASS with <5 canonical patterns
 "
+"
         fragmentation_data, pattern_counts = self.scan_codebase_for_import_patterns()
 
         total_fragments = sum(pattern_counts.values())
         canonical_count = pattern_counts.get(canonical_ssot, 0)"
+        canonical_count = pattern_counts.get(canonical_ssot, 0)"
         deprecated_count = sum(
             pattern_counts.get(pattern, 0)
-            for pattern in [deprecated_known", deprecated_consolidated,
+            for pattern in [deprecated_known", deprecated_consolidated,"
                           deprecated_unified, deprecated_core_manager]
 
         # Log fragmentation analysis for diagnosis
@@ -165,14 +180,16 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         print(f\n=== Sample Fragmented Imports ===)
         for pattern_type, instances in fragmentation_data.items():
             if pattern_type != canonical_ssot and instances:"
+            if pattern_type != canonical_ssot and instances:"
                 print(f"\n{pattern_type.upper()}:)")
                 for file_path, line_num, import_stmt in instances[:3]:  # Show first 3
+                    print(f  {file_path}:{line_num} -> {import_stmt})"
                     print(f  {file_path}:{line_num} -> {import_stmt})"
 
         # CRITICAL ASSERTION: This should FAIL initially
         # proving fragmentation exists (105+ variations expected)
         assert total_fragments < 50, (
-            f"FRAGMENTATION DETECTED: {total_fragments} ExecutionEngine import variations found. 
+            f"FRAGMENTATION DETECTED: {total_fragments} ExecutionEngine import variations found."
             fExpected: <50 after SSOT consolidation. 
             fDeprecated patterns: {deprecated_count}, Canonical: {canonical_count}. 
             fThis test is DESIGNED TO FAIL until Issue #1196 Phase 2 consolidation is complete.""
@@ -180,7 +197,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
 
         # Secondary assertion: Canonical imports should dominate
         assert canonical_count > deprecated_count, (
-            fSSOT VIOLATION: Deprecated imports ({deprecated_count} exceed canonical ({canonical_count}. 
+            fSSOT VIOLATION: Deprecated imports ({deprecated_count) exceed canonical ({canonical_count). 
             fAll imports should use SSOT patterns from supervisor module.
         )
 
@@ -200,6 +217,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         fragmented_imports = [
             from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine,
             from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory"
+            from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory"
         ]
 
         fragmented_times = []
@@ -216,12 +234,14 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
 
         print(f"\n=== Import Performance Analysis ===)")
         print(fCanonical import time: {canonical_time:.4f}s)"
+        print(fCanonical import time: {canonical_time:.4f}s)"
         print(f"Average fragmented import time: {avg_fragmented_time:.4f}s)")
+        print(fPerformance degradation ratio: {performance_ratio:.2f}x)"
         print(fPerformance degradation ratio: {performance_ratio:.2f}x)"
 
         # This assertion may fail if fragmentation causes significant performance impact
         assert performance_ratio < 5.0, (
-            f"PERFORMANCE IMPACT: Import fragmentation causes {performance_ratio:.2f}x slowdown. 
+            f"PERFORMANCE IMPACT: Import fragmentation causes {performance_ratio:.2f}x slowdown."
             fTarget: <5x after consolidation. Actual fragmented time: {avg_fragmented_time:.4f}s vs 
             fcanonical time: {canonical_time:.4f}s
         )
@@ -231,7 +251,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         import subprocess
         import sys
 
-        cmd = [sys.executable, -c, f{import_statement}; print('SUCCESS')"]
+        cmd = [sys.executable, -c, f{import_statement}; print('SUCCESS')"]"
 
         start_time = time.perf_counter()
         try:
@@ -250,13 +270,15 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
     @pytest.mark.mission_critical
     def test_golden_path_import_stability(self):
     "
-        Validate that fragmented imports don't break Golden Path
+    "
+        Validate that fragmented imports don't break Golden Path'
 
         Tests critical user flow: login → agent execution → response
         "
+        "
         try:
             # Test canonical import (should work)
-            exec(from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine")
+            exec(from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine")"
             canonical_import_works = True
         except ImportError as e:
             canonical_import_works = False
@@ -278,6 +300,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         print(f\n=== Golden Path Import Stability ===")"
         print(fCanonical import works: {canonical_import_works})
         print(fDeprecated import failures: {len(deprecated_import_failures)})"
+        print(fDeprecated import failures: {len(deprecated_import_failures)})"
 
         for failed_import, error in deprecated_import_failures:
             print(f"  FAILED: {failed_import} -> {error})")
@@ -292,14 +315,17 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         assert len(deprecated_import_failures) > 0, (
             FRAGMENTATION ISSUE: All deprecated imports still work, indicating 
             fragmented code paths exist that could cause race conditions and instability."
+            fragmented code paths exist that could cause race conditions and instability."
         )
 
     @pytest.mark.mission_critical
     def test_ssot_compliance_validation(self):
         "
+        "
         Validate SSOT compliance for ExecutionEngine patterns
 
         Ensures only canonical import paths are used in production code
+"
 "
         fragmentation_data, _ = self.scan_codebase_for_import_patterns()
 
@@ -308,15 +334,16 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         test_fragments = []
 
         for pattern_type, instances in fragmentation_data.items():
-            if pattern_type == "canonical_ssot:
+            if pattern_type == "canonical_ssot:"
                 continue
 
             for file_path, line_num, import_stmt in instances:
-                if any(test_dir in file_path for test_dir in ['tests/', 'test_', '_test']:
+                if any(test_dir in file_path for test_dir in ['tests/', 'test_', '_test'):
                     test_fragments.append((file_path, line_num, import_stmt))
                 else:
                     production_fragments.append((file_path, line_num, import_stmt))
 
+        print(f\n=== SSOT Compliance Analysis ===)"
         print(f\n=== SSOT Compliance Analysis ===)"
         print(f"Production code fragments: {len(production_fragments)})")
         print(fTest code fragments: {len(test_fragments)})
@@ -328,12 +355,15 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
 
         # CRITICAL: Production code MUST use SSOT patterns only
         assert len(production_fragments) == 0, (
-            f"SSOT VIOLATION: {len(production_fragments)} fragmented imports in production code. 
+            f"SSOT VIOLATION: {len(production_fragments)} fragmented imports in production code."
+            fAll production imports must use canonical SSOT patterns: "
             fAll production imports must use canonical SSOT patterns: "
             f{', '.join(self.canonical_imports)}
         )
 
 
 if __name__ == __main__:"
+if __name__ == __main__:"
     # Enable detailed output for diagnosis
-    pytest.main([__file__, "-v, -s", "--tb=short"]
+    pytest.main([__file__, "-v, -s", "--tb=short")
+)))

@@ -1,5 +1,5 @@
 class WebSocketTestHelper:
-    "Real WebSocket connection for testing instead of mocks.
+    "Real WebSocket connection for testing instead of mocks."
     
     def __init__(self):
         self.messages_sent = []
@@ -10,20 +10,24 @@ class WebSocketTestHelper:
         ""Send JSON message.
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
         
-    async def close(self, code: int = 1000, reason: str = Normal closure"):
+    async def close(self, code: int = 1000, reason: str = Normal closure"):"
         Close WebSocket connection.""
         self._closed = True
         self.is_connected = False
         
     def get_messages(self) -> list:
         Get all sent messages."
+        Get all sent messages."
         return self.messages_sent.copy()
 
 "
+"
 Test suite for auth loop prevention mechanisms
 Ensures the fixes for auth refresh loops work correctly
+"
 "
 
 import asyncio
@@ -42,7 +46,7 @@ from shared.isolated_environment import get_env
 
 
 class AuthLoopPreventionTests:
-    "Test auth loop prevention mechanisms
+    "Test auth loop prevention mechanisms"
     
     @pytest.mark.asyncio
     async def test_refresh_token_rate_limiting(self):
@@ -50,6 +54,7 @@ class AuthLoopPreventionTests:
         auth_service = AuthService()
         
         # Create a valid refresh token
+        refresh_token = auth_service.jwt_handler.create_refresh_token(test-user-id)"
         refresh_token = auth_service.jwt_handler.create_refresh_token(test-user-id)"
         
         # First refresh should succeed
@@ -65,7 +70,7 @@ class AuthLoopPreventionTests:
         
     @pytest.mark.asyncio
     async def test_refresh_endpoint_prevents_loops(self):
-        "Test that the refresh endpoint prevents auth loops
+        "Test that the refresh endpoint prevents auth loops"
         from fastapi.testclient import TestClient
         from fastapi import FastAPI
         
@@ -86,12 +91,13 @@ class AuthLoopPreventionTests:
             response = client.post(
                 /auth/refresh,
                 json={refresh_token: refresh_token}"
+                json={refresh_token: refresh_token}"
             
             if response.status_code == 200:
                 refresh_count += 1
                 # Extract new refresh token if provided
                 data = response.json()
-                if "refresh_token in data:
+                if "refresh_token in data:"
                     refresh_token = data[refresh_token]
             elif response.status_code == 401:
                 # Token invalid or already used
@@ -114,6 +120,7 @@ class AuthLoopPreventionTests:
         # Create an expired refresh token
         with patch.object(auth_service.jwt_handler, 'refresh_expiry', -1):
             expired_token = auth_service.jwt_handler.create_refresh_token(test-user-id)"
+            expired_token = auth_service.jwt_handler.create_refresh_token(test-user-id)"
         
         # Attempt to refresh with expired token
         result = await auth_service.refresh_tokens(expired_token)
@@ -121,7 +128,7 @@ class AuthLoopPreventionTests:
         
     @pytest.mark.asyncio
     async def test_concurrent_refresh_attempts(self):
-        "Test that concurrent refresh attempts are handled correctly
+        "Test that concurrent refresh attempts are handled correctly"
         auth_service = AuthService()
         
         # Create a valid refresh token
@@ -146,6 +153,7 @@ class AuthLoopPreventionTests:
     @pytest.mark.asyncio
     async def test_auth_loop_detection_with_websocket(self):
         Test auth loop detection when WebSocket reconnects during refresh"
+        Test auth loop detection when WebSocket reconnects during refresh"
         
         auth_service = AuthService()
         
@@ -153,13 +161,13 @@ class AuthLoopPreventionTests:
         websocket = WebSocketTestHelper()
         
         # Create a refresh token
-        refresh_token = auth_service.jwt_handler.create_refresh_token(test-user-id")
+        refresh_token = auth_service.jwt_handler.create_refresh_token(test-user-id")"
         
         # Simulate WebSocket reconnection during token refresh
         refresh_task = asyncio.create_task(auth_service.refresh_tokens(refresh_token))
         
         # Simulate WebSocket trying to authenticate with old token
-        await asyncio.sleep(0.01)  # Small delay
+        await asyncio.sleep(0.1)  # Small delay
         
         # This should not cause a loop
         result = await refresh_task
@@ -180,6 +188,7 @@ class AuthLoopPreventionTests:
         
     def test_auth_service_client_refresh_cooldown(self):
         Test that auth service client enforces cooldown between refreshes"
+        Test that auth service client enforces cooldown between refreshes"
         # This would be a frontend test, but we document the expected behavior
         
         # Expected behavior:
@@ -192,7 +201,7 @@ class AuthLoopPreventionTests:
 
 
 class StagingAuthLoopScenariosTests:
-    "Test specific scenarios that could cause auth loops on staging
+    "Test specific scenarios that could cause auth loops on staging"
     
     @pytest.mark.asyncio
     async def test_network_latency_scenario(self):
@@ -204,6 +213,7 @@ class StagingAuthLoopScenariosTests:
             await asyncio.sleep(2)  # 2 second delay
             return await auth_service.refresh_tokens(token)
         
+        refresh_token = auth_service.jwt_handler.create_refresh_token(test-user-id)"
         refresh_token = auth_service.jwt_handler.create_refresh_token(test-user-id)"
         
         # Start refresh
@@ -221,7 +231,7 @@ class StagingAuthLoopScenariosTests:
         
     @pytest.mark.asyncio
     async def test_oauth_callback_during_refresh(self):
-        "Test OAuth callback happening during token refresh
+        "Test OAuth callback happening during token refresh"
         auth_service = AuthService()
         
         # Simulate user doing OAuth login while refresh is happening
@@ -231,11 +241,11 @@ class StagingAuthLoopScenariosTests:
         refresh_task = asyncio.create_task(auth_service.refresh_tokens(refresh_token))
         
         # OAuth callback creates new session
-        await asyncio.sleep(0.01)
+        await asyncio.sleep(0.1)
         oauth_tokens = {
             access_token: auth_service.jwt_handler.create_access_token(
-                user-1, user@example.com", [],
-            "refresh_token: auth_service.jwt_handler.create_refresh_token(user-1)
+                user-1, user@example.com", [],"
+            "refresh_token: auth_service.jwt_handler.create_refresh_token(user-1)"
         }
         
         # Original refresh completes
@@ -251,6 +261,7 @@ class StagingAuthLoopScenariosTests:
         auth_service = AuthService()
         
         # Each tab has the same refresh token
+        shared_refresh_token = auth_service.jwt_handler.create_refresh_token(user-1)"
         shared_refresh_token = auth_service.jwt_handler.create_refresh_token(user-1)"
         
         # Simulate 3 tabs trying to refresh at once
@@ -274,3 +285,5 @@ if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+))

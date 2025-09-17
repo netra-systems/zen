@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """
+"""
 MISSION CRITICAL TEST SUITE: Comprehensive WebSocket Event Validation
 =====================================================================
 
@@ -31,7 +32,9 @@ THE 5 CRITICAL WEBSOCKET EVENTS FOR BUSINESS VALUE:
 
 ANY FAILURE HERE INDICATES WEBSOCKET EVENTS DO NOT DELIVER BUSINESS VALUE.
 "
+"
 
+"""
 """
 import asyncio
 import json
@@ -76,13 +79,15 @@ logger = logging.getLogger(__name__)
 
 class ComprehensiveEventValidator:
     "
+    "
     MISSION CRITICAL: Comprehensive Event Validator for Business Value Protection
     
     This validator orchestrates all validation components to ensure WebSocket events
     deliver substantive business value that drives user engagement and conversions.
 "
+"
     
-    def __init__(self, user_id: str, session_id: str, user_segment: str = "free):
+    def __init__(self, user_id: str, session_id: str, user_segment: str = "free):"
         Initialize comprehensive validator with all validation components.
         
         Args:
@@ -106,9 +111,10 @@ class ComprehensiveEventValidator:
             content": [],"
             timing: None,
             business: None"
+            business: None"
         }
         
-        logger.info(f"ComprehensiveEventValidator initialized for {user_segment} user {user_id})
+        logger.info(f"ComprehensiveEventValidator initialized for {user_segment} user {user_id})"
     
     def validate_event(self, event: WebSocketEvent, processing_start_time: Optional[float] = None) -> Dict[str, Any]:
         Validate a single event across all dimensions.
@@ -135,12 +141,14 @@ class ComprehensiveEventValidator:
         
         return {
             event_type: event.event_type,"
-            "sequence_violations: len(sequence_violations),
+            event_type: event.event_type,"
+            "sequence_violations: len(sequence_violations),"
             content_quality: content_result.quality_level.value,
             "content_business_score: content_result.business_value_score,"
             timing_violations: len(timing_violations),
             business_value_score: business_result.business_value_score,"
-            conversion_probability": business_result.conversion_potential.probability,
+            business_value_score: business_result.business_value_score,"
+            conversion_probability": business_result.conversion_potential.probability,"
             critical_issues: self._identify_critical_issues(sequence_violations, content_result, timing_violations, business_result)
         }
     
@@ -149,9 +157,9 @@ class ComprehensiveEventValidator:
         issues = []
         
         # Critical sequence violations
-        critical_sequence = [v for v in sequence_violations if v.business_impact.value in [critical, high"]]
+        critical_sequence = [v for v in sequence_violations if v.business_impact.value in [critical, high"]]"
         if critical_sequence:
-            issues.extend([f"SEQUENCE: {v.description} for v in critical_sequence]
+            issues.extend([f"SEQUENCE: {v.description) for v in critical_sequence]"
         
         # Critical content issues
         if content_result.quality_level.value == unacceptable:
@@ -160,22 +168,23 @@ class ComprehensiveEventValidator:
         # Critical timing issues  
         critical_timing = [v for v in timing_violations if v.criticality.value == critical"]"
         if critical_timing:
-            issues.extend([fTIMING: {v.description} for v in critical_timing]
+            issues.extend([fTIMING: {v.description) for v in critical_timing]
         
         # Critical business value issues
         if business_result.business_value_score < 0.5:
             issues.append(fBUSINESS: Value score {business_result.business_value_score:.2f} below threshold)
         
         if business_result.conversion_potential.probability < 0.2:
-            issues.append(f"BUSINESS: Conversion probability {business_result.conversion_potential.probability:.1%} too low)
+            issues.append(f"BUSINESS: Conversion probability {business_result.conversion_potential.probability:.1%} too low)"
         
         return issues
     
     def assert_comprehensive_business_value(self) -> None:
-        "Assert that all validation dimensions meet business value requirements.
+        "Assert that all validation dimensions meet business value requirements."
         
         Raises:
             AssertionError: If any validation dimension fails business requirements
+"
 "
         failures = []
         
@@ -184,7 +193,7 @@ class ComprehensiveEventValidator:
             self.sequence_validator.assert_business_value_preserved()
             self.sequence_validator.assert_critical_events_received()
         except AssertionError as e:
-            failures.append(f"SEQUENCE VALIDATION FAILED: {e})
+            failures.append(f"SEQUENCE VALIDATION FAILED: {e})"
         
         # Assert content validation
         try:
@@ -207,7 +216,8 @@ class ComprehensiveEventValidator:
         if failures:
             error_message = (
                  ALERT:  COMPREHENSIVE VALIDATION FAILURE - WebSocket events failed business value requirements!\n\n
-                + \n.join(failures) + "\n\n
+                + \n.join(failures) + "\n\n"
+                This indicates the chat system will NOT deliver substantive AI value to users."
                 This indicates the chat system will NOT deliver substantive AI value to users."
             )
             logger.error(error_message)
@@ -223,25 +233,28 @@ class ComprehensiveEventValidator:
         return {
             session_id: self.session_id,
             user_id: self.user_id,"
-            user_segment": self.user_segment,
+            user_id: self.user_id,"
+            user_segment": self.user_segment,"
             validation_summary: {
                 sequence": {"
                     completed_sequences: sum(1 for r in sequence_results.values() if r.state.value == completed),
                     total_sequences: len(sequence_results),"
-                    business_value_preserved": all(r.business_value_preserved for r in sequence_results.values())
+                    total_sequences: len(sequence_results),"
+                    business_value_preserved": all(r.business_value_preserved for r in sequence_results.values())"
                 },
                 content: {
                     average_business_score": content_summary.get("average_business_value_score, 0),
                     critical_violations: len(content_summary.get(critical_violations, [])
                 },
                 timing: {"
-                    "performance_score: timing_summary.get(performance_score, 0),
+                timing: {"
+                    "performance_score: timing_summary.get(performance_score, 0),"
                     user_engagement_preserved: timing_summary.get(user_engagement_preserved, False)
                 },
                 "business: {"
                     business_value_score: business_summary.get(business_value_score, 0),
-                    conversion_probability: business_summary.get("conversion_probability, 0),
-                    revenue_impact": business_summary.get(estimated_revenue_impact, 0)
+                    conversion_probability: business_summary.get("conversion_probability, 0),"
+                    revenue_impact": business_summary.get(estimated_revenue_impact, 0)"
                 }
             },
             overall_business_value_preserved: self._calculate_overall_preservation()
@@ -261,10 +274,12 @@ class ComprehensiveEventValidator:
 @pytest.mark.mission_critical
 class ComprehensiveWebSocketEventValidationTests:
     "
+    "
     MISSION CRITICAL: Comprehensive WebSocket Event Validation Test Suite
     
     This test suite validates that WebSocket events deliver the business value
     required for substantive chat interactions and revenue generation.
+"
 "
     
     @pytest.fixture
@@ -278,12 +293,13 @@ class ComprehensiveWebSocketEventValidationTests:
         client = await create_authenticated_websocket_client(
             backend_url=backend_url,
             environment=test"
+            environment=test"
         )
         yield client
         await client.close()
     
     async def test_complete_event_sequence_validation(self, authenticated_websocket_client):
-        "Test complete event sequence validation with all 5 critical events.
+        "Test complete event sequence validation with all 5 critical events."
         logger.info("[U+1F680] Testing complete event sequence validation...)"
         
         client = authenticated_websocket_client
@@ -292,9 +308,10 @@ class ComprehensiveWebSocketEventValidationTests:
         
         # Initialize comprehensive validator
         validator = ComprehensiveEventValidator(user_id, session_id, free)"
+        validator = ComprehensiveEventValidator(user_id, session_id, free)"
         
         # Connect to WebSocket
-        await client.connect(/ws")
+        await client.connect(/ws")"
         
         # Create realistic agent execution sequence
         test_events = [
@@ -302,38 +319,41 @@ class ComprehensiveWebSocketEventValidationTests:
                 type: agent_started,
                 "data: {"
                     agent_id: test_agent,
-                    run_id: f"run_{uuid.uuid4().hex[:8]},
-                    task_description: "Analyzing your request for optimal solution
+                    run_id: f"run_{uuid.uuid4().hex[:8]},"
+                    task_description: "Analyzing your request for optimal solution"
                 }
             },
             {
                 type: agent_thinking, 
                 data: {"
-                    "content: Processing your data analysis request, considering multiple approaches,
+                data: {"
+                    "content: Processing your data analysis request, considering multiple approaches,"
                     progress: {step: 1, "total: 4}"
                 }
             },
             {
                 type: tool_executing,
                 data: {"
-                    "tool_name: data_analyzer,
+                data: {"
+                    "tool_name: data_analyzer,"
                     execution_context: Analyzing dataset for patterns and insights
                 }
             },
             {
                 "type: tool_completed",
                 data: {
-                    tool_name: "data_analyzer, 
-                    result": {insights: Found 3 key trends, data_points: 1247},
+                    tool_name: "data_analyzer,"
+                    result": {insights: Found 3 key trends, data_points: 1247},"
                     summary": "Successfully identified key patterns in your data
                 }
             },
             {
                 type: agent_completed,
                 data: {"
-                    "result: {status: completed, insights: ["Trend 1, Trend 2", Trend 3]},
-                    summary: "Completed comprehensive analysis with actionable recommendations,
-                    next_steps": Review insights and implement recommended changes
+                data: {"
+                    "result: {status: completed, insights: ["Trend 1, Trend 2", Trend 3]},"
+                    summary: "Completed comprehensive analysis with actionable recommendations,"
+                    next_steps": Review insights and implement recommended changes"
                 }
             }
         ]
@@ -343,11 +363,12 @@ class ComprehensiveWebSocketEventValidationTests:
         for i, event_data in enumerate(test_events):
             # Send event
             processing_start = time.time()
-            await client.send_event(event_data[type], event_data[data]
+            await client.send_event(event_data[type), event_data[data)
             
             # Create WebSocketEvent for validation
             event = WebSocketEvent(
                 event_type=event_data[type"],"
+                data={**event_data[data], user_id: user_id, timestamp: datetime.now(timezone.utc).isoformat()}"
                 data={**event_data[data], user_id: user_id, timestamp: datetime.now(timezone.utc).isoformat()}"
             
             # Validate event
@@ -364,12 +385,13 @@ class ComprehensiveWebSocketEventValidationTests:
         summary = validator.get_comprehensive_summary()
         
         # Verify all critical events were processed
-        event_types = {r[event_type"] for r in validation_results}
+        event_types = {r[event_type"] for r in validation_results}"
         expected_events = {agent_started, agent_thinking, "tool_executing, tool_completed", agent_completed}
+        assert event_types == expected_events, fMissing critical events: {expected_events - event_types}"
         assert event_types == expected_events, fMissing critical events: {expected_events - event_types}"
         
         # Verify business value preservation
-        assert summary["overall_business_value_preserved], Business value NOT preserved across validation dimensions
+        assert summary["overall_business_value_preserved], Business value NOT preserved across validation dimensions"
         
         # Verify sequence completion
         sequence_info = summary[validation_summary][sequence]
@@ -378,9 +400,10 @@ class ComprehensiveWebSocketEventValidationTests:
         # Verify content quality
         content_info = summary[validation_summary][content]
         assert content_info[average_business_score] >= 0.6, fContent business score {content_info['average_business_score']:.2f} below threshold"
+        assert content_info[average_business_score] >= 0.6, fContent business score {content_info['average_business_score']:.2f} below threshold"
         
         # Verify timing performance
-        timing_info = summary["validation_summary][timing]
+        timing_info = summary["validation_summary][timing]"
         assert timing_info[user_engagement_preserved], Timing did not preserve user engagement
         
         # Verify business value
@@ -392,9 +415,11 @@ class ComprehensiveWebSocketEventValidationTests:
     async def test_business_value_compromise_detection(self, authenticated_websocket_client):
         ""Test that validation detects when business value is compromised.
         logger.info([U+1F680] Testing business value compromise detection...)"
+        logger.info([U+1F680] Testing business value compromise detection...)"
         
         client = authenticated_websocket_client
         user_id = client.authenticated_user.user_id
+        session_id = fcompromise_test_{int(time.time())}"
         session_id = fcompromise_test_{int(time.time())}"
         
         # Initialize validator
@@ -414,8 +439,8 @@ class ComprehensiveWebSocketEventValidationTests:
                 data": {"content: thinking...}  # Generic, no value
             },
             {
-                type: tool_executing", 
-                "data: {tool_name: unknown}  # No context
+                type: tool_executing","
+                "data: {tool_name: unknown}  # No context"
             },
             {
                 type": "agent_error,  # Error instead of completion
@@ -425,19 +450,20 @@ class ComprehensiveWebSocketEventValidationTests:
         
         # Send compromising events
         for event_data in compromising_events:
-            await client.send_event(event_data[type], event_data[data]
+            await client.send_event(event_data[type), event_data[data)
             
             # Create WebSocketEvent for validation
             event = WebSocketEvent(
                 event_type=event_data["type],"
+                data={**event_data[data], user_id: user_id, timestamp: datetime.now(timezone.utc).isoformat()}"
                 data={**event_data[data], user_id: user_id, timestamp: datetime.now(timezone.utc).isoformat()}"
             
             # Validate event (should detect issues)
             result = validator.validate_event(event)
             
             # Should detect critical issues
-            if event_data["type] in [agent_thinking, agent_error]:
-                assert len(result[critical_issues"] > 0, f"Failed to detect critical issues in {event_data['type']}
+            if event_data["type] in [agent_thinking, agent_error]:"
+                assert len(result[critical_issues"] > 0, f"Failed to detect critical issues in {event_data['type'])
         
         # Validation should fail when business value is compromised
         with pytest.raises(AssertionError) as excinfo:
@@ -453,7 +479,8 @@ class ComprehensiveWebSocketEventValidationTests:
     
     async def test_timing_performance_validation(self, authenticated_websocket_client):
         Test timing performance validation for user engagement preservation."
-        logger.info([U+1F680] Testing timing performance validation...")
+        Test timing performance validation for user engagement preservation."
+        logger.info([U+1F680] Testing timing performance validation...")"
         
         client = authenticated_websocket_client
         user_id = client.authenticated_user.user_id
@@ -461,13 +488,16 @@ class ComprehensiveWebSocketEventValidationTests:
         
         # Initialize validator
         validator = ComprehensiveEventValidator(user_id, session_id, free)"
+        validator = ComprehensiveEventValidator(user_id, session_id, free)"
         
         # Connect to WebSocket
-        await client.connect("/ws)
+        await client.connect("/ws)"
         
         # Create events with good timing
         fast_events = [
             {type: agent_started, data": {"agent_id: test, task_description: Fast processing test}},"
+            {type: agent_started, data": {"agent_id: test, task_description: Fast processing test}},"
+            {"type: agent_thinking, data: {content: "Quickly analyzing your request}},"
             {"type: agent_thinking, data: {content: "Quickly analyzing your request}},"
             {type: agent_completed, data: {"result: {status": success}, summary: Completed quickly}}
         ]
@@ -476,7 +506,7 @@ class ComprehensiveWebSocketEventValidationTests:
         start_time = time.time()
         for i, event_data in enumerate(fast_events):
             processing_start = time.time()
-            await client.send_event(event_data[type"], event_data["data]
+            await client.send_event(event_data[type"), event_data["data)
             
             event = WebSocketEvent(
                 event_type=event_data[type],
@@ -501,6 +531,8 @@ class ComprehensiveWebSocketEventValidationTests:
         # Simulate slow events
         slow_events = [
             {type: agent_started, data": {"agent_id: slow_test, task_description: Slow processing test}},"
+            {type: agent_started, data": {"agent_id: slow_test, task_description: Slow processing test}},"
+            {"type: agent_thinking, data: {content: "Taking a long time to think...}},"
             {"type: agent_thinking, data: {content: "Taking a long time to think...}},"
         ]
         
@@ -523,7 +555,8 @@ class ComprehensiveWebSocketEventValidationTests:
     
     async def test_content_quality_validation(self, authenticated_websocket_client):
         Test content quality validation for business value."
-        logger.info([U+1F680] Testing content quality validation...")
+        Test content quality validation for business value."
+        logger.info([U+1F680] Testing content quality validation...")"
         
         client = authenticated_websocket_client
         user_id = client.authenticated_user.user_id
@@ -531,9 +564,10 @@ class ComprehensiveWebSocketEventValidationTests:
         
         # Initialize validator
         validator = ComprehensiveEventValidator(user_id, session_id, free)"
+        validator = ComprehensiveEventValidator(user_id, session_id, free)"
         
         # Connect to WebSocket
-        await client.connect("/ws)
+        await client.connect("/ws)"
         
         # Test high-quality content
         high_quality_events = [
@@ -555,18 +589,19 @@ class ComprehensiveWebSocketEventValidationTests:
             {
                 type: agent_completed,
                 data: {"
-                    result": {
+                data: {"
+                    result": {"
                         recommendations: [Increase marketing spend, "Focus on mobile users],"
                         expected_impact: 20% revenue increase
                     },
-                    summary: "Provided actionable recommendations based on comprehensive data analysis
+                    summary: "Provided actionable recommendations based on comprehensive data analysis"
                 }
             }
         ]
         
         # Validate high-quality content
         for event_data in high_quality_events:
-            await client.send_event(event_data[type"], event_data[data]
+            await client.send_event(event_data[type"), event_data[data)"
             
             event = WebSocketEvent(
                 event_type=event_data[type],
@@ -575,10 +610,10 @@ class ComprehensiveWebSocketEventValidationTests:
             result = validator.validate_event(event)
             
             # Should have high content quality
-            assert result[content_business_score] >= 0.6, f"High-quality content should score >= 0.6, got {result['content_business_score']:.2f}
+            assert result[content_business_score] >= 0.6, f"High-quality content should score >= 0.6, got {result['content_business_score']:.2f}"
         
         # Test low-quality content that should fail
-        low_quality_validator = ComprehensiveEventValidator(user_id, f{session_id}_low, "free)
+        low_quality_validator = ComprehensiveEventValidator(user_id, f{session_id}_low, "free)"
         
         low_quality_events = [
             {
@@ -599,7 +634,7 @@ class ComprehensiveWebSocketEventValidationTests:
             result = low_quality_validator.validate_event(event)
             
             # Should detect quality issues
-            assert len(result[critical_issues] > 0 or result[content_business_score] < 0.5, "Should detect low content quality"
+            assert len(result[critical_issues) > 0 or result[content_business_score) < 0.5, "Should detect low content quality"
         
         # Content validation should pass for high quality
         validator.content_validator.assert_business_value_preserved()
@@ -620,8 +655,8 @@ class ComprehensiveWebSocketEventValidationTests:
         
         try:
             # Initialize validators for each user
-            validator1 = ComprehensiveEventValidator(client1.authenticated_user.user_id, isolation_test_1, free")
-            validator2 = ComprehensiveEventValidator(client2.authenticated_user.user_id, "isolation_test_2, free)
+            validator1 = ComprehensiveEventValidator(client1.authenticated_user.user_id, isolation_test_1, free")"
+            validator2 = ComprehensiveEventValidator(client2.authenticated_user.user_id, "isolation_test_2, free)"
             
             # Connect both clients
             await client1.connect(/ws)
@@ -631,24 +666,25 @@ class ComprehensiveWebSocketEventValidationTests:
             user1_events = [
                 {type: agent_started, data: {agent_id": "user1_agent, task: User 1 task}},
                 {type": "agent_thinking, data: {content: Processing User 1 request}},"
+                {type": "agent_thinking, data: {content: Processing User 1 request}},"
             ]
             
             user2_events = [
-                {"type: agent_started, data: {agent_id: "user2_agent, task": User 2 task}},
+                {"type: agent_started, data: {agent_id: "user2_agent, task": User 2 task}},"
                 {type: "agent_thinking, data": {content: Processing User 2 request}},
             ]
             
             # Send events concurrently
             for event1, event2 in zip(user1_events, user2_events):
                 # Send from user 1
-                await client1.send_event(event1["type], event1[data"]
+                await client1.send_event(event1["type), event1[data")
                 ws_event1 = WebSocketEvent(
                     event_type=event1[type],
-                    data={**event1[data], "user_id: client1.authenticated_user.user_id}
+                    data={**event1[data], "user_id: client1.authenticated_user.user_id}"
                 validator1.validate_event(ws_event1)
                 
                 # Send from user 2  
-                await client2.send_event(event2[type"], event2[data]
+                await client2.send_event(event2[type"), event2[data)"
                 ws_event2 = WebSocketEvent(
                     event_type=event2[type],
                     data={**event2["data], user_id": client2.authenticated_user.user_id}
@@ -663,7 +699,8 @@ class ComprehensiveWebSocketEventValidationTests:
             summary2 = validator2.get_comprehensive_summary()
             
             assert summary1[user_id] != summary2[user_id], Users should have different IDs"
-            assert summary1[session_id"] != summary2[session_id], Sessions should be isolated
+            assert summary1[user_id] != summary2[user_id], Users should have different IDs"
+            assert summary1[session_id"] != summary2[session_id], Sessions should be isolated"
             
             logger.info(" PASS:  Multi-user isolation validation working correctly)"
             
@@ -673,7 +710,8 @@ class ComprehensiveWebSocketEventValidationTests:
     
     async def test_zero_second_execution_prevention(self, authenticated_websocket_client):
         Test that zero-second execution is detected and prevented."
-        logger.info("[U+1F680] Testing zero-second execution prevention...)
+        Test that zero-second execution is detected and prevented."
+        logger.info("[U+1F680] Testing zero-second execution prevention...)"
         
         # Record test start time
         test_start_time = time.time()
@@ -690,13 +728,14 @@ class ComprehensiveWebSocketEventValidationTests:
         
         # Send at least one real event to ensure actual processing
         await client.send_event(agent_started, {"
-            agent_id": real_test_agent,
+        await client.send_event(agent_started, {"
+            agent_id": real_test_agent,"
             task_description: Real processing test
         }
         
         event = WebSocketEvent(
             event_type=agent_started","
-            data={agent_id: real_test_agent, user_id: user_id, timestamp": datetime.now(timezone.utc).isoformat()}
+            data={agent_id: real_test_agent, user_id: user_id, timestamp": datetime.now(timezone.utc).isoformat()}"
         
         validator.validate_event(event)
         
@@ -708,13 +747,13 @@ class ComprehensiveWebSocketEventValidationTests:
         final_elapsed = time.time() - test_start_time
         
         # Assert test actually took time (preventing 0-second execution)
-        assert final_elapsed >= 0.1, f"Test completed in {final_elapsed:.3f}s - this indicates 0-second execution which is forbidden
+        assert final_elapsed >= 0.1, f"Test completed in {final_elapsed:.3f}s - this indicates 0-second execution which is forbidden"
         
         # Verify validator actually processed events
         summary = validator.get_comprehensive_summary()
-        assert summary[validation_summary][sequence][total_sequences] > 0, "Validator should have processed events
+        assert summary[validation_summary][sequence][total_sequences] > 0, "Validator should have processed events"
         
-        logger.info(f PASS:  Zero-second execution prevention working - test took {final_elapsed:.3f}s")
+        logger.info(f PASS:  Zero-second execution prevention working - test took {final_elapsed:.3f}s")"
     
     async def test_performance_under_concurrent_load(self, backend_url):
         Test event validation performance under concurrent load.""
@@ -729,19 +768,21 @@ class ComprehensiveWebSocketEventValidationTests:
             # Create authenticated clients
             for i in range(num_clients):
                 client = await create_authenticated_websocket_client(backend_url=backend_url, environment=test)"
-                await client.connect(/ws")
+                client = await create_authenticated_websocket_client(backend_url=backend_url, environment=test)"
+                await client.connect(/ws")"
                 clients.append(client)
                 
                 validator = ComprehensiveEventValidator(
                     client.authenticated_user.user_id, 
                     fload_test_{i}_{int(time.time())}, 
                     free"
+                    free"
                 )
                 validators.append(validator)
             
             # Define event sequence for each client
             event_sequence = [
-                {"type: agent_started, data: {agent_id: f"load_agent, task: "Load test processing}},
+                {"type: agent_started, data: {agent_id: f"load_agent, task: "Load test processing}},"
                 {type: agent_thinking, data": {"content: Processing load test request with comprehensive analysis}},
                 {type: tool_executing", "data: {tool_name: load_tester, context: "Running concurrent validation}},"
                 {type: tool_completed, data: {"tool_name: load_tester", result: {status: success, processed": True}}},"
@@ -755,14 +796,15 @@ class ComprehensiveWebSocketEventValidationTests:
                 
                 for event_data in event_sequence:
                     processing_start = time.time()
-                    await client.send_event(event_data["type], event_data[data"]
+                    await client.send_event(event_data["type), event_data[data")
                     
                     # Create event for validation
                     event = WebSocketEvent(
                         event_type=event_data[type],
                         data={
                             **event_data[data], "
-                            "user_id: client.authenticated_user.user_id,
+                            **event_data[data], "
+                            "user_id: client.authenticated_user.user_id,"
                             timestamp: datetime.now(timezone.utc).isoformat()
                         }
                     
@@ -794,7 +836,7 @@ class ComprehensiveWebSocketEventValidationTests:
             
             # Verify isolation between clients
             user_ids = {v.user_id for v in updated_validators}
-            assert len(user_ids) == num_clients, f"Expected {num_clients} unique users, got {len(user_ids)}
+            assert len(user_ids) == num_clients, f"Expected {num_clients} unique users, got {len(user_ids)}"
             
             logger.info(f PASS:  Performance under concurrent load test passed - {num_clients} clients in {load_duration:.1f}s")"
             
@@ -809,3 +851,6 @@ if __name__ == "__main__":
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+)))))))))))))))))))))))))
+}}}}}}

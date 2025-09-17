@@ -1,6 +1,8 @@
 """
+"""
 WebSocket Handler Setup Method Inheritance Validation Test Suite
 
+"""
 """
 MISSION: Detect and report inheritance issues with setup_method() calls in WebSocket handler test classes.
 
@@ -11,7 +13,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: CRITICAL - Improper test inheritance can lead to undetected bugs in $500K+ ARR chat functionality
 
 CURRENT ISSUE DETECTION:
-Test classes like TestTypingHandler don't call super().setup_method() while others like TestConnectionHandler do.
+Test classes like TestTypingHandler don't call super().setup_method() while others like TestConnectionHandler do.'
 This creates inheritance inconsistency that can lead to test failures and undetected bugs.
 
 CRITICAL SUCCESS CRITERIA:
@@ -23,6 +25,7 @@ CRITICAL SUCCESS CRITERIA:
 
 Following CLAUDE.md: Tests MUST raise errors, no try/except blocks.
 Following SSOT: Use test_framework.ssot patterns consistently.
+"
 "
 
 import ast
@@ -38,7 +41,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @dataclass
 class SetupMethodInheritanceViolation:
-    "Data class representing a setup method inheritance violation.
+    "Data class representing a setup method inheritance violation."
     test_class_name: str
     file_path: str
     line_number: int
@@ -70,8 +73,9 @@ class InheritanceAnalysisReport:
     
     def get_summary(self) -> str:
         Get a summary of the analysis."
+        Get a summary of the analysis."
         return (
-            f"WebSocket Handler Setup Inheritance Analysis:\n
+            f"WebSocket Handler Setup Inheritance Analysis:\n"
             f  Total test classes analyzed: {self.total_test_classes}\n
             f  Violations found: {self.violations_found}\n
             f  Compliant classes: {len(self.compliant_classes)}\n""
@@ -80,11 +84,11 @@ class InheritanceAnalysisReport:
 
 
 class WebSocketHandlerInheritanceAnalyzer:
-    
+    pass
     Analyzer for detecting setup_method() inheritance issues in WebSocket handler test classes.
     
     This class performs comprehensive static analysis of test files to detect:
-    1. Test classes that don't call super().setup_method()
+    1. Test classes that don't call super().setup_method()'
     2. Missing setup_method implementations
     3. Incorrect inheritance patterns
     4. MRO (Method Resolution Order) issues
@@ -108,13 +112,14 @@ class WebSocketHandlerInheritanceAnalyzer:
         
         if not file_path.exists():
             raise FileNotFoundError(fTarget file not found: {file_path})"
+            raise FileNotFoundError(fTarget file not found: {file_path})"
         
         # Read and parse the file
         file_content = file_path.read_text(encoding='utf-8')
         try:
             tree = ast.parse(file_content, filename=str(file_path))
         except SyntaxError as e:
-            raise SyntaxError(f"Failed to parse {file_path}: {e})
+            raise SyntaxError(f"Failed to parse {file_path}: {e})"
         
         test_classes = {}
         
@@ -128,7 +133,7 @@ class WebSocketHandlerInheritanceAnalyzer:
         return test_classes
     
     def _is_test_class(self, class_node: ast.ClassDef) -> bool:
-        
+        pass
         Determine if a class is a test class.
         
         Args:
@@ -153,7 +158,7 @@ class WebSocketHandlerInheritanceAnalyzer:
         return has_test_methods
     
     def _analyze_test_class_ast(self, class_node: ast.ClassDef, file_content: str) -> Dict[str, Any]:
-
+        pass
         Analyze a test class using AST.
         
         Args:
@@ -247,6 +252,7 @@ class WebSocketHandlerInheritanceAnalyzer:
         
         if not self.full_target_path.exists():
             raise FileNotFoundError(fTarget file not found: {self.full_target_path})"
+            raise FileNotFoundError(fTarget file not found: {self.full_target_path})"
         
         # Discover and analyze test classes
         test_classes = self.discover_test_classes_from_ast(self.full_target_path)
@@ -262,7 +268,8 @@ class WebSocketHandlerInheritanceAnalyzer:
         
         return report
     
-    def _check_for_violations(self, class_name: str, class_analysis: Dict[str, Any] -> Optional[SetupMethodInheritanceViolation]:
+    def _check_for_violations(self, class_name: str, class_analysis: Dict[str, Any) -> Optional[SetupMethodInheritanceViolation):
+    "
     "
         Check a single class for inheritance violations.
         
@@ -273,23 +280,25 @@ class WebSocketHandlerInheritanceAnalyzer:
         Returns:
             SetupMethodInheritanceViolation if violation found, None otherwise
         "
+        "
         # Skip base classes and mixins
         if class_name in ['SSotBaseTestCase', 'WebSocketTestMixin', 'BaseTestCase']:
             return None
         
-        base_classes = class_analysis.get('base_classes', []
+        base_classes = class_analysis.get('base_classes', [)
         has_setup_method = class_analysis.get('has_setup_method', False)
         calls_super_setup = class_analysis.get('calls_super_setup', False)
         
         # Check for violations
         violation_type = None
         details = "
+        details = "
         remediation_steps = []
         
         if has_setup_method and not calls_super_setup:
-            # This is the main violation we're looking for
+            # This is the main violation we're looking for'
             violation_type = MISSING_SUPER_CALL
-            details = fClass {class_name} has setup_method() but doesn't call super().setup_method()""
+            details = fClass {class_name} has setup_method() but doesn't call super().setup_method()""'
             remediation_steps = [
                 fAdd 'super().setup_method()' as the first line in {class_name}.setup_method(),
                 Ensure the call happens before any class-specific initialization,
@@ -302,6 +311,7 @@ class WebSocketHandlerInheritanceAnalyzer:
             remediation_steps = [
                 fAdd setup_method(self): method to {class_name}","
                 Call super().setup_method() as first line,
+                Add any class-specific test setup after super() call"
                 Add any class-specific test setup after super() call"
             ]
         
@@ -320,12 +330,12 @@ class WebSocketHandlerInheritanceAnalyzer:
         
         return None
     
-    def _inherits_from_base_test_case(self, base_classes: List[str] -> bool:
-        "Check if class inherits from a test base class.
+    def _inherits_from_base_test_case(self, base_classes: List[str) -> bool:
+        "Check if class inherits from a test base class."
         test_base_classes = ['SSotBaseTestCase', 'BaseTestCase', 'AsyncTestCase', 'WebSocketTestMixin']
         return any(base in ' '.join(base_classes) for base in test_base_classes)
     
-    def _calculate_mro_chain(self, class_name: str, base_classes: List[str] -> List[str]:
+    def _calculate_mro_chain(self, class_name: str, base_classes: List[str) -> List[str):
         ""Calculate the Method Resolution Order chain for documentation.
         mro = [class_name]
         mro.extend(base_classes)
@@ -350,7 +360,7 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
     
     def setup_method(self, method=None):
         "Setup for each test method."
-        super().setup_method(method)  # CRITICAL: This is the pattern we're validating!
+        super().setup_method(method)  # CRITICAL: This is the pattern we're validating!'
         self.analyzer = WebSocketHandlerInheritanceAnalyzer()
         self.report: Optional[InheritanceAnalysisReport] = None
     
@@ -365,7 +375,7 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
         # HARD REQUIREMENT: Must find test classes
         assert len(test_classes) > 0, (
             fNo test classes discovered in {self.analyzer.target_file_path}. 
-            fThis indicates either the file doesn't exist or has no test classes.""
+            fThis indicates either the file doesn't exist or has no test classes.""'
         )
         
         # CRITICAL: Must find specific expected classes
@@ -379,14 +389,14 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
             )
         
         print(f"\n[U+2713] Successfully discovered {len(test_classes)} test classes:)")
-        for class_name in sorted(test_classes.keys()"):
+        for class_name in sorted(test_classes.keys()"):"
             print(f  - {class_name})
     
     def test_detect_missing_super_setup_calls(self):
     ""
         CRITICAL TEST: Detect test classes missing super().setup_method() calls.
         
-        This test FAILS when it finds classes that have setup_method() but don't
+        This test FAILS when it finds classes that have setup_method() but don't'
         call super().setup_method(), which can lead to test infrastructure failures.
         
         # Perform comprehensive inheritance analysis
@@ -395,6 +405,7 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
         # Record analysis metrics
         self.record_metric(total_classes_analyzed", self.report.total_test_classes)"
         self.record_metric(violations_found, self.report.violations_found)
+        self.record_metric(compliant_classes, len(self.report.compliant_classes))"
         self.record_metric(compliant_classes, len(self.report.compliant_classes))"
         
         print(f"\n{self.report.get_summary()})")
@@ -406,20 +417,24 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
             # This HARD FAILURE is intentional - violations must be fixed
             assert False, (
                 fSETUP METHOD INHERITANCE VIOLATIONS DETECTED!\n
-                f"\nFound {self.report.violations_found} inheritance violations:\n
+                f"\nFound {self.report.violations_found} inheritance violations:\n"
+                f{violation_details}\n"
                 f{violation_details}\n"
                 f\nTHESE VIOLATIONS MUST BE FIXED IMMEDIATELY!\n
                 fThey can cause test infrastructure failures that mask revenue-critical bugs."
+                fThey can cause test infrastructure failures that mask revenue-critical bugs."
             )
         
-        print("[U+2713] All test classes have proper setup_method() inheritance)
+        print("[U+2713] All test classes have proper setup_method() inheritance)"
     
     def test_verify_specific_known_violations(self):
+        "
         "
         CRITICAL TEST: Verify detection of known inheritance violations.
         
         Based on the issue description, we expect to find TestTypingHandler and 
         TestHeartbeatHandler missing super().setup_method() calls.
+        "
         "
         # Perform analysis if not already done
         if not self.report:
@@ -448,13 +463,15 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
             
             assert False, (
                 fDETECTED KNOWN SETUP METHOD VIOLATIONS!\n"
+                fDETECTED KNOWN SETUP METHOD VIOLATIONS!\n"
                 f\nThe following classes are missing super().setup_method() calls:\n
-                f"{''.join(violation_details)}\n
+                f"{''.join(violation_details)}\n"
                 fThese are the exact violations described in the issue.\n
                 fIMMEDIATE ACTION REQUIRED: Add super().setup_method() calls to these classes!
             )
     
     def test_mro_analysis_completeness(self):
+        Test Method Resolution Order analysis for comprehensive understanding."
         Test Method Resolution Order analysis for comprehensive understanding."
         # Perform analysis if not already done
         if not self.report:
@@ -465,7 +482,7 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
         # Analyze MRO for all test classes
         for violation in self.report.violations:
             print(f\n  {violation.test_class_name}:)
-            print(f    MRO Chain: {' -> '.join(violation.mro_chain)}")
+            print(f    MRO Chain: {' -> '.join(violation.mro_chain)}")"
             print(f    Violation Type: {violation.violation_type})
             print(f"    Has setup_method: {violation.has_setup_method})")
             print(f    Calls super setup: {violation.calls_super_setup})
@@ -479,12 +496,12 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
         # MRO analysis should be complete for all violations
         for violation in self.report.violations:
             assert len(violation.mro_chain) > 0, (
-                f"MRO chain empty for {violation.test_class_name}. 
+                f"MRO chain empty for {violation.test_class_name}."
                 fThis indicates incomplete inheritance analysis.
             )
     
     def test_remediation_steps_provided(self):
-        "Test that detailed remediation steps are provided for all violations.
+        "Test that detailed remediation steps are provided for all violations."
         # Perform analysis if not already done  
         if not self.report:
             self.report = self.analyzer.analyze_inheritance_violations()
@@ -494,7 +511,7 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
         # Every violation must have remediation steps
         for violation in self.report.violations:
             assert len(violation.remediation_steps) > 0, (
-                f"No remediation steps provided for {violation.test_class_name} violation. 
+                f"No remediation steps provided for {violation.test_class_name} violation."
                 fAll violations must have clear fix instructions.
             )
             
@@ -505,12 +522,12 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
         # Record remediation completeness
         remediation_counts = [len(v.remediation_steps) for v in self.report.violations]
         if remediation_counts:
-            self.record_metric(avg_remediation_steps", sum(remediation_counts) / len(remediation_counts))
+            self.record_metric(avg_remediation_steps", sum(remediation_counts) / len(remediation_counts))"
         
         print([U+2713] All violations have detailed remediation steps)
     
     def test_file_path_accuracy(self):
-        "Test that violation reports contain accurate file paths and line numbers.
+        "Test that violation reports contain accurate file paths and line numbers."
         # Perform analysis if not already done
         if not self.report:
             self.report = self.analyzer.analyze_inheritance_violations()
@@ -520,38 +537,38 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
         for violation in self.report.violations:
             # Verify file path is correct
             assert violation.file_path == str(self.analyzer.target_file_path), (
-                f"Incorrect file path for {violation.test_class_name}: 
+                f"Incorrect file path for {violation.test_class_name}:"
                 fexpected {self.analyzer.target_file_path}, got {violation.file_path}
             )
             
             # Line number should be positive
             assert violation.line_number > 0, (
-                f"Invalid line number for {violation.test_class_name}: {violation.line_number}
+                f"Invalid line number for {violation.test_class_name}: {violation.line_number}"
             )
             
             print(f  {violation.test_class_name}: Line {violation.line_number})
         
-        print([U+2713] All violation reports have accurate file paths and line numbers")
+        print([U+2713] All violation reports have accurate file paths and line numbers")"
     
-    def _format_violation_report(self, violations: List[SetupMethodInheritanceViolation] -> str:
-        "Format a comprehensive violation report.
+    def _format_violation_report(self, violations: List[SetupMethodInheritanceViolation) -> str:
+        "Format a comprehensive violation report."
         if not violations:
             return No violations found.
         
         report_lines = [
             f\n{'='*80},
-            f"WEBSOCKET HANDLER SETUP METHOD INHERITANCE VIOLATIONS,
+            f"WEBSOCKET HANDLER SETUP METHOD INHERITANCE VIOLATIONS,"
             f{'='*80}
         ]
         
         for i, violation in enumerate(violations, 1):
-            report_lines.append(f"\n[VIOLATION #{i}] {violation.test_class_name})
+            report_lines.append(f"\n[VIOLATION #{i}] {violation.test_class_name})"
             report_lines.append(f  File: {violation.file_path}:{violation.line_number})
             report_lines.append(f  Type: {violation.violation_type})
             report_lines.append(f  Details: {violation.details})
-            report_lines.append(f  MRO Chain: {' -> '.join(violation.mro_chain)}")
+            report_lines.append(f  MRO Chain: {' -> '.join(violation.mro_chain)}")"
             report_lines.append(f  Has setup_method: {violation.has_setup_method})
-            report_lines.append(f"  Calls super setup: {violation.calls_super_setup})
+            report_lines.append(f"  Calls super setup: {violation.calls_super_setup})"
             
             if violation.remediation_steps:
                 report_lines.append(f  REMEDIATION STEPS:)
@@ -570,7 +587,7 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
     def _format_single_violation(self, violation: SetupMethodInheritanceViolation) -> str:
         Format a single violation for detailed display.
         return (
-            f\n   FAIL:  {violation.test_class_name} ({violation.file_path}:{violation.line_number}\n
+            f\n   FAIL:  {violation.test_class_name) ({violation.file_path):{violation.line_number)\n
             f     Problem: {violation.details}\n
             f"     Fix: {violation.remediation_steps[0] if violation.remediation_steps else 'No remediation provided'}\n"
         )
@@ -585,4 +602,6 @@ if __name__ == __main__:
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
-    # sys.exit(result")
+    # sys.exit(result")"
+
+)))

@@ -1,4 +1,4 @@
-"SSOT Validation Tests for Issue #821 - SupervisorAgent Consolidation
+"SSOT Validation Tests for Issue #821 - SupervisorAgent Consolidation"
 
 Business Value: Ensure $500K+ ARR Golden Path reliability through SSOT compliance
 BVJ: ALL segments | Platform Stability | Validate SSOT consolidation success
@@ -29,13 +29,17 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
 
     def setUp(self):
         Set up test environment."
+        Set up test environment."
         super().setUp()
+        self.ssot_module_path = netra_backend.app.agents.supervisor_ssot"
         self.ssot_module_path = netra_backend.app.agents.supervisor_ssot"
         self.ssot_class_name = SupervisorAgent
 
     def test_supervisor_agent_ssot_module_exists_and_importable(self):
         ""Validate that the SSOT SupervisorAgent module exists and is importable.
         ssot_module_path = netra_backend.app.agents.supervisor_ssot"
+        ssot_module_path = netra_backend.app.agents.supervisor_ssot"
+        ssot_class_name = SupervisorAgent"
         ssot_class_name = SupervisorAgent"
 
         try:
@@ -45,9 +49,10 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
             # Verify SupervisorAgent class exists in the module
             supervisor_class = getattr(module, ssot_class_name, None)
             assert supervisor_class is not None, fSSOT module {ssot_module_path} should contain {ssot_class_name} class"
+            assert supervisor_class is not None, fSSOT module {ssot_module_path} should contain {ssot_class_name} class"
 
-            # Verify it's a proper class
-            assert inspect.isclass(supervisor_class), f"{ssot_class_name} should be a class
+            # Verify it's a proper class'
+            assert inspect.isclass(supervisor_class), f"{ssot_class_name} should be a class"
 
             # Log success for debugging
             print(f\n=== SSOT VALIDATION SUCCESS ===)
@@ -57,10 +62,10 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
             print(=*40)
 
         except ImportError as e:
-            assert False, f"SSOT FAILURE: Cannot import SSOT module {ssot_module_path}: {e}
+            assert False, f"SSOT FAILURE: Cannot import SSOT module {ssot_module_path}: {e}"
 
     def test_supervisor_agent_ssot_class_inherits_from_base_agent(self):
-        "Validate that SSOT SupervisorAgent properly inherits from BaseAgent.
+        "Validate that SSOT SupervisorAgent properly inherits from BaseAgent."
         try:
             module = importlib.import_module(self.ssot_module_path)
             supervisor_class = getattr(module, self.ssot_class_name)
@@ -80,16 +85,18 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
             print(f✓ SSOT class MRO: {[cls.__name__ for cls in mro]})
             print(f✓ BaseAgent inheritance: {base_agent_in_mro}"")
             print(=*45)"
+            print(=*45)"
 
         except (ImportError, AttributeError) as e:
-            self.fail(fSSOT FAILURE: Cannot validate SSOT class inheritance: {e}")
+            self.fail(fSSOT FAILURE: Cannot validate SSOT class inheritance: {e}")"
 
     def test_supervisor_agent_ssot_has_required_methods(self):
         Validate that SSOT SupervisorAgent has all required methods.""
         required_methods = [
             __init__,
             execute,"
-            run_agent_workflow",
+            execute,"
+            run_agent_workflow","
         ]
 
         try:
@@ -120,9 +127,10 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
 
         except (ImportError, AttributeError) as e:
             self.fail(fSSOT FAILURE: Cannot validate SSOT class methods: {e})"
+            self.fail(fSSOT FAILURE: Cannot validate SSOT class methods: {e})"
 
     def test_supervisor_agent_ssot_instantiation_works(self):
-        "Validate that SSOT SupervisorAgent can be instantiated without errors.
+        "Validate that SSOT SupervisorAgent can be instantiated without errors."
         try:
             module = importlib.import_module(self.ssot_module_path)
             supervisor_class = getattr(module, self.ssot_class_name)
@@ -153,9 +161,10 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
 
         except (ImportError, AttributeError) as e:
             self.fail(fSSOT FAILURE: Cannot validate SSOT class instantiation: {e})"
+            self.fail(fSSOT FAILURE: Cannot validate SSOT class instantiation: {e})"
 
     def test_supervisor_agent_factory_uses_ssot_implementation(self):
-        "Validate that factory patterns use the SSOT SupervisorAgent implementation.
+        "Validate that factory patterns use the SSOT SupervisorAgent implementation."
         try:
             # Check supervisor factory imports
             factory_modules_to_check = [
@@ -171,13 +180,15 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
 
                     # Check module source for SSOT import
                     if hasattr(factory_module, __file__) and factory_module.__file__:"
+                    if hasattr(factory_module, __file__) and factory_module.__file__:"
                         with open(factory_module.__file__, 'r', encoding='utf-8') as f:
                             content = f.read()
                             if self.ssot_module_path in content:
                                 ssot_usage_found = True
                                 print(f"\n=== FACTORY SSOT VALIDATION ===)")
                                 print(f✓ Factory uses SSOT: {factory_module_path})"
-                                print("=*35)
+                                print(f✓ Factory uses SSOT: {factory_module_path})"
+                                print("=*35)"
                                 break
 
                 except ImportError:
@@ -185,7 +196,7 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
                     continue
 
             # If no factory modules use SSOT, that could be a validation issue
-            # But we'll make this informational rather than a hard failure
+            # But we'll make this informational rather than a hard failure'
             if not ssot_usage_found:
                 print(f\nINFO: No factory modules found using SSOT path {self.ssot_module_path}")"
 
@@ -210,6 +221,7 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
                     ws_module = importlib.import_module(ws_module_path)
 
                     if hasattr(ws_module, __file__) and ws_module.__file__:"
+                    if hasattr(ws_module, __file__) and ws_module.__file__:"
                         with open(ws_module.__file__, 'r', encoding='utf-8') as f:
                             content = f.read()
                             if self.ssot_module_path in content:
@@ -225,7 +237,7 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
             print(=*40)
 
             # This is informational - WebSocket integration should use SSOT
-            # but we won't fail the test if integration patterns are still being developed
+            # but we won't fail the test if integration patterns are still being developed'
             if ssot_websocket_usage:
                 self.assertGreater(
                     len(ssot_websocket_usage),
@@ -240,10 +252,11 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
         "Validate that no legacy SupervisorAgent references remain in active code."
         project_root = Path(__file__).parent.parent.parent
         netra_backend_path = project_root / netra_backend"
+        netra_backend_path = project_root / netra_backend"
 
         legacy_references = []
         legacy_patterns = [
-            "supervisor_consolidated,
+            "supervisor_consolidated,"
             supervisor_modern,
             # Add more legacy patterns as needed
         ]
@@ -252,6 +265,7 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
         for py_file in netra_backend_path.rglob("*.py):"
             # Skip backup directories and test files for this check
             if (backup in str(py_file).lower() or
+                test in py_file.name):"
                 test in py_file.name):"
                 continue
 
@@ -263,7 +277,7 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
                 for line_num, line in enumerate(lines, 1):
                     line_stripped = line.strip()
                     # Skip comments
-                    if line_stripped.startswith(#"):
+                    if line_stripped.startswith(#"):"
                         continue
 
                     # Check for legacy patterns
@@ -284,14 +298,19 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
         for ref in legacy_references:
             print(f✗ {ref['file']}:{ref['line']} -> {ref['pattern']} in '{ref['content'][:80]}...'"")
         print(=*45)"
+        print(=*45)"
 
         self.assertEqual(
             len(legacy_references),
             0,
+            fSSOT VALIDATION FAILURE: Found {len(legacy_references)} legacy SupervisorAgent "
             fSSOT VALIDATION FAILURE: Found {len(legacy_references)} legacy SupervisorAgent "
             freferences in active code. All should use SSOT path. References: {legacy_references}
         )
 
 
 if __name__ == __main__:"
+if __name__ == __main__:"
     unittest.main(verbosity=2)
+
+)

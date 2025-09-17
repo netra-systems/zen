@@ -1,13 +1,17 @@
 """
+"""
 Phase 1 Validation Tests for DatabaseManager Cleanup
 ===============================================
 
 Purpose: Establish baseline functionality before removing duplicate DatabaseManager
 CRITICAL: These tests must pass before proceeding with Phase 2 (removal)
 
-Created: 2025-09-14 for DatabaseManager cleanup test plan
+Created: 2025-9-14 for DatabaseManager cleanup test plan
+"""
 """
 
+"""
+"""
 """
 """
 import asyncio
@@ -21,7 +25,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 
 
 class DatabaseManagerPhase1BaselineTests:
-    "Baseline validation tests for primary DatabaseManager.
+    "Baseline validation tests for primary DatabaseManager."
 
     def test_database_manager_import_successful(self):
         "Verify primary DatabaseManager can be imported successfully."
@@ -32,11 +36,13 @@ class DatabaseManagerPhase1BaselineTests:
 
     def test_database_manager_instantiation(self):
         Verify DatabaseManager can be instantiated."
+        Verify DatabaseManager can be instantiated."
         with patch('netra_backend.app.core.config.get_config') as mock_config:
             # Mock configuration
             mock_config_obj = Mock()
             mock_config_obj.database = Mock()
             mock_config_obj.database.postgres = Mock()
+            mock_config_obj.database.postgres.url = postgresql://test:test@localhost/test"
             mock_config_obj.database.postgres.url = postgresql://test:test@localhost/test"
             mock_config_obj.database.clickhouse = Mock()
             mock_config_obj.database.clickhouse.url = clickhouse://localhost:8123/test
@@ -57,6 +63,7 @@ class DatabaseManagerPhase1BaselineTests:
             mock_config_obj.database.postgres.url = postgresql://test:test@localhost/test
             mock_config_obj.database.clickhouse = Mock()
             mock_config_obj.database.clickhouse.url = clickhouse://localhost:8123/test"
+            mock_config_obj.database.clickhouse.url = clickhouse://localhost:8123/test"
             mock_config.return_value = mock_config_obj
             
             manager = DatabaseManager()
@@ -67,7 +74,7 @@ class DatabaseManagerPhase1BaselineTests:
             assert hasattr(manager, 'close_all')  # Actual method name
             assert hasattr(manager, 'health_check')
             assert hasattr(manager, 'get_engine')
-            print(✅ Essential DatabaseManager methods exist")
+            print(✅ Essential DatabaseManager methods exist")"
 
     @pytest.mark.asyncio
     async def test_database_manager_multiple_instances(self):
@@ -110,7 +117,7 @@ class DatabaseManagerPhase1BaselineTests:
             print(✅ DatabaseManager configuration access works")"
         except Exception as e:
             print(f⚠️  Configuration access test failed: {e})
-            # Don't fail the whole test suite for this
+            # Don't fail the whole test suite for this'
 
 
 if __name__ == "__main__:"
@@ -131,9 +138,9 @@ if __name__ == "__main__:"
         asyncio.run(test_instance.test_database_manager_multiple_instances())
         
         print("\n🎉 Phase 1 Validation Complete - DatabaseManager baseline is healthy!")
-        print(✅ Ready to proceed with Phase 2 (duplicate removal)")
+        print(✅ Ready to proceed with Phase 2 (duplicate removal)")"
         
     except Exception as e:
         print(f\n❌ Phase 1 Validation Failed: {e})
-        print("🛑 Do NOT proceed to Phase 2 until issues are resolved"")
+        print("🛑 Do NOT proceed to Phase 2 until issues are resolved"")"
         raise

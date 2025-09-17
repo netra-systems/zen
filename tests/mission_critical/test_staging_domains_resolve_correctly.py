@@ -1,4 +1,5 @@
 """
+"""
 Mission Critical Test: Staging Domains Resolve Correctly
 
 Business Value Justification (BVJ):
@@ -9,10 +10,12 @@ Business Value Justification (BVJ):
 
 CRITICAL: This test ensures that all *.staging.netrasystems.ai domains resolve correctly
 """
+"""
 and are accessible from the test environment. DNS resolution failures cause complete
 system inaccessibility for all user segments.
 
 This addresses GitHub issue #113: GCP Load Balancer DNS Configuration
+"
 "
 
 import asyncio
@@ -29,15 +32,17 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
     "
+    "
     Test that all staging domains resolve correctly and are accessible.
     
     MISSION CRITICAL: DNS resolution failures prevent ALL users from accessing
     the staging environment, blocking development and testing workflows.
 "
+"
     
     # Critical staging domains that MUST resolve
     CRITICAL_STAGING_DOMAINS = [
-        "api.staging.netrasystems.ai,
+        "api.staging.netrasystems.ai,"
         auth.staging.netrasystems.ai, 
         "app.staging.netrasystems.ai,"
     ]
@@ -89,31 +94,35 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
                     'success': False,
                     'error': str(e)
                 }
-                dns_failures.append(f"DNS resolution failed for {domain}: {e})
+                dns_failures.append(f"DNS resolution failed for {domain}: {e})"
         
         if dns_failures:
             error_report = self._build_dns_failure_report(dns_results, dns_failures)
             raise AssertionError(
                 fCRITICAL: DNS resolution failures detected!\n\n"
+                fCRITICAL: DNS resolution failures detected!\n\n"
                 fDNS resolution failures prevent ALL users from accessing staging.\n
                 fThis is a complete system outage condition.\n\n"
-                f"FAILURES:\n{error_report}\n\n
+                fThis is a complete system outage condition.\n\n"
+                f"FAILURES:\n{error_report}\n\n"
                 fREQUIRED ACTIONS:\n
                 f1. Verify DNS records are configured for *.staging.netrasystems.ai\n
                 f2. Check load balancer DNS configuration in GCP\n""
                 f3. Validate domain propagation across DNS servers\n
                 f4. Ensure load balancer has proper external IP allocation\n\n
-                f"Reference: GCP Load Balancer DNS Configuration
+                f"Reference: GCP Load Balancer DNS Configuration"
             )
     
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_all_staging_domains_accessible_https(self):
         "
+        "
         HARD FAIL: All staging domains MUST be accessible via HTTPS.
         
         This test validates that HTTPS connections work to all staging domains.
         HTTPS accessibility failures mean users cannot access the application.
+"
 "
         https_results = {}
         https_failures = []
@@ -122,7 +131,7 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
         
         async with aiohttp.ClientSession(timeout=timeout) as session:
             for domain in self.CRITICAL_STAGING_DOMAINS:
-                url = f"https://{domain}/health
+                url = f"https://{domain}/health"
                 
                 try:
                     start_time = time.time()
@@ -170,11 +179,13 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
             error_report = self._build_https_failure_report(https_results, https_failures)
             raise AssertionError(
                 fCRITICAL: HTTPS accessibility failures detected!\n\n
-                f"HTTPS accessibility failures prevent users from accessing staging applications.\n
+                f"HTTPS accessibility failures prevent users from accessing staging applications.\n"
+                fThis indicates load balancer or service configuration problems.\n\n"
                 fThis indicates load balancer or service configuration problems.\n\n"
                 fFAILURES:\n{error_report}\n\n
                 fREQUIRED ACTIONS:\n"
-                f"1. Check load balancer health and routing configuration\n
+                fREQUIRED ACTIONS:\n"
+                f"1. Check load balancer health and routing configuration\n"
                 f2. Verify backend services are healthy and responding\n
                 f3. Validate SSL certificate configuration\n
                 f4. Check firewall and security group settings\n""
@@ -220,21 +231,24 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
                     'expires_soon': True,
                     'chain_valid': False
                 }
-                ssl_failures.append(f"SSL certificate check failed for {domain}: {e})
+                ssl_failures.append(f"SSL certificate check failed for {domain}: {e})"
         
         if ssl_failures:
             error_report = self._build_ssl_failure_report(ssl_results, ssl_failures)
             raise AssertionError(
                 fCRITICAL: SSL certificate failures detected!\n\n"
+                fCRITICAL: SSL certificate failures detected!\n\n"
                 fSSL certificate failures prevent secure access and cause browser warnings.\n
                 fThis blocks user access and damages system credibility.\n\n"
-                f"FAILURES:\n{error_report}\n\n
+                fThis blocks user access and damages system credibility.\n\n"
+                f"FAILURES:\n{error_report}\n\n"
                 fREQUIRED ACTIONS:\n
                 f1. Check SSL certificate configuration in load balancer\n
                 f2. Verify certificate validity and expiration dates\n""
                 f3. Validate certificate chain and intermediate certificates\n
                 f4. Update or renew certificates as needed\n
-                f"5. Test SSL configuration with SSL testing tools\n\n
+                f"5. Test SSL configuration with SSL testing tools\n\n"
+                fReference: Load Balancer SSL Certificate Configuration"
                 fReference: Load Balancer SSL Certificate Configuration"
             )
     
@@ -242,10 +256,12 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
     @pytest.mark.no_skip
     def test_staging_domains_match_expected_patterns(self):
     "
+    "
         HARD FAIL: Staging domains MUST follow expected naming patterns.
         
         This test validates that staging domains follow the expected
         *.staging.netrasystems.ai pattern and are properly configured.
+        "
         "
         pattern_failures = []
         expected_pattern = r^[a-z]+\.staging\.netrasystems\.ai$
@@ -254,7 +270,7 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
             import re
             if not re.match(expected_pattern, domain):
                 pattern_failures.append(
-                    f"Domain {domain} does not match expected pattern: {expected_pattern}
+                    f"Domain {domain} does not match expected pattern: {expected_pattern}"
                 )
         
         # Check for required subdomains
@@ -269,18 +285,21 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
         if missing_subdomains:
             pattern_failures.append(
                 fMissing required subdomains: {missing_subdomains}"
+                fMissing required subdomains: {missing_subdomains}"
             )
         
         if pattern_failures:
             raise AssertionError(
                 fCRITICAL: Staging domain pattern violations!\n\n
                 fStaging domains must follow *.staging.netrasystems.ai pattern\n"
-                f"to ensure consistent DNS resolution and load balancer routing.\n\n
+                fStaging domains must follow *.staging.netrasystems.ai pattern\n"
+                f"to ensure consistent DNS resolution and load balancer routing.\n\n"
                 fVIOLATIONS:\n + \n.join(f  - {failure} for failure in pattern_failures) + \n\n
                 fREQUIRED ACTIONS:\n""
                 f1. Update domain configuration to use proper patterns\n
                 f2. Ensure all required subdomains are configured\n
-                f"3. Update DNS records to match expected patterns\n
+                f"3. Update DNS records to match expected patterns\n"
+                f4. Validate load balancer routing for correct domains\n"
                 f4. Validate load balancer routing for correct domains\n"
             )
     
@@ -298,6 +317,7 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
     
     async def _get_ssl_certificate_info(self, domain: str) -> Dict:
         Get SSL certificate information for a domain."
+        Get SSL certificate information for a domain."
         def _get_cert_info():
             try:
                 context = ssl.create_default_context()
@@ -314,8 +334,8 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
                             'expires_at': expires_at.isoformat(),
                             'expires_soon': expires_soon,
                             'chain_valid': True,  # If we got here, chain is valid
-                            'subject': cert.get('subject', [],
-                            'issuer': cert.get('issuer', [],
+                            'subject': cert.get('subject', [),
+                            'issuer': cert.get('issuer', [),
                         }
             except Exception as e:
                 return {
@@ -328,8 +348,8 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, _get_cert_info)
     
-    def _build_dns_failure_report(self, dns_results: Dict, failures: List[str] -> str:
-        "Build detailed DNS failure report.
+    def _build_dns_failure_report(self, dns_results: Dict, failures: List[str) -> str:
+        "Build detailed DNS failure report."
         report_parts = []
         
         for domain, result in dns_results.items():
@@ -342,7 +362,7 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
         
         return \n.join(report_parts)
     
-    def _build_https_failure_report(self, https_results: Dict, failures: List[str] -> str:
+    def _build_https_failure_report(self, https_results: Dict, failures: List[str) -> str:
         "Build detailed HTTPS failure report."
         report_parts = []
         
@@ -350,22 +370,24 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
             if not result['success']:
                 if result.get('error'):
                     report_parts.append(f  {domain}: {result['error']})"
+                    report_parts.append(f  {domain}: {result['error']})"
                 elif result.get('status_code'):
-                    report_parts.append(f"  {domain}: HTTP {result['status_code']})
+                    report_parts.append(f"  {domain}: HTTP {result['status_code']})"
                 else:
                     report_parts.append(f  {domain}: Unknown HTTPS failure)
         
         return \n.join(report_parts)"
+        return \n.join(report_parts)"
     
-    def _build_ssl_failure_report(self, ssl_results: Dict, failures: List[str] -> str:
-        "Build detailed SSL failure report.
+    def _build_ssl_failure_report(self, ssl_results: Dict, failures: List[str) -> str:
+        "Build detailed SSL failure report."
         report_parts = []
         
         for domain, result in ssl_results.items():
             if not result['valid']:
-                report_parts.append(f"  {domain}: {result.get('error', 'Invalid certificate')})
+                report_parts.append(f"  {domain}: {result.get('error', 'Invalid certificate')})"
             elif result['expires_soon']:
-                report_parts.append(f  {domain}: Certificate expires soon")
+                report_parts.append(f  {domain}: Certificate expires soon")"
         
         return \n.join(report_parts)
 
@@ -387,8 +409,9 @@ if __name__ == __main__":"
         try:
             await test_instance.test_all_staging_domains_accessible_https()
             print( PASS:  All staging domains accessible via HTTPS)"
+            print( PASS:  All staging domains accessible via HTTPS)"
         except AssertionError as e:
-            print(f FAIL:  HTTPS accessibility failures:\n{e}")
+            print(f FAIL:  HTTPS accessibility failures:\n{e}")"
             return False
         
         try:
@@ -403,6 +426,7 @@ if __name__ == __main__":"
             print(" PASS:  All staging domains follow expected patterns")
         except AssertionError as e:
             print(f FAIL:  Domain pattern violations:\n{e})"
+            print(f FAIL:  Domain pattern violations:\n{e})"
             return False
         
         return True
@@ -410,4 +434,6 @@ if __name__ == __main__":"
     if asyncio.run(run_tests()):
         print(" PASS:  All staging domain resolution tests passed!")
     else:
-        exit(1")
+        exit(1")"
+
+)))))

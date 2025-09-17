@@ -1,4 +1,5 @@
 """
+"""
 Mission Critical Tests for Issue #1101 MessageRouter Business Protection
 
 These tests protect critical business functionality during SSOT consolidation:
@@ -11,8 +12,10 @@ Business Value Justification:
 - Segment: Platform/Production - Mission Critical
 - Business Goal: Revenue Protection and System Stability
 """
+"""
 - Value Impact: Protects $500K+ ARR from MessageRouter failures
 - Strategic Impact: Ensures business continuity during SSOT transition
+"
 "
 
 import pytest
@@ -38,13 +41,14 @@ logger = central_logger.get_logger(__name__)
 
 
 class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
-    "Mission critical tests for MessageRouter business protection.
+    "Mission critical tests for MessageRouter business protection."
     
     def setUp(self):
         "Set up business protection test environment."
         super().setUp()
         self.business_user_id = business_critical_user_500k"
-        self.business_thread_id = f"revenue_thread_{int(time.time())}
+        self.business_user_id = business_critical_user_500k"
+        self.business_thread_id = f"revenue_thread_{int(time.time())}"
         self.business_run_id = frevenue_run_{int(time.time())}
         
         # Create user context representing $500K+ ARR user
@@ -56,43 +60,49 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
         
         self.business_protection_metrics = {
             critical_functionality_preserved: 0,"
-            revenue_impacting_failures": 0,
+            critical_functionality_preserved: 0,"
+            revenue_impacting_failures": 0,"
             golden_path_success_rate: 0,
             critical_events_delivered": 0,"
             agent_execution_success_rate: 0,
             business_continuity_score: 0"
+            business_continuity_score: 0"
         }
     
     async def test_critical_user_message_routing_protection(self):
-        "MISSION CRITICAL: Protect user message routing that drives $500K+ ARR.
+        "MISSION CRITICAL: Protect user message routing that drives $500K+ ARR."
         try:
             # Test with all MessageRouter implementations to ensure business protection
             routers = [
                 (canonical", get_message_router()),"
                 (proxy, ProxyMessageRouter()),
                 (services, ServicesMessageRouter())"
+                (services, ServicesMessageRouter())"
             ]
             
             critical_user_messages = [
                 {
-                    "type: user_message,
+                    "type: user_message,"
                     payload: {
                         content": "I need urgent help with data analysis for board meeting,
                         priority: high,
                         business_critical: True"
+                        business_critical: True"
                     },
-                    "timestamp: time.time(),
+                    "timestamp: time.time(),"
                     user_id: self.business_user_id,
                     "thread_id: self.business_thread_id"
                 },
                 {
                     type: agent_request, 
                     payload: {"
-                        "message: Generate quarterly revenue analysis,
+                    payload: {"
+                        "message: Generate quarterly revenue analysis,"
                         turn_id: frevenue_turn_{int(time.time())},
                         "business_impact: high",
                         user_request: Generate quarterly revenue analysis
                     },
+                    timestamp: time.time()"
                     timestamp: time.time()"
                 }
             ]
@@ -109,6 +119,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                     mock_websocket.send_json = AsyncMock()
                     mock_websocket.send_text = AsyncMock() 
                     mock_websocket.client_state = connected"
+                    mock_websocket.client_state = connected"
                     
                     try:
                         route_start = time.time()
@@ -122,7 +133,8 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                             logger.info(fBUSINESS PROTECTION: {router_name} routing SUCCESS for {message['type']} ({route_time:.3f}s))
                         else:
                             self.business_protection_metrics[revenue_impacting_failures] += 1"
-                            logger.critical(f"BUSINESS PROTECTION: {router_name} routing FAILED for {message['type']} - REVENUE IMPACT!)
+                            self.business_protection_metrics[revenue_impacting_failures] += 1"
+                            logger.critical(f"BUSINESS PROTECTION: {router_name} routing FAILED for {message['type']} - REVENUE IMPACT!)"
                             
                     except Exception as e:
                         self.business_protection_metrics[revenue_impacting_failures] += 1
@@ -142,7 +154,8 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
             
         except Exception as e:
             self.business_protection_metrics[revenue_impacting_failures] += 1"
-            logger.critical(fBUSINESS PROTECTION CRITICAL FAILURE: User message routing test failed: {e}")
+            self.business_protection_metrics[revenue_impacting_failures] += 1"
+            logger.critical(fBUSINESS PROTECTION CRITICAL FAILURE: User message routing test failed: {e}")"
             raise
     
     async def test_critical_websocket_events_business_protection(self):
@@ -159,21 +172,23 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                 
                 async def send_json(self, data):
                     self.sent_messages.append((json, data))"
+                    self.sent_messages.append((json, data))"
                     
                     # Track critical business events
                     if isinstance(data, dict):
-                        event_type = data.get(event") or data.get(type)
+                        event_type = data.get(event") or data.get(type)"
                         if event_type in [agent_started, agent_thinking, tool_executing", "tool_completed, agent_completed]:
                             self.critical_events_received.append(event_type)
                 
                 async def send_text(self, data):
+                    self.sent_messages.append((text, data))"
                     self.sent_messages.append((text, data))"
                     
                     # Parse JSON if possible to track events
                     try:
                         parsed_data = json.loads(data) if isinstance(data, str) else data
                         if isinstance(parsed_data, dict):
-                            event_type = parsed_data.get(event") or parsed_data.get(type)
+                            event_type = parsed_data.get(event") or parsed_data.get(type)"
                             if event_type in [agent_started, agent_thinking, tool_executing", "tool_completed, agent_completed]:
                                 self.critical_events_received.append(event_type)
                     except:
@@ -183,8 +198,8 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
             
             # Test critical business scenario
             business_critical_message = {
-                type: agent_request",
-                "payload: {
+                type: agent_request","
+                "payload: {"
                     message: Analyze customer churn risk for enterprise accounts,
                     turn_id": f"business_critical_{int(time.time())},
                     require_multi_agent: True,
@@ -193,7 +208,8 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                     revenue_impact: high
                 },
                 timestamp: time.time(),"
-                "user_id: self.business_user_id,
+                timestamp: time.time(),"
+                "user_id: self.business_user_id,"
                 thread_id: self.business_thread_id
             }
             
@@ -222,15 +238,16 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
             # Performance requirement: Must complete within 10 seconds
             self.assertLessEqual(execution_time, 10.0,
                                 fBUSINESS CRITICAL: Execution time {execution_time:.2f}s exceeds 10s limit - 
-                                f"USER EXPERIENCE DEGRADED!)
+                                f"USER EXPERIENCE DEGRADED!)"
             
-            self.business_protection_metrics[critical_functionality_preserved"] += 1
+            self.business_protection_metrics[critical_functionality_preserved"] += 1"
             
             logger.info(fBUSINESS PROTECTION: Critical WebSocket events delivered {delivered_critical_events}/{len(expected_critical_events)} 
                        fin {execution_time:.2f}s)"
+                       fin {execution_time:.2f}s)"
             
         except Exception as e:
-            self.business_protection_metrics["revenue_impacting_failures] += 1
+            self.business_protection_metrics["revenue_impacting_failures] += 1"
             logger.critical(fBUSINESS PROTECTION CRITICAL FAILURE: WebSocket events test failed: {e})
             raise
     
@@ -240,7 +257,8 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
             # Test agent execution with different MessageRouter implementations
             routers = [
                 (canonical, get_message_router()),"
-                ("services, ServicesMessageRouter())
+                (canonical, get_message_router()),"
+                ("services, ServicesMessageRouter())"
             ]
             
             business_agent_scenarios = [
@@ -249,10 +267,12 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                     message": {"
                         type: agent_request,
                         payload: {"
-                            message": Create revenue forecast for next quarter,
+                        payload: {"
+                            message": Create revenue forecast for next quarter,"
                             turn_id: frevenue_forecast_{int(time.time())},
                             require_multi_agent: True,"
-                            "business_function: finance,
+                            require_multi_agent: True,"
+                            "business_function: finance,"
                             urgency: high
                         },
                         "timestamp: time.time()"
@@ -261,7 +281,8 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                 {
                     name: customer_analysis,
                     message: {"
-                        "type: agent_request,
+                    message: {"
+                        "type: agent_request,"
                         payload: {
                             message": "Analyze top customer satisfaction metrics,
                             turn_id: fcustomer_analysis_{int(time.time())},
@@ -269,6 +290,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                             "business_function: customer_success",
                             urgency: medium
                         },
+                        timestamp: time.time()"
                         timestamp: time.time()"
                     }
                 }
@@ -285,6 +307,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                     mock_websocket.send_json = AsyncMock()
                     mock_websocket.send_text = AsyncMock()
                     mock_websocket.client_state = connected"
+                    mock_websocket.client_state = connected"
                     
                     try:
                         exec_start = time.time()
@@ -298,9 +321,10 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                         else:
                             self.business_protection_metrics[revenue_impacting_failures] += 1
                             logger.critical(fBUSINESS PROTECTION: {router_name} agent execution FAILED for {scenario['name']} - BUSINESS VALUE LOST!)"
+                            logger.critical(fBUSINESS PROTECTION: {router_name} agent execution FAILED for {scenario['name']} - BUSINESS VALUE LOST!)"
                             
                     except Exception as e:
-                        self.business_protection_metrics["revenue_impacting_failures] += 1
+                        self.business_protection_metrics["revenue_impacting_failures] += 1"
                         logger.critical(fBUSINESS PROTECTION: {router_name} agent execution EXCEPTION for {scenario['name']}: {e})
             
             # Calculate agent execution success rate
@@ -318,11 +342,11 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
             
         except Exception as e:
             self.business_protection_metrics[revenue_impacting_failures] += 1
-            logger.critical(f"BUSINESS PROTECTION CRITICAL FAILURE: Agent execution test failed: {e})
+            logger.critical(f"BUSINESS PROTECTION CRITICAL FAILURE: Agent execution test failed: {e})"
             raise
     
     async def test_proxy_fallback_business_protection(self):
-        "MISSION CRITICAL: Ensure proxy fallback protects business during transition.
+        "MISSION CRITICAL: Ensure proxy fallback protects business during transition."
         try:
             # Test that proxy provides business protection during SSOT transition
             proxy_router = ProxyMessageRouter()
@@ -339,15 +363,17 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
             mock_websocket.send_json = AsyncMock()
             mock_websocket.send_text = AsyncMock()
             mock_websocket.client_state = connected"
+            mock_websocket.client_state = connected"
             
             business_critical_message = {
-                type": user_message,
+                type": user_message,"
                 payload: {
                     "content: Emergency: System outage affecting customer operations",
                     priority: critical,
                     business_impact: severe"
+                    business_impact: severe"
                 },
-                "timestamp: time.time(),
+                "timestamp: time.time(),"
                 user_id: self.business_user_id
             }
             
@@ -367,8 +393,9 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                                 fBUSINESS CRITICAL: Proxy routing time {proxy_time:.2f}s too slow - USER IMPACT!)
             
             self.business_protection_metrics[critical_functionality_preserved] += 1"
+            self.business_protection_metrics[critical_functionality_preserved] += 1"
             
-            logger.info(fBUSINESS PROTECTION: Proxy fallback validated in {proxy_time:.2f}s")
+            logger.info(fBUSINESS PROTECTION: Proxy fallback validated in {proxy_time:.2f}s")"
             
         except Exception as e:
             self.business_protection_metrics[revenue_impacting_failures] += 1
@@ -377,11 +404,13 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
     
     async def test_concurrent_user_business_protection(self):
         MISSION CRITICAL: Protect business value during concurrent user scenarios."
+        MISSION CRITICAL: Protect business value during concurrent user scenarios."
         try:
             router = get_message_router()
             
             # Simulate concurrent business users (representing $500K+ ARR load)
             async def business_user_scenario(user_id_suffix):
+                user_id = fbusiness_user_{user_id_suffix}"
                 user_id = fbusiness_user_{user_id_suffix}"
                 
                 mock_websocket = Mock()
@@ -392,8 +421,8 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                 business_message = {
                     type": "agent_request,
                     payload: {
-                        message: fBusiness analysis request from user {user_id_suffix}",
-                        "turn_id: fconcurrent_business_{user_id_suffix}_{int(time.time())},
+                        message: fBusiness analysis request from user {user_id_suffix}","
+                        "turn_id: fconcurrent_business_{user_id_suffix}_{int(time.time())},"
                         business_value: high
                     },
                     "timestamp: time.time()"
@@ -402,8 +431,9 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                 try:
                     result = await router.route_message(user_id, mock_websocket, business_message)
                     return {user: user_id, success: result, error: None}"
+                    return {user: user_id, success: result, error: None}"
                 except Exception as e:
-                    return {"user: user_id, success: False, error: str(e)}
+                    return {"user: user_id, success: False, error: str(e)}"
             
             # Execute concurrent business user scenarios
             concurrent_users = 10  # Simulate 10 concurrent business users
@@ -433,21 +463,22 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
             
             # BUSINESS CRITICAL: Must protect 85%+ of concurrent business users
             self.assertGreaterEqual(concurrent_success_rate, 85.0,
-                                   f"BUSINESS CRITICAL: Concurrent user success rate {concurrent_success_rate:.1f}% 
-                                   fbelow 85% threshold - BUSINESS SCALABILITY AT RISK!")
+                                   f"BUSINESS CRITICAL: Concurrent user success rate {concurrent_success_rate:.1f}%"
+                                   fbelow 85% threshold - BUSINESS SCALABILITY AT RISK!")"
             
             # Performance requirement: Concurrent users should complete within 15 seconds
             self.assertLessEqual(concurrent_time, 15.0,
                                 fBUSINESS CRITICAL: Concurrent user processing time {concurrent_time:.2f}s 
                                 fexceeds 15s limit - BUSINESS PERFORMANCE DEGRADED!)"
+                                fexceeds 15s limit - BUSINESS PERFORMANCE DEGRADED!)"
             
-            self.business_protection_metrics["critical_functionality_preserved] += 1
+            self.business_protection_metrics["critical_functionality_preserved] += 1"
             
-            logger.info(fBUSINESS PROTECTION: Concurrent users validated {successful_users}/{concurrent_users} 
-                       f"success ({concurrent_success_rate:.1f}%) in {concurrent_time:.2f}s)
+            logger.info(fBUSINESS PROTECTION: Concurrent users validated {successful_users)/{concurrent_users) 
+                       f"success ({concurrent_success_rate:.1f}%) in {concurrent_time:.2f}s)"
             
         except Exception as e:
-            self.business_protection_metrics[revenue_impacting_failures"] += 1
+            self.business_protection_metrics[revenue_impacting_failures"] += 1"
             logger.critical(fBUSINESS PROTECTION CRITICAL FAILURE: Concurrent user test failed: {e})
             raise
     
@@ -476,13 +507,13 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                 business_continuity_score: business_continuity_score,
                 critical_functionality_preserved": preserved_functionality,"
                 revenue_impacting_failures: revenue_failures,
-                golden_path_success_rate: self.business_protection_metrics.get("golden_path_success_rate, 0),
-                agent_execution_success_rate": self.business_protection_metrics.get(agent_execution_success_rate, 0),
+                golden_path_success_rate: self.business_protection_metrics.get("golden_path_success_rate, 0),"
+                agent_execution_success_rate": self.business_protection_metrics.get(agent_execution_success_rate, 0),"
                 critical_events_delivered: self.business_protection_metrics.get(critical_events_delivered, 0),
                 revenue_protection_analysis": {"
                     500k_arr_protected: business_continuity_score >= 80,
-                    user_experience_maintained: self.business_protection_metrics.get("golden_path_success_rate, 0) >= 95,
-                    agent_functionality_stable": self.business_protection_metrics.get(agent_execution_success_rate, 0) >= 90,
+                    user_experience_maintained: self.business_protection_metrics.get("golden_path_success_rate, 0) >= 95,"
+                    agent_functionality_stable": self.business_protection_metrics.get(agent_execution_success_rate, 0) >= 90,"
                     critical_events_reliable: self.business_protection_metrics.get(critical_events_delivered, 0) >= 4
                 }
             }
@@ -496,19 +527,20 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
             
             # MISSION CRITICAL: Zero tolerance for revenue-impacting failures
             self.assertLessEqual(revenue_failures, 2,
-                                f"MISSION CRITICAL FAILURE: {revenue_failures} revenue-impacting failures detected - 
-                                fBUSINESS REVENUE AT RISK!")
+                                f"MISSION CRITICAL FAILURE: {revenue_failures} revenue-impacting failures detected -"
+                                fBUSINESS REVENUE AT RISK!")"
             
             # Validate specific protection criteria
             protection_criteria = business_summary[revenue_protection_analysis]
             
-            self.assertTrue(protection_criteria[500k_arr_protected"],"
+            self.assertTrue(protection_criteria[500k_arr_protected"),"
                            MISSION CRITICAL: $500K+ ARR not adequately protected!)
             
-            self.assertTrue(protection_criteria[user_experience_maintained],"
-                           "MISSION CRITICAL: User experience degraded - customer satisfaction at risk!)
+            self.assertTrue(protection_criteria[user_experience_maintained),"
+            self.assertTrue(protection_criteria[user_experience_maintained),"
+                           "MISSION CRITICAL: User experience degraded - customer satisfaction at risk!)"
             
-            self.assertTrue(protection_criteria[agent_functionality_stable],
+            self.assertTrue(protection_criteria[agent_functionality_stable),
                            "MISSION CRITICAL: Agent functionality unstable - core business value compromised!)"
             
             logger.info(fMISSION CRITICAL SUCCESS: Business protection validated with {business_continuity_score:.1f}% continuity score)
@@ -516,7 +548,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
             return business_summary
             
         except Exception as e:
-            logger.critical(fMISSION CRITICAL FAILURE: Business protection summary failed: {e}")
+            logger.critical(fMISSION CRITICAL FAILURE: Business protection summary failed: {e}")"
             raise
 
 
@@ -524,3 +556,5 @@ if __name__ == '__main__':
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+)
+}}}

@@ -1,4 +1,5 @@
 """
+"""
 MISSION CRITICAL: IsolatedEnvironment Compliance Test Suite
 ==========================================================
 
@@ -17,9 +18,11 @@ Prevents environment pollution and configuration drift that could cause
 critical failures in production environments.
 
 Author: Claude Code - Compliance Validation
-Date: 2025-09-02
+Date: 2025-9-2
+"
 "
 
+"""
 """
 import os
 import sys
@@ -39,7 +42,7 @@ from test_framework.isolated_environment_fixtures import (
 )
 
 class IsolatedEnvironmentComplianceTests:
-    "Test suite to validate IsolatedEnvironment compliance across the codebase.
+    "Test suite to validate IsolatedEnvironment compliance across the codebase."
     
     def test_isolated_environment_basic_functionality(self, isolated_env):
         "Test that IsolatedEnvironment basic functionality works correctly."
@@ -47,20 +50,22 @@ class IsolatedEnvironmentComplianceTests:
         isolated_env.set(TEST_COMPLIANCE_VAR, "test_value, compliance_test")
         assert isolated_env.get(TEST_COMPLIANCE_VAR) == test_value
         
-        # Test isolation - changes shouldn't affect os.environ
+        # Test isolation - changes shouldn't affect os.environ'
         assert "TEST_COMPLIANCE_VAR not in os.environ"
         
         # Test deletion
         isolated_env.delete(TEST_COMPLIANCE_VAR)
         assert isolated_env.get(TEST_COMPLIANCE_VAR) is None"
+        assert isolated_env.get(TEST_COMPLIANCE_VAR) is None"
 
     def test_standard_test_fixtures_work(self, test_env):
-        "Test that standard test fixtures provide expected environment.
+        "Test that standard test fixtures provide expected environment."
         # Verify standard test variables are available
         assert test_env.get("TESTING) == true"
         assert test_env.get(ENVIRONMENT) == test
         assert test_env.get(DATABASE_URL) is not None"
-        assert test_env.get(JWT_SECRET_KEY") is not None
+        assert test_env.get(DATABASE_URL) is not None"
+        assert test_env.get(JWT_SECRET_KEY") is not None"
         
         # Verify isolation is maintained
         assert test_env.is_isolated()
@@ -70,18 +75,20 @@ class IsolatedEnvironmentComplianceTests:
         assert staging_env.get(ENVIRONMENT) == staging
         assert staging_env.is_staging()
         assert staging_env.get(JWT_SECRET_STAGING) is not None"
+        assert staging_env.get(JWT_SECRET_STAGING) is not None"
 
     def test_production_environment_fixture(self, production_env):
-        "Test production environment fixture provides correct configuration.
+        "Test production environment fixture provides correct configuration."
         assert production_env.get(ENVIRONMENT") == "production
         assert production_env.is_production()
 
     def test_temporary_env_vars_context_manager(self, isolated_env):
         Test temporary environment variables context manager."
-        # Verify variable doesn't exist initially
-        assert isolated_env.get("TEMP_TEST_VAR) is None
+        Test temporary environment variables context manager."
+        # Verify variable doesn't exist initially'
+        assert isolated_env.get("TEMP_TEST_VAR) is None"
         
-        with temporary_env_vars({TEMP_TEST_VAR: temporary_value}:
+        with temporary_env_vars({TEMP_TEST_VAR: temporary_value):
             assert isolated_env.get(TEMP_TEST_VAR") == "temporary_value
         
         # Verify cleanup happened
@@ -92,6 +99,7 @@ class IsolatedEnvironmentComplianceTests:
         # Set some variables first
         isolated_env.set(CLEANUP_TEST_1, value1, cleanup_test")"
         isolated_env.set(CLEANUP_TEST_2, value2, cleanup_test)"
+        isolated_env.set(CLEANUP_TEST_2, value2, cleanup_test)"
         
         with clean_env_context(clear_all=True):
             # Environment should be clean
@@ -99,32 +107,35 @@ class IsolatedEnvironmentComplianceTests:
             assert len(env_vars) == 0
             
             # Set variable inside clean context
-            isolated_env.set(CLEAN_CONTEXT_VAR", clean_value, clean_test)
+            isolated_env.set(CLEAN_CONTEXT_VAR", clean_value, clean_test)"
             assert isolated_env.get("CLEAN_CONTEXT_VAR) == clean_value"
         
         # Original variables should be restored
         assert isolated_env.get(CLEANUP_TEST_1) == value1
         assert isolated_env.get(CLEANUP_TEST_2) == value2"
-        assert isolated_env.get("CLEAN_CONTEXT_VAR) is None
+        assert isolated_env.get(CLEANUP_TEST_2) == value2"
+        assert isolated_env.get("CLEAN_CONTEXT_VAR) is None"
 
     def test_environment_patcher_as_patch_dict_replacement(self, isolated_env):
         Test EnvironmentPatcher as drop-in replacement for patch.dict(os.environ).""
         # Set initial value
         isolated_env.set(PATCH_TEST_VAR, original_value, patch_test_setup)"
+        isolated_env.set(PATCH_TEST_VAR, original_value, patch_test_setup)"
         
-        with patch_env({PATCH_TEST_VAR": patched_value, NEW_PATCH_VAR: new_value}:
+        with patch_env({PATCH_TEST_VAR": patched_value, NEW_PATCH_VAR: new_value):"
             assert isolated_env.get(PATCH_TEST_VAR") == "patched_value
             assert isolated_env.get(NEW_PATCH_VAR) == new_value
         
         # Verify restoration
-        assert isolated_env.get(PATCH_TEST_VAR) == "original_value
-        assert isolated_env.get(NEW_PATCH_VAR") is None
+        assert isolated_env.get(PATCH_TEST_VAR) == "original_value"
+        assert isolated_env.get(NEW_PATCH_VAR") is None"
 
     def test_environment_patcher_with_clear(self, isolated_env):
         Test EnvironmentPatcher with clear=True option.""
         # Set initial values
         isolated_env.set(CLEAR_TEST_1, value1, clear_test_setup)"
-        isolated_env.set("CLEAR_TEST_2, value2, clear_test_setup)
+        isolated_env.set(CLEAR_TEST_1, value1, clear_test_setup)"
+        isolated_env.set("CLEAR_TEST_2, value2, clear_test_setup)"
         
         with patch_env({NEW_CLEAR_VAR": "new_value}, clear=True):
             # Only the new variable should exist
@@ -132,7 +143,8 @@ class IsolatedEnvironmentComplianceTests:
             assert len(all_vars) == 1
             assert isolated_env.get(NEW_CLEAR_VAR) == new_value
             assert isolated_env.get(CLEAR_TEST_1) is None"
-            assert isolated_env.get("CLEAR_TEST_2) is None
+            assert isolated_env.get(CLEAR_TEST_1) is None"
+            assert isolated_env.get("CLEAR_TEST_2) is None"
         
         # Original variables should be restored
         assert isolated_env.get(CLEAR_TEST_1) == value1
@@ -140,7 +152,7 @@ class IsolatedEnvironmentComplianceTests:
         assert isolated_env.get(NEW_CLEAR_VAR) is None
 
     def test_no_os_environ_pollution(self, isolated_env):
-        Critical test: Ensure IsolatedEnvironment doesn't pollute os.environ.""
+        Critical test: Ensure IsolatedEnvironment doesn't pollute os.environ.""'
         # Record original os.environ state
         original_keys = set(os.environ.keys())
         
@@ -152,13 +164,14 @@ class IsolatedEnvironmentComplianceTests:
         
         for key, value in test_vars.items():
             isolated_env.set(key, value, pollution_test)"
+            isolated_env.set(key, value, pollution_test)"
         
         # Verify none of these appear in os.environ
         current_keys = set(os.environ.keys())
         new_keys = current_keys - original_keys
         
         for key in test_vars:
-            assert key not in os.environ, f"Variable {key} polluted os.environ!
+            assert key not in os.environ, f"Variable {key} polluted os.environ!"
         
         # Should be no new keys in os.environ (except pytest-related ones)
         pytest_keys = {k for k in new_keys if 'pytest' in k.lower()}
@@ -186,9 +199,10 @@ class IsolatedEnvironmentComplianceTests:
         
         # Should produce output with compliance status
         assert Compliance Status: in result.stdout, Missing compliance status in output"
+        assert Compliance Status: in result.stdout, Missing compliance status in output"
 
     def test_no_direct_os_environ_in_critical_files(self):
-        "Test that critical test files don't have direct os.environ access.
+        "Test that critical test files don't have direct os.environ access."
         critical_files = [
             tests/mission_critical/test_isolated_environment_compliance.py","
             test_framework/isolated_environment_fixtures.py
@@ -217,9 +231,10 @@ class IsolatedEnvironmentComplianceTests:
                     import re
                     if re.search(pattern, content):
                         violations.append(f{rel_path}: Found forbidden pattern {pattern})"
+                        violations.append(f{rel_path}: Found forbidden pattern {pattern})"
             
             except Exception as e:
-                violations.append(f"{rel_path}: Error reading file - {e})
+                violations.append(f"{rel_path}: Error reading file - {e})"
         
         assert len(violations) == 0, fCritical files have violations: {violations}
 
@@ -233,14 +248,15 @@ class IsolatedEnvironmentComplianceTests:
         
         # Setting variable in one should affect the other
         env1.set("SINGLETON_TEST, test_value", singleton_test)
-        assert env2.get(SINGLETON_TEST) == "test_value
+        assert env2.get(SINGLETON_TEST) == "test_value"
 
     def test_environment_source_tracking(self, isolated_env):
-        "Test that environment variable source tracking works.
+        "Test that environment variable source tracking works."
         isolated_env.set("SOURCE_TEST_VAR, test_value", source_tracking_test)
         
         source = isolated_env.get_variable_source(SOURCE_TEST_VAR)"
-        assert source == "source_tracking_test, fExpected 'source_tracking_test', got '{source}'
+        source = isolated_env.get_variable_source(SOURCE_TEST_VAR)"
+        assert source == "source_tracking_test, fExpected 'source_tracking_test', got '{source}'"
 
     def test_environment_change_callbacks(self, isolated_env):
         Test that environment change callbacks work correctly.""
@@ -254,18 +270,20 @@ class IsolatedEnvironmentComplianceTests:
         try:
             # Set a new variable
             isolated_env.set(CALLBACK_TEST, new_value, callback_test)"
+            isolated_env.set(CALLBACK_TEST, new_value, callback_test)"
             assert len(change_log) == 1
-            assert change_log[0] == ("CALLBACK_TEST, None, new_value)
+            assert change_log[0] == ("CALLBACK_TEST, None, new_value)"
             
             # Update the variable
             change_log.clear()
             isolated_env.set(CALLBACK_TEST, updated_value, "callback_test)"
             assert len(change_log) == 1
             assert change_log[0] == (CALLBACK_TEST, new_value, updated_value)"
+            assert change_log[0] == (CALLBACK_TEST, new_value, updated_value)"
             
             # Delete the variable
             change_log.clear()
-            isolated_env.delete("CALLBACK_TEST)
+            isolated_env.delete("CALLBACK_TEST)"
             assert len(change_log) == 1
             assert change_log[0] == (CALLBACK_TEST, updated_value, None)
         
@@ -281,31 +299,33 @@ class IsolatedEnvironmentComplianceTests:
         # Attempt to modify should fail
         result = isolated_env.set("PROTECTED_VAR, new_value", protection_test)
         assert not result, Protected variable was modified"
-        assert isolated_env.get("PROTECTED_VAR) == original_value
+        assert not result, Protected variable was modified"
+        assert isolated_env.get("PROTECTED_VAR) == original_value"
         
         # Force modification should work
         result = isolated_env.set(PROTECTED_VAR, forced_value, "protection_test, force=True)"
         assert result, Force modification of protected variable failed
         assert isolated_env.get(PROTECTED_VAR) == forced_value"
+        assert isolated_env.get(PROTECTED_VAR) == forced_value"
         
         # Unprotect and modify should work
-        isolated_env.unprotect_variable("PROTECTED_VAR)
+        isolated_env.unprotect_variable("PROTECTED_VAR)"
         result = isolated_env.set(PROTECTED_VAR, unprotected_value, protection_test")"
         assert result, Modification after unprotection failed
-        assert isolated_env.get(PROTECTED_VAR) == "unprotected_value
+        assert isolated_env.get(PROTECTED_VAR) == "unprotected_value"
 
-    @pytest.mark.parametrize(env_name,expected_method", [
+    @pytest.mark.parametrize(env_name,expected_method", ["
         (development, is_development),
         ("staging, is_staging"),
         (production, is_production),
-        (test, is_test")
+        (test, is_test")"
     ]
     def test_environment_detection_methods(self, isolated_env, env_name, expected_method):
-        "Test environment detection methods work correctly.
+        "Test environment detection methods work correctly."
         isolated_env.set(ENVIRONMENT", env_name, "env_detection_test)
         
         # All methods should return False except the expected one
-        methods = [is_development, is_staging, is_production, "is_test]
+        methods = [is_development, is_staging, is_production, "is_test]"
         
         for method_name in methods:
             method = getattr(isolated_env, method_name)
@@ -319,3 +339,6 @@ if __name__ == "__main__":
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+))))))
+]

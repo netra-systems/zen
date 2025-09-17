@@ -1,4 +1,5 @@
 """
+"""
 Mission Critical Auth Service ID Migration Validation Test Suite
 
 MISSION CRITICAL: Phase 1 of UnifiedIDManager migration - Issue #89
@@ -7,6 +8,7 @@ Tests EXACT violations in auth service that block 90%+ migration completion.
 Business Value Justification:
 - Segment: ALL (Critical security infrastructure)
 - Business Goal: Eliminate raw UUID violations causing ID collision risks
+"""
 """
 - Value Impact: Prevents user data leakage from ID collisions ($100K+ security risk)
 - Strategic Impact: CRITICAL - Foundation for entire platform ID migration
@@ -28,6 +30,7 @@ Expected Workflow:
 2. Migrate code  ->  Use UnifiedIdGenerator
 3. Run tests  ->  PASS (validate migration)
 "
+"
 
 import pytest
 import uuid
@@ -47,15 +50,17 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
     "
+    "
     Mission Critical Test Suite for Auth Service ID Migration - Phase 1
     
     These tests validate the exact violations identified in Issue #89.
     Tests are designed to FAIL initially, proving violations exist.
     After migration, tests should PASS, confirming compliance.
 "
+"
 
     def setup_method(self):
-        "Setup for each test method.
+        "Setup for each test method."
         self.violation_count = 0
         self.violations_detected = []
         
@@ -125,6 +130,8 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         # This test SHOULD FAIL initially - we expect violations
         assert len(violations_found) > 0, (
             Expected to find raw UUID violations in auth database models. "
+            Expected to find raw UUID violations in auth database models. "
+            If this passes, violations are already fixed!"
             If this passes, violations are already fixed!"
         )
         
@@ -140,10 +147,11 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         pytest.fail(
             fFound {len(violations_found)} raw UUID violations in auth database models:\n
             f{violation_report}\n\n
-            f"Migration Required: Replace str(uuid.uuid4()) with UnifiedIdGenerator.generate_base_id('auth_user')
+            f"Migration Required: Replace str(uuid.uuid4()) with UnifiedIdGenerator.generate_base_id('auth_user')"
         )
 
     def test_auth_service_session_creation_violations_SHOULD_FAIL(self):
+        "
         "
         EXPECTED TO FAIL: Detect exact raw UUID violations in auth service session creation.
         
@@ -154,8 +162,9 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         
         Migration Target: Replace with UnifiedIdGenerator.generate_base_id()
 "
+"
         # Read the actual auth service file
-        auth_service_file_path = "/Users/anthony/Desktop/netra-apex/auth_service/auth_core/services/auth_service.py
+        auth_service_file_path = "/Users/anthony/Desktop/netra-apex/auth_service/auth_core/services/auth_service.py"
         
         try:
             with open(auth_service_file_path, 'r') as file:
@@ -194,6 +203,8 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         
         # Fail with detailed violation report
         violation_report = \n.join(["
+        violation_report = \n.join(["
+            fLine {v['line']}: {v['content']}"
             fLine {v['line']}: {v['content']}"
             for v in violations_found
         ]
@@ -201,11 +212,12 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         pytest.fail(
             fFound {len(violations_found)} session creation UUID violations in auth service:\n
             f{violation_report}\n\n"
-            f"Migration Required: Replace str(uuid.uuid4()) with UnifiedIdGenerator.generate_base_id('session')
+            f{violation_report}\n\n"
+            f"Migration Required: Replace str(uuid.uuid4()) with UnifiedIdGenerator.generate_base_id('session')"
         )
 
     def test_jwt_handler_jti_generation_violation_SHOULD_FAIL(self):
-        
+        pass
         EXPECTED TO FAIL: Detect exact raw UUID violation in JWT handler JTI generation.
         
         Violation at auth_service/auth_core/core/jwt_handler.py:
@@ -213,7 +225,9 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         
         Migration Target: Replace with UnifiedIdGenerator.generate_base_id('jti')
         "
+        "
         # Read the actual JWT handler file
+        jwt_handler_file_path = /Users/anthony/Desktop/netra-apex/auth_service/auth_core/core/jwt_handler.py"
         jwt_handler_file_path = /Users/anthony/Desktop/netra-apex/auth_service/auth_core/core/jwt_handler.py"
         
         try:
@@ -245,7 +259,8 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         # This test SHOULD FAIL initially - we expect violations
         assert len(violations_found) > 0, (
             Expected to find raw UUID violation in JWT handler JTI generation. "
-            "If this passes, violation is already fixed!
+            Expected to find raw UUID violation in JWT handler JTI generation. "
+            "If this passes, violation is already fixed!"
         )
         
         # Record violations for migration tracking
@@ -253,17 +268,20 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         
         # Fail with detailed violation report
         violation_report = \n.join([
-            f"Line {v['line']}: {v['content']}
+            f"Line {v['line']}: {v['content']}"
             for v in violations_found
         ]
         
         pytest.fail(
             fFound JWT handler JTI generation UUID violation:\n"
+            fFound JWT handler JTI generation UUID violation:\n"
             f{violation_report}\n\n
+            fMigration Required: Replace str(uuid.uuid4()) with UnifiedIdGenerator.generate_base_id('jti')"
             fMigration Required: Replace str(uuid.uuid4()) with UnifiedIdGenerator.generate_base_id('jti')"
         )
 
     def test_unified_auth_interface_violations_SHOULD_FAIL(self):
+    "
     "
         EXPECTED TO FAIL: Detect exact raw UUID violations in unified auth interface.
         
@@ -273,7 +291,9 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         
         Migration Target: Replace with UnifiedIdGenerator.generate_base_id()
         "
+        "
         # Read the actual unified auth interface file
+        auth_interface_file_path = /Users/anthony/Desktop/netra-apex/auth_service/auth_core/unified_auth_interface.py"
         auth_interface_file_path = /Users/anthony/Desktop/netra-apex/auth_service/auth_core/unified_auth_interface.py"
         
         try:
@@ -305,7 +325,8 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         # This test SHOULD FAIL initially - we expect violations
         assert len(violations_found) > 0, (
             Expected to find raw UUID violations in unified auth interface. "
-            "If this passes, violations are already fixed!
+            Expected to find raw UUID violations in unified auth interface. "
+            "If this passes, violations are already fixed!"
         )
         
         # Record violations for migration tracking
@@ -313,13 +334,15 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         
         # Fail with detailed violation report
         violation_report = \n.join([
-            f"Line {v['line']}: {v['content']}
+            f"Line {v['line']}: {v['content']}"
             for v in violations_found
         ]
         
         pytest.fail(
             fFound {len(violations_found)} UUID violations in unified auth interface:\n"
+            fFound {len(violations_found)} UUID violations in unified auth interface:\n"
             f{violation_report}\n\n
+            fMigration Required: Replace str(uuid.uuid4()) with UnifiedIdGenerator.generate_base_id()"
             fMigration Required: Replace str(uuid.uuid4()) with UnifiedIdGenerator.generate_base_id()"
         )
 
@@ -329,9 +352,11 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
 
     def test_auth_models_generate_non_structured_ids_SHOULD_FAIL(self):
     "
+    "
         EXPECTED TO FAIL: Test that auth models currently generate raw UUIDs instead of structured IDs.
         
         This tests the ACTUAL behavior of the models when instantiated.
+        "
         "
         try:
             # Import auth models to test actual behavior
@@ -339,10 +364,10 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
             
             # Test AuthUser ID generation
             try:
-                auth_user = AuthUser(email=test@example.com")
+                auth_user = AuthUser(email=test@example.com")"
                 user_id = auth_user.id
                 
-                # Check if it's a raw UUID (violation) vs structured format (compliant)
+                # Check if it's a raw UUID (violation) vs structured format (compliant)'
                 uuid_pattern = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$', re.I)
                 structured_pattern = re.compile(r'^[a-z_]+_\d+_[a-f0-9]{8}$')
                 
@@ -352,9 +377,10 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
                     violations.append(fAuthUser ID '{user_id}' uses raw UUID format instead of structured format)
                 elif not structured_pattern.match(user_id):
                     violations.append(fAuthUser ID '{user_id}' has unknown format (not UUID or structured))"
+                    violations.append(fAuthUser ID '{user_id}' has unknown format (not UUID or structured))"
                     
                 # Test AuthSession ID generation
-                auth_session = AuthSession(user_id="test_user_id)
+                auth_session = AuthSession(user_id="test_user_id)"
                 session_id = auth_session.id
                 
                 if uuid_pattern.match(session_id):
@@ -387,15 +413,16 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
                 )
                 
             except Exception as model_error:
-                # If models can't be instantiated, that might be due to missing dependencies
+                # If models can't be instantiated, that might be due to missing dependencies'
                 # This is still valuable information for migration planning
+                pytest.fail(fAuth models instantiation failed (may indicate dependency issues): {model_error})"
                 pytest.fail(fAuth models instantiation failed (may indicate dependency issues): {model_error})"
                 
         except ImportError as e:
-            pytest.fail(f"Cannot import auth models for behavioral testing: {e})
+            pytest.fail(f"Cannot import auth models for behavioral testing: {e})"
 
     def test_auth_service_session_creation_behavior_SHOULD_FAIL(self):
-        
+        pass
         EXPECTED TO FAIL: Test that auth service create_session() currently generates raw UUIDs.
         
         This tests the ACTUAL runtime behavior of session creation.
@@ -421,10 +448,11 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
             if uuid_pattern.match(session_id):
                 violations.append(fSession ID '{session_id}' uses raw UUID format instead of structured 'session_*' format)
             elif not structured_pattern.match(session_id):
-                violations.append(f"Session ID '{session_id}' has unknown format (expected session_timestamp_counter_uuid8))
+                violations.append(f"Session ID '{session_id}' has unknown format (expected session_timestamp_counter_uuid8))"
             
             # This test SHOULD FAIL initially - we expect raw UUID usage
             assert len(violations) > 0, (
+                Expected AuthService.create_session() to generate raw UUIDs. "
                 Expected AuthService.create_session() to generate raw UUIDs. "
                 If this passes, session creation is already using structured IDs!
             )
@@ -433,12 +461,13 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
                 fFound session creation behavioral violations:\n" +"
                 \n.join(violations) +
                 \n\nMigration Required: Update AuthService.create_session() to use UnifiedIdGenerator.generate_base_id('session')"
+                \n\nMigration Required: Update AuthService.create_session() to use UnifiedIdGenerator.generate_base_id('session')"
             )
             
         except ImportError as e:
-            pytest.fail(f"Cannot import AuthService for behavioral testing: {e})
+            pytest.fail(f"Cannot import AuthService for behavioral testing: {e})"
         except Exception as e:
-            # If service creation fails, that's also valuable information
+            # If service creation fails, that's also valuable information'
             pytest.fail(fAuthService instantiation or session creation failed: {e})
 
     # ================================================================================
@@ -453,7 +482,8 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         
         # Test UnifiedIdGenerator for auth-specific ID generation
         auth_user_id = UnifiedIdGenerator.generate_base_id(auth_user)"
-        session_id = UnifiedIdGenerator.generate_base_id("session)
+        auth_user_id = UnifiedIdGenerator.generate_base_id(auth_user)"
+        session_id = UnifiedIdGenerator.generate_base_id("session)"
         jti_id = UnifiedIdGenerator.generate_base_id(jti)
         audit_id = UnifiedIdGenerator.generate_base_id("audit)"
         reset_token_id = UnifiedIdGenerator.generate_base_id(reset_token)
@@ -463,8 +493,8 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         uuid_pattern = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$', re.I)
         
         test_cases = [
-            (auth_user_id, auth_user_, Auth user ID"),
-            (session_id, "session_, Session ID),
+            (auth_user_id, auth_user_, Auth user ID"),"
+            (session_id, "session_, Session ID),"
             (jti_id, jti_, JWT ID (JTI)),
             (audit_id, "audit_, Audit log ID"),
             (reset_token_id, reset_token_, Password reset token ID),
@@ -486,22 +516,26 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
             
             # Timestamp should be numeric
             timestamp_part = parts[-3]
-            assert timestamp_part.isdigit(), f"Timestamp part should be numeric in {description}: {timestamp_part}
+            assert timestamp_part.isdigit(), f"Timestamp part should be numeric in {description}: {timestamp_part}"
             
             # Counter should be numeric
             counter_part = parts[-2]
+            assert counter_part.isdigit(), fCounter part should be numeric in {description}: {counter_part}"
             assert counter_part.isdigit(), fCounter part should be numeric in {description}: {counter_part}"
             
             # Random part should be 8-character hex
             random_part = parts[-1]
             assert len(random_part) == 8, fRandom part should be 8 characters in {description}: {random_part}
             assert all(c in '0123456789abcdef' for c in random_part.lower()), fRandom part should be hex in {description}: {random_part}"
+            assert all(c in '0123456789abcdef' for c in random_part.lower()), fRandom part should be hex in {description}: {random_part}"
 
     def test_unified_id_manager_auth_integration_SHOULD_PASS_AFTER_MIGRATION(self):
+    "
     "
         This test should PASS after migration to validate UnifiedIDManager integration.
         
         Tests that UnifiedIDManager methods work properly for auth-related operations.
+        "
         "
         # Test thread and run ID generation for auth contexts
         auth_thread_id = UnifiedIDManager.generate_thread_id()
@@ -511,15 +545,17 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         extracted_thread = UnifiedIDManager.extract_thread_id(auth_run_id)
         assert extracted_thread == auth_thread_id, (
             fRun ID should properly embed and extract thread ID. "
+            fRun ID should properly embed and extract thread ID. "
             fOriginal: {auth_thread_id}, Extracted: {extracted_thread}, Run: {auth_run_id}
         )
         
         # Validate run ID format
         assert UnifiedIDManager.validate_run_id(auth_run_id), fRun ID should validate as proper format: {auth_run_id}"
+        assert UnifiedIDManager.validate_run_id(auth_run_id), fRun ID should validate as proper format: {auth_run_id}"
         
         # Validate parse components
         parsed = UnifiedIDManager.parse_run_id(auth_run_id)
-        assert parsed['valid'] is True, f"Run ID should parse successfully: {auth_run_id}
+        assert parsed['valid'] is True, f"Run ID should parse successfully: {auth_run_id}"
         assert parsed['thread_id'] == auth_thread_id, fParsed thread ID should match original: {parsed}
 
     # ================================================================================
@@ -533,20 +569,22 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         This tests the end-to-end flow with migrated ID generation.
         
         # Test that UnifiedIdGenerator can be used for all auth service ID needs
-        user_context_ids = UnifiedIdGenerator.generate_user_context_ids(auth_test_user, "auth_operation)
+        user_context_ids = UnifiedIdGenerator.generate_user_context_ids(auth_test_user, "auth_operation)"
         thread_id, run_id, request_id = user_context_ids
         
         # Validate all IDs follow consistent patterns
         structured_pattern = re.compile(r'^[a-z_]+_[a-z_]+_\d+_[a-f0-9]{8}$')
         
         assert structured_pattern.match(thread_id), fThread ID should match structured pattern: {thread_id}"
+        assert structured_pattern.match(thread_id), fThread ID should match structured pattern: {thread_id}"
         assert structured_pattern.match(run_id), fRun ID should match structured pattern: {run_id}
+        assert structured_pattern.match(request_id), fRequest ID should match structured pattern: {request_id}"
         assert structured_pattern.match(request_id), fRequest ID should match structured pattern: {request_id}"
         
         # Validate IDs are unique
         ids = [thread_id, run_id, request_id]
         unique_ids = set(ids)
-        assert len(unique_ids) == len(ids), f"All generated IDs should be unique: {ids}
+        assert len(unique_ids) == len(ids), f"All generated IDs should be unique: {ids}"
         
         # Validate IDs can be used in auth operations
         session_data = {
@@ -557,7 +595,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         }
         
         # This should work without any UUID-related errors
-        assert all(key in session_data for key in ['thread_id', 'run_id', 'request_id'], Session data should contain all required IDs
+        assert all(key in session_data for key in ['thread_id', 'run_id', 'request_id'), Session data should contain all required IDs
 
     # ================================================================================
     # CLEANUP AND UTILITIES
@@ -569,7 +607,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
             print(f\n=== Phase 1 Auth Service Violations Detected: {len(self.violations_detected)} ===)
             for violation in self.violations_detected:
                 print(f"  Line {violation['line']}: {violation['content']})")
-            print(f=== Total violations requiring migration: {len(self.violations_detected")} ===)
+            print(f=== Total violations requiring migration: {len(self.violations_detected")} ===)"
 
     def get_violation_summary(self) -> Dict[str, Any]:
         Get summary of violations found during testing.""
@@ -592,7 +630,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
 # ================================================================================
 
 class AuthServiceIDViolationPatternsTests(SSotBaseTestCase):
-    
+    pass
     Specialized tests for detecting specific UUID violation patterns in auth service.
     
     These tests focus on the patterns rather than exact lines, providing
@@ -601,9 +639,11 @@ class AuthServiceIDViolationPatternsTests(SSotBaseTestCase):
 
     def test_detect_sqlalchemy_default_uuid_patterns_SHOULD_FAIL(self):
     "
+    "
         EXPECTED TO FAIL: Detect SQLAlchemy default=lambda: str(uuid.uuid4()) patterns.
         
         These patterns are common in auth service database models.
+        "
         "
         # Pattern specifically for SQLAlchemy default lambdas
         sqlalchemy_uuid_pattern = re.compile(r'default=lambda:\s*str\(uuid\.uuid4\(\)\)')
@@ -638,6 +678,8 @@ class AuthServiceIDViolationPatternsTests(SSotBaseTestCase):
         )
         
         violation_report = \n.join(["
+        violation_report = \n.join(["
+            f{v['file']}:{v['line']} - {v['content']}"
             f{v['file']}:{v['line']} - {v['content']}"
             for v in violations_found
         ]
@@ -645,7 +687,8 @@ class AuthServiceIDViolationPatternsTests(SSotBaseTestCase):
         pytest.fail(
             fFound {len(violations_found)} SQLAlchemy default UUID patterns:\n
             f{violation_report}\n\n"
-            f"Migration Required: Replace default=lambda: str(uuid.uuid4()) with 
+            f{violation_report}\n\n"
+            f"Migration Required: Replace default=lambda: str(uuid.uuid4()) with"
             fdefault=lambda: UnifiedIdGenerator.generate_base_id('model_type')
         )
 
@@ -660,7 +703,8 @@ class AuthServiceIDViolationPatternsTests(SSotBaseTestCase):
         
         violation_files = [
             /Users/anthony/Desktop/netra-apex/auth_service/auth_core/services/auth_service.py,"
-            "/Users/anthony/Desktop/netra-apex/auth_service/auth_core/unified_auth_interface.py
+            /Users/anthony/Desktop/netra-apex/auth_service/auth_core/services/auth_service.py,"
+            "/Users/anthony/Desktop/netra-apex/auth_service/auth_core/unified_auth_interface.py"
         ]
         
         violations_found = []
@@ -697,20 +741,22 @@ class AuthServiceIDViolationPatternsTests(SSotBaseTestCase):
             fFound {len(violations_found)} session creation UUID patterns:\n""
             f{violation_report}\n\n
             fMigration Required: Replace session_id = str(uuid.uuid4()) with 
-            f"session_id = UnifiedIdGenerator.generate_base_id('session')
+            f"session_id = UnifiedIdGenerator.generate_base_id('session')"
         )
 
     def test_detect_user_id_creation_uuid_patterns_SHOULD_FAIL(self):
+        "
         "
         EXPECTED TO FAIL: Detect user ID creation UUID patterns in auth service.
         
         Pattern: user_id = str(uuid.uuid4())
 "
+"
         # Pattern for user ID creation
         user_uuid_pattern = re.compile(r'user_id\s*=\s*str\(uuid\.uuid4\(\)\)')
         
         violation_files = [
-            "/Users/anthony/Desktop/netra-apex/auth_service/auth_core/services/auth_service.py
+            "/Users/anthony/Desktop/netra-apex/auth_service/auth_core/services/auth_service.py"
         ]
         
         violations_found = []
@@ -747,10 +793,11 @@ class AuthServiceIDViolationPatternsTests(SSotBaseTestCase):
             fFound {len(violations_found)} user ID creation UUID patterns:\n""
             f{violation_report}\n\n
             fMigration Required: Replace user_id = str(uuid.uuid4()) with 
-            f"user_id = UnifiedIdGenerator.generate_base_id('user')
+            f"user_id = UnifiedIdGenerator.generate_base_id('user')"
         )
 
     def test_detect_jwt_jti_uuid_patterns_SHOULD_FAIL(self):
+        "
         "
         EXPECTED TO FAIL: Detect JWT JTI UUID patterns.
         
@@ -785,18 +832,20 @@ class AuthServiceIDViolationPatternsTests(SSotBaseTestCase):
         # This test SHOULD FAIL initially
         assert len(violations_found) > 0, (
             Expected to find JWT JTI UUID patterns. "
-            "If this passes, these patterns are already migrated!
+            Expected to find JWT JTI UUID patterns. "
+            "If this passes, these patterns are already migrated!"
         )
         
         violation_report = \n.join([
-            f"{v['file']}:{v['line']} - {v['content']}
+            f"{v['file']}:{v['line']} - {v['content']}"
             for v in violations_found
         ]
         
         pytest.fail(
             fFound {len(violations_found)} JWT JTI UUID patterns:\n"
+            fFound {len(violations_found)} JWT JTI UUID patterns:\n"
             f{violation_report}\n\n
-            fMigration Required: Replace \jti\": str(uuid.uuid4()) with 
+            fMigration Required: Replace \jti\": str(uuid.uuid4()) with"
             f\"jti\": UnifiedIdGenerator.generate_base_id('jti')
         )
 
@@ -806,3 +855,6 @@ if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+))))))))))))))))))))))
+]]

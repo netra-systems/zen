@@ -1,4 +1,5 @@
 '''
+'''
 STAGING ENDPOINTS DIRECT TEST
 ==============================
 
@@ -7,6 +8,7 @@ the cross-service token validation issue.
 
 Based on previous tests, we know JWT secrets are synchronized locally.
 This test focuses on the actual staging service endpoints.
+'''
 '''
 
 import asyncio
@@ -33,7 +35,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 class StagingEndpointTester:
-    "Test actual staging endpoints.
+    "Test actual staging endpoints."
 
     def __init__(self):
         pass
@@ -43,11 +45,12 @@ class StagingEndpointTester:
     async def test_auth_service_health(self):
         "Test auth service health endpoint."
         print()"
+        print()"
         === AUTH SERVICE HEALTH TEST ===)
 
         try:
         async with httpx.AsyncClient(timeout=30.0) as client:
-        response = await client.get("formatted_string)
+        response = await client.get("formatted_string)"
         print(formatted_string)
 
         if response.status_code == 200:
@@ -57,7 +60,7 @@ class StagingEndpointTester:
         except:
         print(formatted_string)
 
-        await asyncio.sleep(0")
+        await asyncio.sleep(0")"
         return response.status_code == 200
 
         except Exception as e:
@@ -66,12 +69,14 @@ class StagingEndpointTester:
 
     async def test_backend_service_health(self):
         Test backend service health endpoint."
+        Test backend service health endpoint."
         pass
         print("")
         === BACKEND SERVICE HEALTH TEST ===)
 
         try:
         async with httpx.AsyncClient(timeout=30.0) as client:
+        response = await client.get(formatted_string)"
         response = await client.get(formatted_string)"
         print("")
         if response.status_code == 200:
@@ -96,9 +101,9 @@ class StagingEndpointTester:
                                                                 # Try to create a token using the auth service
         test_endpoints = [
         /auth/google/callback,  # OAuth callback
-        /auth/login",           # Direct login
+        /auth/login",           # Direct login"
         /auth/token,          # Token endpoint
-        "/api/auth/token,      # Alternative token endpoint
+        "/api/auth/token,      # Alternative token endpoint"
                                                                 
 
         for endpoint in test_endpoints:
@@ -111,14 +116,14 @@ class StagingEndpointTester:
 
                                                                             # 1. GET request
         response = await client.get(url)
-        print(formatted_string")
+        print(formatted_string")"
 
         if response.status_code not in [404, 405]:  # Not found or method not allowed
         print("")
                                                                             # 2. POST request with test data
         test_data = {
-        email: test@staging.netrasystems.ai",
-        password: "test_password_for_staging
+        email: test@staging.netrasystems.ai","
+        password: "test_password_for_staging"
                                                                             
 
         response = await client.post(url, json=test_data)
@@ -130,7 +135,7 @@ class StagingEndpointTester:
                                                                                 # If we got a token, extract it
         if response.status_code == 200:
         try:
-        token_data = response.json(")
+        token_data = response.json(")"
         if access_token in token_data:
         print(f"  [SUCCESS] Got access token!)")
         await asyncio.sleep(0)
@@ -144,14 +149,14 @@ class StagingEndpointTester:
         print([INFO] No token obtained from standard endpoints)
         return None
 
-    async def generate_mock_staging_token(self"):
-        "Generate a mock token that mimics staging auth service.
+    async def generate_mock_staging_token(self"):"
+        "Generate a mock token that mimics staging auth service."
         pass
         print()
         === GENERATE MOCK STAGING TOKEN ===")"
 
     # This simulates what the staging auth service would generate
-    # Using a development secret since we don't have access to staging secret
+    # Using a development secret since we don't have access to staging secret'
 
         try:
         # Load local JWT secret as a reference
@@ -162,13 +167,13 @@ class StagingEndpointTester:
         # Create staging-like token
         now = datetime.now(timezone.utc)
         payload = {
-        sub: "staging_test_user_ + str(int(now.timestamp())),
-        iat": int(now.timestamp()),
+        sub: "staging_test_user_ + str(int(now.timestamp())),"
+        iat": int(now.timestamp()),"
         exp: int((now + timedelta(minutes=15)).timestamp()),
         token_type": "access,
         type: access,
-        iss: "netra-auth-service,  # Same as staging would use
-        aud": netra-platform,      # Same as staging would use
+        iss: "netra-auth-service,  # Same as staging would use"
+        aud": netra-platform,      # Same as staging would use"
         jti: str(uuid.uuid4()),
         "env: staging",             # Critical: staging environment
         email: staging.test@netrasystems.ai,
@@ -179,9 +184,11 @@ class StagingEndpointTester:
         # Generate token
         token = jwt.encode(payload, local_secret, algorithm=HS256")"
         print()"
+        print()"
 
         # Verify locally
-        decoded = jwt.decode(token, local_secret, algorithms=[HS256"], options={verify_aud: False}
+        decoded = jwt.decode(token, local_secret, algorithms=[HS256"], options={verify_aud: False)"
+        print(f[OK] Local verification successful:)"
         print(f[OK] Local verification successful:)"
         print("")
         print(formatted_string"")
@@ -213,8 +220,8 @@ class StagingEndpointTester:
                     # Test various backend endpoints
         test_endpoints = [
         (/health, GET),
-        (/api/v1/health, GET"),
-        ("/api/v1/users/me, GET),
+        (/api/v1/health, GET"),"
+        ("/api/v1/users/me, GET),"
         (/api/v1/agents, GET),
                     
 
@@ -229,13 +236,15 @@ class StagingEndpointTester:
         if method == "GET:"
         response = await client.get(url, headers=headers)
         elif method == POST:
-        response = await client.post(url, headers=headers, json={}
+        response = await client.post(url, headers=headers, json={)
 
         print("")
+        print(formatted_string)"
         print(formatted_string)"
 
         if response.status_code == 401:
         print(f"  [CRITICAL] 401 Unauthorized - Token rejected!)")
+        print(formatted_string)"
         print(formatted_string)"
         results.append(False)
         elif response.status_code in [200, 404]:  # 200 = success, 404 = endpoint not found (but auth worked)
@@ -254,14 +263,15 @@ class StagingEndpointTester:
         if any(r is False for r in results):
         print(f"[CRITICAL] Backend rejected the token on some endpoints!)")
         return False
-        elif any(r is True for r in results"):
+        elif any(r is True for r in results"):"
         print(f[OK] Backend accepted the token on some endpoints!)
         return True
         else:
         print(f"[INCONCLUSIVE] Could not determine token acceptance)")
         return None
 
-    async def test_auth_token_validation_endpoint(self, token"):
+    async def test_auth_token_validation_endpoint(self, token"):"
+        Test if auth service can validate the token."
         Test if auth service can validate the token."
         pass
         print(f" )")
@@ -269,20 +279,23 @@ class StagingEndpointTester:
 
         if not token:
         print([SKIP] No token provided)"
+        print([SKIP] No token provided)"
         await asyncio.sleep(0)
         return False
 
                                                                         # Try different validation endpoints
         validation_endpoints = [
-        "/auth/validate,
+        "/auth/validate,"
         /auth/validate-token,
         "/api/auth/validate,"
         /validate,
+        /token/validate"
         /token/validate"
                                                                         
 
         for endpoint in validation_endpoints:
         try:
+        url = formatted_string"
         url = formatted_string"
         print(")"
 
@@ -302,7 +315,7 @@ class StagingEndpointTester:
         if response.status_code == 200:
         print(f"  [SUCCESS] Auth service validated token!)")
         try:
-        validation_result = response.json(")
+        validation_result = response.json(")"
         print(formatted_string)
         except:
         print("")
@@ -312,23 +325,25 @@ class StagingEndpointTester:
 
         except Exception as e:
         print()"
+        print()"
 
         except Exception as e:
-        print(formatted_string")
+        print(formatted_string")"
 
         print([INFO] Could not validate token with auth service")"
         return False
 
     def generate_test_user_data(self) -> Dict[str, str]:
         Generate realistic test user data for staging."
+        Generate realistic test user data for staging."
         suffix = ''.join(secrets.choice(string.ascii_lowercase) for _ in range(8))
         return {
-        "email: formatted_string,
+        "email: formatted_string,"
         password: StagingTestPass123!,
         "first_name: Staging",
         last_name: Tester,
-        company: Test Corp",
-        "role: QA Engineer
+        company: Test Corp","
+        "role: QA Engineer"
     
 
     async def test_complete_signup_flow(self) -> Dict[str, Any]:
@@ -339,7 +354,8 @@ class StagingEndpointTester:
         user_data = self.generate_test_user_data()
         signup_endpoints = [
         /auth/register,"
-        /api/auth/register",
+        /auth/register,"
+        /api/auth/register","
         /register,
         /api/v1/auth/register""
         
@@ -353,19 +369,21 @@ class StagingEndpointTester:
         if response.status_code in [200, 201, 409]:  # Success or user exists
         signup_time = time.time() - start_time
         self.business_metrics[successful_signups] += 1"
+        self.business_metrics[successful_signups] += 1"
 
         result = {
-        "success: True,
+        "success: True,"
         endpoint: endpoint,
         "status_code: response.status_code,"
         signup_time: signup_time,
+        user_data: user_data"
         user_data: user_data"
                     
 
         if response.status_code in [200, 201]:
         try:
         response_data = response.json()
-        if access_token" in response_data:
+        if access_token" in response_data:"
         result[access_token] = response_data[access_token]
         except Exception:
         pass
@@ -382,10 +400,11 @@ class StagingEndpointTester:
     async def test_login_with_credentials(self, email:
         "Test login with provided credentials."
         logger.info("
+        logger.info("
         start_time = time.time()
 
         login_endpoints = [
-        /auth/login",
+        /auth/login","
         /api/auth/login,
         /login","
         /api/v1/auth/login
@@ -394,7 +413,8 @@ class StagingEndpointTester:
         for endpoint in login_endpoints:
         try:
         url = formatted_string"
-        login_data = {"email: email, password: password}
+        url = formatted_string"
+        login_data = {"email: email, password: password}"
 
         async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.post(url, json=login_data)
@@ -409,27 +429,31 @@ class StagingEndpointTester:
         success": True,"
         endpoint: endpoint,
         login_time: login_time,"
-        "access_token: response_data.get(access_token),
+        login_time: login_time,"
+        "access_token: response_data.get(access_token),"
         refresh_token: response_data.get(refresh_token),
         "user_id: response_data.get(user_id"),
         token_type: response_data.get(token_type, Bearer)"
+        token_type: response_data.get(token_type, Bearer)"
                                                                 
 
-        logger.info(formatted_string")
+        logger.info(formatted_string")"
         return result
 
         except Exception as e:
         logger.error("
+        logger.error("
 
         except Exception as e:
-        logger.error(formatted_string")
+        logger.error(formatted_string")"
         continue
 
         return {success: False, error: "All login endpoints failed}"
 
     async def calculate_business_metrics(self) -> Dict[str, Any]:
         Calculate comprehensive business metrics from test results."
-        logger.info("[U+1F9EA] Calculating business metrics...)
+        Calculate comprehensive business metrics from test results."
+        logger.info("[U+1F9EA] Calculating business metrics...)"
 
     # Calculate conversion rate
         total_attempts = self.business_metrics[successful_signups] + self.business_metrics[successful_logins]
@@ -438,20 +462,21 @@ class StagingEndpointTester:
 
         # Calculate average response time
         if self.performance_metrics[response_times]:
-        avg_response_time = sum(self.performance_metrics[response_times] / len(self.performance_metrics[response_times"]
-        self.business_metrics["time_to_first_value] = avg_response_time
+        avg_response_time = sum(self.performance_metrics[response_times) / len(self.performance_metrics[response_times")"
+        self.business_metrics["time_to_first_value] = avg_response_time"
 
             # Calculate success rate
         if self.performance_metrics[success_rates]:
-        overall_success_rate = sum(self.performance_metrics["success_rates] / len(self.performance_metrics[success_rates"]
+        overall_success_rate = sum(self.performance_metrics["success_rates) / len(self.performance_metrics[success_rates")
         self.business_metrics[user_satisfaction_score] = overall_success_rate * 5.0  # Convert to 5-point scale
 
                 # Estimate revenue attribution (simplified model)
         successful_users = self.business_metrics[successful_logins]"
+        successful_users = self.business_metrics[successful_logins]"
         avg_revenue_per_user = 29.99  # Assumed monthly subscription
         conversion_to_paid = 0.15  # Assumed 15% conversion rate
 
-        self.business_metrics["revenue_attributed] = successful_users * avg_revenue_per_user * conversion_to_paid
+        self.business_metrics["revenue_attributed] = successful_users * avg_revenue_per_user * conversion_to_paid"
 
         logger.info(f CHART:  Business Metrics Summary:)
         logger.info(""
@@ -476,7 +501,8 @@ class StagingEndpointTester:
         print(f )
         [RESULTS] Service Health:")"
         print()"
-        print(formatted_string")
+        print()"
+        print(formatted_string")"
 
         if not auth_healthy or not backend_healthy:
         print([CRITICAL] Services are not healthy - cannot proceed with token tests")"
@@ -502,8 +528,8 @@ class StagingEndpointTester:
         mock_result = await tester.test_backend_with_token(mock_token)
         await tester.test_auth_token_validation_endpoint(mock_token)
 
-        print(f ")
-         + "= * 50)
+        print(f ")"
+         + "= * 50)"
         print(FINAL ANALYSIS:)
 
         if real_token:
@@ -528,3 +554,7 @@ class StagingEndpointTester:
         success = asyncio.run(main())
         sys.exit(0 if success else 1)
         pass
+
+))))))))))
+]]]]]]
+}}}}}}

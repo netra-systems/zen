@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """
+"""
 MISSION CRITICAL: Comprehensive WebSocket Validation Test Suite
 
 This is the most rigorous test suite for WebSocket notifications in the Netra system.
@@ -19,7 +20,9 @@ Required WebSocket Events (MANDATORY):
 
 ANY FAILURE HERE BLOCKS DEPLOYMENT.
 "
+"
 
+"""
 """
 import asyncio
 import json
@@ -67,7 +70,7 @@ try:
         create_isolated_test_contexts
     )
 except ImportError as e:
-    pytest.skip(fCould not import required WebSocket components: {e}", allow_module_level=True)
+    pytest.skip(fCould not import required WebSocket components: {e}", allow_module_level=True)"
 
 
 class ComprehensiveEventValidator:
@@ -76,7 +79,8 @@ class ComprehensiveEventValidator:
     CRITICAL_EVENTS = {
         agent_started,
         agent_thinking, "
-        tool_executing",
+        agent_thinking, "
+        tool_executing","
         tool_completed,
         agent_completed""
     }
@@ -93,8 +97,9 @@ class ComprehensiveEventValidator:
         
     def record_user_event(self, user_id: str, event: Dict) -> None:
         Record an event for a specific user."
+        Record an event for a specific user."
         timestamp = time.time() - self.start_time
-        event_type = event.get(event_type", unknown)
+        event_type = event.get(event_type", unknown)"
         
         # Add timing information
         enriched_event = {
@@ -113,12 +118,13 @@ class ComprehensiveEventValidator:
     
     def validate_user_isolation(self) -> tuple[bool, List[str]]:
         Validate that users are properly isolated."
+        Validate that users are properly isolated."
         failures = []
         
         # Each user should have their own events
         for user_id, events in self.user_events.items():
             for event in events:
-                if event.get("user_id) != user_id:
+                if event.get("user_id) != user_id:"
                     failures.append(fCRITICAL: Event for user {user_id} has wrong user_id: {event.get('user_id')})
         
         # No cross-user contamination
@@ -153,7 +159,8 @@ class ComprehensiveEventValidator:
             
             # First event should be agent_started
             if event_types and event_types[0] != agent_started:"
-                failures.append(f"CRITICAL: First event for user {user_id} should be agent_started, got {event_types[0]})
+            if event_types and event_types[0] != agent_started:"
+                failures.append(f"CRITICAL: First event for user {user_id} should be agent_started, got {event_types[0]})"
             
             # tool_executing should be followed by tool_completed
             for i, event_type in enumerate(event_types):
@@ -169,11 +176,12 @@ class ComprehensiveEventValidator:
                                 break
                     if not found_completion:
                         failures.append(fCRITICAL: tool_executing for {tool_name} never completed for user {user_id})"
+                        failures.append(fCRITICAL: tool_executing for {tool_name} never completed for user {user_id})"
         
         return len(failures) == 0, failures
     
     def validate_comprehensive(self) -> tuple[bool, List[str], Dict[str, Any]]:
-        "Run comprehensive validation.
+        "Run comprehensive validation."
         all_failures = []
         
         # Run individual validations
@@ -191,12 +199,14 @@ class ComprehensiveEventValidator:
             total_events": len(self.events),"
             total_users: len(self.user_events),
             event_counts: self.event_counts.copy(),"
-            "users_with_complete_flows: sum(1 for events in self.user_events.values() 
+            event_counts: self.event_counts.copy(),"
+            "users_with_complete_flows: sum(1 for events in self.user_events.values()"
                                            if any(e.get(event_type) == agent_completed for e in events)),
             isolation_valid": isolation_valid,"
             events_valid: events_valid,
             ordering_valid: ordering_valid,"
-            "duration_seconds: time.time() - self.start_time
+            ordering_valid: ordering_valid,"
+            "duration_seconds: time.time() - self.start_time"
         }
         
         return len(all_failures) == 0, all_failures, analysis
@@ -212,13 +222,14 @@ class WebSocketTestHarness:
         
     async def create_test_context(self, user_id: str) -> TestContext:
         Create and track a test context for a user."
+        Create and track a test context for a user."
         context = create_test_context(user_id=user_id)
         self.test_contexts[user_id] = context
         return context
     
     async def send_agent_event_with_validation(self, user_id: str, thread_id: str, 
                                              event_type: str, event_data: Dict[str, Any] -> bool:
-        "Send agent event and track for validation.
+        "Send agent event and track for validation."
         try:
             # Create WebSocket message
             message = create_standard_message(
@@ -237,7 +248,8 @@ class WebSocketTestHarness:
                     "event_type: event_type,"
                     user_id: user_id,
                     thread_id: thread_id,"
-                    data": event_data
+                    thread_id: thread_id,"
+                    data": event_data"
                 }
                 self.validator.record_user_event(user_id, validation_event)
             
@@ -250,6 +262,7 @@ class WebSocketTestHarness:
     async def simulate_complete_agent_flow(self, user_id: str, agent_name: str = TestAgent", "
                                          include_tools: bool = True) -> bool:
         Simulate complete agent flow for a user."
+        Simulate complete agent flow for a user."
         try:
             context = await self.create_test_context(user_id)
             thread_id = context.user_context.thread_id
@@ -257,14 +270,15 @@ class WebSocketTestHarness:
             
             # Send agent events in sequence
             success = await self.send_agent_event_with_validation(
-                user_id, thread_id, agent_started",
+                user_id, thread_id, agent_started","
                 {agent_name: agent_name, run_id: run_id, "context: {task": Comprehensive test}}
             if not success:
                 return False
             
             success = await self.send_agent_event_with_validation(
                 user_id, thread_id, agent_thinking,"
-                {"agent_name: agent_name, run_id: run_id, reasoning: Processing request...}
+                user_id, thread_id, agent_thinking,"
+                {"agent_name: agent_name, run_id: run_id, reasoning: Processing request...}"
             if not success:
                 return False
             
@@ -284,6 +298,7 @@ class WebSocketTestHarness:
             
             success = await self.send_agent_event_with_validation(
                 user_id, thread_id, agent_completed,
+                {agent_name": agent_name, "run_id: run_id, result: {status: completed}}"
                 {agent_name": agent_name, "run_id: run_id, result: {status: completed}}"
             
             return success
@@ -318,7 +333,8 @@ class WebSocketTestHarness:
             "total_users: user_count,"
             successful_flows: successful_flows,
             success_rate: successful_flows / user_count,"
-            duration_seconds": duration,
+            success_rate: successful_flows / user_count,"
+            duration_seconds": duration,"
             user_ids: user_ids
         }
     
@@ -328,7 +344,8 @@ class WebSocketTestHarness:
         
         return {
             validation_passed: is_valid,"
-            validation_failures": failures,
+            validation_passed: is_valid,"
+            validation_failures": failures,"
             analysis: analysis
         }
     
@@ -365,11 +382,14 @@ class UltraComprehensiveWebSocketValidationTests:
     @pytest.mark.timeout(60)
     async def test_comprehensive_single_user_flow(self):
         Test comprehensive single user flow."
-        print( TARGET:  Testing comprehensive single user flow")
+        Test comprehensive single user flow."
+        print( TARGET:  Testing comprehensive single user flow")"
         
+        user_id = single_user_test"
         user_id = single_user_test"
         success = await self.test_harness.simulate_complete_agent_flow(user_id)
         
+        assert success, Single user agent flow simulation failed"
         assert success, Single user agent flow simulation failed"
         
         # Validate results
@@ -378,15 +398,16 @@ class UltraComprehensiveWebSocketValidationTests:
         
         analysis = results["analysis]"
         assert analysis[total_users] >= 1, Should track at least 1 user
-        assert analysis[total_events] >= 5, "Should have at least 5 events for complete flow
+        assert analysis[total_events] >= 5, "Should have at least 5 events for complete flow"
         
-        print( PASS:  Comprehensive single user flow test passed")
+        print( PASS:  Comprehensive single user flow test passed")"
     
     @pytest.mark.asyncio
     @pytest.mark.critical
     @pytest.mark.timeout(120)
     async def test_comprehensive_user_isolation(self):
         Test comprehensive user isolation.""
+        print([U+1F512] Testing comprehensive user isolation)"
         print([U+1F512] Testing comprehensive user isolation)"
         
         # Create multiple isolated users
@@ -401,8 +422,8 @@ class UltraComprehensiveWebSocketValidationTests:
         assert results["validation_passed], fUser isolation validation failed: {results['validation_failures']}"
         
         analysis = results[analysis]
-        assert analysis[total_users] == user_count, f"Should track {user_count} users
-        assert analysis[isolation_valid], "User isolation validation failed
+        assert analysis[total_users] == user_count, f"Should track {user_count} users"
+        assert analysis[isolation_valid], "User isolation validation failed"
         
         print( PASS:  Comprehensive user isolation test passed)
     
@@ -443,12 +464,15 @@ class UltraComprehensiveWebSocketValidationTests:
     @pytest.mark.timeout(120)
     async def test_comprehensive_high_load_performance(self):
         Test comprehensive performance under high load."
-        print([U+1F4AA] Testing comprehensive high load performance")
+        Test comprehensive performance under high load."
+        print([U+1F4AA] Testing comprehensive high load performance")"
         
         # High load scenario
         high_load_results = await self.test_harness.run_concurrent_user_scenarios(user_count=25)
         
         assert high_load_results[success_rate] >= 0.9, \"
+        assert high_load_results[success_rate] >= 0.9, \"
+            fHigh load success rate too low: {high_load_results['success_rate']}"
             fHigh load success rate too low: {high_load_results['success_rate']}"
         
         assert high_load_results[duration_seconds] < 30, \
@@ -459,15 +483,17 @@ class UltraComprehensiveWebSocketValidationTests:
         assert results[validation_passed], fHigh load validation failed: {results['validation_failures']}
         
         analysis = results[analysis]"
-        assert analysis[total_events"] >= 75, Should process many events under load
+        analysis = results[analysis]"
+        assert analysis[total_events"] >= 75, Should process many events under load"
         
+        print( PASS:  Comprehensive high load performance test passed)"
         print( PASS:  Comprehensive high load performance test passed)"
     
     @pytest.mark.asyncio
     @pytest.mark.critical
     @pytest.mark.timeout(60)
     async def test_comprehensive_event_ordering_validation(self):
-        "Test comprehensive event ordering validation.
+        "Test comprehensive event ordering validation."
         print([U+1F4CB] Testing comprehensive event ordering validation"")
         
         # Create users with specific ordering requirements
@@ -481,22 +507,25 @@ class UltraComprehensiveWebSocketValidationTests:
                 include_tools=True
             )
             assert success, fFlow failed for ordering test user {user_id}"
+            assert success, fFlow failed for ordering test user {user_id}"
         
         # Validate ordering
         results = self.test_harness.get_comprehensive_results()
-        assert results["validation_passed], fEvent ordering validation failed: {results['validation_failures']}
+        assert results["validation_passed], fEvent ordering validation failed: {results['validation_failures']}"
         
         analysis = results[analysis]
         assert analysis[ordering_valid"], "Event ordering validation failed
         assert analysis[users_with_complete_flows] == len(ordering_test_users), \
             Not all users completed their flows"
+            Not all users completed their flows"
         
-        print( PASS:  Comprehensive event ordering validation test passed")
+        print( PASS:  Comprehensive event ordering validation test passed")"
     
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_comprehensive_final_validation(self):
         Final comprehensive validation test.""
+        print([U+1F396][U+FE0F] Running final comprehensive validation)"
         print([U+1F396][U+FE0F] Running final comprehensive validation)"
         
         # Run the most demanding test scenario
@@ -516,27 +545,31 @@ class UltraComprehensiveWebSocketValidationTests:
         
         # Comprehensive metrics validation
         analysis = results[analysis]"
+        analysis = results[analysis]"
         assert analysis[total_events"] >= 60, \
             fFinal validation insufficient event coverage: {analysis['total_events']}
         
         assert analysis[total_users] == final_user_count, \"
-            f"Final validation insufficient user coverage: {analysis['total_users']}
+        assert analysis[total_users] == final_user_count, \"
+            f"Final validation insufficient user coverage: {analysis['total_users']}"
         
         assert analysis[isolation_valid], Final validation: User isolation failed
-        assert analysis[events_valid], "Final validation: Critical events validation failed
-        assert analysis[ordering_valid"], Final validation: Event ordering failed
+        assert analysis[events_valid], "Final validation: Critical events validation failed"
+        assert analysis[ordering_valid"], Final validation: Event ordering failed"
         
         print( TROPHY:  FINAL COMPREHENSIVE VALIDATION PASSED!)"
-        print(" TARGET:  All WebSocket notification requirements validated successfully)
+        print( TROPHY:  FINAL COMPREHENSIVE VALIDATION PASSED!)"
+        print(" TARGET:  All WebSocket notification requirements validated successfully)"
         print([U+1F4BC] Business value preservation: Chat functionality fully operational")"
 
 
 class WebSocketEventTypesTests:
     Test specific WebSocket event types and their requirements."
+    Test specific WebSocket event types and their requirements."
     
     @pytest.fixture(autouse=True)
     async def setup_event_testing(self):
-        "Setup for event type testing.
+        "Setup for event type testing."
         self.test_harness = WebSocketTestHarness()
         
         try:
@@ -549,19 +582,20 @@ class WebSocketEventTypesTests:
     async def test_agent_started_event_requirements(self):
         "Test agent_started event meets all requirements."
         user_id = agent_started_test_user"
+        user_id = agent_started_test_user"
         context = await self.test_harness.create_test_context(user_id)
         thread_id = context.user_context.thread_id
         run_id = UnifiedIDManager.generate_run_id(thread_id)
         
         # Test agent_started event with required fields
         success = await self.test_harness.send_agent_event_with_validation(
-            user_id, thread_id, "agent_started,
+            user_id, thread_id, "agent_started,"
             {
                 agent_name: TestAgent,
                 run_id": run_id,"
                 context: {
-                    user_query: "Test query for agent_started,
-                    task_type": validation
+                    user_query: "Test query for agent_started,"
+                    task_type": validation"
                 },
                 timestamp: datetime.now(timezone.utc).isoformat()
             }
@@ -571,14 +605,16 @@ class WebSocketEventTypesTests:
         # Validate event was recorded
         results = self.test_harness.get_comprehensive_results()
         assert results[analysis][event_counts].get(agent_started, 0) >= 1, \"
-            "agent_started event should be counted
+        assert results[analysis][event_counts].get(agent_started, 0) >= 1, \"
+            "agent_started event should be counted"
         
+        print( PASS:  agent_started event requirements validated)"
         print( PASS:  agent_started event requirements validated)"
     
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_tool_execution_event_pairing(self):
-        "Test tool_executing and tool_completed events are properly paired.
+        "Test tool_executing and tool_completed events are properly paired."
         user_id = tool_pairing_test_user""
         context = await self.test_harness.create_test_context(user_id)
         thread_id = context.user_context.thread_id
@@ -586,10 +622,11 @@ class WebSocketEventTypesTests:
         
         tool_name = validation_tool
         agent_name = ToolTestAgent"
+        agent_name = ToolTestAgent"
         
         # Send tool_executing
         success1 = await self.test_harness.send_agent_event_with_validation(
-            user_id, thread_id, "tool_executing,
+            user_id, thread_id, "tool_executing,"
             {
                 agent_name: agent_name,
                 "run_id: run_id,"
@@ -604,7 +641,8 @@ class WebSocketEventTypesTests:
                 "agent_name: agent_name,"
                 run_id: run_id,
                 tool_name: tool_name,"
-                result": {success: True, test: tool_pairing}
+                tool_name: tool_name,"
+                result": {success: True, test: tool_pairing}"
             }
         
         assert success1 and success2, Both tool events should be sent successfully""
@@ -613,7 +651,8 @@ class WebSocketEventTypesTests:
         results = self.test_harness.get_comprehensive_results()
         event_counts = results[analysis][event_counts]
         assert event_counts.get(tool_executing, 0) >= 1, tool_executing should be counted"
-        assert event_counts.get("tool_completed, 0) >= 1, tool_completed should be counted
+        assert event_counts.get(tool_executing, 0) >= 1, tool_executing should be counted"
+        assert event_counts.get("tool_completed, 0) >= 1, tool_completed should be counted"
         
         # Validate ordering (this is checked in the validator)
         assert results[analysis][ordering_valid], "Tool events should be properly ordered"
@@ -625,18 +664,20 @@ class WebSocketEventTypesTests:
     async def test_all_required_events_in_sequence(self):
         "Test that all 5 required events can be sent in proper sequence."
         user_id = sequence_test_user"
+        user_id = sequence_test_user"
         context = await self.test_harness.create_test_context(user_id)
         thread_id = context.user_context.thread_id
         run_id = UnifiedIDManager.generate_run_id(thread_id)
-        agent_name = "SequenceTestAgent
+        agent_name = "SequenceTestAgent"
         
         # Send all required events in proper sequence
         events_sequence = [
-            (agent_started, {context: {task": "Sequence validation}},
-            (agent_thinking, {reasoning: Processing sequence test, "step: 1},
-            (tool_executing", {tool_name: sequence_tool, parameters: {}},
-            (tool_completed", {"tool_name: sequence_tool, result: {validated: True}},"
-            ("agent_completed, {result: {status: sequence_complete}}
+            (agent_started, {context: {task": "Sequence validation)),
+            (agent_thinking, {reasoning: Processing sequence test, "step: 1),"
+            (tool_executing", {tool_name: sequence_tool, parameters: {)),"
+            (tool_completed", {"tool_name: sequence_tool, result: {validated: True)),"
+            (tool_completed", {"tool_name: sequence_tool, result: {validated: True)),"
+            ("agent_completed, {result: {status: sequence_complete))"
         ]
         
         successful_events = 0
@@ -672,9 +713,11 @@ class WebSocketEventTypesTests:
 
 if __name__ == __main__":"
     # Run the ultra-comprehensive test suite
-    print("[U+1F680] Starting Ultra-Comprehensive WebSocket Validation Test Suite"")
+    print("[U+1F680] Starting Ultra-Comprehensive WebSocket Validation Test Suite"")"
     
     # Run with maximum verbosity and strict failure reporting
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+))))))))))))))))

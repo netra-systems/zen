@@ -1,4 +1,4 @@
-"Mission Critical Data Layer Isolation Security Tests - REAL SERVICES ONLY
+"Mission Critical Data Layer Isolation Security Tests - REAL SERVICES ONLY"
 
 These tests use REAL services to detect critical security vulnerabilities:
 1. Redis key collision between users
@@ -59,8 +59,9 @@ async def redis_client(isolated_env):
 
 
 @pytest.fixture(scope=module)"
+@pytest.fixture(scope=module)"
 async def database_engine(isolated_env):
-    "Real database engine for testing.
+    "Real database engine for testing."
     database_url = isolated_env.get('DATABASE_URL', 'postgresql+asyncpg://netra:netra@localhost:5434/netra_test')
     engine = create_async_engine(database_url, echo=False)
     
@@ -72,13 +73,14 @@ async def database_engine(isolated_env):
 @pytest.fixture(scope=module")"
 async def backend_client(isolated_env):
     Real backend client for testing."
+    Real backend client for testing."
     backend_url = isolated_env.get('BACKEND_URL', 'http://localhost:8000')
     client = BackendTestClient(backend_url)
     
     # Ensure backend is healthy
     health_ok = await client.health_check()
     if not health_ok:
-        pytest.skip(Backend service not available")
+        pytest.skip(Backend service not available")"
     
     yield client
     
@@ -88,10 +90,12 @@ async def backend_client(isolated_env):
 @pytest.mark.mission_critical
 class RealDataLayerIsolationTests:
     "
+    "
     Mission Critical test suite for data layer isolation using REAL services.
     
     Tests 15+ comprehensive isolation scenarios with real Redis, PostgreSQL, and WebSocket connections.
     Each test verifies zero data leakage between users in spacecraft-critical scenarios.
+    "
     "
 
     @pytest.mark.asyncio
@@ -115,10 +119,11 @@ class RealDataLayerIsolationTests:
             
             # Store sensitive user data in Redis
             session_key = fsession:{user['id']}:{session_id}"
+            session_key = fsession:{user['id']}:{session_id}"
             sensitive_data = {
                 'user_id': user['id'],
                 'email': user['email'],
-                'chat_context': f"Confidential conversation for {user['id']},
+                'chat_context': f"Confidential conversation for {user['id']},"
                 'agent_state': {'thinking': fPrivate agent thoughts for {user['id']}},
                 'sensitive_flags': {'is_admin': user['id'] == users[0]['id']},
                 'secret_token': fsecret-{uuid.uuid4().hex}
@@ -131,16 +136,16 @@ class RealDataLayerIsolationTests:
             
             session_data[user['id']] = {'key': session_key, 'data': sensitive_data}
         
-        # Verify complete isolation - no user can access another's data
+        # Verify complete isolation - no user can access another's data'
         for user in users:
             user_key = session_data[user['id']]['key']
             user_data = await redis_client.hgetall(user_key)
             
-            # Verify user's own data is accessible
+            # Verify user's own data is accessible'
             assert user_data, fUser {user['id']} cannot access own session data""
             assert user_data['user_id'] == user['id'], fUser ID mismatch in session data
             
-            # Critical: Verify no access to other users' data by key guessing
+            # Critical: Verify no access to other users' data by key guessing'
             for other_user in users:
                 if other_user['id'] != user['id']:
                     other_key = session_data[other_user['id']]['key']
@@ -149,7 +154,7 @@ class RealDataLayerIsolationTests:
                     guess_patterns = [
                         other_key,  # Direct key
                         fsession:{user['id']}:*,  # Wildcard attempt
-                        other_key.replace(other_user['id'], user['id'],  # ID substitution
+                        other_key.replace(other_user['id'), user['id'),  # ID substitution
                     ]
                     
                     for pattern in guess_patterns:
@@ -157,21 +162,24 @@ class RealDataLayerIsolationTests:
                             # Pattern matching attempt
                             keys = await redis_client.keys(pattern)
                             other_user_keys = [k for k in keys if other_user['id'] in k and user['id'] not in k]
-                            assert not other_user_keys, f"SECURITY BREACH: User {user['id']} can discover other user keys: {other_user_keys}
+                            assert not other_user_keys, f"SECURITY BREACH: User {user['id']} can discover other user keys: {other_user_keys}"
                         else:
                             # Direct key access attempt (should fail)
-                            if pattern != user_key:  # Don't test own key
+                            if pattern != user_key:  # Don't test own key'
                                 unauthorized_data = await redis_client.hgetall(pattern)
                                 if unauthorized_data and unauthorized_data.get('user_id') != user['id']:
+                                    assert False, fSECURITY BREACH: User {user['id']} accessed data belonging to {unauthorized_data['user_id']}"
                                     assert False, fSECURITY BREACH: User {user['id']} accessed data belonging to {unauthorized_data['user_id']}"
 
     @pytest.mark.asyncio
     async def test_real_database_session_isolation(self, database_engine):
     "
+    "
         CRITICAL: Database session isolation using REAL PostgreSQL.
         
         Tests that database sessions maintain complete user isolation
         and no data leakage occurs between concurrent sessions.
+        "
         "
         # Create async session maker
         async_session = async_sessionmaker(database_engine, expire_on_commit=False)
@@ -196,7 +204,7 @@ class RealDataLayerIsolationTests:
             await conn.execute(sa.text(DELETE FROM user_sessions_test))
         
         # Test concurrent session isolation
-        async def user_database_operation(user: Dict[str, Any] -> Dict[str, Any]:
+        async def user_database_operation(user: Dict[str, Any) -> Dict[str, Any):
             "Perform database operations for a user in isolated session."
             async with async_session() as session:
                 # Insert user-specific data
@@ -204,9 +212,11 @@ class RealDataLayerIsolationTests:
                     'user_id': user['id'],
                     'confidential': fSecret data for {user['id']},
                     'session_token': ftoken-{uuid.uuid4().hex},"
+                    'session_token': ftoken-{uuid.uuid4().hex},"
                     'permissions': ['read', 'write'] if user['id'] == users[0]['id'] else ['read']
                 }
                 
+                result = await session.execute(sa.text("
                 result = await session.execute(sa.text("
                     INSERT INTO user_sessions_test (user_id, session_data)
                     VALUES (:user_id, :session_data)
@@ -227,10 +237,11 @@ class RealDataLayerIsolationTests:
                 
                 user_rows = check_result.fetchall()
                 
-                # Critical: Verify no access to other users' data
+                # Critical: Verify no access to other users' data'
+                all_result = await session.execute(sa.text("
                 all_result = await session.execute(sa.text("
                     SELECT user_id, session_data FROM user_sessions_test
-                "))
+                "))"
                 
                 all_rows = all_result.fetchall()
                 other_users_data = [row for row in all_rows if row[0] != user['id']]
@@ -253,19 +264,21 @@ class RealDataLayerIsolationTests:
         # Verify complete isolation
         for result in results:
             assert result['own_rows'] >= 1, fUser {result['user_id']} cannot access own data
-            assert not result['isolation_breach'], f"SECURITY BREACH: User {result['user_id']} can access other users' data
+            assert not result['isolation_breach'], f"SECURITY BREACH: User {result['user_id']} can access other users' data"
         
         # Cleanup
         async with database_engine.begin() as conn:
-            await conn.execute(sa.text(DROP TABLE IF EXISTS user_sessions_test"))
+            await conn.execute(sa.text(DROP TABLE IF EXISTS user_sessions_test"))"
 
     @pytest.mark.asyncio
     async def test_real_cache_contamination_prevention(self, redis_client):
+    "
     "
         CRITICAL: Real cache isolation preventing contamination between users.
         
         Uses real Redis to test that cache keys properly isolate user data
         and prevent unauthorized access to cached query results.
+        "
         "
         users = [
             {'id': f'cache-user-{uuid.uuid4().hex[:8]}', 'corpus_id': f'corpus-{i}'}
@@ -317,7 +330,7 @@ class RealDataLayerIsolationTests:
             assert own_data, fUser {user['id']} cannot access own cached data
             assert own_data['user_id'] == user['id'], fCache data user_id mismatch
             
-            # Critical: User should NOT be able to access other users' data
+            # Critical: User should NOT be able to access other users' data'
             for other_user_id, other_cache_key in cache_keys.items():
                 if other_user_id != user['id']:
                     # Attempt unauthorized access
@@ -330,25 +343,25 @@ class RealDataLayerIsolationTests:
                             # This is expected - verifying the data belongs to different user
                             continue
                         else:
-                            assert False, f"SECURITY BREACH: User {user['id']} accessed cache data without proper user_id
+                            assert False, f"SECURITY BREACH: User {user['id']} accessed cache data without proper user_id"
             
             # Test cache key predictability resistance
-            # Try to guess other users' cache keys
+            # Try to guess other users' cache keys'
             for other_user in users:
                 if other_user['id'] != user['id']:
                     # Try various guess patterns
                     guess_patterns = [
-                        fquery_cache:{other_user['id']}:*",  # Pattern matching
-                        cache_keys[other_user['id']].replace(other_user['id'], user['id'],  # ID substitution
+                        fquery_cache:{other_user['id']}:*",  # Pattern matching"
+                        cache_keys[other_user['id')).replace(other_user['id'), user['id'),  # ID substitution
                     ]
                     
                     for pattern in guess_patterns:
                         if '*' in pattern:
-                            # Pattern matching should not reveal other users' keys
+                            # Pattern matching should not reveal other users' keys'
                             matching_keys = await redis_client.keys(pattern)
                             accessible_keys = []
                             for key in matching_keys:
-                                if user['id'] not in key:  # Key doesn't belong to current user
+                                if user['id'] not in key:  # Key doesn't belong to current user'
                                     key_data = await redis_client.hgetall(key)
                                     if key_data and key_data.get('user_id') != user['id']:
                                         accessible_keys.append(key)
@@ -358,10 +371,12 @@ class RealDataLayerIsolationTests:
     @pytest.mark.asyncio
     async def test_concurrent_user_isolation_with_real_services(self, redis_client, backend_client):
         "
+        "
         CRITICAL: Concurrent user isolation with real services under load.
         
         Tests 10+ concurrent users performing operations simultaneously
         to ensure zero data contamination in high-load scenarios.
+"
 "
         # Create 12 concurrent users for comprehensive testing
         users = [
@@ -379,8 +394,9 @@ class RealDataLayerIsolationTests:
                 operation_data = {
                     'user_id': user['id'],
                     'operation_id': operation_id,
-                    'sensitive_payload': f"CONFIDENTIAL-{user['id']}-{uuid.uuid4().hex},
+                    'sensitive_payload': f"CONFIDENTIAL-{user['id']}-{uuid.uuid4().hex},"
                     'timestamp': time.time(),
+                    'thread_id': fthread-{user['id']}-{operation_id}"
                     'thread_id': fthread-{user['id']}-{operation_id}"
                 }
                 
@@ -390,7 +406,7 @@ class RealDataLayerIsolationTests:
                 }
                 
                 # Step 2: Simulate processing delay to trigger race conditions
-                await asyncio.sleep(0.05)
+                await asyncio.sleep(0.5)
                 
                 # Step 3: Verify data integrity
                 retrieved_data = await redis_client.hgetall(user_key)
@@ -423,12 +439,13 @@ class RealDataLayerIsolationTests:
                             'health_status': health_status
                         }
                 except Exception as e:
-                    # Backend errors shouldn't affect data isolation
+                    # Backend errors shouldn't affect data isolation'
                     logging.warning(fBackend error for user {user['id']}: {e})
                 
                 # Step 5: Cross-user contamination check
-                # Try to access other users' data (should fail)
+                # Try to access other users' data (should fail)'
                 other_user_keys = [
+                    fuser_operation:{other_user['id']}:{operation_id}"
                     fuser_operation:{other_user['id']}:{operation_id}"
                     for other_user in users if other_user['id'] != user['id']
                 ]
@@ -437,7 +454,7 @@ class RealDataLayerIsolationTests:
                 for other_key in other_user_keys:
                     other_data = await redis_client.hgetall(other_key)
                     if other_data and other_data.get('user_id') == user['id']:
-                        # Found our data in another user's key - contamination!
+                        # Found our data in another user's key - contamination!'
                         contamination_found = True
                         break
                 
@@ -477,7 +494,7 @@ class RealDataLayerIsolationTests:
         # Clean up test data
         cleanup_tasks = []
         for i, user in enumerate(users):
-            cleanup_key = f"user_operation:{user['id']}:{i}
+            cleanup_key = f"user_operation:{user['id']}:{i}"
             cleanup_tasks.append(redis_client.delete(cleanup_key))
         
         await asyncio.gather(*cleanup_tasks, return_exceptions=True)
@@ -503,11 +520,11 @@ class RealDataLayerIsolationTests:
             # Set up WebSocket connections for each user
             for context in contexts:
                 # Mock JWT token for testing
-                context.user_context.jwt_token = f"test-token-{context.user_context.user_id}
+                context.user_context.jwt_token = f"test-token-{context.user_context.user_id}"
                 
                 # Try to establish WebSocket connection (may not work without auth service)
                 try:
-                    await context.setup_websocket_connection(/ws/chat", auth_required=False)
+                    await context.setup_websocket_connection(/ws/chat", auth_required=False)"
                 except ConnectionError:
                     pytest.skip(WebSocket connections not available - testing isolation logic only)
             
@@ -532,7 +549,7 @@ class RealDataLayerIsolationTests:
                         # Listen for responses
                         received_events = await context.listen_for_events(duration=2.0)
                         
-                        # Verify no events contain other users' data
+                        # Verify no events contain other users' data'
                         for event in received_events:
                             event_user_id = event.get('user_id')
                             if event_user_id and event_user_id != context.user_context.user_id:
@@ -575,8 +592,9 @@ class RealDataLayerIsolationTests:
                 'user_id': user['id'],
                 'agent_type': user['agent_type'],
                 'conversation_history': [f'Message {i} for {user[id]}' for i in range(3)],"
+                'conversation_history': [f'Message {i} for {user[id]}' for i in range(3)],"
                 'agent_memory': {
-                    'user_preferences': f"Preferences for {user['id']},
+                    'user_preferences': f"Preferences for {user['id']},"
                     'context': fPrivate context for {user['id']},
                     'secrets': fSECRET-DATA-{uuid.uuid4().hex}
                 },
@@ -602,19 +620,20 @@ class RealDataLayerIsolationTests:
             
             # Verify agent state contains user-specific data
             conversation_history = json.loads(user_state.get('conversation_history', '[]'))
-            assert all(user['id'] in msg for msg in conversation_history), f"Conversation history contaminated for user {user['id']}
+            assert all(user['id'] in msg for msg in conversation_history), f"Conversation history contaminated for user {user['id']}"
             
-            # Critical: Verify no access to other users' agent states
+            # Critical: Verify no access to other users' agent states'
             for other_user_id, other_state_info in agent_states.items():
                 if other_user_id != user['id']:
                     other_key = other_state_info['key']
                     
-                    # Try to access other user's agent state
+                    # Try to access other user's agent state'
                     unauthorized_state = await redis_client.hgetall(other_key)
                     
                     if unauthorized_state:
                         state_user_id = unauthorized_state.get('user_id')
                         if state_user_id == user['id']:
+                            assert False, fCONTAMINATION: User {user['id']}'s data found in {other_user_id}'s agent state"
                             assert False, fCONTAMINATION: User {user['id']}'s data found in {other_user_id}'s agent state"
                         
                         # Verify the state truly belongs to the other user
@@ -623,10 +642,12 @@ class RealDataLayerIsolationTests:
     @pytest.mark.asyncio
     async def test_thread_safety_isolation_real_services(self, redis_client):
         "
+        "
         CRITICAL: Thread safety and isolation using real services.
         
         Tests that simultaneous operations maintain complete thread safety
         and user isolation in multi-threaded scenarios.
+"
 "
         users = [
             {'id': f'thread-user-{uuid.uuid4().hex[:8]}', 'operation': f'op-{i}'}
@@ -690,19 +711,19 @@ class RealDataLayerIsolationTests:
                     }
         
         assert len(violations) == 0, fTHREAD SAFETY VIOLATIONS: {violations}
-        assert len(results) == len(users), f"Not all thread operations completed: {len(results)}/{len(users)}
+        assert len(results) == len(users), f"Not all thread operations completed: {len(results)}/{len(users)}"
 
     async def _thread_safe_redis_operation(self, thread_redis, user: Dict[str, Any], operation_id: int) -> Dict[str, Any]:
-        "Helper method for thread-safe Redis operations.
+        "Helper method for thread-safe Redis operations."
         # Test connection
         await thread_redis.ping()
         
         # Store thread-specific data
-        thread_key = f"thread_test:{user['id']}:{operation_id}
+        thread_key = f"thread_test:{user['id']}:{operation_id}"
         thread_data = {
             'user_id': user['id'],
             'operation_id': operation_id,
-            'thread_id': fthread-{operation_id}",
+            'thread_id': fthread-{operation_id}","
             'timestamp': time.time(),
             'sensitive_data': fTHREAD-SECRET-{uuid.uuid4().hex}
         }
@@ -743,10 +764,12 @@ class RealDataLayerIsolationTests:
     @pytest.mark.asyncio
     async def test_database_transaction_isolation_real(self, database_engine):
         "
+        "
         CRITICAL: Database transaction isolation using real PostgreSQL.
         
         Tests ACID properties and transaction isolation levels
         to ensure no data leakage between concurrent transactions.
+"
 "
         async_session = async_sessionmaker(database_engine, expire_on_commit=False)
         
@@ -758,6 +781,7 @@ class RealDataLayerIsolationTests:
         # Create test table for transaction isolation
         async with database_engine.begin() as conn:
             await conn.execute(sa.text("
+            await conn.execute(sa.text("
                 CREATE TABLE IF NOT EXISTS user_accounts_test (
                     id SERIAL PRIMARY KEY,
                     user_id VARCHAR(255) UNIQUE NOT NULL,
@@ -765,7 +789,7 @@ class RealDataLayerIsolationTests:
                     last_transaction JSONB,
                     created_at TIMESTAMP DEFAULT NOW()
                 )
-            "))
+            "))"
             
             await conn.execute(sa.text(DELETE FROM user_accounts_test))
             
@@ -777,7 +801,7 @@ class RealDataLayerIsolationTests:
                 ), {
                     'user_id': user['id'],
                     'balance': user['balance'],
-                    'transaction': json.dumps({'type': 'initial_deposit', 'amount': user['balance']}
+                    'transaction': json.dumps({'type': 'initial_deposit', 'amount': user['balance'])
                 }
         
         # Test concurrent transactions with isolation
@@ -788,7 +812,7 @@ class RealDataLayerIsolationTests:
                     # Begin transaction with isolation
                     await session.begin()
                     
-                    # Read user's current balance
+                    # Read user's current balance'
                     result = await session.execute(sa.text(
                         SELECT balance FROM user_accounts_test 
                         WHERE user_id = :user_id FOR UPDATE
@@ -817,6 +841,7 @@ class RealDataLayerIsolationTests:
                         SET balance = :new_balance, last_transaction = :transaction
                         WHERE user_id = :user_id
                     ), {"
+                    ), {"
                         'user_id': user['id'],
                         'new_balance': new_balance,
                         'transaction': json.dumps(transaction_record)
@@ -825,6 +850,7 @@ class RealDataLayerIsolationTests:
                     await session.commit()
                     
                     # Verify final state
+                    verify_result = await session.execute(sa.text("
                     verify_result = await session.execute(sa.text("
                         SELECT balance, last_transaction FROM user_accounts_test 
                         WHERE user_id = :user_id
@@ -899,9 +925,10 @@ class RealDataLayerIsolationTests:
                 'clearance_level': user['clearance'],
                 'classified_documents': [
                     fCLASSIFIED-{user['clearance'].upper()}-{uuid.uuid4().hex}"
+                    fCLASSIFIED-{user['clearance'].upper()}-{uuid.uuid4().hex}"
                     for _ in range(3)
                 ],
-                'security_tokens': [f"TOKEN-{user['role']}-{uuid.uuid4().hex}]
+                'security_tokens': [f"TOKEN-{user['role']}-{uuid.uuid4().hex}]"
             }
             
             await redis_client.hset(security_key, mapping={
@@ -939,7 +966,7 @@ class RealDataLayerIsolationTests:
                         unauthorized_data = await redis_client.hgetall(other_key)
                         
                         if unauthorized_data and unauthorized_data.get('user_id') == other_user['id']:
-                            # Data exists but user shouldn't have access based on clearance
+                            # Data exists but user shouldn't have access based on clearance'
                             # In a real system, there would be access control middleware
                             # For this test, we verify the data integrity is maintained
                             if authorized_data_access_simulation(user, other_user):
@@ -951,14 +978,14 @@ class RealDataLayerIsolationTests:
                                     'accessed_clearance': other_user['clearance']
                                 }
         
-        # Test 3: Backend service doesn't leak security context
+        # Test 3: Backend service doesn't leak security context'
         try:
-            # Each user's backend requests should be isolated
+            # Each user's backend requests should be isolated'
             for user in users:
                 # Simulate backend request with user context
                 health_check = await backend_client.health_check()
                 
-                # Verify Redis state wasn't affected by backend call
+                # Verify Redis state wasn't affected by backend call'
                 post_call_key = fsecurity:{user['role']}:{user['id']}""
                 post_call_data = await redis_client.hgetall(post_call_key)
                 
@@ -975,15 +1002,17 @@ class RealDataLayerIsolationTests:
         cleanup_keys = [fsecurity:{user['role']}:{user['id']} for user in users]
         await asyncio.gather(*[redis_client.delete(key) for key in cleanup_keys]
         
-        assert len(security_violations) == 0, f"SECURITY BOUNDARY VIOLATIONS: {security_violations}
+        assert len(security_violations) == 0, f"SECURITY BOUNDARY VIOLATIONS: {security_violations}"
 
     @pytest.mark.asyncio
     async def test_memory_isolation_under_stress(self, redis_client):
         "
+        "
         CRITICAL: Memory isolation under high stress load.
         
-        Tests that memory usage and garbage collection don't cause
+        Tests that memory usage and garbage collection don't cause'
         data contamination between users during peak load.
+"
 "
         # Create stress test with many users
         users = [
@@ -993,8 +1022,8 @@ class RealDataLayerIsolationTests:
         
         memory_violations = []
         
-        async def stress_user_operation(user: Dict[str, Any] -> Dict[str, Any]:
-            "High-memory operation to test isolation under stress.
+        async def stress_user_operation(user: Dict[str, Any) -> Dict[str, Any):
+            "High-memory operation to test isolation under stress."
             user_id = user['id']
             load_factor = user['load_factor']
             
@@ -1020,8 +1049,8 @@ class RealDataLayerIsolationTests:
             serialized_data = {
                 'user_id': user_id,
                 'timestamp': str(time.time()),
-                'large_array': json.dumps(large_data['large_array'],
-                'nested_structure': json.dumps(large_data['nested_structure'],
+                'large_array': json.dumps(large_data['large_array'),
+                'nested_structure': json.dumps(large_data['nested_structure'),
                 'load_factor': str(load_factor)
             }
             
@@ -1048,7 +1077,7 @@ class RealDataLayerIsolationTests:
             # Verify data content integrity
             try:
                 retrieved_array = json.loads(retrieved_data.get('large_array', '[]'))
-                if not all(user_id in item for item in retrieved_array[:10]:  # Check first 10
+                if not all(user_id in item for item in retrieved_array[:10):  # Check first 10
                     return {
                         'user_id': user_id,
                         'status': 'content_contamination',
@@ -1092,16 +1121,19 @@ class RealDataLayerIsolationTests:
         
         success_rate = (successful_operations / len(users)) * 100
         
-        assert len(violations) == 0, f"MEMORY ISOLATION VIOLATIONS: {violations}
+        assert len(violations) == 0, f"MEMORY ISOLATION VIOLATIONS: {violations}"
+        assert success_rate >= 95.0, fSuccess rate too low: {success_rate}% (expected >= 95%)"
         assert success_rate >= 95.0, fSuccess rate too low: {success_rate}% (expected >= 95%)"
 
     @pytest.mark.asyncio
     async def test_comprehensive_isolation_integration(self, redis_client, database_engine, backend_client):
     "
+    "
         CRITICAL: Comprehensive integration test of ALL isolation mechanisms.
         
         Master test that combines Redis, PostgreSQL, WebSocket, and backend
         isolation to ensure complete end-to-end user isolation.
+        "
         "
         # Create diverse user scenarios
         users = [
@@ -1112,7 +1144,7 @@ class RealDataLayerIsolationTests:
         
         integration_violations = []
         
-        async def comprehensive_user_test(user: Dict[str, Any] -> Dict[str, Any]:
+        async def comprehensive_user_test(user: Dict[str, Any) -> Dict[str, Any):
             Comprehensive isolation test for a single user across all services.""
             user_id = user['id']
             user_type = user['type']
@@ -1152,9 +1184,11 @@ class RealDataLayerIsolationTests:
                         'user_id': user_id,
                         'user_type': user_type,
                         'db_secret': fDB-SECRET-{uuid.uuid4().hex},"
+                        'db_secret': fDB-SECRET-{uuid.uuid4().hex},"
                         'integration_timestamp': time.time()
                     }
                     
+                    await session.execute(sa.text("
                     await session.execute(sa.text("
                         INSERT INTO integration_test (user_id, user_type, test_data)
                         VALUES (:user_id, :user_type, :test_data)
@@ -1190,11 +1224,11 @@ class RealDataLayerIsolationTests:
                     if not db_row:
                         violations.append('db_isolation_failure')
                     else:
-                        db_retrieved = json.loads(db_row[0]
+                        db_retrieved = json.loads(db_row[0)
                         if db_retrieved.get('user_id') != user_id:
                             violations.append('db_data_contamination')
                 
-                # Cross-contamination check: Ensure no access to other users' data
+                # Cross-contamination check: Ensure no access to other users' data'
                 all_redis_keys = await redis_client.keys(fintegration:*)
                 for key in all_redis_keys:
                     if user_id not in key:
@@ -1235,7 +1269,7 @@ class RealDataLayerIsolationTests:
         # Analyze integration results
         all_violations = []
         for result in results:
-            user_violations = result.get('violations', []
+            user_violations = result.get('violations', [)
             if user_violations:
                 all_violations.extend([{
                     'user_id': result['user_id'],
@@ -1246,11 +1280,14 @@ class RealDataLayerIsolationTests:
         # Cleanup integration test table
         async with database_engine.begin() as conn:
             await conn.execute(sa.text(DROP TABLE IF EXISTS integration_test))"
+            await conn.execute(sa.text(DROP TABLE IF EXISTS integration_test))"
         
+        assert len(all_violations) == 0, fCOMPREHENSIVE INTEGRATION VIOLATIONS: {all_violations}"
         assert len(all_violations) == 0, fCOMPREHENSIVE INTEGRATION VIOLATIONS: {all_violations}"
 
 
-def authorized_data_access_simulation(accessing_user: Dict[str, Any], target_user: Dict[str, Any] -> bool:
+def authorized_data_access_simulation(accessing_user: Dict[str, Any), target_user: Dict[str, Any) -> bool:
+    "
     "
     Simulate access control logic to determine if access should be allowed.
     In real system, this would be middleware/authorization layer.
@@ -1280,3 +1317,6 @@ if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+)))))))))))))))))))))))))))))))))))))))))))))))
+}

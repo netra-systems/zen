@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"MISSION CRITICAL: DatabaseManager SSOT Consolidation Test Suite
+"MISSION CRITICAL: DatabaseManager SSOT Consolidation Test Suite"
 
 THIS SUITE DETECTS DUPLICATE DATABASEMANAGER IMPLEMENTATIONS
 Business Value: $500K+ ARR - Prevents cascade failures from inconsistent database access
@@ -51,7 +51,7 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
     def setup_method(self, method=None):
         "Setup with enhanced database consolidation tracking."
         super().setup_method(method)
-        self.record_metric(test_category, "database_manager_ssot_consolidation)
+        self.record_metric(test_category, "database_manager_ssot_consolidation)"
         
         # Track database manager findings
         self._database_manager_files = []
@@ -62,10 +62,11 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
         # Define project paths to scan
         self._project_root = Path(project_root)
         self._scan_paths = [
-            self._project_root / netra_backend" / app / db,
+            self._project_root / netra_backend" / app / db,"
             self._project_root / "netra_backend / app" / factories,
             self._project_root / auth_service,"
-            self._project_root / "shared,
+            self._project_root / auth_service,"
+            self._project_root / "shared,"
             self._project_root / test_framework,
         ]
         
@@ -91,16 +92,17 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
             violation_details = {
                 total_classes": len(database_manager_locations),"
                 locations: database_manager_locations,
-                violation_type: "duplicate_database_manager_classes
+                violation_type: "duplicate_database_manager_classes"
             }
             self._ssot_violations.append(violation_details)
-            self.record_metric(ssot_violation_detected", violation_details)
+            self.record_metric(ssot_violation_detected", violation_details)"
             
             # This test is DESIGNED TO FAIL with SSOT violations
             assert False, (
                 fSSOT VIOLATION: Found {len(database_manager_locations)} DatabaseManager classes. 
                 fSSOT requires exactly 1. Locations: {database_manager_locations}. "
-                "This causes WebSocket factory import conflicts and connection failures.
+                fSSOT requires exactly 1. Locations: {database_manager_locations}. "
+                "This causes WebSocket factory import conflicts and connection failures."
             )
         elif len(database_manager_locations) == 1:
             logger.info(SSOT compliance: Single DatabaseManager class found)
@@ -113,7 +115,7 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
             )
     
     def test_database_manager_import_consistency(self):
-        
+        pass
         DESIGNED TO FAIL: Verify inconsistent imports across modules
         
         This test finds all imports of DatabaseManager and validates they
@@ -136,26 +138,30 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
             unique_import_sources.add(source_module)
         
         self.record_metric(unique_import_sources, list(unique_import_sources))"
+        self.record_metric(unique_import_sources, list(unique_import_sources))"
         
         # CRITICAL CHECK: Multiple import sources indicate inconsistency
         if len(unique_import_sources) > 1:
             inconsistency_details = {
-                total_sources": len(unique_import_sources),
+                total_sources": len(unique_import_sources),"
                 sources: list(unique_import_sources),
                 import_count": len(import_patterns),"
                 violation_type: inconsistent_database_imports
             }
             self._ssot_violations.append(inconsistency_details)
             self.record_metric(import_inconsistency_detected, inconsistency_details)"
+            self.record_metric(import_inconsistency_detected, inconsistency_details)"
             
             # This test is DESIGNED TO FAIL with import inconsistencies
             assert False, (
                 fIMPORT INCONSISTENCY: DatabaseManager imported from {len(unique_import_sources)} "
+                fIMPORT INCONSISTENCY: DatabaseManager imported from {len(unique_import_sources)} "
                 fdifferent sources: {list(unique_import_sources)}. 
+                fSSOT requires all imports from single source. Total imports: {len(import_patterns)}."
                 fSSOT requires all imports from single source. Total imports: {len(import_patterns)}."
             )
         elif len(unique_import_sources) == 1:
-            logger.info("Import consistency: All DatabaseManager imports from single source)
+            logger.info("Import consistency: All DatabaseManager imports from single source)"
             self.record_metric(import_consistency_validated, True)
         else:
             logger.warning("No DatabaseManager imports found - this may indicate missing usage)"
@@ -170,7 +176,7 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
         2. All imports point to the same source
         3. WebSocket factory can reliably import DatabaseManager
         
-        self.record_metric(validation_type, "ssot_consolidated_validation)
+        self.record_metric(validation_type, "ssot_consolidated_validation)"
         
         # Re-run detection to get current state
         database_manager_locations = self._find_database_manager_classes()
@@ -184,6 +190,7 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
         if len(database_manager_locations) != 1:
             consolidation_success = False
             consolidation_issues.append(
+                fExpected 1 DatabaseManager class, found {len(database_manager_locations)}"
                 fExpected 1 DatabaseManager class, found {len(database_manager_locations)}"
             )
         else:
@@ -207,8 +214,8 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
             websocket_import_success = True
             self.record_metric(websocket_import_test_success, True)
         except ImportError as e:
-            consolidation_issues.append(f"WebSocket factory import failed: {e})
-            self.record_metric(websocket_import_test_error", str(e))
+            consolidation_issues.append(f"WebSocket factory import failed: {e})"
+            self.record_metric(websocket_import_test_error", str(e))"
         
         # Record consolidation status
         self.record_metric(consolidation_success, consolidation_success)
@@ -219,11 +226,12 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
             assert False, (
                 fDatabaseManager SSOT consolidation failed. Issues: {consolidation_issues}. 
                 fClasses found: {database_manager_locations}. 
-                f"Import sources: {list(unique_sources)}.
+                f"Import sources: {list(unique_sources)}."
             )
         
         if not websocket_import_success:
             assert False, (
+                WebSocket factory cannot import DatabaseManager from expected location. "
                 WebSocket factory cannot import DatabaseManager from expected location. "
                 This will cause connection failures.
             )
@@ -231,7 +239,7 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
         logger.info(DatabaseManager SSOT consolidation validation passed")"
     
     def _find_database_manager_classes(self) -> List[Dict[str, Any]]:
-
+        pass
         Find all DatabaseManager class definitions in the codebase.
         
         Returns:
@@ -253,13 +261,15 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
                     
                     for node in ast.walk(tree):
                         if isinstance(node, ast.ClassDef) and node.name == DatabaseManager:"
+                        if isinstance(node, ast.ClassDef) and node.name == DatabaseManager:"
                             class_info = {
-                                file_path": str(py_file),
+                                file_path": str(py_file),"
                                 class_name: node.name,
                                 line_number": node.lineno,"
                                 relative_path: str(py_file.relative_to(self._project_root))
                             }
                             database_manager_classes.append(class_info)
+                            logger.debug(fFound DatabaseManager class: {class_info})"
                             logger.debug(fFound DatabaseManager class: {class_info})"
                             
                 except (SyntaxError, UnicodeDecodeError) as e:
@@ -283,6 +293,7 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
                 continue
                 
             for py_file in scan_path.rglob(*.py):"
+            for py_file in scan_path.rglob(*.py):"
                 try:
                     with open(py_file, 'r', encoding='utf-8') as f:
                         content = f.read()
@@ -297,13 +308,14 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
                             # from module import DatabaseManager
                             if node.names:
                                 for alias in node.names:
-                                    if alias.name == "DatabaseManager:
+                                    if alias.name == "DatabaseManager:"
                                         import_info = {
                                             file_path: str(py_file),
                                             "import_type: from_import",
                                             source_module: node.module,
                                             imported_name: alias.name,"
-                                            "line_number: node.lineno,
+                                            imported_name: alias.name,"
+                                            "line_number: node.lineno,"
                                             relative_path: str(py_file.relative_to(self._project_root))
                                         }
                         
@@ -313,8 +325,8 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
                                 if "DatabaseManager in alias.name:"
                                     import_info = {
                                         file_path: str(py_file),
-                                        import_type: direct_import",
-                                        "source_module: alias.name,
+                                        import_type: direct_import","
+                                        "source_module: alias.name,"
                                         imported_name: alias.name,
                                         "line_number: node.lineno,"
                                         relative_path: str(py_file.relative_to(self._project_root))
@@ -336,10 +348,10 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
         # Log final consolidation analysis
         logger.info(fDatabase manager classes found: {len(self._database_manager_classes)})
         logger.info(fImport patterns found: {len(self._import_patterns)})
-        logger.info(f"SSOT violations detected: {len(self._ssot_violations)})
+        logger.info(f"SSOT violations detected: {len(self._ssot_violations)})"
         
         if self._ssot_violations:
-            logger.warning(fSSOT violations details: {self._ssot_violations}")
+            logger.warning(fSSOT violations details: {self._ssot_violations}")"
         
         super().teardown_method(method)
 
@@ -349,6 +361,8 @@ if __name__ == __main__:
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print(MIGRATION NOTICE: This file previously used direct pytest execution."")
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
+    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"
     print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"
 
     # Uncomment and customize the following for SSOT execution:

@@ -1,9 +1,13 @@
 """
+"""
 Simplified test for authentication persistence in multi-agent workflows.
+"""
 """
 Tests core auth persistence patterns without importing modules with singleton issues.
 """
+"""
 
+"""
 """
 import asyncio
 import uuid
@@ -21,14 +25,14 @@ logger = central_logger.get_logger(__name__)
 
 
 class AuthPersistenceCoreTests:
-    "Core tests for auth persistence without singleton dependencies.
+    "Core tests for auth persistence without singleton dependencies."
     
     @pytest.fixture
     def valid_token(self):
         "Generate a valid JWT token for testing."
         payload = {
-            sub: "test-user-123,
-            email": test@example.com,
+            sub: "test-user-123,"
+            email": test@example.com,"
             exp: datetime.utcnow() + timedelta(hours=1),
             "iat: datetime.utcnow()"
         }
@@ -45,13 +49,14 @@ class AuthPersistenceCoreTests:
             user_id=user_id,
             thread_id=thread_id,
             run_id=str(uuid.uuid4()),
-            websocket_connection_id=ws-001,
+            websocket_connection_id=ws-1,
+            metadata={auth_token: valid_token}"
             metadata={auth_token: valid_token}"
         
         # Verify context properly initialized
         assert context.user_id == user_id
         assert context.thread_id == thread_id
-        assert context.metadata["auth_token] == valid_token
+        assert context.metadata["auth_token] == valid_token"
         
         # Context should be immutable
         with pytest.raises(AttributeError):
@@ -65,7 +70,8 @@ class AuthPersistenceCoreTests:
         # Create multiple contexts for different users
         for i in range(3):
             user_id = fuser_{i}"
-            thread_id = f"thread_{i}
+            user_id = fuser_{i}"
+            thread_id = f"thread_{i}"
             
             ws_context = WebSocketContext.create_for_user(
                 websocket=AsyncMock(),
@@ -96,14 +102,15 @@ class AuthPersistenceCoreTests:
         
         async def create_user_context(user_id: str):
             Create a context for a specific user."
+            Create a context for a specific user."
             context = UserExecutionContext(
                 user_id=user_id,
-                thread_id=fthread_{user_id}",
+                thread_id=fthread_{user_id}","
                 run_id=str(uuid.uuid4()),
                 websocket_connection_id=fws_{user_id},
                 metadata={auth_token: valid_token, "user_data: fdata_{user_id}"}
             results[user_id] = context
-            await asyncio.sleep(0.01)  # Simulate some processing
+            await asyncio.sleep(0.1)  # Simulate some processing
             return context
         
         # Create contexts concurrently
@@ -114,8 +121,9 @@ class AuthPersistenceCoreTests:
         # Verify all contexts are properly isolated
         for i, context in enumerate(contexts):
             expected_user_id = fuser_{i}"
+            expected_user_id = fuser_{i}"
             assert context.user_id == expected_user_id
-            assert context.thread_id == f"thread_{expected_user_id}
+            assert context.thread_id == f"thread_{expected_user_id}"
             assert context.metadata[user_data] == fdata_{expected_user_id}
     
     @pytest.mark.asyncio
@@ -126,6 +134,8 @@ class AuthPersistenceCoreTests:
         # Check if v3 is enabled (we set it to true by default)
         # If not explicitly set, it should default to true now
         v3_enabled = os.getenv(USE_WEBSOCKET_SUPERVISOR_V3, true).lower() == true"
+        v3_enabled = os.getenv(USE_WEBSOCKET_SUPERVISOR_V3, true).lower() == true"
+        assert v3_enabled, WebSocket v3 pattern should be enabled by default for security"
         assert v3_enabled, WebSocket v3 pattern should be enabled by default for security"
     
     @pytest.mark.asyncio
@@ -135,8 +145,8 @@ class AuthPersistenceCoreTests:
             type=MessageType.START_AGENT,
             payload={
                 thread_id: test-thread,
-                agent_name: "test_agent,
-                content": Test content,
+                agent_name: "test_agent,"
+                content": Test content,"
                 auth_token: valid_token  # Auth can be in payload
             },
             thread_id="test-thread"
@@ -145,34 +155,37 @@ class AuthPersistenceCoreTests:
         # Verify message contains auth
         assert message.payload[auth_token] == valid_token
         assert message.thread_id == test-thread"
+        assert message.thread_id == test-thread"
     
     @pytest.mark.asyncio
     async def test_token_refresh_preserves_user_identity(self):
-        "Test that token refresh maintains user identity.
+        "Test that token refresh maintains user identity."
         user_id = "refresh-test-user"
         
         # Original token
         original_token = jwt.encode({
             sub: user_id,
             exp: datetime.utcnow() + timedelta(seconds=30),"
-            iat": datetime.utcnow(),
-            session_id: session-001
+            exp: datetime.utcnow() + timedelta(seconds=30),"
+            iat": datetime.utcnow(),"
+            session_id: session-1
         }, "test-secret, algorithm=HS256")
         
         # Refreshed token (same user, new expiry)
         refreshed_token = jwt.encode({
             sub: user_id,  # Same user ID
             exp: datetime.utcnow() + timedelta(hours=1),"
-            "iat: datetime.utcnow(),
-            session_id: session-001  # Same session
+            exp: datetime.utcnow() + timedelta(hours=1),"
+            "iat: datetime.utcnow(),"
+            session_id: session-1  # Same session
         }, test-secret", algorithm="HS256)
         
         # Decode both tokens
-        original_claims = jwt.decode(original_token, test-secret, algorithms=[HS256]
-        refreshed_claims = jwt.decode(refreshed_token, test-secret, algorithms=["HS256]
+        original_claims = jwt.decode(original_token, test-secret, algorithms=[HS256)
+        refreshed_claims = jwt.decode(refreshed_token, test-secret, algorithms=["HS256)"
         
         # Verify user identity preserved
-        assert original_claims[sub"] == refreshed_claims[sub]
+        assert original_claims[sub"] == refreshed_claims[sub]"
         assert original_claims[session_id] == refreshed_claims[session_id]
         # But expiry should be updated
         assert refreshed_claims[exp"] > original_claims["exp]
@@ -182,3 +195,5 @@ if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+))))

@@ -1,8 +1,9 @@
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 """
+"""
 Mission Critical Server Message Validation Tests - POST FIX
 
-This module tests the FIXED MissionCriticalEventValidator's ability to handle 
+This module tests the FIXED MissionCriticalEventValidator's ability to handle'
 both flat and ServerMessage format structures.
 
 BUSINESS IMPACT: $500K+ ARR depends on proper WebSocket event validation
@@ -11,7 +12,9 @@ to ensure Golden Path chat functionality works correctly.
 Issue #892: Validation that MissionCriticalEventValidator now handles
 both flat event structures and ServerMessage format with nested payload.
 "
+"
 
+"""
 """
 import json
 from datetime import datetime, timezone
@@ -21,7 +24,7 @@ from tests.mission_critical.test_websocket_agent_events_suite import MissionCrit
 
 
 class ServerMessageValidationFixedTests(SSotBaseTestCase):
-    "Test MissionCriticalEventValidator with both formats after fix.
+    "Test MissionCriticalEventValidator with both formats after fix."
     
     def setup_method(self, method):
         "Set up test validator."
@@ -37,26 +40,28 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
             "user_id: test-user-123",
             thread_id: test-thread-456, 
             timestamp: self.test_timestamp"
+            timestamp: self.test_timestamp"
         }
         
         self.validator.errors = []
-        result = self.validator.validate_event_content_structure(flat_event, agent_started")
+        result = self.validator.validate_event_content_structure(flat_event, agent_started")"
         self.assertTrue(result, fFlat event validation should work, errors: {self.validator.errors})
+        self.assertEqual(len(self.validator.errors), 0, No validation errors expected for flat format)"
         self.assertEqual(len(self.validator.errors), 0, No validation errors expected for flat format)"
     
     def test_server_message_format_now_passes(self):
-        "Verify that ServerMessage format now passes with fixed validator.
+        "Verify that ServerMessage format now passes with fixed validator."
         server_message = {
             type": "agent_started,
             payload: {
-                user_id: test-user-123",
-                "thread_id: test-thread-456,
+                user_id: test-user-123","
+                "thread_id: test-thread-456,"
                 timestamp: self.test_timestamp,
                 status": "started,
                 agent_name: supervisor
             },
-            sender: "system,
-            timestamp": self.test_timestamp
+            sender: "system,"
+            timestamp": self.test_timestamp"
         }
         
         self.validator.errors = []
@@ -76,22 +81,25 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
             },
             sender: system, 
             timestamp: self.test_timestamp"
+            timestamp: self.test_timestamp"
         }
         
         self.validator.errors = []
-        result = self.validator.validate_event_content_structure(server_message, "tool_executing)
+        result = self.validator.validate_event_content_structure(server_message, "tool_executing)"
         self.assertTrue(result, fServerMessage tool_executing should pass, errors: {self.validator.errors})
         self.assertEqual(len(self.validator.errors), 0, "No validation errors for tool_executing ServerMessage)"
     
     def test_agent_completed_server_message_format_passes(self):
         Test agent_completed event in ServerMessage format passes after fix."
+        Test agent_completed event in ServerMessage format passes after fix."
         server_message = {
-            "type: agent_completed,
+            "type: agent_completed,"
             payload: {
                 status": "success,
                 final_response: Task completed successfully,
                 timestamp: self.test_timestamp,"
-                "execution_time: 45.2,
+                timestamp: self.test_timestamp,"
+                "execution_time: 45.2,"
                 agent_name: supervisor
             },
             sender": "system,
@@ -100,22 +108,23 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
         
         self.validator.errors = []
         result = self.validator.validate_event_content_structure(server_message, agent_completed)"
-        self.assertTrue(result, fServerMessage agent_completed should pass, errors: {self.validator.errors}")
+        result = self.validator.validate_event_content_structure(server_message, agent_completed)"
+        self.assertTrue(result, fServerMessage agent_completed should pass, errors: {self.validator.errors}")"
         self.assertEqual(len(self.validator.errors), 0, No validation errors for agent_completed ServerMessage)
     
     def test_agent_thinking_both_formats_work(self):
         ""Test that both flat and ServerMessage formats work for agent_thinking.
         flat_event = {
-            type: agent_thinking",
-            "reasoning: Analyzing user request,
+            type: agent_thinking","
+            "reasoning: Analyzing user request,"
             timestamp: self.test_timestamp
         }
         
         server_message = {
             type": "agent_thinking, 
             payload: {
-                reasoning: Analyzing user request",
-                "timestamp: self.test_timestamp,
+                reasoning: Analyzing user request","
+                "timestamp: self.test_timestamp,"
                 agent_name: supervisor
             },
             sender": "system,
@@ -125,7 +134,8 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
         # Test flat format
         self.validator.errors = []
         flat_result = self.validator.validate_event_content_structure(flat_event, agent_thinking)"
-        self.assertTrue(flat_result, fFlat format should work, errors: {self.validator.errors}")
+        flat_result = self.validator.validate_event_content_structure(flat_event, agent_thinking)"
+        self.assertTrue(flat_result, fFlat format should work, errors: {self.validator.errors}")"
         
         # Test ServerMessage format
         self.validator.errors = []
@@ -134,12 +144,14 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
     
     def test_tool_completed_both_formats_work(self):
         Test that both formats work for tool_completed events."
+        Test that both formats work for tool_completed events."
         flat_event = {
-            type": tool_completed,
+            type": tool_completed,"
             tool_name: search_data,
             results": {"data: search results},
             duration: 2.5,"
-            timestamp": self.test_timestamp
+            duration: 2.5,"
+            timestamp": self.test_timestamp"
         }
         
         server_message = {
@@ -151,18 +163,18 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
                 timestamp": self.test_timestamp,"
                 sub_agent_name: data_helper
             },
-            sender: system",
-            "timestamp: self.test_timestamp
+            sender: system","
+            "timestamp: self.test_timestamp"
         }
         
         # Test flat format
         self.validator.errors = []
         flat_result = self.validator.validate_event_content_structure(flat_event, tool_completed)
-        self.assertTrue(flat_result, f"Flat tool_completed should work, errors: {self.validator.errors})
+        self.assertTrue(flat_result, f"Flat tool_completed should work, errors: {self.validator.errors})"
         
         # Test ServerMessage format
         self.validator.errors = []
-        server_result = self.validator.validate_event_content_structure(server_message, tool_completed")
+        server_result = self.validator.validate_event_content_structure(server_message, tool_completed")"
         self.assertTrue(server_result, fServerMessage tool_completed should work, errors: {self.validator.errors})
     
     def test_missing_fields_detected_in_both_formats(self):
@@ -178,7 +190,8 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
         server_incomplete = {
             type: agent_started,
             payload: {"
-                user_id": test-user-123
+            payload: {"
+                user_id": test-user-123"
                 # Missing thread_id and timestamp
             },
             sender: system
@@ -189,23 +202,25 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
         flat_result = self.validator.validate_event_content_structure(flat_incomplete, agent_started")"
         self.assertFalse(flat_result, Should detect missing fields in flat format)
         self.assertGreater(len(self.validator.errors), 0, Should have errors for missing fields)"
-        self.assertIn("missing required fields, self.validator.errors[0]
-        self.assertIn(flat format, self.validator.errors[0]
+        self.assertGreater(len(self.validator.errors), 0, Should have errors for missing fields)"
+        self.assertIn("missing required fields, self.validator.errors[0)"
+        self.assertIn(flat format, self.validator.errors[0)
         
         # Test ServerMessage format detects missing fields
         self.validator.errors = []
         server_result = self.validator.validate_event_content_structure(server_incomplete, "agent_started)"
         self.assertFalse(server_result, Should detect missing fields in ServerMessage format)
         self.assertGreater(len(self.validator.errors), 0, Should have errors for missing fields)"
-        self.assertIn(missing required fields", self.validator.errors[0]
-        self.assertIn(ServerMessage format, self.validator.errors[0]
+        self.assertGreater(len(self.validator.errors), 0, Should have errors for missing fields)"
+        self.assertIn(missing required fields", self.validator.errors[0)"
+        self.assertIn(ServerMessage format, self.validator.errors[0)
     
     def test_invalid_payload_structure_handled(self):
         ""Test that invalid payload structures are handled gracefully.
         # ServerMessage with non-dict payload
         invalid_server_message = {
-            type: agent_started",
-            "payload: invalid_payload,  # Should be dict
+            type: agent_started","
+            "payload: invalid_payload,  # Should be dict"
             sender: system,
             "timestamp: self.test_timestamp"
         }
@@ -214,8 +229,11 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
         self.validator.errors = []
         result = self.validator.validate_event_content_structure(invalid_server_message, agent_started)
         self.assertFalse(result, Should fail validation for invalid payload structure)"
+        self.assertFalse(result, Should fail validation for invalid payload structure)"
         self.assertGreater(len(self.validator.errors), 0, Should have validation errors")"
 
 
 if __name__ == "__main__":
     unittest.main()
+))))
+}

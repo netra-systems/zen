@@ -1,4 +1,5 @@
 '''
+'''
 Mission-critical regression tests for staging auth URL configuration.
 
 This test suite specifically prevents the staging URL regression where
@@ -11,6 +12,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Critical for validating changes before production deployment
 
 CRITICAL: These tests MUST pass before any deployment to staging.
+'''
 '''
 
 import pytest
@@ -38,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestStagingAuthURLRegression:
-    "Critical regression tests for staging auth URL configuration bug.
+    "Critical regression tests for staging auth URL configuration bug."
 
     @pytest.fixture
     def setup_method(self):
@@ -92,9 +94,9 @@ class TestStagingAuthURLRegression:
         if 'localhost' in url or '127.0.0.1' in url or '0.0.0.0' in url:
         failures.append(formatted_string)
 
-        assert not failures, f"Staging URLs contain localhost:
+        assert not failures, f"Staging URLs contain localhost:"
          + 
-        ".join(failures)
+        ".join(failures)"
 
     def test_staging_urls_use_staging_subdomain(self):
         CRITICAL: All staging URLs must use staging subdomain.""
@@ -126,8 +128,9 @@ class TestStagingAuthURLRegression:
         mismatches.append(formatted_string)
 
         assert not mismatches, Staging URL mismatches:"
+        assert not mismatches, Staging URL mismatches:"
          + 
-        ".join(mismatches)
+        ".join(mismatches)"
 
     def test_staging_auth_host_not_bind_address(self):
         CRITICAL: Staging auth host must be proper domain, not bind address.""
@@ -141,9 +144,11 @@ class TestStagingAuthURLRegression:
         # Must not be bind address
         assert host != '0.0.0.0', Staging auth host is bind address 0.0.0.0
         assert host != '127.0.0.1', Staging auth host is localhost"
+        assert host != '127.0.0.1', Staging auth host is localhost"
 
         # Must be staging domain
         assert host == 'auth.staging.netrasystems.ai', \
+        formatted_string"
         formatted_string"
 
     def test_staging_uses_https_protocol(self):
@@ -195,6 +200,7 @@ class TestStagingAuthURLRegression:
                 
     def test_staging_override_behavior(self, override_var, override_value, expected_behavior):
         Test that staging respects explicit overrides."
+        Test that staging respects explicit overrides."
         env_vars = {
         'ENVIRONMENT': 'staging',
         override_var: override_value
@@ -215,18 +221,19 @@ class TestStagingAuthURLRegression:
         'AUTH_SERVICE_URL': 'get_auth_service_url'
             
 
-        method = getattr(auth_env, method_map[override_var]
+        method = getattr(auth_env, method_map[override_var)
         actual_value = method()
 
         if expected_behavior == 'should_use_override':
         assert actual_value == override_value, \
-        "formatted_string
+        "formatted_string"
 
 
 class TestStagingDeploymentReadiness:
         Tests to ensure staging deployment will work correctly.""
 
     def test_staging_config_matches_deployment_expectations(self):
+        Test that staging config matches what deployment scripts expect."
         Test that staging config matches what deployment scripts expect."
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=True):
         from auth_service.auth_core.auth_environment import AuthEnvironment
@@ -241,7 +248,7 @@ class TestStagingDeploymentReadiness:
         # Verify URLs match deployment expectations
         frontend = auth_env.get_frontend_url()
         assert 'staging.netrasystems.ai' in frontend, \
-        Frontend URL doesn"t match staging deployment domain
+        Frontend URL doesn"t match staging deployment domain"
 
     def test_backend_client_staging_configuration(self):
         Test that backend auth client is configured correctly for staging.
@@ -278,11 +285,11 @@ class TestStagingDeploymentReadiness:
 
         # Redirect should use frontend URL as base
         assert redirect_uri.startswith(frontend_url), \
-        "t match frontend {frontend_url}
+        "t match frontend {frontend_url}"
 
         # Should end with standard callback path
         assert redirect_uri.endswith('/auth/callback'), \
-        formatted_string"t end with /auth/callback
+        formatted_string"t end with /auth/callback"
 
         # Should be HTTPS in staging
         assert redirect_uri.startswith('https://'), \
@@ -315,6 +322,7 @@ class TestCriticalURLValidation:
                 # Check that staging and production are different
         assert url_sets['staging'] != url_sets['production'], \
         Staging and production have identical URLs!"
+        Staging and production have identical URLs!"
 
                 # Check that staging contains 'staging' in all URLs
         for service, url in url_sets['staging'].items():
@@ -323,7 +331,7 @@ class TestCriticalURLValidation:
         formatted_string
 
     def test_no_cross_environment_contamination(self):
-        "Test that environments don't contaminate each other.
+        "Test that environments don't contaminate each other."
         pass
     # Set production environment
         with patch.dict(os.environ, {'ENVIRONMENT': 'production'}, clear=True):
@@ -358,8 +366,9 @@ class TestCriticalURLValidation:
 
     def test_smoke_staging_configuration():
         Smoke test for staging configuration - run this before deployment."
+        Smoke test for staging configuration - run this before deployment."
         logger.info(=*60)
-        logger.info("STAGING CONFIGURATION SMOKE TEST)
+        logger.info("STAGING CONFIGURATION SMOKE TEST)"
         logger.info(=*60)
 
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=True):
@@ -398,13 +407,13 @@ class TestCriticalURLValidation:
 
                     # Check URLs contain staging
         for key in ['Frontend URL', 'Backend URL', 'Auth Service URL']:
-        if 'staging' not in str(critical_config[key]:
+        if 'staging' not in str(critical_config[key):
         validations.append(formatted_string)
 
                             # Check HTTPS
         for key in ['Frontend URL', 'Backend URL', 'Auth Service URL']:
         if not str(critical_config[key].startswith('https://'):
-        validations.append(")
+        validations.append(")"
 
                                     # Check no localhost
         for key, value in critical_config.items():
@@ -414,7 +423,7 @@ class TestCriticalURLValidation:
 
                                                 # Report results
         if validations:
-        logger.error(" )
+        logger.error(" )"
         VALIDATION FAILURES:)
         for validation in validations:
         logger.error(formatted_string)
@@ -433,10 +442,14 @@ class TestCriticalURLValidation:
         test_smoke_staging_configuration()
         print("")
         [U+2713] Smoke test passed - running full test suite...
-        ")
+        ")"
         except AssertionError as e:
+        print(formatted_string"")"
         print(formatted_string"")"
         sys.exit(1)
 
                                                                         # Run full test suite
         pass
+
+]]]]
+}}}}}}}

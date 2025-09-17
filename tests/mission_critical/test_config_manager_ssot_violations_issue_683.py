@@ -1,4 +1,5 @@
 """
+"""
 Test Configuration Manager SSOT Violations for Issue #683 (Mission Critical)
 
 This mission critical test reproduces SSOT violations in configuration management
@@ -13,7 +14,9 @@ Issue #683: Staging environment configuration validation failures
 Root Cause: SSOT violations in configuration management causing inconsistent state
 Test Strategy: Detect SSOT violations that contribute to configuration validation failures
 "
+"
 
+"""
 """
 import pytest
 import os
@@ -25,14 +28,16 @@ from shared.isolated_environment import IsolatedEnvironment
 
 class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
     "
+    "
     Mission critical tests to detect SSOT violations in configuration management.
 
     These tests identify SSOT violations that contribute to staging configuration
     validation failures by creating inconsistent configuration state.
 "
+"
 
     def setup_method(self, method):
-        "Set up mission critical test environment for SSOT violation detection.
+        "Set up mission critical test environment for SSOT violation detection."
         super().setup_method(method)
         self.env = IsolatedEnvironment()
         # Store original environment to restore after test
@@ -81,7 +86,7 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
                     config_manager_instances.extend(config_manager_attrs)
 
             except ImportError:
-                # Module doesn't exist, skip
+                # Module doesn't exist, skip'
                 continue
 
         # SSOT VIOLATION: Multiple configuration managers
@@ -90,9 +95,10 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
             for module_name, attr_name, attr in config_manager_instances:
                 manager_type = type(attr).__name__
                 unique_managers.add(f{module_name}.{attr_name}:{manager_type})"
+                unique_managers.add(f{module_name}.{attr_name}:{manager_type})"
 
             if len(unique_managers) > 1:
-                ssot_violations.append(f"Multiple configuration manager instances detected: {unique_managers})
+                ssot_violations.append(f"Multiple configuration manager instances detected: {unique_managers})"
 
         # Test for singleton violation in UnifiedConfigManager
         from netra_backend.app.core.configuration.base import config_manager as manager1
@@ -106,7 +112,7 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
                       fThis causes inconsistent configuration state in staging environment: {ssot_violations}")"
 
     def test_duplicate_secret_config_definitions_ssot_violation(self):
-
+        pass
         CRITICAL SSOT VIOLATION: Test detection of duplicate SECRET_CONFIG definitions.
 
         This detects SSOT violations where SECRET_CONFIG is defined in multiple places,
@@ -152,14 +158,16 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
 
         if ssot_violations:
             pytest.fail(fCRITICAL SSOT VIOLATION: Multiple SECRET_CONFIG definitions detected. 
-                      f"This causes inconsistent secret configuration in staging: {ssot_violations})
+                      f"This causes inconsistent secret configuration in staging: {ssot_violations})"
 
     def test_configuration_schema_duplication_ssot_violation(self):
+        "
         "
         CRITICAL SSOT VIOLATION: Test detection of duplicate configuration schema definitions.
 
         This detects SSOT violations where configuration schemas are duplicated,
         causing inconsistent validation in staging environment.
+"
 "
         # Test for duplicate AppConfig schemas
         config_schema_modules = [
@@ -192,7 +200,7 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
         # SSOT VIOLATION: Multiple AppConfig definitions
         if len(app_config_definitions) > 1:
             config_sources = [module_name for module_name, _ in app_config_definitions]
-            ssot_violations.append(f"Multiple AppConfig schema definitions found in: {config_sources})
+            ssot_violations.append(f"Multiple AppConfig schema definitions found in: {config_sources})"
 
         # SSOT VIOLATION: Multiple StagingConfig definitions
         if len(staging_config_definitions) > 1:
@@ -214,14 +222,16 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
 
         if ssot_violations:
             pytest.fail(fCRITICAL SSOT VIOLATION: Duplicate configuration schemas detected. 
-                      f"This causes inconsistent validation in staging environment: {ssot_violations})
+                      f"This causes inconsistent validation in staging environment: {ssot_violations})"
 
     def test_environment_access_ssot_violations(self):
+        "
         "
         CRITICAL SSOT VIOLATION: Test detection of direct os.environ access bypassing SSOT.
 
         This detects SSOT violations where configuration modules directly access os.environ
         instead of using IsolatedEnvironment, causing inconsistent environment state.
+"
 "
         import ast
         import os as os_module
@@ -238,7 +248,7 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
         ssot_violations = []
 
         for config_file in config_files:
-            file_path = Path(f"C:\\GitHub\\netra-apex\\{config_file})
+            file_path = Path(f"C:\\GitHub\\netra-apex\\{config_file})"
             if file_path.exists():
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
@@ -267,20 +277,21 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
                                     node.value.value.id == 'os' and
                                     node.value.attr == 'environ'):
                                     self.violations.append(Direct os.environ subscript access)"
+                                    self.violations.append(Direct os.environ subscript access)"
                                 self.generic_visit(node)
 
                         visitor = EnvironAccessVisitor()
                         visitor.visit(tree)
 
                         if visitor.violations:
-                            ssot_violations.append(f{config_file}: {visitor.violations}")
+                            ssot_violations.append(f{config_file}: {visitor.violations}")"
 
                     except SyntaxError:
                         # Skip files with syntax errors
                         continue
 
                 except Exception:
-                    # Skip files that can't be read
+                    # Skip files that can't be read'
                     continue
 
         # Also check for string patterns that indicate SSOT violations
@@ -293,17 +304,18 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
 
                     # Check for direct os.environ patterns
                     if 'os.environ[' in file_content or 'os.environ.get(' in file_content:
-                        # Make sure it's not in comments
+                        # Make sure it's not in comments'
                         lines = file_content.split('\n')
                         for i, line in enumerate(lines):
                             if ('os.environ[' in line or 'os.environ.get(' in line) and not line.strip().startswith('#'):
+                                ssot_violations.append(f{config_file}:Line {i+1}: Direct os.environ access)"
                                 ssot_violations.append(f{config_file}:Line {i+1}: Direct os.environ access)"
 
                 except Exception:
                     continue
 
         if ssot_violations:
-            pytest.fail(f"CRITICAL SSOT VIOLATION: Direct os.environ access detected bypassing IsolatedEnvironment. 
+            pytest.fail(f"CRITICAL SSOT VIOLATION: Direct os.environ access detected bypassing IsolatedEnvironment."
                       fThis causes inconsistent environment state in staging: {ssot_violations})
 
     def test_configuration_loader_ssot_violations(self):
@@ -341,7 +353,8 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
         # SSOT VIOLATION: Multiple configuration loaders
         if len(loader_classes) > 1:
             loader_sources = [f{module}.{attr_name} for module, attr_name, _ in loader_classes]"
-            ssot_violations.append(f"Multiple ConfigurationLoader implementations found: {loader_sources})
+            loader_sources = [f{module}.{attr_name} for module, attr_name, _ in loader_classes]"
+            ssot_violations.append(f"Multiple ConfigurationLoader implementations found: {loader_sources})"
 
         # Test for inconsistent loading methods
         if len(loader_classes) >= 2:
@@ -357,7 +370,7 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
                       fThis causes inconsistent configuration loading in staging: {ssot_violations}")"
 
     def test_secret_manager_ssot_violations(self):
-
+        pass
         CRITICAL SSOT VIOLATION: Test detection of multiple secret manager implementations.
 
         This detects SSOT violations where multiple secret managers exist,
@@ -417,14 +430,16 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
 
         if ssot_violations:
             pytest.fail(fCRITICAL SSOT VIOLATION: Multiple secret manager implementations detected. 
-                      f"This causes inconsistent secret management in staging: {ssot_violations})
+                      f"This causes inconsistent secret management in staging: {ssot_violations})"
 
     def test_configuration_validation_ssot_violations(self):
+        "
         "
         CRITICAL SSOT VIOLATION: Test detection of multiple configuration validator implementations.
 
         This detects SSOT violations where multiple configuration validators exist,
         causing inconsistent validation logic in staging environment.
+"
 "
         # Test for multiple ConfigurationValidator classes
         validator_modules = [
@@ -453,14 +468,14 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
 
         # SSOT VIOLATION: Multiple configuration validators
         if len(validator_classes) > 1:
-            validator_sources = [f"{module}.{attr_name} for module, attr_name, _ in validator_classes]
+            validator_sources = [f"{module}.{attr_name} for module, attr_name, _ in validator_classes]"
             ssot_violations.append(fMultiple ConfigurationValidator implementations found: {validator_sources})
 
         # Test for inconsistent validation rules
         if len(validator_classes) >= 2:
-            validator1_methods = set(method for method in dir(validator_classes[0][2]
+            validator1_methods = set(method for method in dir(validator_classes[0)[2)
                                    if method.startswith('validate_'))
-            validator2_methods = set(method for method in dir(validator_classes[1][2]
+            validator2_methods = set(method for method in dir(validator_classes[1)[2)
                                    if method.startswith('validate_'))
 
             validation_differences = validator1_methods.symmetric_difference(validator2_methods)
@@ -469,10 +484,13 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
 
         if ssot_violations:
             pytest.fail(fCRITICAL SSOT VIOLATION: Multiple configuration validator implementations detected. ""
-                      f"This causes inconsistent validation logic in staging: {ssot_violations})
+                      f"This causes inconsistent validation logic in staging: {ssot_violations})"
 
 
 if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+))))))))
+]]

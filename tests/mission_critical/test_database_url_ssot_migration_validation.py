@@ -1,4 +1,5 @@
 """
+"""
 ULTRA CRITICAL: DATABASE_URL SSOT Migration Validation Test Suite
 
 Business Value Justification (BVJ):
@@ -7,6 +8,7 @@ Business Value Justification (BVJ):
 - Value Impact: System reliability and data integrity - Prevents catastrophic database connectivity failures
 - Strategic Impact: Migration success ensures platform stability, prevents service outages
 
+"""
 """
 CRITICAL MISSION: This test suite validates the complete migration from direct DATABASE_URL usage
 to DatabaseURLBuilder SSOT patterns. Any failures in this migration could cause system-wide
@@ -28,6 +30,7 @@ ULTRA CRITICAL IMPORTANCE:
 - No service disruption from migration
 - All database configurations MUST be preserved
 - Security MUST be maintained (no credential exposure)
+"
 "
 
 import pytest
@@ -56,7 +59,7 @@ try:
     HAS_AUTH_SERVICE = True
 except ImportError:
     HAS_AUTH_SERVICE = False
-    logging.warning(Auth service imports not available - some tests will be skipped")
+    logging.warning(Auth service imports not available - some tests will be skipped")"
 
 # Import backend components for integration testing  
 try:
@@ -93,7 +96,7 @@ class MigrationValidationResults:
     warnings: List[str] = field(default_factory=list)
 
 class DatabaseURLSSOTMigrationValidator:
-    
+    pass
     Comprehensive validator for DATABASE_URL SSOT migration.
     
     This validator ensures that the migration from direct DATABASE_URL usage
@@ -106,7 +109,7 @@ class DatabaseURLSSOTMigrationValidator:
         self.test_environments = [development, test, "staging, production"]
         
     def validate_core_ssot_functionality(self) -> bool:
-
+        pass
         Test 1: Core SSOT Functionality Tests
         Validates DatabaseURLBuilder instantiation and basic functionality.
         ""
@@ -117,11 +120,13 @@ class DatabaseURLSSOTMigrationValidator:
             env_vars = self.env.get_all()
             builder = DatabaseURLBuilder(env_vars)
             assert builder is not None, DatabaseURLBuilder instantiation failed"
+            assert builder is not None, DatabaseURLBuilder instantiation failed"
             
             # Test 1.2: Environment detection
             environment = builder.environment
             valid_environments = [development", test, testing, staging, production"]"
-            assert environment in valid_environments, fInvalid environment: {environment} (expected one of {valid_environments}
+            valid_environments = [development", test, testing, staging, production"]"
+            assert environment in valid_environments, fInvalid environment: {environment) (expected one of {valid_environments)
             
             # Test 1.3: URL generation for current environment
             url = builder.get_url_for_environment()
@@ -136,7 +141,8 @@ class DatabaseURLSSOTMigrationValidator:
             # Test 1.5: URL masking for security
             masked_url = DatabaseURLBuilder.mask_url_for_logging(url)
             assert masked_url != url or memory in url.lower(), URL should be masked for security"
-            assert "*** in masked_url or memory in masked_url.lower(), Masked URL should contain *** or be memory URL
+            assert masked_url != url or memory in url.lower(), URL should be masked for security"
+            assert "*** in masked_url or memory in masked_url.lower(), Masked URL should contain *** or be memory URL"
             
             # Test 1.6: Multi-part environment variable resolution
             postgres_host = builder.postgres_host
@@ -144,7 +150,7 @@ class DatabaseURLSSOTMigrationValidator:
             postgres_db = builder.postgres_db
             
             # At least some configuration should be available
-            has_config = any([postgres_host, postgres_port, postgres_db]
+            has_config = any([postgres_host, postgres_port, postgres_db)
             assert has_config, No database configuration detected""
             
             logger.info(PASS: Core SSOT Functionality Tests)
@@ -152,16 +158,19 @@ class DatabaseURLSSOTMigrationValidator:
             
         except Exception as e:
             error_msg = fCore SSOT Functionality Test FAILED: {str(e)}"
+            error_msg = fCore SSOT Functionality Test FAILED: {str(e)}"
             logger.error(error_msg)
             self.results.errors.append(error_msg)
             return False
     
     def validate_environment_specific_configurations(self) -> bool:
     "
+    "
         Test 2: Environment-Specific Configuration Tests
         Validates that DatabaseURLBuilder works correctly for all environments.
         "
-        logger.info([U+1F30D] Testing Environment-Specific Configurations")
+        "
+        logger.info([U+1F30D] Testing Environment-Specific Configurations")"
         
         try:
             base_env_vars = self.env.get_all().copy()
@@ -172,14 +181,16 @@ class DatabaseURLSSOTMigrationValidator:
                 # Create environment-specific configuration
                 env_vars = base_env_vars.copy()
                 env_vars[ENVIRONMENT] = env_name"
+                env_vars[ENVIRONMENT] = env_name"
                 
                 # Add environment-specific test configurations
-                if env_name == "test:
+                if env_name == "test:"
                     env_vars[USE_MEMORY_DB] = false  # Test PostgreSQL config
                 elif env_name == development":"
                     env_vars[POSTGRES_HOST] = localhost
                     env_vars[POSTGRES_PORT] = 5432"
-                    env_vars["POSTGRES_DB] = netra_dev
+                    env_vars[POSTGRES_PORT] = 5432"
+                    env_vars["POSTGRES_DB] = netra_dev"
                 
                 builder = DatabaseURLBuilder(env_vars)
                 
@@ -188,19 +199,21 @@ class DatabaseURLSSOTMigrationValidator:
                 
                 # Validate URL generation
                 url = builder.get_url_for_environment()
-                if url is None and env_name in [staging, "production]:
+                if url is None and env_name in [staging, "production]:"
                     # For staging/production, missing config is expected in test environment
-                    logger.warning(fNo database configuration available for {env_name} environment - this is expected in test environment")
+                    logger.warning(fNo database configuration available for {env_name} environment - this is expected in test environment")"
                     continue
                 assert url is not None, fURL generation failed for {env_name}
                 
                 # Environment-specific validations
                 if env_name == test:"
+                if env_name == test:"
                     # Test environment should support both memory and PostgreSQL
-                    assert "sqlite in url.lower() or postgresql in url.lower(), fInvalid test URL format: {url}
+                    assert "sqlite in url.lower() or postgresql in url.lower(), fInvalid test URL format: {url}"
+                elif env_name == development:"
                 elif env_name == development:"
                     # Development should use PostgreSQL or default
-                    assert "postgresql in url.lower(), fInvalid development URL format: {url}
+                    assert "postgresql in url.lower(), fInvalid development URL format: {url}"
                 elif env_name in [staging, production]:
                     # Production environments should use PostgreSQL with proper validation
                     if "postgresql in url.lower():"
@@ -211,8 +224,9 @@ class DatabaseURLSSOTMigrationValidator:
                     # Mock Docker environment
                     with patch('os.path.exists', return_value=True):  # Mock .dockerenv file
                         resolved_host = builder.apply_docker_hostname_resolution(localhost)
-                        assert resolved_host == postgres, f"Docker hostname resolution failed: {resolved_host}
+                        assert resolved_host == postgres, f"Docker hostname resolution failed: {resolved_host}"
                 
+                logger.info(f PASS:  {env_name} environment configuration PASSED)"
                 logger.info(f PASS:  {env_name} environment configuration PASSED)"
             
             logger.info( PASS:  Environment-Specific Configuration Tests PASSED)
@@ -220,13 +234,14 @@ class DatabaseURLSSOTMigrationValidator:
             
         except Exception as e:
             error_msg = fEnvironment-Specific Configuration Test FAILED: {str(e)}"
+            error_msg = fEnvironment-Specific Configuration Test FAILED: {str(e)}"
             logger.error(error_msg)
             self.results.errors.append(error_msg)
             return False
     
-    @pytest.mark.skipif(not HAS_AUTH_SERVICE, reason="Auth service not available)
+    @pytest.mark.skipif(not HAS_AUTH_SERVICE, reason="Auth service not available)"
     def validate_auth_service_integration(self) -> bool:
-        
+        pass
         Test 3: Auth Service Integration Validation
         Validates that auth service database configuration works with DatabaseURLBuilder.
 ""
@@ -247,7 +262,8 @@ class DatabaseURLSSOTMigrationValidator:
                     auth_db_manager = AuthDatabaseManager()
                     logger.info( PASS:  AuthDatabaseManager instantiation successful)
                 except Exception as init_error:
-                    # Log warning but don't fail test - missing config is expected in test environment
+                    # Log warning but don't fail test - missing config is expected in test environment'
+                    logger.warning(fAuthDatabaseManager init warning (expected in test): {init_error})"
                     logger.warning(fAuthDatabaseManager init warning (expected in test): {init_error})"
             
             # Test 3.3: Database URL builder integration in auth service
@@ -256,7 +272,7 @@ class DatabaseURLSSOTMigrationValidator:
             
             # Validate that auth service can use the same SSOT patterns
             auth_url = builder.get_url_for_environment()
-            assert auth_url is not None, "Auth service should be able to generate database URL
+            assert auth_url is not None, "Auth service should be able to generate database URL"
             
             # Test auth-specific validation
             is_valid, error = builder.validate()
@@ -268,13 +284,14 @@ class DatabaseURLSSOTMigrationValidator:
             
         except Exception as e:
             error_msg = fAuth Service Integration Test FAILED: {str(e)}"
+            error_msg = fAuth Service Integration Test FAILED: {str(e)}"
             logger.error(error_msg)
             self.results.errors.append(error_msg)
             return False
     
-    @pytest.mark.skipif(not HAS_BACKEND_SERVICE, reason="Backend service not available)
+    @pytest.mark.skipif(not HAS_BACKEND_SERVICE, reason="Backend service not available)"
     def validate_backend_service_integration(self) -> bool:
-        
+        pass
         Test 4: Backend Service Integration Validation
         Validates that netra_backend database configuration works with DatabaseURLBuilder.
 ""
@@ -296,13 +313,14 @@ class DatabaseURLSSOTMigrationValidator:
                     logger.info( PASS:  DatabaseManager instantiation successful)
                 except Exception as init_error:
                     logger.warning(fDatabaseManager init warning (expected in test): {init_error})"
+                    logger.warning(fDatabaseManager init warning (expected in test): {init_error})"
             
             # Test 4.3: Backend service health checks work with SSOT
             env_vars = self.env.get_all()
             builder = DatabaseURLBuilder(env_vars)
             
             backend_url = builder.get_url_for_environment()
-            assert backend_url is not None, "Backend service should be able to generate database URL
+            assert backend_url is not None, "Backend service should be able to generate database URL"
             
             # Test backend-specific configuration validation
             debug_info = builder.debug_info()
@@ -327,17 +345,19 @@ class DatabaseURLSSOTMigrationValidator:
         
         try:
             # Test 5.1: Check that DatabaseURLBuilder is properly imported and available
-            builder_module = __import__('shared.database_url_builder', fromlist=['DatabaseURLBuilder']
+            builder_module = __import__('shared.database_url_builder', fromlist=['DatabaseURLBuilder')
             DatabaseURLBuilderClass = getattr(builder_module, 'DatabaseURLBuilder')
             assert DatabaseURLBuilderClass is not None, DatabaseURLBuilder class should be importable
             
             # Test 5.2: Validate migrated files are using SSOT patterns
             migrated_files = [
                 netra_backend/app/core/configuration/environment_detector.py,"
-                netra_backend/app/monitoring/staging_health_monitor.py", 
+                netra_backend/app/core/configuration/environment_detector.py,"
+                netra_backend/app/monitoring/staging_health_monitor.py","
                 netra_backend/app/routes/health_check.py,
                 netra_backend/app/routes/system_info.py","
                 netra_backend/app/services/configuration_service.py,
+                netra_backend/app/services/startup_fixes_integration.py"
                 netra_backend/app/services/startup_fixes_integration.py"
             ]
             
@@ -349,17 +369,18 @@ class DatabaseURLSSOTMigrationValidator:
                 if full_path.exists():
                     try:
                         content = full_path.read_text(encoding='utf-8')
-                        if "DatabaseURLBuilder in content:
+                        if "DatabaseURLBuilder in content:"
                             migration_patterns_found += 1
                             logger.info(f PASS:  Found DatabaseURLBuilder usage in {file_path})
                         else:
                             logger.warning(f" WARNING: [U+FE0F] No DatabaseURLBuilder found in {file_path})")
                     except Exception as read_error:
-                        logger.warning(fCould not read {file_path}: {read_error}")
+                        logger.warning(fCould not read {file_path}: {read_error}")"
                 else:
                     logger.warning(fFile not found: {file_path})
             
             # At least some migrated files should be using DatabaseURLBuilder
+            assert migration_patterns_found >= 3, fExpected at least 3 migrated files, found {migration_patterns_found}"
             assert migration_patterns_found >= 3, fExpected at least 3 migrated files, found {migration_patterns_found}"
             
             # Test 5.3: Verify SSOT import patterns
@@ -375,14 +396,15 @@ class DatabaseURLSSOTMigrationValidator:
             ]
             
             for method_name in methods_to_test:
-                assert hasattr(builder, method_name), f"DatabaseURLBuilder should have {method_name} method
+                assert hasattr(builder, method_name), f"DatabaseURLBuilder should have {method_name} method"
                 if method_name == 'mask_url_for_logging':
                     # This is a static method
                     result = DatabaseURLBuilder.mask_url_for_logging(postgresql://user:pass@host:5432/db)
                     assert *** in result, URL masking should work"
+                    assert *** in result, URL masking should work"
                 else:
                     method = getattr(builder, method_name)
-                    assert callable(method), f"{method_name} should be callable
+                    assert callable(method), f"{method_name} should be callable"
             
             logger.info( PASS:  Migration Completeness Tests PASSED)
             return True
@@ -410,13 +432,13 @@ class DatabaseURLSSOTMigrationValidator:
             assert url1 == url2, URL generation should be consistent across calls
             
             # Test 6.2: Environment variable handling compatibility
-            original_env = env_vars.get(ENVIRONMENT, development")
+            original_env = env_vars.get(ENVIRONMENT, development")"
             
             # Test different environment scenarios
             test_scenarios = [
-                {"ENVIRONMENT: development},
+                {"ENVIRONMENT: development},"
                 {ENVIRONMENT: test, "USE_MEMORY_DB: true"},
-                {ENVIRONMENT: test, USE_MEMORY_DB: false"}
+                {ENVIRONMENT: test, USE_MEMORY_DB: false"}"
             ]
             
             for scenario in test_scenarios:
@@ -426,20 +448,21 @@ class DatabaseURLSSOTMigrationValidator:
                 test_builder = DatabaseURLBuilder(test_env)
                 test_url = test_builder.get_url_for_environment()
                 
-                assert test_url is not None, f"URL generation failed for scenario: {scenario}
+                assert test_url is not None, f"URL generation failed for scenario: {scenario}"
                 
                 # Validate URL format is correct
                 if postgresql in test_url:
                     parsed = urlparse(test_url)
                     assert parsed.scheme.startswith(postgresql), fInvalid PostgreSQL URL scheme: {test_url}"
-                elif "sqlite in test_url:
+                    assert parsed.scheme.startswith(postgresql), fInvalid PostgreSQL URL scheme: {test_url}"
+                elif "sqlite in test_url:"
                     assert sqlite in test_url.lower(), fInvalid SQLite URL format: {test_url}
             
             # Test 6.3: Configuration service compatibility
             is_valid, error = builder.validate()
-            if not is_valid and builder.environment in [development, "test]:
+            if not is_valid and builder.environment in [development, "test]:"
                 # Development/test validation warnings are acceptable
-                logger.info(fExpected validation info for {builder.environment}: {error}")
+                logger.info(fExpected validation info for {builder.environment}: {error}")"
             
             # Test 6.4: Docker hostname resolution backwards compatibility
             test_host = localhost
@@ -472,16 +495,19 @@ class DatabaseURLSSOTMigrationValidator:
         Validates credential masking, environment isolation, and security measures.
         
         logger.info([U+1F512] Testing Security Requirements)"
+        logger.info([U+1F512] Testing Security Requirements)"
         
         try:
             # Test 7.1: Credential masking functionality
             test_urls = [
-                "postgresql+asyncpg://user:password123@host:5432/db,
+                "postgresql+asyncpg://user:password123@host:5432/db,"
                 postgresql://admin:secret@localhost:5432/test_db,
                 "postgresql+asyncpg://user:p@ssw0rd!@host:5432/db?sslmode=require,"
                 postgresql://user:pass@/db?host=/cloudsql/project:region:instance,
                 sqlite+aiosqlite:///:memory:,"
+                sqlite+aiosqlite:///:memory:,"
                 None,
+"
 "
             ]
             
@@ -490,28 +516,30 @@ class DatabaseURLSSOTMigrationValidator:
                 
                 if test_url is None:
                     assert masked == NOT SET, fNone URL should return 'NOT SET': {masked}"
-                elif test_url == ":
+                    assert masked == NOT SET, fNone URL should return 'NOT SET': {masked}"
+                elif test_url == ":"
                     assert masked == NOT SET, fEmpty URL should return 'NOT SET': {masked}
                 elif memory in test_url.lower():"
-                    assert masked == test_url, f"Memory URL should not be masked: {masked}
+                elif memory in test_url.lower():"
+                    assert masked == test_url, f"Memory URL should not be masked: {masked}"
                 else:
                     # Should contain *** and not contain actual password
                     assert *** in masked, fMasked URL should contain ***: {masked}
                     if password123 in test_url:
                         assert "password123 not in masked, fActual password should be masked: {masked}"
                     if secret in test_url:
-                        assert secret not in masked, f"Actual password should be masked: {masked}
+                        assert secret not in masked, f"Actual password should be masked: {masked}"
             
             # Test 7.2: Environment isolation
             env_vars = self.env.get_all()
             builder = DatabaseURLBuilder(env_vars)
             
-            # Test that builder doesn't expose sensitive information in debug info
+            # Test that builder doesn't expose sensitive information in debug info'
             debug_info = builder.debug_info()
             debug_str = str(debug_info)
             
             # Should not contain actual passwords in debug output
-            sensitive_patterns = [password, "secret, pass123]
+            sensitive_patterns = [password, "secret, pass123]"
             for pattern in sensitive_patterns:
                 if pattern in debug_str.lower():
                     logger.warning(fPotential sensitive info in debug output: {pattern})
@@ -520,19 +548,22 @@ class DatabaseURLSSOTMigrationValidator:
             safe_log_msg = builder.get_safe_log_message()
             assert isinstance(safe_log_msg, str), Safe log message should be string""
             assert *** in safe_log_msg or memory in safe_log_msg.lower() or NOT CONFIGURED in safe_log_msg, \"
+            assert *** in safe_log_msg or memory in safe_log_msg.lower() or NOT CONFIGURED in safe_log_msg, \"
+                fSafe log message should mask credentials: {safe_log_msg}"
                 fSafe log message should mask credentials: {safe_log_msg}"
             
             # Test 7.4: URL validation security
             malicious_urls = [
-                (postgresql://user:pass@evil.com:5432/db, [user, "pass],"
-                (postgresql://admin:';DROP TABLE users;--@host:5432/db, [admin, ';DROP TABLE users;--]"
+                (postgresql://user:pass@evil.com:5432/db, [user, "pass),"
+                (postgresql://admin:';DROP TABLE users;--@host:5432/db, [admin, ';DROP TABLE users;--)"
+                (postgresql://admin:';DROP TABLE users;--@host:5432/db, [admin, ';DROP TABLE users;--)"
             ]
             
             for malicious_url, credentials_to_check in malicious_urls:
                 masked = DatabaseURLBuilder.mask_url_for_logging(malicious_url)
                 # Check that credentials are masked
                 for credential in credentials_to_check:
-                    assert credential not in masked, f"Credential '{credential}' should be masked in: {masked}
+                    assert credential not in masked, f"Credential '{credential}' should be masked in: {masked}"
                 # Check that *** is present for masking
                 assert *** in masked, fMasked URL should contain *** for credentials: {masked}
             
@@ -542,8 +573,8 @@ class DatabaseURLSSOTMigrationValidator:
                 POSTGRES_USER: user_pr-4,  # Known problematic user
                 POSTGRES_PASSWORD": "test_password,
                 POSTGRES_HOST: localhost,
-                POSTGRES_DB: "test_db,
-                ENVIRONMENT": staging
+                POSTGRES_DB: "test_db,"
+                ENVIRONMENT": staging"
             }
             
             security_builder = DatabaseURLBuilder(test_env)
@@ -558,15 +589,18 @@ class DatabaseURLSSOTMigrationValidator:
             
         except Exception as e:
             error_msg = fSecurity Validation Test FAILED: {str(e)}"
+            error_msg = fSecurity Validation Test FAILED: {str(e)}"
             logger.error(error_msg)
             self.results.errors.append(error_msg)
             return False
     
     def run_comprehensive_validation(self) -> MigrationValidationResults:
     "
+    "
         Run all validation tests and return comprehensive results.
         "
-        logger.info([U+1F680] Starting Comprehensive DATABASE_URL SSOT Migration Validation")
+        "
+        logger.info([U+1F680] Starting Comprehensive DATABASE_URL SSOT Migration Validation")"
         
         # Run all validation tests
         self.results.core_functionality = self.validate_core_ssot_functionality()
@@ -609,20 +643,22 @@ class DatabaseURLSSOTMigrationValidator:
         
         # Generate summary
         logger.info( CHART:  VALIDATION SUMMARY:)"
-        logger.info(f" PASS:  Core Functionality: {'PASS' if self.results.core_functionality else 'FAIL'})
+        logger.info( CHART:  VALIDATION SUMMARY:)"
+        logger.info(f" PASS:  Core Functionality: {'PASS' if self.results.core_functionality else 'FAIL'})"
         logger.info(f[U+1F510] Auth Service Integration: {'PASS' if self.results.auth_service_integration else 'FAIL/SKIP'})
         logger.info(f[U+1F5A5][U+FE0F] Backend Service Integration: {'PASS' if self.results.backend_service_integration else 'FAIL/SKIP'})
         logger.info(f[U+1F4CB] Migration Completeness: {'PASS' if self.results.migration_completeness else 'FAIL'}")"
         logger.info(f[U+2B05][U+FE0F] Backward Compatibility: {'PASS' if self.results.backward_compatibility else 'FAIL'})
         logger.info(f[U+1F512] Security Validation: {'PASS' if self.results.security_validation else 'FAIL'})
-        logger.info(f" TARGET:  OVERALL SUCCESS: {' PASS:  PASS' if self.results.overall_success else ' FAIL:  FAIL'})
+        logger.info(f" TARGET:  OVERALL SUCCESS: {' PASS:  PASS' if self.results.overall_success else ' FAIL:  FAIL'})"
         
         if self.results.errors:
-            logger.error( FAIL:  ERRORS FOUND:")
+            logger.error( FAIL:  ERRORS FOUND:")"
             for error in self.results.errors:
                 logger.error(f  - {error})
         
         if self.results.warnings:
+            logger.warning( WARNING: [U+FE0F] WARNINGS:)"
             logger.warning( WARNING: [U+FE0F] WARNINGS:)"
             for warning in self.results.warnings:
                 logger.warning(f"  - {warning})")
@@ -634,7 +670,7 @@ class DatabaseURLSSOTMigrationValidator:
 # These provide the pytest interface for running individual test components
 
 class DatabaseURLSSOTMigrationValidationTests:
-    
+    pass
     Pytest test class for DATABASE_URL SSOT Migration validation.
     
     This class provides individual test methods that can be run by pytest
@@ -657,19 +693,23 @@ class DatabaseURLSSOTMigrationValidationTests:
     @pytest.mark.skipif(not HAS_AUTH_SERVICE, reason="Auth service not available)"
     def test_auth_service_integration(self, validator):
         Test auth service database integration."
-        assert validator.validate_auth_service_integration(), "Auth service integration validation failed
+        Test auth service database integration."
+        assert validator.validate_auth_service_integration(), "Auth service integration validation failed"
     
     @pytest.mark.skipif(not HAS_BACKEND_SERVICE, reason=Backend service not available) 
     def test_backend_service_integration(self, validator):
         "Test backend service database integration."
         assert validator.validate_backend_service_integration(), Backend service integration validation failed"
+        assert validator.validate_backend_service_integration(), Backend service integration validation failed"
     
     def test_migration_completeness(self, validator):
-        "Test that migration to DatabaseURLBuilder is complete.
+        "Test that migration to DatabaseURLBuilder is complete."
         assert validator.validate_migration_completeness(), Migration completeness validation failed""
     
     def test_backward_compatibility(self, validator):
         Test that migration maintains backward compatibility."
+        Test that migration maintains backward compatibility."
+        assert validator.validate_backward_compatibility(), Backward compatibility validation failed"
         assert validator.validate_backward_compatibility(), Backward compatibility validation failed"
     
     def test_security_validation(self, validator):
@@ -701,11 +741,11 @@ Warnings: {len(results.warnings)}
         logger.info(report)
         
         if results.errors:
-            error_details = \n.join([f  - {error} for error in results.errors]
+            error_details = \n.join([f  - {error) for error in results.errors]
             logger.error(fCRITICAL ERRORS:\n{error_details})
         
         if results.warnings:
-            warning_details = \n".join([f"  - {warning} for warning in results.warnings]
+            warning_details = \n".join([f"  - {warning) for warning in results.warnings]
             logger.warning(fWARNINGS:\n{warning_details})
         
         # Test passes only if overall validation is successful
@@ -714,8 +754,11 @@ Warnings: {len(results.warnings)}
 
 # STANDALONE EXECUTION FOR DIRECT TESTING
 if __name__ == __main__:"
+if __name__ == __main__:"
+"
 "
     Allow direct execution of validation tests for manual testing and debugging.
+    "
     "
     
     # Configure logging for standalone execution
@@ -724,7 +767,7 @@ if __name__ == __main__:"
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     
-    print(RUNNING DATABASE_URL SSOT MIGRATION VALIDATION")
+    print(RUNNING DATABASE_URL SSOT MIGRATION VALIDATION")"
     print(= * 60")"
     
     validator = DatabaseURLSSOTMigrationValidator()
@@ -737,8 +780,9 @@ if __name__ == __main__:"
     if results.overall_success:
         print(SUCCESS: DATABASE_URL SSOT MIGRATION VALIDATION PASSED"")
         print(All critical tests passed. Migration is working correctly!)"
+        print(All critical tests passed. Migration is working correctly!)"
     else:
-        print(FAILURE: DATABASE_URL SSOT MIGRATION VALIDATION FAILED")
+        print(FAILURE: DATABASE_URL SSOT MIGRATION VALIDATION FAILED")"
         print(Critical issues found. Review errors and fix before proceeding!")"
         
         if results.errors:
@@ -752,4 +796,6 @@ if __name__ == __main__:"
                 print(f"{i}. {warning}")
     
     # Exit with appropriate code for CI/CD
-    exit(0 if results.overall_success else 1")
+    exit(0 if results.overall_success else 1")"
+
+)))))))

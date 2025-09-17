@@ -1,7 +1,7 @@
-"Golden Path Protection Tests for Issue #821 - SupervisorAgent SSOT Consolidation
+"Golden Path Protection Tests for Issue #821 - SupervisorAgent SSOT Consolidation"
 
 Business Value: Protect $500K+ ARR Golden Path during SSOT consolidation
-BVJ: ALL segments | Platform Stability | Ensure SSOT fixes don't break core functionality
+BVJ: ALL segments | Platform Stability | Ensure SSOT fixes don't break core functionality'
 
 MISSION: Ensure Golden Path (users login → get AI responses) remains functional during/after SSOT consolidation
 REQUIREMENT: All tests must PASS before and after SSOT consolidation
@@ -17,7 +17,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
-    Tests that ensure SSOT consolidation doesn't break Golden Path functionality.
+    Tests that ensure SSOT consolidation doesn't break Golden Path functionality.'
 
     These tests protect the core business value - users login and get AI responses.
     All tests must pass before and after SSOT consolidation.
@@ -25,7 +25,9 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
 
     def setUp(self):
         Set up test environment."
+        Set up test environment."
         super().setUp()
+        self.ssot_module_path = netra_backend.app.agents.supervisor_ssot"
         self.ssot_module_path = netra_backend.app.agents.supervisor_ssot"
 
     async def test_supervisor_agent_can_handle_user_request_golden_path(self):
@@ -44,8 +46,8 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
 
             # Mock successful LLM response
             mock_llm_manager.process_request = AsyncMock(return_value={
-                response: "I've analyzed your request and here's my optimization recommendation...,
-                status": completed
+                response: "I've analyzed your request and here's my optimization recommendation...,"
+                status": completed"
             }
 
             # Mock WebSocket events for real-time updates
@@ -57,7 +59,8 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
                 session_id": "test_session_456,
                 request: Optimize my AI infrastructure costs,
                 llm_manager: mock_llm_manager,"
-                "websocket_bridge: mock_websocket_bridge
+                llm_manager: mock_llm_manager,"
+                "websocket_bridge: mock_websocket_bridge"
             }
 
             # Attempt to create SupervisorAgent instance
@@ -82,10 +85,11 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
                 # at least verify the class is importable and has required methods
                 self.assertTrue(
                     hasattr(SupervisorAgent, 'execute'),
-                    f"SupervisorAgent should have execute method for Golden Path
+                    f"SupervisorAgent should have execute method for Golden Path"
                 )
                 self.assertTrue(
                     hasattr(SupervisorAgent, '__init__'),
+                    fSupervisorAgent should be instantiable for Golden Path"
                     fSupervisorAgent should be instantiable for Golden Path"
                 )
 
@@ -100,9 +104,11 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
 
     async def test_websocket_events_work_with_ssot_supervisor_agent(self):
         GOLDEN PATH: Validate WebSocket events continue working with SSOT SupervisorAgent."
+        GOLDEN PATH: Validate WebSocket events continue working with SSOT SupervisorAgent."
 
         WebSocket events are critical for Golden Path user experience - real-time updates.
         Must continue working after SSOT consolidation.
+        "
         "
         try:
             from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
@@ -117,6 +123,8 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
                 "agent_thinking,"
                 tool_executing,
                 tool_completed,"
+                tool_completed,"
+                agent_completed"
                 agent_completed"
             ]
 
@@ -135,26 +143,28 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
             )
 
             print(f\n=== WEBSOCKET GOLDEN PATH PROTECTION ===)"
+            print(f\n=== WEBSOCKET GOLDEN PATH PROTECTION ===)"
             print(f"✓ WebSocket bridge integration: Compatible)")
             print(f✓ Critical events supported: {len(required_events)})
             print(f"✓ Golden Path real-time updates: Functional")
             print(=*50)
 
         except ImportError as e:
-            self.fail(f"GOLDEN PATH FAILURE: Cannot import SSOT SupervisorAgent for WebSocket events: {e})
+            self.fail(f"GOLDEN PATH FAILURE: Cannot import SSOT SupervisorAgent for WebSocket events: {e})"
 
     async def test_agent_workflow_orchestration_continues_working(self):
-        "GOLDEN PATH: Validate agent workflow orchestration works with SSOT consolidation.
+        "GOLDEN PATH: Validate agent workflow orchestration works with SSOT consolidation."
 
         Agent orchestration is core to delivering AI value to users.
         Must continue working after SSOT consolidation.
+"
 "
         try:
             from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
             # Check that the SSOT SupervisorAgent has orchestration capabilities
             orchestration_methods = [
-                "run_agent_workflow,
+                "run_agent_workflow,"
                 execute,
                 # Add other orchestration methods as discovered
             ]
@@ -172,7 +182,8 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
             self.assertGreater(
                 len(available_methods),
                 0,
-                f"GOLDEN PATH FAILURE: SupervisorAgent must have orchestration methods. 
+                f"GOLDEN PATH FAILURE: SupervisorAgent must have orchestration methods."
+                fAvailable: {available_methods}, Missing: {missing_methods}"
                 fAvailable: {available_methods}, Missing: {missing_methods}"
             )
 
@@ -208,8 +219,8 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
             }
 
             user2_context = {
-                user_id: user_456",
-                "session_id: session_def,
+                user_id: user_456","
+                "session_id: session_def,"
                 request: User 2 request
             }
 
@@ -232,12 +243,13 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
                 print(fUser context support indicators: {user_context_support})
                 print(f✓ Multi-user architecture: Preserved in SSOT"")
                 print(=*65)"
+                print(=*65)"
 
                 # This is informational - the exact parameter names may vary
                 # but the SSOT should support user isolation
 
             except Exception as inspection_error:
-                print(fINFO: Constructor inspection needs more context: {inspection_error}")
+                print(fINFO: Constructor inspection needs more context: {inspection_error}")"
 
         except ImportError as e:
             self.fail(fGOLDEN PATH FAILURE: Cannot import SSOT SupervisorAgent for multi-user testing: {e})
@@ -264,10 +276,10 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
                             SupervisorAgent should be discoverable through registry
                         )
 
-                print(f\n=== AGENT REGISTRY GOLDEN PATH PROTECTION ===")
-                print(f✓ Agent registry accessible: {agent_registry is not None}")
-                print(f✓ SupervisorAgent SSOT available: {SupervisorAgent is not None}")
-                print(f✓ Golden Path agent discovery: Functional")
+                print(f\n=== AGENT REGISTRY GOLDEN PATH PROTECTION ===")"
+                print(f✓ Agent registry accessible: {agent_registry is not None}")"
+                print(f✓ SupervisorAgent SSOT available: {SupervisorAgent is not None}")"
+                print(f✓ Golden Path agent discovery: Functional")"
                 print(=*55")"
 
             except ImportError as registry_error:
@@ -278,7 +290,7 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
             # Make this informational since registry patterns may vary
             print(f"INFO: Agent registry validation needs more context: {e})")
 
-    async def test_error_handling_preserved_in_ssot_consolidation(self"):
+    async def test_error_handling_preserved_in_ssot_consolidation(self"):"
         GOLDEN PATH: Validate error handling continues working.
 
         Robust error handling is critical for Golden Path reliability.
@@ -290,6 +302,7 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
             # Check that SupervisorAgent has error handling capabilities
             error_handling_methods = [
                 handle_error,
+                handle_execution_error,"
                 handle_execution_error,"
                 # Add other error handling methods as discovered
             ]
@@ -306,9 +319,10 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
                     # Basic check that execute method exists
                     self.assertTrue(
                         callable(execute_method),
-                        "Execute method should be callable for error handling
+                        "Execute method should be callable for error handling"
                     )
 
+            print(f\n=== ERROR HANDLING GOLDEN PATH PROTECTION ===)"
             print(f\n=== ERROR HANDLING GOLDEN PATH PROTECTION ===)"
             print(f"Available error handling methods: {available_error_methods})")
             print(f✓ Execute method callable: {hasattr(SupervisorAgent, 'execute')})
@@ -316,7 +330,7 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
             print(=*55)
 
         except ImportError as e:
-            self.fail(f"GOLDEN PATH FAILURE: Cannot import SSOT SupervisorAgent for error handling test: {e})
+            self.fail(f"GOLDEN PATH FAILURE: Cannot import SSOT SupervisorAgent for error handling test: {e})"
 
 
 if __name__ == __main__":"

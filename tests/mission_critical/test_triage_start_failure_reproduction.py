@@ -1,6 +1,8 @@
 """
+"""
 Mission Critical Test: Triage Agent Start Failure Reproduction
 
+"""
 """
 This test reproduces the EXACT failure that prevents triage agents from starting,
 which directly impacts the Golden Path user flow and $500K+ ARR chat functionality.
@@ -31,6 +33,7 @@ MISSION CRITICAL REQUIREMENTS:
 - Uses real services where possible
 - Validates complete triage agent start flow
 "
+"
 
 import asyncio
 import pytest
@@ -51,6 +54,7 @@ from shared.id_generation import UnifiedIdGenerator
 
 class TriageStartFailureReproductionTests(SSotAsyncTestCase):
     "
+    "
     Mission Critical: Triage Agent Start Failure Reproduction
     
     Reproduces the exact failure that blocks triage agents from starting,
@@ -59,9 +63,10 @@ class TriageStartFailureReproductionTests(SSotAsyncTestCase):
     GOLDEN PATH IMPACT: This failure breaks the core user journey:
     User Message  ->  Triage Agent  ->  AI Response
 "
+"
     
     async def async_setup_method(self, method=None):
-        "Set up mission critical test environment.
+        "Set up mission critical test environment."
         await super().async_setup_method(method)
         self.env = IsolatedEnvironment()
         self.env.set('ENVIRONMENT', 'test')
@@ -70,7 +75,8 @@ class TriageStartFailureReproductionTests(SSotAsyncTestCase):
         self.connection_id = UnifiedIdGenerator.generate_base_id(conn")"
         self.run_id = UnifiedIdGenerator.generate_base_id(run) 
         self.user_id = mission_critical_user_123"
-        self.thread_id = UnifiedIdGenerator.generate_base_id("thread)
+        self.user_id = mission_critical_user_123"
+        self.thread_id = UnifiedIdGenerator.generate_base_id("thread)"
         
         # Mock WebSocket that simulates real connection
         self.mock_websocket = AsyncMock()
@@ -105,7 +111,7 @@ class TriageStartFailureReproductionTests(SSotAsyncTestCase):
             'content': 'Help me optimize my AI infrastructure',
             'user_id': self.user_id,
             'thread_id': self.thread_id,
-            'timestamp': '2025-01-09T10:00:00Z'
+            'timestamp': '2025-1-09T10:0:00Z'
         }
 
     @pytest.mark.asyncio
@@ -179,15 +185,18 @@ class TriageStartFailureReproductionTests(SSotAsyncTestCase):
             self.record_metric(
                 triage_start_exact_failure,
                 fREPRODUCED - Triage agent start failure reproduced: {error_message}"
+                fREPRODUCED - Triage agent start failure reproduced: {error_message}"
             )
 
     @pytest.mark.asyncio
     async def test_triage_start_session_pattern_isolation(self):
     "
+    "
         Isolate the exact session pattern that causes triage start failure.
         
         This focuses specifically on the problematic lines 125-137 in agent_handler.py
         that prevent database session creation for agent operations.
+        "
         "
         
         # Get the exact session context used in agent_handler.py line 125
@@ -213,7 +222,7 @@ class TriageStartFailureReproductionTests(SSotAsyncTestCase):
                         app_state = self.mock_websocket.scope['app'].state
                     
                     # This code should never execute due to session pattern failure
-                    pytest.fail(Should not reach supervisor creation due to TypeError")
+                    pytest.fail(Should not reach supervisor creation due to TypeError")"
                     
                 except Exception:
                     # Should not reach this except block either
@@ -228,7 +237,8 @@ class TriageStartFailureReproductionTests(SSotAsyncTestCase):
         
         self.record_metric(
             session_pattern_isolation,"
-            "REPRODUCED - Isolated exact session pattern causing triage start failure
+            session_pattern_isolation,"
+            "REPRODUCED - Isolated exact session pattern causing triage start failure"
         )
 
     @pytest.mark.asyncio
@@ -412,7 +422,7 @@ class TriageStartFailureReproductionTests(SSotAsyncTestCase):
         metrics = self.get_all_metrics()
         for metric_name, metric_value in metrics.items():
             print(f  [U+2713] {metric_name}: {metric_value}")"
-        print("=" * 80")
+        print("=" * 80")"
 
 
 if __name__ == '__main__':

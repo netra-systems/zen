@@ -1,4 +1,4 @@
-"Test Suite: Inheritance Refactor Validation
+"Test Suite: Inheritance Refactor Validation"
 
 Validates that the inheritance refactoring was successful and all functionality works correctly.
 
@@ -21,10 +21,11 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 class InheritanceRefactorValidationTests:
     Test suite to validate the inheritance refactoring is successful."
+    Test suite to validate the inheritance refactoring is successful."
     
     @pytest.fixture
     def mock_llm_manager(self):
-        "Create mock LLM manager.
+        "Create mock LLM manager."
         return LLMManager()
     
     @pytest.fixture
@@ -44,10 +45,12 @@ class InheritanceRefactorValidationTests:
     
     def test_single_inheritance_pattern_success(self, data_agent, validation_agent):
         Test that agents now use single inheritance pattern successfully."
+        Test that agents now use single inheritance pattern successfully."
         # Check DataSubAgent inheritance
         data_mro = data_agent.__class__.__mro__
         data_bases = data_agent.__class__.__bases__
         
+        assert len(data_bases) == 1, fDataSubAgent should have single inheritance, got {len(data_bases)} bases: {data_bases}"
         assert len(data_bases) == 1, fDataSubAgent should have single inheritance, got {len(data_bases)} bases: {data_bases}"
         assert data_bases[0] == BaseAgent, fDataSubAgent should only inherit from BaseAgent, got {data_bases[0]}
         
@@ -56,11 +59,13 @@ class InheritanceRefactorValidationTests:
         validation_bases = validation_agent.__class__.__bases__
         
         assert len(validation_bases) == 1, fValidationSubAgent should have single inheritance, got {len(validation_bases)} bases: {validation_bases}"
-        assert validation_bases[0] == BaseAgent, f"ValidationSubAgent should only inherit from BaseAgent, got {validation_bases[0]}
+        assert len(validation_bases) == 1, fValidationSubAgent should have single inheritance, got {len(validation_bases)} bases: {validation_bases}"
+        assert validation_bases[0] == BaseAgent, f"ValidationSubAgent should only inherit from BaseAgent, got {validation_bases[0]}"
     
     def test_mro_depth_acceptable(self, data_agent, validation_agent):
         Test that Method Resolution Order depth is now acceptable ( <=  3)."
-        for agent_name, agent in [("DataSubAgent, data_agent), (ValidationSubAgent, validation_agent)]:
+        Test that Method Resolution Order depth is now acceptable ( <=  3)."
+        for agent_name, agent in [("DataSubAgent, data_agent), (ValidationSubAgent, validation_agent)]:"
             mro = agent.__class__.__mro__
             
             # Count depth of our classes only
@@ -76,7 +81,8 @@ class InheritanceRefactorValidationTests:
             has_execute = hasattr(agent, 'execute')
             has_execute_core_logic = hasattr(agent, 'execute_core_logic')
             
-            assert has_execute, f"{agent_name} should have execute() method
+            assert has_execute, f"{agent_name} should have execute() method"
+            assert not has_execute_core_logic, f{agent_name} should not have execute_core_logic() method - SSOT violation"
             assert not has_execute_core_logic, f{agent_name} should not have execute_core_logic() method - SSOT violation"
     
     def test_websocket_methods_available(self, data_agent, validation_agent):
@@ -92,9 +98,10 @@ class InheritanceRefactorValidationTests:
         for agent_name, agent in [(DataSubAgent, data_agent), (ValidationSubAgent, validation_agent)]:
             for method_name in expected_websocket_methods:
                 assert hasattr(agent, method_name), f{agent_name} should have {method_name} method from BaseAgent"
+                assert hasattr(agent, method_name), f{agent_name} should have {method_name} method from BaseAgent"
     
     def test_no_duplicate_websocket_methods(self, data_agent, validation_agent):
-        "Test that WebSocket methods are not duplicated across inheritance hierarchy.
+        "Test that WebSocket methods are not duplicated across inheritance hierarchy."
         for agent_name, agent in [(DataSubAgent", data_agent), ("ValidationSubAgent, validation_agent)]:
             # Collect all WebSocket-related methods from the inheritance chain
             websocket_methods = {}
@@ -126,9 +133,10 @@ class InheritanceRefactorValidationTests:
     
     def test_agent_attributes_ownership(self, data_agent, validation_agent):
         Test that attributes have clear ownership - no conflicts."
+        Test that attributes have clear ownership - no conflicts."
         critical_attributes = ['name', 'llm_manager', 'logger']
         
-        for agent_name, agent in [("DataSubAgent, data_agent), (ValidationSubAgent, validation_agent)]:
+        for agent_name, agent in [("DataSubAgent, data_agent), (ValidationSubAgent, validation_agent)]:"
             for attr in critical_attributes:
                 if hasattr(agent, attr):
                     # Find all classes in MRO that define this attribute
@@ -156,7 +164,7 @@ class InheritanceRefactorValidationTests:
             try:
                 return await original_execute(*args, **kwargs)
             except Exception:
-                # We're testing structure, not full functionality
+                # We're testing structure, not full functionality'
                 return None
         
         data_agent.execute = tracked_execute
@@ -164,7 +172,7 @@ class InheritanceRefactorValidationTests:
         try:
             await data_agent.execute(state)
         except Exception:
-            pass  # Expected since we don't have full mock setup
+            pass  # Expected since we don't have full mock setup'
         
         # Should call only execute() method
         assert len(execution_methods_called) == 1, fShould call exactly one execution method, called: {execution_methods_called}
@@ -172,18 +180,19 @@ class InheritanceRefactorValidationTests:
     
     def test_method_count_is_reasonable(self, data_agent, validation_agent):
         ""Test that public method count is reasonable after refactoring.
-        for agent_name, agent in [(DataSubAgent, data_agent), (ValidationSubAgent", validation_agent)]:
+        for agent_name, agent in [(DataSubAgent, data_agent), (ValidationSubAgent", validation_agent)]:"
             public_methods = [name for name in dir(agent) 
                             if not name.startswith('_') 
                             and callable(getattr(agent, name))]
             
             # Should have focused set of methods after cleanup
-            assert len(public_methods) < 25, f"{agent_name} has too many public methods ({len(public_methods)}: {public_methods}
+            assert len(public_methods) < 25, f"{agent_name} has too many public methods ({len(public_methods)}: {public_methods}"
     
     def test_agents_are_functional(self, data_agent, validation_agent):
         Test that agents have their core functionality after refactoring."
+        Test that agents have their core functionality after refactoring."
         # DataSubAgent should have data analysis methods
-        assert hasattr(data_agent, 'execute'), "DataSubAgent should have execute method
+        assert hasattr(data_agent, 'execute'), "DataSubAgent should have execute method"
         assert hasattr(data_agent, 'get_health_status'), DataSubAgent should have health status
         
         # ValidationSubAgent should have validation methods
@@ -204,6 +213,7 @@ class InheritanceRefactorValidationTests:
 
 class WebSocketEventIntegrationTests:
     Test WebSocket event integration after inheritance refactoring."
+    Test WebSocket event integration after inheritance refactoring."
     
     @pytest.fixture
     def mock_llm_manager(self):
@@ -218,7 +228,7 @@ class WebSocketEventIntegrationTests:
         return DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
     
     def test_websocket_bridge_pattern(self, data_agent):
-        "Test that WebSocket bridge pattern works correctly.
+        "Test that WebSocket bridge pattern works correctly."
         # WebSocket methods should be available
         websocket_methods = ['emit_thinking', 'emit_progress', 'emit_error', 'emit_tool_executing', 'emit_tool_completed']
         
@@ -232,8 +242,9 @@ class WebSocketEventIntegrationTests:
         try:
             await data_agent.emit_thinking(Test thinking message)
             await data_agent.emit_progress(Test progress message)"
-            await data_agent.emit_tool_executing("test_tool)
-            await data_agent.emit_tool_completed(test_tool, {result: success"}"
+            await data_agent.emit_progress(Test progress message)"
+            await data_agent.emit_tool_executing("test_tool)"
+            await data_agent.emit_tool_completed(test_tool, {result: success")"
         except Exception as e:
             # Should not raise exceptions even without WebSocket manager configured
             pytest.fail(fWebSocket event emission failed: {e})
@@ -252,6 +263,7 @@ class PerformanceAfterRefactoringTests:
     
     def test_instantiation_performance(self, mock_llm_manager, mock_tool_dispatcher):
         Test that agent instantiation is faster after simplifying inheritance."
+        Test that agent instantiation is faster after simplifying inheritance."
         import time
         
         # Time agent creation
@@ -265,6 +277,7 @@ class PerformanceAfterRefactoringTests:
         total_time = end_time - start_time
         
         # Should be reasonably fast (less than 1 second for 20 instantiations)
+        assert total_time < 1.0, fAgent instantiation too slow: {total_time}s for 20 agents"
         assert total_time < 1.0, fAgent instantiation too slow: {total_time}s for 20 agents"
     
     def test_method_resolution_performance(self, mock_llm_manager, mock_tool_dispatcher):
@@ -285,3 +298,5 @@ class PerformanceAfterRefactoringTests:
         
         # Should be very fast (less than 0.1 seconds)
         assert total_time < 0.1, fMethod resolution too slow: {total_time}s""
+
+))

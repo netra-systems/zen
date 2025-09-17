@@ -1,4 +1,5 @@
 """
+"""
 MISSION CRITICAL: EventValidator SSOT Violation Detection Test
 
 PURPOSE: This test is DESIGNED TO FAIL initially to prove that SSOT violations exist.
@@ -15,7 +16,9 @@ Expected Behavior:
 - After SSOT migration, this test SHOULD PASS
 
 """
+"""
 Business Value Impact: $500K+ ARR at risk from inconsistent event validation
+"
 "
 
 import pytest
@@ -36,15 +39,17 @@ logger = central_logger.get_logger(__name__)
 
 class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
     "
+    "
     Test that detects SSOT violations in EventValidator implementations.
     
     This test is DESIGNED TO FAIL initially to prove violations exist.
+"
 "
     
     def setUp(self):
         super().setUp()
         self.sample_valid_event = {
-            "type: agent_started,
+            "type: agent_started,"
             run_id: test-run-123,
             "agent_name: test-agent",
             timestamp: datetime.now(timezone.utc).isoformat(),
@@ -58,14 +63,17 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
         
         self.test_user_id = test-user-ssot-violation
         self.test_connection_id = conn-ssot-test"
+        self.test_connection_id = conn-ssot-test"
         
     def test_multiple_eventvalidator_implementations_exist(self):
+    "
     "
         Test that multiple EventValidator implementations exist - proving SSOT violation.
         
         This test SHOULD FAIL, proving that SSOT violations exist.
         "
-        logger.critical( ALERT:  TESTING FOR SSOT VIOLATIONS: Multiple EventValidator implementations")
+        "
+        logger.critical( ALERT:  TESTING FOR SSOT VIOLATIONS: Multiple EventValidator implementations")"
         
         implementations_found = []
         validation_results = {}
@@ -83,15 +91,16 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             validation_results[unified"] = {"
                 is_valid: unified_result.is_valid,
                 error_message: unified_result.error_message,"
-                "criticality: unified_result.criticality.value if hasattr(unified_result.criticality, 'value') else str(unified_result.criticality)
+                error_message: unified_result.error_message,"
+                "criticality: unified_result.criticality.value if hasattr(unified_result.criticality, 'value') else str(unified_result.criticality)"
             }
             logger.info(f[U+2713] UnifiedEventValidator found and tested)
             print(f"DEBUG: UnifiedEventValidator found - {unified_result.is_valid}")
         except ImportError as e:
             logger.error(f FAIL:  Cannot import UnifiedEventValidator: {e})
-            print(fDEBUG: UnifiedEventValidator import failed: {e}")
+            print(fDEBUG: UnifiedEventValidator import failed: {e}")"
         except Exception as e:
-            logger.error(f FAIL:  UnifiedEventValidator test failed: {e}")
+            logger.error(f FAIL:  UnifiedEventValidator test failed: {e}")"
             print(fDEBUG: UnifiedEventValidator exception: {e})
             
         # Test Import 2: Production WebSocketEventValidator
@@ -106,11 +115,12 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             implementations_found.append(WebSocketEventValidator")"
             validation_results[production] = {
                 is_valid: production_result.is_valid,"
-                "error_message: production_result.error_message,
+                is_valid: production_result.is_valid,"
+                "error_message: production_result.error_message,"
                 criticality: production_result.criticality.value if hasattr(production_result.criticality, 'value') else str(production_result.criticality)
             }
-            logger.info(f"[U+2713] WebSocketEventValidator found and tested)
-            print(fDEBUG: WebSocketEventValidator found - {production_result.is_valid}")
+            logger.info(f"[U+2713] WebSocketEventValidator found and tested)"
+            print(fDEBUG: WebSocketEventValidator found - {production_result.is_valid}")"
         except ImportError as e:
             logger.error(f FAIL:  Cannot import WebSocketEventValidator: {e})
             print(fDEBUG: WebSocketEventValidator import failed: {e}"")
@@ -126,14 +136,15 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             ssot_result = ssot_validator.perform_full_validation()
             implementations_found.append(AgentEventValidator)
             validation_results[ssot_framework] = {"
-                "is_valid: ssot_result.is_valid,
+            validation_results[ssot_framework] = {"
+                "is_valid: ssot_result.is_valid,"
                 error_message: ssot_result.error_message,
                 "business_value_score: ssot_result.business_value_score"
             }
             logger.info(f[U+2713] AgentEventValidator found and tested)
-            print(fDEBUG: AgentEventValidator found - {ssot_result.is_valid}")
+            print(fDEBUG: AgentEventValidator found - {ssot_result.is_valid}")"
         except ImportError as e:
-            logger.error(f FAIL:  Cannot import AgentEventValidator: {e}")
+            logger.error(f FAIL:  Cannot import AgentEventValidator: {e}")"
             print(fDEBUG: AgentEventValidator import failed: {e})
         except Exception as e:
             logger.error(f FAIL:  AgentEventValidator test failed: {e}")"
@@ -141,7 +152,8 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             
         # Log findings
         logger.critical(f ALERT:  SSOT VIOLATION ANALYSIS:)"
-        logger.critical(f" ALERT:  Total EventValidator implementations found: {len(implementations_found)})
+        logger.critical(f ALERT:  SSOT VIOLATION ANALYSIS:)"
+        logger.critical(f" ALERT:  Total EventValidator implementations found: {len(implementations_found)})"
         logger.critical(f ALERT:  Implementations: {implementations_found})
         logger.critical(f ALERT:  Validation results: {validation_results})
         
@@ -151,15 +163,17 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
         # CRITICAL ASSERTION: This SHOULD FAIL initially, proving SSOT violation
         if len(implementations_found) > 1:
             logger.critical( ALERT:  SSOT VIOLATION DETECTED: Multiple EventValidator implementations exist!)"
-            logger.critical(" ALERT:  This proves Issue #231: EventValidator SSOT violations)
+            logger.critical( ALERT:  SSOT VIOLATION DETECTED: Multiple EventValidator implementations exist!)"
+            logger.critical(" ALERT:  This proves Issue #231: EventValidator SSOT violations)"
             logger.critical( ALERT:  BUSINESS IMPACT: $500K+ ARR at risk from inconsistent validation)
             
             # Test that they give different results (proving violation)
             if len(validation_results) > 1:
                 # Compare validation approaches - they should be different, proving violation
-                unified_approach = validation_results.get("unified, {}"
-                production_approach = validation_results.get(production, {}
-                ssot_framework_approach = validation_results.get(ssot_framework, {}"
+                unified_approach = validation_results.get("unified, {)"
+                production_approach = validation_results.get(production, {)
+                ssot_framework_approach = validation_results.get(ssot_framework, {)"
+                ssot_framework_approach = validation_results.get(ssot_framework, {)"
                 
                 approaches_different = False
                 if unified_approach and production_approach:
@@ -168,27 +182,30 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
                     production_fields = set(production_approach.keys())
                     if unified_fields != production_fields:
                         approaches_different = True
-                        logger.critical(f ALERT:  Unified fields: {unified_fields}")
+                        logger.critical(f ALERT:  Unified fields: {unified_fields}")"
                         logger.critical(f ALERT:  Production fields: {production_fields})
                 
                 if approaches_different:
                     logger.critical( ALERT:  PROOF: Different validators return different result structures!)"
-                    logger.critical(" ALERT:  This is a clear SSOT violation requiring consolidation)
+                    logger.critical( ALERT:  PROOF: Different validators return different result structures!)"
+                    logger.critical(" ALERT:  This is a clear SSOT violation requiring consolidation)"
                 
         # FAIL THE TEST TO PROVE VIOLATION EXISTS
         if len(implementations_found) > 1:
             self.fail(
                 fSSOT VIOLATION: Found {len(implementations_found)} EventValidator implementations: {implementations_found}. 
-                f"Should be exactly 1 unified implementation. This failure PROVES Issue #231 exists and needs fixing.
+                f"Should be exactly 1 unified implementation. This failure PROVES Issue #231 exists and needs fixing."
             )
         
     def test_eventvalidator_result_inconsistency(self):
+        "
         "
         Test that different validators give inconsistent results - proving SSOT violation.
         
         This test SHOULD FAIL, proving that validation results are inconsistent.
 "
-        logger.critical(" ALERT:  TESTING VALIDATION RESULT INCONSISTENCY)
+"
+        logger.critical(" ALERT:  TESTING VALIDATION RESULT INCONSISTENCY)"
         
         results = []
         
@@ -207,7 +224,8 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
                 validator": "UnifiedEventValidator,
                 is_valid: unified_result.is_valid,
                 has_business_value_score: hasattr(unified_result, 'business_value_score'),"
-                has_revenue_impact": hasattr(unified_result, 'revenue_impact'),
+                has_business_value_score: hasattr(unified_result, 'business_value_score'),"
+                has_revenue_impact": hasattr(unified_result, 'revenue_impact'),"
                 has_missing_events: hasattr(unified_result, 'missing_critical_events')
             }
         except Exception as e:
@@ -221,7 +239,8 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             results.append({
                 validator: WebSocketEventValidator,
                 is_valid: production_result.is_valid,"
-                has_business_value_score": hasattr(production_result, 'business_value_score'),
+                is_valid: production_result.is_valid,"
+                has_business_value_score": hasattr(production_result, 'business_value_score'),"
                 has_revenue_impact: hasattr(production_result, 'revenue_impact'),
                 has_missing_events": hasattr(production_result, 'missing_critical_events')"
             }
@@ -238,36 +257,41 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             inconsistencies = []
             if first_result["has_business_value_score] != second_result[has_business_value_score"]:
                 inconsistencies.append(business_value_score capability differs)
-            if first_result[has_revenue_impact] != second_result["has_revenue_impact]:
-                inconsistencies.append(revenue_impact capability differs")
+            if first_result[has_revenue_impact] != second_result["has_revenue_impact]:"
+                inconsistencies.append(revenue_impact capability differs")"
             if first_result[has_missing_events] != second_result[has_missing_events]:
                 inconsistencies.append("missing_events capability differs)"
                 
             if inconsistencies:
                 logger.critical(f ALERT:  INCONSISTENCIES DETECTED: {inconsistencies})
                 logger.critical( ALERT:  This proves different validators have different capabilities)"
-                logger.critical( ALERT:  SSOT violation confirmed - consolidation required")
+                logger.critical( ALERT:  This proves different validators have different capabilities)"
+                logger.critical( ALERT:  SSOT violation confirmed - consolidation required")"
                 
                 # FAIL THE TEST TO PROVE INCONSISTENCY
                 self.fail(
                     fSSOT VIOLATION: EventValidator implementations have inconsistent capabilities: {inconsistencies}. 
                     fThis proves Issue #231 - different validators provide different features, blocking Golden Path."
+                    fThis proves Issue #231 - different validators provide different features, blocking Golden Path."
                 )
         
     def test_golden_path_impact_validation(self):
+    "
     "
         Test that SSOT violations impact Golden Path functionality.
         
         This validates the 5 critical events are handled consistently.
         "
-        logger.critical( ALERT:  TESTING GOLDEN PATH IMPACT OF SSOT VIOLATIONS")
+        "
+        logger.critical( ALERT:  TESTING GOLDEN PATH IMPACT OF SSOT VIOLATIONS")"
         
         critical_events = [
             agent_started,
             agent_thinking", "
             tool_executing,
             tool_completed,"
-            "agent_completed
+            tool_completed,"
+            "agent_completed"
         ]
         
         validator_support = {}
@@ -279,13 +303,13 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             unified_critical = unified_validator.get_required_critical_events()
             validator_support[unified] = unified_critical
         except Exception as e:
-            logger.error(f"UnifiedEventValidator critical events test failed: {e})
+            logger.error(f"UnifiedEventValidator critical events test failed: {e})"
             
         # Test SSOT Framework support (migrated to UnifiedEventValidator)
         try:
             from netra_backend.app.websocket_core.event_validator import get_critical_event_types
             ssot_critical = get_critical_event_types()
-            validator_support[ssot_framework"] = ssot_critical
+            validator_support[ssot_framework"] = ssot_critical"
         except Exception as e:
             logger.error(fSSOT Framework critical events test failed: {e})
             
@@ -295,8 +319,9 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             production_validator = WebSocketEventValidator()
             production_critical = production_validator.MISSION_CRITICAL_EVENTS
             validator_support[production] = production_critical"
+            validator_support[production] = production_critical"
         except Exception as e:
-            logger.error(f"Production validator critical events test failed: {e})
+            logger.error(f"Production validator critical events test failed: {e})"
             
         logger.critical(f ALERT:  CRITICAL EVENTS SUPPORT COMPARISON: {validator_support})
         
@@ -305,7 +330,8 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             event_support_sets = list(validator_support.values())
             if len(set(str(sorted(events)) for events in event_support_sets)) > 1:
                 logger.critical( ALERT:  GOLDEN PATH VIOLATION: Different validators support different critical events!)"
-                logger.critical( ALERT:  This directly impacts $500K+ ARR chat functionality")
+                logger.critical( ALERT:  GOLDEN PATH VIOLATION: Different validators support different critical events!)"
+                logger.critical( ALERT:  This directly impacts $500K+ ARR chat functionality")"
                 logger.critical( ALERT:  Critical events must be consistently validated across all implementations)
                 
                 # Show the differences
@@ -316,17 +342,21 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
                 self.fail(
                     fGOLDEN PATH VIOLATION: EventValidator implementations support different critical events. 
                     fThis blocks consistent $500K+ ARR chat functionality. 
-                    f"Validator support: {validator_support}
+                    f"Validator support: {validator_support}"
                 )
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print(MIGRATION NOTICE: This file previously used direct pytest execution.)"
-    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")
-    print(For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print(MIGRATION NOTICE: This file previously used direct pytest execution.)"
+    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")"
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md")"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
-    # sys.exit(result")
+    # sys.exit(result")"
+
+))))))
+}

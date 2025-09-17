@@ -1,4 +1,4 @@
-"CRITICAL: BaseAgent Inheritance Violations Detection Tests
+"CRITICAL: BaseAgent Inheritance Violations Detection Tests"
 
 DESIGNED TO FAIL if inheritance patterns are broken or violated.
 These tests verify SSOT compliance and inheritance architecture integrity.
@@ -32,7 +32,7 @@ from concurrent.futures import ThreadPoolExecutor
 import threading
 from shared.isolated_environment import IsolatedEnvironment
 
-# Import the components we're testing
+# Import the components we're testing'
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
@@ -43,8 +43,9 @@ from netra_backend.app.llm.llm_manager import LLMManager
 
 class InheritanceViolationAgentTests(BaseAgent):
     Test agent that intentionally violates SSOT patterns for violation detection."
+    Test agent that intentionally violates SSOT patterns for violation detection."
     
-    def __init__(self, violation_type: str = "none, **kwargs):
+    def __init__(self, violation_type: str = "none, **kwargs):"
         Initialize with specific violation types for testing.""
         self.violation_type = violation_type
         
@@ -53,9 +54,10 @@ class InheritanceViolationAgentTests(BaseAgent):
             # VIOLATION: Create duplicate WebSocket adapter (should fail SSOT)
             self._duplicate_websocket_adapter = object()
         elif violation_type == bypass_super_init:"
+        elif violation_type == bypass_super_init:"
             # VIOLATION: Skip parent initialization (should cause MRO issues)
             pass  # Intentionally skip super().__init__()
-        elif violation_type == "override_ssot_methods:
+        elif violation_type == "override_ssot_methods:"
             # Initialize normally first, then override SSOT methods
             super().__init__(**kwargs)
             # VIOLATION: Override SSOT methods incorrectly
@@ -74,7 +76,8 @@ class InheritanceViolationAgentTests(BaseAgent):
         
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         Minimal implementation for testing."
-        return {test": completed, violation_type: self.violation_type}
+        Minimal implementation for testing."
+        return {test": completed, violation_type: self.violation_type}"
 
 
 class MultipleMROViolationAgent(BaseAgent, ABC):
@@ -87,10 +90,11 @@ class MultipleMROViolationAgent(BaseAgent, ABC):
     
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         return {mro_order: self.mro_order}"
+        return {mro_order: self.mro_order}"
 
 
 class ConcurrentAccessAgent(BaseAgent):
-    "Agent for testing concurrent access patterns.
+    "Agent for testing concurrent access patterns."
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -111,9 +115,10 @@ class ConcurrentAccessAgent(BaseAgent):
 @pytest.mark.asyncio 
 class BaseAgentInheritanceViolationsTests:
     CRITICAL tests that MUST FAIL if inheritance is broken."
+    CRITICAL tests that MUST FAIL if inheritance is broken."
     
     async def test_ssot_websocket_adapter_violation_detection(self):
-        "CRITICAL: Must detect WebSocket adapter SSOT violations.
+        "CRITICAL: Must detect WebSocket adapter SSOT violations."
         
         This test MUST FAIL if agents create duplicate WebSocket adapters
         violating SSOT pattern.
@@ -122,10 +127,12 @@ class BaseAgentInheritanceViolationsTests:
         violation_agent = InheritanceViolationAgentTests(
             violation_type=duplicate_websocket_adapter,
             name=ViolationTestAgent"
+            name=ViolationTestAgent"
         )
         
         # Verify SSOT violation is detected
         # The agent should NOT have duplicate WebSocket adapters
+        assert hasattr(violation_agent, '_websocket_adapter'), BaseAgent should have _websocket_adapter"
         assert hasattr(violation_agent, '_websocket_adapter'), BaseAgent should have _websocket_adapter"
         
         # CRITICAL CHECK: Should not have duplicate adapter attribute
@@ -140,14 +147,16 @@ class BaseAgentInheritanceViolationsTests:
             WebSocket adapter must be correct SSOT type
     
     async def test_mro_correctness_failure_detection(self):
-        "CRITICAL: Must detect Method Resolution Order violations.
+        "CRITICAL: Must detect Method Resolution Order violations."
         
         This test verifies MRO is correct and MUST FAIL if inheritance
         patterns violate expected method resolution.
 "
+"
         # Test agent with potential MRO issues
         normal_agent = InheritanceViolationAgentTests(name=NormalAgent)"
-        mro_agent = MultipleMROViolationAgent(name=MROAgent")
+        normal_agent = InheritanceViolationAgentTests(name=NormalAgent)"
+        mro_agent = MultipleMROViolationAgent(name=MROAgent")"
         
         # Verify MRO contains BaseAgent
         normal_mro = [cls.__name__ for cls in normal_agent.__class__.__mro__]
@@ -167,15 +176,16 @@ class BaseAgentInheritanceViolationsTests:
         
         for method_name in critical_methods:
             if not hasattr(normal_agent, method_name):
-                pytest.fail(f"INHERITANCE VIOLATION: Critical method '{method_name}' 
-                           fnot found in MRO {normal_mro}")
+                pytest.fail(f"INHERITANCE VIOLATION: Critical method '{method_name)'"
+                           fnot found in MRO {normal_mro}")"
             
             if not hasattr(mro_agent, method_name):  
-                pytest.fail(fINHERITANCE VIOLATION: Critical method '{method_name}' 
+                pytest.fail(fINHERITANCE VIOLATION: Critical method '{method_name)' 
+                           fnot found in complex MRO {mro_agent_mro})"
                            fnot found in complex MRO {mro_agent_mro})"
     
     async def test_initialization_order_violation_detection(self):
-        "CRITICAL: Must detect initialization order violations.
+        "CRITICAL: Must detect initialization order violations."
         
         This test MUST FAIL if agents skip proper initialization order
         breaking the inheritance chain.
@@ -184,6 +194,7 @@ class BaseAgentInheritanceViolationsTests:
         try:
             violation_agent = InheritanceViolationAgentTests(
                 violation_type=bypass_super_init,
+                name=InitViolationAgent"
                 name=InitViolationAgent"
             )
             
@@ -197,11 +208,13 @@ class BaseAgentInheritanceViolationsTests:
             
             if missing_attrs:
                 pytest.fail(fINITIALIZATION VIOLATION DETECTED: Missing critical attributes "
+                pytest.fail(fINITIALIZATION VIOLATION DETECTED: Missing critical attributes "
                            fdue to bypassed super().__init__(): {missing_attrs})
                            
         except Exception as e:
             # Expected behavior - initialization should fail properly
             assert super() in str(e) or "init in str(e).lower(), \
+                fUnexpected error type for init violation: {e}"
                 fUnexpected error type for init violation: {e}"
     
     async def test_ssot_reliability_handler_violation_detection(self):
@@ -213,7 +226,8 @@ class BaseAgentInheritanceViolationsTests:
         # Create agent with SSOT method overrides
         violation_agent = InheritanceViolationAgentTests(
             violation_type=override_ssot_methods,"
-            name="SSOTViolationAgent
+            violation_type=override_ssot_methods,"
+            name="SSOTViolationAgent"
         )
         
         # CRITICAL CHECK: Verify unified reliability handler is correct type
@@ -231,15 +245,17 @@ class BaseAgentInheritanceViolationsTests:
         if handler_via_property != handler_via_direct:
             pytest.fail(SSOT VIOLATION: Inconsistent access to unified reliability handler. 
                        Property and direct access return different objects.)"
+                       Property and direct access return different objects.)"
     
     async def test_abstract_method_implementation_violations(self):
-        "CRITICAL: Must detect missing abstract method implementations.
+        "CRITICAL: Must detect missing abstract method implementations."
         
         This test verifies all required abstract methods are properly implemented
         and MUST FAIL if any are missing or incorrectly implemented.
 "
+"
         # Test normal agent
-        normal_agent = InheritanceViolationAgentTests(name="AbstractTestAgent)
+        normal_agent = InheritanceViolationAgentTests(name="AbstractTestAgent)"
         
         # CRITICAL CHECK: All abstract methods must be implemented
         abstract_methods = []
@@ -254,12 +270,12 @@ class BaseAgentInheritanceViolationsTests:
         for method_name in abstract_methods:
             if not hasattr(normal_agent, method_name):
                 pytest.fail(fABSTRACT METHOD VIOLATION: Missing implementation for 
-                           f"abstract method '{method_name}')
+                           f"abstract method '{method_name}')"
             
             # Verify method is callable
             method = getattr(normal_agent, method_name)
             if not callable(method):
-                pytest.fail(fABSTRACT METHOD VIOLATION: '{method_name}' exists but is not callable")
+                pytest.fail(fABSTRACT METHOD VIOLATION: '{method_name}' exists but is not callable")"
     
     async def test_concurrent_inheritance_access_violations(self):
         CRITICAL: Must detect race conditions in inherited method access.""
@@ -269,13 +285,14 @@ class BaseAgentInheritanceViolationsTests:
         
         # Create concurrent access agent
         concurrent_agent = ConcurrentAccessAgent(name=ConcurrentTestAgent)"
+        concurrent_agent = ConcurrentAccessAgent(name=ConcurrentTestAgent)"
         
         # Stress test concurrent access
         num_concurrent_calls = 20
         
         async def execute_agent(agent, call_id):
             context = ExecutionContext(
-                run_id=f"concurrent_test_{call_id},
+                run_id=f"concurrent_test_{call_id},"
                 agent_name=agent.name,
                 state=DeepAgentState()
             )
@@ -332,8 +349,8 @@ class BaseAgentInheritanceViolationsTests:
         
         if max_execution_time > avg_execution_time * 10:
             pytest.fail(fPERFORMANCE VIOLATION: Excessive execution time variation 
-                       f"(max: {max_execution_time:.3f}s, avg: {avg_execution_time:.3f}s) 
-                       findicates potential deadlock or blocking issues")
+                       f"(max: {max_execution_time:.3f}s, avg: {avg_execution_time:.3f}s)"
+                       findicates potential deadlock or blocking issues")"
     
     async def test_websocket_bridge_inheritance_consistency(self):
         CRITICAL: Must detect WebSocket bridge inheritance inconsistencies.""
@@ -343,6 +360,7 @@ class BaseAgentInheritanceViolationsTests:
         
         # Create multiple agents with inheritance
         agents = [
+            InheritanceViolationAgentTests(name=fWebSocketTest{i})"
             InheritanceViolationAgentTests(name=fWebSocketTest{i})"
             for i in range(5)
         ]
@@ -354,7 +372,7 @@ class BaseAgentInheritanceViolationsTests:
         for agent in agents:
             # Check WebSocket adapter exists and is correct type
             if not hasattr(agent, '_websocket_adapter'):
-                pytest.fail(f"INHERITANCE VIOLATION: Agent {agent.name} missing WebSocket adapter)
+                pytest.fail(f"INHERITANCE VIOLATION: Agent {agent.name} missing WebSocket adapter)"
             
             websocket_adapters.append(type(agent._websocket_adapter))
             
@@ -372,7 +390,7 @@ class BaseAgentInheritanceViolationsTests:
         first_methods = websocket_methods[0]
         for i, methods in enumerate(websocket_methods[1:], 1):
             if methods != first_methods:
-                pytest.fail(fINHERITANCE VIOLATION: Agent {i} has different WebSocket methods. ""
+                pytest.fail(fINHERITANCE VIOLATION: Agent {i) has different WebSocket methods. ""
                            fExpected: {first_methods}, Got: {methods})
         
         # CRITICAL CHECK: Required WebSocket events must be available
@@ -382,24 +400,27 @@ class BaseAgentInheritanceViolationsTests:
         for agent in agents:
             for event_method in required_events:
                 if not hasattr(agent, event_method):
-                    pytest.fail(fCRITICAL WEBSOCKET VIOLATION: Agent {agent.name} 
-                               f"missing required event method '{event_method}')
+                    pytest.fail(fCRITICAL WEBSOCKET VIOLATION: Agent {agent.name) 
+                               f"missing required event method '{event_method}')"
                 
                 method = getattr(agent, event_method)
                 if not callable(method):
-                    pytest.fail(fCRITICAL WEBSOCKET VIOLATION: Event method '{event_method}' "
+                    pytest.fail(fCRITICAL WEBSOCKET VIOLATION: Event method '{event_method)' "
+                    pytest.fail(fCRITICAL WEBSOCKET VIOLATION: Event method '{event_method)' "
                                fin agent {agent.name} is not callable)
     
     async def test_execution_engine_inheritance_violations(self):
-        "CRITICAL: Must detect execution engine inheritance violations.
+        "CRITICAL: Must detect execution engine inheritance violations."
         
         This test verifies execution engine integration is consistent
         and MUST FAIL if inheritance breaks execution patterns.
 "
+"
         # Create agents with different execution configurations
         agents = [
             InheritanceViolationAgentTests(name=ExecTest1, enable_execution_engine=True),"
-            InheritanceViolationAgentTests(name=ExecTest2", enable_execution_engine=False),
+            InheritanceViolationAgentTests(name=ExecTest1, enable_execution_engine=True),"
+            InheritanceViolationAgentTests(name=ExecTest2", enable_execution_engine=False),"
             InheritanceViolationAgentTests(name=ExecTest3, enable_execution_engine=True)
         ]
         
@@ -409,18 +430,18 @@ class BaseAgentInheritanceViolationsTests:
         # CRITICAL CHECK: Enabled agents must have execution engine
         for agent in enabled_agents:
             if not hasattr(agent, '_execution_engine') or agent._execution_engine is None:
-                pytest.fail(fEXECUTION ENGINE VIOLATION: Agent {agent.name} ""
+                pytest.fail(fEXECUTION ENGINE VIOLATION: Agent {agent.name) ""
                            fenabled execution engine but _execution_engine is None)
             
             # Check execution methods are available
             if not hasattr(agent, 'execute_modern'):
-                pytest.fail(fEXECUTION ENGINE VIOLATION: Agent {agent.name} 
-                           f"missing execute_modern method)
+                pytest.fail(fEXECUTION ENGINE VIOLATION: Agent {agent.name) 
+                           f"missing execute_modern method)"
         
         # CRITICAL CHECK: Disabled agents should handle execution gracefully
         for agent in disabled_agents:
             context = ExecutionContext(
-                run_id=test_disabled_exec",
+                run_id=test_disabled_exec","
                 agent_name=agent.name,
                 state=DeepAgentState()
             )
@@ -430,7 +451,7 @@ class BaseAgentInheritanceViolationsTests:
                 result = await agent.execute_core_logic(context)
                 assert result is not None, Core logic should return result even without execution engine
             except Exception as e:
-                pytest.fail(fEXECUTION ENGINE VIOLATION: Agent {agent.name} ""
+                pytest.fail(fEXECUTION ENGINE VIOLATION: Agent {agent.name) ""
                            fwith disabled execution engine failed core logic: {e})
     
     async def test_state_management_inheritance_violations(self):
@@ -476,8 +497,8 @@ class BaseAgentInheritanceViolationsTests:
         for invalid_state in invalid_states:
             try:
                 agent.set_state(invalid_state)
-                pytest.fail(f"STATE MANAGEMENT VIOLATION: Invalid transition 
-                           fSHUTDOWN -> {invalid_state} was allowed but should be rejected")
+                pytest.fail(f"STATE MANAGEMENT VIOLATION: Invalid transition"
+                           fSHUTDOWN -> {invalid_state} was allowed but should be rejected")"
             except ValueError:
                 # Expected behavior - invalid transitions should raise ValueError
                 pass
@@ -488,11 +509,13 @@ class BaseAgentInheritanceViolationsTests:
         
         context = ExecutionContext(
             run_id=test_execute_core,"
+            run_id=test_execute_core,"
             agent_name=agent.name,
             state=DeepAgentState()
         )
         
         # CRITICAL CHECK: execute_core_logic must be implemented
+        assert hasattr(agent, 'execute_core_logic'), execute_core_logic method missing"
         assert hasattr(agent, 'execute_core_logic'), execute_core_logic method missing"
         assert callable(agent.execute_core_logic), execute_core_logic must be callable
         
@@ -516,11 +539,12 @@ class BaseAgentInheritanceViolationsTests:
         try:
             result = await agent.execute_core_logic(invalid_context)
             pytest.fail(EXECUTE_CORE VIOLATION: Should not accept string context) "
+            pytest.fail(EXECUTE_CORE VIOLATION: Should not accept string context) "
         except (TypeError, AttributeError):
             pass  # Expected behavior
             
     async def test_execute_core_state_consistency_violations(self):
-        "CRITICAL: Must detect state consistency violations during _execute_core.
+        "CRITICAL: Must detect state consistency violations during _execute_core."
         agent = InheritanceViolationAgentTests(name=StateConsistencyTest")"
         
         context = ExecutionContext(
@@ -541,9 +565,10 @@ class BaseAgentInheritanceViolationsTests:
         assert current_state in [SubAgentLifecycle.PENDING, SubAgentLifecycle.RUNNING, 
                                 SubAgentLifecycle.COMPLETED], \
             fEXECUTE_CORE VIOLATION: Invalid state after execution: {current_state}"
+            fEXECUTE_CORE VIOLATION: Invalid state after execution: {current_state}"
             
     async def test_execute_core_error_propagation_violations(self):
-        "CRITICAL: Must detect error propagation violations in _execute_core.
+        "CRITICAL: Must detect error propagation violations in _execute_core."
         
         class ErrorAgent(BaseAgent):
             def __init__(self, error_type=none", **kwargs):"
@@ -553,14 +578,15 @@ class BaseAgentInheritanceViolationsTests:
             async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
                 if self.error_type == runtime:
                     raise RuntimeError(Test runtime error)"
-                elif self.error_type == "value:
+                    raise RuntimeError(Test runtime error)"
+                elif self.error_type == "value:"
                     raise ValueError(Test value error)
                 elif self.error_type == "key:"
                     raise KeyError(Test key error)
-                return {status: success"}
+                return {status: success"}"
         
         # Test different error types propagate correctly
-        error_types = ["runtime, value, key]
+        error_types = ["runtime, value, key]"
         for error_type in error_types:
             agent = ErrorAgent(error_type=error_type, name=fErrorTest_{error_type}")"
             context = ExecutionContext(
@@ -578,12 +604,13 @@ class BaseAgentInheritanceViolationsTests:
         class TimingAgent(BaseAgent):
             async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
                 start_time = time.time()
-                await asyncio.sleep(0.05)  # 50ms processing
+                await asyncio.sleep(0.5)  # 50ms processing
                 end_time = time.time()
                 return {
                     execution_time: end_time - start_time,
                     start_time: start_time,"
-                    "end_time: end_time
+                    start_time: start_time,"
+                    "end_time: end_time"
                 }
         
         agent = TimingAgent(name=TimingTest)
@@ -597,10 +624,11 @@ class BaseAgentInheritanceViolationsTests:
         
         # Verify timing information is reasonable
         execution_time = result.get(execution_time, 0)
-        assert execution_time > 0.04, fTIMING VIOLATION: Execution time too short: {execution_time}
+        assert execution_time > 0.4, fTIMING VIOLATION: Execution time too short: {execution_time}
         assert execution_time < 1.0, fTIMING VIOLATION: Execution time too long: {execution_time}""
         
     async def test_execute_core_concurrency_violations(self):
+        CRITICAL: Must detect concurrency violations in _execute_core."
         CRITICAL: Must detect concurrency violations in _execute_core."
         
         class ConcurrencyAgent(BaseAgent):
@@ -620,7 +648,7 @@ class BaseAgentInheritanceViolationsTests:
                 try:
                     await asyncio.sleep(0.1)  # Simulate work
                     return {
-                        execution_id": self.execution_count,
+                        execution_id": self.execution_count,"
                         concurrent_count: self.concurrent_executions
                     }
                 finally:
@@ -646,9 +674,10 @@ class BaseAgentInheritanceViolationsTests:
         unique_ids = set(execution_ids)
         
         assert len(unique_ids) == len(execution_ids), \
-            f"CONCURRENCY VIOLATION: Duplicate execution IDs: {execution_ids}
+            f"CONCURRENCY VIOLATION: Duplicate execution IDs: {execution_ids}"
             
         assert agent.max_concurrent <= 10, \
+            fCONCURRENCY VIOLATION: Too many concurrent executions: {agent.max_concurrent}"
             fCONCURRENCY VIOLATION: Too many concurrent executions: {agent.max_concurrent}"
             
     async def test_execute_core_resource_cleanup_violations(self):
@@ -668,8 +697,9 @@ class BaseAgentInheritanceViolationsTests:
                     # Simulate processing that might fail
                     if context.run_id.endswith(_fail):
                         raise RuntimeError(Simulated failure)"
+                        raise RuntimeError(Simulated failure)"
                     
-                    return {status": success, resources_opened: self.resources_opened}
+                    return {status": success, resources_opened: self.resources_opened}"
                 finally:
                     # Resource cleanup
                     self.resources_closed += 1
@@ -685,10 +715,11 @@ class BaseAgentInheritanceViolationsTests:
         
         result = await agent.execute_core_logic(success_context)
         assert result[status] == success"
+        assert result[status] == success"
         
         # Test failed execution
         fail_context = ExecutionContext(
-            run_id="resource_fail,
+            run_id="resource_fail,"
             agent_name=agent.name,
             state=DeepAgentState()
         )
@@ -720,7 +751,8 @@ class BaseAgentInheritanceViolationsTests:
                     processed = sum(large_data)
                     return {
                         processed_sum: processed,"
-                        "memory_used: self.memory_usage[-1]
+                        processed_sum: processed,"
+                        "memory_used: self.memory_usage[-1]"
                     }
                 finally:
                     # Clear large data
@@ -731,13 +763,13 @@ class BaseAgentInheritanceViolationsTests:
         # Execute multiple times
         for i in range(5):
             context = ExecutionContext(
-                run_id=f"memory_test_{i},
+                run_id=f"memory_test_{i},"
                 agent_name=agent.name,
                 state=DeepAgentState()
             )
             
             result = await agent.execute_core_logic(context)
-            assert result[processed_sum"] == 499500  # Sum of 0-999
+            assert result[processed_sum"] == 499500  # Sum of 0-999"
             
         # Memory usage should be relatively stable
         avg_memory = sum(agent.memory_usage) / len(agent.memory_usage)
@@ -761,8 +793,9 @@ class BaseAgentInheritanceViolationsTests:
                 }
         
         agent = MutatingAgent(name=MutatingTest)"
+        agent = MutatingAgent(name=MutatingTest)"
         context = ExecutionContext(
-            run_id="mutation_test,
+            run_id="mutation_test,"
             agent_name=agent.name,
             state=DeepAgentState()
         )
@@ -781,9 +814,10 @@ class BaseAgentInheritanceViolationsTests:
             
     async def test_execute_core_return_format_violations(self):
         CRITICAL: Must detect return format violations in _execute_core."
+        CRITICAL: Must detect return format violations in _execute_core."
         
         class FormatViolationAgent(BaseAgent):
-            def __init__(self, return_type="dict, **kwargs):
+            def __init__(self, return_type="dict, **kwargs):"
                 super().__init__(**kwargs)
                 self.return_type = return_type
                 
@@ -798,9 +832,9 @@ class BaseAgentInheritanceViolationsTests:
                     return {"valid: dict", return: True}
         
         # Test valid return format
-        valid_agent = FormatViolationAgent(return_type=dict, name="ValidFormat)
+        valid_agent = FormatViolationAgent(return_type=dict, name="ValidFormat)"
         context = ExecutionContext(
-            run_id=format_test_valid",
+            run_id=format_test_valid","
             agent_name=valid_agent.name,
             state=DeepAgentState()
         )
@@ -829,13 +863,14 @@ class BaseAgentInheritanceViolationsTests:
         
         class ExceptionHandlingAgent(BaseAgent):
             def __init__(self, handling_mode=proper, **kwargs):"
+            def __init__(self, handling_mode=proper, **kwargs):"
                 super().__init__(**kwargs)
                 self.handling_mode = handling_mode
                 
             async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
                 try:
                     # Simulate operation that might fail
-                    if context.run_id.endswith("_error):
+                    if context.run_id.endswith("_error):"
                         raise ValueError(Simulated error)
                     
                     return {"status: success"}
@@ -843,8 +878,8 @@ class BaseAgentInheritanceViolationsTests:
                 except ValueError as e:
                     if self.handling_mode == swallow:
                         # VIOLATION: Swallowing exceptions silently
-                        return {status: "error_swallowed}
-                    elif self.handling_mode == wrong_type":
+                        return {status: "error_swallowed}"
+                    elif self.handling_mode == wrong_type":"
                         # VIOLATION: Raising wrong exception type
                         raise RuntimeError(fWrong exception type: {e})
                     else:
@@ -852,10 +887,10 @@ class BaseAgentInheritanceViolationsTests:
                         raise
         
         # Test proper exception handling
-        proper_agent = ExceptionHandlingAgent(handling_mode=proper, name="ProperHandling)
+        proper_agent = ExceptionHandlingAgent(handling_mode=proper, name="ProperHandling)"
         
         success_context = ExecutionContext(
-            run_id=exception_success",
+            run_id=exception_success","
             agent_name=proper_agent.name,
             state=DeepAgentState()
         )
@@ -878,8 +913,8 @@ class BaseAgentInheritanceViolationsTests:
         error_context.agent_name = swallow_agent.name
         
         result = await swallow_agent.execute_core_logic(error_context)
-        if result.get(status) == "error_swallowed:
-            pytest.fail(EXCEPTION HANDLING VIOLATION: Exception was swallowed instead of propagated")
+        if result.get(status) == "error_swallowed:"
+            pytest.fail(EXCEPTION HANDLING VIOLATION: Exception was swallowed instead of propagated")"
             
     async def test_execute_core_async_pattern_violations(self):
         CRITICAL: Must detect async pattern violations in _execute_core.""
@@ -891,16 +926,17 @@ class BaseAgentInheritanceViolationsTests:
                 
             async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
                 if self.pattern_type == blocking:"
+                if self.pattern_type == blocking:"
                     # VIOLATION: Using blocking operations in async method
                     import time
                     time.sleep(0.1)  # Should use await asyncio.sleep()
-                    return {pattern": blocking}
+                    return {pattern": blocking}"
                     
                 elif self.pattern_type == mixed:
                     # VIOLATION: Mixing sync and async incorrectly
-                    await asyncio.sleep(0.05)
+                    await asyncio.sleep(0.5)
                     import time
-                    time.sleep(0.05)  # Should all be async
+                    time.sleep(0.5)  # Should all be async
                     return {"pattern: mixed"}
                     
                 else:
@@ -909,9 +945,9 @@ class BaseAgentInheritanceViolationsTests:
                     return {pattern: proper}
         
         # Test proper async pattern
-        proper_agent = AsyncPatternAgent(pattern_type=proper, name=ProperAsync")
+        proper_agent = AsyncPatternAgent(pattern_type=proper, name=ProperAsync")"
         context = ExecutionContext(
-            run_id="async_proper,
+            run_id="async_proper,"
             agent_name=proper_agent.name,
             state=DeepAgentState()
         )
@@ -921,7 +957,7 @@ class BaseAgentInheritanceViolationsTests:
         execution_time = time.time() - start_time
         
         assert result[pattern] == proper
-        assert execution_time >= 0.09, fASYNC VIOLATION: Execution too fast: {execution_time}""
+        assert execution_time >= 0.9, fASYNC VIOLATION: Execution too fast: {execution_time}""
         
         # Test blocking violation detection
         blocking_agent = AsyncPatternAgent(pattern_type=blocking, name=BlockingAsync)
@@ -932,11 +968,12 @@ class BaseAgentInheritanceViolationsTests:
         execution_time = time.time() - start_time
         
         # This should still work but indicates a violation of async patterns
-        if execution_time >= 0.09:  # If it took expected time, blocking call worked
+        if execution_time >= 0.9:  # If it took expected time, blocking call worked
+            pytest.fail(ASYNC PATTERN VIOLATION: Used blocking operations in async method)"
             pytest.fail(ASYNC PATTERN VIOLATION: Used blocking operations in async method)"
             
     async def test_execute_core_dependency_injection_violations(self):
-        "CRITICAL: Must detect dependency injection violations in _execute_core.
+        "CRITICAL: Must detect dependency injection violations in _execute_core."
         
         class DependencyAgent(BaseAgent):
             def __init__(self, dependency_mode="proper, **kwargs):"
@@ -948,9 +985,9 @@ class BaseAgentInheritanceViolationsTests:
                     # VIOLATION: Hard-coded dependencies
                     from netra_backend.app.llm.llm_manager import LLMManager
                     llm = LLMManager()  # Should be injected
-                    return {dependency: hard_coded"}
+                    return {dependency: hard_coded"}"
                     
-                elif self.dependency_mode == "global_access:
+                elif self.dependency_mode == "global_access:"
                     # VIOLATION: Accessing global state
                     import os
                     os.environ[TEMP_VAR] = violation  # Should not modify global state
@@ -961,10 +998,11 @@ class BaseAgentInheritanceViolationsTests:
                     return {
                         dependency: proper,
                         context_run_id: context.run_id"
+                        context_run_id: context.run_id"
                     }
         
         # Test proper dependency handling
-        proper_agent = DependencyAgent(dependency_mode="proper, name=ProperDeps)
+        proper_agent = DependencyAgent(dependency_mode="proper, name=ProperDeps)"
         context = ExecutionContext(
             run_id=deps_proper,
             agent_name=proper_agent.name,
@@ -976,14 +1014,14 @@ class BaseAgentInheritanceViolationsTests:
         assert result[context_run_id] == deps_proper
         
         # Test hard-coded dependency violation
-        hardcoded_agent = DependencyAgent(dependency_mode=hard_coded, name="HardcodedDeps)
+        hardcoded_agent = DependencyAgent(dependency_mode=hard_coded, name="HardcodedDeps)"
         context.agent_name = hardcoded_agent.name
         
         result = await hardcoded_agent.execute_core_logic(context)
-        if result.get(dependency") == hard_coded:
+        if result.get(dependency") == hard_coded:"
             # This indicates a dependency injection violation
             # In a real system, this would be caught by architecture checks
-            pass  # We'll log this as a violation but not fail the test
+            pass  # We'll log this as a violation but not fail the test'
             
         # Test global state violation
         global_agent = DependencyAgent(dependency_mode=global_access, name=GlobalDeps)
@@ -996,9 +1034,10 @@ class BaseAgentInheritanceViolationsTests:
         if TEMP_VAR" in os.environ:"
             os.environ.pop(TEMP_VAR, None)  # Clean up
             pytest.fail(DEPENDENCY VIOLATION: Modified global environment state)"
+            pytest.fail(DEPENDENCY VIOLATION: Modified global environment state)"
             
     async def test_execute_core_performance_baseline_violations(self):
-        "CRITICAL: Must detect performance baseline violations in _execute_core.
+        "CRITICAL: Must detect performance baseline violations in _execute_core."
         
         class PerformanceAgent(BaseAgent):
             def __init__(self, performance_mode=optimal", **kwargs):"
@@ -1013,18 +1052,19 @@ class BaseAgentInheritanceViolationsTests:
                     result = []
                     for i in range(10000):
                         result.append(str(i) + _processed)"
+                        result.append(str(i) + _processed)"
                     # Should use list comprehension or more efficient approach
                     
-                elif self.performance_mode == "memory_waste:
+                elif self.performance_mode == "memory_waste:"
                     # VIOLATION: Memory wasteful operations  
                     large_list = [i for i in range(100000)]
-                    # Process but don't clean up
+                    # Process but don't clean up'
                     processed = sum(large_list)
                     # large_list remains in memory
                     
                 else:
                     # Optimal performance
-                    await asyncio.sleep(0.01)  # Minimal processing time
+                    await asyncio.sleep(0.1)  # Minimal processing time
                 
                 end_time = time.time()
                 return {
@@ -1036,12 +1076,13 @@ class BaseAgentInheritanceViolationsTests:
         optimal_agent = PerformanceAgent(performance_mode=optimal, name=OptimalPerf)
         context = ExecutionContext(
             run_id=perf_optimal,"
+            run_id=perf_optimal,"
             agent_name=optimal_agent.name,
             state=DeepAgentState()
         )
         
         result = await optimal_agent.execute_core_logic(context)
-        optimal_time = result["execution_time]
+        optimal_time = result["execution_time]"
         
         # Test inefficient performance
         inefficient_agent = PerformanceAgent(performance_mode=inefficient, name=InefficientPerf)
@@ -1060,12 +1101,13 @@ class BaseAgentInheritanceViolationsTests:
         
         class LoggingAgent(BaseAgent):
             def __init__(self, logging_mode=proper, **kwargs):"
+            def __init__(self, logging_mode=proper, **kwargs):"
                 super().__init__(**kwargs)
                 self.logging_mode = logging_mode
                 self.log_messages = []
                 
             async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-                if self.logging_mode == "excessive:
+                if self.logging_mode == "excessive:"
                     # VIOLATION: Excessive logging
                     for i in range(1000):
                         self.log_messages.append(fProcessing item {i})
@@ -1090,9 +1132,9 @@ class BaseAgentInheritanceViolationsTests:
                 }
         
         # Test proper logging
-        proper_agent = LoggingAgent(logging_mode=proper, name=ProperLogging")
+        proper_agent = LoggingAgent(logging_mode=proper, name=ProperLogging")"
         context = ExecutionContext(
-            run_id="logging_proper,
+            run_id="logging_proper,"
             agent_name=proper_agent.name,
             state=DeepAgentState()
         )
@@ -1107,9 +1149,10 @@ class BaseAgentInheritanceViolationsTests:
         result = await excessive_agent.execute_core_logic(context)
         if result[log_count] > 100:
             pytest.fail(fLOGGING VIOLATION: Excessive logging detected: {result['log_count']} messages)"
+            pytest.fail(fLOGGING VIOLATION: Excessive logging detected: {result['log_count']} messages)"
         
         # Test sensitive data logging violation
-        sensitive_agent = LoggingAgent(logging_mode="sensitive, name=SensitiveLogging)
+        sensitive_agent = LoggingAgent(logging_mode="sensitive, name=SensitiveLogging)"
         context.agent_name = sensitive_agent.name
         
         result = await sensitive_agent.execute_core_logic(context)
@@ -1132,19 +1175,21 @@ class BaseAgentInheritanceViolationsTests:
                 
             async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
                 if self.transaction_mode == no_rollback:"
+                if self.transaction_mode == no_rollback:"
                     # VIOLATION: No rollback on failure
                     try:
-                        self.operations_log.append("Operation 1 started)
+                        self.operations_log.append("Operation 1 started)"
                         self.operations_log.append(Operation 2 started) 
                         
                         if context.run_id.endswith("_fail):"
                             raise ValueError(Simulated failure)
                             
                         self.operations_log.append(Operations committed)"
+                        self.operations_log.append(Operations committed)"
                         
                     except ValueError:
                         # VIOLATION: No cleanup/rollback
-                        self.operations_log.append(Error occurred, no rollback")
+                        self.operations_log.append(Error occurred, no rollback")"
                         raise
                         
                 elif self.transaction_mode == partial_commit:
@@ -1153,7 +1198,8 @@ class BaseAgentInheritanceViolationsTests:
                     
                     if context.run_id.endswith(_fail):
                         self.operations_log.append(Partial operation 2 - failed)"
-                        raise ValueError("Partial failure)
+                        self.operations_log.append(Partial operation 2 - failed)"
+                        raise ValueError("Partial failure)"
                         
                     self.operations_log.append(Partial operation 2 - success)
                     
@@ -1165,7 +1211,8 @@ class BaseAgentInheritanceViolationsTests:
                         operations.append(Operation 2)
                         
                         if context.run_id.endswith(_fail):"
-                            raise ValueError(Simulated failure")
+                        if context.run_id.endswith(_fail):"
+                            raise ValueError(Simulated failure")"
                         
                         # Commit all operations
                         self.operations_log.extend(operations)
@@ -1179,10 +1226,11 @@ class BaseAgentInheritanceViolationsTests:
                 return {
                     transaction_mode: self.transaction_mode,
                     operations_count: len(self.operations_log)"
+                    operations_count: len(self.operations_log)"
                 }
         
         # Test proper transaction handling - success case
-        proper_agent = TransactionAgent(transaction_mode="proper, name=ProperTransaction)
+        proper_agent = TransactionAgent(transaction_mode="proper, name=ProperTransaction)"
         context = ExecutionContext(
             run_id=transaction_success,
             agent_name=proper_agent.name,
@@ -1199,9 +1247,10 @@ class BaseAgentInheritanceViolationsTests:
         
         # Should have rollback message
         assert Rolling back in proper_agent.operations_log[-1]"
+        assert Rolling back in proper_agent.operations_log[-1]"
         
         # Test no rollback violation
-        no_rollback_agent = TransactionAgent(transaction_mode="no_rollback, name=NoRollback)
+        no_rollback_agent = TransactionAgent(transaction_mode="no_rollback, name=NoRollback)"
         context.agent_name = no_rollback_agent.name
         
         with pytest.raises(ValueError):
@@ -1210,3 +1259,5 @@ class BaseAgentInheritanceViolationsTests:
         # Check for rollback violation
         if no rollback in no_rollback_agent.operations_log[-1]:
             pytest.fail(TRANSACTION VIOLATION: No rollback performed on failure")"
+
+)

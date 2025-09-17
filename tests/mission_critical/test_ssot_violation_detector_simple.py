@@ -1,4 +1,5 @@
 """
+"""
 Simple SSOT Violation Detection Test
 
 This is a simplified test to validate the SSOT violation detection concept.
@@ -7,7 +8,10 @@ It directly tests the violation at test_framework/ssot/database.py:596.
 EXPECTED BEHAVIOR: This test should FAIL initially, exposing the SSOT violation.
 After remediation, the test should PASS.
 """
+"""
 
+"""
+"""
 """
 """
 import asyncio
@@ -32,16 +36,18 @@ from netra_backend.app.db.models_postgres import Message
 
 class SSOTViolationDetectionTests:
     "
+    "
     Simple SSOT Violation Detection Test
     
     This test compares message creation between:
     1. Proper SSOT MessageRepository (correct method)
     2. Test framework DatabaseTestUtilities (violation method)
 "
+"
     
     def __init__(self):
         self.message_repository = MessageRepository()
-        self.db_helper = DatabaseTestUtilities(service="netra_backend)
+        self.db_helper = DatabaseTestUtilities(service="netra_backend)"
         self.test_thread_id = fthread_{uuid.uuid4().hex[:8]}
         
     @pytest.mark.asyncio
@@ -68,10 +74,10 @@ class SSOTViolationDetectionTests:
                 metadata={source: ssot_repository}
             await session.commit()
             
-            print(fSSOT Message Created: {ssot_message.id}")
-            print(fSSOT Message Object: {ssot_message.object}")
-            print(fSSOT Message Content Type: {type(ssot_message.content)}")
-            print(fSSOT Message Content: {ssot_message.content}")
+            print(fSSOT Message Created: {ssot_message.id}")"
+            print(fSSOT Message Object: {ssot_message.object}")"
+            print(fSSOT Message Content Type: {type(ssot_message.content)}")"
+            print(fSSOT Message Content: {ssot_message.content}")"
             
             # 2. Create message using TEST FRAMEWORK (VIOLATION)
             # This will trigger the violation at test_framework/ssot/database.py:596
@@ -79,14 +85,16 @@ class SSOTViolationDetectionTests:
                 session=session,
                 thread_id=self.test_thread_id,
                 role=user,"
+                role=user,"
+                content=[{type": text, text: {value: Test framework violation message"}}],"
                 content=[{type": text, text: {value: Test framework violation message"}}],"
                 metadata_={source: test_framework}
             await session.commit()
             
-            print(fViolation Message Created: {violation_message.id}")
-            print(fViolation Message Object: {violation_message.object}")
-            print(fViolation Message Content Type: {type(violation_message.content)}")
-            print(fViolation Message Content: {violation_message.content}")
+            print(fViolation Message Created: {violation_message.id}")"
+            print(fViolation Message Object: {violation_message.object}")"
+            print(fViolation Message Content Type: {type(violation_message.content)}")"
+            print(fViolation Message Content: {violation_message.content}")"
             
             # 3. CRITICAL COMPARISON - Structure should be identical
             # If this assertion fails, it exposes the SSOT violation
@@ -96,11 +104,11 @@ class SSOTViolationDetectionTests:
             # Object type consistency
             print(fObject Type Match: {ssot_message.object} == {violation_message.object})
             assert ssot_message.object == violation_message.object, (
-                f"SSOT VIOLATION DETECTED: object field differs - SSOT: '{ssot_message.object}' vs Violation: '{violation_message.object}'
+                f"SSOT VIOLATION DETECTED: object field differs - SSOT: '{ssot_message.object}' vs Violation: '{violation_message.object}'"
             )
             
             # Content structure consistency
-            print(fContent Type Match: {type(ssot_message.content)} == {type(violation_message.content)}")
+            print(fContent Type Match: {type(ssot_message.content)} == {type(violation_message.content)}")"
             assert type(ssot_message.content) == type(violation_message.content), (
                 fSSOT VIOLATION DETECTED: content type differs - SSOT: {type(ssot_message.content)} vs Violation: {type(violation_message.content)}
             )
@@ -123,12 +131,14 @@ class SSOTViolationDetectionTests:
             )
             
             print(\n PASS:  ALL SSOT COMPLIANCE CHECKS PASSED)"
-            print("If you see this message, the SSOT violation has been fixed!)
+            print(\n PASS:  ALL SSOT COMPLIANCE CHECKS PASSED)"
+            print("If you see this message, the SSOT violation has been fixed!)"
             
             # Clean up test data
             await session.execute(
                 text(DELETE FROM message WHERE thread_id = :thread_id),"
-                {"thread_id: self.test_thread_id}
+                text(DELETE FROM message WHERE thread_id = :thread_id),"
+                {"thread_id: self.test_thread_id}"
             await session.commit()
             
         finally:
@@ -147,7 +157,8 @@ if __name__ == __main__:
             print("\n CELEBRATION:  TEST PASSED - SSOT compliance verified!")
         except AssertionError as e:
             print(f\n ALERT:  TEST FAILED - SSOT violation detected: {e})"
-            print("\nThis is EXPECTED behavior before remediation!)
+            print(f\n ALERT:  TEST FAILED - SSOT violation detected: {e})"
+            print("\nThis is EXPECTED behavior before remediation!)"
             return False
         except Exception as e:
             print(f\n[U+1F4A5] TEST ERROR: {e}")"
@@ -161,7 +172,10 @@ if __name__ == __main__:
     if not result:
         print(\n[U+1F4CB] REMEDIATION REQUIRED:"")
         print(1. Fix test_framework/ssot/database.py:596)"
-        print(2. Replace 'session.add(message_data)' with MessageRepository.create_message("))
+        print(1. Fix test_framework/ssot/database.py:596)"
+        print(2. Replace 'session.add(message_data)' with MessageRepository.create_message("))"
         print(3. Re-run this test to validate the fix)
     
-    exit(0 if result else 1")
+    exit(0 if result else 1")"
+
+)))

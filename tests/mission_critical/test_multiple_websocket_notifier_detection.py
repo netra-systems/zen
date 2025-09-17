@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 """
+"""
 FAILING TEST: Multiple WebSocketNotifier Detection - Issue #680
 
 This test DETECTS duplicate WebSocketNotifier implementations across the codebase.
+"""
 """
 Business Impact: $500K+ ARR at risk from conflicting WebSocket implementations
 
@@ -12,6 +14,7 @@ Test Strategy:
 - Should PASS after SSOT consolidation to single implementation
 
 Expected Result: FAILS before SSOT refactor, PASSES after SSOT consolidation
+"
 "
 
 import ast
@@ -34,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 
 class WebSocketClassDetector(ast.NodeVisitor):
-    "AST visitor to detect WebSocket-related class definitions.
+    "AST visitor to detect WebSocket-related class definitions."
     
     def __init__(self):
         self.classes_found = []
@@ -103,6 +106,7 @@ class WebSocketClassDetector(ast.NodeVisitor):
 
 class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
     "
+    "
     FAILING TEST: Detects duplicate WebSocketNotifier implementations.
     
     This test scans the codebase for multiple WebSocket-related class implementations
@@ -111,6 +115,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
     
     Expected to FAIL by finding multiple implementations.
     After SSOT consolidation, should PASS with single authoritative implementation.
+"
 "
     
     def setup_method(self, method=None):
@@ -124,6 +129,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
             self.project_root / "auth_service, "
             self.project_root / shared,
             self.project_root / test_framework"
+            self.project_root / test_framework"
         ]
         
         # Results tracking
@@ -132,13 +138,15 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         self.ssot_violations = []
         self.scan_errors = []
         
-        logger.info(fStarting WebSocket class detection scan")
+        logger.info(fStarting WebSocket class detection scan")"
     
     def scan_file_for_websocket_classes(self, file_path: Path) -> List[Dict[str, Any]]:
+    "
     "
         Scan a single Python file for WebSocket class definitions.
         
         Returns list of WebSocket classes found in the file.
+        "
         "
         classes_found = []
         
@@ -176,7 +184,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         return classes_found
     
     def scan_directory_for_websocket_classes(self, directory: Path) -> List[Dict[str, Any]]:
-        
+        pass
         Recursively scan directory for WebSocket class definitions.
         
         Returns list of all WebSocket classes found in the directory.
@@ -190,6 +198,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         # Find all Python files
         python_files = []
         try:
+            python_files = list(directory.rglob(*.py))"
             python_files = list(directory.rglob(*.py))"
         except Exception as e:
             self.scan_errors.append({
@@ -211,11 +220,13 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         
         return all_classes
     
-    def analyze_duplicates(self, all_classes: List[Dict[str, Any]] -> Dict[str, List[Dict[str, Any]]]:
+    def analyze_duplicates(self, all_classes: List[Dict[str, Any)) -> Dict[str, List[Dict[str, Any))):
+    "
     "
         Analyze WebSocket classes to identify potential duplicates.
         
         Groups classes by name/pattern to identify SSOT violations.
+        "
         "
         groups = {}
         
@@ -230,6 +241,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
             
             # Also group by pattern for broader analysis
             pattern_key = fpattern_{pattern}"
+            pattern_key = fpattern_{pattern}"
             if pattern_key not in groups:
                 groups[pattern_key] = []
             groups[pattern_key].append(class_info)
@@ -242,11 +254,13 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         
         return duplicate_groups
     
-    def identify_ssot_violations(self, duplicate_groups: Dict[str, List[Dict[str, Any]]] -> List[Dict[str, Any]]:
+    def identify_ssot_violations(self, duplicate_groups: Dict[str, List[Dict[str, Any))) -> List[Dict[str, Any)):
+    "
     "
         Identify specific SSOT violations from duplicate class analysis.
         
         Returns list of violations that need to be addressed.
+        "
         "
         violations = []
         
@@ -304,7 +318,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         return violations
     
     def test_detect_multiple_websocket_notifier_implementations(self):
-        
+        pass
         FAILING TEST: Detects duplicate WebSocketNotifier implementations.
         
         This test scans the codebase for multiple WebSocket class implementations
@@ -362,7 +376,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
             for group_name, classes in duplicate_groups.items():
                 logger.warning(f"  Group: {group_name} ({len(classes)} duplicates))")
                 for cls in classes:
-                    logger.warning(f    - {cls['name']} in {cls['file_path']}:{cls['line_number']}")
+                    logger.warning(f    - {cls['name']} in {cls['file_path']}:{cls['line_number']}")"
         
         # Phase 5: Assert violations exist (test should FAIL)
         logger.info(Phase 5: Checking for SSOT violations)
@@ -415,25 +429,28 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         if websocket_notifier_violations:
             logger.error(fWebSocketNotifier violations found: {len(websocket_notifier_violations)})
             for violation in websocket_notifier_violations:
-                logger.error(f"  - {violation})
+                logger.error(f"  - {violation})"
         
         # Assert violations exist to confirm the issue
         assert total_violations > 0, (
             fEXPECTED SSOT VIOLATIONS DETECTED: {total_violations} violations found. "
+            fEXPECTED SSOT VIOLATIONS DETECTED: {total_violations} violations found. "
             fCritical: {len(critical_violations)}, High: {len(high_violations)}. 
+            This confirms duplicate WebSocket implementations exist (Issue #680)."
             This confirms duplicate WebSocket implementations exist (Issue #680)."
         )
         
         # Additional check for WebSocketNotifier specifically
         if websocket_notifier_violations:
             assert len(websocket_notifier_violations) > 0, (
-                f"WebSocketNotifier duplication confirmed: {len(websocket_notifier_violations)} violations. 
+                f"WebSocketNotifier duplication confirmed: {len(websocket_notifier_violations)} violations."
                 This confirms the specific issue mentioned in Issue #680.
             )
         
         # The test PASSES by proving violations exist (confirming the issue)
         logger.info(TEST PASSES: WebSocket implementation duplicates confirmed)"
-        logger.info(Next step: Consolidate WebSocket implementations to single SSOT")
+        logger.info(TEST PASSES: WebSocket implementation duplicates confirmed)"
+        logger.info(Next step: Consolidate WebSocket implementations to single SSOT")"
         
         return {
             'total_violations': total_violations,
@@ -451,8 +468,12 @@ if __name__ == __main__:
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print(MIGRATION NOTICE: This file previously used direct pytest execution."")
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
+    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"
     print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
     # sys.exit(result)
+
+)))))))

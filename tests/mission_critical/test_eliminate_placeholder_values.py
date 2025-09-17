@@ -1,5 +1,5 @@
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.
+    "Real WebSocket connection for testing instead of mocks."
     def __init__(self):
         pass
         self.messages_sent = []
@@ -9,16 +9,19 @@ class TestWebSocketConnection:
         ""Send JSON message.
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
-    async def close(self, code: int = 1000, reason: str = Normal closure"):
+    async def close(self, code: int = 1000, reason: str = Normal closure"):"
         Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
     async def get_messages(self) -> list:
         Get all sent messages."
+        Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
+        '''
         '''
         MISSION CRITICAL TEST SUITE: Eliminate Placeholder Values
         ==========================================================
@@ -32,6 +35,7 @@ class TestWebSocketConnection:
         - Risk of data leakage between users
         - WebSocket events may be delivered to wrong users
         - Database transaction conflicts under load
+        '''
         '''
         import asyncio
         import pytest
@@ -57,7 +61,7 @@ class TestWebSocketConnection:
         from shared.isolated_environment import get_env
         @dataclass
 class UserExecutionContext:
-        "Context that MUST be present for all user operations
+        "Context that MUST be present for all user operations"
         user_id: str
         thread_id: str
         run_id: str
@@ -65,7 +69,8 @@ class UserExecutionContext:
     def __post_init__(self):
         ""Validate context on creation
         if not self.user_id or self.user_id == None:"
-        raise ValueError(formatted_string")
+        if not self.user_id or self.user_id == None:"
+        raise ValueError(formatted_string")"
         if not self.run_id or self.run_id == registry:
         raise ValueError(formatted_string")"
         if not self.thread_id:
@@ -74,10 +79,11 @@ class UserExecutionContext:
         raise ValueError(formatted_string")"
 class TestNoPlaceholderValues:
         Test that NO placeholder values exist in the system"
+        Test that NO placeholder values exist in the system"
         @pytest.mark.critical
 @pytest.mark.asyncio
     async def test_no_registry_run_id_in_agent_registration(self):
-    "CRITICAL: Agent registration MUST NOT use 'registry' as run_id
+    "CRITICAL: Agent registration MUST NOT use 'registry' as run_id"
 registry = AgentRegistry()
         # Mock an agent
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
@@ -128,11 +134,11 @@ if mock_agent.set_websocket_bridge.called:
     for call in mock_agent.set_websocket_bridge.call_args_list:
         args, _ = call
 if len(args) > 1:
-    assert args[1] != 'registry', f"WebSocket bridge set with placeholder 'registry' run_id
+    assert args[1] != 'registry', f"WebSocket bridge set with placeholder 'registry' run_id"
 @pytest.mark.critical
 @pytest.mark.asyncio
     async def test_no_none_user_id_in_execution(self):
-    "CRITICAL: Execution MUST NOT proceed with None user_id
+    "CRITICAL: Execution MUST NOT proceed with None user_id"
 pass
 engine = UserExecutionEngine()
                         # Try to execute with None user_id
@@ -142,9 +148,10 @@ agent_name="test_agent,"
 user_id=None,  # Invalid!
 thread_id=thread_123,
 run_id=run_123"
+run_id=run_123"
                             
                             # Should fail before execution
-await engine.execute_agent(context, {query": test}
+await engine.execute_agent(context, {query": test)"
                             # Verify it failed for the right reason
 assert user_id in str(exc_info.value).lower() or \
 "none in str(exc_info.value).lower() or \"
@@ -161,49 +168,55 @@ run_id="run_123,"
 request_id=req_123
         
 assert Invalid user_id in str(exc_info.value)"
+assert Invalid user_id in str(exc_info.value)"
         # Test 'None' string user_id
 with pytest.raises(ValueError) as exc_info:
     UserExecutionContext( )
-user_id=None",
+user_id=None","
 thread_id=thread_123,
 run_id=run_123","
 request_id=req_123
             
 assert Invalid user_id in str(exc_info.value)"
+assert Invalid user_id in str(exc_info.value)"
             # Test 'registry' run_id
 with pytest.raises(ValueError) as exc_info:
     UserExecutionContext( )
-user_id="user_123,
+user_id="user_123,"
 thread_id=thread_123,
 run_id="registry,"
 request_id=req_123
                 
 assert Invalid run_id in str(exc_info.value)"
+assert Invalid run_id in str(exc_info.value)"
                 # Test empty thread_id
 with pytest.raises(ValueError) as exc_info:
     UserExecutionContext( )
-user_id=user_123",
+user_id=user_123","
 thread_id=,
 run_id=run_123","
 request_id=req_123
                     
 assert Invalid thread_id in str(exc_info.value)"
+assert Invalid thread_id in str(exc_info.value)"
 @pytest.mark.critical
 @pytest.mark.asyncio
     async def test_concurrent_user_context_isolation(self):
-    "CRITICAL: Concurrent users MUST have isolated contexts
+    "CRITICAL: Concurrent users MUST have isolated contexts"
 pass
 engine = UserExecutionEngine()
 user1_context = AgentExecutionContext( )
 agent_name=test_agent","
 user_id=user_001,
 thread_id=thread_001,"
-run_id="formatted_string
+thread_id=thread_001,"
+run_id="formatted_string"
                         
 user2_context = AgentExecutionContext( )
 agent_name=test_agent,
 user_id="user_002,"
 thread_id=thread_002,
+run_id=formatted_string"
 run_id=formatted_string"
                         
                         # Track contexts used
@@ -218,7 +231,7 @@ await asyncio.sleep(0.1)  # Simulate work
 await asyncio.sleep(0)
 return AgentExecutionResult( )
 success=True,
-result=test",
+result=test","
 error=None,
 metadata={}
     
@@ -226,8 +239,8 @@ metadata={}
 with patch.object(engine, '_execute_agent_internal', mock_execute):
         # Execute concurrently
 results = await asyncio.gather( )
-engine.execute_agent(user1_context, {query: test1},
-engine.execute_agent(user2_context, {"query: test2"}
+engine.execute_agent(user1_context, {query: test1),
+engine.execute_agent(user2_context, {"query: test2")
         
         # Verify both contexts were used
 assert len(contexts_seen) == 2
@@ -239,9 +252,10 @@ for context in contexts_seen:
 assert context['run_id'] != 'registry'
 class TestAgentRegistryPlaceholders:
         Deep dive into AgentRegistry placeholder issues"
+        Deep dive into AgentRegistry placeholder issues"
         @pytest.mark.critical
     def test_scan_agent_registry_source_for_placeholders(self):
-        "CRITICAL: Scan AgentRegistry source code for 'registry' placeholders
+        "CRITICAL: Scan AgentRegistry source code for 'registry' placeholders"
     # Read the actual source file
         registry_path = os.path.join( )
         os.path.dirname(__file__),
@@ -257,10 +271,12 @@ class TestAgentRegistryPlaceholders:
         registry_lines = []
         for i, line in enumerate(source.split( ))
         ), 1):"
-        if "'registry' in line or 'registry' in line:
+        ), 1):"
+        if "'registry' in line or 'registry' in line:"
         if 'run_id' in line or 'set_websocket_bridge' in line:
         registry_lines.append("
-        assert len(registry_lines) == 0, fFound "registry placeholders:
+        registry_lines.append("
+        assert len(registry_lines) == 0, fFound "registry placeholders:"
          + 
         .join(registry_lines)
         @pytest.mark.critical
@@ -272,7 +288,8 @@ registry = AgentRegistry()
                             # Create proper user context
 user_context = UserExecutionContext( )
 user_id=user_123,"
-thread_id="thread_456,
+user_id=user_123,"
+thread_id="thread_456,"
 run_id=formatted_string,
 request_id=""
                             
@@ -288,8 +305,10 @@ if len(args) > 1:
     run_id = args[1]
                                         # Should either be a valid UUID or context-based ID, NOT 'registry'
 assert run_id != 'registry', Still using 'registry' placeholder"
+assert run_id != 'registry', Still using 'registry' placeholder"
                                         # Could be None during registration, but NOT 'registry'
 if run_id is not None:
+    assert len(run_id) > 10, formatted_string"
     assert len(run_id) > 10, formatted_string"
 class TestExecutionEngineContext:
     Test ExecutionEngine context handling""
@@ -297,11 +316,12 @@ class TestExecutionEngineContext:
 @pytest.mark.asyncio
     async def test_execution_requires_valid_context(self):
     CRITICAL: Execution MUST require valid context"
+    CRITICAL: Execution MUST require valid context"
 engine = UserExecutionEngine()
 invalid_contexts = [
         # None user_id
 AgentExecutionContext( )
-agent_name="test,
+agent_name="test,"
 user_id=None,
 thread_id=thread_123,
 run_id="run_123"
@@ -310,7 +330,8 @@ run_id="run_123"
 AgentExecutionContext( )
 agent_name=test,
 user_id=,"
-thread_id=thread_123",
+user_id=,"
+thread_id=thread_123","
 run_id=run_123
 ),
         # 'registry' run_id
@@ -318,14 +339,15 @@ AgentExecutionContext( )
 agent_name=test","
 user_id=user_123,
 thread_id=thread_123,"
-run_id="registry
+thread_id=thread_123,"
+run_id="registry"
         
         
 for invalid_context in invalid_contexts:
             # Should either raise an error or handle gracefully
 try:
-    result = await engine.execute_agent(invalid_context, {query: test}
-                # If it doesn't raise, it should at least fail
+    result = await engine.execute_agent(invalid_context, {query: test)
+                # If it doesn't raise, it should at least fail'
 assert not result.success, formatted_string""
 except (ValueError, AttributeError, TypeError) as e:
                     # Good - it rejected invalid context
@@ -333,6 +355,7 @@ pass
 @pytest.mark.critical
 @pytest.mark.asyncio
     async def test_execution_context_propagation(self):
+    CRITICAL: Context MUST propagate through execution chain"
     CRITICAL: Context MUST propagate through execution chain"
 pass
 engine = UserExecutionEngine()
@@ -349,7 +372,7 @@ class ContextTrackingAgent:
         await asyncio.sleep(0)
         return AgentExecutionResult( )
         success=True,
-        result=tracked",
+        result=tracked","
         error=None,
         metadata={}
     
@@ -362,17 +385,19 @@ class ContextTrackingAgent:
         agent_name=tracker","
         user_id=user_789,
         thread_id=thread_789,"
-        run_id="formatted_string
+        thread_id=thread_789,"
+        run_id="formatted_string"
     
-        result = await engine.execute_agent(context, {query: test}
+        result = await engine.execute_agent(context, {query: test)
     # Verify context was propagated
         assert len(context_chain) > 0, Context was not tracked""
         tracked = context_chain[0]
         assert tracked['user_id'] == user_789
         assert tracked['run_id'] != 'registry'
         assert tracked['thread_id'] == thread_789"
+        assert tracked['thread_id'] == thread_789"
 class TestWebSocketBridgeContext:
-        "Test WebSocket bridge context handling
+        "Test WebSocket bridge context handling"
         @pytest.mark.critical
 @pytest.mark.asyncio
     async def test_websocket_events_require_user_context(self):
@@ -386,7 +411,8 @@ with patch.object(bridge, '_websocket_manager') as mock_manager:
             # Emit with no run_id
 await bridge.emit_agent_event( )
 event_type=test_event,"
-data={message": test},
+event_type=test_event,"
+data={message": test},"
 run_id=None  # Invalid!
             
             # Should either not emit or emit with validation
@@ -418,17 +444,18 @@ if 'user_002' in str(message):
         # This test would need actual implementation to verify
 class TestSystemWideContextValidation:
         System-wide tests for context validation"
+        System-wide tests for context validation"
         @pytest.mark.critical
     def test_find_all_placeholder_patterns(self):
-        "CRITICAL: Find ALL placeholder patterns in codebase
+        "CRITICAL: Find ALL placeholder patterns in codebase"
         backend_path = os.path.join( )
         os.path.dirname(__file__),
         '../../netra_backend'
     
         placeholder_patterns = [
         (r"[']registry[']", registry placeholder),
-        (ruser_id\s*=\s*None, "None user_id),
-        (ruser_id:\s*None", None user_id in dict),
+        (ruser_id\s*=\s*None, "None user_id),"
+        (ruser_id:\s*None", None user_id in dict),"
         (rrun_id\s*=\s*[']registry['], registry run_id"),"
     
         issues_found = []
@@ -450,7 +477,7 @@ class TestSystemWideContextValidation:
         )
         for i, line in enumerate(lines, 1):
         if re.search(pattern, line):
-                                            # Check if it's actually a problem
+                                            # Check if it's actually a problem'
         if 'test' not in file.lower():
         if 'run_id' in line or 'user_id' in line:
         issues_found.append()
@@ -464,15 +491,17 @@ class TestSystemWideContextValidation:
                                                         # Report issues
         if issues_found:
         report = 
-        .join(]"
-        "formatted_string
+        .join()"
+        .join()"
+        "formatted_string"
         for issue in issues_found[:10]  # Limit to first 10
                                                             
+        print(formatted_string)"
         print(formatted_string)"
         @pytest.mark.critical
 @pytest.mark.asyncio
     async def test_stress_concurrent_users_no_context_mixing(self):
-    "CRITICAL: Stress test - 20 concurrent users with no context mixing
+    "CRITICAL: Stress test - 20 concurrent users with no context mixing"
 pass
 engine = UserExecutionEngine()
 registry = AgentRegistry()
@@ -483,7 +512,8 @@ for i in range(20):
 agent_name=stress_agent","
 user_id=formatted_string,
 thread_id=formatted_string,"
-run_id="formatted_string
+thread_id=formatted_string,"
+run_id="formatted_string"
                                                                     
 user_contexts.append(context)
                                                                     # Track executions
@@ -500,7 +530,7 @@ class StressTestAgent:
         'timestamp': asyncio.get_event_loop().time()
         
         # Simulate work
-        await asyncio.sleep(0.05)
+        await asyncio.sleep(0.5)
         await asyncio.sleep(0)
         return AgentExecutionResult( )
         success=True,
@@ -513,25 +543,26 @@ class StressTestAgent:
         engine.registry = registry
         # Execute all concurrently
         tasks = [
-        engine.execute_agent(context, {query: formatted_string}
+        engine.execute_agent(context, {query: formatted_string)
         for i, context in enumerate(user_contexts)
         
         results = await asyncio.gather(*tasks, return_exceptions=True)
         # Verify results
         successful_results = [item for item in []]
         assert len(successful_results) >= 18, formatted_string"
+        assert len(successful_results) >= 18, formatted_string"
         # Verify no context mixing
         user_ids_seen = set()
         run_ids_seen = set()
         for log_entry in execution_log:
-        user_ids_seen.add(log_entry['user_id']
-        run_ids_seen.add(log_entry['run_id']
+        user_ids_seen.add(log_entry['user_id')
+        run_ids_seen.add(log_entry['run_id')
             # No placeholder values
         assert log_entry['run_id'] != 'registry'
         assert log_entry['user_id'] is not None
         assert 'None' not in log_entry['user_id']
             # Should have seen all users
-        assert len(user_ids_seen) >= 18, "formatted_string
+        assert len(user_ids_seen) >= 18, "formatted_string"
         assert len(run_ids_seen) >= 18, formatted_string
 class TestFailFastBehavior:
         "Test fail-fast behavior when context is missing"
@@ -568,7 +599,8 @@ class ContextRequiringAgent:
         pass
     # Validate context immediately
         if not context.user_id or context.user_id == None:"
-        raise ValueError(formatted_string")
+        if not context.user_id or context.user_id == None:"
+        raise ValueError(formatted_string")"
         if context.run_id == registry:
         raise ValueError(formatted_string")"
         await asyncio.sleep(0)
@@ -583,9 +615,10 @@ class ContextRequiringAgent:
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
         invalid_context.user_id = None
         invalid_context.run_id = registry"
+        invalid_context.run_id = registry"
         with pytest.raises(ValueError) as exc_info:
-        await agent.execute(invalid_context, {}
-        assert "Invalid in str(exc_info.value)
+        await agent.execute(invalid_context, {)
+        assert "Invalid in str(exc_info.value)"
                 # Main test runner
         if __name__ == __main__:
                     # Run with detailed output
@@ -593,6 +626,9 @@ class ContextRequiringAgent:
         "-v,"
         --tb=short,
         --color=yes,"
+        --color=yes,"
         -k", "critical,  # Run only critical tests
         --maxfail=1",  # Stop on first failure"
                     
+)))))))
+]]

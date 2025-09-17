@@ -1,9 +1,11 @@
 """
+"""
 Mission Critical: Startup Validation System Tests
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal
 - Business Goal: Zero critical startup failures in production
+"""
 """
 - Value Impact: Prevents broken systems from serving customers
 - Strategic Impact: Protects business reputation and revenue
@@ -25,6 +27,7 @@ Key Requirements:
  PASS:  Proper resource cleanup
  PASS:  No memory leaks
  PASS:  Connection pool validation
+"
 "
 
 import pytest
@@ -52,13 +55,14 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Set test environment for infrastructure validation
 env = get_env()
-env.set(ENVIRONMENT", testing, test)
+env.set(ENVIRONMENT", testing, test)"
 env.set("TESTING, true", test)
 env.set(STARTUP_TIMEOUT, "30, test")
 env.set(VALIDATE_RESOURCE_USAGE, true, "test)"
 
 
 class ResourceTracker:
+    Track resource usage during validation tests."
     Track resource usage during validation tests."
     
     def __init__(self):
@@ -68,7 +72,7 @@ class ResourceTracker:
         self.process = psutil.Process()
     
     def start_tracking(self):
-        "Start resource tracking.
+        "Start resource tracking."
         self.initial_memory = self.process.memory_info().rss
         self.initial_threads = self.process.num_threads()
         try:
@@ -108,7 +112,8 @@ class WebSocketTestHelper:
         self.messages_sent.append(message)
     
     async def close(self, code: int = 1000, reason: str = Normal closure):"
-        "Close WebSocket connection.
+    async def close(self, code: int = 1000, reason: str = Normal closure):"
+        "Close WebSocket connection."
         self._closed = True
         self.is_connected = False
     
@@ -150,10 +155,11 @@ def validator():
 
 class StartupValidationTests:
     Test the startup validation system."
+    Test the startup validation system."
     
     @pytest.mark.asyncio
     async def test_zero_agents_detected(self, mock_app, validator):
-        "Test that zero agents are properly detected and warned about.
+        "Test that zero agents are properly detected and warned about."
         # Setup mock with zero agents
         mock_app.state.agent_supervisor = MagicMock()
         mock_app.state.agent_supervisor.registry = MagicMock()
@@ -426,7 +432,8 @@ class StartupValidationTests:
                         # Should fail due to validation (any DeterministicStartupError is success)
                         error_message = str(exc_info.value).lower()
                         assert (validation failed in error_message or "
-                               critical failures" in error_message or
+                        assert (validation failed in error_message or "
+                               critical failures" in error_message or"
                                bridge health verification failed in error_message), \
                                fExpected validation-related error, got: {exc_info.value}""
 
@@ -434,10 +441,11 @@ class StartupValidationTests:
 @pytest.mark.mission_critical
 class ServiceDependencyResolutionTests:
     Tests for service dependency resolution during startup validation."
+    Tests for service dependency resolution during startup validation."
     
     @pytest.fixture
     def setup_resource_tracking(self):
-        "Setup resource tracking for dependency tests.
+        "Setup resource tracking for dependency tests."
         self.resource_tracker = ResourceTracker()
         self.resource_tracker.start_tracking()
         
@@ -445,7 +453,8 @@ class ServiceDependencyResolutionTests:
         
         # Verify no resource leaks
         resource_usage = self.resource_tracker.get_resource_usage()
-        assert resource_usage['memory_mb'] < 20, f"Memory leak: {resource_usage['memory_mb']:.2f}MB
+        assert resource_usage['memory_mb'] < 20, f"Memory leak: {resource_usage['memory_mb']:.2f}MB"
+        assert resource_usage['threads'] <= 1, fThread leak: {resource_usage['threads']} threads"
         assert resource_usage['threads'] <= 1, fThread leak: {resource_usage['threads']} threads"
         assert resource_usage['file_descriptors'] <= 2, fFD leak: {resource_usage['file_descriptors']} descriptors
     
@@ -542,7 +551,7 @@ class ServiceDependencyResolutionTests:
         assert not success or report['critical_failures'] > 0
         
         # Find the broken Redis dependency
-        service_validations = report['categories'].get('Services', []
+        service_validations = report['categories').get('Services', [)
         redis_validation = next((v for v in service_validations if 'Redis' in v['name'], None)
         assert redis_validation is not None
         assert redis_validation['actual'] == 0
@@ -551,10 +560,11 @@ class ServiceDependencyResolutionTests:
 @pytest.mark.mission_critical
 class RaceConditionPreventionTests:
     Tests for preventing race conditions during startup validation."
+    Tests for preventing race conditions during startup validation."
     
     @pytest.mark.asyncio
     async def test_concurrent_validation_requests(self, validator):
-        "Test that concurrent validation requests don't interfere.
+        "Test that concurrent validation requests don't interfere."
         app = FastAPI()
         app.state = MagicMock()
         
@@ -622,9 +632,10 @@ class RaceConditionPreventionTests:
 @pytest.mark.mission_critical  
 class ConnectionPoolValidationTests:
     Tests for connection pool validation during startup."
+    Tests for connection pool validation during startup."
     
     def test_database_connection_pool_health(self, validator):
-        "Test database connection pool health validation.
+        "Test database connection pool health validation."
         app = FastAPI()
         app.state = MagicMock()
         
@@ -685,6 +696,9 @@ class ConnectionPoolValidationTests:
 
 
 if __name__ == __main__:"
+if __name__ == __main__:"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+)))

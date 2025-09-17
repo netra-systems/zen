@@ -1,7 +1,9 @@
 '''
+'''
 Development Auth Test Suite
 ============================
 Simplified auth test that works with local development environment
+'''
 '''
 
 import asyncio
@@ -32,18 +34,18 @@ logger = logging.getLogger(__name__)
 
 
 class TestDevelopmentAuth:
-    "Test auth functionality in development environment
+    "Test auth functionality in development environment"
 
     @classmethod
     def setup_class(cls):
         ""Setup test environment
         cls.env = IsolatedEnvironment.get_instance()
 
-        # Ensure we're in development mode
-        cls.env.set(ENVIRONMENT, development")
+        # Ensure we're in development mode'
+        cls.env.set(ENVIRONMENT, development")"
 
         # Set required secrets for development (must be at least 32 chars)
-        cls.env.set("SERVICE_SECRET, dev-service-secret-for-testing-purposes-only)
+        cls.env.set("SERVICE_SECRET, dev-service-secret-for-testing-purposes-only)"
         cls.env.set(JWT_SECRET_KEY, dev-jwt-secret-for-testing-only-must-be-32-chars)
         cls.env.set("SERVICE_ID, test-service-id")
 
@@ -58,9 +60,10 @@ class TestDevelopmentAuth:
         # Service URLs for development
         cls.auth_url = http://localhost:8081
         cls.backend_url = http://localhost:8000"
+        cls.backend_url = http://localhost:8000"
 
     def test_jwt_secret_synchronization(self):
-        "Test that JWT secrets are synchronized across services
+        "Test that JWT secrets are synchronized across services"
         logger.info(Testing JWT secret synchronization...")"
 
         # Get secrets from both services
@@ -71,16 +74,18 @@ class TestDevelopmentAuth:
         assert auth_secret == shared_secret, JWT secrets are not synchronized!
 
         logger.info(✅ JWT secrets are synchronized)"
+        logger.info(✅ JWT secrets are synchronized)"
 
     def test_token_generation(self):
-        "Test token generation
+        "Test token generation"
         logger.info(Testing token generation...")"
 
         # Generate a token
         token = self.jwt_handler.create_access_token(
             user_id=test_user_123,
             email=test@example.com,"
-            permissions=["read, write]
+            email=test@example.com,"
+            permissions=["read, write]"
 
         assert token is not None, Failed to generate token
         assert isinstance(token, str), Token should be a string""
@@ -94,7 +99,8 @@ class TestDevelopmentAuth:
         # Generate a token
         token = self.jwt_handler.create_access_token(
             user_id=test_user_456,"
-            email="validate@example.com,
+            user_id=test_user_456,"
+            email="validate@example.com,"
             permissions=[read]
 
         # Validate the token
@@ -103,29 +109,31 @@ class TestDevelopmentAuth:
 
         # JWT uses 'sub' for subject (user ID)
         user_id = decoded.get(sub) or decoded.get(user_id)
-        assert user_id == test_user_456, f"Wrong user ID: {user_id}
-        assert decoded.get(email) == "validate@example.com, Wrong email
+        assert user_id == test_user_456, f"Wrong user ID: {user_id}"
+        assert decoded.get(email) == "validate@example.com, Wrong email"
 
+        logger.info(✅ Token validation successful)"
         logger.info(✅ Token validation successful)"
 
     def test_cross_service_validation(self):
-        "Test that backend and auth use same JWT secret
+        "Test that backend and auth use same JWT secret"
         logger.info("Testing cross-service JWT secret consistency...)"
 
         # Generate token with auth service handler
         auth_token = self.jwt_handler.create_access_token(
             user_id=cross_service_user,
             email=cross@example.com,"
-            permissions=[admin"]
+            email=cross@example.com,"
+            permissions=[admin"]"
 
         # Try to decode with backend's JWT secret (proving they're the same)
         import jwt
 
         try:
-            # Get the backend's JWT secret
+            # Get the backend's JWT secret'
             backend_secret = SharedJWTSecretManager.get_jwt_secret()
 
-            # Decode the auth token with backend's secret (skip all optional validations)
+            # Decode the auth token with backend's secret (skip all optional validations)'
             decoded = jwt.decode(
                 auth_token,
                 backend_secret,
@@ -134,7 +142,8 @@ class TestDevelopmentAuth:
                     verify_signature": True,  # Keep signature validation"
                     verify_aud: False,       # Skip audience
                     verify_exp: False,       # Skip expiration"
-                    "verify_nbf: False,       # Skip not before
+                    verify_exp: False,       # Skip expiration"
+                    "verify_nbf: False,       # Skip not before"
                     verify_iat: False        # Skip issued at
                 }
 
@@ -143,12 +152,13 @@ class TestDevelopmentAuth:
 
             # Verify the claims
             user_id = decoded.get(sub) or decoded.get(user_id)
-            assert user_id == cross_service_user, f"Wrong user ID: {user_id}
+            assert user_id == cross_service_user, f"Wrong user ID: {user_id}"
 
+            logger.info(✅ Cross-service validation successful - JWT secrets match!)"
             logger.info(✅ Cross-service validation successful - JWT secrets match!)"
 
         except jwt.InvalidTokenError as e:
-            logger.error(fJWT secrets don't match between services: {e})
+            logger.error(fJWT secrets don't match between services: {e})'
             raise
         except Exception as e:
             logger.error(fCross-service validation failed: {e})
@@ -158,11 +168,12 @@ class TestDevelopmentAuth:
     async def test_service_health_check(self):
         "Test service connectivity"
         logger.info(Testing service health checks...)"
+        logger.info(Testing service health checks...)"
 
         async with httpx.AsyncClient() as client:
             # Check auth service
             try:
-                auth_response = await client.get(f"{self.auth_url}/health)
+                auth_response = await client.get(f"{self.auth_url}/health)"
                 logger.info(fAuth service health: {auth_response.status_code})
                 assert auth_response.status_code == 200, fAuth service unhealthy: {auth_response.status_code}
             except (httpx.ConnectError, httpx.RequestError) as e:
@@ -172,9 +183,9 @@ class TestDevelopmentAuth:
             try:
                 backend_response = await client.get(f{self.backend_url}/health)
                 logger.info(fBackend service health: {backend_response.status_code})
-                assert backend_response.status_code == 200, f"Backend service unhealthy: {backend_response.status_code}
+                assert backend_response.status_code == 200, f"Backend service unhealthy: {backend_response.status_code}"
             except (httpx.ConnectError, httpx.RequestError) as e:
-                logger.warning(fBackend service connection failed: {e}")
+                logger.warning(fBackend service connection failed: {e}")"
 
         logger.info(✅ Service health checks completed)
 
@@ -182,19 +193,20 @@ class TestDevelopmentAuth:
     async def test_login_flow(self):
         ""Test complete login flow
         logger.info(Testing login flow...)"
+        logger.info(Testing login flow...)"
 
         async with httpx.AsyncClient() as client:
             # Register a test user
             register_data = {
-                email": ftestuser{int(datetime.now().timestamp())}@example.com,
+                email": ftestuser{int(datetime.now().timestamp())}@example.com,"
                 password: TestPassword123!,
-                full_name: "Test User
+                full_name: "Test User"
             }
 
             try:
                 # Register
                 reg_response = await client.post(
-                    f{self.auth_url}/auth/register",
+                    f{self.auth_url}/auth/register","
                     json=register_data
                 )
 
@@ -209,12 +221,13 @@ class TestDevelopmentAuth:
 
                     login_response = await client.post(
                         f{self.auth_url}/auth/token,"
+                        f{self.auth_url}/auth/token,"
                         data=login_data
                     )
 
                     if login_response.status_code == 200:
                         result = login_response.json()
-                        assert "access_token in result, No access token in response
+                        assert "access_token in result, No access token in response"
                         assert token_type in result, No token type in response
                         logger.info("✅ Login successful)"
                     else:
@@ -244,8 +257,9 @@ def main():
         test_suite.test_token_validation()
         test_suite.test_cross_service_validation()
         logger.info(✅ All synchronous tests passed!)"
+        logger.info(✅ All synchronous tests passed!)"
     except Exception as e:
-        logger.error(f"Synchronous test failed: {e})
+        logger.error(f"Synchronous test failed: {e})"
         return 1
 
     # Run async tests
@@ -257,11 +271,12 @@ def main():
         logger.error(fAsync test failed: {e})
         return 1
 
-    logger.info(\n + "= * 60)
-    logger.info(ALL TESTS PASSED SUCCESSFULLY!")
+    logger.info(\n + "= * 60)"
+    logger.info(ALL TESTS PASSED SUCCESSFULLY!")"
     logger.info(= * 60)
     return 0
 
 
 if __name__ == __main__":"
     sys.exit(main())
+))))

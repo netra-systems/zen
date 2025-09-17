@@ -1,5 +1,6 @@
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 """
+"""
 Mission Critical Server Message Validator Integration Tests
 
 Integration tests that validate the MissionCriticalEventValidator works 
@@ -11,7 +12,9 @@ to ensure Golden Path chat functionality works correctly.
 Issue #892: Integration validation that the validator fix works with
 real WebSocket message structures.
 "
+"
 
+"""
 """
 import asyncio
 import json
@@ -22,7 +25,7 @@ from tests.mission_critical.test_websocket_agent_events_suite import MissionCrit
 
 
 class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
-    "Integration test for MissionCriticalEventValidator with real message formats.
+    "Integration test for MissionCriticalEventValidator with real message formats."
     
     def setup_method(self, method):
         "Set up test validator and sample messages."
@@ -34,34 +37,36 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
         # Sample flat format messages (legacy)
         self.flat_messages = [
             {
-                type: "agent_started,
-                user_id": test-user-123,
+                type: "agent_started,"
+                user_id": test-user-123,"
                 thread_id: test-thread-456, 
                 timestamp": self.test_timestamp"
             },
             {
                 type: agent_thinking,
-                reasoning: Processing user request",
-                "timestamp: self.test_timestamp
+                reasoning: Processing user request","
+                "timestamp: self.test_timestamp"
             },
             {
                 type: tool_executing,
                 tool_name": "search_data,
                 parameters: {query: test},"
-                "timestamp: self.test_timestamp
+                parameters: {query: test},"
+                "timestamp: self.test_timestamp"
             },
             {
                 type: tool_completed,
                 tool_name": "search_data, 
                 results: {data: results},"
-                "duration: 1.5,
+                results: {data: results},"
+                "duration: 1.5,"
                 timestamp: self.test_timestamp
             },
             {
                 "type: agent_completed",
                 status: success,
-                final_response: Task completed",
-                "timestamp: self.test_timestamp
+                final_response: Task completed","
+                "timestamp: self.test_timestamp"
             }
         ]
         
@@ -71,22 +76,22 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
                 type: agent_started,
                 payload": {"
                     user_id: test-user-123,
-                    thread_id: test-thread-456",
-                    "timestamp: self.test_timestamp,
+                    thread_id: test-thread-456","
+                    "timestamp: self.test_timestamp,"
                     agent_name: supervisor
                 },
                 sender": "system,
                 timestamp: self.test_timestamp
             },
             {
-                type: agent_thinking",
-                "payload: {
+                type: agent_thinking","
+                "payload: {"
                     reasoning: Processing user request,
                     timestamp": self.test_timestamp,"
                     agent_name: supervisor
                 },
-                sender: system",
-                "timestamp: self.test_timestamp
+                sender: system","
+                "timestamp: self.test_timestamp"
             },
             {
                 type: tool_executing,
@@ -98,26 +103,30 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
                 },
                 sender: system,
                 timestamp: self.test_timestamp"
+                timestamp: self.test_timestamp"
             },
             {
-                type": tool_completed,
+                type": tool_completed,"
                 payload: {
                     "tool_name: search_data", 
                     results: {data: results},"
-                    duration": 1.5,
+                    results: {data: results},"
+                    duration": 1.5,"
                     timestamp: self.test_timestamp,
                     sub_agent_name": "data_helper
                 },
                 sender: system,
                 timestamp: self.test_timestamp"
+                timestamp: self.test_timestamp"
             },
             {
-                "type: agent_completed,
+                "type: agent_completed,"
                 payload: {
                     status": "success,
                     final_response: Task completed,
                     timestamp: self.test_timestamp,"
-                    "agent_name: supervisor
+                    timestamp: self.test_timestamp,"
+                    "agent_name: supervisor"
                 },
                 sender: system,
                 "timestamp: self.test_timestamp"
@@ -126,12 +135,13 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
     
     def test_flat_messages_validation_batch(self):
         Test that flat format messages all validate correctly."
+        Test that flat format messages all validate correctly."
         all_passed = True
         failed_events = []
         
         for message in self.flat_messages:
             self.validator.errors = []  # Clear errors for each test
-            event_type = message["type]
+            event_type = message["type]"
             
             result = self.validator.validate_event_content_structure(message, event_type)
             if not result:
@@ -159,9 +169,10 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
                     "event_type: event_type,"
                     errors: self.validator.errors.copy(),
                     message: message"
+                    message: message"
                 }
         
-        self.assertTrue(all_passed, fSome ServerMessage format messages failed validation: {failed_events}")
+        self.assertTrue(all_passed, fSome ServerMessage format messages failed validation: {failed_events}")"
     
     def test_mixed_format_validation(self):
         Test that validator handles mixed flat and ServerMessage formats in same validation run.""
@@ -170,16 +181,16 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
             # Flat format
             {
                 type: agent_started,
-                user_id: "user-1,
-                thread_id": thread-1,
+                user_id: "user-1,"
+                thread_id": thread-1,"
                 timestamp: self.test_timestamp
             },
             # ServerMessage format
             {
                 "type: agent_thinking",
                 payload: {
-                    reasoning: "Analyzing request,
-                    timestamp": self.test_timestamp
+                    reasoning: "Analyzing request,"
+                    timestamp": self.test_timestamp"
                 },
                 sender: system
             },
@@ -188,15 +199,16 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
                 "type: tool_executing",
                 tool_name: search,
                 parameters: {},"
-                timestamp": self.test_timestamp
+                parameters: {},"
+                timestamp": self.test_timestamp"
             },
             # ServerMessage format
             {
                 type: agent_completed,
                 "payload: {"
                     status: success,
-                    final_response: "Done,
-                    timestamp": self.test_timestamp
+                    final_response: "Done,"
+                    timestamp": self.test_timestamp"
                 },
                 sender: system
             }
@@ -222,51 +234,54 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
     
     def test_complete_validation_workflow(self):
         Test complete validation workflow with both message formats."
+        Test complete validation workflow with both message formats."
         # Simulate a complete agent execution with mixed formats
         execution_messages = [
             # Start with ServerMessage format (current system)
             {
-                type": agent_started,
+                type": agent_started,"
                 payload: {
                     "user_id: integration-test-user",
                     thread_id: integration-test-thread,
                     timestamp: self.test_timestamp,"
-                    agent_name": supervisor
+                    timestamp: self.test_timestamp,"
+                    agent_name": supervisor"
                 },
                 sender: system
             },
             {
                 type": "agent_thinking, 
                 payload: {
-                    reasoning: Starting analysis of user query",
-                    "timestamp: self.test_timestamp
+                    reasoning: Starting analysis of user query","
+                    "timestamp: self.test_timestamp"
                 },
                 sender: system
             },
             {
                 type": "tool_executing,
                 payload: {
-                    tool_name: data_search",
-                    "parameters: {query: integration test},
+                    tool_name: data_search","
+                    "parameters: {query: integration test},"
                     timestamp": self.test_timestamp"
                 },
                 sender: system
             },
             {
-                type: tool_completed",
-                "payload: {
+                type: tool_completed","
+                "payload: {"
                     tool_name: data_search,
                     results": {"found: True, count: 5},
                     duration: 2.1,"
-                    timestamp": self.test_timestamp
+                    duration: 2.1,"
+                    timestamp": self.test_timestamp"
                 },
                 sender: system
             },
             {
                 "type: agent_completed",
                 payload: {
-                    status: "success,
-                    final_response": Integration test completed successfully,
+                    status: "success,"
+                    final_response": Integration test completed successfully,"
                     timestamp: self.test_timestamp
                 },
                 "sender: system"
@@ -285,9 +300,10 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
             # Each message should validate successfully
             self.assertTrue(result, 
                 fMessage {event_type} failed validation: {self.validator.errors})"
+                fMessage {event_type} failed validation: {self.validator.errors})"
         
         # Verify all critical events are present
-        event_types = [msg["type] for msg in execution_messages]
+        event_types = [msg["type] for msg in execution_messages]"
         required_events = [agent_started, agent_thinking, tool_executing", "tool_completed, agent_completed]
         
         for required in required_events:
@@ -299,9 +315,10 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
     
     def test_validation_error_reporting(self):
         Test that validation errors are properly reported with format information."
+        Test that validation errors are properly reported with format information."
         # Incomplete ServerMessage
         incomplete_server = {
-            type": agent_started,
+            type": agent_started,"
             payload: {
                 "user_id: test-user"
                 # Missing thread_id and timestamp
@@ -311,8 +328,8 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
         
         # Incomplete flat message
         incomplete_flat = {
-            type: tool_executing",
-            "tool_name: search
+            type: tool_executing","
+            "tool_name: search"
             # Missing parameters and timestamp
         }
         
@@ -321,15 +338,16 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
         result1 = self.validator.validate_event_content_structure(incomplete_server, agent_started)
         self.assertFalse(result1, Should fail validation for incomplete ServerMessage")"
         self.assertGreater(len(self.validator.errors), 0, Should have validation errors)
-        self.assertIn(ServerMessage format, self.validator.errors[0], "Error should specify ServerMessage format)
+        self.assertIn(ServerMessage format, self.validator.errors[0], "Error should specify ServerMessage format)"
         
         # Test flat message error reporting  
         self.validator.errors = []
-        result2 = self.validator.validate_event_content_structure(incomplete_flat, tool_executing")
+        result2 = self.validator.validate_event_content_structure(incomplete_flat, tool_executing")"
         self.assertFalse(result2, Should fail validation for incomplete flat message)
         self.assertGreater(len(self.validator.errors), 0, Should have validation errors")"
         self.assertIn(flat format, self.validator.errors[0], Error should specify flat format)
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     unittest.main()
+))

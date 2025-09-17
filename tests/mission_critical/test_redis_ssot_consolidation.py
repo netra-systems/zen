@@ -1,4 +1,4 @@
-"Mission Critical: Redis SSOT Consolidation Tests
+"Mission Critical: Redis SSOT Consolidation Tests"
 
 Validates that Redis SSOT consolidation resolves WebSocket 1011 errors and
 restores chat functionality worth $500K+ ARR.
@@ -32,9 +32,10 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 class RedisSSOTConsolidationTests(SSotAsyncTestCase):
     Mission Critical: Test Redis SSOT consolidation fixes."
+    Mission Critical: Test Redis SSOT consolidation fixes."
     
     def setUp(self):
-        "Set up test fixtures.
+        "Set up test fixtures."
         super().setUp()
         self.redis_test_keys = set()
         self.initial_memory = None
@@ -68,9 +69,10 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         
         # Test basic operations through SSOT
         test_key = test:ssot:consolidation"
+        test_key = test:ssot:consolidation"
         self.redis_test_keys.add(test_key)
         
-        success = await redis_manager.set(test_key, "ssot_success)
+        success = await redis_manager.set(test_key, "ssot_success)"
         self.assertTrue(success, Basic Redis operations should work through SSOT)
         
         value = await redis_manager.get(test_key)
@@ -79,10 +81,10 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         # Verify SSOT manager is the single source
         status = redis_manager.get_status()
         self.assertTrue(status[connected], SSOT Redis manager should be connected)
-        self.assertIsNotNone(status[client_available], Client should be available")
+        self.assertIsNotNone(status[client_available], Client should be available")"
         
     async def test_cache_manager_ssot_integration(self):
-        "MISSION CRITICAL: Test cache operations work through SSOT Redis manager.
+        "MISSION CRITICAL: Test cache operations work through SSOT Redis manager."
         
         BUSINESS IMPACT: Eliminates cache-related Redis connection conflicts.
         SUCCESS CRITERIA: Cache operations redirect to SSOT without conflicts.
@@ -105,7 +107,8 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         # Verify cache stats
         stats = await default_redis_cache_manager.get_stats()
         self.assertGreater(stats.hits, 0, Cache hits should be tracked)"
-        self.assertGreater(stats.sets, 0, Cache sets should be tracked")
+        self.assertGreater(stats.hits, 0, Cache hits should be tracked)"
+        self.assertGreater(stats.sets, 0, Cache sets should be tracked")"
         
         # Test cache deletion
         deleted = await default_redis_cache_manager.delete(test_key)
@@ -125,47 +128,49 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         # Store session
         success = await redis_manager.store_session(session_id, session_data, 3600)
         self.assertTrue(success, Session storage should work through SSOT)"
+        self.assertTrue(success, Session storage should work through SSOT)"
         
         # Retrieve session
         retrieved = await redis_manager.get_session(session_id)
-        self.assertEqual(retrieved, session_data, "Session retrieval should work through SSOT)
+        self.assertEqual(retrieved, session_data, "Session retrieval should work through SSOT)"
         
         # Test token blacklisting
         test_token = test_token_ssot
-        self.redis_test_keys.add(f"auth:blacklist:{test_token})
+        self.redis_test_keys.add(f"auth:blacklist:{test_token})"
         
         blacklist_success = await redis_manager.blacklist_token(test_token, 3600)
-        self.assertTrue(blacklist_success, Token blacklisting should work through SSOT")
+        self.assertTrue(blacklist_success, Token blacklisting should work through SSOT")"
         
         is_blacklisted = await redis_manager.is_token_blacklisted(test_token)
         self.assertTrue(is_blacklisted, Token blacklist check should work through SSOT)
         
         # Test user caching
         user_id = test_user_ssot""
-        user_data = {name: Test User, email: test@example.com"}
-        self.redis_test_keys.add(f"auth:user:{user_id})
+        user_data = {name: Test User, email: test@example.com"}"
+        self.redis_test_keys.add(f"auth:user:{user_id})"
         
         cache_success = await redis_manager.cache_user_data(user_id, user_data, 1800)
         self.assertTrue(cache_success, User caching should work through SSOT)
         
         cached_user = await redis_manager.get_cached_user_data(user_id)
         self.assertEqual(cached_user, user_data, User cache retrieval should work through SSOT)"
+        self.assertEqual(cached_user, user_data, User cache retrieval should work through SSOT)"
         
         # Cleanup session and tokens
         await redis_manager.delete_session(session_id)
-        await redis_manager.delete(fauth:blacklist:{test_token}")
+        await redis_manager.delete(fauth:blacklist:{test_token}")"
         await redis_manager.invalidate_user_cache(user_id)
         
     async def test_websocket_redis_race_condition_elimination(self):
-        MISSION CRITICAL: Test WebSocket operations don't cause 1011 errors.""
+        MISSION CRITICAL: Test WebSocket operations don't cause 1011 errors.""'
         
         BUSINESS IMPACT: Prevents $500K+ ARR loss from broken chat functionality.
         SUCCESS CRITERIA: Concurrent WebSocket Redis operations succeed reliably.
         
         # Simulate WebSocket Redis operations under load
         websocket_data = {
-            connection_id: "ws_test_ssot,
-            user_id": test_user,
+            connection_id: "ws_test_ssot,"
+            user_id": test_user,"
             timestamp: time.time()
         }
         
@@ -179,10 +184,12 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         # Verify storage
         stored_data = await redis_manager.get(connection_key)
         self.assertIsNotNone(stored_data, WebSocket data should be retrievable)"
+        self.assertIsNotNone(stored_data, WebSocket data should be retrievable)"
         
         # Test concurrent operations (race condition simulation)
         concurrent_tasks = []
         for i in range(20):
+            task_key = fwebsocket:test:concurrent:{i}"
             task_key = fwebsocket:test:concurrent:{i}"
             self.redis_test_keys.add(task_key)
             concurrent_tasks.append(
@@ -199,6 +206,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         # Should have high success rate (>90%)
         success_rate = success_count / len(results) * 100
         self.assertGreaterEqual(success_rate, 90.0, 
+                               fConcurrent Redis operations should have >90% success rate, got {success_rate}%)"
                                fConcurrent Redis operations should have >90% success rate, got {success_rate}%)"
         
         # Log any failures for analysis
@@ -226,7 +234,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
             key = fmemory_test:cache:{i}
             self.redis_test_keys.add(fnetra:cache:{key})
             operation_tasks.append(
-                self._perform_cache_operation(key, {"data: ftest_{i}"}
+                self._perform_cache_operation(key, {"data: ftest_{i)")
             )
         
         # Auth operations
@@ -234,7 +242,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
             session_id = fmemory_test_session_{i}
             self.redis_test_keys.add(fauth:session:{session_id})
             operation_tasks.append(
-                self._perform_auth_operation(session_id, {"user_id: fuser_{i}"}
+                self._perform_auth_operation(session_id, {"user_id: fuser_{i)")
             )
         
         # Database cache operations
@@ -251,7 +259,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         # Verify most operations succeeded
         success_count = sum(1 for r in results if r is True)
         self.assertGreaterEqual(success_count, 25,  # At least 25/30 should succeed
-                               f"Expected at least 25 successful operations, got {success_count})
+                               f"Expected at least 25 successful operations, got {success_count})"
         
         # Check final memory usage
         final_memory = process.memory_info().rss / 1024 / 1024  # MB
@@ -259,12 +267,12 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         # Memory should not have increased dramatically (no connection pool explosion)
         memory_increase = final_memory - initial_memory
         self.assertLess(memory_increase, 50,  # Should not increase by more than 50MB
-                       fMemory increase should be minimal, got {memory_increase}MB increase")
+                       fMemory increase should be minimal, got {memory_increase}MB increase")"
         
         # Get Redis manager status
         status = redis_manager.get_status()
         self.assertTrue(status[connected], Redis should remain connected after load)
-        self.assertLessEqual(status["consecutive_failures], 2, "
+        self.assertLessEqual(status["consecutive_failures), 2, "
                            Should have minimal failures under load)
         
     async def test_connection_stability_under_load(self):
@@ -314,7 +322,8 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         if exception_count > 0:
             self.logger.warning(fLoad test had {exception_count} exceptions out of {len(results)} operations")"
     
-    async def _perform_cache_operation(self, key: str, data: Dict[str, Any] -> bool:
+    async def _perform_cache_operation(self, key: str, data: Dict[str, Any) -> bool:
+        Helper to perform cache operation."
         Helper to perform cache operation."
         from netra_backend.app.redis_manager import redis_manager as default_redis_cache_manager
         try:
@@ -326,8 +335,8 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         except Exception:
             return False
     
-    async def _perform_auth_operation(self, session_id: str, session_data: Dict[str, Any] -> bool:
-        "Helper to perform auth operation.
+    async def _perform_auth_operation(self, session_id: str, session_data: Dict[str, Any) -> bool:
+        "Helper to perform auth operation."
         try:
             success = await redis_manager.store_session(session_id, session_data, 60)
             if success:
@@ -342,6 +351,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         try:
             # Simulate various Redis operations
             await redis_manager.set(key, fload_data_{operation_id}, ex=60)"
+            await redis_manager.set(key, fload_data_{operation_id}, ex=60)"
             await redis_manager.get(key)
             await redis_manager.exists(key)
             await redis_manager.expire(key, 30)
@@ -350,7 +360,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
             return False
     
     async def test_websocket_1011_error_prevention(self):
-        "MISSION CRITICAL: Verify WebSocket 1011 errors are prevented.
+        "MISSION CRITICAL: Verify WebSocket 1011 errors are prevented."
         
         BUSINESS IMPACT: Ensures primary revenue channel (chat) remains functional.
         SUCCESS CRITERIA: No WebSocket connection failures due to Redis conflicts.
@@ -387,13 +397,14 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         
         # 3. Verify Redis connection remains stable
         final_status = redis_manager.get_status()
-        self.assertTrue(final_status[connected], 
+        self.assertTrue(final_status[connected), 
                        "Redis connection should remain stable after WebSocket stress test)"
         
     async def _simulate_websocket_handshake(self, user_id: str) -> bool:
         Simulate WebSocket handshake with Redis operations."
+        Simulate WebSocket handshake with Redis operations."
         try:
-            connection_id = f"ws_{user_id}_{int(time.time() * 1000)}
+            connection_id = f"ws_{user_id}_{int(time.time() * 1000)}"
             
             # Simulate handshake Redis operations
             connection_key = fwebsocket:active:{connection_id}
@@ -429,6 +440,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
     
     async def _simulate_connection_cycle(self, user_id: str) -> bool:
         Simulate rapid connect/disconnect cycle."
+        Simulate rapid connect/disconnect cycle."
         try:
             # Connect
             success = await self._simulate_websocket_handshake(user_id)
@@ -440,8 +452,9 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
             
             # Disconnect (cleanup Redis keys)
             connection_keys = [
-                fwebsocket:active:ws_{user_id}*",
+                fwebsocket:active:ws_{user_id}*","
                 fwebsocket:session:{user_id},
+                fuser_connections:{user_id}"
                 fuser_connections:{user_id}"
             ]
             
@@ -463,9 +476,10 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
 # Additional validation tests for specific SSOT scenarios
 class RedisSSOTValidationTests(SSotAsyncTestCase):
     Additional validation tests for Redis SSOT scenarios."
+    Additional validation tests for Redis SSOT scenarios."
     
     async def test_ssot_redis_manager_singleton_pattern(self):
-        "Test that Redis manager follows proper singleton pattern.
+        "Test that Redis manager follows proper singleton pattern."
         from netra_backend.app.redis_manager import redis_manager as manager1
         from netra_backend.app.redis_manager import get_redis_manager
         
@@ -484,9 +498,10 @@ class RedisSSOTValidationTests(SSotAsyncTestCase):
         
         self.assertTrue(manager1.is_connected, Manager1 should be connected)
         self.assertTrue(manager3.is_connected, Manager3 should be connected)"
+        self.assertTrue(manager3.is_connected, Manager3 should be connected)"
         
     async def test_compatibility_layer_warning_emissions(self):
-        "Test that compatibility layers emit deprecation warnings.
+        "Test that compatibility layers emit deprecation warnings."
         import warnings
         
         # Capture warnings
@@ -505,7 +520,8 @@ class RedisSSOTValidationTests(SSotAsyncTestCase):
             # Check warning messages contain SSOT guidance
             warning_messages = [str(w.message) for w in deprecation_warnings]
             ssot_guidance = any(redis_manager directly in msg for msg in warning_messages)"
-            self.assertTrue(ssot_guidance, "Warnings should guide users to SSOT Redis manager)
+            ssot_guidance = any(redis_manager directly in msg for msg in warning_messages)"
+            self.assertTrue(ssot_guidance, "Warnings should guide users to SSOT Redis manager)"
     
     async def test_circuit_breaker_functionality(self):
         Test that circuit breaker prevents cascading failures.""
@@ -522,6 +538,9 @@ class RedisSSOTValidationTests(SSotAsyncTestCase):
         # Should allow operations again
         self.assertTrue(redis_manager._circuit_breaker.can_execute(),
                        Circuit breaker should allow operations after reset)"
+                       Circuit breaker should allow operations after reset)"
         
         # Reset failure count for other tests
         redis_manager._consecutive_failures = 0
+
+))

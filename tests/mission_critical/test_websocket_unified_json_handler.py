@@ -5,7 +5,10 @@ class TestWebSocketConnection:
         pass
         self.messages_sent = []
         self.is_connected = True"""
+        self.is_connected = True"""
 """
+"""
+        """Send JSON message.""""""
         """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
@@ -14,12 +17,18 @@ class TestWebSocketConnection:
         """Close WebSocket connection."""
         pass
         self._closed = True"""
+        self._closed = True"""
+"""
 """
         """Get all sent messages.""""""
+        """Get all sent messages.""""""
+        return self.messages_sent.copy()"""
         return self.messages_sent.copy()"""
         """
+        """
         MISSION CRITICAL: WebSocket Unified JSON Handler Test Suite"""
-        This test suite specifically validates the WebSocket manager"s JSON serialization
+        MISSION CRITICAL: WebSocket Unified JSON Handler Test Suite"""
+        This test suite specifically validates the WebSocket manager"s JSON serialization"
         methods that will be used by the unified JSON handler. It focuses on edge cases
         and performance requirements that are critical for chat functionality.
 
@@ -34,6 +43,7 @@ class TestWebSocketConnection:
         - Segment: Platform/Internal
         - Business Goal: System Stability (unified JSON handling)
         - Value Impact: Eliminates JSON serialization inconsistencies across WebSocket events
+        - Strategic Impact: Single point of JSON handling reduces maintenance and bugs"""
         - Strategic Impact: Single point of JSON handling reduces maintenance and bugs"""
 
 import asyncio
@@ -64,17 +74,27 @@ from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env"""
+from shared.isolated_environment import get_env"""
+"""
 """
         """Test unified JSON handling in WebSocket manager."""
         pass"""
+        pass"""
         @pytest.fixture"""
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Use real service instance.""""""
         """Create WebSocket manager for testing."""
         pass
         return WebSocketManager()"""
+        return WebSocketManager()"""
+        @pytest.fixture"""
         @pytest.fixture"""
         """Use real service instance.""""""
+        """Use real service instance.""""""
         """Create maximally complex DeepAgentState for stress testing.""""""
+        """Create maximally complex DeepAgentState for stress testing.""""""
+    # Create all possible result types"""
     # Create all possible result types"""
         optimization_type="comprehensive_optimization",
         recommendations=[ )
@@ -236,7 +256,7 @@ agent_input={"analysis_scope": "full_infrastructure",, "optimization_goals": ["c
         },
         { )
         "role": "assistant",
-        "content": "I"ll perform a comprehensive analysis of your cloud infrastructure...",
+        "content": "I"ll perform a comprehensive analysis of your cloud infrastructure...","
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "metadata": {"analysis_type": "comprehensive", "estimated_duration": "15_minutes"}
         },
@@ -260,6 +280,8 @@ context_tracking={"conversation_depth": 5,, "topic_coherence": 0.91,, "user_sati
 
     # Test None
         result = websocket_manager._serialize_message_safely(None)"""
+        result = websocket_manager._serialize_message_safely(None)"""
+"""
 """
         test_dict = {"type": "test", "data": "value"}
         result = websocket_manager._serialize_message_safely(test_dict)
@@ -275,6 +297,8 @@ context_tracking={"conversation_depth": 5,, "topic_coherence": 0.91,, "user_sati
 
     def test_serialize_message_safely_pydantic_models(self, websocket_manager):
         """Test Pydantic model serialization.""""""
+        """Test Pydantic model serialization.""""""
+    # Test WebSocketMessage"""
     # Test WebSocketMessage"""
         type="agent_update",
         payload={"agent_name": "test", "status": "active"},
@@ -304,6 +328,8 @@ context_tracking={"conversation_depth": 5,, "topic_coherence": 0.91,, "user_sati
 
     # Test JSON serialization
         json_str = json.dumps(result)"""
+        json_str = json.dumps(result)"""
+"""
 """
         assert deserialized["user_request"] == complex_deep_agent_state.user_request
         assert deserialized["run_id"] == complex_deep_agent_state.run_id
@@ -340,6 +366,8 @@ assert (end_time - start_time) < 2.0
         # Result should be JSON serializable
 json_str = json.dumps(result)
 assert len(json_str) > 1000  # Should be substantial content"""
+assert len(json_str) > 1000  # Should be substantial content"""
+        # Verify accuracy"""
         # Verify accuracy"""
 assert deserialized["optimizations_result"]["cost_savings"] == 5280.95
 
@@ -349,6 +377,8 @@ assert deserialized["optimizations_result"]["cost_savings"] == 5280.95
 
             # Create a mock that simulates slow serialization
 with patch.object(websocket_manager, '_serialize_message_safely') as mock_sync:"""
+with patch.object(websocket_manager, '_serialize_message_safely') as mock_sync:"""
+time.sleep(6)  # Longer than 5-second timeout"""
 time.sleep(6)  # Longer than 5-second timeout"""
 return {"type": "slow"}
 
@@ -362,9 +392,12 @@ assert "serialization_error" in result
 assert "timed out" in result["serialization_error"]
 
 def test_serialize_message_safely_error_recovery(self, websocket_manager):
+    pass
 """Test error recovery in serialization."""
 
     # Create a problematic object that fails model_dump"""
+    # Create a problematic object that fails model_dump"""
+    def model_dump(self, **kwargs):"""
     def model_dump(self, **kwargs):"""
         raise ValueError("Serialization failed")
 
@@ -391,6 +424,8 @@ def test_serialize_message_safely_error_recovery(self, websocket_manager):
 
     def test_serialize_message_safely_with_frontend_type_conversion(self, websocket_manager):
         """Test message type conversion for frontend compatibility.""""""
+        """Test message type conversion for frontend compatibility.""""""
+    # Test various backend message types"""
     # Test various backend message types"""
         "agent_status_update",
         "tool_execution_started",
@@ -409,8 +444,9 @@ def test_serialize_message_safely_error_recovery(self, websocket_manager):
     def test_serialize_message_safely_special_characters(self, websocket_manager):
         """Test serialization with special characters and unicode."""
 """
-special_message = {"type": "agent_message",, "payload": { ), "unicode_text": "Hello [U+4E16][U+754C]! [U+1F30D] [U+00D1]o[U+00F1]o caf[U+00E9] r[U+00E9]sum[U+00E9]",, "special_chars": ["@", "#", "$", "%", "^", "&", "*"],, "emojis": ["[U+1F600]", "[U+1F680]", " IDEA: ", " LIGHTNING: ", "[U+1F31F]"],, "quotes": ["'single'", '"double"', "`backtick`"],, "newlines_and_tabs": "Line 1}
-        Line 2\tTabbed",
+"""
+special_message = {"type": "agent_message",, "payload": { ), "unicode_text": "Hello [U+4E16][U+754C]! [U+1F30D] [U+00D1]o[U+00F1]o caf[U+00E9] r[U+00E9]sum[U+00E9]",, "special_chars": ["@", "#", "$", "%", "^", "&", "*"],, "emojis": ["[U+1F600]", "[U+1F680]", " IDEA: ", " LIGHTNING: ", "[U+1F31F]"],, "quotes": ["'single'", '"double"', "`backtick`"],, "newlines_and_tabs": "Line 1}"
+        Line 2\tTabbed","
         "null_and_empty": [None, "", "   "],
         "control_chars": "\u0000\u0001\u0002"
     
@@ -430,6 +466,8 @@ special_message = {"type": "agent_message",, "payload": { ), "unicode_text": "He
     def test_serialize_message_safely_deeply_nested_structures(self, websocket_manager):
         """Test serialization of deeply nested structures."""
 """
+"""
+    def create_nested_dict(depth):"""
     def create_nested_dict(depth):"""
         return {"value": f"leaf_value", "numbers": [1, 2, 3]}
         return { )
@@ -461,6 +499,8 @@ deeply_nested = {"type": "deeply_nested",, "payload": create_nested_dict(10)}
 """Test concurrent async serialization calls."""
 
                         # Create multiple complex messages for concurrent serialization"""
+                        # Create multiple complex messages for concurrent serialization"""
+for i in range(20):"""
 for i in range(20):"""
 state = complex_deep_agent_state.copy_with_updates(run_id="formatted_string",, step_count=i + 1)
 messages.append(state)
@@ -487,26 +527,31 @@ assert deserialized["run_id"] == "formatted_string"
 assert deserialized["step_count"] == i + 1
 
 def test_serialize_message_safely_circular_reference_protection(self, websocket_manager):
+    pass
 """Test protection against circular references."""
+"""
 """
 circular_dict = {"type": "circular", "payload": {}}
 circular_dict["payload"]["self_reference"] = circular_dict  # Circular reference
 
     # Should handle gracefully (either by breaking the cycle or falling back)
 try:
+    pass
 result = websocket_manager._serialize_message_safely(circular_dict)
-        # If it doesn't throw, it should produce a valid result
+        # If it doesn't throw, it should produce a valid result'
 json.dumps(result)  # This should not fail
 except (ValueError, TypeError, RecursionError):
             # If it does throw, it should be a controlled error, not infinite recursion
 pytest.fail("Circular reference caused uncontrolled error")
 
 def test_serialize_message_safely_very_large_messages(self, websocket_manager):
+    pass
 """Test handling of very large messages."""
+"""
 """
 large_array = ["x" * 1000 for _ in range(1000)]  # 1MB of data
 large_message = {"type": "large_message",, "payload": { ), "large_array": large_array,, "metadata": {"size": len(large_array), "item_size": 1000}}
-    # Should serialize (WebSocket manager doesn't enforce size limits during serialization)
+    # Should serialize (WebSocket manager doesn't enforce size limits during serialization)'
 result = websocket_manager._serialize_message_safely(large_message)
 
     # Should be JSON serializable
@@ -518,7 +563,9 @@ deserialized = json.loads(json_str)
 assert len(deserialized["payload"]["large_array"]) == 1000
 
 def test_serialize_message_safely_datetime_handling(self, websocket_manager):
+    pass
 """Test proper datetime serialization."""
+"""
 """
 message_with_datetimes = {"type": "datetime_test",, "payload": { ), "timestamp": now,, "created_at": now.isoformat(),, "dates_array": [now, datetime(2024, 1, 1, tzinfo=timezone.utc)],, "nested_datetime": { ), "event_time": now,, "processed_at": now.timestamp()}
 result = websocket_manager._serialize_message_safely(message_with_datetimes)
@@ -533,7 +580,10 @@ assert isinstance(deserialized["payload"]["created_at"], str)
 assert isinstance(deserialized["payload"]["nested_datetime"]["processed_at"], (int, float))
 
 def test_serialize_message_safely_websocket_error_objects(self, websocket_manager):
+    pass
 """Test serialization of WebSocket error objects.""""""
+"""Test serialization of WebSocket error objects.""""""
+    # Test WebSocketError model"""
     # Test WebSocketError model"""
 message="Connection lost unexpectedly",
 error_type="connection_error",
@@ -559,6 +609,8 @@ assert "connection_id" in deserialized["details"]
 @pytest.mark.asyncio
     async def test_websocket_manager_integration_with_serialization(self, websocket_manager):
 """Test integration between WebSocket manager methods and serialization.""""""
+"""Test integration between WebSocket manager methods and serialization.""""""
+        # Test send_to_thread method uses serialization properly"""
         # Test send_to_thread method uses serialization properly"""
 user_request="Test integration",
 run_id="integration-test",
@@ -583,3 +635,6 @@ serialized = websocket_manager._serialize_message_safely(complex_message)
 json_str = json.dumps(serialized)
 assert len(json_str) > 100  # Should have substantial content
 pass
+
+]
+}}}}}

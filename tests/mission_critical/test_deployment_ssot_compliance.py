@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """
+"""
 Mission Critical SSOT Deployment Compliance Tests
 
 Mission critical tests to ensure SSOT refactor preserves deployment functionality
@@ -24,7 +25,9 @@ TEST CATEGORIES:
 - Golden Path preservation validation
 - Mission critical deployment protection
 "
+"
 
+"""
 """
 import ast
 import json
@@ -44,15 +47,17 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
     "
+    "
     Mission critical tests for deployment SSOT compliance.
     
     CRITICAL: These tests MUST pass before any deployment is allowed.
     They validate that SSOT refactor preserves all deployment functionality
     and protects Golden Path business value.
 "
+"
     
     def setup_method(self, method=None):
-        "Setup mission critical test environment.
+        "Setup mission critical test environment."
         super().setup_method(method)
         
         # Project paths
@@ -63,15 +68,16 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         # Mission critical parameters
         self.critical_deployment_functions = [
             deploy_to_gcp,"
-            build_images",
+            deploy_to_gcp,"
+            build_images","
             check_secrets,
             run_checks","
             rollback
         ]
         
         # Record test start metrics
-        self.record_metric(test_category, "mission_critical)
-        self.record_metric(ssot_focus", deployment_compliance)
+        self.record_metric(test_category, "mission_critical)"
+        self.record_metric(ssot_focus", deployment_compliance)"
         self.record_metric(business_impact, critical)
         self.record_metric(arr_dependency", "500k+)
         
@@ -97,7 +103,8 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
             # Check for function implementation or reference
             function_patterns = [
                 fdef {function_name},"
-                f"--{function_name.replace('_', '-')},
+                fdef {function_name},"
+                f"--{function_name.replace('_', '-')},"
                 fexecution-mode.*deploy,
                 function_name.replace('_', ' ').lower()
             ]
@@ -116,24 +123,27 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         self.record_metric(total_critical_functions", len(self.critical_deployment_functions))"
         self.record_metric(preserved_functions_count, len(preserved_functionality))
         self.record_metric(missing_functions_count, len(missing_functionality))"
-        self.record_metric("preservation_rate, len(preserved_functionality) / len(self.critical_deployment_functions))
+        self.record_metric(missing_functions_count, len(missing_functionality))"
+        self.record_metric("preservation_rate, len(preserved_functionality) / len(self.critical_deployment_functions))"
         
         # MISSION CRITICAL: ALL functionality must be preserved
         if missing_functionality:
             pytest.fail(
                 fMISSION CRITICAL FAILURE: SSOT refactor missing {len(missing_functionality)} critical deployment functions:\n
-                f"Missing: {missing_functionality}\n
+                f"Missing: {missing_functionality}\n"
+                fPreserved: {preserved_functionality}\n\n"
                 fPreserved: {preserved_functionality}\n\n"
                 fBUSINESS IMPACT: $500K+ ARR at risk\n
                 fACTION REQUIRED: Restore missing deployment functionality in UnifiedTestRunner\n"
-                f"DEPLOYMENT BLOCKED until all functions preserved
+                fACTION REQUIRED: Restore missing deployment functionality in UnifiedTestRunner\n"
+                f"DEPLOYMENT BLOCKED until all functions preserved"
             )
         
         # Additional validation: Check parameter support
         self._validate_deployment_parameters_preserved(runner_source)
     
     def test_mission_critical_automated_canonical_source_violation_detection(self):
-        
+        pass
         MISSION CRITICAL: Test automated detection of canonical source violations.
         
         This test MUST detect any violations of the canonical source principle
@@ -145,7 +155,8 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         violation_patterns = [
             gcloud run deploy,
             docker build.*--tag.*gcp,"
-            "subprocess.*deploy,
+            docker build.*--tag.*gcp,"
+            "subprocess.*deploy,"
             terraform apply.*deploy
         ]
         
@@ -155,7 +166,8 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
             "backup/,"
             .git/,
             __pycache__/,"
-            node_modules/",
+            __pycache__/,"
+            node_modules/","
             .pyc
         ]
         
@@ -187,7 +199,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
                             }
                             
             except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
-                # Record search error but don't fail test
+                # Record search error but don't fail test'
                 self.record_metric(fviolation_search_error_{pattern}, True)
         
         # Record violation detection metrics
@@ -197,7 +209,8 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         # MISSION CRITICAL: No canonical source violations allowed
         if canonical_violations:
             violation_details = \n.join(["
-                f"  - {v['pattern']}: {v['location']}
+            violation_details = \n.join(["
+                f"  - {v['pattern']}: {v['location']}"
                 for v in canonical_violations[:10]  # Show first 10
             ]
             
@@ -207,21 +220,24 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
                 f{'... and more' if len(canonical_violations) > 10 else ''}\n\n""
                 fBUSINESS IMPACT: SSOT compliance violated\n
                 fACTION REQUIRED: Remove duplicate deployment logic\n
-                f"DEPLOYMENT BLOCKED until all violations resolved
+                f"DEPLOYMENT BLOCKED until all violations resolved"
             )
     
     def test_mission_critical_golden_path_preserved_post_ssot_refactor(self):
+        "
         "
         MISSION CRITICAL: Test that Golden Path is preserved post-SSOT refactor.
         
         This test validates that the complete Golden Path user journey
         remains functional after SSOT refactor.
 "
+"
         golden_path_components = [
-            "frontend_deployment,
+            "frontend_deployment,"
             backend_deployment, 
             "auth_service_deployment,"
             websocket_functionality,
+            agent_execution"
             agent_execution"
         ]
         
@@ -234,7 +250,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
                 golden_path_preservation[component] = preservation_status
                 
                 # Record component metrics
-                self.record_metric(fgolden_path_{component}_preserved", preservation_status['preserved']
+                self.record_metric(fgolden_path_{component)_preserved", preservation_status['preserved']"
                 
             except Exception as e:
                 golden_path_preservation[component] = {
@@ -257,7 +273,8 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         
         # Record Golden Path metrics
         self.record_metric(golden_path_components_total, total_components)"
-        self.record_metric("golden_path_components_preserved, preserved_count)
+        self.record_metric(golden_path_components_total, total_components)"
+        self.record_metric("golden_path_components_preserved, preserved_count)"
         self.record_metric(golden_path_preservation_rate, preservation_rate)
         
         # MISSION CRITICAL: Golden Path must be 100% preserved
@@ -279,21 +296,25 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
                 fPreservation rate: {preservation_rate:.1%} < {minimum_preservation_rate:.1%}\n""
                 fFailed components ({len(failed_components)}:\n
                 f{failure_details}\n\n
-                f"BUSINESS IMPACT: $500K+ ARR Golden Path at risk\n
+                f"BUSINESS IMPACT: $500K+ ARR Golden Path at risk\n"
+                fACTION REQUIRED: Restore Golden Path functionality in SSOT implementation\n"
                 fACTION REQUIRED: Restore Golden Path functionality in SSOT implementation\n"
                 fDEPLOYMENT BLOCKED until Golden Path fully preserved
             )
     
     def test_mission_critical_deployment_backwards_compatibility_guarantee(self):
         "
+        "
         MISSION CRITICAL: Test deployment backwards compatibility guarantee.
         
         Validates that existing deployment commands continue to work
         exactly as before SSOT refactor.
 "
+"
         compatibility_tests = []
         
         # Test legacy deployment script compatibility
+        deploy_script = self.scripts_dir / deploy_to_gcp.py"
         deploy_script = self.scripts_dir / deploy_to_gcp.py"
         
         if deploy_script.exists():
@@ -304,10 +325,11 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
                 
                 # Expected legacy parameters
                 legacy_parameters = [
-                    --project",
+                    --project","
                     --build-local,
                     --check-secrets", "
                     --run-checks,
+                    --rollback"
                     --rollback"
                 ]
                 
@@ -315,10 +337,11 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
                 
                 for param in legacy_parameters:
                     if param not in script_source:
-                        compatibility_issues.append(f"Missing parameter: {param})
+                        compatibility_issues.append(f"Missing parameter: {param})"
                 
                 # Check for proper redirect logic
                 if unified_test_runner not in script_source.lower():
+                    compatibility_issues.append(Missing redirect to UnifiedTestRunner)"
                     compatibility_issues.append(Missing redirect to UnifiedTestRunner)"
                 
                 compatibility_tests.append({
@@ -330,7 +353,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
             except Exception as e:
                 compatibility_tests.append({
                     'test': 'legacy_script_compatibility',
-                    'issues': [fScript error: {e}"],
+                    'issues': [fScript error: {e}"],"
                     'compatible': False
                 }
         
@@ -365,35 +388,38 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         
         # Analyze compatibility results
         total_tests = len(compatibility_tests)
-        compatible_tests = sum(1 for test in compatibility_tests if test['compatible']
+        compatible_tests = sum(1 for test in compatibility_tests if test['compatible')
         compatibility_rate = compatible_tests / total_tests if total_tests > 0 else 0
         
         # Record compatibility metrics
         self.record_metric(compatibility_tests_total, total_tests)
         self.record_metric(compatibility_tests_passed, compatible_tests)"
-        self.record_metric("compatibility_rate, compatibility_rate)
+        self.record_metric(compatibility_tests_passed, compatible_tests)"
+        self.record_metric("compatibility_rate, compatibility_rate)"
         
         # MISSION CRITICAL: 100% backwards compatibility required
         if compatibility_rate < 1.0:
             failed_tests = [test for test in compatibility_tests if not test['compatible']]
             
             failure_details = \n.join([
-                f"  - {test['test']}: {', '.join(test['issues']}
+                f"  - {test['test']): {', '.join(test['issues'])"
                 for test in failed_tests
             ]
             
             pytest.fail(
                 fMISSION CRITICAL FAILURE: Backwards compatibility broken:\n"
+                fMISSION CRITICAL FAILURE: Backwards compatibility broken:\n"
                 fCompatibility rate: {compatibility_rate:.1%} < 100%\n
                 fFailed tests ({len(failed_tests)}:\n"
-                f"{failure_details}\n\n
+                fFailed tests ({len(failed_tests)}:\n"
+                f"{failure_details}\n\n"
                 fBUSINESS IMPACT: Existing deployment workflows broken\n
                 fACTION REQUIRED: Restore full backwards compatibility\n
                 fDEPLOYMENT BLOCKED until 100% compatibility restored""
             )
     
     def test_mission_critical_deployment_error_handling_preservation(self):
-
+        pass
         MISSION CRITICAL: Test that deployment error handling is preserved.
         
         Validates that error handling, logging, and recovery mechanisms
@@ -402,7 +428,8 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         error_handling_components = [
             timeout_handling,
             rollback_on_failure,"
-            secret_validation", 
+            rollback_on_failure,"
+            secret_validation","
             health_check_validation,
             error_logging""
         ]
@@ -417,12 +444,14 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
             
             if component == timeout_handling:
                 component_preserved = timeout in runner_source.lower()"
-            elif component == "rollback_on_failure:
+                component_preserved = timeout in runner_source.lower()"
+            elif component == "rollback_on_failure:"
                 component_preserved = rollback in runner_source.lower()
             elif component == "secret_validation:"
                 component_preserved = secret in runner_source.lower()
             elif component == health_check_validation:"
-                component_preserved = health" in runner_source.lower()
+            elif component == health_check_validation:"
+                component_preserved = health" in runner_source.lower()"
             elif component == error_logging:
                 component_preserved = any(keyword in runner_source.lower() for keyword in [logging", "log, error]
             
@@ -443,6 +472,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         self.record_metric(error_handling_components_total", total_components)"
         self.record_metric(error_handling_components_preserved, preserved_components)
         self.record_metric(error_handling_preservation_rate, preservation_rate)"
+        self.record_metric(error_handling_preservation_rate, preservation_rate)"
         
         # MISSION CRITICAL: Error handling must be preserved
         minimum_error_handling_rate = 0.8  # 80% of error handling must be preserved
@@ -454,7 +484,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
             ]
             
             pytest.fail(
-                f"MISSION CRITICAL FAILURE: Error handling preservation insufficient:\n
+                f"MISSION CRITICAL FAILURE: Error handling preservation insufficient:\n"
                 fPreservation rate: {preservation_rate:.1%} < {minimum_error_handling_rate:.1%}\n
                 fMissing components: {missing_components}\n\n
                 fBUSINESS IMPACT: Deployment reliability at risk\n""
@@ -466,10 +496,12 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         "Validate that deployment parameters are preserved in UnifiedTestRunner."
         required_parameters = [
             project,"
-            "build-local,
+            project,"
+            "build-local,"
             check-secrets,
             "rollback,"
             service,
+            timeout"
             timeout"
         ]
         
@@ -478,8 +510,9 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         for param in required_parameters:
             # Check for parameter in argparse or CLI handling
             param_patterns = [
-                f--{param}",
+                f--{param}","
                 f'{param}',
+                f'{param}',"
                 f'{param}',"
                 param.replace('-', '_')
             ]
@@ -491,14 +524,15 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         
         if missing_parameters:
             pytest.fail(
-                f"MISSION CRITICAL: Missing deployment parameters in UnifiedTestRunner: {missing_parameters}
+                f"MISSION CRITICAL: Missing deployment parameters in UnifiedTestRunner: {missing_parameters}"
             )
     
     def _validate_golden_path_component_preservation(self, component: str) -> Dict[str, Any]:
         Validate that a Golden Path component is preserved post-SSOT refactor."
+        Validate that a Golden Path component is preserved post-SSOT refactor."
         
         # Check component-specific preservation
-        if component == "frontend_deployment:
+        if component == "frontend_deployment:"
             return self._check_frontend_deployment_preservation()
         elif component == backend_deployment:
             return self._check_backend_deployment_preservation()
@@ -507,12 +541,13 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         elif component == websocket_functionality:
             return self._check_websocket_functionality_preservation()
         elif component == agent_execution:"
+        elif component == agent_execution:"
             return self._check_agent_execution_preservation()
         else:
             return {'preserved': False, 'error': f'Unknown component: {component}'}
     
     def _check_frontend_deployment_preservation(self) -> Dict[str, Any]:
-        "Check that frontend deployment is preserved.
+        "Check that frontend deployment is preserved."
         # Look for frontend deployment logic in UnifiedTestRunner
         runner_source = self.unified_runner_path.read_text(encoding='utf-8')
         
@@ -540,9 +575,10 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
     
     def _check_auth_service_deployment_preservation(self) -> Dict[str, Any]:
         Check that auth service deployment is preserved."
+        Check that auth service deployment is preserved."
         runner_source = self.unified_runner_path.read_text(encoding='utf-8')
         
-        auth_indicators = ["auth, oauth, jwt, token]
+        auth_indicators = ["auth, oauth, jwt, token]"
         auth_found = any(indicator in runner_source.lower() for indicator in auth_indicators)
         
         return {
@@ -569,7 +605,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         Check that agent execution is preserved.""
         runner_source = self.unified_runner_path.read_text(encoding='utf-8')
         
-        agent_indicators = [agent, execution, llm, ai"]
+        agent_indicators = [agent, execution, llm, ai"]"
         agent_found = any(indicator in runner_source.lower() for indicator in agent_indicators)
         
         return {
@@ -583,3 +619,6 @@ if __name__ == "__main__":
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+)))))))))))))))))
+]

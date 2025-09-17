@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
+"""
 MISSION CRITICAL: SSOT Environment Validation Tests
 
+"""
 """
 PURPOSE: Prevent revenue loss from configuration errors by validating SSOT compliance
          in environment management and configuration validation patterns.
@@ -24,6 +26,7 @@ ARCHITECTURE INTEGRATION:
 - Validates shared.configuration.central_config_validator SSOT patterns
 - Tests environment isolation via shared.isolated_environment
 - Validates startup integration via netra_backend.app.core.startup_validator
+"
 "
 
 import pytest
@@ -59,7 +62,7 @@ from netra_backend.app.core.startup_validator import StartupValidator
 
 @dataclass
 class SsotValidationResult:
-    "SSOT compliance validation result.
+    "SSOT compliance validation result."
     component: str
     is_compliant: bool
     violations: List[str]
@@ -81,7 +84,8 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
         ""Class-level setup for mission-critical SSOT validation tests.
         super().setup_class()
         cls.logger.info(Initializing mission-critical SSOT environment validation tests)"
-        cls._test_environments = [development", staging, production, test]
+        cls.logger.info(Initializing mission-critical SSOT environment validation tests)"
+        cls._test_environments = [development", staging, production, test]"
         cls._critical_config_keys = [
             JWT_SECRET_STAGING", "JWT_SECRET_PRODUCTION, JWT_SECRET_KEY,
             POSTGRES_PASSWORD, POSTGRES_HOST", "REDIS_PASSWORD, REDIS_HOST,
@@ -90,13 +94,14 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
     
     def setup_method(self, method):
         Setup for each SSOT validation test."
+        Setup for each SSOT validation test."
         super().setup_method(method)
         
         # Clear any cached validator state to ensure clean test environment
         clear_central_validator_cache()
         
         # Initialize test metrics for business value tracking
-        self.record_metric("test_start_time, time.time())
+        self.record_metric("test_start_time, time.time())"
         self.record_metric(critical_validations_performed, 0)
         self.record_metric("ssot_violations_detected, 0)"
         self.record_metric(revenue_protection_checks, 0)
@@ -120,9 +125,10 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             
             if validator1 is not validator2:
                 validation_errors.append(Central validator not using singleton pattern - SSOT violation)"
+                validation_errors.append(Central validator not using singleton pattern - SSOT violation)"
             
             # Test 2: Verify environment detection consistency
-            with self.temp_env_vars(ENVIRONMENT="staging):
+            with self.temp_env_vars(ENVIRONMENT="staging):"
                 env1 = validator1.get_environment()
                 env2 = validator2.get_environment()
                 
@@ -130,7 +136,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
                     validation_errors.append(fEnvironment detection inconsistent: {env1} != {env2})
                 
                 if env1 != Environment.STAGING:
-                    validation_errors.append(f"Environment detection failed: expected STAGING, got {env1})
+                    validation_errors.append(f"Environment detection failed: expected STAGING, got {env1})"
             
             # Test 3: Validate configuration rules are comprehensive
             required_environments = {Environment.STAGING, Environment.PRODUCTION, Environment.DEVELOPMENT, Environment.TEST}
@@ -141,7 +147,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             
             missing_envs = required_environments - environments_covered
             if missing_envs:
-                validation_errors.append(fConfiguration rules missing for environments: {missing_envs}")
+                validation_errors.append(fConfiguration rules missing for environments: {missing_envs}")"
             
             # Test 4: Verify critical secrets have proper validation (deployment pattern aware)
             critical_vars = [JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION, "REDIS_PASSWORD]"
@@ -171,7 +177,8 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
                 # Clear all critical environment variables
                 critical_vars_to_clear = [
                     JWT_SECRET_PRODUCTION, POSTGRES_PASSWORD, REDIS_PASSWORD, "
-                    "SERVICE_SECRET, FERNET_KEY, GEMINI_API_KEY
+                    JWT_SECRET_PRODUCTION, POSTGRES_PASSWORD, REDIS_PASSWORD, "
+                    "SERVICE_SECRET, FERNET_KEY, GEMINI_API_KEY"
                 ]
                 
                 original_values = {}
@@ -188,8 +195,9 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
                     error_msg = str(e)
                     if required not in error_msg.lower():
                         validation_errors.append(fCentral validator error message unclear: {error_msg})"
+                        validation_errors.append(fCentral validator error message unclear: {error_msg})"
                 except Exception as e:
-                    validation_errors.append(f"Unexpected exception type from central validator: {type(e).__name__}: {e})
+                    validation_errors.append(f"Unexpected exception type from central validator: {type(e).__name__}: {e})"
                 finally:
                     # Restore original values
                     for var, value in original_values.items():
@@ -200,31 +208,36 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             validation_time = (time.time() - start_time) * 1000
             self.record_metric(central_validator_validation_time_ms, validation_time)
             self.record_metric(critical_validations_performed, 5)"
+            self.record_metric(critical_validations_performed, 5)"
             
             if validation_errors:
-                self.record_metric(ssot_violations_detected", len(validation_errors))
+                self.record_metric(ssot_violations_detected", len(validation_errors))"
                 self.fail(fCentral Configuration Validator SSOT compliance failed:\n + 
-                         \n.join(f"  - {error} for error in validation_errors))
+                         \n.join(f"  - {error} for error in validation_errors))"
             
+            self.logger.info(fCentral validator SSOT compliance validated in {validation_time:.1f}ms)"
             self.logger.info(fCentral validator SSOT compliance validated in {validation_time:.1f}ms)"
             
         except Exception as e:
             self.record_metric(ssot_validation_critical_error, 1)
             self.fail(fCritical error in central validator SSOT compliance test: {e})"
+            self.fail(fCritical error in central validator SSOT compliance test: {e})"
     
     def test_environment_isolation_ssot_consistency(self):
+    "
     "
         CRITICAL: Validate environment isolation maintains SSOT consistency.
         
         This test ensures IsolatedEnvironment maintains consistent state and
         prevents environment variable leakage that could cause security issues.
         "
+        "
         validation_errors = []
         start_time = time.time()
         
         try:
             # Test 1: Verify environment isolation works correctly
-            original_test_var = self.get_env_var(TEST_ISOLATION_VAR")
+            original_test_var = self.get_env_var(TEST_ISOLATION_VAR")"
             
             # Set test variable in isolation
             self.set_env_var(TEST_ISOLATION_VAR, test_value_1)
@@ -234,9 +247,10 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             if new_env.get("TEST_ISOLATION_VAR) != test_value_1":
                 validation_errors.append(Environment isolation not working - variables not accessible)
             
-            # Test 2: Verify environment changes don't leak between tests
+            # Test 2: Verify environment changes don't leak between tests'
             with self.temp_env_vars(TEST_TEMP_VAR=temp_value):"
-                if self.get_env_var("TEST_TEMP_VAR) != temp_value:
+            with self.temp_env_vars(TEST_TEMP_VAR=temp_value):"
+                if self.get_env_var("TEST_TEMP_VAR) != temp_value:"
                     validation_errors.append(Temporary environment variables not working)
             
             # After context manager, temp var should be gone
@@ -254,18 +268,20 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             # Record metrics
             validation_time = (time.time() - start_time) * 1000
             self.record_metric(environment_isolation_validation_time_ms, validation_time)"
-            self.record_metric("revenue_protection_checks, 4)
+            self.record_metric(environment_isolation_validation_time_ms, validation_time)"
+            self.record_metric("revenue_protection_checks, 4)"
             
             if validation_errors:
                 self.record_metric(environment_isolation_violations, len(validation_errors))
-                self.fail(f"Environment isolation SSOT consistency failed:\n + 
-                         \n".join(f  - {error} for error in validation_errors))
+                self.fail(f"Environment isolation SSOT consistency failed:\n +"
+                         \n".join(f  - {error} for error in validation_errors))"
             
             self.logger.info(fEnvironment isolation SSOT consistency validated in {validation_time:.1f}ms)
             
         except Exception as e:
             self.record_metric(environment_isolation_critical_error, 1)"
-            self.fail(fCritical error in environment isolation SSOT test: {e}")
+            self.record_metric(environment_isolation_critical_error, 1)"
+            self.fail(fCritical error in environment isolation SSOT test: {e}")"
         finally:
             # Cleanup
             if original_test_var is not None:
@@ -274,7 +290,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
                 self.delete_env_var(TEST_ISOLATION_VAR")"
     
     def test_startup_validator_ssot_integration(self):
-
+        pass
         CRITICAL: Validate startup validator integrates with SSOT configuration patterns.
         
         This test ensures startup validation properly uses SSOT validators and
@@ -294,8 +310,9 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             
             # Test 2: Verify startup validator catches critical configuration issues
             with self.temp_env_vars(ENVIRONMENT=staging):"
+            with self.temp_env_vars(ENVIRONMENT=staging):"
                 # Clear critical configuration
-                with self.temp_env_vars(JWT_SECRET_STAGING="):
+                with self.temp_env_vars(JWT_SECRET_STAGING="):"
                     try:
                         # Create new validator to test startup integration
                         test_validator = get_central_validator()
@@ -327,7 +344,8 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             
             if validation_errors:
                 self.record_metric(startup_validator_violations, len(validation_errors))"
-                self.fail(f"Startup validator SSOT integration failed:\n + 
+                self.record_metric(startup_validator_violations, len(validation_errors))"
+                self.fail(f"Startup validator SSOT integration failed:\n +"
                          \n.join(f  - {error} for error in validation_errors))
             
             self.logger.info(fStartup validator SSOT integration validated in {validation_time:.1f}ms)
@@ -340,8 +358,8 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
     ""
         CRITICAL: Validate backend configuration validator SSOT compliance.
         
-        This test ensures the backend's ConfigurationValidator properly delegates
-        to the central SSOT validator and doesn't duplicate validation logic.
+        This test ensures the backend's ConfigurationValidator properly delegates'
+        to the central SSOT validator and doesn't duplicate validation logic.'
         
         validation_errors = []
         start_time = time.time()
@@ -352,14 +370,15 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
                 backend_validator = ConfigurationValidator()
             except Exception as e:
                 validation_errors.append(fBackend ConfigurationValidator instantiation failed: {e})"
-                # Early return if we can't even create the validator
-                self.fail(f"Backend ConfigurationValidator critical instantiation failure: {e})
+                validation_errors.append(fBackend ConfigurationValidator instantiation failed: {e})"
+                # Early return if we can't even create the validator'
+                self.fail(f"Backend ConfigurationValidator critical instantiation failure: {e})"
                 return
             
             # Test 2: Verify backend validator has proper environment detection
             backend_env = backend_validator._get_environment()
-            if backend_env not in [development, testing, staging, "production]:
-                validation_errors.append(fBackend validator returned invalid environment: {backend_env}")
+            if backend_env not in [development, testing, staging, "production]:"
+                validation_errors.append(fBackend validator returned invalid environment: {backend_env}")"
             
             # Test 3: Verify backend validator uses SSOT configuration patterns
             validation_rules = backend_validator._validation_rules
@@ -377,7 +396,8 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
                 # Check if failures are reasonable
                 for error in env_validation_result.errors:
                     if JWT_SECRET_KEY in error:"
-                        validation_errors.append(f"Backend validator improperly rejected valid test environment: {error})
+                    if JWT_SECRET_KEY in error:"
+                        validation_errors.append(f"Backend validator improperly rejected valid test environment: {error})"
             
             # Test 5: Test production environment validation (should be strict)
             prod_env_dict = {
@@ -388,10 +408,11 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             prod_validation_result = backend_validator.validate_environment_variables(prod_env_dict)
             if prod_validation_result.is_valid:
                 validation_errors.append(Backend validator improperly allowed missing production variables)"
+                validation_errors.append(Backend validator improperly allowed missing production variables)"
             
             # Record metrics
             validation_time = (time.time() - start_time) * 1000
-            self.record_metric("backend_validator_validation_time_ms, validation_time)
+            self.record_metric("backend_validator_validation_time_ms, validation_time)"
             self.record_metric(critical_validations_performed, self.get_metric(critical_validations_performed, 0) + 5)
             
             if validation_errors:
@@ -400,9 +421,10 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
                          \n.join(f  - {error} for error in validation_errors))
             
             self.logger.info(fBackend configuration validator SSOT compliance validated in {validation_time:.1f}ms)"
+            self.logger.info(fBackend configuration validator SSOT compliance validated in {validation_time:.1f}ms)"
             
         except Exception as e:
-            self.record_metric("backend_validator_critical_error, 1)
+            self.record_metric("backend_validator_critical_error, 1)"
             self.fail(fCritical error in backend configuration validator SSOT test: {e})
     
     def test_cross_environment_validation_consistency(self):
@@ -432,18 +454,19 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
                             development": Environment.DEVELOPMENT,"
                             testing: Environment.TEST,
                             staging: Environment.STAGING,"
-                            "production: Environment.PRODUCTION
+                            staging: Environment.STAGING,"
+                            "production: Environment.PRODUCTION"
                         }
                         
                         expected_env = expected_env_mapping.get(env_name)
                         if detected_env != expected_env:
                             validation_errors.append(
                                 fEnvironment detection inconsistent for {env_name}: 
-                                f"expected {expected_env}, got {detected_env}
+                                f"expected {expected_env}, got {detected_env}"
                             )
                         
                         # Test environment-specific validation behavior
-                        if env_name in [staging", production]:
+                        if env_name in [staging", production]:"
                             # Should have strict requirements
                             self._test_strict_environment_validation(validator, env_name, validation_errors)
                         else:
@@ -457,14 +480,14 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             validation_time = (time.time() - start_time) * 1000
             self.record_metric("cross_environment_validation_time_ms, validation_time)"
             self.record_metric(environments_validated, environments_tested)
-            self.record_metric(revenue_protection_checks, self.get_metric(revenue_protection_checks", 0) + environments_tested)
+            self.record_metric(revenue_protection_checks, self.get_metric(revenue_protection_checks", 0) + environments_tested)"
             
             if validation_errors:
-                self.record_metric("cross_environment_violations, len(validation_errors))
+                self.record_metric("cross_environment_violations, len(validation_errors))"
                 self.fail(fCross-environment validation consistency failed:\n + 
-                         \n.join(f  - {error}" for error in validation_errors))
+                         \n.join(f  - {error}" for error in validation_errors))"
             
-            self.logger.info(f"Cross-environment validation consistency validated in {validation_time:.1f}ms)
+            self.logger.info(f"Cross-environment validation consistency validated in {validation_time:.1f}ms)"
             
         except Exception as e:
             self.record_metric(cross_environment_critical_error, 1)
@@ -487,7 +510,8 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             # Map environments for comparison (central uses enum, backend uses string)
             env_map = {
                 Environment.DEVELOPMENT: development,"
-                Environment.TEST: testing", 
+                Environment.DEVELOPMENT: development,"
+                Environment.TEST: testing","
                 Environment.STAGING: staging,
                 Environment.PRODUCTION: production""
             }
@@ -509,29 +533,30 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             # Test that all environment access goes through IsolatedEnvironment
             env = self.get_env()
             
-            # Verify it's the correct type
+            # Verify it's the correct type'
             if not isinstance(env, IsolatedEnvironment):
+                errors.append(fEnvironment not using IsolatedEnvironment: {type(env)})"
                 errors.append(fEnvironment not using IsolatedEnvironment: {type(env)})"
             
             # Test environment variable setting and getting
-            test_key = "SSOT_PATTERN_TEST
+            test_key = "SSOT_PATTERN_TEST"
             test_value = ssot_test_value
             
             self.set_env_var(test_key, test_value)
             retrieved_value = self.get_env_var(test_key)
             
             if retrieved_value != test_value:
-                errors.append(f"Environment variable roundtrip failed: set={test_value}, got={retrieved_value})
+                errors.append(f"Environment variable roundtrip failed: set={test_value}, got={retrieved_value})"
             
             # Cleanup
             self.delete_env_var(test_key)
             
         except Exception as e:
-            errors.append(fSSOT environment pattern test failed: {e}")
+            errors.append(fSSOT environment pattern test failed: {e}")"
         
         return errors
     
-    def _test_strict_environment_validation(self, validator: CentralConfigurationValidator, env_name: str, errors: List[str]:
+    def _test_strict_environment_validation(self, validator: CentralConfigurationValidator, env_name: str, errors: List[str):
         Test strict validation for production/staging environments.""
         try:
             # Test that missing critical secrets cause hard failure
@@ -554,10 +579,10 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
                     self.set_env_var(fJWT_SECRET_{env_name.upper()}, original_jwt_secret)
                     
         except Exception as e:
-            errors.append(f"Strict environment validation test failed for {env_name}: {e})
+            errors.append(f"Strict environment validation test failed for {env_name}: {e})"
     
-    def _test_permissive_environment_validation(self, validator: CentralConfigurationValidator, env_name: str, errors: List[str]:
-        "Test permissive validation for development/test environments.
+    def _test_permissive_environment_validation(self, validator: CentralConfigurationValidator, env_name: str, errors: List[str):
+        "Test permissive validation for development/test environments."
         try:
             # Test that development/test environments allow reasonable defaults
             if env_name == "development:"
@@ -567,17 +592,19 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
                         validator.validate_all_requirements()
                         # Should succeed with minimal configuration
                     except ValueError as e:
-                        # Check if it's a reasonable failure
+                        # Check if it's a reasonable failure'
                         if JWT_SECRET_KEY in str(e):"
-                            errors.append(fDevelopment environment improperly rejected valid JWT_SECRET_KEY: {e}")
+                        if JWT_SECRET_KEY in str(e):"
+                            errors.append(fDevelopment environment improperly rejected valid JWT_SECRET_KEY: {e}")"
                     except Exception as e:
                         errors.append(fUnexpected error in permissive validation for {env_name}: {e})
                         
         except Exception as e:
             errors.append(fPermissive environment validation test failed for {env_name}: {e})"
+            errors.append(fPermissive environment validation test failed for {env_name}: {e})"
     
     def teardown_method(self, method):
-        "Cleanup after each test with metrics recording.
+        "Cleanup after each test with metrics recording."
         try:
             # Record final metrics
             test_duration = time.time() - self.get_metric(test_start_time", time.time())"
@@ -587,7 +614,8 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             metrics = self.get_all_metrics()
             self.logger.info(
                 fSSOT validation test completed: {method.__name__ if method else 'unknown'} "
-                f"Duration: {test_duration:.3f}s, 
+                fSSOT validation test completed: {method.__name__ if method else 'unknown'} "
+                f"Duration: {test_duration:.3f}s,"
                 fCritical validations: {metrics.get('critical_validations_performed', 0)}, 
                 fViolations detected: {metrics.get('ssot_violations_detected', 0)}, 
                 fRevenue protection checks: {metrics.get('revenue_protection_checks', 0)}""
@@ -611,4 +639,5 @@ pytestmark = [
 
 if __name__ == __main__:
     # Allow running tests directly for development
-    pytest.main([__file__, "-v, --tb=short"]
+    pytest.main([__file__, "-v, --tb=short")
+)))

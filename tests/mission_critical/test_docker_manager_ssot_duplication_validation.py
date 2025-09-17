@@ -1,4 +1,5 @@
 """
+"""
 MISSION CRITICAL: Docker Manager SSOT Duplication Validation Tests
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
@@ -18,7 +19,9 @@ SSOT VIOLATION DISCOVERED:
 
 This violates the SSOT principle of having exactly ONE authoritative implementation.
 "
+"
 
+"""
 """
 import os
 import ast
@@ -32,14 +35,16 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 class DockerManagerSSOTDuplicationValidationTests(SSotBaseTestCase, unittest.TestCase):
     "
+    "
     CRITICAL: Tests that validate Docker Manager SSOT compliance.
 
     These tests MUST FAIL initially to prove SSOT violations exist.
     After remediation, they should pass to prevent regression.
 "
+"
 
     def setUp(self):
-        "Set up test environment for SSOT validation.
+        "Set up test environment for SSOT validation."
         super().setUp()
         self.project_root = Path(__file__).parent.parent.parent
 
@@ -80,7 +85,7 @@ class DockerManagerSSOTDuplicationValidationTests(SSotBaseTestCase, unittest.Tes
                     continue
 
             except (UnicodeDecodeError, PermissionError):
-                # Skip binary files or files we can't read
+                # Skip binary files or files we can't read'
                 continue
 
         # SSOT VALIDATION: Should have exactly ONE UnifiedDockerManager implementation
@@ -90,18 +95,19 @@ class DockerManagerSSOTDuplicationValidationTests(SSotBaseTestCase, unittest.Tes
             fSSOT requires exactly 1. Implementations found: {docker_manager_classes}""
         )
 
-        # Validate it's in the canonical location
+        # Validate it's in the canonical location'
         canonical_location = test_framework/unified_docker_manager.py
         actual_location = docker_manager_classes[0]['file'].replace('\\', '/')
 
         self.assertEqual(
             actual_location, canonical_location,
             fSSOT VIOLATION: UnifiedDockerManager found at {actual_location}, "
-            f"but canonical SSOT location should be {canonical_location}
+            fSSOT VIOLATION: UnifiedDockerManager found at {actual_location}, "
+            f"but canonical SSOT location should be {canonical_location}"
         )
 
     def test_docker_manager_import_paths_are_consistent(self):
-        
+        pass
         CRITICAL SSOT TEST: Validates that all imports use the same canonical path.
 
         EXPECTED BEHAVIOR (AFTER REMEDIATION):
@@ -115,9 +121,10 @@ class DockerManagerSSOTDuplicationValidationTests(SSotBaseTestCase, unittest.Tes
         import_patterns = []
         canonical_import = from test_framework.unified_docker_manager import
         violation_import = from test_framework.docker.unified_docker_manager import"
+        violation_import = from test_framework.docker.unified_docker_manager import"
 
         # Search for import statements
-        python_files = list(self.project_root.rglob("*.py))
+        python_files = list(self.project_root.rglob("*.py))"
 
         for file_path in python_files:
             try:
@@ -144,7 +151,8 @@ class DockerManagerSSOTDuplicationValidationTests(SSotBaseTestCase, unittest.Tes
         # SSOT VALIDATION: Should have NO violation imports
         self.assertEqual(
             len(violation_imports), 0,
-            f"SSOT VIOLATION: Found {len(violation_imports)} imports using non-canonical path. 
+            f"SSOT VIOLATION: Found {len(violation_imports)} imports using non-canonical path."
+            fAll imports must use canonical path. Violations: {violation_imports}"
             fAll imports must use canonical path. Violations: {violation_imports}"
         )
 
@@ -155,9 +163,11 @@ class DockerManagerSSOTDuplicationValidationTests(SSotBaseTestCase, unittest.Tes
             len(non_canonical_imports), 0,
             fIMPORT PATH INCONSISTENCY: Found {len(non_canonical_imports)} imports using unknown paths. 
             fAll imports must use canonical SSOT path. Unknown imports: {non_canonical_imports}"
+            fAll imports must use canonical SSOT path. Unknown imports: {non_canonical_imports}"
         )
 
     def test_docker_manager_functionality_consistency(self):
+    "
     "
         CRITICAL SSOT TEST: Validates that Docker Manager behavior is consistent.
 
@@ -169,9 +179,10 @@ class DockerManagerSSOTDuplicationValidationTests(SSotBaseTestCase, unittest.Tes
         - WILL FIND inconsistent implementations, causing this test to FAIL
         - This failure proves functional duplication exists
         "
+        "
         # Find all files containing UnifiedDockerManager
         manager_files = []
-        python_files = list(self.project_root.rglob(*.py"))
+        python_files = list(self.project_root.rglob(*.py"))"
 
         for file_path in python_files:
             try:
@@ -184,7 +195,8 @@ class DockerManagerSSOTDuplicationValidationTests(SSotBaseTestCase, unittest.Tes
                         mock" in content.lower() or"
                         Mock in content or
                         MagicMock in content or"
-                        "AsyncMock in content
+                        MagicMock in content or"
+                        "AsyncMock in content"
                     )
 
                     is_real = (
@@ -223,7 +235,7 @@ class DockerManagerSSOTDuplicationValidationTests(SSotBaseTestCase, unittest.Tes
             )
 
     def test_docker_manager_ssot_registry_compliance(self):
-        
+        pass
         CRITICAL SSOT TEST: Validates Docker Manager is properly registered in SSOT registry.
 
         EXPECTED BEHAVIOR (AFTER REMEDIATION):
@@ -236,8 +248,8 @@ class DockerManagerSSOTDuplicationValidationTests(SSotBaseTestCase, unittest.Tes
         ssot_registry_path = self.project_root / docs / SSOT_IMPORT_REGISTRY.md
 
         if not ssot_registry_path.exists():
-            self.fail(f"SSOT REGISTRY MISSING: {ssot_registry_path} not found. 
-                     fSSOT registry is required for import path validation.")
+            self.fail(f"SSOT REGISTRY MISSING: {ssot_registry_path) not found."
+                     fSSOT registry is required for import path validation.")"
 
         with open(ssot_registry_path, 'r', encoding='utf-8') as f:
             registry_content = f.read()
@@ -251,12 +263,14 @@ class DockerManagerSSOTDuplicationValidationTests(SSotBaseTestCase, unittest.Tes
 
         # Check for canonical import path
         canonical_import = test_framework.unified_docker_manager"
+        canonical_import = test_framework.unified_docker_manager"
         self.assertIn(
             canonical_import, registry_content,
-            f"SSOT REGISTRY VIOLATION: Canonical import path {canonical_import} not documented. 
+            f"SSOT REGISTRY VIOLATION: Canonical import path {canonical_import} not documented."
             fRegistry must include proper import paths for SSOT compliance.""
         )
 
 
 if __name__ == '__main__':
     unittest.main()
+)))

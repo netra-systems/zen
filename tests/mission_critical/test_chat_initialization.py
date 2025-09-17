@@ -31,7 +31,7 @@ from test_framework.backend_client import BackendClient
 
 # Set up isolated test environment
 env = get_env()
-env.set('SKIP_REAL_SERVICES', 'false', "test)  # We want to test real chat initialization
+env.set('SKIP_REAL_SERVICES', 'false', "test)  # We want to test real chat initialization"
 env.set('USE_REAL_SERVICES', 'true', test)
 env.set('RUN_E2E_TESTS', 'true', "test)"
 

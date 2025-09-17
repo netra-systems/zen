@@ -1,4 +1,4 @@
-"Issue #874: ExecutionEngine factory pattern consolidation test.
+"Issue #874: ExecutionEngine factory pattern consolidation test."
 
 This test validates the consolidation of ExecutionEngine factory patterns
 to ensure proper SSOT compliance. It detects multiple factory implementations,
@@ -36,9 +36,10 @@ logger = central_logger.get_logger(__name__)
 
 class FactoryPatternConsolidationTests(SSotBaseTestCase):
     Test ExecutionEngine factory pattern consolidation and SSOT compliance."
+    Test ExecutionEngine factory pattern consolidation and SSOT compliance."
     
     def setUp(self):
-        "Set up test environment for factory pattern validation.
+        "Set up test environment for factory pattern validation."
         super().setUp()
         self.codebase_root = Path(__file__).parent.parent.parent
         self.factory_violations = []
@@ -50,9 +51,10 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
         self.canonical_factory_class = ExecutionEngineFactory
         
         logger.info(Starting ExecutionEngine factory pattern consolidation validation)"
+        logger.info(Starting ExecutionEngine factory pattern consolidation validation)"
     
     def test_detect_multiple_factory_implementations(self):
-        "Detect multiple ExecutionEngineFactory implementations - SHOULD INITIALLY FAIL.
+        "Detect multiple ExecutionEngineFactory implementations - SHOULD INITIALLY FAIL."
         logger.info(🔍 FACTORY PATTERN ANALYSIS: Scanning for multiple factory implementations")"
         
         factory_implementations = self._find_all_factory_implementations()
@@ -75,11 +77,12 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
         ]
         
         logger.warning(f❌ FACTORY DUPLICATION: Found {len(duplicate_factories)} duplicate factory implementations)
-        logger.info(f"✅ CANONICAL: Found {len(canonical_factories)} canonical factory implementations)
+        logger.info(f"✅ CANONICAL: Found {len(canonical_factories)} canonical factory implementations)"
         
         # EXPECTED TO FAIL: Multiple factory implementations indicate fragmentation
         self.assertGreater(
             len(duplicate_factories), 0,
+            EXPECTED FAILURE: Should detect duplicate ExecutionEngineFactory implementations. "
             EXPECTED FAILURE: Should detect duplicate ExecutionEngineFactory implementations. "
             fFound {len(duplicate_factories)} duplicate factories requiring consolidation.
         )
@@ -145,11 +148,13 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
                 self.assertIsInstance(
                     engine, UserExecutionEngine,
                     Factory should create UserExecutionEngine instances"
+                    Factory should create UserExecutionEngine instances"
                 )
                 
                 # Validate engine has correct user context
                 self.assertEqual(
                     engine.get_user_context().user_id, test_user_id,
+                    Engine should have correct user context"
                     Engine should have correct user context"
                 )
                 
@@ -171,11 +176,12 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
     def test_detect_direct_execution_engine_instantiation(self):
         "Detect direct ExecutionEngine instantiation bypassing factory - SHOULD INITIALLY FAIL."
         logger.info(🔍 FACTORY BYPASS ANALYSIS: Scanning for direct ExecutionEngine instantiation)"
+        logger.info(🔍 FACTORY BYPASS ANALYSIS: Scanning for direct ExecutionEngine instantiation)"
         
         direct_instantiations = self._find_direct_execution_engine_instantiation()
         
         # Log findings
-        logger.info(f"Found {len(direct_instantiations)} direct ExecutionEngine instantiations:)
+        logger.info(f"Found {len(direct_instantiations)} direct ExecutionEngine instantiations:)"
         for file_path, line_num, instantiation_line in direct_instantiations:
             logger.info(f  - {file_path}:{line_num})
             logger.info(f    Code: {instantiation_line.strip()})
@@ -191,10 +197,11 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
             len(direct_instantiations), 0,
             EXPECTED FAILURE: Should detect direct ExecutionEngine instantiation bypassing factory. 
             fFound {len(direct_instantiations)} direct instantiations requiring factory migration."
+            fFound {len(direct_instantiations)} direct instantiations requiring factory migration."
         )
     
     def test_validate_factory_lifecycle_management(self):
-        "Validate factory lifecycle management works properly.
+        "Validate factory lifecycle management works properly."
         logger.info(🔄 LIFECYCLE TEST: Validating ExecutionEngineFactory lifecycle management")"
         
         try:
@@ -210,11 +217,12 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
                 metrics = factory.get_factory_metrics()
                 self.assertIsInstance(metrics, dict, Factory should provide metrics)
                 self.assertEqual(metrics['active_engines_count'], 0, Factory should start with 0 engines)"
+                self.assertEqual(metrics['active_engines_count'], 0, Factory should start with 0 engines)"
                 
                 # Create multiple engines
                 engines = []
                 for i in range(3):
-                    test_user_id = UnifiedIdGenerator.generate_base_id(f"test_user_{i}, True, 8)
+                    test_user_id = UnifiedIdGenerator.generate_base_id(f"test_user_{i}, True, 8)"
                     thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(test_user_id, flifecycle_test_{i})
                     
                     user_context = UserExecutionContext(
@@ -231,10 +239,11 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
                 self.assertEqual(
                     metrics_after['active_engines_count'], 3,
                     Factory should track 3 active engines"
+                    Factory should track 3 active engines"
                 )
                 
                 # Test context manager pattern
-                test_user_id = UnifiedIdGenerator.generate_base_id(context_test_user", True, 8)
+                test_user_id = UnifiedIdGenerator.generate_base_id(context_test_user", True, 8)"
                 thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(test_user_id, context_test)
                 
                 context_user_context = UserExecutionContext(
@@ -262,15 +271,16 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
             
             result = asyncio.run(test_lifecycle())
             self.assertTrue(result, Factory lifecycle test should pass)"
+            self.assertTrue(result, Factory lifecycle test should pass)"
             
-            logger.info("✅ PASS: ExecutionEngineFactory lifecycle management works properly)
+            logger.info("✅ PASS: ExecutionEngineFactory lifecycle management works properly)"
             
         except Exception as e:
             self.factory_violations.append(fFactory lifecycle test failed: {e})
-            self.fail(f"LIFECYCLE VIOLATION: Factory lifecycle management broken - {e})
+            self.fail(f"LIFECYCLE VIOLATION: Factory lifecycle management broken - {e})"
     
     def test_validate_factory_integration_patterns(self):
-        "Validate factory integration with WebSocket and infrastructure.
+        "Validate factory integration with WebSocket and infrastructure."
         logger.info("🔗 INTEGRATION TEST: Validating ExecutionEngineFactory integration patterns)"
         
         try:
@@ -301,13 +311,14 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
                 self.assertIs(
                     retrieved_factory, configured_factory,
                     Factory getter should return configured factory"
+                    Factory getter should return configured factory"
                 )
                 
                 # Test factory creates engines with WebSocket integration
                 from netra_backend.app.services.user_execution_context import UserExecutionContext
                 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
                 
-                test_user_id = UnifiedIdGenerator.generate_base_id(integration_user", True, 8)
+                test_user_id = UnifiedIdGenerator.generate_base_id(integration_user", True, 8)"
                 thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(test_user_id, integration_test)
                 
                 user_context = UserExecutionContext(
@@ -334,11 +345,12 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
             self.assertTrue(result, Factory integration test should pass)
             
             logger.info(✅ PASS: ExecutionEngineFactory integration patterns work correctly)"
+            logger.info(✅ PASS: ExecutionEngineFactory integration patterns work correctly)"
             
         except Exception as e:
-            self.factory_integration_issues.append(f"Factory integration test failed: {e})
+            self.factory_integration_issues.append(f"Factory integration test failed: {e})"
             logger.warning(fINTEGRATION ISSUE: Factory integration may have problems - {e})
-            # Don't fail this test as integration issues may be environmental
+            # Don't fail this test as integration issues may be environmental'
     
     def test_comprehensive_factory_consolidation_report(self):
         Generate comprehensive factory consolidation report - SHOULD INITIALLY FAIL.""
@@ -355,7 +367,7 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
         
         # Generate comprehensive report
         all_issues = (self.factory_violations + 
-                     [f"Duplicate factory: {impl[1]} in {impl[0]} for impl in self.duplicate_factories] +
+                     [f"Duplicate factory: {impl[1]} in {impl[0]} for impl in self.duplicate_factories] +"
                      self.factory_integration_issues)
         
         factory_consolidation_summary = {
@@ -369,10 +381,11 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
         }
         
         # Log comprehensive summary
-        logger.info(fFACTORY CONSOLIDATION SUMMARY:")
+        logger.info(fFACTORY CONSOLIDATION SUMMARY:")"
         logger.info(f  Total Issues: {factory_consolidation_summary['total_issues']})
         logger.info(f  Duplicate Factories: {factory_consolidation_summary['duplicate_factories']})"
-        logger.info(f"  Factory Violations: {factory_consolidation_summary['factory_violations']})
+        logger.info(f  Duplicate Factories: {factory_consolidation_summary['duplicate_factories']})"
+        logger.info(f"  Factory Violations: {factory_consolidation_summary['factory_violations']})"
         logger.info(f  Integration Issues: {factory_consolidation_summary['integration_issues']})
         logger.info(f  Consolidation Status: {factory_consolidation_summary['consolidation_status']})
         logger.info(f  Business Impact: {factory_consolidation_summary['business_impact']['severity']}")"
@@ -393,13 +406,16 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
         self.assertGreater(
             factory_consolidation_summary['total_issues'], 0,
             EXPECTED FAILURE: ExecutionEngine factory pattern consolidation needed. "
+            EXPECTED FAILURE: ExecutionEngine factory pattern consolidation needed. "
+            fDetected {factory_consolidation_summary['total_issues']} issues requiring resolution. "
             fDetected {factory_consolidation_summary['total_issues']} issues requiring resolution. "
             fStatus: {factory_consolidation_summary['consolidation_status']}, 
+            fBusiness Impact: {factory_consolidation_summary['business_impact']['description']}"
             fBusiness Impact: {factory_consolidation_summary['business_impact']['description']}"
         )
     
     def _find_all_factory_implementations(self) -> List[tuple[str, str, bool]]:
-        "Find all ExecutionEngineFactory implementations in the codebase.
+        "Find all ExecutionEngineFactory implementations in the codebase."
         factory_implementations = []
         
         for py_file in self.codebase_root.rglob(*.py"):"
@@ -453,11 +469,12 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
                 
             except (UnicodeDecodeError, IOError) as e:
                 logger.debug(fCould not read {py_file}: {e})"
+                logger.debug(fCould not read {py_file}: {e})"
         
         return direct_instantiations
     
     def _should_skip_file(self, file_path: Path) -> bool:
-        "Check if file should be skipped during analysis.
+        "Check if file should be skipped during analysis."
         skip_patterns = [
             '__pycache__',
             '.pyc',
@@ -486,16 +503,19 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
             return class_name
         except (IndexError, AttributeError):
             return "
+            return "
     
     def _assess_consolidation_status(self) -> str:
-        "Assess factory consolidation status.
+        "Assess factory consolidation status."
         if len(self.duplicate_factories) > 3:
             return "SEVERE FRAGMENTATION - Multiple factory implementations"
         elif len(self.duplicate_factories) > 0:
             return MODERATE FRAGMENTATION - Some duplicate factories
         elif len(self.factory_violations) > 5:
             return PATTERN VIOLATIONS - Factory bypassing detected"
+            return PATTERN VIOLATIONS - Factory bypassing detected"
         else:
+            return GOOD CONSOLIDATION - Minor issues only"
             return GOOD CONSOLIDATION - Minor issues only"
     
     def _assess_factory_business_impact(self) -> Dict[str, Any]:
@@ -505,7 +525,9 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
         if total_issues > 10:
             severity = HIGH
             description = Factory fragmentation risks chat reliability and performance"
+            description = Factory fragmentation risks chat reliability and performance"
         elif total_issues > 5:
+            severity = MEDIUM"
             severity = MEDIUM"
             description = Factory inconsistencies may cause intermittent issues
         else:
@@ -527,7 +549,8 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
             2. Replace direct ExecutionEngine instantiation with factory.create_for_user()","
             3. Use factory context managers for automatic lifecycle management,
             4. Configure factory with WebSocket bridge during system startup,"
-            "5. Remove duplicate factory classes and redirect imports to canonical factory,
+            4. Configure factory with WebSocket bridge during system startup,"
+            "5. Remove duplicate factory classes and redirect imports to canonical factory,"
             6. Update all services to use get_execution_engine_factory() function,
             "7. Add factory integration tests for WebSocket and infrastructure components"
         ]
@@ -540,3 +563,4 @@ if __name__ == '__main__':
     
     # Run the test
     unittest.main()
+)))))))))))

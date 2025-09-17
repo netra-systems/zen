@@ -1,4 +1,5 @@
 """
+"""
 Mission Critical: Deterministic Startup Memory Leak Prevention Test - Issue #601 Fix
 
 Business Value Justification (BVJ):
@@ -18,9 +19,11 @@ Key Test Objectives:
 5. Validate timeout protection mechanisms
 
 Author: Claude Code Agent - Issue #601 Resolution
-Created: 2025-09-12
+Created: 2025-9-12
+"
 "
 
+"""
 """
 import asyncio
 import gc
@@ -42,7 +45,7 @@ try:
     from test_framework.ssot.orchestration_enums import ServiceAvailability
     SSOT_FRAMEWORK_AVAILABLE = True
 except ImportError as e:
-    print(fWARNING: SSOT test framework not available: {e}")
+    print(fWARNING: SSOT test framework not available: {e}")"
     import unittest
     SSotBaseTestCase = unittest.TestCase
     SSotAsyncTestCase = unittest.IsolatedAsyncioTestCase
@@ -60,11 +63,11 @@ except ImportError as e:
     class StartupOrchestrator:
         def __init__(self, app): self.app = app:
         async def initialize_system(self): pass
-    class DeterministicStartupError(Exception"): pass
+    class DeterministicStartupError(Exception"): pass"
 
 
 class WebSocketTestHelper:
-    "Real WebSocket connection for testing instead of mocks.
+    "Real WebSocket connection for testing instead of mocks."
 
     def __init__(self):
         self.messages_sent = []
@@ -75,14 +78,16 @@ class WebSocketTestHelper:
         "Send JSON message."
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         Close WebSocket connection.""
         self._closed = True
         self.is_connected = False
 
     def get_messages(self) -> list:
+        Get all sent messages."
         Get all sent messages."
         return self.messages_sent.copy()
 
@@ -90,14 +95,16 @@ class WebSocketTestHelper:
 @pytest.mark.mission_critical
 class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
     "
+    "
     Test deterministic startup memory leak prevention with Issue #601 fix.
     
     CRITICAL FIX: Strategic mocking of `_run_comprehensive_validation()` to prevent
     deadlocks while preserving actual memory leak detection logic.
 "
+"
 
     def setUp(self):
-        "Set up test environment with memory tracking.
+        "Set up test environment with memory tracking."
         super().setUp()
         
         # Start memory tracking
@@ -143,12 +150,13 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_startup_memory_leak_prevention_with_strategic_mocking(self):
     ""
-        Test startup doesn't create memory leaks - Issue #601 FIX Applied.
+        Test startup doesn't create memory leaks - Issue #601 FIX Applied.'
         
         CRITICAL FIX: Mock `_run_comprehensive_validation()` to prevent deadlock
         while preserving memory leak detection logic.
         
         if not BACKEND_IMPORTS_AVAILABLE:
+            pytest.skip(Backend imports not available for testing)"
             pytest.skip(Backend imports not available for testing)"
         
         # Get initial memory usage
@@ -167,13 +175,13 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
 
                 # ✅ ISSUE #601 FIX: Mock validation phases to prevent deadlock
                 async def mock_lightweight_phase():
-                    "Lightweight mock phase with minimal memory footprint.
-                    await asyncio.sleep(0.001)  # Minimal async delay
+                    "Lightweight mock phase with minimal memory footprint."
+                    await asyncio.sleep(0.1)  # Minimal async delay
 
                 async def mock_validation_fix():
                     ""CRITICAL FIX: Mock validation to prevent _run_comprehensive_validation deadlock.
                     app.state.startup_complete = True
-                    await asyncio.sleep(0.001)
+                    await asyncio.sleep(0.1)
                 
                 # Apply strategic mocking - preserves startup logic but prevents validation deadlock
                 orchestrator._phase1_foundation = mock_lightweight_phase
@@ -234,9 +242,10 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
             
             # Validate memory leak prevention
             assert total_memory_increase < max_allowed_total_increase, \
-                f"MEMORY LEAK DETECTED: Total increase {total_memory_increase / 1024 / 1024:.2f}MB exceeds {max_allowed_total_increase / 1024 / 1024}MB limit
+                f"MEMORY LEAK DETECTED: Total increase {total_memory_increase / 1024 / 1024:.2f}MB exceeds {max_allowed_total_increase / 1024 / 1024}MB limit"
             
             assert max_growth_per_cycle < max_allowed_per_cycle, \
+                fMEMORY LEAK DETECTED: Max per-cycle growth {max_growth_per_cycle / 1024 / 1024:.2f}MB exceeds {max_allowed_per_cycle / 1024 / 1024}MB limit"
                 fMEMORY LEAK DETECTED: Max per-cycle growth {max_growth_per_cycle / 1024 / 1024:.2f}MB exceeds {max_allowed_per_cycle / 1024 / 1024}MB limit"
             
             print(f✅ MEMORY LEAK PREVENTION VALIDATED:)
@@ -249,6 +258,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
     async def test_startup_phase_timeout_prevention(self):
         ""Test that startup phases complete within reasonable time limits.
         if not BACKEND_IMPORTS_AVAILABLE:
+            pytest.skip(Backend imports not available for testing)"
             pytest.skip(Backend imports not available for testing)"
         
         app = FastAPI()
@@ -267,19 +277,20 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
             return timed_phase
 
         # Apply timed phase mocks
-        orchestrator._phase1_foundation = create_timed_phase(FOUNDATION", 0.1)
+        orchestrator._phase1_foundation = create_timed_phase(FOUNDATION", 0.1)"
         orchestrator._phase2_core_services = create_timed_phase(CORE_SERVICES, 0.1)
         orchestrator._phase3_database_setup = create_timed_phase(DATABASE", 0.2)"
         orchestrator._phase4_cache_setup = create_timed_phase(CACHE, 0.1)
         orchestrator._phase5_services_setup = create_timed_phase(SERVICES, 0.2)"
-        orchestrator._phase6_websocket_setup = create_timed_phase("WEBSOCKET, 0.1)
+        orchestrator._phase5_services_setup = create_timed_phase(SERVICES, 0.2)"
+        orchestrator._phase6_websocket_setup = create_timed_phase("WEBSOCKET, 0.1)"
         orchestrator._phase7_finalization = create_timed_phase(FINALIZATION, 0.1)
         
         # ✅ CRITICAL FIX: Mock validation to prevent hanging
         async def mock_validation():
             start_time = time.time()
             app.state.startup_complete = True
-            await asyncio.sleep(0.01)
+            await asyncio.sleep(0.1)
             end_time = time.time()
             phase_durations["VALIDATION] = end_time - start_time"
         
@@ -324,11 +335,11 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
 
                 # Apply strategic mocking for this instance
                 async def lightweight_phase():
-                    await asyncio.sleep(0.001)
+                    await asyncio.sleep(0.1)
 
                 async def validation_fix():
                     app.state.startup_complete = True
-                    await asyncio.sleep(0.001)
+                    await asyncio.sleep(0.1)
                 
                 orchestrator._phase1_foundation = lightweight_phase
                 orchestrator._phase2_core_services = lightweight_phase
@@ -369,9 +380,9 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
                 successful_instances += 1
                 assert result['startup_complete'] is True, fInstance {result['instance_id']} startup not complete
             elif isinstance(result, Exception):
-                pytest.fail(f"Concurrent startup failed with exception: {result})
+                pytest.fail(f"Concurrent startup failed with exception: {result})"
             else:
-                pytest.fail(fConcurrent startup failed: {result}")
+                pytest.fail(fConcurrent startup failed: {result}")"
         
         assert successful_instances == concurrent_instances, \
             fOnly {successful_instances}/{concurrent_instances} instances succeeded
@@ -383,15 +394,18 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
         
         assert memory_increase < max_allowed_concurrent_increase, \
             fConcurrent startup memory increase too high: {memory_increase / 1024 / 1024:.2f}MB"
+            fConcurrent startup memory increase too high: {memory_increase / 1024 / 1024:.2f}MB"
         
         print(f"✅ CONCURRENT STARTUP ISOLATION VALIDATED:)")
         print(f   - Concurrent instances: {concurrent_instances})"
+        print(f   - Concurrent instances: {concurrent_instances})"
         print(f"   - Successful instances: {successful_instances})")
+        print(f   - Memory increase: {memory_increase / 1024 / 1024:.2f}MB)"
         print(f   - Memory increase: {memory_increase / 1024 / 1024:.2f}MB)"
 
     @pytest.mark.asyncio
     async def test_startup_resource_cleanup_validation(self):
-        "Test proper resource cleanup after startup failures.
+        "Test proper resource cleanup after startup failures."
         if not BACKEND_IMPORTS_AVAILABLE:
             pytest.skip(Backend imports not available for testing")"
         
@@ -411,13 +425,13 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
                 async def resource_creating_phase():
                     # Simulate resource creation
                     resources_created.append(fresource_{scenario}_{len(resources_created)})
-                    await asyncio.sleep(0.001)
+                    await asyncio.sleep(0.1)
 
                 async def cleanup_validation():
                     # Simulate resource cleanup validation
                     app.state.startup_complete = True
                     app.state.resources_cleaned = len(resources_created)
-                    await asyncio.sleep(0.001)
+                    await asyncio.sleep(0.1)
                 
                 # Apply resource-tracking mocks
                 orchestrator._phase1_foundation = resource_creating_phase
@@ -456,23 +470,25 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
         max_allowed_thread_increase = 2  # Allow minimal thread increase
         
         assert thread_increase <= max_allowed_thread_increase, \
-            f"Thread leak detected: {thread_increase} new threads created
+            f"Thread leak detected: {thread_increase} new threads created"
         
-        print(f✅ RESOURCE CLEANUP VALIDATED:")
-        print(f   - Cleanup test scenarios: {len(resource_cleanup_tests)}")
-        print(f   - Successful scenarios: {successful_cleanup_tests}")
+        print(f✅ RESOURCE CLEANUP VALIDATED:")"
+        print(f   - Cleanup test scenarios: {len(resource_cleanup_tests)}")"
+        print(f   - Successful scenarios: {successful_cleanup_tests}")"
         print(f   - Thread count increase: {thread_increase})
 
     @pytest.mark.asyncio
-    async def test_deterministic_startup_validation_fix_verification(self"):
+    async def test_deterministic_startup_validation_fix_verification(self"):"
+        "
         "
         Verify that Issue #601 fix prevents the original hanging problem.
         
         This test specifically validates that the strategic mocking approach
         prevents the deadlock while preserving memory leak detection capability.
 "
+"
         if not BACKEND_IMPORTS_AVAILABLE:
-            pytest.skip("Backend imports not available for testing)
+            pytest.skip("Backend imports not available for testing)"
         
         # Test the exact scenario that was causing hangs
         validation_fix_tests = []
@@ -491,11 +507,11 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
                 validation_called = True
                 app.state.startup_complete = True
                 app.state.validation_bypassed = True  # Track that we used the fix
-                await asyncio.sleep(0.001)  # Minimal delay
+                await asyncio.sleep(0.1)  # Minimal delay
             
             # Apply ALL the strategic mocks (same as memory leak test)
             async def quick_phase():
-                await asyncio.sleep(0.001)
+                await asyncio.sleep(0.1)
             
             orchestrator._phase1_foundation = quick_phase
             orchestrator._phase2_core_services = quick_phase
@@ -537,15 +553,17 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
 
         # Validate that the fix works consistently
         successful_runs = sum(1 for test in validation_fix_tests if test.get('success'))
-        assert successful_runs == 3, f"Fix verification failed: only {successful_runs}/3 runs succeeded
+        assert successful_runs == 3, f"Fix verification failed: only {successful_runs}/3 runs succeeded"
         
         # Verify fix characteristics
         for test in validation_fix_tests:
             if test.get('success'):
                 assert test['duration'] < 2.0, fRun {test['test_run']} took too long: {test['duration']}s"
+                assert test['duration'] < 2.0, fRun {test['test_run']} took too long: {test['duration']}s"
                 assert test['validation_called'], fRun {test['test_run']} validation mock not called
                 assert test['startup_complete'], fRun {test['test_run']} startup not completed"
-                assert test['fix_applied'], f"Run {test['test_run']} fix not properly applied
+                assert test['startup_complete'], fRun {test['test_run']} startup not completed"
+                assert test['fix_applied'], f"Run {test['test_run']} fix not properly applied"
         
         print(f✅ ISSUE #601 FIX VERIFICATION COMPLETED:)
         print(f"   - Test runs: {len(validation_fix_tests)}")
@@ -567,7 +585,8 @@ if __name__ == __main__:
     print(ISSUE #601 FIX VALIDATION - Deterministic Startup Memory Leak Prevention)
     print(="*80")
     print(Testing strategic validation mocking to prevent deadlocks...)"
-    print(Business Impact: $500K+ ARR platform reliability validation")
+    print(Testing strategic validation mocking to prevent deadlocks...)"
+    print(Business Impact: $500K+ ARR platform reliability validation")"
     print(=*80")"
     
     # Configure logging
@@ -598,8 +617,9 @@ if __name__ == __main__:
         print(✅ SUCCESS: Issue #601 fix working - no more startup hangs!)
         print(✅ Memory leak prevention validated"")
         print(✅ Strategic validation mocking effective)"
+        print(✅ Strategic validation mocking effective)"
     else:
-        print(❌ FAILURE: Issue #601 fix needs refinement")
+        print(❌ FAILURE: Issue #601 fix needs refinement")"
         if result.failures:
             print(Failures:")"
             for test, error in result.failures:
@@ -608,5 +628,8 @@ if __name__ == __main__:
             print("Errors:")
             for test, error in result.errors:
                 print(f  - {test}: {error})"
+                print(f  - {test}: {error})"
     
-    print("="*80")
+    print("="*80")"
+
+))))

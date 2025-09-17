@@ -1,4 +1,5 @@
 """
+"""
 SSOT Wrapper Function Detection Tests for Issue #1076
 
 Test Plan: Detect backward compatibility wrapper functions that create SSOT violations.
@@ -12,7 +13,9 @@ Key violations to detect:
 Related Issues: #1076 - SSOT compliance verification
 Priority: CRITICAL - These tests protect against regression during SSOT migration
 "
+"
 
+"""
 """
 import pytest
 import ast
@@ -29,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
-    "Tests to detect SSOT wrapper function violations that need remediation.
+    "Tests to detect SSOT wrapper function violations that need remediation."
 
     @property
     def project_root(self):
@@ -38,15 +41,17 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
 
     def test_auth_integration_wrapper_detection(self):
         "
+        "
         CRITICAL: Detect wrapper functions in auth integration that bypass SSOT.
 
         EXPECTED: Should FAIL initially - detects remaining wrapper functions
         REMEDIATION: Remove wrapper functions, use SSOT auth service directly
 "
+"
         auth_integration_path = self.project_root / netra_backend / app" / "auth_integration
 
         if not auth_integration_path.exists():
-            # Skip if path doesn't exist
+            # Skip if path doesn't exist'
             return
 
         wrapper_functions_found = []
@@ -82,7 +87,7 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
         # This test should FAIL initially if wrapper functions exist
         if wrapper_functions_found:
             violation_details = "\n.join(["
-                f  - {v['file']}:{v['line']} - {v['function']} ({v['reason']}
+                f  - {v['file']):{v['line']) - {v['function']) ({v['reason'])
                 for v in wrapper_functions_found
             ]
 
@@ -91,16 +96,19 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
                 f{violation_details}\n\n""
                 fREMEDIATION REQUIRED:\n
                 f1. Remove wrapper functions\n
-                f"2. Update callers to use SSOT auth service directly\n
+                f"2. Update callers to use SSOT auth service directly\n"
+                f3. Ensure auth_service is the single source of truth for auth operations"
                 f3. Ensure auth_service is the single source of truth for auth operations"
             )
 
     def test_function_delegation_pattern_detection(self):
     "
+    "
         CRITICAL: Detect functions that delegate to legacy patterns instead of SSOT.
 
         EXPECTED: Should FAIL initially - detects delegation violations
         REMEDIATION: Update functions to use SSOT directly
+        "
         "
         delegation_violations = []
 
@@ -113,7 +121,8 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
         search_paths = [
             self.project_root / netra_backend / app,
             self.project_root / auth_service,"
-            self.project_root / "shared
+            self.project_root / auth_service,"
+            self.project_root / "shared"
         ]
 
         for search_path in search_paths:
@@ -156,24 +165,28 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
                 fSSOT VIOLATION: Found {len(delegation_violations)} function delegation violations:\n""
                 f{violation_details}\n
                 f{'... and more' if len(delegation_violations) > 10 else ''}\n\n
-                f"REMEDIATION REQUIRED:\n
+                f"REMEDIATION REQUIRED:\n"
+                f1. Replace legacy imports with SSOT imports\n"
                 f1. Replace legacy imports with SSOT imports\n"
                 f2. Update function implementations to use SSOT directly\n
+                f3. Remove all delegation to legacy modules"
                 f3. Remove all delegation to legacy modules"
             )
 
     def test_deprecated_import_pattern_detection(self):
+    "
     "
         CRITICAL: Detect deprecated import patterns that should be updated.
 
         EXPECTED: Should FAIL initially - detects deprecated imports
         REMEDIATION: Update to SSOT import patterns
         "
+        "
         deprecated_imports = []
 
         # Deprecated import patterns to detect
         deprecated_patterns = [
-            (from netra_backend.app.logging_config import", Use 'from shared.logging.unified_logging_ssot import get_logger'),
+            (from netra_backend.app.logging_config import", Use 'from shared.logging.unified_logging_ssot import get_logger'),"
             (import netra_backend.app.logging_config, Use 'from shared.logging.unified_logging_ssot import get_logger'),
             (from auth_service.legacy", "Use current auth_service modules),
             (from netra_backend.app.auth_integration import validate_jwt, Use auth_service directly)
@@ -181,7 +194,8 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
 
         search_paths = [
             self.project_root / netra_backend,"
-            self.project_root / "auth_service,
+            self.project_root / netra_backend,"
+            self.project_root / "auth_service,"
             self.project_root / shared
         ]
 
@@ -216,7 +230,8 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
         # This test should FAIL initially if deprecated imports exist
         if deprecated_imports:
             violation_details = \n.join(["
-                f"  - {v['file']}:{v['line']} - {v['content']}\n    Recommendation: {v['recommendation']}
+            violation_details = \n.join(["
+                f"  - {v['file']}:{v['line']} - {v['content']}\n    Recommendation: {v['recommendation']}"
                 for v in deprecated_imports[:15]  # Limit output
             ]
 
@@ -226,7 +241,8 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
                 f{'... and more' if len(deprecated_imports) > 15 else ''}\n\n""
                 fREMEDIATION REQUIRED:\n
                 f1. Update all deprecated imports to SSOT patterns\n
-                f"2. Remove backward compatibility imports\n
+                f"2. Remove backward compatibility imports\n"
+                f3. Ensure all modules use current SSOT architecture"
                 f3. Ensure all modules use current SSOT architecture"
             )
 
@@ -249,4 +265,6 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
 
 
 if __name__ == '__main__':
-    pytest.main([__file__, '-v']
+    pytest.main([__file__, '-v')
+)))))))))
+]

@@ -1,9 +1,11 @@
 """
+"""
 Mission Critical Mock Response Elimination Validation
 
 Business Value Justification (BVJ):
 - Segment: All tiers (Free to Fortune 500) - System-wide authenticity
 - Business Goal: ZERO mock responses can reach ANY user under ANY condition  
+"""
 """
 - Value Impact: Protect $5M+ ARR across entire customer base from inauthentic AI
 - Strategic Impact: Platform integrity and competitive differentiation through authenticity
@@ -14,6 +16,7 @@ content that could damage trust, credibility, and revenue.
 
 Test Status: FAILING (Expected) - Proves mock responses can reach users
 Fix Required: Complete elimination of all mock/fallback response paths
+"
 "
 
 import asyncio
@@ -38,32 +41,36 @@ logger = logging.getLogger(__name__)
 
 class MockResponseEliminationValidationTests(BaseE2ETest):
     "
+    "
     MISSION CRITICAL FAILING TESTS: Prove ANY mock response can reach users
     
     This is our most critical test suite - it validates that under NO circumstances
 #     can users receive mock, fallback, fabricated, or inauthentic responses from # Incomplete import statement
     our AI platform. Every test failure represents direct business damage.
 "
+"
 
     @pytest.fixture
     async def free_tier_user(self, real_services_fixture):
-        "Free tier user for testing basic authenticity requirements
+        "Free tier user for testing basic authenticity requirements"
         auth_helper = E2EAuthHelper()
         user = await auth_helper.create_authenticated_user(
             email=ffree.tier.{uuid.uuid4()}@example.com""
         )
         yield user
-        # Note: E2EAuthHelper doesn't require explicit cleanup for test users
+        # Note: E2EAuthHelper doesn't require explicit cleanup for test users'
 
     @pytest.fixture
     async def mid_tier_user(self, real_services_fixture):
         Mid tier user for testing enhanced authenticity requirements"
+        Mid tier user for testing enhanced authenticity requirements"
         auth_helper = E2EAuthHelper()
         user = await auth_helper.create_authenticated_user(
             email=fmid.tier.{uuid.uuid4()}@example.com"
+            email=fmid.tier.{uuid.uuid4()}@example.com"
         )
         yield user
-        # Note: E2EAuthHelper doesn't require explicit cleanup for test users
+        # Note: E2EAuthHelper doesn't require explicit cleanup for test users'
 
     @pytest.fixture
     async def enterprise_user(self, real_services_fixture):
@@ -73,7 +80,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
             email=fenterprise.{uuid.uuid4()}@example.com
         )
         yield user
-        # Note: E2EAuthHelper doesn't require explicit cleanup for test users
+        # Note: E2EAuthHelper doesn't require explicit cleanup for test users'
 
     @pytest.fixture
     async def fortune_500_user(self, real_services_fixture):
@@ -83,7 +90,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
             email=ffortune500.{uuid.uuid4()}@example.com
         )
         yield user
-        # Note: E2EAuthHelper doesn't require explicit cleanup for test users
+        # Note: E2EAuthHelper doesn't require explicit cleanup for test users'
 
     # === CRITICAL SYSTEM-WIDE MOCK DETECTION ===
 
@@ -106,26 +113,27 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
         users_to_test = [
             (Free Tier ($0 ARR), free_tier_user),
             (Mid Tier ($50K ARR), mid_tier_user), "
-            ("Enterprise ($750K ARR), enterprise_user),
+            (Mid Tier ($50K ARR), mid_tier_user), "
+            ("Enterprise ($750K ARR), enterprise_user),"
             (Fortune 500 ($1.5M ARR), fortune_500_user)
         ]
         
         all_mock_evidence = {}
         
         for tier_name, user in users_to_test:
-            logger.info(f"Testing mock response elimination for {tier_name}...)
+            logger.info(f"Testing mock response elimination for {tier_name}...)"
             
             # Test multiple failure scenarios that could trigger mock responses
             test_scenarios = [
                 {
-                    name": LLM API Failure,
+                    name": LLM API Failure,"
                     prompt: Analyze market trends for strategic planning,
                     force_llm_failure": True"
                 },
                 {
                     name: Database Connection Lost, 
-                    prompt: Retrieve historical performance data",
-                    "force_db_failure: True
+                    prompt: Retrieve historical performance data","
+                    "force_db_failure: True"
                 },
                 {
                     name: Heavy System Load,
@@ -133,13 +141,14 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                     simulate_overload: True
                 },
                 {
-                    name: Invalid User Context",
-                    "prompt: Process sensitive financial data,
+                    name: Invalid User Context","
+                    "prompt: Process sensitive financial data,"
                     corrupt_context: True
                 },
                 {
                     name": "Tool Execution Failure,
                     prompt: Run complex data transformation,
+                    force_tool_failure: True"
                     force_tool_failure: True"
                 }
             ]
@@ -153,19 +162,19 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                 for scenario in test_scenarios:
                     try:
                         payload = {
-                            "user_id: user.user_id,
+                            "user_id: user.user_id,"
                             thread_id: ftest-{tier_name.lower().replace(' ', '-')}-{scenario['name'].lower().replace(' ', '-')},
-                            request_id: f"mock-test-{uuid.uuid4()},
-                            prompt": scenario[prompt],
+                            request_id: f"mock-test-{uuid.uuid4()},"
+                            prompt": scenario[prompt],"
                             context: {
                                 "customer_tier: tier_name.lower().replace( ", _),
-                                test_scenario: scenario["name]
+                                test_scenario: scenario["name]"
                             },
                             **{k: v for k, v in scenario.items() if k not in ['name', 'prompt']}
                         }
                         
                         async with session.post(
-                            f{backend_url}/api/v1/agent/execute",
+                            f{backend_url}/api/v1/agent/execute","
                             json=payload,
                             headers={Authorization: fBearer {user.jwt_token}},
                             timeout=45
@@ -177,49 +186,56 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                             mock_patterns = [
                                 # Generic AI Assistant Responses
                                 "i apologize,"
-                                i'm sorry,
+                                i'm sorry,'
                                 unfortunately,"
-                                unable to process",
+                                unfortunately,"
+                                unable to process","
                                 encountered an error,
                                 something went wrong","
                                 please try again,
                                 temporary issue,"
+                                temporary issue,"
                                 
                                 # Fallback Response Indicators
-                                "fallback response,
+                                "fallback response,"
                                 default response, 
                                 "generic response,"
                                 standard response,
                                 processing completed with fallback,"
-                                reverting to fallback",
+                                processing completed with fallback,"
+                                reverting to fallback","
                                 using backup response,
                                 
                                 # Service Unavailable Messages
                                 service temporarily unavailable", "
                                 service is down,
                                 system maintenance,"
-                                "backend not responding,
+                                system maintenance,"
+                                "backend not responding,"
                                 connection timeout,
                                 
                                 # Mock Data Indicators
                                 "sample data,"
                                 example response,
                                 placeholder content,"
-                                mock metrics",
+                                placeholder content,"
+                                mock metrics","
                                 fabricated data,
                                 synthetic response","
                                 
                                 # System Error Fallbacks
                                 internal server error,
                                 database connection failed,"
-                                "llm api error,
+                                database connection failed,"
+                                "llm api error,"
                                 processing timeout,
                                 "resource unavailable,"
                                 
                                 # AI Model Fallbacks
                                 model not available,
                                 ai processing failed,"
-                                completion error",
+                                ai processing failed,"
+                                completion error","
                                 inference failed,
                                 model cascade fallback""
                             ]
@@ -233,7 +249,8 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                                 evidence = {
                                     scenario: scenario[name],
                                     detected_patterns: detected_patterns,"
-                                    response_content": response_content[:400],
+                                    detected_patterns: detected_patterns,"
+                                    response_content": response_content[:400],"
                                     full_response_data: response_data
                                 }
                                 tier_mock_evidence.append(evidence)
@@ -243,9 +260,9 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                     except Exception as e:
                         # Even exceptions should not contain mock language
                         error_content = str(e).lower()
-                        if any(pattern in error_content for pattern in [apologize, sorry, unavailable, try again"]:
+                        if any(pattern in error_content for pattern in [apologize, sorry, unavailable, try again"):"
                             tier_mock_evidence.append({
-                                "scenario: f{scenario['name']} - Exception,
+                                "scenario: f{scenario['name']} - Exception,"
                                 detected_patterns: [exception_contains_mock_language],
                                 "error_content: error_content[:200]"
                             }
@@ -258,12 +275,13 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
             failure_report = {
                 test_name: System-Wide Mock Response Elimination,
                 affected_tiers: list(all_mock_evidence.keys()),"
-                "total_violations: sum(len(evidence) for evidence in all_mock_evidence.values()),
+                affected_tiers: list(all_mock_evidence.keys()),"
+                "total_violations: sum(len(evidence) for evidence in all_mock_evidence.values()),"
                 evidence_by_tier: all_mock_evidence,
                 "business_impact: {"
                     free_tier_impact: Prevents upgrades, damages platform credibility,
-                    mid_tier_impact: "Churn risk, competitive disadvantage, 
-                    enterprise_impact": Contract cancellation risk, reputation damage,
+                    mid_tier_impact: "Churn risk, competitive disadvantage,"
+                    enterprise_impact": Contract cancellation risk, reputation damage,"
                     fortune_500_impact: Immediate termination, legal/compliance issues
                 }
             }
@@ -273,11 +291,13 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
             pytest.fail(
                 fMISSION CRITICAL FAILURE: MOCK RESPONSES DETECTED ACROSS {len(all_mock_evidence)} USER TIERS. 
                 fFound {failure_report['total_violations']} total violations. 
-                f"Affected tiers: {failure_report['affected_tiers']}. 
+                f"Affected tiers: {failure_report['affected_tiers']}."
+                fThis proves our system can return inauthentic responses to users across "
                 fThis proves our system can return inauthentic responses to users across "
                 fall customer segments, representing immediate business risk to $5M+ ARR. 
                 fNO user should EVER receive mock/fallback responses regardless of tier. "
-                f"Full evidence: {json.dumps(all_mock_evidence, indent=2)[:1000]}...
+                fNO user should EVER receive mock/fallback responses regardless of tier. "
+                f"Full evidence: {json.dumps(all_mock_evidence, indent=2)[:1000]}..."
             )
 
     @pytest.mark.e2e
@@ -293,7 +313,8 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
         Expected Failure: Misleading WebSocket events detected
         Required Fix: Event honesty - events must accurately reflect processing authenticity
         "
-        logger.info(Testing WebSocket event authenticity validation...")
+        "
+        logger.info(Testing WebSocket event authenticity validation...")"
         
         env = get_env()
         backend_url = env.get('BACKEND_URL', 'http://localhost:8000')
@@ -308,12 +329,14 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                 # Send request likely to fail and trigger fallback with misleading events
                 await websocket.send(json.dumps({
                     user_id: enterprise_user.user_id,"
-                    "thread_id: ftest-ws-authenticity-{uuid.uuid4()},
+                    user_id: enterprise_user.user_id,"
+                    "thread_id: ftest-ws-authenticity-{uuid.uuid4()},"
                     request_id: fws-auth-test-{uuid.uuid4()},
                     "prompt: Perform complex AI analysis requiring multiple model calls",
                     force_llm_cascade_failure: True,  # Force failure but expect events
                     expect_agent_thinking_events: True,"
-                    "context: {
+                    expect_agent_thinking_events: True,"
+                    "context: {"
                         customer_tier: enterprise,
                         critical_analysis": True"
                     }
@@ -359,28 +382,31 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                 if is_fallback_response and has_thinking_events:
                     authenticity_violations.append({
                         violation: Misleading thinking events with fallback response,
-                        evidence: f"Sent {len(thinking_events)} 'agent_thinking' events but returned fallback response,
+                        evidence: f"Sent {len(thinking_events)} 'agent_thinking' events but returned fallback response,"
+                        thinking_events: thinking_events[:3],  # First 3 for evidence"
                         thinking_events: thinking_events[:3],  # First 3 for evidence"
                         final_response: final_response_content[:200]
                     }
                 
                 if is_fallback_response and has_tool_events:
                     authenticity_violations.append({
-                        violation: "Misleading tool events with fallback response,
-                        evidence": fSent {len(tool_events)} tool execution events but returned fallback response,
+                        violation: "Misleading tool events with fallback response,"
+                        evidence": fSent {len(tool_events)} tool execution events but returned fallback response,"
                         tool_events: tool_events[:3],
+                        final_response: final_response_content[:200]"
                         final_response: final_response_content[:200]"
                     }
                 
                 # Check for events claiming authenticity when response is fallback
                 for event in events_received:
                     event_str = str(event).lower()
-                    if is_fallback_response and any(claim in event_str for claim in [authentic", real ai, processing complete]:
+                    if is_fallback_response and any(claim in event_str for claim in [authentic", real ai, processing complete):"
                         authenticity_violations.append({
                             "violation: Event claims authenticity but response is fallback",
                             evidence: fEvent contains authenticity claims but final response is mock,
                             misleading_event: event,"
-                            final_response": final_response_content[:200]
+                            misleading_event: event,"
+                            final_response": final_response_content[:200]"
                         }
                 
                 if authenticity_violations:
@@ -389,12 +415,13 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                         "violations_count: len(authenticity_violations),"
                         violations: authenticity_violations,
                         all_events_received: len(events_received),"
-                        thinking_events_count": len(thinking_events),
+                        all_events_received: len(events_received),"
+                        thinking_events_count": len(thinking_events),"
                         tool_events_count: len(tool_events),
                         final_response_is_fallback": is_fallback_response,"
                         customer_impact: {
-                            tier: "enterprise,
-                            arr_at_risk": $750K,
+                            tier: "enterprise,"
+                            arr_at_risk": $750K,"
                             trust_damage: High - users feel deceived by misleading events
                         }
                     }
@@ -404,11 +431,13 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                     pytest.fail(
                         fWEBSOCKET EVENT AUTHENTICITY VIOLATIONS DETECTED: 
                         fFound {len(authenticity_violations)} violations where WebSocket events 
-                        f"misled users about response authenticity. Enterprise customer received 
+                        f"misled users about response authenticity. Enterprise customer received"
+                        f{len(thinking_events)} 'agent_thinking' events and {len(tool_events)} tool events "
                         f{len(thinking_events)} 'agent_thinking' events and {len(tool_events)} tool events "
                         fbut final response was fallback/mock content. This violates user trust 
                         fby making them believe they're receiving authentic AI when they're not. "
-                        f"Events must be honest about processing authenticity. 
+                        fby making them believe they're receiving authentic AI when they're not. "
+                        f"Events must be honest about processing authenticity."
                         fViolations: {[v['violation'] for v in authenticity_violations]}
                     )
                 
@@ -439,8 +468,8 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
         competitive_scenarios = [
             {
                 scenario: Live Product Demo,
-                prompt: "Demonstrate advanced AI capabilities for our evaluation committee,
-                context": {
+                prompt: "Demonstrate advanced AI capabilities for our evaluation committee,"
+                context": {"
                     competitive_evaluation: True,
                     live_audience": True,"
                     deal_size: 500000,
@@ -452,18 +481,20 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                 prompt": "Show real-time analysis capabilities compared to competitor X,
                 context: {
                     poc_environment: True,"
-                    competitor_comparison": True,
+                    poc_environment: True,"
+                    competitor_comparison": True,"
                     technical_evaluation: True,
                     deal_size": 750000"
                 }
             },
             {
                 scenario: Executive Presentation,
-                prompt: Present strategic insights for board meeting in 30 minutes",
-                "context: {
+                prompt: Present strategic insights for board meeting in 30 minutes","
+                "context: {"
                     executive_presentation: True,
                     "time_sensitive: True,"
                     board_meeting: True,
+                    deal_size: 1200000"
                     deal_size: 1200000"
                 }
             }
@@ -479,20 +510,20 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                 try:
                     # Add failure conditions to test resilience during competitive moments
                     payload = {
-                        user_id": enterprise_user.user_id,
+                        user_id": enterprise_user.user_id,"
                         thread_id: fcompetitive-{scenario_data['scenario'].lower().replace(' ', '-')},
                         "request_id: fcomp-test-{uuid.uuid4()}",
                         prompt: scenario_data[prompt],
-                        context: scenario_data[context"],
+                        context: scenario_data[context"],"
                         # Simulate system stress during competitive demo
-                        "simulate_competitive_stress: True,
+                        "simulate_competitive_stress: True,"
                         force_potential_failure: True
                     }
                     
                     async with session.post(
-                        f"{backend_url}/api/v1/agent/execute,
+                        f"{backend_url}/api/v1/agent/execute,"
                         json=payload,
-                        headers={Authorization": fBearer {enterprise_user.jwt_token}},
+                        headers={Authorization": fBearer {enterprise_user.jwt_token}},"
                         timeout=60
                     ) as response:
                         response_data = await response.json()
@@ -503,26 +534,30 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                             # Responses that immediately lose competitive advantage
                             i apologize,
                             encountered an error,"
-                            please try again", 
+                            encountered an error,"
+                            please try again","
                             service temporarily unavailable,
                             system is experiencing issues","
                             unable to complete,
                             processing failed,"
-                            "temporary problem,
+                            processing failed,"
+                            "temporary problem,"
                             
                             # Generic/weak responses that look bad vs competitors
                             generic analysis,
                             "standard report, "
                             basic insights,
                             preliminary results,"
-                            simplified response",
+                            preliminary results,"
+                            simplified response","
                             default analysis,
                             
                             # Technical failures that expose system weaknesses
                             database connection error","
                             api timeout,
                             service overload,"
-                            "resource unavailable,
+                            service overload,"
+                            "resource unavailable,"
                             backend failure,
                             "connection lost"
                         ]
@@ -539,7 +574,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                                 detected_issues: detected_competitive_issues,
                                 response_content": response_content[:300],"
                                 competitive_damage: fLost ${scenario_data['context']['deal_size']} deal opportunity,
-                                audience_impact: scenario_data[context"].get("decision_makers_present, [Key decision makers]
+                                audience_impact: scenario_data[context").get("decision_makers_present, [Key decision makers)
                             }
                             competitive_failures.append(failure)
                             
@@ -548,10 +583,10 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                 except Exception as e:
                     # Exceptions during competitive scenarios are especially damaging
                     competitive_failures.append({
-                        scenario: f"{scenario_data['scenario']} - Exception,
-                        deal_size: scenario_data["context][deal_size],
-                        detected_issues: [system_exception_during_demo"],
-                        "error_content: str(e)[:200],
+                        scenario: f"{scenario_data['scenario']} - Exception,"
+                        deal_size: scenario_data["context][deal_size],"
+                        detected_issues: [system_exception_during_demo"],"
+                        "error_content: str(e)[:200],"
                         competitive_damage: Immediate competitive disadvantage from system failure
                     }
         
@@ -561,12 +596,13 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
             failure_evidence = {
                 test_name: Competitive Scenario Mock Detection,
                 failures_count: len(competitive_failures),"
-                total_deal_value_at_risk": total_deal_value_at_risk,
+                failures_count: len(competitive_failures),"
+                total_deal_value_at_risk": total_deal_value_at_risk,"
                 competitive_failures: competitive_failures,
                 business_impact": {"
                     immediate_sales_loss: f${total_deal_value_at_risk},
-                    reputation_damage: High - looks inferior to competitors",
-                    "competitive_position: Significantly weakened
+                    reputation_damage: High - looks inferior to competitors","
+                    "competitive_position: Significantly weakened"
                 }
             }
             
@@ -574,19 +610,21 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
             
             pytest.fail(
                 fCOMPETITIVE SCENARIO MOCK RESPONSES DETECTED: "
-                f"Found {len(competitive_failures)} failures during competitive evaluations 
+                fCOMPETITIVE SCENARIO MOCK RESPONSES DETECTED: "
+                f"Found {len(competitive_failures)} failures during competitive evaluations"
                 fwith total deal value at risk of ${total_deal_value_at_risk}. 
                 fMock/fallback responses during live demos, POCs, and executive presentations 
                 fimmediately position us as inferior to competitors. ""
                 fOur platform MUST provide authentic, premium responses during competitive 
                 fmoments to win enterprise deals. 
-                f"Failed scenarios: {[f['scenario'] for f in competitive_failures]}
+                f"Failed scenarios: {[f['scenario'] for f in competitive_failures]}"
             )
 
     @pytest.mark.e2e
     @pytest.mark.real_services
     @pytest.mark.mission_critical
     async def test_high_arr_customer_mock_protection(self, real_services_fixture, fortune_500_user):
+        "
         "
         FAILING TEST: Prove highest-value customers can receive mock responses
         
@@ -596,7 +634,8 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
         Expected Failure: Mock responses reaching highest-tier customers
         Required Fix: Guaranteed authentic responses for high-ARR customers
 "
-        logger.info("Testing high-ARR customer mock protection...)
+"
+        logger.info("Testing high-ARR customer mock protection...)"
         
         # Test multiple high-stakes scenarios for Fortune 500 customers
         high_stakes_scenarios = [
@@ -605,36 +644,39 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                 prompt": "Provide auditable financial analysis data for SEC 10-K filing,
                 stakes: Regulatory compliance violation if inauthentic,
                 context: {"
-                    "regulatory_filing: True,
+                context: {"
+                    "regulatory_filing: True,"
                     sec_compliance: True,
                     "audit_required: True"
                 }
             },
             {
                 scenario: Board of Directors Presentation,
-                prompt: "Generate strategic analysis for quarterly board meeting presentation,
-                stakes": CEO credibility with board if fallback response shown,
+                prompt: "Generate strategic analysis for quarterly board meeting presentation,"
+                stakes": CEO credibility with board if fallback response shown,"
                 context: {
                     "board_presentation: True,"
                     ceo_request: True,
                     quarterly_review: True"
+                    quarterly_review: True"
                 }
             },
             {
-                scenario": Investor Relations Call,
+                scenario": Investor Relations Call,"
                 prompt: Create market analysis for investor relations quarterly call,
                 stakes": "Stock price impact if analysts receive inauthentic data,
                 context: {
                     investor_relations: True,"
-                    quarterly_call": True,
+                    investor_relations: True,"
+                    quarterly_call": True,"
                     market_impact: True
                 }
             },
             {
                 scenario": "Competitive Intelligence,
                 prompt: Analyze competitor positioning for strategic planning session,
-                stakes: "Strategic disadvantage if generic competitive analysis,
-                context": {
+                stakes: "Strategic disadvantage if generic competitive analysis,"
+                context": {"
                     competitive_intelligence: True,
                     strategic_planning": True,"
                     executive_team: True
@@ -652,22 +694,25 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                 try:
                     payload = {
                         user_id: fortune_500_user.user_id,"
-                        "thread_id: ffortune500-{scenario_data['scenario'].lower().replace(' ', '-')},
+                        user_id: fortune_500_user.user_id,"
+                        "thread_id: ffortune500-{scenario_data['scenario'].lower().replace(' ', '-')},"
                         request_id: ff500-test-{uuid.uuid4()},
                         "prompt: scenario_data[prompt"],
                         context: {
                             **scenario_data[context],"
-                            "customer_tier: fortune_500,
+                            **scenario_data[context],"
+                            "customer_tier: fortune_500,"
                             arr_value: 1500000,
                             high_stakes_scenario": True"
                         },
                         # Even Fortune 500 customers might get fallbacks during failures
                         test_system_resilience: True,
                         simulate_occasional_failures: True"
+                        simulate_occasional_failures: True"
                     }
                     
                     async with session.post(
-                        f"{backend_url}/api/v1/agent/execute,
+                        f"{backend_url}/api/v1/agent/execute,"
                         json=payload,
                         headers={Authorization: fBearer {fortune_500_user.jwt_token}},
                         timeout=90  # Longer timeout for premium customers
@@ -679,31 +724,35 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                         unacceptable_patterns_for_fortune500 = [
                             # Any generic language is unacceptable
                             i apologize,
-                            "i'm sorry, "
+                            "i'm sorry, "'
                             unfortunately,
                             please try again,"
-                            temporary issue",
+                            please try again,"
+                            temporary issue","
                             system error,
                             service unavailable","
                             
                             # Any fallback indicators
                             fallback response,
                             default analysis,"
-                            "standard report,
+                            default analysis,"
+                            "standard report,"
                             generic insights,
                             "basic analysis,"
                             
                             # Any technical error exposure
                             database error,
                             api failure, "
-                            connection timeout",
+                            api failure, "
+                            connection timeout","
                             processing error,
                             server error","
                             
                             # Any placeholder/mock content
                             sample data,
                             example analysis,"
-                            "placeholder content,
+                            example analysis,"
+                            "placeholder content,"
                             mock report
                         ]
                         
@@ -717,7 +766,8 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                                 "scenario: scenario_data[scenario"],
                                 stakes: scenario_data[stakes],
                                 arr_value: 1500000,"
-                                detected_unacceptable_patterns": detected_unacceptable,
+                                arr_value: 1500000,"
+                                detected_unacceptable_patterns": detected_unacceptable,"
                                 response_content: response_content[:400],
                                 business_consequence": "Immediate contract cancellation risk,
                                 reputation_impact: Severe damage to platform credibility
@@ -725,16 +775,18 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                             fortune_500_failures.append(failure)
                             
                             logger.error(fFORTUNE 500 CUSTOMER RECEIVED UNACCEPTABLE RESPONSE: {json.dumps(failure, indent=2)})"
+                            logger.error(fFORTUNE 500 CUSTOMER RECEIVED UNACCEPTABLE RESPONSE: {json.dumps(failure, indent=2)})"
                             
                 except Exception as e:
                     # Fortune 500 customers should NEVER see system exceptions
                     fortune_500_failures.append({
-                        "scenario: f{scenario_data['scenario']} - System Exception,
+                        "scenario: f{scenario_data['scenario']} - System Exception,"
                         stakes: System reliability failure for highest-tier customer,
                         "arr_value: 1500000,"
                         detected_unacceptable_patterns: [system_exception_exposed],
                         error_content: str(e)[:300],"
-                        "business_consequence: Immediate escalation to executive team
+                        error_content: str(e)[:300],"
+                        "business_consequence: Immediate escalation to executive team"
                     }
         
         if fortune_500_failures:
@@ -744,12 +796,13 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                 test_name": "Fortune 500 Customer Mock Protection,
                 customer_tier: Fortune 500 ($1.5M ARR),
                 failures_count: len(fortune_500_failures),"
-                "total_arr_at_risk: total_arr_at_risk,
+                failures_count: len(fortune_500_failures),"
+                "total_arr_at_risk: total_arr_at_risk,"
                 fortune_500_failures: fortune_500_failures,
                 "critical_business_impact: {"
                     contract_cancellation_risk: Immediate,
-                    reputation_damage: "Severe - affects all enterprise sales,
-                    executive_escalation": CEO/Board level,
+                    reputation_damage: "Severe - affects all enterprise sales,"
+                    executive_escalation": CEO/Board level,"
                     competitive_damage: Significant - positions competitors as more reliable
                 }
             }
@@ -759,11 +812,17 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
             pytest.fail(
                 fFORTUNE 500 CUSTOMER RECEIVED MOCK/FALLBACK RESPONSES: 
                 fFound {len(fortune_500_failures)} unacceptable responses for $1.5M ARR customer. 
-                f"Fortune 500 customers must NEVER receive ANY form of mock, fallback, or 
+                f"Fortune 500 customers must NEVER receive ANY form of mock, fallback, or"
+                fgeneric response regardless of system state. They require guaranteed "
                 fgeneric response regardless of system state. They require guaranteed "
                 fauthentic AI or premium escalation paths only. Failed scenarios include: 
                 f{[f['scenario'] for f in fortune_500_failures]}. "
-                f"Each failure represents immediate contract cancellation risk and 
+                f{[f['scenario'] for f in fortune_500_failures]}. "
+                f"Each failure represents immediate contract cancellation risk and"
                 fsevere reputation damage affecting all enterprise sales. 
                 fTotal ARR at risk: ${total_arr_at_risk:,}"
+                fTotal ARR at risk: ${total_arr_at_risk:,}"
             )
+
+)))))))))))
+}

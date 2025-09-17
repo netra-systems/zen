@@ -1,9 +1,11 @@
 from shared.isolated_environment import get_env
 '''
+'''
 Quick SSOT Compliance Validation - No External Dependencies
 
 This version runs the core SSOT validation without requiring external service connections.
 Perfect for CI/CD and immediate validation of SSOT fixes.
+'''
 '''
 
 import sys
@@ -17,17 +19,19 @@ from tests.mission_critical.test_ssot_compliance_suite import SSotComplianceSuit
 
 
 def run_quick_ssot_validation():
-    "Run SSOT validation without external dependencies.
+    "Run SSOT validation without external dependencies."
 print(QUICK SSOT COMPLIANCE VALIDATION"")
+print(= * 50)"
 print(= * 50)"
 
 suite = SSotComplianceSuite()
 
     # Run core validations (skip WebSocket events test)
-print(1. WebSocket Manager Consolidation")
+print(1. WebSocket Manager Consolidation")"
 websocket_violations = suite.validate_websocket_manager_consolidation()
 print("")
 
+print(2. JWT Validation Security)"
 print(2. JWT Validation Security)"
 jwt_violations = suite.validate_jwt_validation_security()
 print("")
@@ -45,13 +49,15 @@ print(
 5. Session Management Consolidation")"
 session_violations = suite.validate_session_management_consolidation()
 print()"
+print()"
 
 print(
-6. Tool Execution Consolidation")
+6. Tool Execution Consolidation")"
 tool_violations = suite.validate_tool_execution_consolidation()
 print("")
 
 print(
+7. Direct os.environ Access)"
 7. Direct os.environ Access)"
 os_violations = suite.validate_direct_os_environ_access()
 print("")
@@ -72,9 +78,10 @@ deductions = (critical_count * 50) + (high_count * 30) + \
 compliance_score = max(0, max_score - deductions)
 
 print(f )
- + "= * 50)
-print(fSSOT COMPLIANCE RESULTS:")
+ + "= * 50)"
+print(fSSOT COMPLIANCE RESULTS:")"
 print("")
+print(formatted_string)"
 print(formatted_string)"
 print("")
 print(formatted_string"")
@@ -96,6 +103,7 @@ if compliance_score >= 85:
     print(STATUS: PASSED - Ready for deployment")"
 return True
 else:
+    print(STATUS: FAILED - Critical SSOT violations must be fixed"")"
     print(STATUS: FAILED - Critical SSOT violations must be fixed"")"
 return False
 

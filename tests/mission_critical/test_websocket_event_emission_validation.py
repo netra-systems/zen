@@ -1,4 +1,5 @@
 """
+"""
 MISSION CRITICAL: WebSocket Event Emission Validation Test
 
 This test validates that all 5 critical WebSocket events are properly emitted
@@ -15,7 +16,9 @@ Critical Events Tested:
 This test runs without requiring full backend services by using mocks,
 but validates that the integration points are correctly connected.
 "
+"
 
+"""
 """
 import asyncio
 import pytest
@@ -32,7 +35,7 @@ from shared.id_generation import UnifiedIdGenerator
 
 
 class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
-    "Validates that all 5 critical WebSocket events are emitted correctly.
+    "Validates that all 5 critical WebSocket events are emitted correctly."
     
     def setup_method(self):
         "Set up test with proper mocking."
@@ -55,7 +58,7 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         self.mock_agent_registry = self.mock_agent_factory._agent_registry
         self.mock_agent_registry.set_tool_dispatcher = MagicMock()
         
-    async def _track_event(self, user_id: str, event_type: str, data: Dict[str, Any]:
+    async def _track_event(self, user_id: str, event_type: str, data: Dict[str, Any):
         "Track emitted WebSocket events."
         event = {
             'user_id': user_id,
@@ -81,10 +84,10 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         emitter = UnifiedWebSocketEmitter(self.mock_websocket_manager, context.user_id, context)
         
         # Test all critical event methods
-        await emitter.notify_agent_started(agent_name='test_agent', context={'status': 'started'}
+        await emitter.notify_agent_started(agent_name='test_agent', context={'status': 'started')
         await emitter.notify_agent_thinking(agent_name='test_agent', reasoning='Processing request...', step_number=1)
-        await emitter.notify_tool_executing(tool_name='test_tool', metadata={'args': {'param': 'value'}}
-        await emitter.notify_tool_completed(tool_name='test_tool', metadata={'result': {'success': True}}
+        await emitter.notify_tool_executing(tool_name='test_tool', metadata={'args': {'param': 'value'))
+        await emitter.notify_tool_completed(tool_name='test_tool', metadata={'result': {'success': True))
         await emitter.notify_agent_completed(agent_name='test_agent', result={'success': True}, execution_time_ms=1500)
         
         # Validate all events were emitted
@@ -124,9 +127,9 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         
         # Test tool execution (this will fail to find the tool but should emit events)
         try:
-            await tool_dispatcher.execute_tool('test_tool', {'param': 'value'}
+            await tool_dispatcher.execute_tool('test_tool', {'param': 'value')
         except Exception:
-            pass  # Expected to fail since tool doesn't exist
+            pass  # Expected to fail since tool doesn't exist'
         
         # Verify that agent registry was configured with tool dispatcher
         self.mock_agent_registry.set_tool_dispatcher.assert_called_once()
@@ -135,6 +138,7 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         
     @pytest.mark.mission_critical
     async def test_agent_factory_websocket_emitter_creation(self):
+        Test that UserWebSocketEmitter is created correctly."
         Test that UserWebSocketEmitter is created correctly."
         # Create mock WebSocket bridge
         mock_bridge = MagicMock()
@@ -151,7 +155,7 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         )
         
         # Test agent notifications
-        await emitter.notify_agent_started('test_agent', {'status': 'started'}
+        await emitter.notify_agent_started('test_agent', {'status': 'started')
         await emitter.notify_agent_thinking('test_agent', 'Processing...', 1)
         await emitter.notify_agent_completed('test_agent', {'success': True}, 1000)
         
@@ -160,7 +164,7 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         mock_bridge.notify_agent_thinking.assert_called_once() 
         mock_bridge.notify_agent_completed.assert_called_once()
         
-        print(" PASS:  UserWebSocketEmitter working correctly)
+        print(" PASS:  UserWebSocketEmitter working correctly)"
         
     @pytest.mark.mission_critical
     async def test_complete_event_flow_integration(self):
@@ -195,6 +199,7 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         # Validate tool dispatcher is created
         tool_dispatcher = engine.get_tool_dispatcher()
         assert tool_dispatcher is not None, Tool dispatcher creation failed"
+        assert tool_dispatcher is not None, Tool dispatcher creation failed"
         
         # Validate agent registry has tool dispatcher
         self.mock_agent_registry.set_tool_dispatcher.assert_called()
@@ -204,12 +209,13 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         await websocket_emitter.notify_agent_thinking(agent_name='integration_test_agent', reasoning='Integration test')
         
         # Verify events were tracked
-        assert len(self.emitted_events) >= 2, "Events not properly emitted
+        assert len(self.emitted_events) >= 2, "Events not properly emitted"
         
+        print( PASS:  Complete integration test passed - all components connected correctly)"
         print( PASS:  Complete integration test passed - all components connected correctly)"
         
     def get_event_summary(self) -> Dict[str, Any]:
-        "Get summary of emitted events for debugging.
+        "Get summary of emitted events for debugging."
         event_types = [event['event_type'] for event in self.emitted_events]
         return {
             'total_events': len(self.emitted_events),
@@ -228,4 +234,6 @@ if __name__ == __main__":"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
-    # sys.exit(result")
+    # sys.exit(result")"
+
+))))))

@@ -1,4 +1,5 @@
 '''
+'''
 MISSION CRITICAL: Docker Edge Cases & Failure Recovery Test Suite
 BUSINESS IMPACT: PROTECTS $2M+ ARR FROM DOCKER EDGE CASE FAILURES
 
@@ -22,6 +23,7 @@ CRITICAL COVERAGE:
 - Image layer corruption recovery
 - Network segmentation edge cases
 - Resource limit boundary conditions
+'''
 '''
 
 import asyncio
@@ -77,7 +79,7 @@ logger = logging.getLogger(__name__)
 
 
 class DockerEdgeCaseFramework:
-    "Framework for Docker edge case and failure testing.
+    "Framework for Docker edge case and failure testing."
 
     def __init__(self):
         ""Initialize edge case testing framework.
@@ -107,12 +109,13 @@ class DockerEdgeCaseFramework:
         self.rate_limiter = get_docker_rate_limiter()
 
         logger.info([U+1F527] Docker Edge Case Test Framework initialized)"
+        logger.info([U+1F527] Docker Edge Case Test Framework initialized)"
 
     def create_orphaned_container(self, container_name: str) -> bool:
-        "Create a container that will become orphaned.
+        "Create a container that will become orphaned."
         pass
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'create', '--name', container_name,
         'alpine:latest', 'sleep', '3600'
         
@@ -127,7 +130,7 @@ class DockerEdgeCaseFramework:
     def create_orphaned_network(self, network_name: str) -> bool:
         Create a network that will become orphaned.""
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'network', 'create', '--driver', 'bridge', network_name
         
         if result.returncode == 0:
@@ -141,7 +144,7 @@ class DockerEdgeCaseFramework:
     def create_orphaned_volume(self, volume_name: str) -> bool:
         ""Create a volume that will become orphaned.
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'volume', 'create', volume_name
         
         if result.returncode == 0:
@@ -154,6 +157,7 @@ class DockerEdgeCaseFramework:
 
     def find_available_port(self, start_port: int = 8000, max_attempts: int = 100) -> Optional[int]:
         Find an available port for testing port conflicts."
+        Find an available port for testing port conflicts."
         for port in range(start_port, start_port + max_attempts):
         try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -165,7 +169,7 @@ class DockerEdgeCaseFramework:
         return None
 
     def cleanup_orphaned_resources(self) -> Dict[str, int]:
-        "Clean up all orphaned resources and return cleanup stats.
+        "Clean up all orphaned resources and return cleanup stats."
         cleanup_stats = {
         'containers_cleaned': 0,
         'networks_cleaned': 0,
@@ -176,12 +180,12 @@ class DockerEdgeCaseFramework:
     
 
     # Cleanup orphaned containers
-        for container_name in list(self.orphaned_resources['containers']:
+        for container_name in list(self.orphaned_resources['containers'):
         try:
             # Try to stop first (if running)
-        execute_docker_command(['docker', 'container', 'stop', container_name]
+        execute_docker_command(['docker', 'container', 'stop', container_name)
             # Then remove
-        result = execute_docker_command(['docker', 'container', 'rm', container_name]
+        result = execute_docker_command(['docker', 'container', 'rm', container_name)
         if result.returncode == 0:
         cleanup_stats['containers_cleaned'] += 1
         self.orphaned_resources['containers'].discard(container_name)
@@ -192,9 +196,9 @@ class DockerEdgeCaseFramework:
         cleanup_stats['containers_failed'] += 1
 
                         # Cleanup orphaned networks
-        for network_name in list(self.orphaned_resources['networks']:
+        for network_name in list(self.orphaned_resources['networks'):
         try:
-        result = execute_docker_command(['docker', 'network', 'rm', network_name]
+        result = execute_docker_command(['docker', 'network', 'rm', network_name)
         if result.returncode == 0:
         cleanup_stats['networks_cleaned'] += 1
         self.orphaned_resources['networks'].discard(network_name)
@@ -205,9 +209,9 @@ class DockerEdgeCaseFramework:
         cleanup_stats['networks_failed'] += 1
 
                                             # Cleanup orphaned volumes
-        for volume_name in list(self.orphaned_resources['volumes']:
+        for volume_name in list(self.orphaned_resources['volumes'):
         try:
-        result = execute_docker_command(['docker', 'volume', 'rm', volume_name]
+        result = execute_docker_command(['docker', 'volume', 'rm', volume_name)
         if result.returncode == 0:
         cleanup_stats['volumes_cleaned'] += 1
         self.orphaned_resources['volumes'].discard(volume_name)
@@ -221,31 +225,32 @@ class DockerEdgeCaseFramework:
 
     def cleanup(self):
         Comprehensive cleanup of all test resources."
-        logger.info([U+1F9F9] Starting comprehensive edge case cleanup...")
+        Comprehensive cleanup of all test resources."
+        logger.info([U+1F9F9] Starting comprehensive edge case cleanup...")"
 
     # Clean up regular test resources
         for container in self.test_containers:
         try:
-        execute_docker_command(['docker', 'container', 'stop', container]
-        execute_docker_command(['docker', 'container', 'rm', container]
+        execute_docker_command(['docker', 'container', 'stop', container)
+        execute_docker_command(['docker', 'container', 'rm', container)
         except:
         pass
 
         for network in self.test_networks:
         try:
-        execute_docker_command(['docker', 'network', 'rm', network]
+        execute_docker_command(['docker', 'network', 'rm', network)
         except:
         pass
 
         for volume in self.test_volumes:
         try:
-        execute_docker_command(['docker', 'volume', 'rm', volume]
+        execute_docker_command(['docker', 'volume', 'rm', volume)
         except:
         pass
 
         for image in self.test_images:
         try:
-        execute_docker_command(['docker', 'image', 'rm', image]
+        execute_docker_command(['docker', 'image', 'rm', image)
         except:
         pass
 
@@ -279,13 +284,14 @@ class TestOrphanedResourceRecovery:
         orphaned_containers.append(container_name)
 
         logger.info(formatted_string)"
-        assert len(orphaned_containers) >= 3, "Should create at least 3 orphaned containers
+        logger.info(formatted_string)"
+        assert len(orphaned_containers) >= 3, "Should create at least 3 orphaned containers"
 
             # Verify containers exist
         existing_count = 0
         for container_name in orphaned_containers:
         try:
-        result = execute_docker_command(['docker', 'container', 'inspect', container_name]
+        result = execute_docker_command(['docker', 'container', 'inspect', container_name)
         if result.returncode == 0:
         existing_count += 1
         except:
@@ -298,7 +304,7 @@ class TestOrphanedResourceRecovery:
         cleanup_stats = edge_case_framework.cleanup_orphaned_resources()
 
         cleanup_rate = (cleanup_stats['containers_cleaned'] / )
-        (cleanup_stats['containers_cleaned'] + cleanup_stats['containers_failed'] * 100
+        (cleanup_stats['containers_cleaned') + cleanup_stats['containers_failed') * 100
         if cleanup_stats['containers_cleaned'] + cleanup_stats['containers_failed'] > 0 else 0)
 
         logger.info(formatted_string)
@@ -306,9 +312,10 @@ class TestOrphanedResourceRecovery:
         edge_case_framework.edge_case_metrics['orphan_cleanups_failed'] += cleanup_stats['containers_failed']
 
         assert cleanup_rate >= 90, formatted_string"
+        assert cleanup_rate >= 90, formatted_string"
 
     def test_orphaned_network_with_dependencies(self, edge_case_framework):
-        "Test orphaned network cleanup with container dependencies.
+        "Test orphaned network cleanup with container dependencies."
         pass
         logger.info("[U+1F310] Testing orphaned network cleanup with dependencies)"
 
@@ -321,7 +328,7 @@ class TestOrphanedResourceRecovery:
         for i in range(3):
         container_name = 'formatted_string'
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'create', '--name', container_name,
         '--network', network_name,
         'alpine:latest', 'sleep', '300'
@@ -336,35 +343,38 @@ class TestOrphanedResourceRecovery:
 
                     # Try to remove network (should fail due to dependencies)
         try:
-        result = execute_docker_command(['docker', 'network', 'rm', network_name]
+        result = execute_docker_command(['docker', 'network', 'rm', network_name)
         network_remove_failed = result.returncode != 0
         except:
         network_remove_failed = True
 
         assert network_remove_failed, Network removal should fail due to connected containers
         logger.info( PASS:  Network correctly cannot be removed due to dependencies)"
+        logger.info( PASS:  Network correctly cannot be removed due to dependencies)"
 
                             # Clean up containers first
         containers_cleaned = 0
         for container_name in connected_containers:
         try:
-        execute_docker_command(['docker', 'container', 'rm', container_name]
+        execute_docker_command(['docker', 'container', 'rm', container_name)
         containers_cleaned += 1
         except:
         pass
 
                                         # Now network should be removable
         try:
-        result = execute_docker_command(['docker', 'network', 'rm', network_name]
+        result = execute_docker_command(['docker', 'network', 'rm', network_name)
         network_cleanup_success = result.returncode == 0
         edge_case_framework.orphaned_resources['networks'].discard(network_name)
         except:
         network_cleanup_success = False
 
-        logger.info(formatted_string" )
+        logger.info(formatted_string" )"
+        "
         "
 
         edge_case_framework.edge_case_metrics['dependency_resolution_successes'] += 1
+        assert network_cleanup_success, Network should be cleanable after removing dependencies"
         assert network_cleanup_success, Network should be cleanable after removing dependencies"
 
     def test_volume_cleanup_with_active_mounts(self, edge_case_framework):
@@ -378,7 +388,7 @@ class TestOrphanedResourceRecovery:
     # Create container with volume mounted
         container_name = 'formatted_string'
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'create', '--name', container_name,
         '-v', 'formatted_string',
         'alpine:latest', 'sleep', '300'
@@ -391,32 +401,35 @@ class TestOrphanedResourceRecovery:
 
                 # Try to remove volume (should fail due to active mount)
         try:
-        result = execute_docker_command(['docker', 'volume', 'rm', volume_name]
+        result = execute_docker_command(['docker', 'volume', 'rm', volume_name)
         volume_remove_failed = result.returncode != 0
         except:
         volume_remove_failed = True
 
         if not volume_remove_failed:
         logger.warning(Volume removal should have failed due to active mount)"
+        logger.warning(Volume removal should have failed due to active mount)"
 
                             # Clean up container first
         try:
-        execute_docker_command(['docker', 'container', 'rm', container_name]
+        execute_docker_command(['docker', 'container', 'rm', container_name)
         container_cleanup = True
         except:
         container_cleanup = False
 
                                     # Now volume should be removable
         try:
-        result = execute_docker_command(['docker', 'volume', 'rm', volume_name]
+        result = execute_docker_command(['docker', 'volume', 'rm', volume_name)
         volume_cleanup_success = result.returncode == 0
         edge_case_framework.orphaned_resources['volumes'].discard(volume_name)
         except:
         volume_cleanup_success = False
 
-        logger.info(formatted_string" )
+        logger.info(formatted_string" )"
+        "
         "
 
+        assert volume_cleanup_success, Volume should be cleanable after removing container"
         assert volume_cleanup_success, Volume should be cleanable after removing container"
 
 
@@ -425,14 +438,15 @@ class TestInterruptedOperations:
 
     def test_interrupted_container_creation(self, edge_case_framework):
         Test recovery from interrupted container creation operations."
-        logger.info(" UNDER_CONSTRUCTION:  Testing interrupted container creation recovery)
+        Test recovery from interrupted container creation operations."
+        logger.info(" UNDER_CONSTRUCTION:  Testing interrupted container creation recovery)"
 
     # Simulate interrupted container creation by creating and then simulating failure
         container_name = 'formatted_string'
 
     # Start container creation
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'create', '--name', container_name,
         'alpine:latest', 'sleep', '300'
         
@@ -447,27 +461,27 @@ class TestInterruptedOperations:
                 # Simulate interruption by checking if we can recover
         try:
                     # Try to inspect the container
-        result = execute_docker_command(['docker', 'container', 'inspect', container_name]
+        result = execute_docker_command(['docker', 'container', 'inspect', container_name)
         container_exists = result.returncode == 0
 
         if container_exists:
                         # Container exists, try to start it (recovery)
-        result = execute_docker_command(['docker', 'container', 'start', container_name]
+        result = execute_docker_command(['docker', 'container', 'start', container_name)
         recovery_successful = result.returncode == 0
 
         if recovery_successful:
                             # Stop and clean up
-        execute_docker_command(['docker', 'container', 'stop', container_name]
-        execute_docker_command(['docker', 'container', 'rm', container_name]
+        execute_docker_command(['docker', 'container', 'stop', container_name)
+        execute_docker_command(['docker', 'container', 'rm', container_name)
         else:
-                                # Container doesn't exist, create it again (recovery)
-        result = execute_docker_command([]
+                                # Container doesn't exist, create it again (recovery)'
+        result = execute_docker_command([)
         'docker', 'create', '--name', 'formatted_string',
         'alpine:latest', 'sleep', '300'
                                 
         recovery_successful = result.returncode == 0
         if recovery_successful:
-        execute_docker_command(['docker', 'container', 'rm', 'formatted_string']
+        execute_docker_command(['docker', 'container', 'rm', 'formatted_string')
 
         edge_case_framework.edge_case_metrics['interrupted_operations_recovered'] += 1
         logger.info(""
@@ -486,9 +500,9 @@ class TestInterruptedOperations:
     # Use a small image for faster testing
         test_image = 'alpine:3.18'
 
-    # First, ensure image doesn't exist locally
+    # First, ensure image doesn't exist locally'
         try:
-        execute_docker_command(['docker', 'image', 'rm', test_image]
+        execute_docker_command(['docker', 'image', 'rm', test_image)
         except:
         pass  # Image might not exist, thats fine
 
@@ -499,7 +513,7 @@ class TestInterruptedOperations:
         if result.returncode != 0:
         pull_interrupted = True
         except Exception as e:
-        logger.info(")
+        logger.info(")"
         pull_interrupted = True
 
                         # Now try recovery (normal pull)
@@ -513,11 +527,11 @@ class TestInterruptedOperations:
 
         logger.info(formatted_string)
 
-                                # Don't assert on this as network conditions can vary
-                                # The important thing is that Docker doesn't crash
+                                # Don't assert on this as network conditions can vary'
+                                # The important thing is that Docker doesn't crash'
 
         except Exception as e:
-        logger.warning(")
+        logger.warning(")"
 
     def test_interrupted_network_operations(self, edge_case_framework):
         Test recovery from interrupted network operations.
@@ -527,7 +541,7 @@ class TestInterruptedOperations:
 
     # Create network
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'network', 'create', '--driver', 'bridge', network_name
         
         network_created = result.returncode == 0
@@ -541,12 +555,12 @@ class TestInterruptedOperations:
                 # Simulate partial operations and recovery
         try:
                     # Try to inspect network (should work)
-        result = execute_docker_command(['docker', 'network', 'inspect', network_name]
+        result = execute_docker_command(['docker', 'network', 'inspect', network_name)
         network_accessible = result.returncode == 0
 
                     # Create container on network (potential interruption point)
         container_name = 'formatted_string'
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'create', '--name', container_name,
         '--network', network_name,
         'alpine:latest', 'sleep', '300'
@@ -556,10 +570,10 @@ class TestInterruptedOperations:
         edge_case_framework.test_containers.append(container_name)
 
                         # Remove container (recovery operation)
-        execute_docker_command(['docker', 'container', 'rm', container_name]
+        execute_docker_command(['docker', 'container', 'rm', container_name)
 
                         # Network should still be functional
-        result = execute_docker_command(['docker', 'network', 'inspect', network_name]
+        result = execute_docker_command(['docker', 'network', 'inspect', network_name)
         network_still_accessible = result.returncode == 0
 
         recovery_successful = network_accessible and network_still_accessible
@@ -569,6 +583,7 @@ class TestInterruptedOperations:
 
         logger.info(formatted_string)
         assert recovery_successful, Network should remain functional after interrupted operations"
+        assert recovery_successful, Network should remain functional after interrupted operations"
 
         except Exception as e:
         logger.error(formatted_string)
@@ -576,7 +591,7 @@ class TestInterruptedOperations:
 
 
 class TestPortConflictResolution:
-        "Test resolution of Docker port conflicts.
+        "Test resolution of Docker port conflicts."
 
     def test_port_conflict_detection_and_resolution(self, edge_case_framework):
         "Test detection and resolution of Docker port conflicts."
@@ -590,7 +605,7 @@ class TestPortConflictResolution:
         # Create first container using the port
         container1_name = 'formatted_string'
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container1_name,
         '-p', 'formatted_string',
         'nginx:alpine'
@@ -601,7 +616,7 @@ class TestPortConflictResolution:
         else:
         container1_created = False
         except Exception as e:
-        logger.warning(")
+        logger.warning(")"
         container1_created = False
 
         if not container1_created:
@@ -613,7 +628,7 @@ class TestPortConflictResolution:
                             # Try to create second container with same port (should fail)
         container2_name = 'formatted_string'
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container2_name,
         '-p', 'formatted_string',
         'nginx:alpine'
@@ -624,7 +639,7 @@ class TestPortConflictResolution:
         edge_case_framework.test_containers.append(container2_name)
         except Exception as e:
         port_conflict_detected = True
-        logger.info(")
+        logger.info(")"
 
         assert port_conflict_detected, Port conflict should be detected
         logger.info( PASS:  Port conflict correctly detected)
@@ -633,7 +648,7 @@ class TestPortConflictResolution:
         alternative_port = edge_case_framework.find_available_port(test_port + 1)
         if alternative_port:
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'run', '-d', '--name', 'formatted_string',
         '-p', 'formatted_string',
         'nginx:alpine'
@@ -655,6 +670,7 @@ class TestPortConflictResolution:
 
     def test_dynamic_port_allocation_conflicts(self, edge_case_framework):
         Test dynamic port allocation with potential conflicts."
+        Test dynamic port allocation with potential conflicts."
         pass
         logger.info( TARGET:  Testing dynamic port allocation conflict handling)
 
@@ -666,7 +682,7 @@ class TestPortConflictResolution:
         container_name = 'formatted_string'
         try:
             # Let Docker allocate random port
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
         '-P',  # Publish all exposed ports to random host ports
         'nginx:alpine'
@@ -676,7 +692,7 @@ class TestPortConflictResolution:
         edge_case_framework.test_containers.append(container_name)
 
                 # Get allocated port
-        inspect_result = execute_docker_command(['docker', 'port', container_name]
+        inspect_result = execute_docker_command(['docker', 'port', container_name)
         if inspect_result.returncode == 0:
         containers_with_ports.append((container_name, inspect_result.stdout))
         successful_allocations += 1
@@ -684,7 +700,7 @@ class TestPortConflictResolution:
         time.sleep(0.5)  # Brief pause between allocations
 
         except Exception as e:
-        logger.warning(")
+        logger.warning(")"
 
         allocation_rate = successful_allocations / 10 * 100
         logger.info(formatted_string)
@@ -716,16 +732,17 @@ class TestPortConflictResolution:
 
 class TestContainerNameConflicts:
         Test resolution of Docker container name conflicts."
+        Test resolution of Docker container name conflicts."
 
     def test_container_name_conflict_handling(self, edge_case_framework):
-        "Test handling of container name conflicts.
+        "Test handling of container name conflicts."
         logger.info([U+1F3F7][U+FE0F] Testing container name conflict handling)
 
         base_name = 'formatted_string'
 
     # Create first container
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'create', '--name', base_name,
         'alpine:latest', 'echo', 'first'
         
@@ -738,7 +755,7 @@ class TestContainerNameConflicts:
 
                 # Try to create second container with same name (should fail)
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'create', '--name', base_name,
         'alpine:latest', 'echo', 'second'
                     
@@ -746,13 +763,13 @@ class TestContainerNameConflicts:
 
         if result.returncode == 0:
                         # If it succeeded unexpectedly, clean it up
-        execute_docker_command(['docker', 'container', 'rm', base_name]
+        execute_docker_command(['docker', 'container', 'rm', base_name)
         except Exception as e:
         name_conflict_detected = True
         logger.info()
 
         assert name_conflict_detected, Container name conflict should be detected
-        logger.info( PASS:  Container name conflict correctly detected")
+        logger.info( PASS:  Container name conflict correctly detected")"
 
                             # Test resolution with modified names
         resolution_strategies = [
@@ -764,7 +781,7 @@ class TestContainerNameConflicts:
         successful_resolutions = 0
         for strategy_name in resolution_strategies:
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'create', '--name', strategy_name,
         'alpine:latest', 'echo', 'resolved'
                                     
@@ -775,13 +792,13 @@ class TestContainerNameConflicts:
         edge_case_framework.edge_case_metrics['name_conflicts_resolved'] += 1
 
                                         # Clean up immediately
-        execute_docker_command(['docker', 'container', 'rm', strategy_name]
+        execute_docker_command(['docker', 'container', 'rm', strategy_name)
 
         except Exception as e:
         logger.warning(formatted_string)
 
         resolution_rate = successful_resolutions / len(resolution_strategies) * 100
-        logger.info(")
+        logger.info(")"
 
         assert resolution_rate >= 100, formatted_string
 
@@ -792,9 +809,10 @@ class TestContainerNameConflicts:
 
     def create_container_with_generated_name(thread_id: int) -> Tuple[bool, str]:
         Create container with thread-specific generated name."
+        Create container with thread-specific generated name."
         container_name = 'formatted_string'
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'create', '--name', container_name,
         'alpine:latest', 'echo', 'formatted_string'
         
@@ -821,7 +839,7 @@ class TestContainerNameConflicts:
         if success:
         edge_case_framework.test_containers.append(container_name)
         except Exception as e:
-        logger.error(")
+        logger.error(")"
         results.append((False, unknown))
 
         successful_creates = sum(1 for success, _ in results if success)
@@ -840,9 +858,10 @@ class TestContainerNameConflicts:
 
 class TestDockerDaemonRestart:
         Test Docker daemon restart scenarios and recovery."
+        Test Docker daemon restart scenarios and recovery."
 
     def test_daemon_availability_monitoring(self, edge_case_framework):
-        "Test monitoring of Docker daemon availability.
+        "Test monitoring of Docker daemon availability."
         logger.info( CYCLE:  Testing Docker daemon availability monitoring)
 
     # Test Docker daemon connectivity
@@ -871,6 +890,7 @@ class TestDockerDaemonRestart:
 
     def test_operation_retry_after_daemon_issues(self, edge_case_framework):
         Test operation retry mechanisms after potential daemon issues."
+        Test operation retry mechanisms after potential daemon issues."
         pass
         logger.info( CYCLE:  Testing operation retry after daemon issues)
 
@@ -896,7 +916,7 @@ class TestDockerDaemonRestart:
         operation_successful = True
         break
         else:
-        logger.info(")
+        logger.info(")"
         time.sleep(1)
 
         except Exception as e:
@@ -919,7 +939,8 @@ class TestResourceLimitBoundaries:
 
     def test_memory_limit_boundary_conditions(self, edge_case_framework):
         Test memory limits at boundary conditions (very low/high values)."
-        logger.info("[U+1F9E0] Testing memory limit boundary conditions)
+        Test memory limits at boundary conditions (very low/high values)."
+        logger.info("[U+1F9E0] Testing memory limit boundary conditions)"
 
         boundary_tests = [
         ('tiny_memory', '16m'),      # Very small memory limit
@@ -936,7 +957,7 @@ class TestResourceLimitBoundaries:
 
         try:
             # Create container with specific memory limit
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'create', '--name', container_name,
         '--memory', memory_limit,
         '--memory-reservation', memory_limit,
@@ -948,7 +969,7 @@ class TestResourceLimitBoundaries:
         successful_deployments += 1
 
                 # Verify memory limit is set correctly
-        inspect_result = execute_docker_command([]
+        inspect_result = execute_docker_command([)
         'docker', 'inspect', container_name, '--format', '{{.HostConfig.Memory}}'
                 
 
@@ -965,11 +986,11 @@ class TestResourceLimitBoundaries:
         logger.warning()
 
                                 # Try to start container to test actual resource application
-        start_result = execute_docker_command(['docker', 'start', container_name]
+        start_result = execute_docker_command(['docker', 'start', container_name)
         if start_result.returncode == 0:
         time.sleep(2)
                                     # Stop it after brief run
-        execute_docker_command(['docker', 'stop', container_name]
+        execute_docker_command(['docker', 'stop', container_name)
         else:
         logger.warning(formatted_string)
 
@@ -1003,7 +1024,7 @@ class TestResourceLimitBoundaries:
 
         try:
             # Create container with specific CPU limit
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'create', '--name', container_name,
         '--cpus', cpu_limit,
         'alpine:latest', 'sh', '-c', 'while true; do echo cpu test; sleep 1; done'
@@ -1014,12 +1035,12 @@ class TestResourceLimitBoundaries:
         successful_cpu_limits += 1
 
                 # Start container to test CPU limits
-        start_result = execute_docker_command(['docker', 'start', container_name]
+        start_result = execute_docker_command(['docker', 'start', container_name)
         if start_result.returncode == 0:
         time.sleep(3)  # Let it run briefly
 
                     # Check container stats to verify CPU usage
-        stats_result = execute_docker_command([]
+        stats_result = execute_docker_command([)
         'docker', 'stats', container_name, '--no-stream', '--format', '{{.CPUPerc}}'
                     
 
@@ -1034,7 +1055,7 @@ class TestResourceLimitBoundaries:
         logger.warning(formatted_string)
 
                                 # Stop container
-        execute_docker_command(['docker', 'stop', container_name]
+        execute_docker_command(['docker', 'stop', container_name)
         else:
         logger.warning("")
 
@@ -1075,7 +1096,7 @@ class TestResourceLimitBoundaries:
                 # Use Docker volume limits or quota systems instead
         pass
 
-        docker_cmd.extend(['alpine:latest', 'sh', '-c', test_command]
+        docker_cmd.extend(['alpine:latest', 'sh', '-c', test_command)
 
         result = execute_docker_command(docker_cmd)
 
@@ -1108,7 +1129,7 @@ class TestNetworkEdgeCases:
         for i in range(3):
         network_name = 'formatted_string'
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'network', 'create', '--driver', 'bridge',
         '--internal', network_name  # Internal network for isolation
             
@@ -1123,10 +1144,10 @@ class TestNetworkEdgeCases:
 
                         # Create containers on different isolated networks
         isolation_containers = []
-        for i, network_name in enumerate(isolated_networks[:2]:  # Use first 2 networks
+        for i, network_name in enumerate(isolated_networks[:2):  # Use first 2 networks
         container_name = 'formatted_string'
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'create', '--name', container_name,
         '--network', network_name,
         'alpine:latest', 'sleep', '60'
@@ -1142,7 +1163,7 @@ class TestNetworkEdgeCases:
         if len(isolation_containers) >= 2:
                                         # Start containers
         for container_name, _ in isolation_containers:
-        execute_docker_command(['docker', 'start', container_name]
+        execute_docker_command(['docker', 'start', container_name)
 
         time.sleep(3)
 
@@ -1152,22 +1173,22 @@ class TestNetworkEdgeCases:
 
                                             # This should fail due to network isolation
         try:
-        ping_result = execute_docker_command([]
+        ping_result = execute_docker_command([)
         'docker', 'exec', container1, 'ping', '-c', '1', '-W', '2', container2
                                                 
         if ping_result.returncode == 0:
         isolation_verified = False
-        logger.warning(Network isolation may not be working - ping succeeded")
+        logger.warning(Network isolation may not be working - ping succeeded")"
         except Exception:
                                                         # Exception expected due to isolation - this is good
         pass
 
                                                         # Stop containers
         for container_name, _ in isolation_containers:
-        execute_docker_command(['docker', 'stop', container_name]
+        execute_docker_command(['docker', 'stop', container_name)
 
         logger.info(formatted_string)
-        logger.info(")
+        logger.info(")"
 
         assert len(isolated_networks) >= 2, Should create at least 2 isolated networks
         assert isolation_verified, Network isolation should prevent cross-network communication
@@ -1181,7 +1202,7 @@ class TestNetworkEdgeCases:
 
     # Create first network
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'network', 'create', '--driver', 'bridge', base_network_name
         
         first_network_created = result.returncode == 0
@@ -1189,11 +1210,11 @@ class TestNetworkEdgeCases:
         edge_case_framework.test_networks.append(base_network_name)
         except Exception as e:
         logger.error(formatted_string)
-        pytest.skip(Cannot create first network for conflict testing")
+        pytest.skip(Cannot create first network for conflict testing")"
 
                 # Try to create second network with same name (should fail)
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'network', 'create', '--driver', 'bridge', base_network_name
                     
         name_conflict_detected = result.returncode != 0
@@ -1201,7 +1222,7 @@ class TestNetworkEdgeCases:
         name_conflict_detected = True
         logger.info(formatted_string)
 
-        assert name_conflict_detected, "Network name conflict should be detected
+        assert name_conflict_detected, "Network name conflict should be detected"
         logger.info( PASS:  Network name conflict correctly detected)
 
                         # Test resolution strategies
@@ -1214,7 +1235,7 @@ class TestNetworkEdgeCases:
         successful_resolutions = 0
         for strategy_name in resolution_strategies:
         try:
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'network', 'create', '--driver', 'bridge', strategy_name
                                 
 
@@ -1232,13 +1253,13 @@ class TestNetworkEdgeCases:
 
     def test_bridge_network_edge_cases(self, edge_case_framework):
         Test bridge network configuration edge cases.
-        logger.info([U+1F309] Testing bridge network edge cases")
+        logger.info([U+1F309] Testing bridge network edge cases")"
 
     # Test various bridge network configurations
         bridge_configs = [
-        ('default_bridge', {},
-        ('custom_subnet', {'subnet': '172.25.0.0/16'},
-        ('custom_gateway', {'subnet': '172.26.0.0/16', 'gateway': '172.26.0.1'},
+        ('default_bridge', {),
+        ('custom_subnet', {'subnet': '172.25.0.0/16'),
+        ('custom_gateway', {'subnet': '172.26.0.0/16', 'gateway': '172.26.0.1'),
     
 
         successful_bridges = 0
@@ -1252,9 +1273,9 @@ class TestNetworkEdgeCases:
         cmd = ['docker', 'network', 'create', '--driver', 'bridge']
 
         if 'subnet' in config:
-        cmd.extend(['--subnet', config['subnet']]
+        cmd.extend(['--subnet', config['subnet'))
         if 'gateway' in config:
-        cmd.extend(['--gateway', config['gateway']]
+        cmd.extend(['--gateway', config['gateway'))
 
         cmd.append(network_name)
 
@@ -1266,7 +1287,7 @@ class TestNetworkEdgeCases:
 
                         # Test functionality by creating container on network
         test_container = 'formatted_string'
-        container_result = execute_docker_command([]
+        container_result = execute_docker_command([)
         'docker', 'create', '--name', test_container,
         '--network', network_name,
         'alpine:latest', 'ping', '-c', '1', '8.8.8.8'
@@ -1277,12 +1298,12 @@ class TestNetworkEdgeCases:
         bridge_functionality_tests += 1
 
                             # Clean up test container
-        execute_docker_command(['docker', 'container', 'rm', test_container]
+        execute_docker_command(['docker', 'container', 'rm', test_container)
         else:
         logger.warning(formatted_string)
 
         except Exception as e:
-        logger.error(")
+        logger.error(")"
 
         bridge_success_rate = successful_bridges / len(bridge_configs) * 100
         functionality_rate = bridge_functionality_tests / successful_bridges * 100 if successful_bridges > 0 else 0
@@ -1296,6 +1317,7 @@ class TestVolumeEdgeCases:
         "Test Docker volume edge cases and unusual configurations."
 
     def test_volume_mount_permission_edge_cases(self, edge_case_framework):
+        Test volume mount permission edge cases."
         Test volume mount permission edge cases."
         logger.info([U+1F510] Testing volume mount permission edge cases)
 
@@ -1315,7 +1337,7 @@ class TestVolumeEdgeCases:
 
         try:
             # Create volume
-        volume_result = execute_docker_command(['docker', 'volume', 'create', volume_name]
+        volume_result = execute_docker_command(['docker', 'volume', 'create', volume_name)
         if volume_result.returncode != 0:
         continue
 
@@ -1323,10 +1345,10 @@ class TestVolumeEdgeCases:
 
                 # Create container with volume mount
         mount_spec = 'formatted_string'
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'create', '--name', container_name,
         '-v', mount_spec,
-        'alpine:latest', 'sh', '-c', 'echo "test > /data/test.txt; cat /data/test.txt'
+        'alpine:latest', 'sh', '-c', 'echo "test > /data/test.txt; cat /data/test.txt'"
                 
 
         if result.returncode == 0:
@@ -1334,7 +1356,7 @@ class TestVolumeEdgeCases:
         successful_mounts += 1
 
                     # Test the mount by starting container
-        start_result = execute_docker_command(['docker', 'start', '-a', container_name]
+        start_result = execute_docker_command(['docker', 'start', '-a', container_name)
 
         if readonly:
                         # Should fail for readonly mounts when trying to write
@@ -1362,9 +1384,10 @@ class TestVolumeEdgeCases:
         logger.info(formatted_string)
 
         assert mount_success_rate >= 80, "
+        assert mount_success_rate >= 80, "
 
     def test_volume_cleanup_with_dependency_chains(self, edge_case_framework):
-        "Test volume cleanup with complex dependency chains.
+        "Test volume cleanup with complex dependency chains."
         pass
         logger.info([U+1F517] Testing volume cleanup with dependency chains)
 
@@ -1375,14 +1398,14 @@ class TestVolumeEdgeCases:
 
         try:
         # Create base volume
-        result = execute_docker_command(['docker', 'volume', 'create', base_volume]
+        result = execute_docker_command(['docker', 'volume', 'create', base_volume)
         if result.returncode == 0:
         edge_case_framework.test_volumes.append(base_volume)
 
             # Create derived volumes (simulated by additional volumes)
         for i in range(3):
         derived_volume = 'formatted_string'
-        result = execute_docker_command(['docker', 'volume', 'create', derived_volume]
+        result = execute_docker_command(['docker', 'volume', 'create', derived_volume)
         if result.returncode == 0:
         derived_volumes.append(derived_volume)
         edge_case_framework.test_volumes.append(derived_volume)
@@ -1394,8 +1417,8 @@ class TestVolumeEdgeCases:
 
                         # Create container that mounts multiple volumes to create dependencies
         mount_args = []
-        for j, vol in enumerate(all_volumes[:i+1]:  # Mount all volumes up to current
-        mount_args.extend(['-v', 'formatted_string']
+        for j, vol in enumerate(all_volumes[:i+1):  # Mount all volumes up to current
+        mount_args.extend(['-v', 'formatted_string')
 
         cmd = ['docker', 'create', '--name', container_name] + mount_args + [
         'alpine:latest', 'sh', '-c', 'echo dependency test > /data0/test.txt'
@@ -1414,7 +1437,7 @@ class TestVolumeEdgeCases:
         for volume in all_volumes:
         cleanup_attempts += 1
         try:
-        result = execute_docker_command(['docker', 'volume', 'rm', volume]
+        result = execute_docker_command(['docker', 'volume', 'rm', volume)
         if result.returncode != 0:
         logger.info("")
         else:
@@ -1425,13 +1448,13 @@ class TestVolumeEdgeCases:
 
                                                 # Clean up containers first
         for container_name in dependency_containers:
-        execute_docker_command(['docker', 'container', 'rm', container_name]
+        execute_docker_command(['docker', 'container', 'rm', container_name)
 
                                                     # Now volumes should be cleanable
         final_cleanup_successes = 0
         for volume in [item for item in []]:
         try:
-        result = execute_docker_command(['docker', 'volume', 'rm', volume]
+        result = execute_docker_command(['docker', 'volume', 'rm', volume)
         if result.returncode == 0:
         final_cleanup_successes += 1
         edge_case_framework.test_volumes.remove(volume)
@@ -1440,15 +1463,15 @@ class TestVolumeEdgeCases:
 
         dependency_protection_rate = ((cleanup_attempts - cleanup_successes) / cleanup_attempts * 100 )
         if cleanup_attempts > 0 else 0)
-        final_cleanup_rate = final_cleanup_successes / len([item for item in []] * 100
+        final_cleanup_rate = final_cleanup_successes / len([item for item in [)) * 100
 
         logger.info(formatted_string )
-        ")
+        ")"
 
         assert dependency_protection_rate >= 50, formatted_string
 
         except Exception as e:
-        logger.error(")
+        logger.error(")"
         raise
 
 
@@ -1460,9 +1483,9 @@ class TestContainerLifecycleEdgeCases:
         logger.info( CYCLE:  Testing container state transition edge cases)
 
         state_transition_tests = [
-        ('create_start_stop', ['create', 'start', 'stop'],
-        ('create_start_pause_unpause', ['create', 'start', 'pause', 'unpause', 'stop'],
-        ('create_start_restart', ['create', 'start', 'restart', 'stop'],
+        ('create_start_stop', ['create', 'start', 'stop'),
+        ('create_start_pause_unpause', ['create', 'start', 'pause', 'unpause', 'stop'),
+        ('create_start_restart', ['create', 'start', 'restart', 'stop'),
     
 
         successful_transitions = 0
@@ -1479,7 +1502,7 @@ class TestContainerLifecycleEdgeCases:
         total_transitions += 1
 
         if action == 'create':
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'create', '--name', container_name,
         'alpine:latest', 'sh', '-c', 'while true; do echo running; sleep 1; done'
                     
@@ -1489,30 +1512,30 @@ class TestContainerLifecycleEdgeCases:
         transitions_completed += 1
 
         elif action == 'start' and current_container:
-        result = execute_docker_command(['docker', 'start', current_container]
+        result = execute_docker_command(['docker', 'start', current_container)
         if result.returncode == 0:
         transitions_completed += 1
         time.sleep(1)  # Let it start
 
         elif action == 'stop' and current_container:
-        result = execute_docker_command(['docker', 'stop', '-t', '2', current_container]
+        result = execute_docker_command(['docker', 'stop', '-t', '2', current_container)
         if result.returncode == 0:
         transitions_completed += 1
 
         elif action == 'pause' and current_container:
-        result = execute_docker_command(['docker', 'pause', current_container]
+        result = execute_docker_command(['docker', 'pause', current_container)
         if result.returncode == 0:
         transitions_completed += 1
         time.sleep(1)
 
         elif action == 'unpause' and current_container:
-        result = execute_docker_command(['docker', 'unpause', current_container]
+        result = execute_docker_command(['docker', 'unpause', current_container)
         if result.returncode == 0:
         transitions_completed += 1
         time.sleep(1)
 
         elif action == 'restart' and current_container:
-        result = execute_docker_command(['docker', 'restart', '-t', '2', current_container]
+        result = execute_docker_command(['docker', 'restart', '-t', '2', current_container)
         if result.returncode == 0:
         transitions_completed += 1
         time.sleep(2)  # Let it restart
@@ -1520,7 +1543,7 @@ class TestContainerLifecycleEdgeCases:
         if transitions_completed == len(transitions):
         successful_transitions += 1
 
-        logger.info(")
+        logger.info(")"
 
         except Exception as e:
         logger.error(formatted_string)
@@ -1528,7 +1551,7 @@ class TestContainerLifecycleEdgeCases:
         transition_success_rate = successful_transitions / len(state_transition_tests) * 100
         overall_transition_rate = (total_transitions - (total_transitions - sum(len(t[1] for t in state_transition_tests if successful_transitions > 0))) / total_transitions * 100
 
-        logger.info(")
+        logger.info(")"
 
         assert transition_success_rate >= 80, formatted_string
 
@@ -1554,7 +1577,7 @@ class TestContainerLifecycleEdgeCases:
 
         try:
             # Run container with specific exit command
-        result = execute_docker_command([]
+        result = execute_docker_command([)
         'docker', 'run', '--name', container_name,
         'alpine:latest', 'sh', '-c', command
             
@@ -1562,7 +1585,7 @@ class TestContainerLifecycleEdgeCases:
         edge_case_framework.test_containers.append(container_name)
 
             # Get actual exit code
-        inspect_result = execute_docker_command([]
+        inspect_result = execute_docker_command([)
         'docker', 'inspect', container_name, '--format', '{{.State.ExitCode}}'
             
 
@@ -1575,15 +1598,15 @@ class TestContainerLifecycleEdgeCases:
         else:
         logger.warning(formatted_string)
         except ValueError:
-        logger.error(")
+        logger.error(")"
         else:
         logger.error(formatted_string)
 
                                     # Clean up
-        execute_docker_command(['docker', 'container', 'rm', container_name]
+        execute_docker_command(['docker', 'container', 'rm', container_name)
 
         except Exception as e:
-        logger.error(")
+        logger.error(")"
 
         exit_code_accuracy = correct_exit_codes / containers_tested * 100 if containers_tested > 0 else 0
         logger.info(formatted_string)
@@ -1611,3 +1634,7 @@ class TestContainerLifecycleEdgeCases:
         raise
         finally:
         framework.cleanup()
+
+))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+]]]]]]]]]]]]]
+}}}

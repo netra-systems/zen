@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
+"""
 Issue #914: AgentRegistry Import Path SSOT Violations Test Suite
 
+"""
 """
 This test suite specifically focuses on import path inconsistencies and violations
 in AgentRegistry implementations. These tests validate that there is a single,
@@ -22,6 +24,7 @@ Test Focus Areas:
 Expected Result: Tests FAIL initially showing import path violations.
 After SSOT consolidation, tests pass with single canonical import path.
 "
+"
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 import sys
@@ -32,7 +35,7 @@ from typing import Dict, List, Set, Optional, Tuple
 from pathlib import Path
 
 class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
-    "Test import path SSOT violations for AgentRegistry implementations.
+    "Test import path SSOT violations for AgentRegistry implementations."
     
     def setup_method(self, method=None):
         "Initialize test with import path analysis."
@@ -61,6 +64,7 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
     def test_01_multiple_agent_registry_import_paths_exist(self):
         "TEST EXPECTED TO FAIL: Only one AgentRegistry import path should exist."
         print(\n=== TEST 1: Multiple Import Path Validation ===)"
+        print(\n=== TEST 1: Multiple Import Path Validation ===)"
         
         successful_imports = []
         failed_imports = []
@@ -73,7 +77,7 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
                 if hasattr(module, class_name):
                     agent_registry_class = getattr(module, class_name)
                     successful_imports.append((import_path, agent_registry_class))
-                    print(f✓ Successfully imported: {import_path}")
+                    print(f✓ Successfully imported: {import_path}")"
                 else:
                     failed_imports.append((import_path, fModule has no {class_name}))
                     print(f✗ No {class_name} in module: {module_path}"")
@@ -90,10 +94,10 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
         self.assertEqual(len(successful_imports), 1,
                         fIMPORT PATH SSOT VIOLATION: Found {len(successful_imports)} working AgentRegistry import paths. 
                         fShould have exactly 1 canonical import path. 
-                        f"Working paths: {[path for path, _ in successful_imports]})
+                        f"Working paths: {[path for path, _ in successful_imports]})"
     
     def test_02_import_ambiguity_in_codebase(self):
-        "TEST EXPECTED TO FAIL: Codebase should not have ambiguous imports.
+        "TEST EXPECTED TO FAIL: Codebase should not have ambiguous imports."
         print("\n=== TEST 2: Codebase Import Ambiguity Analysis ===")
         
         # Scan Python files for AgentRegistry imports
@@ -112,7 +116,7 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
         
         print(f"Import patterns found: {len(import_patterns)})")
         for pattern, usages in import_patterns.items():
-            print(f  Pattern '{pattern}': {len(usages")} usages)
+            print(f  Pattern '{pattern}': {len(usages")} usages)"
             for file_path, import_line in usages[:3]:  # Show first 3 examples
                 print(f    {file_path}: {import_line.strip()})
             if len(usages) > 3:
@@ -122,17 +126,20 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
         self.assertEqual(len(import_patterns), 1,
                         fIMPORT AMBIGUITY VIOLATION: Found {len(import_patterns)} different AgentRegistry import patterns. 
                         fShould have exactly 1 canonical pattern. "
-                        f"Patterns: {list(import_patterns.keys())})
+                        fShould have exactly 1 canonical pattern. "
+                        f"Patterns: {list(import_patterns.keys())})"
     
     def test_03_ssot_import_registry_compliance(self):
         TEST EXPECTED TO FAIL: Should comply with SSOT import registry."
-        print("\n=== TEST 3: SSOT Import Registry Compliance ===)
+        TEST EXPECTED TO FAIL: Should comply with SSOT import registry."
+        print("\n=== TEST 3: SSOT Import Registry Compliance ===)"
         
         # Check if SSOT_IMPORT_REGISTRY.md documents canonical AgentRegistry import
         ssot_registry_path = self.project_root / SSOT_IMPORT_REGISTRY.md"
+        ssot_registry_path = self.project_root / SSOT_IMPORT_REGISTRY.md"
         
         if not ssot_registry_path.exists():
-            self.fail(f"SSOT Import Registry not found at: {ssot_registry_path})
+            self.fail(f"SSOT Import Registry not found at: {ssot_registry_path})"
         
         # Read SSOT import registry
         with open(ssot_registry_path, 'r') as f:
@@ -149,7 +156,7 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
             print(f"SSOT registry entries for AgentRegistry: {len(registry_lines)})")
             
             for line in registry_lines[:5]:  # Show first 5
-                print(f  {line.strip(")})
+                print(f  {line.strip(")})"
         
         # Check if multiple entries exist (violation)
         registry_entries = [line for line in ssot_content.split('\n') 
@@ -183,11 +190,13 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
         # EXPECTED FAILURE: Circular dependencies likely exist
         self.assertEqual(len(circular_deps), 0,
                         fCIRCULAR DEPENDENCY VIOLATION: Found {len(circular_deps)} circular dependency cycles. "
-                        f"Cycles: {circular_deps})
+                        fCIRCULAR DEPENDENCY VIOLATION: Found {len(circular_deps)} circular dependency cycles. "
+                        f"Cycles: {circular_deps})"
     
     def test_05_import_resolution_consistency(self):
         TEST EXPECTED TO FAIL: Import resolution should be consistent across environments."
-        print("\n=== TEST 5: Import Resolution Consistency ===)
+        TEST EXPECTED TO FAIL: Import resolution should be consistent across environments."
+        print("\n=== TEST 5: Import Resolution Consistency ===)"
         
         resolution_results = {}
         
@@ -214,6 +223,7 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
                 
             except Exception as e:
                 resolution_results[module_path] = fERROR: {e}"
+                resolution_results[module_path] = fERROR: {e}"
                 print(f"Resolution failed for {module_path}: {e})")
         
         # Check for consistent resolution
@@ -228,18 +238,20 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
         # EXPECTED FAILURE: Multiple unique paths indicate duplication
         # In ideal SSOT world, all would resolve to same canonical implementation
         if len(unique_paths) > 1:
-            self.fail(f"IMPORT RESOLUTION VIOLATION: Multiple unique file paths resolved 
+            self.fail(f"IMPORT RESOLUTION VIOLATION: Multiple unique file paths resolved"
+                     ffor AgentRegistry imports. Should resolve to single SSOT implementation. "
                      ffor AgentRegistry imports. Should resolve to single SSOT implementation. "
                      fPaths: {unique_paths})
     
     def test_06_import_statement_standardization(self):
         "TEST EXPECTED TO FAIL: Import statements should follow standard pattern."
         print(\n=== TEST 6: Import Statement Standardization ===)"
+        print(\n=== TEST 6: Import Statement Standardization ===)"
         
         # Analyze import statement patterns in codebase
         import_statements = self._extract_all_agent_registry_import_statements()
         
-        print(fFound {len(import_statements)} AgentRegistry import statements")
+        print(fFound {len(import_statements)} AgentRegistry import statements")"
         
         # Categorize import patterns
         import_categories = {
@@ -263,8 +275,9 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
                 import_categories['direct_class'].append((file_path, statement))
         
         print(Import pattern distribution:)"
+        print(Import pattern distribution:)"
         for category, statements in import_categories.items():
-            print(f  {category}: {len(statements)}")
+            print(f  {category}: {len(statements)}")"
             for file_path, statement in statements[:2]:  # Show examples
                 print(f    {os.path.basename(file_path)}: {statement.strip()})
         
@@ -284,7 +297,8 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
         # Scan Python files in relevant directories
         scan_dirs = [
             self.project_root / netra_backend,"
-            self.project_root / "tests,
+            self.project_root / netra_backend,"
+            self.project_root / "tests,"
             self.project_root / test_framework
         ]
         
@@ -308,12 +322,13 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
                                 import_usages[relative_path] = registry_imports
                                 
                     except Exception:
-                        # Skip files that can't be read
+                        # Skip files that can't be read'
                         continue
         
         return import_usages
     
     def _extract_import_pattern(self, import_line: str) -> str:
+        Extract standardized import pattern from import line."
         Extract standardized import pattern from import line."
         import_line = import_line.strip()
         
@@ -325,7 +340,7 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
             import_part = parts[1]
             
             if 'AgentRegistry' in import_part:
-                return f"from {module_part} import AgentRegistry
+                return f"from {module_part} import AgentRegistry"
         
         elif import_line.startswith('import '):
             # import module.AgentRegistry or import module
@@ -362,7 +377,7 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
         
         return dependency_graph
     
-    def _detect_circular_dependencies(self, graph: Dict[str, List[str]] -> List[List[str]]:
+    def _detect_circular_dependencies(self, graph: Dict[str, List[str)) -> List[List[str)):
         Detect circular dependencies in module graph.""
         cycles = []
         visited = set()
@@ -382,18 +397,19 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
             visited.add(node)
             rec_stack.add(node)
             
-            for neighbor in graph.get(node, []:
-                dfs(neighbor, path + [neighbor]
+            for neighbor in graph.get(node, [):
+                dfs(neighbor, path + [neighbor)
             
             rec_stack.remove(node)
         
         for node in graph:
             if node not in visited:
-                dfs(node, [node]
+                dfs(node, [node)
         
         return cycles
     
     def _extract_all_agent_registry_import_statements(self) -> List[Tuple[str, str]]:
+        Extract all AgentRegistry import statements from codebase."
         Extract all AgentRegistry import statements from codebase."
         statements = []
         
@@ -406,14 +422,16 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
         return statements
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print(MIGRATION NOTICE: This file previously used direct pytest execution.)"
-    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")
-    print(For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print(MIGRATION NOTICE: This file previously used direct pytest execution.)"
+    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")"
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md")"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
-    # sys.exit(result")
+    # sys.exit(result")"
     pass  # TODO: Replace with appropriate SSOT test execution
+))))

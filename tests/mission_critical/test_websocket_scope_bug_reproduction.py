@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"MISSION CRITICAL TEST SUITE: WebSocket Scope Bug Reproduction - Issue #165
+"MISSION CRITICAL TEST SUITE: WebSocket Scope Bug Reproduction - Issue #165"
 
 THIS TEST SUITE REPRODUCES THE EXACT WEBSOCKET SCOPE BUG CAUSING 100% CONNECTION FAILURES.
 Business Impact: $500K+ ARR - Complete WebSocket connection failure
@@ -65,7 +65,7 @@ class WebSocketScopeBugReproductionTests:
         
         This test reproduces the exact conditions where state_registry is
         initialized in the main websocket_endpoint function scope but accessed
-        in nested exception handling blocks where it's out of scope.
+        in nested exception handling blocks where it's out of scope.'
         
         Expected Behavior: FAIL with NameError: name 'state_registry' is not defined
         
@@ -76,6 +76,7 @@ class WebSocketScopeBugReproductionTests:
         mock_websocket.headers = {
             authorization: Bearer test_token,
             sec-websocket-protocol: jwt-auth"
+            sec-websocket-protocol: jwt-auth"
         }
         mock_websocket.accept = AsyncMock()
         mock_websocket.close = AsyncMock()
@@ -84,7 +85,7 @@ class WebSocketScopeBugReproductionTests:
         with patch('shared.isolated_environment.get_env') as mock_get_env:
             mock_env = Mock()
             mock_env.get.side_effect = lambda key, default=None: {
-                "ENVIRONMENT: staging,  # Use staging to trigger Cloud Run paths
+                "ENVIRONMENT: staging,  # Use staging to trigger Cloud Run paths"
                 TESTING: 0,
                 "E2E_TESTING: 0", 
                 PYTEST_RUNNING: 0
@@ -98,10 +99,12 @@ class WebSocketScopeBugReproductionTests:
                 mock_auth_result.success = True
                 mock_user_context = Mock()
                 mock_user_context.user_id = test_user_123"
+                mock_user_context.user_id = test_user_123"
+                mock_user_context.websocket_client_id = client_123" 
                 mock_user_context.websocket_client_id = client_123" 
                 mock_auth_result.user_context = mock_user_context
                 mock_auth_result.auth_result = Mock()
-                mock_auth_result.auth_result.to_dict = Mock(return_value={user_id: test_user_123}
+                mock_auth_result.auth_result.to_dict = Mock(return_value={user_id: test_user_123)
                 mock_auth_ssot.return_value = mock_auth_result
                 
                 # Mock WebSocket manager creation to succeed but trigger ID mismatch scenario
@@ -121,12 +124,13 @@ class WebSocketScopeBugReproductionTests:
                         with patch('netra_backend.app.websocket_core.connection_state_machine.get_connection_state_machine') as mock_get_state:
                             mock_get_state.return_value = None  # No existing state machine found
                             
-                            # This should trigger the exact NameError we're reproducing
+                            # This should trigger the exact NameError we're reproducing'
                             with pytest.raises(NameError, match=name 'state_registry' is not defined):
                                 await websocket_endpoint(mock_websocket)
         
         logger.error( FAIL:  SCOPE BUG REPRODUCED: state_registry undefined in nested scope)"
-        logger.error( FAIL:  BUSINESS IMPACT: 100% WebSocket connection failure rate")
+        logger.error( FAIL:  SCOPE BUG REPRODUCED: state_registry undefined in nested scope)"
+        logger.error( FAIL:  BUSINESS IMPACT: 100% WebSocket connection failure rate")"
         logger.error( FAIL:  ROOT CAUSE: Variable initialized in function scope but accessed in exception handler)
     
     @pytest.mark.mission_critical  
@@ -156,8 +160,8 @@ class WebSocketScopeBugReproductionTests:
                 with patch('shared.isolated_environment.get_env') as mock_get_env:
                     mock_env = Mock()
                     mock_env.get.side_effect = lambda key, default=None: {
-                        ENVIRONMENT: "staging,
-                        TESTING": 0
+                        ENVIRONMENT: "staging,"
+                        TESTING": 0"
                     }.get(key, default)
                     mock_get_env.return_value = mock_env
                     
@@ -166,12 +170,12 @@ class WebSocketScopeBugReproductionTests:
                         mock_context.side_effect = Exception(Trigger emergency path)
                         
                         with patch('netra_backend.app.auth_integration.auth.authenticate_websocket') as mock_auth:
-                            mock_auth.return_value = f"user_{i}
+                            mock_auth.return_value = f"user_{i}"
                             
                             with patch('netra_backend.app.websocket_core.unified_manager.UnifiedWebSocketManager') as mock_manager:
                                 mock_ws_manager = Mock()
                                 mock_manager.return_value = mock_ws_manager
-                                mock_ws_manager.connect_user = AsyncMock(return_value=fconn_{i}_different")
+                                mock_ws_manager.connect_user = AsyncMock(return_value=fconn_{i}_different")"
                                 
                                 with patch('netra_backend.app.websocket_core.connection_state_machine.get_connection_state_machine') as mock_get_state:
                                     mock_get_state.return_value = None
@@ -194,19 +198,22 @@ class WebSocketScopeBugReproductionTests:
         failure_rate = (failures / connection_attempts) * 100
         scope_bug_rate = (name_errors / connection_attempts) * 100
         
-        logger.error(f" FAIL:  BUSINESS IMPACT MEASURED:)
-        logger.error(f   [U+2022] Total failure rate: {failure_rate}%")
+        logger.error(f" FAIL:  BUSINESS IMPACT MEASURED:)"
+        logger.error(f   [U+2022] Total failure rate: {failure_rate}%")"
         logger.error(f   [U+2022] Scope bug failures: {scope_bug_rate}%)
         logger.error(f   [U+2022] Successful connections: {connection_attempts - failures})"
-        logger.error(f"   [U+2022] Revenue at risk: $500K+ ARR (100% chat functionality blocked))
+        logger.error(f   [U+2022] Successful connections: {connection_attempts - failures})"
+        logger.error(f"   [U+2022] Revenue at risk: $500K+ ARR (100% chat functionality blocked))"
         
         # This test should FAIL because we expect 100% failure rate
         assert failure_rate == 100.0, fExpected 100% failure rate due to scope bug, got {failure_rate}%
+        assert name_errors > 0, Expected NameError for state_registry but none occurred"
         assert name_errors > 0, Expected NameError for state_registry but none occurred"
         
     @pytest.mark.mission_critical
     @pytest.mark.unit  
     async def test_scope_bug_error_recovery_path(self):
+        "
         "
         REPRODUCER: Test error path that triggers scope bug conditions.
         
@@ -215,7 +222,8 @@ class WebSocketScopeBugReproductionTests:
         
         Expected Behavior: FAIL with NameError in emergency recovery scenarios
 "
-        logger.info(" ALERT:  TESTING: Error recovery paths that trigger scope bug)
+"
+        logger.info(" ALERT:  TESTING: Error recovery paths that trigger scope bug)"
         
         # Test scenarios that lead to state_registry access in nested scopes
         test_scenarios = [
@@ -223,15 +231,15 @@ class WebSocketScopeBugReproductionTests:
                 name: ID_MISMATCH_EMERGENCY_RECOVERY,
                 description": "Connection ID mismatch triggers emergency recovery using state_registry,
                 preliminary_id: prelim_123,
-                final_id: "final_456,  # Different - triggers mismatch
-                state_machine_exists": False  # Triggers state_registry.register_connection
+                final_id: "final_456,  # Different - triggers mismatch"
+                state_machine_exists": False  # Triggers state_registry.register_connection"
             },
             {
                 name: PASS_THROUGH_SUCCESS_NO_STATE,
                 "description: Pass-through success but no existing state machine found",
                 preliminary_id: same_123, 
-                final_id: same_123",  # Same - triggers success path
-                "state_machine_exists: False  # But no state machine - triggers state_registry
+                final_id: same_123",  # Same - triggers success path"
+                "state_machine_exists: False  # But no state machine - triggers state_registry"
             }
         ]
         
@@ -249,12 +257,13 @@ class WebSocketScopeBugReproductionTests:
                     mock_env.get.side_effect = lambda key, default=None: {
                         ENVIRONMENT: staging,
                         TESTING: 0"
+                        TESTING: 0"
                     }.get(key, default)
                     mock_get_env.return_value = mock_env
                     
                     # Mock authentication success
                     with patch('netra_backend.app.auth_integration.auth.authenticate_websocket') as mock_auth:
-                        mock_auth.return_value = "test_user_123
+                        mock_auth.return_value = "test_user_123"
                         
                         # Mock context creation success (to avoid early exit)
                         with patch('netra_backend.app.core.user_context_factory.create_user_execution_context') as mock_context:
@@ -291,9 +300,10 @@ class WebSocketScopeBugReproductionTests:
             except NameError as e:
                 if state_registry not in str(e):
                     pytest.fail(fExpected state_registry NameError but got: {e})"
+                    pytest.fail(fExpected state_registry NameError but got: {e})"
                 # Expected NameError - test passes by reproducing the bug
                 
-        logger.error(" FAIL:  ALL ERROR RECOVERY PATHS TRIGGER SCOPE BUG)
+        logger.error(" FAIL:  ALL ERROR RECOVERY PATHS TRIGGER SCOPE BUG)"
         logger.error( FAIL:  BUSINESS CRITICAL: No fallback mechanism works due to scope isolation)
         
     @pytest.mark.mission_critical
@@ -342,13 +352,14 @@ class WebSocketScopeBugReproductionTests:
         logger.error( CHART:  SCOPE BUG ANALYSIS RESULTS:)
         
         if state_registry_definition:
-            logger.error(f"   [U+2022] Definition: Line {state_registry_definition['line_number']})
-            logger.error(f     Code: {state_registry_definition['line_content']}")
+            logger.error(f"   [U+2022] Definition: Line {state_registry_definition['line_number']})"
+            logger.error(f     Code: {state_registry_definition['line_content']}")"
             logger.error(f     Scope: {state_registry_definition['scope']})
         else:
             logger.error(   [U+2022] Definition: NOT FOUND)"
+            logger.error(   [U+2022] Definition: NOT FOUND)"
             
-        logger.error(f"   [U+2022] References: {len(state_registry_references)} locations)
+        logger.error(f"   [U+2022] References: {len(state_registry_references)} locations)"
         for ref in state_registry_references:
             logger.error(f     Line {ref['line_number']}: {ref['line_content']})
             logger.error(f     Scope: {ref['scope']} (OUT OF SCOPE))
@@ -375,17 +386,19 @@ class WebSocketScopeBugReproductionTests:
         assert len(found_problems) > 0, "Expected to find scope violations but none found"
         assert state_registry_definition is not None, Expected to find state_registry definition
         assert len(state_registry_references) > 0, Expected to find state_registry references"
+        assert len(state_registry_references) > 0, Expected to find state_registry references"
         
         # Document the business impact
-        logger.error([U+1F4B0] BUSINESS IMPACT OF SCOPE BUG:")
+        logger.error([U+1F4B0] BUSINESS IMPACT OF SCOPE BUG:")"
         logger.error(   [U+2022] 100% WebSocket connection failure rate)
         logger.error(   [U+2022] $500K+ ARR at risk due to chat functionality blocked")"
         logger.error(   [U+2022] No fallback mechanism - complete service failure)
         logger.error(   [U+2022] Critical infrastructure bug affecting all user tiers)"
+        logger.error(   [U+2022] Critical infrastructure bug affecting all user tiers)"
         
         # Force test failure to highlight the critical issue
         pytest.fail(
-            f"CRITICAL SCOPE BUG DETECTED: state_registry defined in function scope 
+            f"CRITICAL SCOPE BUG DETECTED: state_registry defined in function scope"
             fbut accessed in {len(state_registry_references)} nested locations. 
             fThis causes 100% WebSocket connection failures affecting $500K+ ARR.
         )
@@ -398,8 +411,11 @@ if __name__ == __main__":"
     ""
     logger.info( ALERT:  DIRECT EXECUTION: WebSocket Scope Bug Reproduction Tests)
     logger.info([U+1F4B0] BUSINESS IMPACT: $500K+ ARR - 100% WebSocket connection failure)"
+    logger.info([U+1F4B0] BUSINESS IMPACT: $500K+ ARR - 100% WebSocket connection failure)"
     logger.info([U+1F527] PURPOSE: Reproduce exact NameError from variable scope isolation")"
     
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+)))

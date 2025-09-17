@@ -1,8 +1,10 @@
 """
+"""
 MISSION CRITICAL: Configuration Manager SSOT Violation Tests - Issue #757
 
 **BUSINESS VALUE JUSTIFICATION (BVJ):**
 - **Segment:** Platform/Internal - $500K+ ARR Protection
+"""
 """
 - **Business Goal:** Protect Golden Path user flow from configuration race conditions
 - **Value Impact:** Prevents startup failures that block user authentication and chat functionality
@@ -28,6 +30,7 @@ Each test reproduces a specific SSOT violation that causes real system failures.
 - Business impact documentation for each failure scenario
 - Post-fix validation ensuring tests pass after SSOT remediation
 "
+"
 
 import warnings
 import unittest
@@ -41,14 +44,16 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
     "
+    "
     Mission Critical Tests: Configuration Manager SSOT Violations - Issue #757
 
     These tests reproduce SSOT violations that block the Golden Path user flow.
     They are EXPECTED TO FAIL until Issue #667 SSOT consolidation is complete.
 "
+"
 
     def setup_method(self, method):
-        "Setup for each test method.
+        "Setup for each test method."
         super().setup_method(method)
 
         # Clear any cached configurations to ensure clean test state
@@ -60,20 +65,22 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
 
     def teardown_method(self, method):
         Cleanup after each test method."
+        Cleanup after each test method."
         self._clear_configuration_caches()
         super().teardown_method(method)
 
     def _clear_configuration_caches(self):
-        "Clear all configuration caches for clean test state.
+        "Clear all configuration caches for clean test state."
         try:
             # Clear cached configurations from both deprecated and canonical managers
             from netra_backend.app.core.configuration.base import config_manager as canonical_manager
             canonical_manager.reload_config(force=True)
         except Exception as e:
-            # Expected during SSOT violations - log but don't fail setup
-            self.logger.debug(f"Expected cache clear failure during SSOT violations: {e})
+            # Expected during SSOT violations - log but don't fail setup'
+            self.logger.debug(f"Expected cache clear failure during SSOT violations: {e})"
 
     def test_config_manager_import_conflict_violation(self):
+        "
         "
         TEST: Configuration Manager Import Conflicts (DESIGNED TO FAIL)
 
@@ -90,12 +97,13 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
         - ❌ CURRENT: Test FAILS due to import conflicts and SSOT violations
         - ✅ POST-FIX: Test PASSES after deprecated manager removal
 "
+"
         import_errors = []
         deprecation_warnings = []
 
         # Capture warnings during imports
         with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always)
+            warnings.simplefilter("always)"
 
             try:
                 # Test 1: Import deprecated manager (should generate deprecation warning)
@@ -148,18 +156,20 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
             "EXPECTED FAILURE: This test should FAIL due to SSOT violations until Issue #667 is resolved. "
             fDeprecation warnings: {len(deprecation_warnings)}, Import errors: {len(import_errors)}. 
             BUSINESS IMPACT: Multiple configuration managers cause startup conflicts blocking $500K+ ARR Golden Path."
+            BUSINESS IMPACT: Multiple configuration managers cause startup conflicts blocking $500K+ ARR Golden Path."
         )
 
         # Document the specific SSOT violations found
         if deprecation_warnings:
             for warning in deprecation_warnings:
-                self.logger.warning(fSSOT Violation - Deprecation Warning: {warning.message}")
+                self.logger.warning(fSSOT Violation - Deprecation Warning: {warning.message}")"
 
         if import_errors:
             for error in import_errors:
                 self.logger.error(fSSOT Violation - Import Error: {error})
 
     def test_startup_race_condition_reproduction(self):
+        "
         "
         TEST: Startup Race Conditions from Configuration Manager Duplication (DESIGNED TO FAIL)
 
@@ -175,6 +185,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
         **EXPECTED RESULT:**
         - ❌ CURRENT: Test FAILS due to race conditions and inconsistent state
         - ✅ POST-FIX: Test PASSES with consistent configuration loading
+"
 "
         startup_errors = []
         configuration_inconsistencies = []
@@ -219,7 +230,8 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
                             ("database.pool_size, 10),"
                             (security.jwt_expire_minutes, 30),
                             (agent.execution_timeout, 300.0),"
-                            (websocket.ping_interval", 20)
+                            (agent.execution_timeout, 300.0),"
+                            (websocket.ping_interval", 20)"
                         ]
 
                         for key, default_value in critical_keys:
@@ -240,12 +252,13 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
                                 configuration_inconsistencies.append(
                                     fWorker {worker_id}: {key} inconsistent - 
                                     fdeprecated: {deprecated_value}, canonical: {canonical_value}"
+                                    fdeprecated: {deprecated_value}, canonical: {canonical_value}"
                                 )
 
                         startup_result['success'] = True
 
                     except Exception as e:
-                        startup_result['errors'].append(f"Configuration access failed: {str(e)})
+                        startup_result['errors'].append(f"Configuration access failed: {str(e)})"
                         startup_errors.append(fWorker {worker_id}: {str(e)})
 
                 return startup_result
@@ -297,7 +310,8 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
         self.assertTrue(
             len(startup_errors) > 0 or len(configuration_inconsistencies) > 0 or race_condition_detected,
             EXPECTED FAILURE: This test should FAIL due to startup race conditions until Issue #667 is resolved. 
-            f"Startup errors: {len(startup_errors)}, Configuration inconsistencies: {len(configuration_inconsistencies)}, 
+            f"Startup errors: {len(startup_errors)}, Configuration inconsistencies: {len(configuration_inconsistencies)},"
+            fRace condition detected: {race_condition_detected}. "
             fRace condition detected: {race_condition_detected}. "
             BUSINESS IMPACT: Race conditions cause unreliable startup blocking user access to chat functionality.
         )
@@ -309,9 +323,10 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
 
         self.logger.error(fSSOT Violation - Configuration inconsistencies: {len(configuration_inconsistencies)})
         for inconsistency in configuration_inconsistencies[:5]:  # Log first 5 inconsistencies
-            self.logger.error(f"  - {inconsistency})
+            self.logger.error(f"  - {inconsistency})"
 
     def test_environment_access_ssot_violation(self):
+        "
         "
         TEST: Environment Access SSOT Violations (DESIGNED TO FAIL)
 
@@ -328,18 +343,20 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
         - ❌ CURRENT: Test FAILS due to environment access SSOT violations
         - ✅ POST-FIX: Test PASSES with consistent IsolatedEnvironment usage
 "
+"
         environment_violations = []
         access_pattern_inconsistencies = []
 
         # Test environment variable access patterns
         test_env_vars = {
-            "DATABASE_POOL_SIZE: 15,
+            "DATABASE_POOL_SIZE: 15,"
             JWT_EXPIRE_MINUTES: 45,
             "WEBSOCKET_PING_INTERVAL: 25",
             AGENT_EXECUTION_TIMEOUT: 400
         }
 
         with warnings.catch_warnings():
+            warnings.simplefilter(ignore)  # Suppress expected warnings"
             warnings.simplefilter(ignore)  # Suppress expected warnings"
 
             try:
@@ -370,7 +387,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
 
                 # Test configuration retrieval from both managers
                 config_mapping = {
-                    DATABASE_POOL_SIZE": database.pool_size,
+                    DATABASE_POOL_SIZE": database.pool_size,"
                     JWT_EXPIRE_MINUTES: security.jwt_expire_minutes,
                     WEBSOCKET_PING_INTERVAL": "websocket.ping_interval,
                     AGENT_EXECUTION_TIMEOUT: agent.execution_timeout
@@ -388,7 +405,8 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
                         if str(deprecated_value) != str(canonical_value):
                             access_pattern_inconsistencies.append(
                                 fEnvironment access inconsistency for {config_key}: "
-                                f"deprecated={deprecated_value}, canonical={canonical_value}
+                                fEnvironment access inconsistency for {config_key}: "
+                                f"deprecated={deprecated_value}, canonical={canonical_value}"
                             )
 
                         # Check if deprecated manager properly uses IsolatedEnvironment
@@ -413,7 +431,8 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
         self.assertTrue(
             len(environment_violations) > 0 or len(access_pattern_inconsistencies) > 0,
             EXPECTED FAILURE: This test should FAIL due to environment access SSOT violations until Issue #667 is resolved. 
-            f"Environment violations: {len(environment_violations)}, 
+            f"Environment violations: {len(environment_violations)},"
+            fAccess pattern inconsistencies: {len(access_pattern_inconsistencies)}. "
             fAccess pattern inconsistencies: {len(access_pattern_inconsistencies)}. "
             BUSINESS IMPACT: Inconsistent environment access causes configuration drift and security risks.
         )
@@ -426,7 +445,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
             self.logger.error(fSSOT Violation - Access Pattern: {inconsistency})
 
     def test_golden_path_auth_failure_reproduction(self):
-        
+        pass
         TEST: Golden Path Auth Failures from Configuration Duplication (DESIGNED TO FAIL)
 
         **SSOT VIOLATION:** Configuration duplication causes JWT authentication failures
@@ -452,10 +471,11 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
             security.jwt_algorithm","
             security.jwt_expire_minutes,
             service_secret  # Critical for service-to-service auth"
+            service_secret  # Critical for service-to-service auth"
         ]
 
         with warnings.catch_warnings():
-            warnings.simplefilter("ignore)  # Suppress expected warnings
+            warnings.simplefilter("ignore)  # Suppress expected warnings"
 
             try:
                 # Test deprecated manager JWT configuration
@@ -485,6 +505,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
 
                 env.set(JWT_SECRET_KEY, test_jwt_secret)
                 env.set(SERVICE_SECRET, test_service_secret)"
+                env.set(SERVICE_SECRET, test_service_secret)"
 
                 # Force reload to pick up test configuration
                 try:
@@ -498,7 +519,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
                         # Get from deprecated manager
                         if hasattr(deprecated_manager, 'get_security_config'):
                             deprecated_security = deprecated_manager.get_security_config()
-                            if config_key == security.jwt_secret":
+                            if config_key == security.jwt_secret":"
                                 deprecated_value = deprecated_security.get('jwt_secret')
                             elif config_key == security.jwt_algorithm:
                                 deprecated_value = deprecated_security.get('jwt_algorithm', 'HS256')
@@ -530,12 +551,12 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
                         if not deprecated_value or not canonical_value:
                             auth_failures.append(
                                 fJWT configuration loading failure for {config_key}: 
-                                f"deprecated={deprecated_value}, canonical={canonical_value}
+                                f"deprecated={deprecated_value}, canonical={canonical_value}"
                             )
                             golden_path_blocked = True
 
                     except Exception as e:
-                        auth_failures.append(fJWT config access error for {config_key}: {str(e)}")
+                        auth_failures.append(fJWT config access error for {config_key}: {str(e)}")"
                         golden_path_blocked = True
 
                 # Simulate Golden Path auth flow with inconsistent configuration
@@ -554,7 +575,8 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
         self.assertTrue(
             len(auth_failures) > 0 or len(jwt_config_inconsistencies) > 0 or golden_path_blocked,
             EXPECTED FAILURE: This test should FAIL due to JWT configuration SSOT violations until Issue #667 is resolved. 
-            f"Auth failures: {len(auth_failures)}, JWT inconsistencies: {len(jwt_config_inconsistencies)}, 
+            f"Auth failures: {len(auth_failures)}, JWT inconsistencies: {len(jwt_config_inconsistencies)},"
+            fGolden Path blocked: {golden_path_blocked}. "
             fGolden Path blocked: {golden_path_blocked}. "
             BUSINESS IMPACT: JWT configuration inconsistencies prevent user login, blocking $500K+ ARR revenue.
         )

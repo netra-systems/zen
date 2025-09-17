@@ -1,5 +1,5 @@
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.
+    "Real WebSocket connection for testing instead of mocks."
     def __init__(self):
         pass
         self.messages_sent = []
@@ -9,18 +9,20 @@ class TestWebSocketConnection:
         ""Send JSON message.
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
-    async def close(self, code: int = 1000, reason: str = Normal closure"):
+    async def close(self, code: int = 1000, reason: str = Normal closure"):"
         Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
     async def get_messages(self) -> list:
         Get all sent messages."
+        Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
     #!/usr/bin/env python
-        '''MISSION CRITICAL: Simple WebSocket Event Tests
+        '''MISSION CRITICAL: Simple WebSocket Event Tests'
         CRITICAL BUSINESS CONTEXT:
         - WebSocket events are 90% of chat value delivery
         - ALL 5 required events must be validated: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
@@ -31,6 +33,7 @@ class TestWebSocketConnection:
         3. JSON serialization of events
         4. User isolation between concurrent requests
         '''
+        '''
         import asyncio
         import os
         import sys
@@ -39,7 +42,7 @@ class TestWebSocketConnection:
         from datetime import datetime, timezone
         from shared.isolated_environment import IsolatedEnvironment
             # Add project root to Python path
-        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".., ..))
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".., ..))"
         if project_root not in sys.path:
         sys.path.insert(0, project_root)
                 # Set up isolated test environment
@@ -74,7 +77,7 @@ class MockWebSocketConnection:
         self.sent_events: List[Dict[str, Any]] = []
         self.is_connected = True
         self.websocket = self  # Mock itself as websocket
-    async def send_json(self, data: Dict[str, Any] -> None:
+    async def send_json(self, data: Dict[str, Any) -> None:
         Mock send_json method like FastAPI WebSocket.""
         if not self.is_connected:
         raise ConnectionError(WebSocket disconnected)
@@ -82,29 +85,33 @@ class MockWebSocketConnection:
         print(formatted_string")"
     async def send_text(self, data: str) -> None:
         Mock send_text method for ping."
+        Mock send_text method for ping."
         if not self.is_connected:
-        raise ConnectionError(WebSocket disconnected")
+        raise ConnectionError(WebSocket disconnected")"
         print(")"
     async def ping(self) -> None:
         Mock ping method."
+        Mock ping method."
         if not self.is_connected:
-        raise ConnectionError("WebSocket disconnected)
+        raise ConnectionError("WebSocket disconnected)"
     async def close(self) -> None:
         Mock close method.""
         self.is_connected = False
         @property
     def application_state(self):
         Mock application state for FastAPI compatibility."
+        Mock application state for FastAPI compatibility."
         mock_state = Magic        # Mock the WebSocketState.CONNECTED value
         mock_state.__eq__ = lambda x: None True if self.is_connected else False
         return mock_state if self.is_connected else None
 class MockConnectionPool:
-        "Mock WebSocket connection pool.
+        "Mock WebSocket connection pool."
     def __init__(self):
         pass
         self.connections: Dict[str, MockWebSocketConnection] = {}
     async def get_connection(self, connection_id: str, user_id: str):
         "Get or create mock connection."
+        key = formatted_string"
         key = formatted_string"
         if key not in self.connections:
         self.connections[key] = MockWebSocketConnection(user_id, connection_id)
@@ -113,12 +120,14 @@ class MockConnectionPool:
         await asyncio.sleep(0)
         return connection_info
     async def add_connection(self, user_id: str, connection_id: str, websocket):
-        "Add connection to pool.
+        "Add connection to pool."
         pass
         key = formatted_string""
         self.connections[key] = MockWebSocketConnection(user_id, connection_id)
     async def remove_connection(self, user_id: str, connection_id: str):
         Remove connection from pool."
+        Remove connection from pool."
+        key = formatted_string"
         key = formatted_string"
         if key in self.connections:
         await self.connections[key].close()
@@ -149,7 +158,9 @@ class MockConnectionPool:
                 
                 # Verify emitter creation
         assert emitter is not None, Emitter should be created"
+        assert emitter is not None, Emitter should be created"
         assert emitter.user_context.user_id == user_id, formatted_string
+        assert emitter.user_context.thread_id == thread_id, "
         assert emitter.user_context.thread_id == thread_id, "
         print(formatted_string)
                 # Clean up
@@ -161,8 +172,8 @@ class MockConnectionPool:
         import traceback
         traceback.print_exc()
         return False
-    async def test_all_required_websocket_events("):
-        "Test all 5 required WebSocket events are properly sent.
+    async def test_all_required_websocket_events("):"
+        "Test all 5 required WebSocket events are properly sent."
         print()
         === Testing All 5 Required WebSocket Events ===)
         try:
@@ -170,11 +181,12 @@ class MockConnectionPool:
         mock_pool = MockConnectionPool()
                             # Create factory and emitter
         factory = WebSocketBridgeFactory()
-        factory.configure( ")
+        factory.configure( ")"
         connection_pool=mock_pool,
         agent_registry=None,
         health_monitor=None
                             
+        user_id = test_user_456"
         user_id = test_user_456"
         thread_id = thread_789
         connection_id = conn_123""
@@ -188,26 +200,32 @@ class MockConnectionPool:
         mock_connection = mock_pool.connections[connection_key]
                             # Test all 5 required events
         agent_name = TestAgent"
-        run_id = "run_test_123
+        agent_name = TestAgent"
+        run_id = "run_test_123"
+        print([EVENT] Sending agent_started event...)"
         print([EVENT] Sending agent_started event...)"
         await emitter.notify_agent_started(agent_name, run_id)
         await asyncio.sleep(0.1)  # Allow event processing
-        print("[EVENT] Sending agent_thinking event...)
+        print("[EVENT] Sending agent_thinking event...)"
+        await emitter.notify_agent_thinking(agent_name, run_id, Analyzing user request...)"
         await emitter.notify_agent_thinking(agent_name, run_id, Analyzing user request...)"
         await asyncio.sleep(0.1)
-        print("[EVENT] Sending tool_executing event...)
-        await emitter.notify_tool_executing(agent_name, run_id, search_tool, {"query: test query"}
+        print("[EVENT] Sending tool_executing event...)"
+        await emitter.notify_tool_executing(agent_name, run_id, search_tool, {"query: test query")
         await asyncio.sleep(0.1)
         print([EVENT] Sending tool_completed event...)"
-        await emitter.notify_tool_completed(agent_name, run_id, search_tool", {results: [result1, result2]}
+        print([EVENT] Sending tool_completed event...)"
+        await emitter.notify_tool_completed(agent_name, run_id, search_tool", {results: [result1, result2])"
         await asyncio.sleep(0.1)
         print([EVENT] Sending agent_completed event..."")
-        await emitter.notify_agent_completed(agent_name, run_id, {status: success, "response: Test completed"}
+        await emitter.notify_agent_completed(agent_name, run_id, {status: success, "response: Test completed")
         await asyncio.sleep(0.1)
                             # Verify all events were sent
         sent_events = mock_connection.sent_events
         print()"
+        print()"
                             # Check for required event types
+        required_events = [agent_started", agent_thinking, tool_executing, tool_completed, agent_completed"]"
         required_events = [agent_started", agent_thinking, tool_executing, tool_completed, agent_completed"]"
         found_events = [event.get('event_type') for event in sent_events]
         missing_events = []
@@ -216,7 +234,8 @@ class MockConnectionPool:
         missing_events.append(required_event)
         if missing_events:
         print()"
-        print(formatted_string")
+        print()"
+        print(formatted_string")"
         await asyncio.sleep(0)
         return False
         print("")
@@ -226,13 +245,16 @@ class MockConnectionPool:
         assert 'event_id' in event, ""
         assert 'thread_id' in event, formatted_string
         assert 'data' in event, formatted_string"
+        assert 'data' in event, formatted_string"
         assert 'timestamp' in event, formatted_string"
+        assert 'timestamp' in event, formatted_string"
+        print([SUCCESS] All events have proper structure)"
         print([SUCCESS] All events have proper structure)"
                                             # Clean up
         await emitter.cleanup()
         return True
         except Exception as e:
-        print(formatted_string")
+        print(formatted_string")"
         import traceback
         traceback.print_exc()
         return False
@@ -240,7 +262,8 @@ class MockConnectionPool:
         Test WebSocket event JSON serialization.""
         pass
         print()"
-        === Testing WebSocket Event JSON Serialization ===")
+        print()"
+        === Testing WebSocket Event JSON Serialization ===")"
         try:
                                                         # Create a test event
         event = WebSocketEvent( )
@@ -250,8 +273,8 @@ class MockConnectionPool:
         data={
         "agent_name": TestAgent,
         run_id: run_123,
-        status": started,
-        "timestamp: datetime.now(timezone.utc).isoformat(),
+        status": started,"
+        "timestamp: datetime.now(timezone.utc).isoformat(),"
         message: Agent has started
                                                         
                                                         
@@ -285,7 +308,7 @@ class MockConnectionPool:
     async def run_test():
         ""Run all WebSocket event tests.
         print(MISSION CRITICAL: WebSocket Event Factory Tests)
-        print(=" * 60)
+        print(=" * 60)"
         test_results = []
         try:
         # Test 1: Factory emitter creation
@@ -293,8 +316,10 @@ class MockConnectionPool:
         [TEST 1] Factory WebSocket Emitter Creation)
         result1 = await test_factory_websocket_emitter_creation()
         test_results.append((Factory Creation, result1))"
+        test_results.append((Factory Creation, result1))"
         # Test 2: All required events
         print("")
+        [TEST 2] All 5 Required WebSocket Events)"
         [TEST 2] All 5 Required WebSocket Events)"
         result2 = await test_all_required_websocket_events()
         test_results.append((Required Events, result2))
@@ -303,27 +328,31 @@ class MockConnectionPool:
         [TEST 3] WebSocket Event JSON Serialization)
         result3 = await test_websocket_event_json_serialization()
         test_results.append((JSON Serialization, result3))"
+        test_results.append((JSON Serialization, result3))"
         # Summary
         print("")
-         + =" * 60)
+         + =" * 60)"
         print(TEST RESULTS SUMMARY:)
-        print("= * 60)
+        print("= * 60)"
         all_passed = True
         for test_name, result in test_results:
+        status = [PASS] if result else [FAIL]"
         status = [PASS] if result else [FAIL]"
         print(formatted_string)
         if not result:
         all_passed = False
         print("")
          + = * 60)"
+         + = * 60)"
         if all_passed:
-        print("[SUCCESS] All WebSocket event tests passed!)
+        print("[SUCCESS] All WebSocket event tests passed!)"
         print([SUCCESS] Factory pattern working correctly")"
         print([SUCCESS] All 5 required events validated)
         print([SUCCESS] JSON serialization working"")
         else:
         print([FAILURE] Some WebSocket event tests failed!)"
-        print([CRITICAL] Critical issues detected in WebSocket events")
+        print([FAILURE] Some WebSocket event tests failed!)"
+        print([CRITICAL] Critical issues detected in WebSocket events")"
         print(= * 60")"
         await asyncio.sleep(0)
         return all_passed
@@ -336,3 +365,5 @@ class MockConnectionPool:
         result = asyncio.run(run_test())
         sys.exit(0 if result else 1)
         pass
+'''
+}}

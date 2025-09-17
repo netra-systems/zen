@@ -1,4 +1,4 @@
-"ExecutionEngine Factory Consolidation - Mission Critical Validation
+"ExecutionEngine Factory Consolidation - Mission Critical Validation"
 
 Business Value Justification:
 - Segment: Platform/Architecture
@@ -31,9 +31,10 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
     Validates ExecutionEngine factory consolidation and thread safety."
+    Validates ExecutionEngine factory consolidation and thread safety."
 
     def setUp(self):
-        "Set up factory consolidation test environment.
+        "Set up factory consolidation test environment."
         super().setUp()
         
         # Test user contexts for factory testing
@@ -64,9 +65,10 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
             params = list(method_signature.parameters.keys())
             self.assertIn('user_context', params, 
                          Factory should accept user_context parameter)"
+                         Factory should accept user_context parameter)"
             
         except ImportError as e:
-            self.skipTest(fExecutionEngine factory not available during consolidation: {e}")
+            self.skipTest(fExecutionEngine factory not available during consolidation: {e}")"
 
     def test_factory_creates_only_user_execution_engine_instances(self):
         Validate factory only creates UserExecutionEngine instances, not legacy types.""
@@ -93,8 +95,9 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
                 engine_context = engine.get_user_context()
                 self.assertEqual(engine_context.user_id, context.user_id,
                                Factory created engine with wrong user context)"
+                               Factory created engine with wrong user context)"
                 self.assertEqual(engine_context.run_id, context.run_id,
-                               Factory created engine with wrong run_id")
+                               Factory created engine with wrong run_id")"
             
             # Validate all created engines are unique instances
             engine_ids = [id(engine) for engine in created_engines]
@@ -106,11 +109,12 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
 
     def test_no_duplicate_factory_implementations(self):
         Validate no duplicate ExecutionEngine factory implementations exist."
+        Validate no duplicate ExecutionEngine factory implementations exist."
         factory_implementations = []
         
         # Known potential factory locations to check
         potential_factory_paths = [
-            netra_backend.app.agents.supervisor.execution_engine_factory",
+            netra_backend.app.agents.supervisor.execution_engine_factory","
             netra_backend.app.core.managers.execution_engine_factory,
             netra_backend.app.agents.execution_engine_factory","
             netra_backend.app.services.execution_engine_factory
@@ -118,7 +122,7 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
         
         for factory_path in potential_factory_paths:
             try:
-                module = __import__(factory_path, fromlist=['']
+                module = __import__(factory_path, fromlist=['')
                 
                 # Look for factory classes or functions
                 for attr_name in dir(module):
@@ -127,13 +131,14 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
                         'factory' in attr_name.lower() and 
                         'execution' in attr_name.lower()):
                         factory_implementations.append(f{factory_path}.{attr_name})"
+                        factory_implementations.append(f{factory_path}.{attr_name})"
                     elif (callable(attr) and 
                           'create' in attr_name.lower() and 
                           'execution' in attr_name.lower()):
-                        factory_implementations.append(f"{factory_path}.{attr_name})
+                        factory_implementations.append(f"{factory_path}.{attr_name})"
                         
             except ImportError:
-                continue  # Module doesn't exist, which is fine
+                continue  # Module doesn't exist, which is fine'
                 
         # Should have at most one canonical factory implementation
         self.assertLessEqual(
@@ -208,9 +213,9 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
             for context_index, result in creation_results.items():
                 expected_context = self.test_contexts[context_index]
                 
-                self.assertEqual(result['user_id'], expected_context.user_id,
+                self.assertEqual(result['user_id'), expected_context.user_id,
                                fThread {result['thread_id']} created engine with wrong user_id)
-                self.assertEqual(result['run_id'], expected_context.run_id,
+                self.assertEqual(result['run_id'), expected_context.run_id,
                                fThread {result['thread_id']} created engine with wrong run_id)
             
             # Validate all engines are unique (no shared instances)
@@ -247,7 +252,7 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
             self.skipTest(ExecutionEngine factory not available during consolidation)
 
     def test_factory_memory_management(self):
-        "Validate factory doesn't create memory leaks or retain references."
+        "Validate factory doesn't create memory leaks or retain references."'
         try:
             from netra_backend.app.agents.supervisor.execution_engine_factory import (
                 ExecutionEngineFactory
@@ -289,6 +294,7 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
 
     def test_factory_integration_with_websocket_bridge(self):
         Validate factory creates engines properly integrated with WebSocket bridges."
+        Validate factory creates engines properly integrated with WebSocket bridges."
         try:
             from netra_backend.app.agents.supervisor.execution_engine_factory import (
                 ExecutionEngineFactory
@@ -306,7 +312,7 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
                 )
                 
                 # Validate engine was created successfully
-                self.assertIsNotNone(engine, Factory should create engine with WebSocket bridge")
+                self.assertIsNotNone(engine, Factory should create engine with WebSocket bridge")"
                 
                 # Validate engine has WebSocket integration
                 if hasattr(engine, 'websocket_bridge') or hasattr(engine, '_websocket_bridge'):
@@ -320,6 +326,7 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
             self.skipTest(ExecutionEngine factory not available during consolidation")"
 
     def test_factory_creates_engines_with_proper_cleanup(self):
+        Validate factory creates engines with proper cleanup capabilities."
         Validate factory creates engines with proper cleanup capabilities."
         try:
             from netra_backend.app.agents.supervisor.execution_engine_factory import (
@@ -341,14 +348,14 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
                     # Engine should have cleanup method
                     engine.cleanup()
                     
-                    # Validate cleanup doesn't affect other engines
+                    # Validate cleanup doesn't affect other engines'
                     for j, other_engine in enumerate(engines_to_cleanup):
                         if i != j:
                             other_context = other_engine.get_user_context()
                             expected_context = self.test_contexts[j]
                             
                             self.assertEqual(other_context.user_id, expected_context.user_id,
-                                           fCleanup of engine {i} affected engine {j}")
+                                           fCleanup of engine {i} affected engine {j}")"
                 
         except ImportError:
             self.skipTest(ExecutionEngine factory not available during consolidation)
@@ -358,19 +365,21 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
         from pathlib import Path
         
         netra_backend_root = Path(__file__).parent.parent.parent / netra_backend"
+        netra_backend_root = Path(__file__).parent.parent.parent / netra_backend"
         legacy_patterns = []
         
         # Patterns that indicate legacy factory usage
         legacy_factory_patterns = [
-            ExecutionEngineAdapter",
+            ExecutionEngineAdapter","
             LegacyExecutionEngineFactory,  
             CompatibilityExecutionEngineFactory","
             create_legacy_execution_engine,
             get_execution_engine_adapter"
+            get_execution_engine_adapter"
         ]
         
         # Scan Python files for legacy patterns
-        for py_file in netra_backend_root.rglob("*.py):
+        for py_file in netra_backend_root.rglob("*.py):"
             if test in str(py_file).lower() or __pycache__ in str(py_file):
                 continue
                 
@@ -429,9 +438,10 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
             
             self.assertLess(avg_creation_time, max_creation_time,
                            fAverage engine creation time {avg_creation_time:.3f}s exceeds limit {max_creation_time}s)"
+                           fAverage engine creation time {avg_creation_time:.3f}s exceeds limit {max_creation_time}s)"
             
             self.assertLess(max_observed_time, max_creation_time * 2,
-                           f"Maximum engine creation time {max_observed_time:.3f}s exceeds reasonable limit)
+                           f"Maximum engine creation time {max_observed_time:.3f}s exceeds reasonable limit)"
             
         except ImportError:
             self.skipTest(ExecutionEngine factory not available during consolidation")"
@@ -439,3 +449,4 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
 
 if __name__ == '__main__':
     unittest.main()
+)

@@ -1,4 +1,4 @@
-"Mission Critical Test: Redis SSOT Factory Pattern Validation
+"Mission Critical Test: Redis SSOT Factory Pattern Validation"
 
 This test suite validates that the Redis SSOT factory pattern correctly
 resolves WebSocket 1011 errors by ensuring proper singleton behavior
@@ -38,6 +38,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 @dataclass
 class FactoryTestResult:
     Result of factory pattern test."
+    Result of factory pattern test."
     test_name: str
     success: bool
     instance_count: int
@@ -47,7 +48,7 @@ class FactoryTestResult:
 
 @dataclass
 class UserContextResult:
-    "Result of user context isolation test.
+    "Result of user context isolation test."
     user_id: str
     redis_instance_id: int
     isolated: bool
@@ -74,7 +75,8 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
         This test validates the core SSOT pattern - that all Redis access
         goes through a single factory that returns the same instance.
         "
-        self.logger.info(Testing Redis singleton factory implementation")
+        "
+        self.logger.info(Testing Redis singleton factory implementation")"
 
         instances = []
         instance_ids = set()
@@ -88,7 +90,7 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
         for module_path, attr_name in import_tests:
             try:
                 # Dynamic import to test different code paths
-                module = __import__(module_path, fromlist=[attr_name]
+                module = __import__(module_path, fromlist=[attr_name)
                 instance = getattr(module, attr_name)
                 instances.append(instance)
                 instance_ids.add(id(instance))
@@ -131,15 +133,16 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
 
         # Save evidence
         evidence = {
-            test_name: "redis_singleton_factory_implementation,
-            total_imports": len(instances),
+            test_name: "redis_singleton_factory_implementation,"
+            total_imports": len(instances),"
             unique_instance_ids: unique_instances,
             instance_ids": list(instance_ids),"
             expected: 1,
             singleton_achieved: unique_instances == 1"
+            singleton_achieved: unique_instances == 1"
         }
 
-        with open("/c/netra-apex/redis_singleton_factory_evidence.json, w) as f:
+        with open("/c/netra-apex/redis_singleton_factory_evidence.json, w) as f:"
             json.dump(evidence, f, indent=2)
 
         # This test should PASS when SSOT factory is implemented
@@ -148,10 +151,11 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
             1,
             fRedis SSOT factory failed: {unique_instances} unique instances found. 
             fExpected 1 singleton instance. Instance IDs: {list(instance_ids)}"
+            fExpected 1 singleton instance. Instance IDs: {list(instance_ids)}"
         )
 
     async def test_user_context_isolation(self):
-        "Test proper user context isolation with Redis SSOT factory.
+        "Test proper user context isolation with Redis SSOT factory."
 
         This test ensures that different users get isolated contexts
         while still using the same underlying Redis manager instance.
@@ -169,7 +173,7 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
 
                 # Store user-specific data
                 user_key = fuser_session:{user_id}
-                user_data = {user_id: user_id, timestamp": time.time()}
+                user_data = {user_id: user_id, timestamp": time.time()}"
 
                 await redis_manager.set(user_key, json.dumps(user_data), ex=60)
 
@@ -177,7 +181,7 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
                 retrieved_data = await redis_manager.get(user_key)
                 if retrieved_data:
                     parsed_data = json.loads(retrieved_data)
-                    isolated = parsed_data["user_id] == user_id
+                    isolated = parsed_data["user_id] == user_id"
                 else:
                     isolated = False
 
@@ -189,7 +193,7 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
                     other_key = fuser_session:{other_user}
                     other_data = await redis_manager.get(other_key)
                     if other_data:
-                        # If we can see other user's data from our context, isolation failed
+                        # If we can see other user's data from our context, isolation failed'
                         shared_state_detected = True
                         break
 
@@ -203,7 +207,7 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
                 return result
 
             except Exception as e:
-                self.logger.error(f"User session {user_id} failed: {e})
+                self.logger.error(f"User session {user_id} failed: {e})"
                 return UserContextResult(
                     user_id=user_id,
                     redis_instance_id=0,
@@ -221,28 +225,31 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
         unique_redis_instances = len(set(ctx.redis_instance_id for ctx in self.user_contexts))
 
         isolation_evidence = {
-            test_name": user_context_isolation,
+            test_name": user_context_isolation,"
             total_users: len(user_sessions),
             "all_isolated: all_isolated,"
             no_shared_state: no_shared_state,
             unique_redis_instances: unique_redis_instances,"
-            user_results": [
+            unique_redis_instances: unique_redis_instances,"
+            user_results": ["
                 {
                     user_id: ctx.user_id,
                     isolated": ctx.isolated,"
                     shared_state_detected: ctx.shared_state_detected,
+                    redis_instance_id: ctx.redis_instance_id"
                     redis_instance_id: ctx.redis_instance_id"
                 }
                 for ctx in self.user_contexts
             ]
         }
 
-        with open("/c/netra-apex/redis_user_isolation_evidence.json, w) as f:
+        with open("/c/netra-apex/redis_user_isolation_evidence.json, w) as f:"
             json.dump(isolation_evidence, f, indent=2)
 
         self.logger.info(fUser isolation results: {len(user_sessions)} users tested)
         self.logger.info(fAll isolated: {all_isolated})"
-        self.logger.info(f"No shared state: {no_shared_state})
+        self.logger.info(fAll isolated: {all_isolated})"
+        self.logger.info(f"No shared state: {no_shared_state})"
         self.logger.info(fRedis instances: {unique_redis_instances})
 
         # Clean up test data
@@ -262,12 +269,13 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
         self.assertTrue(
             no_shared_state,
             fShared state detected between users: {sum(1 for ctx in self.user_contexts if ctx.shared_state_detected)} 
-            f"users detected shared state
+            f"users detected shared state"
         )
 
         self.assertEqual(
             unique_redis_instances,
             1,
+            fExpected 1 Redis instance across all users, found {unique_redis_instances}"
             fExpected 1 Redis instance across all users, found {unique_redis_instances}"
         )
 
@@ -278,11 +286,12 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
         stable connection pool even under concurrent load.
         
         self.logger.info(Testing Redis connection pool consolidation)"
+        self.logger.info(Testing Redis connection pool consolidation)"
 
         connection_results = []
 
         async def test_redis_operation(operation_id: int):
-            "Test Redis operation to stress connection pool.
+            "Test Redis operation to stress connection pool."
             try:
                 from netra_backend.app.redis_manager import redis_manager
 
@@ -314,7 +323,8 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
 
                 return {
                     operation_id: operation_id,"
-                    "success: success,
+                    operation_id: operation_id,"
+                    "success: success,"
                     operation_time: operation_time,
                     "redis_instance_id: id(redis_manager)"
                 }
@@ -323,7 +333,8 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
                 self.logger.error(fRedis operation {operation_id} failed: {e})
                 return {
                     operation_id: operation_id,"
-                    success": False,
+                    operation_id: operation_id,"
+                    success": False,"
                     operation_time: 0,
                     error": str(e),"
                     redis_instance_id: 0
@@ -335,28 +346,31 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
         connection_results = await asyncio.gather(*tasks)
 
         # Analyze connection pool results
-        successful_operations = sum(1 for r in connection_results if r[success]"
+        successful_operations = sum(1 for r in connection_results if r[success)"
+        successful_operations = sum(1 for r in connection_results if r[success)"
         success_rate = (successful_operations / num_operations) * 100
-        unique_redis_instances = len(set(r["redis_instance_id] for r in connection_results if r[redis_instance_id] != 0))
+        unique_redis_instances = len(set(r["redis_instance_id] for r in connection_results if r[redis_instance_id] != 0))"
         avg_operation_time = sum(r[operation_time] for r in connection_results) / len(connection_results)
 
         pool_evidence = {
             test_name": "connection_pool_consolidation,
             total_operations: num_operations,
             successful_operations: successful_operations,"
-            success_rate": success_rate,
+            successful_operations: successful_operations,"
+            success_rate": success_rate,"
             unique_redis_instances: unique_redis_instances,
             average_operation_time": avg_operation_time,"
             operation_results: connection_results
         }
 
-        with open(/c/netra-apex/redis_pool_consolidation_evidence.json, "w) as f:
+        with open(/c/netra-apex/redis_pool_consolidation_evidence.json, "w) as f:"
             json.dump(pool_evidence, f, indent=2)
 
-        self.logger.info(fConnection pool test: {successful_operations}/{num_operations} operations succeeded")
+        self.logger.info(fConnection pool test: {successful_operations}/{num_operations} operations succeeded")"
         self.logger.info(fSuccess rate: {success_rate:.1f}%)
         self.logger.info(fUnique Redis instances: {unique_redis_instances})"
-        self.logger.info(f"Average operation time: {avg_operation_time:.3f}s)
+        self.logger.info(fUnique Redis instances: {unique_redis_instances})"
+        self.logger.info(f"Average operation time: {avg_operation_time:.3f}s)"
 
         # Validate pool consolidation
         self.assertGreaterEqual(
@@ -396,7 +410,7 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
                 self.logger.error(fFailed to create Redis reference {i}: {e}")"
 
         # Perform operations with all references
-        for i, redis_ref in enumerate(redis_refs[:10]:  # Test first 10 to avoid overload
+        for i, redis_ref in enumerate(redis_refs[:10):  # Test first 10 to avoid overload
             try:
                 await redis_ref.set(fmemory_test_{i}, fdata_{i}, ex=30)
             except Exception as e:
@@ -418,27 +432,30 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
         memory_evidence = {
             test_name: memory_usage_optimization,
             memory_before_mb: memory_before,"
-            memory_after_mb": memory_after,
+            memory_before_mb: memory_before,"
+            memory_after_mb": memory_after,"
             memory_increase_mb: memory_increase,
             redis_references_created": len(redis_refs),"
             unique_instances: unique_instances,
             memory_per_reference_kb: (memory_increase * 1024) / len(redis_refs) if redis_refs else 0,"
-            "optimization_target: 75% reduction from 12 managers to 1 SSOT
+            memory_per_reference_kb: (memory_increase * 1024) / len(redis_refs) if redis_refs else 0,"
+            "optimization_target: 75% reduction from 12 managers to 1 SSOT"
         }
 
         with open(/c/netra-apex/redis_memory_optimization_evidence.json, w) as f:
             json.dump(memory_evidence, f, indent=2)
 
-        self.logger.info(f"Memory usage: {memory_before:.2f} MB -> {memory_after:.2f} MB)
-        self.logger.info(fMemory increase: {memory_increase:.2f} MB for {len(redis_refs)} references")
+        self.logger.info(f"Memory usage: {memory_before:.2f} MB -> {memory_after:.2f} MB)"
+        self.logger.info(fMemory increase: {memory_increase:.2f} MB for {len(redis_refs)} references")"
         self.logger.info(fUnique instances: {unique_instances})
+        self.logger.info(fMemory per reference: {(memory_increase * 1024) / len(redis_refs):.2f} KB)"
         self.logger.info(fMemory per reference: {(memory_increase * 1024) / len(redis_refs):.2f} KB)"
 
         # Validate memory optimization
         self.assertEqual(
             unique_instances,
             1,
-            f"Memory optimization failed: {unique_instances} instances created instead of 1 SSOT instance
+            f"Memory optimization failed: {unique_instances} instances created instead of 1 SSOT instance"
         )
 
         # Memory increase should be minimal with proper singleton
@@ -463,7 +480,8 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
             test_results: [
                 {
                     test_name: result.test_name,"
-                    "success: result.success,
+                    test_name: result.test_name,"
+                    "success: result.success,"
                     instance_count: result.instance_count,
                     "memory_usage_mb: result.memory_usage_mb,"
                     error_details: result.error_details
@@ -471,8 +489,9 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
                 for result in self.test_results
             ],
             user_context_results: ["
+            user_context_results: ["
                 {
-                    user_id": ctx.user_id,
+                    user_id": ctx.user_id,"
                     isolated: ctx.isolated,
                     shared_state_detected": ctx.shared_state_detected"
                 }
@@ -480,9 +499,10 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
             ],
             final_memory_usage: self._get_memory_usage(),
             memory_optimization: self._get_memory_usage() - self.initial_memory"
+            memory_optimization: self._get_memory_usage() - self.initial_memory"
         }
 
-        with open("/c/netra-apex/redis_ssot_factory_validation_final.json, w) as f:
+        with open("/c/netra-apex/redis_ssot_factory_validation_final.json, w) as f:"
             json.dump(final_evidence, f, indent=2)
 
         await super().asyncTearDown()
@@ -490,4 +510,6 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
 
 if __name__ == __main__:
     # Run tests with verbose output
-    pytest.main([__file__, -v", "-s"]"
+    pytest.main([__file__, -v", "-s")"
+))))))
+]

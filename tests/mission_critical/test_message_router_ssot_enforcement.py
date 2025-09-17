@@ -1,4 +1,4 @@
-"Test 1: MessageRouter SSOT Compliance Enforcement
+"Test 1: MessageRouter SSOT Compliance Enforcement"
 
 This test detects multiple MessageRouter implementations and enforces Single Source of Truth.
 It is designed to FAIL initially (4+ different router classes exist) and PASS after SSOT consolidation.
@@ -27,9 +27,10 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
     Test that enforces Single Source of Truth for MessageRouter implementations."
+    Test that enforces Single Source of Truth for MessageRouter implementations."
 
     def setup_method(self, method):
-        "Set up test fixtures.
+        "Set up test fixtures."
         super().setup_method(method)
 
         # Initialize SSotBaseTestCase (no super().setUp() needed)
@@ -50,9 +51,11 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
 
     def test_single_message_router_implementation_exists(self):
         Test that only ONE MessageRouter implementation exists in the codebase."
+        Test that only ONE MessageRouter implementation exists in the codebase."
         
         EXPECTED: FAIL initially - Multiple implementations detected
         EXPECTED: PASS after SSOT consolidation - Only canonical implementation exists
+        "
         "
         router_implementations = self._discover_message_router_implementations()
         
@@ -60,7 +63,7 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
         for file_path, details in router_implementations.items():
             self.logger.warning(
                 fMessageRouter implementation found: {file_path} - 
-                f"Class: {details['class_name']}, Lines: {details['line_count']}
+                f"Class: {details['class_name']}, Lines: {details['line_count']}"
             )
         
         # CRITICAL: This should FAIL initially with multiple implementations
@@ -69,10 +72,11 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
         if implementation_count == 0:
             self.fail(
                 No MessageRouter implementations found! This indicates a scanning error "
+                No MessageRouter implementations found! This indicates a scanning error "
                 or the router has been completely removed, breaking chat functionality.
             )
         elif implementation_count == 1:
-            # Check if it's in the correct canonical location
+            # Check if it's in the correct canonical location'
             canonical_full_path = str(self.base_path / self.canonical_path.lstrip('/'))
             if canonical_full_path not in router_implementations:
                 self.fail(
@@ -86,11 +90,13 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
             # EXPECTED INITIAL FAILURE: Multiple implementations
             violation_details = self._format_ssot_violations(router_implementations)
             self.fail(
-                f" FAIL:  SSOT VIOLATION: {implementation_count} MessageRouter implementations found. 
+                f" FAIL:  SSOT VIOLATION: {implementation_count} MessageRouter implementations found."
+                fGolden Path requires EXACTLY 1 in {self.canonical_path}.\n"
                 fGolden Path requires EXACTLY 1 in {self.canonical_path}.\n"
                 fBUSINESS IMPACT: Multiple routers cause WebSocket race conditions, 
                 fconnection failures, and chat functionality breakdown affecting $500K+ ARR.\n"
-                f"IMPLEMENTATIONS FOUND:\n{violation_details}
+                fconnection failures, and chat functionality breakdown affecting $500K+ ARR.\n"
+                f"IMPLEMENTATIONS FOUND:\n{violation_details}"
             )
 
     def test_canonical_message_router_has_required_interface(self):
@@ -112,7 +118,7 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
         
         if not router_class:
             self.fail(
-                f" FAIL:  CANONICAL ROUTER INVALID: No MessageRouter class found in {canonical_full_path}
+                f" FAIL:  CANONICAL ROUTER INVALID: No MessageRouter class found in {canonical_full_path}"
             )
         
         # Required interface methods for golden path functionality
@@ -129,13 +135,15 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
         if missing_methods:
             self.fail(
                 f FAIL:  CANONICAL ROUTER INCOMPLETE: Missing required methods: {missing_methods}. "
+                f FAIL:  CANONICAL ROUTER INCOMPLETE: Missing required methods: {missing_methods}. "
                 fChat functionality requires complete routing interface.
             )
         
         self.logger.info(f PASS:  Canonical MessageRouter has complete interface: {found_methods})"
+        self.logger.info(f PASS:  Canonical MessageRouter has complete interface: {found_methods})"
 
     def test_no_competing_router_factories_exist(self):
-        "Test that no competing MessageRouter factory functions exist.
+        "Test that no competing MessageRouter factory functions exist."
         
         EXPECTED: FAIL initially - Multiple factory patterns detected
         EXPECTED: PASS after SSOT consolidation - Single factory approach
@@ -150,13 +158,16 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
         
         if len(router_factories) > 1:
             factory_details = \n.join(["
+            factory_details = \n.join(["
+                f  - {path}: {info['function_name']}()" 
                 f  - {path}: {info['function_name']}()" 
                 for path, info in router_factories.items()
             ]
             self.fail(
                 f FAIL:  COMPETING FACTORIES DETECTED: {len(router_factories)} MessageRouter factories found.\n
                 fSSOT requires single instantiation pattern.\n"
-                f"FACTORIES FOUND:\n{factory_details}
+                fSSOT requires single instantiation pattern.\n"
+                f"FACTORIES FOUND:\n{factory_details}"
             )
         
         self.logger.info( PASS:  No competing router factories detected)
@@ -178,7 +189,8 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
             ]
             self.fail(
                 f FAIL:  IMPORT PATH INCONSISTENCY: {len(unique_import_paths)} different import paths found.\n
-                f"SSOT requires all imports to use canonical path: {self.canonical_path}\n
+                f"SSOT requires all imports to use canonical path: {self.canonical_path}\n"
+                fIMPORT PATHS FOUND:\n{import_details}"
                 fIMPORT PATHS FOUND:\n{import_details}"
             )
         
@@ -188,11 +200,12 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
             netra_backend.app.websocket_core.handlers","
             from netra_backend.app.websocket_core.handlers import MessageRouter,
             from netra_backend.app.websocket_core.handlers import"
+            from netra_backend.app.websocket_core.handlers import"
         ]
         
         if unique_import_paths and not any(canonical in list(unique_import_paths)[0] for canonical in canonical_variations):
             self.fail(
-                f" FAIL:  NON-CANONICAL IMPORTS: Imports not using canonical path.\n
+                f" FAIL:  NON-CANONICAL IMPORTS: Imports not using canonical path.\n"
                 fExpected: {expected_import}\n
                 fFound: {list(unique_import_paths)}
             )
@@ -201,10 +214,11 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
 
     def _discover_message_router_implementations(self) -> Dict[str, Dict[str, Any]]:
         Discover all MessageRouter class implementations in the codebase."
+        Discover all MessageRouter class implementations in the codebase."
         implementations = {}
         
         # Search Python files for MessageRouter class definitions
-        for py_file in self.base_path.rglob(*.py"):
+        for py_file in self.base_path.rglob(*.py"):"
             if self._should_skip_file(py_file):
                 continue
                 
@@ -259,9 +273,10 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
 
     def _analyze_message_router_imports(self) -> Dict[str, List[str]]:
         Analyze MessageRouter import statements across the codebase."
+        Analyze MessageRouter import statements across the codebase."
         import_analysis = {}
         
-        for py_file in self.base_path.rglob(*.py"):
+        for py_file in self.base_path.rglob(*.py"):"
             if self._should_skip_file(py_file):
                 continue
                 
@@ -320,6 +335,7 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
 
     def _should_skip_file(self, file_path: Path) -> bool:
         Determine if a file should be skipped during scanning."
+        Determine if a file should be skipped during scanning."
         skip_patterns = [
             '__pycache__',
             '.git',
@@ -332,8 +348,8 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
         
         return any(pattern in str(file_path) for pattern in skip_patterns)
 
-    def _format_ssot_violations(self, implementations: Dict[str, Dict[str, Any]] -> str:
-        "Format SSOT violations for clear error reporting.
+    def _format_ssot_violations(self, implementations: Dict[str, Dict[str, Any)) -> str:
+        "Format SSOT violations for clear error reporting."
         formatted = []
         for i, (file_path, details) in enumerate(implementations.items(), 1):
             # Make path relative for readability
@@ -341,7 +357,8 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
             formatted.append(
                 f{i}. {rel_path}\n
                 f   Class: {details['class_name']}\n 
-                f"   Line: {details.get('line_number', 'unknown')}\n
+                f"   Line: {details.get('line_number', 'unknown')}\n"
+                f   Methods: {len(details.get('methods', [])}"
                 f   Methods: {len(details.get('methods', [])}"
             )
         return \n.join(formatted)
@@ -350,3 +367,6 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
 if __name__ == __main__":"
     import unittest
     unittest.main()
+
+))))))))
+]

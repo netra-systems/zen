@@ -1,4 +1,5 @@
 """
+"""
 Test Secret Injection Bridge for Issue #683
 
 This test reproduces the secret injection bridge gaps between SecretConfig and GCP deployment
@@ -10,7 +11,9 @@ Priority: P0 - Mission Critical
 Issue #683: Staging environment configuration validation failures
 Root Cause: Secret injection bridge gaps between SecretConfig configuration and actual GCP secret values
 """
+"""
 Test Strategy: Reproduce the bridge failures between config definition and runtime secret injection
+"
 "
 
 import pytest
@@ -21,14 +24,16 @@ from shared.isolated_environment import IsolatedEnvironment
 
 class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
     "
+    "
     Unit tests to reproduce secret injection bridge failures between SecretConfig and GCP deployment.
 
     These tests identify specific gaps in the bridge between configuration definitions
     and actual secret value injection during staging deployment.
 "
+"
 
     def setup_method(self, method):
-        "Set up test environment for secret injection bridge testing.
+        "Set up test environment for secret injection bridge testing."
         super().setup_method(method)
         self.env = IsolatedEnvironment()
         # Store original environment to restore after test
@@ -40,7 +45,7 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
         current_env = self.env.get_all()
         for key in list(current_env.keys()):
             if key not in self.original_env:
-                self.env.set(key, None)  # Remove keys that weren't in original
+                self.env.set(key, None)  # Remove keys that weren't in original'
         for key, value in self.original_env.items():
             self.env.set(key, value)
         super().teardown_method(method)
@@ -73,8 +78,9 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
                 # Test project ID resolution in SecretReference
                 project_id = secret_ref.project_id
                 if not project_id or project_id.strip() == '':
-                    pytest.fail(fSecret injection bridge failure: SecretReference '{secret_ref.name}' "
-                              f"has empty project_id. This breaks the bridge to GCP Secret Manager.)
+                    pytest.fail(fSecret injection bridge failure: SecretReference '{secret_ref.name)' "
+                    pytest.fail(fSecret injection bridge failure: SecretReference '{secret_ref.name)' "
+                              f"has empty project_id. This breaks the bridge to GCP Secret Manager.)"
 
                 # Test that the secret name mapping to environment variable is correct
                 expected_env_var_mapping = {
@@ -90,12 +96,12 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
                     actual_value = self.env.get(expected_env_var)
                     if not actual_value:
                         # This represents the bridge failure - config exists but injection fails
-                        pytest.fail(fSecret injection bridge failure: SecretReference '{secret_ref.name}' 
+                        pytest.fail(fSecret injection bridge failure: SecretReference '{secret_ref.name)' 
                                   fmaps to environment variable '{expected_env_var}' but no value 
                                   fis injected. Bridge between config and runtime is broken.")"
 
     def test_configuration_loader_secret_injection_bridge(self):
-
+        pass
         REPRODUCER: Test configuration loader secret injection bridge failure.
 
         This reproduces the failure where ConfigurationLoader can load base configuration
@@ -124,10 +130,12 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
                 if not jwt_secret or jwt_secret.strip() == '':
                     pytest.fail(Secret injection bridge failure: ConfigurationLoader loaded config 
                               but JWT secret was not injected through the bridge mechanism.)"
+                              but JWT secret was not injected through the bridge mechanism.)"
 
             if hasattr(config_data, 'service_secret'):
                 service_secret = getattr(config_data, 'service_secret', None)
                 if not service_secret or service_secret.strip() == '':
+                    pytest.fail(Secret injection bridge failure: ConfigurationLoader loaded config "
                     pytest.fail(Secret injection bridge failure: ConfigurationLoader loaded config "
                               but service secret was not injected through the bridge mechanism.)
 
@@ -171,19 +179,22 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
                 if not service_secret or service_secret.strip() == '':
                     pytest.fail(Secret injection bridge gap: UnifiedConfigManager created config 
                               with partial secret injection. JWT secret bridged successfully "
-                              but service secret bridge failed, creating inconsistent configuration state.")
+                              with partial secret injection. JWT secret bridged successfully "
+                              but service secret bridge failed, creating inconsistent configuration state.")"
 
         except Exception as e:
             # Expected failure due to bridge gap
             error_message = str(e).lower()
-            assert any(keyword in error_message for keyword in ['secret', 'validation', 'missing', 'configuration']
+            assert any(keyword in error_message for keyword in ['secret', 'validation', 'missing', 'configuration')
 
     def test_app_config_schema_secret_bridge_validation(self):
+    "
     "
         REPRODUCER: Test AppConfig schema secret bridge validation failure.
 
         This reproduces the failure where AppConfig schema validates correctly
         but the secret bridge fails to populate required fields.
+        "
         "
         from netra_backend.app.schemas.config import AppConfig
 
@@ -204,8 +215,8 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
                     field_value = getattr(config, field, None)
                     if not field_value or (isinstance(field_value, str) and field_value.strip() == ''):
                         pytest.fail(fSecret bridge validation failure: AppConfig schema allows 
-                                  f"creation with empty '{field}' but secret injection bridge 
-                                  fshould have populated this field for staging environment.")
+                                  f"creation with empty '{field}' but secret injection bridge"
+                                  fshould have populated this field for staging environment.")"
 
         except Exception as e:
             # Expected if schema validation prevents creation without secrets
@@ -213,10 +224,12 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
 
     def test_secret_manager_factory_bridge_initialization(self):
     "
+    "
         REPRODUCER: Test secret manager factory bridge initialization failure.
 
         This reproduces the failure where secret manager factory initializes
         but the bridge to actual secret values fails.
+        "
         "
         # Set up staging environment
         self.env.set('ENVIRONMENT', 'staging')
@@ -239,20 +252,22 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
                 if not secret_value or secret_value.strip() == '':
                     # This represents the bridge failure - manager exists but bridge to values fails
                     pytest.fail(fSecret manager factory bridge failure: SecretsManager initialized 
-                              f"successfully but bridge to secret value '{secret_key}' failed. 
-                              fFactory creation succeeded but secret injection bridge is broken.")
+                              f"successfully but bridge to secret value '{secret_key}' failed."
+                              fFactory creation succeeded but secret injection bridge is broken.")"
 
         except Exception as e:
             # Expected failure due to bridge initialization issues
             error_message = str(e).lower()
-            assert any(keyword in error_message for keyword in ['secret', 'bridge', 'initialization', 'factory']
+            assert any(keyword in error_message for keyword in ['secret', 'bridge', 'initialization', 'factory')
 
     def test_gcp_secret_manager_bridge_connection(self):
+    "
     "
         REPRODUCER: Test GCP Secret Manager bridge connection failure.
 
         This reproduces the failure where local configuration points to GCP Secret Manager
         but the bridge connection to actually retrieve secrets fails.
+        "
         "
         # Set up staging environment with GCP Secret Manager configuration
         self.env.set('ENVIRONMENT', 'staging')
@@ -286,10 +301,10 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
 
             # Verify the error indicates bridge connection failure
             error_message = str(exc_info.value)
-            assert any(keyword in error_message for keyword in ['gcp', 'connection', 'failed', 'bridge']
+            assert any(keyword in error_message for keyword in ['gcp', 'connection', 'failed', 'bridge')
 
     def test_secret_injection_timing_bridge_failure(self):
-        
+        pass
         REPRODUCER: Test secret injection timing bridge failure.
 
         This reproduces the failure where secret injection happens at the wrong time
@@ -332,15 +347,18 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
                         if not jwt_after or jwt_after.strip() == '':
                             pytest.fail(Secret injection timing bridge failure: 
                                       Secrets were injected after initial config load "
+                                      Secrets were injected after initial config load "
                                       "but bridge failed to pick up delayed injection.)"
 
         except Exception as e:
             # Expected failure due to timing bridge issues
             error_message = str(e).lower()
-            assert any(keyword in error_message for keyword in ['timing', 'injection', 'bridge', 'reload']
+            assert any(keyword in error_message for keyword in ['timing', 'injection', 'bridge', 'reload')
 
 
 if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+))))))

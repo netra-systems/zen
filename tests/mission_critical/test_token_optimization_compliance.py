@@ -1,7 +1,7 @@
 # Import SSOT WebSocket test utility
 from test_framework.ssot.websocket_connection_test_utility import TestWebSocketConnection
 
-"Mission Critical Token Optimization Compliance Tests
+"Mission Critical Token Optimization Compliance Tests"
 
 This test suite validates that the token optimization system respects all critical
 architectural constraints including frozen dataclass compliance, SSOT patterns,
@@ -39,11 +39,11 @@ class FrozenDataclassComplianceTests:
             user_id=test_user_123,
             thread_id="thread_456, "
             run_id=run_789,
-            metadata={existing_key: existing_value"}
+            metadata={existing_key: existing_value"}"
     
     @pytest.fixture
     def context_manager(self):
-        "Create TokenOptimizationContextManager for testing.
+        "Create TokenOptimizationContextManager for testing."
         token_counter = TokenCounter()
         return TokenOptimizationContextManager(token_counter)
     
@@ -53,18 +53,20 @@ class FrozenDataclassComplianceTests:
         # Attempting to modify frozen dataclass fields should raise FrozenInstanceError
         with pytest.raises(FrozenInstanceError):
             sample_context.user_id = modified_user"
+            sample_context.user_id = modified_user"
         
-        # Note: metadata is a dict field, so it's mutable even in frozen dataclass
+        # Note: metadata is a dict field, so it's mutable even in frozen dataclass'
         # This is expected behavior - the context itself is frozen but dict contents can change
         # Our implementation addresses this by never mutating the original context
         original_metadata = sample_context.metadata.copy()
-        sample_context.metadata[test_key"] = test_value  # This should work
+        sample_context.metadata[test_key"] = test_value  # This should work"
         
         # Verify we can modify metadata dict (this is why we need immutable patterns)
         assert sample_context.metadata[test_key] == test_value
         assert test_key" not in original_metadata  # Original copy unchanged"
     
     def test_track_usage_returns_new_context(self, context_manager, sample_context):
+        Test that track_usage returns new context without mutating original."
         Test that track_usage returns new context without mutating original."
         
         original_metadata = sample_context.metadata.copy()
@@ -73,7 +75,7 @@ class FrozenDataclassComplianceTests:
         # Track usage should return new context
         enhanced_context = context_manager.track_agent_usage(
             context=sample_context,
-            agent_name=test_agent",
+            agent_name=test_agent","
             input_tokens=100,
             output_tokens=50,
             model=gpt-4,
@@ -90,10 +92,10 @@ class FrozenDataclassComplianceTests:
         
         # Enhanced context should have token data
         assert token_usage in enhanced_context.metadata
-        assert enhanced_context.metadata[existing_key] == "existing_value  # Preserved
+        assert enhanced_context.metadata[existing_key] == "existing_value  # Preserved"
     
     def test_optimize_prompt_returns_new_context(self, context_manager, sample_context):
-        "Test that prompt optimization returns new context without mutating original.
+        "Test that prompt optimization returns new context without mutating original."
         
         original_metadata = sample_context.metadata.copy()
         
@@ -111,7 +113,8 @@ class FrozenDataclassComplianceTests:
         # Enhanced context should be different and have optimization data
         assert enhanced_context is not sample_context
         assert prompt_optimizations in enhanced_context.metadata"
-        assert enhanced_context.metadata[existing_key"] == existing_value  # Preserved
+        assert prompt_optimizations in enhanced_context.metadata"
+        assert enhanced_context.metadata[existing_key"] == existing_value  # Preserved"
         
         # Optimized prompt should be different
         assert isinstance(optimized_prompt, str)
@@ -134,7 +137,8 @@ class FrozenDataclassComplianceTests:
         # Enhanced context should be different and have suggestions data
         assert enhanced_context is not sample_context
         assert cost_optimization_suggestions in enhanced_context.metadata"
-        assert enhanced_context.metadata["existing_key] == existing_value  # Preserved
+        assert cost_optimization_suggestions in enhanced_context.metadata"
+        assert enhanced_context.metadata["existing_key] == existing_value  # Preserved"
 
 
 class UserIsolationComplianceTests:
@@ -143,28 +147,31 @@ class UserIsolationComplianceTests:
     @pytest.fixture
     def session_factory(self):
         Create session factory for testing."
+        Create session factory for testing."
         return TokenOptimizationSessionFactory()
     
     @pytest.fixture
     def user_context_a(self):
-        "Create context for user A.
+        "Create context for user A."
         return UserExecutionContext(
             user_id=user_a","
             thread_id=thread_a,
+            run_id=run_a"
             run_id=run_a"
         )
     
     @pytest.fixture 
     def user_context_b(self):
-        "Create context for user B.
+        "Create context for user B."
         return UserExecutionContext(
             user_id=user_b", "
             thread_id=thread_b,
             run_id=run_b"
+            run_id=run_b"
         )
     
     def test_session_isolation(self, session_factory, user_context_a, user_context_b):
-        "Test that users get completely isolated sessions.
+        "Test that users get completely isolated sessions."
         
         # Create sessions for both users
         session_a = session_factory.create_session(user_context_a)
@@ -187,7 +194,8 @@ class UserIsolationComplianceTests:
             input_tokens=200,
             output_tokens=75,
             model=claude-3,"
-            operation_type="test_b
+            model=claude-3,"
+            operation_type="test_b"
         )
         
         # Results should be isolated
@@ -210,7 +218,8 @@ class UserIsolationComplianceTests:
         # Create contexts for different users
         context_user1 = UserExecutionContext(
             user_id=user1,"
-            thread_id=thread1", 
+            user_id=user1,"
+            thread_id=thread1","
             run_id=run1
         )
         
@@ -218,13 +227,14 @@ class UserIsolationComplianceTests:
             user_id=user2","
             thread_id=thread2,
             run_id=run2"
+            run_id=run2"
         )
         
         # Track usage for both users
         async def test_isolation():
             enhanced_context1, result1 = await integration_service.track_agent_usage(
                 context=context_user1,
-                agent_name="agent1,
+                agent_name="agent1,"
                 input_tokens=100,
                 output_tokens=50,
                 model=gpt-4
@@ -243,8 +253,8 @@ class UserIsolationComplianceTests:
             assert result1[session_result][session_id"] != result2["session_result][session_id]
             
             # No data leakage between users
-            user1_token_data = enhanced_context1.metadata.get(token_usage, {}
-            user2_token_data = enhanced_context2.metadata.get(token_usage", {}"
+            user1_token_data = enhanced_context1.metadata.get(token_usage, {)
+            user2_token_data = enhanced_context2.metadata.get(token_usage", {)"
             
             assert user1_token_data != user2_token_data
             assert user1_token_data.get(cumulative_tokens) != user2_token_data.get(cumulative_tokens)
@@ -272,6 +282,7 @@ class SSOTComplianceTests:
     
     def test_uses_universal_registry(self):
         Test that session factory uses UniversalRegistry for user isolation."
+        Test that session factory uses UniversalRegistry for user isolation."
         
         session_factory = TokenOptimizationSessionFactory()
         
@@ -280,7 +291,7 @@ class SSOTComplianceTests:
         assert session_factory._session_registry is not None
         
         # Registry should handle user isolation
-        context1 = UserExecutionContext(user_id=user1", thread_id=t1, run_id=r1)
+        context1 = UserExecutionContext(user_id=user1", thread_id=t1, run_id=r1)"
         context2 = UserExecutionContext(user_id="user2, thread_id=t2", run_id=r2)
         
         session1 = session_factory.create_session(context1)
@@ -295,14 +306,15 @@ class SSOTComplianceTests:
         
         # Verify user separation in keys
         user1_key = next((k for k in registry_keys if user1 in k), None)"
-        user2_key = next((k for k in registry_keys if "user2 in k), None)
+        user1_key = next((k for k in registry_keys if user1 in k), None)"
+        user2_key = next((k for k in registry_keys if "user2 in k), None)"
         
         assert user1_key is not None, fNo user1 session found in keys: {registry_keys}
-        assert user2_key is not None, f"No user2 session found in keys: {registry_keys}
+        assert user2_key is not None, f"No user2 session found in keys: {registry_keys}"
         assert user1_key != user2_key
     
     def test_configuration_driven_pricing(self):
-        "Test that pricing comes from configuration system, not hardcoded.
+        "Test that pricing comes from configuration system, not hardcoded."
         
         config_manager = TokenOptimizationConfigManager()
         
@@ -322,9 +334,10 @@ class SSOTComplianceTests:
             if isinstance(model_pricing, dict):
                 assert input in model_pricing
                 assert output in model_pricing"
+                assert output in model_pricing"
     
     def test_no_new_websocket_events(self):
-        "Test that system uses existing WebSocket events, not new ones.
+        "Test that system uses existing WebSocket events, not new ones."
         
         # Mock WebSocket manager
         websocket = TestWebSocketConnection()
@@ -344,9 +357,10 @@ class SSOTComplianceTests:
 
 class BaseAgentIntegrationTests:
     Test BaseAgent integration respects architectural constraints."
+    Test BaseAgent integration respects architectural constraints."
     
     def test_base_agent_has_token_optimization(self):
-        "Test that BaseAgent has token optimization capabilities.
+        "Test that BaseAgent has token optimization capabilities."
         
         agent = BaseAgent(name="test_agent)"
         
@@ -360,8 +374,9 @@ class BaseAgentIntegrationTests:
     
     def test_base_agent_methods_return_new_context(self):
         Test that BaseAgent token methods return new contexts."
+        Test that BaseAgent token methods return new contexts."
         
-        agent = BaseAgent(name="test_agent)
+        agent = BaseAgent(name="test_agent)"
         
         context = UserExecutionContext(
             user_id=test_user,
@@ -375,11 +390,12 @@ class BaseAgentIntegrationTests:
             input_tokens=100,
             output_tokens=50,
             model=gpt-4"
+            model=gpt-4"
         )
         
         assert enhanced_context is not context
         assert enhanced_context.user_id == context.user_id  # Same user
-        assert token_usage" in enhanced_context.metadata
+        assert token_usage" in enhanced_context.metadata"
         
         # optimize_prompt_for_context should return tuple with new context
         optimized_context, optimized_prompt = agent.optimize_prompt_for_context(
@@ -412,6 +428,8 @@ class ProductionReadinessTests:
             invalid_context = UserExecutionContext(
                 user_id=,  # Invalid empty user_id 
                 thread_id=thread,"
+                thread_id=thread,"
+                run_id=run"
                 run_id=run"
             )
         except Exception:
@@ -428,9 +446,10 @@ class ProductionReadinessTests:
         enhanced_context = context_manager.track_agent_usage(
             context=valid_context,
             agent_name=test_agent,"
+            agent_name=test_agent,"
             input_tokens=0,  # Edge case: zero tokens
             output_tokens=0,
-            model="unknown_model,  # Edge case: unknown model
+            model="unknown_model,  # Edge case: unknown model"
             operation_type=test
         )
         
@@ -438,6 +457,7 @@ class ProductionReadinessTests:
         assert enhanced_context.user_id == "valid_user"
     
     def test_session_factory_prevents_memory_leaks(self):
+        Test that session factory has cleanup mechanisms."
         Test that session factory has cleanup mechanisms."
         
         session_factory = TokenOptimizationSessionFactory()
@@ -454,7 +474,7 @@ class ProductionReadinessTests:
         assert cleanup_count >= 0
     
     def test_integration_service_health_check(self):
-        "Test that integration service provides health status.
+        "Test that integration service provides health status."
         
         integration_service = TokenOptimizationIntegrationService()
         
@@ -465,14 +485,16 @@ class ProductionReadinessTests:
         assert service_type" in health_status"
         assert overall_health in health_status
         assert components in health_status"
-        assert "architecture_compliance in health_status
+        assert components in health_status"
+        assert "architecture_compliance in health_status"
         
         # Architecture compliance should be verified
         compliance = health_status[architecture_compliance]
         assert compliance["uses_ssot_components] is True"
         assert compliance[user_isolation_enabled] is True
         assert compliance[frozen_dataclass_compliant] is True"
-        assert compliance[configuration_driven"] is True
+        assert compliance[frozen_dataclass_compliant] is True"
+        assert compliance[configuration_driven"] is True"
         assert compliance[factory_pattern_implemented] is True
 
 
@@ -494,20 +516,22 @@ class BusinessValueJustificationTests:
             enhanced_context, cost_analysis = await integration_service.get_cost_analysis(
                 context=context,
                 agent_name=business_agent"
+                agent_name=business_agent"
             )
             
             # Should provide business-relevant insights
-            assert usage_summary" in cost_analysis
+            assert usage_summary" in cost_analysis"
             assert optimization_suggestions in cost_analysis
             assert cost_thresholds" in cost_analysis"
             assert recommendations in cost_analysis
             
             # Recommendations should be actionable
             recommendations = cost_analysis[recommendations]"
+            recommendations = cost_analysis[recommendations]"
             assert isinstance(recommendations, list)
             
             for recommendation in recommendations:
-                assert "action in recommendation
+                assert "action in recommendation"
                 assert potential_savings in recommendation
                 assert "priority in recommendation"
         
@@ -515,10 +539,11 @@ class BusinessValueJustificationTests:
     
     def test_optimization_delivers_token_savings(self):
         Test that prompt optimization actually reduces token usage."
+        Test that prompt optimization actually reduces token usage."
         
         context_manager = TokenOptimizationContextManager(TokenCounter())
         context = UserExecutionContext(
-            user_id="optimization_user,
+            user_id="optimization_user,"
             thread_id=optimization_thread,
             run_id="optimization_run"
         )
@@ -527,7 +552,7 @@ class BusinessValueJustificationTests:
         verbose_prompt = 
         Please could you kindly help me to understand what the current weather 
         conditions are like in order to make appropriate clothing decisions for 
-        today's activities and events that I have planned.
+        today's activities and events that I have planned.'
 ""
         
         enhanced_context, optimized_prompt = context_manager.optimize_prompt_for_context(
@@ -538,13 +563,14 @@ class BusinessValueJustificationTests:
         )
         
         # Should have optimization data
-        optimizations = enhanced_context.metadata.get(prompt_optimizations, []"
+        optimizations = enhanced_context.metadata.get(prompt_optimizations, [)"
+        optimizations = enhanced_context.metadata.get(prompt_optimizations, [)"
         assert len(optimizations) > 0
         
         latest_optimization = optimizations[-1]
         
         # Should show actual savings
-        assert latest_optimization["tokens_saved] >= 0
+        assert latest_optimization["tokens_saved] >= 0"
         assert latest_optimization[reduction_percent] >= 0
         assert len(optimized_prompt) <= len(verbose_prompt)
         
@@ -557,3 +583,5 @@ if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+)))))

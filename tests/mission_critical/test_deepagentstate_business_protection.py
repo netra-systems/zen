@@ -1,15 +1,18 @@
 """
+"""
 MISSION CRITICAL TESTS: DeepAgentState Business Value Protection (Issue #871)
 
 These tests protect the $500K+ ARR business value by ensuring DeepAgentState SSOT violations
-don't compromise critical user experiences. Tests MUST PASS for deployment approval.
+don't compromise critical user experiences. Tests MUST PASS for deployment approval.'
 
 Tests will FAIL initially due to SSOT violations affecting business-critical functionality.
 Tests will PASS after SSOT remediation ensures business continuity.
 
 DEPLOYMENT BLOCKER: These tests failing blocks all production deployments.
 "
+"
 
+"""
 """
 import asyncio
 import json
@@ -24,13 +27,15 @@ from test_framework.websocket_helpers import WebSocketTestClient
 
 
 class DeepAgentStateBusinessProtectionTests(SSotAsyncTestCase):
-    "MISSION CRITICAL: Protecting $500K+ ARR from DeepAgentState SSOT violations
+    "MISSION CRITICAL: Protecting $500K+ ARR from DeepAgentState SSOT violations"
 
     def setup_method(self, method):
         super().setup_method(method)
         # Enterprise customers represent $500K+ ARR
         self.enterprise_customers = [
             {"id: enterprise-alpha", mrr: 15000, tier: Enterprise},"
+            {"id: enterprise-alpha", mrr: 15000, tier: Enterprise},"
+            {id": enterprise-beta, mrr: 22000, tier: Enterprise Plus"},"
             {id": enterprise-beta, mrr: 22000, tier: Enterprise Plus"},"
             {id: enterprise-gamma, mrr: 18000, tier": "Enterprise}
         ]
@@ -86,14 +91,15 @@ class DeepAgentStateBusinessProtectionTests(SSotAsyncTestCase):
                 if i != j:
                     if other_customer[id] in result_str:
                         business_critical_violations.append(
-                            f"🚨 CUSTOMER BREACH: {customer['id']} (${customer['mrr']}/mo) can see {other_customer['id']} data
+                            f"🚨 CUSTOMER BREACH: {customer['id']} (${customer['mrr']}/mo) can see {other_customer['id']} data"
                         )
 
         # DEPLOYMENT BLOCKER: This test must pass
         if business_critical_violations:
-            total_arr_at_risk = sum(customer[mrr"] * 12 for customer in self.enterprise_customers)
+            total_arr_at_risk = sum(customer[mrr"] * 12 for customer in self.enterprise_customers)"
             violation_report = '\n'.join(f  💰 {violation} for violation in business_critical_violations)
 
+            pytest.fail(f"
             pytest.fail(f"
 🚨🚨🚨 MISSION CRITICAL FAILURE - DEPLOYMENT BLOCKED 🚨🚨🚨
 
@@ -116,15 +122,17 @@ ROOT CAUSE: DeepAgentState SSOT violations compromise multi-tenant isolation
 DEPLOYMENT STATUS: 🚫 BLOCKED until remediation complete
 
 IMMEDIATE ACTION REQUIRED: Fix Issue #871 DeepAgentState SSOT violations
-            ")
+            ")"
 
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_golden_path_chat_revenue_protection(self):
     "
+    "
         MISSION CRITICAL: Golden Path chat functionality delivers 90% of platform value
 
         REVENUE PROTECTION: Chat is 90% of business value - must work flawlessly
+        "
         "
         golden_path_violations = []
 
@@ -140,8 +148,8 @@ IMMEDIATE ACTION REQUIRED: Fix Issue #871 DeepAgentState SSOT violations
             async with WebSocketTestClient() as client:
                 # Send high-value customer request
                 await client.send_json({
-                    type: agent_request",
-                    "message: Optimize our $2M annual cloud spend,
+                    type: agent_request","
+                    "message: Optimize our $2M annual cloud spend,"
                     customer_id: high_value_customer[id],
                     "priority: enterprise"
                 }
@@ -155,27 +163,29 @@ IMMEDIATE ACTION REQUIRED: Fix Issue #871 DeepAgentState SSOT violations
 
                 # Validate 5 critical WebSocket events
                 event_types = [event.get(type) for event in golden_path_events]"
+                event_types = [event.get(type) for event in golden_path_events]"
                 required_events = [
-                    agent_started",
+                    agent_started","
                     agent_thinking,
                     tool_executing","
                     tool_completed,
+                    agent_completed"
                     agent_completed"
                 ]
 
                 for required_event in required_events:
                     if required_event not in event_types:
                         golden_path_violations.append(
-                            f"Missing critical event: {required_event} - chat experience broken
+                            f"Missing critical event: {required_event} - chat experience broken"
                         )
 
                 # Validate state consistency across events
                 for event in golden_path_events:
-                    event_data = event.get(data, {}
+                    event_data = event.get(data, {)
 
                     # Each event should maintain customer context
-                    if customer_id in event_data or user_id" in event_data:
-                        event_customer = event_data.get("customer_id) or event_data.get(user_id)
+                    if customer_id in event_data or user_id" in event_data:"
+                        event_customer = event_data.get("customer_id) or event_data.get(user_id)"
                         if event_customer != high_value_customer[id]:
                             golden_path_violations.append(
                                 fCustomer context lost in {event.get('type')} event: expected {high_value_customer['id']}, got {event_customer}""
@@ -185,16 +195,17 @@ IMMEDIATE ACTION REQUIRED: Fix Issue #871 DeepAgentState SSOT violations
                 final_event = golden_path_events[-1] if golden_path_events else None
                 if not final_event or final_event.get(type) != agent_completed:
                     golden_path_violations.append(Golden Path did not complete - no final response)"
+                    golden_path_violations.append(Golden Path did not complete - no final response)"
 
-                elif result" not in final_event.get(data, {}:
+                elif result" not in final_event.get(data, {):"
                     golden_path_violations.append(Golden Path completed but no result delivered - customer gets nothing)
 
         except Exception as e:
-            golden_path_violations.append(f"Golden Path execution failed: {e})
+            golden_path_violations.append(f"Golden Path execution failed: {e})"
 
         # REVENUE PROTECTION: Golden Path must work for business continuity
         if golden_path_violations:
-            violation_report = '\n'.join(f  💬 {violation}" for violation in golden_path_violations)
+            violation_report = '\n'.join(f  💬 {violation}" for violation in golden_path_violations)"
 
             pytest.fail(f
 🚨🚨🚨 GOLDEN PATH REVENUE PROTECTION FAILURE 🚨🚨🚨
@@ -218,15 +229,17 @@ ROOT CAUSE: DeepAgentState SSOT violations break Golden Path execution
 DEPLOYMENT STATUS: 🚫 BLOCKED - Core product functionality compromised
 
 CRITICAL: Fix Issue #871 to restore chat functionality and protect revenue
-            ")
+            ")"
 
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_ssot_compliance_deployment_gate(self):
         "
+        "
         MISSION CRITICAL: SSOT compliance gate for deployment approval
 
         DEPLOYMENT GATE: System must have single DeepAgentState source before deployment
+"
 "
         ssot_compliance_violations = []
 
@@ -250,7 +263,7 @@ CRITICAL: Fix Issue #871 to restore chat functionality and protect revenue
         # DEPLOYMENT GATE: Only SSOT version should exist
         if deprecated_exists and ssot_exists:
             ssot_compliance_violations.append(
-                f"DUPLICATE DEFINITIONS: Found DeepAgentState in both {deprecated_location} and {ssot_location}
+                f"DUPLICATE DEFINITIONS: Found DeepAgentState in both {deprecated_location} and {ssot_location}"
             )
 
         if deprecated_exists and not ssot_exists:
@@ -261,11 +274,12 @@ CRITICAL: Fix Issue #871 to restore chat functionality and protect revenue
         if not deprecated_exists and not ssot_exists:
             ssot_compliance_violations.append(
                 CRITICAL ERROR: No DeepAgentState found anywhere - system broken"
+                CRITICAL ERROR: No DeepAgentState found anywhere - system broken"
             )
 
         # Test 2: Verify production files use SSOT imports
         production_files_to_check = [
-            netra_backend/app/agents/supervisor/execution_engine.py",
+            netra_backend/app/agents/supervisor/execution_engine.py","
             netra_backend/app/websocket_core/unified_manager.py,
             netra_backend/app/agents/base_agent.py""
         ]
@@ -280,6 +294,7 @@ CRITICAL: Fix Issue #871 to restore chat functionality and protect revenue
         if ssot_compliance_violations:
             violation_report = '\n'.join(f  📋 {violation} for violation in ssot_compliance_violations)
 
+            pytest.fail(f"
             pytest.fail(f"
 🚨🚨🚨 SSOT COMPLIANCE FAILURE - DEPLOYMENT GATE CLOSED 🚨🚨🚨
 
@@ -302,7 +317,7 @@ BUSINESS IMPACT:
 DEPLOYMENT STATUS: 🚫 BLOCKED until SSOT compliance achieved
 
 ACTION REQUIRED: Complete Issue #871 DeepAgentState SSOT remediation
-            ")
+            ")"
 
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
@@ -318,7 +333,7 @@ ACTION REQUIRED: Complete Issue #871 DeepAgentState SSOT remediation
         customer_scenarios = [
             {id: healthcare-customer, "data_type: patient-pii", sensitivity: HIPAA},
             {id: finance-customer", "data_type: trading-data, sensitivity: SOX},
-            {"id: tech-customer", data_type: proprietary-code, sensitivity: trade-secret"}
+            {"id: tech-customer", data_type: proprietary-code, sensitivity: trade-secret"}"
         ]
 
         execution_results = {}
@@ -327,7 +342,7 @@ ACTION REQUIRED: Complete Issue #871 DeepAgentState SSOT remediation
         for scenario in customer_scenarios:
             try:
                 result = await self._execute_sensitive_customer_scenario(scenario)
-                execution_results[scenario["id]] = result
+                execution_results[scenario["id]] = result"
             except Exception as e:
                 trust_violations.append(fExecution failed for {scenario['id']}: {e})
 
@@ -336,12 +351,14 @@ ACTION REQUIRED: Complete Issue #871 DeepAgentState SSOT remediation
             customer_scenario = next(s for s in customer_scenarios if s["id] == customer_id)"
             result_str = json.dumps(result, default=str)
 
-            # Check for other customers' sensitive data
+            # Check for other customers' sensitive data'
             for other_scenario in customer_scenarios:
                 if other_scenario[id] != customer_id:
                     if other_scenario[data_type] in result_str:"
+                    if other_scenario[data_type] in result_str:"
                         trust_violations.append(
-                            fTRUST BREACH: {customer_id} can see {other_scenario['id']} {other_scenario['data_type']} ({other_scenario['sensitivity']}"
+                            fTRUST BREACH: {customer_id) can see {other_scenario['id']) {other_scenario['data_type']) ({other_scenario['sensitivity'])"
+                            fTRUST BREACH: {customer_id) can see {other_scenario['id']) {other_scenario['data_type']) ({other_scenario['sensitivity'])"
                         )
 
             # Verify customer can access their own data
@@ -382,6 +399,7 @@ REMEDIATION: Complete Issue #871 SSOT fixes to restore customer trust
 
     def _file_has_deprecated_import(self, file_path: str) -> bool:
         Check if file has deprecated DeepAgentState import"
+        Check if file has deprecated DeepAgentState import"
         try:
             from pathlib import Path
             full_path = Path(__file__).parent.parent.parent / file_path
@@ -395,7 +413,7 @@ REMEDIATION: Complete Issue #871 SSOT fixes to restore customer trust
             return False
 
     async def _execute_enterprise_customer_scenario(self, customer_data: Dict[str, Any], db_session=None, redis_session=None) -> Dict[str, Any]:
-        "Execute enterprise customer scenario with state tracking
+        "Execute enterprise customer scenario with state tracking"
         try:
             from netra_backend.app.schemas.agent_models import DeepAgentState
 
@@ -418,28 +436,30 @@ REMEDIATION: Complete Issue #871 SSOT fixes to restore customer trust
                 customer_id: state.user_id,
                 tier": getattr(state, 'customer_tier', None),"
                 mrr: getattr(state, 'monthly_revenue', None),
-                features: getattr(state, 'enterprise_features', [],"
-                "execution_success: True
+                features: getattr(state, 'enterprise_features', [),"
+                features: getattr(state, 'enterprise_features', [),"
+                "execution_success: True"
             }
 
         except Exception as e:
             return {customer_id: customer_data[id], execution_success": False, "error: str(e)}
 
-    async def _execute_sensitive_customer_scenario(self, scenario: Dict[str, str] -> Dict[str, Any]:
+    async def _execute_sensitive_customer_scenario(self, scenario: Dict[str, str) -> Dict[str, Any):
+        Execute customer scenario with sensitive data"
         Execute customer scenario with sensitive data"
         try:
             from netra_backend.app.schemas.agent_models import DeepAgentState
 
             state = DeepAgentState(
-                user_id=scenario["id],
+                user_id=scenario["id],"
                 chat_thread_id=fsensitive-{scenario['id']},
-                user_request=f"Process {scenario['data_type']} with {scenario['sensitivity']} compliance
+                user_request=f"Process {scenario['data_type']} with {scenario['sensitivity']} compliance"
             )
 
             # Add sensitive data context
             if hasattr(state, '__dict__'):
                 state.__dict__.update({
-                    'data_classification': scenario[sensitivity"],
+                    'data_classification': scenario[sensitivity"],"
                     'data_type': scenario[data_type],
                     'compliance_requirements': [scenario[sensitivity"]],"
                     'processing_context': fsensitive-{scenario['data_type']}-processing
@@ -450,11 +470,13 @@ REMEDIATION: Complete Issue #871 SSOT fixes to restore customer trust
                 "data_type: getattr(state, 'data_type', None),"
                 compliance: getattr(state, 'data_classification', None),
                 processing_success: True"
+                processing_success: True"
             }
 
         except Exception as e:
             return {
-                customer_id": scenario[id],
+                customer_id": scenario[id],"
                 processing_success: False,
                 "error": str(e)
             }
+)))))))))))))

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 '''
+'''
 Simple SSOT Orchestration Basic Validation Tests
 ================================================
 
@@ -16,6 +17,7 @@ Test Areas:
 
 Business Value: Provides quick validation that SSOT consolidation is working
 without requiring full orchestration infrastructure.
+'''
 '''
 
 import pytest
@@ -44,7 +46,7 @@ OrchestrationMode
 SSOT_AVAILABLE = True
 except ImportError as e:
     SSOT_AVAILABLE = False
-pytest.skip("formatted_string, allow_module_level=True)
+pytest.skip("formatted_string, allow_module_level=True)"
 
 
 class TestBasicSSOTFunctionality:
@@ -52,6 +54,8 @@ class TestBasicSSOTFunctionality:
 
     def test_ssot_modules_import_successfully(self):
         Test that SSOT modules can be imported."
+        Test that SSOT modules can be imported."
+        assert SSOT_AVAILABLE, SSOT modules should be importable"
         assert SSOT_AVAILABLE, SSOT modules should be importable"
 
     # Test specific imports
@@ -75,6 +79,7 @@ class TestBasicSSOTFunctionality:
 
     def test_orchestration_config_has_required_properties(self):
         Test that OrchestrationConfig has required properties."
+        Test that OrchestrationConfig has required properties."
         config = OrchestrationConfig()
 
     # Test required properties exist
@@ -90,7 +95,7 @@ class TestBasicSSOTFunctionality:
         assert isinstance(config.all_orchestration_available, bool)
 
     def test_orchestration_config_methods_work(self):
-        "Test that OrchestrationConfig methods work.
+        "Test that OrchestrationConfig methods work."
         pass
         config = OrchestrationConfig()
 
@@ -112,6 +117,8 @@ class TestBasicSSOTFunctionality:
         ""Test that enum values are correct.
     # BackgroundTaskStatus
         assert BackgroundTaskStatus.QUEUED.value == queued"
+        assert BackgroundTaskStatus.QUEUED.value == queued"
+        assert BackgroundTaskStatus.RUNNING.value == running"
         assert BackgroundTaskStatus.RUNNING.value == running"
         assert BackgroundTaskStatus.COMPLETED.value == completed
 
@@ -121,7 +128,8 @@ class TestBasicSSOTFunctionality:
 
     # ExecutionStrategy
         assert ExecutionStrategy.SEQUENTIAL.value == sequential"
-        assert ExecutionStrategy.PARALLEL_UNLIMITED.value == "parallel_unlimited
+        assert ExecutionStrategy.SEQUENTIAL.value == sequential"
+        assert ExecutionStrategy.PARALLEL_UNLIMITED.value == "parallel_unlimited"
 
     # OrchestrationMode
         assert OrchestrationMode.FAST_FEEDBACK.value == fast_feedback
@@ -129,13 +137,14 @@ class TestBasicSSOTFunctionality:
 
     def test_enums_have_expected_members(self):
         Test that enums have expected members."
+        Test that enums have expected members."
         pass
     # BackgroundTaskStatus should have these members
         expected_statuses = ['QUEUED', 'STARTING', 'RUNNING', 'COMPLETED', 'FAILED', 'CANCELLED', 'TIMEOUT']
         actual_statuses = [status.name for status in BackgroundTaskStatus]
 
         for expected in expected_statuses:
-        assert expected in actual_statuses, "formatted_string
+        assert expected in actual_statuses, "formatted_string"
 
         # ExecutionStrategy should have these members
         expected_strategies = ['SEQUENTIAL', 'PARALLEL_UNLIMITED', 'PARALLEL_LIMITED', 'HYBRID_SMART']
@@ -151,6 +160,7 @@ class TestBasicSSOTFunctionality:
         config = BackgroundTaskConfig( )
         category=E2ETestCategory.CYPRESS,
         environment=test,"
+        environment=test,"
         timeout_minutes=30
     
 
@@ -160,7 +170,7 @@ class TestBasicSSOTFunctionality:
     # Test serialization
         config_dict = config.to_dict()
         assert isinstance(config_dict, dict)
-        assert config_dict['category'] == "cypress
+        assert config_dict['category'] == "cypress"
         assert config_dict['environment'] == test
         assert config_dict['timeout_minutes'] == 30
 
@@ -172,10 +182,11 @@ class TestBasicSSOTFunctionality:
 
         for expected in expected_modes:
         assert expected in actual_modes, formatted_string"
+        assert expected in actual_modes, formatted_string"
 
         # Test values are lowercase
         for mode in ProgressOutputMode:
-        assert mode.value.islower(), "formatted_string
+        assert mode.value.islower(), "formatted_string"
 
     def test_orchestration_modes_complete(self):
         Test that OrchestrationMode has all expected modes.""
@@ -229,4 +240,4 @@ class TestBasicSSOTFunctionality:
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
-    # sys.exit(result")
+    # sys.exit(result")"

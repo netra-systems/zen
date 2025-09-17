@@ -1,9 +1,13 @@
 """
+"""
 Simple Mock Response Validation Test - Proof of Concept
 
 This test demonstrates that mock responses can be detected in the system.
 """
+"""
 
+"""
+"""
 """
 """
 import pytest
@@ -16,7 +20,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.real_services
 @pytest.mark.asyncio
 async def test_simple_mock_detection():
-    "Simple test to prove mock responses can be detected
+    "Simple test to prove mock responses can be detected"
     
     # Create authenticated user
     auth_helper = E2EAuthHelper()
@@ -27,7 +31,8 @@ async def test_simple_mock_detection():
         "i apologize,"
         unable to process,
         service temporarily unavailable,"
-        please try again",
+        service temporarily unavailable,"
+        please try again","
         encountered an error
     ]
     
@@ -56,18 +61,18 @@ async def test_simple_mock_detection():
                         detected_patterns.append(pattern)
                 
                 if detected_patterns:
-                    pytest.fail(f"MOCK RESPONSE DETECTED! Patterns found: {detected_patterns})
+                    pytest.fail(f"MOCK RESPONSE DETECTED! Patterns found: {detected_patterns})"
                 else:
                     # Test passed - no mock responses detected
-                    print( PASS:  No mock responses detected in this test")
+                    print( PASS:  No mock responses detected in this test")"
             else:
                 print(fAPI returned status {response.status})
 
 @pytest.mark.e2e  
 @pytest.mark.real_services
 @pytest.mark.asyncio
-async def test_fallback_detection("):
-    "Test to detect fallback responses in service failures
+async def test_fallback_detection("):"
+    "Test to detect fallback responses in service failures"
     
     auth_helper = E2EAuthHelper()
     user = await auth_helper.create_authenticated_user()
@@ -93,7 +98,8 @@ async def test_fallback_detection("):
                 
                 fallback_indicators = [
                     fallback,"
-                    "default response,
+                    fallback,"
+                    "default response,"
                     generic response,
                     "template response"
                 ]

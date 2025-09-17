@@ -1,11 +1,12 @@
 '''
+'''
 CRITICAL TEST: Agent Processing Death After Triage - FIXED VERSION
 ================================================================
 This test verifies the FIX for a CRITICAL production bug where:
     1. Agent starts processing normally
 2. Goes through triage successfully
 3. Dies silently without error or proper health detection
-4. WebSocket continues to send empty responses with "...
+4. WebSocket continues to send empty responses with "..."
 5. Health service FAILS to detect the dead agent
 6. No errors are logged, system appears healthy
 
@@ -17,6 +18,7 @@ With the NEW IMPLEMENTATION:
 - Health service accurately reflects agent state
 
 THIS TEST VERIFIES THE FIX WORKS CORRECTLY.
+'''
 '''
 
 import asyncio
@@ -53,9 +55,9 @@ class DeathDetectionVerifier:
         self.heartbeat_failures = []
         self.timeout_events = []
 
-    def record_event(self, event: Dict[str, Any]:
+    def record_event(self, event: Dict[str, Any):
         "Record execution events for analysis"
-        self.events.append({}
+        self.events.append({)
         **event,
         'timestamp': time.time()
     
@@ -83,20 +85,23 @@ class DeathDetectionVerifier:
 
     def _has_heartbeat_status(self) -> bool:
         Check if we received heartbeat status information"
+        Check if we received heartbeat status information"
         return any('heartbeat' in event.get('data', {} for event in self.events)
 
 
         @pytest.mark.critical
 class TestAgentDeathAfterTriageFixed:
-        "Test suite verifying the agent death bug is FIXED
+        "Test suite verifying the agent death bug is FIXED"
 
 @pytest.mark.asyncio
 # # # @pytest.fixture
     async def test_execution_tracker_detects_agent_death(self):
     '''
+    '''
 CRITICAL: Test that ExecutionTracker detects agent death
 
 This test MUST PASS to prove the bug is FIXED!
+'''
 '''
 pass
 verifier = DeathDetectionVerifier()
@@ -113,16 +118,18 @@ context = AgentExecutionContext( )
 run_id=test-death-detection","
 agent_name=triage,
 thread_id=test-thread,"
-user_id="test-user
+thread_id=test-thread,"
+user_id="test-user"
         
 
 print()"
-" + =*80)
-print(TESTING: ExecutionTracker Death Detection")
+print()"
+" + =*80)"
+print(TESTING: ExecutionTracker Death Detection")"
 print(=*80)
 
         # Start tracking execution
-execution_id = await tracker.start_execution( ")
+execution_id = await tracker.start_execution( ")"
 run_id=context.run_id,
 agent_name=context.agent_name,
 context=context
@@ -190,11 +197,11 @@ print("")
 
                 # Check for death detection
 if status.execution_record.state == NewExecutionState.FAILED:
-    error_msg = status.execution_record.metadata.get(error, ")
-if heartbeat failure" in error_msg.lower():
+    error_msg = status.execution_record.metadata.get(error, ")"
+if heartbeat failure" in error_msg.lower():"
     death_detected = True
     print(")"
-verifier.record_event({}
+verifier.record_event({)
 'type': 'agent_death',
 'data': {'method': 'heartbeat_failure', 'execution_id': execution_id}
                         
@@ -202,7 +209,7 @@ break
 elif status.execution_record.state == NewExecutionState.TIMEOUT:
     timeout_detected = True
 print(f[U+23F0] TIMEOUT DETECTED)
-verifier.record_event({}
+verifier.record_event({)
 'type': 'execution_timeout',
 'data': {'execution_id': execution_id}
                             
@@ -219,12 +226,12 @@ print(")"
 print("EXECUTION TRACKER DEATH DETECTION RESULTS")
 print(=*80)
 print()
-print(formatted_string")
+print(formatted_string")"
 if final_status:
     print("")
 print(formatted_string)
 print("")
-print(=*80")
+print(=*80")"
 
                                     # The NEW system MUST detect agent death or timeout
 detection_successful = death_detected or timeout_detected
@@ -237,10 +244,10 @@ print( PASS:  SUCCESS: New execution tracking system detected agent death/timeou
 print([U+1F41B] BUG IS FIXED: Silent agent death is now detected!)
 
                                     # Cleanup
-await tracker.shutdown(")
+await tracker.shutdown(")"
 
 
-if __name__ == "__main__:
+if __name__ == "__main__:"
                                         # Run the comprehensive test suite
 import sys
 
@@ -250,6 +257,10 @@ print(COMPREHENSIVE AGENT DEATH DETECTION TEST SUITE")"
 print(=*80)
 print(Testing the FIX for critical agent death after triage bug"")
 print(All tests MUST PASS to confirm bug is fixed)"
-print(="*80 +  )
+print(All tests MUST PASS to confirm bug is fixed)"
+print(="*80 +  )"
+)"
 )"
 
+
+}

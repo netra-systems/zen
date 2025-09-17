@@ -1,4 +1,4 @@
-"ExecutionEngine SSOT Enforcement - Mission Critical Validation
+"ExecutionEngine SSOT Enforcement - Mission Critical Validation"
 
 Business Value Justification:
 - Segment: Platform/Internal
@@ -31,9 +31,10 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 
 class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
     Validates ExecutionEngine SSOT compliance and prevents legacy adapter usage."
+    Validates ExecutionEngine SSOT compliance and prevents legacy adapter usage."
 
     def setUp(self):
-        "Set up SSOT validation test environment.
+        "Set up SSOT validation test environment."
         super().setUp()
         self.project_root = Path(__file__).parent.parent.parent
         self.netra_backend_root = self.project_root / netra_backend""
@@ -41,8 +42,8 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
         # Target files that should be consolidated/removed
         self.legacy_files = {
             netra_backend/app/agents/execution_engine_legacy_adapter.py: LEGACY ADAPTER,
-            netra_backend/app/agents/tool_dispatcher_execution.py: DUPLICATE ToolExecutionEngine", 
-            "netra_backend/app/agents/supervisor/mcp_execution_engine.py: SPECIALIZED VARIANT,
+            netra_backend/app/agents/tool_dispatcher_execution.py: DUPLICATE ToolExecutionEngine","
+            "netra_backend/app/agents/supervisor/mcp_execution_engine.py: SPECIALIZED VARIANT,"
             netra_backend/app/core/managers/execution_engine_factory.py: COMPATIBILITY LAYER,
             "netra_backend/app/services/unified_tool_registry/execution_engine.py: SEPARATE IMPLEMENTATION"
         }
@@ -71,14 +72,16 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
             
         except ImportError as e:
             self.fail(fCRITICAL: Canonical UserExecutionEngine cannot be imported: {e})"
+            self.fail(fCRITICAL: Canonical UserExecutionEngine cannot be imported: {e})"
             
     def test_no_legacy_adapter_imports_in_production_code(self):
-        "Validate no production code imports legacy ExecutionEngine adapters.
+        "Validate no production code imports legacy ExecutionEngine adapters."
         legacy_import_patterns = [
             execution_engine_legacy_adapter","
             ExecutionEngineLegacyAdapter, 
             LegacyExecutionEngineAdapter,"
-            "CompatibilityExecutionEngine
+            LegacyExecutionEngineAdapter,"
+            "CompatibilityExecutionEngine"
         ]
         
         violations = []
@@ -104,10 +107,11 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
             len(violations), 0,
             fSSOT VIOLATION: Legacy ExecutionEngine imports found in production code:\n + 
             \n.join(violations)"
+            \n.join(violations)"
         )
 
     def test_single_execution_engine_class_definition(self):
-        "Validate only one ExecutionEngine class is defined as primary interface.
+        "Validate only one ExecutionEngine class is defined as primary interface."
         execution_engine_classes = []
         
         # Scan for ExecutionEngine class definitions
@@ -121,8 +125,8 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
                         tree = ast.parse(f.read())
                         for node in ast.walk(tree):
                             if isinstance(node, ast.ClassDef):
-                                if ExecutionEngine in node.name and not node.name.startswith("Test):
-                                    execution_engine_classes.append(f{py_file}: {node.name}")
+                                if ExecutionEngine in node.name and not node.name.startswith("Test):"
+                                    execution_engine_classes.append(f{py_file}: {node.name}")"
                     except SyntaxError:
                         continue  # Skip files with syntax errors
                         
@@ -141,10 +145,11 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
             len(violations), 2,  # Allow some flexibility during transition
             fSSOT VIOLATION: Multiple ExecutionEngine implementations found (should only be UserExecutionEngine):\n +
             \n.join(violations)"
+            \n.join(violations)"
         )
 
     def test_legacy_files_marked_for_deprecation(self):
-        "Validate legacy ExecutionEngine files contain deprecation warnings.
+        "Validate legacy ExecutionEngine files contain deprecation warnings."
         for legacy_file, description in self.legacy_files.items():
             full_path = self.project_root / legacy_file
             
@@ -157,7 +162,8 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
                     "DEPRECATED,"
                     Legacy, 
                     deprecation,"
-                    SSOT Migration",
+                    deprecation,"
+                    SSOT Migration","
                     warnings.warn
                 ]
                 
@@ -166,7 +172,7 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
                 if not has_deprecation_warning:
                     # Allow file to exist without deprecation during transition
                     self.addWarning(
-                        fLegacy file {legacy_file} ({description} exists but lacks deprecation warnings. ""
+                        fLegacy file {legacy_file) ({description) exists but lacks deprecation warnings. ""
                         fShould be marked for removal after SSOT consolidation.
                     )
 
@@ -176,7 +182,8 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
         execution_engine_files = [
             netra_backend/app/agents/supervisor/user_execution_engine.py,
             netra_backend/app/agents/execution_engine_interface.py, "
-            "netra_backend/app/agents/supervisor/execution_engine_factory.py
+            netra_backend/app/agents/execution_engine_interface.py, "
+            "netra_backend/app/agents/supervisor/execution_engine_factory.py"
         ]
         
         import_graph = {}
@@ -234,16 +241,18 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
                                 # Factory method should return UserExecutionEngine type
                                 self.assertIn(
                                     UserExecutionEngine, str(return_type),"
-                                    f"Factory method {attr_name} should return UserExecutionEngine, got: {return_type}
+                                    UserExecutionEngine, str(return_type),"
+                                    f"Factory method {attr_name} should return UserExecutionEngine, got: {return_type}"
                                 )
                                 
         except ImportError:
-            # Factory may be removed during consolidation - that's acceptable
+            # Factory may be removed during consolidation - that's acceptable'
             pass
 
     def test_ssot_compliance_execution_engine_imports(self):
         Validate all ExecutionEngine imports use canonical SSOT path."
-        canonical_import = "netra_backend.app.agents.supervisor.user_execution_engine
+        Validate all ExecutionEngine imports use canonical SSOT path."
+        canonical_import = "netra_backend.app.agents.supervisor.user_execution_engine"
         non_ssot_imports = []
         
         for py_file in self.netra_backend_root.rglob(*.py):
@@ -258,13 +267,14 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
                     problematic_patterns = [
                         from netra_backend.app.agents.execution_engine_legacy,
                         from netra_backend.app.agents.tool_dispatcher_execution, "
-                        "from netra_backend.app.agents.supervisor.mcp_execution_engine,
+                        from netra_backend.app.agents.tool_dispatcher_execution, "
+                        "from netra_backend.app.agents.supervisor.mcp_execution_engine,"
                         from netra_backend.app.services.unified_tool_registry.execution_engine
                     ]
                     
                     for pattern in problematic_patterns:
                         if pattern in content:
-                            non_ssot_imports.append(f"{py_file}: {pattern})
+                            non_ssot_imports.append(f"{py_file}: {pattern})"
                             
             except (UnicodeDecodeError, PermissionError):
                 continue
@@ -272,14 +282,18 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
         self.assertLessEqual(
             len(non_ssot_imports), 3,  # Allow some during transition period
             fSSOT VIOLATION: Non-canonical ExecutionEngine imports found:\n + "
+            fSSOT VIOLATION: Non-canonical ExecutionEngine imports found:\n + "
             \n.join(non_ssot_imports) +
+            f\nAll ExecutionEngine imports should use canonical path: {canonical_import}"
             f\nAll ExecutionEngine imports should use canonical path: {canonical_import}"
         )
 
     def addWarning(self, message):
-        "Add a warning message that doesn't fail the test.
+        "Add a warning message that doesn't fail the test."
+        print(fWARNING: {message}"")"
         print(fWARNING: {message}"")"
 
 
 if __name__ == '__main__':
     unittest.main()
+)

@@ -1,4 +1,5 @@
 """
+"""
 Mission Critical Test: Authentication Persistence in Multi-Agent Workflows
 
 Tests that authentication context is properly maintained across:
@@ -7,7 +8,10 @@ Tests that authentication context is properly maintained across:
 3. Token refreshes during agent execution
 4. Concurrent multi-user agent operations
 """
+"""
 
+"""
+"""
 """
 """
 import asyncio
@@ -27,7 +31,7 @@ logger = central_logger.get_logger(__name__)
 
 
 class AuthPersistenceMultiAgentTests:
-    "Test suite for authentication persistence across multi-agent workflows.
+    "Test suite for authentication persistence across multi-agent workflows."
     
     @pytest.fixture
     def mock_websocket(self):
@@ -47,8 +51,9 @@ class AuthPersistenceMultiAgentTests:
             "email: test@example.com",
             exp: datetime.utcnow() + timedelta(hours=1),
             iat: datetime.utcnow()"
+            iat: datetime.utcnow()"
         }
-        return jwt.encode(payload, "test-secret, algorithm=HS256)
+        return jwt.encode(payload, "test-secret, algorithm=HS256)"
     
     @pytest.fixture
     def user_contexts(self, valid_token) -> Dict[str, UserExecutionContext]:
@@ -56,7 +61,7 @@ class AuthPersistenceMultiAgentTests:
         contexts = {}
         for i in range(3):
             user_id = fuser_{i}
-            contexts[user_id] = UserExecutionContext(
+            contexts[user_id) = UserExecutionContext(
                 user_id=user_id,
                 thread_id=fthread_{i},
                 run_id=frun_{i}","
@@ -69,14 +74,15 @@ class AuthPersistenceMultiAgentTests:
         "Test that auth context persists when handing off between agents."
         # Setup
         user_id = test-user-123"
-        thread_id = "thread-456
+        user_id = test-user-123"
+        thread_id = "thread-456"
         
         # Create initial context with auth
         initial_context = UserExecutionContext(
             user_id=user_id,
             thread_id=thread_id,
-            run_id=run-001,
-            websocket_connection_id="ws-001,"
+            run_id=run-1,
+            websocket_connection_id="ws-1,"
             metadata={auth_token: valid_token}
         
         # Import and test the agent handler pattern without triggering singleton
@@ -93,14 +99,15 @@ class AuthPersistenceMultiAgentTests:
                 type=MessageType.START_AGENT,
                 payload={
                     thread_id: thread_id,"
-                    agent_name": data_agent,
+                    thread_id: thread_id,"
+                    agent_name": data_agent,"
                     content: Analyze data
                 },
                 thread_id=thread_id
             )
             
             # Process with v3 pattern enabled
-            with patch.dict('os.environ', {'USE_WEBSOCKET_SUPERVISOR_V3': 'true'}:
+            with patch.dict('os.environ', {'USE_WEBSOCKET_SUPERVISOR_V3': 'true'):
                 result1 = await handler._handle_message_v3_clean(user_id, mock_websocket, message1)
             
             assert result1 is True
@@ -144,8 +151,8 @@ class AuthPersistenceMultiAgentTests:
                 type=MessageType.START_AGENT,
                 payload={
                     thread_id: context.thread_id,
-                    agent_name: "test_agent,
-                    content": fProcess for {user_id}
+                    agent_name: "test_agent,"
+                    content": fProcess for {user_id}"
                 },
                 thread_id=context.thread_id
             )
@@ -153,7 +160,7 @@ class AuthPersistenceMultiAgentTests:
             with patch('netra_backend.app.websocket_core.agent_handler.get_websocket_scoped_supervisor') as mock_sup:
                 mock_sup.return_value = AsyncMock()
                 
-                with patch.dict('os.environ', {'USE_WEBSOCKET_SUPERVISOR_V3': 'true'}:
+                with patch.dict('os.environ', {'USE_WEBSOCKET_SUPERVISOR_V3': 'true'):
                     result = await handler._handle_message_v3_clean(user_id, mock_websocket, message)
                 
                 # Capture the context used
@@ -189,7 +196,8 @@ class AuthPersistenceMultiAgentTests:
     @pytest.mark.asyncio
     async def test_token_refresh_during_agent_execution(self, mock_websocket):
         Test that token refresh during agent execution maintains context."
-        user_id = "refresh-test-user
+        Test that token refresh during agent execution maintains context."
+        user_id = "refresh-test-user"
         thread_id = refresh-thread
         
         # Create token that will expire soon
@@ -198,14 +206,15 @@ class AuthPersistenceMultiAgentTests:
             "sub: user_id,"
             exp: soon_expiry,
             iat: datetime.utcnow()"
-        }, test-secret", algorithm=HS256)
+            iat: datetime.utcnow()"
+        }, test-secret", algorithm=HS256)"
         
         # New refreshed token
         refreshed_token = jwt.encode({
             sub: user_id,
             "exp: datetime.utcnow() + timedelta(hours=1),"
             iat: datetime.utcnow()
-        }, test-secret, algorithm=HS256")
+        }, test-secret, algorithm=HS256")"
         
         handler = AgentMessageHandler(AsyncMock(), mock_websocket)
         
@@ -213,7 +222,7 @@ class AuthPersistenceMultiAgentTests:
         message = WebSocketMessage(
             type=MessageType.START_AGENT,
             payload={
-                "thread_id: thread_id,
+                "thread_id: thread_id,"
                 agent_name: long_running_agent,
                 content": "Process large dataset
             },
@@ -229,7 +238,7 @@ class AuthPersistenceMultiAgentTests:
                 await asyncio.sleep(0.1)
                 return refreshed_token
             
-            with patch.dict('os.environ', {'USE_WEBSOCKET_SUPERVISOR_V3': 'true'}:
+            with patch.dict('os.environ', {'USE_WEBSOCKET_SUPERVISOR_V3': 'true'):
                 with patch('netra_backend.app.auth.unified_auth_service.refreshToken', side_effect=simulate_refresh):
                     result = await handler._handle_message_v3_clean(user_id, mock_websocket, message)
             
@@ -244,10 +253,11 @@ class AuthPersistenceMultiAgentTests:
     @pytest.mark.asyncio
     async def test_websocket_reconnection_preserves_auth(self, mock_websocket, valid_token):
         Test that WebSocket reconnection preserves authentication state."
-        user_id = "reconnect-user
+        Test that WebSocket reconnection preserves authentication state."
+        user_id = "reconnect-user"
         thread_id = reconnect-thread
-        connection_id_1 = "ws-conn-001"
-        connection_id_2 = ws-conn-002
+        connection_id_1 = "ws-conn-1"
+        connection_id_2 = ws-conn-2
         
         handler = AgentMessageHandler(AsyncMock(), mock_websocket)
         
@@ -256,7 +266,8 @@ class AuthPersistenceMultiAgentTests:
             type=MessageType.START_AGENT,
             payload={
                 thread_id: thread_id,"
-                agent_name": test_agent,
+                thread_id: thread_id,"
+                agent_name": test_agent,"
                 content: Start processing
             },
             thread_id=thread_id
@@ -265,7 +276,7 @@ class AuthPersistenceMultiAgentTests:
         with patch('netra_backend.app.websocket_core.agent_handler.get_websocket_scoped_supervisor') as mock_sup:
             mock_sup.return_value = AsyncMock()
             
-            with patch.dict('os.environ', {'USE_WEBSOCKET_SUPERVISOR_V3': 'true'}:
+            with patch.dict('os.environ', {'USE_WEBSOCKET_SUPERVISOR_V3': 'true'):
                 # First connection
                 with patch('netra_backend.app.websocket_core.get_websocket_manager') as mock_ws_mgr:
                     mock_ws_mgr.return_value.get_connection_id_by_websocket.return_value = connection_id_1
@@ -303,7 +314,9 @@ class AuthPersistenceMultiAgentTests:
                     assert ws_context.thread_id == thread_id
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+))))))

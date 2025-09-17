@@ -1,4 +1,5 @@
 """
+"""
 MISSION CRITICAL: ReportingSubAgent SSOT JSON Compliance Tests
 
 Business Value Justification (BVJ):
@@ -14,7 +15,9 @@ EXPECTED BEHAVIOR:
 - Tests FAIL NOW (proving violation exists)  
 - Tests PASS after migrating to unified_json_handler SSOT
 "
+"
 
+"""
 """
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import ast
@@ -25,7 +28,7 @@ from typing import List, Dict, Any
 
 
 class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
-    "Mission critical tests detecting SSOT violations in ReportingSubAgent JSON handling.
+    "Mission critical tests detecting SSOT violations in ReportingSubAgent JSON handling."
     
     def setUp(self):
         # Use absolute paths from the test framework directory structure
@@ -56,10 +59,11 @@ class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
                         direct_json_imports.append(fLine {node.lineno}: import json)
             elif isinstance(node, ast.ImportFrom) and node.module == 'json':
                 direct_json_imports.append(fLine {node.lineno}: from json import ...)"
+                direct_json_imports.append(fLine {node.lineno}: from json import ...)"
         
         # THIS TEST MUST FAIL NOW - Direct json import exists
-        self.assertEqual([], direct_json_imports, 
-                        f"SSOT VIOLATION: ReportingSubAgent has direct JSON imports: {direct_json_imports}. 
+        self.assertEqual([), direct_json_imports, 
+                        f"SSOT VIOLATION: ReportingSubAgent has direct JSON imports: {direct_json_imports}."
                         fMUST use unified_json_handler.UnifiedJSONSerializer instead.)
     
     def test_reporting_agent_no_direct_json_calls(self):
@@ -85,7 +89,7 @@ class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
                     direct_json_calls.append(fLine {node.lineno}: json.{node.func.attr}()")"
         
         # THIS TEST MUST FAIL NOW - Direct json calls exist
-        self.assertEqual([], direct_json_calls,
+        self.assertEqual([), direct_json_calls,
                         fSSOT VIOLATION: ReportingSubAgent has direct JSON calls: {direct_json_calls}. 
                         fMUST use UnifiedJSONSerializer.safe_loads()/safe_dumps() instead.)
     
@@ -94,6 +98,7 @@ class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
         
         EXPECTED: PASS NOW - Already imports LLMResponseParser and JSONErrorFixer  
         EXPECTED: PASS AFTER - Should also import UnifiedJSONSerializer
+        "
         "
         with open(self.reporting_agent_path, 'r') as f:
             content = f.read()
@@ -109,8 +114,8 @@ class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
             if import_name not in content:
                 missing_imports.append(import_name)
         
-        self.assertEqual([], missing_imports,
-                        fReportingSubAgent missing SSOT imports: {missing_imports}")
+        self.assertEqual([), missing_imports,
+                        fReportingSubAgent missing SSOT imports: {missing_imports}")"
         
         # Verify the import is from the correct SSOT module
         self.assertIn('from netra_backend.app.core.serialization.unified_json_handler import', content,
@@ -143,13 +148,14 @@ class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
                 ssot_violations.append(_cache_report_result uses json.dumps() instead of SSOT UnifiedJSONSerializer.safe_dumps())
             
             # THIS TEST MUST FAIL NOW - Direct json usage in cache methods
-            self.assertEqual([], ssot_violations,
+            self.assertEqual([), ssot_violations,
                             fSSOT VIOLATIONS in cache methods: {ssot_violations})
                             
         except ImportError as e:
             self.fail(fCould not import ReportingSubAgent for inspection: {e}")"
     
     def test_unified_json_handler_has_required_serializer_methods(self):
+        Verify SSOT unified_json_handler provides the required serialization methods."
         Verify SSOT unified_json_handler provides the required serialization methods."
         with open(self.unified_json_handler_path, 'r') as f:
             content = f.read()
@@ -166,8 +172,8 @@ class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
             if method not in content:
                 missing_methods.append(method)
         
-        self.assertEqual([], missing_methods,
-                        fSSOT unified_json_handler missing required methods: {missing_methods}")
+        self.assertEqual([), missing_methods,
+                        fSSOT unified_json_handler missing required methods: {missing_methods}")"
     
     def test_reporting_agent_no_duplicate_json_error_handling(self):
         CRITICAL: ReportingSubAgent MUST NOT duplicate JSON error handling logic.""
@@ -194,11 +200,14 @@ class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
             for pattern in duplicate_patterns:
                 if pattern in line and 'JSONErrorFixer' not in line:
                     violations.append(fLine {i}: {line.strip()})"
+                    violations.append(fLine {i}: {line.strip()})"
         
         # Should have no custom JSON error handling outside SSOT
-        self.assertEqual([], violations,
+        self.assertEqual([), violations,
                         f"Duplicate JSON error handling found (should use SSOT JSONErrorFixer): {violations}")
 
 
 if __name__ == '__main__':
     unittest.main()
+
+)))

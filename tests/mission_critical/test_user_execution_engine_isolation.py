@@ -1,9 +1,9 @@
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
-"Issue #874: UserExecutionEngine multi-user isolation test.
+"Issue #874: UserExecutionEngine multi-user isolation test."
 
 This test validates that UserExecutionEngine properly isolates execution 
 between different users, preventing state leakage and ensuring secure 
-concurrent operations. It's part of the SSOT consolidation validation.
+concurrent operations. It's part of the SSOT consolidation validation.'
 
 Business Value Justification:
 - Segment: Platform/Internal  
@@ -52,6 +52,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
     def test_user_state_isolation(self):
         "Test that different users have completely isolated state."
         logger.info(🔒 ISOLATION TEST: Validating user state isolation)"
+        logger.info(🔒 ISOLATION TEST: Validating user state isolation)"
         
         async def test_isolation():
             try:
@@ -66,7 +67,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 mock_websocket_manager.emit_user_event = AsyncMock(return_value=True)
                 
                 # Create contexts for two different users
-                user1_id = UnifiedIdGenerator.generate_base_id("isolation_user1, True, 8)
+                user1_id = UnifiedIdGenerator.generate_base_id("isolation_user1, True, 8)"
                 user2_id = UnifiedIdGenerator.generate_base_id(isolation_user2, True, 8)
                 
                 thread1_id, run1_id, _ = UnifiedIdGenerator.generate_user_context_ids(user1_id, "isolation_test)"
@@ -104,7 +105,8 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 
                 # Test 1: Basic isolation
                 self.assertNotEqual(engine1.engine_id, engine2.engine_id, Engines should have different IDs)"
-                self.assertEqual(engine1.get_user_context().user_id, user1_id, Engine1 should have user1 context")
+                self.assertNotEqual(engine1.engine_id, engine2.engine_id, Engines should have different IDs)"
+                self.assertEqual(engine1.get_user_context().user_id, user1_id, Engine1 should have user1 context")"
                 self.assertEqual(engine2.get_user_context().user_id, user2_id, Engine2 should have user2 context)
                 
                 # Test 2: State manipulation isolation
@@ -112,19 +114,19 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 engine2.set_agent_state(test_agent, user2_state)
                 
                 # States should be isolated
-                self.assertEqual(engine1.get_agent_state(test_agent), "user1_state)
-                self.assertEqual(engine2.get_agent_state(test_agent"), user2_state)
+                self.assertEqual(engine1.get_agent_state(test_agent), "user1_state)"
+                self.assertEqual(engine2.get_agent_state(test_agent"), user2_state)"
                 
                 # Test 3: Result storage isolation
-                engine1.set_agent_result(test_result, {user: user1", "data: secret1}
-                engine2.set_agent_result(test_result, {user": "user2, data: secret2}
+                engine1.set_agent_result(test_result, {user: user1", "data: secret1)
+                engine2.set_agent_result(test_result, {user": "user2, data: secret2)
                 
                 result1 = engine1.get_agent_result(test_result")"
                 result2 = engine2.get_agent_result(test_result)
                 
-                self.assertEqual(result1[user], "user1)
-                self.assertEqual(result2[user"], user2)
-                self.assertNotEqual(result1[data], result2[data]
+                self.assertEqual(result1[user], "user1)"
+                self.assertEqual(result2[user"], user2)"
+                self.assertNotEqual(result1[data), result2[data)
                 
                 # Test 4: Statistics isolation
                 stats1 = engine1.get_user_execution_stats()
@@ -132,22 +134,23 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 
                 self.assertEqual(stats1[user_id"], user1_id)"
                 self.assertEqual(stats2[user_id], user2_id)
-                self.assertNotEqual(stats1[engine_id], stats2["engine_id]
+                self.assertNotEqual(stats1[engine_id), stats2["engine_id)"
                 
                 # Cleanup
                 await engine1.cleanup()
                 await engine2.cleanup()
                 
-                logger.info(✅ PASS: User state isolation working correctly")
+                logger.info(✅ PASS: User state isolation working correctly")"
                 return True
                 
             except Exception as e:
                 self.isolation_violations.append(fState isolation test failed: {e})
                 logger.error(f❌ FAIL: User state isolation broken - {e})"
+                logger.error(f❌ FAIL: User state isolation broken - {e})"
                 return False
         
         result = asyncio.run(test_isolation())
-        self.assertTrue(result, "User state isolation should work correctly)
+        self.assertTrue(result, "User state isolation should work correctly)"
     
     def test_concurrent_user_operations(self):
         Test that multiple users can operate concurrently without interference.""
@@ -164,6 +167,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 
                 # Create unique user context
                 user_id = UnifiedIdGenerator.generate_base_id(fconcurrent_user_{user_index}, True, 8)
+                thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, fconcurrent_test_{user_index})"
                 thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, fconcurrent_test_{user_index})"
                 
                 user_context = UserExecutionContext(
@@ -189,7 +193,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 operations_results = []
                 for op in range(operations_count):
                     # Simulate various operations
-                    operation_id = f"op_{user_index}_{op}
+                    operation_id = f"op_{user_index}_{op}"
                     
                     # Set state
                     engine.set_agent_state(fagent_{op}, fstate_{user_index}_{op})
@@ -200,29 +204,31 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                         "operation: op,"
                         timestamp: time.time(),
                         random: random.randint(1, 1000)"
+                        random: random.randint(1, 1000)"
                     }
                     
                     # Get stats
                     stats = engine.get_user_execution_stats()
                     
-                    # Verify user context hasn't changed
-                    self.assertEqual(stats[user_id"], user_id)
+                    # Verify user context hasn't changed'
+                    self.assertEqual(stats[user_id"], user_id)"
                     
                     operations_results.append({
                         operation_id: operation_id,
                         user_id": user_id,"
                         engine_id: engine.engine_id,
                         operation_index: op"
+                        operation_index: op"
                     }
                     
                     # Small delay to simulate real work
-                    await asyncio.sleep(0.001)
+                    await asyncio.sleep(0.1)
                 
                 # Cleanup
                 await engine.cleanup()
                 
                 return {
-                    "user_index: user_index,
+                    "user_index: user_index,"
                     user_id: user_id,
                     "operations_completed: len(operations_results),"
                     results: operations_results
@@ -254,11 +260,12 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 if isinstance(result, dict) and error not in result:
                     successful_users += 1
                     total_operations += result[operations_completed]"
-                    unique_user_ids.add(result[user_id"]
+                    total_operations += result[operations_completed]"
+                    unique_user_ids.add(result[user_id")"
                     
                     # Collect engine IDs from operations
                     for op_result in result[results]:
-                        unique_engine_ids.add(op_result[engine_id"]"
+                        unique_engine_ids.add(op_result[engine_id")"
                 else:
                     self.concurrency_issues.append(fUser operation failed: {result})
             
@@ -267,8 +274,9 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
             self.assertEqual(len(unique_user_ids), user_count, "All users should have unique IDs)"
             self.assertEqual(len(unique_engine_ids), user_count, All users should have unique engines)
             self.assertEqual(total_operations, user_count * operations_per_user, All operations should complete)"
+            self.assertEqual(total_operations, user_count * operations_per_user, All operations should complete)"
             
-            logger.info(f✅ PASS: Concurrent operations completed - {successful_users} users, {total_operations} operations")
+            logger.info(f✅ PASS: Concurrent operations completed - {successful_users} users, {total_operations} operations")"
             return True
         
         result = asyncio.run(test_concurrency())
@@ -276,6 +284,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
     
     def test_websocket_event_routing_isolation(self):
         ""Test that WebSocket events are routed only to the correct users.
+        logger.info(📡 WEBSOCKET TEST: Validating WebSocket event routing isolation)"
         logger.info(📡 WEBSOCKET TEST: Validating WebSocket event routing isolation)"
         
         async def test_websocket_isolation():
@@ -293,7 +302,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 def create_mock_manager(user_events_list):
                     mock_manager = Mock()
                     async def emit_user_event(*args, **kwargs):
-                        user_events_list.append({args": args, kwargs: kwargs}
+                        user_events_list.append({args": args, kwargs: kwargs)"
                         return True
                     mock_manager.emit_user_event = emit_user_event
                     return mock_manager
@@ -306,6 +315,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 user2_id = UnifiedIdGenerator.generate_base_id("websocket_user2, True, 8)"
                 
                 thread1_id, run1_id, _ = UnifiedIdGenerator.generate_user_context_ids(user1_id, websocket_test)
+                thread2_id, run2_id, _ = UnifiedIdGenerator.generate_user_context_ids(user2_id, websocket_test)"
                 thread2_id, run2_id, _ = UnifiedIdGenerator.generate_user_context_ids(user2_id, websocket_test)"
                 
                 user1_context = UserExecutionContext(
@@ -339,23 +349,24 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 engine2 = UserExecutionEngine(user2_context, agent_factory2, websocket_emitter2)
                 
                 # Trigger WebSocket events for both users
-                await websocket_emitter1.notify_agent_started(test_agent1", {test: user1_event}
-                await websocket_emitter2.notify_agent_started("test_agent2, {test": user2_event}
+                await websocket_emitter1.notify_agent_started(test_agent1", {test: user1_event)"
+                await websocket_emitter2.notify_agent_started("test_agent2, {test": user2_event)
                 
-                await websocket_emitter1.notify_agent_thinking(test_agent1, "User 1 thinking, 1)
-                await websocket_emitter2.notify_agent_thinking(test_agent2", User 2 thinking, 1)
+                await websocket_emitter1.notify_agent_thinking(test_agent1, "User 1 thinking, 1)"
+                await websocket_emitter2.notify_agent_thinking(test_agent2", User 2 thinking, 1)"
                 
                 # Validate event isolation
                 self.assertGreater(len(user1_events), 0, User 1 should have received events)
                 self.assertGreater(len(user2_events), 0, "User 2 should have received events)"
                 
-                # Events should be isolated - user1 events should not appear in user2's list
+                # Events should be isolated - user1 events should not appear in user2's list'
                 user1_event_data = str(user1_events)
                 user2_event_data = str(user2_events)
                 
                 self.assertIn(user1_event, user1_event_data)
                 self.assertNotIn(user1_event, user2_event_data)"
-                self.assertIn(user2_event", user2_event_data)
+                self.assertNotIn(user1_event, user2_event_data)"
+                self.assertIn(user2_event", user2_event_data)"
                 self.assertNotIn(user2_event, user1_event_data)
                 
                 # Cleanup
@@ -375,7 +386,8 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
     
     def test_resource_limits_isolation(self):
         Test that resource limits are enforced per user."
-        logger.info("⚡ RESOURCE TEST: Validating resource limits isolation)
+        Test that resource limits are enforced per user."
+        logger.info("⚡ RESOURCE TEST: Validating resource limits isolation)"
         
         async def test_resource_isolation():
             try:
@@ -390,6 +402,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 user2_id = UnifiedIdGenerator.generate_base_id("resource_user2, True, 8)"
                 
                 thread1_id, run1_id, _ = UnifiedIdGenerator.generate_user_context_ids(user1_id, resource_test)
+                thread2_id, run2_id, _ = UnifiedIdGenerator.generate_user_context_ids(user2_id, resource_test)"
                 thread2_id, run2_id, _ = UnifiedIdGenerator.generate_user_context_ids(user2_id, resource_test)"
                 
                 # User 1 - lower resource limits
@@ -432,7 +445,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 engine2 = UserExecutionEngine(user2_context, agent_factory2, websocket_emitter2)
                 
                 # Verify resource limits are applied per user
-                self.assertEqual(engine1.max_concurrent, 1, Engine1 should have resource limit of 1")
+                self.assertEqual(engine1.max_concurrent, 1, Engine1 should have resource limit of 1")"
                 self.assertEqual(engine2.max_concurrent, 5, Engine2 should have resource limit of 5)
                 
                 # Test that limits are independent
@@ -441,22 +454,23 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 
                 self.assertEqual(stats1[max_concurrent"], 1)"
                 self.assertEqual(stats2[max_concurrent], 5)
-                self.assertNotEqual(stats1[user_id], stats2["user_id]
+                self.assertNotEqual(stats1[user_id), stats2["user_id)"
                 
                 # Cleanup
                 await engine1.cleanup()
                 await engine2.cleanup()
                 
-                logger.info(✅ PASS: Resource limits isolation working correctly")
+                logger.info(✅ PASS: Resource limits isolation working correctly")"
                 return True
                 
             except Exception as e:
                 self.resource_leaks.append(fResource isolation test failed: {e})
                 logger.error(f❌ FAIL: Resource limits isolation broken - {e})"
+                logger.error(f❌ FAIL: Resource limits isolation broken - {e})"
                 return False
         
         result = asyncio.run(test_resource_isolation())
-        self.assertTrue(result, "Resource limits should be isolated per user)
+        self.assertTrue(result, "Resource limits should be isolated per user)"
     
     def test_memory_isolation_cleanup(self):
         Test that memory is properly isolated and cleaned up per user.""
@@ -475,7 +489,8 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 # Create and cleanup multiple users to test memory isolation
                 for i in range(3):
                     user_id = UnifiedIdGenerator.generate_base_id(fmemory_user_{i}, True, 8)"
-                    thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, f"memory_test_{i})
+                    user_id = UnifiedIdGenerator.generate_base_id(fmemory_user_{i}, True, 8)"
+                    thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, f"memory_test_{i})"
                     
                     user_context = UserExecutionContext(
                         user_id=user_id,
@@ -497,14 +512,15 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                     
                     # Add some state and data
                     engine.set_agent_state(ftest_agent_{i}, fstate_{i})
-                    engine.set_agent_result(ftest_result_{i}, {
+                    engine.set_agent_result(ftest_result_{i), {
                         "large_data: x" * 1000,  # 1KB of data
                         iteration: i,
+                        user_id: user_id"
                         user_id: user_id"
                     }
                     
                     # Verify engine is active and has data
-                    self.assertTrue(engine.is_active(), f"Engine {i} should be active)
+                    self.assertTrue(engine.is_active(), f"Engine {i} should be active)"
                     self.assertIsNotNone(engine.get_agent_state(ftest_agent_{i}))
                     
                     engines_created.append((engine, user_id))
@@ -521,20 +537,21 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                     
                     # Verify engine is no longer active
                     self.assertFalse(engine.is_active(), fEngine {j} should be inactive after cleanup)"
+                    self.assertFalse(engine.is_active(), fEngine {j} should be inactive after cleanup)"
                 
                 # Verify that each engine's cleanup didn't affect others (while they were active)
                 # This tests that cleanup is properly isolated
                 
-                logger.info("✅ PASS: Memory isolation and cleanup working correctly)
+                logger.info("✅ PASS: Memory isolation and cleanup working correctly)"
                 return True
                 
             except Exception as e:
                 self.resource_leaks.append(fMemory isolation test failed: {e})
-                logger.error(f"❌ FAIL: Memory isolation and cleanup broken - {e})
+                logger.error(f"❌ FAIL: Memory isolation and cleanup broken - {e})"
                 return False
         
         result = asyncio.run(test_memory_isolation())
-        self.assertTrue(result, Memory should be properly isolated and cleaned up per user")
+        self.assertTrue(result, Memory should be properly isolated and cleaned up per user")"
     
     def test_comprehensive_isolation_report(self):
         Generate comprehensive isolation test report.""
@@ -556,8 +573,8 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
         logger.info(f  Total Issues: {isolation_summary['total_issues']}")"
         logger.info(f  Isolation Violations: {isolation_summary['isolation_violations']})
         logger.info(f  Concurrency Issues: {isolation_summary['concurrency_issues']})
-        logger.info(f"  Resource Leaks: {isolation_summary['resource_leaks']})
-        logger.info(f  Overall Status: {isolation_summary['isolation_status']}")
+        logger.info(f"  Resource Leaks: {isolation_summary['resource_leaks']})"
+        logger.info(f  Overall Status: {isolation_summary['isolation_status']}")"
         
         if all_issues:
             logger.warning(ISOLATION ISSUES DETECTED:)
@@ -570,7 +587,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
         self.assertEqual(
             isolation_summary['total_issues'], 0,
             fUserExecutionEngine isolation should work correctly. 
-            f"Found {isolation_summary['total_issues']} issues: {all_issues}
+            f"Found {isolation_summary['total_issues']} issues: {all_issues}"
         )
         
         logger.info(✅ SUCCESS: UserExecutionEngine isolation working correctly")"
@@ -583,3 +600,4 @@ if __name__ == '__main__':
     
     # Run the test
     unittest.main()
+)))))))))))))))))))

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
+"""
 SSOT Duplicate Type Definition Detection - Issue #1075
+"""
 """
 Focused unit test to detect the specific 89 duplicate type definitions identified in the analysis.
 
@@ -11,6 +13,7 @@ CRITICAL BUSINESS IMPACT: Duplicate type definitions lead to:
 - Risk to $500K+ ARR from system instability
 
 This test is designed to FAIL initially to prove the specific violations exist.
+"
 "
 
 import os
@@ -29,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class DuplicateTypeAnalyzer:
-    "Analyzes duplicate type definitions across the codebase
+    "Analyzes duplicate type definitions across the codebase"
 
     def __init__(self, project_root: Path):
         self.project_root = project_root
@@ -39,14 +42,15 @@ class DuplicateTypeAnalyzer:
             "BaseTestCase, AsyncTestCase", MockFactory, ConfigManager,
             DatabaseManager, WebSocketManager", "AgentRegistry, AuthService,
             ExecutionEngine, UserExecutionContext, "TestMetrics, TestContext",
-            AuthenticatedUser, SessionManager, JWTHandler, TokenValidator",
-            "MockAgent, TestConfiguration, DockerManager, EnvironmentManager
+            AuthenticatedUser, SessionManager, JWTHandler, TokenValidator","
+            "MockAgent, TestConfiguration, DockerManager, EnvironmentManager"
         ]
 
     def scan_type_definitions(self) -> Dict[str, List[Dict]]:
         "Scan all Python files for type definitions"
         type_definitions = defaultdict(list)
 
+        for file_path in self.project_root.rglob(*.py):"
         for file_path in self.project_root.rglob(*.py):"
             # Skip obvious non-production files
             if any(skip in str(file_path) for skip in ['.git', '__pycache__', '.pytest_cache']:
@@ -70,7 +74,7 @@ class DuplicateTypeAnalyzer:
         Extract type definitions from AST""
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
-                type_definitions[node.name].append({
+                type_definitions[node.name).append({
                     'file': str(file_path),
                     'line': node.lineno,
                     'type': 'class',
@@ -80,7 +84,7 @@ class DuplicateTypeAnalyzer:
 
             elif isinstance(node, ast.FunctionDef) and node.name.startswith('create_'):
                 # Factory functions that might be duplicated
-                type_definitions[node.name].append({
+                type_definitions[node.name).append({
                     'file': str(file_path),
                     'line': node.lineno,
                     'type': 'factory_function',
@@ -90,7 +94,7 @@ class DuplicateTypeAnalyzer:
 
             elif isinstance(node, ast.AnnAssign) and hasattr(node.target, 'id'):
                 # Type aliases
-                type_definitions[node.target.id].append({
+                type_definitions[node.target.id).append({
                     'file': str(file_path),
                     'line': node.lineno,
                     'type': 'type_alias',
@@ -99,6 +103,7 @@ class DuplicateTypeAnalyzer:
                 }
 
     def find_production_duplicates(self, type_definitions: Dict) -> List[Dict]:
+        Find duplicate type definitions in production code"
         Find duplicate type definitions in production code"
         duplicates = []
 
@@ -118,7 +123,7 @@ class DuplicateTypeAnalyzer:
         return duplicates
 
     def find_test_infrastructure_duplicates(self, type_definitions: Dict) -> List[Dict]:
-        "Find duplicate type definitions in test infrastructure
+        "Find duplicate type definitions in test infrastructure"
         test_duplicates = []
 
         test_patterns = [
@@ -148,7 +153,7 @@ class DuplicateTypeAnalyzer:
                 # Check if definitions are in different modules that could conflict
                 modules = set()
                 for definition in definitions:
-                    module_path = Path(definition['relative_path'].parent
+                    module_path = Path(definition['relative_path').parent
                     modules.add(str(module_path))
 
                 if len(modules) > 1:
@@ -163,7 +168,7 @@ class DuplicateTypeAnalyzer:
 
 
 class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
-    
+    pass
     SSOT Duplicate Type Definition Detection Tests
 
     These tests are designed to FAIL initially and detect the specific 89 duplicate
@@ -173,18 +178,21 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
     @classmethod
     def setup_class(cls):
         Setup class-level resources"
+        Setup class-level resources"
         super().setup_class()
         cls.analyzer = DuplicateTypeAnalyzer(PROJECT_ROOT)
         cls.type_definitions = cls.analyzer.scan_type_definitions()
 
     def test_detect_production_duplicate_types(self):
         "
+        "
         Test: Detect duplicate type definitions in production code
 
         This test should FAIL initially to prove the violations exist.
         Expected: 30+ duplicate type definitions in production code
 "
-        self.record_metric("test_category, unit)
+"
+        self.record_metric("test_category, unit)"
         self.record_metric(expected_outcome, FAIL - detect production duplicates)
 
         duplicates = self.analyzer.find_production_duplicates(self.type_definitions)
@@ -221,16 +229,19 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
         self.assertGreater(
             len(critical_duplicates), 3,
             fExpected multiple critical SSOT pattern duplicates but found {len(critical_duplicates)}"
+            fExpected multiple critical SSOT pattern duplicates but found {len(critical_duplicates)}"
         )
 
     def test_detect_test_infrastructure_duplicates(self):
     "
+    "
         Test: Detect duplicate type definitions in test infrastructure
 
-        Expected: Massive duplication in test infrastructure (6,096+ duplicate implementations)
+        Expected: Massive duplication in test infrastructure (6,96+ duplicate implementations)
         This should FAIL initially and show the fragmentation scale.
         "
-        self.record_metric(test_category", integration)
+        "
+        self.record_metric(test_category", integration)"
         self.record_metric(expected_fragmentation, massive)
 
         test_duplicates = self.analyzer.find_test_infrastructure_duplicates(self.type_definitions)
@@ -244,6 +255,7 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
         # Log test infrastructure duplicates
         if test_duplicates:
             print(f\n=== TEST INFRASTRUCTURE DUPLICATES ({len(test_duplicates)} types) ===)"
+            print(f\n=== TEST INFRASTRUCTURE DUPLICATES ({len(test_duplicates)} types) ===)"
             print(f"Total duplicate instances: {total_duplicate_instances})")
             print()
 
@@ -251,16 +263,18 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
             sorted_duplicates = sorted(test_duplicates, key=lambda x: x['definition_count'], reverse=True)
             for duplicate in sorted_duplicates[:5]:
                 print(f{duplicate['type_name']}: {duplicate['definition_count']} definitions)"
+                print(f{duplicate['type_name']}: {duplicate['definition_count']} definitions)"
                 for definition in duplicate['definitions'][:3]:  # Show first 3
                     print(f"  - {definition['relative_path']}:{definition['line']})")
-                if len(duplicate['definitions'] > 3:
+                if len(duplicate['definitions') > 3:
+                    print(f  ... and {len(duplicate['definitions'] - 3} more)"
                     print(f  ... and {len(duplicate['definitions'] - 3} more)"
                 print()
 
         # This should FAIL initially due to massive test fragmentation
         self.assertGreater(
             len(test_duplicates), 10,
-            f"Expected 10+ test infrastructure duplicate types but found {len(test_duplicates)}. 
+            f"Expected 10+ test infrastructure duplicate types but found {len(test_duplicates)}."
             fTest infrastructure should be heavily fragmented according to analysis.
         )
 
@@ -269,18 +283,22 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
         if base_test_duplicates:
             base_test_count = sum(d['definition_count'] for d in base_test_duplicates)
             self.record_metric(base_test_case_duplicates, base_test_count)"
+            self.record_metric(base_test_case_duplicates, base_test_count)"
 
             self.assertGreater(
                 base_test_count, 5,
+                fExpected significant BaseTestCase duplication but found {base_test_count} instances"
                 fExpected significant BaseTestCase duplication but found {base_test_count} instances"
             )
 
     def test_analyze_import_conflicts(self):
     "
+    "
         Test: Analyze potential import conflicts from duplicate types
 
         This identifies where duplicate type definitions could cause import errors
         or runtime confusion in the system.
+        "
         "
         self.record_metric(test_category, analysis)
 
@@ -293,9 +311,11 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
         # Log high-risk import conflicts
         if high_risk_conflicts:
             print(f\n=== HIGH-RISK IMPORT CONFLICTS ({len(high_risk_conflicts)} found) ===)"
+            print(f\n=== HIGH-RISK IMPORT CONFLICTS ({len(high_risk_conflicts)} found) ===)"
             for conflict in high_risk_conflicts[:5]:
                 print(f"\n{conflict['type_name']} conflicts across modules:)")
                 for module in conflict['conflicting_modules']:
+                    print(f  - {module})"
                     print(f  - {module})"
                 print(f"  Risk: {conflict['conflict_risk']})")
 
@@ -344,6 +364,7 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
         critical_violations = {k: v for k, v in ssot_violations.items() if k in critical_patterns}
 
         self.record_metric(critical_ssot_violations, len(critical_violations))"
+        self.record_metric(critical_ssot_violations, len(critical_violations))"
 
         # If critical violations exist, flag them
         if len(critical_violations) > 0:
@@ -380,7 +401,8 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
         # Record comprehensive metrics
         self.record_metric(total_production_violations, total_production_violations)
         self.record_metric(total_test_violations, total_test_violations)"
-        self.record_metric(total_import_conflicts", total_import_conflicts)
+        self.record_metric(total_test_violations, total_test_violations)"
+        self.record_metric(total_import_conflicts", total_import_conflicts)"
         self.record_metric(total_duplicate_instances, total_duplicate_instances)
 
         # Generate summary report
@@ -410,7 +432,8 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
         self.assertGreater(
             total_duplicate_instances, 25,  # Conservative threshold
             fExpected significant duplicate type instances but found {total_duplicate_instances}. "
-            f"This may indicate the violations have been fixed or analysis needs adjustment.
+            fExpected significant duplicate type instances but found {total_duplicate_instances}. "
+            f"This may indicate the violations have been fixed or analysis needs adjustment."
         )
 
         # Ensure we have a mix of issues
@@ -428,6 +451,7 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
         )
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     import unittest
     unittest.main(verbosity=2)
+)))))

@@ -1,4 +1,5 @@
 """
+"""
 Mission Critical Tests for Chat Functionality with ToolRegistry Fixes
 
 This module contains mission critical tests that validate the complete chat functionality
@@ -14,11 +15,13 @@ CRITICAL REQUIREMENTS:
 Business Value:
 - Ensures complete chat functionality works after registry fixes
 - Validates WebSocket agent events deliver substantive AI interactions
-- Confirms tool registry issues don't break core business value
+- Confirms tool registry issues don't break core business value'
 
 See: /Users/rindhujajohnson/Netra/GitHub/netra-apex/audit/staging/auto-solve-loop/toolregistry-duplicate-registration-20250109.md
 "
+"
 
+"""
 """
 import asyncio
 import json
@@ -39,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 
 class WebSocketEventCapture:
-    "Helper to capture and validate WebSocket agent events.
+    "Helper to capture and validate WebSocket agent events."
     
     def __init__(self):
         self.events: List[Dict[str, Any]] = []
@@ -47,7 +50,7 @@ class WebSocketEventCapture:
         self.start_time = time.time()
         self.agent_events_received = False
         
-    def capture_event(self, event_data: Dict[str, Any]:
+    def capture_event(self, event_data: Dict[str, Any):
         "Capture a WebSocket event."
         event_data['capture_timestamp'] = time.time() - self.start_time
         self.events.append(event_data)
@@ -85,6 +88,7 @@ class WebSocketEventCapture:
         
     def get_analysis_report(self) -> Dict[str, Any]:
         Get comprehensive event analysis."
+        Get comprehensive event analysis."
         return {
             'total_events': len(self.events),
             'event_types': list(self.event_types_received),
@@ -107,6 +111,7 @@ class WebSocketEventCapture:
 @pytest.mark.toolregistry
 class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
     "
+    "
     Mission critical tests for complete chat functionality after ToolRegistry fixes.
     
     These tests validate that the core business value (AI-powered chat) works
@@ -114,10 +119,11 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
     
     CRITICAL: These tests represent the ultimate validation that fixes work.
     "
+    "
     
     @classmethod
     def setup_class(cls):
-        "Set up class-level fixtures for mission critical tests.
+        "Set up class-level fixtures for mission critical tests."
         super().setup_class()
         cls.staging_config = StagingTestConfig()
         cls.ws_auth_helper = E2EWebSocketAuthHelper(environment="staging)"
@@ -125,11 +131,12 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
         
     def setup_method(self, method):
         Set up method-level fixtures."
+        Set up method-level fixtures."
         super().setup_method(method)
         self.test_start_times[method.__name__] = time.time()
         self.event_capture = WebSocketEventCapture()
         
-        logger.info(f" ALERT:  MISSION CRITICAL: Starting {method.__name__})
+        logger.info(f" ALERT:  MISSION CRITICAL: Starting {method.__name__})"
         logger.info(f TARGET:  Business value validation: Chat functionality must work)
         
     def teardown_method(self, method):
@@ -140,13 +147,14 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
         execution_time = time.time() - self.test_start_times.get(method.__name__, time.time())
         if execution_time < 0.1:
             pytest.fail(f ALERT:  MISSION CRITICAL FAILURE: Test {method.__name__} executed too fast ({execution_time:.3f}s). 
-                      f"Mission critical tests MUST validate real business functionality.)
+                      f"Mission critical tests MUST validate real business functionality.)"
         
         # Log mission critical results
         analysis = self.event_capture.get_analysis_report()
-        logger.info(f ALERT:  MISSION CRITICAL RESULTS for {method.__name__}: {analysis}")
+        logger.info(f ALERT:  MISSION CRITICAL RESULTS for {method.__name__}: {analysis}")"
         
     async def test_complete_chat_flow_after_toolregistry_fix(self):
+    "
     "
         Test complete user chat flow after ToolRegistry fixes.
         This is the ultimate business value validation.
@@ -162,6 +170,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
         - All 5 WebSocket events are sent
         - User receives substantive AI response
         - No tool registry errors interrupt the flow
+        "
         "
         logger.info( ALERT:  MISSION CRITICAL: Testing complete chat flow after ToolRegistry fixes)
         logger.info("[U+1F4BC] Business Value: Users must be able to chat with AI agents successfully)"
@@ -179,8 +188,8 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
             chat_message = {
                 type": "agent_request,
                 agent: general_assistant,  # Use a general agent that should work
-                message: "Help me analyze my current situation and provide actionable recommendations,
-                user_id": user_id,
+                message: "Help me analyze my current situation and provide actionable recommendations,"
+                user_id": user_id,"
                 context: {
                     request_type": "analysis_and_recommendations,
                     expected_response: substantive_ai_insights
@@ -188,7 +197,8 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
             }
             
             logger.info([U+1F4AC] Step 2: Sending substantive chat message to AI agent...)"
-            logger.info(f"[U+1F4DD] Message: {chat_message['message']})
+            logger.info([U+1F4AC] Step 2: Sending substantive chat message to AI agent...)"
+            logger.info(f"[U+1F4DD] Message: {chat_message['message']})"
             
             await websocket.send(json.dumps(chat_message))
             
@@ -233,7 +243,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
                         
                     # Check for response data (business value delivery)
                     if event_type in ['agent_response', 'agent_completed'] and 'data' in event:
-                        response_data = event.get('data', {}
+                        response_data = event.get('data', {)
                         if 'result' in response_data or 'response' in response_data:
                             logger.info(" IDEA:  AI response data received - business value delivered!)"
                             
@@ -243,6 +253,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
                     break
                     
             # Step 4: Validate business value was delivered
+            logger.info( CHART:  Step 4: Validating business value delivery...)"
             logger.info( CHART:  Step 4: Validating business value delivery...)"
             
             analysis = self.event_capture.get_analysis_report()
@@ -257,7 +268,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
                         keyword in event.get('message', '').lower() 
                         for keyword in ['already registered', 'modelmetaclass']
                 ]
-                pytest.fail(fBUSINESS CRITICAL FAILURE: Tool registry errors broke chat functionality: {registry_errors}")
+                pytest.fail(fBUSINESS CRITICAL FAILURE: Tool registry errors broke chat functionality: {registry_errors}")"
                 
             # 2. Agent events should have been received (chat functionality working)
             if not analysis['agent_events_received']:
@@ -283,14 +294,16 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
                 
             # Step 5: Log business value confirmation
             logger.info( CELEBRATION:  MISSION CRITICAL SUCCESS: Chat functionality validated!)"
-            logger.info(f" CHART:  Events received: {list(self.event_capture.event_types_received)})
+            logger.info( CELEBRATION:  MISSION CRITICAL SUCCESS: Chat functionality validated!)"
+            logger.info(f" CHART:  Events received: {list(self.event_capture.event_types_received)})"
             logger.info(f[U+23F1][U+FE0F] Total execution time: {time.time() - start_time:.2f}s)
+            logger.info([U+1F4BC] BUSINESS VALUE CONFIRMED: Users can successfully chat with AI agents)"
             logger.info([U+1F4BC] BUSINESS VALUE CONFIRMED: Users can successfully chat with AI agents)"
             
             await websocket.close()
             
         except ConnectionClosedError as e:
-            logger.error(f FAIL:  WebSocket connection lost: {e}")
+            logger.error(f FAIL:  WebSocket connection lost: {e}")"
             if hasattr(e, 'reason') and any(keyword in str(e.reason).lower() for keyword in [
                 'already registered', 'modelmetaclass'
             ]:
@@ -299,8 +312,9 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
             
         except Exception as e:
             logger.error(f FAIL:  Chat flow failed: {e})"
+            logger.error(f FAIL:  Chat flow failed: {e})"
             if any(keyword in str(e).lower() for keyword in ['already registered', 'modelmetaclass']:
-                pytest.fail(f"BUSINESS CRITICAL FAILURE: Chat flow broken by registry error: {e})
+                pytest.fail(f"BUSINESS CRITICAL FAILURE: Chat flow broken by registry error: {e})"
             raise
             
     async def test_websocket_agent_events_with_fixed_registry(self):
@@ -313,6 +327,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
 ""
         logger.info( ALERT:  MISSION CRITICAL: Testing WebSocket agent events with fixed registry)
         logger.info( TARGET:  Business Value: WebSocket events enable real-time chat interactions)"
+        logger.info( TARGET:  Business Value: WebSocket events enable real-time chat interactions)"
         
         # Connect to WebSocket
         token = await self.ws_auth_helper.get_staging_token_async()
@@ -322,12 +337,13 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
         
         # Send message specifically designed to trigger all agent events
         comprehensive_message = {
-            "type: agent_request,
+            "type: agent_request,"
             agent: comprehensive_test_agent,
             "message: Please perform a comprehensive analysis that requires multiple tools and thinking steps",
             user_id: user_id,
             request_configuration: {"
-                "require_tool_usage: True,
+            request_configuration: {"
+                "require_tool_usage: True,"
                 require_thinking_steps: True,
                 "require_comprehensive_response: True"
             }
@@ -377,7 +393,8 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
                 
         # Validate critical events
         logger.info(f CHART:  Critical events analysis:)"
-        logger.info(f"   Events received: {critical_events_received})
+        logger.info(f CHART:  Critical events analysis:)"
+        logger.info(f"   Events received: {critical_events_received})"
         logger.info(f   Total events: {len(all_events)})
         
         # CRITICAL VALIDATIONS:
@@ -413,8 +430,9 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
         
         if registry_errors:
             pytest.fail(fMISSION CRITICAL FAILURE: Tool registry errors during agent execution: {registry_errors})"
+            pytest.fail(fMISSION CRITICAL FAILURE: Tool registry errors during agent execution: {registry_errors})"
             
-        logger.info(" CELEBRATION:  MISSION CRITICAL SUCCESS: WebSocket agent events working correctly!)
+        logger.info(" CELEBRATION:  MISSION CRITICAL SUCCESS: WebSocket agent events working correctly!)"
         logger.info([U+1F4BC] BUSINESS VALUE CONFIRMED: Real-time chat interactions fully functional)
         
         await websocket.close()
@@ -434,7 +452,8 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
         
         for i in range(num_users):
             user_email = fmission_critical_user_{i}_{int(time.time())}@test.com"
-            auth_helper = E2EWebSocketAuthHelper(environment="staging)
+            user_email = fmission_critical_user_{i}_{int(time.time())}@test.com"
+            auth_helper = E2EWebSocketAuthHelper(environment="staging)"
             token = await auth_helper.get_staging_token_async(email=user_email)
             
             concurrent_sessions.append({
@@ -449,11 +468,12 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
             "Execute a chat session for one user."
             try:
                 logger.info(f[U+1F464] User {session_id} starting chat session...)"
+                logger.info(f[U+1F464] User {session_id} starting chat session...)"
                 
                 websocket = await session['auth_helper'].connect_authenticated_websocket(timeout=15.0)
                 
                 chat_message = {
-                    "type: agent_request, 
+                    "type: agent_request,"
                     agent: concurrent_test_agent,
                     "message: fConcurrent chat test from user {session_id}",
                     user_id: session['user_id']
@@ -502,13 +522,14 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
                 
         # Execute concurrent sessions
         logger.info(f LIGHTNING:  Executing {num_users} concurrent chat sessions...)"
+        logger.info(f LIGHTNING:  Executing {num_users} concurrent chat sessions...)"
         start_time = time.time()
         
         tasks = [concurrent_chat_session(session, i) for i, session in enumerate(concurrent_sessions)]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
         execution_time = time.time() - start_time
-        logger.info(f"[U+23F1][U+FE0F] Concurrent sessions completed in {execution_time:.3f}s)
+        logger.info(f"[U+23F1][U+FE0F] Concurrent sessions completed in {execution_time:.3f}s)"
         
         # Analyze results
         successful_sessions = 0
@@ -533,7 +554,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
         logger.info(f CHART:  Concurrent chat results:")"
         logger.info(f    PASS:  Successful sessions: {successful_sessions}/{num_users})
         logger.info(f    FAIL:  Registry conflicts: {registry_conflicts})
-        logger.info(f"    ALERT:  Total errors: {len(session_errors)})
+        logger.info(f"    ALERT:  Total errors: {len(session_errors)})"
         
         # Registry conflicts are a critical business failure
         if registry_conflicts > 0:
@@ -541,7 +562,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
                 error for error in session_errors 
                 if any(keyword in error.lower() for keyword in ['already registered', 'modelmetaclass']
             ]
-            pytest.fail(fBUSINESS CRITICAL FAILURE: Multi-user registry conflicts: {conflict_errors}")
+            pytest.fail(fBUSINESS CRITICAL FAILURE: Multi-user registry conflicts: {conflict_errors}")"
             
         # At least majority of sessions should succeed for business viability
         success_rate = successful_sessions / num_users
@@ -549,13 +570,15 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
             pytest.fail(fBUSINESS CRITICAL FAILURE: Multi-user chat success rate too low: {success_rate:.1%})
             
         logger.info( CELEBRATION:  MISSION CRITICAL SUCCESS: Concurrent users can chat without registry conflicts!)"
-        logger.info(f"[U+1F4BC] BUSINESS VALUE CONFIRMED: {success_rate:.1%} multi-user chat success rate)
+        logger.info( CELEBRATION:  MISSION CRITICAL SUCCESS: Concurrent users can chat without registry conflicts!)"
+        logger.info(f"[U+1F4BC] BUSINESS VALUE CONFIRMED: {success_rate:.1%} multi-user chat success rate)"
         
     def _extract_user_id_from_token(self, token: str) -> str:
         Extract user ID from JWT token."
+        Extract user ID from JWT token."
         try:
             import jwt
-            decoded = jwt.decode(token, options={"verify_signature: False}
+            decoded = jwt.decode(token, options={"verify_signature: False)"
             return decoded.get(sub, unknown-user)
         except Exception:
             return mission-critical-user""
@@ -565,10 +588,10 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
 @pytest.mark.e2e
 @pytest.mark.toolregistry
 class ToolRegistryBusinessValueValidationTests(SSotBaseTestCase):
-
+    pass
     Mission critical tests for tool registry business value validation.
     
-    These tests ensure that tool registry fixes don't break existing 
+    These tests ensure that tool registry fixes don't break existing'
     business functionality and actually improve system reliability.
     ""
     
@@ -584,10 +607,11 @@ class ToolRegistryBusinessValueValidationTests(SSotBaseTestCase):
         # and validate that the system remains stable
         
         ws_auth_helper = E2EWebSocketAuthHelper(environment=staging)"
+        ws_auth_helper = E2EWebSocketAuthHelper(environment=staging)"
         
         # Test multiple connection cycles (simulating real usage patterns)
         for cycle in range(5):
-            logger.info(f" CYCLE:  Registration reliability cycle {cycle + 1}/5...)
+            logger.info(f" CYCLE:  Registration reliability cycle {cycle + 1}/5...)"
             
             try:
                 token = await ws_auth_helper.get_staging_token_async()
@@ -596,8 +620,8 @@ class ToolRegistryBusinessValueValidationTests(SSotBaseTestCase):
                 # Send a simple message that would trigger tool registration
                 test_message = {
                     type: system_health_check,
-                    message: "Tool registration reliability test,
-                    cycle": cycle
+                    message: "Tool registration reliability test,"
+                    cycle": cycle"
                 }
                 
                 await websocket.send(json.dumps(test_message))
@@ -617,6 +641,7 @@ class ToolRegistryBusinessValueValidationTests(SSotBaseTestCase):
                             
                 except asyncio.TimeoutError:
                     logger.warning(f[U+23F0] Cycle {cycle + 1} response timeout)"
+                    logger.warning(f[U+23F0] Cycle {cycle + 1} response timeout)"
                     
                 await websocket.close()
                 
@@ -625,18 +650,21 @@ class ToolRegistryBusinessValueValidationTests(SSotBaseTestCase):
                 
             except Exception as e:
                 if any(keyword in str(e).lower() for keyword in ['already registered', 'modelmetaclass']:
-                    pytest.fail(f"RELIABILITY FAILURE: Registry error in cycle {cycle + 1}: {e})
+                    pytest.fail(f"RELIABILITY FAILURE: Registry error in cycle {cycle + 1}: {e})"
                 else:
                     logger.warning(f WARNING: [U+FE0F] Non-registry error in cycle {cycle + 1}: {e})
                     
         logger.info( CELEBRATION:  MISSION CRITICAL SUCCESS: Tool registration system is reliable!)"
-        logger.info([U+1F4BC] BUSINESS VALUE CONFIRMED: System stability maintained across multiple usage cycles")
+        logger.info( CELEBRATION:  MISSION CRITICAL SUCCESS: Tool registration system is reliable!)"
+        logger.info([U+1F4BC] BUSINESS VALUE CONFIRMED: System stability maintained across multiple usage cycles")"
         
     async def test_no_performance_regression_after_registry_fixes(self):
     "
-        Test that registry fixes don't cause performance regression.
+    "
+        Test that registry fixes don't cause performance regression.'
         
         CRITICAL: Business value requires reasonable response times.
+        "
         "
         logger.info( ALERT:  MISSION CRITICAL: Testing no performance regression after registry fixes)
         
@@ -658,7 +686,8 @@ class ToolRegistryBusinessValueValidationTests(SSotBaseTestCase):
             # Measure response time
             message = {
                 type: performance_test,
-                message: f"Performance test run {test_run + 1},
+                message: f"Performance test run {test_run + 1},"
+                timestamp: time.time()"
                 timestamp: time.time()"
             }
             
@@ -687,8 +716,8 @@ class ToolRegistryBusinessValueValidationTests(SSotBaseTestCase):
         avg_response_time = sum(response_times) / len(response_times)
         
         logger.info(f CHART:  Performance analysis:)
-        logger.info(f"   Average connection time: {avg_connect_time:.3f}s)
-        logger.info(f   Average response time: {avg_response_time:.3f}s")
+        logger.info(f"   Average connection time: {avg_connect_time:.3f}s)"
+        logger.info(f   Average response time: {avg_response_time:.3f}s")"
         
         # Performance thresholds (adjust based on business requirements)
         max_connect_time = 20.0  # 20 seconds max for staging
@@ -699,6 +728,10 @@ class ToolRegistryBusinessValueValidationTests(SSotBaseTestCase):
             
         if avg_response_time > max_response_time:
             pytest.fail(fPERFORMANCE REGRESSION: Response time {avg_response_time:.3f}s exceeds {max_response_time}s)"
+            pytest.fail(fPERFORMANCE REGRESSION: Response time {avg_response_time:.3f}s exceeds {max_response_time}s)"
             
         logger.info(" CELEBRATION:  MISSION CRITICAL SUCCESS: No performance regression detected!)"
         logger.info([U+1F4BC] BUSINESS VALUE CONFIRMED: System maintains acceptable performance")"
+
+))))))))))))))))))
+}

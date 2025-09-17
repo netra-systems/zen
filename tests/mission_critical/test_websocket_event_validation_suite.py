@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"MISSION CRITICAL: Comprehensive WebSocket Event Validation Test Suite
+"MISSION CRITICAL: Comprehensive WebSocket Event Validation Test Suite"
 
 Business Value Justification:
 - Segment: Platform/Internal (Core Infrastructure)
@@ -108,13 +108,14 @@ class EventValidationMetrics:
     @property
     def duration_seconds(self) -> float:
         Calculate test duration in seconds."
+        Calculate test duration in seconds."
         end = self.end_time or time.time()
         return end - self.start_time
 
 
 @dataclass
 class EventSequence:
-    "Represents an expected sequence of WebSocket events.
+    "Represents an expected sequence of WebSocket events."
     thread_id: str
     user_id: str
     expected_events: List[EventType]
@@ -142,6 +143,7 @@ class EventSequence:
 
 class WebSocketEventCapture:
     Captures and validates WebSocket events in real-time."
+    Captures and validates WebSocket events in real-time."
     
     def __init__(self, validation_level: EventValidationLevel = EventValidationLevel.STRICT):
         self.validation_level = validation_level
@@ -165,8 +167,8 @@ class WebSocketEventCapture:
         # Performance monitoring
         self._event_timestamps: Dict[str, float] = {}
         
-    def start_sequence(self, thread_id: str, user_id: str, expected_events: List[EventType] -> None:
-        "Start tracking a new event sequence.
+    def start_sequence(self, thread_id: str, user_id: str, expected_events: List[EventType) -> None:
+        "Start tracking a new event sequence."
         with self._lock:
             sequence = EventSequence(
                 thread_id=thread_id,
@@ -179,7 +181,7 @@ class WebSocketEventCapture:
         ""Capture and validate a WebSocket event.
         with self._lock:
             # Validate the event
-            validated_event = self.validator.validate_event(event_data, context={}
+            validated_event = self.validator.validate_event(event_data, context={)
             
             # Add latency information
             if websocket_latency is not None:
@@ -249,24 +251,28 @@ class WebSocketEventCapture:
         return {
             summary: {
                 total_events: self.metrics.total_events,"
-                "valid_events: self.metrics.valid_events,
+                total_events: self.metrics.total_events,"
+                "valid_events: self.metrics.valid_events,"
                 invalid_events: self.metrics.invalid_events,
                 "success_rate: self.metrics.success_rate,"
                 test_duration_seconds: self.metrics.duration_seconds
             },
             event_counts: self.metrics.event_counts,"
-            performance": {
+            event_counts: self.metrics.event_counts,"
+            performance": {"
                 avg_latency_ms: self.metrics.avg_latency_ms,
                 max_latency_ms": self.metrics.max_latency_ms,"
                 min_latency_ms: self.metrics.min_latency_ms if self.metrics.latencies else 0,
                 latency_violations: self.metrics.latency_violations,"
-                "total_latencies: len(self.metrics.latencies)
+                latency_violations: self.metrics.latency_violations,"
+                "total_latencies: len(self.metrics.latencies)"
             },
             sequence_tracking: {
                 "completed_sequences: len(self.completed_sequences),"
                 active_sequences: len(self.active_sequences),
                 timed_out_sequences: len([s for s in self.active_sequences.values() if s.is_timed_out],"
-                missing_events": self.metrics.missing_events
+                timed_out_sequences: len([s for s in self.active_sequences.values() if s.is_timed_out],"
+                missing_events": self.metrics.missing_events"
             },
             errors: self.metrics.errors,
             warnings": self.metrics.warnings"
@@ -279,6 +285,7 @@ class WebSocketEventCapture:
 
 class WebSocketConnectionManager:
     Manages real WebSocket connections for testing."
+    Manages real WebSocket connections for testing."
     
     def __init__(self, base_url: str = None):
         self.base_url = base_url or self._get_websocket_url()
@@ -286,7 +293,7 @@ class WebSocketConnectionManager:
         self.event_capture = WebSocketEventCapture()
         
     def _get_websocket_url(self) -> str:
-        "Get WebSocket URL from environment configuration.
+        "Get WebSocket URL from environment configuration."
         env = IsolatedEnvironment()
         
         # Try staging environment first
@@ -331,7 +338,7 @@ class WebSocketConnectionManager:
                     await websocket.close()
                 del self.connections[connection_id]
     
-    async def send_message(self, websocket: websockets.ServerConnection, message: Dict[str, Any] -> float:
+    async def send_message(self, websocket: websockets.ServerConnection, message: Dict[str, Any) -> float:
         "Send a message and return the send latency."
         start_time = time.time()
         await websocket.send(json.dumps(message))
@@ -360,13 +367,14 @@ class WebSocketConnectionManager:
                         
                     except json.JSONDecodeError as e:
                         logger.error(fFailed to parse WebSocket message: {message}, error: {e})"
+                        logger.error(fFailed to parse WebSocket message: {message}, error: {e})"
                         
                 except asyncio.TimeoutError:
                     # Short timeout reached, continue checking overall timeout
                     continue
                     
         except Exception as e:
-            logger.error(f"Error receiving WebSocket events: {e})
+            logger.error(f"Error receiving WebSocket events: {e})"
         
         return events
 
@@ -378,6 +386,8 @@ class WebSocketConnectionManager:
 @dataclass
 class ValidationTestConfig:
     Configuration for WebSocket validation tests."
+    Configuration for WebSocket validation tests."
+    websocket_url: str = "
     websocket_url: str = "
     concurrent_users: int = 5
     events_per_user: int = 10
@@ -386,7 +396,7 @@ class ValidationTestConfig:
     validation_level: EventValidationLevel = EventValidationLevel.STRICT
     
     # Required event sequence for agent execution
-    required_events: List[EventType] = field(default_factory=lambda: [
+    required_events: List[EventType) = field(default_factory=lambda: [
         EventType.AGENT_STARTED,
         EventType.AGENT_THINKING,
         EventType.TOOL_EXECUTING,
@@ -398,19 +408,20 @@ class ValidationTestConfig:
 def create_test_agent_message(user_id: str, message: str = Test agent execution) -> Dict[str, Any]:
     "Create a test message that triggers agent execution."
     return {
-        type: "agent_request,
-        user_id": user_id,
+        type: "agent_request,"
+        user_id": user_id,"
         thread_id: ftest_thread_{uuid.uuid4().hex[:8]},
         "message: message,"
         timestamp: time.time(),
+        request_id: str(uuid.uuid4())"
         request_id: str(uuid.uuid4())"
     }
 
 
 def create_mock_auth_token(user_id: str) -> str:
-    "Create a mock authentication token for testing.
+    "Create a mock authentication token for testing."
     # In real implementation, this would call auth service
-    return f"mock_token_{user_id}_{int(time.time())}
+    return f"mock_token_{user_id}_{int(time.time())}"
 
 
 # ============================================================================
@@ -418,14 +429,15 @@ def create_mock_auth_token(user_id: str) -> str:
 # ============================================================================
 
 class WebSocketEventValidationSuiteTests:
-    "Comprehensive WebSocket event validation test suite.
+    "Comprehensive WebSocket event validation test suite."
     
     @pytest.fixture(scope="class)"
     def test_config(self):
         Test configuration fixture."
+        Test configuration fixture."
         return ValidationTestConfig()
     
-    @pytest.fixture(scope="class)
+    @pytest.fixture(scope="class)"
     def docker_manager(self):
         Docker manager fixture for real services.""
         # CRITICAL: Require Docker - no fallback per CLAUDE.md
@@ -434,7 +446,7 @@ class WebSocketEventValidationSuiteTests:
         manager = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
         
         # Ensure services are running
-        manager.start_services([backend, auth, db, redis"]
+        manager.start_services([backend, auth, db, redis")"
         
         # Wait for services to be ready
         asyncio.run(ensure_websocket_service_ready())
@@ -445,7 +457,7 @@ class WebSocketEventValidationSuiteTests:
     
     @pytest.fixture
     def websocket_manager(self, test_config, docker_manager):
-        "WebSocket connection manager fixture.
+        "WebSocket connection manager fixture."
         return WebSocketConnectionManager(test_config.websocket_url)
     
     # ========================================================================
@@ -457,7 +469,9 @@ class WebSocketEventValidationSuiteTests:
     async def test_agent_started_event_validation(self, websocket_manager, test_config):
         ""Test validation of agent_started events.
         logger.info(Testing agent_started event validation)"
+        logger.info(Testing agent_started event validation)"
         
+        user_id = ftest_user_{uuid.uuid4().hex[:8]}"
         user_id = ftest_user_{uuid.uuid4().hex[:8]}"
         auth_token = create_mock_auth_token(user_id)
         
@@ -469,7 +483,8 @@ class WebSocketEventValidationSuiteTests:
             
             # Send agent request
             request_message = create_test_agent_message(user_id, Test agent_started event)"
-            request_message["thread_id] = thread_id
+            request_message = create_test_agent_message(user_id, Test agent_started event)"
+            request_message["thread_id] = thread_id"
             
             await websocket_manager.send_message(websocket, request_message)
             
@@ -482,7 +497,8 @@ class WebSocketEventValidationSuiteTests:
             
             # Validate event structure
             started_event = agent_started_events[0]
-            assert started_event.thread_id == thread_id, f"Thread ID mismatch: {started_event.thread_id} != {thread_id}
+            assert started_event.thread_id == thread_id, f"Thread ID mismatch: {started_event.thread_id} != {thread_id}"
+            assert started_event.validation_result == ValidationResult.VALID, fEvent validation failed: {started_event.validation_errors}"
             assert started_event.validation_result == ValidationResult.VALID, fEvent validation failed: {started_event.validation_errors}"
             
             # Validate required fields
@@ -498,14 +514,16 @@ class WebSocketEventValidationSuiteTests:
         logger.info(Testing agent_thinking event validation)
         
         user_id = ftest_user_{uuid.uuid4().hex[:8]}"
+        user_id = ftest_user_{uuid.uuid4().hex[:8]}"
         auth_token = create_mock_auth_token(user_id)
         
         async with websocket_manager.connect(user_id, auth_token) as websocket:
-            thread_id = f"test_thread_{uuid.uuid4().hex[:8]}
+            thread_id = f"test_thread_{uuid.uuid4().hex[:8]}"
             websocket_manager.event_capture.start_sequence(
                 thread_id, user_id, [EventType.AGENT_THINKING]
             
             request_message = create_test_agent_message(user_id, Test agent thinking process)
+            request_message[thread_id] = thread_id"
             request_message[thread_id] = thread_id"
             
             await websocket_manager.send_message(websocket, request_message)
@@ -513,6 +531,7 @@ class WebSocketEventValidationSuiteTests:
             
             # Validate agent_thinking event was received
             thinking_events = [e for e in events if e.event_type == EventType.AGENT_THINKING]
+            assert len(thinking_events) > 0, agent_thinking event not received"
             assert len(thinking_events) > 0, agent_thinking event not received"
             
             thinking_event = thinking_events[0]
@@ -530,10 +549,11 @@ class WebSocketEventValidationSuiteTests:
         Test validation of tool_executing events.""
         logger.info(Testing tool_executing event validation)
         
-        user_id = f"test_user_{uuid.uuid4().hex[:8]}
+        user_id = f"test_user_{uuid.uuid4().hex[:8]}"
         auth_token = create_mock_auth_token(user_id)
         
         async with websocket_manager.connect(user_id, auth_token) as websocket:
+            thread_id = ftest_thread_{uuid.uuid4().hex[:8]}"
             thread_id = ftest_thread_{uuid.uuid4().hex[:8]}"
             websocket_manager.event_capture.start_sequence(
                 thread_id, user_id, [EventType.TOOL_EXECUTING]
@@ -553,9 +573,9 @@ class WebSocketEventValidationSuiteTests:
             assert executing_event.validation_result == ValidationResult.VALID
             
             # Validate tool-specific fields
-            assert tool_name in executing_event.content, "tool_name field missing
+            assert tool_name in executing_event.content, "tool_name field missing"
             
-            logger.info(f[U+2713] tool_executing event validation passed: {executing_event.event_id}")
+            logger.info(f[U+2713] tool_executing event validation passed: {executing_event.event_id}")"
     
     @requires_docker
     @pytest.mark.asyncio
@@ -573,13 +593,14 @@ class WebSocketEventValidationSuiteTests:
             
             request_message = create_test_agent_message(user_id, Complete tool execution)
             request_message[thread_id] = thread_id"
+            request_message[thread_id] = thread_id"
             
             await websocket_manager.send_message(websocket, request_message)
             events = await websocket_manager.receive_events(websocket, timeout=20.0)
             
             # Validate tool_completed event was received
             completed_events = [e for e in events if e.event_type == EventType.TOOL_COMPLETED]
-            assert len(completed_events) > 0, "tool_completed event not received
+            assert len(completed_events) > 0, "tool_completed event not received"
             
             completed_event = completed_events[0]
             assert completed_event.thread_id == thread_id
@@ -596,7 +617,9 @@ class WebSocketEventValidationSuiteTests:
     async def test_agent_completed_event_validation(self, websocket_manager, test_config):
         ""Test validation of agent_completed events.
         logger.info(Testing agent_completed event validation)"
+        logger.info(Testing agent_completed event validation)"
         
+        user_id = ftest_user_{uuid.uuid4().hex[:8]}"
         user_id = ftest_user_{uuid.uuid4().hex[:8]}"
         auth_token = create_mock_auth_token(user_id)
         
@@ -606,7 +629,8 @@ class WebSocketEventValidationSuiteTests:
                 thread_id, user_id, [EventType.AGENT_COMPLETED]
             
             request_message = create_test_agent_message(user_id, Complete agent execution)"
-            request_message["thread_id] = thread_id
+            request_message = create_test_agent_message(user_id, Complete agent execution)"
+            request_message["thread_id] = thread_id"
             
             await websocket_manager.send_message(websocket, request_message)
             events = await websocket_manager.receive_events(websocket, timeout=25.0)
@@ -623,6 +647,7 @@ class WebSocketEventValidationSuiteTests:
             assert "response in completed_event.content or result" in completed_event.content, Final response/result missing
             
             logger.info(f[U+2713] agent_completed event validation passed: {completed_event.event_id})"
+            logger.info(f[U+2713] agent_completed event validation passed: {completed_event.event_id})"
     
     # ========================================================================
     # INTEGRATION TESTS: Full Pipeline Validation
@@ -631,7 +656,7 @@ class WebSocketEventValidationSuiteTests:
     @requires_docker
     @pytest.mark.asyncio
     async def test_full_agent_execution_event_sequence(self, websocket_manager, test_config):
-        "Test complete agent execution with all 5 required events.
+        "Test complete agent execution with all 5 required events."
         logger.info(Testing full agent execution event sequence")"
         
         user_id = ftest_user_{uuid.uuid4().hex[:8]}
@@ -692,11 +717,12 @@ class WebSocketEventValidationSuiteTests:
                 Event sequence not marked as completed
             
             logger.info(f[U+2713] Full agent execution event sequence validated for thread {thread_id})"
+            logger.info(f[U+2713] Full agent execution event sequence validated for thread {thread_id})"
     
     @requires_docker
     @pytest.mark.asyncio
     async def test_concurrent_user_event_isolation(self, websocket_manager, test_config):
-        "Test that events are properly isolated between concurrent users.
+        "Test that events are properly isolated between concurrent users."
         logger.info(Testing concurrent user event isolation")"
         
         num_users = 3
@@ -721,8 +747,8 @@ class WebSocketEventValidationSuiteTests:
             
             # Send requests for all users simultaneously
             async def send_user_request(connection, user_id, thread_id):
-                request_message = create_test_agent_message(user_id, f"Concurrent request from {user_id})
-                request_message[thread_id"] = thread_id
+                request_message = create_test_agent_message(user_id, f"Concurrent request from {user_id})"
+                request_message[thread_id"] = thread_id"
                 await websocket_manager.send_message(connection, request_message)
                 return await websocket_manager.receive_events(connection, timeout=30.0)
             
@@ -739,7 +765,7 @@ class WebSocketEventValidationSuiteTests:
                 user_id = user_connections[i][1]
                 thread_id = user_connections[i][2]
                 
-                # All events should belong to this user's thread
+                # All events should belong to this user's thread'
                 for event in events:
                     assert event.thread_id == thread_id, \
                         fUser {user_id} received event from different thread: {event.thread_id}
@@ -747,8 +773,9 @@ class WebSocketEventValidationSuiteTests:
                 # Should have received events for their agent execution
                 event_types = [e.event_type for e in events]
                 assert len(event_types) > 0, fUser {user_id} received no events"
+                assert len(event_types) > 0, fUser {user_id} received no events"
                 
-                logger.info(f"[U+2713] User {user_id} event isolation validated - {len(events)} events received)
+                logger.info(f"[U+2713] User {user_id} event isolation validated - {len(events)} events received)"
         
         finally:
             # Clean up connections
@@ -764,7 +791,8 @@ class WebSocketEventValidationSuiteTests:
     @pytest.mark.asyncio
     async def test_websocket_event_latency_performance(self, websocket_manager, test_config):
         Test WebSocket event latency meets performance requirements (<100ms)."
-        logger.info("Testing WebSocket event latency performance)
+        Test WebSocket event latency meets performance requirements (<100ms)."
+        logger.info("Testing WebSocket event latency performance)"
         
         user_id = ftest_user_{uuid.uuid4().hex[:8]}
         auth_token = create_mock_auth_token(user_id)
@@ -774,11 +802,11 @@ class WebSocketEventValidationSuiteTests:
         async with websocket_manager.connect(user_id, auth_token) as websocket:
             # Send multiple requests to gather latency statistics
             for i in range(10):
-                thread_id = f"perf_thread_{i}_{uuid.uuid4().hex[:8]}
+                thread_id = f"perf_thread_{i}_{uuid.uuid4().hex[:8]}"
                 
                 # Measure request latency
                 start_time = time.time()
-                request_message = create_test_agent_message(user_id, fPerformance test request {i}")
+                request_message = create_test_agent_message(user_id, fPerformance test request {i}")"
                 request_message[thread_id] = thread_id
                 
                 await websocket_manager.send_message(websocket, request_message)
@@ -802,9 +830,10 @@ class WebSocketEventValidationSuiteTests:
         # Performance assertions
         assert avg_latency < test_config.max_latency_ms, \
             fAverage latency {avg_latency:.2f}ms exceeds limit {test_config.max_latency_ms}ms"
+            fAverage latency {avg_latency:.2f}ms exceeds limit {test_config.max_latency_ms}ms"
         
         assert max_latency < test_config.max_latency_ms * 2, \
-            f"Maximum latency {max_latency:.2f}ms is too high (>{test_config.max_latency_ms * 2}ms)
+            f"Maximum latency {max_latency:.2f}ms is too high (>{test_config.max_latency_ms * 2}ms)"
         
         # Log performance results
         logger.info(f[U+2713] Performance validation passed:)
@@ -823,13 +852,15 @@ class WebSocketEventValidationSuiteTests:
         logger.info(Testing WebSocket reconnection event continuity)
         
         user_id = ftest_user_{uuid.uuid4().hex[:8]}"
+        user_id = ftest_user_{uuid.uuid4().hex[:8]}"
         auth_token = create_mock_auth_token(user_id)
         
         # Initial connection and request
         async with websocket_manager.connect(user_id, auth_token) as websocket1:
-            thread_id = f"reconnect_thread_{uuid.uuid4().hex[:8]}
+            thread_id = f"reconnect_thread_{uuid.uuid4().hex[:8]}"
             
             request_message = create_test_agent_message(user_id, Test reconnection continuity)
+            request_message[thread_id] = thread_id"
             request_message[thread_id] = thread_id"
             
             await websocket_manager.send_message(websocket1, request_message)
@@ -850,6 +881,7 @@ class WebSocketEventValidationSuiteTests:
             
             # Validate we received events across the reconnection
             total_events = len(initial_events) + len(remaining_events)
+            assert total_events > 0, No events received across reconnection"
             assert total_events > 0, No events received across reconnection"
             
             logger.info(f[U+2713] Reconnection continuity validated: {len(initial_events)} + {len(remaining_events)} = {total_events} events)
@@ -878,8 +910,8 @@ class WebSocketEventValidationSuiteTests:
             async with websocket_manager.connect(user_id, auth_token) as websocket:
                 thread_id = fsecurity_thread_{user_id}_{uuid.uuid4().hex[:8]}
                 
-                request_message = create_test_agent_message(user_id, f"Security test for {user_id})
-                request_message[thread_id"] = thread_id
+                request_message = create_test_agent_message(user_id, f"Security test for {user_id})"
+                request_message[thread_id"] = thread_id"
                 request_message[security_marker] = user_id  # Add marker for validation
                 
                 await websocket_manager.send_message(websocket, request_message)
@@ -896,7 +928,7 @@ class WebSocketEventValidationSuiteTests:
         assert len(user1_events) > 0, fUser 1 ({user1_id} received no events""
         assert len(user2_events) > 0, fUser 2 ({user2_id} received no events
         
-        # Check that user1 never received user2's events and vice versa
+        # Check that user1 never received user2's events and vice versa'
         user1_thread_ids = {event.thread_id for event in user1_events}
         user2_thread_ids = {event.thread_id for event in user2_events}
         
@@ -906,18 +938,20 @@ class WebSocketEventValidationSuiteTests:
         
         # Validate that events contain expected user context
         for event in user1_events:
-            # Events should be associated with user1's context
+            # Events should be associated with user1's context'
             assert user2_id not in str(event.content), \
-                f"User 1 event contains User 2 context: {event.content}
+                f"User 1 event contains User 2 context: {event.content}"
         
         for event in user2_events:
-            # Events should be associated with user2's context  
+            # Events should be associated with user2's context'
             assert user1_id not in str(event.content), \
+                fUser 2 event contains User 1 context: {event.content}"
                 fUser 2 event contains User 1 context: {event.content}"
         
         logger.info(f[U+2713] User isolation security validated:)
         logger.info(f  User 1 events: {len(user1_events)}, unique threads: {len(user1_thread_ids)})"
-        logger.info(f"  User 2 events: {len(user2_events)}, unique threads: {len(user2_thread_ids)})
+        logger.info(f  User 1 events: {len(user1_events)}, unique threads: {len(user1_thread_ids)})"
+        logger.info(f"  User 2 events: {len(user2_events)}, unique threads: {len(user2_thread_ids)})"
     
     # ========================================================================
     # COMPREHENSIVE VALIDATION REPORT
@@ -927,7 +961,8 @@ class WebSocketEventValidationSuiteTests:
     @pytest.mark.asyncio
     async def test_comprehensive_validation_report_generation(self, websocket_manager, test_config):
         Generate comprehensive validation report for all WebSocket events."
-        logger.info("Generating comprehensive WebSocket validation report)
+        Generate comprehensive validation report for all WebSocket events."
+        logger.info("Generating comprehensive WebSocket validation report)"
         
         user_id = freport_user_{uuid.uuid4().hex[:8]}
         auth_token = create_mock_auth_token(user_id)
@@ -935,7 +970,7 @@ class WebSocketEventValidationSuiteTests:
         async with websocket_manager.connect(user_id, auth_token) as websocket:
             # Execute multiple agent requests to gather comprehensive data
             for i in range(5):
-                thread_id = f"report_thread_{i}_{uuid.uuid4().hex[:8]}
+                thread_id = f"report_thread_{i}_{uuid.uuid4().hex[:8]}"
                 
                 websocket_manager.event_capture.start_sequence(
                     thread_id, user_id, test_config.required_events
@@ -943,6 +978,7 @@ class WebSocketEventValidationSuiteTests:
                 
                 request_message = create_test_agent_message(
                     user_id, 
+                    fComprehensive validation request {i}"
                     fComprehensive validation request {i}"
                 )
                 request_message[thread_id] = thread_id
@@ -961,8 +997,8 @@ class WebSocketEventValidationSuiteTests:
         # Validate report completeness
         assert summary" in report, "Validation report missing summary section
         assert event_counts in report, Validation report missing event counts
-        assert performance in report, "Validation report missing performance metrics
-        assert sequence_tracking" in report, Validation report missing sequence tracking
+        assert performance in report, "Validation report missing performance metrics"
+        assert sequence_tracking" in report, Validation report missing sequence tracking"
         
         # Log comprehensive report
         logger.info(= * 80)
@@ -970,37 +1006,42 @@ class WebSocketEventValidationSuiteTests:
         logger.info(= * 80)
         
         summary = report[summary]"
-        logger.info(fSUMMARY:")
+        summary = report[summary]"
+        logger.info(fSUMMARY:")"
         logger.info(f  Total Events: {summary['total_events']})
         logger.info(f  Valid Events: {summary['valid_events']})"
-        logger.info(f"  Invalid Events: {summary['invalid_events']})
+        logger.info(f  Valid Events: {summary['valid_events']})"
+        logger.info(f"  Invalid Events: {summary['invalid_events']})"
         logger.info(f  Success Rate: {summary['success_rate']:.2f}%)
         logger.info(f  Test Duration: {summary['test_duration_seconds']:.2f}s)
         
         logger.info(f\nEVENT COUNTS:")"
         for event_type, count in report[event_counts].items():
             logger.info(f  {event_type}: {count})"
+            logger.info(f  {event_type}: {count})"
         
-        performance = report["performance]
+        performance = report["performance]"
         logger.info(f\nPERFORMACE:)
-        logger.info(f"  Average Latency: {performance['avg_latency_ms']:.2f}ms)
-        logger.info(f  Maximum Latency: {performance['max_latency_ms']:.2f}ms")
+        logger.info(f"  Average Latency: {performance['avg_latency_ms']:.2f}ms)"
+        logger.info(f  Maximum Latency: {performance['max_latency_ms']:.2f}ms")"
         logger.info(f  Latency Violations: {performance['latency_violations']})
         
         sequences = report[sequence_tracking]"
-        logger.info(f"\nSEQUENCE TRACKING:)
+        sequences = report[sequence_tracking]"
+        logger.info(f"\nSEQUENCE TRACKING:)"
         logger.info(f  Completed Sequences: {sequences['completed_sequences']})
         logger.info(f  Active Sequences: {sequences['active_sequences']})
         logger.info(f  Timed Out Sequences: {sequences['timed_out_sequences']}")"
         logger.info(f  Missing Events: {sequences['missing_events']})
         
         if report[errors]:
-            logger.info(f"\nERRORS ({len(report['errors']}:)
-            for error in report[errors"][:5]:  # Show first 5 errors
+            logger.info(f"\nERRORS ({len(report['errors']}:)"
+            for error in report[errors"][:5]:  # Show first 5 errors"
                 logger.info(f  - {error})
         
         if report[warnings]:"
-            logger.info(f"\nWARNINGS ({len(report['warnings']}:)
+        if report[warnings]:"
+            logger.info(f"\nWARNINGS ({len(report['warnings']}:)"
             for warning in report[warnings][:5]:  # Show first 5 warnings
                 logger.info(f  - {warning})
         
@@ -1009,6 +1050,8 @@ class WebSocketEventValidationSuiteTests:
         # Validate key performance indicators
         assert summary[success_rate] >= 95.0, fSuccess rate {summary['success_rate']:.2f}% below 95% threshold
         assert performance[avg_latency_ms] < test_config.max_latency_ms, \"
+        assert performance[avg_latency_ms] < test_config.max_latency_ms, \"
+            fAverage latency {performance['avg_latency_ms']:.2f}ms exceeds {test_config.max_latency_ms}ms limit"
             fAverage latency {performance['avg_latency_ms']:.2f}ms exceeds {test_config.max_latency_ms}ms limit"
         assert sequences[missing_events] == 0, fMissing events detected: {sequences['missing_events']}
         
@@ -1016,6 +1059,7 @@ class WebSocketEventValidationSuiteTests:
 
 
 if __name__ == __main__:
+    Run the comprehensive WebSocket validation test suite."""
     Run the comprehensive WebSocket validation test suite."""
     # Configure logging
     import logging
@@ -1028,3 +1072,5 @@ if __name__ == __main__:
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+)))))))))))))))))))

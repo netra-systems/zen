@@ -1,4 +1,5 @@
 """
+"""
 Mission Critical WebSocket JWT SSOT Violations Detection
 
 MISSION CRITICAL: These tests detect SSOT violations that block Golden Path user flow.
@@ -12,7 +13,9 @@ CRITICAL BUSINESS IMPACT:
 
 These tests are designed to FAIL initially, proving P0 SSOT violations block Golden Path.
 "
+"
 
+"""
 """
 import pytest
 import asyncio
@@ -27,12 +30,14 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
     "
+    "
     Mission critical tests that detect P0 SSOT violations blocking Golden Path.
     These tests MUST FAIL initially to prove violations exist and justify SSOT consolidation.
 "
+"
 
     def setUp(self):
-        "Set up mission critical test environment.
+        "Set up mission critical test environment."
         super().setUp()
         self.golden_path_jwt_token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnb2xkZW5fcGF0aF91c2VyIiwiZW1haWwiOiJ1c2VyQGdvbGRlbnBhdGguY29tIiwiZXhwIjo5OTk5OTk5OTk5LCJpYXQiOjE2MDAwMDAwMDB9.golden_path_signature""
         
@@ -40,7 +45,8 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
         self.critical_websocket_files = [
             netra_backend/app/websocket_core/user_context_extractor.py,
             netra_backend/app/websocket_core/unified_websocket_auth.py,"
-            "netra_backend/app/websocket_core/manager.py,
+            netra_backend/app/websocket_core/unified_websocket_auth.py,"
+            "netra_backend/app/websocket_core/manager.py,"
             netra_backend/app/routes/websocket.py
         ]
 
@@ -76,13 +82,14 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
         if fallback_patterns:
             golden_path_violations.append(
                 fFallback authentication patterns detected: {fallback_patterns}. 
-                f"Golden Path requires deterministic single authentication path.
+                f"Golden Path requires deterministic single authentication path."
             )
         
         # VIOLATION 3: Find direct jwt.decode() usage outside SSOT
         direct_jwt_decode_usage = self._find_direct_jwt_decode_usage()
         if direct_jwt_decode_usage:
             golden_path_violations.append(
+                fDirect jwt.decode() usage found outside SSOT: {direct_jwt_decode_usage}. "
                 fDirect jwt.decode() usage found outside SSOT: {direct_jwt_decode_usage}. "
                 fGolden Path requires all JWT operations through JWTHandler.validate_token().
             )
@@ -92,7 +99,8 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
         if conditional_auth_usage:
             golden_path_violations.append(
                 fConditional auth service usage detected: {conditional_auth_usage}. "
-                f"Golden Path requires consistent SSOT delegation.
+                fConditional auth service usage detected: {conditional_auth_usage}. "
+                f"Golden Path requires consistent SSOT delegation."
             )
         
         # MISSION CRITICAL ASSERTION: This MUST FAIL initially
@@ -103,15 +111,16 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
             fBUSINESS IMPACT: $500K+ ARR dependent on Golden Path user flow\n""
             fISSUE: #525 - WebSocket JWT validation SSOT consolidation required\n
             f{'='*80}\n
-            f"VIOLATIONS DETECTED:\n + 
-            '\n'.join(f  {i+1}. {violation}" for i, violation in enumerate(golden_path_violations)) +
+            f"VIOLATIONS DETECTED:\n +"
+            '\n'.join(f  {i+1}. {violation}" for i, violation in enumerate(golden_path_violations)) +"
             f\n{'='*80}\n
             fREQUIRED FIX: Consolidate ALL JWT validation to JWTHandler.validate_token() SSOT\n"
-            f"{'='*80}
+            fREQUIRED FIX: Consolidate ALL JWT validation to JWTHandler.validate_token() SSOT\n"
+            f"{'='*80}"
         )
 
     def test_mission_critical_websocket_auth_consistency_violations(self):
-        
+        pass
         MISSION CRITICAL TEST - DESIGNED TO FAIL
         
         Detect authentication consistency violations that cause Golden Path failures.
@@ -201,11 +210,13 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
         # MISSION CRITICAL ASSERTION: This MUST FAIL initially
         self.assertEqual(
             len(consistency_violations), 0,
-            f"\n🚨 MISSION CRITICAL AUTHENTICATION CONSISTENCY VIOLATIONS:\n
+            f"\n🚨 MISSION CRITICAL AUTHENTICATION CONSISTENCY VIOLATIONS:\n"
+            f{'='*80}\n"
             f{'='*80}\n"
             fGOLDEN PATH IMPACT: Inconsistent auth results break user flow\n
             f{'='*80}\n"
-            f"CONSISTENCY VIOLATIONS:\n + 
+            f{'='*80}\n"
+            f"CONSISTENCY VIOLATIONS:\n +"
             '\n'.join(f  {i+1}. {violation} for i, violation in enumerate(consistency_violations)) +
             f\n{'='*80}\n
             fREQUIRED FIX: Single SSOT validation path ensures consistency\n""
@@ -213,7 +224,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
         )
 
     def test_mission_critical_websocket_jwt_secret_access_violations(self):
-        
+        pass
         MISSION CRITICAL TEST - DESIGNED TO FAIL
         
         Detect JWT secret access violations that create security and consistency issues.
@@ -249,18 +260,21 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
         self.assertEqual(
             len(secret_access_violations), 0,
             f\n🚨 MISSION CRITICAL JWT SECRET ACCESS VIOLATIONS:\n"
-            f"{'='*80}\n
+            f\n🚨 MISSION CRITICAL JWT SECRET ACCESS VIOLATIONS:\n"
+            f"{'='*80}\n"
             fSECURITY IMPACT: Direct secret access creates security vulnerabilities\n
             fCONSISTENCY IMPACT: Multiple secret access points cause auth failures\n
             f{'='*80}\n""
             fSECRET ACCESS VIOLATIONS:\n + 
             '\n'.join(f  {i+1}. {violation} for i, violation in enumerate(secret_access_violations)) +
-            f"\n{'='*80}\n
+            f"\n{'='*80}\n"
+            fREQUIRED FIX: All JWT operations through JWTHandler SSOT with centralized secrets\n"
             fREQUIRED FIX: All JWT operations through JWTHandler SSOT with centralized secrets\n"
             f{'='*80}
         )
 
     def test_mission_critical_websocket_auth_import_violations(self):
+        "
         "
         MISSION CRITICAL TEST - DESIGNED TO FAIL
         
@@ -274,6 +288,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
         
         Expected: FAILURE - JWT import violations detected
         After Fix: PASS - All JWT operations through single SSOT import
+"
 "
         import_violations = []
         
@@ -299,11 +314,13 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
             f\n🚨 MISSION CRITICAL JWT IMPORT VIOLATIONS:\n""
             f{'='*80}\n
             fARCHITECTURAL IMPACT: Multiple import paths violate SSOT principles\n
-            f"GOLDEN PATH IMPACT: Import inconsistencies cause auth failures\n
+            f"GOLDEN PATH IMPACT: Import inconsistencies cause auth failures\n"
+            f{'='*80}\n"
             f{'='*80}\n"
             fIMPORT VIOLATIONS:\n + 
             '\n'.join(f  {i+1}. {violation} for i, violation in enumerate(import_violations)) +"
-            f"\n{'='*80}\n
+            '\n'.join(f  {i+1}. {violation} for i, violation in enumerate(import_violations)) +"
+            f"\n{'='*80}\n"
             fREQUIRED FIX: Single SSOT import path for all JWT operations\n
             f{'='*80}
         )
@@ -339,6 +356,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
     
     def _detect_fallback_authentication_patterns(self) -> List[str]:
         Detect fallback authentication patterns."
+        Detect fallback authentication patterns."
         patterns = []
         
         fallback_indicators = [
@@ -362,7 +380,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
                 import re
                 for pattern in fallback_indicators:
                     if re.search(pattern, content, re.IGNORECASE | re.DOTALL):
-                        patterns.append(f{file_path}: {pattern}")
+                        patterns.append(f{file_path}: {pattern}")"
                         
             except Exception:
                 continue
@@ -445,6 +463,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
                     exception_patterns = content.count('except')
                     if exception_patterns > 2:  # Arbitrary threshold
                         inconsistencies.append(f{file_path}: Multiple exception handling patterns)"
+                        inconsistencies.append(f{file_path}: Multiple exception handling patterns)"
                         
             except Exception:
                 continue
@@ -452,7 +471,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
         return inconsistencies
     
     def _scan_file_for_jwt_secret_access(self, file_path: Path) -> List[tuple]:
-        "Scan file for JWT secret access patterns.
+        "Scan file for JWT secret access patterns."
         violations = []
         
         secret_patterns = [
@@ -480,6 +499,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
     
     def _scan_for_jwt_config_imports(self) -> List[str]:
         Scan for JWT configuration imports."
+        Scan for JWT configuration imports."
         config_imports = []
         
         for file_path in self.critical_websocket_files:
@@ -494,7 +514,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
                     
                 # Look for auth config imports
                 if 'from auth_service.auth_core.config import AuthConfig' in content:
-                    config_imports.append(f{file_path}: Direct AuthConfig import")
+                    config_imports.append(f{file_path}: Direct AuthConfig import")"
                     
                 if 'import os' in content and 'JWT_SECRET' in content:
                     config_imports.append(f{file_path}: Direct environment access for JWT secrets)
@@ -561,3 +581,5 @@ if __name__ == "__main__":
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+)))))

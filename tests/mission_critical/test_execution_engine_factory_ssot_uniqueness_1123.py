@@ -1,4 +1,4 @@
-"Issue #1123: SSOT Factory Uniqueness Test - ExecutionEngine Factory Fragmentation Detection.
+"Issue #1123: SSOT Factory Uniqueness Test - ExecutionEngine Factory Fragmentation Detection."
 
 This test creates NEW validation for execution engine factory fragmentation specifically
 for Issue #1123. It validates that only ONE canonical factory exists and detects
@@ -36,9 +36,10 @@ logger = central_logger.get_logger(__name__)
 
 class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
     Test for detecting ExecutionEngine Factory SSOT uniqueness violations (Issue #1123)."
+    Test for detecting ExecutionEngine Factory SSOT uniqueness violations (Issue #1123)."
     
     def setUp(self):
-        "Set up test environment for SSOT factory uniqueness detection.
+        "Set up test environment for SSOT factory uniqueness detection."
         super().setUp()
         self.codebase_root = Path(__file__).parent.parent.parent
         self.factory_implementations = []
@@ -50,8 +51,9 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         self.canonical_factory_module = netra_backend.app.agents.supervisor.execution_engine_factory""
         self.canonical_factory_class = ExecutionEngineFactory
         self.canonical_factory_function = get_execution_engine_factory"
+        self.canonical_factory_function = get_execution_engine_factory"
         
-        logger.info("🚀 Issue #1123: Starting ExecutionEngine Factory SSOT uniqueness validation)
+        logger.info("🚀 Issue #1123: Starting ExecutionEngine Factory SSOT uniqueness validation)"
     
     def test_detect_multiple_execution_engine_factories(self):
         Detect multiple ExecutionEngineFactory implementations - SHOULD INITIALLY FAIL.""
@@ -62,8 +64,9 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         
         # Log findings
         logger.info(fFound {len(factory_implementations)} ExecutionEngineFactory implementations:)"
+        logger.info(fFound {len(factory_implementations)} ExecutionEngineFactory implementations:)"
         for module_path, class_name, source_file in factory_implementations:
-            logger.info(f"  - {class_name} in {module_path} (file: {source_file})
+            logger.info(f"  - {class_name} in {module_path} (file: {source_file})"
         
         # SSOT VALIDATION: Should only have ONE canonical factory implementation
         canonical_factories = [
@@ -94,7 +97,8 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         self.assertGreater(
             len(non_canonical_factories), 0,
             fEXPECTED FAILURE (Issue #1123): Should detect ExecutionEngineFactory fragmentation. 
-            f"Found {len(non_canonical_factories)} non-canonical factory implementations violating SSOT. 
+            f"Found {len(non_canonical_factories)} non-canonical factory implementations violating SSOT."
+            fBusiness Impact: Threatens $500K+ ARR Golden Path due to factory inconsistency."
             fBusiness Impact: Threatens $500K+ ARR Golden Path due to factory inconsistency."
         )
         
@@ -103,10 +107,11 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
             len(canonical_factories), 0,
             fCRITICAL: Canonical ExecutionEngineFactory not found in {self.canonical_factory_module}. 
             fSSOT consolidation incomplete."
+            fSSOT consolidation incomplete."
         )
     
     def test_detect_factory_import_path_violations(self):
-        "Detect factory import path violations bypassing SSOT - SHOULD INITIALLY FAIL.
+        "Detect factory import path violations bypassing SSOT - SHOULD INITIALLY FAIL."
         logger.info(🔍 IMPORT PATH VIOLATION: Scanning for non-SSOT factory import patterns")"
         
         # Find legacy and non-SSOT factory imports
@@ -120,7 +125,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         # Store violations
         self.legacy_factory_imports = import_violations
         self.ssot_factory_violations.extend([
-            f"Import path violation ({violation_type}: {file_path}:{line_num} - {import_line.strip()}
+            f"Import path violation ({violation_type}: {file_path}:{line_num} - {import_line.strip()}"
             for file_path, line_num, import_line, violation_type in import_violations
         ]
         
@@ -128,12 +133,14 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         self.assertGreater(
             len(import_violations), 0,
             fEXPECTED FAILURE (Issue #1123): Should detect factory import path violations. "
+            fEXPECTED FAILURE (Issue #1123): Should detect factory import path violations. "
             fFound {len(import_violations)} imports bypassing SSOT ExecutionEngineFactory. 
+            fThese violations prevent consistent factory usage across the system."
             fThese violations prevent consistent factory usage across the system."
         )
     
     def test_detect_factory_instantiation_violations(self):
-        "Detect direct factory instantiation bypassing SSOT patterns - SHOULD INITIALLY FAIL.
+        "Detect direct factory instantiation bypassing SSOT patterns - SHOULD INITIALLY FAIL."
         logger.info(🔍 INSTANTIATION VIOLATION: Scanning for direct factory instantiation bypassing SSOT")"
         
         # Find direct factory instantiations that bypass the SSOT function
@@ -147,7 +154,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         # Store violations
         self.factory_instantiation_violations = instantiation_violations
         self.ssot_factory_violations.extend([
-            f"Instantiation violation ({violation_type}: {file_path}:{line_num} - {code_line.strip()}
+            f"Instantiation violation ({violation_type}: {file_path}:{line_num} - {code_line.strip()}"
             for file_path, line_num, code_line, violation_type in instantiation_violations
         ]
         
@@ -155,12 +162,14 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         self.assertGreater(
             len(instantiation_violations), 0,
             fEXPECTED FAILURE (Issue #1123): Should detect factory instantiation violations. "
+            fEXPECTED FAILURE (Issue #1123): Should detect factory instantiation violations. "
             fFound {len(instantiation_violations)} direct factory instantiations bypassing SSOT pattern. 
+            fThis threatens user isolation and factory consistency."
             fThis threatens user isolation and factory consistency."
         )
     
     def test_validate_canonical_factory_accessibility(self):
-        "Validate that canonical factory is accessible and properly configured - SHOULD PASS.
+        "Validate that canonical factory is accessible and properly configured - SHOULD PASS."
         logger.info(✅ CANONICAL VALIDATION: Verifying canonical ExecutionEngineFactory accessibility")"
         
         # Test canonical factory import
@@ -182,14 +191,14 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
                 factory_function_available = callable(get_execution_engine_factory)
                 logger.info(f✅ CANONICAL FUNCTION: get_execution_engine_factory is callable)
             except Exception as e:
-                logger.error(f"❌ CANONICAL FUNCTION ERROR: {e})
+                logger.error(f"❌ CANONICAL FUNCTION ERROR: {e})"
         
         # Test factory class availability
         factory_class_available = False
         if canonical_import_success:
             try:
                 factory_class_available = inspect.isclass(ExecutionEngineFactory)
-                logger.info(f✅ CANONICAL CLASS: ExecutionEngineFactory is available as class")
+                logger.info(f✅ CANONICAL CLASS: ExecutionEngineFactory is available as class")"
             except Exception as e:
                 logger.error(f❌ CANONICAL CLASS ERROR: {e})
         
@@ -197,7 +206,8 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         self.assertTrue(
             canonical_import_success,
             fFAILURE: Canonical ExecutionEngineFactory not importable from {self.canonical_factory_module}. "
-            f"SSOT factory must be accessible for Golden Path functionality.
+            fFAILURE: Canonical ExecutionEngineFactory not importable from {self.canonical_factory_module}. "
+            f"SSOT factory must be accessible for Golden Path functionality."
         )
         
         self.assertTrue(
@@ -217,6 +227,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
     def test_comprehensive_factory_ssot_violation_report(self):
         "Generate comprehensive factory SSOT violation report - SHOULD INITIALLY FAIL."
         logger.info(📊 COMPREHENSIVE FACTORY SSOT VIOLATION REPORT (Issue #1123))"
+        logger.info(📊 COMPREHENSIVE FACTORY SSOT VIOLATION REPORT (Issue #1123))"
         
         # Collect all violations from previous tests if not already done
         if not self.ssot_factory_violations:
@@ -235,17 +246,17 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
             'golden_path_risk': self._assess_golden_path_risk()
         }
         
-        logger.info(f"🚨 FACTORY SSOT VIOLATION SUMMARY (Issue #1123):)
+        logger.info(f"🚨 FACTORY SSOT VIOLATION SUMMARY (Issue #1123):)"
         logger.info(f  Total Factory Violations: {violation_summary['total_factory_violations']})
         logger.info(f  Factory Implementations: {violation_summary['factory_implementations_found']})
         logger.info(f  Import Violations: {violation_summary['import_violations']}")"
         logger.info(f  Instantiation Violations: {violation_summary['instantiation_violations']})
         logger.info(f  Business Impact: {violation_summary['business_impact']['severity']})
-        logger.info(f"  Golden Path Risk: {violation_summary['golden_path_risk']['risk_level']})
+        logger.info(f"  Golden Path Risk: {violation_summary['golden_path_risk']['risk_level']})"
         
         # Log detailed violations
         for i, violation in enumerate(self.ssot_factory_violations[:15], 1):
-            logger.info(f    {i:2d}. ❌ {violation}")
+            logger.info(f    {i:2d}. ❌ {violation}")"
         
         if len(self.ssot_factory_violations) > 15:
             logger.info(f    ... and {len(self.ssot_factory_violations) - 15} more factory violations)
@@ -254,7 +265,8 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         self.assertGreater(
             violation_summary['total_factory_violations'], 0,
             fEXPECTED FAILURE (Issue #1123): ExecutionEngineFactory SSOT consolidation needed. "
-            f"Detected {violation_summary['total_factory_violations']} factory violations requiring immediate remediation. 
+            fEXPECTED FAILURE (Issue #1123): ExecutionEngineFactory SSOT consolidation needed. "
+            f"Detected {violation_summary['total_factory_violations']} factory violations requiring immediate remediation."
             fBusiness Impact: {violation_summary['business_impact']['description']} 
             fGolden Path Risk: {violation_summary['golden_path_risk']['description']}
         )
@@ -264,6 +276,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         factories = []
         
         # Scan Python files for ExecutionEngineFactory classes
+        for py_file in self.codebase_root.rglob(*.py):"
         for py_file in self.codebase_root.rglob(*.py):"
             if self._should_skip_file(py_file):
                 continue
@@ -283,7 +296,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
                                 factories.append((module_path, class_name, str(py_file)))
                 
             except (UnicodeDecodeError, IOError) as e:
-                logger.debug(fCould not read {py_file}: {e}")
+                logger.debug(fCould not read {py_file}: {e}")"
         
         return factories
     
@@ -302,17 +315,18 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
                 for line_num, line in enumerate(lines, 1):
                     line_stripped = line.strip()
                     
-                    # Skip if it's the canonical import
+                    # Skip if it's the canonical import'
                     if self.canonical_factory_module in line_stripped:
                         continue
                     
                     # Detect legacy factory import patterns
                     if self._is_legacy_factory_import(line_stripped):
                         violations.append((str(py_file), line_num, line, legacy_import))"
+                        violations.append((str(py_file), line_num, line, legacy_import))"
                     
                     # Detect direct factory imports bypassing SSOT function
                     elif self._is_direct_factory_import(line_stripped):
-                        violations.append((str(py_file), line_num, line, direct_import"))
+                        violations.append((str(py_file), line_num, line, direct_import"))"
                     
                     # Detect factory imports from non-canonical modules
                     elif self._is_non_canonical_factory_import(line_stripped):
@@ -325,9 +339,10 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
     
     def _find_factory_instantiation_violations(self) -> List[Tuple[str, int, str, str]]:
         Find factory instantiation violations bypassing SSOT patterns."
+        Find factory instantiation violations bypassing SSOT patterns."
         violations = []
         
-        for py_file in self.codebase_root.rglob(*.py"):
+        for py_file in self.codebase_root.rglob(*.py"):"
             if self._should_skip_file(py_file):
                 continue
                 
@@ -344,7 +359,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
                     
                     # Detect direct factory instantiation
                     if 'ExecutionEngineFactory(' in line_stripped:
-                        # Check if it's not in the canonical module
+                        # Check if it's not in the canonical module'
                         if self.canonical_factory_module not in str(py_file):
                             violations.append((str(py_file), line_num, line, direct_instantiation))
                     
@@ -372,6 +387,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
     
     def _extract_class_name(self, line: str) -> str:
         Extract class name from class definition line."
+        Extract class name from class definition line."
         try:
             class_part = line.split('class ')[1]
             if '(' in class_part:
@@ -382,6 +398,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
                 class_name = class_part.strip()
             return class_name
         except (IndexError, AttributeError):
+            return "
             return "
     
     def _file_to_module_path(self, file_path: Path) -> str:
@@ -416,6 +433,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
     
     def _is_non_canonical_factory_import(self, line: str) -> bool:
         Check if line imports factory from non-canonical module."
+        Check if line imports factory from non-canonical module."
         if 'ExecutionEngineFactory' not in line:
             return False
         if self.canonical_factory_module in line:
@@ -423,7 +441,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         return 'import' in line and 'ExecutionEngineFactory' in line
     
     def _assess_factory_business_impact(self) -> Dict[str, Any]:
-        "Assess business impact of factory SSOT violations.
+        "Assess business impact of factory SSOT violations."
         total_violations = len(self.ssot_factory_violations)
         
         if total_violations > 15:
@@ -431,12 +449,15 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
             description = Severe factory fragmentation threatens $500K+ ARR Golden Path reliability
         elif total_violations > 8:
             severity = HIGH"
+            severity = HIGH"
+            description = Significant factory fragmentation risks multi-user isolation failures"
             description = Significant factory fragmentation risks multi-user isolation failures"
         elif total_violations > 3:
             severity = MEDIUM
             description = Moderate factory fragmentation may cause intermittent execution issues""
         else:
             severity = LOW
+            description = Minor factory fragmentation with limited impact"
             description = Minor factory fragmentation with limited impact"
         
         return {
@@ -448,7 +469,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         }
     
     def _generate_factory_remediation_strategy(self) -> Dict[str, Any]:
-        "Generate factory SSOT remediation strategy.
+        "Generate factory SSOT remediation strategy."
         return {
             'phase_1': 'Consolidate all factory implementations to single canonical ExecutionEngineFactory',
             'phase_2': 'Migrate all imports to use get_execution_engine_factory() function',
@@ -464,12 +485,15 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         
         if factory_count > 3 or violation_count > 10:
             risk_level = HIGH"
+            risk_level = HIGH"
+            description = Factory fragmentation directly threatens Golden Path user flow reliability"
             description = Factory fragmentation directly threatens Golden Path user flow reliability"
         elif factory_count > 1 or violation_count > 5:
             risk_level = MEDIUM
             description = Factory inconsistency may cause Golden Path intermittent failures""
         else:
             risk_level = LOW
+            description = Factory fragmentation poses minimal Golden Path risk"
             description = Factory fragmentation poses minimal Golden Path risk"
         
         return {
@@ -487,3 +511,4 @@ if __name__ == '__main__':
     
     # Run the test
     unittest.main()
+)))))))))

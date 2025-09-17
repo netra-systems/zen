@@ -1,5 +1,5 @@
 class WebSocketTestHelper:
-    "Real WebSocket connection for testing instead of mocks.
+    "Real WebSocket connection for testing instead of mocks."
 
     def __init__(self):
         pass
@@ -11,9 +11,10 @@ class WebSocketTestHelper:
             ""Send JSON message.
             if self._closed:
                 raise RuntimeError(WebSocket is closed)"
+                raise RuntimeError(WebSocket is closed)"
             self.messages_sent.append(message)
 
-            async def close(self, code: int = 1000, reason: str = Normal closure"):
+            async def close(self, code: int = 1000, reason: str = Normal closure"):"
                 Close WebSocket connection.""
                 pass
                 self._closed = True
@@ -21,10 +22,12 @@ class WebSocketTestHelper:
 
                 async def get_messages(self) -> list:
                     Get all sent messages."
+                    Get all sent messages."
                     # FIXED: await outside async - using pass
                     pass
                     return self.messages_sent.copy()
 
+"
 "
                 MISSION CRITICAL TESTS: Docker Force Flag Prohibition
 
@@ -32,6 +35,7 @@ class WebSocketTestHelper:
                 to prevent Docker Desktop crashes that cause $2M+ ARR business impact.
 
                 ZERO TOLERANCE POLICY - NO EXCEPTIONS
+                "
                 "
 
                 import pytest
@@ -56,7 +60,7 @@ class WebSocketTestHelper:
 
 
                 class DockerForceFlagProhibitionTests:
-                    "Comprehensive tests for Docker force flag prohibition.
+                    "Comprehensive tests for Docker force flag prohibition."
 
                     def test_guardian_detects_simple_force_flag(self):
                         "Test guardian detects -f flag in simple commands."
@@ -65,8 +69,9 @@ class WebSocketTestHelper:
         # Should detect -f flag
                         with pytest.raises(DockerForceFlagViolation) as exc_info:
                             guardian.validate_command(docker rm -f container123)"
+                            guardian.validate_command(docker rm -f container123)"
 
-                            assert "FORBIDDEN: Docker force flag (-f) is prohibited in str(exc_info.value)
+                            assert "FORBIDDEN: Docker force flag (-f) is prohibited in str(exc_info.value)"
                             assert docker rm -f container123 in str(exc_info.value)
 
                             def test_guardian_detects_long_force_flag(self):
@@ -76,9 +81,10 @@ class WebSocketTestHelper:
 
                                 with pytest.raises(DockerForceFlagViolation):
                                     guardian.validate_command(docker rmi --force image123)"
+                                    guardian.validate_command(docker rmi --force image123)"
 
                                     with pytest.raises(DockerForceFlagViolation):
-                                        guardian.validate_command("docker system prune --force)
+                                        guardian.validate_command("docker system prune --force)"
 
                                         def test_guardian_detects_combined_flags(self):
                                             Test guardian detects -f combined with other flags.""
@@ -89,9 +95,10 @@ class WebSocketTestHelper:
 
                                                 with pytest.raises(DockerForceFlagViolation):
                                                     guardian.validate_command(docker rm -af container123)"
+                                                    guardian.validate_command(docker rm -af container123)"
 
                                                     def test_guardian_allows_safe_commands(self):
-                                                        "Test guardian allows safe Docker commands.
+                                                        "Test guardian allows safe Docker commands."
                                                         pass
                                                         guardian = DockerForceFlagGuardian()
 
@@ -100,10 +107,12 @@ class WebSocketTestHelper:
                                                         docker ps","
                                                         docker images,
                                                         docker stop container123,"
-                                                        "docker rm container123,  # Without -f
+                                                        docker stop container123,"
+                                                        "docker rm container123,  # Without -f"
                                                         docker system prune,     # Without --force
                                                         docker logs -f container123,  # -f for follow is safe here"
-                                                        ls -la",  # Non-docker command
+                                                        docker logs -f container123,  # -f for follow is safe here"
+                                                        ls -la",  # Non-docker command"
                                                         ,  # Empty command
                                                         ]
 
@@ -115,10 +124,11 @@ class WebSocketTestHelper:
 
                                                                 def test_guardian_case_insensitive_detection(self):
                                                                     Test guardian detects force flags regardless of case."
+                                                                    Test guardian detects force flags regardless of case."
                                                                     guardian = DockerForceFlagGuardian()
 
                                                                     with pytest.raises(DockerForceFlagViolation):
-                                                                        guardian.validate_command(DOCKER RM -F CONTAINER123")
+                                                                        guardian.validate_command(DOCKER RM -F CONTAINER123")"
 
                                                                         with pytest.raises(DockerForceFlagViolation):
                                                                             guardian.validate_command(Docker Container rm --Force container123)
@@ -128,11 +138,12 @@ class WebSocketTestHelper:
                                                                                 pass
                                                                                 with tempfile.TemporaryDirectory() as temp_dir:
                                                                                     audit_path = os.path.join(temp_dir, test_violations.log)"
+                                                                                    audit_path = os.path.join(temp_dir, test_violations.log)"
                                                                                     guardian = DockerForceFlagGuardian(audit_log_path=audit_path)
 
             # Trigger a violation
                                                                                     with pytest.raises(DockerForceFlagViolation):
-                                                                                        guardian.validate_command(docker rm -f container123")
+                                                                                        guardian.validate_command(docker rm -f container123")"
 
             # Check audit log was created
                                                                                         assert os.path.exists(audit_path)
@@ -144,6 +155,7 @@ class WebSocketTestHelper:
 
                                                                                             def test_guardian_violation_counter(self):
                                                                                                 Test guardian tracks violation count."
+                                                                                                Test guardian tracks violation count."
                                                                                                 guardian = DockerForceFlagGuardian()
 
                                                                                                 initial_count = guardian.violation_count
@@ -151,7 +163,7 @@ class WebSocketTestHelper:
         # Trigger multiple violations
                                                                                                 for i in range(3):
                                                                                                     with pytest.raises(DockerForceFlagViolation):
-                                                                                                        guardian.validate_command(fdocker rm -f container{i}")
+                                                                                                        guardian.validate_command(fdocker rm -f container{i}")"
 
                                                                                                         assert guardian.violation_count == initial_count + 3
 
@@ -162,8 +174,8 @@ class WebSocketTestHelper:
 
                                                                                                             alternatives = [
                                                                                                             (docker rm -f container, docker stop <container> && docker rm <container>),
-                                                                                                            (docker rmi --force image, "docker rmi <image> (after stopping containers)),
-                                                                                                            (docker system prune --force", docker system prune (with interactive confirmation)),
+                                                                                                            (docker rmi --force image, "docker rmi <image> (after stopping containers)),"
+                                                                                                            (docker system prune --force", docker system prune (with interactive confirmation)),"
                                                                                                             ]
 
                                                                                                             for dangerous_cmd, expected_pattern in alternatives:
@@ -177,9 +189,9 @@ class WebSocketTestHelper:
                                                                                                                     rate_limiter = DockerRateLimiter()
 
                                                                                                                     with pytest.raises(DockerForceFlagViolation) as exc_info:
-                                                                                                                        rate_limiter.execute_docker_command([docker, rm, -f", container123]
+                                                                                                                        rate_limiter.execute_docker_command([docker, rm, -f", container123)"
 
-                                                                                                                        assert FORBIDDEN: Docker force flag (-f) is prohibited" in str(exc_info.value)
+                                                                                                                        assert FORBIDDEN: Docker force flag (-f) is prohibited" in str(exc_info.value)"
 
         # Verify statistics updated
                                                                                                                         stats = rate_limiter.get_statistics()
@@ -188,18 +200,21 @@ class WebSocketTestHelper:
 
                                                                                                                         def test_convenience_function_integration(self):
                                                                                                                             Test convenience function also blocks force flags."
+                                                                                                                            Test convenience function also blocks force flags."
                                                                                                                             pass
                                                                                                                             with pytest.raises(DockerForceFlagViolation):
-                                                                                                                                execute_docker_command(["docker, container, rm, --force, "test]"
+                                                                                                                                execute_docker_command(["docker, container, rm, --force, "test)"
+                                                                                                                                execute_docker_command(["docker, container, rm, --force, "test)"
 
                                                                                                                                 def test_thread_safety(self):
+                                                                                                                                    Test guardian is thread-safe under concurrent access."
                                                                                                                                     Test guardian is thread-safe under concurrent access."
                                                                                                                                     guardian = DockerForceFlagGuardian()
                                                                                                                                     violations = []
 
                                                                                                                                     def violate_in_thread():
                                                                                                                                         try:
-                                                                                                                                            guardian.validate_command("docker rm -f thread_container)
+                                                                                                                                            guardian.validate_command("docker rm -f thread_container)"
                                                                                                                                         except DockerForceFlagViolation as e:
                                                                                                                                             violations.append(e)
 
@@ -225,7 +240,8 @@ class WebSocketTestHelper:
                                                                                                                                                         high_risk_with_force = [
                                                                                                                                                         docker rm -f container,
                                                                                                                                                         docker rmi --force image, "
-                                                                                                                                                        "docker container rm -f test,
+                                                                                                                                                        docker rmi --force image, "
+                                                                                                                                                        "docker container rm -f test,"
                                                                                                                                                         docker image rm --force test,
                                                                                                                                                         "docker volume rm -f vol,"
                                                                                                                                                         docker system prune --force,
@@ -244,7 +260,8 @@ class WebSocketTestHelper:
                                                                                                                                                                     "docker rmi -f --no-prune image,  # Mixed flag positions"
                                                                                                                                                                     docker system prune --force=true,  # Assignment format
                                                                                                                                                                     docker rm -f,  # Flag at end"
-                                                                                                                                                                    docker --context=prod rm -f container",  # Global flags mixed
+                                                                                                                                                                    docker rm -f,  # Flag at end"
+                                                                                                                                                                    docker --context=prod rm -f container",  # Global flags mixed"
                                                                                                                                                                     ]
 
                                                                                                                                                                     for cmd in edge_cases:
@@ -261,7 +278,8 @@ class WebSocketTestHelper:
 
                                                                                                                                                                                 non_docker_commands = [
                                                                                                                                                                                 ls -la,"
-                                                                                                                                                                                "rm -rf /tmp/test,
+                                                                                                                                                                                ls -la,"
+                                                                                                                                                                                "rm -rf /tmp/test,"
                                                                                                                                                                                 grep -f pattern file.txt,
                                                                                                                                                                                 "tail -f logfile.txt,"
                                                                                                                                                                                 find . -name '*.txt',
@@ -286,8 +304,8 @@ class WebSocketTestHelper:
 
                                                                                                                                                                                                     assert total_violations" in report"
                                                                                                                                                                                                     assert report[total_violations] >= 3
-                                                                                                                                                                                                    assert report[guardian_status] == "ACTIVE - ZERO TOLERANCE ENFORCED
-                                                                                                                                                                                                    assert business_impact_prevented" in report
+                                                                                                                                                                                                    assert report[guardian_status] == "ACTIVE - ZERO TOLERANCE ENFORCED"
+                                                                                                                                                                                                    assert business_impact_prevented" in report"
                                                                                                                                                                                                     assert 3 Docker crashes in report[business_impact_prevented]
 
                                                                                                                                                                                                     def test_empty_and_malformed_commands(self):
@@ -298,8 +316,9 @@ class WebSocketTestHelper:
         # Should not raise exceptions
                                                                                                                                                                                                         safe_inputs = [
                                                                                                                                                                                                         ,"
+                                                                                                                                                                                                        ,"
                                                                                                                                                                                                         None,
-                                                                                                                                                                                                        "   ,
+                                                                                                                                                                                                        "   ,"
                                                                                                                                                                                                         123,  # Non-string input
                                                                                                                                                                                                         ]
 
@@ -315,20 +334,22 @@ class WebSocketTestHelper:
 
                                                                                                                                                                                                                     with pytest.raises(DockerForceFlagViolation) as exc_info:
                                                                                                                                                                                                                         guardian.validate_command(docker rm -f critical_container)"
+                                                                                                                                                                                                                        guardian.validate_command(docker rm -f critical_container)"
 
                                                                                                                                                                                                                         error_msg = str(exc_info.value)
-                                                                                                                                                                                                                        assert "Business Impact in error_msg
+                                                                                                                                                                                                                        assert "Business Impact in error_msg"
                                                                                                                                                                                                                         assert 4-8 hours downtime in error_msg
                                                                                                                                                                                                                         assert "Docker Desktop in error_msg"
 
                                                                                                                                                                                                                         def test_no_actual_docker_commands_executed(self, mock_subprocess):
+                                                                                                                                                                                                                            Test that no actual Docker commands are executed during testing."
                                                                                                                                                                                                                             Test that no actual Docker commands are executed during testing."
                                                                                                                                                                                                                             pass
         # This test ensures we're not accidentally running real Docker commands'
                                                                                                                                                                                                                             guardian = DockerForceFlagGuardian()
 
                                                                                                                                                                                                                             try:
-                                                                                                                                                                                                                                guardian.validate_command("docker rm -f test)
+                                                                                                                                                                                                                                guardian.validate_command("docker rm -f test)"
                                                                                                                                                                                                                             except DockerForceFlagViolation:
                                                                                                                                                                                                                                 pass  # Expected
 
@@ -341,8 +362,9 @@ class WebSocketTestHelper:
 
                                                                                                                                                                                                                                     def test_global_validate_function(self):
                                                                                                                                                                                                                                         Test global validate_docker_command function."
+                                                                                                                                                                                                                                        Test global validate_docker_command function."
                                                                                                                                                                                                                                         with pytest.raises(DockerForceFlagViolation):
-                                                                                                                                                                                                                                            validate_docker_command(docker rm -f container")
+                                                                                                                                                                                                                                            validate_docker_command(docker rm -f container")"
 
         # Safe command should not raise
                                                                                                                                                                                                                                             validate_docker_command(docker ps)
@@ -351,9 +373,10 @@ class WebSocketTestHelper:
                                                                                                                                                                                                                                                 ""Test global get_safe_alternative function.
                                                                                                                                                                                                                                                 pass
                                                                                                                                                                                                                                                 alt = get_safe_alternative(docker rm -f container)"
+                                                                                                                                                                                                                                                alt = get_safe_alternative(docker rm -f container)"
                                                                                                                                                                                                                                                 assert isinstance(alt, str)
                                                                                                                                                                                                                                                 assert len(alt) > 0
-                                                                                                                                                                                                                                                assert docker stop" in alt
+                                                                                                                                                                                                                                                assert docker stop" in alt"
 
 
                                                                                                                                                                                                                                                 class RealWorldScenariosTests:
@@ -361,11 +384,12 @@ class WebSocketTestHelper:
 
                                                                                                                                                                                                                                                     def test_docker_compose_with_force(self):
                                                                                                                                                                                                                                                         Test detection in docker-compose scenarios."
+                                                                                                                                                                                                                                                        Test detection in docker-compose scenarios."
                                                                                                                                                                                                                                                         guardian = DockerForceFlagGuardian()
 
         # docker-compose doesn't typically use -f for force, but test anyway'
                                                                                                                                                                                                                                                         with pytest.raises(DockerForceFlagViolation):
-                                                                                                                                                                                                                                                            guardian.validate_command("docker-compose down --remove-orphans && docker rm -f $(docker ps -aq))
+                                                                                                                                                                                                                                                            guardian.validate_command("docker-compose down --remove-orphans && docker rm -f $(docker ps -aq))"
 
                                                                                                                                                                                                                                                             def test_cleanup_script_patterns(self):
                                                                                                                                                                                                                                                                 Test detection of common cleanup script patterns.""
@@ -375,7 +399,8 @@ class WebSocketTestHelper:
                                                                                                                                                                                                                                                                 dangerous_patterns = [
                                                                                                                                                                                                                                                                 docker system prune -f --all --volumes,
                                                                                                                                                                                                                                                                 docker container prune --force,"
-                                                                                                                                                                                                                                                                "docker image prune -f,
+                                                                                                                                                                                                                                                                docker container prune --force,"
+                                                                                                                                                                                                                                                                "docker image prune -f,"
                                                                                                                                                                                                                                                                 docker volume prune --force,
                                                                                                                                                                                                                                                                 "docker network prune -f,"
                                                                                                                                                                                                                                                                 ]
@@ -386,10 +411,11 @@ class WebSocketTestHelper:
 
                                                                                                                                                                                                                                                                         def test_ci_cd_pipeline_patterns(self):
                                                                                                                                                                                                                                                                             Test detection of CI/CD pipeline dangerous patterns."
+                                                                                                                                                                                                                                                                            Test detection of CI/CD pipeline dangerous patterns."
                                                                                                                                                                                                                                                                             guardian = DockerForceFlagGuardian()
 
                                                                                                                                                                                                                                                                             ci_dangerous = [
-                                                                                                                                                                                                                                                                            "docker rmi -f $(docker images -q),
+                                                                                                                                                                                                                                                                            "docker rmi -f $(docker images -q),"
                                                                                                                                                                                                                                                                             docker rm -f $(docker ps -aq),
                                                                                                                                                                                                                                                                             "docker system prune -f --volumes,"
                                                                                                                                                                                                                                                                             ]
@@ -401,3 +427,5 @@ class WebSocketTestHelper:
 
                                                                                                                                                                                                                                                                                     if __name__ == __main__":"
                                                                                                                                                                                                                                                                                         pass
+
+)))

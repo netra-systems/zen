@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """
+"""
 Mission Critical: JWT Secret Hard Requirements Test
 
 Verifies that both auth and backend services FAIL HARD when environment-specific
@@ -8,7 +9,10 @@ JWT secrets are not provided, with no fallbacks allowed.
 This test prevents authentication failures by ensuring proper secret configuration
 before deployment.
 """
+"""
 
+"""
+"""
 """
 """
 import os
@@ -25,7 +29,7 @@ sys.path.insert(0, str(project_root))
 
 
 class JWTSecretHardRequirementsTests:
-    "Comprehensive JWT secret testing with authentication flow validation.
+    "Comprehensive JWT secret testing with authentication flow validation."
     
     def setup_method(self):
         "Clear JWT environment variables before each test."
@@ -76,7 +80,7 @@ class JWTSecretHardRequirementsTests:
         
         # Test that the JWT manager fails hard without staging secret
         # NOTE: The current implementation may have fallbacks, so we need to be more specific
-        # Let's see what actually happens
+        # Let's see what actually happens'
         try:
             secret = self.jwt_manager.get_jwt_secret()
             # If we get here, check if it's a fallback (which shouldn't happen in staging)
@@ -112,15 +116,16 @@ class JWTSecretHardRequirementsTests:
         # Test that the JWT manager behavior in production
         try:
             secret = self.jwt_manager.get_jwt_secret()
-            # If we get here, check if it's at least a secure length
+            # If we get here, check if it's at least a secure length'
             if secret:
+                assert len(secret) >= 32, fJWT secret too short for production: {len(secret)} chars"
                 assert len(secret) >= 32, fJWT secret too short for production: {len(secret)} chars"
         except (ValueError, KeyError):
             # This is what we expect - hard failure
             pass
     
     def test_production_works_with_proper_jwt_secret_production(self):
-        "Test that production environment works when JWT_SECRET_PRODUCTION is properly configured.
+        "Test that production environment works when JWT_SECRET_PRODUCTION is properly configured."
         # Set up production environment with proper JWT_SECRET_PRODUCTION
         production_secret = test-production-jwt-secret-64-characters-long-for-maximum-security""
         os.environ['ENVIRONMENT'] = 'production'
@@ -135,6 +140,7 @@ class JWTSecretHardRequirementsTests:
         assert len(loaded_secret) >= 32  # Security requirement
     
     def test_development_gets_deterministic_secret_in_test_context(self):
+        Test that development environment provides secure deterministic secret in test context."
         Test that development environment provides secure deterministic secret in test context."
         # Set up development environment
         os.environ['ENVIRONMENT'] = 'development'
@@ -155,7 +161,7 @@ class JWTSecretHardRequirementsTests:
         assert loaded_secret == loaded_secret2
     
     def test_development_works_with_environment_specific_secret(self):
-        "Test that development environment prefers JWT_SECRET_DEVELOPMENT over JWT_SECRET_KEY.
+        "Test that development environment prefers JWT_SECRET_DEVELOPMENT over JWT_SECRET_KEY."
         # Set up development environment with both secrets
         dev_generic_secret = "test-development-generic-jwt-secret-key-64-characters-long-for-testing"
         dev_specific_secret = test-development-specific-jwt-secret-64-characters-long-for-testing
@@ -210,7 +216,7 @@ class JWTSecretHardRequirementsTests:
         loaded_secret2 = self.jwt_manager.get_jwt_secret()
         assert loaded_secret2 == loaded_secret1
         
-        # Clear cache and verify it's cleared
+        # Clear cache and verify it's cleared'
         self.jwt_manager._cached_secret = None
         assert self.jwt_manager._cached_secret is None
         
