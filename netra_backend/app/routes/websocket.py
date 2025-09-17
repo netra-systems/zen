@@ -36,7 +36,7 @@ All changes must be made in websocket_ssot.py to maintain SSOT compliance.
 from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.core.configuration.base import get_config
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 # Compatibility classes for backward compatibility
 class WebSocketComponentError(Exception):

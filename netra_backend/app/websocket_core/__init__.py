@@ -13,7 +13,7 @@ Business Value:
 # Unified implementations (SSOT)
 # ISSUE #1144 SSOT CONSOLIDATION: Phase 1 - Deprecate __init__.py imports
 # DEPRECATED: from netra_backend.app.websocket_core import WebSocketManager
-# CANONICAL: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+# CANONICAL: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 #
 # MIGRATION PLAN:
 # - Phase 1: Update key consumers to use canonical imports (IN PROGRESS)
@@ -114,7 +114,7 @@ def _emit_deprecation_warning():
 
 # Minimal imports for critical backward compatibility only
 try:
-    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
     from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
@@ -123,10 +123,10 @@ try:
     from netra_backend.app.websocket_core.types import create_server_message, create_error_message
 
     # ISSUE #1286 FIX: Add missing get_websocket_manager export for test compatibility
-    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
     # ISSUE #1286 FIX: Add missing create_test_user_context export for test compatibility
-    from netra_backend.app.websocket_core.canonical_import_patterns import create_test_user_context
+    from netra_backend.app.websocket_core.websocket_manager import create_test_user_context
 except ImportError as e:
     # FAIL FAST: Critical WebSocket components must be available
     raise ImportError(
@@ -164,7 +164,7 @@ except ImportError:
 
 # ISSUE #1176 PHASE 2 REMEDIATION: Add missing get_websocket_manager for test compatibility
 try:
-    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 except ImportError:
     get_websocket_manager = None
 
@@ -332,7 +332,7 @@ __all__.extend(_optional_exports)
 
 
 # GOLDEN PATH PHASE 3 FIX: Export get_websocket_manager for mission critical tests
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 # Log consolidation
 from shared.logging.unified_logging_ssot import get_logger
