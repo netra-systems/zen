@@ -56,7 +56,7 @@ class ServiceStatus:
     error: Optional[str] = None
 
 
-    @dataclass
+@dataclass
 class ServiceAvailability:
     """Complete service availability configuration."""
 
