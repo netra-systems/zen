@@ -1,6 +1,7 @@
 """Unified WebSocket Manager - SSOT for WebSocket connection management.
 
 This module is the single source of truth for WebSocket connection management.
+Refactored to use extracted modules for validation, message processing, and user context handling.
 """
 
 import asyncio
@@ -17,10 +18,19 @@ from shared.types.core_types import (
     UserID, ThreadID, ConnectionID, WebSocketID, RequestID,
     ensure_user_id, ensure_thread_id, ensure_websocket_id
 )
-# Import UnifiedIDManager for SSOT ID generation
-from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
-# ISSUE #965 REMEDIATION: Import shared types and functions from types.py to resolve circular dependency
+# Import extracted modules
+from netra_backend.app.websocket_core.connection_validator import (
+    WebSocketConnectionValidator, ConnectionValidationResult, ConnectionLimitCheckResult
+)
+from netra_backend.app.websocket_core.message_validator import (
+    WebSocketMessageValidator, MessageValidationResult, MessageDeliveryResult
+)
+from netra_backend.app.websocket_core.user_context_handler import (
+    WebSocketUserContextHandler, UserIsolationResult, UserIsolationViolation
+)
+
+# Import shared types and functions
 from netra_backend.app.websocket_core.types import (
     WebSocketConnection,
     WebSocketManagerMode,
@@ -28,54 +38,44 @@ from netra_backend.app.websocket_core.types import (
     _get_enum_key_representation
 )
 
-# ISSUE #1011 REMEDIATION: Import SSOT MessageQueue for consolidation
+# Import SSOT MessageQueue
 from netra_backend.app.websocket_core.message_queue import (
     get_message_queue_registry,
     MessageQueue,
     MessagePriority
 )
 
-# Import the protocol after it's defined to avoid circular imports
 logger = get_logger(__name__)
 
-# WEBSOCKET MANAGER SSOT CONSOLIDATION: Connection limits enforcement
-MAX_CONNECTIONS_PER_USER = 10  # Maximum WebSocket connections per user to prevent resource exhaustion
-
-
-# ISSUE #965 REMEDIATION: WebSocketManagerMode enum moved to types.py to break circular dependency
-# ISSUE #965 REMEDIATION: _get_enum_key_representation function moved to types.py to break circular dependency
-
-
-# ISSUE #965 REMEDIATION: _serialize_message_safely function moved to types.py to break circular dependency
-# ISSUE #965 REMEDIATION: WebSocketConnection dataclass moved to types.py to break circular dependency
+# Connection limits enforcement
+MAX_CONNECTIONS_PER_USER = 10
 
 
 class RegistryCompat:
     """Compatibility registry for legacy tests with circular reference prevention."""
-    
+
     def __init__(self, manager):
-        # ISSUE #601 FIX: Use weakref to prevent circular reference manager <-> registry
+        # Use weakref to prevent circular reference manager <-> registry
         self._manager_ref = weakref.ref(manager)
-    
-    @property 
+
+    @property
     def manager(self):
         """Get manager from weak reference, preventing circular reference memory leaks."""
         manager = self._manager_ref()
         if manager is None:
             raise RuntimeError("WebSocket manager has been garbage collected")
         return manager
-    
+
     async def register_connection(self, user_id: str, connection_info):
         """Register a connection for test compatibility."""
         # Convert ConnectionInfo to WebSocketConnection format for the unified manager
-        # ISSUE #556 FIX: Extract thread_id from connection_info if available
         thread_id = getattr(connection_info, 'thread_id', None)
         websocket_conn = WebSocketConnection(
             connection_id=connection_info.connection_id,
             user_id=user_id,
             websocket=connection_info.websocket,
             connected_at=connection_info.connected_at,
-            thread_id=thread_id,  # ISSUE #556 FIX: Include thread_id for propagation
+            thread_id=thread_id,
             metadata={"connection_info": connection_info}
         )
         await self.manager.add_connection(websocket_conn)
@@ -83,7 +83,7 @@ class RegistryCompat:
         if not hasattr(self.manager, '_connection_infos'):
             self.manager._connection_infos = {}
         self.manager._connection_infos[connection_info.connection_id] = connection_info
-    
+
     def get_user_connections(self, user_id: str):
         """Get user connections for test compatibility."""
         if hasattr(self.manager, '_connection_infos') and user_id in self.manager._user_connections:
@@ -94,1144 +94,217 @@ class RegistryCompat:
 
 class _UnifiedWebSocketManagerImplementation:
     """Unified WebSocket connection manager - SSOT with enhanced thread safety.
-    
-     ALERT:  FIVE WHYS ROOT CAUSE PREVENTION: This class implements the same interface
-    as WebSocketManagerProtocol to ensure consistency with IsolatedWebSocketManager.
-    
-    While this class predates the protocol, it provides all required methods to
-    maintain interface compatibility and prevent the root cause identified in
-    Five Whys analysis: "lack of formal interface contracts."
-    
-    ENHANCED: Eliminates race conditions by providing connection-level isolation:
-    - Per-user connection locks prevent race conditions during concurrent operations
-    - Thread-safe connection management with user-specific isolation
-    - Connection state validation prevents silent failures
+
+    Refactored to use extracted modules for:
+    - Connection validation (connection_validator.py)
+    - Message validation and processing (message_validator.py)
+    - User context and isolation management (user_context_handler.py)
     """
 
-    def _is_test_context(self, frame) -> bool:
-        """
-        ISSUE #824 FIX: Determine if we're in a test context to allow bypass of factory restrictions.
+    def __init__(self, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED,
+                 user_context: Optional[Any] = None, config: Optional[Dict[str, Any]] = None,
+                 _ssot_authorization_token: Optional[str] = None):
+        """Initialize UnifiedWebSocketManager with extracted modules."""
 
-        Checks the call stack for test-related indicators:
-        - pytest test functions (test_*)
-        - unittest methods
-        - test file paths
-        - test runner contexts
-
-        Args:
-            frame: Current inspection frame
-
-        Returns:
-            bool: True if in test context, False otherwise
-        """
-        if not frame:
-            return False
-
-        # Check the call stack for test indicators
-        current_frame = frame
-        while current_frame:
-            try:
-                # Check function name patterns
-                func_name = current_frame.f_code.co_name
-                if (func_name.startswith('test_') or
-                    func_name.endswith('_test') or
-                    'test' in func_name.lower()):
-                    return True
-
-                # Check file path patterns
-                filename = current_frame.f_code.co_filename
-                if (('/test' in filename) or
-                    ('\\test' in filename) or
-                    ('_test.py' in filename) or
-                    ('test_' in filename) or
-                    ('pytest' in filename)):
-                    return True
-
-                # Check for pytest/unittest runners
-                if ('pytest' in str(current_frame.f_globals.get('__package__', '')) or
-                    'unittest' in str(current_frame.f_globals.get('__package__', ''))):
-                    return True
-
-                current_frame = current_frame.f_back
-            except (AttributeError, OSError):
-                # Handle frame access errors gracefully
-                current_frame = current_frame.f_back if current_frame else None
-
-        return False
-
-    def __new__(cls, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED, user_context: Optional[Any] = None, config: Optional[Dict[str, Any]] = None, _ssot_authorization_token: Optional[str] = None):
-        """
-        ISSUE #889 REMEDIATION: User-scoped singleton implementation.
-        
-        This ensures that multiple instantiations with the same user context
-        return the same instance, preventing SSOT violations and user isolation failures.
-        """
-        # Import registry functions (avoid circular imports)
-        try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import (
-                _get_user_key, _USER_MANAGER_REGISTRY, _REGISTRY_LOCK
-            )
-            
-            # Extract user key for registry lookup
-            user_key = _get_user_key(user_context)
-            
-            # Check if instance already exists for this user
-            if user_key in _USER_MANAGER_REGISTRY:
-                existing_instance = _USER_MANAGER_REGISTRY[user_key]
-                logger.debug(f"Returning existing manager instance for user {user_key} from __new__")
-                return existing_instance
-                
-        except ImportError:
-            # Registry not available - continue with normal instantiation
-            logger.debug("Registry not available in __new__, continuing with normal instantiation")
-            pass
-        
-        # Create new instance using normal object creation
-        return super().__new__(cls)
-
-    def __init__(self, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED, user_context: Optional[Any] = None, config: Optional[Dict[str, Any]] = None, _ssot_authorization_token: Optional[str] = None):
-        """Initialize UnifiedWebSocketManager - ALL MODES CONSOLIDATED TO UNIFIED.
-        
-        SSOT MIGRATION NOTICE: All WebSocket modes now use unified initialization.
-        User isolation is achieved through UserExecutionContext, not separate modes.
-        
-        ISSUE #889 REMEDIATION: If this instance was returned from registry in __new__,
-        skip initialization to prevent reinitializing an existing instance.
-        
-        Args:
-            mode: DEPRECATED - All modes redirect to UNIFIED (kept for backward compatibility)
-            user_context: User execution context for proper user isolation
-            config: Configuration dictionary (optional)
-        """
-        # Check if this instance is already initialized (returned from registry)
-        if hasattr(self, '_initialized'):
-            logger.debug(f"Instance already initialized for user {getattr(user_context, 'user_id', 'unknown')}, skipping __init__")
-            return
-        # ISSUE #712 FIX: SSOT Validation Integration
-        from netra_backend.app.websocket_core.ssot_validation_enhancer import (
-            validate_websocket_manager_creation,
-            FactoryBypassDetected,
-            UserIsolationViolation
-        )
-
-        # PHASE 1: Direct instantiation prevention (Issue #712)
-        # Check if this is being created through proper factory pattern
-        # ISSUE #824 FIX: Allow direct instantiation in test contexts
-        if _ssot_authorization_token is None:
-            import inspect
-            frame = inspect.currentframe()
-            caller_name = frame.f_back.f_code.co_name if frame and frame.f_back else "unknown"
-
-            # Check if we're in a test context
-            is_test_context = self._is_test_context(frame)
-
-            if not is_test_context:
-                error_msg = f"Direct instantiation not allowed. Use get_websocket_manager() factory function. Caller: {caller_name}"
-                logger.error(f"SSOT VIOLATION: {error_msg}")
-                raise FactoryBypassDetected(error_msg)
-            else:
-                logger.debug(f"Allowing direct instantiation in test context: {caller_name}")
-                # Generate test authorization token
-                _ssot_authorization_token = "test_context_bypass_token_824"
-
-        # Validate authorization token format (strengthened security - PHASE 1 FIX)
-        if not isinstance(_ssot_authorization_token, str) or len(_ssot_authorization_token) < 16:
-            error_msg = f"Invalid SSOT authorization token format (length: {len(_ssot_authorization_token) if _ssot_authorization_token else 0})"
-            logger.error(f"SSOT VIOLATION: {error_msg}")
-            raise FactoryBypassDetected(error_msg)
-
-        # PHASE 1: User context requirement enforcement (Issue #712)
-        # ISSUE #824 FIX: Allow None user_context in test contexts
-        if user_context is None:
-            import inspect
-            frame = inspect.currentframe()
-            is_test_context = self._is_test_context(frame)
-
-            if not is_test_context:
-                error_msg = "UserExecutionContext required for proper user isolation"
-                logger.error(f"USER ISOLATION VIOLATION: {error_msg}")
-                raise UserIsolationViolation(error_msg)
-            else:
-                logger.debug("Allowing None user_context in test context")
-                # Create minimal test user context
-                from shared.types.core_types import ensure_user_id
-                class TestUserContext:
-                    def __init__(self):
-                        self.user_id = ensure_user_id("test_user_824")
-                        self.thread_id = "test_thread_824"
-                        self.request_id = "test_request_824"
-                user_context = TestUserContext()
-
-        # ISSUE #889 FIX: Store mode parameter to prevent state sharing between users
-        # Create isolated wrapper to prevent shared references
-        # Python enums share object instances, so we wrap them to create unique objects
-        class IsolatedModeWrapper:
-            """Wrapper to prevent enum object sharing between manager instances."""
-            def __init__(self, enum_value):
-                self._value = enum_value.value if hasattr(enum_value, 'value') else enum_value
-                self._name = enum_value.name if hasattr(enum_value, 'name') else str(enum_value)
-
-            @property
-            def value(self):
-                return self._value
-
-            @property
-            def name(self):
-                return self._name
-
-            def __str__(self):
-                return f"WebSocketManagerMode.{self._name}"
-
-            def __repr__(self):
-                return f"<WebSocketManagerMode.{self._name}: '{self._value}'>"
-
-            def __eq__(self, other):
-                if hasattr(other, 'value'):
-                    return self._value == other.value
-                return self._value == other
-
-        self.mode = IsolatedModeWrapper(mode)
+        self.mode = mode
         self.user_context = user_context
         self.config = config or {}
 
-        # PHASE 1: SSOT validation integration (Issue #712)
-        try:
-            validate_websocket_manager_creation(
-                manager_instance=self,
-                user_context=user_context,
-                creation_method="factory_authorized"
-            )
-            logger.info(f"SSOT validation passed for user {getattr(user_context, 'user_id', 'unknown')}")
-        except Exception as e:
-            logger.error(f"SSOT validation failed: {e}")
-            # Re-raise to prevent creation of non-compliant instances
-            raise
-        
+        # Initialize extracted module handlers
+        self._connection_validator = WebSocketConnectionValidator()
+        self._message_validator = WebSocketMessageValidator()
+        self._user_context_handler = WebSocketUserContextHandler(user_context)
+
         # Core connection management
         self._connections: Dict[str, WebSocketConnection] = {}
         self._user_connections: Dict[str, Set[str]] = {}
         self._lock = asyncio.Lock()
-        
-        # RACE CONDITION FIX: Add per-user connection locks
-        self._user_connection_locks: Dict[str, asyncio.Lock] = {}
-        self._connection_lock_creation_lock = asyncio.Lock()
-        
-        # ISSUE #414 FIX: Event contamination prevention
-        self._event_isolation_tokens: Dict[str, str] = {}  # connection_id -> isolation_token
-        self._user_event_queues: Dict[str, asyncio.Queue] = {}  # user_id -> event_queue
-        self._event_delivery_tracking: Dict[str, Dict[str, Any]] = {}  # event_id -> metadata
-        self._cross_user_detection: Dict[str, int] = {}  # user_id -> violation_count
-        self._event_queue_stats = {
-            'total_events_sent': 0,
-            'events_delivered': 0,
-            'contamination_prevented': 0,
-            'queue_overflows': 0,
-            'auth_token_reuse_detected': 0
-        }
-        
-        # SSOT CONSOLIDATION: Always use unified initialization
-        self._initialize_unified_mode()
-        
-        # ISSUE #601 FIX: Use WeakValueDictionary for connection pools to prevent memory leaks
-        self._connection_pool = weakref.WeakValueDictionary()
-        
-        # Add compatibility registry for legacy tests (no circular reference with weakref)
+
+        # Message queue integration
+        self._message_queue_registry = get_message_queue_registry()
+        self._connection_message_queues: Dict[str, MessageQueue] = {}
+
+        # Compatibility for legacy tests
+        self.active_connections: Dict[str, List] = {}
+
+        # Background task monitoring
+        self._background_tasks: Dict[str, asyncio.Task] = {}
+        self._monitoring_enabled = True
+        self._monitoring_lock = asyncio.Lock()
+        self._shutdown_requested = False
+
+        # Initialize mode-specific features
+        if mode == WebSocketManagerMode.ISOLATED:
+            self._initialize_isolated_mode(user_context)
+        else:
+            self._initialize_unified_mode()
+
+        # Create compatibility registry
         self.registry = RegistryCompat(self)
-        
-        # Add compatibility for legacy tests expecting connection_manager
-        self._connection_manager = self
-        self.connection_manager = self
 
-        # ISSUE #556 FIX: Initialize connection_registry for legacy compatibility
-        self.connection_registry = {}  # Registry for connection objects
-        self.active_connections = {}  # Compatibility mapping
+        logger.info(f"WebSocket manager initialized in {mode.value} mode")
 
-        # Event listener support for testing
-        self.on_event_emitted: Optional[callable] = None
-        self._event_listeners: List[callable] = []
-
-        # ISSUE #889 REMEDIATION: Register this instance in the user-scoped registry
-        try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import (
-                _get_user_key, _USER_MANAGER_REGISTRY
-            )
-            
-            user_key = _get_user_key(user_context)
-            _USER_MANAGER_REGISTRY[user_key] = self
-            logger.debug(f"Registered new manager instance for user {user_key} in registry")
-            
-        except ImportError:
-            logger.debug("Registry not available, skipping registration")
-
-        # Mark this instance as initialized
-        self._initialized = True
-        
-        logger.info("UnifiedWebSocketManager initialized with SSOT unified mode (all legacy modes consolidated)")
-
-    def _validate_user_isolation(self, user_id: str, operation: str = "unknown") -> bool:
-        """
-        ISSUE #712 FIX: Validate user isolation for operations.
-
-        This method enforces user isolation by ensuring operations are only
-        performed on behalf of the user this manager was created for.
-
-        Args:
-            user_id: User ID requesting the operation
-            operation: Description of operation for logging
-
-        Returns:
-            bool: True if validation passes
-
-        Raises:
-            UserIsolationViolation: If user isolation is violated in strict mode
-        """
-        from netra_backend.app.websocket_core.ssot_validation_enhancer import validate_user_isolation
-
-        try:
-            return validate_user_isolation(
-                manager_instance=self,
-                user_id=user_id,
-                operation=operation
-            )
-        except Exception as e:
-            logger.error(f"User isolation validation failed for {operation}: {e}")
-            raise
-
-    def _prevent_cross_user_event_bleeding(self, event_data: Dict[str, Any], target_user_id: str) -> Dict[str, Any]:
-        """
-        ISSUE #712 FIX: Prevent cross-user event bleeding.
-
-        This method ensures events are only delivered to the intended user
-        and adds isolation metadata to prevent contamination.
-
-        Args:
-            event_data: Event data to be sent
-            target_user_id: User ID that should receive this event
-
-        Returns:
-            Dict[str, Any]: Event data with isolation metadata
-        """
-        from netra_backend.app.websocket_core.ssot_validation_enhancer import UserIsolationViolation
-
-        # Add user isolation metadata
-        isolated_event = event_data.copy()
-        isolated_event['_user_isolation'] = {
-            'target_user_id': target_user_id,
-            'manager_user_id': getattr(self.user_context, 'user_id', None),
-            'isolation_token': f"{target_user_id}_{time.time()}",
-            'timestamp': datetime.now(timezone.utc).isoformat()
-        }
-
-        # Validate user match
-        manager_user_id = getattr(self.user_context, 'user_id', None)
-        if manager_user_id and str(manager_user_id) != str(target_user_id):
-            logger.warning(f"Cross-user event bleeding prevented: manager_user={manager_user_id}, target_user={target_user_id}")
-            raise UserIsolationViolation(f"Event targeting different user: {target_user_id} != {manager_user_id}")
-
-        return isolated_event
-    
     def _initialize_unified_mode(self):
         """Initialize unified mode with full feature set."""
-        # ISSUE #1011 REMEDIATION: Replace competing queue implementations with SSOT MessageQueue registry
-        self._message_queue_registry = get_message_queue_registry()
-        self._connection_message_queues: Dict[str, MessageQueue] = {}  # connection_id -> MessageQueue
-
-        # Maintain minimal backward compatibility for error recovery
-        self._connection_error_count: Dict[str, int] = {}  # user_id -> error_count
-        self._last_error_time: Dict[str, datetime] = {}  # user_id -> last_error_timestamp
-        
-        # Transaction coordination support
-        self._transaction_coordinator = None  # Will be set by DatabaseManager
-        self._coordination_enabled = False
-        
-        logger.debug("[U+1F517] WebSocket manager initialized with transaction coordination support")
         self._error_recovery_enabled = True
-        
-        # Background task monitoring system
-        self._background_tasks: Dict[str, asyncio.Task] = {}  # task_name -> task
-        self._task_failures: Dict[str, int] = {}  # task_name -> failure_count
-        self._task_last_failure: Dict[str, datetime] = {}  # task_name -> last_failure_time
-        self._monitoring_enabled = True
-        self._monitoring_lock = asyncio.Lock()  # Synchronization for monitoring state changes
-        
-        # Task registry for recovery and restart capabilities
-        self._task_registry: Dict[str, Dict[str, Any]] = {}  # task_name -> {func, args, kwargs, meta}
-        self._shutdown_requested = False  # Track intentional shutdown vs error-based disable
+        self._task_failures: Dict[str, int] = {}
+        self._task_last_failure: Dict[str, datetime] = {}
+        self._task_registry: Dict[str, Dict[str, Any]] = {}
         self._last_health_check = datetime.now(timezone.utc)
         self._health_check_failures = 0
-    
+
+        logger.debug("WebSocket manager initialized in unified mode")
+
     def _initialize_isolated_mode(self, user_context):
         """Initialize isolated mode for user-specific operation."""
-        self.user_context = user_context
         self._connection_ids: Set[str] = set()
 
-        # ISSUE #1011 REMEDIATION: Use SSOT MessageQueue registry for isolated mode as well
-        self._message_queue_registry = get_message_queue_registry()
-        self._connection_message_queues: Dict[str, MessageQueue] = {}  # connection_id -> MessageQueue
+        logger.debug(f"WebSocket manager initialized in isolated mode for user {getattr(user_context, 'user_id', 'unknown')}")
 
-        # Private connection state for isolation
-        self._private_connections: Dict[str, Any] = {}
-        self._private_error_count = 0
-        self._is_healthy = True
-        self._connection_error_count: Dict[str, int] = {}
-        self._last_error_time: Dict[str, datetime] = {}
-        self._error_recovery_enabled = True
-        
-        # Disable background monitoring in isolated mode for performance
-        self._monitoring_enabled = False
-        self._background_tasks = {}
-        
-        logger.info(f"Isolated mode initialized for user context")
-    
-    def add_event_listener(self, listener: callable) -> None:
-        """Add an event listener for WebSocket events.
-        
-        This method provides compatibility with test frameworks that expect
-        event listener functionality for capturing WebSocket events during testing.
-        
-        Args:
-            listener: Callable that will receive event data when events are emitted
-        """
-        if listener not in self._event_listeners:
-            self._event_listeners.append(listener)
-            logger.debug(f"Added WebSocket event listener: {listener}")
-    
-    def remove_event_listener(self, listener: callable) -> None:
-        """Remove an event listener.
-        
-        Args:
-            listener: Callable to remove from the event listeners list
-        """
-        if listener in self._event_listeners:
-            self._event_listeners.remove(listener)
-            logger.debug(f"Removed WebSocket event listener: {listener}")
-    
-    def _notify_event_listeners(self, event: Dict[str, Any]) -> None:
-        """Notify all event listeners about a WebSocket event.
-        
-        Args:
-            event: Event data to send to listeners
-        """
-        # Call the on_event_emitted callback if set (for compatibility with existing tests)
-        if self.on_event_emitted:
-            try:
-                self.on_event_emitted(**event)
-            except Exception as e:
-                logger.warning(f"Error in on_event_emitted callback: {e}")
-        
-        # Call all registered event listeners
-        for listener in self._event_listeners:
-            try:
-                listener(event)
-            except Exception as e:
-                logger.warning(f"Error in event listener {listener}: {e}")
-    
-    def _initialize_emergency_mode(self, config: Dict[str, Any]):
-        """Initialize emergency mode for service continuity."""
-        self.user_id = config.get('user_id')
-        self.websocket_client_id = config.get('websocket_client_id')
-        self.thread_id = config.get('thread_id')
-        self.run_id = config.get('run_id')
-        self.emergency_mode = True
-        self.created_at = datetime.now(timezone.utc)
-        
-        # Minimal state tracking
-        self._emergency_connections = {}
-        self._emergency_message_queue = []
-        self._is_healthy = True
-        
-        # Minimal recovery system
-        self._message_recovery_queue: Dict[str, List[Dict]] = {}
-        self._connection_error_count: Dict[str, int] = {}
-        self._error_recovery_enabled = False  # Disabled in emergency mode
-        
-        # Disable monitoring in emergency mode
-        self._monitoring_enabled = False
-        self._background_tasks = {}
-        
-        logger.warning("Emergency mode initialized - minimal functionality only")
-    
-    def _initialize_degraded_mode(self, config: Dict[str, Any]):
-        """Initialize degraded mode for absolute last resort."""
-        self.degraded_mode = True
-        self.created_at = datetime.now(timezone.utc)
-        self._is_healthy = False
-        
-        # Minimal recovery system
-        self._message_recovery_queue: Dict[str, List[Dict]] = {}
-        self._connection_error_count: Dict[str, int] = {}
-        self._error_recovery_enabled = False
-        
-        # Disable all advanced features in degraded mode
-        self._monitoring_enabled = False
-        self._background_tasks = {}
-        
-        logger.error("Degraded mode initialized - system operating at minimal capacity")
-    
-    async def _get_user_connection_lock(self, user_id: str) -> asyncio.Lock:
-        """Get or create user-specific connection lock for thread safety.
-        
-        Args:
-            user_id: User identifier for connection lock isolation
-            
-        Returns:
-            User-specific asyncio Lock for connection operations
-        """
-        if user_id not in self._user_connection_locks:
-            async with self._connection_lock_creation_lock:
-                # Double-check locking pattern
-                if user_id not in self._user_connection_locks:
-                    self._user_connection_locks[user_id] = asyncio.Lock()
-                    logger.debug(f"Created user-specific connection lock for user: {user_id}")
-        return self._user_connection_locks[user_id]
-    
     async def add_connection(self, connection: WebSocketConnection) -> None:
-        """Add a new WebSocket connection with thread safety and type validation."""
+        """Add a new WebSocket connection with thread safety and validation."""
         connection_start_time = time.time()
-        
-        # CRITICAL: Log connection addition attempt with full context
-        connection_add_context = {
-            "connection_id": connection.connection_id,
-            "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
-            "websocket_available": connection.websocket is not None,
-            "websocket_state": _get_enum_key_representation(getattr(connection.websocket, 'client_state', 'unknown')) if hasattr(connection.websocket, 'client_state') else 'unknown',
-            "existing_connections_count": len(self._connections),
-            "user_existing_connections": len(self._user_connections.get(connection.user_id, set())),
-            "has_queued_messages": connection.user_id in self._message_recovery_queue and bool(self._message_recovery_queue[connection.user_id]),
-            "manager_mode": self.mode.value,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "golden_path_stage": "connection_addition_start"
-        }
-        
-        logger.info(f"[U+1F517] GOLDEN PATH CONNECTION ADD: Adding connection {connection.connection_id} for user {connection.user_id[:8] if connection.user_id else 'unknown'}...")
-        logger.info(f" SEARCH:  CONNECTION ADD CONTEXT: {json.dumps(connection_add_context, indent=2)}")
-        
-        # Validate connection before adding
-        try:
-            if not connection.user_id:
-                raise ValueError("Connection must have a valid user_id")
-            if not connection.connection_id:
-                raise ValueError("Connection must have a valid connection_id")
-            logger.debug(f" PASS:  CONNECTION VALIDATION: Connection {connection.connection_id} validated successfully")
-        except Exception as e:
-            # CRITICAL: Log validation failure
-            validation_failure_context = {
-                "connection_id": connection.connection_id,
-                "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
-                "validation_error": str(e),
-                "error_type": type(e).__name__,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "golden_path_impact": "CRITICAL - Connection rejected due to validation failure"
-            }
-            
-            logger.critical(f" ALERT:  GOLDEN PATH CONNECTION VALIDATION FAILURE: Connection {connection.connection_id} validation failed for user {connection.user_id[:8] if connection.user_id else 'unknown'}...")
-            logger.critical(f" SEARCH:  VALIDATION FAILURE CONTEXT: {json.dumps(validation_failure_context, indent=2)}")
-            raise
 
-        # WEBSOCKET MANAGER SSOT CONSOLIDATION: Enforce connection limits per user
+        # Log connection attempt
+        connection_context = self._connection_validator.create_connection_context_log(
+            connection=connection,
+            existing_connections_count=len(self._connections),
+            user_existing_connections=len(self._user_connections.get(connection.user_id, set())),
+            has_queued_messages=connection.user_id in self._message_validator._message_recovery_queue,
+            manager_mode=self.mode.value,
+            stage="connection_addition_start"
+        )
+
+        logger.info(f"GOLDEN PATH CONNECTION ADD: Adding connection {connection.connection_id} for user {connection.user_id[:8] if connection.user_id else 'unknown'}...")
+        logger.info(f"CONNECTION ADD CONTEXT: {json.dumps(connection_context, indent=2)}")
+
+        # Validate connection
+        validation_result = self._connection_validator.validate_connection_basic(connection)
+        if not validation_result.is_valid:
+            self._connection_validator.log_validation_failure(validation_result)
+            raise ValueError(validation_result.error_message)
+
+        # Check connection limits
         current_user_connections = len(self._user_connections.get(connection.user_id, set()))
-        if current_user_connections >= MAX_CONNECTIONS_PER_USER:
-            connection_limit_context = {
-                "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
-                "current_connections": current_user_connections,
-                "max_allowed": MAX_CONNECTIONS_PER_USER,
-                "connection_id": connection.connection_id,
-                "rejection_reason": "MAX_CONNECTIONS_PER_USER exceeded",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "golden_path_impact": "CONNECTION_REJECTED - User exceeded connection limit"
-            }
+        limit_check = self._connection_validator.check_connection_limits(connection, current_user_connections)
+        if not limit_check.within_limits:
+            raise ValueError(f"User {connection.user_id} exceeded maximum connections per user limit ({limit_check.max_allowed}). Current: {limit_check.current_connections}")
 
-            logger.warning(f" LIMIT: CONNECTION REJECTED: User {connection.user_id[:8] if connection.user_id else 'unknown'} exceeded MAX_CONNECTIONS_PER_USER ({MAX_CONNECTIONS_PER_USER})")
-            logger.warning(f" SEARCH: CONNECTION LIMIT CONTEXT: {json.dumps(connection_limit_context, indent=2)}")
+        # Get user-specific lock for thread safety
+        user_lock = await self._connection_validator.get_user_connection_lock(connection.user_id)
 
-            # Raise specific exception for connection limit exceeded
-            raise ValueError(f"User {connection.user_id} exceeded maximum connections per user limit ({MAX_CONNECTIONS_PER_USER}). Current: {current_user_connections}")
-
-        # Use user-specific lock for connection operations
-        user_lock = await self._get_user_connection_lock(connection.user_id)
-        
         async with user_lock:
             async with self._lock:
-                # ISSUE #414 FIX: Event contamination prevention setup
-                # Use UnifiedIDManager for isolation token generation
-                id_manager = UnifiedIDManager()
-                isolation_token = id_manager.generate_id(IDType.WEBSOCKET, prefix="isolation", context={
-                    'user_id': connection.user_id,
-                    'connection_id': connection.connection_id,
-                    'purpose': 'event_contamination_prevention'
-                })
-                self._event_isolation_tokens[connection.connection_id] = isolation_token
-                
-                # ISSUE #1011 REMEDIATION: Create SSOT MessageQueue for this connection
+                # Generate isolation token
+                isolation_token = self._connection_validator.generate_isolation_token(connection)
+
+                # Validate token uniqueness and fix collisions if needed
+                isolation_token = self._connection_validator.validate_isolation_token_uniqueness(
+                    connection, isolation_token,
+                    self._user_context_handler._event_isolation_tokens,
+                    self._connections
+                )
+
+                # Register isolation token
+                self._user_context_handler.register_isolation_token(connection.connection_id, isolation_token)
+
+                # Create message queue for connection
                 message_queue = self._message_queue_registry.create_message_queue(
                     connection_id=connection.connection_id,
                     user_id=connection.user_id,
                     max_size=1000
                 )
                 self._connection_message_queues[connection.connection_id] = message_queue
-
-                # Set up message processor for the queue
                 message_queue.set_message_processor(self._process_queued_message)
 
-                # Initialize user tracking for backward compatibility
-                if connection.user_id not in self._cross_user_detection:
-                    self._cross_user_detection[connection.user_id] = 0
-                
-                # Validate no cross-user contamination
-                for existing_conn_id, existing_token in self._event_isolation_tokens.items():
-                    if existing_conn_id in self._connections:
-                        existing_user = self._connections[existing_conn_id].user_id
-                        if existing_user != connection.user_id and existing_token == isolation_token:
-                            # This should never happen with UUID but check anyway
-                            logger.error(
-                                f" ALERT:  CRITICAL ISOLATION VIOLATION: Token collision detected! "
-                                f"User {connection.user_id} vs {existing_user}, "
-                                f"Connection {connection.connection_id} vs {existing_conn_id}"
-                            )
-                            self._cross_user_detection[connection.user_id] += 1
-                            self._event_queue_stats['contamination_prevented'] += 1
-                            
-                            # Generate new token to fix collision using UnifiedIDManager
-                            isolation_token = id_manager.generate_id(IDType.WEBSOCKET, prefix="isolation_fix", context={
-                                'user_id': connection.user_id,
-                                'connection_id': connection.connection_id,
-                                'purpose': 'collision_recovery'
-                            })
-                            self._event_isolation_tokens[connection.connection_id] = isolation_token
-                            break
-                
+                # Store connection
                 self._connections[connection.connection_id] = connection
                 if connection.user_id not in self._user_connections:
                     self._user_connections[connection.user_id] = set()
                 self._user_connections[connection.user_id].add(connection.connection_id)
-                
-                logger.debug(f" PASS:  ISSUE #414 FIX: Connection {connection.connection_id} isolated with token {isolation_token[:8]}... for user {connection.user_id[:8]}...")
-                
-                # Update compatibility mapping for legacy tests
+
+                # Update compatibility mapping
                 if connection.user_id not in self.active_connections:
                     self.active_connections[connection.user_id] = []
-                # Create a simple connection info object for compatibility
                 conn_info = type('ConnectionInfo', (), {
                     'websocket': connection.websocket,
                     'user_id': connection.user_id,
                     'connection_id': connection.connection_id
                 })()
                 self.active_connections[connection.user_id].append(conn_info)
-                
-                # CRITICAL: Log successful connection addition with state details
-                connection_duration = time.time() - connection_start_time
-                
-                connection_success_context = {
-                    "connection_id": connection.connection_id,
-                    "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
-                    "total_connections": len(self._connections),
-                    "user_total_connections": len(self._user_connections[connection.user_id]),
-                    "connection_duration_ms": round(connection_duration * 1000, 2),
-                    "active_users": len(self._user_connections),
-                    "manager_mode": self.mode.value,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "golden_path_milestone": "Connection successfully added to manager"
-                }
-                
-                logger.info(f" PASS:  GOLDEN PATH CONNECTION ADDED: Connection {connection.connection_id} added for user {connection.user_id[:8] if connection.user_id else 'unknown'}... in {connection_duration*1000:.2f}ms")
-                logger.info(f" SEARCH:  CONNECTION SUCCESS CONTEXT: {json.dumps(connection_success_context, indent=2)}")
-                logger.info(f"Added connection {connection.connection_id} for user {connection.user_id} (thread-safe)")
 
-    # ISSUE #1011 REMEDIATION: Add SSOT MessageQueue processor method
+        # Process queued messages
+        await self._message_validator.process_queued_messages(
+            connection.user_id, self.send_to_user
+        )
+
+        # Log successful connection
+        connection_duration = time.time() - connection_start_time
+        self._connection_validator.log_connection_success(
+            connection=connection,
+            total_connections=len(self._connections),
+            user_total_connections=len(self._user_connections[connection.user_id]),
+            connection_duration=connection_duration,
+            active_users=len(self._user_connections),
+            manager_mode=self.mode.value
+        )
+
     async def _process_queued_message(self, queued_message):
         """Process a message from the SSOT MessageQueue"""
         from netra_backend.app.websocket_core.message_queue import QueuedMessage
 
         if isinstance(queued_message, QueuedMessage):
-            # Convert QueuedMessage to the format expected by send_to_user
             await self.send_to_user(
                 user_id=queued_message.user_id,
-                message=queued_message.message_data,
-                message_type=queued_message.message_type
+                message=queued_message.message_data
             )
         else:
-            # Handle legacy message format for backward compatibility
+            # Handle legacy message format
             user_id = queued_message.get('user_id')
             message_data = queued_message.get('message', queued_message)
-            message_type = queued_message.get('type', 'unknown')
+            await self.send_to_user(user_id=user_id, message=message_data)
 
-            await self.send_to_user(
-                user_id=user_id,
-                message=message_data,
-                message_type=message_type
-            )
-
-        # CRITICAL FIX: Process any queued messages for this user after connection established
-        # This prevents race condition where messages are sent before connection is ready
-        # Store the user_id for processing outside the lock to prevent deadlock
-        process_recovery = connection.user_id in self._message_recovery_queue
-                
-        # DEADLOCK FIX: Process recovery queue OUTSIDE the lock to prevent circular dependency
-        # add_connection -> _process_queued_messages -> send_to_user -> user_lock (deadlock)
-        if process_recovery:
-            queued_messages = self._message_recovery_queue.get(connection.user_id, [])
-            if queued_messages:
-                # CRITICAL: Log message recovery processing
-                recovery_context = {
-                    "connection_id": connection.connection_id,
-                    "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
-                    "queued_messages_count": len(queued_messages),
-                    "message_types": [msg.get('type', 'unknown') for msg in queued_messages[:5]],  # First 5 types
-                    "timeout_seconds": 5.0,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "golden_path_stage": "message_recovery_processing"
-                }
-                
-                logger.info(f"[U+1F4E4] GOLDEN PATH MESSAGE RECOVERY: Processing {len(queued_messages)} queued messages for user {connection.user_id[:8] if connection.user_id else 'unknown'}...")
-                logger.info(f" SEARCH:  MESSAGE RECOVERY CONTEXT: {json.dumps(recovery_context, indent=2)}")
-                
-                # HANG FIX: Await the processing to ensure messages are sent before method returns
-                # This prevents test hanging where the test expects messages but they're still processing
-                recovery_start = time.time()
-                try:
-                    await asyncio.wait_for(
-                        self._process_queued_messages(connection.user_id), 
-                        timeout=5.0  # Reasonable timeout to prevent infinite hang
-                    )
-                    
-                    # CRITICAL: Log successful recovery completion
-                    recovery_duration = time.time() - recovery_start
-                    
-                    recovery_success_context = {
-                        "connection_id": connection.connection_id,
-                        "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
-                        "messages_processed": len(queued_messages),
-                        "recovery_duration_ms": round(recovery_duration * 1000, 2),
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
-                        "golden_path_milestone": "Message recovery completed successfully"
-                    }
-                    
-                    logger.info(f" PASS:  GOLDEN PATH RECOVERY SUCCESS: Processed {len(queued_messages)} queued messages for user {connection.user_id[:8] if connection.user_id else 'unknown'}... in {recovery_duration*1000:.2f}ms")
-                    logger.info(f" SEARCH:  RECOVERY SUCCESS CONTEXT: {json.dumps(recovery_success_context, indent=2)}")
-                    
-                except asyncio.TimeoutError:
-                    recovery_duration = time.time() - recovery_start
-                    
-                    # CRITICAL: Log recovery timeout
-                    timeout_context = {
-                        "connection_id": connection.connection_id,
-                        "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
-                        "messages_pending": len(queued_messages),
-                        "timeout_seconds": 5.0,
-                        "elapsed_time_ms": round(recovery_duration * 1000, 2),
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
-                        "golden_path_impact": "WARNING - Message recovery timed out, messages may be lost"
-                    }
-                    
-                    logger.warning(f" WARNING: [U+FE0F] GOLDEN PATH RECOVERY TIMEOUT: Message recovery timed out for user {connection.user_id[:8] if connection.user_id else 'unknown'}... after {recovery_duration:.3f}s")
-                    logger.warning(f" SEARCH:  RECOVERY TIMEOUT CONTEXT: {json.dumps(timeout_context, indent=2)}")
-                    logger.error(f"Timeout processing queued messages for user {connection.user_id}")
-                    
-                except Exception as e:
-                    recovery_duration = time.time() - recovery_start
-                    
-                    # CRITICAL: Log recovery error
-                    recovery_error_context = {
-                        "connection_id": connection.connection_id,
-                        "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
-                        "messages_pending": len(queued_messages),
-                        "error_type": type(e).__name__,
-                        "error_message": str(e),
-                        "elapsed_time_ms": round(recovery_duration * 1000, 2),
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
-                        "golden_path_impact": "WARNING - Message recovery failed, messages may be lost"
-                    }
-                    
-                    logger.warning(f" WARNING: [U+FE0F] GOLDEN PATH RECOVERY ERROR: Message recovery failed for user {connection.user_id[:8] if connection.user_id else 'unknown'}... after {recovery_duration:.3f}s")
-                    logger.warning(f" SEARCH:  RECOVERY ERROR CONTEXT: {json.dumps(recovery_error_context, indent=2)}")
-                    logger.error(f"Error processing queued messages for user {connection.user_id}: {e}")
-    
     async def remove_connection(self, connection_id: Union[str, ConnectionID]) -> None:
-        """Remove a WebSocket connection with thread safety, type validation, and pattern-agnostic cleanup.
-        
-        PHASE 1 SSOT REMEDIATION: Enhanced with pattern-agnostic resource cleanup
-        to prevent WebSocket 1011 errors caused by ID pattern mismatches.
-        """
-        # Convert to string for internal use
+        """Remove a WebSocket connection with thread safety and cleanup."""
         validated_connection_id = str(connection_id)
-        
-        # First get the connection to determine user_id
+
         connection = self._connections.get(validated_connection_id)
         if not connection:
             logger.debug(f"Connection {validated_connection_id} not found for removal")
             return
-        
-        # Use user-specific lock for connection operations
-        user_lock = await self._get_user_connection_lock(connection.user_id)
-        
+
+        user_lock = await self._connection_validator.get_user_connection_lock(connection.user_id)
+
         async with user_lock:
             async with self._lock:
-                if connection_id in self._connections:
-                    connection = self._connections[connection_id]
-                    del self._connections[connection_id]
-                    
-                    # ISSUE #1011 REMEDIATION: Clean up SSOT MessageQueue
-                    if connection_id in self._connection_message_queues:
-                        message_queue = self._connection_message_queues[connection_id]
-                        await message_queue.close()
-                        del self._connection_message_queues[connection_id]
-                        # Also remove from registry
-                        await self._message_queue_registry.remove_message_queue(connection_id)
-                        logger.debug(f"Cleaned up SSOT MessageQueue for connection {connection_id}")
+                # Remove from connections
+                if validated_connection_id in self._connections:
+                    del self._connections[validated_connection_id]
 
-                    # PHASE 1 SSOT REMEDIATION: Enhanced cleanup with pattern-agnostic matching
-                    if connection.user_id in self._user_connections:
-                        # Remove exact match first
-                        self._user_connections[connection.user_id].discard(connection_id)
-                        
-                        # CRITICAL FIX: Also remove pattern matches to prevent resource leaks
-                        # This prevents WebSocket 1011 errors by ensuring all related resources are cleaned up
-                        from netra_backend.app.websocket_core.utils import find_matching_resources
-                        try:
-                            # Find connections with matching patterns for this user
-                            user_connections_dict = {cid: cid for cid in self._user_connections[connection.user_id]}
-                            matching_connection_ids = find_matching_resources(validated_connection_id, user_connections_dict)
-                            
-                            for match_id in matching_connection_ids:
-                                if match_id in self._user_connections[connection.user_id]:
-                                    self._user_connections[connection.user_id].discard(match_id)
-                                    logger.debug(f"Pattern cleanup: removed matching connection {match_id} for {validated_connection_id}")
-                        except Exception as e:
-                            logger.warning(f"Pattern cleanup failed for connection {validated_connection_id}: {e}")
-                        
-                        # Clean up user entry if no connections remain
-                        if not self._user_connections[connection.user_id]:
-                            del self._user_connections[connection.user_id]
-                    
-                    # Update compatibility mapping with pattern-agnostic cleanup
-                    if connection.user_id in self.active_connections:
-                        # Remove exact matches
-                        self.active_connections[connection.user_id] = [
-                            c for c in self.active_connections[connection.user_id]
-                            if c.connection_id != connection_id
-                        ]
-                        
-                        # CRITICAL FIX: Also remove pattern matches from active connections
-                        try:
-                            from netra_backend.app.core.id_migration_bridge import validate_id_compatibility
-                            self.active_connections[connection.user_id] = [
-                                c for c in self.active_connections[connection.user_id]
-                                if not validate_id_compatibility(c.connection_id, validated_connection_id)
-                            ]
-                        except Exception as e:
-                            logger.warning(f"Pattern cleanup in active_connections failed for {validated_connection_id}: {e}")
-                        
-                        # Clean up user entry if no connections remain
-                        if not self.active_connections[connection.user_id]:
-                            del self.active_connections[connection.user_id]
-                    
-                    # PHASE 2 INTEGRATION - Cleanup Token Lifecycle Management
-                    # Unregister connection from token lifecycle manager when WebSocket closes
-                    try:
-                        from netra_backend.app.websocket_core.token_lifecycle_manager import get_token_lifecycle_manager
-                        
-                        lifecycle_manager = get_token_lifecycle_manager()
-                        await lifecycle_manager.unregister_connection(validated_connection_id)
-                        
-                        logger.debug(f"PHASE 2: Token lifecycle management cleaned up for connection {validated_connection_id}")
-                        
-                    except Exception as e:
-                        logger.warning(f"PHASE 2: Error cleaning up token lifecycle for connection {validated_connection_id}: {e}")
-                        # Don't fail connection removal due to lifecycle cleanup errors
-                    
-                    # ISSUE #601 FIX: Explicit event handler cleanup to prevent memory leaks
-                    try:
-                        # Clean up event handlers and references for this connection
-                        if hasattr(connection.websocket, '_event_handlers'):
-                            connection.websocket._event_handlers.clear()
-                        
-                        # Clean up any circular references in the connection object
-                        if hasattr(connection, 'metadata') and connection.metadata:
-                            # Remove any parent/child references in metadata
-                            for key in list(connection.metadata.keys()):
-                                if 'parent' in key.lower() or 'child' in key.lower() or 'ref' in key.lower():
-                                    connection.metadata.pop(key, None)
-                        
-                        # Remove from connection pool weak references
-                        if validated_connection_id in self._connection_pool:
-                            del self._connection_pool[validated_connection_id]
-                            
-                        logger.debug(f"ISSUE #601: Event handler cleanup completed for connection {validated_connection_id}")
-                        
-                    except Exception as e:
-                        logger.warning(f"ISSUE #601: Error during event handler cleanup for connection {validated_connection_id}: {e}")
-                        # Don't fail connection removal due to cleanup errors
-                    
-                    logger.info(f"Removed connection {connection_id} with pattern-agnostic cleanup, Phase 2 lifecycle cleanup, and Issue #601 memory leak prevention (thread-safe)")
-    
-    def get_connection(self, connection_id: Union[str, ConnectionID]) -> Optional[WebSocketConnection]:
-        """Get a specific connection with type validation."""
-        validated_connection_id = str(connection_id)
-        return self._connections.get(validated_connection_id)
-    
-    def get_user_connections(self, user_id: Union[str, UserID]) -> Set[str]:
-        """Get all connections for a user with type validation."""
-        validated_user_id = ensure_user_id(user_id)
-        return self._user_connections.get(validated_user_id, set()).copy()
-    
-    def get_connection_thread_id(self, connection_id: Union[str, ConnectionID]) -> Optional[str]:
-        """Get the thread_id for a specific connection."""
-        connection = self.get_connection(connection_id)
-        return connection.thread_id if connection else None
-    
-    def get_user_connections_by_thread(self, user_id: Union[str, UserID], thread_id: str) -> Set[str]:
-        """Get all connections for a user filtered by thread_id."""
-        validated_user_id = ensure_user_id(user_id)
-        user_connections = self._user_connections.get(validated_user_id, set())
-        
-        thread_connections = set()
-        for conn_id in user_connections:
-            connection = self.get_connection(conn_id)
-            if connection and connection.thread_id == thread_id:
-                thread_connections.add(conn_id)
-        
-        return thread_connections
+                # Remove from user connections
+                if connection.user_id in self._user_connections:
+                    self._user_connections[connection.user_id].discard(validated_connection_id)
+                    if not self._user_connections[connection.user_id]:
+                        del self._user_connections[connection.user_id]
 
-    # =================== COMPATIBILITY METHODS FOR ISSUE #618 ===================
-    # These methods provide compatibility with legacy test signatures that expect
-    # register_connection(connection_id, user_id, websocket) pattern
-    
-    def register_connection(self, connection_id: str, user_id: str, websocket: Any) -> None:
-        """
-        ISSUE #618 FIX: Compatibility method for legacy test patterns.
-        
-        This synchronous method provides compatibility with tests that expect:
-        register_connection(connection_id, user_id, websocket)
-        
-        The async add_connection method is the preferred SSOT method for new code.
-        """
-        from netra_backend.app.websocket_core.connection_manager import ConnectionInfo
-        
-        # Create ConnectionInfo object for compatibility
-        connection_info = ConnectionInfo(connection_id=connection_id, user_id=user_id)
-        connection_info.websocket = websocket
-        connection_info.connected_at = datetime.now(timezone.utc)
-        
-        # Convert to WebSocketConnection and add to manager
-        websocket_conn = WebSocketConnection(
-            connection_id=connection_id,
-            user_id=user_id,
-            websocket=websocket,
-            connected_at=connection_info.connected_at,
-            metadata={"source": "legacy_test_compatibility"}
-        )
-        
-        # Store in synchronous collections for immediate access
-        self._connections[connection_id] = websocket_conn
-        
-        if user_id not in self._user_connections:
-            self._user_connections[user_id] = set()
-        self._user_connections[user_id].add(connection_id)
-        
-        # Store connection info for legacy test access patterns
-        if not hasattr(self, '_connection_infos'):
-            self._connection_infos = {}
-        self._connection_infos[connection_id] = {
-            'connection_id': connection_id,
-            'user_id': user_id,
-            'websocket': websocket,
-            'connected_at': connection_info.connected_at,
-            'is_active': True
-        }
-        
-        logger.debug(f"Legacy compatibility: Registered connection {connection_id} for user {user_id}")
-    
-    def unregister_connection(self, connection_id: str) -> None:
-        """
-        ISSUE #618 FIX: Synchronous compatibility method for connection removal.
-        
-        Provides compatibility with legacy test patterns that expect synchronous unregistration.
-        """
-        # Remove from main connections
-        connection = self._connections.pop(connection_id, None)
-        
-        if connection:
-            # Remove from user connections
-            user_id = connection.user_id
-            if user_id in self._user_connections:
-                self._user_connections[user_id].discard(connection_id)
-                if not self._user_connections[user_id]:
-                    del self._user_connections[user_id]
-        
-        # Remove from legacy connection info store
-        if hasattr(self, '_connection_infos'):
-            self._connection_infos.pop(connection_id, None)
-        
-        logger.debug(f"Legacy compatibility: Unregistered connection {connection_id}")
-    
-    def get_connection_info(self, connection_id: str) -> Optional[Dict[str, Any]]:
-        """
-        ISSUE #618 FIX: Compatibility method for legacy connection info access.
-        ISSUE #556 FIX: Include thread_id for thread propagation support.
-        
-        Tests expect to access connection metadata through get_connection_info.
-        """
-        if hasattr(self, '_connection_infos') and connection_id in self._connection_infos:
-            return self._connection_infos[connection_id]
-        
-        # Fallback to standard connection if available
-        connection = self.get_connection(connection_id)
-        if connection:
-            return {
-                'connection_id': connection.connection_id,
-                'user_id': connection.user_id,
-                'websocket': connection.websocket,
-                'connected_at': connection.connected_at,
-                'thread_id': connection.thread_id,  # ISSUE #556 FIX: Include thread_id for propagation
-                'is_active': True
-            }
-        
-        return None
-    
-    def get_connections_for_user(self, user_id: str) -> List[Dict[str, Any]]:
-        """
-        ISSUE #618 FIX: Compatibility method for user connection lookup.
-        
-        Tests expect this method to return a list of connection objects/dicts.
-        """
-        connections = []
-        user_connection_ids = self.get_user_connections(user_id)
-        
-        for conn_id in user_connection_ids:
-            conn_info = self.get_connection_info(conn_id)
-            if conn_info:
-                connections.append(conn_info)
-        
-        return connections
+                # Cleanup isolation token
+                self._user_context_handler.unregister_isolation_token(validated_connection_id)
 
-    def clear_all_connections(self) -> None:
-        """
-        ISSUE #618 FIX: Compatibility method for test cleanup.
-        
-        Clears all connections for test isolation.
-        """
-        self._connections.clear()
-        self._user_connections.clear()
-        
-        if hasattr(self, '_connection_infos'):
-            self._connection_infos.clear()
-        
-        logger.debug("Legacy compatibility: Cleared all connections")
-    
-    # =================== END COMPATIBILITY METHODS ===================
-    
-    async def wait_for_connection(self, user_id: str, timeout: float = 5.0, check_interval: float = 0.1) -> bool:
-        """
-        Wait for a WebSocket connection to be established for a user.
-        
-        This method is useful during startup sequences to ensure connections are ready
-        before attempting to send messages, avoiding race conditions.
-        
-        Args:
-            user_id: User ID to wait for connection
-            timeout: Maximum time to wait in seconds (default: 5.0)
-            check_interval: How often to check for connection in seconds (default: 0.1)
-            
-        Returns:
-            True if connection established within timeout, False otherwise
-        """
-        start_time = asyncio.get_event_loop().time()
-        
-        while asyncio.get_event_loop().time() - start_time < timeout:
-            # Check if user has any connections
-            if self.get_user_connections(user_id):
-                logger.debug(f"Connection established for user {user_id} after {asyncio.get_event_loop().time() - start_time:.2f}s")
-                # HANG FIX: Process queued messages with timeout to prevent infinite wait
-                try:
-                    await asyncio.wait_for(
-                        self.process_recovery_queue(user_id), 
-                        timeout=min(2.0, timeout - (asyncio.get_event_loop().time() - start_time))
-                    )
-                except asyncio.TimeoutError:
-                    logger.warning(f"Timeout processing recovery queue for user {user_id}")
-                except Exception as e:
-                    logger.error(f"Error processing recovery queue for user {user_id}: {e}")
-                return True
-            
-            # Wait before next check
-            await asyncio.sleep(check_interval)
-        
-        logger.warning(f"Timeout waiting for connection for user {user_id} after {timeout}s")
-        return False
-    
-    async def _send_emergency_message(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> None:
-        """Send message in emergency mode with minimal error handling."""
-        try:
-            # Add emergency mode indicator to messages
-            emergency_message = {
-                **message,
-                'emergency_mode': True,
-                'manager_type': 'emergency_fallback',
-                'timestamp': datetime.now(timezone.utc).isoformat()
-            }
-            
-            # Find connection for user (simplified emergency logic)
-            connection_ids = self.get_user_connections(user_id)
-            for conn_id in connection_ids:
-                connection = self.get_connection(conn_id)
-                if connection and hasattr(connection.websocket, 'send_json'):
-                    await connection.websocket.send_json(emergency_message)
-                    return
-                    
-            logger.warning(f"Emergency mode: No active connections for user {user_id}")
-            
-        except Exception as e:
-            logger.error(f"Emergency manager send failed: {e}")
-    
-    async def _send_degraded_message(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> None:
-        """Send message in degraded mode with service notification."""
-        try:
-            degraded_message = {
-                'type': 'degraded_service',
-                'message': 'Service operating in degraded mode - limited functionality available',
-                'original_message_type': message.get('type', 'unknown'),
-                'degraded_mode': True,
-                'timestamp': datetime.now(timezone.utc).isoformat()
-            }
-            
-            # Find connection for user (minimal degraded logic)
-            connection_ids = self.get_user_connections(user_id)
-            for conn_id in connection_ids:
-                connection = self.get_connection(conn_id)
-                if connection and hasattr(connection.websocket, 'send_json'):
-                    await connection.websocket.send_json(degraded_message)
-                    return
-                    
-        except Exception as e:
-            logger.error(f"Degraded manager send failed: {e}")
-    
-    async def _send_isolated_message(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> None:
-        """Send message in isolated mode with user context validation."""
-        try:
-            # Validate user context for isolation
-            if self.user_context and hasattr(self.user_context, 'user_id'):
-                context_user_id = str(self.user_context.user_id)
-                if str(user_id) != context_user_id:
-                    logger.warning(f"Isolated mode: User ID mismatch {user_id} != {context_user_id}")
-                    return
-            
-            # Send message using private connection state
-            connection_ids = self.get_user_connections(user_id)
-            for conn_id in connection_ids:
-                connection = self.get_connection(conn_id)
-                if connection and connection.websocket:
-                    safe_message = _serialize_message_safely(message)
-                    await connection.websocket.send_json(safe_message)
-                    return
-                    
-            # Queue message if no active connections
-            if not connection_ids:
-                self._private_message_queue.append(message)
-                
-        except Exception as e:
-            logger.error(f"Isolated mode send failed: {e}")
-            self._private_error_count += 1
-    
+                # Cleanup message queue
+                if validated_connection_id in self._connection_message_queues:
+                    del self._connection_message_queues[validated_connection_id]
+
+                # Update compatibility mapping
+                if connection.user_id in self.active_connections:
+                    self.active_connections[connection.user_id] = [
+                        conn for conn in self.active_connections[connection.user_id]
+                        if getattr(conn, 'connection_id', None) != validated_connection_id
+                    ]
+                    if not self.active_connections[connection.user_id]:
+                        del self.active_connections[connection.user_id]
+
+        logger.debug(f"Removed connection {validated_connection_id} for user {connection.user_id}")
+
     async def send_to_user(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> None:
         """Send a message to all connections for a user with thread safety and type validation."""
         # SSOT CONSOLIDATION: All modes use unified message handling
@@ -1563,21 +636,87 @@ class _UnifiedWebSocketManagerImplementation:
             await self.broadcast(message)
             return
 
-        # CRITICAL FIX: Use safe serialization for broadcast messages
-        safe_message = _serialize_message_safely(message)
+        # Use sanitized message if contamination was detected
+        final_message = validation_result.message
+        validated_user_id = validation_result.user_id
 
-        # Broadcast to all connections except excluded users
-        for connection in list(self._connections.values()):
-            # Skip if user is in exclusion list
-            if exclude_users and connection.user_id in exclude_users:
-                continue
+        # Get user connections
+        user_lock = await self._connection_validator.get_user_connection_lock(validated_user_id)
 
+        async with user_lock:
+            connection_ids = self.get_user_connections(validated_user_id)
+
+            if not connection_ids:
+                # Handle case where no connections exist
+                delivery_context = self._message_validator.validate_delivery_context(
+                    validated_user_id, final_message, connection_ids
+                )
+
+                if delivery_context['log_level'] == 'critical':
+                    logger.critical(f"CRITICAL ERROR: No WebSocket connections found for user {validated_user_id}")
+                else:
+                    logger.debug(f"No connections for user {validated_user_id} during {delivery_context['description']}")
+
+                # Store for recovery
+                await self._message_validator.store_failed_message(
+                    validated_user_id, final_message, "no_connections"
+                )
+                return
+
+            # Send to all connections
+            failed_connections = []
+            successful_sends = 0
+
+            for conn_id in connection_ids:
+                connection = self.get_connection(conn_id)
+                if connection and connection.websocket:
+                    try:
+                        safe_message = self._message_validator.create_safe_message(final_message)
+                        await connection.websocket.send_json(safe_message)
+                        successful_sends += 1
+                        logger.debug(f"Sent message to connection {conn_id}")
+                    except Exception as e:
+                        logger.critical(f"WEBSOCKET SEND FAILURE: Failed to send to connection {conn_id}: {e}")
+                        failed_connections.append((conn_id, str(e)))
+                else:
+                    logger.critical(f"INVALID CONNECTION: Connection {conn_id} has no valid WebSocket")
+                    failed_connections.append((conn_id, "invalid_websocket"))
+
+            # Handle delivery results
+            delivery_result = self._message_validator.create_message_delivery_result(
+                successful_sends, failed_connections, len(connection_ids),
+                validated_user_id, final_message.get('type', 'unknown')
+            )
+
+            if failed_connections:
+                self._message_validator.log_delivery_failure(delivery_result)
+
+                # Store message for recovery if all failed
+                if successful_sends == 0:
+                    await self._message_validator.store_failed_message(
+                        validated_user_id, final_message, "all_connections_failed"
+                    )
+
+                # Schedule cleanup of failed connections
+                asyncio.create_task(self._cleanup_failed_connections(failed_connections))
+
+    async def _cleanup_failed_connections(self, failed_connections: List[tuple]) -> None:
+        """Cleanup failed connections in background to avoid deadlocks."""
+        for failed_conn_id, error in failed_connections:
             try:
-                await connection.websocket.send_json(safe_message)
+                await self.remove_connection(failed_conn_id)
+                logger.info(f"Removed failed connection {failed_conn_id} due to: {error}")
             except Exception as e:
-                logger.error(f"Failed to broadcast to {connection.connection_id}: {e}")
-                await self.remove_connection(connection.connection_id)
-    
+                logger.critical(f"CLEANUP FAILURE: Failed to remove connection {failed_conn_id}: {e}")
+
+    def get_connection(self, connection_id: Union[str, ConnectionID]) -> Optional[WebSocketConnection]:
+        """Get a specific connection."""
+        return self._connections.get(str(connection_id))
+
+    def get_user_connections(self, user_id: Union[str, UserID]) -> Set[str]:
+        """Get all connections for a user."""
+        return self._user_connections.get(str(user_id), set()).copy()
+
     def get_stats(self) -> Dict[str, Any]:
         """Get connection statistics."""
         return {
@@ -3650,677 +2789,88 @@ class _UnifiedWebSocketManagerImplementation:
             'healthy': getattr(self, '_is_healthy', True),
             'manager_type': f'unified_{self.mode.value}',
             'mode': self.mode.value,
-            'created_at': getattr(self, 'created_at', datetime.now(timezone.utc)).isoformat(),
+            'contamination_stats': self._message_validator.get_contamination_stats(),
+            'recovery_queue_stats': self._message_validator.get_recovery_queue_stats(),
+            'user_context_info': self._user_context_handler.get_user_context_info()
         }
-        
-        if self.mode == WebSocketManagerMode.UNIFIED:
-            return {
-                **base_status,
-                'functionality_level': 'full',
-                'error_recovery_enabled': getattr(self, '_error_recovery_enabled', True),
-                'monitoring_enabled': getattr(self, '_monitoring_enabled', True),
-                'connection_count': self.get_connection_count(),
-                'background_tasks': len(getattr(self, '_background_tasks', {}))
-            }
-        elif self.mode == WebSocketManagerMode.ISOLATED:
-            return {
-                **base_status,
-                'functionality_level': 'isolated',
-                'user_context': bool(self.user_context),
-                'private_error_count': getattr(self, '_private_error_count', 0),
-                'private_message_queue_size': len(getattr(self, '_private_message_queue', []))
-            }
-        elif self.mode == WebSocketManagerMode.EMERGENCY:
-            return {
-                **base_status,
-                'functionality_level': 'emergency',
-                'emergency_mode': True,
-                'queued_messages': len(getattr(self, '_emergency_message_queue', [])),
-                'uptime_seconds': (datetime.now(timezone.utc) - self.created_at).total_seconds()
-            }
-        elif self.mode == WebSocketManagerMode.DEGRADED:
-            return {
-                **base_status,
-                'healthy': False,
-                'functionality_level': 'minimal',
-                'degraded_mode': True,
-                'message': 'Operating in degraded mode - please retry connection'
-            }
-        
-        return base_status
-
-    def is_healthy(self) -> bool:
-        """
-        Check if WebSocket manager is healthy and operational.
-
-        Returns:
-            bool: True if manager is healthy and can process WebSocket events
-
-        Note:
-            This method is required by AgentWebSocketBridge and test infrastructure.
-            It provides a simple boolean interface to the detailed health status.
-        """
-        return getattr(self, '_is_healthy', True)
-    
-    # ===========================================================================
-    # GOLDEN PATH METHODS (Issue #1100 SSOT Consolidation)
-    # ===========================================================================
-    
-    async def broadcast_system_status(self, status_message: str, event_type: str = "system_status") -> int:
-        """
-        Broadcast system status message to all connected users.
-        
-        Golden Path method for system-wide notifications.
-        
-        Args:
-            status_message: Status message to broadcast
-            event_type: Event type for the status message
-            
-        Returns:
-            int: Number of users notified
-        """
-        logger.info(f"Broadcasting system status: {status_message}")
-        
-        notified_count = 0
-        status_data = {
-            "message": status_message,
-            "timestamp": datetime.now().isoformat(),
-            "event_type": event_type
-        }
-        
-        # Get all connected users
-        connected_users = set()
-        for connection in self._connections.values():
-            if hasattr(connection, 'user_id') and connection.user_id:
-                connected_users.add(connection.user_id)
-        
-        # Send to each user
-        for user_id in connected_users:
-            try:
-                await self.send_agent_event(user_id, event_type, status_data)
-                notified_count += 1
-            except Exception as e:
-                logger.error(f"Failed to send system status to user {user_id}: {e}")
-        
-        logger.info(f"System status broadcasted to {notified_count} users")
-        return notified_count
-    
-    def get_connection_status(self, user_id: Optional[Union[str, UserID]] = None) -> Dict[str, Any]:
-        """
-        Get connection status for a user or all users.
-        
-        Golden Path method for connection monitoring.
-        
-        Args:
-            user_id: Optional user ID to check. If None, returns status for all users
-            
-        Returns:
-            Dictionary with connection status information
-        """
-        if user_id:
-            typed_user_id = str(user_id)
-            user_connections = self.get_user_connections(typed_user_id)
-            
-            return {
-                "user_id": typed_user_id,
-                "connected": len(user_connections) > 0,
-                "connection_count": len(user_connections),
-                "connection_ids": list(user_connections),
-                "timestamp": datetime.now().isoformat()
-            }
-        else:
-            # Return status for all users
-            all_users = set()
-            for connection in self._connections.values():
-                if hasattr(connection, 'user_id') and connection.user_id:
-                    all_users.add(connection.user_id)
-            
-            users_status = {}
-            for user in all_users:
-                user_connections = self.get_user_connections(user)
-                users_status[user] = {
-                    "connected": len(user_connections) > 0,
-                    "connection_count": len(user_connections),
-                    "connection_ids": list(user_connections)
-                }
-            
-            return {
-                "total_users": len(all_users),
-                "total_connections": len(self._connections),
-                "users": users_status,
-                "timestamp": datetime.now().isoformat()
-            }
-    
-    async def cleanup_stale_connections(self, max_age_seconds: int = 3600) -> int:
-        """
-        Clean up stale WebSocket connections that are no longer active.
-        
-        Golden Path method for connection maintenance.
-        
-        Args:
-            max_age_seconds: Maximum age in seconds before considering connection stale
-            
-        Returns:
-            int: Number of stale connections cleaned up
-        """
-        logger.info(f"Starting cleanup of stale connections older than {max_age_seconds} seconds")
-        
-        current_time = time.time()
-        stale_connections = []
-        
-        # Find stale connections
-        for connection_id, connection in self._connections.items():
-            connection_age = current_time - getattr(connection, 'created_at', current_time)
-            
-            # Check if connection is stale
-            is_stale = (
-                connection_age > max_age_seconds or
-                not hasattr(connection, 'websocket') or
-                getattr(connection, 'websocket', None) is None
-            )
-            
-            if is_stale:
-                stale_connections.append((connection_id, connection))
-                logger.debug(f"Found stale connection: {connection_id} (age: {connection_age:.1f}s)")
-        
-        # Clean up stale connections
-        cleaned_count = 0
-        for connection_id, connection in stale_connections:
-            try:
-                await self.remove_connection(connection_id)
-                cleaned_count += 1
-                logger.debug(f"Cleaned up stale connection: {connection_id}")
-            except Exception as e:
-                logger.error(f"Failed to clean up stale connection {connection_id}: {e}")
-        
-        logger.info(f"Cleanup complete: {cleaned_count} stale connections removed")
-        return cleaned_count
 
     async def shutdown(self):
-        """
-        Shutdown the WebSocket manager and cleanup all resources.
-        
-        This method provides a complete shutdown interface for the WebSocket manager,
-        cleaning up connections, background tasks, and other resources.
-        
-        ISSUE #1199 Phase 2: Adds missing shutdown interface method for test compatibility.
-        
-        Business Value:
-        - Ensures proper resource cleanup in production and test environments
-        - Prevents resource leaks and memory issues
-        - Provides clean shutdown interface for testing frameworks
-        """
-        logger.info("Starting WebSocket manager shutdown...")
-        
-        try:
-            # 1. Shutdown background monitoring first
-            await self.shutdown_background_monitoring()
-            
-            # 2. Clean up all connections
-            connection_ids = list(self._connections.keys())
-            for connection_id in connection_ids:
+        """Shutdown the WebSocket manager."""
+        async with self._lock:
+            self._shutdown_requested = True
+
+            # Close all connections
+            for connection in list(self._connections.values()):
                 try:
-                    await self.remove_connection(connection_id)
+                    if connection.websocket:
+                        await connection.websocket.close()
                 except Exception as e:
-                    logger.warning(f"Error removing connection {connection_id} during shutdown: {e}")
-            
-            # 3. Clear user mappings
+                    logger.error(f"Error closing connection {connection.connection_id}: {e}")
+
+            # Clear all data structures
+            self._connections.clear()
             self._user_connections.clear()
-            
-            # 4. Clear event tracking and queues
-            if hasattr(self, '_event_tracking'):
-                self._event_tracking.clear()
-            
-            if hasattr(self, '_event_queues'):
-                self._event_queues.clear()
-                
-            if hasattr(self, '_user_event_queues'):
-                self._user_event_queues.clear()
-            
-            # 5. Clear coordination and transaction data
-            if hasattr(self, '_pending_events'):
-                self._pending_events.clear()
-                
-            if hasattr(self, '_transaction_coordinator'):
-                self._transaction_coordinator = None
-            
-            # 6. Clear metrics and health tracking
-            if hasattr(self, '_metrics'):
-                self._metrics.clear()
-                
-            if hasattr(self, '_health_status'):
-                self._health_status = {'healthy': False, 'shutdown': True}
-            
-            logger.info("WebSocket manager shutdown completed successfully")
-            
-        except Exception as e:
-            logger.error(f"Error during WebSocket manager shutdown: {e}")
-            raise
+            self._connection_message_queues.clear()
+            self.active_connections.clear()
 
-    # =================== GOLDEN PATH INTERFACE METHODS ===================
-    # These methods provide the interface expected by tests and Golden Path flows
-    
-    async def connect(self, user_id: str, websocket: Any, connection_id: str = None, thread_id: str = None) -> Any:
-        """
-        Connect a WebSocket for a user (Golden Path interface method).
-        
-        CRITICAL: This method provides the interface expected by Golden Path tests
-        and WebSocket validation suites. It's an alias to connect_user() to maintain
-        backward compatibility with existing test expectations.
-        
-        Business Value Justification:
-        - Segment: ALL (Free -> Enterprise)  
-        - Business Goal: Enable reliable Golden Path WebSocket connections
-        - Value Impact: Critical for $500K+ ARR chat functionality
-        - Revenue Impact: Foundation for all AI-powered user interactions
-        
-        Args:
-            user_id: User identifier for the connection
-            websocket: WebSocket instance to connect
-            connection_id: Optional connection ID to use
-            thread_id: Optional thread ID for connection
-            
-        Returns:
-            Connection information or connection ID
-        """
-        logger.debug(f"[Golden Path] Connecting user {user_id[:8]}... via connect() interface")
-        return await self.connect_user(user_id, websocket, connection_id, thread_id)
-    
-    async def disconnect(self, user_id: str, websocket: Any = None, code: int = 1000, reason: str = "Normal closure") -> None:
-        """
-        Disconnect a WebSocket for a user (Golden Path interface method).
-        
-        CRITICAL: This method provides the interface expected by Golden Path tests
-        and WebSocket validation suites. It's an alias to disconnect_user() to maintain
-        backward compatibility with existing test expectations.
-        
-        Business Value Justification:
-        - Segment: ALL (Free -> Enterprise)
-        - Business Goal: Enable clean WebSocket disconnections for Golden Path
-        - Value Impact: Critical for proper connection lifecycle management
-        - Revenue Impact: Prevents connection leaks affecting system stability
-        
-        Args:
-            user_id: User identifier for the disconnection
-            websocket: Optional WebSocket instance to disconnect
-            code: WebSocket close code (default: 1000 for normal closure)
-            reason: Reason for disconnection
-        """
-        logger.debug(f"[Golden Path] Disconnecting user {user_id[:8]}... via disconnect() interface")
-        if websocket:
-            await self.disconnect_user(user_id, websocket, code, reason)
-        else:
-            # Disconnect all connections for the user if no specific websocket provided
-            await self.handle_disconnection(user_id, websocket)
-    
+            # Cancel background tasks
+            for task in self._background_tasks.values():
+                if not task.done():
+                    task.cancel()
+
+            logger.info("WebSocket manager shutdown complete")
+
+    # Compatibility methods for existing code
+    def is_connection_active(self, user_id: Union[str, UserID]) -> bool:
+        """Check if user has active connections."""
+        return len(self.get_user_connections(user_id)) > 0
+
     async def emit_agent_event(self, user_id: Union[str, UserID], event_type: str, data: Dict[str, Any]) -> None:
-        """
-        Emit agent event to user connections (Golden Path interface method).
-        
-        CRITICAL: This method provides the interface expected by Golden Path tests
-        and agent execution flows. It's an alias to send_agent_event() to maintain
-        backward compatibility with existing test and agent execution expectations.
-        
-        Business Value Justification:
-        - Segment: ALL (Free -> Enterprise)
-        - Business Goal: Enable real-time agent progress updates (90% of platform value)
-        - Value Impact: Critical for chat functionality and user experience
-        - Revenue Impact: Core method for $500K+ ARR AI interaction delivery
-        
-        Args:
-            user_id: Target user ID for the event
-            event_type: Type of agent event (agent_started, agent_thinking, tool_executing, etc.)
-            data: Event payload data
-        """
-        logger.debug(f"[Golden Path] Emitting agent event '{event_type}' to user {str(user_id)[:8]}... via emit_agent_event() interface")
-        await self.send_agent_event(user_id, event_type, data)
+        """Emit an agent event to a user."""
+        # Process business event
+        processed_event = self._message_validator.process_business_event(event_type, data)
+        if processed_event:
+            await self.send_to_user(user_id, processed_event)
 
-    # ==================================================================================
-    # HEALTH MONITORING AND CLEANUP LIFECYCLE METHODS
-    # Support for WebSocket Manager Factory resource management
-    # ==================================================================================
-
-    def _is_active(self) -> bool:
-        """
-        Check if this manager instance is active and responsive.
-
-        Used by get_websocket_manager() for resource management decisions.
-
-        Returns:
-            bool: True if manager is active and handling connections
-        """
-        try:
-            # Manager is active if it has been initialized and has connections or recent activity
-            if not hasattr(self, '_initialized') or not self._initialized:
-                return False
-
-            # Check if we have any active connections
-            if self._connections:
-                return True
-
-            # Check if we had recent activity (within last 5 minutes)
-            if hasattr(self, '_last_activity_time'):
-                time_since_activity = (datetime.now(timezone.utc) - self._last_activity_time).total_seconds()
-                return time_since_activity < 300  # 5 minutes
-
-            # If no connections and no recent activity, consider inactive
-            return False
-
-        except Exception as e:
-            logger.error(f"Error checking manager active status: {e}")
-            return False
-
-    async def health_check(self, timeout: float = 2.0) -> bool:
-        """
-        Perform comprehensive health check of this manager instance.
-
-        Used by get_websocket_manager() for zombie detection and cleanup decisions.
-
-        Args:
-            timeout: Maximum time to spend on health check
-
-        Returns:
-            bool: True if manager is healthy and responsive
-        """
-        try:
-            start_time = time.time()
-
-            # Basic state validation
-            if not hasattr(self, '_initialized') or not self._initialized:
-                logger.debug("Health check failed: Manager not initialized")
-                return False
-
-            # Check if we can access core attributes without errors
-            _ = len(self._connections)
-            _ = len(self._user_connections)
-
-            # Test connection responsiveness for active connections
-            responsive_connections = 0
-            total_connections = len(self._connections)
-
-            if total_connections > 0:
-                # Test a sample of connections (max 5 to avoid timeout)
-                test_connections = list(self._connections.values())[:5]
-
-                for connection in test_connections:
-                    if time.time() - start_time > timeout:
-                        break  # Avoid timeout
-
-                    try:
-                        # Quick responsiveness test
-                        if hasattr(connection, 'websocket') and connection.websocket:
-                            # Try to send a ping or check connection state
-                            if hasattr(connection.websocket, 'state'):
-                                # WebSocket has state - check if it's open
-                                if str(connection.websocket.state).lower() in ['open', 'connected']:
-                                    responsive_connections += 1
-                            elif hasattr(connection.websocket, 'ping'):
-                                # Try a ping with short timeout
-                                try:
-                                    await asyncio.wait_for(connection.websocket.ping(), timeout=0.5)
-                                    responsive_connections += 1
-                                except asyncio.TimeoutError:
-                                    pass  # Connection not responsive
-                            else:
-                                # Assume responsive if no way to test
-                                responsive_connections += 1
-                    except Exception:
-                        pass  # Connection not responsive
-
-                # Manager is healthy if majority of connections are responsive
-                if total_connections > 0:
-                    responsiveness_ratio = responsive_connections / min(total_connections, 5)
-                    if responsiveness_ratio < 0.5:  # Less than 50% responsive
-                        logger.debug(f"Health check failed: Low connection responsiveness ({responsive_connections}/{total_connections})")
-                        return False
-
-            # Check for internal error state
-            if hasattr(self, '_error_count'):
-                error_count = getattr(self, '_error_count', 0)
-                if error_count > 10:  # Too many errors
-                    logger.debug(f"Health check failed: High error count ({error_count})")
-                    return False
-
-            # Update last activity time
-            self._last_activity_time = datetime.now(timezone.utc)
-
-            # All checks passed
-            elapsed = time.time() - start_time
-            logger.debug(f"Health check passed in {elapsed:.3f}s: {responsive_connections}/{total_connections} connections responsive")
-            return True
-
-        except Exception as e:
-            logger.error(f"Health check failed with exception: {e}")
-            return False
-
-    async def graceful_shutdown(self, timeout: float = 5.0) -> bool:
-        """
-        Perform graceful shutdown of this manager instance.
-
-        Used by get_websocket_manager() during emergency cleanup.
-
-        Args:
-            timeout: Maximum time to spend on shutdown
-
-        Returns:
-            bool: True if shutdown completed successfully
-        """
-        try:
-            logger.info(f"Starting graceful shutdown of WebSocket manager (timeout: {timeout}s)")
-            start_time = time.time()
-
-            # Mark as shutting down
-            self._shutting_down = True
-
-            # Close all connections gracefully
-            connection_ids = list(self._connections.keys())
-            closed_count = 0
-
-            for conn_id in connection_ids:
-                if time.time() - start_time > timeout * 0.8:  # Leave time for cleanup
-                    break
-
-                try:
-                    connection = self._connections.get(conn_id)
-                    if connection and hasattr(connection, 'websocket') and connection.websocket:
-                        # Send close frame if possible
-                        if hasattr(connection.websocket, 'close'):
-                            await asyncio.wait_for(
-                                connection.websocket.close(code=1001, reason="Manager shutdown"),
-                                timeout=1.0
-                            )
-
-                    # Remove from our registry
-                    await self.remove_connection(conn_id)
-                    closed_count += 1
-
-                except Exception as e:
-                    logger.warning(f"Error closing connection {conn_id} during shutdown: {e}")
-
-            # Clear internal state
+    async def broadcast(self, message: Dict[str, Any]) -> None:
+        """Broadcast message to all connected users."""
+        for user_id in list(self._user_connections.keys()):
             try:
-                self._connections.clear()
-                self._user_connections.clear()
-                if hasattr(self, '_connection_message_queues'):
-                    self._connection_message_queues.clear()
-                if hasattr(self, '_message_recovery_queue'):
-                    self._message_recovery_queue.clear()
+                await self.send_to_user(user_id, message)
             except Exception as e:
-                logger.warning(f"Error clearing internal state during shutdown: {e}")
+                logger.error(f"Failed to broadcast to user {user_id}: {e}")
 
-            elapsed = time.time() - start_time
-            logger.info(f"Graceful shutdown completed in {elapsed:.3f}s: {closed_count}/{len(connection_ids)} connections closed")
-            return True
+    # Additional compatibility aliases
+    async def connect_user(self, user_id: str, websocket: Any, connection_id: str = None, thread_id: str = None) -> str:
+        """Connect a user (compatibility method)."""
+        if not connection_id:
+            from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+            id_manager = UnifiedIDManager()
+            connection_id = id_manager.generate_id(IDType.CONNECTION)
 
-        except Exception as e:
-            logger.error(f"Error during graceful shutdown: {e}")
-            return False
-
-    def get_manager_metrics(self) -> Dict[str, Any]:
-        """
-        Get detailed metrics about this manager instance.
-
-        Used by get_websocket_manager() for health assessment and monitoring.
-
-        Returns:
-            Dict containing manager metrics and health indicators
-        """
-        try:
-            now = datetime.now(timezone.utc)
-
-            # Basic connection metrics
-            total_connections = len(self._connections) if hasattr(self, '_connections') else 0
-            total_users = len(self._user_connections) if hasattr(self, '_user_connections') else 0
-
-            # Activity metrics
-            last_activity = getattr(self, '_last_activity_time', None)
-            seconds_since_activity = None
-            if last_activity:
-                seconds_since_activity = (now - last_activity).total_seconds()
-
-            # Error metrics
-            error_count = getattr(self, '_error_count', 0)
-            connection_error_count = len(getattr(self, '_connection_error_count', {}))
-
-            # Message queue metrics
-            queued_messages = 0
-            if hasattr(self, '_message_recovery_queue'):
-                queued_messages = sum(len(queue) for queue in self._message_recovery_queue.values())
-
-            # Calculate health score (0.0 to 1.0)
-            health_score = 1.0
-
-            # Penalize for errors
-            if error_count > 0:
-                health_score -= min(0.3, error_count * 0.02)  # Max 30% penalty
-
-            # Penalize for old activity
-            if seconds_since_activity is not None:
-                if seconds_since_activity > 300:  # 5 minutes
-                    health_score -= 0.2
-                elif seconds_since_activity > 600:  # 10 minutes
-                    health_score -= 0.4
-
-            # Penalize for too many queued messages
-            if queued_messages > 10:
-                health_score -= min(0.2, queued_messages * 0.01)
-
-            health_score = max(0.0, health_score)
-
-            return {
-                'connection_count': total_connections,
-                'user_count': total_users,
-                'error_count': error_count,
-                'connection_errors': connection_error_count,
-                'queued_messages': queued_messages,
-                'last_activity': last_activity.isoformat() if last_activity else None,
-                'seconds_since_activity': seconds_since_activity,
-                'health_score': health_score,
-                'is_active': self._is_active(),
-                'is_shutting_down': getattr(self, '_shutting_down', False),
-                'manager_mode': self.mode.value if hasattr(self, 'mode') else 'unknown',
-                'user_id': getattr(self.user_context, 'user_id', 'unknown') if hasattr(self, 'user_context') else 'unknown',
-                'timestamp': now.isoformat()
-            }
-
-        except Exception as e:
-            logger.error(f"Error getting manager metrics: {e}")
-            return {
-                'error': str(e),
-                'timestamp': datetime.now(timezone.utc).isoformat()
-            }
-
-    def get_connection_health_summary(self) -> Dict[str, Any]:
-        """
-        Get summary of connection health for this manager.
-
-        Returns:
-            Dict containing connection health statistics
-        """
-        try:
-            total_connections = len(self._connections)
-            healthy_connections = 0
-            unhealthy_connections = 0
-            unknown_connections = 0
-
-            for connection in self._connections.values():
-                try:
-                    # Basic health check
-                    if hasattr(connection, 'websocket') and connection.websocket:
-                        if hasattr(connection.websocket, 'state'):
-                            state = str(connection.websocket.state).lower()
-                            if state in ['open', 'connected']:
-                                healthy_connections += 1
-                            else:
-                                unhealthy_connections += 1
-                        else:
-                            unknown_connections += 1
-                    else:
-                        unhealthy_connections += 1
-                except Exception:
-                    unhealthy_connections += 1
-
-            return {
-                'total_connections': total_connections,
-                'healthy_connections': healthy_connections,
-                'unhealthy_connections': unhealthy_connections,
-                'unknown_connections': unknown_connections,
-                'health_ratio': healthy_connections / max(1, total_connections),
-                'needs_attention': unhealthy_connections > 0 or (total_connections > 0 and healthy_connections == 0)
-            }
-
-        except Exception as e:
-            logger.error(f"Error getting connection health summary: {e}")
-            return {'error': str(e), 'total_connections': 0}
-
-
-# SECURITY FIX: Replace singleton with factory pattern
-#  ALERT:  SECURITY FIX: Singleton pattern completely removed to prevent multi-user data leakage
-# Use create_websocket_manager(user_context) or WebSocketBridgeFactory instead
-
-# ISSUE #824 FIX: Removed get_websocket_manager() function causing circular reference
-# This deprecated function was throwing errors and blocking unit tests
-# The working implementation is in websocket_manager.py:182
-
-
-# ISSUE #824 REMEDIATION: SSOT CONSOLIDATION
-# This implementation is only accessible through the canonical SSOT import path.
-# Direct imports from this module violate SSOT principles.
-
-# Implementation is available as a private class only
-# Public access must go through: netra_backend.app.websocket_core.websocket_manager
-
-# ISSUE #824 REMEDIATION: EXPORTS REMOVED FOR SSOT CONSOLIDATION
-#
-# This module now contains the implementation but does NOT export classes directly.
-# All imports must go through the canonical SSOT path:
-# from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-#
-# This prevents fragmented import paths and enforces SSOT compliance.
-
-# SSOT CONSOLIDATION COMPLETE - Issue #824 
-# Backward compatibility exports REMOVED to achieve SSOT compliance
-# CANONICAL PATH: Use netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-
-# UnifiedWebSocketManager export - RESTORED for Issue #1236 import fix
-UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation
-
-# ISSUE #1184 REMEDIATION: Remove duplicate exports to eliminate SSOT violations
-# WebSocketConnection, _serialize_message_safely, WebSocketManagerMode are in types.py (SSOT)
-__all__ = ['UnifiedWebSocketManager']
-
-# SSOT Consolidation: Log that direct imports are not supported
-import sys
-if __name__ not in sys.modules:
-    # Only log if this module is being imported (not executed directly)
-    try:
-        from shared.logging.unified_logging_ssot import get_logger
-        logger = get_logger(__name__)
-        logger.warning(
-            "SSOT CONSOLIDATION (Issue #824): Direct imports from unified_manager.py are deprecated. "
-            "Use canonical path: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager"
+        connection = WebSocketConnection(
+            connection_id=connection_id,
+            user_id=user_id,
+            websocket=websocket,
+            connected_at=datetime.now(timezone.utc),
+            thread_id=thread_id
         )
-    except ImportError:
-        # Fallback logging if logging import fails
-        import logging
-        logging.warning("SSOT CONSOLIDATION (Issue #824): Use websocket_manager.py canonical import path")
+
+        await self.add_connection(connection)
+        return connection_id
+
+    async def disconnect_user(self, user_id: str, websocket: Any = None, code: int = 1000, reason: str = "Normal closure") -> None:
+        """Disconnect a user (compatibility method)."""
+        connection_ids = self.get_user_connections(user_id)
+        for conn_id in connection_ids:
+            await self.remove_connection(conn_id)
+
+
+# Create factory function for external access
+def get_websocket_manager(user_context=None, mode=WebSocketManagerMode.UNIFIED, **kwargs):
+    """Factory function to create WebSocket manager instances."""
+    return _UnifiedWebSocketManagerImplementation(mode=mode, user_context=user_context, **kwargs)
+
+
+# Export implementation for compatibility
+UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation

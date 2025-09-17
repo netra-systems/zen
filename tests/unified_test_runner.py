@@ -1140,7 +1140,11 @@ class UnifiedTestRunner:
                         }
                     
                     print(f"✅ Fast collection completed: {sum(len(r.get('output', '').split()) for r in results.values())} files")
-                    return 0
+                    # CRITICAL FIX Issue #1176: Fast collection does NOT run tests - must return failure
+                    print("❌ FAILURE: Fast collection mode discovered tests but did NOT execute them")
+                    print("   This is test discovery only, not actual test execution")
+                    print("   Remove --fast-collection flag to actually run tests")
+                    return 1  # Collection is not execution - must fail
 
 
             # Check service availability if real services or E2E tests are requested
@@ -4781,7 +4785,11 @@ def main():
                 print(f"Found {len(valid_files)} test files in {test_dir.name}")
         
         print(f"✅ Fast collection completed: {total_files} test files discovered")
-        return 0
+        # CRITICAL FIX Issue #1176: Fast collection does NOT run tests - must return failure
+        print("❌ FAILURE: Fast collection mode discovered tests but did NOT execute them")
+        print("   This is test discovery only, not actual test execution")
+        print("   Remove --fast-collection flag to actually run tests")
+        return 1  # Collection is not execution - must fail
     
     # Run validation by default unless --no-validate is specified
     if not getattr(args, 'no_validate', False):

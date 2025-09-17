@@ -1176,6 +1176,7 @@ __all__ = [
     "get_current_user",
     "get_optional_user",
     "get_auth_client",
+    "get_auth_handler",  # Deployment compatibility alias
     "generate_access_token",
     "BackendAuthIntegration",
     "AuthValidationResult",
@@ -1188,3 +1189,6 @@ __all__ = [
 
 # Issue #762 Phase 2 Remediation: Add backward compatibility alias
 unified_auth_client = auth_client
+
+# Deployment compatibility alias for get_auth_handler
+get_auth_handler = get_auth_client

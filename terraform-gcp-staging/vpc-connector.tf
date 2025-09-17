@@ -22,7 +22,7 @@ resource "google_vpc_access_connector" "staging_connector" {
   name          = "staging-connector"
   project       = var.project_id
   region        = var.region
-  network       = "staging-vpc" # Must match the VPC network name
+  network       = var.enable_private_ip ? google_compute_network.vpc[0].name : "default" # Must match the VPC network name
 
   # ISSUE #1177 FIX: Updated CIDR to align with Redis subnet routing
   # This ensures proper connectivity to Redis at 10.166.204.83:6379
@@ -55,6 +55,12 @@ resource "google_vpc_access_connector" "staging_connector" {
     purpose     = "cloud-run-private-access"
     issue       = "1177-http-503-fixes"
   }
+
+  # ISSUE #1177 FIX: Ensure VPC connector is created after VPC network
+  depends_on = [
+    google_project_service.required_apis,
+    google_compute_network.vpc
+  ]
 }
 
 # ISSUE #1177 FIX: Enhanced outputs for comprehensive infrastructure tracking
