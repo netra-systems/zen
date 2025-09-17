@@ -330,7 +330,7 @@ class WebSocketAuditTrailComplianceMissionCriticalTests(BaseMissionCriticalTest)
         assert chain_hash == reconstructed_hash, \
             fAudit chain integrity verification failed: {chain_hash} != {reconstructed_hash}
             
-        print(f" PASS:  Mission Critical: Business transaction audit integrity validated)
+        print(f" PASS:  Mission Critical: Business transaction audit integrity validated)")
 
     def test_regulatory_compliance_reporting_EXPECTED_FAILURE(self"):
         
@@ -489,9 +489,9 @@ class WebSocketAuditTrailComplianceMissionCriticalTests(BaseMissionCriticalTest)
         assert len(temporally_queryable_entries) == len(time_range_entries), \
             fTemporal compliance queries not supported with uuid.uuid4(): {len(temporally_queryable_entries)} != {len(time_range_entries)}"
             
-        print(f" PASS:  Mission Critical: Regulatory compliance reporting validated)
+        print(f" PASS:  Mission Critical: Regulatory compliance reporting validated)")
         print(f   SOX entries: {len(sox_entries)})
-        print(f"   GDPR entries: {len(gdpr_entries)})
+        print(f"   GDPR entries: {len(gdpr_entries)})")
         print(f   Time range entries: {len(time_range_entries")})
 
     def test_security_audit_incident_investigation_EXPECTED_FAILURE(self):

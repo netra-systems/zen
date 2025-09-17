@@ -200,7 +200,7 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
                                 'violation_type': 'legacy_websocket_manager_imports'
                             }
                             
-                            logger.warning(f"🚨 LEGACY IMPORT VIOLATION: {py_file.relative_to(project_root)})
+                            logger.warning(f"🚨 LEGACY IMPORT VIOLATION: {py_file.relative_to(project_root)})")
                             for imp in legacy_imports:
                                 logger.warning(f  Line {imp['line_num']}: {imp['line']}")
                                 
@@ -444,7 +444,7 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
                 if isinstance(details, list) and details:
                     count = len(details)
                     total_violations += count
-                    logger.warning(f"  {violation_type}: {count} violations)
+                    logger.warning(f"  {violation_type}: {count} violations)")
                 elif isinstance(details, dict) and 'compliance_rate' in details:
                     logger.info(f  {violation_type}: {details['compliance_rate']:.1%} compliant)
             

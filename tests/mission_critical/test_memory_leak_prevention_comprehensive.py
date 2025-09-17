@@ -1147,7 +1147,7 @@ class AuthenticationFlowMemoryManagementTests:
         # Final memory analysis
         final_analysis = self.profiler.detect_memory_leaks(iterations_completed=1)
         if final_analysis.get(leak_detected):
-            logger.warning(f"Authentication flow memory leak detected: {final_analysis})
+            logger.warning(f"Authentication flow memory leak detected: {final_analysis})")
 
     @pytest.mark.asyncio
     @pytest.mark.critical

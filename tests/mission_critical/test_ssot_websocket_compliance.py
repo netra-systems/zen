@@ -335,7 +335,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             
             # Allow some factory patterns if they're properly marked as SSOT
             if deprecated_patterns:
-                logger.warning(f"⚠️ Factory patterns detected: {deprecated_patterns})
+                logger.warning(f"⚠️ Factory patterns detected: {deprecated_patterns})")
                 # Only fail if these are not SSOT-compliant factories
                 for pattern in deprecated_patterns:
                     if 'websocket_manager_factory' in pattern:

@@ -91,7 +91,7 @@ class TestAgentDeathAfterTriageFixed:
         "Test suite verifying the agent death bug is FIXED
 
 @pytest.mark.asyncio
-# @pytest.fixture
+# # @pytest.fixture
     async def test_execution_tracker_detects_agent_death(self):
     '''
 CRITICAL: Test that ExecutionTracker detects agent death

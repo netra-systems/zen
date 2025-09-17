@@ -281,7 +281,7 @@ else:
 SUCCESS: All critical frontend message types are properly mapped)
 def test_generate_comprehensive_mapping_report(self"):
     Generate a comprehensive report of all message type mappings."
-print("")
+    print("")
  + ="*60)
 print(COMPREHENSIVE MESSAGE TYPE MAPPING REPORT)
 print("=*60)

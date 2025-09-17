@@ -31,7 +31,7 @@ try:
     from netra_backend.app.schemas.websocket_models import WebSocketMessage
     from netra_backend.app.logging_config import central_logger
 except ImportError as e:
-    logger.warning(f"Some imports failed: {e}. Test will use mock implementations.)
+    logger.warning(f"Some imports failed: {e}. Test will use mock implementations.)")
 
 
 class TestWebSocketConnection:

@@ -317,7 +317,7 @@ if line.strip() and not line.strip().startswith('#')
 and not line.strip().startswith(''''')
 and not line.strip().startswith(''')]
         # Should be under golden pattern limit (<300 lines)
-assert len(code_lines) < 300, "formatted_string"
+assert len(code_lines) < 300, ""
 @pytest.mark.asyncio
     async def test_hook_execution(self, supervisor_agent):
     Test 15: Verify hook execution works correctly."

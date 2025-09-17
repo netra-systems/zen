@@ -167,10 +167,10 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
         # Test concurrent session isolation
         session_contamination = self._test_concurrent_session_isolation()
         
-        print(f"\nDETECTED SESSION CONTAMINATION VIOLATIONS: {len(session_contamination)})
+        print(f"\nDETECTED SESSION CONTAMINATION VIOLATIONS: {len(session_contamination)})")
         for contamination in session_contamination:
             print(f  - Session {contamination['source_session']} contaminated {contamination['target_session']})"
-            print(f"    Contamination type: {contamination['contamination_type']})
+            print(f"    Contamination type: {contamination['contamination_type']})")
             print(f    Data affected: {contamination['affected_data']})"
         
         # This assertion SHOULD FAIL with current session contamination

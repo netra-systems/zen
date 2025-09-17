@@ -1,4 +1,4 @@
-"Integration Test: WebSocket Startup Coordination for Issue #586
+"Integration Test: WebSocket Startup Coordination for Issue #586"""
 
 Tests the integration between startup manager and WebSocket readiness to expose
 the architectural gap causing 1011 errors.
@@ -16,7 +16,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 class StartupPhaseMonitor:
-    Monitor startup phases and their coordination."
+    Monitor startup phases and their coordination.""
 
     def __init__(self):
         self.phases = []
@@ -24,26 +24,26 @@ class StartupPhaseMonitor:
         self.start_time = time.time()
 
     async def record_phase(self, phase: str, component: str, status: str, metadata: Dict[str, Any]=None):
-        "Record a startup phase completion.
+        "Record a startup phase completion."""
         async with self.phase_lock:
             phase_data = {'phase': phase, 'component': component, 'status': status, 'timestamp': time.time(), 'relative_time': time.time() - self.start_time, 'metadata': metadata or {}}
             self.phases.append(phase_data)
             logger.debug(f📊 Startup phase: {component}.{phase} -> {status} at {phase_data['relative_time']:.3f}s")"
 
     def get_phases_by_component(self, component: str) -> List[Dict[str, Any]]:
-        Get all phases for a specific component."
+        Get all phases for a specific component.""
         return [p for p in self.phases if p['component'] == component]
 
     def get_phases_by_status(self, status: str) -> List[Dict[str, Any]]:
-        "Get all phases with specific status.
+        "Get all phases with specific status."""
         return [p for p in self.phases if p['status'] == status]
 
     def get_phase_timeline(self) -> List[str]:
         "Get timeline of phases as strings."
-        return [f{p['component']}.{p['phase']}:{p['status']}@{p['relative_time']:.3f}s for p in self.phases]"
+        return [f{p['component']}.{p['phase']}:{p['status']}@{p['relative_time']:.3f}s for p in self.phases]""
 
     def is_component_ready(self, component: str) -> bool:
-        "Check if component has completed all phases successfully.
+        "Check if component has completed all phases successfully."""
         component_phases = self.get_phases_by_component(component)
         if not component_phases:
             return False
@@ -120,11 +120,11 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
             self.assertTrue(has_readiness_validation, 'EXPECTED FAILURE: No WebSocket readiness validation mechanism exists. Service may accept connections before WebSocket is ready, causing 1011 errors.')
 
     async def test_dependency_initialization_order(self):
-        "TEST FAILURE EXPECTED: WebSocket dependencies not initialized in correct order.
+        "TEST FAILURE EXPECTED: WebSocket dependencies not initialized in correct order."""
         
         This test should FAIL to expose that WebSocket manager may start before
         its dependencies are ready, leading to initialization failures and 1011 errors.
-"
+"""Empty docstring."""
         logger.info('🧪 Testing dependency initialization order')
         monitor = StartupPhaseMonitor()
         dependency_order = await self._simulate_dependency_startup_sequence(monitor)
@@ -182,7 +182,7 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
         websocket_phases = monitor.get_phases_by_component('websocket_manager')
         websocket_errors = [p for p in websocket_phases if p['status'] == 'error']
         if websocket_errors:
-            race_conditions.extend([f"WebSocket error: {error['metadata']} for error in websocket_errors]
+            race_conditions.extend([f"WebSocket error: {error['metadata']} for error in websocket_errors]"
         logger.info(f'Concurrent startup completed in {total_time:.3f}s')
         logger.info(f'Failed services: {len(failed_services)}')
         logger.info(f'Race conditions detected: {len(race_conditions)}')
@@ -190,7 +190,7 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
         self.assertEqual(len(failed_services), 0, f'Service startup failures during concurrent initialization: {failed_services}. This may indicate race conditions or dependency issues.')
 
     async def _simulate_uncoordinated_startup(self, monitor: StartupPhaseMonitor):
-        "Simulate startup sequence with coordination gaps.
+        "Simulate startup sequence with coordination gaps."""
         await monitor.record_phase('init', 'configuration', 'started')
         await asyncio.sleep(0.1)
         await monitor.record_phase('init', 'configuration', 'ready')
@@ -242,7 +242,7 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
         return False
 
     async def _simulate_early_connection_attempts(self, monitor: StartupPhaseMonitor, websocket_state: Dict[str, Any] -> List[Dict[str, Any]]:
-        Simulate connection attempts before WebSocket is ready."
+        Simulate connection attempts before WebSocket is ready.""
         connection_attempts = []
         phases = [{'time': 0.05, 'phase': 'early_init'}, {'time': 0.15, 'phase': 'listening'}, {'time': 0.25, 'phase': 'dependencies_ready'}, {'time': 0.35, 'phase': 'fully_ready'}]
         for phase_info in phases:
@@ -255,7 +255,7 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
         return connection_attempts
 
     async def _simulate_dependency_startup_sequence(self, monitor: StartupPhaseMonitor) -> List[str]:
-        "Simulate dependency startup sequence with ordering issues.
+        "Simulate dependency startup sequence with ordering issues."""
         startup_sequence = [('configuration', 0.05), ('websocket_manager', 0.1), ('database', 0.15), ('agent_registry', 0.2), ('redis', 0.25), ('http_server', 0.3)]
         actual_order = []
         for service, delay in startup_sequence:
@@ -306,7 +306,7 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
         return False
 
     async def _simulate_service_startup(self, service_name: str, monitor: StartupPhaseMonitor, delay: float) -> bool:
-        Simulate individual service startup."
+        Simulate individual service startup.""
         try:
             await monitor.record_phase('startup', service_name, 'started')
             actual_delay = delay + 0.1 * hash(service_name) % 10 / 100

@@ -502,7 +502,7 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
             if report['has_delivery_failures']:
                 logger.warning(fUser {report['user_id']} delivery failures:)
                 logger.warning(f  Missing events: {report['missing_events']})"
-                logger.warning(f"  Duplicate events: {[d['type'] for d in report['duplicate_events']]})
+                logger.warning(f"  Duplicate events: {[d['type'] for d in report['duplicate_events']]})")
                 logger.warning(f  Delivery rate: {report['delivery_rate']:.2%})
         
         # Phase 4: Assert delivery failures exist (test should FAIL)

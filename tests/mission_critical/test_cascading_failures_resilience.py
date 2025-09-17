@@ -92,7 +92,7 @@ class CascadingFailureSimulator:
         with patch.object(redis_manager, 'get', side_effect=ConnectionError(Redis connection failed)):"
             with patch.object(redis_manager, 'set', side_effect=ConnectionError("Redis connection failed)):
                 with patch.object(redis_manager, 'lpush', side_effect=ConnectionError(Redis connection failed)):
-                    logger.warning(f"[U+1F534] SIMULATING: Redis failure for {duration_seconds}s)
+                    logger.warning(f"[U+1F534] SIMULATING: Redis failure for {duration_seconds}s)")
                     await asyncio.sleep(duration_seconds)
                     
         self.active_failures.discard(failure_id)

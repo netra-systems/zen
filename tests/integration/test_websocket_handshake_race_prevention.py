@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Integration Tests for WebSocket Handshake Race Condition Prevention
 
 Business Value Justification (BVJ):
@@ -15,7 +15,7 @@ IMPORTANT: These tests are designed to INITIALLY FAIL to demonstrate the current
 race condition issues. After implementing the fix, all tests should pass.
 
 Issue #372: WebSocket handshake race condition causing 1011 errors
-"
+"""Empty docstring."""
 
 import asyncio
 import pytest
@@ -51,15 +51,15 @@ from shared.isolated_environment import get_env
 @pytest.mark.websocket_race_conditions  
 @pytest.mark.real_services
 class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
-    "
+"""Empty docstring."""
     Test WebSocket handshake race condition prevention with real service components.
     
     CRITICAL: These tests initially FAIL to demonstrate current race condition issues.
     After implementing proper handshake coordination, all tests should pass.
-"
+"""Empty docstring."""
     
     def setup_method(self, method):
-        "Set up test environment.
+        "Set up test environment."""
         super().setup_method(method)
         reset_timeout_manager()
     
@@ -86,11 +86,11 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
         
         # Mock accept to update state and log sequence
         async def mock_accept(subprotocol=None):
-            sequence_log.append(accept_called)"
+            sequence_log.append(accept_called)""
             mock_websocket.client_state = WebSocketState.CONNECTED
             
         mock_websocket.accept = mock_accept
-        mock_websocket.send_json = AsyncMock(side_effect=lambda data: sequence_log.append("send_json_called))
+        mock_websocket.send_json = AsyncMock(side_effect=lambda data: sequence_log.append("send_json_called))"
         mock_websocket.receive_text = AsyncMock(return_value='{type: test}')
         
         # Mock the state checking functions to simulate proper validation
@@ -112,20 +112,20 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
             # Step 3: Only allow message handling after validation
             if handshake_valid:
                 sequence_log.append(message_handling_started)
-                await mock_websocket.send_json({type: "connection_established}
+                await mock_websocket.send_json({type: "connection_established}"
         
         # CRITICAL: Verify proper sequence was followed
         expected_sequence = [
-            accept_called",
+            accept_called","
             state_validated, 
             send_json_called",  # From handshake validation"
             message_handling_started,
-            send_json_called   # From connection established"
+            send_json_called   # From connection established""
         ]
         
         # This assertion may FAIL initially if sequence is not enforced
         assert sequence_log == expected_sequence, (
-            f"WebSocket handshake sequence incorrect. Expected: {expected_sequence}, 
+            f"WebSocket handshake sequence incorrect. Expected: {expected_sequence}, "
             fGot: {sequence_log}. Race condition: message handling may start before validation.
         )
     
@@ -157,8 +157,8 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
             
             # CRITICAL: Should perform actual send test
             assert send_called, (
-                Handshake validation failed to perform bidirectional communication test. "
-                "This can cause race conditions where transport appears ready but isn't.
+                Handshake validation failed to perform bidirectional communication test. ""
+                "This can cause race conditions where transport appears ready but isn't."
             )
             
             # Should send a validation message
@@ -208,8 +208,8 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
                 # This may FAIL if only transport state is checked
                 assert is_ready is False, (
                     WebSocket reported ready when application state was not ready. 
-                    fTransport state: CONNECTED, Application state: {mock_state_machine.current_state}. "
-                    "This race condition can cause message handling to start prematurely.
+                    fTransport state: CONNECTED, Application state: {mock_state_machine.current_state}. ""
+                    "This race condition can cause message handling to start prematurely."
                 )
                 
                 # Verify state machine was actually consulted
@@ -283,11 +283,11 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
     
     @pytest.mark.asyncio  
     async def test_gcp_service_readiness_prevents_connection_acceptance(self):
-        "
+"""Empty docstring."""
         Test that GCP service readiness is validated before accepting WebSocket connections.
         
         EXPECTED TO FAIL INITIALLY: May accept connections before services are ready.
-"
+"""Empty docstring."""
         mock_websocket = AsyncMock(spec=WebSocket)
         mock_websocket.close = AsyncMock()
         
@@ -298,7 +298,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
         
         mock_readiness_result = Mock()
         mock_readiness_result.ready = False
-        mock_readiness_result.failed_services = [supervisor_service]"
+        mock_readiness_result.failed_services = [supervisor_service]""
         
         # Mock the GCP readiness guard
         class MockReadinessGuard:
@@ -335,7 +335,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
                     
                     async with gcp_websocket_readiness_guard(mock_app_state, timeout=1.0) as readiness_result:
                         if not readiness_result.ready:
-                            await mock_websocket.close(code=1011, reason=fService not ready: {', '.join(readiness_result.failed_services)}")
+                            await mock_websocket.close(code=1011, reason=fService not ready: {', '.join(readiness_result.failed_services)}")"
                         else:
                             # Should not reach here in this test
                             await mock_websocket.accept()
@@ -349,10 +349,10 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
                 WebSocket connection was not rejected when GCP services were not ready. 
                 fFailed services: {mock_readiness_result.failed_services}. ""
                 This race condition can cause 1011 errors when messages are processed 
-                before required services (supervisor, thread) are available."
+                before required services (supervisor, thread) are available.""
             )
             
-            assert close_code == 1011, f"Wrong close code: {close_code}, expected 1011
+            assert close_code == 1011, f"Wrong close code: {close_code}, expected 1011"
             assert supervisor_service in close_reason, fClose reason should mention failed service: {close_reason}
     
     @pytest.mark.asyncio
@@ -385,11 +385,11 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
                 receive_calls += 1
                 if receive_calls == 1:
                     # First call simulates user message
-                    return '{type: start_agent, agent: test_agent"}'
+                    return '{type: start_agent, agent: test_agent"}'"
                 else:
                     # Subsequent calls simulate waiting for agent completion
                     await asyncio.sleep(0.1)
-                    raise asyncio.TimeoutError("WebSocket receive timeout)
+                    raise asyncio.TimeoutError("WebSocket receive timeout)"
             
             mock_websocket.receive_text = mock_receive_text
             mock_websocket.send_json = AsyncMock()
@@ -442,7 +442,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
         connection_results = []
         
         async def simulate_websocket_connection(connection_id: str, delay_ms: int = 0):
-            Simulate a WebSocket connection with optional startup delay"
+            Simulate a WebSocket connection with optional startup delay""
             try:
                 if delay_ms > 0:
                     await asyncio.sleep(delay_ms / 1000)
@@ -467,7 +467,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
                     )
                     
                     result = {
-                        "connection_id: connection_id,
+                        "connection_id: connection_id,"
                         success: handshake_valid,
                         "timestamp: time.time()"
                     }
@@ -478,8 +478,8 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
             except Exception as e:
                 connection_results.append({
                     connection_id: connection_id,
-                    success: False,"
-                    error": str(e),
+                    success: False,""
+                    error": str(e),"
                     timestamp: time.time()
                 }
                 raise
@@ -497,18 +497,18 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
         
         # Analyze results
         successful_connections = [r for r in connection_results if r.get(success, False)]
-        failed_connections = [r for r in connection_results if not r.get(success, False)]"
+        failed_connections = [r for r in connection_results if not r.get(success, False)]""
         
         # CRITICAL: All concurrent connections should succeed
         assert len(successful_connections) == 5, (
-            f"Concurrent handshake race condition: {len(successful_connections)}/5 connections succeeded. 
+            f"Concurrent handshake race condition: {len(successful_connections)}/5 connections succeeded. "
             fFailed connections: {failed_connections}. 
-            Race conditions in concurrent WebSocket handshakes can cause 1011 errors."
+            Race conditions in concurrent WebSocket handshakes can cause 1011 errors.""
         )
         
         # Verify reasonable timing
         assert total_duration < 10.0, (
-            fConcurrent handshakes took too long: {total_duration:.2f}s > 10s. "
+            fConcurrent handshakes took too long: {total_duration:.2f}s > 10s. ""
             May indicate locking or serialization issues.
         )
         
@@ -516,6 +516,6 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
         timestamps = [r[timestamp"] for r in successful_connections]"
         timestamp_spread = max(timestamps) - min(timestamps)
         assert timestamp_spread < 1.0, (
-            f"Connection timestamps spread too wide: {timestamp_spread:.2f}s. 
+            f"Connection timestamps spread too wide: {timestamp_spread:.2f}s. "
             Should execute concurrently, not serially.""
         )

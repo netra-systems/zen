@@ -36,7 +36,7 @@ from shared.isolated_environment import get_env
 
 
 class TestWebSocketExecutionIntegration:
-    "Test WebSocket integration with execution factory.
+    "Test WebSocket integration with execution factory."""
 
     @pytest.fixture
     def ws_factory(self):
@@ -50,13 +50,13 @@ class TestWebSocketExecutionIntegration:
     def exec_factory(self):
         Use real service instance.""
     # TODO: Initialize real service
-        Create execution factory."
+        Create execution factory.""
         pass
         return ExecutionFactory()
 
         @pytest.fixture
     def real_agent_registry():
-        "Use real service instance.
+        "Use real service instance."""
     # TODO: Initialize real service
         "Create mock agent registry."
         pass
@@ -96,8 +96,8 @@ assert context.websocket_emitter == emitter
 
         # Test sending event through context
         # Removed problematic line: await emitter.emit({}
-type: "execution_started,
-data": {context_id: context.session_id}
+type: "execution_started,"
+data": {context_id: context.session_id}"
         
 
 mock_ws.send.assert_called_once()
@@ -112,14 +112,14 @@ user_id = user-123
             # Create emitter
 emitter = await ws_factory.create_user_emitter( )
 user_id=user_id,
-session_id=session-1"
+session_id=session-1""
             
 
             # Set WebSocket manager in registry
 mock_agent_registry.set_websocket_manager(emitter)
 
             # Create mock tool dispatcher
-mock_dispatcher = MagicMock(); mock_dispatcher.execute_tool = AsyncMock(return_value={"status: success}
+mock_dispatcher = MagicMock(); mock_dispatcher.execute_tool = AsyncMock(return_value={"status: success}"
 
             # Enhance dispatcher
 mock_agent_registry.enhance_tool_dispatcher.return_value = mock_dispatcher
@@ -160,10 +160,10 @@ websocket_emitter=emitter
 events = ]
 {type: "agent_started, data": {agent: test_agent, task: search"}},"
 {type: agent_thinking, data: {thought": "Analyzing query...}},
-{type: tool_executing, data": {"tool: search, params: {q: "test}}},
-{type": tool_completed, data: {tool: search", "result: {hits: 10}}},
+{type: tool_executing, data": {"tool: search, params: {q: "test}}},"
+{type": tool_completed, data: {tool: search", "result: {hits: 10}}},"
 {type: agent_thinking", "data: {thought: Processing results...}},
-{type": "agent_completed, data: {response: Found 10 results}}"
+{type": "agent_completed, data: {response: Found 10 results}}""
                 
 
                 # Send all events
@@ -182,7 +182,7 @@ for i, call in enumerate(calls):
 if isinstance(sent_data, str):
     sent_data = json.loads(sent_data)
 
-assert sent_data["type] == events[i][type]
+assert sent_data["type] == events[i][type]"
 
 @pytest.mark.asyncio
     async def test_concurrent_user_execution(self, ws_factory, exec_factory):
@@ -191,8 +191,8 @@ assert sent_data["type] == events[i][type]
 pass
 users = ]
 (user-1, session-1),
-(user-2, "session-2),
-(user-3", session-3)
+(user-2, "session-2),"
+(user-3", session-3)"
                                 
 
 contexts = []
@@ -224,7 +224,7 @@ for i, context in enumerate(contexts):
     event = {
 
 "type: agent_started",
-data: {user: context.user_id, index: i}"
+data: {user: context.user_id, index: i}""
                                         
 tasks.append(context.websocket_emitter.emit(event))
 
@@ -242,7 +242,7 @@ assert contexts[i].user_id in str(call_data)
 
 @pytest.mark.asyncio
     async def test_error_event_propagation(self, ws_factory):
-        "Test error events are properly propagated.
+        "Test error events are properly propagated."""
 
 user_id = "user-123"
 
@@ -251,18 +251,18 @@ mock_ws.state = MagicMock(); mock_ws.state.name = OPEN
 
 emitter = await ws_factory.create_user_emitter( )
 user_id=user_id,
-session_id=session-1,"
+session_id=session-1,""
 websocket=mock_ws
                                                     
 
                                                     # Send error event
 error_event = {
-type": error,
+type": error,"
 data: }
 "message: Agent execution failed",
 code: AGENT_ERROR,
-details: }"
-agent": test_agent,
+details: }""
+agent": test_agent,"
 reason: Tool timeout
                                                     
                                                     
@@ -278,11 +278,11 @@ if isinstance(sent, str):
 
 
 assert sent[type] == error
-assert Agent execution failed in str(sent)"
+assert Agent execution failed in str(sent)""
 
 
 class TestWebSocketToolDispatcher:
-    "Test WebSocket integration with tool dispatcher.
+    "Test WebSocket integration with tool dispatcher."""
 
     @pytest.fixture
     def real_tool_dispatcher():
@@ -302,11 +302,11 @@ user_id = user-123
 
         # Create WebSocket setup
 mock_ws = MagicMock(); mock_ws.websocket = TestWebSocketConnection()
-mock_ws.state = MagicMock(); mock_ws.state.name = OPEN"
+mock_ws.state = MagicMock(); mock_ws.state.name = OPEN""
 
 emitter = await ws_factory.create_user_emitter( )
 user_id=user_id,
-session_id=session-1",
+session_id=session-1","
 websocket=mock_ws
         
 
@@ -330,7 +330,7 @@ result = await mock_tool_dispatcher.execute(tool_name, tool_params)
         # Send completion event
         # Removed problematic line: await emitter.emit({}
 "type: tool_completed",
-data: {tool: tool_name, result: result}"
+data: {tool: tool_name, result: result}""
         
 
         # Verify events were sent
@@ -339,7 +339,7 @@ calls = mock_ws.send.call_args_list
 
         # Check executing event
 executing = json.loads(calls[0][0][0] if isinstance(calls[0][0][0], str) else calls[0][0][0]
-assert executing[type"] == tool_executing
+assert executing[type"] == tool_executing"
 
         # Check completed event
 completed = json.loads(calls[1][0][0] if isinstance(calls[1][0][0], str) else calls[1][0][0]
@@ -350,11 +350,11 @@ assert completed[type] == tool_completed
         ""Test enhanced tool dispatcher with WebSocket wrapper.
 
 pass
-user_id = user-123"
+user_id = user-123""
 
             # Create emitter
 mock_ws = MagicMock(); mock_ws.websocket = TestWebSocketConnection()
-mock_ws.state = MagicMock(); mock_ws.state.name = OPEN"
+mock_ws.state = MagicMock(); mock_ws.state.name = OPEN""
 
 emitter = await ws_factory.create_user_emitter( )
 user_id=user_id,

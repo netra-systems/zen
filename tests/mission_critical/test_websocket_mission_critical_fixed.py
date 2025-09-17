@@ -403,10 +403,10 @@ class MissionCriticalWebSocketEventsTests:
                 user_context=user_context
             )
         except Exception as e:
-            print(f"DEBUG: agent_completed failed: {e})
+            print(f"DEBUG: agent_completed failed: {e})")
             
         print(fDEBUG: Total events captured: {len(sent_events)})
-        print(f"DEBUG: Event types: {[event.get('type') for event in sent_events]})
+        print(f"DEBUG: Event types: {[event.get('type') for event in sent_events]})")
 
         # Validate all events were captured
         is_valid, failures = validator.validate_critical_requirements(")
@@ -550,7 +550,7 @@ class MissionCriticalWebSocketEventsTests:
         # Debug output to understand what we captured
         print(fDEBUG: Captured {len(sent_events)} events)
         event_types = [event.get('type') for event in sent_events]
-        print(f"DEBUG: Event types: {event_types})
+        print(f"DEBUG: Event types: {event_types})")
         for i, event in enumerate(sent_events):
             print(fDEBUG: Event {i+1}: type='{event.get('type')}', data keys={list(event.get('data', {}.keys()")})
 

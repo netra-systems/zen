@@ -151,7 +151,7 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
                                 "function: violation[function],
                                 description: violation[description]
                             }
-                            logger.warning(f"[VIOLATION FOUND] Line {i + 1}: {violation['description']})
+                            logger.warning(f"[VIOLATION FOUND] Line {i + 1}: {violation['description']})")
         
         # MIGRATION STATE LOGIC:
         if violations_found:

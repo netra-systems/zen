@@ -1,11 +1,11 @@
-"
+"""Empty docstring."""
 Integration test for WebSocket manager method compatibility.
 
 This test ensures that IsolatedWebSocketManager has all methods
 required by agent_handler.py, preventing AttributeError failures.
 
 Related to: AttributeError 'IsolatedWebSocketManager' object has no attribute 'get_connection_id_by_websocket'
-"
+"""Empty docstring."""
 
 import asyncio
 import uuid
@@ -29,7 +29,7 @@ from shared.id_generation import UnifiedIdGenerator
 
 @pytest.mark.integration
 class WebSocketManagerMethodCompatibilityTests:
-    "Test suite to ensure WebSocket manager has all required methods.
+    "Test suite to ensure WebSocket manager has all required methods."""
     
     async def test_isolated_manager_has_get_connection_id_by_websocket(self):
     ""
@@ -41,7 +41,7 @@ class WebSocketManagerMethodCompatibilityTests:
         context = UserExecutionContext(
             user_id=105945141827451681156",  # Real Google OAuth user ID format"
             thread_id=thread_2025_09_08_14_45_00_abc123,
-            run_id=run_2025_09_08_14_45_00_def456"
+            run_id=run_2025_09_08_14_45_00_def456""
         )
         
         # Create isolated manager (FIXED: Added await)
@@ -49,7 +49,7 @@ class WebSocketManagerMethodCompatibilityTests:
         
         # Verify the method exists
         assert hasattr(manager, 'get_connection_id_by_websocket'), \
-            "IsolatedWebSocketManager must have get_connection_id_by_websocket method
+            "IsolatedWebSocketManager must have get_connection_id_by_websocket method"
         
         # Verify it's callable
         assert callable(getattr(manager, 'get_connection_id_by_websocket')), \
@@ -65,7 +65,7 @@ class WebSocketManagerMethodCompatibilityTests:
         context = UserExecutionContext(
             user_id=github_user_98765432101",  # GitHub OAuth format"
             thread_id=thread_2025_09_08_14_45_01_ghi789,
-            run_id=run_2025_09_08_14_45_01_jkl012"
+            run_id=run_2025_09_08_14_45_01_jkl012""
         )
         
         # Create isolated manager (FIXED: Added await)
@@ -73,7 +73,7 @@ class WebSocketManagerMethodCompatibilityTests:
         
         # Verify the method exists
         assert hasattr(manager, 'update_connection_thread'), \
-            "IsolatedWebSocketManager must have update_connection_thread method
+            "IsolatedWebSocketManager must have update_connection_thread method"
         
         # Verify it's callable
         assert callable(getattr(manager, 'update_connection_thread')), \
@@ -89,7 +89,7 @@ class WebSocketManagerMethodCompatibilityTests:
         context = UserExecutionContext(
             user_id=email_user_john.doe@example.com","
             thread_id=thread_2025_09_08_14_45_02_mno345,
-            run_id=run_2025_09_08_14_45_02_pqr678"
+            run_id=run_2025_09_08_14_45_02_pqr678""
         )
         
         # Create isolated manager (FIXED: Added await)
@@ -101,7 +101,7 @@ class WebSocketManagerMethodCompatibilityTests:
         websocket.client_state = 1  # CONNECTED state
         
         # Create a connection with known ID
-        connection_id = UnifiedIdGenerator.generate_websocket_connection_id("email_user_john.doe@example.com)
+        connection_id = UnifiedIdGenerator.generate_websocket_connection_id("email_user_john.doe@example.com)"
         connection = WebSocketConnection(
             connection_id=connection_id,
             websocket=websocket,
@@ -123,17 +123,17 @@ class WebSocketManagerMethodCompatibilityTests:
         unknown_websocket = AsyncMock()
         not_found = manager.get_connection_id_by_websocket(unknown_websocket)
         assert not_found is None, \
-            Should return None for unknown WebSocket"
+            Should return None for unknown WebSocket""
     
     async def test_update_connection_thread_functionality(self):
-        "
+"""Empty docstring."""
         Test that update_connection_thread actually updates thread associations.
         
         This verifies the method can update thread IDs for connections.
-"
+"""Empty docstring."""
         # Create a valid user context (use realistic IDs)
         context = UserExecutionContext(
-            user_id="oauth_user_567890123456,
+            user_id="oauth_user_567890123456,"
             thread_id=thread_2025_09_08_14_45_03_initial,
             run_id="run_2025_09_08_14_45_03_stu901"
         )
@@ -151,11 +151,11 @@ class WebSocketManagerMethodCompatibilityTests:
         connection = WebSocketConnection(
             connection_id=connection_id,
             websocket=websocket,
-            user_id=oauth_user_567890123456,"
+            user_id=oauth_user_567890123456,""
             connected_at=datetime.utcnow()
         )
         # Set thread_id after creation since it's not in constructor
-        connection.thread_id = thread_2025_09_08_14_45_03_initial"
+        connection.thread_id = thread_2025_09_08_14_45_03_initial""
         
         # Add the connection to manager
         await manager.add_connection(connection)
@@ -185,8 +185,8 @@ class WebSocketManagerMethodCompatibilityTests:
         This simulates how agent_handler.py uses these methods.
         
         # Simulate agent_handler.py usage pattern
-        user_id = production_user_abc123def456"
-        thread_id = "thread_2025_09_08_14_45_04_agent
+        user_id = production_user_abc123def456""
+        thread_id = "thread_2025_09_08_14_45_04_agent"
         
         # Create context like agent_handler does
         context = UserExecutionContext(
@@ -224,13 +224,13 @@ class WebSocketManagerMethodCompatibilityTests:
             else:
                 # This would trigger the fallback in agent_handler.py
                 connection_id = UnifiedIdGenerator.generate_websocket_connection_id(user_id)
-                assert connection_id.startswith(ws_conn_), \"
-                    Fallback connection ID generation should work"
+                assert connection_id.startswith(ws_conn_), \""
+                    Fallback connection ID generation should work""
     
     async def test_all_required_methods_exist(self):
-    "
+"""Empty docstring."""
         Comprehensive test that all methods used by agent_handler.py exist.
-        "
+"""Empty docstring."""
         # Create a valid user context (use realistic IDs)
         context = UserExecutionContext(
             user_id=enterprise_user_789012345678,
@@ -282,7 +282,7 @@ if __name__ == __main__":"
         print([U+2713] test_isolated_manager_has_update_connection_thread passed"")
         
         await test_instance.test_all_required_methods_exist()
-        print([U+2713] test_all_required_methods_exist passed)"
+        print([U+2713] test_all_required_methods_exist passed)""
     
     # Run the tests that were previously sync
     asyncio.run(run_sync_like_tests())
@@ -290,7 +290,7 @@ if __name__ == __main__":"
     # Run async tests
     async def run_async_tests():
         await test_instance.test_get_connection_id_by_websocket_functionality()
-        print([U+2713] test_get_connection_id_by_websocket_functionality passed")
+        print([U+2713] test_get_connection_id_by_websocket_functionality passed")"
         
         await test_instance.test_update_connection_thread_functionality()
         print([U+2713] test_update_connection_thread_functionality passed")"
@@ -300,4 +300,4 @@ if __name__ == __main__":"
     
     asyncio.run(run_async_tests())
     
-    print("\n PASS:  All WebSocket manager compatibility tests passed!"")
+    print("\n PASS:  All WebSocket manager compatibility tests passed!"")"

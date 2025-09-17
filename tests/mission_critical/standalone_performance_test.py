@@ -366,7 +366,7 @@ async def test_concurrent_users():
         emitter = MockWebSocketEmitter(fconcurrent-user-{i}, latency_ms=0.1)
         emitters.append(emitter)
 
-    print(f"Created {num_users} concurrent users)
+    print(f"Created {num_users} concurrent users)")
 
     # Send events from all users concurrently
     start_time = time.time()
@@ -414,11 +414,11 @@ async def test_concurrent_users():
     p99 = statistics.quantiles(all_latencies, n=100)[98] if len(all_latencies) >= 100 else max(all_latencies)
     avg_latency = statistics.mean(all_latencies)
 
-    print(f"Concurrent Users: {num_users})
+    print(f"Concurrent Users: {num_users})")
     print(fEvents per User: {events_per_user})
     print(fTotal Events: {total_events})
     print(fTotal Duration: {total_duration:.2f}s")
-    print(f"Overall Throughput: {overall_throughput:.2f} events/s)
+    print(f"Overall Throughput: {overall_throughput:.2f} events/s)")
     print(fConcurrent Latency: P50={p50:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms, Avg={avg_latency:.2f}ms)
     print("")
     # Validate requirements
@@ -477,7 +477,7 @@ async def test_comprehensive_performance():
         print(fPerformance Summary:)
         print(f  P50 Latency: {metrics.p50_latency:.2f}ms)
         print(f  P90 Latency: {metrics.p90_latency:.2f}ms")
-        print(f"  P95 Latency: {metrics.p95_latency:.2f}ms)
+        print(f"  P95 Latency: {metrics.p95_latency:.2f}ms)")
         print(f  P99 Latency: {metrics.p99_latency:.2f}ms [CRITICAL])
         print(f  Max Throughput: {metrics.throughput:.2f} events/s [CRITICAL])
         print(f  Avg Connection Time: {metrics.avg_connection_time:.2f}ms")
@@ -491,7 +491,7 @@ async def test_comprehensive_performance():
 
         print(f  P99 Latency < 50ms: {'PASS' if p99_passed else 'FAIL'} ({metrics.p99_latency:.2f}ms))
         print(f  Throughput > 1000/s: {'PASS' if throughput_passed else 'FAIL'} ({metrics.throughput:.2f}/s)")
-        print(f"  Connection < 500ms: {'PASS' if connection_passed else 'FAIL'} ({metrics.avg_connection_time:.2f}ms))
+        print(f"  Connection < 500ms: {'PASS' if connection_passed else 'FAIL'} ({metrics.avg_connection_time:.2f}ms))")
         print(f  Memory Growth < 200MB: {'PASS' if memory_passed else 'FAIL'} ({final_memory - initial_memory:.2f}MB))
 
         all_passed = all([p99_passed, throughput_passed, connection_passed, memory_passed]

@@ -17,7 +17,7 @@ try:
     from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
     from netra_backend.app.agents.supervisor.execution_context import PipelineStepConfig
 except ImportError as e:
-    print(f"Warning: Could not import workflow components: {e})
+    print(f"Warning: Could not import workflow components: {e})")
     WorkflowOrchestrator = None
     PipelineStepConfig = None
 

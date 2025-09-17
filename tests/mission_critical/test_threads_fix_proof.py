@@ -137,7 +137,7 @@ print()
 [PASS] PROOF: NULL metadata doesn't crash the system')
 print()
 print(f   - Filtered out NULL, empty, and malformed metadata")
-print(f"   - Returned only valid matching thread)
+print(f"   - Returned only valid matching thread)")
 
 @pytest.mark.asyncio
     async def test_actual_code_both_queries_fail(self):

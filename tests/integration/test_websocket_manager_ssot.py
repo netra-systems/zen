@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 WebSocket Manager SSOT Integration Tests - ISSUE #1060
 
 PURPOSE: Detect WebSocket manager duplication across services
@@ -18,7 +18,7 @@ Test Strategy:
 
 Author: Claude Code Agent - SSOT Validation Test Generator
 Date: 2025-09-14
-"
+"""Empty docstring."""
 import pytest
 import asyncio
 import logging
@@ -36,17 +36,17 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
 class WebSocketManagerSsotTests(SSotBaseTestCase):
-    "
+"""Empty docstring."""
     WebSocket Manager SSOT Tests - Designed to FAIL initially
 
     Business Value: Platform/Internal - $500K+ ARR Golden Path WebSocket Management
     These tests detect WebSocket manager duplication that fragments real-time communication.
 
     EXPECTED RESULT: ALL TESTS FAIL until SSOT remediation complete
-"
+"""Empty docstring."""
 
     def setup_method(self, method):
-        "Initialize test environment for WebSocket Manager SSOT validation.
+        "Initialize test environment for WebSocket Manager SSOT validation."""
         super().setup_method(method)
         self.logger = logger
         self.test_context = self.get_test_context()
@@ -73,7 +73,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
                 websocket_manager_implementations.extend(service_managers)
         self.record_metric('websocket_manager_implementations_found', len(websocket_manager_implementations))
         if len(websocket_manager_implementations) > 1:
-            violation_details = [f"WebSocket Manager in {impl['service']}: {impl['file']} ({impl['class_name']} for impl in websocket_manager_implementations]
+            violation_details = [f"WebSocket Manager in {impl['service']}: {impl['file']} ({impl['class_name']} for impl in websocket_manager_implementations]"
             self.logger.critical(f'WEBSOCKET MANAGER SSOT VIOLATION DETECTED: {len(websocket_manager_implementations)} separate WebSocket manager implementations found: {violation_details}')
             self.assertTrue(False, f'WEBSOCKET MANAGER SSOT VIOLATION: Found {len(websocket_manager_implementations)} separate WebSocket manager implementations. Expected: 1 (single SSOT manager). Violations: {violation_details}')
         else:
@@ -81,12 +81,12 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
             self.assertTrue(len(websocket_manager_implementations) == 1)
 
     def test_no_websocket_factory_wrappers(self):
-        "
+"""Empty docstring."""
         Test: No WebSocket factory wrapper classes should exist
 
         EXPECTED: FAIL - WebSocket factory wrappers create manager duplication
         VIOLATION: Factory wrappers violate SSOT principle by creating duplicate managers
-"
+"""Empty docstring."""
         factory_wrapper_violations = []
         project_root = Path(__file__).parent.parent.parent
         factory_patterns = ['WebSocketFactory', 'WebSocketManagerFactory', 'SocketFactory', 'WSManagerFactory', 'create_websocket_manager', 'websocket_manager_factory', 'get_websocket_manager']
@@ -98,7 +98,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
                 factory_wrapper_violations.extend(service_factories)
         self.record_metric('websocket_factory_violations', len(factory_wrapper_violations))
         if factory_wrapper_violations:
-            violation_details = [f"Factory wrapper: {violation['service']}/{violation['file']} - {violation['pattern']} for violation in factory_wrapper_violations]
+            violation_details = [f"Factory wrapper: {violation['service']}/{violation['file']} - {violation['pattern']} for violation in factory_wrapper_violations]"
             self.logger.critical(f'WEBSOCKET FACTORY WRAPPER VIOLATION: Found factory wrappers creating WebSocket manager duplication. Violations: {violation_details}')
             self.assertTrue(False, f'WEBSOCKET FACTORY WRAPPER VIOLATION: Factory wrappers violate SSOT by creating multiple manager instances. Found {len(factory_wrapper_violations)} violations: {violation_details}')
         else:
@@ -193,7 +193,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
         return violations
 
     def _scan_for_websocket_operations(self, path: Path, service_name: str, operations: List[str] -> List[Dict[str, Any]]:
-        Scan for WebSocket operations outside SSOT manager."
+        Scan for WebSocket operations outside SSOT manager.""
         scattered_operations = []
         if not path.exists():
             return scattered_operations
@@ -210,7 +210,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
         return scattered_operations
 
     def _filter_legitimate_websocket_operations(self, operations: List[Dict[str, Any]] -> List[Dict[str, Any]]:
-        "Filter out legitimate WebSocket operations (those in SSOT manager).
+        "Filter out legitimate WebSocket operations (those in SSOT manager)."""
         legitimate = []
         legitimate_paths = ['websocket_core/unified_manager.py', 'websocket_core/manager.py', 'test_framework/ssot/websocket_test_utility.py']
         for operation in operations:

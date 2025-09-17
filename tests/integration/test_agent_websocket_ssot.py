@@ -1,5 +1,5 @@
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.
+    "Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
         pass
@@ -10,17 +10,17 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         ""Send JSON message.
         if self._closed:
-            raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)""
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = Normal closure"):
+    async def close(self, code: int = 1000, reason: str = Normal closure"):"
         Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
 
     def get_messages(self) -> list:
-        Get all sent messages."
+        Get all sent messages.""
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
@@ -53,7 +53,7 @@ class TestWebSocketConnection:
 
 
 class TestWebSocketSSOT:
-        "Test Suite for WebSocket SSOT Compliance
+        "Test Suite for WebSocket SSOT Compliance"""
 
         @pytest.fixture
     def real_bridge():
@@ -69,20 +69,20 @@ class TestWebSocketSSOT:
     def real_websocket_manager():
         Use real service instance.""
     # TODO: Initialize real service
-        Create mock WebSocket manager"
+        Create mock WebSocket manager""
         pass
         websocket = TestWebSocketConnection()
-        manager._current_user_id = test_user"
+        manager._current_user_id = test_user""
         return manager
 
         @pytest.fixture
     def execution_context(self):
         Use real service instance.""
     # TODO: Initialize real service
-        Create execution context"
+        Create execution context""
         pass
         return ExecutionContext( )
-        run_id="test_run_123,
+        run_id="test_run_123,"
         agent_name=test_agent,
         stream_updates=True,
         user_id="test_user"
@@ -90,7 +90,7 @@ class TestWebSocketSSOT:
 
 @pytest.mark.asyncio
     async def test_no_duplicate_websocket_methods(self):
-        Test that WebSocket methods are not duplicated across modules"
+        Test that WebSocket methods are not duplicated across modules""
 
         # Critical test: Ensure only ONE implementation of each WebSocket method
 
@@ -117,7 +117,7 @@ locations = []
 if method in comm_methods:
     count += 1
 
-locations.append("AgentCommunicationMixin)
+locations.append("AgentCommunicationMixin)"
 if method in lifecycle_methods:
     count += 1
 
@@ -151,7 +151,7 @@ class TestCommAgent(AgentCommunicationMixin):
 
 @pytest.mark.asyncio
     async def test_error_handling_classes_not_duplicated(self):
-        Test that error handling classes are centralized"
+        Test that error handling classes are centralized""
 
 
         # Check if WebSocketError is defined locally in agent_communication.py
@@ -159,7 +159,7 @@ from netra_backend.app.agents import agent_communication
 
         # This should fail if local definitions exist
 assert hasattr(agent_communication, 'WebSocketError'), \
-Local WebSocketError class found - should use centralized exception"
+Local WebSocketError class found - should use centralized exception""
 
         # Check for centralized error handling
 try:
@@ -185,8 +185,8 @@ events_received.append(event_type)
 await asyncio.sleep(0)
 return None
 
-mock_bridge.notify_agent_started.side_effect = lambda x: None track_event(agent_started, *a, **k)"
-mock_bridge.notify_agent_thinking.side_effect = lambda x: None track_event(agent_thinking", *a, **k)
+mock_bridge.notify_agent_started.side_effect = lambda x: None track_event(agent_started, *a, **k)""
+mock_bridge.notify_agent_thinking.side_effect = lambda x: None track_event(agent_thinking", *a, **k)"
 mock_bridge.notify_tool_executing.side_effect = lambda x: None track_event(tool_executing, *a, **k)
 mock_bridge.notify_tool_completed.side_effect = lambda x: None track_event(tool_completed", *a, **k)"
 mock_bridge.notify_agent_completed.side_effect = lambda x: None track_event(agent_completed, *a, **k)
@@ -196,10 +196,10 @@ class TestAgent(AgentLifecycleMixin):
     def __init__(self):
         pass
         self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
-        self.name = test_agent"
+        self.name = test_agent""
         self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         self.context = {}
-        self.user_id = "test_user
+        self.user_id = "test_user"
         self.start_time = 0
         self.end_time = 0
 
@@ -222,9 +222,9 @@ class TestAgent(AgentLifecycleMixin):
     async def _send_update(self, run_id, data):
         "Override to use Bridge"
         bridge = await get_agent_websocket_bridge()
-        status = data.get(status, ")
+        status = data.get(status, ")"
 
-        if status == starting":
+        if status == starting":"
         await bridge.notify_agent_started(run_id, self.name, data)
         elif status in [completed, failed]:
         await bridge.notify_agent_completed(run_id, self.name, data)
@@ -234,8 +234,8 @@ class TestAgent(AgentLifecycleMixin):
         await self.send_agent_thinking(run_id, "Processing request...)"
         await self.send_tool_executing(run_id, data_analyzer)
         await asyncio.sleep(0.01)  # Simulate work
-        await self.send_partial_result(run_id, Found 10 items, False)"
-        await self.send_final_report(run_id, {items": 10}, 100.0)
+        await self.send_partial_result(run_id, Found 10 items, False)""
+        await self.send_final_report(run_id, {items": 10}, 100.0)"
 
         agent = TestAgent()
         state = DeepAgentState()
@@ -247,8 +247,8 @@ class TestAgent(AgentLifecycleMixin):
         required_events = ]
         agent_started","
         agent_thinking,
-        tool_executing,"
-        "agent_completed
+        tool_executing,""
+        "agent_completed"
     
 
         for event in required_events:
@@ -263,7 +263,7 @@ class TestAgent(AgentCommunicationMixin):
     def __init__(self):
         pass
         self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
-        self.name = test_agent"
+        self.name = test_agent""
         self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
         agent = TestAgent()
@@ -272,7 +272,7 @@ class TestAgent(AgentCommunicationMixin):
         with pytest.raises(AttributeError) as exc_info:
         _ = agent.agent_id  # Line 162 references undefined agent_id
 
-        assert "agent_id in str(exc_info.value)
+        assert "agent_id in str(exc_info.value)"
 
         # Test get_state() method (line 102)
         with pytest.raises(AttributeError):
@@ -301,10 +301,10 @@ dead_method = _setup_websocket_context_if_available
 
                         # These assertions should FAIL if dead code still exists
 assert not hasattr(DataSubAgent, dead_method), \
-formatted_string"
+formatted_string""
 
 assert not hasattr(ValidationSubAgent, dead_method), \
-"formatted_string
+"formatted_string"
 
 @pytest.mark.asyncio
     async def test_websocket_bridge_consistency(self, mock_bridge):
@@ -325,12 +325,12 @@ if b'get_agent_websocket_bridge' in comm_source:
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
 lifecycle_source = AgentLifecycleMixin.send_agent_thinking.__code__.co_code
 if b'get_agent_websocket_bridge' in lifecycle_source:
-    patterns_found.add(bridge_pattern)"
+    patterns_found.add(bridge_pattern)""
 
 
                                     # Should only have ONE consistent pattern
 assert len(patterns_found) == 1, \
-"formatted_string
+"formatted_string"
 
 @pytest.mark.asyncio
     async def test_multiple_inheritance_resolved(self):
@@ -379,11 +379,11 @@ formatted_string""
 
 
 class TestWebSocketCriticalPath:
-    Test the critical path for WebSocket events that deliver business value"
+    Test the critical path for WebSocket events that deliver business value""
 
 @pytest.mark.asyncio
     async def test_chat_value_delivery_path(self, mock_bridge):
-        "Test that chat functionality (90% of value) works end-to-end
+        "Test that chat functionality (90% of value) works end-to-end"""
 
 
 chat_events = []
@@ -394,10 +394,10 @@ async def track_chat_event(event_type, *args, **kwargs):
 
 "type: event_type,"
 args: args,
-kwargs: kwargs"
+kwargs: kwargs""
     
 
-mock_bridge.notify_agent_started = AsyncMock(side_effect=lambda x: None track_chat_event(started", *a, **k))
+mock_bridge.notify_agent_started = AsyncMock(side_effect=lambda x: None track_chat_event(started", *a, **k))"
 mock_bridge.notify_agent_thinking = AsyncMock(side_effect=lambda x: None track_chat_event(thinking, *a, **k))
 mock_bridge.notify_agent_completed = AsyncMock(side_effect=lambda x: None track_chat_event(completed", *a, **k))"
 
@@ -411,24 +411,24 @@ agent.websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
     # Call the actual methods
 lifecycle = AgentLifecycleMixin()
-lifecycle.name = chat_agent"
+lifecycle.name = chat_agent""
 lifecycle.websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
-await lifecycle.send_agent_thinking("chat_123, Analyzing your request...)
+await lifecycle.send_agent_thinking("chat_123, Analyzing your request...)"
     # Removed problematic line: await lifecycle.send_final_report(chat_123, {response: "Heres your answer}, 250.0)
 
     # Verify critical chat events were sent
-assert len(chat_events) >= 2, "Not enough chat events sent
+assert len(chat_events) >= 2, "Not enough chat events sent"
 assert any(e[type] == thinking for e in chat_events), No thinking event for chat
 assert any(e["type"] == completed for e in chat_events), No completion event for chat
 
 
 class TestWebSocketPerformance:
-        Test WebSocket performance and reliability"
+        Test WebSocket performance and reliability""
 
 @pytest.mark.asyncio
     async def test_websocket_retry_mechanism(self, mock_bridge):
-        "Test that WebSocket retries work correctly
+        "Test that WebSocket retries work correctly"""
 
 
 retry_count = 0
@@ -463,11 +463,11 @@ class TestAgent(AgentCommunicationMixin):
 
 @pytest.mark.asyncio
     async def test_websocket_failure_handling(self, mock_bridge):
-        Test graceful degradation when WebSocket fails"
+        Test graceful degradation when WebSocket fails""
 
 
         # Always fail
-mock_bridge.notify_agent_thinking = AsyncMock(side_effect=Exception("WebSocket error))
+mock_bridge.notify_agent_thinking = AsyncMock(side_effect=Exception("WebSocket error))"
 
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
 

@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 HTTP vs WebSocket Authentication Parity Test Suite
 
 ISSUE #342: Identifies configuration differences between HTTP and WebSocket auth
@@ -7,7 +7,7 @@ This test suite compares HTTP authentication (which works) with WebSocket
 authentication (which has issues) to identify the exact configuration mismatch.
 
 PRIORITY: SECONDARY - These tests should reveal specific configuration differences
-"
+"""Empty docstring."""
 
 import pytest
 import json
@@ -31,14 +31,14 @@ from netra_backend.app.services.unified_authentication_service import (
 
 @pytest.mark.integration
 class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
-    "
+"""Empty docstring."""
     Test suite to compare HTTP vs WebSocket authentication configurations.
     
     These tests should reveal exact differences causing Issue #342.
-"
+"""Empty docstring."""
 
     def setUp(self):
-        "Set up test fixtures.
+        "Set up test fixtures."""
         super().setUp()
         self.websocket_authenticator = UnifiedWebSocketAuthenticator()
         
@@ -47,10 +47,10 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
         websocket = Mock()
         websocket.headers = headers
         websocket.client = Mock()
-        websocket.client.host = 127.0.0.1"
+        websocket.client.host = 127.0.0.1""
         websocket.client.port = 8000
         websocket.client_state = Mock()
-        websocket.client_state.name = CONNECTED"
+        websocket.client_state.name = CONNECTED""
         return websocket
     
     def create_mock_http_request(self, headers: Dict[str, str] -> Mock:
@@ -76,16 +76,16 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
             # Mock successful authentication result
             mock_auth_result = AuthResult(
                 success=True,
-                user_id=test-user-123,"
-                email="test@example.com,
+                user_id=test-user-123,""
+                email="test@example.com,"
                 permissions=[read, write]
             
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             mock_user_context = UserExecutionContext(
                 user_id=test-user-123","
                 thread_id=thread-123,
-                run_id=run-123,"
-                request_id="req-123,
+                run_id=run-123,""
+                request_id="req-123,"
                 websocket_client_id=ws-client-123
             )
             
@@ -115,20 +115,20 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
             
             # Compare results
             comparison_results = {
-                http_auth: {"
-                    success": http_result.success,
+                http_auth: {""
+                    success": http_result.success,"
                     user_id: getattr(http_result, 'user_id', None),
                     error": getattr(http_result, 'error', None),"
                 },
                 websocket_auth_header: {
-                    success: websocket_result.success,"
-                    "user_id: websocket_result.user_context.user_id if websocket_result.user_context else None,
+                    success: websocket_result.success,""
+                    "user_id: websocket_result.user_context.user_id if websocket_result.user_context else None,"
                     error: websocket_result.error_message,
                 },
                 "websocket_subprotocol: {"
                     success: websocket_subprotocol_result.success,
-                    user_id: websocket_subprotocol_result.user_context.user_id if websocket_subprotocol_result.user_context else None,"
-                    error": websocket_subprotocol_result.error_message,
+                    user_id: websocket_subprotocol_result.user_context.user_id if websocket_subprotocol_result.user_context else None,""
+                    error": websocket_subprotocol_result.error_message,"
                 }
             }
             
@@ -139,10 +139,10 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
                 differences.append(fHTTP vs WebSocket header: success mismatch ({http_result.success} vs {websocket_result.success})
                 
             if http_result.success != websocket_subprotocol_result.success:
-                differences.append(fHTTP vs WebSocket subprotocol: success mismatch ({http_result.success} vs {websocket_subprotocol_result.success})"
+                differences.append(fHTTP vs WebSocket subprotocol: success mismatch ({http_result.success} vs {websocket_subprotocol_result.success})""
             
             if websocket_result.success != websocket_subprotocol_result.success:
-                differences.append(f"WebSocket header vs subprotocol: success mismatch ({websocket_result.success} vs {websocket_subprotocol_result.success})
+                differences.append(f"WebSocket header vs subprotocol: success mismatch ({websocket_result.success} vs {websocket_subprotocol_result.success})"
             
             # Log detailed comparison for analysis
             print(\n=== AUTH PARITY COMPARISON ===)
@@ -151,10 +151,10 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
             if differences:
                 print("\n=== DETECTED DIFFERENCES ===")
                 for diff in differences:
-                    print(f- {diff})"
+                    print(f- {diff})""
                     
             # At minimum, all should succeed if using the same token
-            self.assertTrue(http_result.success, "HTTP authentication should succeed)
+            self.assertTrue(http_result.success, "HTTP authentication should succeed)"
             
             # These assertions reveal the Issue #342 bugs
             self.assertTrue(
@@ -164,21 +164,21 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
             
             self.assertTrue(
                 websocket_subprotocol_result.success,
-                f"WebSocket subprotocol authentication should succeed. Error: {websocket_subprotocol_result.error_message}
+                f"WebSocket subprotocol authentication should succeed. Error: {websocket_subprotocol_result.error_message}"
             )
 
     async def test_configuration_consistency_check(self):
-        "
+"""Empty docstring."""
         Test configuration consistency between HTTP and WebSocket auth systems.
         
         This test checks if both systems use the same configuration values.
-"
+"""Empty docstring."""
         config_comparison = {}
         
         # Check HTTP authentication configuration
         try:
             http_auth_service = get_unified_auth_service()
-            config_comparison["http_auth_service_available] = http_auth_service is not None
+            config_comparison["http_auth_service_available] = http_auth_service is not None"
             
             # Get HTTP auth configuration details
             if http_auth_service:
@@ -191,11 +191,11 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
         try:
             websocket_authenticator = UnifiedWebSocketAuthenticator()
             config_comparison[websocket_authenticator_available] = websocket_authenticator is not None
-            config_comparison[websocket_authenticator_type] = type(websocket_authenticator).__name__"
+            config_comparison[websocket_authenticator_type] = type(websocket_authenticator).__name__""
             
             # Check if WebSocket authenticator uses the same auth service
             websocket_auth_service = getattr(websocket_authenticator, '_auth_service', None)
-            config_comparison[websocket_uses_unified_service"] = websocket_auth_service is not None
+            config_comparison[websocket_uses_unified_service"] = websocket_auth_service is not None"
             
             if websocket_auth_service:
                 config_comparison[websocket_auth_service_type] = type(websocket_auth_service).__name__
@@ -211,8 +211,8 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
             # Check key auth-related env vars
             auth_env_vars = [
                 AUTH_SERVICE_URL,
-                JWT_SECRET,"
-                "JWT_SECRET_KEY, 
+                JWT_SECRET,""
+                "JWT_SECRET_KEY, "
                 SERVICE_SECRET,
                 "ENVIRONMENT"
             ]
@@ -220,8 +220,8 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
             config_comparison[environment_config] = {}
             for var in auth_env_vars:
                 value = env.get(var)
-                config_comparison[environment_config][var] = {"
-                    configured": value is not None,
+                config_comparison[environment_config][var] = {""
+                    configured": value is not None,"
                     length: len(value) if value else 0,
                     starts_with": value[:10] if value and len(value) > 10 else value"
                 }
@@ -237,26 +237,26 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
         inconsistencies = []
         
         if not config_comparison.get(http_auth_service_available, False):
-            inconsistencies.append(HTTP auth service not available)"
+            inconsistencies.append(HTTP auth service not available)""
             
-        if not config_comparison.get("websocket_authenticator_available, False):
+        if not config_comparison.get("websocket_authenticator_available, False):"
             inconsistencies.append(WebSocket authenticator not available)
             
         if not config_comparison.get("websocket_uses_unified_service, False):"
             inconsistencies.append(WebSocket authenticator not using unified auth service)
         
         # Check if both use the same underlying service type
-        http_service_type = config_comparison.get(http_auth_service_type)"
-        websocket_service_type = config_comparison.get(websocket_auth_service_type")
+        http_service_type = config_comparison.get(http_auth_service_type)""
+        websocket_service_type = config_comparison.get(websocket_auth_service_type")"
         
         if http_service_type and websocket_service_type and http_service_type != websocket_service_type:
             inconsistencies.append(fService type mismatch: HTTP uses {http_service_type}, WebSocket uses {websocket_service_type})
         
         # Check critical environment variables
-        env_config = config_comparison.get(environment_config, {}"
+        env_config = config_comparison.get(environment_config, {}""
         critical_missing = []
         
-        for var in ["JWT_SECRET, JWT_SECRET_KEY]:
+        for var in ["JWT_SECRET, JWT_SECRET_KEY]:"
             if not env_config.get(var, {}.get(configured, False):
                 critical_missing.append(var)
         
@@ -271,24 +271,24 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
             raise AssertionError(fConfiguration inconsistencies detected: {inconsistencies})
 
     async def test_subprotocol_negotiation_comparison(self):
-        "
+"""Empty docstring."""
         Test subprotocol negotiation differences that might cause issues.
         
         HTTP doesn't have subprotocol negotiation, but WebSocket does.
         This test checks if the negotiation process causes auth issues.
-"
+"""Empty docstring."""
         # Test different subprotocol formats and their negotiation success
-        jwt_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        jwt_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c""
         
         from netra_backend.app.websocket_core.unified_jwt_protocol_handler import negotiate_websocket_subprotocol
         
         subprotocol_test_cases = [
             # (client_protocols, description, expected_success)
-            ([fjwt.{jwt_token}"], JWT with token, True),
+            ([fjwt.{jwt_token}"], JWT with token, True),"
             ([jwt], JWT protocol only, True),
             ([jwt-auth"], "JWT auth protocol, True),
-            ([fjwt.{jwt_token}, chat], JWT with other protocols, True),"
-            (["chat, fjwt.{jwt_token}], JWT after other protocols, True),
+            ([fjwt.{jwt_token}, chat], JWT with other protocols, True),""
+            (["chat, fjwt.{jwt_token}], JWT after other protocols, True),"
             ([unsupported"], "Unsupported protocol, False),
             ([], No protocols, False),
         ]
@@ -299,18 +299,18 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
             accepted_protocol = negotiate_websocket_subprotocol(client_protocols)
             
             result = {
-                description: description,"
-                client_protocols": client_protocols,
+                description: description,""
+                client_protocols": client_protocols,"
                 accepted_protocol: accepted_protocol,
                 negotiation_success": accepted_protocol is not None,"
                 expected_success: expected_success,
-                matches_expectation: (accepted_protocol is not None) == expected_success"
+                matches_expectation: (accepted_protocol is not None) == expected_success""
             }
             
             negotiation_results.append(result)
             
         # Log negotiation results
-        print("\n=== SUBPROTOCOL NEGOTIATION RESULTS ===)
+        print("\n=== SUBPROTOCOL NEGOTIATION RESULTS ===)"
         for result in negotiation_results:
             print(f- {result['description']}: {result['negotiation_success']} (expected: {result['expected_success']}")"
             if not result['matches_expectation']:
@@ -320,8 +320,8 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
         mismatches = [r for r in negotiation_results if not r['matches_expectation']]
         
         if mismatches:
-            mismatch_details = [f{r['description']}: got {r['negotiation_success']}, expected {r['expected_success']} for r in mismatches]"
-            raise AssertionError(f"Subprotocol negotiation mismatches: {mismatch_details})
+            mismatch_details = [f{r['description']}: got {r['negotiation_success']}, expected {r['expected_success']} for r in mismatches]""
+            raise AssertionError(f"Subprotocol negotiation mismatches: {mismatch_details})"
 
     async def test_auth_service_method_parity(self):
         
@@ -335,8 +335,8 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
         auth_service = get_unified_auth_service()
         
         method_comparison = {
-            auth_service_type: type(auth_service).__name__,"
-            "available_methods: [],
+            auth_service_type: type(auth_service).__name__,""
+            "available_methods: [],"
             http_auth_method: None,
             "websocket_auth_method: None"
         }
@@ -348,9 +348,9 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
         
         # Check for HTTP auth method
         if hasattr(auth_service, 'authenticate_token'):
-            method_comparison[http_auth_method] = authenticate_token"
+            method_comparison[http_auth_method] = authenticate_token""
         elif hasattr(auth_service, 'authenticate'):
-            method_comparison["http_auth_method] = authenticate
+            method_comparison["http_auth_method] = authenticate"
         elif hasattr(auth_service, 'validate_token'):
             method_comparison[http_auth_method] = validate_token
             
@@ -368,9 +368,9 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
         issues = []
         
         if not method_comparison[http_auth_method]:
-            issues.append(No HTTP authentication method found)"
+            issues.append(No HTTP authentication method found)""
             
-        if not method_comparison[websocket_auth_method"]:
+        if not method_comparison[websocket_auth_method"]:"
             issues.append(No WebSocket authentication method found)
         
         if issues:
@@ -380,12 +380,12 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
         if method_comparison[http_auth_method] and method_comparison[websocket_auth_method]:
             # Mock WebSocket for testing
             mock_websocket = self.create_mock_websocket({
-                authorization: fBearer {jwt_token}"
+                authorization: fBearer {jwt_token}""
             }
             
             try:
                 # HTTP method call
-                http_method = getattr(auth_service, method_comparison["http_auth_method]
+                http_method = getattr(auth_service, method_comparison["http_auth_method]"
                 
                 if asyncio.iscoroutinefunction(http_method):
                     if method_comparison[http_auth_method] == authenticate_token:
@@ -408,8 +408,8 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
                 
                 # Compare results structure
                 method_results = {
-                    http_result_type: type(http_result).__name__,"
-                    websocket_result_type": type(websocket_result).__name__,
+                    http_result_type: type(http_result).__name__,""
+                    websocket_result_type": type(websocket_result).__name__,"
                     http_success: getattr(http_result, 'success', None),
                     websocket_success": getattr(websocket_result[0] if isinstance(websocket_result, tuple) else websocket_result, 'success', None)"
                 }

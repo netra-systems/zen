@@ -320,7 +320,7 @@ class TestSSOTOrchestrationIsolation:
         execution_time = time.time() - start_time
         final_memory = process.memory_info().rss / 1024 / 1024  # MB
                         # Validate no isolation violations
-        assert len(isolation_violations) == 0, "formatted_string"
+        assert len(isolation_violations) == 0, ""
                         # Validate all users completed successfully
         successful_results = [item for item in []]
         assert len(successful_results) == num_users, formatted_string
@@ -476,7 +476,7 @@ class TestSSOTOrchestrationIsolation:
         user_availability_data['global_status'] = formatted_string
                 # Validation operations
         validation_issues = validate_global_orchestration_config()
-        user_availability_data['validation_issues'] = "formatted_string"
+        user_availability_data['validation_issues'] = ""
         availability_data[user_id] = user_availability_data
         return formatted_string, user_availability_data
         finally:
@@ -578,7 +578,7 @@ class TestSSOTOrchestrationIsolation:
         futures = [executor.submit(concurrent_orchestration_operations, i) for i in range(num_threads)]
         results = [future.result(timeout=18) for future in as_completed(futures, timeout=22)]
                                 # Validate no race conditions detected
-        assert len(race_conditions_detected) == 0, "formatted_string"
+        assert len(race_conditions_detected) == 0, ""
                                 # Validate all threads completed successfully
         successful_results = [item for item in []]
         assert len(successful_results) == num_threads, formatted_string
@@ -783,7 +783,7 @@ class TestSSOTOrchestrationIsolation:
         user_simulator.cleanup_orchestration_context()
         loop.close()
         except Exception as e:
-        error_msg = "formatted_string"
+        error_msg = ""
         logger.error(error_msg)
         return formatted_string, None
                         # Measure overall test performance

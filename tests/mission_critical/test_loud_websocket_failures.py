@@ -37,7 +37,7 @@ try:
         WebSocketAuthenticationError
     )
 except ImportError as e:
-    logger.warning(f"Some imports failed: {e}. Test will use mock implementations.)
+    logger.warning(f"Some imports failed: {e}. Test will use mock implementations.)")
 
     # Define mock exceptions for testing
     class WebSocketConnectionError(Exception):

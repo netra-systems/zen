@@ -359,7 +359,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         if duplicate_groups:
             logger.warning(Duplicate Groups Detail:)
             for group_name, classes in duplicate_groups.items():
-                logger.warning(f"  Group: {group_name} ({len(classes)} duplicates))
+                logger.warning(f"  Group: {group_name} ({len(classes)} duplicates))")
                 for cls in classes:
                     logger.warning(f    - {cls['name']} in {cls['file_path']}:{cls['line_number']}")
         

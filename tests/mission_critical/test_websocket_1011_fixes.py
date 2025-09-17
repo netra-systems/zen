@@ -573,7 +573,7 @@ class WebSocketRedisIntegrationTests(SSotAsyncTestCase):
         self.assertTrue(recovery_success, WebSocket should work after Redis recovery)
     
     async def _test_websocket_after_recovery(self, user_id: str) -> bool:
-        "Test WebSocket operations after Redis recovery.""
+        """Test WebSocket operations after Redis recovery."""
         try:
             # Should work normally after recovery
             session_data = {"user_id: user_id, recovered": True}

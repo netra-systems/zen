@@ -251,7 +251,7 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
         if files_still_exist and not files_with_forbidden_classes:
             warning_msg = fFiles exist but appear cleaned of forbidden classes: {files_still_exist}
             warning_msg += f\nThese files may be safe but should be verified for Issue #1146 consolidation
-            print(f"WARNING: {warning_msg})
+            print(f"WARNING: {warning_msg})")
 
     def test_user_execution_engine_is_only_execution_engine_implementation(self"):
         CRITICAL: Validate UserExecutionEngine is the only execution engine implementation."

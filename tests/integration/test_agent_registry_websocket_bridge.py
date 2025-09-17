@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"
+"""Empty docstring."""
 Agent Registry WebSocket Bridge Integration Tests - Exposing Factory Pattern Gaps
 
 Business Value Justification (BVJ):
@@ -22,7 +22,7 @@ TEST FAILURE EXPECTATIONS:
 
 This test suite intentionally exposes the Agent Registry WebSocket integration
 gaps that prevent Data Helper Agents from delivering business value.
-"
+"""Empty docstring."""
 
 import asyncio
 import json
@@ -47,7 +47,7 @@ try:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 except ImportError as e:
     # Expected in some test environments - we'll test for this gap
-    print(f[EXPECTED IMPORT ERROR] Agent Registry components not available: {e}")
+    print(f[EXPECTED IMPORT ERROR] Agent Registry components not available: {e}")"
     AgentRegistry = None
     UnifiedToolDispatcher = None
     UserExecutionContext = None
@@ -70,22 +70,22 @@ class AgentRegistryIntegrationGap:
     def to_dict(self) -> Dict[str, Any]:
         "Convert integration gap to dictionary for analysis."
         return {
-            test_name: self.test_name,"
-            "gap_type: self.gap_type,
+            test_name: self.test_name,""
+            "gap_type: self.gap_type,"
             component: self.component,
             "error_message: self.error_message,"
             expected_gap: self.expected_gap,
-            business_impact: self.business_impact,"
-            timestamp": self.timestamp,
+            business_impact: self.business_impact,""
+            timestamp": self.timestamp,"
             technical_details: self.technical_details,
             fix_complexity": self.fix_complexity"
         }
 
 
 class MockWebSocketManager:
-    Mock WebSocket manager for testing Agent Registry integration gaps."
+    Mock WebSocket manager for testing Agent Registry integration gaps.""
     
-    def __init__(self, should_fail: bool = False, failure_mode: str = creation"):
+    def __init__(self, should_fail: bool = False, failure_mode: str = creation"):"
         self.should_fail = should_fail
         self.failure_mode = failure_mode
         self.bridge_creation_attempts = []
@@ -95,8 +95,8 @@ class MockWebSocketManager:
         Create WebSocket bridge - may fail to test integration gaps.""
         self.bridge_creation_attempts.append({
             timestamp: datetime.now(timezone.utc).isoformat(),
-            user_id: getattr(user_context, 'user_id', 'unknown'),"
-            context_type": type(user_context).__name__
+            user_id: getattr(user_context, 'user_id', 'unknown'),""
+            context_type": type(user_context).__name__"
         }
         
         self.user_contexts_processed.append(user_context)
@@ -105,16 +105,16 @@ class MockWebSocketManager:
             if self.failure_mode == creation:
                 raise Exception(WebSocket bridge creation failed - missing factory integration")"
             elif self.failure_mode == user_context:
-                raise ValueError(Invalid user context for WebSocket bridge creation)"
-            elif self.failure_mode == "permissions:
+                raise ValueError(Invalid user context for WebSocket bridge creation)""
+            elif self.failure_mode == "permissions:"
                 raise PermissionError(WebSocket bridge creation not authorized)
         
         return MockWebSocketBridge(user_context)
     
     async def send_to_user(self, user_id: str, message: Dict[str, Any]:
         "Send message to user - may fail to test integration gaps."
-        if self.should_fail and self.failure_mode == send:"
-            raise Exception("WebSocket message sending failed - no active connections)
+        if self.should_fail and self.failure_mode == send:""
+            raise Exception("WebSocket message sending failed - no active connections)"
         
         # Mock successful send
         return True
@@ -129,23 +129,23 @@ class MockWebSocketBridge:
         self.is_functional = True
         
     async def emit_agent_started(self, agent_type: str, message: str = None):
-        Emit agent started event - track for integration testing."
+        Emit agent started event - track for integration testing.""
         event = {
-            type": agent_started,
+            type": agent_started,"
             agent_type: agent_type,
             "message: message,"
             timestamp: datetime.now(timezone.utc).isoformat(),
-            user_id: getattr(self.user_context, 'user_id', 'unknown')"
+            user_id: getattr(self.user_context, 'user_id', 'unknown')""
         }
         self.events_emitted.append(event)
         
     async def emit_agent_thinking(self, reasoning: str):
-        "Emit agent thinking event.
+        "Emit agent thinking event."""
         event = {
             "type: agent_thinking",
             reasoning: reasoning,
-            timestamp: datetime.now(timezone.utc).isoformat(),"
-            "user_id: getattr(self.user_context, 'user_id', 'unknown')
+            timestamp: datetime.now(timezone.utc).isoformat(),""
+            "user_id: getattr(self.user_context, 'user_id', 'unknown')"
         }
         self.events_emitted.append(event)
         
@@ -153,31 +153,31 @@ class MockWebSocketBridge:
         Emit tool executing event.""
         event = {
             type: tool_executing,
-            tool_name: tool_name,"
-            parameters": parameters,
+            tool_name: tool_name,""
+            parameters": parameters,"
             timestamp: datetime.now(timezone.utc).isoformat(),
             user_id": getattr(self.user_context, 'user_id', 'unknown')"
         }
         self.events_emitted.append(event)
         
     async def emit_tool_completed(self, tool_name: str, result: Dict[str, Any]:
-        Emit tool completed event."
+        Emit tool completed event.""
         event = {
-            type": tool_completed,
+            type": tool_completed,"
             tool_name: tool_name,
             "result: result,"
             timestamp: datetime.now(timezone.utc).isoformat(),
-            user_id: getattr(self.user_context, 'user_id', 'unknown')"
+            user_id: getattr(self.user_context, 'user_id', 'unknown')""
         }
         self.events_emitted.append(event)
         
     async def emit_agent_completed(self, result: Dict[str, Any], agent_type: str = None):
-        "Emit agent completed event.
+        "Emit agent completed event."""
         event = {
             "type: agent_completed",
             agent_type: agent_type,
-            result: result,"
-            "timestamp: datetime.now(timezone.utc).isoformat(),
+            result: result,""
+            "timestamp: datetime.now(timezone.utc).isoformat(),"
             user_id: getattr(self.user_context, 'user_id', 'unknown')
         }
         self.events_emitted.append(event)
@@ -219,8 +219,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                     component=AgentRegistry,
                     error_message=str(e),
                     expected_gap=True,
-                    business_impact=Agent Registry cannot be initialized - blocks all agent execution,"
-                    fix_complexity="critical,
+                    business_impact=Agent Registry cannot be initialized - blocks all agent execution,""
+                    fix_complexity="critical,"
                     technical_details={
                         error_type: type(e).__name__,
                         "setup_phase: agent_registry_creation"
@@ -228,8 +228,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
         else:
             self.capture_integration_gap(
                 test_name=setup_agent_registry_imports,
-                gap_type=missing_agent_registry_imports,"
-                component="ImportSystem,
+                gap_type=missing_agent_registry_imports,""
+                component="ImportSystem,"
                 error_message=Agent Registry components not available for import,
                 expected_gap=True,
                 business_impact="Agent Registry cannot be imported - complete system failure,"
@@ -265,10 +265,10 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
         self.integration_gaps.append(gap)
         
         # Log gap for immediate visibility
-        gap_status = EXPECTED if expected_gap else UNEXPECTED"
-        print(f"[{gap_status} GAP] {test_name}: {business_impact})
-        print(f[COMPONENT] {component} - {gap_type})"
-        print(f"[ERROR] {error_message})
+        gap_status = EXPECTED if expected_gap else UNEXPECTED""
+        print(f"[{gap_status} GAP] {test_name}: {business_impact})"
+        print(f[COMPONENT] {component} - {gap_type})""
+        print(f"[ERROR] {error_message})"
         if technical_details:
             print(f[TECHNICAL] {json.dumps(technical_details, indent=2)})
     
@@ -290,8 +290,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
             self.capture_integration_gap(
                 test_name=test_name,
                 gap_type=agent_registry_unavailable,
-                component=AgentRegistry,"
-                error_message="Agent Registry not available for testing,
+                component=AgentRegistry,""
+                error_message="Agent Registry not available for testing,"
                 expected_gap=True,
                 business_impact=Cannot test WebSocket integration - Agent Registry missing,
                 fix_complexity="critical"
@@ -306,14 +306,14 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                 self.capture_integration_gap(
                     test_name=test_name,
                     gap_type=missing_websocket_manager_integration,
-                    component=AgentRegistry,"
-                    error_message=Agent Registry has no websocket_manager attribute",
+                    component=AgentRegistry,""
+                    error_message=Agent Registry has no websocket_manager attribute","
                     expected_gap=True,
                     business_impact=Agent Registry cannot emit WebSocket events - no real-time user feedback,
                     fix_complexity=high","
                     technical_details={
                         agent_registry_attributes: dir(self.agent_registry),
-                        websocket_manager_present: False"
+                        websocket_manager_present: False""
                     }
             
             # Test WebSocket manager setting functionality
@@ -326,36 +326,36 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                     if updated_manager != self.mock_websocket_manager:
                         self.capture_integration_gap(
                             test_name=test_name,
-                            gap_type="websocket_manager_setting_failure,
+                            gap_type="websocket_manager_setting_failure,"
                             component=AgentRegistry,
                             error_message="WebSocket manager not properly set in Agent Registry,"
                             expected_gap=True,
                             business_impact=WebSocket manager cannot be configured - integration broken,
-                            fix_complexity=high"
+                            fix_complexity=high""
                         )
                     else:
                         # Unexpected success - integration may be working
                         self.capture_integration_gap(
                             test_name=test_name,
-                            gap_type=websocket_manager_integration_working",
+                            gap_type=websocket_manager_integration_working","
                             component=AgentRegistry,
                             error_message=WebSocket manager integration appears functional","
                             expected_gap=False,
                             business_impact=WebSocket integration may be resolved,
-                            fix_complexity=low"
+                            fix_complexity=low""
                         )
                         
                 else:
                     self.capture_integration_gap(
                         test_name=test_name,
-                        gap_type="missing_websocket_manager_setter,
+                        gap_type="missing_websocket_manager_setter,"
                         component=AgentRegistry,
                         error_message="Agent Registry missing set_websocket_manager_async method,"
                         expected_gap=True,
                         business_impact=Cannot configure WebSocket manager - missing API,
-                        fix_complexity=high,"
+                        fix_complexity=high,""
                         technical_details={
-                            available_methods": [m for m in dir(self.agent_registry) if not m.startswith('_')]
+                            available_methods": [m for m in dir(self.agent_registry) if not m.startswith('_')]"
                         }
                     
             except Exception as setter_error:
@@ -366,9 +366,9 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                     error_message=str(setter_error),
                     expected_gap=True,
                     business_impact=WebSocket manager setter throws exceptions - integration broken,
-                    fix_complexity=high,"
+                    fix_complexity=high,""
                     technical_details={
-                        "error_type: type(setter_error).__name__
+                        "error_type: type(setter_error).__name__"
                     }
                 
         except Exception as test_error:
@@ -379,20 +379,20 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                 error_message=str(test_error),
                 expected_gap=False,
                 business_impact=Cannot test WebSocket integration due to test framework issues,
-                fix_complexity=medium,"
-                technical_details={error_type": type(test_error).__name__}
+                fix_complexity=medium,""
+                technical_details={error_type": type(test_error).__name__}"
             raise
     
     @pytest.mark.integration
     async def test_agent_registry_websocket_bridge_creation_gap(self):
-    "
+"""Empty docstring."""
         Test Agent Registry WebSocket bridge creation gap in factory pattern.
         
         EXPECTED TO FAIL: This should expose WebSocket bridge creation failures
         when Agent Registry tries to create per-user WebSocket bridges.
         
         Integration Gap: Factory pattern WebSocket bridge creation not working
-        "
+"""Empty docstring."""
         test_name = agent_registry_websocket_bridge_creation
         
         if not self.agent_registry:
@@ -400,9 +400,9 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                 test_name=test_name,
                 gap_type="agent_registry_unavailable,"
                 component=AgentRegistry,
-                error_message=Agent Registry not available for bridge testing,"
+                error_message=Agent Registry not available for bridge testing,""
                 expected_gap=True,
-                business_impact=Cannot test WebSocket bridge creation",
+                business_impact=Cannot test WebSocket bridge creation","
                 fix_complexity=critical
             )
             return
@@ -415,7 +415,7 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
             )
             
             # Set up WebSocket manager that will fail during bridge creation
-            failing_websocket_manager = MockWebSocketManager(should_fail=True, failure_mode=creation)"
+            failing_websocket_manager = MockWebSocketManager(should_fail=True, failure_mode=creation)""
             
             try:
                 if hasattr(self.agent_registry, 'set_websocket_manager_async'):
@@ -426,7 +426,7 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                     # This should fail when trying to create WebSocket bridge
                     agent = await self.agent_registry.create_agent_for_user(
                         user_id=user_context.user_id,
-                        agent_type="triage,
+                        agent_type="triage,"
                         user_context=user_context,
                         websocket_manager=failing_websocket_manager
                     )
@@ -438,8 +438,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                         component="AgentRegistry,"
                         error_message=Agent creation succeeded without WebSocket bridge,
                         expected_gap=True,
-                        business_impact=WebSocket bridge creation not integrated - agents work but no events,"
-                        fix_complexity=high",
+                        business_impact=WebSocket bridge creation not integrated - agents work but no events,""
+                        fix_complexity=high","
                         technical_details={
                             agent_created: True,
                             bridge_creation_attempts": len(failing_websocket_manager.bridge_creation_attempts)"
@@ -449,8 +449,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                     self.capture_integration_gap(
                         test_name=test_name,
                         gap_type=missing_agent_creation_method,
-                        component=AgentRegistry,"
-                        error_message="Agent Registry missing create_agent_for_user method,
+                        component=AgentRegistry,""
+                        error_message="Agent Registry missing create_agent_for_user method,"
                         expected_gap=True,
                         business_impact=Cannot create agents with WebSocket integration,
                         fix_complexity="critical"
@@ -471,9 +471,9 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                         error_message=str(bridge_error),
                         expected_gap=True,
                         business_impact=WebSocket bridge creation fails - no real-time events for users,
-                        fix_complexity=high,"
+                        fix_complexity=high,""
                         technical_details={
-                            "error_type: type(bridge_error).__name__,
+                            "error_type: type(bridge_error).__name__,"
                             is_bridge_error: is_bridge_error,
                             "bridge_patterns_found: [p for p in bridge_error_patterns if p in error_message]"
                         }
@@ -481,10 +481,10 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                     self.capture_integration_gap(
                         test_name=test_name,
                         gap_type=agent_creation_failure,
-                        component=AgentRegistry,"
+                        component=AgentRegistry,""
                         error_message=str(bridge_error),
                         expected_gap=True,
-                        business_impact=Agent creation fails when WebSocket integration attempted",
+                        business_impact=Agent creation fails when WebSocket integration attempted","
                         fix_complexity=high,
                         technical_details={
                             error_type": type(bridge_error).__name__"
@@ -494,10 +494,10 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
             self.capture_integration_gap(
                 test_name=test_name,
                 gap_type=test_execution_error,
-                component=TestFramework,"
+                component=TestFramework,""
                 error_message=str(test_error),
                 expected_gap=False,
-                business_impact="Cannot test WebSocket bridge creation,
+                business_impact="Cannot test WebSocket bridge creation,"
                 fix_complexity=medium,
                 technical_details={"error_type: type(test_error).__name__}"
             raise
@@ -517,8 +517,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
         if not self.agent_registry:
             self.capture_integration_gap(
                 test_name=test_name,
-                gap_type=agent_registry_unavailable,"
-                component="AgentRegistry,
+                gap_type=agent_registry_unavailable,""
+                component="AgentRegistry,"
                 error_message=Agent Registry not available for event testing,
                 expected_gap=True,
                 business_impact="Cannot test WebSocket event emission,"
@@ -535,8 +535,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
             
             # Create test user context
             user_context = await create_authenticated_user_context(
-                user_email=event_test@example.com,"
-                environment=test"
+                user_email=event_test@example.com,""
+                environment=test""
             )
             
             # Test agent creation and execution with WebSocket event emission
@@ -564,9 +564,9 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                         test_name=test_name,
                                         gap_type=missing_websocket_bridge_in_session","
                                         component=UserAgentSession,
-                                        error_message=User session has no WebSocket bridge,"
+                                        error_message=User session has no WebSocket bridge,""
                                         expected_gap=True,
-                                        business_impact="User sessions cannot emit WebSocket events - no real-time feedback,
+                                        business_impact="User sessions cannot emit WebSocket events - no real-time feedback,"
                                         fix_complexity=high,
                                         technical_details={
                                             "user_session_attributes: dir(user_session),"
@@ -575,11 +575,11 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                 else:
                                     # Test WebSocket event emission
                                     try:
-                                        await websocket_bridge.emit_agent_started(agent_type=data, message=Testing event emission")
-                                        await websocket_bridge.emit_agent_thinking(reasoning="Testing WebSocket integration)
+                                        await websocket_bridge.emit_agent_started(agent_type=data, message=Testing event emission")"
+                                        await websocket_bridge.emit_agent_thinking(reasoning="Testing WebSocket integration)"
                                         await websocket_bridge.emit_tool_executing(tool_name=test_tool, parameters={test: True}
                                         await websocket_bridge.emit_tool_completed(tool_name=test_tool", result={"success: True}
-                                        await websocket_bridge.emit_agent_completed(result={test: completed}, agent_type=data)"
+                                        await websocket_bridge.emit_agent_completed(result={test: completed}, agent_type=data)""
                                         
                                         # Check if events were properly emitted
                                         events_emitted = getattr(websocket_bridge, 'events_emitted', []
@@ -587,29 +587,29 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                         if len(events_emitted) < 5:
                                             self.capture_integration_gap(
                                                 test_name=test_name,
-                                                gap_type="insufficient_websocket_events,
+                                                gap_type="insufficient_websocket_events,"
                                                 component=WebSocketBridge,
-                                                error_message=f"Only {len(events_emitted)} events emitted, expected 5,
+                                                error_message=f"Only {len(events_emitted)} events emitted, expected 5,"
                                                 expected_gap=True,
-                                                business_impact=Incomplete WebSocket events - poor user experience",
+                                                business_impact=Incomplete WebSocket events - poor user experience","
                                                 fix_complexity=medium,
                                                 technical_details={
                                                     events_emitted": len(events_emitted),"
                                                     expected_events: 5,
-                                                    event_types: [e.get("type) for e in events_emitted]
+                                                    event_types: [e.get("type) for e in events_emitted]"
                                                 }
                                         else:
                                             # Unexpected success - events working properly
                                             self.capture_integration_gap(
                                                 test_name=test_name,
-                                                gap_type=websocket_events_working",
+                                                gap_type=websocket_events_working","
                                                 component=WebSocketBridge,
                                                 error_message=WebSocket events emitted successfully","
                                                 expected_gap=False,
                                                 business_impact=WebSocket event emission appears functional,
-                                                fix_complexity=low,"
+                                                fix_complexity=low,""
                                                 technical_details={
-                                                    "events_emitted: len(events_emitted),
+                                                    "events_emitted: len(events_emitted),"
                                                     event_types: [e.get(type) for e in events_emitted]
                                                 }
                                             
@@ -620,8 +620,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                             component=WebSocketBridge,
                                             error_message=str(event_error),
                                             expected_gap=True,
-                                            business_impact=WebSocket event emission fails - no user feedback,"
-                                            fix_complexity="high,
+                                            business_impact=WebSocket event emission fails - no user feedback,""
+                                            fix_complexity="high,"
                                             technical_details={
                                                 error_type: type(event_error).__name__
                                             }
@@ -631,9 +631,9 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                     test_name=test_name,
                                     gap_type="missing_user_session,"
                                     component=AgentRegistry,
-                                    error_message=User session not found after agent creation,"
+                                    error_message=User session not found after agent creation,""
                                     expected_gap=True,
-                                    business_impact=User sessions not properly managed - multi-user isolation broken",
+                                    business_impact=User sessions not properly managed - multi-user isolation broken","
                                     fix_complexity=high
                                 )
                                 
@@ -642,9 +642,9 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                 test_name=test_name,
                                 gap_type=missing_user_session_getter","
                                 component=AgentRegistry,
-                                error_message=Agent Registry missing get_user_session method,"
+                                error_message=Agent Registry missing get_user_session method,""
                                 expected_gap=True,
-                                business_impact="Cannot access user sessions - WebSocket integration impossible,
+                                business_impact="Cannot access user sessions - WebSocket integration impossible,"
                                 fix_complexity=critical
                             )
                             
@@ -653,9 +653,9 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                             test_name=test_name,
                             gap_type="agent_creation_returned_none,"
                             component=AgentRegistry,
-                            error_message=Agent creation returned None,"
+                            error_message=Agent creation returned None,""
                             expected_gap=True,
-                            business_impact=Agent creation fails silently - no agents available for execution",
+                            business_impact=Agent creation fails silently - no agents available for execution","
                             fix_complexity=high
                         )
                         
@@ -666,8 +666,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                         component=AgentRegistry,
                         error_message=str(agent_error),
                         expected_gap=True,
-                        business_impact=Agent creation fails - no business value delivery possible,"
-                        fix_complexity="critical,
+                        business_impact=Agent creation fails - no business value delivery possible,""
+                        fix_complexity="critical,"
                         technical_details={
                             error_type: type(agent_error).__name__
                         }
@@ -677,9 +677,9 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                     test_name=test_name,
                     gap_type="missing_agent_creation_method,"
                     component=AgentRegistry,
-                    error_message=Agent Registry missing create_agent_for_user method,"
+                    error_message=Agent Registry missing create_agent_for_user method,""
                     expected_gap=True,
-                    business_impact=Cannot create agents - complete system failure",
+                    business_impact=Cannot create agents - complete system failure","
                     fix_complexity=critical
                 )
                 
@@ -690,8 +690,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                 component=TestFramework,
                 error_message=str(test_error),
                 expected_gap=False,
-                business_impact=Cannot test WebSocket event emission,"
-                fix_complexity="medium,
+                business_impact=Cannot test WebSocket event emission,""
+                fix_complexity="medium,"
                 technical_details={error_type: type(test_error).__name__}
             raise
     
@@ -713,8 +713,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
             self.capture_integration_gap(
                 test_name=test_name,
                 gap_type=agent_registry_unavailable,
-                component=AgentRegistry,"
-                error_message="Agent Registry not available for isolation testing,
+                component=AgentRegistry,""
+                error_message="Agent Registry not available for isolation testing,"
                 expected_gap=True,
                 business_impact=Cannot test multi-user isolation,
                 fix_complexity="critical"
@@ -731,8 +731,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
             # Create two different user contexts
             user_alice_context = await create_authenticated_user_context(
                 user_email=alice@example.com,
-                user_id=alice_user_123,"
-                environment=test"
+                user_id=alice_user_123,""
+                environment=test""
             )
             
             user_bob_context = await create_authenticated_user_context(
@@ -747,14 +747,14 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                     # Create agents for both users
                     alice_agent = await self.agent_registry.create_agent_for_user(
                         user_id=user_alice_context.user_id,
-                        agent_type=triage,"
+                        agent_type=triage,""
                         user_context=user_alice_context,
                         websocket_manager=isolation_websocket_manager
                     )
                     
                     bob_agent = await self.agent_registry.create_agent_for_user(
                         user_id=user_bob_context.user_id,
-                        agent_type="triage,
+                        agent_type="triage,"
                         user_context=user_bob_context,
                         websocket_manager=isolation_websocket_manager
                     )
@@ -774,8 +774,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                         component="AgentRegistry,"
                                         error_message=Same user session returned for different users,
                                         expected_gap=True,
-                                        business_impact=CRITICAL: Multi-user data leakage - security breach,"
-                                        fix_complexity=critical",
+                                        business_impact=CRITICAL: Multi-user data leakage - security breach,""
+                                        fix_complexity=critical","
                                         technical_details={
                                             alice_user_id: str(user_alice_context.user_id),
                                             bob_user_id": str(user_bob_context.user_id),"
@@ -790,15 +790,15 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                     if alice_bridge == bob_bridge:
                                         self.capture_integration_gap(
                                             test_name=test_name,
-                                            gap_type=websocket_bridge_not_isolated,"
-                                            component="WebSocketBridge,
+                                            gap_type=websocket_bridge_not_isolated,""
+                                            component="WebSocketBridge,"
                                             error_message=Same WebSocket bridge for different users,
                                             expected_gap=True,
                                             business_impact="CRITICAL: WebSocket events may leak between users,"
                                             fix_complexity=critical,
                                             technical_details={
-                                                bridge_isolation: False,"
-                                                bridges_identical": True
+                                                bridge_isolation: False,""
+                                                bridges_identical": True"
                                             }
                                     
                                     # Test event isolation by emitting events for each user
@@ -812,19 +812,19 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                         
                                         # Verify events are properly isolated
                                         alice_user_ids = set(e.get(user_id) for e in alice_events)
-                                        bob_user_ids = set(e.get(user_id) for e in bob_events)"
+                                        bob_user_ids = set(e.get(user_id) for e in bob_events)""
                                         
                                         if alice_user_ids.intersection(bob_user_ids):
                                             self.capture_integration_gap(
                                                 test_name=test_name,
-                                                gap_type="websocket_event_cross_contamination,
+                                                gap_type="websocket_event_cross_contamination,"
                                                 component=WebSocketBridge,
                                                 error_message="WebSocket events cross-contamination between users,"
                                                 expected_gap=True,
                                                 business_impact=CRITICAL: User events leaking between sessions,
-                                                fix_complexity=critical,"
+                                                fix_complexity=critical,""
                                                 technical_details={
-                                                    alice_user_ids": list(alice_user_ids),
+                                                    alice_user_ids": list(alice_user_ids),"
                                                     bob_user_ids: list(bob_user_ids),
                                                     cross_contamination": True"
                                                 }
@@ -833,15 +833,15 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                             self.capture_integration_gap(
                                                 test_name=test_name,
                                                 gap_type=websocket_isolation_working,
-                                                component=WebSocketBridge,"
-                                                error_message="WebSocket isolation appears functional,
+                                                component=WebSocketBridge,""
+                                                error_message="WebSocket isolation appears functional,"
                                                 expected_gap=False,
                                                 business_impact=Multi-user WebSocket isolation working correctly,
                                                 fix_complexity="low,"
                                                 technical_details={
                                                     alice_events: len(alice_events),
-                                                    bob_events: len(bob_events),"
-                                                    isolation_verified": True
+                                                    bob_events: len(bob_events),""
+                                                    isolation_verified": True"
                                                 }
                                             
                                     except Exception as event_error:
@@ -852,9 +852,9 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                             error_message=str(event_error),
                                             expected_gap=True,
                                             business_impact=WebSocket event emission fails in multi-user context,
-                                            fix_complexity=high,"
+                                            fix_complexity=high,""
                                             technical_details={
-                                                "error_type: type(event_error).__name__
+                                                "error_type: type(event_error).__name__"
                                             }
                                         
                                 else:
@@ -864,8 +864,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                         component="UserAgentSession,"
                                         error_message=WebSocket bridges not found in user sessions,
                                         expected_gap=True,
-                                        business_impact=WebSocket bridges not created for user sessions,"
-                                        fix_complexity=high",
+                                        business_impact=WebSocket bridges not created for user sessions,""
+                                        fix_complexity=high","
                                         technical_details={
                                             alice_bridge_present: bool(alice_bridge),
                                             bob_bridge_present": bool(bob_bridge)"
@@ -875,38 +875,38 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                 self.capture_integration_gap(
                                     test_name=test_name,
                                     gap_type=missing_user_sessions,
-                                    component=AgentRegistry,"
-                                    error_message="User sessions not found for multi-user test,
+                                    component=AgentRegistry,""
+                                    error_message="User sessions not found for multi-user test,"
                                     expected_gap=True,
                                     business_impact=User session management not working,
                                     fix_complexity="high,"
                                     technical_details={
                                         alice_session_present: bool(alice_session),
-                                        bob_session_present: bool(bob_session)"
+                                        bob_session_present: bool(bob_session)""
                                     }
                                 
                         else:
                             self.capture_integration_gap(
                                 test_name=test_name,
-                                gap_type=missing_user_session_getter",
+                                gap_type=missing_user_session_getter","
                                 component=AgentRegistry,
                                 error_message=Agent Registry missing get_user_session method","
                                 expected_gap=True,
                                 business_impact=Cannot test multi-user isolation without session access,
-                                fix_complexity=critical"
+                                fix_complexity=critical""
                             )
                             
                     else:
                         self.capture_integration_gap(
                             test_name=test_name,
-                            gap_type="multi_user_agent_creation_failure,
+                            gap_type="multi_user_agent_creation_failure,"
                             component=AgentRegistry,
                             error_message="Failed to create agents for multi-user testing,"
                             expected_gap=True,
                             business_impact=Multi-user agent creation not working,
-                            fix_complexity=high,"
+                            fix_complexity=high,""
                             technical_details={
-                                alice_agent_created": bool(alice_agent),
+                                alice_agent_created": bool(alice_agent),"
                                 bob_agent_created: bool(bob_agent)
                             }
                         
@@ -917,8 +917,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                         component=AgentRegistry,
                         error_message=str(multi_user_error),
                         expected_gap=True,
-                        business_impact=Multi-user setup fails - isolation cannot be tested,"
-                        fix_complexity="high,
+                        business_impact=Multi-user setup fails - isolation cannot be tested,""
+                        fix_complexity="high,"
                         technical_details={
                             error_type: type(multi_user_error).__name__
                         }
@@ -928,9 +928,9 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                     test_name=test_name,
                     gap_type="missing_agent_creation_method,"
                     component=AgentRegistry,
-                    error_message=Agent Registry missing create_agent_for_user method,"
+                    error_message=Agent Registry missing create_agent_for_user method,""
                     expected_gap=True,
-                    business_impact=Cannot create agents for multi-user testing",
+                    business_impact=Cannot create agents for multi-user testing","
                     fix_complexity=critical
                 )
                 
@@ -941,8 +941,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                 component=TestFramework,
                 error_message=str(test_error),
                 expected_gap=False,
-                business_impact=Cannot test multi-user WebSocket isolation,"
-                fix_complexity="medium,
+                business_impact=Cannot test multi-user WebSocket isolation,""
+                fix_complexity="medium,"
                 technical_details={error_type: type(test_error).__name__}
             raise
     
@@ -961,8 +961,8 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
         print(f\n{'='*90})
         print(fAGENT REGISTRY WEBSOCKET INTEGRATION GAP ANALYSIS REPORT")"
         print(fGenerated: {datetime.now(timezone.utc).isoformat()})
-        print(fTotal Integration Gaps Captured: {len(self.integration_gaps)})"
-        print(f"{'='*90})
+        print(fTotal Integration Gaps Captured: {len(self.integration_gaps)})""
+        print(f"{'='*90})"
         
         # Categorize gaps by component and severity
         gap_categories = {}
@@ -1009,21 +1009,21 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
         
         print(f\nEXPECTED vs UNEXPECTED GAPS:")"
         print(f  Expected: {len(expected_gaps)} (integration gaps successfully exposed))
-        print(f  Unexpected: {len(unexpected_gaps)} (test framework or resolved issues))"
+        print(f  Unexpected: {len(unexpected_gaps)} (test framework or resolved issues))""
         
         if unexpected_gaps:
-            print(f"\nUNEXPECTED GAP DETAILS:)
+            print(f"\nUNEXPECTED GAP DETAILS:)"
             for gap in unexpected_gaps:
-                print(f  - {gap.component}: {gap.error_message})"
+                print(f  - {gap.component}: {gap.error_message})""
         
         # Generate structured report for analysis
         integration_gap_report = {
-            "timestamp: datetime.now(timezone.utc).isoformat(),
+            "timestamp: datetime.now(timezone.utc).isoformat(),"
             total_gaps: len(self.integration_gaps),
             "critical_gaps: len(critical_gaps),"
             high_severity_gaps: len(high_severity_gaps),
-            expected_gaps: len(expected_gaps),"
-            unexpected_gaps": len(unexpected_gaps),
+            expected_gaps: len(expected_gaps),""
+            unexpected_gaps": len(unexpected_gaps),"
             gap_categories: {k: len(v) for k, v in gap_categories.items()},
             key_business_impacts": list(set(gap.business_impact for gap in self.integration_gaps)),"
             detailed_gaps: [gap.to_dict() for gap in self.integration_gaps]
@@ -1031,13 +1031,13 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
         
         # Priority recommendations based on gap analysis
         priority_fixes = []
-        if any(gap.gap_type == missing_agent_registry_imports for gap in self.integration_gaps):"
-            priority_fixes.append("P0: Fix Agent Registry import issues - complete system failure)
+        if any(gap.gap_type == missing_agent_registry_imports for gap in self.integration_gaps):""
+            priority_fixes.append("P0: Fix Agent Registry import issues - complete system failure)"
         if any(gap.gap_type == missing_websocket_manager_integration for gap in self.integration_gaps):
             priority_fixes.append("P1: Implement WebSocket manager integration in Agent Registry)"
         if any(gap.gap_type == websocket_bridge_creation_failure for gap in self.integration_gaps):
-            priority_fixes.append(P1: Fix WebSocket bridge factory pattern implementation)"
-        if any(gap.gap_type == user_session_not_isolated" for gap in self.integration_gaps):
+            priority_fixes.append(P1: Fix WebSocket bridge factory pattern implementation)""
+        if any(gap.gap_type == user_session_not_isolated" for gap in self.integration_gaps):"
             priority_fixes.append(P0: CRITICAL - Fix multi-user session isolation (security risk))
         
         print(f\nPRIORITY FIXES RECOMMENDED:"")
@@ -1077,8 +1077,8 @@ class MockToolDispatcher:
         Mock tool execution for testing.""
         execution_record = {
             tool_name: tool_name,
-            parameters: parameters,"
-            timestamp": datetime.now(timezone.utc).isoformat(),
+            parameters: parameters,""
+            timestamp": datetime.now(timezone.utc).isoformat(),"
             user_id: getattr(self.user_context, 'user_id', 'unknown')
         }
         self.tools_executed.append(execution_record)
@@ -1088,11 +1088,11 @@ class MockToolDispatcher:
             await self.websocket_bridge.emit_tool_executing(tool_name, parameters)
             await self.websocket_bridge.emit_tool_completed(tool_name, {success": True}"
         
-        return {success: True, result: mock_execution}"
+        return {success: True, result: mock_execution}""
 
 
 # Integration with pytest fixtures and markers
-if __name__ == __main__":
+if __name__ == __main__":"
     import asyncio
     
     async def run_direct_tests():
@@ -1122,4 +1122,4 @@ if __name__ == __main__":
             raise
     
     # Run tests if executed directly
-    asyncio.run(run_direct_tests()")
+    asyncio.run(run_direct_tests()")"

@@ -223,7 +223,7 @@ class MockConnectionPool:
                                         # Verify event structure
         for event in sent_events:
         assert 'event_type' in event, formatted_string
-        assert 'event_id' in event, "formatted_string"
+        assert 'event_id' in event, ""
         assert 'thread_id' in event, formatted_string
         assert 'data' in event, formatted_string"
         assert 'timestamp' in event, formatted_string"

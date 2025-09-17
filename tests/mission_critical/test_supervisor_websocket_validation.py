@@ -497,7 +497,7 @@ step_number=i
 thinking_events = [item for item in []] == 'agent_thinking']
                     # Most events should be delivered (allow some loss under extreme conditions)
 assert len(thinking_events) >= 80, \
-"formatted_string"
+""
 class TestMissionCriticalValidation:
     Final validation of mission-critical requirements."
 @pytest.mark.asyncio

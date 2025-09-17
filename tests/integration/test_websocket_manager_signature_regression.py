@@ -1,12 +1,12 @@
-"
+"""Empty docstring."""
 Regression test for WebSocket manager signature issues.
 
 This test ensures that create_websocket_manager() function
 accepts both positional and keyword arguments correctly,
-preventing the unexpected keyword argument 'context'" error.
+preventing the unexpected keyword argument 'context'" error."
 
 Related to: WEBSOCKET_CONTEXT_ERROR_FIVE_WHYS_20250908.md
-"
+"""Empty docstring."""
 import pytest
 from unittest.mock import Mock, patch
 import sys
@@ -36,11 +36,11 @@ class WebSocketManagerSignatureTests:
             pytest.fail(f'Failed with positional argument: {e}')
 
     def test_create_websocket_manager_accepts_keyword_argument(self):
-    "
+"""Empty docstring."""
         Ensure create_websocket_manager also accepts keyword argument.
         
         The function should accept both patterns for flexibility.
-        "
+"""Empty docstring."""
         context = UserExecutionContext(user_id='github_user_98765432101', thread_id='thread_xyz789ghi012', run_id='run_2025_09_08_14_31_00')
         try:
             manager = create_websocket_manager(user_context=context)
@@ -62,11 +62,11 @@ class WebSocketManagerSignatureTests:
                 create_websocket_manager(invalid_context)
 
     def test_create_websocket_manager_preserves_context_isolation(self):
-    "
+"""Empty docstring."""
         Ensure each call creates an isolated manager instance.
         
         This is critical for multi-user security isolation.
-        "
+"""Empty docstring."""
         context1 = UserExecutionContext(user_id='user_1', thread_id='thread_1', run_id='run_1')
         context2 = UserExecutionContext(user_id='user_2', thread_id='thread_2', run_id='run_2')
         manager1 = create_websocket_manager(context1)
@@ -82,7 +82,7 @@ class WebSocketManagerSignatureTests:
         Meta-test: Verify common call patterns found in codebase work.
         
         This catches any patterns we might have missed.
-"""
+""""""
         context = UserExecutionContext(user_id='email_user_john.doe@example.com', thread_id='thread_main_2025_09', run_id='run_2025_09_08_14_32_00')
         manager1 = create_websocket_manager(context)
         assert manager1 is not None

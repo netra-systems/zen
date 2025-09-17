@@ -1,5 +1,5 @@
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.
+    "Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
         pass
@@ -10,17 +10,17 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         ""Send JSON message.
         if self._closed:
-        raise RuntimeError(WebSocket is closed)"
+        raise RuntimeError(WebSocket is closed)""
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = Normal closure"):
+    async def close(self, code: int = 1000, reason: str = Normal closure"):"
         Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
 
     def get_messages(self) -> list:
-        Get all sent messages."
+        Get all sent messages.""
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
@@ -59,7 +59,7 @@ class TestWebSocketConnection:
         from shared.isolated_environment import get_env
         # Decorator to enforce real services
     def use_real_services_enforced(func):
-        "Decorator that enforces use of real services in tests.
+        "Decorator that enforces use of real services in tests."""
         return func
 
 
@@ -72,14 +72,14 @@ class TestWebSocketSessionRegression:
     '''Verify database session is NOT passed to supervisor agent.
 
     CRITICAL: This test prevents the root cause of agents hanging in Docker.
-    The supervisor must NOT hold a reference to the handlers session."
+    The supervisor must NOT hold a reference to the handlers session.""
     '''
     pass
         # Setup
     handler = AgentMessageHandler()
     test_message = WebSocketMessage( )
     type=MessageType.START_AGENT,
-    payload={user_request: "Test request},
+    payload={user_request: "Test request},"
     user_id=test_user,
     thread_id=test_thread
         
@@ -118,7 +118,7 @@ class TestWebSocketSessionRegression:
         Simulate a single agent request.
         message = WebSocketMessage( )
         type=MessageType.START_AGENT,
-        payload={user_request": request},
+        payload={user_request": request},"
         user_id=user_id,
         thread_id=formatted_string
     
@@ -126,7 +126,7 @@ class TestWebSocketSessionRegression:
         try:
         result = await handler.handle_message(user_id, None, message)
         await asyncio.sleep(0)
-        return {"success: True, user_id: user_id}
+        return {"success: True, user_id: user_id}"
         except IllegalStateChangeError as e:
         return {success: False, error: str(e), "user_id": user_id}
 
@@ -141,7 +141,7 @@ class TestWebSocketSessionRegression:
             # Verify no session conflicts occurred
         for result in results:
         if isinstance(result, dict):
-        assert result[success], "
+        assert result[success], ""
         else:
         pytest.fail(formatted_string)
 
@@ -158,7 +158,7 @@ class TestWebSocketSessionRegression:
         original_close = None
 
     async def track_session_close(self):
-        "Track when session.close() is called.
+        "Track when session.close() is called."""
         nonlocal session_closed, original_close
         session_closed = True
         if original_close:
@@ -182,7 +182,7 @@ class TestWebSocketSessionRegression:
         await handler.handle_message(test_user, None, message)
 
                 # Verify session was closed properly
-        assert session_closed, Session should be closed after handler completes"
+        assert session_closed, Session should be closed after handler completes""
 
         @use_real_services_enforced
     async def test_no_session_in_async_supervisor_execution(self):
@@ -210,7 +210,7 @@ class TestWebSocketSessionRegression:
         assert supervisor.db_session is None, Supervisor should not have session reference
 
                     # Simulate supervisor execution (would fail if it tries to use db_session)
-        supervisor.user_id = "test_user
+        supervisor.user_id = "test_user"
         supervisor.thread_id = test_thread
 
                     # This should not raise any session-related errors
@@ -260,12 +260,12 @@ class TestWebSocketSessionRegression:
         assert agent.db_session is None or agent.db_session.is_active is False
         except IllegalStateChangeError:
                     # If error occurs, it means the pattern is still problematic
-        pytest.fail(IllegalStateChangeError detected - session management issue present")
+        pytest.fail(IllegalStateChangeError detected - session management issue present")"
 
 
 @pytest.mark.asyncio
 class TestAgentPerformanceRegression:
-    "Test suite to ensure agent performance doesn't regress.
+    "Test suite to ensure agent performance doesn't regress."""
 
     @use_real_services_enforced
     async def test_agent_response_time_under_threshold(self):
@@ -281,7 +281,7 @@ class TestAgentPerformanceRegression:
     type=MessageType.START_AGENT,
     payload={"user_request: Performance test request"},
     user_id=perf_user,
-    thread_id=perf_thread"
+    thread_id=perf_thread""
         
 
     start_time = time.time()
@@ -289,7 +289,7 @@ class TestAgentPerformanceRegression:
         # Execute with timeout to prevent hanging
     try:
     result = await asyncio.wait_for( )
-    handler.handle_message("perf_user, None, message),
+    handler.handle_message("perf_user, None, message),"
     timeout=5.0  # Should complete much faster than 20s
             
     elapsed = time.time() - start_time
@@ -305,7 +305,7 @@ class TestAgentPerformanceRegression:
     async def test_multiple_sequential_agents_no_degradation(self):
     '''Test multiple sequential agent requests don't cause performance degradation.
 
-    This verifies that session management doesnt cause cumulative issues."
+    This verifies that session management doesnt cause cumulative issues.""
     '''
     pass
     handler = AgentMessageHandler()
@@ -314,7 +314,7 @@ class TestAgentPerformanceRegression:
     for i in range(3):
     message = WebSocketMessage( )
     type=MessageType.START_AGENT,
-    payload={user_request: "},
+    payload={user_request: "},"
     user_id=formatted_string,
     thread_id=
                         
@@ -339,7 +339,7 @@ class TestAgentPerformanceRegression:
 
 @pytest.mark.asyncio
 class TestSessionCleanup:
-    Test suite for proper session cleanup and resource management."
+    Test suite for proper session cleanup and resource management.""
 
     @use_real_services_enforced
     async def test_no_session_leaks_after_agent_execution(self):
@@ -355,7 +355,7 @@ class TestSessionCleanup:
     original_get_db = handler._get_database_session
 
     async def track_sessions():
-        "Track session creation.
+        "Track session creation."""
         session = await original_get_db()
         if session:
         active_sessions.append(session)
@@ -389,10 +389,10 @@ class TestSessionCleanup:
         session_closed = False
 
                     # Force an error in message routing
-        with patch.object(handler, '_route_agent_message', side_effect=Exception(Test error")):
+        with patch.object(handler, '_route_agent_message', side_effect=Exception(Test error")):"
         message = WebSocketMessage( )
         type=MessageType.START_AGENT,
-        payload={user_request: "Error test},
+        payload={user_request: "Error test},"
         user_id=error_user,
         thread_id=error_thread
                         

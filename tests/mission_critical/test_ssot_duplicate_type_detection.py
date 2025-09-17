@@ -60,7 +60,7 @@ class DuplicateTypeAnalyzer:
 
             except Exception as e:
                 # Log parsing errors but continue
-                print(f"Warning: Could not parse {file_path}: {e})
+                print(f"Warning: Could not parse {file_path}: {e})")
                 continue
 
         return type_definitions
@@ -243,7 +243,7 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
         # Log test infrastructure duplicates
         if test_duplicates:
             print(f\n=== TEST INFRASTRUCTURE DUPLICATES ({len(test_duplicates)} types) ===)"
-            print(f"Total duplicate instances: {total_duplicate_instances})
+            print(f"Total duplicate instances: {total_duplicate_instances})")
             print()
 
             # Show most duplicated types
@@ -251,7 +251,7 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
             for duplicate in sorted_duplicates[:5]:
                 print(f{duplicate['type_name']}: {duplicate['definition_count']} definitions)"
                 for definition in duplicate['definitions'][:3]:  # Show first 3
-                    print(f"  - {definition['relative_path']}:{definition['line']})
+                    print(f"  - {definition['relative_path']}:{definition['line']})")
                 if len(duplicate['definitions'] > 3:
                     print(f  ... and {len(duplicate['definitions'] - 3} more)"
                 print()
@@ -293,10 +293,10 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
         if high_risk_conflicts:
             print(f\n=== HIGH-RISK IMPORT CONFLICTS ({len(high_risk_conflicts)} found) ===)"
             for conflict in high_risk_conflicts[:5]:
-                print(f"\n{conflict['type_name']} conflicts across modules:)
+                print(f"\n{conflict['type_name']} conflicts across modules:)")
                 for module in conflict['conflicting_modules']:
                     print(f  - {module})"
-                print(f"  Risk: {conflict['conflict_risk']})
+                print(f"  Risk: {conflict['conflict_risk']})")
 
         # Import conflicts indicate architectural problems
         if len(high_risk_conflicts) > 0:
@@ -346,7 +346,7 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
 
         # If critical violations exist, flag them
         if len(critical_violations) > 0:
-            print(f"\nCRITICAL: {len(critical_violations)} critical SSOT patterns have violations!)
+            print(f"\nCRITICAL: {len(critical_violations)} critical SSOT patterns have violations!)")
             self.assertTrue(
                 len(critical_violations) > 0,  # This will always pass but logs the issue
                 fCritical SSOT pattern violations detected: {list(critical_violations.keys())}

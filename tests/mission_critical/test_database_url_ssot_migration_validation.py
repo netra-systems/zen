@@ -352,7 +352,7 @@ class DatabaseURLSSOTMigrationValidator:
                             migration_patterns_found += 1
                             logger.info(f PASS:  Found DatabaseURLBuilder usage in {file_path})
                         else:
-                            logger.warning(f" WARNING: [U+FE0F] No DatabaseURLBuilder found in {file_path})
+                            logger.warning(f" WARNING: [U+FE0F] No DatabaseURLBuilder found in {file_path})")
                     except Exception as read_error:
                         logger.warning(fCould not read {file_path}: {read_error}")
                 else:
@@ -624,7 +624,7 @@ class DatabaseURLSSOTMigrationValidator:
         if self.results.warnings:
             logger.warning( WARNING: [U+FE0F] WARNINGS:)"
             for warning in self.results.warnings:
-                logger.warning(f"  - {warning})
+                logger.warning(f"  - {warning})")
         
         return self.results
 

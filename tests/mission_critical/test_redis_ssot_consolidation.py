@@ -203,7 +203,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         
         # Log any failures for analysis
         if failure_count > 0:
-            self.logger.warning(f"Had {failure_count} failures out of {len(results)} concurrent operations)
+            self.logger.warning(f"Had {failure_count} failures out of {len(results)} concurrent operations)")
         
     async def test_memory_usage_optimization(self):
         MISSION CRITICAL: Test memory usage is optimized with single connection pool.
@@ -456,7 +456,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
             return True
             
         except Exception as e:
-            self.logger.warning(f"Connection cycle failed for {user_id}: {e})
+            self.logger.warning(f"Connection cycle failed for {user_id}: {e})")
             return False
 
 

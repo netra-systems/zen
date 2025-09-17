@@ -377,7 +377,7 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
                 fDiscovered classes: {sorted(discovered_names)}
             )
         
-        print(f"\n[U+2713] Successfully discovered {len(test_classes)} test classes:)
+        print(f"\n[U+2713] Successfully discovered {len(test_classes)} test classes:)")
         for class_name in sorted(test_classes.keys()"):
             print(f  - {class_name})
     
@@ -396,7 +396,7 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
         self.record_metric(violations_found, self.report.violations_found)
         self.record_metric(compliant_classes, len(self.report.compliant_classes))"
         
-        print(f"\n{self.report.get_summary()})
+        print(f"\n{self.report.get_summary()})")
         
         # CRITICAL ASSERTION: No violations should exist
         if self.report.violations_found > 0:
@@ -459,14 +459,14 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
         if not self.report:
             self.report = self.analyzer.analyze_inheritance_violations()
         
-        print(f"\nMethod Resolution Order Analysis:)
+        print(f"\nMethod Resolution Order Analysis:)")
         
         # Analyze MRO for all test classes
         for violation in self.report.violations:
             print(f\n  {violation.test_class_name}:)
             print(f    MRO Chain: {' -> '.join(violation.mro_chain)}")
             print(f    Violation Type: {violation.violation_type})
-            print(f"    Has setup_method: {violation.has_setup_method})
+            print(f"    Has setup_method: {violation.has_setup_method})")
             print(f    Calls super setup: {violation.calls_super_setup})
         
         # Record MRO metrics
@@ -497,7 +497,7 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
                 fAll violations must have clear fix instructions.
             )
             
-            print(f"\n  {violation.test_class_name} ({violation.violation_type}:)
+            print(f"\n  {violation.test_class_name} ({violation.violation_type}:)")
             for i, step in enumerate(violation.remediation_steps, 1):
                 print(f    {i}. {step})
         

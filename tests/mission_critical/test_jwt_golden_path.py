@@ -467,7 +467,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                         )
                     else:
                         # Other status codes may be acceptable, but log for analysis
-                        logger.warning(f"{scenario_name}: Unexpected status {response.status_code})
+                        logger.warning(f"{scenario_name}: Unexpected status {response.status_code})")
                 
                 # Test WebSocket error handling
                 try:

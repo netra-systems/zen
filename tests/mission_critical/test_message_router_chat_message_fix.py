@@ -135,7 +135,7 @@ class ChatMessageBusinessValueTests:
             after the fix is applied to LEGACY_MESSAGE_TYPE_MAP"
         )
         
-        print(f" PASS:  CONFIRMED: 'chat_message' is recognized as valid message type)
+        print(f" PASS:  CONFIRMED: 'chat_message' is recognized as valid message type)")
         print(f PASS:  CONFIRMED: Presence in LEGACY_MESSAGE_TYPE_MAP resolves the issue)"
     
     @pytest.mark.asyncio
@@ -258,9 +258,9 @@ class ChatMessageBusinessValueTests:
         )
         
         print(f[U+1F916] AGENT IMPACT: 'chat_message' prevents agent workflow initiation)"
-        print(f"[U+1F916] AGENT IMPACT: Multi-agent collaboration requests are not processed)
+        print(f"[U+1F916] AGENT IMPACT: Multi-agent collaboration requests are not processed)")
         print(f[U+1F916] AGENT IMPACT: Users request AI help but get acknowledgment only)"
-        print(f"[U+1F916] BUSINESS VALUE LOST: Core AI functionality is inaccessible via chat)
+        print(f"[U+1F916] BUSINESS VALUE LOST: Core AI functionality is inaccessible via chat)")
 
 
 class ChatMessageTechnicalValidationTests:
@@ -352,7 +352,7 @@ class ChatMessageTechnicalValidationTests:
         normalized = normalize_message_type("chat_message)  # This defaults to USER_MESSAGE
         
         print(f[U+1F4CB] NORMALIZATION BYPASS CONFIRMED:)"
-        print(f"   - Unknown check happens first: {is_unknown})
+        print(f"   - Unknown check happens first: {is_unknown})")
         print(f   - Normalization result (if it ran): {normalized})
         print(f"   - But normalization is bypassed for unknown types")
         print(f   - Router sends acknowledgment instead of processing message)
@@ -400,9 +400,9 @@ class ChatMessageTechnicalValidationTests:
         assert timestamp in ack_response, Should include timestamp"
         
         # Verify the acknowledgment indicates unknown type handling
-        print(f"[U+1F4E8] ACKNOWLEDGMENT FORMAT VALIDATION:)
+        print(f"[U+1F4E8] ACKNOWLEDGMENT FORMAT VALIDATION:)")
         print(f   - Type: {ack_response.get('type')})
-        print(f"   - Received Type: {ack_response.get('received_type')})
+        print(f"   - Received Type: {ack_response.get('received_type')})")
         print(f   - Status: {ack_response.get('status'")})
         print(f   - Contains timestamp: {'timestamp' in ack_response})
         print(f   - Full response: {json.dumps(ack_response, indent=2")}")

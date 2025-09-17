@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Integration tests for Issue #508 - WebSocket ASGI Middleware Processing
 
 Tests WebSocket ASGI middleware processing without Docker dependency.
@@ -6,7 +6,7 @@ These tests are designed to FAIL initially to reproduce middleware errors,
 then pass after fixes are implemented.
 
 Focus: middleware_setup.py WebSocket exclusion middleware and ASGI scope handling
-"
+"""Empty docstring."""
 import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch
@@ -19,7 +19,7 @@ from netra_backend.app.routes.websocket_ssot import extract_query_params
 
 @pytest.mark.integration
 class WebSocketASGIMiddlewareTests:
-    "Integration tests for WebSocket ASGI middleware processing.
+    "Integration tests for WebSocket ASGI middleware processing."""
 
     @pytest.fixture
     def app(self):
@@ -49,7 +49,7 @@ class WebSocketASGIMiddlewareTests:
 
     @pytest.mark.asyncio
     async def test_websocket_ssot_query_param_extraction_with_url_objects(self):
-        Test websocket_ssot.py query parameter extraction with different URL objects - WILL FAIL."
+        Test websocket_ssot.py query parameter extraction with different URL objects - WILL FAIL.""
         websocket_fastapi = Mock()
         websocket_fastapi.url = Mock()
         websocket_fastapi.url.query_params = QueryParams('token=abc123&user_id=user123')
@@ -58,7 +58,7 @@ class WebSocketASGIMiddlewareTests:
         assert result.get('token') == 'abc123', 'Token extraction failed'
         websocket_starlette = Mock()
         websocket_starlette.url = URL('wss://staging.netrasystems.ai/ws?token=abc123&user_id=user123')
-        with pytest.raises(AttributeError, match="'URL' object has no attribute 'query_params'):
+        with pytest.raises(AttributeError, match="'URL' object has no attribute 'query_params'):"
             result = extract_query_params(websocket_starlette)
 
     @pytest.mark.asyncio
@@ -74,7 +74,7 @@ class WebSocketASGIMiddlewareTests:
 
     @pytest.mark.asyncio
     async def test_websocket_middleware_ordering_preserves_scope(self):
-        Test that middleware processing order doesn't corrupt ASGI scopes - MAY FAIL."
+        Test that middleware processing order doesn't corrupt ASGI scopes - MAY FAIL.""
         app = FastAPI()
         app.add_middleware(WebSocketExclusionMiddleware)
 
@@ -93,13 +93,13 @@ class WebSocketASGIMiddlewareTests:
 
     @pytest.mark.asyncio
     async def test_gcp_cloud_run_asgi_simulation(self):
-        "Simulate GCP Cloud Run ASGI environment characteristics - WILL FAIL if GCP-specific.
+        "Simulate GCP Cloud Run ASGI environment characteristics - WILL FAIL if GCP-specific."""
         gcp_style_scope = {'type': 'websocket', 'scheme': 'wss', 'path': '/ws', 'raw_path': b'/ws', 'query_string': b'token=abc123&user_id=user123', 'root_path': '', 'headers': [(b'host', b'staging.netrasystems.ai'), (b'user-agent', b'websockets/10.4'), (b'upgrade', b'websocket'), (b'connection', b'Upgrade'), (b'sec-websocket-key', b'dGhlIHNhbXBsZSBub25jZQ=='), (b'sec-websocket-version', b'13'), (b'x-forwarded-for', b'203.0.113.1'), (b'x-forwarded-proto', b'https'), (b'x-cloud-trace-context', b'105445aa7843bc8bf206b120001000/1'), (b'x-appengine-request-log-id', b'5f2b6e6c0001f4b6b9d7c8e9')], 'server': ('staging.netrasystems.ai', 443), 'client': ('203.0.113.1', 56789), 'extensions': {}}
         try:
             websocket = Mock()
-            url_string = f"{gcp_style_scope['scheme']}://{gcp_style_scope['server'][0]}{gcp_style_scope['path']}
+            url_string = f"{gcp_style_scope['scheme']}://{gcp_style_scope['server'][0]}{gcp_style_scope['path']}"
             if gcp_style_scope['query_string']:
-                url_string += f?{gcp_style_scope['query_string'].decode()}"
+                url_string += f?{gcp_style_scope['query_string'].decode()}""
             websocket.url = URL(url_string)
             result = extract_query_params(websocket)
             assert isinstance(result, dict), 'Failed to extract params from GCP-style URL'
@@ -126,10 +126,10 @@ class WebSocketASGIMiddlewareTests:
 
     @pytest.mark.asyncio
     async def test_concurrent_websocket_asgi_scope_handling(self):
-        Test concurrent WebSocket ASGI scope handling for race conditions - MAY FAIL."
+        Test concurrent WebSocket ASGI scope handling for race conditions - MAY FAIL.""
 
         async def create_websocket_with_scope(scope_id):
-            "Create WebSocket with unique scope for concurrency testing.
+            "Create WebSocket with unique scope for concurrency testing."""
             scope = {'type': 'websocket', 'path': f'/ws/{scope_id}', 'query_string': f'session_id={scope_id}&token=abc123'.encode(), 'headers': [(b'host', b'localhost')]}
             websocket = Mock()
             url_string = f'ws://localhost/ws/{scope_id}?session_id={scope_id}&token=abc123'

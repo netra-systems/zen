@@ -236,7 +236,7 @@ for user_id, events in events_by_user.items():
                                 # Events should only be for the correct user
 if "message in event.get(data, {}:
     assert user_id in event[data][message], \
-"formatted_string"
+""
 
 @pytest.mark.asyncio
     async def test_database_session_isolation(self):
@@ -336,7 +336,7 @@ import random
 
 async def simulate_request(request_id: int):
     "Simulate a request with random failure chance.
-user_id = "formatted_string"
+user_id = ""
 context = UserExecutionContext( )
 user_id=user_id,
 thread_id=formatted_string,
@@ -700,7 +700,7 @@ assert len(results) == user_count, formatted_string
 
                     # High success rate required
 success_rate = len(successful) / len(results)
-assert success_rate > 0.95, "formatted_string"
+assert success_rate > 0.95, ""
 
                     # Verify unique agent instances
 agent_ids = {r[agent_id] for r in successful}
@@ -772,7 +772,7 @@ max_response_time = max(response_times)
         # Performance requirements
 assert avg_response_time < 50.0, "formatted_string
 assert p95_response_time < 100.0, formatted_string
-assert max_response_time < 200.0, "formatted_string"
+assert max_response_time < 200.0, ""
 
 logger.info(formatted_string)
 

@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Test Issue #920: WebSocket Integration Without Docker Dependencies
 
 Business Value Justification (BVJ):
@@ -15,7 +15,7 @@ This integration test suite validates Issue #920 WebSocket behaviors:
 
 TEST DESIGN NOTE: These are integration tests that validate the complete flow
 from ExecutionEngineFactory through UserWebSocketEmitter without requiring Docker.
-"
+"""Empty docstring."""
 
 import asyncio
 import pytest
@@ -41,15 +41,15 @@ from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmi
 
 
 class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
-    "Integration tests for Issue #920 WebSocket functionality without Docker.
+    "Integration tests for Issue #920 WebSocket functionality without Docker."""
     
     def setup_method(self, method):
         "Setup integration test environment for Issue #920."
         super().setup_method(method)
         
         # Test identifiers
-        self.test_user_id = fissue920_integration_user_{uuid.uuid4().hex[:8]}"
-        self.test_thread_id = f"issue920_integration_thread_{uuid.uuid4().hex[:8]}
+        self.test_user_id = fissue920_integration_user_{uuid.uuid4().hex[:8]}""
+        self.test_thread_id = f"issue920_integration_thread_{uuid.uuid4().hex[:8]}"
         self.test_run_id = fissue920_integration_run_{uuid.uuid4().hex[:8]}
         self.test_session_id = fissue920_integration_session_{uuid.uuid4().hex[:8]}
         
@@ -147,16 +147,16 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
         assert factory._engine_timeout_seconds > 0
         
         self.integration_metrics['factories_created'] += 1
-        self.record_metric(none_bridge_integration_success, True)"
+        self.record_metric(none_bridge_integration_success, True)""
     
     @pytest.mark.integration
     async def test_user_websocket_emitter_factory_integration_flow(self):
-    "
+"""Empty docstring."""
         ISSUE #920 INTEGRATION: Complete UserWebSocketEmitter + Factory integration flow.
         
         This validates the end-to-end integration from factory creation through
         WebSocket event emission.
-        "
+"""Empty docstring."""
         # Given: ExecutionEngineFactory with WebSocket bridge
         factory = ExecutionEngineFactory(
             websocket_bridge=self.mock_websocket_bridge,
@@ -177,7 +177,7 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
         
         # When: Sending WebSocket events through the integration
         await emitter.notify_agent_started(
-            agent_name=integration_test_agent",
+            agent_name=integration_test_agent","
             context={
                 integration_test: True,
                 issue": "920,
@@ -185,8 +185,8 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
             }
         
         await emitter.notify_tool_executing(
-            tool_name=integration_test_tool,"
-            context={tool_test": True}
+            tool_name=integration_test_tool,""
+            context={tool_test": True}"
         
         await emitter.notify_agent_completed(
             agent_name=integration_test_agent,
@@ -205,12 +205,12 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_multi_user_websocket_integration_isolation(self):
-        "
+"""Empty docstring."""
         ISSUE #920 INTEGRATION: Multi-user WebSocket integration with proper isolation.
         
         This validates that Issue #920 fixes don't break multi-user isolation
         in integrated scenarios.
-"
+"""Empty docstring."""
         # Given: Multiple user contexts and ExecutionEngineFactory
         user2_id = fissue920_integration_user2_{uuid.uuid4().hex[:8]}
         user2_context = Mock(spec=UserExecutionContext)
@@ -241,8 +241,8 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
         # When: Sending concurrent events from both users
         user1_tasks = [
             emitter1.notify_agent_started(
-                agent_name=f"user1_agent_{i},
-                context={user": self.test_user_id, task: i}
+                agent_name=f"user1_agent_{i},"
+                context={user": self.test_user_id, task: i}"
             for i in range(3)
         ]
         
@@ -273,12 +273,12 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_websocket_integration_error_recovery(self):
-        "
+"""Empty docstring."""
         ISSUE #920 INTEGRATION: WebSocket integration with error recovery scenarios.
         
         This validates that the integration handles failures gracefully
         and can recover from WebSocket errors.
-"
+"""Empty docstring."""
         # Given: Factory and emitter setup
         factory = ExecutionEngineFactory(
             websocket_bridge=self.mock_websocket_bridge,
@@ -298,8 +298,8 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
         
         # Attempt to send events during failure
         await emitter.notify_agent_started(
-            agent_name=error_recovery_agent,"
-            context={error_test": True}
+            agent_name=error_recovery_agent,""
+            context={error_test": True}"
         
         # Then: Integration should handle errors gracefully
         assert emitter.metrics.total_events >= 1  # Attempt was recorded
@@ -321,11 +321,11 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     def test_integration_resource_cleanup(self):
-        "
+"""Empty docstring."""
         ISSUE #920 INTEGRATION: Validate proper resource cleanup in integration scenarios.
         
         This ensures that Issue #920 fixes maintain proper resource management.
-"
+"""Empty docstring."""
         # Given: Multiple factories and emitters created during integration
         factories = []
         emitters = []
@@ -367,7 +367,7 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
         assert self.integration_metrics['events_sent'] >= 0
         
     def teardown_method(self, method):
-        Cleanup integration test environment."
+        Cleanup integration test environment.""
         # Log integration metrics
         logger = self.get_logger()
         logger.info(

@@ -1,4 +1,4 @@
-"Integration tests for ExecutionEngineFactory with WebSocket bridge.
+"Integration tests for ExecutionEngineFactory with WebSocket bridge."""
 
 Business Value Justification:
 - Segment: Platform/Internal
@@ -29,11 +29,11 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocke
 
 @pytest.mark.integration
 class ExecutionEngineFactoryWebSocketIntegrationTests:
-    Test ExecutionEngineFactory WebSocket bridge integration patterns."
+    Test ExecutionEngineFactory WebSocket bridge integration patterns.""
 
     @pytest.fixture
     def mock_websocket_bridge(self):
-        "Create mock WebSocket bridge with comprehensive event tracking.
+        "Create mock WebSocket bridge with comprehensive event tracking."""
         bridge = MagicMock()
         bridge.is_connected.return_value = True
         bridge.emit = AsyncMock(return_value=True)
@@ -101,7 +101,7 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
 
     @pytest.mark.asyncio
     async def test_factory_user_websocket_emitter_creation_with_bridge_validation(self, mock_websocket_bridge):
-        Test factory creates UserWebSocketEmitter with validated bridge."
+        Test factory creates UserWebSocketEmitter with validated bridge.""
         factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
         user_context = self.create_user_context('emitter_creation')
         mock_agent_factory = MagicMock()
@@ -112,7 +112,7 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
 
     @pytest.mark.asyncio
     async def test_factory_concurrent_websocket_emitter_creation_isolation(self, mock_websocket_bridge):
-        "Test factory creates isolated WebSocket emitters for concurrent users.
+        "Test factory creates isolated WebSocket emitters for concurrent users."""
         factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
         user1_context = self.create_user_context('concurrent_user1')
         user2_context = self.create_user_context('concurrent_user2')
@@ -223,11 +223,11 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
 
 @pytest.mark.integration
 class ExecutionEngineFactoryWebSocketConfigurationTests:
-    Test ExecutionEngineFactory WebSocket configuration and setup."
+    Test ExecutionEngineFactory WebSocket configuration and setup.""
 
     @pytest.mark.asyncio
     async def test_configure_execution_engine_factory_with_websocket_bridge(self):
-        "Test configuring factory with WebSocket bridge for production use.
+        "Test configuring factory with WebSocket bridge for production use."""
         mock_bridge = MagicMock()
         mock_bridge.is_connected.return_value = True
         factory = await configure_execution_engine_factory(websocket_bridge=mock_bridge, database_session_manager=None, redis_manager=None)
@@ -287,10 +287,10 @@ class ExecutionEngineFactoryWebSocketConfigurationTests:
 
 @pytest.mark.integration
 class ExecutionEngineFactoryWebSocketBusinessValueTests:
-    Test ExecutionEngineFactory delivers WebSocket business value."
+    Test ExecutionEngineFactory delivers WebSocket business value.""
 
     def test_factory_websocket_integration_enables_chat_business_value(self):
-        "Test factory WebSocket integration enables critical chat business value delivery.
+        "Test factory WebSocket integration enables critical chat business value delivery."""
         mock_bridge = MagicMock()
         mock_bridge.is_connected.return_value = True
         mock_bridge.supports_chat_events = True

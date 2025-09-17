@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 E2E Test Suite for WebSocket ID Consistency Failures
 
 MISSION CRITICAL: This test suite validates end-to-end WebSocket ID generation
@@ -21,7 +21,7 @@ Identified Violations:
 - WebSocket connection IDs have format conflicts
 - Thread/WebSocket ID routing dependencies broken
 - User isolation failures due to ID format mismatches
-"
+"""Empty docstring."""
 
 import pytest
 import asyncio
@@ -51,7 +51,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 @pytest.mark.e2e
 class WebSocketIDConsistencyFailuresTests(BaseTestCase):
-    "E2E tests exposing WebSocket ID generation and routing consistency failures.
+    "E2E tests exposing WebSocket ID generation and routing consistency failures."""
     
     def setup_method(self):
         "Setup for each test method."
@@ -86,12 +86,12 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_client_id_violations_SHOULD_FAIL(self):
-    "
+"""Empty docstring."""
         EXPECTED TO FAIL: WebSocket client IDs use inconsistent generation patterns.
         
         This test exposes WebSocket client ID generation that doesn't follow
         SSOT patterns, causing routing and isolation issues.
-        "
+"""Empty docstring."""
         # Create authenticated user contexts for WebSocket testing
         user_contexts = []
         for i in range(3):
@@ -112,12 +112,12 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                 client_id = getattr(user_context, 'websocket_client_id', None)
                 if not client_id:
                     # Try to get from manager or generate one
-                    client_id = f"client_{uuid.uuid4().hex[:8]}  # Current violation pattern
+                    client_id = f"client_{uuid.uuid4().hex[:8]}  # Current violation pattern"
                 
                 # Check if client ID follows SSOT patterns
                 if isinstance(client_id, str):
                     if self.id_patterns['uuid_v4'].match(client_id):
-                        client_id_violations.append(fWebSocket client ID uses raw UUID: {client_id}")
+                        client_id_violations.append(fWebSocket client ID uses raw UUID: {client_id}")"
                     elif not self.id_patterns['websocket_structured'].match(client_id):
                         client_id_violations.append(fWebSocket client ID doesn't follow SSOT format: {client_id})
                 
@@ -125,21 +125,21 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                 for j, other_context in enumerate(user_contexts[:i]:
                     other_client_id = getattr(other_context, 'websocket_client_id', None)
                     if client_id == other_client_id:
-                        client_id_violations.append(fDuplicate WebSocket client IDs found: {client_id})"
+                        client_id_violations.append(fDuplicate WebSocket client IDs found: {client_id})""
                 
             except Exception as e:
-                client_id_violations.append(f"WebSocket manager creation failed for user {i}: {e})
+                client_id_violations.append(f"WebSocket manager creation failed for user {i}: {e})"
         
         # This test SHOULD FAIL due to client ID violations
         assert len(client_id_violations) > 0, (
             Expected WebSocket client ID violations. 
-            If this passes, WebSocket client ID generation is already SSOT compliant!"
+            If this passes, WebSocket client ID generation is already SSOT compliant!""
         )
         
         self.consistency_violations.extend(client_id_violations)
         
         pytest.fail(
-            fWebSocket client ID generation violations:\n" +
+            fWebSocket client ID generation violations:\n" +"
             \n.join(client_id_violations) +
             \n\nMIGRATION REQUIRED: Use UnifiedIdGenerator.generate_base_id('websocket') for all WebSocket client IDs""
         )
@@ -161,10 +161,10 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
             # Test different WebSocket connection ID generation paths
             connection_scenarios = [
                 # Scenario 1: Direct WebSocket connection (simulated)
-                {method: direct_connection, id: str(uuid.uuid4())},  # Current violation"
+                {method: direct_connection, id: str(uuid.uuid4())},  # Current violation""
                 
                 # Scenario 2: WebSocket manager factory connection
-                {"method: manager_factory, id: fws_conn_{uuid.uuid4().hex[:8]}},  # Current violation
+                {"method: manager_factory, id: fws_conn_{uuid.uuid4().hex[:8]}},  # Current violation"
                 
                 # Scenario 3: WebSocket bridge connection
                 {"method: bridge_connection", id: uuid.uuid4().hex},  # Current violation
@@ -175,11 +175,11 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
             
             for scenario in connection_scenarios:
                 connection_id = scenario[id]
-                method = scenario[method]"
+                method = scenario[method]""
                 
                 # Check for raw UUID violations
                 if self.id_patterns['uuid_v4'].match(connection_id):
-                    connection_id_violations.append(f{method} uses raw UUID connection ID: {connection_id}")
+                    connection_id_violations.append(f{method} uses raw UUID connection ID: {connection_id}")"
                 
                 # Check for non-SSOT structured format
                 elif not (self.id_patterns['ssot_structured'].match(connection_id) or 
@@ -194,8 +194,8 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
             for i in range(3):
                 # This simulates current WebSocket connection creation
                 conn_data = {
-                    connection_id: str(uuid.uuid4()),  # VIOLATION: Raw UUID"
-                    "user_id: user_context.user_id,
+                    connection_id: str(uuid.uuid4()),  # VIOLATION: Raw UUID""
+                    "user_id: user_context.user_id,"
                     created_at: datetime.utcnow().isoformat()
                 }
                 simulated_connections.append(conn_data)
@@ -216,8 +216,8 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
         )
         
         pytest.fail(
-            fWebSocket connection ID violations:\n +"
-            "\n.join(connection_id_violations) +
+            fWebSocket connection ID violations:\n +""
+            "\n.join(connection_id_violations) +"
             \n\nMIGRATION REQUIRED: Use SSOT ID generation for all WebSocket connection IDs
         )
 
@@ -241,20 +241,20 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
             {
                 name": "uuid_thread_ssot_run,
                 thread_id: str(uuid.uuid4()),  # Raw UUID (violation)
-                run_id: UnifiedIdGenerator.generate_base_id(run"),  # SSOT compliant
-                "expected_routing: should_fail
+                run_id: UnifiedIdGenerator.generate_base_id(run"),  # SSOT compliant"
+                "expected_routing: should_fail"
             },
             {
                 name: ssot_thread_uuid_run, 
                 "thread_id: UnifiedIdGenerator.generate_base_id(session"),  # SSOT compliant
                 run_id: str(uuid.uuid4()),  # Raw UUID (violation)
-                expected_routing: "should_fail
+                expected_routing: "should_fail"
             },
             {
-                name": mixed_format_chaos,
+                name": mixed_format_chaos,"
                 thread_id: fthread_{uuid.uuid4().hex[:8]},  # Mixed format (violation)
-                run_id: f"run_{uuid.uuid4()},  # Mixed format (violation)
-                expected_routing": should_fail
+                run_id: f"run_{uuid.uuid4()},  # Mixed format (violation)"
+                expected_routing": should_fail"
             }
         ]
         
@@ -274,11 +274,11 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                 
                 # Test WebSocket routing with mixed ID formats
                 test_message = {
-                    type: agent_started",
-                    "data: {message: test routing},
+                    type: agent_started","
+                    "data: {message: test routing},"
                     thread_id": scenario["thread_id],
                     run_id: scenario[run_id],
-                    routing_test: scenario["name]
+                    routing_test: scenario["name]"
                 }
                 
                 # Try to send message (this should expose routing issues)
@@ -288,15 +288,15 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                     # If this succeeds with mixed formats, that's actually a problem
                     # because it means routing doesn't validate ID consistency
                     routing_violations.append(
-                        fWebSocket routing succeeded with inconsistent ID formats in {scenario['name']}: "
+                        fWebSocket routing succeeded with inconsistent ID formats in {scenario['name']}: ""
                         fthread_id={scenario['thread_id'][:20]}..., run_id={scenario['run_id'][:20]}...
                     )
                     
                 except Exception as routing_error:
                     # If routing fails due to ID format issues, that confirms the violation
-                    if format in str(routing_error).lower() or "id in str(routing_error).lower():
+                    if format in str(routing_error).lower() or "id in str(routing_error).lower():"
                         routing_violations.append(
-                            fWebSocket routing failed due to ID format inconsistency in {scenario['name']}: {routing_error}"
+                            fWebSocket routing failed due to ID format inconsistency in {scenario['name']}: {routing_error}""
                         )
                     else:
                         # Other errors might be expected
@@ -307,8 +307,8 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
         
         # This test SHOULD FAIL due to routing inconsistencies
         assert len(routing_violations) > 0, (
-            Expected WebSocket routing violations due to ID format inconsistencies. "
-            "If this passes, WebSocket routing is already handling mixed ID formats properly!
+            Expected WebSocket routing violations due to ID format inconsistencies. ""
+            "If this passes, WebSocket routing is already handling mixed ID formats properly!"
         )
         
         pytest.fail(
@@ -329,7 +329,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
         user_contexts = []
         for i in range(3):
             context = await create_authenticated_user_context(
-                user_email=fisolation_test_{i}@example.com"
+                user_email=fisolation_test_{i}@example.com""
             )
             user_contexts.append(context)
         
@@ -352,16 +352,16 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                 elif i == 1:
                     # User 1: Use SSOT format
                     test_context = UserExecutionContext.from_request(
-                        user_id=UnifiedIdGenerator.generate_base_id("user),
+                        user_id=UnifiedIdGenerator.generate_base_id("user),"
                         thread_id=UnifiedIdGenerator.generate_base_id(session),
                         run_id=UnifiedIdGenerator.generate_base_id("run),"
                         request_id=UnifiedIdGenerator.generate_base_id(req),
-                        websocket_client_id=UnifiedIdGenerator.generate_base_id(websocket)"
+                        websocket_client_id=UnifiedIdGenerator.generate_base_id(websocket)""
                     )
                 else:
                     # User 2: Use mixed format (violation)
                     test_context = UserExecutionContext.from_request(
-                        user_id=fuser_{uuid.uuid4().hex[:8]}",  # Mixed format
+                        user_id=fuser_{uuid.uuid4().hex[:8]}",  # Mixed format"
                         thread_id=UnifiedIdGenerator.generate_base_id(session),  # SSOT
                         run_id=str(uuid.uuid4()),  # Raw UUID
                         request_id=freq_{uuid.uuid4().hex}",  # Mixed format"
@@ -429,7 +429,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                     else:
                         formats[field] = 'unknown'
                 
-                id_format_analysis[f"user_{i}] = formats
+                id_format_analysis[f"user_{i}] = formats"
             
             # Mixed formats across users indicate isolation risk
             all_formats = set()
@@ -438,7 +438,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
             
             if len(all_formats) > 1:
                 isolation_violations.append(
-                    fMixed ID formats across users create isolation risks: {id_format_analysis}"
+                    fMixed ID formats across users create isolation risks: {id_format_analysis}""
                 )
         
         except Exception as e:
@@ -454,8 +454,8 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
         
         # This test SHOULD FAIL due to isolation violations
         assert len(isolation_violations) > 0, (
-            Expected multi-user WebSocket isolation violations. "
-            "If this passes, WebSocket isolation is already handling mixed ID formats properly!
+            Expected multi-user WebSocket isolation violations. ""
+            "If this passes, WebSocket isolation is already handling mixed ID formats properly!"
         )
         
         pytest.fail(
@@ -485,47 +485,47 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
         
         message_scenarios = [
             {
-                name: "agent_started_raw_uuid,
-                message": {
+                name: "agent_started_raw_uuid,"
+                message": {"
                     type: agent_started,
                     "data: {agent_id": str(uuid.uuid4())},  # VIOLATION: Raw UUID
                     user_id: str(uuid.uuid4()),  # VIOLATION: Raw UUID
-                    thread_id: str(uuid.uuid4()),  # VIOLATION: Raw UUID"
-                    "run_id: str(uuid.uuid4()),  # VIOLATION: Raw UUID
+                    thread_id: str(uuid.uuid4()),  # VIOLATION: Raw UUID""
+                    "run_id: str(uuid.uuid4()),  # VIOLATION: Raw UUID"
                     timestamp: datetime.utcnow().isoformat()
                 }
             },
             {
                 "name: tool_executing_mixed_format",
                 message: {
-                    type: "tool_executing,
-                    data": {
+                    type: "tool_executing,"
+                    data": {"
                         tool_id: ftool_{uuid.uuid4().hex[:8]},  # VIOLATION: Mixed format
                         "execution_id: uuid.uuid4().hex  # VIOLATION: Raw UUID hex"
                     },
                     user_id: user_context.user_id,  # May be compliant
-                    thread_id: fthread_{uuid.uuid4()}",  # VIOLATION: Mixed format
-                    "timestamp: datetime.utcnow().isoformat()
+                    thread_id: fthread_{uuid.uuid4()}",  # VIOLATION: Mixed format"
+                    "timestamp: datetime.utcnow().isoformat()"
                 }
             },
             {
                 name: agent_completed_inconsistent,
                 message": {"
                     type: agent_completed,
-                    data: {"
-                        result_id": str(uuid.uuid4()),  # VIOLATION: Raw UUID
+                    data: {""
+                        result_id": str(uuid.uuid4()),  # VIOLATION: Raw UUID"
                         session_id: uuid.uuid4().hex[:16]  # VIOLATION: Truncated UUID
                     },
                     user_id": user_context.user_id,"
                     correlation_id: str(uuid.uuid4()),  # VIOLATION: Raw UUID
-                    timestamp: datetime.utcnow().isoformat()"
+                    timestamp: datetime.utcnow().isoformat()""
                 }
             }
         ]
         
         for scenario in message_scenarios:
             try:
-                message = scenario["message]
+                message = scenario["message]"
                 scenario_name = scenario[name]
                 
                 # Analyze message for ID format violations
@@ -534,9 +534,9 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                     if isinstance(obj, dict):
                         for key, value in obj.items():
                             current_path = f{path}.{key} if path else key
-                            if isinstance(value, str) and (id in key.lower() or key in [correlation_id"]:
+                            if isinstance(value, str) and (id in key.lower() or key in [correlation_id"]:"
                                 if self.id_patterns['uuid_v4'].match(value):
-                                    violations.append(f"{scenario_name} {current_path} uses raw UUID: {value})
+                                    violations.append(f"{scenario_name} {current_path} uses raw UUID: {value})"
                                 elif not self.id_patterns['ssot_structured'].match(value):
                                     violations.append(f{scenario_name} {current_path} uses non-SSOT format: {value})
                             elif isinstance(value, (dict, list)):
@@ -566,8 +566,8 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
         )
         
         pytest.fail(
-            fWebSocket message ID format violations:\n +"
-            "\n.join(message_violations) +
+            fWebSocket message ID format violations:\n +""
+            "\n.join(message_violations) +"
             \n\nMIGRATION REQUIRED: Use SSOT ID formats in all WebSocket messages
         )
 
@@ -609,20 +609,20 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
             type: agent_started,
             data": {"
                 agent_id: UnifiedIdGenerator.generate_base_id(agent),
-                tool_id: UnifiedIdGenerator.generate_base_id(tool")
+                tool_id: UnifiedIdGenerator.generate_base_id(tool")"
             },
-            "user_id: user_context.user_id,
+            "user_id: user_context.user_id,"
             thread_id: user_context.thread_id,
             "run_id: user_context.run_id,"
             correlation_id: UnifiedIdGenerator.generate_base_id(correlation),
-            timestamp: datetime.utcnow().isoformat()"
+            timestamp: datetime.utcnow().isoformat()""
         }
         
         # This should work without issues after migration
         try:
             await ws_manager.send_to_user(compliant_message)
         except Exception as e:
-            pytest.fail(f"SSOT-compliant WebSocket message should send successfully: {e})
+            pytest.fail(f"SSOT-compliant WebSocket message should send successfully: {e})"
         
         # Cleanup
         await ws_manager.cleanup_all_connections()
@@ -651,8 +651,8 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
             assert len(set(user_ids)) == len(user_ids), All user IDs should be unique
             
             for user_id in user_ids:
-                assert not self.id_patterns['uuid_v4'].match(user_id), f"User ID should not be raw UUID: {user_id}
-                assert '_' in user_id, fUser ID should be structured: {user_id}"
+                assert not self.id_patterns['uuid_v4'].match(user_id), f"User ID should not be raw UUID: {user_id}"
+                assert '_' in user_id, fUser ID should be structured: {user_id}""
             
             # Test isolation - each manager should only handle its own user
             for i, manager in enumerate(ws_managers):
@@ -687,9 +687,9 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_id_regression_prevention(self):
-        "
+"""Empty docstring."""
         Test to prevent regression back to inconsistent WebSocket ID generation.
-"
+"""Empty docstring."""
         # Define patterns that should NEVER be used after migration
         forbidden_patterns = [
             str(uuid.uuid4()),  # Raw UUID
@@ -711,12 +711,12 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
             UnifiedIdGenerator.generate_base_id(websocket),
             UnifiedIdGenerator.generate_base_id("connection),"
             UnifiedIdGenerator.generate_base_id(ws_client),
-            UnifiedIdGenerator.generate_base_id(ws_session)"
+            UnifiedIdGenerator.generate_base_id(ws_session)""
         ]
         
         # All acceptable patterns should be SSOT-compliant
         for acceptable_id in acceptable_patterns:
-            assert not self.id_patterns['uuid_v4'].match(acceptable_id), fSSOT pattern should not be raw UUID: {acceptable_id}"
+            assert not self.id_patterns['uuid_v4'].match(acceptable_id), fSSOT pattern should not be raw UUID: {acceptable_id}""
             assert self.id_patterns['ssot_structured'].match(acceptable_id), fShould match SSOT format: {acceptable_id}
 
     # =============================================================================
@@ -725,9 +725,9 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_id_consistency_under_load(self):
-        "
+"""Empty docstring."""
         Test WebSocket ID consistency under concurrent load conditions.
-"
+"""Empty docstring."""
         # Create multiple concurrent WebSocket operations
         concurrent_tasks = []
         user_contexts = []
@@ -756,11 +756,11 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
             # Check uniqueness
             assert len(set(all_user_ids)) == len(all_user_ids), All user IDs should be unique under load""
             assert len(set(all_thread_ids)) == len(all_thread_ids), All thread IDs should be unique under load
-            assert len(set(all_run_ids)) == len(all_run_ids), All run IDs should be unique under load"
+            assert len(set(all_run_ids)) == len(all_run_ids), All run IDs should be unique under load""
             
             # Check format consistency
             for user_id in all_user_ids:
-                assert not self.id_patterns['uuid_v4'].match(user_id), f"Load test user ID should not be UUID: {user_id}
+                assert not self.id_patterns['uuid_v4'].match(user_id), f"Load test user ID should not be UUID: {user_id}"
             
             # Cleanup
             cleanup_tasks = [manager.cleanup_all_connections() for manager in ws_managers]
@@ -779,9 +779,9 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
         if hasattr(self, 'consistency_violations') and self.consistency_violations:
             print(f\nWebSocket ID consistency violations detected: {len(self.consistency_violations)})
             for violation in self.consistency_violations[:3]:  # Show first 3
-                print(f"  - {violation})
+                print(f"  - {violation})"
             if len(self.consistency_violations) > 3:
-                print(f  ... and {len(self.consistency_violations") - 3} more violations)
+                print(f  ... and {len(self.consistency_violations") - 3} more violations)"
 
     @pytest.mark.asyncio
     async def test_websocket_integration_health_check(self):
@@ -795,8 +795,8 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
             ws_manager = await create_websocket_manager(user_context)
             
             # Verify manager is created successfully
-            assert ws_manager is not None, WebSocket manager should be created"
-            assert isinstance(ws_manager, IsolatedWebSocketManager), "Should be IsolatedWebSocketManager
+            assert ws_manager is not None, WebSocket manager should be created""
+            assert isinstance(ws_manager, IsolatedWebSocketManager), "Should be IsolatedWebSocketManager"
             
             # Test basic operations
             manager_stats = ws_manager.get_manager_stats()
@@ -828,7 +828,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
             
             for i in range(3):
                 context = await create_authenticated_user_context(
-                    user_email=ffactory_test_{i}@example.com"
+                    user_email=ffactory_test_{i}@example.com""
                 )
                 manager = await factory.create_manager(context)
                 
@@ -844,7 +844,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                 for field in ['user_id', 'thread_id', 'run_id', 'request_id']:
                     if field in user_data:
                         id_value = user_data[field]
-                        assert isinstance(id_value, str), f"Factory manager {i} {field} should be string
+                        assert isinstance(id_value, str), f"Factory manager {i} {field} should be string"
                         assert len(id_value) > 0, fFactory manager {i} {field} should not be empty
             
             # Cleanup

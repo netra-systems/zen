@@ -1,4 +1,4 @@
-"WebSocket Multi-Service Communication Tests.
+"WebSocket Multi-Service Communication Tests."""
 
 Tests cross-service WebSocket message routing per SPEC/independent_services.xml
 and SPEC/websockets.xml requirements:
@@ -28,11 +28,11 @@ from tests.e2e.config import UnifiedTestConfig
 
 @pytest.mark.e2e
 class WebSocketMultiServiceTests:
-    Test suite for WebSocket multi-service communication."
+    Test suite for WebSocket multi-service communication.""
     
     @pytest.fixture
     async def backend_client(self):
-        "Get authenticated backend client.
+        "Get authenticated backend client."""
         client = BackendTestClient()
         await client.authenticate()
         try:
@@ -67,11 +67,11 @@ class WebSocketMultiServiceTests:
         # Verify auth service is accessible
         auth_health = await auth_service_client.get(/health)
         if auth_health.status_code != 200:
-            pytest.skip(Auth service not available for multi-service testing)"
+            pytest.skip(Auth service not available for multi-service testing)""
         
         # Trigger authentication-related WebSocket events
         await websocket_client.send_message({
-            "type: auth_status_request,
+            "type: auth_status_request,"
             payload: {request_id: "multi_service_test_001}"
         }
         
@@ -91,9 +91,9 @@ class WebSocketMultiServiceTests:
                     message = json.loads(message)
                 
                 if isinstance(message, dict) and type in message:
-                    event_type = message[type]"
+                    event_type = message[type]""
                     # Look for auth-related events from different services
-                    if any(auth_keyword in event_type.lower() for auth_keyword in [auth", token, session]:
+                    if any(auth_keyword in event_type.lower() for auth_keyword in [auth", token, session]:"
                         auth_events.append(message)
                         
             except (asyncio.TimeoutError, json.JSONDecodeError):
@@ -105,10 +105,10 @@ class WebSocketMultiServiceTests:
                 payload = event.get("payload, {}"
                 
                 # Should include service identification
-                service_indicators = [service_id, service_name, source_service]"
+                service_indicators = [service_id, service_name, source_service]""
                 has_service_indicator = any(indicator in payload for indicator in service_indicators)
                 
-                assert has_service_indicator or "service in str(payload).lower(), (
+                assert has_service_indicator or "service in str(payload).lower(), ("
                     fAuth event missing service identification: {event}
                 )
                 
@@ -140,7 +140,7 @@ class WebSocketMultiServiceTests:
                 if isinstance(message, str):
                     message = json.loads(message)
                 
-                if isinstance(message, dict) and type in message:"
+                if isinstance(message, dict) and type in message:""
                     # Try to identify service origin
                     service_origin = self._identify_service_origin(message)
                     
@@ -154,7 +154,7 @@ class WebSocketMultiServiceTests:
         # Validate service independence principles
         for service, events in service_events.items():
             for event in events:
-                payload = event.get(payload", {}
+                payload = event.get(payload", {}"
                 
                 # Should not contain references to internal modules of other services
                 forbidden_imports = [app.internal, auth_service.internal, "frontend.internal]"
@@ -178,8 +178,8 @@ class WebSocketMultiServiceTests:
         # Send messages that require multi-service coordination
         test_messages = [
             {
-                type: "user_message,
-                payload": {content: Agent task requiring auth verification}
+                type: "user_message,"
+                payload": {content: Agent task requiring auth verification}"
             },
             {
                 "type: service_health_check",
@@ -224,8 +224,8 @@ class WebSocketMultiServiceTests:
         
         # Validate routing effectiveness
         for result in routing_results:
-            responses = result[responses]"
-            assert len(responses) > 0, fNo responses for message: {result['request']}"
+            responses = result[responses]""
+            assert len(responses) > 0, fNo responses for message: {result['request']}""
             
             # Should have proper message correlation
             request_type = result[request][type]
@@ -233,19 +233,19 @@ class WebSocketMultiServiceTests:
             
             # Responses should be related to request
             assert any(
-                request_type.replace(_, ).lower() in response_type.replace(_, ").lower()
-                or "response in response_type.lower()
+                request_type.replace(_, ).lower() in response_type.replace(_, ").lower()"
+                or "response in response_type.lower()"
                 or result in response_type.lower()
                 for response_type in response_types
-            ), f"No correlated responses for {request_type}: {response_types}
+            ), f"No correlated responses for {request_type}: {response_types}"
     
     @pytest.mark.e2e
     async def test_service_failure_isolation(self, websocket_client):
-        "Test WebSocket continues working when individual services have issues.
+        "Test WebSocket continues working when individual services have issues."""
         # Trigger comprehensive workflow
         await websocket_client.send_message({
             "type: user_message",
-            payload: {content: Test service failure isolation with comprehensive workflow}"
+            payload: {content: Test service failure isolation with comprehensive workflow}""
         }
         
         # Monitor events and service health
@@ -264,7 +264,7 @@ class WebSocketMultiServiceTests:
                 if isinstance(message, str):
                     message = json.loads(message)
                 
-                if isinstance(message, dict) and type" in message:
+                if isinstance(message, dict) and type" in message:"
                     service = self._identify_service_origin(message)
                     
                     if service not in events_by_service:
@@ -275,8 +275,8 @@ class WebSocketMultiServiceTests:
                     if error in message.get(type, ").lower():"
                         service_errors.append({
                             service: service,
-                            error_event: message,"
-                            timestamp": asyncio.get_event_loop().time()
+                            error_event: message,""
+                            timestamp": asyncio.get_event_loop().time()"
                         }
                         
             except (asyncio.TimeoutError, json.JSONDecodeError):
@@ -320,7 +320,7 @@ class WebSocketMultiServiceTests:
                 type: user_message,
                 payload": {"
                     content: fLoad balancing test request {i+1},
-                    session_marker: flb_test_{i+1}"
+                    session_marker: flb_test_{i+1}""
                 }
             }
             
@@ -346,7 +346,7 @@ class WebSocketMultiServiceTests:
                     break
             
             session_consistency_results.append({
-                "request_id: i + 1,
+                "request_id: i + 1,"
                 events: request_events,
                 "service_origins: [self._identify_service_origin(e) for e in request_events]"
             }
@@ -363,19 +363,19 @@ class WebSocketMultiServiceTests:
         session_ids = set()
         
         for result in session_consistency_results:
-            for event in result[events]:"
-                payload = event.get(payload", {}
+            for event in result[events]:""
+                payload = event.get(payload", {}"
                 
                 # Extract session/user identifiers if present
                 if user_id in payload:
                     user_ids.add(payload[user_id"]"
                 if session_id in payload:
-                    session_ids.add(payload[session_id]"
+                    session_ids.add(payload[session_id]""
         
         # Session identifiers should be consistent across load-balanced requests
         if len(user_ids) > 1:
             pytest.fail(
-                f"Load balancing broke user session consistency: {user_ids}. 
+                f"Load balancing broke user session consistency: {user_ids}. "
                 fSame WebSocket connection should maintain consistent user identity.
             )
         
@@ -387,10 +387,10 @@ class WebSocketMultiServiceTests:
     
     @pytest.mark.e2e
     async def test_service_version_compatibility(self, websocket_client, backend_client):
-        Test WebSocket handles service version mismatches gracefully."
+        Test WebSocket handles service version mismatches gracefully.""
         # Get service version information
         try:
-            main_version_response = await backend_client.get(/api/version")
+            main_version_response = await backend_client.get(/api/version")"
             main_version = main_version_response.json() if main_version_response.status_code == 200 else {}
         except:
             main_version = {}
@@ -416,8 +416,8 @@ class WebSocketMultiServiceTests:
                 if isinstance(message, str):
                     message = json.loads(message)
                 
-                if isinstance(message, dict) and type in message:"
-                    event_type = message["type]
+                if isinstance(message, dict) and type in message:""
+                    event_type = message["type]"
                     if any(keyword in event_type.lower() for keyword in [version, compatibility, error"]:"
                         version_events.append(message)
                         
@@ -427,13 +427,13 @@ class WebSocketMultiServiceTests:
         # Validate version handling
         compatibility_errors = [
             e for e in version_events 
-            if error in e.get(type, ).lower() and version" in str(e).lower()
+            if error in e.get(type, ).lower() and version" in str(e).lower()"
         ]
         
         # Should handle version mismatches gracefully, not crash
         if compatibility_errors:
             for error in compatibility_errors:
-                payload = error.get("payload, {}
+                payload = error.get("payload, {}"
                 assert message in payload or error in payload, (
                     Version compatibility errors should include descriptive messages""
                 )
@@ -447,15 +447,15 @@ class WebSocketMultiServiceTests:
     # Helper methods (each  <= 8 lines)
     def _identify_service_origin(self, event: Dict[str, Any] -> str:
         ""Identify which service originated the event.
-        payload = str(event.get(payload, {}).lower()"
-        event_type = event.get(type", ).lower()
+        payload = str(event.get(payload, {}).lower()""
+        event_type = event.get(type", ).lower()"
         
         if auth in event_type or auth in payload:
             return auth_service""
         elif frontend in payload or ui in event_type:
-            return frontend"
+            return frontend""
         else:
-            return main_backend"
+            return main_backend""
     
     def _analyze_service_participation(self, events: List[Dict] -> Dict[str, int]:
         Analyze which services participated in event responses.""
@@ -466,10 +466,10 @@ class WebSocketMultiServiceTests:
         return participation
     
     def _extract_session_markers(self, events: List[Dict] -> Set[str]:
-        Extract session/correlation markers from events."
+        Extract session/correlation markers from events.""
         markers = set()
         for event in events:
-            payload = event.get("payload, {}
+            payload = event.get("payload, {}"
             for field in [session_id, correlation_id, request_id"]:"
                 if field in payload:
                     markers.add(str(payload[field])

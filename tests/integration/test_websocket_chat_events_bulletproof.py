@@ -1,4 +1,4 @@
-"MISSION CRITICAL INTEGRATION TEST: WebSocket Chat Event Flow
+"MISSION CRITICAL INTEGRATION TEST: WebSocket Chat Event Flow"""
 
 Business Value: $500K+ ARR - Real-time chat interaction and agent visibility
 CHAT IS KING - THIS TEST MUST PASS.
@@ -37,7 +37,7 @@ from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine, enhance_tool_dispatcher_with_notifications
 
 class WebSocketEventValidator:
-    Validates WebSocket events against specification requirements."
+    Validates WebSocket events against specification requirements.""
     REQUIRED_EVENTS = {'agent_started': {'critical': True, 'description': 'User must know agent is processing'}, 'agent_thinking': {'critical': True, 'description': 'Real-time reasoning visibility'}, 'tool_executing': {'critical': True, 'description': 'Tool usage transparency'}, 'tool_completed': {'critical': True, 'description': 'Tool results display'}, 'agent_completed': {'critical': True, 'description': 'User must know when done'}, 'partial_result': {'critical': False, 'description': 'Streaming response UX'}, 'final_report': {'critical': False, 'description': 'Comprehensive summary'}}
     EVENT_SEQUENCES = [['agent_started', 'agent_thinking'], ['tool_executing', 'tool_completed'], ['agent_started', 'agent_completed']]
     MAX_EVENT_DELAYS = {'agent_started': 500, 'agent_thinking': 1000, 'tool_executing': 2000, 'agent_completed': 30000}
@@ -48,7 +48,7 @@ class WebSocketEventValidator:
         self.validation_errors: List[str] = []
 
     def add_event(self, event: Dict) -> None:
-        "Add an event for validation.
+        "Add an event for validation."""
         event_type = event.get('type')
         timestamp = time.time()
         self.events.append({'event': event, 'timestamp': timestamp, 'type': event_type}
@@ -104,13 +104,13 @@ class WebSocketEventValidator:
         return len(self.validation_errors) == 0
 
     def get_validation_report(self) -> Dict[str, Any]:
-        Get comprehensive validation report."
+        Get comprehensive validation report.""
         received_types = {e['type'] for e in self.events}
         critical_events = {k for k, v in self.REQUIRED_EVENTS.items() if v['critical']}
         return {'total_events': len(self.events), 'unique_event_types': len(received_types), 'received_types': list(received_types), 'critical_events_received': list(critical_events & received_types), 'critical_events_missing': list(critical_events - received_types), 'validation_errors': self.validation_errors, 'is_valid': len(self.validation_errors) == 0}
 
 class WebSocketChatClient:
-    "Simulates a frontend WebSocket client for chat interactions.
+    "Simulates a frontend WebSocket client for chat interactions."""
 
     def __init__(self, client_id: str=None):
         self.client_id = client_id or f'test_client_{uuid.uuid4().hex[:8]}'
@@ -185,14 +185,14 @@ class WebSocketChatClient:
             return {'success': False, 'error': str(e)}
 
     async def disconnect(self):
-        Disconnect from WebSocket."
+        Disconnect from WebSocket.""
         if self.websocket:
             await self.websocket.close()
             self.connected = False
             logger.info(f'Client {self.client_id} disconnected')
 
 class WebSocketChatIntegrationTest:
-    "Comprehensive WebSocket chat integration tests.
+    "Comprehensive WebSocket chat integration tests."""
 
     def __init__(self):
         self.ws_manager = WebSocketManager()
@@ -238,7 +238,7 @@ class WebSocketChatIntegrationTest:
         return {'success': successful == num_messages, 'total': num_messages, 'successful': successful, 'results': results}
 
     async def test_message_deduplication(self, token: str) -> Dict[str, Any]:
-        Test that duplicate messages are properly handled."
+        Test that duplicate messages are properly handled.""
         client = WebSocketChatClient()
         self.clients.append(client)
         ws_url = 'ws://localhost:8080/ws'
@@ -254,7 +254,7 @@ class WebSocketChatIntegrationTest:
         return {'success': len(agent_started_events) == 1, 'agent_started_count': len(agent_started_events), 'total_events': len(client.validator.events)}
 
     async def test_websocket_reconnection(self, token: str) -> Dict[str, Any]:
-        "Test WebSocket reconnection and message continuity.
+        "Test WebSocket reconnection and message continuity."""
         client = WebSocketChatClient()
         self.clients.append(client)
         ws_url = 'ws://localhost:8080/ws'
@@ -317,14 +317,14 @@ class WebSocketEventStressTest:
 @pytest.mark.asyncio
 @pytest.mark.mission_critical
 async def test_websocket_chat_events_complete_flow():
-    Test complete WebSocket chat event flow."
+    Test complete WebSocket chat event flow.""
     test = WebSocketChatIntegrationTest()
     await test.setup()
     from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
     auth_helper = E2EAuthHelper()
     token = auth_helper.create_test_jwt_token(user_id='test_user', email='test@netrasystems.ai')
     result = await test.test_single_message_flow(token)
-    assert result['success'], f"Chat flow failed: {result.get('error')}
+    assert result['success'], f"Chat flow failed: {result.get('error')}"
     report = result['validation_report']
     assert report['is_valid'], fValidation errors: {report['validation_errors']}
     assert len(report['critical_events_missing'] == 0, fMissing critical events: {report['critical_events_missing']}
@@ -363,7 +363,7 @@ async def test_websocket_event_storm():
     token = auth_helper.create_test_jwt_token(user_id='test_user', email='test@netrasystems.ai')
     result = await stress_test.test_event_storm(token, num_clients=5, messages_per_client=3)
     logger.info(f'Stress test results: {json.dumps(result, indent=2)}')
-    assert result['success_rate'] >= 80, fToo many failures: {result['failed']}/{result['total_messages']}"
+    assert result['success_rate'] >= 80, fToo many failures: {result['failed']}/{result['total_messages']}""
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

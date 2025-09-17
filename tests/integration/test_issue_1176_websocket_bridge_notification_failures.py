@@ -1,4 +1,4 @@
-"Integration tests for Issue #1176 - WebSocket Bridge Notification Failures
+"Integration tests for Issue #1176 - WebSocket Bridge Notification Failures"""
 
 TARGET: WebSocket Bridge Integration Conflicts - Timeout Notification Failures
 
@@ -45,13 +45,13 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
 ""
 
     async def test_websocket_bridge_timeout_during_factory_initialization(self, real_services_fixture):
-        Test WebSocket bridge timeout notifications during factory initialization."
+        Test WebSocket bridge timeout notifications during factory initialization.""
 
         This test reproduces the timeout failures identified in Issue #1176
         where factory initialization causes WebSocket bridge timeouts.
 
         Expected: Test fails if bridge initialization times out.
-        "
+"""Empty docstring."""
         db = real_services_fixture[db]
         redis = real_services_fixture["redis]"
 
@@ -64,8 +64,8 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
             # Create real user context
             user_context = UserExecutionContext(
                 user_id=test-user-bridge-timeout,
-                run_id=test-run-timeout-123,"
-                session_id=test-session-timeout"
+                run_id=test-run-timeout-123,""
+                session_id=test-session-timeout""
             )
 
             # Test bridge creation with timeout constraints
@@ -91,19 +91,19 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
 
             except asyncio.TimeoutError:
                 # Expected in Issue #1176 - bridge initialization should timeout
-                self.fail(WebSocket bridge initialization timed out - confirms Issue #1176 timeout problem)"
+                self.fail(WebSocket bridge initialization timed out - confirms Issue #1176 timeout problem)""
 
             except Exception as e:
                 # Other initialization failures
-                if "timeout in str(e).lower() or connection in str(e).lower():
+                if "timeout in str(e).lower() or connection in str(e).lower():"
                     self.fail(fWebSocket bridge initialization failed with timeout-related error: {e})
                 raise
 
         except ImportError:
-            pytest.skip(WebSocket bridge factory not available)"
+            pytest.skip(WebSocket bridge factory not available)""
 
     async def test_auth_service_config_breakdown_affects_websocket(self, real_services_fixture):
-        "Test auth service configuration breakdown preventing WebSocket establishment.
+        "Test auth service configuration breakdown preventing WebSocket establishment."""
 
         This test reproduces the auth service business logic failures
         identified in Issue #1176 that break WebSocket connections.
@@ -119,8 +119,8 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
 
             # Simulate auth configuration breakdown scenarios
             auth_config_scenarios = [
-                {JWT_SECRET_KEY: None, description: Missing JWT secret},"
-                {"JWT_SECRET_KEY: , description: Empty JWT secret},
+                {JWT_SECRET_KEY: None, description: Missing JWT secret},""
+                {"JWT_SECRET_KEY: , description: Empty JWT secret},"
                 {"OAUTH_CLIENT_ID: None, description": Missing OAuth client ID},
                 {AUTH_SERVICE_URL: "http://invalid-url, description": Invalid auth service URL}
             ]
@@ -135,7 +135,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
                             if value is None:
                                 env.unset(key, source=test)
                             else:
-                                env.set(key, value, source=test)"
+                                env.set(key, value, source=test)""
 
                     try:
                         # Try to get auth manager with broken config
@@ -146,17 +146,17 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
 
                         # Test authentication with broken config - should fail
                         mock_websocket = Mock()
-                        mock_websocket.headers = {authorization": Bearer test-token}
+                        mock_websocket.headers = {authorization": Bearer test-token}"
 
                         auth_result = await ws_authenticator.authenticate_websocket(mock_websocket)
 
                         # If authentication succeeds with broken config, there's no validation
                         if auth_result.get(success, False):
-                            self.fail(f"WebSocket authentication succeeded with broken config: {scenario['description']})
+                            self.fail(f"WebSocket authentication succeeded with broken config: {scenario['description']})"
 
                     except Exception as e:
                         # Expected - broken auth config should cause WebSocket failures
-                        if auth" in str(e).lower() or jwt in str(e).lower() or oauth in str(e).lower():
+                        if auth" in str(e).lower() or jwt in str(e).lower() or oauth in str(e).lower():"
                             # This confirms auth config breakdown affects WebSocket
                             continue
                         else:
@@ -190,7 +190,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
             user_context = UserExecutionContext(
                 user_id=test-user-dependency","
                 run_id=test-run-dependency-456,
-                session_id=test-session-dependency"
+                session_id=test-session-dependency""
             )
 
             # Create bridge with real services
@@ -198,7 +198,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
 
             # Test dependency failure scenarios
             dependency_scenarios = [
-                {"service: database, action: disconnect},
+                {"service: database, action: disconnect},"
                 {"service: redis", action: timeout},
                 {service: auth", "action: unavailable}
             ]
@@ -212,13 +212,13 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
                     if service == database and action == disconnect:
                         # Simulate database disconnection
                         with patch('netra_backend.app.db.database_manager.DatabaseManager.get_session') as mock_db:
-                            mock_db.side_effect = Exception(Database connection lost)"
+                            mock_db.side_effect = Exception(Database connection lost)""
 
                             # Test bridge behavior with database failure
                             try:
                                 await bridge.notify_agent_started(
                                     run_id=user_context.run_id,
-                                    agent_name=test-agent",
+                                    agent_name=test-agent","
                                     context={}
 
                                 # If notification succeeds despite database failure, there's no graceful handling
@@ -234,12 +234,12 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
                     elif service == redis and action == timeout:
                         # Simulate Redis timeout
                         with patch('netra_backend.app.services.redis_manager.RedisManager.get_client') as mock_redis:
-                            mock_redis.side_effect = asyncio.TimeoutError(Redis timeout)"
+                            mock_redis.side_effect = asyncio.TimeoutError(Redis timeout)""
 
                             try:
                                 await bridge.notify_tool_executing(
                                     run_id=user_context.run_id,
-                                    tool_name="test-tool,
+                                    tool_name="test-tool,"
                                     context={}
 
                                 # If notification succeeds despite Redis timeout, there's no timeout handling
@@ -258,13 +258,13 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
             pytest.skip(WebSocket bridge dependencies not available)
 
     async def test_message_routing_failures_with_interface_mismatches(self, real_services_fixture):
-        "Test message routing failures when bridge interfaces don't match.
+        "Test message routing failures when bridge interfaces don't match."""
 
         This test reproduces message routing failures identified in Issue #1176
         where interface mismatches cause routing breakdowns.
 
         Expected: Test fails if interface mismatches cause routing failures.
-"
+"""Empty docstring."""
         try:
             from netra_backend.app.websocket_core.handlers import MessageRouter
             from netra_backend.app.websocket_core.agent_handler import AgentHandler
@@ -280,28 +280,28 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
             # Test message routing with different interface expectations
             interface_mismatch_scenarios = [
                 {
-                    message_type: agent_request",
-                    "handler_expects: AgentWebSocketBridge,
+                    message_type: agent_request","
+                    "handler_expects: AgentWebSocketBridge,"
                     bridge_provides: StandardWebSocketBridge
                 },
                 {
                     "message_type: user_message",
                     handler_expects: WebSocketEventEmitter,
-                    bridge_provides: WebSocketManager"
+                    bridge_provides: WebSocketManager""
                 }
             ]
 
             for scenario in interface_mismatch_scenarios:
                 with self.subTest(scenario=scenario):
-                    message_type = scenario["message_type]
+                    message_type = scenario["message_type]"
                     handler_expects = scenario[handler_expects]
                     bridge_provides = scenario["bridge_provides]"
 
                     # Create message with specific type
                     test_message = {
                         type: message_type,
-                        content: Test message content",
-                        "user_id: test-user-routing,
+                        content: Test message content","
+                        "user_id: test-user-routing,"
                         thread_id: test-thread-routing
                     }
 
@@ -310,10 +310,10 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
                         handler = message_router._find_handler(message_type)
 
                         if handler is None:
-                            self.fail(f"No handler found for message type {message_type})
+                            self.fail(f"No handler found for message type {message_type})"
 
                         # Test handler processing with interface mismatch
-                        user_id = test_message[user_id"]
+                        user_id = test_message[user_id"]"
 
                         # This should expose interface conflicts in Issue #1176
                         await handler.handle_message(user_id, mock_websocket, test_message)
@@ -346,8 +346,8 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
         consistently when using real services, detecting delivery failures.
 
         Expected: Test fails if any critical events are not delivered.
-        "
-        db = real_services_fixture[db"]
+"""Empty docstring."""
+        db = real_services_fixture[db"]"
         redis = real_services_fixture[redis]
 
         try:
@@ -358,7 +358,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
             user_context = UserExecutionContext(
                 user_id=test-user-events","
                 run_id=test-run-events-789,
-                session_id=test-session-events"
+                session_id=test-session-events""
             )
 
             # Create bridge with real services
@@ -372,7 +372,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
             mock_websocket = Mock()
 
             def capture_event(event_data):
-                event_type = event_data.get("type, unknown)
+                event_type = event_data.get("type, unknown)"
                 delivered_events.append(event_type)
                 event_timestamps[event_type] = asyncio.get_event_loop().time()
 
@@ -386,8 +386,8 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
                 (agent_started, notify_agent_started),
                 ("agent_thinking, notify_agent_thinking"),
                 (tool_executing, notify_tool_executing),
-                (tool_completed, notify_tool_completed"),
-                ("agent_completed, notify_agent_completed)
+                (tool_completed, notify_tool_completed"),"
+                ("agent_completed, notify_agent_completed)"
             ]
 
             start_time = asyncio.get_event_loop().time()
@@ -440,4 +440,4 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
 
 
 if __name__ == __main__:
-    pytest.main([__file__, -v, --tb=short"]
+    pytest.main([__file__, -v, --tb=short"]"

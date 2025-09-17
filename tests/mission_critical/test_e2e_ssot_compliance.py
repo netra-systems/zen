@@ -389,7 +389,7 @@ class E2ESsotComplianceTests(SSotBaseTestCase):
                 correct_mappings += 1
                 logger.debug(f PASS:  Category '{category}' correctly maps to {expected_class.__name__})"
             else:
-                logger.warning(f" FAIL:  Category '{category}' maps to {result_class.__name__}, expected {expected_class.__name__})
+                logger.warning(f" FAIL:  Category '{category}' maps to {result_class.__name__}, expected {expected_class.__name__})")
         
         # Test async E2E mappings
         for category, expected_class in async_e2e_categories:

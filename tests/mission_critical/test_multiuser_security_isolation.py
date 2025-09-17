@@ -104,7 +104,7 @@ class SecurityTestUser:
     # Base64 encode the token for subprotocol
         token_bytes = self.token.encode('utf-8')
         encoded_token = base64.urlsafe_b64encode(token_bytes).decode('utf-8').rstrip('=')
-        return "formatted_string"
+        return ""
 
 
 class MultiUserSecurityTester:
@@ -273,7 +273,7 @@ class TestWebSocketAuthenticationVulnerabilities:
 
         assert len(successful_invalid_connections) == 0, ( )
         formatted_string
-        "formatted_string"
+        ""
                         
 
     async def test_token_extraction_methods(self, security_tester:
@@ -804,7 +804,7 @@ class TestUserIsolationVulnerabilities:
 
         assert len(conversation_mixing_vulnerabilities) == 0, ( )
         fCRITICAL SECURITY VULNERABILITY: LLM conversation mixing detected: 
-        "formatted_string"
+        ""
                                                                     
 
 

@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 WebSocket Bridge Startup Integration Test Suite
 
 Addresses WHY #4 from Five Whys Analysis:
@@ -14,7 +14,7 @@ This test ensures the complete flow works end-to-end with real services:
 5. Events are properly delivered to WebSocket connections
 
 CRITICAL: This test prevents the exact failure that occurred in the original Five Whys issue.
-"
+"""Empty docstring."""
 
 import sys
 import os
@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 
 class MockApp:
-    "Mock FastAPI app with state management for testing
+    "Mock FastAPI app with state management for testing"""
     
     def __init__(self):
         self.state = MockAppState()
@@ -60,7 +60,7 @@ class MockAppState:
 
 
 class WebSocketBridgeStartupIntegrationTestSuite:
-    "
+"""Empty docstring."""
     Integration test suite validating complete WebSocket bridge startup flow
     
     This test suite addresses WHY #4 by providing comprehensive validation of:
@@ -68,7 +68,7 @@ class WebSocketBridgeStartupIntegrationTestSuite:
     - Bridge configuration and storage
     - Cross-component integration 
     - Contract compliance validation
-"
+"""Empty docstring."""
 
     def __init__(self):
         self.env = IsolatedEnvironment()
@@ -108,8 +108,8 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         self.app.state.websocket_connection_pool = connection_pool
         
         # Validate bridge is properly initialized
-        assert self.app.state.agent_websocket_bridge is not None, WebSocket bridge not stored in app.state"
-        assert isinstance(self.app.state.agent_websocket_bridge, AgentWebSocketBridge), Bridge is wrong type"
+        assert self.app.state.agent_websocket_bridge is not None, WebSocket bridge not stored in app.state""
+        assert isinstance(self.app.state.agent_websocket_bridge, AgentWebSocketBridge), Bridge is wrong type""
         
         # Validate bridge has connection pool
         assert bridge._connection_pool is not None, Bridge missing connection pool
@@ -130,10 +130,10 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         logger.info([U+1F9EA] TEST 2: Bridge available to SupervisorFactory)
         
         # Ensure bridge is initialized from test 1
-        assert self.app.state.agent_websocket_bridge is not None, Bridge not available from test 1"
+        assert self.app.state.agent_websocket_bridge is not None, Bridge not available from test 1""
         
         # Test that supervisor creation can access WebSocket bridge from app_state
-        user_id = test_user_123"
+        user_id = test_user_123""
         thread_id = test_thread_456
         
         # This tests the critical integration point that was failing
@@ -150,9 +150,9 @@ class WebSocketBridgeStartupIntegrationTestSuite:
             
             # Validate that WebSocket bridge is accessible from app.state
             websocket_bridge = self.app.state.agent_websocket_bridge
-            assert websocket_bridge is not None, WebSocket bridge not available in app.state"
+            assert websocket_bridge is not None, WebSocket bridge not available in app.state""
             
-            logger.info(f" PASS:  WebSocket bridge successfully accessible from app.state)
+            logger.info(f" PASS:  WebSocket bridge successfully accessible from app.state)"
             
             # Validate bridge has expected interface
             expected_methods = ['emit_event', 'broadcast_event']
@@ -188,10 +188,10 @@ class WebSocketBridgeStartupIntegrationTestSuite:
             # Store in app state as startup does
             self.app.state.execution_engine_factory = execution_factory
             
-            logger.info( PASS:  ExecutionEngineFactory created with WebSocket bridge)"
+            logger.info( PASS:  ExecutionEngineFactory created with WebSocket bridge)""
             
             # Validate factory has bridge reference
-            assert execution_factory._websocket_bridge is not None, Factory missing websocket_bridge"
+            assert execution_factory._websocket_bridge is not None, Factory missing websocket_bridge""
             assert execution_factory._websocket_bridge is self.app.state.agent_websocket_bridge, Bridge reference mismatch
             
         except Exception as e:
@@ -201,18 +201,18 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         return True
 
     async def test_04_user_execution_context_websocket_emitter_creation(self):
-        "
+"""Empty docstring."""
         Test that UserExecutionContext can create WebSocket emitters
         
         Validates the end-to-end flow:
         - UserExecutionContext creates execution engine via factory
         - Factory creates WebSocket emitter using bridge
         - Emitter is properly configured for event delivery
-"
-        logger.info([U+1F9EA] TEST 4: UserExecutionContext WebSocket emitter creation)"
+"""Empty docstring."""
+        logger.info([U+1F9EA] TEST 4: UserExecutionContext WebSocket emitter creation)""
         
         # Ensure execution factory is configured
-        assert self.app.state.execution_engine_factory is not None, ExecutionEngineFactory not available"
+        assert self.app.state.execution_engine_factory is not None, ExecutionEngineFactory not available""
         
         # Create UserExecutionContext as would happen during agent execution
         user_id = await self.auth_helper.get_test_user_id()
@@ -244,21 +244,21 @@ class WebSocketBridgeStartupIntegrationTestSuite:
             
             emitter = UserWebSocketEmitter(user_execution_context)
             
-            logger.info( PASS:  UserWebSocketEmitter created successfully)"
+            logger.info( PASS:  UserWebSocketEmitter created successfully)""
             
             # Validate emitter configuration
-            assert emitter._context.user_id == context.user_id, "Emitter user_id mismatch
+            assert emitter._context.user_id == context.user_id, "Emitter user_id mismatch"
             assert emitter._context.thread_id == context.thread_id, Emitter thread_id mismatch
             assert emitter._context.run_id == context.run_id, "Emitter run_id mismatch"
             
         except Exception as e:
             pytest.fail(f FAIL:  WebSocket emitter creation failed: {e})
             
-        logger.info( PASS:  UserExecutionContext can create WebSocket emitters via factory)"
+        logger.info( PASS:  UserExecutionContext can create WebSocket emitters via factory)""
         return True
 
     async def test_05_end_to_end_agent_websocket_event_flow(self):
-        "
+"""Empty docstring."""
         Test complete end-to-end agent execution with WebSocket events
         
         Validates:
@@ -266,8 +266,8 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         - Events are delivered through bridge to connection pool
         - All 5 critical events are sent: agent_started, agent_thinking, 
           tool_executing, tool_completed, agent_completed
-"
-        logger.info("[U+1F9EA] TEST 5: End-to-end agent WebSocket event flow)
+"""Empty docstring."""
+        logger.info("[U+1F9EA] TEST 5: End-to-end agent WebSocket event flow)"
         
         # Create mock WebSocket connection to receive events
         received_events = []
@@ -297,7 +297,7 @@ class WebSocketBridgeStartupIntegrationTestSuite:
             user_id=user_id,
             thread_id="test_thread_e2e,"
             run_id=test_run_e2e,
-            request_id=test_request_e2e"
+            request_id=test_request_e2e""
         )
         
         factory = self.app.state.execution_engine_factory
@@ -317,11 +317,11 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         
         # Test sending all 5 critical WebSocket events
         critical_events = [
-            (agent_started", {message: Agent began processing your request},
+            (agent_started", {message: Agent began processing your request},"
             ("agent_thinking, {message": Agent is analyzing the problem},
             (tool_executing, {"tool: analysis_tool", message: Running analysis},
-            ("tool_completed, {tool": analysis_tool, result: Analysis complete},"
-            (agent_completed", {message: Agent has completed processing}
+            ("tool_completed, {tool": analysis_tool, result: Analysis complete},""
+            (agent_completed", {message: Agent has completed processing}"
         ]
         
         try:
@@ -329,21 +329,21 @@ class WebSocketBridgeStartupIntegrationTestSuite:
                 await emitter.emit_event(event_type, event_data)
                 
             # Validate all events were received
-            assert len(received_events) == 5, f"Expected 5 events, received {len(received_events)}
+            assert len(received_events) == 5, f"Expected 5 events, received {len(received_events)}"
             
             # Validate event types
             event_types = [event.get('type') for event in received_events]
             expected_types = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
             
             for expected_type in expected_types:
-                assert expected_type in event_types, fMissing critical event: {expected_type}"
+                assert expected_type in event_types, fMissing critical event: {expected_type}""
             
             logger.info(f PASS:  All 5 critical WebSocket events delivered: {event_types})
             
         except Exception as e:
-            pytest.fail(f FAIL:  End-to-end WebSocket event flow failed: {e})"
+            pytest.fail(f FAIL:  End-to-end WebSocket event flow failed: {e})""
         
-        logger.info(" PASS:  Complete end-to-end agent WebSocket event flow working)
+        logger.info(" PASS:  Complete end-to-end agent WebSocket event flow working)"
         return True
 
     async def test_06_contract_validation_startup_integration(self):
@@ -379,9 +379,9 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         
         # This test should pass (no violations) because we've set up all components properly
         if contract_violations:
-            pytest.fail(f" FAIL:  App state contract violations: {contract_violations})
+            pytest.fail(f" FAIL:  App state contract violations: {contract_violations})"
         
-        logger.info( PASS:  App state meets all contract requirements")
+        logger.info( PASS:  App state meets all contract requirements")"
         
         # Test that we can detect violations by deliberately breaking state
         test_app = MockApp()  # Fresh app with no state
@@ -391,9 +391,9 @@ class WebSocketBridgeStartupIntegrationTestSuite:
             if not hasattr(test_app.state, component_name) or getattr(test_app.state, component_name) is None:
                 test_violations.append(fMissing component: {component_name})
         
-        assert len(test_violations) == 3, fExpected 3 violations for empty app state, got {len(test_violations)}"
+        assert len(test_violations) == 3, fExpected 3 violations for empty app state, got {len(test_violations)}""
         
-        logger.info(" PASS:  Contract validation successfully detects missing components)
+        logger.info(" PASS:  Contract validation successfully detects missing components)"
         return True
 
     async def run_all_tests(self) -> Dict[str, Any]:
@@ -404,21 +404,21 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         await self.setup_test_environment()
         
         test_results = {
-            suite_name: "WebSocket Bridge Startup Integration,
-            purpose": Addresses WHY #4 - Missing integration tests for startup  ->  bridge  ->  supervisor flow,
+            suite_name: "WebSocket Bridge Startup Integration,"
+            purpose": Addresses WHY #4 - Missing integration tests for startup  ->  bridge  ->  supervisor flow,"
             tests: {},
             "total_tests: 6,"
             passed_tests: 0,
-            failed_tests: 0,"
-            business_value": Prevents WebSocket bridge configuration failures that break chat functionality
+            failed_tests: 0,""
+            business_value": Prevents WebSocket bridge configuration failures that break chat functionality"
         }
         
         tests = [
             (startup_bridge_init, self.test_01_startup_initializes_websocket_bridge),
             ("bridge_supervisor_integration, self.test_02_bridge_available_to_supervisor_factory),"
             (execution_factory_integration, self.test_03_execution_engine_factory_bridge_integration),
-            (websocket_emitter_creation, self.test_04_user_execution_context_websocket_emitter_creation),"
-            (end_to_end_event_flow", self.test_05_end_to_end_agent_websocket_event_flow),
+            (websocket_emitter_creation, self.test_04_user_execution_context_websocket_emitter_creation),""
+            (end_to_end_event_flow", self.test_05_end_to_end_agent_websocket_event_flow),"
             (contract_validation, self.test_06_contract_validation_startup_integration)
         ]
         
@@ -427,8 +427,8 @@ class WebSocketBridgeStartupIntegrationTestSuite:
                 logger.info(f\n[U+1F4CB] Running test: {test_name}")"
                 result = await test_func()
                 test_results[tests][test_name] = {
-                    status: "PASSED,
-                    result": result,
+                    status: "PASSED,"
+                    result": result,"
                     error: None
                 }
                 test_results[passed_tests"] += 1"
@@ -437,8 +437,8 @@ class WebSocketBridgeStartupIntegrationTestSuite:
                 logger.error(f FAIL:  {test_name} FAILED: {e})
                 test_results["tests][test_name] = {"
                     status: FAILED, 
-                    result: False,"
-                    "error: str(e)
+                    result: False,""
+                    "error: str(e)"
                 }
                 test_results[failed_tests] += 1
         
@@ -451,8 +451,8 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         
         logger.info(f\n[U+1F3C1] Test Suite Complete: {test_results['passed_tests']}/{test_results['total_tests']} tests passed ({success_rate:.1f}%))
         
-        if test_results[overall_status] == "PASSED:
-            logger.info( CELEBRATION:  ALL INTEGRATION TESTS PASSED - WebSocket bridge startup flow is working correctly")
+        if test_results[overall_status] == "PASSED:"
+            logger.info( CELEBRATION:  ALL INTEGRATION TESTS PASSED - WebSocket bridge startup flow is working correctly")"
         else:
             logger.error([U+1F4A5] INTEGRATION TEST FAILURES - WebSocket bridge startup flow has issues)
         
@@ -486,23 +486,23 @@ async def test_websocket_bridge_startup_integration_suite():
 
 
 if __name__ == __main__:
-    "
+"""Empty docstring."""
     Run integration test suite directly for development and debugging
-"
+"""Empty docstring."""
     async def main():
         suite = WebSocketBridgeStartupIntegrationTestSuite()
         results = await suite.run_all_tests()
         
-        print(f\n CHART:  INTEGRATION TEST RESULTS:")
-        print(fOverall Status: {results['overall_status']}")
-        print(fSuccess Rate: {results['success_rate']:.1f}%")
-        print(fTests: {results['passed_tests']}/{results['total_tests']} passed")
+        print(f\n CHART:  INTEGRATION TEST RESULTS:")"
+        print(fOverall Status: {results['overall_status']}")"
+        print(fSuccess Rate: {results['success_rate']:.1f}%")"
+        print(fTests: {results['passed_tests']}/{results['total_tests']} passed")"
         
         if results['overall_status'] == 'FAILED':
             print(f\n FAIL:  FAILED TESTS:)
-            for test_name, test_result in results['tests'].items("):
+            for test_name, test_result in results['tests'].items("):"
                 if test_result['status'] == 'FAILED':
-                    print(f  - {test_name}: {test_result['error']}"")"
+                    print(f  - {test_name}: {test_result['error']}"")""
         
         return results['overall_status'] == 'PASSED'
     

@@ -747,7 +747,7 @@ class TestDockerMultiServiceIntegration:
 
                                                     # Assertions
         assert result.success, formatted_string
-        assert result.services_deployed >= 2, "formatted_string"
+        assert result.services_deployed >= 2, ""
 
         dependency_success_rate = result.performance_metrics.get('dependency_success_rate', 0)
         assert dependency_success_rate >= 80, formatted_string
@@ -1010,7 +1010,7 @@ class TestDockerCIPipelineSimulation:
         assert result.services_deployed >= 2, formatted_string
 
         deployment_success_rate = result.performance_metrics.get('deployment_success_rate', 0)
-        assert deployment_success_rate >= 80, "formatted_string"
+        assert deployment_success_rate >= 80, ""
 
         logger.info(formatted_string)
 
@@ -1091,7 +1091,7 @@ class TestDockerInfrastructureServiceStartup:
         assert result.services_deployed >= 3, formatted_string
 
         avg_startup = result.performance_metrics.get('average_startup_time', 999)
-        assert avg_startup < 30, "formatted_string"
+        assert avg_startup < 30, ""
 
         logger.info(formatted_string)
 
@@ -1459,7 +1459,7 @@ class TestDockerInfrastructureServiceStartup:
         assert memory_used <= 500, formatted_string
 
         efficiency = result.performance_metrics.get('memory_efficiency_services_per_100mb', 0)
-        assert efficiency >= 0.5, "formatted_string"
+        assert efficiency >= 0.5, ""
 
         logger.info(formatted_string)
 
@@ -1747,7 +1747,7 @@ class TestDockerInfrastructureHealthMonitoring:
         health_check_scenario
                                                 
 
-        assert result.success, "formatted_string"
+        assert result.success, ""
 
         health_rate = result.performance_metrics.get('health_success_rate', 0)
         assert health_rate >= 80, formatted_string
@@ -2020,7 +2020,7 @@ class TestDockerInfrastructureHealthMonitoring:
         assert zero_conflicts, Port conflicts detected - should be zero
 
         efficiency = result.performance_metrics.get('port_allocation_efficiency', 999)
-        assert efficiency < 10, "formatted_string"
+        assert efficiency < 10, ""
 
         logger.info(formatted_string)
 
@@ -2045,7 +2045,7 @@ class TestDockerInfrastructureHealthMonitoring:
         
 
         for service_name, image in monitoring_services:
-        container_name = "formatted_string"
+        container_name = ""
 
         result = execute_docker_command([]
         'docker', 'run', '-d', '--name', container_name,

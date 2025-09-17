@@ -326,9 +326,9 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
         # Log fragmentation details
         duplicates = base_class_analysis['duplicate_base_classes']
         if duplicates:
-            print(f"\n=== TEST BASE CLASS FRAGMENTATION ({len(duplicates)} duplicate types) ===)
+            print(f"\n=== TEST BASE CLASS FRAGMENTATION ({len(duplicates)} duplicate types) ===)")
             print(fTotal duplicate instances: {base_class_analysis['total_duplicate_count']})"
-            print(f"Fragmentation score: {base_class_analysis['fragmentation_score']:.2f})
+            print(f"Fragmentation score: {base_class_analysis['fragmentation_score']:.2f})")
             print()
 
             # Show most fragmented base classes
@@ -336,7 +336,7 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
             for class_name, implementations in sorted_duplicates[:5]:
                 print(f{class_name} ({len(implementations)} implementations):)
                 for impl in implementations[:3]:  # Show first 3
-                    print(f"  - {impl['relative_path']}:{impl['line']} ({impl['category']})
+                    print(f"  - {impl['relative_path']}:{impl['line']} ({impl['category']})")
                 if len(implementations) > 3:
                     print(f  ... and {len(implementations") - 3} more)
                 print()

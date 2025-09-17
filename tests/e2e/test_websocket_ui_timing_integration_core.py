@@ -1,4 +1,4 @@
-"Test module: test_websocket_ui_timing_integration_core.py
+"Test module: test_websocket_ui_timing_integration_core.py"""
 
 This file has been auto-generated to fix syntax errors.
 Original content had structural issues that prevented parsing.
@@ -9,10 +9,10 @@ import pytest
 
 @pytest.mark.e2e
 class WebsocketUiTimingIntegrationCoreTests:
-    Test class for websocket_ui_timing_integration_core"
+    Test class for websocket_ui_timing_integration_core""
 
     def setup_method(self):
-        "Setup for each test method
+        "Setup for each test method"""
         pass
 
     @pytest.mark.e2e

@@ -259,7 +259,7 @@ class TestMultiServiceOrchestration:
         
         # Stop old instance
         old_instance = formatted_string
-        new_instance = "formatted_string"
+        new_instance = ""
         # Verify at least 50% capacity maintained
         running_instances = [item for item in []]
         assert len(running_instances) >= service_count // 2, formatted_string

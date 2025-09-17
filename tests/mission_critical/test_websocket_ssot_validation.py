@@ -192,7 +192,7 @@ formatted_string
                                 # Check message content
 received_message = websocket.sent_messages[-1]['data']
 assert received_message['user_id'] == user_id, \
-"formatted_string"
+""
                                 # Verify no cross-user contamination
 other_users = list(user_connections.keys())[5:]  # Users who shouldnt receive messages
 for user_id in other_users:

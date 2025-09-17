@@ -105,7 +105,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         total_violations = len(deprecated_imports) + len(multiple_managers) + len(config_inconsistencies)
 
         # PHASE 5: Generate final compliance report
-        print(f"\n=== ISSUE #962 FINAL COMPLIANCE REPORT ===)
+        print(f"\n=== ISSUE #962 FINAL COMPLIANCE REPORT ===)")
         print(fDeprecated imports found: {len(deprecated_imports")})
         print(fMultiple config managers: {len(multiple_managers)})
         print(fConfiguration inconsistencies: {len(config_inconsistencies")}")
@@ -119,12 +119,12 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
                 print(f... and {len(deprecated_imports) - 5} more)"
 
         if multiple_managers:
-            print(f"\n--- MULTIPLE CONFIG MANAGERS (DEPLOYMENT BLOCKERS) ---)
+            print(f"\n--- MULTIPLE CONFIG MANAGERS (DEPLOYMENT BLOCKERS) ---)")
             for mgr in multiple_managers:
                 print(fBLOCKER: {mgr})"
 
         if config_inconsistencies:
-            print(f"\n--- CONFIGURATION INCONSISTENCIES (DEPLOYMENT BLOCKERS) ---)
+            print(f"\n--- CONFIGURATION INCONSISTENCIES (DEPLOYMENT BLOCKERS) ---)")
             for incon in config_inconsistencies:
                 print(fBLOCKER: {incon})"
 
@@ -142,7 +142,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         # SUCCESS: Issue #962 fully resolved
         print(f"\n✅ MISSION CRITICAL SUCCESS: Issue #962 FULLY RESOLVED")
         print(f✅ Zero configuration SSOT violations remaining)
-        print(f"✅ Production deployment gate: PASS)
+        print(f"✅ Production deployment gate: PASS)")
 
     async def test_golden_path_configuration_stability_end_to_end(self"):
         
@@ -199,9 +199,9 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         success_rate = (successful_steps / total_steps * 100) if total_steps > 0 else 0
 
         print(f\n=== GOLDEN PATH CONFIGURATION STABILITY RESULTS ===)"
-        print(f"Success Rate: {success_rate:.1f}%)
+        print(f"Success Rate: {success_rate:.1f}%)")
         print(fSuccessful Steps: {successful_steps}/{total_steps})"
-        print(f"Failed Steps: {len(golden_path_failures)})
+        print(f"Failed Steps: {len(golden_path_failures)})")
 
         if golden_path_failures:
             print(f\n--- GOLDEN PATH FAILURES (REVENUE BLOCKERS) ---)
@@ -219,7 +219,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
 
         # SUCCESS: Golden Path works perfectly
         print(f\n✅ MISSION CRITICAL SUCCESS: Golden Path 100% stable with SSOT configuration)"
-        print(f"✅ $500K+ ARR Golden Path fully protected from configuration failures)
+        print(f"✅ $500K+ ARR Golden Path fully protected from configuration failures)")
 
     async def test_authentication_configuration_eliminates_race_conditions(self):
         
@@ -256,7 +256,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
                 race_condition_results[test_name] = no_race_condition
 
                 if no_race_condition:
-                    print(f"✅ {test_name}: No race condition detected)
+                    print(f"✅ {test_name}: No race condition detected)")
                 else:
                     print(f❌ {test_name}: Race condition detected)"
                     race_condition_failures.append(f"{test_name}: Race condition exists)

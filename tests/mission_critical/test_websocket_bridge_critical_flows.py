@@ -489,7 +489,7 @@ class ThreadRegistryOperationsTests:
         assert metrics['registry_healthy'], Registry should remain healthy under load
         assert metrics['active_mappings'] >= mapping_count * 0.9, Most mappings should still be active"
         
-        print(f" PASS:  Registry performance under load: {mapping_count} mappings registered in {registration_time:.2f}s, {len(lookup_results)} lookups in {lookup_time:.2f}s)
+        print(f" PASS:  Registry performance under load: {mapping_count} mappings registered in {registration_time:.2f}s, {len(lookup_results)} lookups in {lookup_time:.2f}s)")
     
     @pytest.mark.asyncio
     async def test_registry_ttl_and_cleanup(self, test_registry):
@@ -1312,7 +1312,7 @@ class BusinessMetricsTests:
         print(" PASS:  Business Metrics Summary:")
         for user_type, metrics in business_metrics.items():
             print(f  {user_type}: {metrics['success_rate']:.1%} success, {metrics['events_per_second']:.1f} events/sec, {metrics['thread_count']} threads)"
-        print(f"  Overall: {overall_success_rate:.1%} success rate, {total_events} total events)
+        print(f"  Overall: {overall_success_rate:.1%} success rate, {total_events} total events)")
     
     @pytest.mark.asyncio
     async def test_thread_resolution_accuracy_metrics(self, websocket_bridge, test_registry, mock_orchestrator):

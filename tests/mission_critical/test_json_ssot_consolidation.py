@@ -24,98 +24,94 @@ from typing import Any, Dict, List
 from shared.isolated_environment import IsolatedEnvironment
 
     # We'll test against the unified handler
-from netra_backend.app.core.serialization.unified_json_handler import ( )
-UnifiedJSONHandler,
-UnifiedJSONEncoder,
-JSONSerializationError,
-JSONDeserializationError,
-JSONFileError
-    
+from netra_backend.app.core.serialization.unified_json_handler import (
+    UnifiedJSONHandler,
+    UnifiedJSONEncoder,
+    JSONSerializationError,
+    JSONDeserializationError,
+    JSONFileError
+)
 
 
 class TestUnifiedJSONHandler:
-    "Comprehensive tests for unified JSON handling.
+    """Comprehensive tests for unified JSON handling."""
 
     @pytest.fixture
     def handler(self):
-        ""Create a test handler instance.
-        return UnifiedJSONHandler(test_service)"
+        """Create a test handler instance."""
+        return UnifiedJSONHandler("test_service")
 
-        @pytest.fixture
+    @pytest.fixture
     def complex_data(self):
-        "Create complex test data with various types.
-        pass
+        """Create complex test data with various types."""
         return {
-        "string: test",
-        integer: 42,
-        float: 3.14,"
-        "boolean: True,
-        null: None,
-        "datetime: datetime(2025, 8, 30, 12, 0, 0, tzinfo=timezone.utc),"
-        date: date(2025, 8, 30),
-        uuid: uuid4(),"
-        decimal": Decimal(123.45),
-        list: [1, 2, 3],
-        "nested: {"
-        key: value,
-        timestamp: datetime.now(timezone.utc)"
-        },
-        "set: {1, 2, 3},
-        path: Path(/test/path)
-    
+            "string": "test",
+            "integer": 42,
+            "float": 3.14,
+            "boolean": True,
+            "null": None,
+            "datetime": datetime(2025, 8, 30, 12, 0, 0, tzinfo=timezone.utc),
+            "date": date(2025, 8, 30),
+            "uuid": uuid4(),
+            "decimal": Decimal("123.45"),
+            "list": [1, 2, 3],
+            "nested": {
+                "key": "value",
+                "timestamp": datetime.now(timezone.utc)
+            },
+            "set": {1, 2, 3},
+            "path": Path("/test/path")
+        }
 
     def test_basic_serialization(self, handler):
-        ""Test basic JSON serialization.
-        data = {key: value", "number: 42}
+        """Test basic JSON serialization."""
+        data = {"key": "value", "number": 42}
         json_str = handler.dumps(data)
         assert isinstance(json_str, str)
         parsed = json.loads(json_str)
         assert parsed == data
 
     def test_datetime_serialization(self, handler):
-        Test datetime serialization to ISO format.""
-        pass
+        """Test datetime serialization to ISO format."""
         dt = datetime(2025, 8, 30, 12, 0, 0, tzinfo=timezone.utc)
-        data = {timestamp: dt}
+        data = {"timestamp": dt}
         json_str = handler.dumps(data)
-        assert 2025-08-30T12:00:00+00:00 in json_str"
+        assert "2025-08-30T12:00:00+00:00" in json_str
 
     def test_uuid_serialization(self, handler):
-        "Test UUID serialization.
+        """Test UUID serialization."""
         test_uuid = uuid4()
-        data = {id": test_uuid}"
+        data = {"id": test_uuid}
         json_str = handler.dumps(data)
         parsed = json.loads(json_str)
-        assert parsed[id] == str(test_uuid)
+        assert parsed["id"] == str(test_uuid)
 
     def test_decimal_serialization(self, handler):
-        "Test Decimal serialization."
-        pass
-        data = {amount: Decimal(123.45)}
+        """Test Decimal serialization."""
+        data = {"amount": Decimal("123.45")}
         json_str = handler.dumps(data)
         parsed = json.loads(json_str)
-        assert parsed["amount] == 123.45"
+        assert parsed["amount"] == 123.45
 
     def test_set_serialization(self, handler):
-        Test set serialization to list."
-        data = {"items: {1, 2, 3}}
+        """Test set serialization to list."""
+        data = {"items": {1, 2, 3}}
         json_str = handler.dumps(data)
         parsed = json.loads(json_str)
-        assert set(parsed[items] == {1, 2, 3}
+        assert set(parsed["items"]) == {1, 2, 3}
 
     def test_path_serialization(self, handler):
-        "Test Path object serialization."
-        pass
-        data = {file: Path("/test/path/file.txt)}
+        """Test Path object serialization."""
+        data = {"file": Path("/test/path/file.txt")}
         json_str = handler.dumps(data)
         parsed = json.loads(json_str)
-        assert parsed[file"] == /test/path/file.txt
+        assert parsed["file"] == "/test/path/file.txt"
 
     def test_complex_nested_serialization(self, handler, complex_data):
-        Test serialization of complex nested data.""
+        """Test serialization of complex nested data."""
         json_str = handler.dumps(complex_data)
         assert isinstance(json_str, str)
-    # Verify it's valid JSON
+        # Verify it's valid JSON
         parsed = json.loads(json_str)
         assert isinstance(parsed, dict)
 

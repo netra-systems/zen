@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 WebSocket Race Condition End-to-End (E2E) Tests
 
 CRITICAL: These tests focus on full-stack WebSocket race conditions through Docker containers.
@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 - Strategic/Revenue Impact: Prevents $500K+ ARR loss from production WebSocket failures
 
 Key Full-Stack Race Conditions Tested:
-1. Handshake timing race conditions through Docker containers (Need to call 'accept' first")
+1. Handshake timing race conditions through Docker containers (Need to call 'accept' first")"
 2. Connection state persistence across full system boundaries (PostgreSQL/Redis/Backend/Auth)
 3. WebSocket event ordering through complete application stack
 4. Multi-user isolation in full production-like environment
@@ -26,7 +26,7 @@ E2E TEST REQUIREMENTS:
 
 Author: AI Agent - WebSocket E2E Test Creation
 Date: 2025-09-09
-"
+"""Empty docstring."""
 
 import asyncio
 import json
@@ -86,7 +86,7 @@ class WebSocketRaceConditionsE2EHandshakeTests:
     
     @pytest.fixture(autouse=True)
     def setup_e2e_environment(self, real_services_fixture):
-        Set up full Docker stack for E2E testing"
+        Set up full Docker stack for E2E testing""
         self.services = real_services_fixture
         self.backend_url = self.services['backend_url']
         
@@ -102,7 +102,7 @@ class WebSocketRaceConditionsE2EHandshakeTests:
         self.logger.setLevel(logging.INFO)
         
     async def create_e2e_authenticated_user(self, user_id_override: Optional[str] = None) -> E2EAuthenticatedUser:
-        "Create fully authenticated user for E2E testing through complete auth stack
+        "Create fully authenticated user for E2E testing through complete auth stack"""
         if user_id_override:
             user_id = UserID(user_id_override)
         else:
@@ -131,31 +131,31 @@ class WebSocketRaceConditionsE2EHandshakeTests:
         )
         
     async def _validate_e2e_authentication(self, jwt_token: str, user_id: str) -> bool:
-        Validate authentication through full E2E stack"
+        Validate authentication through full E2E stack""
         try:
             # Validate JWT token through auth service API
             validation_result = await self.e2e_auth_helper.validate_token_through_api(jwt_token)
             return validation_result.get('user_id') == user_id and validation_result.get('valid', False)
         except Exception as e:
-            self.logger.error(fE2E authentication validation failed: {e}")
+            self.logger.error(fE2E authentication validation failed: {e}")"
             return False
     
     @pytest.mark.asyncio
     async def test_critical_user_handshake_race_condition_e2e(self, real_services_fixture):
-    "
+"""Empty docstring."""
         CRITICAL E2E: Test specific User ID 101463487227881885914 handshake race condition.
         
         This test reproduces the exact staging failure scenario through full Docker stack
         with real authentication to ensure the race condition is resolved.
-        "
+"""Empty docstring."""
         # MANDATORY: Test specific critical user ID from staging logs
         critical_user = await self.create_e2e_authenticated_user(101463487227881885914)
         
         # Validate authentication before proceeding
-        assert critical_user.auth_validated, f"Authentication failed for critical user {critical_user.user_id}
+        assert critical_user.auth_validated, f"Authentication failed for critical user {critical_user.user_id}"
         
         # Test handshake race condition through full stack
-        websocket_url = fws://{self.backend_url.replace('http://', '')}/ws/{critical_user.user_id}"
+        websocket_url = fws://{self.backend_url.replace('http://', '')}/ws/{critical_user.user_id}""
         
         race_condition_resolved = False
         handshake_attempts = []
@@ -177,8 +177,8 @@ class WebSocketRaceConditionsE2EHandshakeTests:
                     type: handshake,
                     "user_id: str(critical_user.user_id),"
                     session_id: critical_user.session_id,
-                    critical_user_test: True,"
-                    staging_reproduction": True
+                    critical_user_test: True,""
+                    staging_reproduction": True"
                 }
                 
                 await connection.send(json.dumps(handshake_message))
@@ -218,9 +218,9 @@ class WebSocketRaceConditionsE2EHandshakeTests:
         
         # Validate handshake performance (should be fast, not affected by race condition)
         avg_handshake_time = sum(attempt['handshake_time'] for attempt in handshake_attempts) / len(handshake_attempts)
-        assert avg_handshake_time < 3.0, fHandshake taking too long due to race conditions: {avg_handshake_time}s"
+        assert avg_handshake_time < 3.0, fHandshake taking too long due to race conditions: {avg_handshake_time}s""
         
-        self.logger.info(f"Critical user race condition test passed. User: {critical_user.user_id}, Attempts: {len(handshake_attempts)})
+        self.logger.info(f"Critical user race condition test passed. User: {critical_user.user_id}, Attempts: {len(handshake_attempts)})"
     
     @pytest.mark.asyncio 
     async def test_concurrent_handshake_race_conditions_e2e(self, real_services_fixture):
@@ -275,7 +275,7 @@ class WebSocketRaceConditionsE2EHandshakeTests:
         try:
             start_time = time.time()
             
-            websocket_url = fws://{self.backend_url.replace('http://', '')}/ws/{user.user_id}"
+            websocket_url = fws://{self.backend_url.replace('http://', '')}/ws/{user.user_id}""
             connection = await websockets.connect(
                 websocket_url,
                 extra_headers=user.websocket_headers,
@@ -283,7 +283,7 @@ class WebSocketRaceConditionsE2EHandshakeTests:
             )
             
             handshake_message = {
-                "type: handshake,
+                "type: handshake,"
                 user_id: str(user.user_id),
                 session_id": user.session_id,"
                 e2e_test: True
@@ -318,11 +318,11 @@ class WebSocketRaceConditionsE2EHandshakeTests:
 
 @pytest.mark.e2e
 class WebSocketRaceConditionsE2EAgentExecutionTests:
-    "
+"""Empty docstring."""
     E2E tests for WebSocket race conditions during agent execution through full stack.
     
     These tests validate the 5 mission-critical WebSocket events through complete system.
-"
+"""Empty docstring."""
     
     @pytest.fixture(autouse=True)
     def setup_agent_execution_environment(self, real_services_fixture):
@@ -373,8 +373,8 @@ class WebSocketRaceConditionsE2EAgentExecutionTests:
         try:
             # Complete handshake through full stack
             handshake_message = {
-                type: "handshake,
-                user_id": str(user.user_id),
+                type: "handshake,"
+                user_id": str(user.user_id),"
                 session_id: user.session_id
             }
             
@@ -387,8 +387,8 @@ class WebSocketRaceConditionsE2EAgentExecutionTests:
             agent_request = {
                 type": "agent_execution_request,
                 user_id: str(user.user_id),
-                request: E2E agent execution test",
-                "agent_type: test_agent,
+                request: E2E agent execution test","
+                "agent_type: test_agent,"
                 request_id: fe2e_{int(time.time())}
             }
             
@@ -399,8 +399,8 @@ class WebSocketRaceConditionsE2EAgentExecutionTests:
             expected_events = [
                 "agent_started,"
                 agent_thinking, 
-                tool_executing,"
-                tool_completed",
+                tool_executing,""
+                tool_completed","
                 agent_completed
             ]
             
@@ -414,31 +414,31 @@ class WebSocketRaceConditionsE2EAgentExecutionTests:
                     events_received.append({
                         type": event_data.get("type),
                         timestamp: time.time(),
-                        user_id: event_data.get(user_id")
+                        user_id: event_data.get(user_id")"
                     }
                     
                     # Validate user isolation in events
-                    assert event_data.get("user_id) == str(user.user_id), Event user isolation violated
+                    assert event_data.get("user_id) == str(user.user_id), Event user isolation violated"
                     
                     if event_data.get(type) == agent_completed:
                         break
                         
                 except asyncio.TimeoutError:
-                    self.logger.warning(f"Timeout waiting for {expected_event} through full stack)
+                    self.logger.warning(f"Timeout waiting for {expected_event} through full stack)"
                     break
                     
             total_event_time = time.time() - event_start_time
             
             # Validate event ordering through full stack
-            event_types = [event[type"] for event in events_received]
+            event_types = [event[type"] for event in events_received]"
             
             # CRITICAL: Validate mission-critical events are present
             critical_events = [agent_started, agent_completed]
             critical_events_present = all(event in event_types for event in critical_events)
-            assert critical_events_present, f"Critical events missing through full stack. Received: {event_types}
+            assert critical_events_present, f"Critical events missing through full stack. Received: {event_types}"
             
             # Validate event timing (should complete within reasonable time through full stack)
-            assert total_event_time < 30.0, fAgent execution taking too long through full stack: {total_event_time}s"
+            assert total_event_time < 30.0, fAgent execution taking too long through full stack: {total_event_time}s""
             
             # Check for temporal race conditions in events
             temporal_violations = 0
@@ -450,21 +450,21 @@ class WebSocketRaceConditionsE2EAgentExecutionTests:
                         
             # Temporal violations are warnings for E2E (network latency affects timing)
             if temporal_violations > 0:
-                self.logger.warning(f"Temporal event violations in E2E: {temporal_violations})
+                self.logger.warning(f"Temporal event violations in E2E: {temporal_violations})"
                 
-            self.logger.info(fE2E agent execution event ordering test passed. Events: {len(events_received)}, Time: {total_event_time}s")
+            self.logger.info(fE2E agent execution event ordering test passed. Events: {len(events_received)}, Time: {total_event_time}s")"
             
         finally:
             await connection.close()
     
     @pytest.mark.asyncio
     async def test_concurrent_agent_execution_isolation_e2e(self, real_services_fixture):
-    "
+"""Empty docstring."""
         E2E test for concurrent agent execution isolation through full stack.
         
         This validates that multiple users can execute agents simultaneously
         without race conditions or message leakage between users.
-        "
+"""Empty docstring."""
         # Create multiple authenticated users
         user_count = 3
         users = []
@@ -490,18 +490,18 @@ class WebSocketRaceConditionsE2EAgentExecutionTests:
             if isinstance(result, Exception):
                 if isolation in str(result).lower():
                     isolation_violations += 1
-                self.logger.error(f"Concurrent agent execution failed for user {users[i].user_id}: {result})
+                self.logger.error(f"Concurrent agent execution failed for user {users[i].user_id}: {result})"
             elif result and result.get('success'):
                 successful_executions += 1
                 
         # Validate concurrent execution isolation
-        assert successful_executions >= 2, fExpected at least 2 successful concurrent executions, got {successful_executions}"
+        assert successful_executions >= 2, fExpected at least 2 successful concurrent executions, got {successful_executions}""
         assert isolation_violations == 0, fUser isolation violations detected: {isolation_violations}
         
-        self.logger.info(fConcurrent agent execution isolation test passed. Users: {user_count}, Successes: {successful_executions})"
+        self.logger.info(fConcurrent agent execution isolation test passed. Users: {user_count}, Successes: {successful_executions})""
         
     async def _execute_agent_with_isolation_validation(self, user: E2EAuthenticatedUser, user_index: int) -> Dict[str, Any]:
-        "Execute agent with user isolation validation
+        "Execute agent with user isolation validation"""
         try:
             websocket_url = fws://{self.backend_url.replace('http://', '')}/ws/{user.user_id}""
             connection = await websockets.connect(
@@ -513,8 +513,8 @@ class WebSocketRaceConditionsE2EAgentExecutionTests:
             # Complete handshake
             handshake_message = {
                 type: handshake,
-                user_id: str(user.user_id),"
-                session_id": user.session_id
+                user_id: str(user.user_id),""
+                session_id": user.session_id"
             }
             
             await connection.send(json.dumps(handshake_message))
@@ -544,7 +544,7 @@ class WebSocketRaceConditionsE2EAgentExecutionTests:
                         
                     user_events.append(event_data)
                     
-                    if event_data.get(type) == agent_completed":
+                    if event_data.get(type) == agent_completed":"
                         break
                         
                 except asyncio.TimeoutError:
@@ -570,13 +570,13 @@ class WebSocketRaceConditionsE2EAgentExecutionTests:
 
 @pytest.mark.e2e
 class WebSocketRaceConditionsE2EPerformanceTests:
-    "
+"""Empty docstring."""
     E2E performance tests for WebSocket race conditions under high load through full stack.
-    "
+"""Empty docstring."""
     
     @pytest.fixture(autouse=True)
     def setup_performance_environment(self, real_services_fixture):
-        "Set up full stack for performance testing
+        "Set up full stack for performance testing"""
         self.services = real_services_fixture
         self.backend_url = self.services['backend_url']
         self.e2e_auth_helper = E2EAuthHelper(base_url=self.backend_url)
@@ -660,24 +660,24 @@ class WebSocketRaceConditionsE2EPerformanceTests:
                 
         # Validate high concurrency performance
         success_rate = successful_connections / len(connection_tasks) * 100
-        assert success_rate >= 80, f"Low success rate under high concurrency: {success_rate}%
+        assert success_rate >= 80, f"Low success rate under high concurrency: {success_rate}%"
         
-        assert race_conditions_detected == 0, fRace conditions detected under high load: {race_conditions_detected}"
+        assert race_conditions_detected == 0, fRace conditions detected under high load: {race_conditions_detected}""
         
         # Validate connection performance
         if connection_times:
             avg_connection_time = sum(connection_times) / len(connection_times)
             assert avg_connection_time < 5.0, fSlow connections under high load: {avg_connection_time}s
             
-        self.logger.info(fHigh concurrency E2E test passed. Connections: {len(connection_tasks)}, "
-                        f"Success rate: {success_rate}%, Total time: {total_time}s)
+        self.logger.info(fHigh concurrency E2E test passed. Connections: {len(connection_tasks)}, ""
+                        f"Success rate: {success_rate}%, Total time: {total_time}s)"
         
     async def _create_performance_connection(self, user: E2EAuthenticatedUser, conn_index: int) -> Dict[str, Any]:
-        Create performance test connection"
+        Create performance test connection""
         try:
             start_time = time.time()
             
-            websocket_url = f"ws://{self.backend_url.replace('http://', '')}/ws/{user.user_id}
+            websocket_url = f"ws://{self.backend_url.replace('http://', '')}/ws/{user.user_id}"
             connection = await websockets.connect(
                 websocket_url,
                 extra_headers=user.websocket_headers,
@@ -687,8 +687,8 @@ class WebSocketRaceConditionsE2EPerformanceTests:
             # Quick handshake for performance testing
             handshake_message = {
                 type: handshake,
-                user_id: str(user.user_id),"
-                "session_id: f{user.session_id}_{conn_index},
+                user_id: str(user.user_id),""
+                "session_id: f{user.session_id}_{conn_index},"
                 performance_test: True
             }
             
@@ -737,12 +737,12 @@ class WebSocketRaceConditionsE2EGoldenPathTests:
     
     @pytest.mark.asyncio
     async def test_new_user_first_interaction_golden_path_e2e(self, real_services_fixture):
-        "
+"""Empty docstring."""
         CRITICAL Golden Path E2E: New user's first WebSocket interaction.
         
         This is the most critical business flow - new user connecting and 
         successfully executing their first agent through full stack.
-"
+"""Empty docstring."""
         # Create new user (simulating first-time user experience)
         new_user_id = SSOT_ID_Manager.generate_user_id()
         jwt_token = await self.e2e_auth_helper.create_authenticated_session(str(new_user_id))
@@ -774,8 +774,8 @@ class WebSocketRaceConditionsE2EGoldenPathTests:
             
             handshake_message = {
                 type: handshake,
-                user_id: str(new_user.user_id),"
-                session_id": new_user.session_id,
+                user_id: str(new_user.user_id),""
+                session_id": new_user.session_id,"
                 first_interaction: True
             }
             
@@ -788,24 +788,24 @@ class WebSocketRaceConditionsE2EGoldenPathTests:
             # CRITICAL: First handshake must succeed
             assert handshake_data.get('type') == 'handshake_complete', New user first handshake failed""
             assert handshake_data.get('status') == 'success', New user handshake status not success
-            assert handshake_time < 3.0, fNew user handshake too slow: {handshake_time}s"
+            assert handshake_time < 3.0, fNew user handshake too slow: {handshake_time}s""
             
             # Step 2: First agent execution (business value delivery)
             agent_start = time.time()
             
             first_agent_request = {
-                "type: agent_execution_request, 
+                "type: agent_execution_request, "
                 user_id: str(new_user.user_id),
                 request": "Hello, this is my first interaction with the AI system,
                 first_interaction: True,
-                agent_type: welcome_agent"
+                agent_type: welcome_agent""
             }
             
             await connection.send(json.dumps(first_agent_request))
             
             # Step 3: Collect first interaction events
             first_interaction_events = []
-            critical_events_received = {"agent_started: False, agent_completed: False}
+            critical_events_received = {"agent_started: False, agent_completed: False}"
             
             for _ in range(5):  # Expect up to 5 events
                 try:
@@ -827,8 +827,8 @@ class WebSocketRaceConditionsE2EGoldenPathTests:
             
             # CRITICAL: First interaction must deliver value
             assert critical_events_received[agent_started], New user did not receive agent_started event
-            assert critical_events_received[agent_completed], New user did not receive agent_completed event"
-            assert len(first_interaction_events) >= 2, "Insufficient events for new user first interaction
+            assert critical_events_received[agent_completed], New user did not receive agent_completed event""
+            assert len(first_interaction_events) >= 2, "Insufficient events for new user first interaction"
             assert agent_execution_time < 30.0, fFirst interaction too slow: {agent_execution_time}s
             
             # Validate business value delivery (events contain actual content)
@@ -838,8 +838,8 @@ class WebSocketRaceConditionsE2EGoldenPathTests:
             )
             assert agent_completed_event is not None, No agent_completed event found
             
-            self.logger.info(fNew user first interaction golden path passed. User: {new_user.user_id}, "
-                           f"Handshake: {handshake_time}s, Execution: {agent_execution_time}s)
+            self.logger.info(fNew user first interaction golden path passed. User: {new_user.user_id}, ""
+                           f"Handshake: {handshake_time}s, Execution: {agent_execution_time}s)"
             
         finally:
             await connection.close()
@@ -881,8 +881,8 @@ class WebSocketRaceConditionsE2EGoldenPathTests:
             handshake_message = {
                 "type: handshake",
                 user_id: str(returning_user.user_id),
-                session_id: returning_user.session_id,"
-                "returning_user: True
+                session_id: returning_user.session_id,""
+                "returning_user: True"
             }
             
             await connection.send(json.dumps(handshake_message))
@@ -891,8 +891,8 @@ class WebSocketRaceConditionsE2EGoldenPathTests:
             # Execute sequence of agents
             agent_requests = [
                 {request: Analyze my data, agent_type": "data_agent},
-                {request: Optimize my workflow, agent_type: "optimization_agent},
-                {request": Generate a report, agent_type: reporting_agent}
+                {request: Optimize my workflow, agent_type: "optimization_agent},"
+                {request": Generate a report, agent_type: reporting_agent}"
             ]
             
             successful_agent_executions = 0
@@ -903,8 +903,8 @@ class WebSocketRaceConditionsE2EGoldenPathTests:
                 agent_request = {
                     type": "agent_execution_request,
                     user_id: str(returning_user.user_id),
-                    request: agent_config[request"],
-                    "agent_type: agent_config[agent_type],
+                    request: agent_config[request"],"
+                    "agent_type: agent_config[agent_type],"
                     sequence_number: i + 1
                 }
                 
@@ -987,14 +987,14 @@ class WebSocketRaceConditionsE2EGoldenPathTests:
             error_scenarios = [
                 {type: "invalid_request, expected_recovery": True},
                 {type: timeout_request, "expected_recovery: True},"
-                {type: normal_request, expected_recovery: True}  # Should work after errors"
+                {type: normal_request, expected_recovery: True}  # Should work after errors""
             ]
             
             recovery_successes = 0
             
             for scenario in error_scenarios:
                 try:
-                    if scenario["type] == invalid_request:
+                    if scenario["type] == invalid_request:"
                         # Send malformed request
                         await connection.send(invalid json)
                         
@@ -1002,8 +1002,8 @@ class WebSocketRaceConditionsE2EGoldenPathTests:
                         # Send request that might timeout
                         timeout_request = {
                             type: agent_execution_request,
-                            user_id: str(error_recovery_user.user_id),"
-                            "request: This is a request that might timeout,
+                            user_id: str(error_recovery_user.user_id),""
+                            "request: This is a request that might timeout,"
                             timeout_test: True
                         }
                         await connection.send(json.dumps(timeout_request))
@@ -1012,8 +1012,8 @@ class WebSocketRaceConditionsE2EGoldenPathTests:
                         # Send normal request after errors
                         normal_request = {
                             type: agent_execution_request,
-                            user_id: str(error_recovery_user.user_id),"
-                            "request: Normal request after error recovery,
+                            user_id: str(error_recovery_user.user_id),""
+                            "request: Normal request after error recovery,"
                             recovery_test: True
                         }
                         await connection.send(json.dumps(normal_request))
@@ -1029,11 +1029,11 @@ class WebSocketRaceConditionsE2EGoldenPathTests:
                             
                     except (asyncio.TimeoutError, json.JSONDecodeError):
                         # Timeout/decode errors are acceptable for error scenarios
-                        if scenario[type] != "normal_request:
+                        if scenario[type] != "normal_request:"
                             recovery_successes += 1
                             
                 except Exception as e:
-                    if scenario[type"] == normal_request:
+                    if scenario[type"] == normal_request:"
                         self.logger.error(fNormal request failed after error recovery: {e})
                     else:
                         # Error scenarios are expected to have some failures
@@ -1041,7 +1041,7 @@ class WebSocketRaceConditionsE2EGoldenPathTests:
                         
             # Validate graceful error recovery
             expected_recoveries = len(error_scenarios)
-            assert recovery_successes >= 2, f"Insufficient error recovery. Expected: {expected_recoveries}, Got: {recovery_successes}
+            assert recovery_successes >= 2, f"Insufficient error recovery. Expected: {expected_recoveries}, Got: {recovery_successes}"
             
             self.logger.info(fError recovery and graceful degradation test passed. ""
                            f"User: {error_recovery_user.user_id}, Recoveries: {recovery_successes}/{expected_recoveries}")

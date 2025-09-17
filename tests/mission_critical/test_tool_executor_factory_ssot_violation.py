@@ -206,11 +206,11 @@ class ToolExecutorFactorySSotViolationTests(SSotBaseTestCase):
         # Log detailed findings
         for system in competing_systems:
             print(f\nTool Execution System Detected:)"
-            print(f"  Name: {system['name']})
+            print(f"  Name: {system['name']})")
             print(f  Module: {system['module']})"
-            print(f"  Status: {'ACTIVE' if 'instance' in system else 'FACTORY_ENFORCED' if system.get('factory_enforced') else 'ERROR'})
+            print(f"  Status: {'ACTIVE' if 'instance' in system else 'FACTORY_ENFORCED' if system.get('factory_enforced') else 'ERROR'})")
             if error in system:
-                print(f"  Error: {system['error']})
+                print(f"  Error: {system['error']})")
         
         # ASSERT VIOLATION: This test SHOULD FAIL until consolidation complete
         # When fixed, there should be only ONE tool execution system
@@ -326,7 +326,7 @@ Systems Found: {[s['name'] for s in competing_systems]}
         
         # Log findings
         print(f\nWebSocket Adapter Detection Results:)"
-        print(f"Total adapters found: {len(websocket_adapters)})
+        print(f"Total adapters found: {len(websocket_adapters)})")
         for adapter in websocket_adapters:
             print(f  - {adapter['name']} ({adapter['type']} from {adapter['source']})"
         
@@ -542,7 +542,7 @@ This test SHOULD FAIL until GitHub Issue #219 registry consolidation is complete
         
         # Log findings
         print(f\nTool Execution Routing Analysis:)
-        print(f"Available routes: {len(available_routes)})
+        print(f"Available routes: {len(available_routes)})")
         print(fFactory-enforced routes: {len(factory_enforced_routes")})
         for route in execution_routes:
             status = AVAILABLE if route.get(available") else "BLOCKED if route.get(factory_enforced) else ERROR
@@ -580,9 +580,9 @@ This test SHOULD FAIL until GitHub Issue #219 routing consolidation is complete.
             print(f{'='*80})"
             
             for violation in self._violations_detected:
-                print(f"\nVIOLATION: {violation['type']})
+                print(f"\nVIOLATION: {violation['type']})")
                 print(fSeverity: {violation['severity']})"
-                print(f"Description: {violation['description']})
+                print(f"Description: {violation['description']})")
                 print(fBusiness Impact: {violation['business_impact']})"
                 if "systems in violation:
                     print(fSystems: {violation['systems']})"
@@ -593,7 +593,7 @@ This test SHOULD FAIL until GitHub Issue #219 routing consolidation is complete.
                 if "routes in violation:
                     print(fRoutes: {violation['routes']})"
             
-            print(f"\nTotal violations: {len(self._violations_detected)})
+            print(f"\nTotal violations: {len(self._violations_detected)})")
             print(These violations MUST be resolved to complete GitHub Issue #219)"
             print(f"{'='*80}")
         
@@ -609,4 +609,4 @@ This test SHOULD FAIL until GitHub Issue #219 routing consolidation is complete.
         gc.collect()
         
         super().teardown_method(method)
-")
+"))

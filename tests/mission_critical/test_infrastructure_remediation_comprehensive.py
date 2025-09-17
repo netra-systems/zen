@@ -314,7 +314,7 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         # Verify all phases were tested
         missing_phases = expected_phases - tested_phases
         if missing_phases:
-            logger.warning(f" WARNING: [U+FE0F] Missing validation phases: {missing_phases})
+            logger.warning(f" WARNING: [U+FE0F] Missing validation phases: {missing_phases})")
         
         # Should have tested major phases
         critical_phases = {

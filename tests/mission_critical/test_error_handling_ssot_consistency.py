@@ -254,7 +254,7 @@ class ErrorHandlingSSOTValidator:
         if re.search(r'^class ErrorContext\([^)]*\):', content, re.MULTILINE):
         self.errors_found.append( )
         formatted_string
-        "formatted_string"
+        ""
                     
         return False
 

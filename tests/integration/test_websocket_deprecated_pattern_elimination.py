@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Priority 1 SSOT Validation Test: WebSocket Deprecated Pattern Elimination
 
 PURPOSE: Ensure deprecated factory methods are completely removed.
@@ -12,7 +12,7 @@ during SSOT consolidation (GitHub Issue #514).
 Business Value: Platform/Internal - System Stability & Development Velocity
 Validates that deprecated patterns are eliminated, reducing technical debt
 and eliminating confusion in factory pattern usage.
-"
+"""Empty docstring."""
 
 import pytest
 import os
@@ -25,15 +25,15 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
 class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
-    "
+"""Empty docstring."""
     SSOT validation tests for WebSocket deprecated pattern elimination.
     
     These tests verify that deprecated factory methods and patterns are
     completely removed after SSOT consolidation.
-"
+"""Empty docstring."""
 
     def setup_method(self, method):
-        "Set up test environment for deprecated pattern validation.
+        "Set up test environment for deprecated pattern validation."""
         super().setup_method(method)
         self.project_root = Path(__file__).parent.parent.parent
         
@@ -41,27 +41,27 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
         self.deprecated_import_patterns = [
             from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory","
             from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory,
-            import websocket_manager_factory,"
-            "from .websocket_manager_factory import,
+            import websocket_manager_factory,""
+            "from .websocket_manager_factory import,"
         ]
         
         self.deprecated_usage_patterns = [
             rget_websocket_manager_factory\s*\(\s*\),
             r"WebSocketManagerFactory\s*\(\s*\),"
             rwebsocket_manager_factory\.,
-            r\.get_websocket_manager_factory,"
+            r\.get_websocket_manager_factory,""
         ]
         
         # Staging deployment warnings that should be eliminated
         self.staging_warning_patterns = [
-            COMPATIBILITY MODULE",
+            COMPATIBILITY MODULE","
             DEPRECATED.*websocket_manager_factory, 
             compatibility.*wrapper","
             legacy.*factory,
         ]
         
-        self.record_metric(deprecated_imports_checked, len(self.deprecated_import_patterns))"
-        self.record_metric("deprecated_usage_checked, len(self.deprecated_usage_patterns))
+        self.record_metric(deprecated_imports_checked, len(self.deprecated_import_patterns))""
+        self.record_metric("deprecated_usage_checked, len(self.deprecated_usage_patterns))"
 
     def test_deprecated_factory_imports_eliminated(self):
         
@@ -70,7 +70,7 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
         PRE-consolidation: SHOULD FAIL (deprecated imports exist)
         POST-consolidation: MUST PASS (no deprecated imports found)
 ""
-        print(\n🔍 Scanning for deprecated WebSocket factory imports...)"
+        print(\n🔍 Scanning for deprecated WebSocket factory imports...)""
         
         deprecated_imports = self._scan_for_deprecated_imports()
         
@@ -80,22 +80,22 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
         # This assertion SHOULD FAIL before SSOT consolidation
         self.assertEqual(
             len(deprecated_imports), 0,
-            f❌ PRE-CONSOLIDATION FAILURE (EXPECTED): Found {len(deprecated_imports)} files "
+            f❌ PRE-CONSOLIDATION FAILURE (EXPECTED): Found {len(deprecated_imports)} files ""
             fwith deprecated factory imports. These must be eliminated during SSOT consolidation. 
-            fThis test should PASS after consolidation removes all deprecated imports."
+            fThis test should PASS after consolidation removes all deprecated imports.""
         )
         
-        print("✅ Zero deprecated factory imports detected - elimination successful!)
-        self.record_metric(deprecated_imports_found, len(deprecated_imports))"
+        print("✅ Zero deprecated factory imports detected - elimination successful!)"
+        self.record_metric(deprecated_imports_found, len(deprecated_imports))""
 
     def test_deprecated_factory_usage_eliminated(self):
-    "
+"""Empty docstring."""
         CRITICAL TEST: Validate deprecated factory usage is eliminated.
         
         PRE-consolidation: SHOULD FAIL (deprecated usage exists)
         POST-consolidation: MUST PASS (no deprecated usage found)
-        "
-        print(\n🔍 Scanning for deprecated WebSocket factory usage...")
+"""Empty docstring."""
+        print(\n🔍 Scanning for deprecated WebSocket factory usage...")"
         
         deprecated_usage = self._scan_for_deprecated_usage()
         
@@ -110,8 +110,8 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
             fThis test should PASS after consolidation removes all deprecated usage.
         )
         
-        print(✅ Zero deprecated factory usage detected - elimination successful!)"
-        self.record_metric("deprecated_usage_found, len(deprecated_usage))
+        print(✅ Zero deprecated factory usage detected - elimination successful!)""
+        self.record_metric("deprecated_usage_found, len(deprecated_usage))"
 
     def test_websocket_manager_factory_file_removed(self):
         
@@ -120,10 +120,10 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
         PRE-consolidation: SHOULD FAIL (file exists)
         POST-consolidation: MUST PASS (file removed or properly consolidated)
 ""
-        print(\n📁 Checking websocket_manager_factory.py file status...)"
+        print(\n📁 Checking websocket_manager_factory.py file status...)""
         
         factory_file_paths = [
-            self.project_root / netra_backend" / app / websocket_core / websocket_manager_factory.py,
+            self.project_root / netra_backend" / app / websocket_core / websocket_manager_factory.py,"
             self.project_root / netra_backend" / "websocket_core / websocket_manager_factory.py,
             # Check for any websocket_manager_factory.py files
         ]
@@ -136,9 +136,9 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
                     existing_factory_files.append(str(factory_path))
         
         if existing_factory_files:
-            files_list = \n.join(f  - {f}" for f in existing_factory_files)
+            files_list = \n.join(f  - {f}" for f in existing_factory_files)"
             self.fail(
-                f"❌ PRE-CONSOLIDATION FAILURE (EXPECTED): Found {len(existing_factory_files)} 
+                f"❌ PRE-CONSOLIDATION FAILURE (EXPECTED): Found {len(existing_factory_files)} "
                 fdeprecated websocket_manager_factory.py files:\n{files_list}\n\n
                 fThese files should be removed or consolidated during SSOT consolidation. 
                 fThis test should PASS after consolidation eliminates deprecated factory files.""
@@ -164,23 +164,23 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
         # This assertion SHOULD FAIL before SSOT consolidation
         self.assertEqual(
             len(warning_sources), 0,
-            f"❌ PRE-CONSOLIDATION FAILURE (EXPECTED): Found {len(warning_sources)} files 
-            fwith staging deployment compatibility warnings. These indicate deprecated "
+            f"❌ PRE-CONSOLIDATION FAILURE (EXPECTED): Found {len(warning_sources)} files "
+            fwith staging deployment compatibility warnings. These indicate deprecated ""
             fpatterns still in use and should be eliminated during SSOT consolidation. 
-            fThis test should PASS after consolidation removes all compatibility warnings."
+            fThis test should PASS after consolidation removes all compatibility warnings.""
         )
         
-        print("✅ Zero staging deployment warnings detected - elimination successful!)
-        self.record_metric(staging_warnings_found, len(warning_sources))"
+        print("✅ Zero staging deployment warnings detected - elimination successful!)"
+        self.record_metric(staging_warnings_found, len(warning_sources))""
 
     def test_ssot_import_pattern_validation(self):
-    "
+"""Empty docstring."""
         CRITICAL TEST: Validate only SSOT import patterns are used.
         
         PRE-consolidation: SHOULD FAIL (mixed import patterns)
         POST-consolidation: MUST PASS (only SSOT imports used)
-        "
-        print(\n🎯 Validating SSOT import pattern compliance...")
+"""Empty docstring."""
+        print(\n🎯 Validating SSOT import pattern compliance...")"
         
         ssot_compliance = self._validate_ssot_import_patterns()
         
@@ -203,8 +203,8 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
             fduring consolidation. This test should PASS after consolidation standardizes imports.
         )
         
-        print(✅ All files use SSOT import patterns - compliance achieved!)"
-        self.record_metric("non_compliant_imports, len(non_compliant_files))
+        print(✅ All files use SSOT import patterns - compliance achieved!)""
+        self.record_metric("non_compliant_imports, len(non_compliant_files))"
 
     def test_codebase_grep_validation(self):
         
@@ -213,7 +213,7 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
         PRE-consolidation: SHOULD FAIL (grep finds deprecated patterns)
         POST-consolidation: MUST PASS (grep finds no deprecated patterns)
 ""
-        print(\n🔎 Running codebase grep validation for deprecated patterns...)"
+        print(\n🔎 Running codebase grep validation for deprecated patterns...)""
         
         grep_results = self._run_grep_validation()
         
@@ -223,16 +223,16 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
         # This assertion SHOULD FAIL before SSOT consolidation
         self.assertEqual(
             len(grep_results['violations'], 0,
-            f❌ PRE-CONSOLIDATION FAILURE (EXPECTED): Grep found {len(grep_results['violations']} "
+            f❌ PRE-CONSOLIDATION FAILURE (EXPECTED): Grep found {len(grep_results['violations']} ""
             fdeprecated pattern violations. These must be eliminated during SSOT consolidation. 
-            fThis test should PASS after consolidation removes all deprecated patterns."
+            fThis test should PASS after consolidation removes all deprecated patterns.""
         )
         
-        print("✅ Grep validation passed - no deprecated patterns found!)
-        self.record_metric(grep_violations, len(grep_results['violations'])"
+        print("✅ Grep validation passed - no deprecated patterns found!)"
+        self.record_metric(grep_violations, len(grep_results['violations'])""
 
     def _scan_for_deprecated_imports(self) -> Dict[str, List[str]]:
-        "Scan for deprecated import statements.
+        "Scan for deprecated import statements."""
         violations = {}
         
         for py_file in self._get_python_files():
@@ -276,8 +276,8 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
         
         return violations
 
-    def _is_deprecated_factory_file(self, file_path: Path") -> bool:
-        "Check if a websocket_manager_factory.py file is deprecated.
+    def _is_deprecated_factory_file(self, file_path: Path") -> bool:"
+        "Check if a websocket_manager_factory.py file is deprecated."""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -286,8 +286,8 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
             deprecated_indicators = [
                 "get_websocket_manager_factory,"
                 WebSocketManagerFactory,
-                COMPATIBILITY MODULE,"
-                DEPRECATED",
+                COMPATIBILITY MODULE,""
+                DEPRECATED","
             ]
             
             for indicator in deprecated_indicators:
@@ -322,8 +322,8 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
         
         return warnings
 
-    def _validate_ssot_import_patterns(self") -> Dict[str, Dict]:
-        "Validate files use only SSOT import patterns.
+    def _validate_ssot_import_patterns(self") -> Dict[str, Dict]:"
+        "Validate files use only SSOT import patterns."""
         compliance_data = {}
         
         # Define SSOT patterns that SHOULD be used
@@ -338,18 +338,18 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
                     content = f.read()
                 
                 issues = []
-                has_websocket_imports = websocket in content.lower() and import" in content
+                has_websocket_imports = websocket in content.lower() and import" in content"
                 
                 if has_websocket_imports:
                     # Check for deprecated imports
                     for deprecated_pattern in self.deprecated_import_patterns:
                         if deprecated_pattern in content:
-                            issues.append(f"Uses deprecated import: {deprecated_pattern})
+                            issues.append(f"Uses deprecated import: {deprecated_pattern})"
                     
                     # Check if using SSOT patterns
                     uses_ssot = any(pattern in content for pattern in ssot_patterns)
                     if not uses_ssot and websocket_manager in content:
-                        issues.append(Does not use SSOT import patterns)"
+                        issues.append(Does not use SSOT import patterns)""
                 
                 compliance_data[str(py_file)] = {
                     'is_compliant': len(issues) == 0,
@@ -359,7 +359,7 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
             except Exception as e:
                 compliance_data[str(py_file)] = {
                     'is_compliant': False,
-                    'issues': [fCould not analyze file: {e}"]
+                    'issues': [fCould not analyze file: {e}"]"
                 }
         
         return compliance_data
@@ -368,8 +368,8 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
         Run grep commands to validate deprecated pattern elimination.""
         grep_patterns = [
             get_websocket_manager_factory,
-            websocket_manager_factory,"
-            WebSocketManagerFactory",
+            websocket_manager_factory,""
+            WebSocketManagerFactory","
         ]
         
         violations = []
@@ -404,12 +404,12 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
         # Focus on core directories
         core_dirs = [
             self.project_root / netra_backend / app,
-            self.project_root / tests,"
+            self.project_root / tests,""
         ]
         
         for directory in core_dirs:
             if directory.exists():
-                python_files.extend(list(directory.rglob("*.py))[:100]  # Limit to avoid timeout
+                python_files.extend(list(directory.rglob("*.py))[:100]  # Limit to avoid timeout"
         
         return python_files
 
@@ -425,16 +425,16 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
 
     def _report_deprecated_imports(self, violations: Dict[str, List[str]]:
         "Report deprecated import violations."
-        print(\n❌ DEPRECATED IMPORT VIOLATIONS DETECTED:)"
-        print(=" * 80)
+        print(\n❌ DEPRECATED IMPORT VIOLATIONS DETECTED:)""
+        print(=" * 80)"
         
         for file_path, imports in violations.items():
-            relative_path = str(file_path).replace(str(self.project_root), )"
-            print(f\n📁 {relative_path}")
+            relative_path = str(file_path).replace(str(self.project_root), )""
+            print(f\n📁 {relative_path}")"
             for import_stmt in imports:
-                print(f   ❌ {import_stmt}")
+                print(f   ❌ {import_stmt}")"
         
-        print(\n🔧 REMEDIATION REQUIRED:")
+        print(\n🔧 REMEDIATION REQUIRED:")"
         print(   ✅ Replace with: from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager")"
         print(   ✅ Replace with: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager)
 
@@ -450,36 +450,36 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
                 print(f   ❌ {usage}")"
 
     def _report_staging_warnings(self, warnings: Dict[str, List[str]]:
-        Report staging deployment warnings."
-        print(\n⚠️ STAGING DEPLOYMENT WARNINGS DETECTED:")
+        Report staging deployment warnings.""
+        print(\n⚠️ STAGING DEPLOYMENT WARNINGS DETECTED:")"
         print(= * 80")"
         
         for file_path, file_warnings in warnings.items():
             relative_path = str(file_path).replace(str(self.project_root), )
-            print(f\n📁 {relative_path}")
+            print(f\n📁 {relative_path}")"
             for warning in file_warnings:
-                print(f   ⚠️ {warning}")
+                print(f   ⚠️ {warning}")"
 
     def _report_import_compliance_violations(self, violations: List[Dict]:
         Report import compliance violations.""
-        print(\n❌ SSOT IMPORT COMPLIANCE VIOLATIONS:)"
-        print("= * 80)
+        print(\n❌ SSOT IMPORT COMPLIANCE VIOLATIONS:)""
+        print("= * 80)"
         
         for violation in violations:
-            relative_path = str(violation['file'].replace(str(self.project_root), )"
-            print(f"\n📁 {relative_path})
+            relative_path = str(violation['file'].replace(str(self.project_root), )""
+            print(f"\n📁 {relative_path})"
             for issue in violation['issues']:
-                print(f   ❌ {issue})"
+                print(f   ❌ {issue})""
 
     def _report_grep_violations(self, grep_results: Dict):
-        "Report grep validation violations.
+        "Report grep validation violations."""
         print(\n❌ GREP VALIDATION VIOLATIONS:"")
-        print(= * 80)"
+        print(= * 80)""
         
-        print(f📊 Found {len(grep_results['violations']} violations across codebase")
+        print(f📊 Found {len(grep_results['violations']} violations across codebase")"
         
         for violation in grep_results['violations'][:20]:  # Limit output
-            print(f   ❌ {violation}")
+            print(f   ❌ {violation}")"
         
         if len(grep_results['violations'] > 20:
-            print(f   ... and {len(grep_results['violations'] - 20} more violations"")"
+            print(f   ... and {len(grep_results['violations'] - 20} more violations"")""

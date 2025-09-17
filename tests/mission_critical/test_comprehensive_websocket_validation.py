@@ -55,7 +55,7 @@ try:
     from netra_backend.app.clients.auth_client_core import AuthServiceClient
     from shared.isolated_environment import get_env
 except ImportError as e:
-    logger.warning(f"Some imports failed: {e}. Test will use mock implementations.)
+    logger.warning(f"Some imports failed: {e}. Test will use mock implementations.)")
 
 
 class TestWebSocketConnection:
@@ -475,7 +475,7 @@ async def test_comprehensive_websocket_validation():
     # Assert specific test results
     for test_name, test_result in results['detailed_results'].items():
         if not test_result.get('success', False):
-            logger.warning(f"Test {test_name} failed: {test_result})
+            logger.warning(f"Test {test_name} failed: {test_result})")
 
 
 if __name__ == __main__":"

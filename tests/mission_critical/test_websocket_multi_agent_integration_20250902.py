@@ -441,7 +441,7 @@ class MultiAgentFactoryTestHarness:
         async def _execute_error_agent(self, emitter: UserWebSocketEmitter,
         agent_name: str, user_id: str) -> Dict[str, Any]:
         "Error agent execution pattern.
-        run_id = "formatted_string"
+        run_id = ""
 
         await emitter.notify_agent_started(agent_name, run_id)
         await emitter.notify_agent_thinking(agent_name, run_id, About to encounter error)
@@ -548,7 +548,7 @@ class TestMultiAgentWebSocketFactoryIntegration:
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-# @pytest.fixture
+# # @pytest.fixture
     async def test_multiple_agents_per_user_sharing_factory(self):
         "Test 1: Multiple agents per user sharing the same factory with isolation."
 pass
@@ -617,7 +617,7 @@ print(formatted_string"")
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-# @pytest.fixture
+# # @pytest.fixture
     async def test_agent_hierarchy_per_user_with_factory_isolation(self):
         Test 2: Agent hierarchy per user with factory pattern isolation.""
 print([U+1F9EA] TEST 2: Agent hierarchy per user with factory isolation)
@@ -625,7 +625,7 @@ print([U+1F9EA] TEST 2: Agent hierarchy per user with factory isolation)
                             # Create users with hierarchical agent patterns
 hierarchical_users = []
 for i in range(4):
-    user_id = "formatted_string"
+    user_id = ""
 agents = [
 {name: supervisor, type: "supervisor, pattern": hierarchical},
 {name: coordinator, type": "coordinator, pattern: hierarchical}
@@ -661,7 +661,7 @@ user_events = self.test_harness.mock_pool.get_user_events(user_id)
                                             # Should have coordinator events
 coord_events = [item for item in []]
 assert len(coord_events) >= 5, \
-"formatted_string"
+""
 
 total_users = len(hierarchical_users)
 total_events = comprehensive_results[total_events]
@@ -669,7 +669,7 @@ print("")
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-# @pytest.fixture
+# # @pytest.fixture
     async def test_concurrent_multi_agent_event_ordering_per_user(self):
         Test 3: Event ordering across concurrent agents with user isolation.""
 pass
@@ -756,7 +756,7 @@ print("")
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-# @pytest.fixture
+# # @pytest.fixture
     async def test_factory_state_consistency_under_multi_user_load(self):
         "Test 4: Factory state consistency with concurrent multi-user operations."
     print([U+1F9EA] TEST 4: Factory state consistency under multi-user load)"
@@ -828,7 +828,7 @@ print()"
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-# @pytest.fixture
+# # @pytest.fixture
     async def test_cleanup_with_mixed_success_failure_per_user(self):
         "Test 5: Cleanup when agents complete or fail per user.
 pass
@@ -898,7 +898,7 @@ print(" PASS:  TEST 5 PASSED: Mixed success/failure scenarios handled with prope
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-# @pytest.fixture
+# # @pytest.fixture
     async def test_event_collision_handling_with_user_isolation(self):
         Test 6: Event collision handling with user isolation.""
     print([U+1F9EA] TEST 6: Event collision handling with user isolation)
@@ -959,7 +959,7 @@ print(")"
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-# @pytest.fixture
+# # @pytest.fixture
     async def test_extreme_stress_multi_user_resource_contention(self):
         Test 7: Extreme stress test with multi-user resource contention."
 pass
@@ -1020,7 +1020,7 @@ assert factory_metrics[emitters_created"] > 0, Factory stopped creating emitters
 total_events = comprehensive_results[total_events]
 events_per_second = total_events / duration
 assert events_per_second > 20, \
-"formatted_string"
+""
 
                                                                                                                 # Critical: User isolation must be maintained even under extreme stress
 assert comprehensive_results[validation_passed], \
@@ -1033,7 +1033,7 @@ print(f   User isolation: MAINTAINED under extreme load)"
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-# @pytest.fixture
+# # @pytest.fixture
     async def test_comprehensive_multi_agent_factory_integration(self):
         "Test 8: Comprehensive multi-agent factory integration suite.
     print("")

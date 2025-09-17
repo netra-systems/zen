@@ -228,7 +228,7 @@ class MockWebSocket:
 
                                                                 # Check no leaks
         assert len(ws_manager.connections) == 0, formatted_string
-        print(f"  [OK] No memory leaks after 30 connection cycles)
+        print(f"  [OK] No memory leaks after 30 connection cycles)")
         await asyncio.sleep(0)
         return True
 

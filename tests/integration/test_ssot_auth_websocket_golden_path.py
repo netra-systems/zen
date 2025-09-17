@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Integration Test: SSOT Auth-WebSocket-Agent Golden Path
 ISSUE #1176 REMEDIATION: Comprehensive validation of unified authentication pathway
 
@@ -18,7 +18,7 @@ SUCCESS CRITERIA:
 - Agent events: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
 - Complete flow works under 30 seconds
 - Error logging captures any auth failures
-"
+"""Empty docstring."""
 
 import asyncio
 import json
@@ -40,13 +40,13 @@ logger = get_logger(__name__)
 @pytest.mark.websocket
 @pytest.mark.auth
 class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
-    "Integration tests for SSOT auth-websocket-agent Golden Path
+    "Integration tests for SSOT auth-websocket-agent Golden Path"""
     
     @pytest.fixture(autouse=True)
     async def setup_ssot_auth_test(self, real_services_fixture):
         "Setup SSOT authentication testing infrastructure"
         self.services = real_services_fixture
-        self.auth_helper = E2EWebSocketAuthHelper(environment=test)"
+        self.auth_helper = E2EWebSocketAuthHelper(environment=test)""
         
         # Skip if backend service not available
         if not self.services.get('services_available', {}.get('backend', False):
@@ -57,7 +57,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
         self.websocket_url = backend_url.replace('http://', 'ws://') + '/ws'
         self.auth_helper.config.websocket_url = self.websocket_url
         
-        logger.info(f"🔧 SSOT Auth Test Setup: WebSocket URL = {self.websocket_url})
+        logger.info(f"🔧 SSOT Auth Test Setup: WebSocket URL = {self.websocket_url})"
     
     async def test_ssot_auth_jwt_subprotocol_primary_method(self):
         
@@ -68,8 +68,8 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
         logger.info(🧪 Testing SSOT auth jwt-auth subprotocol (primary method))
         
         # Create test user and JWT token
-        test_user_id = fssot-test-{int(time.time())}-{uuid.uuid4().hex[:6]}"
-        test_email = f"ssot-{test_user_id}@test.example
+        test_user_id = fssot-test-{int(time.time())}-{uuid.uuid4().hex[:6]}""
+        test_email = f"ssot-{test_user_id}@test.example"
         
         jwt_token = self.auth_helper.create_test_jwt_token(
             user_id=test_user_id,
@@ -88,11 +88,11 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             assert connection_metadata[authenticated] is True
             assert connection_metadata[user_id"] == test_user_id"
             assert connection_metadata[auth_method] == ssot-unified
-            assert jwt-auth in str(connection_metadata[subprotocols_sent"]
+            assert jwt-auth in str(connection_metadata[subprotocols_sent"]"
             
             # Test connection is functional
             ping_message = {
-                "type: ping,
+                "type: ping,"
                 user_id: test_user_id,
                 timestamp": datetime.now().isoformat()"
             }
@@ -108,21 +108,21 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             
             await websocket.close()
             
-            logger.info(f"✅ SSOT jwt-auth subprotocol authentication SUCCESS for {test_email})
+            logger.info(f"✅ SSOT jwt-auth subprotocol authentication SUCCESS for {test_email})"
             
         except Exception as e:
-            pytest.fail(f❌ SSOT jwt-auth subprotocol authentication FAILED: {str(e)}")
+            pytest.fail(f❌ SSOT jwt-auth subprotocol authentication FAILED: {str(e)}")"
     
     async def test_ssot_auth_authorization_header_fallback(self):
-    "
+"""Empty docstring."""
         Test SSOT authentication using Authorization header as fallback method.
         
         ISSUE #1176 REMEDIATION: Validates Authorization header still works when not stripped.
-        "
+"""Empty docstring."""
         logger.info(🧪 Testing SSOT auth Authorization header (fallback method))
         
-        test_user_id = f"ssot-header-{int(time.time())}-{uuid.uuid4().hex[:6]}
-        test_email = fssot-header-{test_user_id}@test.example"
+        test_user_id = f"ssot-header-{int(time.time())}-{uuid.uuid4().hex[:6]}"
+        test_email = fssot-header-{test_user_id}@test.example""
         
         jwt_token = self.auth_helper.create_test_jwt_token(
             user_id=test_user_id,
@@ -143,8 +143,8 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             
             # Test basic functionality
             test_message = {
-                type: user_identity_verify",
-                "user_id: test_user_id,
+                type: user_identity_verify","
+                "user_id: test_user_id,"
                 email: test_email
             }
             
@@ -179,10 +179,10 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
         jwt_token = self.auth_helper.create_test_jwt_token(
             user_id=test_user_id,
             email=test_email,
-            permissions=[read, write, chat, websocket"]
+            permissions=[read, write, chat, websocket"]"
         
         # Test with token only in query parameter (no headers or subprotocols)
-        websocket_url_with_token = f"{self.websocket_url}?token={jwt_token}
+        websocket_url_with_token = f"{self.websocket_url}?token={jwt_token}"
         
         try:
             import websockets
@@ -195,8 +195,8 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             # Test basic functionality
             test_message = {
                 type: chat_message,
-                content: "Testing query parameter auth,
-                user_id": test_user_id
+                content: "Testing query parameter auth,"
+                user_id": test_user_id"
             }
             
             await websocket.send(json.dumps(test_message))
@@ -243,8 +243,8 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             
             # Test E2E bypass functionality
             test_message = {
-                type: e2e_test",
-                "user_id: test_user_id,
+                type: e2e_test","
+                "user_id: test_user_id,"
                 test_type: ssot_auth_bypass
             }
             
@@ -259,10 +259,10 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             
             await websocket.close()
             
-            logger.info(f✅ SSOT E2E bypass authentication SUCCESS for {test_user_id})"
+            logger.info(f✅ SSOT E2E bypass authentication SUCCESS for {test_user_id})""
             
         except Exception as e:
-            logger.warning(f"⚠️ SSOT E2E bypass failed (may be disabled): {str(e)})
+            logger.warning(f"⚠️ SSOT E2E bypass failed (may be disabled): {str(e)})"
             # Don't fail test - E2E bypass may be disabled in some environments
     
     async def test_complete_golden_path_with_ssot_auth(self):
@@ -274,8 +274,8 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
         logger.info(🌟 Testing COMPLETE Golden Path with SSOT authentication)
         
         start_time = time.time()
-        test_user_id = fgolden-path-{int(time.time())}-{uuid.uuid4().hex[:6]}"
-        test_email = f"golden-{test_user_id}@test.example
+        test_user_id = fgolden-path-{int(time.time())}-{uuid.uuid4().hex[:6]}""
+        test_email = f"golden-{test_user_id}@test.example"
         
         # STEP 1: Create authenticated user with SSOT auth
         jwt_token = self.auth_helper.create_test_jwt_token(
@@ -294,14 +294,14 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             logger.info(f🔗 Golden Path: WebSocket connected via {connection_metadata['auth_method']})
             
             # STEP 3: Submit agent request
-            thread_id = fgolden-thread-{uuid.uuid4().hex[:8]}"
+            thread_id = fgolden-thread-{uuid.uuid4().hex[:8]}""
             agent_request = {
-                "type: agent_request,
+                "type: agent_request,"
                 agent_name: triage_agent,
                 "query: Hello! This is a Golden Path test. Please provide a helpful response.",
                 user_id: test_user_id,
-                thread_id: thread_id,"
-                "metadata: {
+                thread_id: thread_id,""
+                "metadata: {"
                     test_type: golden_path_ssot_auth,
                     timestamp": datetime.now().isoformat()"
                 }
@@ -352,11 +352,11 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             response_success = agent_response_complete
             performance_success = total_duration < 45.0  # Under 45 seconds
             
-            logger.info(f"🏆 GOLDEN PATH RESULTS:)
-            logger.info(f   Duration: {total_duration:.1f}s")
+            logger.info(f"🏆 GOLDEN PATH RESULTS:)"
+            logger.info(f   Duration: {total_duration:.1f}s")"
             logger.info(f   Auth Success: {auth_success})
-            logger.info(f   WebSocket Success: {websocket_success})"
-            logger.info(f"   Events Received: {len(received_events)}/{len(required_events)} ({list(received_events)})
+            logger.info(f   WebSocket Success: {websocket_success})""
+            logger.info(f"   Events Received: {len(received_events)}/{len(required_events)} ({list(received_events)})"
             logger.info(f   Response Complete: {response_success})
             logger.info(f   Performance: {performance_success})
             
@@ -406,12 +406,12 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             
         except Exception as e:
             # This exception is expected - invalid token should be rejected
-            logger.info(f✅ SSOT Auth: Invalid token correctly rejected - {str(e)})"
+            logger.info(f✅ SSOT Auth: Invalid token correctly rejected - {str(e)})""
             
             # Check that error contains useful information
             error_str = str(e).lower()
             has_useful_info = any(keyword in error_str for keyword in [
-                "authentication, jwt, token, invalid, "failed, unauthorized"
+                """authentication, jwt, token, invalid, failed, unauthorized"""
             ]
             
             assert has_useful_info, fError message should contain authentication details: {str(e)}
@@ -425,7 +425,7 @@ class TestSSotAuthMethodPriority(SSotAsyncTestCase):
     "Test SSOT authentication method priority ordering"
     
     def test_auth_method_priority_order(self):
-        "
+"""Empty docstring."""
         Test that SSOT authentication tries methods in correct priority order.
         
         Expected order:
@@ -433,15 +433,15 @@ class TestSSotAuthMethodPriority(SSotAsyncTestCase):
         2. Authorization header (may be stripped)  
         3. Query parameter (infrastructure workaround)
         4. E2E bypass (testing only)
-"
-        logger.info(🧪 Testing SSOT authentication method priority order)"
+"""Empty docstring."""
+        logger.info(🧪 Testing SSOT authentication method priority order)""
         
         from netra_backend.app.websocket_core.unified_auth_ssot import UnifiedWebSocketAuthenticator
         from unittest.mock import Mock
         
         auth_instance = UnifiedWebSocketAuthenticator()
         
-        test_token = test.jwt.token"
+        test_token = test.jwt.token""
         mock_websocket = Mock()
         
         # Set up mock websocket with multiple auth sources
@@ -463,7 +463,7 @@ class TestSSotAuthMethodPriority(SSotAsyncTestCase):
         query_param_result = auth_instance._extract_jwt_from_query_params(mock_websocket)
         assert query_param_result == test_token, Query parameter should be extracted
         
-        logger.info(✅ SSOT authentication method priority order VALIDATED)"
+        logger.info(✅ SSOT authentication method priority order VALIDATED)""
 
 
 if __name__ == __main__":"

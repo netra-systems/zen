@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Integration tests for WebSocket authentication handshake (Issue #280)
 
 This test suite validates the WebSocket authentication handshake process
@@ -6,7 +6,7 @@ without requiring Docker containers - focuses on the handshake and
 subprotocol negotiation logic.
 
 Expected: ALL TESTS SHOULD FAIL initially - demonstrating handshake issues
-"
+"""Empty docstring."""
 import asyncio
 import pytest
 from unittest.mock import Mock, patch, AsyncMock
@@ -15,7 +15,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
 class WebSocketAuthHandshakeTests(SSotBaseTestCase):
-    "Integration tests for WebSocket authentication handshake
+    "Integration tests for WebSocket authentication handshake"""
 
     def setup_method(self, method=None):
         "Set up test fixtures"
@@ -27,10 +27,10 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
         self.mock_websocket.close = AsyncMock()
 
     def test_websocket_handshake_without_subprotocol_fails(self):
-        "
+"""Empty docstring."""
         Test: WebSocket handshake should FAIL when no subprotocol is provided
         Expected: Should reject connection during handshake phase
-"
+"""Empty docstring."""
         self.mock_websocket.headers = {}
         try:
             from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
@@ -63,10 +63,10 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             pass
 
     def test_missing_subprotocol_error_handling(self):
-        "
+"""Empty docstring."""
         Test: Missing subprotocol should be handled gracefully
         Expected: Should return proper error message and close connection
-"
+"""Empty docstring."""
         self.mock_websocket.headers = {}
         try:
             from netra_backend.app.routes.websocket_ssot import WebSocketSSotRouter
@@ -90,17 +90,17 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             try:
                 from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
                 result = asyncio.run(authenticate_websocket_ssot(self.mock_websocket))
-                pytest.fail(fShould reject invalid token '{invalid_token}', but got: {result})"
+                pytest.fail(fShould reject invalid token '{invalid_token}', but got: {result})""
             except ImportError:
                 break
             except Exception:
                 pass
 
     def test_websocket_accept_with_subprotocol_response(self):
-    "
+"""Empty docstring."""
         Test: WebSocket accept should include selected subprotocol in response
         Expected: Should follow RFC 6455 and return Sec-WebSocket-Protocol header
-        "
+"""Empty docstring."""
         self.mock_websocket.headers = {'sec-websocket-protocol': f'jwt.{self.test_jwt_token}'}
         try:
             from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
@@ -121,10 +121,10 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             pass
 
     def test_websocket_handshake_timeout_handling(self):
-        "
+"""Empty docstring."""
         Test: WebSocket handshake should handle timeouts gracefully
         Expected: Should implement timeout for authentication process
-"
+"""Empty docstring."""
         self.mock_websocket.headers = {'sec-websocket-protocol': f'jwt.{self.test_jwt_token}'}
         try:
             from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
@@ -141,7 +141,7 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             pass
 
     def test_concurrent_websocket_handshakes(self):
-    "
+"""Empty docstring."""
         Test: Multiple concurrent WebSocket handshakes should be handled safely
         Expected: Should support concurrent authentication without conflicts
         ""

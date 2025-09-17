@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Focused WebSocket Coroutine Regression Integration Test
 
 Simplified integration test focused specifically on the coroutine regression issue.
@@ -14,22 +14,22 @@ CLAUDE.MD COMPLIANCE:
 - Tests real environment detection logic
 - No mocks for environment access
 - Focuses on coroutine regression detection
-"
+"""Empty docstring."""
 import inspect
 import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 class WebSocketCoroutineFocusedTests(BaseIntegrationTest):
-    "
+"""Empty docstring."""
     Focused integration test for WebSocket coroutine regression.
     
     Tests the core environment detection logic that was causing
     the 'coroutine' object has no attribute 'get' error.
-"
+"""Empty docstring."""
 
     def setUp(self):
-        "Set up test environment.
+        "Set up test environment."""
         super().setUp()
         self.env = get_env()
 

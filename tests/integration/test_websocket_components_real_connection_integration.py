@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Integration Test: Real WebSocket Components - SSOT for WebSocket Connection Integration
 
 MISSION CRITICAL: Tests real WebSocket connections with authentication and chat components.
@@ -22,7 +22,7 @@ COMPLIANCE:
 @compliance CLAUDE.md - NO MOCKS for integration tests  
 @compliance CLAUDE.md - WebSocket events for substantive chat (Section 6)
 @compliance SPEC/type_safety.xml - Strongly typed WebSocket events
-"
+"""Empty docstring."""
 import asyncio
 import json
 import pytest
@@ -44,17 +44,17 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
 class WebSocketComponentsRealConnectionIntegrationTests(SSotBaseTestCase):
-    "
+"""Empty docstring."""
     Integration tests for real WebSocket connections with authentication.
     
     These tests validate that WebSocket infrastructure works with real
     connections, authentication, and proper event delivery.
     
     CRITICAL: All tests use REAL WebSocket connections - no mocks allowed.
-"
+"""Empty docstring."""
 
     def setup_method(self):
-        "Set up test environment with WebSocket components.
+        "Set up test environment with WebSocket components."""
         super().setup_method()
         self.ws_auth_helper = E2EWebSocketAuthHelper(environment='test')
         self.golden_path_helper = WebSocketGoldenPathHelper(environment='test')
@@ -100,14 +100,14 @@ class WebSocketComponentsRealConnectionIntegrationTests(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_real_websocket_authentication_connection(self):
-        "
+"""Empty docstring."""
         Test: Real WebSocket connection with authentication.
         
         Validates that actual WebSocket connections can be established
         with proper JWT authentication and headers.
         
         Business Value: Ensures customers can connect to chat infrastructure.
-"
+"""Empty docstring."""
         print('\n[U+1F9EA] Testing real WebSocket authentication connection...')
         websocket, user_context = await self._create_authenticated_websocket(user_email='real_ws_auth_test@example.com')
         assert websocket is not None, 'WebSocket connection should be established'
@@ -164,14 +164,14 @@ class WebSocketComponentsRealConnectionIntegrationTests(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_bidirectional_websocket_communication(self):
-        "
+"""Empty docstring."""
         Test: Bidirectional WebSocket communication with authentication.
         
         Validates that WebSocket connections support both sending
         and receiving messages with proper authentication context.
         
         Business Value: Ensures full duplex chat communication for users.
-"
+"""Empty docstring."""
         print('\n[U+1F9EA] Testing bidirectional WebSocket communication...')
         websocket, user_context = await self._create_authenticated_websocket(user_email='bidirectional_test@example.com')
         user_message = {'type': 'chat_message', 'content': 'Test bidirectional communication with agent', 'user_id': str(user_context.user_id), 'thread_id': str(user_context.thread_id), 'timestamp': datetime.now(timezone.utc).isoformat(), 'message_id': f'msg_{uuid.uuid4().hex[:8]}'}
@@ -206,15 +206,15 @@ class WebSocketComponentsRealConnectionIntegrationTests(SSotBaseTestCase):
         print(' PASS:  Bidirectional WebSocket communication successful')
 
     @pytest.mark.asyncio
-    async def test_multiple_websocket_connections_isolation(self"):
-        "
+    async def test_multiple_websocket_connections_isolation(self"):"
+"""Empty docstring."""
         Test: Multiple WebSocket connections with user isolation.
         
         Validates that multiple authenticated WebSocket connections
         can operate simultaneously with proper user isolation.
         
         Business Value: Ensures multi-user chat functionality with security.
-"
+"""Empty docstring."""
         print('\n[U+1F9EA] Testing multiple WebSocket connections with isolation...')
         ws1, user1_context = await self._create_authenticated_websocket(user_email='multi_user1_test@example.com')
         ws2, user2_context = await self._create_authenticated_websocket(user_email='multi_user2_test@example.com')
@@ -239,7 +239,7 @@ class WebSocketComponentsRealConnectionIntegrationTests(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_connection_resilience(self):
-    "
+"""Empty docstring."""
         Test: WebSocket connection resilience with authentication.
         
         Validates that WebSocket connections handle errors gracefully

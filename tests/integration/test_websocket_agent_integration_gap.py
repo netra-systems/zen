@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Test WebSocket-Agent Integration Gap
 
 Business Value Justification (BVJ):
@@ -16,7 +16,7 @@ Based on Five Whys Root Cause Analysis:
 - Evidence: ExecutionEngine -> AgentWebSocketBridge -> UserWebSocketEmitter chain failure
 
 This test SHOULD FAIL initially because it reproduces the current broken integration.
-"
+"""Empty docstring."""
 
 import pytest
 import asyncio
@@ -32,17 +32,17 @@ logger = logging.getLogger(__name__)
 
 
 class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
-    "
+"""Empty docstring."""
     Test the integration gap between ExecutionEngine and AgentWebSocketBridge.
     
     CRITICAL: This test reproduces the factory delegation failure that prevents
     WebSocket events from reaching users during agent execution.
-"
+"""Empty docstring."""
 
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_execution_engine_websocket_bridge_chain_failure(self, real_services_fixture):
-    "
+"""Empty docstring."""
         Test ExecutionEngine -> AgentWebSocketBridge -> UserWebSocketEmitter chain failure.
         
         EXPECTED: This test SHOULD FAIL because ExecutionEngine doesn't properly
@@ -52,9 +52,9 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
         - ExecutionEngine was not updated when AgentWebSocketBridge migrated
         - Factory delegation is broken at the handoff point
         - Users don't receive WebSocket events during agent execution
-        "
+"""Empty docstring."""
         # Setup authenticated user context using SSOT E2E auth helper
-        auth_helper = E2EAuthHelper(environment=test")
+        auth_helper = E2EAuthHelper(environment=test")"
         user_context = await create_authenticated_user_context(
             user_email=integration_test@example.com,
             environment=test","
@@ -70,8 +70,8 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
             Mock WebSocket emitter that records events.""
             websocket_events.append({
                 event_type: event_type,
-                data: data,"
-                "user_id: kwargs.get(user_id),
+                data: data,""
+                "user_id: kwargs.get(user_id),"
                 timestamp: asyncio.get_event_loop().time()
             }
             logger.info(fMock WebSocket event: {event_type} for user {kwargs.get('user_id')}")"
@@ -94,12 +94,12 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
             # According to Five Whys analysis, this delegation is broken
             assert hasattr(execution_engine, '_websocket_bridge'), (
                 INTEGRATION GAP: ExecutionEngine missing _websocket_bridge attribute. 
-                This confirms the factory delegation failure identified in Five Whys analysis."
+                This confirms the factory delegation failure identified in Five Whys analysis.""
             )
             
             websocket_bridge = execution_engine._websocket_bridge
             assert websocket_bridge is not None, (
-                "INTEGRATION GAP: ExecutionEngine._websocket_bridge is None. 
+                "INTEGRATION GAP: ExecutionEngine._websocket_bridge is None. "
                 ExecutionEngine not properly updated for per-request factory pattern.
             )
             
@@ -112,8 +112,8 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
             
             user_emitter = websocket_bridge._user_emitter
             assert user_emitter is not None, (
-                INTEGRATION GAP: AgentWebSocketBridge._user_emitter is None. "
-                create_user_emitter() factory method failing."
+                INTEGRATION GAP: AgentWebSocketBridge._user_emitter is None. ""
+                create_user_emitter() factory method failing.""
             )
             
             # CRITICAL FAILURE POINT: Check if user emitter can emit events
@@ -135,13 +135,13 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
                                     # This should trigger WebSocket events through the chain
                                     await execution_engine.execute_agent_request(
                                         agent_type=triage_agent,
-                                        message=Test integration gap,"
+                                        message=Test integration gap,""
                                         user_context=user_context
                                     )
                                     
                                     # CRITICAL ASSERTION: Events should be collected
                                     assert len(websocket_events) >= 2, (
-                                        f"INTEGRATION GAP CONFIRMED: Only {len(websocket_events)} events collected. 
+                                        f"INTEGRATION GAP CONFIRMED: Only {len(websocket_events)} events collected. "
                                         fExpected at least agent_started and agent_completed events. 
                                         fThis confirms the WebSocket integration is broken.
                                     )
@@ -150,8 +150,8 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
                                     event_types = [event[event_type"] for event in websocket_events]"
                                     
                                     assert agent_started in event_types, (
-                                        INTEGRATION GAP: agent_started event not sent. "
-                                        "ExecutionEngine not triggering WebSocket notifications.
+                                        INTEGRATION GAP: agent_started event not sent. ""
+                                        "ExecutionEngine not triggering WebSocket notifications."
                                     )
                                     
                                     assert agent_completed in event_types, (
@@ -168,23 +168,23 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
                                     integration_gap_indicators = [
                                         websocket","
                                         factory,
-                                        emitter,"
-                                        "bridge,
+                                        emitter,""
+                                        "bridge,"
                                         delegation
                                     ]
                                     
                                     gap_detected = any(indicator in error_message for indicator in integration_gap_indicators)
                                     
                                     pytest.fail(
-                                        f"INTEGRATION GAP REPRODUCED: Agent execution failed due to WebSocket integration issues. 
-                                        fError: {e}. "
+                                        f"INTEGRATION GAP REPRODUCED: Agent execution failed due to WebSocket integration issues. "
+                                        fError: {e}. ""
                                         fIntegration gap indicators detected: {gap_detected}. 
-                                        fThis confirms the ExecutionEngine -> AgentWebSocketBridge chain is broken."
+                                        fThis confirms the ExecutionEngine -> AgentWebSocketBridge chain is broken.""
                                     )
                     
         except ImportError as e:
             pytest.fail(
-                f"INTEGRATION GAP: Required components not available for testing. 
+                f"INTEGRATION GAP: Required components not available for testing. "
                 fImport error: {e}. 
                 fThis indicates the factory pattern migration is incomplete.
             )
@@ -198,16 +198,16 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
         
         except Exception as e:
             pytest.fail(
-                f"INTEGRATION GAP: Unexpected failure in WebSocket chain testing. 
-                fError: {e}. "
+                f"INTEGRATION GAP: Unexpected failure in WebSocket chain testing. "
+                fError: {e}. ""
                 fEvents collected: {len(websocket_events)}. 
-                fThis indicates broader integration issues in the factory pattern."
+                fThis indicates broader integration issues in the factory pattern.""
             )
 
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_factory_delegation_handoff_failure(self, real_services_fixture):
-    "
+"""Empty docstring."""
         Test the specific handoff point where ExecutionEngine should delegate to factories.
         
         EXPECTED: This test SHOULD FAIL because factory delegation is broken.
@@ -216,9 +216,9 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
         - ExecutionEngine factory delegation to UserExecutionEngine is broken
         - Per-request WebSocket emitter creation fails
         - Factory initialization failures cause cascade errors
-        "
+"""Empty docstring."""
         # Setup test context
-        auth_helper = E2EAuthHelper(environment=test")
+        auth_helper = E2EAuthHelper(environment=test")"
         user_context = await create_authenticated_user_context(
             user_email=factory_test@example.com,
             environment=test""
@@ -241,8 +241,8 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
             except Exception as e:
                 pytest.fail(
                     fFACTORY DELEGATION FAILURE: Factory configuration failed. 
-                    f"Error: {e}. 
-                    fThis confirms SSOT validation failures identified in Five Whys analysis."
+                    f"Error: {e}. "
+                    fThis confirms SSOT validation failures identified in Five Whys analysis.""
                 )
             
             # CRITICAL TEST: Factory should create user-specific instances
@@ -280,7 +280,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
                 # Check if ExecutionEngine was configured with WebSocket bridge
                 assert hasattr(execution_engine, '_websocket_bridge') or hasattr(execution_engine, 'websocket_bridge'), (
                     INTEGRATION GAP CONFIRMED: ExecutionEngine lacks WebSocket bridge reference. 
-                    Factory delegation not establishing proper component connections."
+                    Factory delegation not establishing proper component connections.""
                 )
                 
                 # If bridge exists, verify it's properly configured
@@ -288,21 +288,21 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
                 if websocket_bridge:
                     # Verify bridge has user emitter
                     assert hasattr(websocket_bridge, '_user_emitter') or hasattr(websocket_bridge, 'user_emitter'), (
-                        "INTEGRATION GAP: WebSocket bridge lacks user emitter reference. 
+                        "INTEGRATION GAP: WebSocket bridge lacks user emitter reference. "
                         Per-request factory pattern not creating proper user-specific connections.
                     )
                 
             except Exception as e:
                 pytest.fail(
-                    f"INTEGRATION GAP CONFIRMED: ExecutionEngine-WebSocket bridge integration broken. 
-                    fError: {e}. "
+                    f"INTEGRATION GAP CONFIRMED: ExecutionEngine-WebSocket bridge integration broken. "
+                    fError: {e}. ""
                     fThis is the exact handoff failure identified in the Five Whys analysis.
                 )
                 
         except ImportError as e:
             pytest.fail(
-                fFACTORY DELEGATION FAILURE: Required factory components not available. "
-                f"Import error: {e}. 
+                fFACTORY DELEGATION FAILURE: Required factory components not available. ""
+                f"Import error: {e}. "
                 fFactory pattern migration incomplete.
             )
 
@@ -320,14 +320,14 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
         - No dependency management system to ensure chain integrity
         
         # Setup test context
-        auth_helper = E2EAuthHelper(environment=test)"
+        auth_helper = E2EAuthHelper(environment=test)""
         user_context = await create_authenticated_user_context(
-            user_email="cascade_test@example.com,
+            user_email="cascade_test@example.com,"
             environment=test,
             websocket_enabled=True
         )
         
-        logger.info(f"Testing WebSocket emitter creation cascade for user: {user_context.user_id})
+        logger.info(f"Testing WebSocket emitter creation cascade for user: {user_context.user_id})"
         
         failure_points = []
         
@@ -341,25 +341,25 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
             try:
                 # Step 1: Factory configuration
                 websocket_factory.configure()
-                logger.info([U+2713] Factory configuration succeeded")
+                logger.info([U+2713] Factory configuration succeeded")"
             except Exception as e:
                 failure_points.append(fFactory configuration: {e})
             
             try:
                 # Step 2: Connection pool availability  
                 assert hasattr(websocket_factory, '_connection_pool'), (
-                    Missing connection pool dependency"
+                    Missing connection pool dependency""
                 )
                 connection_pool = websocket_factory._connection_pool
-                assert connection_pool is not None, "Connection pool is None
+                assert connection_pool is not None, "Connection pool is None"
                 logger.info([U+2713] Connection pool available)
             except Exception as e:
-                failure_points.append(f"Connection pool: {e})
+                failure_points.append(f"Connection pool: {e})"
             
             try:
                 # Step 3: Agent registry availability
                 assert hasattr(websocket_factory, '_agent_registry'), (
-                    Missing agent registry dependency"
+                    Missing agent registry dependency""
                 )
                 agent_registry = websocket_factory._agent_registry
                 assert agent_registry is not None, Agent registry is None
@@ -389,8 +389,8 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
                 
                 # If we get here, the test should fail because the integration gap should prevent this
                 pytest.fail(
-                    fUNEXPECTED SUCCESS: User emitter creation succeeded when it should fail. "
-                    f"This suggests the integration gap may have been partially fixed, 
+                    fUNEXPECTED SUCCESS: User emitter creation succeeded when it should fail. ""
+                    f"This suggests the integration gap may have been partially fixed, "
                     fbut we need to verify the complete ExecutionEngine integration chain.
                 )
                 
@@ -403,19 +403,19 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
                     fCASCADE FAILURE CONFIRMED: WebSocket emitter creation failed at multiple points. ""
                     fFailure points: {failure_points}. 
                     fThis confirms the complex dependency chain identified in Five Whys analysis. 
-                    f"No dependency orchestration system ensures component availability.
+                    f"No dependency orchestration system ensures component availability."
                 )
             
         except ImportError as e:
             pytest.fail(
-                fCASCADE FAILURE: WebSocket factory components not available. "
+                fCASCADE FAILURE: WebSocket factory components not available. ""
                 fImport error: {e}. 
-                fDependency chain broken at import level."
+                fDependency chain broken at import level.""
             )
         
         except Exception as e:
             pytest.fail(
-                f"CASCADE FAILURE: Unexpected error in dependency chain testing. 
+                f"CASCADE FAILURE: Unexpected error in dependency chain testing. "
                 fError: {e}. 
                 fFailure points detected: {len(failure_points)}. 
                 fThis indicates broader dependency management issues.""
@@ -437,8 +437,8 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
         # Setup test context with monitoring
         auth_helper = E2EAuthHelper(environment=test)
         user_context = await create_authenticated_user_context(
-            user_email=silent_failure_test@example.com,"
-            environment=test",
+            user_email=silent_failure_test@example.com,""
+            environment=test","
             websocket_enabled=True
         )
         
@@ -452,7 +452,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
         def event_monitor(event_type: str, **kwargs):
             "Monitor function to track event delivery."
             received_events.append(event_type)
-            logger.info(fEvent monitored: {event_type})"
+            logger.info(fEvent monitored: {event_type})""
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
@@ -497,13 +497,13 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
                                 monitored_method = create_monitored_method(event_type, original_method)
                                 setattr(user_emitter, method_name, monitored_method)
                                 
-                                logger.info(f"Monitoring patched for: {method_name})
+                                logger.info(f"Monitoring patched for: {method_name})"
                             else:
                                 silent_failures.append(fMethod {method_name} not found on user emitter)
                     else:
-                        silent_failures.append(User emitter not found on WebSocket bridge)"
+                        silent_failures.append(User emitter not found on WebSocket bridge)""
                 else:
-                    silent_failures.append(WebSocket bridge not found on execution engine")
+                    silent_failures.append(WebSocket bridge not found on execution engine")"
                     
             except Exception as e:
                 silent_failures.append(fFailed to setup event monitoring: {e})
@@ -511,11 +511,11 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
             # CRITICAL TEST: Execute agent and monitor for silent failures
             try:
                 # Simulate a simple agent execution that should trigger events
-                test_message = Test message for silent failure detection"
+                test_message = Test message for silent failure detection""
                 
                 # This should trigger WebSocket events through the chain
                 result = await execution_engine.execute_agent_request(
-                    agent_type="triage_agent,
+                    agent_type="triage_agent,"
                     message=test_message,
                     user_context=user_context
                 )
@@ -526,10 +526,10 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
                 if missing_events or silent_failures:
                     pytest.fail(
                         fSILENT FAILURE DETECTED: WebSocket events not delivered silently. 
-                        f"Missing events: {missing_events}. 
-                        fSilent failures: {silent_failures}. "
+                        f"Missing events: {missing_events}. "
+                        fSilent failures: {silent_failures}. ""
                         fReceived events: {received_events}. 
-                        fThis confirms the integration gap causes silent event delivery failures."
+                        fThis confirms the integration gap causes silent event delivery failures.""
                     )
                 
             except Exception as e:
@@ -539,7 +539,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
                 integration_failure = any(keyword in error_message for keyword in integration_keywords)
                 
                 pytest.fail(
-                    f"SILENT FAILURE CONFIRMED: Agent execution failed with integration-related error. 
+                    f"SILENT FAILURE CONFIRMED: Agent execution failed with integration-related error. "
                     fError: {e}. 
                     fIntegration failure detected: {integration_failure}. 
                     fSilent failures: {silent_failures}. ""
@@ -549,15 +549,15 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
         except ImportError as e:
             pytest.fail(
                 fSILENT FAILURE: Required components for integration testing not available. 
-                f"Import error: {e}. 
-                fThis indicates incomplete factory pattern migration."
+                f"Import error: {e}. "
+                fThis indicates incomplete factory pattern migration.""
             )
         
         except Exception as e:
             pytest.fail(
                 fSILENT FAILURE: Unexpected error during silent failure detection. 
-                fError: {e}. "
-                f"Silent failures detected: {len(silent_failures)}. 
+                fError: {e}. ""
+                f"Silent failures detected: {len(silent_failures)}. "
                 fReceived events: {len(received_events)}/{len(expected_events)}. 
-                fThis indicates broader integration issues in the WebSocket chain."
+                fThis indicates broader integration issues in the WebSocket chain.""
             )

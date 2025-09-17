@@ -293,7 +293,7 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
             logger.warning( WARNING: [U+FE0F]  ARCHITECTURAL REGRESSION: WebSocket auth fallback patterns detected!)
             for violation in violations_found:
                 logger.warning(f  File: {violation['file']}:{violation['line']})"
-                logger.warning(f"  Issue: {violation['description']})
+                logger.warning(f"  Issue: {violation['description']})")
                 logger.warning(f  Code: {violation['content']})
             
             # This is a warning-level issue, not a hard failure

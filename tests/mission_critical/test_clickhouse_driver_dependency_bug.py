@@ -55,7 +55,7 @@ except ImportError as e:
     if 'clickhouse_driver' in str(e):
     code_uses_driver = True  # Code tries to import it but its missing
 
-print(f" )
+print(f" )")
 Code import analysis:)
 print(formatted_string)
 print("")
@@ -73,7 +73,7 @@ return True
 
 def test_both_libraries_not_same():
     Verify that clickhouse-driver and clickhouse-connect are different packages."
-print("")
+    print("")
  + "=*60)"
 print(Testing if both ClickHouse libraries are different...)
 

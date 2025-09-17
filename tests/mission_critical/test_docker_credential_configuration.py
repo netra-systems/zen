@@ -531,7 +531,7 @@ class DockerCredentialSecurityInfrastructureTests:
                 url_construction_times.append(construction_time)
                 
             except Exception as e:
-                self.logger.warning(f"URL construction test {i} failed: {e})
+                self.logger.warning(f"URL construction test {i} failed: {e})")
         
         if url_construction_times:
             avg_construction_time = statistics.mean(url_construction_times)
@@ -670,7 +670,7 @@ class DockerCredentialSecurityInfrastructureTests:
         for leak in isolation_results['credential_leaks']:
             self.logger.warning(f   LEAK: {leak})
         for confusion in isolation_results['environment_confusion']:
-            self.logger.warning(f"   CONFUSION: {confusion})
+            self.logger.warning(f"   CONFUSION: {confusion})")
         
         # Isolation assertions
         assert isolation_results['isolation_score'] >= 80, fIsolation score too low: {isolation_results['isolation_score']:.1f}%"
@@ -914,7 +914,7 @@ class DockerCredentialSecurityInfrastructureTests:
         
         # Log violations
         for violation in compliance_results['violations'][:10]:  # Show first 10
-            self.logger.warning(f"   VIOLATION: {violation})
+            self.logger.warning(f"   VIOLATION: {violation})")
         
         # Compliance assertions
         assert compliance_results['overall_compliance_score'] >= 70, fOverall compliance too low: {compliance_results['overall_compliance_score']:.1f}%

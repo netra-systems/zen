@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"
+"""Empty docstring."""
 CLAUDE.md COMPLIANT: Multi-User Concurrent WebSocket Sessions with MANDATORY Authentication
 
 This test suite validates concurrent WebSocket sessions with proper user isolation,
@@ -30,7 +30,7 @@ ARCHITECTURE COMPLIANCE:
 - Request-scoped session management
 - Independent execution contexts per user
 - No shared state between concurrent user sessions
-"
+"""Empty docstring."""
 
 import asyncio
 import json
@@ -55,7 +55,7 @@ from shared.isolated_environment import get_env
 
 @dataclass
 class ConcurrentUserSession:
-    "Represents a single user's WebSocket session with isolation tracking.
+    "Represents a single user's WebSocket session with isolation tracking."""
     user_id: str
     session_id: str
     auth_helper: E2EWebSocketAuthHelper
@@ -98,12 +98,12 @@ class ConcurrentSessionMetrics:
 
 
 class MultiUserWebSocketValidator:
-    "
+"""Empty docstring."""
     Validates concurrent WebSocket sessions with MANDATORY authentication and user isolation.
     
     CLAUDE.md Section 5 Compliance: This validator enforces multi-user system requirements
     and proper isolation as required for a scalable AI platform.
-"
+"""Empty docstring."""
     
     def __init__(self):
         Initialize with MANDATORY authentication and multi-user capabilities.""
@@ -125,8 +125,8 @@ class MultiUserWebSocketValidator:
             Analyze my personal investment portfolio for tax optimization strategies,
             Review my company's quarterly sales data and identify growth opportunities", "
             Evaluate my marketing campaign performance and suggest budget adjustments,
-            Assess my supply chain risks and recommend mitigation strategies,"
-            "Analyze my customer retention data and propose improvement initiatives,
+            Assess my supply chain risks and recommend mitigation strategies,""
+            "Analyze my customer retention data and propose improvement initiatives,"
             Review my product development roadmap and suggest priority adjustments,
             "Examine my operational costs and identify efficiency improvements,"
             Evaluate my competitive positioning and recommend strategic responses
@@ -171,11 +171,11 @@ class MultiUserWebSocketValidator:
             await self._establish_concurrent_connections(user_sessions, metrics)
             
             # STEP 3: Execute concurrent business interactions with isolation testing
-            print([U+1F4BC] STEP 3: Executing concurrent business interactions)"
+            print([U+1F4BC] STEP 3: Executing concurrent business interactions)""
             await self._execute_concurrent_business_interactions(user_sessions, session_duration_seconds, metrics)
             
             # STEP 4: Validate user isolation (critical security requirement)
-            print([U+1F512] STEP 4: Validating user isolation and security boundaries")
+            print([U+1F512] STEP 4: Validating user isolation and security boundaries")"
             await self._validate_user_isolation(user_sessions, metrics)
             
             # STEP 5: Performance and scalability analysis
@@ -190,7 +190,7 @@ class MultiUserWebSocketValidator:
             
         except Exception as e:
             # CLAUDE.md COMPLIANCE: Tests must fail hard - no bypassing
-            print(f" ALERT:  CRITICAL FAILURE - Multi-user concurrent validation failed: {e})
+            print(f" ALERT:  CRITICAL FAILURE - Multi-user concurrent validation failed: {e})"
             
             # Record failure metrics
             metrics.authentication_failures = num_concurrent_users
@@ -199,7 +199,7 @@ class MultiUserWebSocketValidator:
             
             return metrics
     
-    async def _create_concurrent_user_sessions(self, num_users: int, metrics: ConcurrentSessionMetrics") -> List[ConcurrentUserSession]:
+    async def _create_concurrent_user_sessions(self, num_users: int, metrics: ConcurrentSessionMetrics") -> List[ConcurrentUserSession]:"
         
         Create isolated user sessions with MANDATORY authentication for each user.
         
@@ -232,14 +232,14 @@ class MultiUserWebSocketValidator:
             session_creation_tasks.append((session, auth_task))
         
         # Execute concurrent authentication
-        print(f"[U+1F510] Authenticating {num_users} users concurrently...)
+        print(f"[U+1F510] Authenticating {num_users} users concurrently...)"
         
         for session, auth_task in session_creation_tasks:
             try:
                 # Give each authentication reasonable time
                 authenticated = await asyncio.wait_for(auth_task, timeout=10.0)
                 if authenticated:
-                    user_sessions.append(session")
+                    user_sessions.append(session")"
                     metrics.successful_authentications += 1
                     print(f PASS:  User {session.user_id[:12]} authenticated successfully)
                 else:
@@ -250,9 +250,9 @@ class MultiUserWebSocketValidator:
                 print(f[U+23F0] User {session.user_id[:12]} authentication timeout)
             except Exception as e:
                 metrics.authentication_failures += 1
-                print(f" FAIL:  User {session.user_id[:12]} authentication error: {e})
+                print(f" FAIL:  User {session.user_id[:12]} authentication error: {e})"
         
-        print(f CHART:  Authentication Summary: {len(user_sessions")}/{num_users} users authenticated)
+        print(f CHART:  Authentication Summary: {len(user_sessions")}/{num_users} users authenticated)"
         return user_sessions
     
     async def _authenticate_user_session(self, session: ConcurrentUserSession) -> bool:
@@ -266,23 +266,23 @@ class MultiUserWebSocketValidator:
             
             if auth_test_result:
                 session.authentication_successful = True
-                print(f[U+1F511] User {session.user_id[:12]} auth flow validated)"
+                print(f[U+1F511] User {session.user_id[:12]} auth flow validated)""
                 return True
             else:
-                print(f" FAIL:  User {session.user_id[:12]} auth flow failed)
+                print(f" FAIL:  User {session.user_id[:12]} auth flow failed)"
                 return False
                 
         except Exception as e:
-            print(f FAIL:  User {session.user_id[:12]} authentication exception: {e})"
+            print(f FAIL:  User {session.user_id[:12]} authentication exception: {e})""
             return False
     
     async def _establish_concurrent_connections(self, user_sessions: List[ConcurrentUserSession], 
                                               metrics: ConcurrentSessionMetrics):
-"
+"""Empty docstring."""
         Establish concurrent WebSocket connections for all authenticated users.
         
         Each connection is independent and isolated from others.
-        "
+"""Empty docstring."""
         connection_tasks = []
         
         for session in user_sessions:
@@ -290,7 +290,7 @@ class MultiUserWebSocketValidator:
             connection_tasks.append(connection_task)
         
         # Execute concurrent connections
-        print(f[U+1F50C] Establishing {len(user_sessions)} concurrent WebSocket connections...")
+        print(f[U+1F50C] Establishing {len(user_sessions)} concurrent WebSocket connections...")"
         
         connection_results = await asyncio.gather(*connection_tasks, return_exceptions=True)
         
@@ -314,7 +314,7 @@ class MultiUserWebSocketValidator:
         print(f CHART:  Connection Summary: {metrics.successful_connections}/{len(user_sessions)} users connected")"
     
     async def _connect_user_websocket(self, session: ConcurrentUserSession) -> bool:
-        Connect WebSocket for a single user with proper isolation."
+        Connect WebSocket for a single user with proper isolation.""
         try:
             connection_start = time.time()
             
@@ -326,14 +326,14 @@ class MultiUserWebSocketValidator:
             
             # Validate connection performance
             if connection_time <= self.max_connection_time_ms:
-                print(f LIGHTNING:  User {session.user_id[:12]} connected in {connection_time:.0f}ms")
+                print(f LIGHTNING:  User {session.user_id[:12]} connected in {connection_time:.0f}ms")"
                 return True
             else:
-                print(f[U+23F0] User {session.user_id[:12]} slow connection: {connection_time:.0f}ms")
+                print(f[U+23F0] User {session.user_id[:12]} slow connection: {connection_time:.0f}ms")"
                 return True  # Still successful, just slow
                 
         except Exception as e:
-            print(f FAIL:  User {session.user_id[:12]} connection error: {e}")
+            print(f FAIL:  User {session.user_id[:12]} connection error: {e}")"
             return False
     
     async def _execute_concurrent_business_interactions(self, user_sessions: List[ConcurrentUserSession],
@@ -364,7 +364,7 @@ class MultiUserWebSocketValidator:
             user_prompt = self.user_specific_prompts[i % len(self.user_specific_prompts)]
             
             # Add user-specific context to enable isolation detection
-            personalized_prompt = f[USER: {session.user_id}] {user_prompt}"
+            personalized_prompt = f[USER: {session.user_id}] {user_prompt}""
             
             interaction_task = self._execute_user_business_interaction(session, personalized_prompt, duration_seconds)
             interaction_tasks.append(interaction_task)
@@ -376,13 +376,13 @@ class MultiUserWebSocketValidator:
         successful_interactions = 0
         for session, result in zip(active_sessions, interaction_results):
             if isinstance(result, Exception):
-                print(f" FAIL:  User {session.user_id[:12]} interaction failed: {result})
+                print(f" FAIL:  User {session.user_id[:12]} interaction failed: {result})"
             elif result:
                 successful_interactions += 1
                 metrics.concurrent_business_interactions += 1
-                print(f PASS:  User {session.user_id[:12]} business interaction completed)"
+                print(f PASS:  User {session.user_id[:12]} business interaction completed)""
         
-        print(f" CHART:  Business Interaction Summary: {successful_interactions}/{len(active_sessions)} successful)
+        print(f" CHART:  Business Interaction Summary: {successful_interactions}/{len(active_sessions)} successful)"
     
     async def _execute_user_business_interaction(self, session: ConcurrentUserSession, 
                                                prompt: str, duration_seconds: int) -> bool:
@@ -394,8 +394,8 @@ class MultiUserWebSocketValidator:
             # Send user-specific business request
             business_request = {
                 type: agent_execution_request,
-                message: prompt,"
-                user_id": session.user_id,  # Critical for isolation
+                message: prompt,""
+                user_id": session.user_id,  # Critical for isolation"
                 session_id: session.session_id,  # Additional isolation context
                 thread_id": f"thread-{session.session_id},
                 timestamp: datetime.now(timezone.utc).isoformat(),
@@ -460,25 +460,25 @@ class MultiUserWebSocketValidator:
         for other_keyword in self.cross_contamination_detectors:
             if other_keyword in content:
                 violation = {
-                    timestamp: time.time(),"
-                    "user_id: session.user_id,
+                    timestamp: time.time(),""
+                    "user_id: session.user_id,"
                     violation_type: cross_user_contamination,
                     detected_content": other_keyword,"
                     response_data: response_data,
-                    severity: "CRITICAL
+                    severity: "CRITICAL"
                 }
                 session.isolation_violations.append(violation)
-                print(f ALERT:  ISOLATION VIOLATION: User {session.user_id[:12]} received cross-user content: {other_keyword}")
+                print(f ALERT:  ISOLATION VIOLATION: User {session.user_id[:12]} received cross-user content: {other_keyword}")"
         
         # Check for proper user context preservation
-        user_context_present = session.user_id in str(response_data.get(content, "))
-        if not user_context_present and "agent_completed in response_data.get(type, ):
+        user_context_present = session.user_id in str(response_data.get(content, "))"
+        if not user_context_present and "agent_completed in response_data.get(type, ):"
             # Final response should maintain user context
             violation = {
                 timestamp": time.time(),"
                 user_id: session.user_id,
-                violation_type: "lost_user_context,
-                detected_content": missing_user_context,
+                violation_type: "lost_user_context,"
+                detected_content": missing_user_context,"
                 response_data: response_data,
                 "severity: WARNING"
             }
@@ -558,12 +558,12 @@ class MultiUserWebSocketValidator:
                     if shared_content:
                         cross_contamination_found = True
                         print(f ALERT:  CROSS-SESSION CONTAMINATION: Users {user_id_1[:12]} and {user_id_2[:12]} share content)
-                        print(f   Shared: {list(shared_content)[:2]})  # Show first 2 shared items"
+                        print(f   Shared: {list(shared_content)[:2]})  # Show first 2 shared items""
         
         if cross_contamination_found:
             metrics.isolation_test_failures += 1
         else:
-            print(" PASS:  Cross-session isolation validation PASSED)
+            print(" PASS:  Cross-session isolation validation PASSED)"
     
     def _analyze_concurrent_performance(self, user_sessions: List[ConcurrentUserSession],
                                       metrics: ConcurrentSessionMetrics, validation_start: float):
@@ -635,12 +635,12 @@ class MultiUserWebSocketValidator:
 # CLAUDE.md COMPLIANT TEST CASES
 @pytest.mark.e2e
 class WebSocketMultiUserConcurrentAuthenticatedTests:
-    "
+"""Empty docstring."""
     CLAUDE.md COMPLIANT: Multi-User Concurrent WebSocket Tests with MANDATORY Authentication
     
     ALL tests use SSOT E2EAuthHelper as mandated by CLAUDE.md Section 6.
     Validates multi-user system capabilities with proper isolation.
-"
+"""Empty docstring."""
     
     @pytest.fixture(autouse=True)
     async def setup_validator(self):
@@ -675,12 +675,12 @@ class WebSocketMultiUserConcurrentAuthenticatedTests:
         
         assert auth_success_rate >= self.validator.min_concurrent_success_rate, (
             f FAIL:  CLAUDE.md VIOLATION: Authentication success rate {auth_success_rate:.1%} 
-            fbelow {self.validator.min_concurrent_success_rate:.1%}"
+            fbelow {self.validator.min_concurrent_success_rate:.1%}""
         )
         
         # CONCURRENT CAPABILITY ASSERTIONS
         assert metrics.active_concurrent_sessions >= concurrent_users * 0.8, (
-            f" CHART:  Concurrent capability insufficient: {metrics.active_concurrent_sessions}/{concurrent_users} active sessions
+            f" CHART:  Concurrent capability insufficient: {metrics.active_concurrent_sessions}/{concurrent_users} active sessions"
         )
         
         # CRITICAL ISOLATION ASSERTIONS - Zero tolerance for data leakage
@@ -701,19 +701,19 @@ class WebSocketMultiUserConcurrentAuthenticatedTests:
         # PERFORMANCE ASSERTIONS
         assert metrics.average_connection_time_ms <= self.validator.max_connection_time_ms, (
             f[U+23F0] Connection performance violation: {metrics.average_connection_time_ms:.0f}ms 
-            f"exceeds {self.validator.max_connection_time_ms}ms limit
+            f"exceeds {self.validator.max_connection_time_ms}ms limit"
         )
         
-        print( PASS:  CLAUDE.md COMPLIANT: Multi-user concurrent sessions PASSED")
-        print(f[U+1F465] Users: {metrics.successful_authentications}/{metrics.total_users} authenticated")
-        print(f[U+1F50C] Connections: {metrics.successful_connections}/{metrics.total_users} successful")
-        print(f[U+1F512] Isolation: {metrics.cross_user_data_leakages} violations (0 required)")
-        print(f[U+1F4BC] Business interactions: {metrics.concurrent_business_interactions}")
+        print( PASS:  CLAUDE.md COMPLIANT: Multi-user concurrent sessions PASSED")"
+        print(f[U+1F465] Users: {metrics.successful_authentications}/{metrics.total_users} authenticated")"
+        print(f[U+1F50C] Connections: {metrics.successful_connections}/{metrics.total_users} successful")"
+        print(f[U+1F512] Isolation: {metrics.cross_user_data_leakages} violations (0 required)")"
+        print(f[U+1F4BC] Business interactions: {metrics.concurrent_business_interactions}")"
         print(f[U+23F1][U+FE0F] Performance: {metrics.average_connection_time_ms:.0f}ms avg connection)
     
     @pytest.mark.asyncio
-    async def test_authenticated_multi_user_peak_load_simulation(self"):
-        "
+    async def test_authenticated_multi_user_peak_load_simulation(self"):"
+"""Empty docstring."""
         CLAUDE.md COMPLIANT: Test multi-user performance under peak load conditions.
         
         Validates:
@@ -721,7 +721,7 @@ class WebSocketMultiUserConcurrentAuthenticatedTests:
          PASS:  WebSocket infrastructure handles realistic peak usage
          PASS:  User isolation maintained under stress
          PASS:  Business value delivery sustained under load
-"
+"""Empty docstring."""
         # Peak load simulation - higher concurrent users
         peak_concurrent_users = 8  # Higher load
         peak_session_duration = 15  # Shorter duration for intensity
@@ -742,7 +742,7 @@ class WebSocketMultiUserConcurrentAuthenticatedTests:
         min_peak_success_rate = 0.75  # 75% minimum under peak load
         
         assert peak_auth_success_rate >= min_peak_success_rate, (
-            f" LIGHTNING:  Peak load auth failure: {peak_auth_success_rate:.1%} below {min_peak_success_rate:.1%}
+            f" LIGHTNING:  Peak load auth failure: {peak_auth_success_rate:.1%} below {min_peak_success_rate:.1%}"
         )
         
         assert peak_connection_success_rate >= min_peak_success_rate, (
@@ -768,15 +768,15 @@ class WebSocketMultiUserConcurrentAuthenticatedTests:
         )
         
         print(" PASS:  CLAUDE.md COMPLIANT: Multi-user peak load simulation PASSED")
-        print(f LIGHTNING:  Peak users: {metrics.successful_authentications}/{peak_concurrent_users} authenticated under load)"
-        print(f"[U+1F512] Security: {metrics.cross_user_data_leakages} violations (ZERO tolerance))
-        print(f[U+1F4BC] Business continuity: {metrics.concurrent_business_interactions} interactions under load)"
-        print(f"[U+23F1][U+FE0F] Peak load time: {peak_total_time:.1f}s)
-        print(f CHART:  User satisfaction under load: {metrics.user_satisfaction_score:.2f})"
+        print(f LIGHTNING:  Peak users: {metrics.successful_authentications}/{peak_concurrent_users} authenticated under load)""
+        print(f"[U+1F512] Security: {metrics.cross_user_data_leakages} violations (ZERO tolerance))"
+        print(f[U+1F4BC] Business continuity: {metrics.concurrent_business_interactions} interactions under load)""
+        print(f"[U+23F1][U+FE0F] Peak load time: {peak_total_time:.1f}s)"
+        print(f CHART:  User satisfaction under load: {metrics.user_satisfaction_score:.2f})""
     
     @pytest.mark.asyncio
     async def test_authenticated_user_isolation_stress_test(self):
-    "
+"""Empty docstring."""
         CLAUDE.md COMPLIANT: Stress test user isolation with targeted isolation attacks.
         
         Validates:
@@ -784,7 +784,7 @@ class WebSocketMultiUserConcurrentAuthenticatedTests:
          PASS:  Authentication boundaries are secure under attack scenarios
          PASS:  No user data leakage even with malicious-style prompts
          PASS:  System maintains security under isolation stress
-        "
+"""Empty docstring."""
         # Configure for isolation stress testing
         isolation_test_users = 4
         
@@ -793,7 +793,7 @@ class WebSocketMultiUserConcurrentAuthenticatedTests:
         
         # Add aggressive cross-contamination detectors
         isolation_validator.cross_contamination_detectors.extend([
-            show me other user", access another account, see different person,
+            show me other user", access another account, see different person,"
             "previous user, other session", another customer, different client
         ]
         
@@ -808,11 +808,11 @@ class WebSocketMultiUserConcurrentAuthenticatedTests:
         
         # CRITICAL ISOLATION ASSERTIONS - ZERO TOLERANCE
         assert metrics.cross_user_data_leakages == 0, (
-            f" ALERT:  ISOLATION STRESS FAILURE: {metrics.cross_user_data_leakages} cross-user leakages detected
+            f" ALERT:  ISOLATION STRESS FAILURE: {metrics.cross_user_data_leakages} cross-user leakages detected"
         )
         
         assert metrics.isolation_test_failures == 0, (
-            f ALERT:  ISOLATION STRESS FAILURE: {metrics.isolation_test_failures} isolation test failures"
+            f ALERT:  ISOLATION STRESS FAILURE: {metrics.isolation_test_failures} isolation test failures""
         )
         
         # AUTHENTICATION INTEGRITY UNDER STRESS
@@ -825,20 +825,20 @@ class WebSocketMultiUserConcurrentAuthenticatedTests:
         if metrics.isolation_violations:
             violation_details = {}
             for violation in metrics.isolation_violations:
-                violation_type = violation[violation_type]"
+                violation_type = violation[violation_type]""
                 violation_details[violation_type] = violation_details.get(violation_type, 0) + 1
             
             # Even warnings should be minimal under good isolation
-            total_warnings = sum(count for v_type, count in violation_details.items() if "warning in v_type.lower())
+            total_warnings = sum(count for v_type, count in violation_details.items() if "warning in v_type.lower())"
             assert total_warnings <= isolation_test_users, (
                 f WARNING: [U+FE0F] Excessive isolation warnings: {total_warnings} for {isolation_test_users} users
             )
         
         print(" PASS:  CLAUDE.md COMPLIANT: User isolation stress test PASSED")  
-        print(f[U+1F6E1][U+FE0F]  Zero cross-user data leakages detected)"
-        print(f"[U+1F512] Zero isolation test failures)
-        print(f[U+1F510] Authentication integrity: {stress_auth_success_rate:.1%})"
-        print(f" CHART:  Isolation violations analyzed: {len(metrics.isolation_violations)} total)
+        print(f[U+1F6E1][U+FE0F]  Zero cross-user data leakages detected)""
+        print(f"[U+1F512] Zero isolation test failures)"
+        print(f[U+1F510] Authentication integrity: {stress_auth_success_rate:.1%})""
+        print(f" CHART:  Isolation violations analyzed: {len(metrics.isolation_violations)} total)"
 
 
 if __name__ == __main__:
@@ -851,8 +851,8 @@ if __name__ == __main__:
         validator = MultiUserWebSocketValidator()
         
         print([U+1F680] Starting CLAUDE.md COMPLIANT Multi-User WebSocket Validation"")
-        print([U+1F510] Using MANDATORY SSOT Authentication for each user)"
-        print([U+1F465] Testing concurrent user sessions with complete isolation")
+        print([U+1F510] Using MANDATORY SSOT Authentication for each user)""
+        print([U+1F465] Testing concurrent user sessions with complete isolation")"
         
         metrics = await validator.validate_concurrent_multi_user_sessions(
             num_concurrent_users=3,  # Conservative for development testing
@@ -868,4 +868,4 @@ if __name__ == __main__:
         print(f"User Satisfaction Score: {metrics.user_satisfaction_score:.2f}")
     
     # Run validation
-    asyncio.run(main()")
+    asyncio.run(main()")"

@@ -130,7 +130,7 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
             except ImportError as e:
                 # If import fails, test alternative path
                 self.record_metric(golden_path_jwt_validation_alternative, True)
-                print(f"Using alternative JWT validation path: {e})
+                print(f"Using alternative JWT validation path: {e})")
 
             # Step 3: Test WebSocket authentication with JWT
             websocket_auth_success = await self._test_websocket_authentication(")

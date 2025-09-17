@@ -182,7 +182,7 @@ class Issue1094GoldenPathProtectionTests(BaseIntegrationTest):
         assert impact_percentage >= 100, \
             fIssue #1094 should affect 100% of revenue-critical functions, got {impact_percentage}%"
 
-        print(f"Business value impact: {affected_revenue_functions})
+        print(f"Business value impact: {affected_revenue_functions})")
         print(fRevenue impact percentage: {impact_percentage}%)"
 
     @pytest.mark.mission_critical

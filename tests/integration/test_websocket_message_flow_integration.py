@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Phase 1: WebSocket Message Flow Integration Tests - Issue #861
 
 Business Value Justification (BVJ):
@@ -29,7 +29,7 @@ BUSINESS-CRITICAL WEBSOCKET EVENTS (ALL MUST BE TESTED):
 3. tool_executing - Tool usage transparency
 4. tool_completed - Tool results display
 5. agent_completed - User knows response ready
-"
+"""Empty docstring."""
 
 import pytest
 import asyncio
@@ -79,15 +79,15 @@ except ImportError:
 @pytest.mark.websocket_flow
 @pytest.mark.business_critical
 class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
-    "
+"""Empty docstring."""
     Phase 1: WebSocket Message Flow Integration Test Suite
 
     BUSINESS IMPACT: Protects $500K+ ARR through reliable WebSocket message delivery
     COVERAGE TARGET: Agent Registry, WebSocket Bridge, Message Flow components
-"
+"""Empty docstring."""
 
     def setup_method(self, method):
-        "Setup for each test method with isolated WebSocket infrastructure
+        "Setup for each test method with isolated WebSocket infrastructure"""
         super().setup_method(method)
         self.test_user_ids = []
         self.websocket_connections = []
@@ -126,7 +126,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
         COVERS: Agent Registry (11.48% coverage gap - 740/836 lines missing)
         
         if not WEBSOCKET_AVAILABLE or not AGENT_SYSTEM_AVAILABLE:
-            pytest.skip(WebSocket or Agent system not available)"
+            pytest.skip(WebSocket or Agent system not available)""
 
         # Create authenticated test user
         user_id = str(uuid.uuid4())
@@ -174,12 +174,12 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(25)
     async def test_websocket_bridge_message_routing(self):
-    "
+"""Empty docstring."""
         Test WebSocket Bridge message routing functionality
         COVERS: Agent WebSocket Bridge (15.19% coverage gap - 1,267/1,494 lines missing)
-        "
+"""Empty docstring."""
         if not WEBSOCKET_AVAILABLE or not USER_CONTEXT_AVAILABLE:
-            pytest.skip(WebSocket or User Context system not available")
+            pytest.skip(WebSocket or User Context system not available")"
 
         # Create multiple authenticated test users for isolation testing
         user_1_id = str(uuid.uuid4())
@@ -233,10 +233,10 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(30)
     async def test_complete_websocket_event_flow_sequence(self):
-    "
+"""Empty docstring."""
         Test complete WebSocket event flow for all 5 business-critical events
         COVERS: Complete WebSocket message flow end-to-end
-        "
+"""Empty docstring."""
         if not all([WEBSOCKET_AVAILABLE, AGENT_SYSTEM_AVAILABLE, USER_CONTEXT_AVAILABLE]:
             pytest.skip(Required systems not available)
 
@@ -438,7 +438,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
         COVERS: WebSocket error scenarios and system resilience
         
         if not WEBSOCKET_AVAILABLE:
-            pytest.skip(WebSocket system not available)"
+            pytest.skip(WebSocket system not available)""
 
         # Create authenticated test user
         user_id = str(uuid.uuid4())
@@ -465,7 +465,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
             await bridge.send_agent_event(invalid_message)
         except Exception as e:
             # Error handling should be graceful
-            assert "invalid_event_type in str(e).lower() or malformed in str(e).lower()
+            assert "invalid_event_type in str(e).lower() or malformed in str(e).lower()"
 
         # Test recovery with valid message after error
         valid_message = {
@@ -486,10 +486,10 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(30)
     async def test_websocket_agent_instance_factory_integration(self):
-    "
+"""Empty docstring."""
         Test WebSocket integration with Agent Instance Factory
         COVERS: Agent Instance Factory (9.60% coverage - 452/500 lines missing)
-        "
+"""Empty docstring."""
         if not all([WEBSOCKET_AVAILABLE, AGENT_SYSTEM_AVAILABLE, USER_CONTEXT_AVAILABLE]:
             pytest.skip(Required systems not available)
 

@@ -159,7 +159,7 @@ class DockerInfrastructureValidator:
             try:
                 self.docker_manager.release_environment()
             except Exception as e:
-                logger.warning(f"Cleanup warning: {e})
+                logger.warning(f"Cleanup warning: {e})")
             
             return True
 
@@ -326,7 +326,7 @@ class DockerStabilityP1Tests:
                     docker_validator.docker_manager.release_environment()
                 assert True, Cleanup mechanism test passed
             except Exception as e:
-                logger.warning(f"Cleanup test warning: {e})
+                logger.warning(f"Cleanup test warning: {e})")
                 assert True, Cleanup mechanism test completed with warnings"
         else:
             assert True, Cleanup mechanism test passed (Docker manager not available)

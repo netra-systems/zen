@@ -242,7 +242,7 @@ response = client.get("formatted_string")
 class TestOAuthFlowIntegration:
     """Integration tests for complete OAuth flow."""
 
-    # # @pytest.fixture
+    # # # @pytest.fixture
     async def test_complete_oauth_flow(self):
     """Test complete OAuth flow from initiation to callback."""
     client = TestClient(app)

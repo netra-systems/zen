@@ -164,7 +164,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         print(f\n=== Sample Fragmented Imports ===)
         for pattern_type, instances in fragmentation_data.items():
             if pattern_type != canonical_ssot and instances:"
-                print(f"\n{pattern_type.upper()}:)
+                print(f"\n{pattern_type.upper()}:)")
                 for file_path, line_num, import_stmt in instances[:3]:  # Show first 3
                     print(f  {file_path}:{line_num} -> {import_stmt})"
 
@@ -213,9 +213,9 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         avg_fragmented_time = sum(fragmented_times) / len(fragmented_times) if fragmented_times else canonical_time
         performance_ratio = avg_fragmented_time / canonical_time if canonical_time > 0 else 1
 
-        print(f"\n=== Import Performance Analysis ===)
+        print(f"\n=== Import Performance Analysis ===)")
         print(fCanonical import time: {canonical_time:.4f}s)"
-        print(f"Average fragmented import time: {avg_fragmented_time:.4f}s)
+        print(f"Average fragmented import time: {avg_fragmented_time:.4f}s)")
         print(fPerformance degradation ratio: {performance_ratio:.2f}x)"
 
         # This assertion may fail if fragmentation causes significant performance impact
@@ -279,7 +279,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         print(fDeprecated import failures: {len(deprecated_import_failures)})"
 
         for failed_import, error in deprecated_import_failures:
-            print(f"  FAILED: {failed_import} -> {error})
+            print(f"  FAILED: {failed_import} -> {error})")
 
         # CRITICAL: Canonical import MUST work for Golden Path
         assert canonical_import_works, (
@@ -317,7 +317,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
                     production_fragments.append((file_path, line_num, import_stmt))
 
         print(f\n=== SSOT Compliance Analysis ===)"
-        print(f"Production code fragments: {len(production_fragments)})
+        print(f"Production code fragments: {len(production_fragments)})")
         print(fTest code fragments: {len(test_fragments)})
 
         if production_fragments:

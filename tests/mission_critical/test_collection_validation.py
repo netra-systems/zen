@@ -131,16 +131,16 @@ class CollectionValidationTests(SSotBaseTestCase):
                            if v['status'] == 'success'}
         
         print(f\nCollection Results:)"
-        print(f"Successful: {len(successful_files)})
+        print(f"Successful: {len(successful_files)})")
         print(fFailed: {len(failed_files)})
         
         if failed_files:
-            print(f"\nFailed Files Details:)
+            print(f"\nFailed Files Details:)")
             for filename, result in failed_files.items("):
                 print(f  {filename}: {result['status']})
                 if 'error_analysis' in result:
                     for error_type, count in result['error_analysis'].items():
-                        print(f"    {error_type}: {count})
+                        print(f"    {error_type}: {count})")
         
         # This test should initially fail to demonstrate the issue
         if failed_files:
@@ -260,9 +260,9 @@ class CollectionValidationTests(SSotBaseTestCase):
                 
             total_test_files += result.get('test_files', 0)
         
-        print(f"\nSummary:)
+        print(f"\nSummary:)")
         print(f  Total test files found: {total_test_files})"
-        print(f"  Total tests collected: {total_collected})
+        print(f"  Total tests collected: {total_collected})")
         print(f  Failed directories: {len(failed_directories)})
         
         # This test should initially fail to demonstrate discovery issues

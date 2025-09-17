@@ -45,7 +45,7 @@ class Settings:
 
 
 class WebSocketReconnectionTests:
-        "Integration tests for WebSocket reconnection scenarios.
+        "Integration tests for WebSocket reconnection scenarios."""
 
     def __init__(self):
         pass
@@ -158,7 +158,7 @@ class WebSocketReconnectionTests:
         try:
         token = self.generate_test_token()
         connection_id = None
-        thread_id = test_thread_123"
+        thread_id = test_thread_123""
 
                                                         # Establish initial connection and create session state
         async with websockets.connect()
@@ -218,15 +218,15 @@ class WebSocketReconnectionTests:
         restored = True
         restored_thread = data.get('payload', {}.get('thread_id')
         if restored_thread != thread_id:
-        raise AssertionError("
+        raise AssertionError(""
         break
         except asyncio.TimeoutError:
         continue
 
         if not restored:
-        raise AssertionError(Session not restored after reconnection)"
+        raise AssertionError(Session not restored after reconnection)""
 
-        print(")
+        print(")"
         self.test_results['passed'] += 1
         return True
 
@@ -358,14 +358,14 @@ class WebSocketReconnectionTests:
 
                                                                                                                                                     # Should receive pong or auth confirmation
         if data.get('type') not in ['pong', 'auth_success', 'auth']:
-        raise AssertionError(")
+        raise AssertionError(")"
 
         print(formatted_string)
         self.test_results['passed'] += 1
         return True
 
         except Exception as e:
-        print(")
+        print(")"
         self.test_results['failed'] += 1
         return False
         finally:
@@ -377,7 +377,7 @@ class WebSocketReconnectionTests:
         Prevents infinite reconnection loops.
         '''
         test_name = max_reconnection_attempts
-        print(")
+        print(")"
 
         try:
         max_attempts = 10
@@ -407,7 +407,7 @@ class WebSocketReconnectionTests:
 
         try:
         final_attempts = await asyncio.wait_for( )
-        attempt_reconnection("),
+        attempt_reconnection("),"
         timeout=5.0
                         
         except asyncio.TimeoutError:
@@ -422,13 +422,13 @@ class WebSocketReconnectionTests:
         return True
 
         except Exception as e:
-        print(")
+        print(")"
         self.test_results['failed'] += 1
         return False
         finally:
         self.test_results['total'] += 1
 
-    async def test_reconnection_with_queued_messages(self") -> bool:
+    async def test_reconnection_with_queued_messages(self") -> bool:"
         '''
         Test that queued messages are sent after reconnection.
         Ensures no message loss during temporary disconnections.
@@ -549,22 +549,22 @@ class WebSocketReconnectionTests:
         raise AssertionError(formatted_string)
 
         print()
-        print(formatted_string")
+        print(formatted_string")"
         self.test_results['passed'] += 1
         return True
 
         except Exception as e:
-        print(")
+        print(")"
         self.test_results['failed'] += 1
         return False
         finally:
         self.test_results['total'] += 1
 
     async def run_all_tests(self) -> Dict[str, Any]:
-        Run all WebSocket reconnection tests."
-        print(")
-         + = * 60)"
-        print("[U+1F50C] WebSocket Reconnection Integration Tests)
+        Run all WebSocket reconnection tests.""
+        print(")"
+         + = * 60)""
+        print("[U+1F50C] WebSocket Reconnection Integration Tests)"
         print(= * 60")"
 
         tests = ]
@@ -581,12 +581,12 @@ class WebSocketReconnectionTests:
         try:
         await test_func()
         except Exception as e:
-        print()"
+        print()""
         self.test_results['failed'] += 1
         self.test_results['total'] += 1
 
                 # Print summary
-        print(")
+        print(")"
          + "= * 60)"
         print( CHART:  TEST RESULTS SUMMARY)
         print(= * 60)
@@ -595,8 +595,8 @@ class WebSocketReconnectionTests:
         print()
 
         if self.test_results.get('reconnection_times'):
-        print(")
-        [U+1F4C8] RECONNECTION METRICS:")
+        print(")"
+        [U+1F4C8] RECONNECTION METRICS:")"
         metrics = self.test_results['reconnection_times']
         print(")"
         print(formatted_string)

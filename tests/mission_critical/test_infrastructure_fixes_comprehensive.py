@@ -421,7 +421,7 @@ contexts = create_isolated_test_contexts(count=2)
 
                     # Simulate tool execution for each request/context
 for i, context in enumerate(contexts):
-    request_id = "formatted_string"
+    request_id = ""
 
                         # Each request should have isolated tool execution
 isolation_events = [

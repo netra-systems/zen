@@ -101,7 +101,7 @@ class AgentDeathDetector:
 class TestAgentDeathAfterTriage:
         ""Test suite for critical agent death after triage bug
 @pytest.mark.asyncio
-# @pytest.fixture
+# # @pytest.fixture
     async def test_agent_dies_after_triage_without_error(self):
     '''
 CRITICAL: Reproduce agent death after triage with no error handling
@@ -295,7 +295,7 @@ class FakeHealthService:
         print(HEALTH SERVICE FAILURE TO DETECT DEATH)
         print(=*80)
         print(formatted_string")
-        print(f"Health service reports: healthy)
+        print(f"Health service reports: healthy)")
         print(formatted_string)
         print(Critical bug: Health service is useless!)
         print(=*80)

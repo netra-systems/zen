@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Test Agent-WebSocket Integration - Simplified Version
 
 Business Value Justification (BVJ):
@@ -12,7 +12,7 @@ CRITICAL REQUIREMENTS:
 2. Uses REAL services (no mocks in integration tests per CLAUDE.md)
 3. Validates multi-user isolation with factory patterns
 4. Ensures WebSocket events enable substantive chat business value
-"
+"""Empty docstring."""
 import asyncio
 import json
 import time
@@ -25,7 +25,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import get_env
 
 class AgentWebSocketIntegrationTests(BaseIntegrationTest):
-    "Test agent execution with WebSocket event delivery using real services.
+    "Test agent execution with WebSocket event delivery using real services."""
 
     @pytest.fixture(autouse=True)
     async def setup_test_environment(self, real_services_fixture):
@@ -41,12 +41,12 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_websocket_connection_basic(self, real_services_fixture):
-        "
+"""Empty docstring."""
         Test basic WebSocket connection to validate infrastructure.
         
         This test validates the foundational WebSocket connectivity required
         for agent-websocket integration.
-"
+"""Empty docstring."""
         import websockets
         try:
             websocket_url = 'ws://localhost:8000/ws'
@@ -83,12 +83,12 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_redis_connectivity(self, real_services_fixture):
-        "
+"""Empty docstring."""
         Test Redis connectivity for session management.
         
         Validates Redis integration required for user session isolation
         and WebSocket state management.
-"
+"""Empty docstring."""
         redis = real_services_fixture['redis']
         test_key = f'test:integration:{self.test_user_id}'
         test_value = json.dumps({'user_id': self.test_user_id, 'session_type': 'agent_websocket_integration', 'timestamp': datetime.utcnow().isoformat()}
@@ -120,12 +120,12 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_websocket_event_structure_validation(self, real_services_fixture):
-        "
+"""Empty docstring."""
         Test WebSocket event structure validation.
         
         Validates the event structure patterns required for the 5 critical
         WebSocket events that enable substantive chat business value.
-"
+"""Empty docstring."""
         critical_events = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
         for event_type in critical_events:
             event_structure = {'type': event_type, 'user_id': self.test_user_id, 'thread_id': self.test_thread_id, 'data': {}, 'timestamp': datetime.utcnow().isoformat()}
@@ -145,7 +145,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
         
         Validates that the infrastructure supports the factory patterns
         required for proper user context isolation during concurrent agent execution.
-        """
+        """"""
         user_contexts = []
         for i in range(3):
             user_id = f'test_user_{i}_{uuid.uuid4().hex[:6]}'

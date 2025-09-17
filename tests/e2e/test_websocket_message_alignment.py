@@ -20,7 +20,7 @@ from shared.isolated_environment import get_env
 
 
 class WebSocketMessageAlignmentTest:
-    "Test WebSocket message type alignment between backend and frontend.
+    "Test WebSocket message type alignment between backend and frontend."""
 
     def __init__(self):
         pass
@@ -214,37 +214,37 @@ welcome_msg = create_server_message( )
 MessageType.SYSTEM_MESSAGE,
 }
 event: connection_established,
-connection_id: "conn_abc123,
-user_id": user_123,
+connection_id: "conn_abc123,"
+user_id": user_123,"
 server_time: 2025-08-29T18:36:00Z,
 config": }"
 heartbeat_interval: 45,
-max_message_size: 8192"
+max_message_size: 8192""
                                                                     
                                                                     
                                                                     
 
 msg_dict = welcome_msg.model_dump()
-print(f" )
+print(f" )"
 Testing Welcome Message Format:)
-print(formatted_string)"
+print(formatted_string)""
 
 success = await tester.simulate_frontend_validation(msg_dict)
 
 if not success:
-    print(f"ERROR: Welcome message failed validation!)
+    print(f"ERROR: Welcome message failed validation!)"
 
-print(formatted_string)"
+print(formatted_string)""
                                                                         # This is expected to fail before the fix
-assert False, "Welcome message should be valid but failed frontend validation
+assert False, "Welcome message should be valid but failed frontend validation"
 else:
-    print(SUCCESS: Welcome message validated correctly)"
+    print(SUCCESS: Welcome message validated correctly)""
 
 
 
 @pytest.mark.asyncio
     async def test_data_to_payload_conversion():
-        "Test that messages with 'data' field are properly converted to 'payload' for frontend.
+        "Test that messages with 'data' field are properly converted to 'payload' for frontend."""
 
 
 tester = WebSocketMessageAlignmentTest()
@@ -274,7 +274,7 @@ Data field should be accessible as payload
 else:
     print(fWARNING: Message validation failed - this is expected before the fix")"
 
-print()"
+print()""
 
 
 if __name__ == __main__":"

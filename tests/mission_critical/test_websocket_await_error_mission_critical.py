@@ -296,7 +296,7 @@ class TestWebSocketAwaitErrorMissionCritical(SSotAsyncTestCase):
             pass
 
         # Log impact assessment
-        print(f"\nISSUE #1184 IMPACT ASSESSMENT:)
+        print(f"\nISSUE #1184 IMPACT ASSESSMENT:)")
         for component, works in impact_assessment.items():
             status = ✅ WORKING if works else ❌ BROKEN
             print(f  {component}: {status}"")

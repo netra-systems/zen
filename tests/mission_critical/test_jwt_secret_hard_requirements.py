@@ -218,7 +218,7 @@ class JWTSecretHardRequirementsTests:
         assert self.jwt_manager._cached_secret == loaded_secret3
     
     def test_jwt_secret_replaces_insecure_defaults(self):
-        "Test that insecure default test secrets are replaced with secure deterministic ones.""
+        """Test that insecure default test secrets are replaced with secure deterministic ones."""
         # Use one of the known insecure default secrets
         insecure_secret = "development-jwt-secret-minimum-32-characters-long"
         os.environ['ENVIRONMENT'] = 'development'

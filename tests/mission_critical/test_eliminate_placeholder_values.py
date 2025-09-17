@@ -274,7 +274,7 @@ user_context = UserExecutionContext( )
 user_id=user_123,"
 thread_id="thread_456,
 run_id=formatted_string,
-request_id="formatted_string"
+request_id=""
                             
                             # Mock agent
 websocket = TestWebSocketConnection()  # Real WebSocket implementation

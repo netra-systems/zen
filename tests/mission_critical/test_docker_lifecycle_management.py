@@ -520,7 +520,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         "Perform various Docker operations concurrently.
         thread_results = []
         for i in range(operations_per_thread):
-        container_name = "formatted_string"
+        container_name = ""
         try:
             # Create container
         create_cmd = [
@@ -796,7 +796,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
                     # =============================================================================
     def test_existing_container_conflict_detection_and_resolution(self):
         "Test detection and resolution of existing container name conflicts.
-        conflict_container_name = "formatted_string"
+        conflict_container_name = ""
     # Create initial container
         create_cmd = [
         'docker', 'run', '-d', '--name', conflict_container_name,
@@ -865,7 +865,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         "Test detection and resolution of port conflicts.
         test_port = 28999  # Use a high port to avoid system conflicts
     # Create container using the test port
-        conflicting_container = "formatted_string"
+        conflicting_container = ""
         create_cmd = [
         'docker', 'run', '-d', '--name', conflicting_container,
         '--label', 'formatted_string',
@@ -1091,7 +1091,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
     # Create various resources
         base_name = formatted_string
     # Create volume
-        volume_name = "formatted_string"
+        volume_name = ""
         volume_cmd = ['docker', 'volume', 'create', volume_name]
         result = subprocess.run(volume_cmd, capture_output=True, text=True, timeout=10)
         self.assertEqual(result.returncode, 0, formatted_string)
@@ -1224,7 +1224,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         "Test that environment cleanup is complete and doesn't leave artifacts.
         manager = UnifiedDockerManager( )
         environment_type=EnvironmentType.DEDICATED,
-        test_id="formatted_string"
+        test_id=""
     
         try:
         # Record initial state
@@ -1523,7 +1523,7 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
     
         test_containers = []
         for scenario_name, health_cmd in health_scenarios:
-        container_name = "formatted_string"
+        container_name = ""
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
@@ -1690,7 +1690,7 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
     
         service_containers = {}
         for service_name, health_cmd, interval in services:
-        container_name = "formatted_string"
+        container_name = ""
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
@@ -1741,7 +1741,7 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         "
     def test_health_monitoring_resource_efficiency(self):
         "Test health monitoring doesn't consume excessive system resources.
-        test_id = "formatted_string"
+        test_id = ""
     # Create many services to stress the monitoring system
         monitored_containers = []
         for i in range(20):
@@ -1813,7 +1813,7 @@ class DockerInfrastructureFailureRecoveryTests(SSotAsyncTestCase):
         Test services automatically restart when they fail.""
         test_id = formatted_string
     # Create service with restart policy
-        service_container = "formatted_string"
+        service_container = ""
         create_cmd = [
         'docker', 'run', '-d', '--name', service_container,
         '--label', 'formatted_string',
@@ -2041,7 +2041,7 @@ class DockerInfrastructureFailureRecoveryTests(SSotAsyncTestCase):
         subprocess.run(network_rm_cmd, capture_output=True, timeout=10)
     def test_docker_daemon_connection_recovery(self):
         "Test recovery from Docker daemon connection issues.
-        test_id = "formatted_string"
+        test_id = ""
     # Create a service
         test_container = formatted_string
         create_cmd = [

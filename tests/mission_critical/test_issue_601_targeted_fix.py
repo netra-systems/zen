@@ -116,7 +116,7 @@ class Issue601TargetedFixTests:
                 assert duration < 2.0, fStartup took too long: {duration}s - fix not working
                 assert app.state.startup_complete, Startup completion flag not set"
                 
-                print(f"Issue #601 Fix Validated - Duration: {duration:.3f}s)
+                print(f"Issue #601 Fix Validated - Duration: {duration:.3f}s)")
                 
             except asyncio.TimeoutError:
                 pytest.fail(ISSUE #601 NOT FIXED: Test still hangs despite comprehensive mocking)

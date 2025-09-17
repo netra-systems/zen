@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 WebSocket Integration Tests - Real Authentication & Services
 
 Business Value:
@@ -17,7 +17,7 @@ CRITICAL: Per CLAUDE.md requirements:
 - ALL integration tests MUST use real authentication
 - NO mocks in integration tests - use real services
 - Use test_framework/ssot/e2e_auth_helper.py for SSOT auth patterns
-"
+"""Empty docstring."""
 
 import asyncio
 import json
@@ -35,7 +35,7 @@ from shared.isolated_environment import get_env
 
 # Get environment to determine which auth helper config to use
 env = get_env()
-test_environment = env.get(TEST_ENV", env.get(ENVIRONMENT, test))
+test_environment = env.get(TEST_ENV", env.get(ENVIRONMENT, test))"
 
 @pytest.fixture
 async def auth_helper():
@@ -43,8 +43,8 @@ async def auth_helper():
     helper = E2EWebSocketAuthHelper(environment=test_environment)
     # Create and cache a valid JWT token
     token = helper.create_test_jwt_token(
-        user_id=websocket-test-user, "
-        email="websocket-test@example.com,
+        user_id=websocket-test-user, ""
+        email="websocket-test@example.com,"
         permissions=[read, write],
         exp_minutes=10
     )
@@ -74,20 +74,20 @@ async def test_websocket_connection_success(authenticated_websocket_client):
         # Verify connection established
         assert data["type] == connection_established"
         assert connection_id in data
-        assert user_id in data"
-        assert data["connection_ready] is True
+        assert user_id in data""
+        assert data["connection_ready] is True"
         assert server_time in data
         assert "config in data"
 
 
 @pytest.mark.asyncio 
 async def test_websocket_connection_failure_no_token():
-    Test WebSocket connection fails without authentication token."
+    Test WebSocket connection fails without authentication token.""
     client = TestClient(app)
     
     # Try to connect without authentication - should fail
     with pytest.raises(Exception):  # Should raise WebSocketException or similar
-        with client.websocket_connect("/ws) as websocket:
+        with client.websocket_connect("/ws) as websocket:"
             # This should fail before we get here
             pass
 
@@ -100,11 +100,11 @@ async def test_websocket_send_receive_ping_pong(authenticated_websocket_client):
     with client.websocket_connect(/ws, headers=headers) as websocket:
         # Wait for connection established
         connection_data = websocket.receive_json()
-        assert connection_data[type] == "connection_established
+        assert connection_data[type] == "connection_established"
         
         # Send ping message
         ping_message = {
-            type": ping,
+            type": ping,"
             timestamp: datetime.now(timezone.utc).isoformat()
         }
         websocket.send_json(ping_message)
@@ -128,8 +128,8 @@ async def test_websocket_send_receive_echo(authenticated_websocket_client):
         # Send echo message
         echo_message = {
             type: echo, 
-            content: "Hello WebSocket!,
-            timestamp": datetime.now(timezone.utc).isoformat()
+            content: "Hello WebSocket!,"
+            timestamp": datetime.now(timezone.utc).isoformat()"
         }
         websocket.send_json(echo_message)
         
@@ -141,10 +141,10 @@ async def test_websocket_send_receive_echo(authenticated_websocket_client):
 
 @pytest.mark.asyncio 
 async def test_websocket_heartbeat_functionality(authenticated_websocket_client):
-    Test WebSocket heartbeat configuration."
+    Test WebSocket heartbeat configuration.""
     client, headers = authenticated_websocket_client
     
-    with client.websocket_connect("/ws, headers=headers) as websocket:
+    with client.websocket_connect("/ws, headers=headers) as websocket:"
         # Wait for connection established
         connection_data = websocket.receive_json()
         assert connection_data[type] == connection_established
@@ -152,11 +152,11 @@ async def test_websocket_heartbeat_functionality(authenticated_websocket_client)
         # Verify heartbeat config is present
         assert config" in connection_data"
         assert heartbeat_interval in connection_data[config]
-        assert connection_data[config][heartbeat_interval"] > 0
+        assert connection_data[config][heartbeat_interval"] > 0"
         
         # Test that connection is stable (basic heartbeat functionality)
         # Send a ping to ensure connection is still active
-        websocket.send_json({"type: ping}
+        websocket.send_json({"type: ping}"
         response = websocket.receive_json()
         assert response[type] == pong
 
@@ -166,10 +166,10 @@ async def test_websocket_agent_message_fallback(authenticated_websocket_client):
     "Test agent message handling with fallback handler."
     client, headers = authenticated_websocket_client
     
-    with client.websocket_connect(/ws, headers=headers) as websocket:"
+    with client.websocket_connect(/ws, headers=headers) as websocket:""
         # Wait for connection established
         connection_data = websocket.receive_json() 
-        assert connection_data["type] == connection_established
+        assert connection_data["type] == connection_established"
         
         user_id = connection_data[user_id]
         
@@ -177,8 +177,8 @@ async def test_websocket_agent_message_fallback(authenticated_websocket_client):
         chat_message = {
             type": "chat,
             content: Hello from integration test!,
-            thread_id: f"test-thread-{int(time.time())},
-            user_id: user_id"
+            thread_id: f"test-thread-{int(time.time())},"
+            user_id: user_id""
         }
         websocket.send_json(chat_message)
         
@@ -201,12 +201,12 @@ async def test_websocket_agent_message_fallback(authenticated_websocket_client):
                 break
         
         # Should have received at least one agent event
-        assert len(events_received) > 0, f"No agent events received. Got: {events_received}
+        assert len(events_received) > 0, f"No agent events received. Got: {events_received}"
 
 
 @pytest.mark.asyncio
 async def test_websocket_multiple_connections_isolation():
-    "Test that multiple WebSocket connections are properly isolated.
+    "Test that multiple WebSocket connections are properly isolated."""
     # Create two different auth helpers with different users
     helper1 = E2EWebSocketAuthHelper(environment=test_environment)
     helper2 = E2EWebSocketAuthHelper(environment=test_environment)
@@ -220,8 +220,8 @@ async def test_websocket_multiple_connections_isolation():
     client = TestClient(app)
     
     # Open two connections simultaneously
-    with client.websocket_connect(/ws, headers=headers1) as ws1:"
-        with client.websocket_connect(/ws", headers=headers2) as ws2:
+    with client.websocket_connect(/ws, headers=headers1) as ws1:""
+        with client.websocket_connect(/ws", headers=headers2) as ws2:"
             
             # Get connection info for both
             conn1_data = ws1.receive_json(timeout=10.0)
@@ -232,11 +232,11 @@ async def test_websocket_multiple_connections_isolation():
             
             # Verify different users and connection IDs
             assert conn1_data[user_id] != conn2_data[user_id]
-            assert conn1_data[connection_id] != conn2_data[connection_id"]
+            assert conn1_data[connection_id] != conn2_data[connection_id"]"
             
             # Send message from user 1
             ws1.send_json({
-                "type: ping,
+                "type: ping,"
                 message: from user 1
             }
             
@@ -249,7 +249,7 @@ async def test_websocket_multiple_connections_isolation():
             try:
                 user2_unexpected = ws2.receive_json()
                 # If we get anything, it should NOT be user 1's pong
-                assert user2_unexpected.get(type) != pong or user2_unexpected.get(message) != from user 1"
+                assert user2_unexpected.get(type) != pong or user2_unexpected.get(message) != from user 1""
             except Exception:
                 # Timeout is expected - user 2 should not receive user 1's messages
                 pass
@@ -257,7 +257,7 @@ async def test_websocket_multiple_connections_isolation():
 
 @pytest.mark.asyncio
 async def test_websocket_error_handling(authenticated_websocket_client):
-    "Test WebSocket error handling with invalid messages.
+    "Test WebSocket error handling with invalid messages."""
     client, headers = authenticated_websocket_client
     
     with client.websocket_connect(/ws", headers=headers) as websocket:"
@@ -266,14 +266,14 @@ async def test_websocket_error_handling(authenticated_websocket_client):
         assert connection_data[type] == connection_established
         
         # Send invalid JSON (should be handled gracefully)
-        websocket.send_text(invalid json {)"
+        websocket.send_text(invalid json {)""
         
         # Should receive format error
         error_response = websocket.receive_json()
-        assert error_response[type"] == error
+        assert error_response[type"] == error"
         assert FORMAT_ERROR in error_response.get(error_code, ")"
         
         # Connection should still be alive after error
         websocket.send_json({type: ping}
         ping_response = websocket.receive_json()
-        assert ping_response[type] == pong"
+        assert ping_response[type] == pong""

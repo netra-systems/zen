@@ -469,7 +469,7 @@ def _get_environment_websocket_url() -> str:
             logger.info(f✅ Priority 4: Using mock WebSocket server: {mock_websocket_url})
             return mock_websocket_url
         else:
-            logger.warning(f"⚠️ Mock WebSocket server not available at {mock_websocket_url})
+            logger.warning(f"⚠️ Mock WebSocket server not available at {mock_websocket_url})")
 
     # Priority 5: Derive from backend URL (fallback)
     backend_url = _get_environment_backend_url()
@@ -552,7 +552,7 @@ class MockWebSocketServer:
                     data = json.loads(message)
                     await self.handle_message(websocket, data)
                 except json.JSONDecodeError:
-                    logger.warning(f"Invalid JSON received: {message})
+                    logger.warning(f"Invalid JSON received: {message})")
         except Exception as e:
             logger.error(fWebSocket client error: {e})
         finally:
@@ -931,7 +931,7 @@ class RealWebSocketTestBase:
             # Method doesn't exist, skip this validation
             logger.debug(ISSUE #773: Service definition validation not available, proceeding with normal startup)
         except Exception as validation_error:
-            logger.warning(f"ISSUE #773: Service validation failed: {validation_error}, proceeding with normal startup)
+            logger.warning(f"ISSUE #773: Service validation failed: {validation_error}, proceeding with normal startup)")
             # Continue with normal startup if validation fails
 
         logger.info(Starting Docker services for WebSocket testing...")

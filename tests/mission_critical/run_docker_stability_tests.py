@@ -71,7 +71,7 @@ try:
 
     report = metrics.generate_report()
     print(fTotal operations: {report.total_operations})"
-    print(f"Success rate: {report.success_rate:.2%})
+    print(f"Success rate: {report.success_rate:.2%})")
     print(fForce flag violations: {report.force_flag_violations})"
 
     print("\n + = * 60)

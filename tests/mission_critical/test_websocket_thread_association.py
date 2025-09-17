@@ -320,7 +320,7 @@ class TestWebSocketThreadAssociation:
     # There should be at least a small delay between association and execution
         if association_time and execution_time:
         delay = execution_time - association_time
-        assert delay >= 0.01, "formatted_string"
+        assert delay >= 0.01, ""
 
 
 @pytest.mark.asyncio

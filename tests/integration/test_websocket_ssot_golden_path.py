@@ -1,7 +1,7 @@
 _lazy_imports = {}
 
 def lazy_import(module_path: str, component: str=None):
-    "Lazy import pattern for performance optimization
+    "Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else []
@@ -65,16 +65,16 @@ class WebSocketSSOTGoldenPathTests(SSotAsyncTestCase):
         self.received_events = []
 
     async def capture_websocket_event(self, event_data: Dict[str, Any]:
-        Capture WebSocket events for validation."
+        Capture WebSocket events for validation.""
         self.received_events.append({'timestamp': datetime.now(timezone.utc).isoformat(), 'event': event_data}
         logger.info(f'Golden Path event captured: {event_data}')
 
     async def test_golden_path_complete_user_journey_ssot(self):
-        "
+"""Empty docstring."""
         Test complete Golden Path user journey through SSOT WebSocket.
         
         CRITICAL: This validates the $500K+ ARR chat functionality works end-to-end.
-"
+"""Empty docstring."""
         mock_auth_result = {'success': True, 'user_id': self.test_user_id, 'jwt_token': self.test_jwt_token, 'user_context': {'email': self.test_email, 'authenticated': True}}
         decoded_payload = jwt.decode(self.test_jwt_token, self.jwt_secret, algorithms=['HS256']
         assert decoded_payload['sub'] == self.test_user_id
@@ -84,7 +84,7 @@ class WebSocketSSOTGoldenPathTests(SSotAsyncTestCase):
         mock_websocket.state.name = 'OPEN'
         mock_auth_context = {'user_id': self.test_user_id, 'authenticated': True, 'connection_id': f'conn_{uuid.uuid4().hex[:8]}', 'handshake_complete': True}
         user_message = {'type': 'user_message', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Help me optimize my AI infrastructure costs', 'timestamp': datetime.now(timezone.utc).isoformat()}
-        critical_events = [{'type': 'agent_started', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Agent processing started', 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'agent_thinking', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Analyzing AI infrastructure optimization request', 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'tool_executing', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Executing cost analysis tool', 'tool': 'cost_analyzer', 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'tool_completed', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Cost analysis complete', 'tool': 'cost_analyzer', 'results': {'potential_savings': '$50K/month'}, 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'agent_completed', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Agent response ready', 'response': "I've analyzed your AI infrastructure and identified $50K/month in potential savings..., 'timestamp': datetime.now(timezone.utc).isoformat()}]
+        critical_events = [{'type': 'agent_started', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Agent processing started', 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'agent_thinking', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Analyzing AI infrastructure optimization request', 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'tool_executing', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Executing cost analysis tool', 'tool': 'cost_analyzer', 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'tool_completed', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Cost analysis complete', 'tool': 'cost_analyzer', 'results': {'potential_savings': '$50K/month'}, 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'agent_completed', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Agent response ready', 'response': "I've analyzed your AI infrastructure and identified $50K/month in potential savings..., 'timestamp': datetime.now(timezone.utc).isoformat()}]"
         for event in critical_events:
             await self.capture_websocket_event(event)
         assert mock_auth_result['success']
@@ -131,11 +131,11 @@ class WebSocketSSOTGoldenPathTests(SSotAsyncTestCase):
         assert auth_failure_result['retry_allowed']
 
     async def test_ssot_websocket_event_ordering_preservation(self):
-    "
+"""Empty docstring."""
         Test SSOT WebSocket preserves critical event ordering.
         
         CRITICAL: Event order affects user experience quality.
-        "
+"""Empty docstring."""
         ordered_events = [{'type': 'agent_started', 'sequence': 1, 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'agent_thinking', 'sequence': 2, 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'tool_executing', 'sequence': 3, 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'tool_completed', 'sequence': 4, 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'agent_completed', 'sequence': 5, 'timestamp': datetime.now(timezone.utc).isoformat()}]
         received_sequences = []
         for event in ordered_events:
@@ -175,11 +175,11 @@ class WebSocketSSOTGoldenPathTests(SSotAsyncTestCase):
         assert 'User 1' not in str(user_2_events)
 
     async def test_ssot_websocket_error_recovery_patterns(self):
-    "
+"""Empty docstring."""
         Test SSOT WebSocket implements proper error recovery.
         
         CRITICAL: Errors should not break the Golden Path user journey.
-        """
+        """"""
         recoverable_errors = [{'type': 'temporary_failure', 'recoverable': True, 'retry_delay': 1}, {'type': 'rate_limit', 'recoverable': True, 'retry_delay': 5}, {'type': 'service_busy', 'recoverable': True, 'retry_delay': 2}]
         recovery_results = []
         for error in recoverable_errors:

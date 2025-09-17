@@ -567,7 +567,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         if hasattr(self, 'violations_detected') and self.violations_detected:
             print(f\n=== Phase 1 Auth Service Violations Detected: {len(self.violations_detected)} ===)
             for violation in self.violations_detected:
-                print(f"  Line {violation['line']}: {violation['content']})
+                print(f"  Line {violation['line']}: {violation['content']})")
             print(f=== Total violations requiring migration: {len(self.violations_detected")} ===)
 
     def get_violation_summary(self) -> Dict[str, Any]:

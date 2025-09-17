@@ -370,7 +370,7 @@ class DatabaseImportDependencyResolutionTests(SSotBaseTestCase):
                             graph.add_edge(module_name, imported_module)
                 
             except Exception as e:
-                logger.warning(f"Could not analyze module {module_name}: {e})
+                logger.warning(f"Could not analyze module {module_name}: {e})")
         
         return graph
     
@@ -400,7 +400,7 @@ class DatabaseImportDependencyResolutionTests(SSotBaseTestCase):
                         imports.append(alias.name)
                         
         except Exception as e:
-            logger.warning(f"Could not extract imports from {file_path}: {e})
+            logger.warning(f"Could not extract imports from {file_path}: {e})")
         
         return imports
     

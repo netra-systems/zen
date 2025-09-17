@@ -330,7 +330,7 @@ class Issue1182WebSocketManagerSSOTViolationsTests(SSotBaseTestCase):
         self.logger.info(f   Race condition indicators: {race_condition_count})
         
         for indicator in race_condition_indicators:
-            self.logger.warning(f"   ⚠️  {indicator})
+            self.logger.warning(f"   ⚠️  {indicator})")
         
         # MISSION CRITICAL: This should FAIL if race conditions detected
         # Race conditions can cause data corruption and multi-user chat failures

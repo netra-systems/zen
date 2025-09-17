@@ -25,7 +25,7 @@ from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
-from netra_backend.app.agents.reporting_sub_agent import ReportingAgent
+from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
@@ -172,11 +172,11 @@ class TestSupervisorExecutionPatterns:
         data_agent = MagicMock(spec=DataHelperAgent)
         data_agent.execute = AsyncMock(return_value={"data": "test"})
 
-        report_agent = MagicMock(spec=ReportingAgent)
+        report_agent = MagicMock(spec=ReportingSubAgent)
         report_agent.execute = AsyncMock(return_value={"report": "generated"})
 
         supervisor.register_agent("DataHelper", data_agent)
-        supervisor.register_agent("ReportingAgent", report_agent)
+        supervisor.register_agent("ReportingSubAgent", report_agent)
 
         await asyncio.sleep(0)
         return supervisor, data_agent, report_agent

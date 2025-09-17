@@ -144,7 +144,7 @@ class ASCIIAuthenticationTestSuite:
         self.metrics.append(metrics)
 
         try:
-        self._ascii_safe_print([RUNNING] Complete signup -> login -> chat flow)
+"        self._ascii_safe_print([RUNNING] Complete signup -> login -> chat flow)")
 
         # Step 1: User Registration
         signup_data = {
@@ -212,7 +212,7 @@ class ASCIIAuthenticationTestSuite:
     def test_jwt_token_generation_and_validation_ascii(self) -> bool:
         Test JWT token generation and cross-service validation with ASCII output.""
         try:
-        self._ascii_safe_print([RUNNING] JWT token generation and validation)
+"        self._ascii_safe_print([RUNNING] JWT token generation and validation)")
 
         from shared.jwt_secret_manager import SharedJWTSecretManager
         secret = SharedJWTSecretManager.get_jwt_secret()
@@ -263,10 +263,10 @@ class ASCIIAuthenticationTestSuite:
 
     def test_token_refresh_during_active_chat_ascii(self) -> bool:
         "Test token refresh during active chat session with ASCII logging.
-        user_id = "formatted_string"
+        user_id = ""
 
         try:
-        self._ascii_safe_print([RUNNING] Token refresh during active chat)
+"        self._ascii_safe_print([RUNNING] Token refresh during active chat)")
 
         # Login and get short-lived token
         login_data = {
@@ -339,7 +339,7 @@ class ASCIIAuthenticationTestSuite:
         self._ascii_safe_print([OK] JWT secrets synchronized between services)
 
             # Test token created by auth service validates in backend
-        user_id = "formatted_string"
+        user_id = ""
 
             # Create token using auth service secret
         now = datetime.now(timezone.utc)
@@ -670,7 +670,7 @@ class ASCIIAuthenticationTestSuite:
         self.metrics.append(metrics)
 
         try:
-        self._ascii_safe_print([RUNNING] First-time user onboarding test)
+"        self._ascii_safe_print([RUNNING] First-time user onboarding test)")
 
         # Step 1: Landing page / welcome
         welcome_response = self.session.get(formatted_string")"

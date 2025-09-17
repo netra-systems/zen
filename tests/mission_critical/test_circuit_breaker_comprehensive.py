@@ -1,6 +1,10 @@
 
+
 class TestSyntaxFix:
-    "Test class for orphaned methods""
+    """Test class for orphaned methods"""
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
 
 class WebSocketTestHelper:
     Real WebSocket connection for testing instead of mocks."

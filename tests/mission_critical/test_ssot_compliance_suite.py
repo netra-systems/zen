@@ -909,7 +909,7 @@ class SSotComplianceWithIsolationTests:
         ssot_compliance_rate = sum(1 for result in ssot_workload_results if result.get('ssot_compliance', False)) / len(ssot_workload_results)
         assert ssot_compliance_rate == 1.0, fSSOT compliance rate below 100%: {ssot_compliance_rate:.2%}
         
-        print(f"SSOT compliance performance: {execution_time:.2f}s execution, {memory_usage:.2f}MB memory, {ssot_compliance_rate:.2%} compliance)
+        print(f"SSOT compliance performance: {execution_time:.2f}s execution, {memory_usage:.2f}MB memory, {ssot_compliance_rate:.2%} compliance)")
         
         # Store SSOT compliance performance metrics
         self.performance_metrics['ssot_compliance_test'] = {
@@ -993,7 +993,7 @@ class SSotComplianceWithIsolationTests:
         print(fPerformance tests completed: {len(self.performance_metrics)}")"
         print(fWebSocket SSOT violations: {len(websocket_violations)})
         print(fJWT SSOT violations: {len(jwt_violations)})"
-        print(f"Overall SSOT compliance validated successfully)
+        print(f"Overall SSOT compliance validated successfully)")
 
 
 if __name__ == __main__:

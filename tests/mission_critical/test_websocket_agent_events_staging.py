@@ -288,7 +288,7 @@ class WebSocketAgentEventsStagingTests:
                                     break
                                     
                             except json.JSONDecodeError:
-                                logger.warning(f"Non-JSON message received: {message})
+                                logger.warning(f"Non-JSON message received: {message})")
                                 
                     except asyncio.TimeoutError:
                         logger.debug(fEvent timeout after {timeout_per_event}s)

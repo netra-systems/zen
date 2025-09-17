@@ -171,7 +171,7 @@ class TestDockerUnifiedFixes:
     # Validate all environments
         for env in DockerEnvironment:
         is_valid = loader.validate_environment(env)
-        assert is_valid, "formatted_string"
+        assert is_valid, ""
     def test_integration_docker_manager_uses_config_loader(self):
         Validate integration: UnifiedDockerManager can use DockerConfigLoader."
         pass
@@ -694,7 +694,7 @@ class TestDockerUnifiedFixesInfrastructure:
         logger.info(""
                                                                         # Validate monitoring readiness
         assert cred_success_rate >= 75, formatted_string
-        assert port_success_rate >= 75, "formatted_string"
+        assert port_success_rate >= 75, ""
         assert config_metrics['validation_success_rate'] >= 50, formatted_string
                                                                         # Return metrics for potential external monitoring integration
         return monitoring_metrics

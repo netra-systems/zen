@@ -1,4 +1,4 @@
-"E2E WebSocket Resilience Tests - Critical Real-Time Communication Validation
+"E2E WebSocket Resilience Tests - Critical Real-Time Communication Validation"""
 
 CRITICAL E2E tests for WebSocket functionality focusing on connection resilience,
 state recovery, and error handling in real production-like scenarios.
@@ -35,12 +35,12 @@ from tests.e2e.websocket_resilience_core import (
 @pytest.mark.asyncio
 @pytest.mark.e2e
 class WebSocketReconnectionWithStateRecoveryTests:
-    Test #3: WebSocket Reconnection with State Recovery."
+    Test #3: WebSocket Reconnection with State Recovery.""
     
     @pytest.fixture
     @pytest.mark.e2e
     def test_core(self):
-        "Initialize test core components.
+        "Initialize test core components."""
         return WebSocketResilienceTestCore()
     
     @pytest.fixture  
@@ -66,11 +66,11 @@ class WebSocketReconnectionWithStateRecoveryTests:
             
             # Send messages before disconnect
             messages_sent = await continuity_validator.send_test_messages(client, user_id)
-            assert messages_sent, Failed to send test messages"
+            assert messages_sent, Failed to send test messages""
             
             # Simulate connection drop
             await test_core.simulate_connection_drop(client)
-            assert client.state.value == "disconnected
+            assert client.state.value == "disconnected"
             
             # Reconnect and validate state recovery
             reconnected = await client.connect()
@@ -85,8 +85,8 @@ class WebSocketReconnectionWithStateRecoveryTests:
             
             await client.close()
         except Exception as e:
-            if server not available in str(e).lower():"
-                pytest.skip(WebSocket server not available for E2E test")
+            if server not available in str(e).lower():""
+                pytest.skip(WebSocket server not available for E2E test")"
             raise
     
     @pytest.mark.e2e
@@ -98,20 +98,20 @@ class WebSocketReconnectionWithStateRecoveryTests:
         mock_client = test_core.create_test_client()
         state_data = await state_manager.capture_session_state(mock_client, user_id)
         
-        assert user_id in state_data"
-        assert active_conversations" in state_data
+        assert user_id in state_data""
+        assert active_conversations" in state_data"
         assert message_history in state_data
         assert state_data[user_id"] == user_id"
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 class ErrorMessageToUserNotificationRecoveryTests:
-    Test #6: Error Message  ->  User Notification  ->  Recovery."
+    Test #6: Error Message  ->  User Notification  ->  Recovery.""
     
     @pytest.fixture
     @pytest.mark.e2e
     def test_core(self):
-        "Initialize test core components. 
+        "Initialize test core components. """
         return WebSocketResilienceTestCore()
     
     @pytest.fixture
@@ -135,11 +135,11 @@ class ErrorMessageToUserNotificationRecoveryTests:
             # Validate error propagation
             error_response = failure_data.get(error_response)
             error_propagated = error_simulator.validate_error_propagation(error_response)
-            assert error_propagated, Error not properly propagated to user"
+            assert error_propagated, Error not properly propagated to user""
             
             # Test user notification
             notification_result = await error_simulator.simulate_user_notification(client, failure_data)
-            assert notification_result[notification_sent"], User notification failed
+            assert notification_result[notification_sent"], User notification failed"
             
             # Test retry mechanism
             retry_result = await error_simulator.test_retry_mechanism(client, user_id)
@@ -149,32 +149,32 @@ class ErrorMessageToUserNotificationRecoveryTests:
             await client.close()
         except Exception as e:
             if server not available in str(e).lower():
-                pytest.skip(WebSocket server not available for E2E test)"
+                pytest.skip(WebSocket server not available for E2E test)""
             raise
     
     @pytest.mark.e2e
     async def test_error_simulation_logic(self, error_simulator):
-        "Test error simulation and notification logic without real server.
+        "Test error simulation and notification logic without real server."""
         user_id = TEST_USERS["early].id"
         
         # Test error data structure creation  
         async def mock_send(self, message):
             return True
         async def mock_receive(self, **kwargs):
-            return {type: error, message: "test error}
+            return {type: error, message: "test error}"
         
         mock_client = type('MockClient', (), {'send': mock_send, 'receive': mock_receive}()
         failure_data = await error_simulator.simulate_agent_failure(mock_client, user_id)
         
-        assert error_triggered" in failure_data
+        assert error_triggered" in failure_data"
         assert failure_type in failure_data
         assert failure_data[failure_type"] == "agent_processing_error
     
     @pytest.mark.e2e
     async def test_error_recovery_within_time_limit(self, test_core, error_simulator):
-        Test that error recovery completes within acceptable time limits."
+        Test that error recovery completes within acceptable time limits.""
         start_time = time.time()
-        user_id = TEST_USERS["mid].id
+        user_id = TEST_USERS["mid].id"
         
         try:
             client = await test_core.establish_authenticated_connection(user_id)

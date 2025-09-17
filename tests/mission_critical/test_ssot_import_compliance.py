@@ -297,7 +297,7 @@ class SSotImportComplianceTests(SSotBaseTestCase):
         # ASSERTION: All WebSocketNotifier imports should use canonical source
         # (Allow some flexibility during migration, but log violations)
         if violations:
-            logger.warning(f"Found {len(violations)} non-canonical WebSocketNotifier imports)
+            logger.warning(f"Found {len(violations)} non-canonical WebSocketNotifier imports)")
             logger.warning(These should be migrated to canonical SSOT source during next refactoring)
 
         # CRITICAL ASSERTION: Must have at least one canonical import

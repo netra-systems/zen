@@ -502,7 +502,7 @@ if __name__ == "__main__":
 pytest.main([__file__, "-v", "--tb=short"])
 
 class TestWebSocketConnection:
-    """Real WebSocket connection for testing instead of mocks."""
+    """""Real WebSocket connection for testing instead of mocks.""""
 
     def __init__(self):
         pass

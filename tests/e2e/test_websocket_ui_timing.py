@@ -28,7 +28,7 @@ from tests.e2e.config import UnifiedTestConfig
 
 @pytest.mark.e2e
 class TestWebSocketUITiming:
-    "Test suite for WebSocket UI layer timing requirements.
+    "Test suite for WebSocket UI layer timing requirements."""
 
     @pytest.fixture
     async def backend_client(self):
@@ -61,8 +61,8 @@ class TestWebSocketUITiming:
                 # Record send time and trigger action
         send_time = time.time()
                 # Removed problematic line: await websocket_client.send_message({}
-        type: user_message",
-        "payload: {content: Trigger fast feedback events for timing test}
+        type: user_message","
+        "payload: {content: Trigger fast feedback events for timing test}"
                 
 
                 # Collect events with precise timing
@@ -85,8 +85,8 @@ class TestWebSocketUITiming:
         latency_ms = (receive_time - send_time) * 1000
         fast_events_timing.append({}
         event_type: message[type],
-        latency_ms: latency_ms,"
-        timestamp": receive_time
+        latency_ms: latency_ms,""
+        timestamp": receive_time"
                                 
 
         except (asyncio.TimeoutError, json.JSONDecodeError):
@@ -101,19 +101,19 @@ class TestWebSocketUITiming:
 
                                         # Fast Layer requirement:  <= 100ms
         assert latency <= 100.0, ( )
-        formatted_string"
-        f"This impacts immediate user feedback perception.
+        formatted_string""
+        f"This impacts immediate user feedback perception."
                                         
 
                                         # Ultra-fast events should be near-instantaneous
         if event_type == agent_started:
         assert latency <= 50.0, ( )
-        formatted_string"
+        formatted_string""
                                             
 
         @pytest.mark.e2e
     async def test_medium_layer_timing_compliance(self, websocket_client):
-        "Test Medium Layer events arrive within 100ms-1s for progressive updates.
+        "Test Medium Layer events arrive within 100ms-1s for progressive updates."""
         pass
                                                 # Medium layer events per spec
         medium_layer_events = {"agent_thinking, partial_result"}
@@ -146,7 +146,7 @@ class TestWebSocketUITiming:
         medium_events_timing.append({}
         "event_type: message[type"],
         latency_ms: latency_ms,
-        timestamp: receive_time"
+        timestamp: receive_time""
                                                                 
 
         except (asyncio.TimeoutError, json.JSONDecodeError):
@@ -155,7 +155,7 @@ class TestWebSocketUITiming:
                                                                     # Validate Medium Layer timing (100ms-1000ms)
         if len(medium_events_timing) > 0:  # Only validate if events were received
         for event_timing in medium_events_timing:
-        latency = event_timing["latency_ms]
+        latency = event_timing["latency_ms]"
         event_type = event_timing[event_type]
 
                                                                         # Medium Layer requirement: 100ms  <=  latency  <=  1000ms
@@ -174,7 +174,7 @@ class TestWebSocketUITiming:
         send_time = time.time()
                                                                             # Removed problematic line: await websocket_client.send_message({}
         type": "user_message,
-        payload: {content: Execute comprehensive analysis for final results timing test}"
+        payload: {content: Execute comprehensive analysis for final results timing test}""
                                                                             
 
                                                                             # Collect slow layer events with timing
@@ -193,7 +193,7 @@ class TestWebSocketUITiming:
         if isinstance(message, str):
         message = json.loads(message)
 
-        if isinstance(message, dict) and message.get("type) in slow_layer_events:
+        if isinstance(message, dict) and message.get("type) in slow_layer_events:"
         latency_ms = (receive_time - send_time) * 1000
         slow_events_timing.append({}
         event_type: message[type],
@@ -205,10 +205,10 @@ class TestWebSocketUITiming:
         continue
 
                                                                                                 # Validate Slow Layer timing ( >= 1000ms)
-        assert len(slow_events_timing) > 0, No slow layer events received for timing validation"
+        assert len(slow_events_timing) > 0, No slow layer events received for timing validation""
 
         for event_timing in slow_events_timing:
-        latency = event_timing["latency_ms]
+        latency = event_timing["latency_ms]"
         event_type = event_timing[event_type]
 
                                                                                                     # Slow Layer requirement:  >= 1000ms (indicates substantial work)
@@ -226,8 +226,8 @@ class TestWebSocketUITiming:
         agent_started: fast,      # 0-100ms
         tool_executing": "fast,     # 0-100ms
         agent_thinking: medium,   # 100ms-1s
-        partial_result: "medium,   # 100ms-1s
-        agent_completed": slow,    # 1s+
+        partial_result: "medium,   # 100ms-1s"
+        agent_completed": slow,    # 1s+"
         final_report: slow        # 1s+
                                                                                                         
 
@@ -235,7 +235,7 @@ class TestWebSocketUITiming:
         send_time = time.time()
                                                                                                         # Removed problematic line: await websocket_client.send_message({}
         type": "user_message,
-        payload: {content: Full workflow test for timing layer segregation validation}"
+        payload: {content: Full workflow test for timing layer segregation validation}""
                                                                                                         
 
                                                                                                         # Collect all events with precise timing
@@ -254,15 +254,15 @@ class TestWebSocketUITiming:
         if isinstance(message, str):
         message = json.loads(message)
 
-        if isinstance(message, dict) and "type in message:
+        if isinstance(message, dict) and "type in message:"
         event_type = message[type]
         if event_type in expected_layers:
         latency_ms = (receive_time - send_time) * 1000
         all_events_timing.append({}
         "event_type: event_type,"
         latency_ms: latency_ms,
-        expected_layer: expected_layers[event_type],"
-        timestamp": receive_time
+        expected_layer: expected_layers[event_type],""
+        timestamp": receive_time"
                                                                                                                             
 
         except (asyncio.TimeoutError, json.JSONDecodeError):
@@ -281,8 +281,8 @@ class TestWebSocketUITiming:
 
         if actual_layer != expected_layer:
         layer_violations.append({}
-        event_type: event_type,"
-        "latency_ms: latency,
+        event_type: event_type,""
+        "latency_ms: latency,"
         expected_layer: expected_layer,
         "actual_layer: actual_layer"
                                                                                                                                         
@@ -291,8 +291,8 @@ class TestWebSocketUITiming:
         if layer_violations:
         violation_details = 
         .join(]
-        formatted_string"
-        formatted_string"
+        formatted_string""
+        formatted_string""
         for v in layer_violations
                                                                                                                                             
         pytest.fail( )
@@ -302,10 +302,10 @@ class TestWebSocketUITiming:
 
         @pytest.mark.e2e
     async def test_progressive_timing_sequence(self, websocket_client):
-        Test events follow progressive timing sequence (fast -> medium -> slow)."
+        Test events follow progressive timing sequence (fast -> medium -> slow).""
                                                                                                                                                     # Trigger workflow with full timing spectrum
                                                                                                                                                     # Removed problematic line: await websocket_client.send_message({}
-        type": user_message,
+        type": user_message,"
         payload: {content: Progressive timing sequence test with all layer events"}"
                                                                                                                                                     
 
@@ -327,12 +327,12 @@ class TestWebSocketUITiming:
         message = json.loads(message)
 
         if isinstance(message, dict) and type in message:
-        event_type = message[type]"
+        event_type = message[type]""
         latency_ms = (arrival_time - sequence_start) * 1000
         layer = self._classify_timing_layer(latency_ms)
 
         events_sequence.append({}
-        "event_type: event_type,
+        "event_type: event_type,"
         latency_ms: latency_ms,
         "layer: layer,"
         order: len(events_sequence)
@@ -344,8 +344,8 @@ class TestWebSocketUITiming:
                                                                                                                                                                         # Analyze progressive sequence
         if len(events_sequence) >= 2:
                                                                                                                                                                             # Check general trend: fast events should come before slow events
-        fast_events = [item for item in []] == fast]"
-        slow_events = [item for item in []] == slow"]
+        fast_events = [item for item in []] == fast]""
+        slow_events = [item for item in []] == slow"]"
 
         if fast_events and slow_events:
         last_fast_order = max(e[order] for e in fast_events)
@@ -366,8 +366,8 @@ class TestWebSocketUITiming:
         for i in range(3):
         send_time = time.time()
                                                                                                                                                                                         # Removed problematic line: await websocket_client.send_message({}
-        type: "user_message,
-        payload": {content: formatted_string}
+        type: "user_message,"
+        payload": {content: formatted_string}"
                                                                                                                                                                                         
 
                                                                                                                                                                                         # Measure first event latency
@@ -405,27 +405,27 @@ class TestWebSocketUITiming:
 
         assert coefficient_of_variation <= 50.0, ( )
         formatted_string
-        formatted_string"
+        formatted_string""
                                                                                                                                                                                                                 
 
                                                                                                                                                                                                                 # Helper methods (each  <= 8 lines)
     def _classify_timing_layer(self, latency_ms: float) -> str:
-        "Classify latency into timing layer per spec.
+        "Classify latency into timing layer per spec."""
         if latency_ms <= 100.0:
         await asyncio.sleep(0)
         return "fast"
         elif latency_ms <= 1000.0:
         return medium
         else:
-        return slow"
+        return slow""
 
     def _calculate_timing_stats(self, timings: List[float] -> Dict[str, float]:
-        "Calculate timing statistics for analysis.
+        "Calculate timing statistics for analysis."""
         if not timings:
         return {}
         return }
         "min: min(timings),"
         max: max(timings),
-        avg: sum(timings) / len(timings),"
+        avg: sum(timings) / len(timings),""
         count": len(timings)"
         

@@ -552,7 +552,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
         return patterns
 
     def tearDown(self):
-        "Clean up mission critical test environment.""
+        """Clean up mission critical test environment."""
         super().tearDown()
 
 

@@ -551,7 +551,7 @@ class SsotViolationsRemediationCompleteTests(SSotBaseTestCase):
     def tearDown(self):
         Clean up and log final summary.
         if hasattr(self, 'compliance_report'):
-            print(f"\nFinal compliance status: {self.compliance_report.is_fully_compliant})
+            print(f"\nFinal compliance status: {self.compliance_report.is_fully_compliant})")
             print(fTotal violations: {self.compliance_report.total_violations}")
             print(fSSOT score: {self.compliance_report.ssot_infrastructure_score}/10)
         super().tearDown()

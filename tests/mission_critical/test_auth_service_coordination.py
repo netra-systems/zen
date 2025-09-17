@@ -353,7 +353,7 @@ class AuthServiceCoordinationTests(BaseIntegrationTest):
         
         if not validation.get(oauth_config_synchronized, False):
             # OAuth may not be fully configured in test environment - warn but don't fail
-            logger.warning(f"OAUTH WARNING: {validation.get('business_impact', 'OAuth not configured')})
+            logger.warning(f"OAUTH WARNING: {validation.get('business_impact', 'OAuth not configured')})")
             pytest.skip(OAuth not configured in test environment - skipping OAuth coordination test")
         
         # Test OAuth redirect handling

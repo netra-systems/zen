@@ -689,7 +689,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
             return events_collected
             
         except Exception as e:
-            self.logger.warning(f"Event collection stopped after {len(events_collected)} events: {e})
+            self.logger.warning(f"Event collection stopped after {len(events_collected)} events: {e})")
             return events_collected
     
     def _validate_event_ordering(self, events: List[Dict[str, Any]] -> None:
@@ -750,7 +750,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                         timestamp = datetime.fromtimestamp(float(ts_str))
                     timestamps.append(timestamp)
                 except Exception as e:
-                    self.logger.warning(f"Could not parse timestamp {ts_str}: {e})
+                    self.logger.warning(f"Could not parse timestamp {ts_str}: {e})")
         
         if len(timestamps) >= 2:
             # Validate events are in chronological order

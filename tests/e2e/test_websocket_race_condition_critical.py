@@ -1,7 +1,7 @@
 _lazy_imports = {}
 
 def lazy_import(module_path: str, component: str=None):
-    "Lazy import pattern for performance optimization
+    "Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else []
@@ -83,7 +83,7 @@ class WebSocketRaceConditionTestFramework:
         logger.debug(f'Connection state: {connection_id} -> {state}')
 
     def simulate_cloud_run_latency(self, delay_type: str='random') -> float:
-        Inject network delays to simulate GCP Cloud Run conditions."
+        Inject network delays to simulate GCP Cloud Run conditions.""
         min_delay, max_delay = self.cloud_run_latency_ranges.get(self.environment, (0.01, 0.05))
         if delay_type == 'random':
             delay = random.uniform(min_delay, max_delay)
@@ -96,7 +96,7 @@ class WebSocketRaceConditionTestFramework:
         return delay
 
     async def inject_network_delay(self, delay_type: str='random'):
-        "Async network delay injection.
+        "Async network delay injection."""
         delay = self.simulate_cloud_run_latency(delay_type)
         await asyncio.sleep(delay)
         return delay
@@ -153,7 +153,7 @@ class RaceConditionWebSocketClient:
 
     @asynccontextmanager
     async def connect(self, timeout: float=15.0):
-        Connect with race condition monitoring and Cloud Run delay simulation."
+        Connect with race condition monitoring and Cloud Run delay simulation.""
         self.connection_id = f'race_test_{int(time.time() * 1000)}_{random.randint(1000, 9999)}'
         try:
             self.test_framework.log_connection_state(self.connection_id, 'connecting', {'timeout': timeout, 'environment': self.test_framework.environment}
@@ -183,7 +183,7 @@ class RaceConditionWebSocketClient:
             raise
 
     async def _monitor_messages(self):
-        "Monitor incoming messages and detect race conditions.
+        "Monitor incoming messages and detect race conditions."""
         try:
             while self.is_connected and self.websocket:
                 try:
@@ -256,7 +256,7 @@ class WebSocketRaceConditionCriticalTests:
         
         Business Value: Prevents user churn from failed WebSocket connections
         Success Criteria: Zero race condition errors over 10-minute test
-        "
+"""Empty docstring."""
         test_start_time = time.time()
         logger.info(' FIRE:  CRITICAL: Reproducing staging WebSocket race condition')
         test_duration_seconds = 120
@@ -275,10 +275,10 @@ class WebSocketRaceConditionCriticalTests:
             await asyncio.gather(*connection_tasks, return_exceptions=True)
             report = self.test_framework.generate_report()
             logger.info(' CHART:  RACE CONDITION TEST RESULTS:')
-            logger.info(f   Total Duration: {report['test_duration']:.2f}s")
+            logger.info(f   Total Duration: {report['test_duration']:.2f}s")"
             logger.info(f   Total Connections: {report['total_connections']})
-            logger.info(f   Race Condition Errors: {report['race_condition_errors']})"
-            logger.info(f"   Connection Success Rate: {report['connection_success_rate']:.2%})
+            logger.info(f   Race Condition Errors: {report['race_condition_errors']})""
+            logger.info(f"   Connection Success Rate: {report['connection_success_rate']:.2%})"
             logger.info(f   Race Condition Frequency: {report['race_condition_frequency']:.2f}/min)
             if report['race_condition_errors'] > 0:
                 logger.error(' ALERT:  RACE CONDITION REPRODUCED - This test will pass after fix implementation')
@@ -290,7 +290,7 @@ class WebSocketRaceConditionCriticalTests:
             else:
                 logger.info(' PASS:  SUCCESS: No race condition errors detected - fix is working!')
                 assert report['connection_success_rate'] >= 0.95, fConnection success rate too low: {report['connection_success_rate']:.2%}
-                assert report['total_connections'] >= expected_connections * 0.8, f"Insufficient connections tested: {report['total_connections']} < {expected_connections * 0.8}
+                assert report['total_connections'] >= expected_connections * 0.8, f"Insufficient connections tested: {report['total_connections']} < {expected_connections * 0.8}"
         except Exception as e:
             logger.error(f' FAIL:  Race condition test failed with exception: {e}')
             report = self.test_framework.generate_report()
@@ -305,7 +305,7 @@ class WebSocketRaceConditionCriticalTests:
         logger.info(f' PASS:  Race condition reproduction test completed in {actual_duration:.2f}s')
 
     async def _test_single_connection_with_delays(self, client: RaceConditionWebSocketClient):
-        "Test single connection with race condition detection.
+        "Test single connection with race condition detection."""
         try:
             pre_connection_delay = await self.test_framework.inject_network_delay('random')
             async with client.connect(timeout=15.0):
@@ -415,7 +415,7 @@ class WebSocketRaceConditionCriticalTests:
 
     @pytest.mark.asyncio
     async def test_websocket_cloud_run_latency_simulation(self):
-        "
+"""Empty docstring."""
         CRITICAL TEST: WebSocket connections under GCP Cloud Run network latency.
         
         Simulates staging environment network conditions with controlled delays.
@@ -423,7 +423,7 @@ class WebSocketRaceConditionCriticalTests:
         
         Business Value: Ensures Chat works reliably in Cloud Run production environment
         Success Criteria: All connections stable with 300ms+ network delays
-"
+"""Empty docstring."""
         test_start_time = time.time()
         logger.info('[U+2601][U+FE0F] CRITICAL: Cloud Run network latency simulation test')
         latency_scenarios = [{'name': 'Low Latency', 'delay_type': 'low', 'expected_success': 1.0}, {'name': 'Medium Latency', 'delay_type': 'random', 'expected_success': 0.95}, {'name': 'High Latency', 'delay_type': 'high', 'expected_success': 0.8}]
@@ -458,19 +458,19 @@ class WebSocketRaceConditionCriticalTests:
                 avg_handshake_time = sum(handshake_times) / len(handshake_times) if handshake_times else 0
                 scenario_result = {'name': scenario['name'], 'success_rate': success_rate, 'expected_success': scenario['expected_success'], 'avg_handshake_time': avg_handshake_time, 'connections_attempted': connections_attempted, 'successful_connections': successful_connections, 'duration': time.time() - scenario_start}
                 scenario_results.append(scenario_result)
-                logger.info(f" CHART:  {scenario['name']} Results:)
+                logger.info(f" CHART:  {scenario['name']} Results:)"
                 logger.info(f'   Success Rate: {success_rate:.2%}')
                 logger.info(f'   Avg Handshake Time: {avg_handshake_time:.3f}s')
                 logger.info(f'   Successful: {successful_connections}/{connections_attempted}')
-                assert success_rate >= scenario['expected_success'], f{scenario['name']} success rate {success_rate:.2%} below expected {scenario['expected_success']:.2%}"
+                assert success_rate >= scenario['expected_success'], f{scenario['name']} success rate {success_rate:.2%} below expected {scenario['expected_success']:.2%}""
             report = self.test_framework.generate_report()
             logger.info(' CHART:  CLOUD RUN LATENCY SIMULATION RESULTS:')
             for result in scenario_results:
                 logger.info(f   {result['name']}: {result['success_rate']:.2%} success, {result['avg_handshake_time']:.3f}s handshake)
-            logger.info(f   Race Condition Errors: {report['race_condition_errors']})"
+            logger.info(f   Race Condition Errors: {report['race_condition_errors']})""
             overall_success_rate = sum((r['success_rate'] for r in scenario_results)) / len(scenario_results)
             assert overall_success_rate >= 0.85, f'Overall Cloud Run success rate too low: {overall_success_rate:.2%}'
-            assert report['race_condition_errors'] == 0, f"Race conditions detected under Cloud Run latency: {report['race_condition_errors']}
+            assert report['race_condition_errors'] == 0, f"Race conditions detected under Cloud Run latency: {report['race_condition_errors']}"
         except Exception as e:
             logger.error(f' FAIL:  Cloud Run latency simulation failed: {e}')
             raise
@@ -533,7 +533,7 @@ class WebSocketRaceConditionCriticalTests:
             logger.info(f'   Successful Sessions: {successful_sessions}/{num_agent_sessions}')
             logger.info(f'   Total Events Delivered: {total_events_delivered}/{expected_total_events}')
             logger.info(f'   Event Delivery Rate: {total_events_delivered / expected_total_events:.2%}')
-            logger.info(f"   Race Condition Errors: {report['race_condition_errors']})
+            logger.info(f"   Race Condition Errors: {report['race_condition_errors']})"
             session_success_rate = successful_sessions / num_agent_sessions
             assert session_success_rate == 1.0, f'Agent session success rate must be 100%: {session_success_rate:.2%}'
             event_delivery_rate = total_events_delivered / expected_total_events

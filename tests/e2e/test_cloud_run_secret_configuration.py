@@ -15,24 +15,27 @@ from shared.isolated_environment import IsolatedEnvironment
 class CloudRunSecretValidator:
     """Validates Cloud Run service secret configurations."""
 
-    REQUIRED_BACKEND_SECRETS = [ ]
-    "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DB",
-    "POSTGRES_USER", "POSTGRES_PASSWORD",
-    "JWT_SECRET_KEY", "SECRET_KEY", "OPENAI_API_KEY",
-    "FERNET_KEY", "REDIS_URL"
+    REQUIRED_BACKEND_SECRETS = [
+        "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DB",
+        "POSTGRES_USER", "POSTGRES_PASSWORD",
+        "JWT_SECRET_KEY", "SECRET_KEY", "OPENAI_API_KEY",
+        "FERNET_KEY", "REDIS_URL"
+    ]
     
 
-    REQUIRED_AUTH_SECRETS = [ ]
-    "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DB",
-    "POSTGRES_USER", "POSTGRES_PASSWORD",
-    "JWT_SECRET_KEY", "JWT_SECRET",
-    "SERVICE_SECRET", "SERVICE_ID"
+    REQUIRED_AUTH_SECRETS = [
+        "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DB",
+        "POSTGRES_USER", "POSTGRES_PASSWORD",
+        "JWT_SECRET_KEY", "JWT_SECRET",
+        "SERVICE_SECRET", "SERVICE_ID"
+    ]
     
 
-    SERVICE_MAPPINGS = { }
-    "backend": "netra-backend-staging",
-    "auth": "netra-auth-service",
-    "frontend": "netra-frontend-staging"
+    SERVICE_MAPPINGS = {
+        "backend": "netra-backend-staging",
+        "auth": "netra-auth-service",
+        "frontend": "netra-frontend-staging"
+    }
     
 
     def __init__(self, project: str = "netra-staging", region: str = "us-central1"):
@@ -44,18 +47,20 @@ class CloudRunSecretValidator:
     def get_service_config(self, service_name: str) -> Dict:
         """Fetch Cloud Run service configuration."""
         try:
-        result = subprocess.run( )
-        ""
-        "",
-        capture_output=True,
-        text=True,
-        check=True,
-        shell=True
-        
-        return json.loads(result.stdout)
+            result = subprocess.run([
+                "gcloud", "run", "services", "describe", service_name,
+                "--platform=managed", f"--region={self.region}",
+                "--format=json"
+            ],
+            capture_output=True,
+            text=True,
+            check=True
+            )
+
+            return json.loads(result.stdout)
         except subprocess.CalledProcessError as e:
-        self.errors.append("")
-        return {}
+            self.errors.append(f"Failed to get config for {service_name}: {e}")
+            return {}
 
     def validate_secret_refs(self, config: Dict, service_type: str) -> List[str]:
         """Validate secretKeyRef configurations have proper name fields."""
@@ -162,39 +167,38 @@ class CloudRunSecretValidator:
         is_valid, issues = validator.validate_all_services()
 
         if not is_valid:
-        print("")
-        [X] VALIDATION FAILED - Issues found:")
-        for service, service_issues in issues.items():
-        print("")
-        for issue in service_issues:
-        print("")
+            print("")
+            print("[X] VALIDATION FAILED - Issues found:")
+            for service, service_issues in issues.items():
+                print(f"Service: {service}")
+                for issue in service_issues:
+                    print(f"  - {issue}")
 
-                # Generate fix commands
-        fix_commands = validator.generate_fix_commands(issues)
-        if fix_commands:
-        print("")
-        [FIX] COMMANDS:")
-        for cmd in fix_commands:
-        print("")
+            # Generate fix commands
+            fix_commands = validator.generate_fix_commands(issues)
+            if fix_commands:
+                print("")
+                print("[FIX] COMMANDS:")
+                for cmd in fix_commands:
+                    print(f"  {cmd}")
 
-                        # Fail the test
-        assert False, ""
+            # Fail the test
+            assert False, "Configuration validation failed"
         else:
-        print("")
-        [OK] All services have properly configured secrets")
-        return True
+            print("")
+            print("[OK] All services have properly configured secrets")
+            return True
 
 
-        if __name__ == "__main__":
-                                # Run the validation
-        try:
+if __name__ == "__main__":
+    # Run the validation
+    try:
         test_cloud_run_secret_configuration()
         print("")
-        [OK] All validations passed!")
-        except AssertionError as e:
-        print("")
+        print("[OK] All validations passed!")
+    except AssertionError as e:
+        print(f"[ERROR] Configuration validation failed: {e}")
         exit(1)
-        except Exception as e:
-        print("")
+    except Exception as e:
+        print(f"[ERROR] Unexpected error: {e}")
         exit(1)
-        pass

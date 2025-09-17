@@ -422,7 +422,7 @@ await asyncio.sleep(0.2)
 
     # Validate comprehensive isolation
 is_valid, errors, diagnostics = validator.validate_comprehensive()
-assert is_valid, "formatted_string"
+assert is_valid, ""
 
     # Verify each user has complete event flow
 assert diagnostics[total_users] == num_users, formatted_string
@@ -541,7 +541,7 @@ latency_ms=random.uniform(5, 25)
                                 # Send high volume of events
 async def send_user_load(user_id: str, emitter: UserWebSocketEmitter):
     pass
-run_id = "formatted_string"
+run_id = ""
 agent_name = formatted_string
 
     # Agent flow with multiple events
@@ -744,7 +744,7 @@ connection_ids = set()
 for context in batch_contexts:
                 # Should have unique identifiers
 assert context.user_id not in user_ids, formatted_string
-assert context.thread_id not in thread_ids, "formatted_string"
+assert context.thread_id not in thread_ids, ""
 assert context.connection_id not in connection_ids, formatted_string
 
 user_ids.add(context.user_id)

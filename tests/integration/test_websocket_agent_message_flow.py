@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 WebSocket Agent Message Flow Integration Tests
 
 Business Value Justification (BVJ):
@@ -30,7 +30,7 @@ ARCHITECTURE ALIGNMENT:
 - Tests agent-WebSocket bridge integration patterns
 - Validates WebSocket event timing for responsive user experience
 - Follows Golden Path WebSocket requirements from GOLDEN_PATH_USER_FLOW_COMPLETE.md
-"
+"""Empty docstring."""
 
 import asyncio
 import json
@@ -61,7 +61,7 @@ try:
     REAL_WEBSOCKET_COMPONENTS_AVAILABLE = True
 except ImportError as e:
     # Graceful fallback if components not available
-    print(fWarning: Some real WebSocket components not available: {e}")
+    print(fWarning: Some real WebSocket components not available: {e}")"
     REAL_WEBSOCKET_COMPONENTS_AVAILABLE = False
     UserExecutionContext = MagicMock
     get_websocket_manager = MagicMock
@@ -153,8 +153,8 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
 
         await super().async_teardown_method(method)
 
-    async def _initialize_real_websocket_infrastructure(self"):
-        "Initialize real WebSocket infrastructure components for testing.
+    async def _initialize_real_websocket_infrastructure(self"):"
+        "Initialize real WebSocket infrastructure components for testing."""
         if not REAL_WEBSOCKET_COMPONENTS_AVAILABLE:return
 
         try:
@@ -170,8 +170,8 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
 
             # Create user execution context for SSOT factory pattern
             user_context = UserExecutionContext(
-                user_id=f"websocket_test_user_{UnifiedIdGenerator.generate_base_id('user')},
-                thread_id=fwebsocket_test_thread_{UnifiedIdGenerator.generate_base_id('thread')}",
+                user_id=f"websocket_test_user_{UnifiedIdGenerator.generate_base_id('user')},"
+                thread_id=fwebsocket_test_thread_{UnifiedIdGenerator.generate_base_id('thread')}","
                 run_id=UnifiedIdGenerator.generate_base_id('run')
             )
 
@@ -205,12 +205,12 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
     @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_websocket_connection_during_chat_message_processing(self):
-    "
+"""Empty docstring."""
         Test WebSocket connection establishment and maintenance during chat message processing.
 
         Business Value: Foundation for real-time chat - WebSocket connection must be reliable
         and persistent throughout user chat sessions.
-        "
+"""Empty docstring."""
         async with self._get_user_execution_context() as user_context:
 
             # Step 1: Establish WebSocket connection for chat session
@@ -225,7 +225,7 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
 
             # Validate connection establishment
             self.assertIsNotNone(websocket_connection, WebSocket connection must be established for chat)
-            self.assertLess(connection_time, 2.0, f"WebSocket connection too slow: {connection_time:.3f}s)
+            self.assertLess(connection_time, 2.0, f"WebSocket connection too slow: {connection_time:.3f}s)"
 
             # Step 2: Simulate chat message processing with WebSocket active
             message = {
@@ -252,7 +252,7 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
 
             # Step 3: Validate WebSocket connection maintained throughout processing
             self.assertTrue(websocket_connection.is_connected(),
-                          WebSocket connection must remain active during chat processing")
+                          WebSocket connection must remain active during chat processing")"
 
             # Validate processing performance with WebSocket overhead
             self.assertLess(processing_time, 8.0,
@@ -266,8 +266,8 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
                 self.websocket_metrics['real_time_performance_met'] += 1
 
             # Record performance metrics
-            self.record_metric(websocket_connection_time_ms, connection_time * 1000)"
-            self.record_metric("websocket_processing_time_ms, processing_time * 1000)
+            self.record_metric(websocket_connection_time_ms, connection_time * 1000)""
+            self.record_metric("websocket_processing_time_ms, processing_time * 1000)"
 
     @pytest.mark.integration
     @pytest.mark.asyncio
@@ -353,11 +353,11 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
 
             # Validate sufficient critical events delivered
             self.assertGreaterEqual(critical_events_delivered, 3,
-                                  fInsufficient critical events delivered: {critical_events_delivered}/3)"
+                                  fInsufficient critical events delivered: {critical_events_delivered}/3)""
 
             # Validate total processing time with real-time events
             self.assertLess(total_processing_time, 10.0,
-                          f"Real-time processing too slow: {total_processing_time:.3f}s)
+                          f"Real-time processing too slow: {total_processing_time:.3f}s)"
 
             # Record event delivery metrics
             avg_delivery_time = sum(d['delivery_time_ms'] for d in event_delivery_times) / len(event_delivery_times)
@@ -377,8 +377,8 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
         # Create multiple concurrent WebSocket chat sessions
         user_websocket_scenarios = [
             {
-                'user_id': UserID(fws_user_medical_{uuid.uuid4().hex[:8]}),"
-                'thread_id': ThreadID(f"ws_thread_medical_{uuid.uuid4().hex[:8]}),
+                'user_id': UserID(fws_user_medical_{uuid.uuid4().hex[:8]}),""
+                'thread_id': ThreadID(f"ws_thread_medical_{uuid.uuid4().hex[:8]}),"
                 'message': 'Analyze medical data with real-time progress - confidential patient information',
                 'domain': 'medical',
                 'sensitive_marker': 'MEDICAL_CONFIDENTIAL'
@@ -475,7 +475,7 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
 
                     # Validate domain isolation in WebSocket events
                     self.assertNotEqual(session_a['domain'], session_b['domain'],
-                                      Different domains must maintain complete WebSocket isolation)"
+                                      Different domains must maintain complete WebSocket isolation)""
 
         # Record successful isolation
         self.websocket_metrics['isolated_sessions'] += len(websocket_sessions)
@@ -483,12 +483,12 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
     @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_websocket_error_recovery_maintains_chat_experience(self):
-        "
+"""Empty docstring."""
         Test WebSocket error handling and recovery during chat maintains user experience.
 
         Business Value: Platform reliability - WebSocket failures should not break
         the chat experience or cause users to lose progress.
-"
+"""Empty docstring."""
         async with self._get_user_execution_context() as user_context:
 
             # Test different WebSocket error scenarios
@@ -524,7 +524,7 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
                 )
 
                 message = {
-                    'content': f'Test WebSocket error recovery: {scenario["description]}',
+                    'content': f'Test WebSocket error recovery: {scenario["description]}',"
                     'error_simulation': scenario['scenario']
                 }
 
@@ -548,12 +548,12 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
 
                         # Validate recovery time is acceptable for user experience
                         self.assertLess(recovery_time, 12.0,
-                                      f"WebSocket error recovery too slow: {recovery_time:.3f}s)
+                                      f"WebSocket error recovery too slow: {recovery_time:.3f}s)"
 
                         # Validate some events still delivered despite errors
                         events_delivered = len(event_tracker.get_events())
                         self.assertGreater(events_delivered, 0,
-                                         fShould deliver some events despite {scenario['scenario']}")
+                                         fShould deliver some events despite {scenario['scenario']}")"
 
                         successful_recoveries += 1
 
@@ -602,7 +602,7 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
         yield context
 
     async def _establish_websocket_connection(self, user_id: UserID, thread_id: ThreadID):
-        Establish WebSocket connection for testing."
+        Establish WebSocket connection for testing.""
         if REAL_WEBSOCKET_COMPONENTS_AVAILABLE:
             try:
                 connection = await self.websocket_manager.connect(
@@ -613,7 +613,7 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
                 self.websocket_connections.append(connection)
                 return connection
             except Exception as e:
-                print(f"Failed to establish real WebSocket connection: {e})
+                print(f"Failed to establish real WebSocket connection: {e})"
 
         # Mock WebSocket connection
         mock_connection = MagicMock()
@@ -686,7 +686,7 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
         return mock_agent
 
     async def _create_isolated_websocket_agent(self, user_context, websocket_connection) -> Any:
-        Create agent for WebSocket isolation testing."
+        Create agent for WebSocket isolation testing.""
         mock_agent = MagicMock()
 
         async def process_with_isolation(message, user_context, websocket_connection=None, stream_updates=False):
@@ -702,7 +702,7 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
         return mock_agent
 
     async def _create_error_recovery_websocket_agent(self, user_context, websocket_connection) -> Any:
-        "Create agent with WebSocket error recovery capabilities.
+        "Create agent with WebSocket error recovery capabilities."""
         mock_agent = MagicMock()
 
         async def process_with_websocket_recovery(message, user_context, websocket_connection=None, stream_updates=False):
@@ -761,7 +761,7 @@ class WebSocketEventTracker:
         return self.events
 
     def get_events_count(self) -> int:
-        Get count of tracked events."
+        Get count of tracked events.""
         return len(self.events)
 
     def increment_events(self):

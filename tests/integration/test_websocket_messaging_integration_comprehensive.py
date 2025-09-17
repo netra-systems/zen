@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Comprehensive WebSocket Integration Tests for Netra Platform
 
 Business Value Justification (BVJ):
@@ -12,7 +12,7 @@ All 5 agent events MUST be sent: agent_started, agent_thinking, tool_executing, 
 
 These integration tests validate WebSocket behavior without requiring Docker services.
 They test real WebSocket connections, authentication, message handling, and agent integration patterns.
-"
+"""Empty docstring."""
 
 import asyncio
 import json
@@ -41,26 +41,26 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, get_test_jwt_toke
 
 
 class WebSocketConnectionManagementTests(SSotBaseTestCase):
-    "
+"""Empty docstring."""
     Test WebSocket connection establishment, lifecycle, and authentication.
     
     BVJ: Platform/Internal - Connection reliability ensures users can receive AI insights
-"
+"""Empty docstring."""
     
     @pytest.mark.integration
     async def test_websocket_connection_establishment_success(self):
-    "
+"""Empty docstring."""
         Test successful WebSocket connection with proper authentication.
         
         BVJ: Users must be able to connect to receive AI agent responses
-        "
+"""Empty docstring."""
         env = self.get_env()
         
         # Create mock WebSocket server for testing
         with patch('websockets.connect') as mock_connect:
             mock_websocket = AsyncMock()
             mock_websocket.send = AsyncMock()
-            mock_websocket.recv = AsyncMock(return_value='{type": pong}')
+            mock_websocket.recv = AsyncMock(return_value='{type": pong}')"
             mock_websocket.close = AsyncMock()
             mock_connect.return_value.__aenter__ = AsyncMock(return_value=mock_websocket)
             mock_connect.return_value.__aexit__ = AsyncMock(return_value=None)
@@ -81,17 +81,17 @@ class WebSocketConnectionManagementTests(SSotBaseTestCase):
                     # Test that connection accepts authentication headers
                     assert "X-User-ID in client.headers"
                     assert Authorization in client.headers
-                    assert client.headers[Authorization].startswith(Bearer")
+                    assert client.headers[Authorization].startswith(Bearer")"
                     
-                    self.record_metric("websocket_connection_test, success)
+                    self.record_metric("websocket_connection_test, success)"
     
     @pytest.mark.integration
     async def test_websocket_connection_with_jwt_authentication(self):
-    "
+"""Empty docstring."""
         Test WebSocket connection with proper JWT authentication headers.
         
         BVJ: Authenticated users must connect securely to receive personalized AI insights
-        "
+"""Empty docstring."""
         auth_helper = E2EAuthHelper()
         token = auth_helper.create_test_jwt_token(
             user_id=auth-test-user,
@@ -99,16 +99,16 @@ class WebSocketConnectionManagementTests(SSotBaseTestCase):
             permissions=[read, write]
         
         async with WebSocketTestUtility() as ws_util:
-            client = await ws_util.create_authenticated_client(auth-test-user, token)"
+            client = await ws_util.create_authenticated_client(auth-test-user, token)""
             
             # Verify authentication headers are properly set
             headers = client.headers
-            assert "Authorization in headers
+            assert "Authorization in headers"
             assert headers[Authorization] == fBearer {token}
-            assert headers[X-User-ID] == "auth-test-user
+            assert headers[X-User-ID] == "auth-test-user"
             
             # Test that token is valid format
-            assert len(token.split('.')) == 3, JWT token must have 3 parts"
+            assert len(token.split('.')) == 3, JWT token must have 3 parts""
             
             self.record_metric(jwt_auth_validation, passed)
     
@@ -129,8 +129,8 @@ class WebSocketConnectionManagementTests(SSotBaseTestCase):
             # Mock connection failure
             with patch('websockets.connect', side_effect=ConnectionError(Connection refused)):
                 success = await client.connect(timeout=1.0)
-                assert not success, Connection should fail to non-existent server"
-                assert not client.is_connected, "Client should not be marked as connected
+                assert not success, Connection should fail to non-existent server""
+                assert not client.is_connected, "Client should not be marked as connected"
             
             # Restore original URL
             client.url = original_url
@@ -160,39 +160,39 @@ class WebSocketConnectionManagementTests(SSotBaseTestCase):
                 assert elapsed < 3.0, Should respect timeout parameter
                 assert not client.is_connected
                 
-                self.record_metric(timeout_handling, elapsed)"
+                self.record_metric(timeout_handling, elapsed)""
 
 
 class WebSocketMessageHandlingTests(SSotBaseTestCase):
-    "
+"""Empty docstring."""
     Test WebSocket message serialization, deserialization, and routing.
     
     BVJ: Reliable message handling ensures AI responses reach users correctly
-"
+"""Empty docstring."""
     
     @pytest.mark.integration
     async def test_websocket_message_serialization(self):
-    "
+"""Empty docstring."""
         Test WebSocket message serialization and structure.
         
         BVJ: Proper message format ensures consistent AI response delivery
-        "
+"""Empty docstring."""
         message = WebSocketMessage(
             event_type=WebSocketEventType.AGENT_STARTED,
-            data={agent_id": cost_optimizer, user_request: Analyze costs},
+            data={agent_id": cost_optimizer, user_request: Analyze costs},"
             timestamp=datetime.now(timezone.utc),
             message_id=msg_123","
             user_id=test-user,
-            thread_id=thread_456"
+            thread_id=thread_456""
         )
         
         # Test serialization
         serialized = message.to_dict()
-        assert serialized["type] == agent_started
+        assert serialized["type] == agent_started"
         assert serialized[data][agent_id] == "cost_optimizer"
         assert serialized[message_id] == msg_123
-        assert serialized[user_id] == "test-user
-        assert serialized[thread_id"] == thread_456
+        assert serialized[user_id] == "test-user"
+        assert serialized[thread_id"] == thread_456"
         assert timestamp in serialized
         
         # Test JSON serialization works
@@ -205,15 +205,15 @@ class WebSocketMessageHandlingTests(SSotBaseTestCase):
         assert restored.data["agent_id] == cost_optimizer"
         assert restored.user_id == test-user
         
-        self.record_metric(message_serialization, "success)
+        self.record_metric(message_serialization, "success)"
     
     @pytest.mark.integration
     async def test_websocket_message_sending(self):
-        "
+"""Empty docstring."""
         Test sending messages through WebSocket client.
         
         BVJ: Reliable message sending enables user requests to reach AI agents
-"
+"""Empty docstring."""
         async with WebSocketTestUtility() as ws_util:
             client = await ws_util.create_test_client()
             
@@ -226,7 +226,7 @@ class WebSocketMessageHandlingTests(SSotBaseTestCase):
             # Send test message
             message = await client.send_message(
                 WebSocketEventType.PING,
-                {"timestamp: time.time()},
+                {"timestamp: time.time()},"
                 user_id=sender-123
             )
             
@@ -243,30 +243,30 @@ class WebSocketMessageHandlingTests(SSotBaseTestCase):
             parsed_data = json.loads(sent_data)
             assert parsed_data[type] == ping
             
-            self.record_metric(message_sending, len(client.sent_messages))"
+            self.record_metric(message_sending, len(client.sent_messages))""
     
     @pytest.mark.integration
     async def test_websocket_message_receiving(self):
-    "
+"""Empty docstring."""
         Test receiving and parsing messages from WebSocket.
         
         BVJ: Accurate message parsing ensures users receive AI responses correctly
-        "
+"""Empty docstring."""
         async with WebSocketTestUtility() as ws_util:
             client = await ws_util.create_test_client()
             
             # Create test message data
             test_message = {
-                type": agent_completed,
+                type": agent_completed,"
                 data: {
                     "result: Cost analysis complete",
-                    recommendations: [Reduce instance sizes, Use spot instances],"
-                    savings": {monthly: 1500, percentage: 25}
+                    recommendations: [Reduce instance sizes, Use spot instances],""
+                    savings": {monthly: 1500, percentage: 25}"
                 },
                 "timestamp: datetime.now(timezone.utc).isoformat(),"
                 message_id: msg_response_789,
-                user_id: "test-user,
-                thread_id": thread_cost_analysis
+                user_id: "test-user,"
+                thread_id": thread_cost_analysis"
             }
             
             # Simulate message reception
@@ -282,10 +282,10 @@ class WebSocketMessageHandlingTests(SSotBaseTestCase):
                 assert len(received.data[recommendations"] == 2"
                 assert received.data[savings][monthly] == 1500
                 
-                self.record_metric(message_receiving, success")
+                self.record_metric(message_receiving, success")"
                 
             except Exception as e:
-                self.record_metric("message_parsing_error, str(e))
+                self.record_metric("message_parsing_error, str(e))"
                 raise
     
     @pytest.mark.integration
@@ -312,8 +312,8 @@ class WebSocketMessageHandlingTests(SSotBaseTestCase):
             invalid_message_data = {
                 type": "invalid_event_type,
                 data: {},
-                timestamp: datetime.now(timezone.utc).isoformat(),"
-                message_id": msg_invalid
+                timestamp: datetime.now(timezone.utc).isoformat(),""
+                message_id": msg_invalid"
             }
             
             with pytest.raises(ValueError):
@@ -346,8 +346,8 @@ class WebSocketAgentIntegrationTests(SSotBaseTestCase):
                 WebSocketEventType.AGENT_STARTED,
                 {
                     agent_type: cost_optimizer,
-                    request_id: req_123",
-                    "user_request: Analyze my AWS spend,
+                    request_id: req_123","
+                    "user_request: Analyze my AWS spend,"
                     estimated_duration: 30-60 seconds
                 },
                 user_id="agent-test-user,"
@@ -358,8 +358,8 @@ class WebSocketAgentIntegrationTests(SSotBaseTestCase):
             assert len(client.sent_messages) == 1
             started_event = client.sent_messages[0]
             assert started_event.event_type == WebSocketEventType.AGENT_STARTED
-            assert started_event.data[agent_type] == cost_optimizer"
-            assert started_event.data["request_id] == req_123
+            assert started_event.data[agent_type] == cost_optimizer""
+            assert started_event.data["request_id] == req_123"
             assert started_event.user_id == agent-test-user
             
             self.increment_websocket_events()
@@ -381,13 +381,13 @@ class WebSocketAgentIntegrationTests(SSotBaseTestCase):
             await client.send_message(
                 WebSocketEventType.AGENT_THINKING,
                 {
-                    reasoning_step: "Analyzing cost patterns,
-                    current_thought": Examining EC2 instance utilization across regions,
+                    reasoning_step: "Analyzing cost patterns,"
+                    current_thought": Examining EC2 instance utilization across regions,"
                     progress: 0.3,
                     "sub_tasks: ["
                         Load historical billing data,
-                        Identify underutilized resources, "
-                        Calculate potential savings"
+                        Identify underutilized resources, ""
+                        Calculate potential savings""
                     ]
                 },
                 user_id=thinking-user
@@ -397,10 +397,10 @@ class WebSocketAgentIntegrationTests(SSotBaseTestCase):
             assert thinking_event.event_type == WebSocketEventType.AGENT_THINKING
             assert thinking_event.data[reasoning_step"] == "Analyzing cost patterns
             assert thinking_event.data[progress] == 0.3
-            assert len(thinking_event.data[sub_tasks] == 3"
+            assert len(thinking_event.data[sub_tasks] == 3""
             
             self.increment_websocket_events()
-            self.record_metric(agent_thinking_event", delivered)
+            self.record_metric(agent_thinking_event", delivered)"
     
     @pytest.mark.integration
     async def test_tool_executing_event(self):
@@ -420,24 +420,24 @@ class WebSocketAgentIntegrationTests(SSotBaseTestCase):
                 {
                     tool_name": "aws_cost_analyzer,
                     tool_description: Analyze AWS billing data for cost optimization opportunities,
-                    parameters: {"
-                        "account_id: 123456789,
+                    parameters: {""
+                        "account_id: 123456789,"
                         time_range: 30_days,
                         "services: [EC2", RDS, S3]
                     },
-                    expected_duration: 10-15 seconds"
+                    expected_duration: 10-15 seconds""
                 },
-                user_id="tool-user
+                user_id="tool-user"
             )
             
             tool_event = client.sent_messages[0]
             assert tool_event.event_type == WebSocketEventType.TOOL_EXECUTING
             assert tool_event.data[tool_name] == aws_cost_analyzer
             assert parameters" in tool_event.data"
-            assert tool_event.data[parameters][account_id] == 123456789"
+            assert tool_event.data[parameters][account_id] == 123456789""
             
             self.increment_websocket_events()
-            self.record_metric(tool_executing_event", delivered)
+            self.record_metric(tool_executing_event", delivered)"
     
     @pytest.mark.integration
     async def test_tool_completed_event(self):
@@ -457,31 +457,31 @@ class WebSocketAgentIntegrationTests(SSotBaseTestCase):
                 {
                     tool_name": "aws_cost_analyzer,
                     execution_time: 12.5,
-                    status: success",
-                    "results: {
+                    status: success","
+                    "results: {"
                         total_monthly_cost: 5420.50,
                         "potential_savings: 1365.75,"
                         recommendations: [
                             {
-                                type: rightsizing",
-                                "resource: EC2 instances,
+                                type: rightsizing","
+                                "resource: EC2 instances,"
                                 savings: 800.25,
                                 action": "Reduce instance sizes for underutilized servers
                             },
                             {
                                 type: scheduling,
-                                resource: "Development environments,
-                                savings": 565.50,
+                                resource: "Development environments,"
+                                savings": 565.50,"
                                 action: Schedule dev instances to run only during business hours
                             }
                         ]
                     },
                     "metadata: {"
                         resources_analyzed: 147,
-                        optimization_opportunities: 12"
+                        optimization_opportunities: 12""
                     }
                 },
-                user_id=result-user"
+                user_id=result-user""
             )
             
             completed_event = client.sent_messages[0]
@@ -491,17 +491,17 @@ class WebSocketAgentIntegrationTests(SSotBaseTestCase):
             assert len(completed_event.data[results][recommendations] == 2
             
             self.increment_websocket_events()
-            self.record_metric(tool_completed_event, delivered")
+            self.record_metric(tool_completed_event, delivered")"
     
     @pytest.mark.integration
     async def test_agent_completed_event(self):
-    "
+"""Empty docstring."""
         Test agent_completed event - final deliverable to user.
         
         BVJ: Users receive final AI analysis and actionable recommendations
-        "
+"""Empty docstring."""
         async with WebSocketTestUtility() as ws_util:
-            client = await ws_util.create_authenticated_client(completion-user")
+            client = await ws_util.create_authenticated_client(completion-user")"
             client.is_connected = True
             client.websocket = AsyncMock()
             
@@ -512,62 +512,62 @@ class WebSocketAgentIntegrationTests(SSotBaseTestCase):
                     agent_type: cost_optimizer,
                     "request_id: req_final_123",
                     execution_time: 45.2,
-                    status: "success,
-                    final_results": {
+                    status: "success,"
+                    final_results": {"
                         executive_summary: Identified $1,365/month in cost savings (25% reduction),
                         "total_analysis: {"
                             current_monthly_spend: 5420.50,
-                            potential_savings: 1365.75,"
-                            savings_percentage": 25.2
+                            potential_savings: 1365.75,""
+                            savings_percentage": 25.2"
                         },
                         priority_actions: [
                             {
                                 priority": 1,"
                                 action: Right-size 8 overprovisioned EC2 instances,
-                                impact: $800/month savings",
-                                "effort: Low - automated resize available
+                                impact: $800/month savings","
+                                "effort: Low - automated resize available"
                             },
                             {
                                 priority: 2,
                                 action": "Implement dev environment scheduling,
                                 impact: $565/month savings, 
-                                effort: "Medium - requires policy changes
+                                effort: "Medium - requires policy changes"
                             }
                         ],
-                        next_steps": [
+                        next_steps": ["
                             Review and approve recommended instance changes,
                             Set up automated scaling policies","
                             Schedule monthly cost reviews
                         ]
                     },
-                    conversation_continuation: {"
-                        "suggested_followups: [
+                    conversation_continuation: {""
+                        "suggested_followups: ["
                             Would you like me to help implement these changes?,
                             "Should I analyze other AWS services for additional savings?,"
                             Do you want to set up automated cost monitoring?
                         ]
                     }
                 },
-                user_id=completion-user"
+                user_id=completion-user""
             )
             
             completed_event = client.sent_messages[0]
             assert completed_event.event_type == WebSocketEventType.AGENT_COMPLETED
-            assert completed_event.data[status"] == success
+            assert completed_event.data[status"] == success"
             assert executive_summary in completed_event.data[final_results]
             assert completed_event.data[final_results"]["total_analysis][savings_percentage] == 25.2
-            assert len(completed_event.data[final_results][priority_actions"] == 2
+            assert len(completed_event.data[final_results][priority_actions"] == 2"
             
             self.increment_websocket_events()
-            self.record_metric("agent_completed_event, delivered)
+            self.record_metric("agent_completed_event, delivered)"
     
     @pytest.mark.integration
     async def test_complete_agent_event_flow(self):
-    "
+"""Empty docstring."""
         Test complete agent execution flow with all 5 critical events.
         
         BVJ: Complete event flow ensures users have full visibility into AI processing
-        "
+"""Empty docstring."""
         async with WebSocketTestUtility() as ws_util:
             client = await ws_util.create_authenticated_client(flow-test-user)
             
@@ -584,12 +584,12 @@ class WebSocketAgentIntegrationTests(SSotBaseTestCase):
             client.is_connected = True
             client.websocket = AsyncMock()
             
-            execution_id = f"exec_{uuid.uuid4().hex[:8]}
+            execution_id = f"exec_{uuid.uuid4().hex[:8]}"
             
             # Simulate complete agent flow
             for i, event_type in enumerate(expected_events):
                 event_data = {
-                    execution_id": execution_id,
+                    execution_id": execution_id,"
                     step: i + 1,
                     total_steps": len(expected_events),"
                     timestamp: datetime.now(timezone.utc).isoformat()
@@ -597,9 +597,9 @@ class WebSocketAgentIntegrationTests(SSotBaseTestCase):
                 
                 # Add specific data based on event type
                 if event_type == WebSocketEventType.AGENT_STARTED:
-                    event_data[agent_type] = "cost_optimizer
+                    event_data[agent_type] = "cost_optimizer"
                 elif event_type == WebSocketEventType.AGENT_THINKING:
-                    event_data[current_thought"] = fProcessing step {i+1}
+                    event_data[current_thought"] = fProcessing step {i+1}"
                 elif event_type == WebSocketEventType.TOOL_EXECUTING:
                     event_data[tool_name] = cost_analyzer
                 elif event_type == WebSocketEventType.TOOL_COMPLETED:
@@ -616,9 +616,9 @@ class WebSocketAgentIntegrationTests(SSotBaseTestCase):
                 actual_event = client.sent_messages[i]
                 assert actual_event.event_type == expected_event
                 assert actual_event.data[execution_id] == execution_id
-                assert actual_event.data[step] == i + 1"
+                assert actual_event.data[step] == i + 1""
             
-            self.record_metric("complete_agent_flow, len(client.sent_messages))
+            self.record_metric("complete_agent_flow, len(client.sent_messages))"
             
             # Verify all 5 critical events tracked
             assert self.get_websocket_events_count() >= 5
@@ -633,11 +633,11 @@ class WebSocketMultiUserIsolationTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_multi_user_websocket_isolation(self):
-    "
+"""Empty docstring."""
         Test that multiple users have isolated WebSocket sessions.
         
         BVJ: User data isolation prevents cross-contamination of AI contexts
-        "
+"""Empty docstring."""
         async with WebSocketTestUtility() as ws_util:
             # Create multiple authenticated clients
             user1_client = await ws_util.create_authenticated_client(user1, token1)
@@ -652,8 +652,8 @@ class WebSocketMultiUserIsolationTests(SSotBaseTestCase):
             # Send messages from each user
             await user1_client.send_message(
                 WebSocketEventType.PING,
-                {user_data: "user1_specific_data},
-                user_id=user1"
+                {user_data: "user1_specific_data},"
+                user_id=user1""
             )
             
             await user2_client.send_message(
@@ -665,7 +665,7 @@ class WebSocketMultiUserIsolationTests(SSotBaseTestCase):
             await user3_client.send_message(
                 WebSocketEventType.PING,
                 {user_data: user3_specific_data},
-                user_id=user3"
+                user_id=user3""
             )
             
             # Verify user isolation - each client has only its own messages
@@ -673,14 +673,14 @@ class WebSocketMultiUserIsolationTests(SSotBaseTestCase):
             assert len(user2_client.sent_messages) == 1
             assert len(user3_client.sent_messages) == 1
             
-            assert user1_client.sent_messages[0].data["user_data] == user1_specific_data
+            assert user1_client.sent_messages[0].data["user_data] == user1_specific_data"
             assert user2_client.sent_messages[0].data[user_data] == user2_specific_data
             assert user3_client.sent_messages[0].data["user_data] == user3_specific_data"
             
             # Verify user IDs are correctly set
             assert user1_client.sent_messages[0].user_id == user1
-            assert user2_client.sent_messages[0].user_id == user2"
-            assert user3_client.sent_messages[0].user_id == "user3
+            assert user2_client.sent_messages[0].user_id == user2""
+            assert user3_client.sent_messages[0].user_id == "user3"
             
             self.record_metric(multi_user_isolation, verified)
     
@@ -700,10 +700,10 @@ class WebSocketMultiUserIsolationTests(SSotBaseTestCase):
         
         async with WebSocketTestUtility() as ws_util:
             # Create client with valid token
-            valid_client = await ws_util.create_authenticated_client(secure-user, valid_token)"
+            valid_client = await ws_util.create_authenticated_client(secure-user, valid_token)""
             
             # Verify authentication headers are set correctly
-            assert valid_client.headers["Authorization] == fBearer {valid_token}
+            assert valid_client.headers["Authorization] == fBearer {valid_token}"
             assert valid_client.headers[X-User-ID] == secure-user
             
             # Test with expired/invalid token
@@ -711,17 +711,17 @@ class WebSocketMultiUserIsolationTests(SSotBaseTestCase):
             invalid_client = await ws_util.create_authenticated_client(invalid-user, invalid_token)
             
             # Verify invalid client still has headers (server will reject)
-            assert invalid_client.headers[Authorization] == fBearer {invalid_token}"
+            assert invalid_client.headers[Authorization] == fBearer {invalid_token}""
             
-            self.record_metric("authentication_security, tested)
+            self.record_metric("authentication_security, tested)"
     
     @pytest.mark.integration
     async def test_websocket_concurrent_connections(self):
-    "
+"""Empty docstring."""
         Test handling of concurrent WebSocket connections.
         
         BVJ: Concurrent connection support enables multiple users simultaneously
-        "
+"""Empty docstring."""
         async with WebSocketTestUtility() as ws_util:
             # Create multiple concurrent connections
             connection_count = 5
@@ -787,7 +787,7 @@ class WebSocketPerformanceAndResilienceTests(SSotBaseTestCase):
                 await client.send_message(
                     WebSocketEventType.PING,
                     {sequence: i, batch_test: True},
-                    user_id=throughput-user"
+                    user_id=throughput-user""
                 )
             
             end_time = time.time()
@@ -801,7 +801,7 @@ class WebSocketPerformanceAndResilienceTests(SSotBaseTestCase):
             avg_latency_per_message = (duration / message_count) * 1000  # ms
             
             # Performance assertions
-            assert messages_per_second > 10, "Should handle at least 10 messages/second
+            assert messages_per_second > 10, "Should handle at least 10 messages/second"
             assert avg_latency_per_message < 100, Average message latency should be under 100ms
             
             self.record_metric("messages_per_second, messages_per_second)"
@@ -821,8 +821,8 @@ class WebSocketPerformanceAndResilienceTests(SSotBaseTestCase):
             resilience_results = await ws_util.test_connection_resilience(client, disconnect_count=3)
             
             # Verify resilience metrics
-            assert disconnect_count in resilience_results"
-            assert "successful_reconnects in resilience_results
+            assert disconnect_count in resilience_results""
+            assert "successful_reconnects in resilience_results"
             assert avg_reconnect_time in resilience_results
             
             # Basic resilience expectations
@@ -846,7 +846,7 @@ class WebSocketPerformanceAndResilienceTests(SSotBaseTestCase):
             # Create and use clients
             test_clients = []
             for i in range(10):
-                client = await ws_util.create_test_client(user_id=fmemory-test-{i})"
+                client = await ws_util.create_test_client(user_id=fmemory-test-{i})""
                 client.is_connected = True
                 client.websocket = AsyncMock()
                 test_clients.append(client)
@@ -858,7 +858,7 @@ class WebSocketPerformanceAndResilienceTests(SSotBaseTestCase):
             for client in test_clients:
                 await client.send_message(
                     WebSocketEventType.PING,
-                    {"memory_test: True, data: x * 1000},  # 1KB message
+                    {"memory_test: True, data: x * 1000},  # 1KB message"
                     user_id=client.headers.get(X-User-ID", "unknown)
                 )
             
@@ -873,20 +873,20 @@ class WebSocketPerformanceAndResilienceTests(SSotBaseTestCase):
             connected_count = sum(1 for client in test_clients if client.is_connected)
             assert connected_count == 0, All clients should be disconnected after cleanup
             
-            self.record_metric(memory_usage_test, completed")
+            self.record_metric(memory_usage_test, completed")"
     
     @pytest.mark.integration
     async def test_websocket_error_handling_comprehensive(self):
-    "
+"""Empty docstring."""
         Test comprehensive WebSocket error handling scenarios.
         
         BVJ: Robust error handling prevents service disruption and user confusion
-        "
+"""Empty docstring."""
         async with WebSocketTestUtility() as ws_util:
             client = await ws_util.create_test_client()
             
             # Test 1: Sending message without connection
-            with pytest.raises(RuntimeError, match=not connected"):
+            with pytest.raises(RuntimeError, match=not connected"):"
                 await client.send_message(WebSocketEventType.PING, {}
             
             # Test 2: Mock connection with send failure
@@ -958,11 +958,11 @@ class WebSocketEventValidationTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_websocket_message_integrity(self):
-        "
+"""Empty docstring."""
         Test WebSocket message data integrity and completeness.
         
         BVJ: Message integrity ensures users receive complete AI responses
-"
+"""Empty docstring."""
         async with WebSocketTestUtility() as ws_util:
             client = await ws_util.create_test_client()
             client.is_connected = True
@@ -970,23 +970,23 @@ class WebSocketEventValidationTests(SSotBaseTestCase):
             
             # Test message with complex nested data
             complex_data = {
-                analysis_results: {"
-                    cost_breakdown": [
+                analysis_results: {""
+                    cost_breakdown": ["
                         {service: EC2, "cost: 2500.75, percentage": 46.1},
-                        {service: RDS, cost: 1200.25, percentage": 22.1},
-                        {"service: S3, cost: 850.50, percentage: 15.7}
+                        {service: RDS, cost: 1200.25, percentage": 22.1},"
+                        {"service: S3, cost: 850.50, percentage: 15.7}"
                     ],
                     "recommendations: {"
                         immediate: [
                             {action: Right-size instances", "impact: High, effort: Low},
-                            {"action: Enable auto-scaling", impact: Medium, effort: Low"}
+                            {"action: Enable auto-scaling", impact: Medium, effort: Low"}"
                         ],
-                        "planned: [
+                        "planned: ["
                             {action: Migrate to Graviton, impact": "High, effort: High}
                         ]
                     },
-                    metadata: {"
-                        "analysis_time: 45.2,
+                    metadata: {""
+                        "analysis_time: 45.2,"
                         data_points: 1247,
                         "confidence_score: 0.94"
                     }
@@ -998,13 +998,13 @@ class WebSocketEventValidationTests(SSotBaseTestCase):
                 WebSocketEventType.AGENT_COMPLETED,
                 complex_data,
                 user_id=integrity-test-user,
-                thread_id=thread_integrity_test"
+                thread_id=thread_integrity_test""
             )
             
             # Verify message integrity
             sent_message = client.sent_messages[0]
             assert sent_message.data == complex_data
-            assert len(sent_message.data[analysis_results"][cost_breakdown] == 3
+            assert len(sent_message.data[analysis_results"][cost_breakdown] == 3"
             assert sent_message.data[analysis_results][metadata][confidence_score"] == 0.94"
             
             # Test JSON serialization integrity
@@ -1013,8 +1013,8 @@ class WebSocketEventValidationTests(SSotBaseTestCase):
             restored_data = json.loads(json_string)
             
             # Verify no data loss in serialization
-            original_cost = complex_data[analysis_results][cost_breakdown][0][cost]"
-            restored_cost = restored_data[data"][analysis_results][cost_breakdown][0][cost]
+            original_cost = complex_data[analysis_results][cost_breakdown][0][cost]""
+            restored_cost = restored_data[data"][analysis_results][cost_breakdown][0][cost]"
             assert original_cost == restored_cost
             
             self.record_metric(message_integrity", "verified)
@@ -1045,8 +1045,8 @@ class WebSocketEventValidationTests(SSotBaseTestCase):
             )
             
             # Verify simulation structure
-            assert execution_id in execution_results"
-            assert "thread_id in execution_results
+            assert execution_id in execution_results""
+            assert "thread_id in execution_results"
             assert execution_time in execution_results
             
             self.record_metric("event_ordering, tested")
@@ -1071,8 +1071,8 @@ class WebSocketConfigurationAndEnvironmentTests(SSotBaseTestCase):
         # Test default configuration
         with self.temp_env_vars(WEBSOCKET_TEST_URL=ws://test.example.com:8000/ws):
             async with WebSocketTestUtility() as ws_util:
-                assert test.example.com in ws_util.base_url"
-                assert ws_util.base_url.startswith("ws://)
+                assert test.example.com in ws_util.base_url""
+                assert ws_util.base_url.startswith("ws://)"
         
         # Test HTTPS to WSS conversion
         with self.temp_env_vars(WEBSOCKET_URL=https://secure.example.com/ws):
@@ -1080,16 +1080,16 @@ class WebSocketConfigurationAndEnvironmentTests(SSotBaseTestCase):
                 assert ws_util.base_url.startswith("wss://)"
                 assert secure.example.com in ws_util.base_url
         
-        self.record_metric(environment_config, tested")
+        self.record_metric(environment_config, tested")"
     
     async def test_websocket_timeout_configuration(self):
-    "
+"""Empty docstring."""
         Test WebSocket timeout configuration.
         
         BVJ: Configurable timeouts prevent indefinite waits and improve user experience
-        "
+"""Empty docstring."""
         # Test custom timeout configuration
-        with self.temp_env_vars(WEBSOCKET_TEST_TIMEOUT=15"):
+        with self.temp_env_vars(WEBSOCKET_TEST_TIMEOUT=15"):"
             async with WebSocketTestUtility() as ws_util:
                 assert ws_util.default_timeout == 15.0
         
@@ -1116,7 +1116,7 @@ class WebSocketConfigurationAndEnvironmentTests(SSotBaseTestCase):
                 assert ws_util.metrics.connection_time == 0.0  # Initial state
         
         # Test with performance monitoring disabled
-        with self.temp_env_vars(WS_ENABLE_PERF_MONITORING=false):"
+        with self.temp_env_vars(WS_ENABLE_PERF_MONITORING=false):""
             async with WebSocketTestUtility() as ws_util:
                 assert ws_util.enable_performance_monitoring is False
         

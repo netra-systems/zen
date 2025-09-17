@@ -405,7 +405,7 @@ class TestNetworkPartitionChaos:
         assert result[recovery_time] <= result["expected_recovery_time] * 2, formatted_string"
 
                         # Convergence should be high
-        assert result[final_convergence_ratio] >= result[convergence_threshold], "formatted_string"
+        assert result[final_convergence_ratio] >= result[convergence_threshold], ""
 
 
         @pytest.mark.mission_critical
@@ -1157,7 +1157,7 @@ class TestSecurityAttackResilience:
         service for service, perf in result["service_performance].items()
         if perf[final_availability] >= 0.8
                                                         
-        assert len(high_availability_services) >= 1, "formatted_string"
+        assert len(high_availability_services) >= 1, ""
 
 
         if __name__ == __main__:

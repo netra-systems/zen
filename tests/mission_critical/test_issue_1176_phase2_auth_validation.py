@@ -400,7 +400,7 @@ if __name__ == __main__:
             for test_method in test_methods:
                 test_name = test_method.__name__
                 try:
-                    print(f"\n🧪 Running {test_name}...)
+                    print(f"\n🧪 Running {test_name}...)")
                     await test_method(")
                     print(f✅ {test_name} PASSED)
                     test_results.append((test_name, "PASSED, None))"
@@ -426,9 +426,9 @@ if __name__ == __main__:
         print(\n + =" * 60")
         print(f🏁 Issue #1176 Phase 2 Results:)
         print(f   Total tests: {len(results)})"
-        print(f"   Passed: {passed_count})
+        print(f"   Passed: {passed_count})")
         print(f   Failed: {failed_count})"
-        print(f"   Duration: {standalone_duration:.3f}s)
+        print(f"   Duration: {standalone_duration:.3f}s)")
         print(f   Execution: {'✅ REAL' if standalone_duration > 0.1 else '❌ FAKE'})"
 
         # Issue #1176 Phase 1 validation

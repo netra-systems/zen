@@ -378,7 +378,7 @@ class DockerSSOTInfrastructureTests:
             if utility1 is not utility2 and type(utility1) == type(utility2):
                 boundary_checks['ssot_factory_function'] = True
         except Exception as e:
-            logger.warning(f"SSOT factory function issue: {e})
+            logger.warning(f"SSOT factory function issue: {e})")
         
         # Check 5: Proper error handling
         try:
@@ -537,7 +537,7 @@ class DockerSSOTInfrastructureTests:
                         
                 except Exception as e:
                     error_count += 1
-                    logger.warning(f"Concurrent operation timeout/error: {e})
+                    logger.warning(f"Concurrent operation timeout/error: {e})")
         
         # Analyze concurrent access safety
         if concurrent_results:

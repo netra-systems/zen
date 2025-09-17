@@ -1,8 +1,8 @@
-"
+"""Empty docstring."""
 End-to-end tests for WebSocket immediate disconnect regression prevention.
 
 These tests verify the complete WebSocket connection lifecycle works correctly,
-preventing the Loading chat..." issue where connections immediately disconnect
+preventing the Loading chat..." issue where connections immediately disconnect"
 with ABNORMAL_CLOSURE (1006).
 
 To verify these tests catch the regression:
@@ -10,7 +10,7 @@ To verify these tests catch the regression:
 2. These tests should fail with connection closing immediately
 3. Restore both fixes
 4. Tests should pass with stable connections
-"
+"""Empty docstring."""
 import pytest
 import asyncio
 import json
@@ -36,16 +36,16 @@ class WebSocketImmediateDisconnectRegressionTests:
     @pytest.mark.websocket
     @pytest.mark.e2e
     def test_token(self):
-        Get a test JWT token."
+        Get a test JWT token.""
         return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZXYtdGVtcC10ZXN0IiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiZXhwIjoxNzU2NDE5MzY5LCJpYXQiOjE3MjQ3OTczNjkifQ.test'
 
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_websocket_must_not_immediately_disconnect(self, backend_url, test_token):
-        "
+"""Empty docstring."""
         REGRESSION TEST: WebSocket must stay connected, not immediately disconnect.
         This is the primary symptom users experienced - immediate ABNORMAL_CLOSURE.
-"
+"""Empty docstring."""
         connection_start = time.time()
         connection_duration = 0
         disconnect_code = None
@@ -86,10 +86,10 @@ class WebSocketImmediateDisconnectRegressionTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_websocket_with_frontend_like_subprotocols(self, backend_url, test_token):
-    "
+"""Empty docstring."""
         REGRESSION TEST: Test with exact subprotocols the frontend sends.
         Frontend sends: jwt-auth, jwt.<token>, sometimes compression protocols.
-        "
+"""Empty docstring."""
         encoded_token = test_token.replace('+', '-').replace('/', '_').replace('=', '')
         subprotocols = ['jwt-auth', f'jwt.{encoded_token}']
         connection_stable = False
@@ -100,7 +100,7 @@ class WebSocketImmediateDisconnectRegressionTests:
                 logger.info(f'Server selected subprotocol: {selected_subprotocol}')
                 assert selected_subprotocol in ['jwt-auth', None], f'Server selected unexpected subprotocol: {selected_subprotocol}'
                 if subprotocols:
-                    assert selected_subprotocol == 'jwt-auth', Server didn't select jwt-auth subprotocol when client requested it"
+                    assert selected_subprotocol == 'jwt-auth', Server didn't select jwt-auth subprotocol when client requested it""
                 await asyncio.sleep(0.5)
                 connection_stable = websocket.open
         except ConnectionClosed as e:
@@ -112,10 +112,10 @@ class WebSocketImmediateDisconnectRegressionTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_websocket_message_exchange(self, backend_url, test_token):
-    "
+"""Empty docstring."""
         REGRESSION TEST: Full message exchange must work.
         Tests that connection stays open long enough for bidirectional communication.
-        "
+"""Empty docstring."""
         messages_sent = 0
         messages_received = 0
         try:
@@ -159,10 +159,10 @@ class WebSocketImmediateDisconnectRegressionTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_multiple_concurrent_websocket_connections(self, backend_url, test_token):
-    "
+"""Empty docstring."""
         REGRESSION TEST: Multiple connections should work simultaneously.
         Tests that the fix works under concurrent connection load.
-        "
+"""Empty docstring."""
         num_connections = 5
         connections = []
         connection_results = []
@@ -225,10 +225,10 @@ class WebSocketChatUIIntegrationTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_chat_ui_websocket_connection(self):
-        "
+"""Empty docstring."""
         REGRESSION TEST: Simulate the exact chat UI connection flow.
         This should resolve the Loading chat... issue.
-        "
+"""Empty docstring."""
         backend_url = 'ws://localhost:8000/ws'
         auth_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZXYtdGVtcC11aSIsImVtYWlsIjoidWlAZXhhbXBsZS5jb20ifQ.test'
         chat_ready = False
@@ -256,8 +256,8 @@ class WebSocketChatUIIntegrationTests:
                 error_message = f'Chat UI connection failed with code {e.code}'
         except Exception as e:
             error_message = f'Chat UI connection error: {str(e)}'
-        assert chat_ready, f"Chat UI not ready: {error_message or 'Unknown error'}
-        assert not error_message, "error_message
+        assert chat_ready, f"Chat UI not ready: {error_message or 'Unknown error'}"
+        assert not error_message, "error_message"
         logger.info(Chat UI WebSocket connection successful - no more 'Loading chat...'!")"
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

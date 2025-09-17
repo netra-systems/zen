@@ -288,7 +288,7 @@ class WebSocketTestHarness:
             return success
             
         except Exception as e:
-            print(f"Error in agent flow for user {user_id}: {e})
+            print(f"Error in agent flow for user {user_id}: {e})")
             return False
     
     async def run_concurrent_user_scenarios(self, user_count: int = 10) -> Dict[str, Any]:

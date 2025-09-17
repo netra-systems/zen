@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 WEBSOCKET STREAMING TIMEOUT REPRODUCTION TEST SUITE
 
 This test suite reproduces the exact P1 critical failures identified in the Five Whys analysis:
@@ -8,7 +8,7 @@ This test suite reproduces the exact P1 critical failures identified in the Five
 4. Connection tracking issues
 
 CRITICAL: This test MUST fail before fixes and pass after fixes are applied.
-"
+"""Empty docstring."""
 
 import pytest
 import asyncio
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class WebSocketStreamingTimeoutReproduction:
-    "Reproduces the exact WebSocket streaming timeout issues found in staging
+    "Reproduces the exact WebSocket streaming timeout issues found in staging"""
     
     def __init__(self):
         self.websocket_url = "wss://netra-backend-staging-123456-uc.a.run.app/ws"
@@ -34,10 +34,10 @@ class WebSocketStreamingTimeoutReproduction:
         
         from shared.types.core_types import ensure_user_id
         
-        with pytest.raises(ValueError, match=rInvalid user_id format):"
+        with pytest.raises(ValueError, match=rInvalid user_id format):""
             ensure_user_id(self.google_oauth_user_id)
             
-        logger.info(" PASS:  REPRODUCED: User ID validation failure)
+        logger.info(" PASS:  REPRODUCED: User ID validation failure)"
         
     async def test_streaming_implementation_missing(self):
         
@@ -54,9 +54,9 @@ class WebSocketStreamingTimeoutReproduction:
         )
         
         # This should raise AttributeError intentionally
-        with pytest.raises(AttributeError, match=stream_agent_execution method not implemented):"
+        with pytest.raises(AttributeError, match=stream_agent_execution method not implemented):""
             # Simulate the failing code path
-            raise AttributeError("stream_agent_execution method not implemented)
+            raise AttributeError("stream_agent_execution method not implemented)"
             
         logger.info( PASS:  REPRODUCED: Missing streaming implementation)
         
@@ -71,22 +71,22 @@ class WebSocketStreamingTimeoutReproduction:
         async def simulate_redis_validation():
             ""Simulates Redis service validation that times out
             await asyncio.sleep(30.1)  # Exceeds 30s timeout
-            raise asyncio.TimeoutError(Service 'redis' validation timeout after 30.0s)"
+            raise asyncio.TimeoutError(Service 'redis' validation timeout after 30.0s)""
             
         with pytest.raises(asyncio.TimeoutError):
             await asyncio.wait_for(simulate_redis_validation(), timeout=30.0)
             
-        logger.info( PASS:  REPRODUCED: Redis dependency timeout")
+        logger.info( PASS:  REPRODUCED: Redis dependency timeout")"
         
     async def test_websocket_connection_tracking_failure(self):
-    "
+"""Empty docstring."""
         REPRODUCES: No connections available for user test-use... Message type: agent_stopped
         EXPECTS: WebSocket message delivery failure due to connection tracking issues
-        "
+"""Empty docstring."""
         # This simulates the connection tracking mismatch issue
         run_id = websocket_factory_1757432107922
-        expected_thread_id = f"thread_{run_id}_461_0cc710f1
-        actual_thread_id = fthread_websocket_factory_1757432107922_461_0cc710f1"
+        expected_thread_id = f"thread_{run_id}_461_0cc710f1"
+        actual_thread_id = fthread_websocket_factory_1757432107922_461_0cc710f1""
         
         assert run_id in expected_thread_id, Thread ID should contain run_id
         assert expected_thread_id != actual_thread_id, Thread ID mismatch reproduced""
@@ -94,7 +94,7 @@ class WebSocketStreamingTimeoutReproduction:
         logger.info( PASS:  REPRODUCED: Connection tracking mismatch)
         
     async def test_full_websocket_streaming_timeout_scenario(self):
-        "
+"""Empty docstring."""
         INTEGRATION TEST: Reproduces the complete failure scenario
         
         This test attempts to:
@@ -104,7 +104,7 @@ class WebSocketStreamingTimeoutReproduction:
         4. Verify no streaming events are received
         
         CRITICAL: This test represents the exact user experience failure
-"
+"""Empty docstring."""
         connection_successful = False
         auth_successful = False
         streaming_successful = False
@@ -114,12 +114,12 @@ class WebSocketStreamingTimeoutReproduction:
             # Attempt WebSocket connection (this part usually works)
             async with websockets.connect(
                 self.websocket_url,
-                extra_headers={Authorization: fBearer test-jwt-for-user-{self.google_oauth_user_id}"} as websocket:
+                extra_headers={Authorization: fBearer test-jwt-for-user-{self.google_oauth_user_id}"} as websocket:"
                 connection_successful = True
                 
                 # Send authentication with Google OAuth user ID
                 auth_message = {
-                    "type: authenticate,
+                    "type: authenticate,"
                     user_id: self.google_oauth_user_id,
                     token": "test-jwt-token
                 }
@@ -132,12 +132,12 @@ class WebSocketStreamingTimeoutReproduction:
                     if auth_data.get(type) == auth_success:
                         auth_successful = True
                 except asyncio.TimeoutError:
-                    logger.info( FAIL:  Auth timeout - user ID validation likely failed)"
+                    logger.info( FAIL:  Auth timeout - user ID validation likely failed)""
                 
                 # Attempt streaming request (should fail even if auth worked)
                 if auth_successful:
                     stream_message = {
-                        "type: execute_agent,
+                        "type: execute_agent,"
                         agent_type: data_analyst,
                         "message: Test streaming execution",
                         stream_updates: True
@@ -166,8 +166,8 @@ class WebSocketStreamingTimeoutReproduction:
             logger.error(fWebSocket connection failed: {e})
             
         # ASSERTIONS - These should all fail before fix, pass after fix
-        assert connection_successful, WebSocket connection should work"
-        assert not auth_successful, "BEFORE FIX: Auth should fail on user ID validation
+        assert connection_successful, WebSocket connection should work""
+        assert not auth_successful, "BEFORE FIX: Auth should fail on user ID validation"
         assert not streaming_successful, BEFORE FIX: Streaming should timeout
         assert len(events_received) == 0, "BEFORE FIX: No streaming events should be received"
         
@@ -186,12 +186,12 @@ class WebSocketStreamingTimeoutReproductionTests:
         await reproducer.test_user_id_validation_failure()
         
     async def test_streaming_missing_implementation_reproduction(self):
-        Test the missing streaming implementation reproduction"
+        Test the missing streaming implementation reproduction""
         reproducer = WebSocketStreamingTimeoutReproduction()
         await reproducer.test_streaming_implementation_missing()
         
     async def test_redis_timeout_reproduction(self):
-        "Test the Redis dependency timeout reproduction
+        "Test the Redis dependency timeout reproduction"""
         reproducer = WebSocketStreamingTimeoutReproduction()
         await reproducer.test_redis_dependency_timeout()
         
@@ -223,12 +223,12 @@ if __name__ == __main__:
             await reproducer.test_user_id_validation_failure()
             print(" PASS:  User ID validation failure reproduced")
         except Exception as e:
-            print(f FAIL:  Failed to reproduce user ID validation: {e})"
+            print(f FAIL:  Failed to reproduce user ID validation: {e})""
             
         # Test 2: Missing streaming
         try:
             await reproducer.test_streaming_implementation_missing()
-            print(" PASS:  Missing streaming implementation reproduced)
+            print(" PASS:  Missing streaming implementation reproduced)"
         except Exception as e:
             print(f FAIL:  Failed to reproduce streaming issue: {e}")"
             
@@ -242,9 +242,9 @@ if __name__ == __main__:
         # Test 4: Connection tracking
         try:
             await reproducer.test_websocket_connection_tracking_failure()
-            print( PASS:  Connection tracking failure reproduced)"
+            print( PASS:  Connection tracking failure reproduced)""
         except Exception as e:
-            print(f FAIL:  Failed to reproduce connection tracking: {e}")
+            print(f FAIL:  Failed to reproduce connection tracking: {e}")"
             
         print(= * 60")"
         print( TARGET:  REPRODUCTION COMPLETE - Issues identified and documented)

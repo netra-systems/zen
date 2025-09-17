@@ -227,7 +227,7 @@ class PostFixValidationTests(SSotBaseTestCase):
                     self.fail(fImport errors still present: {result.stderr})"
                 else:
                     # Test failures are acceptable, import errors are not
-                    print(f"Tests collected successfully, some may have failed: {result.stdout})
+                    print(f"Tests collected successfully, some may have failed: {result.stdout})")
             
             # Verify substantial test discovery
             output = result.stdout + result.stderr

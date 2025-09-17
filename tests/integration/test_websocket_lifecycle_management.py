@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Integration Tests for WebSocket Lifecycle Management Race Conditions
 
 Business Value Justification (BVJ):
@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 
 CRITICAL: These tests focus on WebSocket lifecycle management with real services.
 They target the MessageHandlerService initialization gaps and service readiness issues.
-"
+"""Empty docstring."""
 
 import asyncio
 import json
@@ -32,16 +32,16 @@ logger = logging.getLogger(__name__)
 
 
 class WebSocketLifecycleManagementTests(BaseIntegrationTest):
-    "
+"""Empty docstring."""
     Integration tests for WebSocket lifecycle management with real services.
     
     Tests WebSocket initialization, MessageHandlerService setup, and service readiness
     validation timing using real PostgreSQL and Redis services.
-"
+"""Empty docstring."""
 
     @pytest.fixture(autouse=True)
     async def setup_auth_helper(self):
-        "Set up authentication helper for integration tests.
+        "Set up authentication helper for integration tests."""
         self.auth_helper = E2EAuthHelper(environment=test")"
 
     @pytest.mark.integration
@@ -55,11 +55,11 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         ""
         # Get real services
         redis_client = real_services_fixture[redis]
-        db_session = real_services_fixture[db]"
+        db_session = real_services_fixture[db]""
         
         # Create authenticated user
         user_context = await create_authenticated_user_context(
-            user_email=fredis_race_test_{int(time.time())}@example.com",
+            user_email=fredis_race_test_{int(time.time())}@example.com","
             environment=test,
             websocket_enabled=True
         )
@@ -69,7 +69,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
             fwebsocket:user:{user_context.user_id}","
             fwebsocket:connection:{user_context.websocket_client_id},
             fuser:session:{user_context.user_id},
-            f"websocket:state:{user_context.websocket_client_id}
+            f"websocket:state:{user_context.websocket_client_id}"
         ]
         
         for key in user_redis_keys:
@@ -92,13 +92,13 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                 
                 # Simulate WebSocket connection initialization
                 # Set Redis state as WebSocket connection would
-                connection_id = fconn_{attempt}_{int(time.time() * 1000)}"
+                connection_id = fconn_{attempt}_{int(time.time() * 1000)}""
                 websocket_state = {
                     user_id: str(user_context.user_id),
                     connection_id": connection_id,"
                     status: connecting,
-                    timestamp: datetime.now(timezone.utc).isoformat(),"
-                    attempt": attempt
+                    timestamp: datetime.now(timezone.utc).isoformat(),""
+                    attempt": attempt"
                 }
                 
                 # Set Redis state (simulating WebSocket manager)
@@ -111,8 +111,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                 # Simulate race condition: rapid state updates
                 for i in range(3):
                     state_update = websocket_state.copy()
-                    state_update[status] = f"update_{i}
-                    state_update[update_time] = datetime.now(timezone.utc).isoformat()"
+                    state_update[status] = f"update_{i}"
+                    state_update[update_time] = datetime.now(timezone.utc).isoformat()""
                     
                     await redis_client.setex(
                         fwebsocket:connection:{connection_id},
@@ -132,8 +132,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     await asyncio.sleep(0.01)  # 10ms between updates to trigger race
                 
                 # Final state update
-                websocket_state[status] = "connected
-                websocket_state[connected_at"] = datetime.now(timezone.utc).isoformat()
+                websocket_state[status] = "connected"
+                websocket_state[connected_at"] = datetime.now(timezone.utc).isoformat()"
                 await redis_client.setex(
                     fwebsocket:connection:{connection_id},
                     300,
@@ -149,23 +149,23 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     redis_state_after[key] = value.decode() if value else None
                 
                 # Verify state consistency
-                final_state = await redis_client.get(fwebsocket:connection:{connection_id})"
+                final_state = await redis_client.get(fwebsocket:connection:{connection_id})""
                 final_data = json.loads(final_state.decode()) if final_state else {}
                 
                 connection_attempts.append({
-                    "attempt: attempt,
+                    "attempt: attempt,"
                     success: True,
                     "connection_time: connection_time,"
                     connection_id: connection_id,
-                    final_status: final_data.get(status"),
-                    "state_consistent: final_data.get(status) == connected
+                    final_status: final_data.get(status"),"
+                    "state_consistent: final_data.get(status) == connected"
                 }
                 
                 redis_state_tracking.append({
                     attempt": attempt,"
                     before: redis_state_before,
-                    after: redis_state_after,"
-                    "final_state: final_data
+                    after: redis_state_after,""
+                    "final_state: final_data"
                 }
                 
             except Exception as e:
@@ -174,8 +174,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     attempt: attempt,
                     "success: False,"
                     connection_time: connection_time,
-                    error: str(e),"
-                    error_type": type(e).__name__
+                    error: str(e),""
+                    error_type": type(e).__name__"
                 }
             
             # Small delay between attempts
@@ -193,22 +193,22 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         
         # Print detailed results
         for attempt in connection_attempts:
-            attempt_num = attempt[attempt]"
-            if attempt.get("success):
+            attempt_num = attempt[attempt]""
+            if attempt.get("success):"
                 status =  PASS:  SUCCESS if attempt.get(state_consistent) else  WARNING: [U+FE0F]  INCONSISTENT""
                 conn_time = attempt.get(connection_time, 0)
-                final_status = attempt.get(final_status, "unknown)
-                print(f   Attempt {attempt_num}: {status} ({conn_time:.3f}s) - Final: {final_status}")
+                final_status = attempt.get(final_status, "unknown)"
+                print(f   Attempt {attempt_num}: {status} ({conn_time:.3f}s) - Final: {final_status}")"
             else:
                 error = attempt.get(error, Unknown error)
-                print(f"   Attempt {attempt_num}:  FAIL:  FAILED - {error})
+                print(f"   Attempt {attempt_num}:  FAIL:  FAILED - {error})"
         
         # Check for race conditions
         race_conditions_detected = (
             inconsistent_states > 0 or           # State inconsistency indicates race conditions
             successful_attempts < len(connection_attempts) or  # Connection failures
             avg_connection_time > 0.1            # Slow connections may indicate contention
-        ")
+        ")"
         
         if race_conditions_detected:
             print(f\n ALERT:  WEBSOCKET-REDIS RACE CONDITIONS DETECTED:)
@@ -217,19 +217,19 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
             
             # This test is designed to detect race conditions
             assert False, (
-                f"WebSocket-Redis race conditions detected:\n
-                fInconsistent states: {inconsistent_states} (should be 0)\n"
+                f"WebSocket-Redis race conditions detected:\n"
+                fInconsistent states: {inconsistent_states} (should be 0)\n""
                 fSuccess rate: {successful_attempts}/{len(connection_attempts)}\n
-                fAverage time: {avg_connection_time:.3f}s\n"
-                f"This proves WebSocket-Redis synchronization race conditions exist.
+                fAverage time: {avg_connection_time:.3f}s\n""
+                f"This proves WebSocket-Redis synchronization race conditions exist."
             )
         else:
             print(f\n PASS:  WEBSOCKET-REDIS SYNCHRONIZATION APPEARS STABLE:)
-            print(f"   No race conditions detected in state synchronization)
+            print(f"   No race conditions detected in state synchronization)"
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_auth_validation_with_redis_delay(self, real_services_fixture"):
+    async def test_auth_validation_with_redis_delay(self, real_services_fixture"):"
         
         Test authentication validation when Redis responses are delayed.
         
@@ -240,8 +240,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         
         # Create authenticated user
         user_context = await create_authenticated_user_context(
-            user_email=fauth_delay_test_{int(time.time())}@example.com,"
-            environment="test,
+            user_email=fauth_delay_test_{int(time.time())}@example.com,""
+            environment="test,"
             websocket_enabled=True
         )
         
@@ -258,8 +258,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     user_id: str(user_context.user_id),
                     "email: user_context.agent_context['user_email'],"
                     token: jwt_token,
-                    permissions: user_context.agent_context['permissions'],"
-                    validated_at": datetime.now(timezone.utc).isoformat(),
+                    permissions: user_context.agent_context['permissions'],""
+                    validated_at": datetime.now(timezone.utc).isoformat(),"
                     delay_test: delay_ms
                 }
                 
@@ -296,37 +296,37 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     total_validation_time = time.time() - validation_start
                     
                     auth_validation_results.append({
-                        delay_ms: delay_ms,"
-                        "success: jwt_valid,
+                        delay_ms: delay_ms,""
+                        "success: jwt_valid,"
                         redis_response_time: delay_ms / 1000.0,
                         "jwt_validation_time: jwt_validation_time,"
                         total_validation_time: total_validation_time,
-                        auth_data_retrieved: bool(stored_auth)"
+                        auth_data_retrieved: bool(stored_auth)""
                     }
                     
                 else:
                     # Redis data not found
                     total_validation_time = time.time() - validation_start
                     auth_validation_results.append({
-                        delay_ms": delay_ms,
+                        delay_ms": delay_ms,"
                         success: False,
                         error": "Auth data not found in Redis,
                         total_validation_time: total_validation_time,
-                        auth_data_retrieved: False"
+                        auth_data_retrieved: False""
                     }
                     
             except Exception as e:
                 validation_time = time.time() - validation_start if 'validation_start' in locals() else 0
                 auth_validation_results.append({
-                    delay_ms": delay_ms,
+                    delay_ms": delay_ms,"
                     success: False,
                     error": str(e),"
                     total_validation_time: validation_time,
-                    auth_data_retrieved: False"
+                    auth_data_retrieved: False""
                 }
         
         # Analyze auth validation under delays
-        successful_validations = sum(1 for r in auth_validation_results if r.get("success, False))
+        successful_validations = sum(1 for r in auth_validation_results if r.get("success, False))"
         max_validation_time = max(r.get(total_validation_time, 0) for r in auth_validation_results)
         avg_validation_time = sum(r.get("total_validation_time, 0) for r in auth_validation_results) / len(auth_validation_results)"
         
@@ -337,15 +337,15 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         print(f CHART:  Successful validations: {successful_validations}/{len(auth_validation_results)})
         print(f[U+23F1][U+FE0F]  Maximum validation time: {max_validation_time:.3f}s")"
         print(f[U+1F4C8] Average validation time: {avg_validation_time:.3f}s)
-        print(f FAIL:  Failures under delay: {len(failed_under_delay)})"
+        print(f FAIL:  Failures under delay: {len(failed_under_delay)})""
         
         # Print detailed results
-        print(f"\n[U+1F4CB] Validation Results by Delay:)
+        print(f"\n[U+1F4CB] Validation Results by Delay:)"
         for result in auth_validation_results:
             delay = result.get(delay_ms, 0)
             success = " PASS:  if result.get(success", False) else  FAIL: 
-            val_time = result.get(total_validation_time, 0)"
-            error = result.get("error, )
+            val_time = result.get(total_validation_time, 0)""
+            error = result.get("error, )"
             print(f   {delay:4d}ms delay: {success} ({val_time:.3f}s) {error})
         
         # Check for auth validation timing issues
@@ -362,8 +362,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
             
             assert False, (
                 fAuth validation timing issues detected:\n
-                fFailures under delay: {len(failed_under_delay)}\n"
-                f"Max validation time: {max_validation_time:.3f}s (should be <1s)\n
+                fFailures under delay: {len(failed_under_delay)}\n""
+                f"Max validation time: {max_validation_time:.3f}s (should be <1s)\n"
                 fSuccess rate: {successful_validations}/{len(auth_validation_results)}\n
                 fThis proves auth validation race conditions exist with Redis delays.
             )
@@ -385,21 +385,21 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         # Create authenticated user
         user_context = await create_authenticated_user_context(
             user_email=fsession_persist_test_{int(time.time())}@example.com,
-            environment=test,"
+            environment=test,""
             websocket_enabled=True
         )
         
         # Test session persistence through connection lifecycle
         session_persistence_results = []
-        session_id = fsession_{user_context.user_id}_{int(time.time())}"
+        session_id = fsession_{user_context.user_id}_{int(time.time())}""
         
         # Create initial session
         initial_session = {
             session_id: session_id,
             user_id": str(user_context.user_id),"
             websocket_id: str(user_context.websocket_client_id),
-            created_at: datetime.now(timezone.utc).isoformat(),"
-            "status: active,
+            created_at: datetime.now(timezone.utc).isoformat(),""
+            "status: active,"
             message_count: 0,
             last_activity": datetime.now(timezone.utc).isoformat()"
         }
@@ -410,8 +410,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         # Test session persistence through various scenarios
         test_scenarios = [
             {name: normal_activity, simulation": "normal},
-            {name: connection_drop, simulation: "disconnect},
-            {name": rapid_reconnect, simulation: fast_reconnect},
+            {name: connection_drop, simulation: "disconnect},"
+            {name": rapid_reconnect, simulation: fast_reconnect},"
             {name": "delayed_reconnect, simulation: slow_reconnect},
             {name: "concurrent_updates, simulation": concurrent}
         ]
@@ -430,8 +430,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                         # Update session with activity
                         session_update = initial_session.copy()
                         session_update[message_count] = i + 1
-                        session_update[last_activity] = datetime.now(timezone.utc).isoformat()"
-                        session_update[activity_type"] = message_sent
+                        session_update[last_activity] = datetime.now(timezone.utc).isoformat()""
+                        session_update[activity_type"] = message_sent"
                         
                         await redis_client.setex(session_key, 3600, json.dumps(session_update))
                         await asyncio.sleep(0.01)  # 10ms between updates
@@ -451,9 +451,9 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     # Check if session persisted
                     persisted_session = await redis_client.get(session_key)
                     success = persisted_session is not None
-                    error = None if success else Session not persisted during disconnect"
+                    error = None if success else Session not persisted during disconnect""
                     
-                elif simulation_type == "fast_reconnect:
+                elif simulation_type == "fast_reconnect:"
                     # Simulate rapid reconnection
                     session_update = initial_session.copy()
                     session_update[status] = disconnected
@@ -465,8 +465,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     await redis_client.setex(session_key, 3600, json.dumps(session_update))
                     
                     # Quick reconnect complete
-                    session_update[status] = active"
-                    session_update["reconnected_at] = datetime.now(timezone.utc).isoformat()
+                    session_update[status] = active""
+                    session_update["reconnected_at] = datetime.now(timezone.utc).isoformat()"
                     await redis_client.setex(session_key, 3600, json.dumps(session_update))
                     
                     # Verify final state
@@ -479,10 +479,10 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                         success = False
                         error = Session lost during fast reconnect
                         
-                elif simulation_type == slow_reconnect:"
+                elif simulation_type == slow_reconnect:""
                     # Simulate delayed reconnection
                     session_update = initial_session.copy()
-                    session_update["status] = disconnected
+                    session_update["status] = disconnected"
                     await redis_client.setex(session_key, 3600, json.dumps(session_update))
                     
                     # Longer delay before reconnect
@@ -495,13 +495,13 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     await asyncio.sleep(0.1)
                     
                     session_update[status] = active
-                    session_update[reconnected_at] = datetime.now(timezone.utc).isoformat()"
+                    session_update[reconnected_at] = datetime.now(timezone.utc).isoformat()""
                     await redis_client.setex(session_key, 3600, json.dumps(session_update))
                     
                     # Verify persistence after delay
                     final_session = await redis_client.get(session_key)
                     success = final_session is not None
-                    error = None if success else "Session not persisted after delayed reconnect
+                    error = None if success else "Session not persisted after delayed reconnect"
                     
                 elif simulation_type == concurrent:
                     # Simulate concurrent session updates (race condition test)
@@ -510,14 +510,14 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                             session_update = initial_session.copy()
                             session_update["concurrent_update_id] = update_id"
                             session_update[update_sequence] = i
-                            session_update[update_time] = datetime.now(timezone.utc).isoformat()"
+                            session_update[update_time] = datetime.now(timezone.utc).isoformat()""
                             
                             await redis_client.setex(session_key, 3600, json.dumps(session_update))
                             await asyncio.sleep(0.001)  # 1ms between updates
                     
                     # Run 3 concurrent update tasks
                     await asyncio.gather(
-                        concurrent_update(task_1"),
+                        concurrent_update(task_1"),"
                         concurrent_update(task_2),
                         concurrent_update(task_3")"
                     )
@@ -528,10 +528,10 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                         final_data = json.loads(final_session.decode())
                         # Should have data from one of the concurrent updates
                         success = concurrent_update_id in final_data
-                        error = None if success else Concurrent updates caused data corruption"
+                        error = None if success else Concurrent updates caused data corruption""
                     else:
                         success = False
-                        error = "Session lost during concurrent updates
+                        error = "Session lost during concurrent updates"
                 
                 scenario_time = time.time() - scenario_start
                 
@@ -539,8 +539,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     scenario: scenario_name,
                     "success: success,"
                     scenario_time: scenario_time,
-                    error: error,"
-                    simulation_type": simulation_type
+                    error: error,""
+                    simulation_type": simulation_type"
                 }
                 
             except Exception as e:
@@ -549,8 +549,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     scenario: scenario_name,
                     success": False,"
                     scenario_time: scenario_time,
-                    error: str(e),"
-                    "simulation_type: simulation_type
+                    error: str(e),""
+                    "simulation_type: simulation_type"
                 }
         
         # Analyze session persistence results
@@ -567,8 +567,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         print(f\n[U+1F4CB] Session Persistence Results:)
         for result in session_persistence_results:
             scenario = result.get(scenario", "unknown)
-            success =  PASS:  if result.get(success, False) else  FAIL: "
-            time_taken = result.get("scenario_time, 0)
+            success =  PASS:  if result.get(success, False) else  FAIL: ""
+            time_taken = result.get("scenario_time, 0)"
             error = result.get(error, )
             print(f   {scenario}: {success} ({time_taken:.3f}s) {error}")"
         
@@ -584,10 +584,10 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
             print(f   These can cause loss of user context during reconnections)
             
             for failed in failed_scenarios:
-                print(f   Failed: {failed['scenario']} - {failed.get('error', 'Unknown error')})"
+                print(f   Failed: {failed['scenario']} - {failed.get('error', 'Unknown error')})""
             
             assert False, (
-                f"Session persistence issues detected:\n
+                f"Session persistence issues detected:\n"
                 fFailed scenarios: {len(failed_scenarios)}/{len(session_persistence_results)}\n
                 fSuccessful scenarios: {successful_scenarios}\n
                 fThis proves session persistence race conditions exist.""
@@ -622,23 +622,23 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         isolation_test_results = []
         
         async def user_operation(user_context, user_index):
-            Perform user-specific operations and track state isolation."
+            Perform user-specific operations and track state isolation.""
             try:
                 user_id = str(user_context.user_id)
                 websocket_id = str(user_context.websocket_client_id)
                 
                 # Create user-specific Redis state
                 user_state = {
-                    user_id": user_id,
+                    user_id": user_id,"
                     websocket_id: websocket_id,
                     user_index": user_index,"
                     messages: [],
-                    created_at: datetime.now(timezone.utc).isoformat(),"
-                    "status: active
+                    created_at: datetime.now(timezone.utc).isoformat(),""
+                    "status: active"
                 }
                 
                 user_key = fuser:state:{user_id}
-                websocket_key = fwebsocket:state:{websocket_id}"
+                websocket_key = fwebsocket:state:{websocket_id}""
                 
                 # Store initial state
                 await redis_client.setex(user_key, 3600, json.dumps(user_state))
@@ -647,12 +647,12 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                 # Perform rapid operations to test isolation
                 for operation in range(5):
                     # Update user state
-                    user_state["messages].append({
+                    user_state["messages].append({"
                         operation: operation,
                         "message: fUser {user_index} operation {operation}",
                         timestamp: datetime.now(timezone.utc).isoformat()
                     }
-                    user_state[last_operation] = operation"
+                    user_state[last_operation] = operation""
                     
                     # Store updated state
                     await redis_client.setex(user_key, 3600, json.dumps(user_state))
@@ -671,7 +671,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     
                     # Check state consistency
                     state_consistent = (
-                        user_data.get("user_id) == user_id and
+                        user_data.get("user_id) == user_id and"
                         websocket_data.get(user_id) == user_id and
                         user_data.get("user_index) == user_index and"
                         len(user_data.get(messages, []) == 5
@@ -679,38 +679,38 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     
                     # Check for contamination from other users
                     no_contamination = (
-                        user_data.get(user_index) == user_index and"
-                        websocket_data.get(user_index") == user_index
+                        user_data.get(user_index) == user_index and""
+                        websocket_data.get(user_index") == user_index"
                     )
                     
                     return {
                         user_index: user_index,
                         user_id": user_id,"
                         success: True,
-                        state_consistent: state_consistent,"
-                        "no_contamination: no_contamination,
+                        state_consistent: state_consistent,""
+                        "no_contamination: no_contamination,"
                         message_count: len(user_data.get(messages, []),
                         final_user_data": user_data,"
                         final_websocket_data: websocket_data
                     }
                 else:
                     return {
-                        user_index: user_index,"
-                        "user_id: user_id,
+                        user_index: user_index,""
+                        "user_id: user_id,"
                         success: False,
                         "error: State not found in Redis",
                         state_consistent: False,
-                        no_contamination: False"
+                        no_contamination: False""
                     }
                     
             except Exception as e:
                 return {
-                    "user_index: user_index,
+                    "user_index: user_index,"
                     user_id: user_context.user_id if user_context else unknown,
                     success": False,"
                     error: str(e),
-                    error_type: type(e).__name__,"
-                    "state_consistent: False,
+                    error_type: type(e).__name__,""
+                    "state_consistent: False,"
                     no_contamination: False
                 }
         
@@ -725,9 +725,9 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         # Analyze isolation results
         successful_users = sum(1 for r in isolation_test_results if r.get("success, False))"
         consistent_states = sum(1 for r in isolation_test_results if r.get(state_consistent, False))
-        no_contamination_count = sum(1 for r in isolation_test_results if r.get(no_contamination, False))"
+        no_contamination_count = sum(1 for r in isolation_test_results if r.get(no_contamination, False))""
         
-        print(f\n[U+1F465] MULTI-USER ISOLATION ANALYSIS:")
+        print(f\n[U+1F465] MULTI-USER ISOLATION ANALYSIS:")"
         print(f CHART:  Successful user operations: {successful_users}/{len(isolation_test_results)})
         print(f PASS:  Consistent states: {consistent_states}/{len(isolation_test_results")}")
         print(f[U+1F512] No contamination: {no_contamination_count}/{len(isolation_test_results)})
@@ -740,9 +740,9 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
             consistent =  PASS:  if result.get("state_consistent, False) else  FAIL: "
             no_contam =  PASS:  if result.get(no_contamination, False) else " FAIL: "
             msg_count = result.get(message_count, 0)
-            error = result.get(error, ")
+            error = result.get(error, ")"
             
-            print(f"   User {user_idx}: {success} Consistent:{consistent} Isolated:{no_contam} Messages:{msg_count} {error})
+            print(f"   User {user_idx}: {success} Consistent:{consistent} Isolated:{no_contam} Messages:{msg_count} {error})"
         
         # Check for cross-user contamination in Redis
         contamination_detected = False
@@ -755,10 +755,10 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                 if i == j or not result_b.get(success):
                     continue
                     
-                user_data_b = result_b.get(final_user_data, {}"
+                user_data_b = result_b.get(final_user_data, {}""
                 
                 # Check if user A's data contains user B's information
-                if user_data_a.get(user_index") != i:
+                if user_data_a.get(user_index") != i:"
                     contamination_detected = True
                     print(f    WARNING: [U+FE0F]  User {i} data contaminated with user {user_data_a.get('user_index')} data)
         
@@ -777,8 +777,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
             
             assert False, (
                 fUser isolation failures detected:\n
-                fSuccessful operations: {successful_users}/{len(isolation_test_results)}\n"
-                f"Consistent states: {consistent_states}/{len(isolation_test_results)}\n
+                fSuccessful operations: {successful_users}/{len(isolation_test_results)}\n""
+                f"Consistent states: {consistent_states}/{len(isolation_test_results)}\n"
                 fNo contamination: {no_contamination_count}/{len(isolation_test_results)}\n
                 fCross-contamination: {contamination_detected}\n
                 fThis proves user isolation race conditions exist.""
@@ -786,4 +786,4 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         else:
             print(f\n PASS:  USER ISOLATION APPEARS ROBUST:)
             print(f   All users maintained proper state isolation")"
-            print(f"   No cross-user contamination detected"")
+            print(f"   No cross-user contamination detected"")"

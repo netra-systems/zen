@@ -104,7 +104,7 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
 
             # Log status
             status = ✅ COMPLIANT if is_compliant else ❌ NON-COMPLIANT"
-            print(f"{status}: {file_path})
+            print(f"{status}: {file_path})")
             if not is_compliant:
                 print(f  Issues: {'; '.join(violation_details)})
 

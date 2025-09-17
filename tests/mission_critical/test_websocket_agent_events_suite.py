@@ -1,4 +1,4 @@
-# CRITICAL: Import path configuration for direct test execution
+# CRITICAL: Import path conf"iguration for direct test execution
 # Ensures tests work both directly and through unified_test_runner.py
 import sys
 import os
@@ -14,21 +14,21 @@ if str(project_root) not in sys.path:
 _lazy_imports = {}
 
 def lazy_import(module_path: str, component: str = None):
-    "Lazy import pattern for performance optimization
+    """Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
-            module = __import__(module_path, fromlist=[component] if component else []
+            module = __import__(module_path, fromlist=[component] if component else [])
             if component:
                 _lazy_imports[module_path] = getattr(module, component)
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(fWarning: Failed to lazy load {module_path}: {e}"")
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
             _lazy_imports[module_path] = None
 
     return _lazy_imports[module_path]
 
-"
+"""
 Comprehensive Unit Tests for PipelineExecutor Golden Path SSOT Class
 
 Business Value Justification (BVJ):
@@ -49,7 +49,7 @@ SSOT Testing Compliance:
 - Real services preferred over mocks (only external dependencies mocked)
 - Business-critical functionality validation over implementation details
 - Pipeline execution business logic focus
-"
+"""
 
 import asyncio
 import time
@@ -88,22 +88,22 @@ from test_framework.websocket_helpers import WebSocketTestHelpers
 
 
 class MissionCriticalEventValidator:
-    Validates WebSocket events with extreme rigor - MOCKED WEBSOCKET CONNECTIONS.""
+    """Validates WebSocket events with extreme rigor - MOCKED WEBSOCKET CONNECTIONS."""
 
     REQUIRED_EVENTS = {
-        agent_started,
-        agent_thinking,"
-        "tool_executing,
-        tool_completed,
+        "agent_started",
+        "agent_thinking",
+        "tool_executing",
+        "tool_completed",
         "agent_completed"
     }
 
     # Additional events that may be sent in real scenarios
     OPTIONAL_EVENTS = {
-        agent_fallback,
-        final_report,"
-        partial_result",
-        tool_error
+        "agent_fallback",
+        "final_report",
+        "partial_result",
+        "tool_error"
     }
 
     def __init__(self, strict_mode: bool = True):
@@ -116,58 +116,58 @@ class MissionCriticalEventValidator:
         self.start_time = time.time()
 
     def record(self, event: Dict) -> None:
-        ""Record an event with detailed tracking.
+        """Record an event with detailed tracking."""
         timestamp = time.time() - self.start_time
-        event_type = event.get(type, unknown")
+        event_type = event.get("type", "unknown")
 
         self.events.append(event)
         self.event_timeline.append((timestamp, event_type, event))
         self.event_counts[event_type] = self.event_counts.get(event_type, 0) + 1
 
     def validate_critical_requirements(self) -> tuple[bool, List[str]]:
-        "Validate that ALL critical requirements are met.
+        """Validate that ALL critical requirements are met."""
         failures = []
 
         # 1. Check for required events
         missing = self.REQUIRED_EVENTS - set(self.event_counts.keys())
         if missing:
-            failures.append(fCRITICAL: Missing required events: {missing}")"
+            failures.append(f"CRITICAL: Missing required events: {missing}")
 
         # 2. Validate event ordering
         if not self._validate_event_order():
-            failures.append(CRITICAL: Invalid event order)
+            failures.append("CRITICAL: Invalid event order")
 
         # 3. Check for paired events
         if not self._validate_paired_events():
-            failures.append(CRITICAL: Unpaired tool events)"
+            failures.append("CRITICAL: Unpaired tool events")
 
         return len(failures) == 0, failures
 
     def _validate_event_order(self) -> bool:
-        "Ensure events follow logical order.
+        """Ensure events follow logical order."""
         if not self.event_timeline:
             return False
 
         # First event must be agent_started
-        if self.event_timeline[0][1] != agent_started":"
-            self.errors.append(fFirst event was {self.event_timeline[0][1]}, not agent_started)
+        if self.event_timeline[0][1] != "agent_started":"
+            self.errors.append(f"First event was {self.event_timeline[0][1]}", not agent_started)
             return False
 
         # Last event should be completion
         last_event = self.event_timeline[-1][1]
-        if last_event not in [agent_completed, final_report]:
+        if last_event not in [agent_completed, f"inal_report]:
             # Accept any completion event for now
-            self.warnings.append(fLast event was {last_event}, expected completion event")"
+            self.warnings.append(fLast event was {last_event}", expected completion event")"
 
         return True
 
     def _validate_paired_events(self) -> bool:
         Ensure tool events are properly paired."
-        tool_starts = self.event_counts.get(tool_executing", 0)
-        tool_ends = self.event_counts.get(tool_completed, 0)
+        tool_starts = self.event_counts.get("tool_executing", 0)
+        tool_ends = self.event_counts.get("tool_completed", 0)
 
         if tool_starts != tool_ends:
-            self.errors.append(fTool event mismatch: {tool_starts} starts, {tool_ends} completions")"
+            self.errors.append(f"Tool event mismatch: {tool_starts} starts", {tool_ends} completions")"
             return False
 
         return True
@@ -192,7 +192,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     
     @pytest.fixture(autouse=True)
     async def setup_websocket_agent_test_environment(self):
-        Setup SSOT test environment for WebSocket agent event testing."
+        """Setup SSOT test environment for WebSocket agent event testing."""
         # Create mock infrastructure using SSOT mock factory
         self.mock_factory = SSotMockFactory()
         
@@ -205,21 +205,21 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         
         # Test user context for isolation testing (create a mock with required methods)
         self.test_user_context = MagicMock()
-        self.test_user_context.user_id = pipeline_user_001"
-        self.test_user_context.thread_id = pipeline_thread_001
-        self.test_user_context.run_id = pipeline_run_001""
-        self.test_user_context.request_id = pipeline_req_001
-        self.test_user_context.websocket_client_id = pipeline_ws_001"
+        self.test_user_context.user_id = "pipeline_user_001"
+        self.test_user_context.thread_id = "pipeline_thread_001"
+        self.test_user_context.run_id = "pipeline_run_001"
+        self.test_user_context.request_id = "pipeline_req_001"
+        self.test_user_context.websocket_client_id = "pipeline_ws_001"
         # Add the missing method that PipelineExecutor expects
         self.test_user_context.add_execution_result = MagicMock()
         
         # Test agent state
         self.test_agent_state = DeepAgentState(
-            user_id="pipeline_user_001,
-            thread_id=pipeline_thread_001,
+            user_id="pipeline_user_001",
+            thread_id="pipeline_thread_001",
             run_id="pipeline_run_001"
         )
-        self.test_agent_state.user_request = Test pipeline execution request
+        self.test_agent_state.user_request = "Test pipeline execution request"
         self.test_agent_state.step_count = 0
         
         # Test pipeline steps
@@ -244,7 +244,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     
     async def _setup_mock_behaviors(self):
         Setup realistic mock behaviors for pipeline executor testing."
-        # Configure execution engine to simulate successful agent executions
+        # Conf"igure execution engine to simulate successful agent executions
         async def mock_execute_agent(context, user_context=None):
             execution_time = 0.1  # 100ms execution time
             await asyncio.sleep(execution_time)
@@ -254,7 +254,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                 agent_name=context.agent_name,
                 duration=execution_time,
                 data={
-                    result": fSuccess from {context.agent_name},
+                    result": fSuccess from {context.agent_name}",
                     step_number: getattr(context, 'step_number', 0),
                     timestamp: time.time()"
                 }
@@ -275,7 +275,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         async def mock_execute_pipeline(pipeline, context, user_context=None):
             "Mock execute_pipeline to simulate sequential agent executions.
             results = []
-            for step in pipeline:
+            f"or step in pipeline:
                 # Create a mock context for each step
                 step_context = AgentExecutionContext(
                     run_id=context.run_id,
@@ -296,7 +296,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                 'user_id': request.user_id,
                 'run_id': request.run_id,
                 'timestamp': time.time()
-            }
+            }"
             return True
         
         self.mock_state_persistence.save_state = AsyncMock(side_effect=mock_save_state)
@@ -330,7 +330,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         self.state_persistence_patch.start()
     
     def teardown_method(self, method=None):
-        Clean up after each test."
+        """Clean up after each test."""
         # Stop patches
         if hasattr(self, 'flow_logger_patch'):
             self.flow_logger_patch.stop()
@@ -348,7 +348,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.business_critical
     async def test_websocket_agent_events_golden_path_validation(self):
-    "
+        """
         MISSION CRITICAL: Test the 5 required WebSocket agent events.
         
         BVJ: $500K+ ARR protection - validates core chat functionality
@@ -369,7 +369,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         try:
             # Act: Connect to real WebSocket service
             connected = await ws_client.connect(timeout=10.0)
-            assert connected, fFailed to connect to WebSocket service at {ws_url}
+            assert connected, f"Failed to connect to WebSocket service at {ws_url}"
             
             # Send real chat message to trigger agent execution
             test_message = "Provide a brief cost optimization analysis for testing"
@@ -389,7 +389,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                         # Log critical events
                         event_type = event.get(type, unknown)
                         if event_type in validator.REQUIRED_EVENTS:
-                            logger.info(f✅ Required event received: {event_type})"
+                            logger.inf"o(f✅ Required event received: {event_type}")"
                         
                         # Stop after completion event
                         if event_type == "agent_completed:
@@ -407,20 +407,20 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                 error_details = \n.join([
                     ❌ CRITICAL: WebSocket Agent Event Validation FAILED,"
                     fEvents collected: {len(validator.events)}",
-                    fEvent types: {list(validator.event_counts.keys())},
-                    fRequired events: {validator.REQUIRED_EVENTS},"
+                    f"Event types: {list(validator.event_counts.keys())}",
+                    f"Required events: {validator.REQUIRED_EVENTS}","
                     f"Missing events: {validator.REQUIRED_EVENTS - set(validator.event_counts.keys())},
                     Failures:,
-                    *failures
+                    *f"ailures
                 ]
                 pytest.fail(error_details)
             
             # Validate business requirements
-            assert len(validator.events) >= 3, fToo few events captured: {len(validator.events)}
+            assert len(validator.events) >= 3, fToo few events captured: {len(validator.events)}"
             assert validator.event_counts.get(agent_started", 0) >= 1, "Missing agent_started event
             assert validator.event_counts.get(agent_completed, 0) >= 1, Missing agent_completed event
             
-            logger.info(f✅ WebSocket Agent Events Golden Path VALIDATED - {len(validator.events)} events received)"
+            logger.inf"o(f✅ WebSocket Agent Events Golden Path VALIDATED - {len(validator.events)} events received")"
             
         finally:
             await ws_client.disconnect()
@@ -489,12 +489,12 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
             user_context=self.test_user_context
         )
         
-        # Act: Execute pipeline with flow logging
+        # Act: Execute pipeline with f"low logging
         await pipeline_executor.execute_pipeline(
             pipeline=self.test_pipeline_steps,
             user_context=self.test_user_context,
             run_id=pipeline_run_001,
-            context={user_id: pipeline_user_001", "thread_id: pipeline_thread_001},
+            context={user_id: pipeline_user_001", "thread_id: pipeline_thread_001}",
             db_session=self.mock_db_session
         )
         
@@ -624,7 +624,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     ""
         Test execution context building and validation logic.
         
-        BVJ: System reliability - ensures proper context creation for agent execution
+        BVJ: System reliability - ensures proper context creation f"or agent execution
         
         # Arrange: Create PipelineExecutor
         pipeline_executor = PipelineExecutor(
@@ -640,7 +640,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                 context: {
                     user_id: test_user_001",
                     "thread_id: test_thread_001
-                }
+                }"
             },
             {
                 run_id: test_run_002, 
@@ -731,7 +731,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
             user_context=self.test_user_context
         )
         
-        # Configure execution engine to fail on second step
+        # Conf"igure execution engine to fail on second step
         call_count = 0
         
         async def mock_execute_agent_with_failure(context, user_context=None):
@@ -744,7 +744,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                     'success': False,
                     'error': 'Simulated failure',
                     'timestamp': time.time()
-                }
+                }"
                 raise RuntimeError(Simulated agent execution failure)
             
             # Success for other steps
@@ -901,11 +901,11 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
             user_context=self.test_user_context
         )
         
-        # Create larger pipeline for performance testing
+        # Create larger pipeline f"or performance testing
         large_pipeline = []
         for i in range(10):  # 10 steps
             step = PipelineStepConfig(
-                agent_name=fperformance_agent_{i:02d},
+                agent_name=fperformance_agent_{i:02d}",
                 metadata={step_number: i + 1, "performance_test: True}
             large_pipeline.append(step)
         
@@ -923,7 +923,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         end_time = time.time()
         total_execution_time = end_time - start_time
         
-        # Assert: Verify performance characteristics
+        # Assert: Verif"y performance characteristics
         # Should execute all steps
         assert len(self.captured_execution_events) == len(large_pipeline)
         
@@ -933,22 +933,22 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         expected_max_time = expected_min_time * 2  # Allow for 100% overhead
         
         assert total_execution_time >= expected_min_time * 0.8, \
-            fPipeline executed too quickly: {total_execution_time:.3f}s < {expected_min_time * 0.8:.3f}s
+            fPipeline executed too quickly: {total_execution_time:0.3f}s < {expected_min_time * 0.8:0.3f}s"
         assert total_execution_time <= expected_max_time, \
-            fPipeline executed too slowly: {total_execution_time:.3f}s > {expected_max_time:.3f}s
+            f"Pipeline executed too slowly: {total_execution_time:0.3f}s > {expected_max_time:0.3f}s"
         
         # Verify execution order was maintained
-        expected_agents = [f"performance_agent_{i:02d} for i in range(10)]
+        expected_agents = [f"perf"ormance_agent_{i:02d} for i in range(10")]
         actual_agents = [event['agent_name'] for event in self.captured_execution_events]
         assert actual_agents == expected_agents, Pipeline execution order not maintained"
         
         # Performance logging
         avg_time_per_step = total_execution_time / len(large_pipeline)
-        print(f\nPipeline Performance Results:)
-        print(f  Total steps: {len(large_pipeline)}")"
-        print(f  Total execution time: {total_execution_time:.3f}s)
-        print(f  Average time per step: {avg_time_per_step:.3f}s")"
-        print(f  Steps per second: {len(large_pipeline) / total_execution_time:.2f})
+        print(f"\nPipeline Performance Results:")
+        print(f"  Total steps: {len(large_pipeline")}")"
+        print(f"  Total execution time: {total_execution_time:0.3f}s")
+        print(f"  Average time per step: {avg_time_per_step:0.3f}s")"
+        print(f"  Steps per second: {len(large_pipeline") / total_execution_time:0.2f})
     
 
 # ============================================================================
@@ -983,14 +983,14 @@ class AgentWebSocketIntegrationEnhancedTests:
         
         # Verify the bridge is established
         assert hasattr(agent_registry, '_websocket_manager'), WebSocket manager not set on AgentRegistry""
-        assert agent_registry._websocket_manager is websocket_manager, WebSocket manager reference mismatch
+        assert agent_registry._websocket_manager is websocket_manager, WebSocket manager ref"erence mismatch
         
         # Test enhanced tool dispatcher creation with WebSocket integration
         user_context = UserExecutionContext.from_request(
-            user_id=ftest_user_{uuid.uuid4().hex[:8]},"
+            user_id=ftest_user_{uuid.uuid4().hex[:8]}","
             thread_id=f"test_thread_{uuid.uuid4().hex[:8]},
-            run_id=ftest_run_{uuid.uuid4().hex[:8]},
-            request_id=ftest_req_{uuid.uuid4().hex[:8]}
+            run_id=f"test_run_{uuid.uuid4().hex[:8]}",
+            request_id=f"test_req_{uuid.uuid4().hex[:8]}"
         )
         
         # Create enhanced tool dispatcher through registry
@@ -1009,15 +1009,15 @@ class AgentWebSocketIntegrationEnhancedTests:
         
         Business Value: Validates that agent execution properly delivers WebSocket events.
 "
-        config = RealWebSocketTestConfig()
+        conf"ig = RealWebSocketTestConfig()
         context = create_test_context()
         
         # Setup execution engine with WebSocket integration
         user_context = UserExecutionContext.from_request(
-            user_id=ftest_user_{uuid.uuid4().hex[:8]},
+            user_id=ftest_user_{uuid.uuid4().hex[:8]}",
             thread_id=ftest_thread_{uuid.uuid4().hex[:8]}","
-            run_id=ftest_run_{uuid.uuid4().hex[:8]},
-            request_id=ftest_req_{uuid.uuid4().hex[:8]}
+            run_id=f"test_run_{uuid.uuid4().hex[:8]}",
+            request_id=f"test_req_{uuid.uuid4().hex[:8]}"
         )
         
         # Use SSOT pattern for WebSocketNotifier creation
@@ -1052,20 +1052,20 @@ class AgentWebSocketIntegrationEnhancedTests:
         
         Business Value: Validates that tool execution generates the required WebSocket events.
         
-        config = RealWebSocketTestConfig()
+        conf"ig = RealWebSocketTestConfig()
         context = create_test_context()
         # TODO: Replace with appropriate event capture mechanism
         # event_capture = RealWebSocketEventCapture()
         
         # Setup enhanced tool execution engine
         user_context = UserExecutionContext.from_request(
-            user_id=ftest_user_{uuid.uuid4().hex[:8]},"
+            user_id=ftest_user_{uuid.uuid4().hex[:8]}","
             thread_id=f"test_thread_{uuid.uuid4().hex[:8]},
-            run_id=ftest_run_{uuid.uuid4().hex[:8]},
-            request_id=ftest_req_{uuid.uuid4().hex[:8]}
+            run_id=f"test_run_{uuid.uuid4().hex[:8]}",
+            request_id=f"test_req_{uuid.uuid4().hex[:8]}"
         )
         
-        # Use SSOT pattern for WebSocketNotifier creation
+        # Use SSOT pattern f"or WebSocketNotifier creation
         websocket_notifier = AgentWebSocketBridge.WebSocketNotifier.create_for_user(emitter=user_context, # Placeholder - would be actual emitter
             exec_context=user_context
         )
@@ -1078,8 +1078,8 @@ class AgentWebSocketIntegrationEnhancedTests:
         # Test tool execution with WebSocket wrapping
         tool_request = {
             tool_name": "test_tool,
-            parameters: {query: test query},"
-            "execution_id: fexec_{uuid.uuid4().hex[:8]}
+            parameters: {query: test query}","
+            "execution_id: f"exec_{uuid.uuid4().hex[:8]}"
         }
         
         # Mock WebSocket event capture
@@ -1098,8 +1098,8 @@ class AgentWebSocketIntegrationEnhancedTests:
                 context=user_context
             )
         except Exception as e:
-            # Expected for test tool, capture events during execution attempt
-            logger.info(fTool execution failed as expected: {e})"
+            # Expected f"or test tool, capture events during execution attempt
+            logger.info(fTool execution failed as expected: {e}")"
         
         # Verify WebSocket events were generated
         event_types = [event["type] for event in captured_events]
@@ -1131,7 +1131,7 @@ class AgentWebSocketIntegrationEnhancedTests:
         user_context = UserExecutionContext.from_request(
             user_id=user_id,
             thread_id=ftest_thread_{uuid.uuid4().hex[:8]}",
-            run_id=ftest_run_{uuid.uuid4().hex[:8]},
+            run_id=f"test_run_{uuid.uuid4().hex[:8]}",
             request_id=ftest_req_{uuid.uuid4().hex[:8]}"
         )
         
@@ -1152,7 +1152,7 @@ class AgentWebSocketIntegrationEnhancedTests:
             await websocket_manager.emit_to_user(user_id, test_event)
             logger.info( PASS:  WebSocket agent event emission successful")
         except Exception as e:
-            logger.info(fWebSocket emission test completed: {e})
+            logger.inf"o(fWebSocket emission test completed: {e}")
         
         logger.info( PASS:  UnifiedWebSocketManager agent coordination validated)"
 
@@ -1164,7 +1164,7 @@ class AgentWebSocketIntegrationEnhancedTests:
         
         Business Value: Validates the SSOT bridge that coordinates agent-websocket integration lifecycle.
         ""
-        config = RealWebSocketTestConfig()
+        conf"ig = RealWebSocketTestConfig()
         context = create_test_context()
         
         # Import and test AgentWebSocketBridge
@@ -1188,10 +1188,10 @@ class AgentWebSocketIntegrationEnhancedTests:
         
         # Test integration initialization
         user_context = UserExecutionContext.from_request(
-            user_id=ftest_user_{uuid.uuid4().hex[:8]},
+            user_id=ftest_user_{uuid.uuid4().hex[:8]}",
             thread_id=ftest_thread_{uuid.uuid4().hex[:8]}","
-            run_id=ftest_run_{uuid.uuid4().hex[:8]},
-            request_id=ftest_req_{uuid.uuid4().hex[:8]}
+            run_id=f"test_run_{uuid.uuid4().hex[:8]}",
+            request_id=f"test_req_{uuid.uuid4().hex[:8]}"
         )
         
         try:
@@ -1238,7 +1238,7 @@ class AgentBusinessValueDeliveryTests:
         if project_root not in sys.path:
             sys.path.insert(0, project_root)
 
-        from test_framework.business_value_validators import (
+        f"rom test_framework.business_value_validators import (
             validate_agent_business_value,
             assert_response_has_business_value,
             assert_cost_optimization_value
@@ -1257,7 +1257,7 @@ class AgentBusinessValueDeliveryTests:
         try:
             await self._test_session.__aexit__(None, None, None)
         except Exception as e:
-            logger.warning(fBusiness value test cleanup error: {e})
+            logger.warning(fBusiness value test cleanup error: {e}")
 
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -1315,11 +1315,11 @@ class AgentBusinessValueDeliveryTests:
                 except asyncio.TimeoutError:
                     continue
                 except Exception as e:
-                    logger.warning(fError receiving business value event: {e})
+                    logger.warning(f"Error receiving business value event: {e}")
                     break
 
             # CRITICAL: Validate business value of agent response
-            logger.info(fAgent response content for validation ({len(agent_response_content)} chars): {agent_response_content[:200]}...)"
+            logger.inf"o(fAgent response content for validation ({len(agent_response_content)} chars"): {agent_response_content[:200]}...)"
 
             assert agent_response_content.strip(), "Agent must provide substantive response content
 
@@ -1333,9 +1333,9 @@ class AgentBusinessValueDeliveryTests:
             # CRITICAL ASSERTIONS: Business value requirements
             assert business_results['passes_business_threshold'], (
                 fAgent response failed business value validation. 
-                f"Score: {business_results['general_quality'].overall_score:.2f}. 
+                f"Score: {business_results['general_quality'].overall_score:0.2f}. 
                 fQuality: {business_results['general_quality'].quality_level.value}. "
-                fResponse: {agent_response_content[:300]}...
+                f"Response: {agent_response_content[:300]}..."
             )
 
             # Validate cost optimization specific requirements
@@ -1347,18 +1347,18 @@ class AgentBusinessValueDeliveryTests:
 
                 # Log business value metrics for monitoring
                 logger.info(f"Business Value Validation PASSED:)
-                logger.info(f  Overall Score: {business_results['general_quality'].overall_score:.2f})
-                logger.info(f  Quality Level: {business_results['general_quality'].quality_level.value})
-                logger.info(f  Cost Optimization Score: {cost_results['overall_score']:.2f}")"
-                logger.info(f  Requirements Met: {cost_results['requirements_met']})
-                logger.info(f  Word Count: {business_results['general_quality'].word_count})
+                logger.inf"o(f  Overall Score: {business_results['general_quality'].overall_score:0.2f}")
+                logger.inf"o(f  Quality Level: {business_results['general_quality'].quality_level.value}")
+                logger.info(f  Cost Optimization Score: {cost_results['overall_score']:0.2f}")"
+                logger.inf"o(f  Requirements Met: {cost_results['requirements_met']}")
+                logger.inf"o(f  Word Count: {business_results['general_quality'].word_count}")
                 logger.info(f"  Actionable Steps: {business_results['general_quality'].actionable_steps_count})
 
             # Validate WebSocket events still work correctly
             assert len(business_events_received) > 0, Must receive WebSocket events during business response"
 
-            event_types = [event.get('type') for event in business_events_received]
-            logger.info(fBusiness value test received event types: {event_types})
+            event_types = [event.get('type') f"or event in business_events_received]
+            logger.info(fBusiness value test received event types: {event_types}")
 
         finally:
             await test_context.cleanup()
@@ -1414,7 +1414,7 @@ class AgentBusinessValueDeliveryTests:
                     # Track tool executions
                     elif event_type == 'tool_executing':
                         tool_executions += 1
-                        logger.info(fTool execution: {event.get('tool_name', 'unknown')})
+                        logger.inf"o(fTool execution: {event.get('tool_name', 'unknown')}")
 
                     # Collect comprehensive response content
                     elif event_type == 'agent_completed':
@@ -1436,18 +1436,18 @@ class AgentBusinessValueDeliveryTests:
                 except asyncio.TimeoutError:
                     continue
                 except Exception as e:
-                    logger.warning(fError in multi-agent orchestration: {e})"
+                    logger.warning(f"Error in multi-agent orchestration: {e}")"
                     break
 
             # CRITICAL: Validate multi-agent orchestration occurred
             logger.info(f"Multi-agent orchestration metrics:)
-            logger.info(f  Agent handoffs: {agent_handoffs})
-            logger.info(f  Tool executions: {tool_executions})
+            logger.inf"o(f  Agent handoffs: {agent_handoffs}")
+            logger.inf"o(f  Tool executions: {tool_executions}")
             logger.info(f  Response length: {len(complete_response_content)} chars")"
-            logger.info(f  Events received: {len(orchestration_events)})
+            logger.inf"o(f  Events received: {len(orchestration_events)}")
 
             # Validate orchestration complexity indicates multi-agent coordination
-            assert agent_handoffs >= 1, fExpected multi-agent coordination, got {agent_handoffs} agent starts
+            assert agent_handof"fs >= 1, fExpected multi-agent coordination, got {agent_handoffs} agent starts"
             assert len(orchestration_events) >= 5, f"Expected complex orchestration, got {len(orchestration_events)} events
 
             # CRITICAL: Validate superior business value from multi-agent response
@@ -1464,27 +1464,27 @@ class AgentBusinessValueDeliveryTests:
 
             assert business_results['general_quality'].overall_score >= multi_agent_threshold, (
                 fMulti-agent response failed enhanced business value validation. 
-                fScore: {business_results['general_quality'].overall_score:.2f} "
+                fScore: {business_results['general_quality'].overall_score:0.2f} "
                 f"(required: {multi_agent_threshold}. 
                 fMulti-agent coordination should produce superior results.
             )
 
             # Validate multi-agent specific quality indicators
             quality = business_results['general_quality']
-            assert quality.quantified_recommendations >= 3, (
-                fMulti-agent system should provide multiple quantified recommendations, got {quality.quantified_recommendations}
+            assert quality.quantif"ied_recommendations >= 3, (
+                fMulti-agent system should provide multiple quantified recommendations, got {quality.quantified_recommendations}"
             )
 
             assert quality.actionable_steps_count >= 5, (
                 fMulti-agent system should provide detailed actionable steps, got {quality.actionable_steps_count}""
             )
 
-            logger.info(fMulti-Agent Business Value Validation PASSED:)
-            logger.info(f  Enhanced Score: {business_results['general_quality'].overall_score:.2f})
+            logger.inf"o(fMulti-Agent Business Value Validation PASSED:)
+            logger.info(f  Enhanced Score: {business_results['general_quality'].overall_score:0.2f}")
             logger.info(f"  Quality Level: {business_results['general_quality'].quality_level.value})
             logger.info(f  Quantified Recommendations: {quality.quantified_recommendations}")
-            logger.info(f  Actionable Steps: {quality.actionable_steps_count})
-            logger.info(f  Technical Depth Score: {quality.technical_depth_score:.2f})"
+            logger.inf"o(f  Actionable Steps: {quality.actionable_steps_count}")
+            logger.inf"o(f  Technical Depth Score: {quality.technical_depth_score:0.2f}")"
 
         finally:
             await test_context.cleanup()
@@ -1505,13 +1505,13 @@ class AgentBusinessValueDeliveryTests:
         validator = MissionCriticalEventValidator()
 
         try:
-            # Query requiring tool execution for business insights
+            # Query requiring tool execution f"or business insights
             tool_query = {
                 type": "chat_message,
                 content: Check my current cloud spending patterns and provide optimization recommendations with specific cost savings estimates.,
                 user_id: test_context.user_context.user_id,"
                 "thread_id: test_context.user_context.thread_id
-            }
+            }"
 
             await test_context.send_message(tool_query)
             logger.info(Sent tool integration query)
@@ -1535,13 +1535,13 @@ class AgentBusinessValueDeliveryTests:
 
                     # Track tool execution pipeline
                     if event_type == 'tool_executing':
-                        tool_info = {
+                        tool_inf"o = {
                             'tool_name': event.get('tool_name'),
-                            'parameters': event.get('parameters', {},
+                            'parameters': event.get('parameters', {}",
                             'timestamp': event.get('timestamp')
                         }
-                        tool_executions.append(tool_info)
-                        logger.info(fTool executing: {tool_info['tool_name']})
+                        tool_executions.append(tool_inf"o)
+                        logger.info(fTool executing: {tool_info['tool_name']}")
 
                     elif event_type == 'tool_completed':
                         tool_result = {
@@ -1567,8 +1567,8 @@ class AgentBusinessValueDeliveryTests:
                     break
 
             # CRITICAL: Validate tool execution occurred and results were integrated
-            logger.info(fTool integration metrics:)
-            logger.info(f  Tool executions: {len(tool_executions)})
+            logger.inf"o(fTool integration metrics:)
+            logger.info(f  Tool executions: {len(tool_executions)}")
             logger.info(f"  Tool results: {len(tool_results)})
             logger.info(f  Integrated response length: {len(integrated_response)} chars")
 
@@ -1588,8 +1588,8 @@ class AgentBusinessValueDeliveryTests:
             )
 
             assert business_results['passes_business_threshold'], (
-                f"Tool-integrated response failed business value validation. 
-                fScore: {business_results['general_quality'].overall_score:.2f}. 
+                f"Tool-integrated response f"ailed business value validation. 
+                fScore: {business_results['general_quality'].overall_score:0.2f}. "
                 fTool results should enhance business value delivery.
             )
 
@@ -1601,16 +1601,16 @@ class AgentBusinessValueDeliveryTests:
                 fTool-enhanced responses should reference specific technologies, got {quality.specific_technologies_mentioned}""
             )
 
-            # Should contain quantified insights from tool execution
+            # Should contain quantif"ied insights from tool execution
             assert quality.quantified_recommendations >= 1, (
-                fTool execution should provide quantified insights, got {quality.quantified_recommendations}
+                fTool execution should provide quantified insights, got {quality.quantified_recommendations}"
             )
 
             logger.info(fTool Integration Business Value PASSED:)
             logger.info(f"  Tools executed: {[t['tool_name'] for t in tool_executions]})
-            logger.info(f  Business value score: {business_results['general_quality'].overall_score:.2f}")
-            logger.info(f  Technical depth: {quality.specific_technologies_mentioned} technologies)
-            logger.info(f  Quantified insights: {quality.quantified_recommendations})"
+            logger.info(f  Business value score: {business_results['general_quality'].overall_score:0.2f}")
+            logger.inf"o(f  Technical depth: {quality.specific_technologies_mentioned} technologies")
+            logger.inf"o(f  Quantified insights: {quality.quantified_recommendations}")"
 
         finally:
             await test_context.cleanup()
@@ -1620,7 +1620,7 @@ class AgentBusinessValueDeliveryTests:
 # COMPREHENSIVE TEST SUITE EXECUTION
 # ============================================================================ 
 
-if __name__ == "__main__:
+if __name__ == "__main__":
     # Run the comprehensive mission critical REAL WebSocket tests
     import sys
     
@@ -1654,7 +1654,7 @@ if __name__ == "__main__:
     ]
     
     for test_file in test_files:
-        print(f\n🚀 Running {test_file}..."")
+        print(f"\n🚀 Running {test_file}...")
         try:
             result = subprocess.run([
                 sys.executable, 
@@ -1665,15 +1665,17 @@ if __name__ == "__main__:
                 --real-services"  # Ensure real service connections
             ], capture_output=True, text=True, timeout=180)
             
-            print(fExit code: {result.returncode})
+            print(f"Exit code: {result.returncode}")
             if result.stdout:
-                print(fSTDOUT:\n{result.stdout}"")
+                print(f"STDOUT:\n{result.stdout}")
             if result.stderr:
-                print(fSTDERR:\n{result.stderr})
+                print(f"STDERR:\n{result.stderr}")
                 
         except subprocess.TimeoutExpired:
-            print(f❌ Test {test_file} timed out after 180 seconds"")
+            print(f"[FAIL] Test {test_file} timed out after 180 seconds")
         except Exception as e:
-            print(f❌ Error running {test_file}: {e})
-    
-    print(\n✅ SSOT WebSocket Agent Events test execution completed."")"
+            print(f"[FAIL] Error running {test_file}: {e}")
+
+    print("\\n[PASS] SSOT WebSocket Agent Events test execution completed.")
+
+"""

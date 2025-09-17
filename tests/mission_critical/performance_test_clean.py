@@ -1,4 +1,4 @@
-"
+"""
 Standalone WebSocket Bridge Performance Test - Clean Version (Windows Compatible)
 
 This test validates the performance test infrastructure and generates
@@ -15,7 +15,7 @@ a baseline performance report without requiring the full application stack.
 - Throughput > 1000 events/second (scalability)
 - Connection time < 500ms (quick user engagement)
 - Support 25+ concurrent users (business growth)
-"
+"""
 
 import asyncio
 import json
@@ -36,7 +36,7 @@ from shared.isolated_environment import get_env
 
 @dataclass
 class PerformanceMetrics:
-    "Performance measurement data structure.
+    """Performance measurement data structure."""
     latencies: List[float]  # milliseconds
     throughput: float  # messages per second
     connection_times: List[float]  # milliseconds
@@ -264,7 +264,7 @@ async def test_latency_baseline():
 
     # Validate requirements
     p99_passed = p99 < 50.0
-    print(f✓ P99 latency baseline validated: {p99_passed})
+    print(f[PASS] P99 latency baseline validated: {p99_passed})
 
     return latencies
 
@@ -304,7 +304,7 @@ async def test_throughput_baseline():
 
     # Validate requirements
     throughput_passed = throughput > 1000.0
-    print(f✓ Throughput baseline validated: {throughput_passed})
+    print(f[PASS] Throughput baseline validated: {throughput_passed})
 
     return throughput
 
@@ -341,7 +341,7 @@ async def test_connection_establishment():
 
     # Validate requirements
     connection_passed = p99_time < 500.0
-    print(f✓ Connection time baseline validated: {connection_passed}")
+    print(f[PASS] Connection time baseline validated: {connection_passed}")
 
     return connection_times
 
@@ -359,7 +359,7 @@ async def test_concurrent_users():
         emitter = MockWebSocketEmitter(fconcurrent-user-{i}, latency_ms=0.1)
         emitters.append(emitter)
 
-    print(f"Created {num_users} concurrent users)
+    print(f"Created {num_users} concurrent users)")
 
     # Send events from all users concurrently
     start_time = time.time()
@@ -407,11 +407,11 @@ async def test_concurrent_users():
     p99 = statistics.quantiles(all_latencies, n=100)[98] if len(all_latencies) >= 100 else max(all_latencies)
     avg_latency = statistics.mean(all_latencies)
 
-    print(f"Concurrent Users: {num_users})
+    print(f"Concurrent Users: {num_users})")
     print(fEvents per User: {events_per_user})
     print(fTotal Events: {total_events})
     print(fTotal Duration: {total_duration:.2f}s")
-    print(f"Overall Throughput: {overall_throughput:.2f} events/s)
+    print(f"Overall Throughput: {overall_throughput:.2f} events/s)")
     print(fConcurrent Latency: P50={p50:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms, Avg={avg_latency:.2f}ms)
     print("")
     # Validate requirements
@@ -419,9 +419,9 @@ async def test_concurrent_users():
     throughput_passed = overall_throughput > 200.0
     user_passed = num_users >= 25
 
-    print(f✓ P99 latency validated: {p99_passed}")
-    print(f✓ Concurrent throughput validated: {throughput_passed})
-    print(f✓ User count validated: {user_passed})
+    print(f[PASS] P99 latency validated: {p99_passed}")
+    print(f[PASS] Concurrent throughput validated: {throughput_passed})
+    print(f[PASS] User count validated: {user_passed})
 
     return all_latencies, overall_throughput
 
@@ -470,7 +470,7 @@ async def test_comprehensive_performance():
         print(fPerformance Summary:)
         print(f  P50 Latency: {metrics.p50_latency:.2f}ms)
         print(f  P90 Latency: {metrics.p90_latency:.2f}ms")
-        print(f"  P95 Latency: {metrics.p95_latency:.2f}ms)
+        print(f"  P95 Latency: {metrics.p95_latency:.2f}ms)")
         print(f  P99 Latency: {metrics.p99_latency:.2f}ms [CRITICAL])
         print(f  Max Throughput: {metrics.throughput:.2f} events/s [CRITICAL])
         print(f  Avg Connection Time: {metrics.avg_connection_time:.2f}ms")
@@ -484,16 +484,16 @@ async def test_comprehensive_performance():
 
         print(f  P99 Latency < 50ms: {'PASS' if p99_passed else 'FAIL'} ({metrics.p99_latency:.2f}ms))
         print(f  Throughput > 1000/s: {'PASS' if throughput_passed else 'FAIL'} ({metrics.throughput:.2f}/s)")
-        print(f"  Connection < 500ms: {'PASS' if connection_passed else 'FAIL'} ({metrics.avg_connection_time:.2f}ms))
+        print(f"  Connection < 500ms: {'PASS' if connection_passed else 'FAIL'} ({metrics.avg_connection_time:.2f}ms))")
         print(f  Memory Growth < 200MB: {'PASS' if memory_passed else 'FAIL'} ({final_memory - initial_memory:.2f}MB))
 
         all_passed = all([p99_passed, throughput_passed, connection_passed, memory_passed]
 
         if all_passed:
-            print(\n✓ ALL PERFORMANCE REQUIREMENTS PASSED!")
+            print("\\n[PASS] ALL PERFORMANCE REQUIREMENTS PASSED!")
             print(WebSocket bridge ready for production with 25+ concurrent users")
         else:
-            print(\n❌ SOME PERFORMANCE REQUIREMENTS FAILED!)
+            print("\\n[FAIL] SOME PERFORMANCE REQUIREMENTS FAILED!")
             print(Performance optimization required before production)
 
         return metrics

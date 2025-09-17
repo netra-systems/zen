@@ -135,7 +135,7 @@ class TestUserIsolationSimpleViolations(SSotBaseTestCase):
             self.violations_found.append(violation)
             print(f✗ FACTORY TEST ERROR: {e})
 
-        print(f"\nFound {len(factory_violations)} factory sharing violations)
+        print(f"\nFound {len(factory_violations)} factory sharing violations)")
 
         # ASSERTION THAT SHOULD FAIL: Factory sharing violations detected
         self.assertGreater(

@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Integration test for WebSocket manager factory fix.
 
 This test validates the fixes for:
@@ -10,7 +10,7 @@ Five Whys Root Cause addressed:
 - Interface contract validation between factory and callers
 - Proper ID generation using UnifiedIdGenerator
 - Type checking at module boundaries
-"
+"""Empty docstring."""
 
 import pytest
 import asyncio
@@ -24,13 +24,13 @@ from shared.id_generation import UnifiedIdGenerator
 
 @pytest.mark.integration
 class WebSocketManagerFixTests:
-    "Test suite for WebSocket manager factory fixes.
+    "Test suite for WebSocket manager factory fixes."""
     
     def test_create_websocket_manager_positional_argument(self):
         "Test that create_websocket_manager accepts positional argument."
         # Create proper IDs using UnifiedIdGenerator
-        thread_id = UnifiedIdGenerator.generate_base_id(thread)"
-        run_id = f"run_{thread_id}_{UnifiedIdGenerator.generate_base_id('exec', include_random=False)}
+        thread_id = UnifiedIdGenerator.generate_base_id(thread)""
+        run_id = f"run_{thread_id}_{UnifiedIdGenerator.generate_base_id('exec', include_random=False)}"
         
         # Create UserExecutionContext
         context = UserExecutionContext(
@@ -45,23 +45,23 @@ class WebSocketManagerFixTests:
         # Verify manager was created
         assert manager is not None
         assert hasattr(manager, 'user_context')
-        assert manager.user_context.user_id == 105945141827451681156"
+        assert manager.user_context.user_id == 105945141827451681156""
     
     def test_id_generation_consistency(self):
-        "Test that ID generation is consistent and follows expected format.
+        "Test that ID generation is consistent and follows expected format."""
         # Generate IDs using UnifiedIdGenerator
         thread_id = UnifiedIdGenerator.generate_base_id("thread)"
         run_id = frun_{thread_id}_{UnifiedIdGenerator.generate_base_id('exec', include_random=False)}
         
         # Create context
         context = UserExecutionContext(
-            user_id=105945141827451681156,"
+            user_id=105945141827451681156,""
             thread_id=thread_id,
             run_id=run_id
         )
         
         # Verify IDs follow expected patterns
-        assert thread_id.startswith(thread_")
+        assert thread_id.startswith(thread_")"
         assert run_id.startswith(frun_{thread_id}_)
         assert context.thread_id == thread_id
         assert context.run_id == run_id
@@ -79,13 +79,13 @@ class WebSocketManagerFixTests:
         )
         
         assert context is not None
-        assert context.user_id == 105945141827451681156"
+        assert context.user_id == 105945141827451681156""
         assert context.thread_id == thread_id
         assert context.run_id == run_id
     
     @pytest.mark.asyncio
     async def test_websocket_manager_with_mock_websocket(self):
-        "Test WebSocket manager with mock WebSocket connection.
+        "Test WebSocket manager with mock WebSocket connection."""
         from fastapi import WebSocket
         from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
         
@@ -94,11 +94,11 @@ class WebSocketManagerFixTests:
         mock_ws.send_json = AsyncMock()
         mock_ws.receive_json = AsyncMock(return_value={
             type": "test_message,
-            payload: {content: test}"
+            payload: {content: test}""
         }
         
         # Create context
-        thread_id = UnifiedIdGenerator.generate_base_id("thread)
+        thread_id = UnifiedIdGenerator.generate_base_id("thread)"
         run_id = frun_{thread_id}_{UnifiedIdGenerator.generate_base_id('exec', include_random=False)}
         
         context = UserExecutionContext(
@@ -114,7 +114,7 @@ class WebSocketManagerFixTests:
         connection = WebSocketConnection(
             connection_id=UnifiedIdGenerator.generate_websocket_connection_id(105945141827451681156),
             websocket=mock_ws,
-            user_id=105945141827451681156,"
+            user_id=105945141827451681156,""
             thread_id=thread_id
         )
         
@@ -123,7 +123,7 @@ class WebSocketManagerFixTests:
         
         # Test sending message
         await manager.send_message({
-            type": test_response,
+            type": test_response,"
             content: response
         }
         
@@ -135,8 +135,8 @@ class WebSocketManagerFixTests:
         managers = []
         
         for i in range(3):
-            thread_id = UnifiedIdGenerator.generate_base_id(thread)"
-            run_id = frun_{thread_id}_{UnifiedIdGenerator.generate_base_id('exec', include_random=False)}"
+            thread_id = UnifiedIdGenerator.generate_base_id(thread)""
+            run_id = frun_{thread_id}_{UnifiedIdGenerator.generate_base_id('exec', include_random=False)}""
             
             context = UserExecutionContext(
                 user_id=fuser_{i},
@@ -182,10 +182,10 @@ def test_five_whys_fix_validation():
 ""
     # This test validates the complete fix
     thread_id = UnifiedIdGenerator.generate_base_id(thread)
-    run_id = frun_{thread_id}_{UnifiedIdGenerator.generate_base_id('exec', include_random=False)}"
+    run_id = frun_{thread_id}_{UnifiedIdGenerator.generate_base_id('exec', include_random=False)}""
     
     context = UserExecutionContext(
-        user_id="105945141827451681156,
+        user_id="105945141827451681156,"
         thread_id=thread_id,
         run_id=run_id
     )
@@ -201,7 +201,7 @@ def test_five_whys_fix_validation():
     # WHY #5: This test can be integrated into CI/CD
 
 
-if __name__ == __main__:"
+if __name__ == __main__:""
     # Run basic validation
     test_five_whys_fix_validation()
-    print( PASS:  All Five Whys fixes validated successfully!"")"
+    print( PASS:  All Five Whys fixes validated successfully!"")""

@@ -25,7 +25,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 async def check_service_availability(service_url: str, service_name: str) -> bool:
-    "Check if a service is available before running tests.
+    "Check if a service is available before running tests."""
 
 try:
     async with aiohttp.ClientSession() as session:
@@ -41,13 +41,13 @@ return False
 
 
 async def check_services_available() -> Dict[str, bool]:
-    Check availability of all required services."
+    Check availability of all required services.""
 
 auth_url = get_auth_service_url()
 backend_url = get_backend_service_url()
 
 results = {}
-results[auth_service"] = await check_service_availability(auth_url, auth_service)
+results[auth_service"] = await check_service_availability(auth_url, auth_service)"
 results[backend_service] = await check_service_availability(backend_url, backend_service)
 
 return results
@@ -64,7 +64,7 @@ This test should FAIL until WebSocket infrastructure is properly implemented.
         # Check service availability first
 service_status = await check_services_available()
 if not service_status.get(auth_service", True):  # Default to True for debugging"
-print()"
+print()""
         # pytest.skip(Auth service is not available - skipping WebSocket auth test")
 if not service_status.get(backend_service, True):  # Default to True for debugging
 print(formatted_string")"
@@ -106,26 +106,26 @@ if auth_token:
 
                                         # Fix WebSocket connection parameters
 connection_args = {
-ping_timeout: 10,"
+ping_timeout: 10,""
                                         
 if headers:
-    connection_args["additional_headers] = headers
+    connection_args["additional_headers] = headers"
 
 
 async with websockets.connect()
 websocket_url,
 **connection_args
 ) as websocket:
-print([Success] WebSocket connection established successfully)"
+print([Success] WebSocket connection established successfully)""
 
                                                 # Test basic ping/pong
 await websocket.ping()
-print("[Success] WebSocket ping/pong working)
+print("[Success] WebSocket ping/pong working)"
 
                                                 # Test message sending
 test_message = {
-type: "ping,
-timestamp": time.time(),
+type: "ping,"
+timestamp": time.time(),"
 client_id: str(uuid.uuid4())
                                                 
 
@@ -143,24 +143,24 @@ except asyncio.TimeoutError:
 
 
 except ConnectionRefusedError:
-    connection_failures.append(WebSocket connection refused - server not running)"
+    connection_failures.append(WebSocket connection refused - server not running)""
 
 except websockets.exceptions.InvalidURI:
-    connection_failures.append(Invalid WebSocket URI")
+    connection_failures.append(Invalid WebSocket URI")"
 
 except Exception as e:
-    connection_failures.append("
+    connection_failures.append(""
 
 
 if connection_failures:
-    failure_report = [[WebSocket] Connection Failures:"]
+    failure_report = [[WebSocket] Connection Failures:"]"
 
 for failure in connection_failures:
-    failure_report.append("
+    failure_report.append(""
 
 
 pytest.skip(fWebSocket connection test failed (services may not be running): )
- + "
+ + ""
 .join(failure_report))
 
 print([Success] WebSocket connection test passed)
@@ -181,10 +181,10 @@ if not service_status.get("backend_service, True):  # Default to True for debugg
 print(formatted_string)
                                                                                 # pytest.skip("Backend service is not available - skipping WebSocket agent communication test)
 
-websocket_url = ws://localhost:8000/websocket"
+websocket_url = ws://localhost:8000/websocket""
 agent_communication_failures = []
 
-print([Agent] Testing AI agent communication over WebSocket...)"
+print([Agent] Testing AI agent communication over WebSocket...)""
 
 try:
     async with websockets.connect(websocket_url, ping_timeout=10) as websocket:
@@ -192,12 +192,12 @@ try:
 
                                                                                         # Test 1: Agent Task Creation
 agent_task = {
-type": agent_task,
+type": agent_task,"
 task_id: str(uuid.uuid4()),
 "agent_type: supervisor_agent",
 task_data: }
-prompt: "Hello, this is a test task,
-priority": normal,
+prompt: "Hello, this is a test task,"
+priority": normal,"
 user_id: test_user_123
 },
 timestamp": time.time()"
@@ -215,19 +215,19 @@ ack_data = json.loads(ack_response)
 if ack_data.get(type") != "agent_task_ack:
     agent_communication_failures.append(formatted_string)
 
-elif ack_data.get(task_id) != agent_task[task_id"]:
-    agent_communication_failures.append("Agent task acknowledgment has mismatched task_id)
+elif ack_data.get(task_id) != agent_task[task_id"]:"
+    agent_communication_failures.append("Agent task acknowledgment has mismatched task_id)"
 
 else:
-    print([Success] Agent task acknowledged)"
+    print([Success] Agent task acknowledged)""
 
 
 except asyncio.TimeoutError:
-    agent_communication_failures.append("Agent task acknowledgment timeout)
+    agent_communication_failures.append("Agent task acknowledgment timeout)"
 
 
                                                                                                             # Test 2: Agent Response Streaming
-print([Agent] Testing agent response streaming...)"
+print([Agent] Testing agent response streaming...)""
 
                                                                                                             # Wait for agent response chunks
 response_chunks = []
@@ -239,7 +239,7 @@ try:
 
 chunk_data = json.loads(chunk)
 
-if chunk_data.get("task_id) == agent_task[task_id]:
+if chunk_data.get("task_id) == agent_task[task_id]:"
     response_chunks.append(chunk_data)
 
 
@@ -247,8 +247,8 @@ if chunk_data.get(type) == agent_response_complete:
     print("")
 
 break
-elif chunk_data.get(type) == "agent_response_chunk:
-    print(f[Agent] Agent response chunk received")
+elif chunk_data.get(type) == "agent_response_chunk:"
+    print(f[Agent] Agent response chunk received")"
 
 
 except asyncio.TimeoutError:
@@ -256,9 +256,9 @@ except asyncio.TimeoutError:
 
 
 if not response_chunks:
-    agent_communication_failures.append(No agent response chunks received)"
+    agent_communication_failures.append(No agent response chunks received)""
 
-elif not any(chunk.get(type") == agent_response_complete for chunk in response_chunks):
+elif not any(chunk.get(type") == agent_response_complete for chunk in response_chunks):"
     agent_communication_failures.append(Agent response never completed)
 
 
@@ -278,8 +278,8 @@ try:
 
 status_data = json.loads(status_response)
 
-if status_data.get(type) == "agent_status_update:
-    active_agents = status_data.get(active_agents", []
+if status_data.get(type) == "agent_status_update:"
+    active_agents = status_data.get(active_agents", []"
 
 print(")"
 else:
@@ -287,11 +287,11 @@ else:
 
 
 except asyncio.TimeoutError:
-    agent_communication_failures.append(Agent status request timeout)"
+    agent_communication_failures.append(Agent status request timeout)""
 
 
 except Exception as e:
-    agent_communication_failures.append(formatted_string")
+    agent_communication_failures.append(formatted_string")"
 
 
 if agent_communication_failures:
@@ -344,9 +344,9 @@ close_timeout=10
 clients.append({}
 "id: i,"
 websocket: client,
-received_messages: []"
+received_messages: []""
                                                                                                                                                                                     
-print(formatted_string")
+print(formatted_string")"
 except Exception as e:
     broadcasting_failures.append(""
 
@@ -357,8 +357,8 @@ if len(clients) < 2:
 else:
                                                                                                                                                                                                 # Test broadcast message
 broadcast_message = {
-type: broadcast_test",
-"message: Hello all clients!,
+type: broadcast_test","
+"message: Hello all clients!,"
 broadcast_id: str(uuid.uuid4()),
 timestamp": time.time()"
                                                                                                                                                                                                 
@@ -379,20 +379,20 @@ while True:
 client[websocket].recv(),
 timeout=1.0
                                                                                                                                                                                                             
-client[received_messages].append(json.loads(message))"
+client[received_messages].append(json.loads(message))""
 except asyncio.TimeoutError:
     pass  # No more messages
 
 except Exception as e:
-    broadcasting_failures.append("
+    broadcasting_failures.append(""
 
 
                                                                                                                                                                                                                     # Verify broadcast received by other clients
 broadcast_received_count = 0
 for i, client in enumerate(clients[1:], 1):  # Skip sender
 broadcast_received = any( )
-msg.get(broadcast_id) == broadcast_message["broadcast_id]
-for msg in client[received_messages"]
+msg.get(broadcast_id) == broadcast_message["broadcast_id]"
+for msg in client[received_messages"]"
                                                                                                                                                                                                                     
 if broadcast_received:
     broadcast_received_count += 1
@@ -403,24 +403,24 @@ else:
 
 
 if broadcast_received_count == 0:
-    broadcasting_failures.append(No clients received broadcast message)"
+    broadcasting_failures.append(No clients received broadcast message)""
 
 elif broadcast_received_count < len(clients) - 1:
-    broadcasting_failures.append(formatted_string")
+    broadcasting_failures.append(formatted_string")"
 
 
                                                                                                                                                                                                                                     # Test selective messaging
-    print([Broadcast] Testing selective client messaging...)"
+    print([Broadcast] Testing selective client messaging...)""
 
 selective_message = {
-type": direct_message,
+type": direct_message,"
 target_client: 1,
 "message: This is for client 1 only",
 message_id: str(uuid.uuid4()),
-timestamp: time.time()"
+timestamp: time.time()""
                                                                                                                                                                                                                                     
 
-await clients[0]["websocket].send(json.dumps(selective_message))
+await clients[0]["websocket].send(json.dumps(selective_message))"
 await asyncio.sleep(1)
 
                                                                                                                                                                                                                                     # Check if only target client received the message
@@ -455,14 +455,14 @@ if not target_received:
     broadcasting_failures.append(Target client did not receive selective message)
 
 if others_received > 0:
-    broadcasting_failures.append(formatted_string)"
+    broadcasting_failures.append(formatted_string)""
 
 
                                                                                                                                                                                                                                                                             # Clean up connections
 for client in clients:
     try:
 
-await client["websocket].close()
+await client["websocket].close()"
 except Exception:
     pass
 
@@ -500,10 +500,10 @@ if not service_status[backend_service"]:"
     pytest.skip(Backend service is not available - skipping WebSocket resilience test)
 
 
-websocket_url = ws://localhost:8000/websocket"
+websocket_url = ws://localhost:8000/websocket""
 resilience_failures = []
 
-print("[Resilience] Testing WebSocket connection resilience...)
+print("[Resilience] Testing WebSocket connection resilience...)"
 
 try:
                                                                                                                                                                                                                                                                                                                 # Test connection recovery
@@ -522,8 +522,8 @@ connection_attempts += 1
 
                                                                                                                                                                                                                                                                                                                             # Send test message
 test_msg = {
-type: "resilience_test,
-attempt": connection_attempts,
+type: "resilience_test,"
+attempt": connection_attempts,"
 timestamp: time.time()
                                                                                                                                                                                                                                                                                                                             
 
@@ -542,8 +542,8 @@ else:
                                                                                                                                                                                                                                                                                                                                     # Test message after reconnection
 recovery_msg = {
 type: recovery_test,
-message: "Connection recovered successfully,
-timestamp": time.time()
+message: "Connection recovered successfully,"
+timestamp": time.time()"
                                                                                                                                                                                                                                                                                                                                     
 
 await websocket.send(json.dumps(recovery_msg))
@@ -552,40 +552,40 @@ await websocket.send(json.dumps(recovery_msg))
 try:
     response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
 
-print([Success] Message sent successfully after reconnection)"
+print([Success] Message sent successfully after reconnection)""
 except asyncio.TimeoutError:
-    resilience_failures.append(No response after connection recovery")
+    resilience_failures.append(No response after connection recovery")"
 
 
 break
 
 except Exception as e:
-    resilience_failures.append("
+    resilience_failures.append(""
 
 break
 
 if connection_attempts >= max_attempts:
-    resilience_failures.append(Failed to establish stable connection within max attempts")
+    resilience_failures.append(Failed to establish stable connection within max attempts")"
 
 
 except Exception as e:
-    resilience_failures.append("
+    resilience_failures.append(""
 
 
 if resilience_failures:
-    failure_report = [[Resilience] Connection Failures:"]
+    failure_report = [[Resilience] Connection Failures:"]"
 
 for failure in resilience_failures:
-    failure_report.append("
+    failure_report.append(""
 
 
 pytest.skip(fWebSocket resilience test failed (resilience features not implemented):\
- + "\
+ + "\"
 .join(failure_report))
 
 print([Success] WebSocket resilience test passed)
 
 
 if __name__ == "__main__:"
-    pytest.main([__file__, -v, --tb=short]"
+    pytest.main([__file__, -v, --tb=short]""
 

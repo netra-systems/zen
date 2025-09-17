@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Integration Tests for WebSocket HTTP 500 Error Reproduction
 
 These tests target Issue #517 - reproducing HTTP 500 WebSocket connection errors
@@ -9,7 +9,7 @@ Business Value Justification:
 - Goal: Stability - Identify and reproduce HTTP 500 WebSocket errors  
 - Impact: Protects $500K+ ARR chat functionality from connection failures
 - Revenue Impact: Prevents WebSocket service degradation affecting customer chat
-"
+"""Empty docstring."""
 import asyncio
 import json
 import pytest
@@ -25,7 +25,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.integration
 class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
-    "Reproduce WebSocket HTTP 500 errors in integration environment
+    "Reproduce WebSocket HTTP 500 errors in integration environment"""
 
     def setup_method(self):
         "Set up test environment and authentication"
@@ -58,10 +58,10 @@ class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
                     http_500_detected = True
                     connection_details[scenario['name']] = f'HTTP_500: {e}'
                 elif hasattr(e, 'status_code') and e.status_code == 403:
-                    print(f[EXPECTED] {scenario['name']} - HTTP 403 (expected auth error): {e})"
+                    print(f[EXPECTED] {scenario['name']} - HTTP 403 (expected auth error): {e})""
                     connection_details[scenario['name']] = f'HTTP_403: {e}'
                 else:
-                    print(f"[INFO] {scenario['name']} - Other HTTP error: {e})
+                    print(f"[INFO] {scenario['name']} - Other HTTP error: {e})"
                     connection_details[scenario['name']] = fHTTP_{getattr(e, 'status_code', 'UNKNOWN')}: {e}
             except WebSocketException as e:
                 print(f"[INFO] {scenario['name']} - WebSocket protocol error: {e}")
@@ -94,14 +94,14 @@ class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
                     print(f[PASS] {test_case['name']} - No ASGI errors detected")"
             except Exception as e:
                 print(f[ERROR] {test_case['name']} - Test execution error: {e})
-                asgi_errors_detected.append({'test': test_case['name'], 'error': str(e), 'description': fTest execution failed: {test_case['description']}}"
+                asgi_errors_detected.append({'test': test_case['name'], 'error': str(e), 'description': fTest execution failed: {test_case['description']}}""
         if asgi_errors_detected:
             pytest.fail(f'ASGI scope errors causing HTTP 500 detected. Issue #517 reproduced. Errors: {asgi_errors_detected}')
         else:
             print('[INFO] No ASGI scope errors detected - Issue #517 may be resolved')
 
     async def _check_backend_health(self) -> bool:
-        "Check if backend is healthy for testing
+        "Check if backend is healthy for testing"""
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get(f'{self.base_url}/health', timeout=5.0)
@@ -182,10 +182,10 @@ class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
 
 @pytest.mark.integration
 class WebSocketMiddlewareIntegrationTests(SSotAsyncTestCase):
-    Test WebSocket middleware integration for HTTP 500 prevention"
+    Test WebSocket middleware integration for HTTP 500 prevention""
 
     def setup_method(self):
-        "Set up middleware integration tests
+        "Set up middleware integration tests"""
         super().setup_method()
         self.env = IsolatedEnvironment()
 

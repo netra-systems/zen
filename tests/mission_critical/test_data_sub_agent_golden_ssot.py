@@ -435,7 +435,7 @@ class WebSocketCapture:
         assert isinstance(circuit_status, dict), Circuit breaker status should be dictionary
     # Test health determination logic
         overall_status = data_agent._determine_overall_health_status(health_status)
-        assert overall_status in ['healthy', 'degraded'], "formatted_string"
+        assert overall_status in ['healthy', 'degraded'], ""
     # === ERROR HANDLING PATTERNS (5 TESTS) ===
     async def test_error_recovery_timing(self, data_agent):
         Test 4.1: Error Recovery within 5 Seconds"

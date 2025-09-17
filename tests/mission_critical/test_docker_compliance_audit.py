@@ -608,7 +608,7 @@ class DockerComplianceInfrastructureTests:
 
                                             # Performance assertions
         assert success_rate >= 95, formatted_string
-        assert avg_monitoring_time < 1000, "formatted_string"
+        assert avg_monitoring_time < 1000, ""
         assert max_monitoring_time < 5000, formatted_string
         assert failed_cycles == 0, formatted_string"
 
@@ -977,4 +977,4 @@ class DockerComplianceInfrastructureTests:
         logger.error(")
         sys.exit(1)
         pass
-)
+))

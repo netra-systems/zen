@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Test Suite for WebSocket 1011 Internal Server Error Fix
 
 This test suite reproduces the WebSocket 1011 internal server error and validates
@@ -21,7 +21,7 @@ Fix Implementation:
 - Graceful fallback handling instead of hard 1011 failures
 - Enhanced authentication result validation with fallback patterns
 - Better error diagnostics and logging
-"
+"""Empty docstring."""
 import asyncio
 import json
 import pytest
@@ -40,7 +40,7 @@ pytestmark = pytest.mark.asyncio
 
 @pytest.mark.integration
 class WebSocket1011ErrorReproductionTests:
-    "Test cases that reproduce the original 1011 error conditions.
+    "Test cases that reproduce the original 1011 error conditions."""
 
     async def test_invalid_user_context_causes_factory_error(self):
         "Test that invalid UserExecutionContext causes FactoryInitializationError (original bug)."
@@ -85,10 +85,10 @@ class WebSocket1011ErrorReproductionTests:
 
 @pytest.mark.integration
 class WebSocket1011ErrorFixValidationTests:
-    Test cases that validate the SSOT-compliant fix prevents 1011 errors."
+    Test cases that validate the SSOT-compliant fix prevents 1011 errors.""
 
     async def test_defensive_user_context_creation_success(self):
-        "Test that defensive UserExecutionContext creation prevents validation failures.
+        "Test that defensive UserExecutionContext creation prevents validation failures."""
         user_id = 'unique_test_user_defensive_123'
         websocket_client_id = 'ws_client_test_123'
         user_context = create_defensive_user_execution_context(user_id=user_id, websocket_client_id=websocket_client_id)
@@ -131,7 +131,7 @@ class WebSocket1011ErrorFixValidationTests:
         assert ws_manager._is_active is True
 
     async def test_authentication_service_creates_valid_context(self):
-        Test that unified authentication service creates valid UserExecutionContext."
+        Test that unified authentication service creates valid UserExecutionContext.""
         mock_auth_result = AuthResult(success=True, user_id='unique_auth_test_user_101112', email='test@example.com', permissions=['read', 'write']
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.client = Mock()
@@ -147,7 +147,7 @@ class WebSocket1011ErrorFixValidationTests:
 
 @pytest.mark.integration
 class WebSocketErrorHandlingIntegrationTests:
-    "Integration tests for WebSocket error handling and fallback mechanisms.
+    "Integration tests for WebSocket error handling and fallback mechanisms."""
 
     async def test_websocket_auth_with_invalid_context_provides_fallback(self):
         "Test that WebSocket authentication provides fallback when context creation fails."
@@ -180,7 +180,7 @@ class WebSocketValidationDefensiveMeasuresTests:
     Test defensive validation measures in WebSocket components.""
 
     async def test_ssot_validation_handles_attribute_access_errors(self):
-        Test that SSOT validation handles attribute access errors defensively."
+        Test that SSOT validation handles attribute access errors defensively.""
 
         class ProblematicContext:
 
@@ -197,7 +197,7 @@ class WebSocketValidationDefensiveMeasuresTests:
         assert 'thread_id attribute access failed' in error_message or 'SSOT' in error_message
 
     async def test_defensive_context_creation_with_id_generator_failure(self):
-        "Test that defensive context creation handles ID generator failures.
+        "Test that defensive context creation handles ID generator failures."""
         with patch('shared.id_generation.unified_id_generator.UnifiedIdGenerator.generate_user_context_ids') as mock_id_gen:
             mock_id_gen.side_effect = Exception('ID generator service unavailable')
             user_context = create_defensive_user_execution_context(user_id='unique_fallback_test_user_222324', websocket_client_id='fallback_client')
@@ -238,7 +238,7 @@ class WebSocketErrorDiagnosticsTests:
         assert 'UserExecutionContext type incompatibility' in error_message
 
     async def test_validation_errors_include_context_information(self):
-        Test that validation errors include sufficient context for debugging."
+        Test that validation errors include sufficient context for debugging.""
 
         class BadContext:
 
@@ -256,7 +256,7 @@ class WebSocketErrorDiagnosticsTests:
         assert 'UserExecutionContext' in error_message or 'VALIDATION FAILED' in error_message
 
     async def test_websocket_auth_result_includes_diagnostic_info(self):
-        "Test that WebSocket authentication results include diagnostic information.
+        "Test that WebSocket authentication results include diagnostic information."""
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.headers = {}
         mock_websocket.client_state = WebSocketState.CONNECTED
@@ -274,7 +274,7 @@ class WebSocketConnectionFlowIntegrationTests:
     "Integration test simulating complete WebSocket connection flow with error handling."
 
     async def test_complete_websocket_connection_with_error_recovery(self):
-        "Test complete WebSocket connection flow with error recovery mechanisms.""
+        """Test complete WebSocket connection flow with error recovery mechanisms."""
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.headers = {'authorization': 'Bearer test_token_with_valid_format'}
         mock_websocket.client = Mock()

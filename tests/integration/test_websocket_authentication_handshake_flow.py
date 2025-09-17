@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Integration Tests for WebSocket Authentication Handshake Flow
 
 ISSUE #395 TEST PLAN (Step 3) - Integration Test Suite  
@@ -10,7 +10,7 @@ TARGET ISSUES:
 3. E2E context propagation failure in integration scenarios
 
 CRITICAL: These tests use real services (no mocks) for authentication validation.
-"
+"""Empty docstring."""
 import pytest
 import asyncio
 import logging
@@ -28,7 +28,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.websocket, pytest.mark.websoc
 
 @pytest.mark.integration
 class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
-    "
+"""Empty docstring."""
     Integration test suite for WebSocket authentication handshake flow.
     
     Business Impact:
@@ -40,10 +40,10 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
     EXPECTED BEHAVIOR:
     - Initial runs: Tests should FAIL (reproducing handshake failures)
     - After fixes: Tests should PASS (validating proper handshake flow)
-"
+"""Empty docstring."""
 
     def setUp(self):
-        "Set up test fixtures.
+        "Set up test fixtures."""
         super().setUp()
         self.authenticator = UnifiedWebSocketAuthenticator()
         self.auth_service = get_unified_auth_service()
@@ -88,12 +88,12 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
                 self.assertFalse(is_valid, f'HANDSHAKE TIMING BUG: {description}')
 
     async def test_authentication_service_integration_real(self):
-        "
+"""Empty docstring."""
         INTEGRATION TEST: Real authentication service integration.
         
         Issue #395: Tests authentication service integration with real service calls.
         This test should FAIL initially if service integration is broken.
-"
+"""Empty docstring."""
         logger.info('[U+1F9EA] INTEGRATION TEST: Real authentication service integration')
         websocket = self.create_mock_websocket_with_state(headers={'authorization': 'Bearer test-valid-token'}, host='127.0.0.1', port=8000)
         e2e_context = {'is_e2e_testing': True, 'detection_method': {'via_environment': True}, 'environment': 'test', 'bypass_enabled': True}
@@ -135,15 +135,15 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
             if result.auth_result and hasattr(result.auth_result, 'metadata'):
                 metadata = result.auth_result.metadata or {}
                 if 'auth_method' in metadata:
-                    logger.info(fAuth method with E2E context: {metadata['auth_method']})"
+                    logger.info(fAuth method with E2E context: {metadata['auth_method']})""
 
     async def test_websocket_state_management_during_auth(self):
-    "
+"""Empty docstring."""
         INTEGRATION TEST: WebSocket state management during authentication.
         
         Issue #395: Tests that WebSocket state is properly managed during authentication flow.
         This test should FAIL initially if state management is broken.
-        "
+"""Empty docstring."""
         logger.info('[U+1F9EA] INTEGRATION TEST: WebSocket state management during authentication')
         from fastapi.websockets import WebSocketState
         state_test_cases = [(WebSocketState.CONNECTED, True, 'Connected state should allow authentication'), (WebSocketState.DISCONNECTED, False, 'Disconnected state should prevent authentication')]
@@ -162,12 +162,12 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
                 self.assertIn('WEBSOCKET_STATE', result.error_code or '', 'Error code should indicate WebSocket state issue')
 
     async def test_authentication_retry_mechanism_integration(self):
-        "
+"""Empty docstring."""
         INTEGRATION TEST: Authentication retry mechanism with real timing.
         
         Issue #395: Tests that authentication retry mechanism works with realistic timing.
         This test should FAIL initially if retry logic is broken.
-"
+"""Empty docstring."""
         logger.info('[U+1F9EA] INTEGRATION TEST: Authentication retry mechanism')
         websocket = self.create_mock_websocket_with_state(headers={'authorization': 'Bearer test-token'}
         e2e_context = {'is_e2e_testing': True, 'bypass_enabled': True, 'environment': 'test'}
@@ -180,12 +180,12 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
         logger.info(f'Authentication completed in {elapsed_time:.2f} seconds')
 
     async def test_circuit_breaker_integration(self):
-    "
+"""Empty docstring."""
         INTEGRATION TEST: Circuit breaker pattern in authentication.
         
         Issue #395: Tests that circuit breaker pattern works in integration scenarios.
         This test should FAIL initially if circuit breaker logic is broken.
-        "
+"""Empty docstring."""
         logger.info('[U+1F9EA] INTEGRATION TEST: Circuit breaker pattern')
         circuit_state = await self.authenticator._check_circuit_breaker()
         self.assertEqual(circuit_state, 'CLOSED', 'Circuit breaker should start in CLOSED state')
@@ -197,12 +197,12 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
         self.assertEqual(circuit_state, 'CLOSED', 'Single failure should not open circuit breaker')
 
     async def test_concurrent_authentication_integration(self):
-        "
+"""Empty docstring."""
         INTEGRATION TEST: Concurrent authentication handling.
         
         Issue #395: Tests that multiple concurrent authentication attempts are handled correctly.
         This test should FAIL initially if concurrency handling is broken.
-"
+"""Empty docstring."""
         logger.info('[U+1F9EA] INTEGRATION TEST: Concurrent authentication handling')
         websockets = []
         for i in range(3):
@@ -238,7 +238,7 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
         logger.info(f'Concurrent authentication of {len(websockets)} connections completed in {elapsed_time:.2f} seconds')
 
     def test_websocket_validation_edge_cases(self):
-    "
+"""Empty docstring."""
         INTEGRATION TEST: WebSocket validation edge cases.
         
         Issue #395: Tests edge cases in WebSocket validation that cause authentication failures.

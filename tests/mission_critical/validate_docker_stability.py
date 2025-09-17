@@ -206,7 +206,7 @@ class DockerStabilityValidator:
         metrics = {}
         try:
         # Test container lifecycle
-        container_name = "formatted_string"
+        container_name = ""
         # Create container
         create_start = time.time()
         create_result = self._execute_docker_command(]
@@ -275,7 +275,7 @@ class DockerStabilityValidator:
         "Perform Docker operations concurrently.
         worker_results = []
         for op_id in range(operations_per_worker):
-        container_name = "formatted_string"
+        container_name = ""
         try:
             # Create container
         op_start = time.time()
@@ -930,7 +930,7 @@ class DockerStabilityValidator:
         if create_result.returncode == 0:
         self.created_networks.add(network_name)
                 # Create container on network
-        container_name = "formatted_string"
+        container_name = ""
         container_result = self._execute_docker_command(]
         'docker', 'run', '-d', '--name', container_name,
         '--network', network_name,
@@ -977,7 +977,7 @@ class DockerStabilityValidator:
         operation_times = []
         errors = []
         for i in range(total_operations):
-        volume_name = "formatted_string"
+        volume_name = ""
         try:
         op_start = time.time()
             # Create volume

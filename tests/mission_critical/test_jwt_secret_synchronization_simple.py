@@ -238,7 +238,7 @@ class AuthenticationTestSuite:
 
     def test_token_refresh_during_active_chat(self) -> bool:
         "Test token refresh during active chat session.
-        user_id = "formatted_string"
+        user_id = ""
 
         try:
         # Login and get short-lived token

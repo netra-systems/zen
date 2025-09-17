@@ -185,7 +185,7 @@ class TestStagingAuthURLRegression:
             # Should NOT contain localhost
         for origin in cors_origins:
         assert 'localhost' not in origin, \
-        "formatted_string"
+        ""
 
         @pytest.fixture)
                 # Test that overrides still work in staging

@@ -263,7 +263,7 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
                             logger.debug(fFound DatabaseManager class: {class_info})"
                             
                 except (SyntaxError, UnicodeDecodeError) as e:
-                    logger.warning(f"Could not parse {py_file}: {e})
+                    logger.warning(f"Could not parse {py_file}: {e})")
                 except Exception as e:
                     logger.warning(fError scanning {py_file}: {e})
         

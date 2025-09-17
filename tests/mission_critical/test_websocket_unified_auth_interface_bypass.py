@@ -192,7 +192,7 @@ class WebSocketUnifiedAuthInterfaceBypassTests(SSotAsyncTestCase):
                 pytest.fail(VIOLATION NOT REPRODUCED: No direct auth imports found)"
                 
         except Exception as e:
-            logger.warning(f" WARNING: [U+FE0F] Could not analyze source code: {e})
+            logger.warning(f" WARNING: [U+FE0F] Could not analyze source code: {e})")
             pytest.skip(Cannot analyze source code for violations)
 
     @pytest.mark.asyncio

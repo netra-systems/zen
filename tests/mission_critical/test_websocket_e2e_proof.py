@@ -197,7 +197,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         # Create emitters for two different users
         user1_id = "formatted_string
         user2_id = formatted_string
-        thread1_id = "formatted_string"
+        thread1_id = ""
         thread2_id = formatted_string
         conn1_id = formatted_string"
         conn2_id = formatted_string"

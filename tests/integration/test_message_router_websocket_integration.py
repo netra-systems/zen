@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Integration Tests for MessageRouter WebSocket Integration - GitHub Issue #217
 
 Business Value Justification:
@@ -9,7 +9,7 @@ Business Value Justification:
 
 These tests are designed to FAIL initially to reproduce WebSocket routing issues.
 They test with REAL WebSocket connections (no mocks) as per SSOT testing standards.
-"
+"""Empty docstring."""
 
 import asyncio
 import json
@@ -28,7 +28,7 @@ from netra_backend.app.websocket_core import create_websocket_manager
 
 @pytest.mark.integration
 class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
-    "Integration tests for MessageRouter with real WebSocket connections.
+    "Integration tests for MessageRouter with real WebSocket connections."""
     
     async def asyncSetUp(self):
         "Set up test environment with real WebSocket infrastructure."
@@ -50,13 +50,13 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
         await super().asyncTearDown()
         
     async def test_websocket_message_routing_with_real_connections(self):
-    "
+"""Empty docstring."""
         Test MessageRouter with real WebSocket connections.
         This should FAIL initially, revealing routing inconsistencies.
-        "
+"""Empty docstring."""
         # Create real WebSocket connection
         user_id = ftest_user_{uuid.uuid4()}
-        connection_id = f"conn_{uuid.uuid4()}
+        connection_id = f"conn_{uuid.uuid4()}"
         
         try:
             # Attempt to create WebSocket connection through router
@@ -68,7 +68,7 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
             # Test message routing through the router
             test_message = create_standard_message(
                 message_type=MessageType.USER_MESSAGE,
-                content={text": test routing message, user_id: user_id},
+                content={text": test routing message, user_id: user_id},"
                 user_id=user_id
             )
             
@@ -90,8 +90,8 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
             # This assertion should FAIL, revealing routing issues
             self.assertTrue(
                 routing_success,
-                f"MESSAGE ROUTING FAILURE: MessageRouter failed to route message. 
-                fRouting failures: {self.routing_failures}"
+                f"MESSAGE ROUTING FAILURE: MessageRouter failed to route message. "
+                fRouting failures: {self.routing_failures}""
             )
             
         except Exception as e:
@@ -105,20 +105,20 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
             # This should FAIL, revealing the integration issue
             self.fail(
                 fWEBSOCKET ROUTING EXCEPTION: {e}. 
-                fAll failures: {self.routing_failures}"
+                fAll failures: {self.routing_failures}""
             )
             
     async def test_agent_router_communication_consistency(self):
-    "
+"""Empty docstring."""
         Test that agent communication through MessageRouter is consistent.
         This should FAIL initially, revealing agent-router communication issues.
-        "
+"""Empty docstring."""
         agent_messages = []
         routing_inconsistencies = []
         
         # Simulate agent communication scenarios
         agents = ['supervisor', 'triage', 'data_helper', 'apex_optimizer']
-        user_id = fagent_test_user_{uuid.uuid4()}"
+        user_id = fagent_test_user_{uuid.uuid4()}""
         
         try:
             # Create WebSocket for agent communication
@@ -132,8 +132,8 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
                 agent_message = create_standard_message(
                     message_type=MessageType.AGENT_RESPONSE,
                     content={
-                        agent: agent_name,"
-                        "response: fResponse from {agent_name},
+                        agent: agent_name,""
+                        "response: fResponse from {agent_name},"
                         user_id: user_id
                     },
                     user_id=user_id
@@ -174,19 +174,19 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
             # This should FAIL, revealing the communication issue
             self.fail(
                 fAGENT COMMUNICATION FAILURE: {e}. 
-                f"Inconsistencies: {routing_inconsistencies}
+                f"Inconsistencies: {routing_inconsistencies}"
             )
             
     async def test_golden_path_message_flow_validation(self):
-        "
+"""Empty docstring."""
         Test the complete golden path message flow through MessageRouter.
         This should FAIL initially, revealing breaks in the golden path.
-"
+"""Empty docstring."""
         golden_path_events = []
         golden_path_failures = []
         
         # Golden path: User message -> Agent processing -> Response
-        user_id = f"golden_path_user_{uuid.uuid4()}
+        user_id = f"golden_path_user_{uuid.uuid4()}"
         
         try:
             # Step 1: Create WebSocket connection
@@ -318,8 +318,8 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
                     message_type=MessageType.USER_MESSAGE,
                     content={
                         text: fMessage from {user_id},
-                        user_id: user_id,"
-                        timestamp": asyncio.get_event_loop().time()
+                        user_id: user_id,""
+                        timestamp": asyncio.get_event_loop().time()"
                     },
                     user_id=user_id
                 )
@@ -361,18 +361,18 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
             self.assertEqual(
                 len(failed_users), 0,
                 fUSER ISOLATION VIOLATION: {len(failed_users)} users failed routing. 
-                fFailed users: {failed_users}. Violations: {isolation_violations}"
+                fFailed users: {failed_users}. Violations: {isolation_violations}""
             )
             
         except Exception as e:
             # This should FAIL, revealing the isolation issue
             self.fail(
-                f"CONCURRENT USER ISOLATION FAILURE: {e}. 
+                f"CONCURRENT USER ISOLATION FAILURE: {e}. "
                 fUsers: {concurrent_users}. Violations: {isolation_violations}
             )
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # Run async tests
     import unittest
     unittest.main(verbosity=2)

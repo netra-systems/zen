@@ -1,4 +1,4 @@
-"WebSocket Factory Pattern Consolidation Test Suite
+"WebSocket Factory Pattern Consolidation Test Suite"""
 
 PURPOSE: Verify unified factory pattern behavior for Issue #1182 WebSocket Manager SSOT Migration
 BUSINESS VALUE: Protects $500K+ ARR Golden Path by ensuring consistent factory behavior
@@ -37,14 +37,14 @@ class WebSocketFactoryConsolidationTests(SSotAsyncTestCase):
 ""
 
     def setUp(self):
-        Set up test environment for factory pattern testing."
+        Set up test environment for factory pattern testing.""
         super().setUp()
         self.created_managers = []
         self.factory_inconsistencies = []
         self.user_isolation_violations = []
         
     async def asyncSetUp(self):
-        "Async setup for factory testing.
+        "Async setup for factory testing."""
         await super().asyncSetUp()
         self.test_user_contexts = await self._create_test_user_contexts()
         
@@ -59,12 +59,12 @@ class WebSocketFactoryConsolidationTests(SSotAsyncTestCase):
                 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
                 
                 id_manager = UnifiedIDManager()
-                user_id = ensure_user_id(id_manager.generate_id(IDType.USER, prefix=ftest_factory_{i}))"
+                user_id = ensure_user_id(id_manager.generate_id(IDType.USER, prefix=ftest_factory_{i}))""
                 
                 # Create isolated user context
                 context = type('TestUserContext', (), {
                     'user_id': user_id,
-                    'thread_id': id_manager.generate_id(IDType.THREAD, prefix=f"test_factory_{i}),
+                    'thread_id': id_manager.generate_id(IDType.THREAD, prefix=f"test_factory_{i}),"
                     'request_id': id_manager.generate_id(IDType.REQUEST, prefix=ftest_factory_{i}),
                     'is_test': True,
                     'factory_test_index': i
@@ -98,7 +98,7 @@ class WebSocketFactoryConsolidationTests(SSotAsyncTestCase):
         factory_methods_to_test = [
             (netra_backend.app.websocket_core.websocket_manager", "get_websocket_manager),
             (netra_backend.app.websocket_core.manager, WebSocketManager),  # Direct instantiation
-            (netra_backend.app.websocket_core.websocket_manager, "WebSocketManager),  # Class access
+            (netra_backend.app.websocket_core.websocket_manager, "WebSocketManager),  # Class access"
         ]
         
         created_manager_types = {}
@@ -121,17 +121,17 @@ class WebSocketFactoryConsolidationTests(SSotAsyncTestCase):
                     manager_class = getattr(module, factory_name)
                     manager = manager_class(
                         user_context=self.test_user_contexts[0],
-                        _ssot_authorization_token=test_token_123"
+                        _ssot_authorization_token=test_token_123""
                     )
                 
                 manager_type = type(manager)
                 created_manager_types[f{module_path}.{factory_name}] = manager_type
                 self.created_managers.append(manager)
                 
-                logger.info(fFactory {module_path}.{factory_name} created: {manager_type})"
+                logger.info(fFactory {module_path}.{factory_name} created: {manager_type})""
                 
             except Exception as e:
-                factory_errors.append(f"{module_path}.{factory_name}: {e})
+                factory_errors.append(f"{module_path}.{factory_name}: {e})"
                 logger.error(fFactory method {module_path}.{factory_name} failed: {e})
         
         # Check for consistency across all factory methods
@@ -147,17 +147,17 @@ class WebSocketFactoryConsolidationTests(SSotAsyncTestCase):
                         fFACTORY INCONSISTENCY: Found {len(unique_manager_types)} different manager types from factories. ""
                         fTypes: {unique_manager_types}. 
                         fFactory errors: {factory_errors}. 
-                        f"Inconsistencies: {self.factory_inconsistencies})
+                        f"Inconsistencies: {self.factory_inconsistencies})"
 
     async def test_websocket_manager_user_isolation_enforcement(self):
-        "
+"""Empty docstring."""
         CRITICAL TEST: Verify factory creates properly isolated manager instances per user
         
         EXPECTED BEHAVIOR:
         - MUST FAIL (current): Shared state between users (singleton contamination)
         - MUST PASS (after SSOT): Complete user isolation with factory pattern
-"
-        logger.info("Testing WebSocket manager user isolation enforcement...)
+"""Empty docstring."""
+        logger.info("Testing WebSocket manager user isolation enforcement...)"
         
         try:
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
@@ -179,7 +179,7 @@ class WebSocketFactoryConsolidationTests(SSotAsyncTestCase):
                 # Check for shared instance violations
                 for existing_user_id, existing_manager in user_managers.items():
                     if existing_user_id != user_context.user_id and id(existing_manager) == manager_id:
-                        shared_state_violations.append(f"Same manager instance {manager_id} shared between users {existing_user_id} and {user_context.user_id})
+                        shared_state_violations.append(f"Same manager instance {manager_id} shared between users {existing_user_id} and {user_context.user_id})"
             
             # Test concurrent access isolation
             isolation_violations = await self._test_concurrent_user_isolation(user_managers)
@@ -190,19 +190,19 @@ class WebSocketFactoryConsolidationTests(SSotAsyncTestCase):
             # ASSERTION: This MUST FAIL currently (proving isolation violations)
             # After SSOT consolidation, this MUST PASS (proper user isolation)
             self.assertEqual(len(total_violations), 0,
-                           fUSER ISOLATION VIOLATIONS: Found {len(total_violations)} violations. "
+                           fUSER ISOLATION VIOLATIONS: Found {len(total_violations)} violations. ""
                            fShared state violations: {shared_state_violations}. 
-                           fIsolation violations: {isolation_violations})"
+                           fIsolation violations: {isolation_violations})""
                            
         except Exception as e:
-            self.fail(f"Failed to test user isolation: {e})
+            self.fail(f"Failed to test user isolation: {e})"
 
     async def _test_concurrent_user_isolation(self, user_managers: Dict[str, Any] -> List[str]:
-        Test that concurrent operations don't contaminate user data."
+        Test that concurrent operations don't contaminate user data.""
         isolation_violations = []
         
         async def user_operation(user_id: str, manager: Any, operation_id: str) -> Dict[str, Any]:
-            "Simulate user-specific operation.
+            "Simulate user-specific operation."""
             try:
                 # Set user-specific data
                 test_data = fdata_for_{user_id}_{operation_id}""
@@ -249,19 +249,19 @@ class WebSocketFactoryConsolidationTests(SSotAsyncTestCase):
                 if 'violation' in result:
                     isolation_violations.append(result['violation']
                 elif 'error' in result:
-                    isolation_violations.append(f"User {result['user_id']} operation failed: {result['error']})
+                    isolation_violations.append(f"User {result['user_id']} operation failed: {result['error']})"
         
         return isolation_violations
 
     async def test_websocket_manager_factory_thread_safety(self):
-        "
+"""Empty docstring."""
         CRITICAL TEST: Verify factory is thread-safe under concurrent access
         
         EXPECTED BEHAVIOR:
         - MUST FAIL (current): Race conditions in factory creation
         - MUST PASS (after SSOT): Thread-safe factory with proper locking
-"
-        logger.info("Testing WebSocket manager factory thread safety...)
+"""Empty docstring."""
+        logger.info("Testing WebSocket manager factory thread safety...)"
         
         try:
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
@@ -328,22 +328,22 @@ class WebSocketFactoryConsolidationTests(SSotAsyncTestCase):
             # ASSERTION: This MUST FAIL currently (proving race conditions)
             # After SSOT consolidation, this MUST PASS (thread-safe factory)
             self.assertEqual(len(race_condition_violations), 0,
-                           f"THREAD SAFETY VIOLATIONS: Found {len(race_condition_violations)} race conditions. 
-                           fViolations: {race_condition_violations}. "
+                           f"THREAD SAFETY VIOLATIONS: Found {len(race_condition_violations)} race conditions. "
+                           fViolations: {race_condition_violations}. ""
                            fThread results: {len(thread_results)} successful, {len(thread_errors)} failed.)
                            
         except Exception as e:
-            self.fail(fFailed to test thread safety: {e})"
+            self.fail(fFailed to test thread safety: {e})""
 
     async def test_websocket_manager_factory_memory_isolation(self):
-    "
+"""Empty docstring."""
         CRITICAL TEST: Verify factory prevents memory leaks and cross-user contamination
         
         EXPECTED BEHAVIOR:
         - MUST FAIL (current): Memory shared between user contexts
         - MUST PASS (after SSOT): Complete memory isolation per user
-        "
-        logger.info(Testing WebSocket manager factory memory isolation...")
+"""Empty docstring."""
+        logger.info(Testing WebSocket manager factory memory isolation...")"
         
         try:
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
@@ -357,7 +357,7 @@ class WebSocketFactoryConsolidationTests(SSotAsyncTestCase):
                 
                 # Try to set some state that shouldn't leak between users
                 test_state_key = ftest_state_{user_context.user_id}
-                test_state_value = fsecret_data_for_user_{i}"
+                test_state_value = fsecret_data_for_user_{i}""
                 
                 # Try different ways to set state that might be shared
                 if hasattr(manager, '_user_state'):
@@ -375,7 +375,7 @@ class WebSocketFactoryConsolidationTests(SSotAsyncTestCase):
                         if hasattr(manager1, '_user_state') and hasattr(getattr(manager1, '_user_state', None), key2):
                             contamination_value = getattr(manager1._user_state, key2, None)
                             if contamination_value == value2:
-                                memory_violations.append(f"Manager for {user_id1} has contaminated state from {user_id2}: {key2}={contamination_value})
+                                memory_violations.append(f"Manager for {user_id1} has contaminated state from {user_id2}: {key2}={contamination_value})"
                         
                         # Check direct attribute contamination
                         if hasattr(manager1, key2) and getattr(manager1, key2, None) == value2:
@@ -406,7 +406,7 @@ class WebSocketFactoryConsolidationTests(SSotAsyncTestCase):
     def tearDown(self):
         Clean up after factory pattern tests.""
         super().tearDown()
-        logger.info(f"Factory test completed. Inconsistencies found: {len(self.factory_inconsistencies)})
+        logger.info(f"Factory test completed. Inconsistencies found: {len(self.factory_inconsistencies)})"
         logger.info(fUser isolation violations found: {len(self.user_isolation_violations)}")"
 
 

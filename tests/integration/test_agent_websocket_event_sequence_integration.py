@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 P0 Critical Integration Tests: Agent-to-WebSocket Event Sequence Integration
 
 Business Value Justification (BVJ):
@@ -29,7 +29,7 @@ ARCHITECTURE ALIGNMENT:
 - Uses AgentWebSocketBridge for event sequence coordination
 - Tests AgentRegistry with real WebSocket event emission
 - Validates supervisor agent workflow with complete event delivery
-"
+"""Empty docstring."""
 import asyncio
 import uuid
 from datetime import datetime, timedelta
@@ -54,7 +54,7 @@ from netra_backend.app.schemas.core_enums import MessageType
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 
 class WebSocketEventSequenceCapture:
-    "Captures and validates WebSocket event sequences in real-time.
+    "Captures and validates WebSocket event sequences in real-time."""
 
     def __init__(self, user_id: str):
         self.user_id = user_id
@@ -70,11 +70,11 @@ class WebSocketEventSequenceCapture:
         self.events.append(event_data)
         self.event_sequence.append(event_type)
         self.timing_data[event_type] = event_data['relative_time_ms']
-        print(f[EVENT-CAPTURE] {event_type}: {data.get('agent_name', 'unknown')} ({event_data['relative_time_ms']:.2f}ms))"
+        print(f[EVENT-CAPTURE] {event_type}: {data.get('agent_name', 'unknown')} ({event_data['relative_time_ms']:.2f}ms))""
         return True
 
     def validate_complete_sequence(self) -> Dict[str, Any]:
-        "Validate the complete 5-event sequence.
+        "Validate the complete 5-event sequence."""
         expected_sequence = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
         return {'has_all_events': all((event_type in self.event_sequence for event_type in expected_sequence)), 'correct_order': self.event_sequence == expected_sequence, 'event_count': len(self.events), 'sequence_received': self.event_sequence.copy(), 'timing_valid': all((timing < 5000 for timing in self.timing_data.values())), 'total_duration_ms': max(self.timing_data.values()) if self.timing_data else 0}
 
@@ -113,8 +113,8 @@ class AgentWebSocketEventSequenceIntegrationTests(SSotAsyncTestCase):
             validation = self.event_capture.validate_complete_sequence()
             self.assertTrue(validation['has_all_events'], fMissing critical events. Got: {validation['sequence_received']})
             self.assertTrue(validation['correct_order'], fIncorrect event order. Expected: [agent_started, agent_thinking, tool_executing, tool_completed, agent_completed], Got: {validation['sequence_received']})
-            self.assertLessEqual(validation['total_duration_ms'], 5000, f"Event sequence too slow: {validation['total_duration_ms']}ms)
-            self.assertGreaterEqual(validation['event_count'], 5, fInsufficient events captured: {validation['event_count']}")
+            self.assertLessEqual(validation['total_duration_ms'], 5000, f"Event sequence too slow: {validation['total_duration_ms']}ms)"
+            self.assertGreaterEqual(validation['event_count'], 5, fInsufficient events captured: {validation['event_count']}")"
 
     @pytest.mark.asyncio
     async def test_event_sequence_with_tool_failure(self):
@@ -141,7 +141,7 @@ class AgentWebSocketEventSequenceIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_multi_user_event_isolation(self):
-        Test that events are isolated per user."
+        Test that events are isolated per user.""
         user_2_id = f'test_user_2_{uuid.uuid4().hex[:8]}'
         user_2_context = UserExecutionContext(user_id=user_2_id, run_id=f'test_run_2_{uuid.uuid4().hex[:8]}', session_id=f'session_2_{uuid.uuid4().hex[:8]}', thread_id=f'thread_2_{uuid.uuid4().hex[:8]}')
         event_capture_2 = WebSocketEventSequenceCapture(user_2_id)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"Integration test to verify all 5 critical WebSocket agent events are sent during execution.
+"Integration test to verify all 5 critical WebSocket agent events are sent during execution."
 
 CRITICAL BUSINESS VALUE: This test validates the core chat functionality that drives $500K+ ARR.
 
@@ -50,25 +50,25 @@ class MockWebSocketEventCapture:
         print(f[U+1F514] WebSocket Event: {event_type} - {data.get('tool_name', data.get('agent_name', 'unknown'))})
         return True
         
-    def get_events_by_type(self, event_type: str") -> List[Dict]:
-        "Get all events of a specific type.
+    def get_events_by_type(self, event_type: str") -> List[Dict]:"
+        "Get all events of a specific type."""
         return [event for event in self.events if event["type] == event_type]"
         
     def has_all_critical_events(self) -> bool:
-        Check if all 5 critical events were received."
+        Check if all 5 critical events were received.""
         required_events = {
-            "agent_started,
+            "agent_started,"
             agent_thinking, 
             "tool_executing,"
             tool_completed,
-            agent_completed"
+            agent_completed""
         }
         received_events = set(self.event_types)
         return required_events.issubset(received_events)
 
 
 class SimpleTestAgent:
-    "Simple test agent that uses tools.
+    "Simple test agent that uses tools."""
     
     def __init__(self, name: str = "TestAgent):"
         self.name = name
@@ -76,12 +76,12 @@ class SimpleTestAgent:
         self._run_id = None
         
     def set_websocket_bridge(self, bridge, run_id):
-        Set WebSocket bridge for notifications."
+        Set WebSocket bridge for notifications.""
         self.websocket_bridge = bridge
         self._run_id = run_id
         
     async def execute(self, state: DeepAgentState, run_id: str, should_continue: bool = True) -> Dict[str, Any]:
-        "Execute agent with tool usage.
+        "Execute agent with tool usage."""
         
         # Emit thinking event during execution
         if self.websocket_bridge:
@@ -98,14 +98,14 @@ class SimpleTestAgent:
                 # Execute a test tool
                 tool_result = await state.tool_dispatcher.execute_tool(
                     test_tool,
-                    {test_param: "test_value}
+                    {test_param: "test_value}"
                 
                 # Emit another thinking event after tool usage
                 if self.websocket_bridge:
                     await self.websocket_bridge.notify_agent_thinking(
                         run_id=run_id,
                         agent_name=self.name,
-                        reasoning=Processing tool results and preparing final response...",
+                        reasoning=Processing tool results and preparing final response...","
                         step_number=2
                     )
                     
@@ -113,19 +113,19 @@ class SimpleTestAgent:
                     success: True,
                     result": "Agent executed successfully with tool usage,
                     tool_result: str(tool_result),
-                    agent_name: self.name"
+                    agent_name: self.name""
                 }
             except Exception as e:
                 return {
-                    success": False,
+                    success": False,"
                     error: fTool execution failed: {e},
                     "agent_name: self.name"
                 }
         
         return {
             success: True,
-            result: Agent executed successfully without tools",
-            "agent_name: self.name
+            result: Agent executed successfully without tools","
+            "agent_name: self.name"
         }
 
 
@@ -142,9 +142,9 @@ async def create_mock_tool_dispatcher(user_context: UserExecutionContext, websoc
     class ToolTests:
         name = test_tool
         
-        async def arun(self, test_param: str = default) -> str:"
+        async def arun(self, test_param: str = default) -> str:""
             await asyncio.sleep(0.1)  # Simulate work
-            return f"Tool executed with param: {test_param}
+            return f"Tool executed with param: {test_param}"
     
     test_tool = ToolTests()
     dispatcher.register_tool(test_tool)
@@ -154,24 +154,24 @@ async def create_mock_tool_dispatcher(user_context: UserExecutionContext, websoc
 
 @pytest.fixture
 async def websocket_event_capture():
-    Create WebSocket event capture fixture."
+    Create WebSocket event capture fixture.""
     return MockWebSocketEventCapture()
 
 
 @pytest.fixture 
 async def user_context():
-    "Create test user context.
+    "Create test user context."""
     return UserExecutionContext(
         user_id=ftest_user_{uuid.uuid4().hex[:8]}","
         run_id=frun_{uuid.uuid4().hex[:8]},
         thread_id=fthread_{uuid.uuid4().hex[:8]},
-        session_id=f"session_{uuid.uuid4().hex[:8]}
+        session_id=f"session_{uuid.uuid4().hex[:8]}"
     )
 
 
 @pytest.fixture
 async def websocket_manager(websocket_event_capture):
-    "Create WebSocket manager that captures events.
+    "Create WebSocket manager that captures events."""
     manager = Mock()
     manager.send_event = websocket_event_capture.send_event
     return manager
@@ -209,11 +209,11 @@ async def test_complete_websocket_event_flow(
     agent_registry,
     test_agent
 ):
-    Test complete WebSocket event flow with all 5 critical events."
+    Test complete WebSocket event flow with all 5 critical events.""
     
     CRITICAL: This test validates the core chat functionality.
     ALL 5 events MUST be sent for proper user experience.
-    "
+"""Empty docstring."""
     
     # Setup: Register agent and set WebSocket manager
     agent_registry.register(test_agent.name, test_agent)
@@ -265,16 +265,16 @@ async def test_complete_websocket_event_flow(
         Must send agent_started event for user transparency""
         
     assert len(websocket_event_capture.get_events_by_type(agent_thinking)) >= 1, \
-        Must send agent_thinking events for real-time user feedback"
+        Must send agent_thinking events for real-time user feedback""
         
-    assert len(websocket_event_capture.get_events_by_type("tool_executing)) >= 1, \
+    assert len(websocket_event_capture.get_events_by_type("tool_executing)) >= 1, \"
         Must send tool_executing event for tool usage transparency
         
     assert len(websocket_event_capture.get_events_by_type("tool_completed)) >= 1, \"
         Must send tool_completed event for tool result visibility
         
-    assert len(websocket_event_capture.get_events_by_type(agent_completed)) >= 1, \"
-        Must send agent_completed event for user closure"
+    assert len(websocket_event_capture.get_events_by_type(agent_completed)) >= 1, \""
+        Must send agent_completed event for user closure""
     
     # CRITICAL: Validate all 5 events are present
     assert websocket_event_capture.has_all_critical_events(), \
@@ -290,10 +290,10 @@ async def test_websocket_events_with_tool_dispatcher_integration(
     user_context,
     websocket_manager
 ):
-    "Test WebSocket events specifically through tool dispatcher integration.
+    "Test WebSocket events specifically through tool dispatcher integration."
     
     This test focuses on the tool_executing and tool_completed events.
-"
+"""Empty docstring."""
     
     # Create WebSocket bridge
     bridge = AgentWebSocketBridge(user_context)
@@ -307,9 +307,9 @@ async def test_websocket_events_with_tool_dispatcher_integration(
     
     # Register a test tool
     class ToolTests:
-        name = integration_test_tool"
+        name = integration_test_tool""
         
-        async def arun(self, message: str = test") -> str:
+        async def arun(self, message: str = test") -> str:"
             await asyncio.sleep(0.05)  # Brief work simulation
             return fProcessed: {message}
     
@@ -318,15 +318,15 @@ async def test_websocket_events_with_tool_dispatcher_integration(
     
     # Execute tool (should trigger WebSocket events)
     result = await dispatcher.execute_tool(
-        integration_test_tool,"
-        {"message: Hello from integration test}
+        integration_test_tool,""
+        {"message: Hello from integration test}"
     
     # Validate tool execution
     assert result.success, fTool execution should succeed: {result.error if hasattr(result, 'error') else 'Unknown'}
     
     # Validate WebSocket events
-    tool_executing_events = websocket_event_capture.get_events_by_type(tool_executing)"
-    tool_completed_events = websocket_event_capture.get_events_by_type("tool_completed)
+    tool_executing_events = websocket_event_capture.get_events_by_type(tool_executing)""
+    tool_completed_events = websocket_event_capture.get_events_by_type("tool_completed)"
     
     assert len(tool_executing_events) >= 1, Must send tool_executing event
     assert len(tool_completed_events) >= 1, "Must send tool_completed event"
@@ -335,8 +335,8 @@ async def test_websocket_events_with_tool_dispatcher_integration(
     executing_event = tool_executing_events[0]
     completed_event = tool_completed_events[0]
     
-    assert executing_event[data][tool_name] == integration_test_tool"
-    assert completed_event["data][tool_name] == integration_test_tool
+    assert executing_event[data][tool_name] == integration_test_tool""
+    assert completed_event["data][tool_name] == integration_test_tool"
     assert completed_event[data"]["status] == success
     
     print( PASS:  Tool dispatcher WebSocket integration validated!")"
@@ -350,7 +350,7 @@ if __name__ == __main__:
             user_id=direct_test_user,
             run_id="direct_test_run, "
             thread_id=direct_test_thread,
-            session_id=direct_test_session"
+            session_id=direct_test_session""
         ),
         Mock(),
         AgentWebSocketBridge(),

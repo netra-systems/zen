@@ -135,7 +135,7 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
             )
 
             print(f\n=== WEBSOCKET GOLDEN PATH PROTECTION ===)"
-            print(f"✓ WebSocket bridge integration: Compatible)
+            print(f"✓ WebSocket bridge integration: Compatible)")
             print(f✓ Critical events supported: {len(required_events)})
             print(f"✓ Golden Path real-time updates: Functional")
             print(=*50)
@@ -276,7 +276,7 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
 
         except Exception as e:
             # Make this informational since registry patterns may vary
-            print(f"INFO: Agent registry validation needs more context: {e})
+            print(f"INFO: Agent registry validation needs more context: {e})")
 
     async def test_error_handling_preserved_in_ssot_consolidation(self"):
         GOLDEN PATH: Validate error handling continues working.
@@ -310,7 +310,7 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
                     )
 
             print(f\n=== ERROR HANDLING GOLDEN PATH PROTECTION ===)"
-            print(f"Available error handling methods: {available_error_methods})
+            print(f"Available error handling methods: {available_error_methods})")
             print(f✓ Execute method callable: {hasattr(SupervisorAgent, 'execute')})
             print(f"✓ Golden Path error resilience: Preserved")
             print(=*55)

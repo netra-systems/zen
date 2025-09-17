@@ -387,7 +387,7 @@ if __name__ == __main__:
             print( UNEXPECTED: Test passed - issue may be resolved)"
             return 0
         except AssertionError as e:
-            print(f" REPRODUCED ISSUE #690: {e})
+            print(f" REPRODUCED ISSUE #690: {e})")
             return 1
         except Exception as e:
             print(f ERROR: Unexpected failure: {e})"

@@ -343,7 +343,7 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
             logger.warning("Memory Leak Risks:)
             for risk in memory_leak_risks:
                 logger.warning(f  - {risk['component_type']}: {risk['issue_type']})
-                logger.warning(f"    Shared by: {risk['shared_by_users']})
+                logger.warning(f"    Shared by: {risk['shared_by_users']})")
                 logger.warning(f    Risk level: {risk['memory_leak_risk']}")
         
         if creation_errors:

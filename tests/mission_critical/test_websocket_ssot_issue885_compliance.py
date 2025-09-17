@@ -355,14 +355,14 @@ class TestWebSocketSSOTComplianceMissionCritical(SSotAsyncTestCase):
 
     def _log_critical_findings(self):
         Log critical findings for mission critical assessment."
-        print(f"\n{'='*60})
+        print(f"\n{'='*60})")
         print(MISSION CRITICAL FINDINGS SUMMARY)"
-        print(f"{'='*60})
+        print(f"{'='*60})")
 
         if self.ssot_violations:
             print(🚨 CRITICAL SSOT VIOLATIONS DETECTED:)"
             for i, violation in enumerate(self.ssot_violations, 1):
-                print(f"   {i}. {violation})
+                print(f"   {i}. {violation})")
         else:
             print(✅ NO SSOT VIOLATIONS DETECTED)"
             print("⚠️  WARNING: If Issue #885 is unresolved, this may indicate test failure)

@@ -1,4 +1,4 @@
-"WebSocket User Session Consistency E2E Tests
+"WebSocket User Session Consistency E2E Tests"""
 
 CRITICAL PURPOSE: These tests MUST FAIL to expose end-to-end WebSocket user session
 consistency issues with REAL authentication, demonstrating the business impact of
@@ -37,13 +37,13 @@ class WebSocketUserSessionConsistencyE2ETests:
     @pytest.mark.e2e
     @pytest.mark.asyncio
     async def test_authenticated_websocket_session_creation_with_thread_consistency(self):
-        FAILING E2E TEST: Verify authenticated WebSocket sessions maintain thread ID consistency"
+        FAILING E2E TEST: Verify authenticated WebSocket sessions maintain thread ID consistency""
         
         EXPECTED FAILURE: This test should FAIL because WebSocket factory generates thread IDs
         that are incompatible with authenticated session management, breaking real user workflows.
         
         Business Impact: Users cannot start chat conversations = revenue loss
-        "
+"""Empty docstring."""
         auth_helper = E2EAuthHelper()
         user_context = await create_authenticated_user_context(user_email='websocket.test.user@example.com', environment='test', permissions=['read', 'write', 'premium']
         jwt_token = user_context.agent_context['jwt_token']
@@ -138,13 +138,13 @@ class WebSocketUserSessionConsistencyE2ETests:
     @pytest.mark.e2e
     @pytest.mark.asyncio
     async def test_websocket_agent_execution_with_authenticated_thread_consistency(self):
-        "FAILING E2E TEST: Verify WebSocket agent execution works with authenticated thread consistency
+        "FAILING E2E TEST: Verify WebSocket agent execution works with authenticated thread consistency"""
         
         EXPECTED FAILURE: This test should FAIL because agent execution fails when WebSocket
         thread IDs are incompatible with authenticated session management.
         
         Business Impact: AI agents cannot execute for users = core product value lost
-"
+"""Empty docstring."""
         auth_helper = E2EAuthHelper()
         user_context = await create_authenticated_user_context(user_email='agent.execution.user@example.com', environment='test', permissions=['read', 'write', 'premium']
         user_id = str(user_context.user_id)

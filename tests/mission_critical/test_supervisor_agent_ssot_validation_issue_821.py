@@ -175,7 +175,7 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
                             content = f.read()
                             if self.ssot_module_path in content:
                                 ssot_usage_found = True
-                                print(f"\n=== FACTORY SSOT VALIDATION ===)
+                                print(f"\n=== FACTORY SSOT VALIDATION ===)")
                                 print(f✓ Factory uses SSOT: {factory_module_path})"
                                 print("=*35)
                                 break
@@ -218,7 +218,7 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
                 except ImportError:
                     continue
 
-            print(f"\n=== WEBSOCKET SSOT VALIDATION ===)
+            print(f"\n=== WEBSOCKET SSOT VALIDATION ===)")
             print(fWebSocket modules using SSOT: {len(ssot_websocket_usage)})
             for module in ssot_websocket_usage:
                 print(f"✓ {module}")

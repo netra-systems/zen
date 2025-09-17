@@ -1,4 +1,4 @@
-"MISSION CRITICAL: Issue #989 WebSocket SSOT Migration Validation Test
+"MISSION CRITICAL: Issue #989 WebSocket SSOT Migration Validation Test"""
 
 GitHub Issue: #989 WebSocket factory deprecation SSOT violation - get_websocket_manager_factory()
 GitHub Stage: Step 2 - EXECUTE THE TEST PLAN (Migration Validation)
@@ -50,7 +50,7 @@ from loguru import logger
 
 @dataclass
 class MigrationValidationResult:
-    Results from SSOT migration validation"
+    Results from SSOT migration validation""
     validation_name: str
     pre_migration_violations: int
     post_migration_violations: int
@@ -60,7 +60,7 @@ class MigrationValidationResult:
 
 @dataclass
 class ImportPatternAnalysis:
-    "Analysis of import patterns post-migration
+    "Analysis of import patterns post-migration"""
     total_files_analyzed: int
     ssot_compliant_files: int
     deprecated_pattern_files: int
@@ -91,13 +91,13 @@ class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
         logger.info('📋 Issue #989 SSOT Migration Validation - Starting comprehensive validation...')
 
     def test_validate_canonical_imports_deprecated_export_removal(self):
-        "CRITICAL: Validate deprecated exports removed from canonical_imports.py
+        "CRITICAL: Validate deprecated exports removed from canonical_imports.py"""
 
         This test verifies that get_websocket_manager_factory() is no longer
         exported from canonical_imports.py after SSOT migration completion.
 
         MIGRATION SUCCESS CRITERIA: No deprecated exports in __all__ list.
-"
+"""Empty docstring."""
         logger.info('📋 Validating deprecated export removal from canonical_imports.py...')
         validation_result = MigrationValidationResult(validation_name='canonical_imports_export_removal', pre_migration_violations=1, post_migration_violations=0, migration_success=False)
         if self.canonical_imports_path.exists():
@@ -267,13 +267,13 @@ class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
         assert validation_result.migration_success, f'SINGLE PATTERN ENFORCEMENT FAILED: Found {validation_result.post_migration_violations} pattern violations. Multiple pattern files: {len(pattern_violations)}, Deprecated pattern files: {len(deprecated_patterns_in_use)}. SSOT requires single initialization pattern only.'
 
     def test_validate_websocket_import_path_consistency_post_migration(self):
-        "CRITICAL: Validate WebSocket import path consistency after migration
+        "CRITICAL: Validate WebSocket import path consistency after migration"""
 
         Ensures all WebSocket-related imports use consistent SSOT import paths
         without circular dependencies or import conflicts.
 
         MIGRATION SUCCESS CRITERIA: Consistent import paths, no conflicts.
-"
+"""Empty docstring."""
         logger.info('📋 Validating WebSocket import path consistency post-migration...')
         validation_result = MigrationValidationResult(validation_name='import_path_consistency', pre_migration_violations=0, post_migration_violations=0, migration_success=False)
         import_paths = defaultdict(list)

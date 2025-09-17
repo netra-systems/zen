@@ -156,7 +156,7 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
                     results.append(validation)
 
             except Exception as e:
-                logger.warning(f"Error scanning {file_path}: {e})
+                logger.warning(f"Error scanning {file_path}: {e})")
                 continue
 
         return results

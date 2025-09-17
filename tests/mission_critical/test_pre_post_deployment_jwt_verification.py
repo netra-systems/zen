@@ -516,7 +516,7 @@ class DeploymentAuthTestSuite:
         print(formatted_string)
 
         if metrics.success:
-        print(f" )
+        print(f" )")
         [U+2713] DEPLOYMENT ROLLBACK AUTHENTICATION PASSED")
         self._calculate_deployment_revenue_impact(metrics, neutral)
         else:
@@ -871,7 +871,7 @@ class TestPrePostDeploymentJWTVerification:
         for env in environments:
         try:
             # Set environment-specific JWT secret
-        jwt_secret = "formatted_string"
+        jwt_secret = ""
         os.environ['formatted_string'] = jwt_secret
 
             # Generate test token for this environment

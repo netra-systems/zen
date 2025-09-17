@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 WebSocket Authentication SSOT Delegation Integration Tests
 
 MISSION CRITICAL: Integration tests that validate SSOT JWT validation delegation
@@ -11,7 +11,7 @@ SSOT INTEGRATION REQUIREMENTS:
 4. Integration between WebSocket bridge and auth service
 
 These tests are designed to FAIL initially, proving integration-level SSOT violations exist.
-"
+"""Empty docstring."""
 import pytest
 import asyncio
 import json
@@ -23,13 +23,13 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
 class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
-    "
+"""Empty docstring."""
     Integration tests that validate SSOT delegation in WebSocket authentication flows.
     These tests should FAIL initially to prove integration-level violations exist.
-"
+"""Empty docstring."""
 
     def setUp(self):
-        "Set up integration test environment.
+        "Set up integration test environment."""
         super().setUp()
         self.valid_jwt_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0X3VzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjk5OTk5OTk5OTksImlhdCI6MTYwMDAwMDAwMH0.test_signature'
         self.expired_jwt_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0X3VzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjE2MDAwMDAwMDAsImlhdCI6MTYwMDAwMDAwMH0.expired_signature'

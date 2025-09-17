@@ -138,7 +138,7 @@ class SsotWebSocketValidationSuite:
                 if result.stdout:
                     logger.info(f[TEST STDOUT] {result.stdout})
                 if result.stderr:
-                    logger.warning(f"[TEST STDERR] {result.stderr})
+                    logger.warning(f"[TEST STDERR] {result.stderr})")
                     
                 # Determine if failures are migration-related or system issues
                 output_text = result.stdout + result.stderr

@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 WebSocket Race Condition Integration Tests - Issue #1176
 
 Business Value Justification:
@@ -21,7 +21,7 @@ TEST STRATEGY:
 - Real service dependencies to expose timing issues
 - Progressive delay patterns to trigger race conditions
 - Concurrent connection scenarios to expose conflicts
-"
+"""Empty docstring."""
 
 import asyncio
 import pytest
@@ -52,7 +52,7 @@ logger = get_logger(__name__)
 
 
 class WebSocketRaceConditionIntegrationTests(SSotAsyncTestCase):
-    "
+"""Empty docstring."""
     Integration tests for WebSocket race conditions that cause Golden Path failures.
     
     CRITICAL: These tests expose timing issues between:
@@ -62,10 +62,10 @@ class WebSocketRaceConditionIntegrationTests(SSotAsyncTestCase):
     - Concurrent connection establishment
     
     Business Impact: $500K+ ARR depends on reliable WebSocket infrastructure.
-"
+"""Empty docstring."""
     
     def setUp(self):
-        "Set up test environment with race condition detection.
+        "Set up test environment with race condition detection."""
         super().setUp()
         self.id_manager = UnifiedIDManager()
         self.test_user_id = self.id_manager.generate_id(IDType.USER, prefix=racetest")"
@@ -159,16 +159,16 @@ class WebSocketRaceConditionIntegrationTests(SSotAsyncTestCase):
                 else:
                     failure_details.append(
                         fAttempt {rc['attempt']}: Manager creation {rc['manager_creation_time']:.3f}s 
-                        f"(service_available={rc['service_available']}
+                        f"(service_available={rc['service_available']}"
                     )
             
             pytest.fail(
-                fRACE CONDITION DETECTED: Cloud Run startup timing issues found. "
+                fRACE CONDITION DETECTED: Cloud Run startup timing issues found. ""
                 fThis proves Issue #1176 exists. Details: {'; '.join(failure_details)}
             )
     
     async def test_websocket_manager_initialization_race_condition(self):
-        "
+"""Empty docstring."""
         Test WebSocket manager initialization conflicts during concurrent requests.
         
         EXPECTED BEHAVIOR: This test should FAIL initially, proving concurrent initialization race conditions.
@@ -180,8 +180,8 @@ class WebSocketRaceConditionIntegrationTests(SSotAsyncTestCase):
         4. Memory leaks from incomplete cleanup
         
         BUSINESS IMPACT: Multi-user chat sessions interfere with each other.
-"
-        logger.info(Testing WebSocket manager initialization race conditions...)"
+"""Empty docstring."""
+        logger.info(Testing WebSocket manager initialization race conditions...)""
         
         concurrent_failures = []
         
@@ -190,15 +190,15 @@ class WebSocketRaceConditionIntegrationTests(SSotAsyncTestCase):
         for i in range(5):
             # Using fallback test context since UserExecutionContextFactory not available
             context = type('MockUserContext', (), {
-                'user_id': self.id_manager.generate_id(IDType.USER, prefix=fconcurrent_{i}"),
+                'user_id': self.id_manager.generate_id(IDType.USER, prefix=fconcurrent_{i}"),"
                 'thread_id': self.id_manager.generate_id(IDType.THREAD, prefix=fconcurrent_{i}),
-                'request_id': self.id_manager.generate_id(IDType.REQUEST, prefix=fconcurrent_{i}),"
+                'request_id': self.id_manager.generate_id(IDType.REQUEST, prefix=fconcurrent_{i}),""
                 'is_test': True
             }()
             user_contexts.append(context)
         
         async def create_manager_with_timing(context, index):
-            "Create WebSocket manager and track timing.
+            "Create WebSocket manager and track timing."""
             try:
                 start_time = time.time()
                 manager = get_websocket_manager(
@@ -256,11 +256,11 @@ class WebSocketRaceConditionIntegrationTests(SSotAsyncTestCase):
         
         # 4. Total time indicating serialization instead of parallelization
         if total_time > 3.0:  # Should be much faster if truly concurrent
-            race_indicators.append(f"Total time {total_time:.3f}s indicates serialization)
+            race_indicators.append(f"Total time {total_time:.3f}s indicates serialization)"
         
-        logger.info(fConcurrent manager creation results: {len(successful_creations)} successful, "
+        logger.info(fConcurrent manager creation results: {len(successful_creations)} successful, ""
                    f{len(failed_creations)} failed, {len(exceptions)} exceptions, 
-                   ftotal time: {total_time:.3f}s)"
+                   ftotal time: {total_time:.3f}s)""
         
         # CRITICAL: Test should fail if race conditions detected
         if race_indicators:
@@ -268,7 +268,7 @@ class WebSocketRaceConditionIntegrationTests(SSotAsyncTestCase):
             concurrent_failures.extend(race_indicators)
             
             pytest.fail(
-                f"RACE CONDITION DETECTED: WebSocket manager initialization conflicts found. 
+                f"RACE CONDITION DETECTED: WebSocket manager initialization conflicts found. "
                 fThis proves Issue #1176 concurrent access issues exist. 
                 fRace indicators: {'; '.join(race_indicators)}
             )
@@ -359,7 +359,7 @@ class WebSocketRaceConditionIntegrationTests(SSotAsyncTestCase):
                     'error': str(e),
                     'error_type': type(e).__name__
                 }
-                logger.error(f"Exception during handshake delay test (delay={delay}s): {e})
+                logger.error(f"Exception during handshake delay test (delay={delay}s): {e})"
         
         # CRITICAL: Test should fail if handshake race conditions detected
         if handshake_failures:
@@ -374,13 +374,13 @@ class WebSocketRaceConditionIntegrationTests(SSotAsyncTestCase):
                 failure_summary[issue_type] += 1
             
             pytest.fail(
-                fHANDSHAKE RACE CONDITION DETECTED: Progressive delays caused validation failures. "
+                fHANDSHAKE RACE CONDITION DETECTED: Progressive delays caused validation failures. ""
                 fThis proves Issue #1176 handshake timing issues exist. 
-                fFailure summary: {failure_summary}"
+                fFailure summary: {failure_summary}""
             )
     
     async def test_concurrent_connection_establishment_conflicts(self):
-    "
+"""Empty docstring."""
         Test concurrent WebSocket connection establishment conflicts.
         
         EXPECTED BEHAVIOR: This test should FAIL initially, proving concurrent connection race conditions.
@@ -392,8 +392,8 @@ class WebSocketRaceConditionIntegrationTests(SSotAsyncTestCase):
         4. Connection cleanup race conditions
         
         BUSINESS IMPACT: Chat sessions fail to establish when multiple users connect simultaneously.
-        "
-        logger.info(Testing concurrent connection establishment conflicts...")
+"""Empty docstring."""
+        logger.info(Testing concurrent connection establishment conflicts...")"
         
         connection_conflicts = []
         
@@ -467,19 +467,19 @@ class WebSocketRaceConditionIntegrationTests(SSotAsyncTestCase):
         if failed_connections:
             conflict_indicators.append(fFailed concurrent connections: {len(failed_connections)})
             for failed in failed_connections:
-                conflict_indicators.append(f"  - Attempt {failed['attempt_id']}: {failed.get('error_type', 'Unknown')})
+                conflict_indicators.append(f"  - Attempt {failed['attempt_id']}: {failed.get('error_type', 'Unknown')})"
         
         # 3. Exceptions during concurrent establishment
         if connection_exceptions:
-            conflict_indicators.append(fConnection exceptions: {len(connection_exceptions)}")
+            conflict_indicators.append(fConnection exceptions: {len(connection_exceptions)}")"
         
         # 4. Excessive total time for concurrent operations
         expected_concurrent_time = 1.0  # Should be much faster for true concurrency
         if total_concurrent_time > expected_concurrent_time:
             conflict_indicators.append(fExcessive concurrent time: {total_concurrent_time:.3f}s > {expected_concurrent_time}s)
         
-        logger.info(fConcurrent connection results: {len(successful_connections)} successful, "
-                   f"{len(failed_connections)} failed, {len(connection_exceptions)} exceptions, 
+        logger.info(fConcurrent connection results: {len(successful_connections)} successful, ""
+                   f"{len(failed_connections)} failed, {len(connection_exceptions)} exceptions, "
                    ftotal time: {total_concurrent_time:.3f}s)
         
         # CRITICAL: Test should fail if connection conflicts detected
@@ -564,22 +564,22 @@ class WebSocketRaceConditionIntegrationTests(SSotAsyncTestCase):
             failure_details = []
             for rc in router_race_conditions:
                 if rc['issue'] == 'exception_during_init':
-                    failure_details.append(f"Attempt {rc['attempt']}: {rc['error_type']} - {rc['error']})
+                    failure_details.append(f"Attempt {rc['attempt']}: {rc['error_type']} - {rc['error']})"
                 else:
-                    failure_details.append(fAttempt {rc['attempt']}: {rc['issue']}")
+                    failure_details.append(fAttempt {rc['attempt']}: {rc['issue']}")"
             
             pytest.fail(
                 fROUTER STARTUP RACE CONDITION DETECTED: WebSocket router initialization conflicts found. 
-                fThis proves Issue #1176 router startup issues exist. "
-                f"Details: {'; '.join(failure_details)}
+                fThis proves Issue #1176 router startup issues exist. ""
+                f"Details: {'; '.join(failure_details)}"
             )
 
     def tearDown(self):
-        Clean up test environment and report race condition findings."
+        Clean up test environment and report race condition findings.""
         super().tearDown()
         
         if self.race_condition_detected:
-            logger.error(f"ISSUE #1176 VALIDATION: Race conditions detected during testing. 
+            logger.error(f"ISSUE #1176 VALIDATION: Race conditions detected during testing. "
                         fTotal timing failures: {len(self.timing_failures)})
             
             # Log detailed race condition analysis
@@ -608,7 +608,7 @@ class RaceConditionDetector:
         self.failure_patterns = []
     
     def record_timing(self, operation: str, duration: float, success: bool):
-        Record timing data for race condition analysis."
+        Record timing data for race condition analysis.""
         self.timing_samples.append({
             'operation': operation,
             'duration': duration,
@@ -617,7 +617,7 @@ class RaceConditionDetector:
         }
     
     def analyze_race_patterns(self) -> Dict[str, Any]:
-        "Analyze recorded timings for race condition patterns.
+        "Analyze recorded timings for race condition patterns."""
         if not self.timing_samples:
             return {'race_detected': False, 'patterns': []}
         
@@ -628,7 +628,7 @@ class RaceConditionDetector:
         if len(successful_timings) > 1:
             variance = max(successful_timings) - min(successful_timings)
             if variance > 0.5:  # High variance indicates contention
-                patterns.append(f"High timing variance: {variance:.3f}s)
+                patterns.append(f"High timing variance: {variance:.3f}s)"
         
         # Check for failure correlation with timing
         failed_operations = [s for s in self.timing_samples if not s['success']]

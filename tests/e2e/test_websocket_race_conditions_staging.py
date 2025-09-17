@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 E2E GCP Staging WebSocket Race Condition Tests for GitHub Issue #111
 
 Business Value Justification (BVJ):
@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 
 CRITICAL: These tests reproduce the exact race conditions causing failures in GCP staging.
 They MUST fail initially to prove they capture the actual race condition issues.
-"
+"""Empty docstring."""
 
 import asyncio
 import json
@@ -33,16 +33,16 @@ logger = logging.getLogger(__name__)
 
 
 class WebSocketRaceConditionsStagingTests(BaseE2ETest):
-    "
+"""Empty docstring."""
     E2E tests that reproduce WebSocket race conditions in GCP staging environment.
     
     CRITICAL: These tests are designed to FAIL initially to prove they reproduce
     the race conditions causing backend 1011 errors and 20% concurrent load failures.
-"
+"""Empty docstring."""
 
     @pytest.fixture(autouse=True)
     async def setup_staging_auth(self):
-        "Set up staging authentication for all tests.
+        "Set up staging authentication for all tests."""
         self.auth_helper = E2EWebSocketAuthHelper(environment=staging")"
         self.websocket_auth_helper = E2EWebSocketAuthHelper(environment=staging)
         
@@ -51,12 +51,12 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
     @pytest.mark.staging
     @pytest.mark.mission_critical
     async def test_concurrent_connection_storm_triggers_1011_errors(self):
-        "
+"""Empty docstring."""
         Test concurrent connection storms to reproduce backend 1011 errors.
         
         EXPECTED RESULT: Should FAIL with 1011 errors to prove race condition reproduction.
         This test simulates the exact scenario causing failures in staging.
-"
+"""Empty docstring."""
         # Create multiple authenticated users for concurrent connections
         user_contexts = []
         for i in range(10):  # 10 concurrent users to trigger race conditions
@@ -73,7 +73,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
         start_time = time.time()
         
         async def attempt_websocket_connection(user_context, user_index):
-            Attempt WebSocket connection and track results."
+            Attempt WebSocket connection and track results.""
             try:
                 # Get staging token for this user
                 token = await self.websocket_auth_helper.get_staging_token_async(
@@ -90,7 +90,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 
                 # Send test message to verify connection works
                 test_message = {
-                    type": ping,
+                    type": ping,"
                     user_id: str(user_context.user_id),
                     "timestamp: datetime.now(timezone.utc).isoformat(),"
                     test_id: frace_test_{user_index}
@@ -114,8 +114,8 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 return {
                     "user_index: user_index,"
                     success: success,
-                    connection_duration: connection_duration,"
-                    error": error,
+                    connection_duration: connection_duration,""
+                    error": error,"
                     response_received: response_data is not None,
                     connection_info": connection_info"
                 }
@@ -124,12 +124,12 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 connection_duration = time.time() - connection_start
                 return {
                     user_index: user_index,
-                    success: False,"
-                    "connection_duration: connection_duration,
+                    success: False,""
+                    "connection_duration: connection_duration,"
                     error: str(e),
                     "error_type: type(e).__name__,"
                     response_received: False,
-                    connection_info: None"
+                    connection_info: None""
                 }
         
         # Execute concurrent connections to trigger race conditions
@@ -144,37 +144,37 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
         total_duration = time.time() - start_time
         
         # Analyze results to detect race conditions
-        successful_connections = sum(1 for r in connection_results if isinstance(r, dict) and r.get(success", False))
+        successful_connections = sum(1 for r in connection_results if isinstance(r, dict) and r.get(success", False))"
         failed_connections = len(connection_results) - successful_connections
         failure_rate = failed_connections / len(connection_results)
         
         # Detect specific race condition patterns
         race_condition_indicators = {
             1011_errors: sum(1 for r in connection_results if isinstance(r, dict) and 1011 in str(r.get("error, "))),
-            accept_errors: sum(1 for r in connection_results if isinstance(r, dict) and accept in str(r.get(error, ")).lower()),
-            "timeout_errors: sum(1 for r in connection_results if isinstance(r, dict) and timeout in str(r.get(error, )).lower()),
+            accept_errors: sum(1 for r in connection_results if isinstance(r, dict) and accept in str(r.get(error, ")).lower()),"
+            "timeout_errors: sum(1 for r in connection_results if isinstance(r, dict) and timeout in str(r.get(error, )).lower()),"
             "connection_refused: sum(1 for r in connection_results if isinstance(r, dict) and refused" in str(r.get(error, )).lower()),
-            timing_failures: sum(1 for r in connection_results if isinstance(r, dict) and r.get(connection_duration", 0) > 10.0)
+            timing_failures: sum(1 for r in connection_results if isinstance(r, dict) and r.get(connection_duration", 0) > 10.0)"
         }
         
         # Log detailed results for analysis
-        print(f"\n SEARCH:  RACE CONDITION TEST RESULTS:)
+        print(f"\n SEARCH:  RACE CONDITION TEST RESULTS:)"
         print(f CHART:  Total connections attempted: {len(connection_results)})
         print(f" PASS:  Successful connections: {successful_connections}")
         print(f FAIL:  Failed connections: {failed_connections})
         print(f"[U+1F4C8] Failure rate: {failure_rate:.1%}")
         print(f[U+23F1][U+FE0F]  Total test duration: {total_duration:.2f}s)
-        print(f"\n ALERT:  Race Condition Indicators:)
-        for indicator, count in race_condition_indicators.items("):
+        print(f"\n ALERT:  Race Condition Indicators:)"
+        for indicator, count in race_condition_indicators.items("):"
             if count > 0:
                 print(f   {indicator}: {count} occurrences)
         
         # Log individual connection results for debugging
-        print(f"\n[U+1F4CB] Individual Connection Results:)
+        print(f"\n[U+1F4CB] Individual Connection Results:)"
         for i, result in enumerate(connection_results):
-            if isinstance(result, dict"):
-                status =  PASS:  SUCCESS if result.get(success) else  FAIL:  FAILED"
-                duration = result.get("connection_duration, 0)
+            if isinstance(result, dict"):"
+                status =  PASS:  SUCCESS if result.get(success) else  FAIL:  FAILED""
+                duration = result.get("connection_duration, 0)"
                 error = result.get(error, None)
                 print(f   User {i}: {status} ({duration:.2f}s) - {error}")"
         
@@ -184,18 +184,18 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
         
         if race_conditions_detected:
             # Log that we successfully reproduced the race conditions
-            print(f\n PASS:  RACE CONDITIONS SUCCESSFULLY REPRODUCED:)"
-            print(f"   This test proves the WebSocket race conditions exist in staging)
-            print(f   Failure patterns match those reported in GitHub Issue #111)"
+            print(f\n PASS:  RACE CONDITIONS SUCCESSFULLY REPRODUCED:)""
+            print(f"   This test proves the WebSocket race conditions exist in staging)"
+            print(f   Failure patterns match those reported in GitHub Issue #111)""
             
             # Create detailed failure analysis
             failure_analysis = {
-                "race_conditions_detected: True,
+                "race_conditions_detected: True,"
                 failure_rate: failure_rate,
                 "race_condition_indicators: race_condition_indicators,"
                 total_duration: total_duration,
-                connection_results: connection_results,"
-                test_timestamp": datetime.now(timezone.utc).isoformat(),
+                connection_results: connection_results,""
+                test_timestamp": datetime.now(timezone.utc).isoformat(),"
                 github_issue: #111,
                 "expected_outcome: FAILURE_TO_REPRODUCE_RACE_CONDITIONS"
             }
@@ -204,35 +204,35 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
             assert False, (
                 f ALERT:  RACE CONDITIONS DETECTED IN STAGING (Expected for Issue #111):\n
                 fFailure Rate: {failure_rate:.1%} (Target: <5%)\n
-                f"1011 Errors: {race_condition_indicators['1011_errors']}\n
-                fAccept Errors: {race_condition_indicators['accept_errors']}\n"
+                f"1011 Errors: {race_condition_indicators['1011_errors']}\n"
+                fAccept Errors: {race_condition_indicators['accept_errors']}\n""
                 fTimeout Errors: {race_condition_indicators['timeout_errors']}\n
-                fThis proves the race conditions exist and need fixing."
+                fThis proves the race conditions exist and need fixing.""
             )
         else:
             # If no race conditions detected, that's unexpected
-            print(f"\n WARNING: [U+FE0F]  NO RACE CONDITIONS DETECTED:)
-            print(f   This may indicate the race conditions have been fixed)"
-            print(f"   Or this test needs refinement to trigger them)
+            print(f"\n WARNING: [U+FE0F]  NO RACE CONDITIONS DETECTED:)"
+            print(f   This may indicate the race conditions have been fixed)""
+            print(f"   Or this test needs refinement to trigger them)"
             
             # This would be surprising given the reported issues
             pytest.fail(
                 fNo race conditions detected. Expected 1011 errors and timing failures. 
-                f"Either race conditions are fixed or test needs refinement.
+                f"Either race conditions are fixed or test needs refinement."
             )
 
     @pytest.mark.e2e
     @pytest.mark.real_services
     @pytest.mark.staging
     async def test_gcp_cloud_run_startup_timing_edge_cases(self):
-        "
+"""Empty docstring."""
         Test GCP Cloud Run startup timing edge cases that cause race conditions.
         
         EXPECTED RESULT: Should detect timing gaps between network handshake and app readiness.
-"
+"""Empty docstring."""
         # Create authenticated user for timing tests
         user_context = await create_authenticated_user_context(
-            user_email=f"timing_test_{int(time.time())}@example.com,
+            user_email=f"timing_test_{int(time.time())}@example.com,"
             environment=staging,
             websocket_enabled=True
         )
@@ -261,8 +261,8 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 # Phase 2: First message timing (tests app readiness)
                 app_readiness_start = time.time()
                 test_message = {
-                    type: connection_test",
-                    "phase: app_readiness,
+                    type: connection_test","
+                    "phase: app_readiness,"
                     attempt: attempt,
                     timestamp": datetime.now(timezone.utc).isoformat()"
                 }
@@ -282,17 +282,17 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 
                 timing_results.append({
                     attempt: attempt,
-                    success: app_ready,"
-                    "network_handshake_time: phase_times['network_handshake'],
+                    success: app_ready,""
+                    "network_handshake_time: phase_times['network_handshake'],"
                     app_response_time: phase_times['app_response'],
                     "total_time: phase_times['network_handshake'] + phase_times['app_response'],"
                     timing_gap: phase_times['app_response'] - phase_times['network_handshake'],
-                    connection_info: connection_info"
+                    connection_info: connection_info""
                 }
                 
             except Exception as e:
                 timing_results.append({
-                    attempt": attempt,
+                    attempt": attempt,"
                     success: False,
                     error": str(e),"
                     error_type: type(e).__name__
@@ -302,23 +302,23 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
             await asyncio.sleep(1.0)
         
         # Analyze timing patterns for race conditions
-        successful_attempts = [r for r in timing_results if r.get(success, False)]"
-        avg_network_time = sum(r.get("network_handshake_time, 0) for r in successful_attempts) / len(successful_attempts) if successful_attempts else 0
+        successful_attempts = [r for r in timing_results if r.get(success, False)]""
+        avg_network_time = sum(r.get("network_handshake_time, 0) for r in successful_attempts) / len(successful_attempts) if successful_attempts else 0"
         avg_app_time = sum(r.get(app_response_time, 0) for r in successful_attempts) / len(successful_attempts) if successful_attempts else 0
         
         timing_gaps = [r.get("timing_gap, 0) for r in successful_attempts if r.get(timing_gap", 0) > 0]
         max_timing_gap = max(timing_gaps) if timing_gaps else 0
         
         print(f\n[U+23F1][U+FE0F]  GCP CLOUD RUN TIMING ANALYSIS:)
-        print(f CHART:  Successful attempts: {len(successful_attempts)}/{len(timing_results)})"
-        print(f"[U+1F310] Average network handshake time: {avg_network_time:.2f}s)
-        print(f[U+1F4F1] Average app response time: {avg_app_time:.2f}s)"
-        print(f" LIGHTNING:  Maximum timing gap: {max_timing_gap:.2f}s)
+        print(f CHART:  Successful attempts: {len(successful_attempts)}/{len(timing_results)})""
+        print(f"[U+1F310] Average network handshake time: {avg_network_time:.2f}s)"
+        print(f[U+1F4F1] Average app response time: {avg_app_time:.2f}s)""
+        print(f" LIGHTNING:  Maximum timing gap: {max_timing_gap:.2f}s)"
         
         # Print individual timing results
-        print(f\n[U+1F4CB] Individual Timing Results:)"
+        print(f\n[U+1F4CB] Individual Timing Results:)""
         for result in timing_results:
-            if result.get("success):
+            if result.get("success):"
                 net_time = result.get(network_handshake_time, 0)
                 app_time = result.get("app_response_time, 0)"
                 gap = result.get(timing_gap, 0)
@@ -343,8 +343,8 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 fGCP Cloud Run timing race conditions detected:\n""
                 fMax timing gap: {max_timing_gap:.2f}s (should be <1s)\n
                 fAverage app response: {avg_app_time:.2f}s (should be <5s)\n
-                f"Failed attempts: {len(timing_results) - len(successful_attempts)}\n
-                fThis proves startup timing race conditions exist."
+                f"Failed attempts: {len(timing_results) - len(successful_attempts)}\n"
+                fThis proves startup timing race conditions exist.""
             )
         else:
             print(f\n PASS:  NO TIMING ISSUES DETECTED:)
@@ -362,8 +362,8 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
 
         # Create authenticated user for service initialization tests
         user_context = await create_authenticated_user_context(
-            user_email=f"service_init_test_{int(time.time())}@example.com,
-            environment=staging",
+            user_email=f"service_init_test_{int(time.time())}@example.com,"
+            environment=staging","
             websocket_enabled=True
         )
         
@@ -396,8 +396,8 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 # Test service readiness by sending service-specific messages
                 readiness_tests = [
                     {type: service_health_check, "service: websocket"},
-                    {type: auth_validation_test, token_validation: True},"
-                    {type": message_routing_test, routing_check: True}
+                    {type: auth_validation_test, token_validation: True},""
+                    {type": message_routing_test, routing_check: True}"
                 ]
                 
                 service_responses = []
@@ -405,7 +405,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                     test_msg.update({
                         "attempt: attempt,"
                         timestamp: datetime.now(timezone.utc).isoformat(),
-                        user_id: str(user_context.user_id)"
+                        user_id: str(user_context.user_id)""
                     }
                     
                     try:
@@ -421,12 +421,12 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                         
                         response_data = json.loads(response)
                         service_responses.append({
-                            test_type": test_msg[type],
+                            test_type": test_msg[type],"
                             success: True,
                             "send_time: send_time,"
                             response_time: response_time,
-                            total_time: send_time + response_time,"
-                            response_data": response_data
+                            total_time: send_time + response_time,""
+                            response_data": response_data"
                         }
                         
                     except asyncio.TimeoutError:
@@ -434,26 +434,26 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                             test_type: test_msg[type],
                             "success: False,"
                             error: Response timeout - service may not be ready,
-                            send_time: send_time if 'send_time' in locals() else 0,"
-                            "response_time: 8.0  # Timeout duration
+                            send_time: send_time if 'send_time' in locals() else 0,""
+                            "response_time: 8.0  # Timeout duration"
                         }
                     except Exception as e:
                         service_responses.append({
                             test_type: test_msg[type],
                             success": False,"
                             error: str(e),
-                            error_type: type(e).__name__"
+                            error_type: type(e).__name__""
                         }
                 
                 await websocket.close()
                 
                 service_readiness_results.append({
-                    "attempt: attempt,
+                    "attempt: attempt,"
                     connection_success: True,
                     "connection_time: connection_time,"
                     service_responses: service_responses,
-                    total_response_time: sum(r.get(response_time", 0) for r in service_responses),
-                    "successful_services: sum(1 for r in service_responses if r.get(success, False)),
+                    total_response_time: sum(r.get(response_time", 0) for r in service_responses),"
+                    "successful_services: sum(1 for r in service_responses if r.get(success, False)),"
                     failed_services: sum(1 for r in service_responses if not r.get(success, False))
                 }
                 
@@ -462,19 +462,19 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 service_readiness_results.append({
                     "attempt: attempt,"
                     connection_success: False,
-                    connection_time: connection_time,"
-                    error": str(e),
+                    connection_time: connection_time,""
+                    error": str(e),"
                     error_type: type(e).__name__,
                     service_responses": [],"
                     successful_services: 0,
-                    failed_services: 3  # All tests failed due to connection failure"
+                    failed_services: 3  # All tests failed due to connection failure""
                 }
             
             # Delay between attempts
             await asyncio.sleep(2.0)
         
         # Analyze service initialization race conditions
-        successful_connections = sum(1 for r in service_readiness_results if r.get("connection_success, False))
+        successful_connections = sum(1 for r in service_readiness_results if r.get("connection_success, False))"
         total_service_failures = sum(r.get(failed_services, 0) for r in service_readiness_results)
         avg_connection_time = sum(r.get("connection_time, 0) for r in service_readiness_results) / len(service_readiness_results)"
         
@@ -488,15 +488,15 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
         for result in service_readiness_results:
             attempt = result["attempt]"
             if result.get(connection_success):
-                successful = result.get(successful_services, 0)"
-                failed = result.get(failed_services", 0)
+                successful = result.get(successful_services, 0)""
+                failed = result.get(failed_services", 0)"
                 conn_time = result.get(connection_time, 0)
                 print(f   Attempt {attempt}: Connected in {conn_time:.2f}s, Services: {successful} PASS: /{failed} FAIL: "")
                 
                 for response in result.get(service_responses, []:
                     test_type = response.get(test_type", "unknown)
-                    success =  PASS:  if response.get(success) else  FAIL: "
-                    resp_time = response.get("response_time, 0)
+                    success =  PASS:  if response.get(success) else  FAIL: ""
+                    resp_time = response.get("response_time, 0)"
                     error = response.get(error, )
                     print(f      {test_type}: {success} ({resp_time:.2f}s) {error}")"
             else:
@@ -508,12 +508,12 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
             total_service_failures > 0 or        # Any service failures indicate race conditions
             avg_connection_time > 10.0 or        # Slow connections suggest initialization issues
             successful_connections < len(service_readiness_results)  # Connection failures
-        ")
+        ")"
         
         if service_race_conditions:
-            print(f\n ALERT:  SERVICE INITIALIZATION RACE CONDITIONS DETECTED:")
-            print(f   Service failures suggest initialization timing issues")
-            print(f   These can cause WebSocket functionality to fail even when connected")
+            print(f\n ALERT:  SERVICE INITIALIZATION RACE CONDITIONS DETECTED:")"
+            print(f   Service failures suggest initialization timing issues")"
+            print(f   These can cause WebSocket functionality to fail even when connected")"
             
             # This indicates race conditions in service initialization
             assert False, (
@@ -521,12 +521,12 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 fService failures: {total_service_failures} (should be 0)\n""
                 fConnection success rate: {successful_connections}/{len(service_readiness_results)}\n
                 fAverage connection time: {avg_connection_time:.2f}s (should be <5s)\n
-                f"This proves service initialization race conditions exist.
+                f"This proves service initialization race conditions exist."
             )
         else:
-            print(f\n PASS:  SERVICE INITIALIZATION APPEARS STABLE:")
-            print(f   All services responded properly during connection tests")
-            print(f   Race conditions may have been resolved")
+            print(f\n PASS:  SERVICE INITIALIZATION APPEARS STABLE:")"
+            print(f   All services responded properly during connection tests")"
+            print(f   Race conditions may have been resolved")"
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -539,8 +539,8 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
         
         # Create authenticated user for heartbeat testing
         user_context = await create_authenticated_user_context(
-            user_email=fheartbeat_test_{int(time.time())}@example.com,"
-            environment="staging,
+            user_email=fheartbeat_test_{int(time.time())}@example.com,""
+            environment="staging,"
             websocket_enabled=True
         )
         
@@ -550,7 +550,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
         
         # Create long-running connection to test heartbeat behavior
         print(f\n[U+1F493] TESTING HEARTBEAT BEHAVIOR (2 minute duration):)
-        print(f"   Monitoring for systematic heartbeat failures every ~2 minutes)
+        print(f"   Monitoring for systematic heartbeat failures every ~2 minutes)"
         
         try:
             # Create connection with heartbeat monitoring
@@ -563,7 +563,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 close_timeout=5
             )
             
-            connection_start = time.time(")
+            connection_start = time.time(")"
             heartbeat_events = []
             last_ping_time = connection_start
             
@@ -581,8 +581,8 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                         test_message = {
                             "type: heartbeat_test",
                             timestamp: datetime.now(timezone.utc).isoformat(),
-                            elapsed_time: current_time - connection_start,"
-                            "ping_number: len(heartbeat_events) + 1
+                            elapsed_time: current_time - connection_start,""
+                            "ping_number: len(heartbeat_events) + 1"
                         }
                         
                         ping_start = time.time()
@@ -597,8 +597,8 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                                 ping_number: len(heartbeat_events) + 1,
                                 "timestamp: current_time,"
                                 elapsed_time: current_time - connection_start,
-                                ping_duration: ping_duration,"
-                                success": True,
+                                ping_duration: ping_duration,""
+                                success": True,"
                                 response_received: True
                             }
                             
@@ -608,15 +608,15 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                             ping_duration = time.time() - ping_start
                             heartbeat_events.append({
                                 ping_number: len(heartbeat_events) + 1,
-                                timestamp: current_time,"
-                                "elapsed_time: current_time - connection_start,
+                                timestamp: current_time,""
+                                "elapsed_time: current_time - connection_start,"
                                 ping_duration: ping_duration,
                                 "success: False,"
                                 error: Response timeout,
-                                response_received: False"
+                                response_received: False""
                             }
                             
-                            print(f"   Ping {len(heartbeat_events)}:  FAIL:  TIMEOUT at {current_time - connection_start:.0f}s)
+                            print(f"   Ping {len(heartbeat_events)}:  FAIL:  TIMEOUT at {current_time - connection_start:.0f}s)"
                         
                         last_ping_time = current_time
                     
@@ -627,7 +627,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                     print(f    FAIL:  Connection closed unexpectedly at {time.time() - connection_start:.0f}s)
                     break
                 except Exception as e:
-                    print(f"    FAIL:  Connection error at {time.time() - connection_start:.0f}s: {e})
+                    print(f"    FAIL:  Connection error at {time.time() - connection_start:.0f}s: {e})"
                     break
             
             # Close connection
@@ -636,7 +636,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
             except:
                 pass  # Connection may already be closed
             
-            total_test_time = time.time(") - connection_start
+            total_test_time = time.time(") - connection_start"
             
         except Exception as e:
             print(f    FAIL:  Failed to establish heartbeat test connection: {e})
@@ -679,8 +679,8 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
             
             # This indicates heartbeat race conditions
             assert False, (
-                fSystematic heartbeat failures detected:\n"
-                f"Failure rate: {failure_rate:.1%} (should be <5%)\n
+                fSystematic heartbeat failures detected:\n""
+                f"Failure rate: {failure_rate:.1%} (should be <5%)\n"
                 f2-minute pattern failures: {two_minute_failures} (should be 0)\n
                 fTest duration: {total_test_time:.1f}s (target: {test_duration}s)\n
                 fThis proves heartbeat timing race conditions exist.""
@@ -688,4 +688,4 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
         else:
             print(f\n PASS:  HEARTBEAT BEHAVIOR APPEARS STABLE:)
             print(f   No systematic failures detected")"
-            print(f"   Heartbeat race conditions may have been resolved"")
+            print(f"   Heartbeat race conditions may have been resolved"")"

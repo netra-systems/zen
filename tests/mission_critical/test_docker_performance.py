@@ -495,7 +495,7 @@ class TestDockerOperationLatency:
 
         logger.info(formatted_string)
 
-        assert avg_duration < 3000, "formatted_string"
+        assert avg_duration < 3000, ""
         assert ops_per_sec > 1.0, formatted_string
 
 
@@ -619,7 +619,7 @@ class TestDockerConcurrentPerformance:
         assert operations_rate_limited > 0, Some operations should have been rate limited
 
                 # Operations should still complete within reasonable time
-        assert avg_duration < 3000, "formatted_string"
+        assert avg_duration < 3000, ""
 
 
 class TestDockerMemoryPerformance:
@@ -1388,7 +1388,7 @@ class TestDockerInfrastructureBenchmarks:
         infrastructure_test.test_resource_allocation_efficiency(profiler)
 
                                                     # Export results
-        results_file = "formatted_string"
+        results_file = ""
         profiler.export_results(results_file)
 
         logger.info( PASS:  Docker Performance Benchmark Suite completed successfully)

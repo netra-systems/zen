@@ -472,7 +472,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
                 logger.info(f    ✅ {endpoint['endpoint']}: {endpoint['status']})"
                 
             for endpoint in failed_endpoints:
-                logger.warning(f"    ❌ {endpoint['endpoint']}: {endpoint.get('error', 'unknown error')})
+                logger.warning(f"    ❌ {endpoint['endpoint']}: {endpoint.get('error', 'unknown error')})")
             
             # Production readiness criteria:
             # - At least health check must work (critical for load balancer)

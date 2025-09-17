@@ -260,7 +260,7 @@ class TestAgentRestartAfterFailure:
                     This means WebSocket events from both users go through same channel
                     # causing potential cross-user event leakage
 
-        # @pytest.fixture
+        # # @pytest.fixture
     async def test_factory_pattern_creates_fresh_instances(self):
         Test desired behavior: factory pattern creates fresh instances per request."
 
@@ -784,7 +784,7 @@ run_id=formatted_string
     
 
     # Each user gets unique data pattern
-user_signature = "formatted_string"
+user_signature = ""
 restart_attempts = 0
 max_attempts = 3
 

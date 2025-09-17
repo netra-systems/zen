@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Golden Path Integration Test Suite 2: WebSocket Race Condition Reproduction (Issue #1176)
 
 Business Value Justification (BVJ):
@@ -12,7 +12,7 @@ specifically in Cloud Run deployments, despite WebSocket components working
 individually in local testing.
 
 Root Cause Focus: Component-level excellence but integration-level coordination gaps
-"
+"""Empty docstring."""
 
 import pytest
 import asyncio
@@ -34,7 +34,7 @@ from netra_backend.app.routes.websocket_unified import websocket_endpoint
 
 
 class GoldenPathWebSocketRaceConditionsTests(BaseIntegrationTest):
-    "Test WebSocket race conditions causing Golden Path failures.
+    "Test WebSocket race conditions causing Golden Path failures."""
 
     @pytest.mark.integration
     @pytest.mark.golden_path
@@ -112,29 +112,29 @@ class GoldenPathWebSocketRaceConditionsTests(BaseIntegrationTest):
             event_manager_task
         )
         
-        assert connection_result, Connection should succeed"
+        assert connection_result, Connection should succeed""
         
         # Try to send events immediately after connection
         # This is where Golden Path fails - events are lost
         events_to_send = [
-            "agent_started,
+            "agent_started,"
             agent_thinking, 
             "tool_executing,"
             tool_completed,
-            agent_completed"
+            agent_completed""
         ]
         
         sent_events = []
         for event in events_to_send:
             try:
                 await event_manager.send_event(test_token, {
-                    type": event,
-                    data: {message: f"Test {event}}
+                    type": event,"
+                    data: {message: f"Test {event}}"
                 }
                 sent_events.append(event)
             except Exception as e:
                 # Events fail due to initialization race
-                print(fEvent {event} failed due to race condition: {e}")
+                print(fEvent {event} failed due to race condition: {e}")"
         
         # EXPECTED FAILURE: Not all events sent due to initialization race
         assert len(sent_events) == len(events_to_send), \
@@ -148,18 +148,18 @@ class GoldenPathWebSocketRaceConditionsTests(BaseIntegrationTest):
     @pytest.mark.golden_path
     @pytest.mark.issue_1176
     async def test_websocket_connection_cleanup_race_condition(self, real_services_fixture):
-        "
+"""Empty docstring."""
         EXPECTED TO FAIL INITIALLY: Test connection cleanup race conditions.
         
         Root Cause: When user disconnects and reconnects quickly, cleanup and
         new connection setup race with each other causing connection conflicts.
-"
+"""Empty docstring."""
         websocket_manager = WebSocketManager()
-        test_token = await self._create_test_user_token(reconnect_user@example.com)"
+        test_token = await self._create_test_user_token(reconnect_user@example.com)""
         
         # Establish initial connection
         initial_connection = await websocket_manager.authenticate_user(test_token)
-        assert initial_connection, Initial connection should work"
+        assert initial_connection, Initial connection should work""
         
         # Simulate user disconnection and immediate reconnection (common pattern)
         disconnection_task = asyncio.create_task(
@@ -187,12 +187,12 @@ class GoldenPathWebSocketRaceConditionsTests(BaseIntegrationTest):
             fReconnection should succeed but race with cleanup causes failure: {reconnect_result}
         
         assert reconnect_result, \
-            Golden Path requires fast reconnection but cleanup race prevents it"
+            Golden Path requires fast reconnection but cleanup race prevents it""
         
         # Verify connection is actually usable after race condition
         event_manager = WebSocketEventManager()
         test_event_sent = await event_manager.send_event(test_token, {
-            "type: test_event,
+            "type: test_event,"
             data: {message: "Testing post-race connection}"
         }
         
@@ -214,7 +214,7 @@ class GoldenPathWebSocketRaceConditionsTests(BaseIntegrationTest):
         # Create multiple users connecting simultaneously
         user_tokens = []
         for i in range(3):
-            token = await self._create_test_user_token(fconcurrent_{i}@example.com)"
+            token = await self._create_test_user_token(fconcurrent_{i}@example.com)""
             user_tokens.append(token)
         
         # All users connect at exactly the same time
@@ -234,7 +234,7 @@ class GoldenPathWebSocketRaceConditionsTests(BaseIntegrationTest):
         
         # EXPECTED FAILURE: Concurrent connections interfere with each other
         assert len(successful_connections) == 3, \
-            f"All 3 users should connect successfully but interference causes failures: {len(successful_connections)}/3
+            f"All 3 users should connect successfully but interference causes failures: {len(successful_connections)}/3"
         
         # Verify each user has isolated connection
         event_manager = WebSocketEventManager()
@@ -264,11 +264,11 @@ class GoldenPathWebSocketRaceConditionsTests(BaseIntegrationTest):
         causing connections to be dropped mid-conversation.
         
         websocket_manager = WebSocketManager()
-        test_token = await self._create_test_user_token(timeout_user@example.com)"
+        test_token = await self._create_test_user_token(timeout_user@example.com)""
         
         # Establish connection
         connection = await websocket_manager.authenticate_user(test_token)
-        assert connection, "Initial connection should work
+        assert connection, "Initial connection should work"
         
         # Simulate Cloud Run timeout scenario
         # Connection is idle, then user sends message right as timeout happens
@@ -318,11 +318,11 @@ class GoldenPathWebSocketRaceConditionsTests(BaseIntegrationTest):
             websocket_manager = WebSocketManager()
             return await websocket_manager.authenticate_user(token)
         except Exception as e:
-            print(fConnection failed for {email}: {e})"
+            print(fConnection failed for {email}: {e})""
             raise e
 
     async def _delayed_event_manager_init(self) -> WebSocketEventManager:
-        "Helper to simulate delayed event manager initialization.
+        "Helper to simulate delayed event manager initialization."""
         await asyncio.sleep(0.05)  # Simulate initialization delay
         return WebSocketEventManager()
 
@@ -363,5 +363,5 @@ class GoldenPathWebSocketRaceConditionsTests(BaseIntegrationTest):
         Helper to create test user tokens.""
         from auth_service.core.auth_manager import AuthManager
         auth_service = AuthManager()
-        test_user = {id: ftest_{email.split('@')[0]}, email": email}
+        test_user = {id: ftest_{email.split('@')[0]}, email": email}"
         return await auth_service.create_token(test_user)

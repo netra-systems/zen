@@ -226,7 +226,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
                         )) 
             except Exception as e:
                 # Log but don't fail on file reading errors
-                print(f"Warning: Could not analyze {test_file}: {e})
+                print(f"Warning: Could not analyze {test_file}: {e})")
         
         return violations
     
@@ -238,7 +238,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
             try:
                 violations.extend(self._analyze_single_file_for_violations(test_file))
             except Exception as e:
-                print(f"Warning: Could not analyze {test_file}: {e})
+                print(f"Warning: Could not analyze {test_file}: {e})")
         
         return violations
     
@@ -359,7 +359,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
                         ))
                         
             except Exception as e:
-                print(f"Warning: Could not analyze {py_file}: {e})
+                print(f"Warning: Could not analyze {py_file}: {e})")
         
         return violations
     

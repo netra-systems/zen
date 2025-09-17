@@ -1,6 +1,6 @@
 @pytest.mark.integration
 class WebSocketConnectionTests:
-    "Real WebSocket connection for testing instead of mocks.
+    "Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
         self.messages_sent = []
@@ -10,19 +10,19 @@ class WebSocketConnectionTests:
     async def send_json(self, message: dict):
         ""Send JSON message.
         if self._closed:
-            raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)""
         self.messages_sent.append(message)
         
-    async def close(self, code: int = 1000, reason: str = Normal closure"):
+    async def close(self, code: int = 1000, reason: str = Normal closure"):"
         Close WebSocket connection.""
         self._closed = True
         self.is_connected = False
         
     def get_messages(self) -> list:
-        Get all sent messages."
+        Get all sent messages.""
         return self.messages_sent.copy()
 
-"
+"""Empty docstring."""
 WebSocket Authentication Handshake Complete Flow Integration Test
 
 Business Value Justification (BVJ):
@@ -36,7 +36,7 @@ initial connection through JWT validation, session binding, and state persistenc
 
 CRITICAL: Real integration testing with minimal mocking.
 Tests the complete auth flow: OAuth  ->  JWT  ->  WebSocket  ->  Session.
-"
+"""Empty docstring."""
 
 import asyncio
 import json
@@ -60,7 +60,7 @@ from shared.isolated_environment import get_env
 
 @dataclass
 class WebSocketAuthResult:
-    Result of WebSocket authentication handshake."
+    Result of WebSocket authentication handshake.""
     success: bool
     connection_time: float
     auth_time: float
@@ -68,7 +68,7 @@ class WebSocketAuthResult:
     user_id: Optional[str]
     token_valid: bool
     error_message: Optional[str] = None
-    connection_state: str = disconnected"
+    connection_state: str = disconnected""
 
 
 class WebSocketAuthHandshakeTester:
@@ -76,8 +76,8 @@ class WebSocketAuthHandshakeTester:
     
     def __init__(self):
         self.backend_url = http://localhost:8000
-        self.auth_url = http://localhost:8001"
-        self.ws_url = ws://localhost:8000/websocket"
+        self.auth_url = http://localhost:8001""
+        self.ws_url = ws://localhost:8000/websocket""
         
     async def perform_oauth_flow(self, username: str, password: str) -> Dict[str, Any]:
         Simulate OAuth authentication flow.""
@@ -88,8 +88,8 @@ class WebSocketAuthHandshakeTester:
             refresh_token: ftest_refresh_token_{username},
             token_type": "Bearer,
             expires_in: 3600,
-            user_id: fuser_{username}",
-            "email: f{username}@example.com
+            user_id: fuser_{username}","
+            "email: f{username}@example.com"
         }
     
     async def validate_jwt_token(self, token: str) -> bool:
@@ -103,7 +103,7 @@ class WebSocketAuthHandshakeTester:
         auth_token: str,
         timeout: float = 10.0
     ) -> WebSocketAuthResult:
-        Establish WebSocket connection with authentication."
+        Establish WebSocket connection with authentication.""
         start_time = time.time()
         result = WebSocketAuthResult(
             success=False,
@@ -118,14 +118,14 @@ class WebSocketAuthHandshakeTester:
             # Validate token first
             result.token_valid = await self.validate_jwt_token(auth_token)
             if not result.token_valid:
-                result.error_message = "Invalid JWT token structure
+                result.error_message = "Invalid JWT token structure"
                 return result
             
             # Establish WebSocket connection with auth headers
             headers = {
                 Authorization: fBearer {auth_token},
-                X-Client-ID: "test_client,
-                X-Request-ID": freq_{int(time.time())}
+                X-Client-ID: "test_client,"
+                X-Request-ID": freq_{int(time.time())}"
             }
             
             # Mock WebSocket connection for testing
@@ -141,8 +141,8 @@ class WebSocketAuthHandshakeTester:
                 # Send auth handshake message
                 auth_message = {
                     type: auth,
-                    token: auth_token,"
-                    "timestamp: datetime.now(timezone.utc).isoformat()
+                    token: auth_token,""
+                    "timestamp: datetime.now(timezone.utc).isoformat()"
                 }
                 await websocket.send(json.dumps(auth_message))
                 
@@ -161,21 +161,21 @@ class WebSocketAuthHandshakeTester:
                     result.auth_time = auth_time
                     result.session_id = auth_response.get(session_id")"
                     result.user_id = auth_response.get(user_id)
-                    result.connection_state = connected"
+                    result.connection_state = connected""
                 else:
-                    result.error_message = auth_response.get("error, Authentication failed)
+                    result.error_message = auth_response.get("error, Authentication failed)"
                     
         except websockets.exceptions.WebSocketException as e:
             result.error_message = fWebSocket error: {str(e)}
         except asyncio.TimeoutError:
-            result.error_message = Connection timeout"
+            result.error_message = Connection timeout""
         except Exception as e:
-            result.error_message = f"Unexpected error: {str(e)}
+            result.error_message = f"Unexpected error: {str(e)}"
             
         return result
     
     async def verify_session_binding(self, session_id: str) -> bool:
-        Verify that session is properly bound in backend."
+        Verify that session is properly bound in backend.""
         # Check Redis for session state
         # Check database for session record
         # For testing, return True if session_id exists
@@ -186,7 +186,7 @@ class WebSocketAuthHandshakeTester:
         initial_token: str,
         refresh_token: str
     ) -> bool:
-        "Test token refresh during active WebSocket connection.
+        "Test token refresh during active WebSocket connection."
         # Establish initial connection
         # Wait for token to near expiry
         # Trigger refresh
@@ -291,10 +291,10 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
 # COMMENTED OUT: Mock-dependent test -     
     async def test_token_refresh_during_active_connection(self):
         "Test token refresh while maintaining WebSocket connection."
-        oauth_result = await self.auth_tester.perform_oauth_flow(testuser, "password123)
+        oauth_result = await self.auth_tester.perform_oauth_flow(testuser, "password123)"
         
         refresh_success = await self.auth_tester.test_token_refresh_during_connection(
-            oauth_result[access_token"],
+            oauth_result[access_token"],"
             oauth_result[refresh_token]
         
         assert refresh_success, Token refresh should maintain connection""
@@ -328,7 +328,7 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
 # COMMENTED OUT: Mock-dependent test -         assert total_time < 10.0, Concurrent connections should complete quickly"
 # COMMENTED OUT: Mock-dependent test -     
     async def test_cross_service_session_validation(self):
-        "Test session validation across auth service and main backend.
+        "Test session validation across auth service and main backend."""
         oauth_result = await self.auth_tester.perform_oauth_flow(testuser", "password123)
         
         # Verify token is valid in auth service
@@ -337,7 +337,7 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
         
         # Verify session can be established in backend
         # This would involve real service calls in production
-        session_valid = await self.auth_tester.verify_session_binding(test_session)"
+        session_valid = await self.auth_tester.verify_session_binding(test_session)""
         assert session_valid
     
 # COMMENTED OUT: Mock-dependent test -     async def test_websocket_reconnection_with_same_token(self):

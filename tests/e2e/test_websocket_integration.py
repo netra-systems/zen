@@ -1,4 +1,4 @@
-"WebSocket + Auth Integration Tests - Phase 3 Unified System Testing
+"WebSocket + Auth Integration Tests - Phase 3 Unified System Testing"""
 
 Real-time communication testing with authentication integration.
 Tests WebSocket connections, JWT validation, reconnection scenarios, and multi-client broadcasts.
@@ -45,10 +45,10 @@ logger = central_logger.get_logger(__name__)
 _auth_helper = E2EAuthHelper()
 
 def create_test_token(user_id: str, exp_offset: int = 900) -> str:
-    Create test JWT token using SSOT auth helper."
+    Create test JWT token using SSOT auth helper.""
     return _auth_helper.create_test_jwt_token(
         user_id=user_id,
-        email=f"{user_id}@test.com,
+        email=f"{user_id}@test.com,"
         permissions=[read, write],
         exp_minutes=exp_offset // 60
     )
@@ -69,13 +69,13 @@ class WebSocketBuilder:
         return self
     
     def with_authentication(self, token: str) -> 'WebSocketBuilder':
-        Set authentication token for WebSocket connection."
+        Set authentication token for WebSocket connection.""
         self.auth_token = token
         self.is_authenticated = True
         return self
     
     def with_rate_limiting(self, max_requests: int) -> 'WebSocketBuilder':
-        "Set rate limiting configuration.
+        "Set rate limiting configuration."""
         self.rate_limit_config = {'max_requests': max_requests}
         return self
     
@@ -100,7 +100,7 @@ class MessageSimulator:
     
     async def simulate_broadcast(self, clients: List[MockWebSocket], 
                                 message: Dict[str, Any] -> Dict[str, int]:
-        Simulate broadcasting a message to multiple clients."
+        Simulate broadcasting a message to multiple clients.""
         successful = 0
         failed = 0
         
@@ -110,7 +110,7 @@ class MessageSimulator:
             successful += 1
         
         return {
-            successful": successful,
+            successful": successful,"
             failed: failed
         }
 
@@ -141,8 +141,8 @@ class WebSocketAuthHandshakeTests:
         
         result = await self._perform_auth_handshake(websocket_auth_tester, user_id, token)
         
-        assert result[authenticated] is True"
-        assert result["user_id] == user_id
+        assert result[authenticated] is True""
+        assert result["user_id] == user_id"
         websocket_auth_tester.record_auth_result(user_id, True)
     
     async def _perform_auth_handshake(self, tester: WebSocketAuthTester,
@@ -167,10 +167,10 @@ class WebSocketAuthHandshakeTests:
         result = await self._test_invalid_token_rejection(user_id, invalid_token)
         
         assert result[authenticated] is False
-        websocket_auth_tester.record_auth_result(user_id, False, result.get(error))"
+        websocket_auth_tester.record_auth_result(user_id, False, result.get(error))""
     
     async def _test_invalid_token_rejection(self, user_id: str, token: str) -> Dict[str, Any]:
-        "Test invalid token rejection during handshake.
+        "Test invalid token rejection during handshake."""
         websocket = WebSocketBuilder().with_user_id(user_id).build()
         
         # Mock: Authentication service isolation for testing without real auth flows
@@ -238,8 +238,8 @@ class ReconnectionWithAuthTests:
         new_token = create_test_token(user_id, exp_offset=7200)
         result = await self._perform_token_refresh(websocket, new_token)
         
-        assert result[refresh_successful] is True"
-        assert result["connection_maintained] is True
+        assert result[refresh_successful] is True""
+        assert result["connection_maintained] is True"
     
     async def _establish_connection_for_refresh(self, tester: WebSocketAuthTester,
                                               user_id: str, token: str) -> MockWebSocket:
@@ -250,8 +250,8 @@ class ReconnectionWithAuthTests:
         return websocket
     
     async def _perform_token_refresh(self, websocket: MockWebSocket, new_token: str) -> Dict[str, Any]:
-        Perform token refresh on active WebSocket."
-        refresh_message = {type": auth_refresh, payload: {new_token: new_token}}
+        Perform token refresh on active WebSocket.""
+        refresh_message = {type": auth_refresh, payload: {new_token: new_token}}"
         await websocket.send_json(refresh_message)
         websocket.auth_token = new_token
         
@@ -282,10 +282,10 @@ class MultiClientBroadcastTests:
     
     async def _create_authenticated_clients(self, tester: WebSocketAuthTester,
                                           count: int) -> List[MockWebSocket]:
-        Create multiple authenticated WebSocket clients."
+        Create multiple authenticated WebSocket clients.""
         clients = []
         for i in range(count):
-            user_id = fuser_{i}"
+            user_id = fuser_{i}""
             token = tester.create_test_user_with_token(user_id)
             client = WebSocketBuilder().with_user_id(user_id).with_authentication(token).build()
             await client.accept()
@@ -307,11 +307,11 @@ class MultiClientBroadcastTests:
 
 @pytest.mark.e2e
 class WebSocketRateLimitingTests:
-    Test rate limit enforcement on WebSocket connections."
+    Test rate limit enforcement on WebSocket connections.""
     
     @pytest.mark.e2e
     async def test_websocket_rate_limiting(self, websocket_auth_tester):
-        "Test rate limit enforcement on WebSocket.
+        "Test rate limit enforcement on WebSocket."""
         user_id = test_rate_limit""
         token = websocket_auth_tester.create_test_user_with_token(user_id)
         
@@ -319,11 +319,11 @@ class WebSocketRateLimitingTests:
         result = await self._test_rate_limit_enforcement(client)
         
         assert result[rate_limit_triggered] is True
-        assert result[limit_enforced_correctly] is True"
+        assert result[limit_enforced_correctly] is True""
     
     async def _create_rate_limited_client(self, tester: WebSocketAuthTester,
                                         user_id: str, token: str) -> MockWebSocket:
-        "Create WebSocket client with rate limiting enabled.
+        "Create WebSocket client with rate limiting enabled."
         client = (WebSocketBuilder()
                  .with_user_id(user_id)
                  .with_authentication(token)

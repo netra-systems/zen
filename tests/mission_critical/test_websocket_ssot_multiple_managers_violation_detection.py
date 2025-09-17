@@ -129,7 +129,7 @@ class WebSocketSSotMultipleManagersViolationDetectionTests(SSotBaseTestCase):
             file_path = self.websocket_core_path / file_name
             if file_path.exists():
                 competing_implementations.append(str(file_path))
-                logger.warning(f"🚨 Issue #1182: Found competing implementation {file_name})
+                logger.warning(f"🚨 Issue #1182: Found competing implementation {file_name})")
         
         if len(competing_implementations) > 1:
             issue_1182_violations.append(

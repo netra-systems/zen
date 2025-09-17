@@ -283,7 +283,7 @@ class JWTSecretConsistencyValidator:
                 logger.error(f FAIL:  {service_name} JWT validation: FAILED (403) - JWT SECRET MISMATCH)
                 return False
             else:
-                logger.warning(f" WARNING: [U+FE0F] {service_name} unexpected response: {response.status_code})
+                logger.warning(f" WARNING: [U+FE0F] {service_name} unexpected response: {response.status_code})")
                 return True  # Don't fail on unexpected responses
                 
         except requests.exceptions.RequestException as e:
@@ -775,7 +775,7 @@ if __name__ == "__main__:"
     
     # Execute tests
     for test_name, test_func in tests:
-        print(f"\n SEARCH:  Running: {test_name})
+        print(f"\n SEARCH:  Running: {test_name})")
         try:
             result = test_func()
             status =  PASS:  PASSED if result else  FAIL:  FAILED
@@ -804,7 +804,7 @@ if __name__ == "__main__:"
         print(   System ready for deployment)"
         exit_code = 0
     
-    print(f"   Overall Success Rate: {success_rate:.1%})
+    print(f"   Overall Success Rate: {success_rate:.1%})")
     print(f   Estimated MRR Protection: {report['business_impact']['estimated_mrr_at_risk']})"
     print("=" * 60)
     

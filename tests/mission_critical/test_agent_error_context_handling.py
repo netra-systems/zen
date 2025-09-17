@@ -139,7 +139,7 @@ class TestRunIdValidation:
         fastest_execution       # Contains 'test' within 'fastest'
     
         for run_id in safe_patterns:
-        assert not bridge._is_suspicious_run_id(run_id), "formatted_string"
+        assert not bridge._is_suspicious_run_id(run_id), ""
     def test_context_validation(self, bridge):
         Test full context validation for WebSocket events."
         pass

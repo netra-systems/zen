@@ -149,7 +149,7 @@ class SupervisorAgentSSOTViolationsTests(SSotBaseTestCase):
 
         # Log findings for debugging
         print(f\n=== IMPORT VIOLATION SCAN RESULTS ===)"
-        print(f"Non-SSOT SupervisorAgent imports found: {len(import_violations)})
+        print(f"Non-SSOT SupervisorAgent imports found: {len(import_violations)})")
         for violation in import_violations:
             print(f  - {violation['file']}:{violation['line']} -> {violation['content']})"
         print("=*50)
@@ -190,7 +190,7 @@ class SupervisorAgentSSOTViolationsTests(SSotBaseTestCase):
             print(f\n=== REGISTRY VIOLATION SCAN RESULTS ===)
             print(fSupervisorAgent registrations found: {len(supervisor_registrations)})"
             for reg in supervisor_registrations:
-                print(f"  - {reg['name']} -> {reg['class']} from {reg['module']})
+                print(f"  - {reg['name']} -> {reg['class']} from {reg['module']})")
             print(=*50)"
 
             # ASSERTION: Should have at most ONE supervisor registration

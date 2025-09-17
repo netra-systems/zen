@@ -383,9 +383,9 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
         assert memory_increase < max_allowed_concurrent_increase, \
             fConcurrent startup memory increase too high: {memory_increase / 1024 / 1024:.2f}MB"
         
-        print(f"✅ CONCURRENT STARTUP ISOLATION VALIDATED:)
+        print(f"✅ CONCURRENT STARTUP ISOLATION VALIDATED:)")
         print(f   - Concurrent instances: {concurrent_instances})"
-        print(f"   - Successful instances: {successful_instances})
+        print(f"   - Successful instances: {successful_instances})")
         print(f   - Memory increase: {memory_increase / 1024 / 1024:.2f}MB)"
 
     @pytest.mark.asyncio

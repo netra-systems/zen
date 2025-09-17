@@ -338,7 +338,7 @@ await asyncio.gather(*tasks)
 
     # Validate each user got their events
 for i in range(user_count):
-    thread_id = "formatted_string"
+    thread_id = ""
 user_events = self.event_capture.get_events_for_thread(thread_id)
 assert len(user_events) >= 5, formatted_string
 

@@ -70,7 +70,7 @@ def main():
     unified_runner = project_root / tests / unified_test_runner.py"
     
     if not unified_runner.exists():
-        print(f"ERROR: UnifiedTestRunner not found at {unified_runner})
+        print(f"ERROR: UnifiedTestRunner not found at {unified_runner})")
         print(Falling back to original isolation test runner...)"
         return execute_fallback_isolation_tests()
     
@@ -105,7 +105,7 @@ def main():
         # Add any unknown arguments
         cmd.extend(unknown_args)
         
-        print(f"Executing isolation tests via UnifiedTestRunner:)
+        print(f"Executing isolation tests via UnifiedTestRunner:)")
         print(f   {' '.join(cmd")})
         print()
         print(WARNING: These tests are EXPECTED TO FAIL initially!")"

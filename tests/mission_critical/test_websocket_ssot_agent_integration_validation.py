@@ -430,7 +430,7 @@ class WebSocketSSotAgentIntegrationValidationTests(SSotAsyncTestCase):
                         registry_integration_successful = False
                         
                 except Exception as e:
-                    logger.warning(f"AgentRegistry integration failed: {e})
+                    logger.warning(f"AgentRegistry integration failed: {e})")
                     registry_integration_successful = False
             else:
                 registry_integration_successful = False

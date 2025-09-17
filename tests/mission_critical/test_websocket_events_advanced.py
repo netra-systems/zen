@@ -520,7 +520,7 @@ class TestPerformanceBenchmarks:
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-# @pytest.fixture
+# # @pytest.fixture
     async def test_high_frequency_event_throughput(self):
     "Test WebSocket can handle high-frequency event streams.
 ws_manager = WebSocketManager()
@@ -862,7 +862,7 @@ class TestMultiAgentCoordination:
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-# @pytest.fixture
+# # @pytest.fixture
     async def test_supervisor_with_multiple_subagents(self):
     "Test supervisor coordinating multiple sub-agents."
 ws_manager = WebSocketManager()

@@ -1,4 +1,4 @@
-"Real WebSocket Connection Test - CRITICAL Authentication & Agent Pipeline Validation
+"Real WebSocket Connection Test - CRITICAL Authentication & Agent Pipeline Validation"""
 
 CRITICAL WebSocket Real Connection Test - Complete End-to-End Validation
 Tests REAL WebSocket connections with JWT authentication and agent pipeline message routing.
@@ -44,17 +44,17 @@ from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
 class WebSocketRealConnectionTester:
-    Tests real WebSocket connections with authentication and agent pipeline."
+    Tests real WebSocket connections with authentication and agent pipeline.""
     
     def __init__(self):
-        "Initialize real WebSocket connection tester.
+        "Initialize real WebSocket connection tester."""
         self.websocket_url = ws://localhost:8000/ws""
         self.backend_url = http://localhost:8000
-        self.auth_url = http://localhost:8001"
+        self.auth_url = http://localhost:8001""
         self.jwt_helper = JWTTestHelper()
         
     async def _quick_health_check(self) -> bool:
-        "Quick health check to avoid timeouts.
+        "Quick health check to avoid timeouts."""
         try:
             import httpx
             # CRITICAL FIX: Increase timeout and use proper connection settings for Windows/Docker
@@ -90,19 +90,19 @@ class WebSocketRealConnectionTester:
             return {
                 "client: client,"
                 token: token,
-                connected: connection_success,"
-                error": None if connection_success else Connection failed
+                connected: connection_success,""
+                error": None if connection_success else Connection failed"
             }
         except asyncio.TimeoutError:
             return {
                 client: None,
                 "token: None,"
                 connected: False,
-                error: Connection timeout - WebSocket service not available"
+                error: Connection timeout - WebSocket service not available""
             }
         except Exception as e:
             return {
-                "client: None,
+                "client: None,"
                 token: None,
                 "connected: False,"
                 error: str(e)
@@ -130,26 +130,26 @@ class WebSocketRealConnectionTester:
     
     @pytest.mark.websocket
     async def test_bidirectional_message_flow(self, client: RealWebSocketClient) -> Dict[str, Any]:
-        Test bidirectional message flow through agent pipeline."
+        Test bidirectional message flow through agent pipeline.""
         test_messages = [
             {
-                type": user_message,
+                type": user_message,"
                 payload: {
                     "content: Test agent pipeline connectivity",
                     thread_id: None,
-                    user_id: "test-user
+                    user_id: "test-user"
                 }
             },
             {
-                type": start_agent,
+                type": start_agent,"
                 payload: {
                     "query: Validate agent pipeline response",
                     user_id: test-user
                 }
             },
             {
-                type: ping",
-                "payload: {timestamp: time.time()}
+                type: ping","
+                "payload: {timestamp: time.time()}"
             }
         ]
         
@@ -166,17 +166,17 @@ class WebSocketRealConnectionTester:
                 sent_message: message,
                 send_success": send_success,"
                 responses_received: len(responses),
-                responses: responses"
+                responses: responses""
             }
         
         return {
-            "message_flows: message_flow_results,
+            "message_flows: message_flow_results,"
             total_messages_sent: len(test_messages),
             "total_responses_received: sum(len(flow[responses"] for flow in message_flow_results)
         }
     
     async def _collect_responses(self, client: RealWebSocketClient, timeout: float) -> List[Dict[str, Any]]:
-        Collect WebSocket responses within timeout period."
+        Collect WebSocket responses within timeout period.""
         responses = []
         start_time = time.time()
         
@@ -198,13 +198,13 @@ class WebSocketRealConnectionTester:
     
     @pytest.mark.e2e
     async def test_reconnection_scenario(self, user_id: str) -> Dict[str, Any]:
-        "Test WebSocket reconnection after disconnect.
+        "Test WebSocket reconnection after disconnect."""
         # Initial connection
         connection_result = await self.create_authenticated_connection(user_id)
         if not connection_result["connected]:"
-            return {reconnection_success: False, error: Initial connection failed}"
+            return {reconnection_success: False, error: Initial connection failed}""
         
-        client = connection_result["client]
+        client = connection_result["client]"
         
         # Send initial message
         initial_message = {type: ping, payload": {"test: before_disconnect}}
@@ -217,30 +217,30 @@ class WebSocketRealConnectionTester:
         # Attempt reconnection
         reconnection_result = await self.create_authenticated_connection(user_id)
         
-        if reconnection_result[connected]:"
+        if reconnection_result[connected]:""
             # Test message after reconnection
-            reconnect_client = reconnection_result[client"]
+            reconnect_client = reconnection_result[client"]"
             reconnect_message = {type: ping, "payload: {test": after_reconnect}}
             send_success = await reconnect_client.send(reconnect_message)
             
             await reconnect_client.close()
             
             return {
-                reconnection_success: True,"
-                "send_after_reconnect: send_success
+                reconnection_success: True,""
+                "send_after_reconnect: send_success"
             }
         
         return {reconnection_success: False, error: reconnection_result[error"]}"
     
     @pytest.mark.e2e
     async def test_invalid_token_rejection(self, invalid_token: str) -> Dict[str, Any]:
-        Test WebSocket properly rejects invalid authentication tokens."
+        Test WebSocket properly rejects invalid authentication tokens.""
         try:
             # Quick health check first
             health_check_result = await self._quick_health_check()
             if not health_check_result:
                 return {
-                    properly_rejected": True,  # Assume rejection if service not available
+                    properly_rejected": True,  # Assume rejection if service not available"
                     rejection_reason: Service not available - cannot test token rejection
                 }
             
@@ -257,11 +257,11 @@ class WebSocketRealConnectionTester:
                 await client.close()
                 return {
                     properly_rejected: False,
-                    error: "Invalid token was accepted (security issue)
+                    error: "Invalid token was accepted (security issue)"
                 }
             
             return {
-                properly_rejected": True,
+                properly_rejected": True,"
                 rejected_correctly: True
             }
             
@@ -272,8 +272,8 @@ class WebSocketRealConnectionTester:
             }
         except (ConnectionClosedError, InvalidStatus) as e:
             return {
-                properly_rejected: True,"
-                rejection_reason": str(e)
+                properly_rejected: True,""
+                rejection_reason": str(e)"
             }
         except Exception as e:
             return {
@@ -283,10 +283,10 @@ class WebSocketRealConnectionTester:
 
 
 class AgentPipelineValidator:
-    Validates message routing through agent pipeline."
+    Validates message routing through agent pipeline.""
     
     def __init__(self, client: RealWebSocketClient):
-        "Initialize agent pipeline validator.
+        "Initialize agent pipeline validator."""
         self.client = client
     
     async def validate_agent_message_routing(self, user_id: str) -> Dict[str, Any]:
@@ -294,16 +294,16 @@ class AgentPipelineValidator:
         # Test message types that should trigger agent responses
         agent_test_messages = [
             {
-                type: "user_message,
-                payload": {
+                type: "user_message,"
+                payload": {"
                     content: Test agent routing validation,
                     "thread_id: None,"
                     user_id: user_id
                 }
             },
             {
-                type: start_agent",
-                "payload: {
+                type: start_agent","
+                "payload: {"
                     query: Agent pipeline validation test,
                     user_id": user_id"
                 }
@@ -321,8 +321,8 @@ class AgentPipelineValidator:
             
             routing_results.append({
                 test_message: test_message,
-                agent_responses: agent_responses,"
-                "routing_successful: len(agent_responses) > 0
+                agent_responses: agent_responses,""
+                "routing_successful: len(agent_responses) > 0"
             }
         
         return {
@@ -331,7 +331,7 @@ class AgentPipelineValidator:
         }
     
     async def _wait_for_agent_responses(self, timeout: float) -> List[Dict[str, Any]]:
-        Wait for agent responses within timeout."
+        Wait for agent responses within timeout.""
         responses = []
         start_time = time.time()
         
@@ -342,7 +342,7 @@ class AgentPipelineValidator:
                     responses.append(response)
                     
                     # Stop if we get agent completion
-                    if response.get(type") == agent_completed:
+                    if response.get(type") == agent_completed:"
                         break
             except asyncio.TimeoutError:
                 break
@@ -352,8 +352,8 @@ class AgentPipelineValidator:
     def _filter_agent_responses(self, responses: List[Dict[str, Any]] -> List[Dict[str, Any]]:
         Filter responses to find agent-related messages.""
         agent_message_types = {
-            agent_started, agent_update, agent_completed, agent_error",
-            "partial_result, final_report, connection_established
+            agent_started, agent_update, agent_completed, agent_error","
+            "partial_result, final_report, connection_established"
         }
         
         return [
@@ -366,23 +366,23 @@ class AgentPipelineValidator:
 @pytest.mark.integration
 @pytest.mark.e2e
 class WebSocketRealConnectionTests:
-    CRITICAL: Real WebSocket Connection Test with Authentication & Agent Pipeline"
+    CRITICAL: Real WebSocket Connection Test with Authentication & Agent Pipeline""
     
     @pytest.fixture
     def connection_tester(self):
-        "Initialize WebSocket real connection tester.
+        "Initialize WebSocket real connection tester."""
         return WebSocketRealConnectionTester()
     
     @pytest.mark.e2e
     async def test_websocket_authenticated_connection(self, connection_tester):
         "Test successful WebSocket connection with JWT authentication."
-        user_id = TEST_USERS[enterprise].id"
+        user_id = TEST_USERS[enterprise].id""
         start_time = time.time()
         
         try:
             connection_result = await connection_tester.create_authenticated_connection(user_id)
             
-            if not connection_result["connected]:
+            if not connection_result["connected]:"
                 error_msg = str(connection_result[error].lower()
                 if any(keyword in error_msg for keyword in ["connection, timeout", not available, refused]:
                     pytest.skip(fWebSocket service not available: {connection_result['error']})
@@ -401,18 +401,18 @@ class WebSocketRealConnectionTests:
             
             # Verify execution time - CRITICAL FIX: Account for Docker networking delays on Windows
             execution_time = time.time() - start_time
-            assert execution_time < 20.0, f"Test took {execution_time:.2f}s, expected <20s (Docker networking can be slow on Windows)
+            assert execution_time < 20.0, f"Test took {execution_time:.2f}s, expected <20s (Docker networking can be slow on Windows)"
             
         except Exception as e:
             error_msg = str(e).lower()
-            if any(keyword in error_msg for keyword in [server not available", connection, timeout, refused]:
+            if any(keyword in error_msg for keyword in [server not available", connection, timeout, refused]:"
                 pytest.skip(WebSocket service not available for authentication test")"
             raise
     
     @pytest.mark.e2e
     async def test_bidirectional_message_flow(self, connection_tester):
-        Test bidirectional message flow between client and server."
-        user_id = TEST_USERS[mid"].id
+        Test bidirectional message flow between client and server.""
+        user_id = TEST_USERS[mid"].id"
         
         try:
             connection_result = await connection_tester.create_authenticated_connection(user_id)
@@ -424,10 +424,10 @@ class WebSocketRealConnectionTests:
             # Test bidirectional message flow
             flow_result = await connection_tester.test_bidirectional_message_flow(client)
             
-            assert flow_result[total_messages_sent] > 0, "No messages sent
+            assert flow_result[total_messages_sent] > 0, "No messages sent"
             
             # Validate message flow results
-            for flow in flow_result[message_flows"]:
+            for flow in flow_result[message_flows"]:"
                 assert flow[send_success], fFailed to send message: {flow['sent_message']}
                 
                 # Note: Response count may be 0 if agent pipeline is not fully running
@@ -450,21 +450,21 @@ class WebSocketRealConnectionTests:
             if not connection_result["connected]:"
                 pytest.skip(fConnection failed: {connection_result['error']})
             
-            client = connection_result[client]"
+            client = connection_result[client]""
             validator = AgentPipelineValidator(client)
             
             # Test agent message routing
             routing_result = await validator.validate_agent_message_routing(user_id)
             
             # Validate routing tests were performed
-            assert len(routing_result[message_routing_tests"] > 0, No routing tests performed
+            assert len(routing_result[message_routing_tests"] > 0, No routing tests performed"
             
             # Test that messages were sent successfully (routing validation)
             for routing_test in routing_result[message_routing_tests]:
                 test_message = routing_test["test_message]"
                 assert test_message is not None, Test message missing
-                assert type in test_message, Test message missing 'type' field"
-                assert "payload in test_message, Test message missing 'payload' field
+                assert type in test_message, Test message missing 'type' field""
+                assert "payload in test_message, Test message missing 'payload' field"
                 
                 # Agent responses are optional if agent pipeline is not fully running
                 # We're primarily testing WebSocket message routing capability
@@ -478,8 +478,8 @@ class WebSocketRealConnectionTests:
     
     @pytest.mark.e2e
     async def test_websocket_reconnection(self, connection_tester):
-        Test WebSocket reconnection after disconnect."
-        user_id = TEST_USERS[early"].id
+        Test WebSocket reconnection after disconnect.""
+        user_id = TEST_USERS[early"].id"
         
         try:
             reconnection_result = await connection_tester.test_reconnection_scenario(user_id)
@@ -488,8 +488,8 @@ class WebSocketRealConnectionTests:
                 pytest.skip(WebSocket service not available for reconnection test)
             
             # Reconnection should succeed
-            assert reconnection_result[reconnection_success], \"
-                fReconnection failed: {reconnection_result.get('error')}"
+            assert reconnection_result[reconnection_success], \""
+                fReconnection failed: {reconnection_result.get('error')}""
             
             # Should be able to send messages after reconnection
             if send_after_reconnect in reconnection_result:
@@ -497,8 +497,8 @@ class WebSocketRealConnectionTests:
                     Failed to send message after reconnection
             
         except Exception as e:
-            if server not available in str(e).lower():"
-                pytest.skip("WebSocket service not available for reconnection test)
+            if server not available in str(e).lower():""
+                pytest.skip("WebSocket service not available for reconnection test)"
             raise
     
     @pytest.mark.e2e
@@ -510,8 +510,8 @@ class WebSocketRealConnectionTests:
             pytest.skip(WebSocket service not available for invalid auth test)
         
         invalid_tokens = [
-            invalid-jwt-token,"
-            "expired.jwt.token,
+            invalid-jwt-token,""
+            "expired.jwt.token,"
             ,
             "malformed-token-structure,"
             connection_tester.jwt_helper.create_none_algorithm_token()
@@ -524,17 +524,17 @@ class WebSocketRealConnectionTests:
                 rejection_result = await connection_tester.test_invalid_token_rejection(invalid_token)
                 rejection_results.append({
                     token: invalid_token[:20] + ... if len(invalid_token) > 20 else invalid_token,
-                    result: rejection_result"
+                    result: rejection_result""
                 }
                 
                 # If service is not available in the result, skip the test
-                if "service not available in str(rejection_result.get(rejection_reason, )).lower():
+                if "service not available in str(rejection_result.get(rejection_reason, )).lower():"
                     pytest.skip(WebSocket service not available for invalid auth test")"
                     
             except Exception as e:
                 error_msg = str(e).lower()
-                if any(keyword in error_msg for keyword in [server not available, connection, timeout]:"
-                    pytest.skip(WebSocket service not available for invalid auth test")
+                if any(keyword in error_msg for keyword in [server not available, connection, timeout]:""
+                    pytest.skip(WebSocket service not available for invalid auth test")"
                 rejection_results.append({
                     token: invalid_token[:20] + ...,
                     "result: {properly_rejected": True, rejection_reason: str(e)}
@@ -542,29 +542,29 @@ class WebSocketRealConnectionTests:
         
         # Validate all invalid tokens were properly rejected
         for rejection in rejection_results:
-            result = rejection[result]"
-            assert result.get("properly_rejected, True), \
+            result = rejection[result]""
+            assert result.get("properly_rejected, True), \"
                 fInvalid token was not rejected: {rejection['token']}
     
     @pytest.mark.e2e
     async def test_connection_persistence(self, connection_tester):
         "Test WebSocket connection persistence under various conditions."
-        user_id = TEST_USERS[free].id"
+        user_id = TEST_USERS[free].id""
         
         try:
             connection_result = await connection_tester.create_authenticated_connection(user_id)
-            if not connection_result["connected]:
+            if not connection_result["connected]:"
                 pytest.skip(fConnection failed: {connection_result['error']})
             
             client = connection_result["client]"
             
             # Test connection persistence with multiple messages
             persistence_messages = [
-                {type: ping, payload: {"sequence: 1}},
-                {type": user_message, payload: {content: Persistence test 1", "thread_id: None}},
-                {type: ping, payload: {"sequence: 2}},
-                {type": user_message, payload: {content: Persistence test 2", "thread_id: None}},
-                {type: ping, payload: {"sequence: 3}}
+                {type: ping, payload: {"sequence: 1}},"
+                {type": user_message, payload: {content: Persistence test 1", "thread_id: None}},"
+                {type: ping, payload: {"sequence: 2}},"
+                {type": user_message, payload: {content: Persistence test 2", "thread_id: None}},"
+                {type: ping, payload: {"sequence: 3}}"
             ]
             
             message_results = []
@@ -576,7 +576,7 @@ class WebSocketRealConnectionTests:
                 await asyncio.sleep(0.5)
             
             # All messages should be sent successfully
-            assert all(message_results), Connection lost persistence during message sequence"
+            assert all(message_results), Connection lost persistence during message sequence""
             
             # Test connection is still active
             final_ping = {type: ping, "payload: {final": True}}
@@ -586,8 +586,8 @@ class WebSocketRealConnectionTests:
             await client.close()
             
         except Exception as e:
-            if server not available in str(e).lower():"
-                pytest.skip("WebSocket service not available for persistence test)
+            if server not available in str(e).lower():""
+                pytest.skip("WebSocket service not available for persistence test)"
             raise
     
     @pytest.mark.e2e
@@ -597,8 +597,8 @@ class WebSocketRealConnectionTests:
         
         try:
             connection_result = await connection_tester.create_authenticated_connection(user_id)
-            if not connection_result[connected]:"
-                pytest.skip(f"Connection failed: {connection_result['error']})
+            if not connection_result[connected]:""
+                pytest.skip(f"Connection failed: {connection_result['error']})"
             
             client = connection_result[client]
             
@@ -616,12 +616,12 @@ class WebSocketRealConnectionTests:
                 
                 # Send message
                 send_success = await client.send(test_message)
-                assert send_success, fFailed to send structured message: {test_message}"
+                assert send_success, fFailed to send structured message: {test_message}""
                 
                 # Collect responses and validate their structure
                 responses = await connection_tester._collect_responses(client, timeout=2.0)
                 for response in responses:
-                    assert isinstance(response, dict), "Response is not a dictionary
+                    assert isinstance(response, dict), "Response is not a dictionary"
                     # Note: Server response structure validation is optional
                     # as it depends on the current server implementation
             
@@ -634,11 +634,11 @@ class WebSocketRealConnectionTests:
     
     @pytest.mark.e2e
     async def test_concurrent_websocket_connections(self, connection_tester):
-        Test multiple concurrent WebSocket connections."
+        Test multiple concurrent WebSocket connections.""
         # Check if service is available first
         health_check = await connection_tester._quick_health_check()
         if not health_check:
-            pytest.skip("WebSocket service not available for concurrent test)
+            pytest.skip("WebSocket service not available for concurrent test)"
             
         user_ids = [TEST_USERS[free].id, TEST_USERS[early].id, TEST_USERS[mid"].id]"
         
@@ -673,8 +673,8 @@ class WebSocketRealConnectionTests:
             
             # Test messaging on each connection
             for connection in successful_connections:
-                client = connection[client]"
-                test_message = {"type: ping, payload: {concurrent: True}}
+                client = connection[client]""
+                test_message = {"type: ping, payload: {concurrent: True}}"
                 send_success = await client.send(test_message)
                 assert send_success, "Failed to send message on concurrent connection"
             
@@ -716,4 +716,4 @@ Test Coverage:
 - Invalid token rejection with proper security handling
 - Concurrent connections with different authenticated users
 - Message structure validation for frontend compatibility
-"
+"""Empty docstring."""

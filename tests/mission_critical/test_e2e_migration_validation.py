@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 class TestSyntaxFix:
-    "Test class for orphaned methods""
+    """Test class for orphaned methods"""
 
 
 E2E Migration Validation Suite - Mission Critical Test Suite

@@ -132,7 +132,7 @@ class StagingEndpointTester:
         try:
         token_data = response.json(")
         if access_token in token_data:
-        print(f"  [SUCCESS] Got access token!)
+        print(f"  [SUCCESS] Got access token!)")
         await asyncio.sleep(0)
         return token_data[access_token]
         except:
@@ -222,7 +222,7 @@ class StagingEndpointTester:
 
         for endpoint, method in test_endpoints:
         try:
-        url = "formatted_string"
+        url = ""
         print(formatted_string)
 
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -235,7 +235,7 @@ class StagingEndpointTester:
         print(formatted_string)"
 
         if response.status_code == 401:
-        print(f"  [CRITICAL] 401 Unauthorized - Token rejected!)
+        print(f"  [CRITICAL] 401 Unauthorized - Token rejected!)")
         print(formatted_string)"
         results.append(False)
         elif response.status_code in [200, 404]:  # 200 = success, 404 = endpoint not found (but auth worked)
@@ -252,19 +252,19 @@ class StagingEndpointTester:
 
                                                     # Analyze results
         if any(r is False for r in results):
-        print(f"[CRITICAL] Backend rejected the token on some endpoints!)
+        print(f"[CRITICAL] Backend rejected the token on some endpoints!)")
         return False
         elif any(r is True for r in results"):
         print(f[OK] Backend accepted the token on some endpoints!)
         return True
         else:
-        print(f"[INCONCLUSIVE] Could not determine token acceptance)
+        print(f"[INCONCLUSIVE] Could not determine token acceptance)")
         return None
 
     async def test_auth_token_validation_endpoint(self, token"):
         Test if auth service can validate the token."
         pass
-        print(f" )
+        print(f" )")
         === TEST AUTH TOKEN VALIDATION ===)
 
         if not token:
@@ -300,7 +300,7 @@ class StagingEndpointTester:
         print(formatted_string)
 
         if response.status_code == 200:
-        print(f"  [SUCCESS] Auth service validated token!)
+        print(f"  [SUCCESS] Auth service validated token!)")
         try:
         validation_result = response.json(")
         print(formatted_string)

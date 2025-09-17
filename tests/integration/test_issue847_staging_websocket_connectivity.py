@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Integration Tests for Issue #847: Staging WebSocket Connectivity Validation
 
 Business Value Justification (BVJ):
@@ -20,7 +20,7 @@ After Fix: PASSING with staging environment properly accessible
 
 @compliance CLAUDE.md - Chat is King, staging environment critical for fallback
 @compliance SPEC/core.xml - Integration testing with real staging services
-"
+"""Empty docstring."""
 
 import pytest
 import unittest
@@ -39,7 +39,7 @@ def get_env(key, default=None):
 
 @pytest.mark.integration
 class Issue847StagingWebSocketConnectivityTests(unittest.TestCase):
-    "Integration tests for staging WebSocket connectivity validation.
+    "Integration tests for staging WebSocket connectivity validation."""
 
     def setUp(self):
         "Set up test environment with staging configuration."
@@ -60,14 +60,14 @@ class Issue847StagingWebSocketConnectivityTests(unittest.TestCase):
         }
 
     def test_staging_backend_api_connectivity(self):
-        "
+"""Empty docstring."""
         Test that staging backend API is accessible and responding.
 
         Expected: PASS if staging backend is available, FAIL if not accessible
         Business Impact: Validates staging environment availability for fallback
 
         ROOT CAUSE: Staging backend must be accessible for WebSocket fallback to work
-"
+"""Empty docstring."""
         with patch.dict(os.environ, self.staging_env):
             env = get_env()
             staging_backend_url = env.get('NETRA_BACKEND_URL')
@@ -146,8 +146,8 @@ class Issue847StagingWebSocketConnectivityTests(unittest.TestCase):
                 health_error = health_status.get('error', 'Unknown error')
                 api_health_error = api_health_status.get('error', 'Unknown error')
 
-                self.fail(fSTAGING CONNECTIVITY ISSUE #847: Health endpoints not accessible - "
-                         f"Health: {health_error}, API Health: {api_health_error} - 
+                self.fail(fSTAGING CONNECTIVITY ISSUE #847: Health endpoints not accessible - ""
+                         f"Health: {health_error}, API Health: {api_health_error} - "
                          fFull results: {json.dumps(results, indent=2)})
 
             # If we reach here, staging is accessible
@@ -180,8 +180,8 @@ class Issue847StagingWebSocketConnectivityTests(unittest.TestCase):
                 # Test if the WebSocket endpoint responds to HTTP requests
                 # This validates the endpoint exists without requiring full WebSocket handshake
                 ws_http_test_urls = [
-                    f"{staging_backend_url}/ws,  # Direct WebSocket endpoint
-                    f{staging_backend_url}/ws/chat",  # Chat WebSocket endpoint
+                    f"{staging_backend_url}/ws,  # Direct WebSocket endpoint"
+                    f{staging_backend_url}/ws/chat",  # Chat WebSocket endpoint"
                     f{staging_backend_url}/api/ws,  # API WebSocket endpoint
                 ]
 
@@ -231,29 +231,29 @@ class Issue847StagingWebSocketConnectivityTests(unittest.TestCase):
             accessibility_result = results['accessibility_result']
             accessible_endpoints = accessibility_result['accessible_endpoints']
 
-            self.assertIsNotNone(websocket_url, WebSocket URL should be configured)"
-            self.assertGreater(len(results['connection_tests'], 0, "Should test WebSocket endpoints)
+            self.assertIsNotNone(websocket_url, WebSocket URL should be configured)""
+            self.assertGreater(len(results['connection_tests'], 0, "Should test WebSocket endpoints)"
 
             if len(accessible_endpoints) == 0:
                 # Expected potential failure - WebSocket endpoint not accessible
                 test_errors = [test['error'] for test in results['connection_tests'] if test['error']]
 
                 self.fail(fWEBSOCKET ENDPOINT ISSUE #847: No WebSocket endpoints accessible - 
-                         f"Errors: {test_errors} - Full results: {json.dumps(results, indent=2)})
+                         f"Errors: {test_errors} - Full results: {json.dumps(results, indent=2)})"
 
             # If we reach here, at least one WebSocket endpoint is accessible
             self.assertGreater(len(accessible_endpoints), 0,
-                             fAt least one WebSocket endpoint accessible: {results}")
+                             fAt least one WebSocket endpoint accessible: {results}")"
 
     def test_staging_environment_fallback_configuration(self):
-    "
+"""Empty docstring."""
         Test staging environment fallback configuration completeness.
 
         Expected: PASS if all required configuration is present, FAIL if missing
         Business Impact: Validates complete fallback configuration availability
 
         ROOT CAUSE: Complete staging configuration required for effective fallback
-        "
+"""Empty docstring."""
         with patch.dict(os.environ, self.staging_env):
             env = get_env()
 
@@ -301,22 +301,22 @@ class Issue847StagingWebSocketConnectivityTests(unittest.TestCase):
                                    fConfiguration should be at least 60% complete: {configuration_analysis})
 
             if len(missing_config) > 2:
-                self.fail(f"STAGING CONFIG ISSUE #847: Too much configuration missing for effective fallback - 
-                         fMissing: {missing_config} - Analysis: {json.dumps(configuration_analysis, indent=2)}")
+                self.fail(f"STAGING CONFIG ISSUE #847: Too much configuration missing for effective fallback - "
+                         fMissing: {missing_config} - Analysis: {json.dumps(configuration_analysis, indent=2)}")"
 
             # If we reach here, staging configuration is adequate
             self.assertTrue(configuration_analysis['fallback_readiness'] or completeness >= 0.6,
                            fStaging configuration adequate for fallback: {configuration_analysis})
 
     def test_staging_service_integration_capability(self):
-        "
+"""Empty docstring."""
         Test staging service integration capability for Issue #847 resolution.
 
         Expected: Document current integration capability
         Business Impact: Shows staging readiness for WebSocket fallback integration
 
         ROOT CAUSE: Integration capability determines feasibility of staging fallback
-"
+"""Empty docstring."""
         with patch.dict(os.environ, self.staging_env):
             env = get_env()
 
@@ -358,15 +358,15 @@ class Issue847StagingWebSocketConnectivityTests(unittest.TestCase):
             service_score = integration_capability['service_configuration_score']
             services_configured_count = integration_capability['services_configured_count']
 
-            self.assertGreater(services_configured_count, 0, Some staging services should be configured)"
-            self.assertGreaterEqual(service_score, 0.5, fAt least 50% of services should be configured")
+            self.assertGreater(services_configured_count, 0, Some staging services should be configured)""
+            self.assertGreaterEqual(service_score, 0.5, fAt least 50% of services should be configured")"
 
             # Document integration capability for Issue #847 resolution
             integration_summary = fIntegration Capability Assessment: {service_score:.1%} services configured
 
             if service_score < 0.75:
-                self.fail(fINTEGRATION CAPABILITY ISSUE #847: Insufficient staging service configuration - "
-                         f"Score: {service_score:.1%}, Details: {json.dumps(integration_capability, indent=2)})
+                self.fail(fINTEGRATION CAPABILITY ISSUE #847: Insufficient staging service configuration - ""
+                         f"Score: {service_score:.1%}, Details: {json.dumps(integration_capability, indent=2)})"
 
             # If we reach here, integration capability is adequate
             self.assertGreaterEqual(service_score, 0.75,

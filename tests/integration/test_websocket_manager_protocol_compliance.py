@@ -1,9 +1,9 @@
-"
+"""Empty docstring."""
 WebSocket Manager Protocol Compliance Test Suite - Five Whys Prevention
 
 This test suite validates that all WebSocket manager implementations comply with
 the WebSocketManagerProtocol, directly preventing the root cause identified in
-the Five Whys analysis: lack of formal interface contracts."
+the Five Whys analysis: lack of formal interface contracts.""
 
 Test Focus:
 1. Protocol compliance validation for all manager types
@@ -15,7 +15,7 @@ Root Cause Prevention:
 These tests ensure that NO WebSocket manager can be deployed without implementing
 the complete protocol interface, preventing AttributeError exceptions during
 agent execution.
-"
+"""Empty docstring."""
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, Mock
@@ -48,13 +48,13 @@ class WebSocketManagerProtocolComplianceTests:
         self.test_connection = WebSocketConnection(connection_id=self.test_connection_id, user_id=self.test_user_id, websocket=self.mock_websocket, connected_at=datetime.utcnow(), thread_id=self.test_thread_id)
 
     def test_isolated_manager_protocol_compliance(self):
-    "
+"""Empty docstring."""
         Test IsolatedWebSocketManager implements WebSocketManagerProtocol.
         
         FIVE WHYS CRITICAL: This test prevents the specific error that triggered
         the Five Whys analysis by ensuring IsolatedWebSocketManager has all
         required methods.
-        "
+"""Empty docstring."""
         manager = create_websocket_manager(self.user_context)
         validation_result = WebSocketManagerProtocolValidator.validate_manager_protocol(manager)
         assert validation_result['compliant'], fIsolatedWebSocketManager MUST be protocol compliant. Missing methods: {validation_result['missing_methods']}, Invalid signatures: {validation_result['invalid_signatures']}. Compliance: {validation_result['summary']['compliance_percentage']}%
@@ -82,12 +82,12 @@ class WebSocketManagerProtocolComplianceTests:
 
     @pytest.mark.asyncio
     async def test_five_whys_critical_methods_functionality(self):
-    "
+"""Empty docstring."""
         Test the specific methods identified in Five Whys analysis work correctly.
         
         This test ensures the methods that were missing (causing the original error)
         now function properly.
-        "
+"""Empty docstring."""
         manager = create_websocket_manager(self.user_context)
         await manager.add_connection(self.test_connection)
         found_connection_id = manager.get_connection_id_by_websocket(self.mock_websocket)
@@ -146,7 +146,7 @@ class WebSocketManagerProtocolComplianceTests:
         assert validation_passed, 'WebSocket manager should pass startup validation. This indicates protocol compliance issues.'
 
     def test_compliance_report_generation(self):
-        Test generation of detailed protocol compliance reports."
+        Test generation of detailed protocol compliance reports.""
         manager = create_websocket_manager(self.user_context)
         report = create_protocol_compliance_report(manager)
         assert 'compliant' in report
@@ -154,7 +154,7 @@ class WebSocketManagerProtocolComplianceTests:
         assert 'method_check_details' in report
         assert 'five_whys_critical_methods' in report
         assert 'recommendations' in report
-        assert report['compliant'], f"Manager should be compliant: {report.get('missing_methods', []}
+        assert report['compliant'], f"Manager should be compliant: {report.get('missing_methods', []}"
         five_whys_methods = report['five_whys_critical_methods']
         assert 'get_connection_id_by_websocket' in five_whys_methods
         assert 'update_connection_thread' in five_whys_methods
@@ -175,9 +175,9 @@ class WebSocketManagerProtocolComplianceTests:
         test_results = await test_critical_method_functionality(manager)
         assert test_results['tests_run'] > 0, 'Should have run functionality tests'
         assert test_results['success_rate'] >= 80, fCritical method functionality tests should have high success rate. Success rate: {test_results['success_rate']}%. Errors: {test_results['errors']}
-        print(fCritical method test results: {test_results['tests_passed']}/{test_results['tests_run']} passed)"
+        print(fCritical method test results: {test_results['tests_passed']}/{test_results['tests_run']} passed)""
         if test_results['errors']:
-            print(f"Errors encountered: {test_results['errors']})
+            print(f"Errors encountered: {test_results['errors']})"
 
     def test_protocol_validator_error_handling(self):
         Test protocol validator handles edge cases gracefully.""
@@ -195,7 +195,7 @@ class WebSocketManagerProtocolComplianceTests:
         assert 'update_connection_thread' in validation_result['missing_methods']
 
     def test_require_protocol_compliance_enforcement(self):
-        Test that protocol compliance can be strictly enforced."
+        Test that protocol compliance can be strictly enforced.""
         compliant_manager = create_websocket_manager(self.user_context)
         try:
             WebSocketManagerProtocolValidator.require_protocol_compliance(compliant_manager, 'Test Context')

@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 TEST SUITE 2: WebSocket Event Handler Wiring Race Conditions
 ===========================================================
 
@@ -16,7 +16,7 @@ BUSINESS VALUE:
 - Validates proper event handler wiring in multi-user scenarios
 
 EXPECTED BEHAVIOR: These tests should INITIALLY FAIL, reproducing the regression issues.
-"
+"""Empty docstring."""
 
 import asyncio
 import pytest
@@ -54,15 +54,15 @@ logger = logging.getLogger(__name__)
 @pytest.mark.integration
 @pytest.mark.websocket_race_conditions  
 class WebSocketEventHandlerRaceConditionsTests(SSotBaseTestCase):
-    "
+"""Empty docstring."""
     Integration tests for WebSocket event handler wiring race conditions.
     
     These tests reproduce the regression where dual WebSocket interfaces
     cause event handler wiring issues and race conditions.
-"
+"""Empty docstring."""
 
     def setup_method(self):
-        "Setup for each test method.
+        "Setup for each test method."""
         super().setup_method()
         self.env = IsolatedEnvironment()
         self.test_user_id = ensure_user_id(str(uuid.uuid4()))
@@ -74,14 +74,14 @@ class WebSocketEventHandlerRaceConditionsTests(SSotBaseTestCase):
         # Setup real components for integration testing
         self.user_context = UserExecutionContext(
             user_id=str(self.test_user_id),
-            request_id=event_race_test_request,"
-            thread_id=event_race_test_thread",
+            request_id=event_race_test_request,""
+            thread_id=event_race_test_thread","
             run_id=str(uuid.uuid4())
         )
         
     @pytest.mark.regression_reproduction
     async def test_dual_interface_event_handler_wiring_race(self):
-    "
+"""Empty docstring."""
         CRITICAL: Test race conditions in dual WebSocket interface event handler wiring.
         
         ROOT CAUSE REPRODUCTION: When both WebSocketManager and AgentWebSocketBridge
@@ -89,7 +89,7 @@ class WebSocketEventHandlerRaceConditionsTests(SSotBaseTestCase):
         be delivered to wrong handlers or dropped entirely.
         
         EXPECTED FAILURE: Should fail due to handler wiring race conditions.
-        "
+"""Empty docstring."""
         logger.info( ALERT:  TESTING: Dual interface event handler wiring race conditions)
         
         await self.async_setup_method()
@@ -111,10 +111,10 @@ class WebSocketEventHandlerRaceConditionsTests(SSotBaseTestCase):
                 'handler_id': id(handler),
                 'timestamp': registration_time
             }
-            logger.debug(fHandler registered: {interface_name}.{event_type} at {registration_time})"
+            logger.debug(fHandler registered: {interface_name}.{event_type} at {registration_time})""
             
         def track_event_delivery(interface_name: str, event_type: str, event_data: Dict[str, Any]:
-            "Track which interface delivers which events.
+            "Track which interface delivers which events."""
             delivery_time = time.time()
             event_deliveries.append({
                 'interface': interface_name,
@@ -139,14 +139,14 @@ class WebSocketEventHandlerRaceConditionsTests(SSotBaseTestCase):
         registration_tasks = []
         
         async def register_manager_handlers():
-            Register handlers on WebSocketManager."
+            Register handlers on WebSocketManager.""
             for event_type in critical_events:
                 await asyncio.sleep(0.001)  # Small delay to trigger race
                 handler = Mock()
                 websocket_manager.register_handler(event_type, handler)
                 
         async def register_bridge_handlers():
-            "Register handlers on AgentWebSocketBridge. 
+            "Register handlers on AgentWebSocketBridge. """
             for event_type in critical_events:
                 await asyncio.sleep(0.0015)  # Slightly different delay
                 if hasattr(websocket_bridge, 'register_handler'):
@@ -184,7 +184,7 @@ class WebSocketEventHandlerRaceConditionsTests(SSotBaseTestCase):
         )
         
         logger.info(fHandler registrations: {len(handler_registrations)})
-        logger.info(fEvent deliveries: {len(event_deliveries)})"
+        logger.info(fEvent deliveries: {len(event_deliveries)})""
         
         # REGRESSION DETECTION: Analyze race condition patterns
         race_conditions = []
@@ -197,7 +197,7 @@ class WebSocketEventHandlerRaceConditionsTests(SSotBaseTestCase):
             
         for event_type, count in event_type_counts.items():
             if count > 1:
-                race_conditions.append(f"Event type '{event_type}' has {count} handler registrations (race condition))
+                race_conditions.append(f"Event type '{event_type}' has {count} handler registrations (race condition))"
                 
         # Check for event delivery conflicts
         delivery_conflicts = {}
@@ -286,7 +286,7 @@ class WebSocketEventHandlerRaceConditionsTests(SSotBaseTestCase):
             except Exception as e:
                 undefined_handler_errors.append(fEvent delivery error for {event_type}: {str(e)})
                 
-        logger.info(f"Undefined handler errors detected: {len(undefined_handler_errors)})
+        logger.info(f"Undefined handler errors detected: {len(undefined_handler_errors)})"
         
         # CRITICAL: Test handler reference stability 
         handler_reference_issues = []
@@ -304,15 +304,15 @@ class WebSocketEventHandlerRaceConditionsTests(SSotBaseTestCase):
                 elif user_session._websocket_bridge and hasattr(user_session._websocket_bridge, 'send_event'):
                     user_session._websocket_bridge.send_event('test_event', {'switch_test': i}
                 else:
-                    handler_reference_issues.append(fNo valid handler reference available at switch {i}")
+                    handler_reference_issues.append(fNo valid handler reference available at switch {i}")"
             except Exception as e:
                 handler_reference_issues.append(fHandler reference error at switch {i}: {str(e)})
                 
         # CRITICAL ASSERTION: Should fail due to undefined handler references
         total_errors = len(undefined_handler_errors) + len(handler_reference_issues)
         assert total_errors == 0, (
-            fREGRESSION DETECTED: Undefined event handler references cause event delivery failures - "
-            f"undefined errors: {undefined_handler_errors}, reference issues: {handler_reference_issues}
+            fREGRESSION DETECTED: Undefined event handler references cause event delivery failures - ""
+            f"undefined errors: {undefined_handler_errors}, reference issues: {handler_reference_issues}"
         )
         
     @pytest.mark.regression_reproduction
@@ -444,22 +444,22 @@ class WebSocketEventHandlerRaceConditionsTests(SSotBaseTestCase):
         # Check for event duplication
         event_counts = {}
         for event in sorted_events:
-            key = f"{event['event_type']}_{event['event_data'].get('sequence_id')}
+            key = f"{event['event_type']}_{event['event_data'].get('sequence_id')}"
             event_counts[key] = event_counts.get(key, 0) + 1
             
         duplicated_events = [key for key, count in event_counts.items() if count > 2]  # More than 2 (manager + bridge) indicates duplication
         if duplicated_events:
-            timing_race_conditions.append(fEvent duplication detected: {duplicated_events}")
+            timing_race_conditions.append(fEvent duplication detected: {duplicated_events}")"
             
         # CRITICAL ASSERTION: Should fail due to timing race conditions
         assert len(timing_race_conditions) == 0, (
             fREGRESSION DETECTED: Timing-dependent event delivery races break AI agent flow - 
-            frace conditions: {timing_race_conditions}"
+            frace conditions: {timing_race_conditions}""
         )
         
     @pytest.mark.regression_reproduction
     async def test_partial_event_handler_initialization_drops(self):
-    "
+"""Empty docstring."""
         CRITICAL: Test event drops due to partial event handler initialization.
         
         ROOT CAUSE REPRODUCTION: When event handlers are partially initialized
@@ -467,8 +467,8 @@ class WebSocketEventHandlerRaceConditionsTests(SSotBaseTestCase):
         the WebSocket event flow that users depend on.
         
         EXPECTED FAILURE: Should fail due to dropped events.
-        "
-        logger.info( ALERT:  TESTING: Partial event handler initialization causing event drops")
+"""Empty docstring."""
+        logger.info( ALERT:  TESTING: Partial event handler initialization causing event drops")"
         
         await self.async_setup_method()
         
@@ -582,7 +582,7 @@ class WebSocketEventHandlerRaceConditionsTests(SSotBaseTestCase):
             if result['dropped_events'] > 0:
                 event_drop_violations.append(
                     fScenario '{result['scenario']}': {result['dropped_events']} events dropped 
-                    f"({result['drop_rate']*100:.1f}% drop rate) - types: {result['dropped_event_types']}
+                    f"({result['drop_rate']*100:.1f}% drop rate) - types: {result['dropped_event_types']}"
                 )
                 
             # CRITICAL: Business-critical events should never be dropped
@@ -591,7 +591,7 @@ class WebSocketEventHandlerRaceConditionsTests(SSotBaseTestCase):
             
             if dropped_critical:
                 event_drop_violations.append(
-                    fScenario '{result['scenario']}': CRITICAL events dropped: {dropped_critical} "
+                    fScenario '{result['scenario']}': CRITICAL events dropped: {dropped_critical} ""
                     f- this breaks user chat experience
                 )
                 
@@ -600,8 +600,8 @@ class WebSocketEventHandlerRaceConditionsTests(SSotBaseTestCase):
             drop_rates = [r['drop_rate'] for r in scenario_results]
             if len(set(drop_rates)) > 1:  # Different drop rates indicate inconsistency
                 event_drop_violations.append(
-                    fInconsistent event drop patterns across scenarios: {[(r['scenario'], f'{r['drop_rate']*100:.1f}%') for r in scenario_results]} "
-                    f"- indicates race conditions in handler initialization
+                    fInconsistent event drop patterns across scenarios: {[(r['scenario'], f'{r['drop_rate']*100:.1f}%') for r in scenario_results]} ""
+                    f"- indicates race conditions in handler initialization"
                 )
                 
         # CRITICAL ASSERTION: Should fail due to dropped events
@@ -628,7 +628,7 @@ class WebSocketEventHandlerPerformanceRacesTests(SSotBaseTestCase):
     @pytest.mark.regression_reproduction
     @pytest.mark.slow
     async def test_high_concurrency_event_handler_conflicts(self):
-        "
+"""Empty docstring."""
         CRITICAL: Test event handler conflicts under high concurrency load.
         
         ROOT CAUSE REPRODUCTION: Under heavy load with multiple concurrent users,
@@ -636,8 +636,8 @@ class WebSocketEventHandlerPerformanceRacesTests(SSotBaseTestCase):
         failures and race conditions.
         
         EXPECTED FAILURE: Should fail due to concurrency conflicts.
-"
-        logger.info( ALERT:  TESTING: High concurrency event handler conflicts)"
+"""Empty docstring."""
+        logger.info( ALERT:  TESTING: High concurrency event handler conflicts)""
         
         # CRITICAL: Setup high concurrency scenario
         concurrent_users = 10
@@ -649,13 +649,13 @@ class WebSocketEventHandlerPerformanceRacesTests(SSotBaseTestCase):
         delivery_lock = asyncio.Lock()
         
         async def simulate_user_session(user_id: int):
-            "Simulate concurrent user with WebSocket events.
+            "Simulate concurrent user with WebSocket events."""
             session_events = []
             
             # Create user-specific WebSocket interface (dual interface scenario)
             user_context = UserExecutionContext(
-                user_id=f"concurrent_user_{user_id},
-                request_id=fconcurrent_request_{user_id}",
+                user_id=f"concurrent_user_{user_id},"
+                request_id=fconcurrent_request_{user_id}","
                 thread_id=fconcurrent_thread_{user_id},
                 run_id=str(uuid.uuid4())
             )
@@ -668,7 +668,7 @@ class WebSocketEventHandlerPerformanceRacesTests(SSotBaseTestCase):
                 # Send rapid-fire events via both interfaces
                 for event_seq in range(events_per_user):
                     event_data = {
-                        'user_id': fconcurrent_user_{user_id},"
+                        'user_id': fconcurrent_user_{user_id},""
                         'sequence': event_seq,
                         'timestamp': time.time()
                     }
@@ -735,7 +735,7 @@ class WebSocketEventHandlerPerformanceRacesTests(SSotBaseTestCase):
         await asyncio.gather(*tasks, return_exceptions=True)
         end_time = time.time()
         
-        logger.info(f"Concurrency test completed in {end_time - start_time:.2f}s)
+        logger.info(f"Concurrency test completed in {end_time - start_time:.2f}s)"
         logger.info(fEvents delivered: {len(delivered_events)}/{total_expected_events})
         logger.info(fDelivery errors: {len(delivery_errors)})
         
@@ -760,8 +760,8 @@ class WebSocketEventHandlerPerformanceRacesTests(SSotBaseTestCase):
             
         if interface_errors:
             concurrency_violations.append(
-                f"Interface-specific errors under concurrency: {interface_errors} 
-                f- indicates dual interface conflicts"
+                f"Interface-specific errors under concurrency: {interface_errors} "
+                f- indicates dual interface conflicts""
             )
             
         # Check for timing-based conflicts
@@ -779,8 +779,8 @@ class WebSocketEventHandlerPerformanceRacesTests(SSotBaseTestCase):
                 time_diff < 0.0001):  # Less than 0.1ms indicates race condition
                 timing_conflicts.append(
                     fUser {current['user_id']}: Race condition detected - 
-                    fevents {current['sequence']} and {next_event['sequence']} "
-                    f"delivered {time_diff*1000:.3f}ms apart
+                    fevents {current['sequence']} and {next_event['sequence']} ""
+                    f"delivered {time_diff*1000:.3f}ms apart"
                 )
                 
         if len(timing_conflicts) > 5:  # Multiple timing conflicts indicate systemic issue

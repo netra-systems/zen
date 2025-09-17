@@ -124,7 +124,7 @@ class ChaosWebSocketClient:
     def __init__(self, user_id: str, conditions: NetworkConditions):
         pass
         self.user_id = user_id
-        self.connection_id = "formatted_string"
+        self.connection_id = ""
         self.conditions = conditions
         self.websocket: Optional[MockWebSocketClient] = None
         self.sent_messages: List[Dict] = []
@@ -327,7 +327,7 @@ class TestWebSocketBridgeChaosStandalone:
 @pytest.mark.asyncio
     async def test_random_connection_drops_medium_chaos(self):
     "Test resilience with 20-30% random connection drops.
-print("Starting medium chaos test: 20-30% connection drops")
+    print("Starting medium chaos test: 20-30% connection drops")
 
         # Medium chaos conditions
 conditions = NetworkConditions( )

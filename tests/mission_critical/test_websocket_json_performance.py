@@ -198,7 +198,7 @@ assert sync_result == async_result
 
                 # Async might be slightly slower due to overhead, but not significantly
                 # Both should complete within reasonable time
-assert sync_duration < 10.0, "formatted_string"
+assert sync_duration < 10.0, ""
 assert async_duration < 10.0, formatted_string
 
 @pytest.mark.asyncio
@@ -225,7 +225,7 @@ end_time = time.time()
 
                         # Should be faster than serializing sequentially
 duration = end_time - start_time
-assert duration < 15.0, "formatted_string"
+assert duration < 15.0, ""
 
                         # All should succeed
 assert len(results) == 10

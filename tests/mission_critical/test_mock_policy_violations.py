@@ -357,7 +357,7 @@ class TestWebSocketConnection:
         report += "= * 60 + "
 
         for v in violations[:10]:  # Show first 10 violations
-        report += "formatted_string"
+        report += ""
         if len(violations) > 10:
         report += formatted_string
         report += "
@@ -388,7 +388,7 @@ class TestWebSocketConnection:
         report += "= * 60 + "
 
         for v in violations[:10]:
-        report += "formatted_string"
+        report += ""
         if len(violations) > 10:
         report += formatted_string
         report += "
@@ -471,7 +471,7 @@ class TestWebSocketConnection:
         for v in vlist[:3]:  # Show first 3 of each type
         report += formatted_string
         if len(vlist) > 3:
-        report += "formatted_string"
+        report += ""
 
         report += 
          + = * 80 + 
@@ -583,7 +583,7 @@ class TestWebSocketConnection:
         for service, missing in missing_patterns.items():
         report += formatted_string
         for item in missing:
-        report += "formatted_string"
+        report += ""
         report += 
         Required: Configure tests to use real services
 
@@ -591,7 +591,7 @@ class TestWebSocketConnection:
 
         report += "= * 60 + "
 
-        report += "formatted_string"
+        report += ""
         report += Each service needs proper examples of real service testing
 
 

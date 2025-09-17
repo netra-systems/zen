@@ -973,9 +973,9 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
             total_categories = len([cat for violations in violation_summary.values() if violations]
             total_violations = sum(len(violations) for violations in violation_summary.values())
             
-            print(f"\nMulti-User Isolation Violation Summary:)
+            print(f"\nMulti-User Isolation Violation Summary:)")
             print(fCategories with violations: {total_categories}/{len(violation_summary)})
-            print(f"Total potential violations: {total_violations})
+            print(f"Total potential violations: {total_violations})")
             
             for category, violations in violation_summary.items():
                 if violations:

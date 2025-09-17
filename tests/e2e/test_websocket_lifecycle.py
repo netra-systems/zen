@@ -1,4 +1,4 @@
-"WebSocket Agent Message Lifecycle Tests - Real WebSocket Connections Only
+"WebSocket Agent Message Lifecycle Tests - Real WebSocket Connections Only"""
 
 Complete message lifecycle validation for core chat experience.
 Tests real WebSocket connections with SupervisorAgent integration and streaming response delivery.
@@ -35,7 +35,7 @@ logger = central_logger.get_logger(__name__)
 
 
 class WebSocketLifecycleTracker:
-    Tracks WebSocket lifecycle timing and state transitions."
+    Tracks WebSocket lifecycle timing and state transitions.""
     
     def __init__(self, test_id: str):
         self.test_id = test_id
@@ -48,7 +48,7 @@ class WebSocketLifecycleTracker:
         self.agent_states: List[Dict[str, Any]] = []
     
     def record_connection_start(self) -> None:
-        "Record connection initiation.
+        "Record connection initiation."""
         self.connection_start = time.time()
     
     def record_connection_established(self) -> None:
@@ -65,7 +65,7 @@ class WebSocketLifecycleTracker:
 
 
 class WebSocketAgentClient:
-    Real WebSocket client for agent communication testing."
+    Real WebSocket client for agent communication testing.""
     
     def __init__(self, test_harness: UnifiedE2ETestHarness, user_id: str):
         self.harness = test_harness
@@ -75,24 +75,24 @@ class WebSocketAgentClient:
         self.auth_token = None
     
     async def establish_connection(self) -> bool:
-        "Establish authenticated WebSocket connection.
+        "Establish authenticated WebSocket connection."""
         self._prepare_connection_url()
         self._prepare_auth_token()
         return await self._connect_with_auth()
     
     def _prepare_connection_url(self) -> None:
         "Prepare WebSocket connection URL."
-        self.connection_url = ws://localhost:8000/ws/test"
+        self.connection_url = ws://localhost:8000/ws/test""
     
     def _prepare_auth_token(self) -> None:
-        "Prepare authentication token.
+        "Prepare authentication token."""
         tokens = self.harness.create_test_tokens(self.user_id)
         self.auth_token = tokens[access_token"]"
     
     async def _connect_with_auth(self) -> bool:
-        Connect with authentication headers."
+        Connect with authentication headers.""
         try:
-            if /ws/test" in self.connection_url:
+            if /ws/test" in self.connection_url:"
                 # Test endpoint doesn't require auth headers
                 self.websocket = await websockets.connect(
                     self.connection_url,
@@ -107,12 +107,12 @@ class WebSocketAgentClient:
                 )
             return True
         except Exception as e:
-            logger.error(f"Connection failed: {e})
+            logger.error(f"Connection failed: {e})"
             return False
 
 
 class SupervisorAgentMessageHandler:
-    "Handles SupervisorAgent message routing and response tracking.
+    "Handles SupervisorAgent message routing and response tracking."""
     
     def __init__(self, client: WebSocketAgentClient):
         self.client = client
@@ -130,8 +130,8 @@ class SupervisorAgentMessageHandler:
             type: user_message,
             "payload: {"
                 content: content,
-                thread_id: thread_id or str(uuid.uuid4()),"
-                user_id": self.client.user_id
+                thread_id: thread_id or str(uuid.uuid4()),""
+                user_id": self.client.user_id"
             }
         }
     
@@ -161,24 +161,24 @@ class StreamingResponseValidator:
         return await self._collect_with_timeout(websocket, start_time, min(timeout, 3.0))
     
     async def _collect_with_timeout(self, websocket, start_time: float, timeout: float) -> bool:
-        Collect response chunks within timeout."
+        Collect response chunks within timeout.""
         try:
             while time.time() - start_time < timeout:
                 response = await asyncio.wait_for(websocket.recv(), timeout=1.0)
                 chunk_time = time.time()
                 parsed = json.loads(response)
-                logger.info(fReceived WebSocket response: {parsed}")  # Debug output
+                logger.info(fReceived WebSocket response: {parsed}")  # Debug output"
                 self._process_response_chunk(chunk_time, parsed)
                 if self._is_complete_response(parsed):
                     logger.info(fComplete response received: {parsed})  # Debug output
                     return True
             return False
         except (asyncio.TimeoutError, ConnectionClosed):
-            logger.info(fWebSocket timeout or closed, collected {len(self.response_chunks)} chunks)  # Debug output"
+            logger.info(fWebSocket timeout or closed, collected {len(self.response_chunks)} chunks)  # Debug output""
             return len(self.response_chunks) > 0
     
     def _process_response_chunk(self, chunk_time: float, parsed: Dict[str, Any] -> None:
-        "Process individual response chunk.
+        "Process individual response chunk."""
         if self.first_chunk_time is None:
             self.first_chunk_time = chunk_time
             self.streaming_started = chunk_time
@@ -210,8 +210,8 @@ class WebSocketAgentMessageLifecycleTests:
     
     @pytest.mark.e2e
     async def test_websocket_agent_message_lifecycle(self, agent_client):
-        Test complete message lifecycle with performance validation."
-        tracker = WebSocketLifecycleTracker(lifecycle_test")
+        Test complete message lifecycle with performance validation.""
+        tracker = WebSocketLifecycleTracker(lifecycle_test")"
         
         # 1. Establish WebSocket connection
         await self._establish_connection_with_timing(agent_client, tracker)
@@ -224,8 +224,8 @@ class WebSocketAgentMessageLifecycleTests:
             type: user_message,
             "payload: {"
                 content: Test agent processing,
-                thread_id: f"test-{tracker.test_id},
-                user_id: agent_client.user_id"
+                thread_id: f"test-{tracker.test_id},"
+                user_id: agent_client.user_id""
             }
         }
         await agent_client.websocket.send(json.dumps(user_msg))
@@ -240,8 +240,8 @@ class WebSocketAgentMessageLifecycleTests:
             tracker.record_message_acknowledged()
             
             # Validate the response
-            assert parsed_response.get('type') == 'ack', f"Expected ack, got {parsed_response.get('type')}
-            assert parsed_response.get('received_type') == 'user_message', fExpected received_type=user_message"
+            assert parsed_response.get('type') == 'ack', f"Expected ack, got {parsed_response.get('type')}"
+            assert parsed_response.get('received_type') == 'user_message', fExpected received_type=user_message""
             
             # Create a mock validator for performance testing
             validator = StreamingResponseValidator()
@@ -259,7 +259,7 @@ class WebSocketAgentMessageLifecycleTests:
     
     async def _establish_connection_with_timing(self, client: WebSocketAgentClient, 
                                              tracker: WebSocketLifecycleTracker) -> None:
-        Establish connection with timing validation."
+        Establish connection with timing validation.""
         tracker.record_connection_start()
         success = await client.establish_connection()
         
@@ -268,14 +268,14 @@ class WebSocketAgentMessageLifecycleTests:
             try:
                 initial_msg = await asyncio.wait_for(client.websocket.recv(), timeout=2.0)
                 parsed_msg = json.loads(initial_msg)
-                logger.info(fConsumed initial message: {parsed_msg}")
+                logger.info(fConsumed initial message: {parsed_msg}")"
                 assert parsed_msg.get('type') == 'connection_established', fExpected connection_established, got {parsed_msg.get('type')}
             except asyncio.TimeoutError:
-                logger.warning(No initial connection message received)"
+                logger.warning(No initial connection message received)""
         
         tracker.record_connection_established()
         
-        assert success is True, "WebSocket connection failed
+        assert success is True, "WebSocket connection failed"
         assert client.websocket is not None, WebSocket not established
     
     async def _send_message_with_routing(self, client: WebSocketAgentClient,
@@ -283,13 +283,13 @@ class WebSocketAgentMessageLifecycleTests:
         "Send message and validate SupervisorAgent routing."
         handler = SupervisorAgentMessageHandler(client)
         tracker.record_message_sent()
-        success = await handler.send_user_message(Test agent processing)"
+        success = await handler.send_user_message(Test agent processing)""
         
         # Wait a moment for the response to be processed
         await asyncio.sleep(0.1)
         tracker.record_message_acknowledged()
         
-        assert success is True, "Message send failed
+        assert success is True, "Message send failed"
         return handler
     
     async def _validate_streaming_response(self, client: WebSocketAgentClient,
@@ -301,8 +301,8 @@ class WebSocketAgentMessageLifecycleTests:
         logger.info(fResponse received: {response_received}, chunks collected: {len(validator.response_chunks)})
         logger.info(fResponse chunks: {validator.response_chunks})
         
-        assert response_received is True, f"No streaming response received (got {len(validator.response_chunks)} chunks)
-        assert len(validator.response_chunks) > 0, No response chunks collected"
+        assert response_received is True, f"No streaming response received (got {len(validator.response_chunks)} chunks)"
+        assert len(validator.response_chunks) > 0, No response chunks collected""
         return validator
     
     def _assert_performance_thresholds(self, tracker: WebSocketLifecycleTracker, 
@@ -333,7 +333,7 @@ class AgentStateManagementTests:
     
     @pytest.mark.e2e
     async def test_agent_state_lifecycle(self, agent_client):
-        Test agent state management throughout message processing."
+        Test agent state management throughout message processing.""
         await agent_client.establish_connection()
         handler = SupervisorAgentMessageHandler(agent_client)
         
@@ -342,7 +342,7 @@ class AgentStateManagementTests:
     
     async def _track_agent_states(self, client: WebSocketAgentClient, 
                                 handler: SupervisorAgentMessageHandler) -> List[Dict[str, Any]]:
-        "Track agent state changes during processing.
+        "Track agent state changes during processing."
         states = []
         
         # Send message and collect state updates
@@ -362,8 +362,8 @@ class AgentStateManagementTests:
         return states
     
     def _validate_state_transitions(self, states: List[Dict[str, Any]] -> None:
-        Validate proper agent state transitions."
-        assert len(states) > 0, "No agent states captured
+        Validate proper agent state transitions.""
+        assert len(states) > 0, "No agent states captured"
         
         # Should have at least: started -> processing -> completed
         state_types = [s.get('type', '') for s in states]
@@ -393,14 +393,14 @@ class WebSocketReliabilityTests:
     
     @pytest.mark.e2e
     async def test_message_delivery_guarantees(self, agent_client):
-        Test message delivery reliability."
+        Test message delivery reliability.""
         await agent_client.establish_connection()
         handler = SupervisorAgentMessageHandler(agent_client)
         
         # Send multiple messages rapidly
         messages_sent = 0
         for i in range(5):
-            success = await handler.send_user_message(fMessage {i}")
+            success = await handler.send_user_message(fMessage {i}")"
             if success:
                 messages_sent += 1
             await asyncio.sleep(0.1)

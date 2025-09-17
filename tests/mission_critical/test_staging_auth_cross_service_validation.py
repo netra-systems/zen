@@ -2699,7 +2699,7 @@ async def run_single_test(test_name: str):
                 )
                 return {success: response.status_code == 200}"
         except Exception as e:
-            logger.warning(f"API key backend auth failed: {e})
+            logger.warning(f"API key backend auth failed: {e})")
             return {success: False, error: str(e)}
     
     async def _test_token_refresh_mobile(self, login_data: Dict) -> Dict:

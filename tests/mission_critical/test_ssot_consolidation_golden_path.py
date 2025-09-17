@@ -133,9 +133,9 @@ class TestSSotConsolidationGoldenPath(SSotAsyncTestCase):
             self.record_metric("event_delivery_time_ms, event_result['delivery_time_ms']
             
             print(f\n📊 WEBSOCKET EVENTS GOLDEN PATH RESULTS:)"
-            print(f"   Events sent: {event_result['events_sent']})
+            print(f"   Events sent: {event_result['events_sent']})")
             print(f   All events delivered: {event_result['all_events_delivered']})"
-            print(f"   Event delivery time: {event_result['delivery_time_ms']:.1f}ms)
+            print(f"   Event delivery time: {event_result['delivery_time_ms']:.1f}ms)")
             print(f   Event types: {event_result['event_types']})"
             
             # MISSION CRITICAL ASSERTIONS
@@ -247,9 +247,9 @@ class TestSSotConsolidationGoldenPath(SSotAsyncTestCase):
             self.record_metric("ai_response_generated, execution_result['ai_response_generated']
             
             print(f\n📊 AGENT EXECUTION GOLDEN PATH RESULTS:)"
-            print(f"   Execution successful: {execution_result['execution_successful']})
+            print(f"   Execution successful: {execution_result['execution_successful']})")
             print(f   Execution time: {execution_result['execution_time_ms']:.1f}ms)"
-            print(f"   AI response generated: {execution_result['ai_response_generated']})
+            print(f"   AI response generated: {execution_result['ai_response_generated']})")
             print(f   Response length: {execution_result['response_length']} chars)"
             
             # MISSION CRITICAL ASSERTIONS

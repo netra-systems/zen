@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 Integration Tests for WebSocket JWT Authentication Crisis (Issue #681)
 
 Tests validate WebSocket authentication failures due to missing JWT secrets in staging.
@@ -6,7 +6,7 @@ These tests demonstrate the $50K MRR WebSocket functionality blockage.
 
 Business Value: Validates WebSocket authentication works correctly with proper JWT configuration
 Architecture: Integration tests with real WebSocket connections (no Docker required)
-"
+"""Empty docstring."""
 import pytest
 import asyncio
 import json
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
 class WebSocketJWTAuthenticationCrisisTests(SSotAsyncTestCase):
-    "Integration tests for WebSocket JWT authentication failures in staging.
+    "Integration tests for WebSocket JWT authentication failures in staging."""
 
     async def asyncSetUp(self):
         "Set up async test fixtures."
@@ -157,15 +157,15 @@ class WebSocketJWTAuthenticationCrisisTests(SSotAsyncTestCase):
 
 @pytest.mark.integration
 class JWTConfigurationBusinessImpactIntegrationTests(SSotAsyncTestCase):
-    Integration tests demonstrating business impact of JWT configuration failures."
+    Integration tests demonstrating business impact of JWT configuration failures.""
 
     async def test_websocket_revenue_functionality_integration(self):
-    "
+"""Empty docstring."""
         Test $50K MRR WebSocket functionality integration with JWT configuration.
         
         This test validates that JWT configuration directly impacts
         revenue-generating WebSocket features.
-        "
+"""Empty docstring."""
         mock_env = Mock()
         mock_env.get.side_effect = lambda key, default=None: {'ENVIRONMENT': 'staging', 'TESTING': 'false'}.get(key, default)
         with patch('shared.isolated_environment.get_env', return_value=mock_env):
@@ -180,12 +180,12 @@ class JWTConfigurationBusinessImpactIntegrationTests(SSotAsyncTestCase):
             logger.critical(f'$50K MRR WebSocket functionality blocked: {error_message}')
 
     async def test_staging_deployment_validation_jwt_integration(self):
-        "
+"""Empty docstring."""
         Test staging deployment validation integration with JWT configuration.
         
         This simulates the staging deployment process where JWT configuration
         must be validated before WebSocket services can start.
-"
+"""Empty docstring."""
         mock_env = Mock()
         mock_env.get.side_effect = lambda key, default=None: {'ENVIRONMENT': 'staging', 'TESTING': 'false'}.get(key, default)
         with patch('shared.isolated_environment.get_env', return_value=mock_env):
@@ -213,7 +213,7 @@ class JWTConfigurationBusinessImpactIntegrationTests(SSotAsyncTestCase):
 
 @pytest.mark.integration
 class JWTSecretDeploymentScenariosTests(SSotAsyncTestCase):
-    "Integration tests for various JWT secret deployment scenarios.
+    "Integration tests for various JWT secret deployment scenarios."""
 
     async def test_environment_variable_jwt_secret_integration(self):
         ""
@@ -236,7 +236,7 @@ class JWTSecretDeploymentScenariosTests(SSotAsyncTestCase):
         Test JWT secret integration via GCP Secret Manager.
         
         This tests the enterprise-grade fix for Issue #681.
-        "
+"""Empty docstring."""
         mock_env = Mock()
         mock_env.get.side_effect = lambda key, default=None: {'ENVIRONMENT': 'staging', 'TESTING': 'false'}.get(key, default)
         mock_get_staging_secret = AsyncMock(return_value='gcp-managed-jwt-secret-32-characters')

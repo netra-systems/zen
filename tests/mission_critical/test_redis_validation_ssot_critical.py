@@ -312,7 +312,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
                         }
                         
                 except Exception as e:
-                    logger.warning(f"Failed to scan {py_file}: {e})
+                    logger.warning(f"Failed to scan {py_file}: {e})")
         
         return implementations
     
@@ -488,7 +488,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
                     behaviors[file_path] = behavior_info
                     
             except Exception as e:
-                logger.warning(f"Failed to analyze behavior in {file_path}: {e})
+                logger.warning(f"Failed to analyze behavior in {file_path}: {e})")
         
         return behaviors
     

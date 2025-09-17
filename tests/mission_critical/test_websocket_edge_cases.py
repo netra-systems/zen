@@ -271,7 +271,7 @@ class EdgeCaseStressTester(RealWebSocketLoadTester):
                                                                                                         # Strict boundary testing
         assert metrics.concurrent_users == 5, "Must test exactly 5 users
         assert metrics.successful_connections == 5, All 5 users must connect
-        assert metrics.max_response_time_ms <= 2000, "formatted_string"
+        assert metrics.max_response_time_ms <= 2000, ""
         assert metrics.avg_response_time_ms <= 2000, formatted_string
         assert not metrics.missing_required_events, formatted_string"
         logger.info( PASS:  Exact acceptance criteria test PASSED")

@@ -94,7 +94,7 @@ class RealWebSocketConnection:
         self.events_received = []
         self.response_times = []
         self.last_send_time = None
-        self.connection_url = "formatted_string"
+        self.connection_url = ""
 
     async def connect(self) -> bool:
         Connect to real WebSocket service - fails fast if connection fails."
@@ -483,7 +483,7 @@ class RealWebSocketLoadTester:
         formatted_string
 
         assert metrics.p95_response_time_ms <= 10000, \
-        "formatted_string"
+        ""
 
         assert not metrics.missing_required_events, \
         formatted_string

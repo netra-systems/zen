@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 TEST SUITE 3: End-to-End WebSocket Race Condition Regression Reproduction
 ========================================================================
 
@@ -17,7 +17,7 @@ BUSINESS VALUE:
 - Protects business-critical user experience from interface regression
 
 EXPECTED BEHAVIOR: These tests should INITIALLY FAIL, reproducing the production regression issues.
-"
+"""Empty docstring."""
 
 import asyncio
 import pytest  
@@ -50,13 +50,13 @@ logger = logging.getLogger(__name__)
 @pytest.mark.websocket_regression
 @pytest.mark.real_services
 class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
-    "
+"""Empty docstring."""
     End-to-end tests reproducing WebSocket race condition regression in
     complete user chat flows with real WebSocket connections and services.
-"
+"""Empty docstring."""
 
     def setup_method(self):
-        "Setup for E2E regression tests.
+        "Setup for E2E regression tests."""
         super().setup_method()
         self.env = IsolatedEnvironment()
         self.auth_helper = E2EAuthHelper()
@@ -177,12 +177,12 @@ class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
                                 break
                             elif event_type == 'error':
                                 # REGRESSION DETECTION: Error events indicate interface issues
-                                chat_flow_violations.append(f"Error event received: {event_data})
+                                chat_flow_violations.append(f"Error event received: {event_data})"
                                 break
                                 
                 except asyncio.TimeoutError:
                     chat_flow_violations.append(
-                        fChat flow timeout - expected agent response within {event_timeout}s"
+                        fChat flow timeout - expected agent response within {event_timeout}s""
                     )
                     
                 if response_content:
@@ -196,7 +196,7 @@ class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
             
         # REGRESSION DETECTION: Analyze chat flow for violations
         logger.info(fChat flow events recorded: {chat_flow_events})
-        logger.info(f"Expected sequence: {expected_event_sequence})
+        logger.info(f"Expected sequence: {expected_event_sequence})"
         
         # Check for missing critical events
         missing_events = []
@@ -205,14 +205,14 @@ class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
                 missing_events.append(expected_event)
                 
         if missing_events:
-            chat_flow_violations.append(fMissing critical chat flow events: {missing_events}")
+            chat_flow_violations.append(fMissing critical chat flow events: {missing_events}")"
             
         # Check event ordering
         actual_sequence = [e for e in chat_flow_events if e in expected_event_sequence]
         if actual_sequence != expected_event_sequence:
             chat_flow_violations.append(
                 fChat flow sequence violation - expected: {expected_event_sequence}, 
-                factual: {actual_sequence}"
+                factual: {actual_sequence}""
             )
             
         # Check for timing violations indicating race conditions  
@@ -226,7 +226,7 @@ class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
                 # Events arriving too quickly indicate race conditions
                 if time_diff_ms < 1.0 and current['event_type'] != next_event['event_type']:
                     chat_flow_violations.append(
-                        f"Race condition detected: {current['event_type']} -> {next_event['event_type']} 
+                        f"Race condition detected: {current['event_type']} -> {next_event['event_type']} "
                         fin {time_diff_ms:.2f}ms
                     )
                     
@@ -341,13 +341,13 @@ class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
                                 # Check thread isolation
                                 if event_thread_id and user_id not in event_thread_id:
                                     user_results['isolation_violations'].append(
-                                        f"Received event from different thread: {event_thread_id}
+                                        f"Received event from different thread: {event_thread_id}"
                                     )
                                     
                                 # Check user marker contamination
                                 if event_marker and event_marker != f'USER_{user_index}':
                                     user_results['isolation_violations'].append(
-                                        fReceived event with different user marker: {event_marker}"
+                                        fReceived event with different user marker: {event_marker}""
                                     )
                                     
                                 # CRITICAL: Agent completion indicates successful flow
@@ -363,7 +363,7 @@ class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
                         
             except Exception as e:
                 user_results['error'] = str(e)
-                multi_user_violations.append(fUser {user_index}: Connection error - {str(e)})"
+                multi_user_violations.append(fUser {user_index}: Connection error - {str(e)})""
                 
             return user_results
             
@@ -374,7 +374,7 @@ class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
             batch_end = min(batch_start + users_per_batch, concurrent_user_count)
             batch_users = list(range(batch_start, batch_end))
             
-            logger.info(f"Running user batch: {batch_users})
+            logger.info(f"Running user batch: {batch_users})"
             
             # Execute batch concurrently
             batch_tasks = [simulate_concurrent_user_chat(user_idx) for user_idx in batch_users]
@@ -414,19 +414,19 @@ class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
                 
         if total_isolation_violations:
             multi_user_violations.append(
-                f"User isolation violations detected: {len(total_isolation_violations)} total violations
+                f"User isolation violations detected: {len(total_isolation_violations)} total violations"
             )
             
         # Check for cross-contamination patterns  
         if cross_contamination_events:
             contamination_pattern = {}
             for event in cross_contamination_events:
-                key = f{event['receiving_user']} <- {event['event_user_id']}"
+                key = f{event['receiving_user']} <- {event['event_user_id']}""
                 contamination_pattern[key] = contamination_pattern.get(key, 0) + 1
                 
             multi_user_violations.append(
                 fCross-user event contamination detected: {contamination_pattern} 
-                f- indicates race conditions in user isolation"
+                f- indicates race conditions in user isolation""
             )
             
         # Check timing anomalies indicating race conditions
@@ -439,7 +439,7 @@ class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
                     time_diff = events[i + 1]['timestamp'] - events[i]['timestamp']
                     if time_diff < 0.001:  # Events within 1ms indicate race
                         timing_anomalies.append(
-                            f"User {user_result['user_index']}: Race condition - 
+                            f"User {user_result['user_index']}: Race condition - "
                             fevents {i} and {i+1} delivered {time_diff*1000:.2f}ms apart
                         )
                         
@@ -533,7 +533,7 @@ class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
                 
                 headers = {
                     'Authorization': f'Bearer {authenticated_user.jwt_token}',
-                    'User-Agent': f'Netra-Business-Test-{scenario[name]}'"
+                    'User-Agent': f'Netra-Business-Test-{scenario[name]}'""
                 }
                 
                 start_time = time.time()
@@ -548,7 +548,7 @@ class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
                     business_message = {
                         'type': 'chat_message',
                         'content': scenario['message'],
-                        'thread_id': f'business_{scenario[name"]}_{authenticated_user.user_id}',
+                        'thread_id': f'business_{scenario[name"]}_{authenticated_user.user_id}',"
                         'user_id': str(authenticated_user.user_id),
                         'business_context': True,
                         'expected_value_type': scenario['expected_value'],
@@ -634,7 +634,7 @@ class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
         # CRITICAL: Test all business scenarios
         scenario_results = []
         for scenario in business_scenarios:
-            logger.info(fTesting business scenario: {scenario['name']})"
+            logger.info(fTesting business scenario: {scenario['name']})""
             result = await test_business_scenario(scenario)
             scenario_results.append(result)
             
@@ -648,7 +648,7 @@ class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
         successful_completions = business_metrics['successful_completions']
         business_success_rate = successful_completions / total_attempts if total_attempts > 0 else 0
         
-        logger.info(f"Business success rate: {business_success_rate*100:.1f}% ({successful_completions}/{total_attempts})
+        logger.info(f"Business success rate: {business_success_rate*100:.1f}% ({successful_completions}/{total_attempts})"
         
         # CRITICAL: Business success rate should be > 90% for viable business
         if business_success_rate < 0.9:
@@ -674,7 +674,7 @@ class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
         if high_quality_rate < 0.7:  # Less than 70% high quality
             business_value_violations.append(
                 fPoor business value quality: {high_quality_rate*100:.1f}% high-quality responses 
-                f"(below 70% threshold) - quality distribution: {quality_distribution}
+                f"(below 70% threshold) - quality distribution: {quality_distribution}"
             )
             
         # Check completion time degradation
@@ -683,7 +683,7 @@ class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
             avg_completion_time = sum(completion_times) / len(completion_times)
             if avg_completion_time > 30000:  # More than 30 seconds
                 business_value_violations.append(
-                    fBusiness scenario completion time degradation: {avg_completion_time:.0f}ms average "
+                    fBusiness scenario completion time degradation: {avg_completion_time:.0f}ms average ""
                     f(above 30s threshold) - impacts user experience
                 )
                 
@@ -691,8 +691,8 @@ class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
         interface_issue_scenarios = [r for r in scenario_results if r['interface_issues']]
         if len(interface_issue_scenarios) > 2:  # More than 40% of scenarios
             business_value_violations.append(
-                fSystematic interface issues affecting business scenarios: "
-                f"{len(interface_issue_scenarios)}/{len(scenario_results)} scenarios impacted
+                fSystematic interface issues affecting business scenarios: ""
+                f"{len(interface_issue_scenarios)}/{len(scenario_results)} scenarios impacted"
             )
             
         # CRITICAL ASSERTION: Should fail due to business value degradation
@@ -713,7 +713,7 @@ class ProductionWebSocketEventDeliveryFailuresTests(SSotBaseTestCase):
     ""
     
     def setup_method(self):
-        Setup for production simulation tests."
+        Setup for production simulation tests.""
         super().setup_method()
         self.env = IsolatedEnvironment()
         
@@ -721,7 +721,7 @@ class ProductionWebSocketEventDeliveryFailuresTests(SSotBaseTestCase):
     @pytest.mark.real_services
     @pytest.mark.slow
     async def test_production_event_delivery_failure_patterns(self):
-    "
+"""Empty docstring."""
         CRITICAL: Test production-level event delivery failure patterns.
         
         ROOT CAUSE REPRODUCTION: Reproduce the specific event delivery failure
@@ -730,8 +730,8 @@ class ProductionWebSocketEventDeliveryFailuresTests(SSotBaseTestCase):
         PRODUCTION IMPACT: 503 errors, failed agent executions, customer complaints.
         
         EXPECTED FAILURE: Should fail with production failure patterns.
-        "
-        logger.info( ALERT:  PRODUCTION SIMULATION: Event delivery failure patterns")
+"""Empty docstring."""
+        logger.info( ALERT:  PRODUCTION SIMULATION: Event delivery failure patterns")"
         
         # CRITICAL: Simulate production load characteristics
         production_load_config = {
@@ -873,7 +873,7 @@ class ProductionWebSocketEventDeliveryFailuresTests(SSotBaseTestCase):
                             
                         except Exception as e:
                             connection_result['failures'].append(
-                                f"Event processing error at message {message_idx}: {str(e)}
+                                f"Event processing error at message {message_idx}: {str(e)}"
                             )
                             event_delivery_stats['events_failed'] += 1
                             
@@ -881,7 +881,7 @@ class ProductionWebSocketEventDeliveryFailuresTests(SSotBaseTestCase):
                         await asyncio.sleep(production_load_config['message_interval_s']
                         
             except Exception as e:
-                connection_result['failures'].append(fConnection error: {str(e)}")
+                connection_result['failures'].append(fConnection error: {str(e)}")"
                 event_delivery_stats['events_failed'] += 1
                 
             return connection_result
@@ -898,7 +898,7 @@ class ProductionWebSocketEventDeliveryFailuresTests(SSotBaseTestCase):
         connection_results = await asyncio.gather(*connection_tasks, return_exceptions=True)
         end_time = time.time()
         
-        logger.info(fProduction simulation completed in {end_time - start_time:.2f}s)"
+        logger.info(fProduction simulation completed in {end_time - start_time:.2f}s)""
         
         # REGRESSION DETECTION: Analyze production failure patterns
         
@@ -911,7 +911,7 @@ class ProductionWebSocketEventDeliveryFailuresTests(SSotBaseTestCase):
         
         failure_rate = (event_delivery_stats['events_failed'] + event_delivery_stats['events_timeout'] / event_delivery_stats['total_events_sent'] if event_delivery_stats['total_events_sent'] > 0 else 0
         
-        logger.info(f"Production simulation stats: {event_delivery_stats})
+        logger.info(f"Production simulation stats: {event_delivery_stats})"
         logger.info(fSuccess rate: {success_rate*100:.1f}%, Failure rate: {failure_rate*100:.1f}%)
         
         # CRITICAL: Check failure rate threshold
@@ -933,8 +933,8 @@ class ProductionWebSocketEventDeliveryFailuresTests(SSotBaseTestCase):
         if event_delivery_stats['race_conditions_detected'] > 0:
             race_condition_rate = event_delivery_stats['race_conditions_detected'] / event_delivery_stats['total_events_sent']
             production_failures.append(
-                f"Race conditions detected in production simulation: {event_delivery_stats['race_conditions_detected']} 
-                fincidents ({race_condition_rate*100:.2f}% of events)"
+                f"Race conditions detected in production simulation: {event_delivery_stats['race_conditions_detected']} "
+                fincidents ({race_condition_rate*100:.2f}% of events)""
             )
             
         # Analyze individual connection patterns
@@ -944,7 +944,7 @@ class ProductionWebSocketEventDeliveryFailuresTests(SSotBaseTestCase):
         if connection_success_rate < 0.95:  # Less than 95% connection success
             production_failures.append(
                 fPoor connection success rate: {connection_success_rate*100:.1f}% 
-                f({len(successful_connections)}/{len(connection_results)} connections successful"
+                f({len(successful_connections)}/{len(connection_results)} connections successful""
             )
             
         # Check performance degradation
@@ -957,7 +957,7 @@ class ProductionWebSocketEventDeliveryFailuresTests(SSotBaseTestCase):
             avg_latency = sum(m['total_latency_ms'] for m in all_performance_metrics) / len(all_performance_metrics)
             if avg_latency > 10000:  # More than 10 seconds average latency
                 production_failures.append(
-                    f"Production performance degradation: {avg_latency:.0f}ms average latency 
+                    f"Production performance degradation: {avg_latency:.0f}ms average latency "
                     f(above 10s threshold)
                 )
                 

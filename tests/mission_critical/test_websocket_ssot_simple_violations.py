@@ -89,7 +89,7 @@ class TestWebSocketSSotSimpleViolations(SSotBaseTestCase):
             fShould be exactly 1. Factories: {factories}
         )
 
-        print(f"FACTORY VIOLATION CONFIRMED: {len(factories)} factories detected)
+        print(f"FACTORY VIOLATION CONFIRMED: {len(factories)} factories detected)")
 
     def tearDown(self"):
         Report violations found."

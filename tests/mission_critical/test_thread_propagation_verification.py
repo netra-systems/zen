@@ -239,7 +239,7 @@ class ThreadPropagationVerificationTests(SSotAsyncTestCase):
 
             except AssertionError as e:
                 # Expected failure - proves test works
-                logger.warning(f"Expected failure in WebSocket thread propagation: {e})
+                logger.warning(f"Expected failure in WebSocket thread propagation: {e})")
                 raise
             except Exception as e:
                 # Any exception indicates thread propagation issues

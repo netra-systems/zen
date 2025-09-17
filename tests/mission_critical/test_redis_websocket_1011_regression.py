@@ -169,7 +169,7 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
                     )
                     return True
                 else:
-                    logger.warning(f"Failed to store connection state for {connection_id})
+                    logger.warning(f"Failed to store connection state for {connection_id})")
                     return False
                     
             except Exception as e:

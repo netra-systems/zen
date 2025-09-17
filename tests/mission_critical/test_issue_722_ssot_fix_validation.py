@@ -180,7 +180,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
             fMISSION CRITICAL: All critical components must work.  \
             fWorking: {critical_working}/{total_critical}. Results: {golden_path_components}"
 
-        print(f"GOLDEN PATH VALIDATION SUCCESSFUL: {golden_path_components})
+        print(f"GOLDEN PATH VALIDATION SUCCESSFUL: {golden_path_components})")
 
     def test_ssot_fixes_use_isolated_environment_correctly(self):
         
@@ -361,7 +361,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
                 fCORPUS ISOLATION: Users should have isolated corpus paths.  \
                 fIsolated: {len(isolated_corpus)}, Successful: {len(successful_users)}
 
-        print(f"MULTI-USER ISOLATION INTEGRITY VALIDATED: {len(successful_users)} users successful)
+        print(f"MULTI-USER ISOLATION INTEGRITY VALIDATED: {len(successful_users)} users successful)")
 
     def test_system_stability_after_ssot_changes(self"):
         
@@ -460,7 +460,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
             fSYSTEM STABILITY: Most stability metrics should pass.  \
             fStable: {stable_metrics}/{total_metrics}. Results: {stability_metrics}
 
-        print(f"SYSTEM STABILITY VALIDATED: {stable_metrics}/{total_metrics} metrics stable)
+        print(f"SYSTEM STABILITY VALIDATED: {stable_metrics}/{total_metrics} metrics stable)")
 
     def test_business_continuity_validation(self"):
         

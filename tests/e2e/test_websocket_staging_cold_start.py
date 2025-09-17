@@ -1,4 +1,4 @@
-"E2E Test: WebSocket Connection During Staging Cold Start for Issue #586
+"E2E Test: WebSocket Connection During Staging Cold Start for Issue #586"""
 
 Tests real WebSocket connections to staging environment during cold starts to expose
 the 1011 error conditions that occur in production-like environments.
@@ -22,7 +22,7 @@ logger = central_logger.get_logger(__name__)
 
 @dataclass
 class ColdStartSimulation:
-    Configuration for cold start simulation."
+    Configuration for cold start simulation.""
     trigger_delay: float
     connection_attempts: int
     timeout_seconds: float
@@ -30,7 +30,7 @@ class ColdStartSimulation:
 
 @dataclass
 class WebSocketConnectionAttempt:
-    "Result of a WebSocket connection attempt.
+    "Result of a WebSocket connection attempt."""
     attempt_number: int
     start_time: float
     end_time: float
@@ -65,7 +65,7 @@ class StagingEnvironmentManager:
         return f'{websocket_url}/ws'
 
     async def trigger_cold_start(self) -> bool:
-        Trigger a cold start in staging environment."
+        Trigger a cold start in staging environment.""
         try:
             logger.info(f'Triggering cold start conditions for {self.staging_base_url}')
             await asyncio.sleep(2.0)
@@ -75,7 +75,7 @@ class StagingEnvironmentManager:
             return False
 
     async def check_service_health(self) -> Dict[str, Any]:
-        "Check service health status.
+        "Check service health status."""
         try:
             loop = asyncio.get_event_loop()
 
@@ -130,11 +130,11 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
 
     @pytest.mark.staging
     async def test_websocket_handshake_timeout_during_startup(self):
-        "TEST FAILURE EXPECTED: WebSocket handshake timeouts during service startup.
+        "TEST FAILURE EXPECTED: WebSocket handshake timeouts during service startup."""
         
         This test should FAIL to expose handshake timeout issues that contribute
         to 1011 errors when the service is not ready to handle WebSocket connections.
-"
+"""Empty docstring."""
         logger.info('🧪 Testing WebSocket handshake timeouts during startup')
         initial_health = await self.staging_manager.check_service_health()
         logger.info(f'Initial service health: {initial_health}')
@@ -161,11 +161,11 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
 
     @pytest.mark.staging
     async def test_websocket_health_check_coordination(self):
-        TEST FAILURE EXPECTED: Health check passes but WebSocket not ready."
+        TEST FAILURE EXPECTED: Health check passes but WebSocket not ready.""
         
         This test should FAIL to expose the issue where health checks pass but
         WebSocket connections still fail with 1011 errors.
-        "
+"""Empty docstring."""
         logger.info('🧪 Testing WebSocket health check coordination')
         monitoring_duration = 30.0
         check_interval = 2.0
@@ -186,8 +186,8 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
         logger.info(f'Total correlation points: {len(health_websocket_correlation)}')
         logger.info(f'Problematic points (health OK, WebSocket 1011): {len(problematic_points)}')
         for point in problematic_points:
-            logger.error(f"🚨 Health check OK but WebSocket 1011 at {point['timestamp']:.1f}s)
-        self.assertEqual(len(problematic_points), 0, fEXPECTED FAILURE: Found {len(problematic_points)} cases where health check passed but WebSocket returned 1011 errors. This demonstrates lack of coordination between health checks and WebSocket readiness, causing load balancers to route traffic to instances that aren't ready for WebSocket connections.")
+            logger.error(f"🚨 Health check OK but WebSocket 1011 at {point['timestamp']:.1f}s)"
+        self.assertEqual(len(problematic_points), 0, fEXPECTED FAILURE: Found {len(problematic_points)} cases where health check passed but WebSocket returned 1011 errors. This demonstrates lack of coordination between health checks and WebSocket readiness, causing load balancers to route traffic to instances that aren't ready for WebSocket connections.")"
 
     @pytest.mark.staging
     async def test_concurrent_websocket_connections_cold_start(self):

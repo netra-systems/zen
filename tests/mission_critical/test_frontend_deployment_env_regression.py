@@ -338,7 +338,7 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         (auth_api_url, AUTH_API_URL")]:
         self.assertTrue( )
         url.startswith(https://) or url.startswith(http://),
-        "formatted_string"
+        ""
                     
 
         print(f   PASS:  Auth URLs configured correctly)
@@ -427,7 +427,7 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
 
         self.assertTrue( )
         ws_url.startswith(ws),
-        "formatted_string"
+        ""
                     
 
         print(formatted_string)

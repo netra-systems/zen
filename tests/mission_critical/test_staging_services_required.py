@@ -172,7 +172,7 @@ else:
 
 def run_tests():
     "Run the tests to demonstrate the bug."
-print(")"
+    print(")"
  + =*70)
 print("Testing Staging Services Required Flags")
 print(=*70 +  )"

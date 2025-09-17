@@ -166,7 +166,7 @@ class DuplicateAuthenticatorClassesViolationTests(SSotAsyncTestCase):
         
         except SyntaxError as e:
             # Fallback to simple text parsing if AST fails
-            self.logger.warning(f"AST parsing failed ({e}, using text-based parsing)
+            self.logger.warning(f"AST parsing failed ({e}, using text-based parsing)")
             return self._count_class_definitions_text_based(file_content, class_name)
         
         return class_definitions

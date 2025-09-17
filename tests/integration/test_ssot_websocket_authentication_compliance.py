@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 SSOT WebSocket Authentication Compliance Test Suite
 
 Business Value Justification:
@@ -14,7 +14,7 @@ This test suite validates that:
 4. Legacy authentication implementations are completely eliminated
 
 CRITICAL: These tests MUST pass to ensure SSOT compliance is maintained.
-"
+"""Empty docstring."""
 import asyncio
 import json
 import pytest
@@ -32,7 +32,7 @@ from test_framework.fixtures.websocket_fixtures import create_mock_websocket
 from test_framework.ssot.integration_auth_manager import IntegrationAuthServiceManager
 
 class SSOTWebSocketAuthenticationComplianceTests:
-    "Test suite for SSOT WebSocket authentication compliance.
+    "Test suite for SSOT WebSocket authentication compliance."""
 
     @pytest.fixture
     def auth_manager(self):
@@ -56,7 +56,7 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
     @pytest.mark.asyncio
     async def test_unified_authentication_service_ssot_compliance(self):
-        Test that UnifiedAuthenticationService is SSOT for all authentication."
+        Test that UnifiedAuthenticationService is SSOT for all authentication.""
         auth_service = get_unified_auth_service()
         assert isinstance(auth_service, UnifiedAuthenticationService)
         assert hasattr(auth_service, '_auth_client')
@@ -66,7 +66,7 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
     @pytest.mark.asyncio
     async def test_websocket_authenticator_uses_ssot(self):
-        "Test that WebSocket authenticator uses SSOT authentication service.
+        "Test that WebSocket authenticator uses SSOT authentication service."""
         ws_authenticator = get_websocket_authenticator()
         assert isinstance(ws_authenticator, UnifiedWebSocketAuthenticator)
         assert hasattr(ws_authenticator, '_auth_service')
@@ -125,7 +125,7 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
     @pytest.mark.asyncio
     async def test_no_duplicate_authentication_paths_exist(self):
-        Test that no duplicate authentication paths exist (SSOT violation check)."
+        Test that no duplicate authentication paths exist (SSOT violation check).""
         try:
             from netra_backend.app.websocket_core import auth as old_auth_module
             if hasattr(old_auth_module, 'WebSocketAuthenticator'):
@@ -140,7 +140,7 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
     @pytest.mark.asyncio
     async def test_authentication_statistics_tracking(self):
-        "Test that SSOT authentication service tracks statistics correctly.
+        "Test that SSOT authentication service tracks statistics correctly."""
         auth_service = get_unified_auth_service()
         ws_authenticator = get_websocket_authenticator()
         initial_auth_stats = auth_service.get_authentication_stats()
@@ -202,7 +202,7 @@ class SSOTWebSocketAuthenticationComplianceTests:
         print(' PASS:  SSOT COMPLIANCE: JWT token extraction methods work correctly')
 
     def test_ssot_enforcement_imports(self):
-        Test that only SSOT-compliant imports are allowed."
+        Test that only SSOT-compliant imports are allowed.""
         from netra_backend.app.services.unified_authentication_service import get_unified_auth_service
         from netra_backend.app.websocket_core.unified_websocket_auth import get_websocket_authenticator
         auth_service = get_unified_auth_service()
@@ -217,7 +217,7 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
 @pytest.mark.integration
 class SSOTWebSocketAuthenticationEndToEndTests:
-    "End-to-end integration tests for SSOT WebSocket authentication.
+    "End-to-end integration tests for SSOT WebSocket authentication."""
 
     @pytest.mark.asyncio
     async def test_full_websocket_auth_flow_integration(self):

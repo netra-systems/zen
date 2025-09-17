@@ -620,7 +620,7 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
                 }
                 
         except Exception as e:
-            print(f"ERROR: Error in simulate_complete_agent_execution: {e})
+            print(f"ERROR: Error in simulate_complete_agent_execution: {e})")
             raise
 
     async def _simulate_agent_execution_with_error(self, engine, user_data):

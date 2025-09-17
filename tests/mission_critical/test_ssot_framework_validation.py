@@ -1,6 +1,10 @@
 
+
 class TestSyntaxFix:
-    "Test class for orphaned methods""
+    """Test class for orphaned methods"""
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
 
 class WebSocketTestHelper:
     Real WebSocket connection for testing instead of mocks."
@@ -985,7 +989,7 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
         
         # Validate no compliance violations
         if compliance_violations:
-            logger.warning(f"Compliance violations detected: {compliance_violations})
+            logger.warning(f"Compliance violations detected: {compliance_violations})")
         
         # For SSOT framework validation, some violations might be expected
         # The key is that all checks should complete successfully

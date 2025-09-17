@@ -6,7 +6,7 @@
 _lazy_imports = {}
 
 def lazy_import(module_path: str, component: str = None):
-    "Lazy import pattern for performance optimization
+    "Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else []
@@ -131,8 +131,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
     CRITICAL_WEBSOCKET_EVENTS = [
         "agent_started,    # User sees AI began processing their problem"
         agent_thinking,   # Real-time reasoning visibility
-        tool_executing,   # Tool usage transparency  "
-        tool_completed",   # Tool results display
+        tool_executing,   # Tool usage transparency  ""
+        tool_completed",   # Tool results display"
         agent_completed   # User knows when valuable response is ready
     ]
     
@@ -143,8 +143,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
         
         # Initialize authentication with Docker-compatible config
         self.auth_config = E2EAuthConfig(
-            auth_service_url=http://localhost:8083,"
-            backend_url=http://localhost:8002", 
+            auth_service_url=http://localhost:8083,""
+            backend_url=http://localhost:8002", "
             websocket_url=ws://localhost:8002/ws
         )
         self.auth_helper = E2EWebSocketAuthHelper(
@@ -188,8 +188,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 await asyncio.sleep(1.0)
                 
             except Exception as e:
-                print(f"[U+23F3] System readiness check failed: {e}, retrying...)
-                await asyncio.sleep(1.0")
+                print(f"[U+23F3] System readiness check failed: {e}, retrying...)"
+                await asyncio.sleep(1.0")"
         
         pytest.fail(fFull system not ready after {max_wait_time}s wait)
     
@@ -223,14 +223,14 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             return False
 
     async def test_001_rapid_websocket_connections_no_race(self):
-    "
+"""Empty docstring."""
         Test rapid WebSocket connections without race conditions.
         
         Validates that multiple rapid connections work without 1011 errors
         and all required WebSocket events are delivered properly.
         
         CRITICAL: This addresses P1 WebSocket authentication timeout failures.
-        "
+"""Empty docstring."""
         connection_count = 5
         connections = []
         event_tracking = {}
@@ -258,8 +258,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                     
                     # Send test message and capture events
                     test_message = {
-                        type: chat_message",
-                        "message: fTest rapid connection {i},
+                        type: chat_message","
+                        "message: fTest rapid connection {i},"
                         thread_id: str(user_context.thread_id),
                         user_id": str(user_context.user_id)"
                     }
@@ -295,7 +295,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 error_events = [e for e in events if e.get("type) == error"]
                 assert len(error_events) == 0, fError events found on {conn_id}: {error_events}
             
-            print(f PASS:  Successfully established {connection_count} rapid connections without race conditions)"
+            print(f PASS:  Successfully established {connection_count} rapid connections without race conditions)""
             
         finally:
             # Clean up all connections
@@ -306,15 +306,15 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                     pass
 
     async def test_002_websocket_authentication_real(self):
-    "
+"""Empty docstring."""
         Test WebSocket authentication with real services.
         
         CRITICAL: This addresses P1 WebSocket authentication timeout failures
         reported in the Golden Path test suite.
-        "
+"""Empty docstring."""
         # Create authenticated user context (MANDATORY per CLAUDE.md)
         user_context = await create_authenticated_user_context(
-            user_email=auth_test_002@example.com", 
+            user_email=auth_test_002@example.com", "
             environment=test,
             websocket_enabled=True
         )
@@ -332,8 +332,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             
             # Send authentication test message
             auth_test_message = {
-                type: "auth_test,
-                user_id": str(user_context.user_id),
+                type: "auth_test,"
+                user_id": str(user_context.user_id),"
                 timestamp: datetime.now(timezone.utc).isoformat()
             }
             
@@ -345,21 +345,21 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             
             # Validate authentication success
             assert type" in response_data, "Response missing type field
-            assert response_data.get(type) != error, fAuthentication error: {response_data}"
+            assert response_data.get(type) != error, fAuthentication error: {response_data}""
             
-            print(" PASS:  WebSocket authentication successful with real services)
+            print(" PASS:  WebSocket authentication successful with real services)"
             
         finally:
             if websocket:
                 await websocket.close()
 
     async def test_003_multi_user_concurrent_chat_sessions(self):
-        "
+"""Empty docstring."""
         Test concurrent multi-user chat sessions with proper isolation.
         
         Validates that multiple users can chat simultaneously without
         cross-contamination of events or race conditions.
-"
+"""Empty docstring."""
         user_count = 3
         user_sessions = []
         
@@ -378,8 +378,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 
                 user_sessions.append({
                     context: user_context,
-                    websocket: websocket,"
-                    "events: [],
+                    websocket: websocket,""
+                    "events: [],"
                     user_id: str(user_context.user_id),
                     "thread_id: str(user_context.thread_id)"
                 }
@@ -389,8 +389,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             for i, session in enumerate(user_sessions):
                 chat_message = {
                     type: chat_message, 
-                    message: f"Concurrent chat test from user {i},
-                    thread_id: session["thread_id],
+                    message: f"Concurrent chat test from user {i},"
+                    thread_id: session["thread_id],"
                     user_id: session[user_id]
                 }
                 
@@ -405,10 +405,10 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             # Validate all sessions completed successfully
             for i, result in enumerate(results):
                 if isinstance(result, Exception):
-                    pytest.fail(fUser {i} chat session failed: {result})"
+                    pytest.fail(fUser {i} chat session failed: {result})""
                 
                 session = user_sessions[i]
-                assert len(session["events] > 0, fNo events received for user {i}
+                assert len(session["events] > 0, fNo events received for user {i}"
                 
                 # Validate user isolation - no cross-contamination
                 user_events = session[events]
@@ -429,7 +429,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
 
     async def _send_and_capture_events(self, session: Dict, message: Dict) -> None:
         ""Send message and capture resulting events.
-        websocket = session[websocket]"
+        websocket = session[websocket]""
         
         # Send message
         await websocket.send(json.dumps(message))
@@ -440,7 +440,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             try:
                 response = await asyncio.wait_for(websocket.recv(), timeout=1.0)
                 event_data = json.loads(response)
-                session[events"].append(event_data)
+                session[events"].append(event_data)"
                 
                 # Stop if we get completion event
                 if event_data.get(type) == agent_completed:
@@ -449,10 +449,10 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             except asyncio.TimeoutError:
                 continue  # Continue listening for more events
             except Exception as e:
-                print(f"Event capture error: {e})
+                print(f"Event capture error: {e})"
                 break
 
-    async def test_004_complete_agent_execution_with_all_events(self"):
+    async def test_004_complete_agent_execution_with_all_events(self"):"
         
         Test complete agent execution with all 5 mission-critical WebSocket events.
         
@@ -462,7 +462,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
         # Create authenticated user context (MANDATORY per CLAUDE.md)
         user_context = await create_authenticated_user_context(
             user_email=complete_agent_test@example.com,
-            environment=test, "
+            environment=test, ""
             websocket_enabled=True
         )
         
@@ -477,11 +477,11 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             
             # Send agent execution request
             agent_request = {
-                "type: chat_message,
+                "type: chat_message,"
                 message: Please analyze my cloud costs and provide optimization recommendations.,
                 "thread_id: str(user_context.thread_id),"
                 user_id: str(user_context.user_id),
-                request_agent_execution: True"
+                request_agent_execution: True""
             }
             
             await websocket.send(json.dumps(agent_request))
@@ -496,7 +496,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                     event_data = json.loads(response)
                     received_events.append(event_data)
                     
-                    print(f[U+1F4E8] Received event: {event_data.get('type', 'unknown')}")
+                    print(f[U+1F4E8] Received event: {event_data.get('type', 'unknown')}")"
                     
                     # Stop when agent completes
                     if event_data.get(type) == agent_completed:
@@ -506,37 +506,37 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                     print("[U+23F1][U+FE0F] Timeout waiting for events, continuing...")
                     continue
                 except Exception as e:
-                    print(f FAIL:  Error receiving events: {e})"
+                    print(f FAIL:  Error receiving events: {e})""
                     break
             
             # Validate all 5 mission-critical events were received
-            received_event_types = set(event.get("type) for event in received_events)
+            received_event_types = set(event.get("type) for event in received_events)"
             
             for required_event in self.CRITICAL_WEBSOCKET_EVENTS:
                 assert required_event in received_event_types, \
                     fMissing critical WebSocket event: {required_event}.  \
-                    f"Received: {sorted(received_event_types)}
+                    f"Received: {sorted(received_event_types)}"
             
             # Validate event sequence makes business sense
-            event_sequence = [event.get(type") for event in received_events]
+            event_sequence = [event.get(type") for event in received_events]"
             
             # agent_started should come first
             if agent_started in event_sequence:
                 first_agent_started = event_sequence.index(agent_started")"
                 assert first_agent_started == 0 or all(
-                    event_sequence[i] in [connection_ack, ping, pong] "
+                    event_sequence[i] in [connection_ack, ping, pong] ""
                     for i in range(first_agent_started)
-                ), fagent_started not at expected position in sequence: {event_sequence}"
+                ), fagent_started not at expected position in sequence: {event_sequence}""
             
             # agent_completed should come last (among agent events)
             if agent_completed in event_sequence:
                 last_agent_completed = len(event_sequence) - 1 - event_sequence[::-1].index(agent_completed")"
                 agent_events_after = [
                     event_sequence[i] for i in range(last_agent_completed + 1, len(event_sequence))
-                    if event_sequence[i] not in [ping, pong, connection_ack]"
+                    if event_sequence[i] not in [ping, pong, connection_ack]""
                 ]
                 assert len(agent_events_after) == 0, \
-                    fNon-system events after agent_completed: {agent_events_after}"
+                    fNon-system events after agent_completed: {agent_events_after}""
             
             print(f PASS:  All {len(self.CRITICAL_WEBSOCKET_EVENTS)} mission-critical events received)
             print(f PASS:  Event sequence validated: {len(received_events)} total events")"
@@ -555,7 +555,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
         # Create authenticated user context for staging-like test
         user_context = await create_authenticated_user_context(
             user_email=staging_race_test@example.com,
-            environment=test,  # Use test env with staging-like conditions"
+            environment=test,  # Use test env with staging-like conditions""
             websocket_enabled=True
         )
         
@@ -566,7 +566,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
         for cycle in range(connection_cycles):
             websocket = None
             try:
-                print(f CYCLE:  Testing connection cycle {cycle + 1}/{connection_cycles}")
+                print(f CYCLE:  Testing connection cycle {cycle + 1}/{connection_cycles}")"
                 
                 # Connect with staging-compatible timeout
                 websocket = await self.auth_helper.connect_authenticated_websocket(
@@ -575,8 +575,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 
                 # Send quick test message
                 test_message = {
-                    type: chat_message",
-                    "message: fStaging race test cycle {cycle},
+                    type: chat_message","
+                    "message: fStaging race test cycle {cycle},"
                     thread_id: str(user_context.thread_id),
                     user_id": str(user_context.user_id)"
                 }
@@ -616,12 +616,12 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
         print(f PASS:  All {connection_cycles} race condition test cycles passed"")
 
     async def test_006_business_value_delivery_validation(self):
-    "
+"""Empty docstring."""
         Test complete business value delivery through WebSocket events.
         
         Validates that users receive substantive AI-powered results through
         WebSocket communication, demonstrating complete business value flow.
-        "
+"""Empty docstring."""
         # Create authenticated user context (MANDATORY per CLAUDE.md)
         user_context = await create_authenticated_user_context(
             user_email=business_value_test@example.com,
@@ -641,8 +641,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             # Send business-relevant request
             business_request = {
                 type: chat_message,
-                message: "What are the top 3 ways I can optimize my cloud infrastructure costs?,
-                thread_id": str(user_context.thread_id),
+                message: "What are the top 3 ways I can optimize my cloud infrastructure costs?,"
+                thread_id": str(user_context.thread_id),"
                 user_id: str(user_context.user_id),
                 request_business_value": True"
             }
@@ -662,10 +662,10 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                     # Log business-relevant events
                     event_type = event_data.get(type)
                     if event_type in [tool_executing, "tool_completed, agent_thinking", agent_completed]:
-                        print(f[U+1F4BC] Business value event: {event_type})"
+                        print(f[U+1F4BC] Business value event: {event_type})""
                     
                     # Stop when business value delivered
-                    if event_data.get("type) == agent_completed:
+                    if event_data.get("type) == agent_completed:"
                         break
                         
                 except asyncio.TimeoutError:
@@ -679,8 +679,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             
             # Must have agent execution events
             assert agent_started in event_types, No agent_started event for business value
-            assert agent_thinking in event_types, No agent_thinking event for business reasoning"
-            assert "agent_completed in event_types, No agent_completed event for business results
+            assert agent_thinking in event_types, No agent_thinking event for business reasoning""
+            assert "agent_completed in event_types, No agent_completed event for business results"
             
             # Should have tool execution for real business analysis
             has_tool_execution = tool_executing in event_types or tool_completed in event_types
@@ -688,10 +688,10 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             
             # Validate substantive content in final response
             completion_events = [e for e in business_value_events if e.get(type) == agent_completed]
-            assert len(completion_events) > 0, No completion events found"
+            assert len(completion_events) > 0, No completion events found""
             
             final_event = completion_events[-1]
-            response_content = final_event.get("content, ).lower()
+            response_content = final_event.get("content, ).lower()"
             
             # Check for business-relevant content
             business_keywords = [cost, optimize, "cloud, recommend", save, efficient]
@@ -732,8 +732,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             
             # Send initial message
             test_message = {
-                type: chat_message",
-                "message: Test error recovery capabilities,
+                type: chat_message","
+                "message: Test error recovery capabilities,"
                 thread_id: str(user_context.thread_id),
                 user_id": str(user_context.user_id)"
             }
@@ -760,7 +760,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 type: chat_message,
                 "message: Test recovery connection functionality",
                 thread_id: str(user_context.thread_id),
-                user_id: str(user_context.user_id)"
+                user_id: str(user_context.user_id)""
             }
             
             await recovery_websocket.send(json.dumps(recovery_message))
@@ -769,7 +769,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             recovery_response = await asyncio.wait_for(recovery_websocket.recv(), timeout=5.0)
             recovery_data = json.loads(recovery_response)
             
-            assert recovery_data.get("type) != error, fRecovery connection error: {recovery_data}
+            assert recovery_data.get("type) != error, fRecovery connection error: {recovery_data}"
             
             print( PASS:  WebSocket error recovery successful")"
             print( PASS:  Business continuity maintained through connection recovery)
@@ -795,8 +795,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             # Create concurrent user sessions
             for i in range(concurrent_users):
                 user_context = await create_authenticated_user_context(
-                    user_email=f"load_test_{i}@example.com,
-                    environment=test",
+                    user_email=f"load_test_{i}@example.com,"
+                    environment=test","
                     websocket_enabled=True
                 )
                 
@@ -810,16 +810,16 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                     context: user_context,
                     websocket": websocket,"
                     user_id: str(user_context.user_id),
-                    thread_id: str(user_context.thread_id),"
-                    "events: [],
+                    thread_id: str(user_context.thread_id),""
+                    "events: [],"
                     connection_time: connection_time
                 }
                 
                 performance_metrics.append({
                     "user: i,"
                     connection_time: connection_time,
-                    events_received: 0,"
-                    response_times": []
+                    events_received: 0,""
+                    response_times": []"
                 }
             
             # Send concurrent messages and measure performance
@@ -841,8 +841,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 metrics = performance_metrics[i]
                 
                 # Validate connection performance
-                assert metrics[connection_time] < 10.0, \"
-                    f"User {i} connection too slow: {metrics['connection_time']:.2f}s
+                assert metrics[connection_time] < 10.0, \""
+                    f"User {i} connection too slow: {metrics['connection_time']:.2f}s"
                 
                 # Validate event delivery
                 assert metrics[events_received] > 0, fUser {i} received no events
@@ -870,8 +870,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                     pass
 
     async def _run_performance_test_session(self, session: Dict, metrics: Dict) -> None:
-        Run performance test for a single user session."
-        websocket = session["websocket]
+        Run performance test for a single user session.""
+        websocket = session["websocket]"
         
         # Send test message
         test_message = {
@@ -897,17 +897,17 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 session[events"].append(event_data)"
                 
                 metrics[events_received] += 1
-                metrics[response_times].append(response_time)"
+                metrics[response_times].append(response_time)""
                 
                 # Update start time for next response time measurement
                 message_start = time.time()
                 
                 # Stop if we get completion
-                if event_data.get("type) == agent_completed:
+                if event_data.get("type) == agent_completed:"
                     break
                     
             except asyncio.TimeoutError:
                 continue
             except Exception as e:
-                print(fPerformance test error: {e}")
+                print(fPerformance test error: {e}")"
                 break

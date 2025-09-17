@@ -225,7 +225,7 @@ class MockResponseEliminationTestSuite:
         results = {}
         
         for scenario in failure_scenarios:
-            print(f"  Testing scenario: {scenario})
+            print(f"  Testing scenario: {scenario})")
             
             context = self.create_test_context()
             

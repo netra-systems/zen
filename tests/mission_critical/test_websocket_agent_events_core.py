@@ -460,7 +460,7 @@ class WebSocketAgentEventsCoreTests:
         try:
             await ws_manager.disconnect_user(user_id)
         except Exception as e:
-            logger.warning(f"Disconnect failed (expected in test): {e})
+            logger.warning(f"Disconnect failed (expected in test): {e})")
         
     async def _test_with_mock_websocket_simulation(
         self,

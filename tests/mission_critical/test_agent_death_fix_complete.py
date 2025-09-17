@@ -87,7 +87,7 @@ class TestAgentDeathFixComplete:
 @pytest.mark.asyncio
     async def test_complete_death_detection_flow(self):
     Test the complete flow from agent execution to death detection."
-print("")
+    print("")
  + "=*80)"
 print(TEST: Complete Agent Death Detection Flow)
 print(=*80)
@@ -231,7 +231,7 @@ for i in range(2):
 await tracker.heartbeat(exec_id)
 print()
         # Stop heartbeats to simulate death
-print("")
+    print("")
 [U+1F534] Simulating agent death...")
         # Register death callback
 tracker.registry.on_state_change = death_callback
@@ -299,7 +299,7 @@ print( PASS:  Health status correctly shows UNHEALTHY")
 @pytest.mark.asyncio
     async def test_recovery_after_agent_death(self"):
     Test that system can recover after agent death.
-print("")
+    print("")
  + =*80)
 print(TEST: Recovery After Agent Death")"
 print(=*80)

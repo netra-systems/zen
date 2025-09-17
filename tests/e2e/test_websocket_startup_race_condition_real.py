@@ -1,4 +1,4 @@
-"
+"""Empty docstring."""
 MISSION CRITICAL: WebSocket Startup Race Condition Real Testing - CLAUDE.md Compliant
 
 CRITICAL: Tests REAL race conditions in WebSocket startup using authentic concurrent scenarios.
@@ -20,7 +20,7 @@ CLAUDE.md COMPLIANCE:
 CHEATING ON TESTS = ABOMINATION - This tests REAL race conditions only.
 
 Business Value: $500K+ ARR protection by ensuring race conditions don't break user experience.
-"
+"""Empty docstring."""
 import asyncio
 import json
 import time
@@ -43,7 +43,7 @@ CONCURRENT_CONNECTION_COUNT = 5
 
 @dataclass
 class RaceConditionResult:
-    "Result of a race condition test operation.
+    "Result of a race condition test operation."""
     success: bool
     timing: float
     error: Optional[str]
@@ -167,7 +167,7 @@ class RealRaceConditionTester:
         return race_results
 
     async def _test_concurrent_auth_validation(self, user_data, sequence: int) -> RaceConditionResult:
-        Test concurrent authentication validation."
+        Test concurrent authentication validation.""
         start_time = time.time()
         try:
             jwt_secret = AuthConfig.get_jwt_secret()
@@ -184,7 +184,7 @@ class RealRaceConditionTester:
             return RaceConditionResult(success=False, timing=validation_time, error=str(e), connection_id=None, user_id=user_data.user_id, operation='concurrent_auth', sequence_number=sequence)
 
     async def cleanup_connections(self):
-        "Cleanup all active connections.
+        "Cleanup all active connections."""
         logger.info(f'[U+1F9F9] Cleaning up {len(self.active_connections)} active connections')
         cleanup_tasks = []
         for connection in list(self.active_connections):
@@ -279,7 +279,7 @@ class WebSocketStartupRaceConditionRealTests(BaseE2ETest):
     @pytest.mark.critical
     @pytest.mark.timeout(60)
     async def test_rapid_reconnection_no_race_conditions(self):
-        Test that rapid reconnection scenarios don't cause race conditions."
+        Test that rapid reconnection scenarios don't cause race conditions.""
         
         CLAUDE.md COMPLIANCE:
          PASS:  Tests REAL rapid reconnection scenarios
@@ -287,7 +287,7 @@ class WebSocketStartupRaceConditionRealTests(BaseE2ETest):
          PASS:  NO mocks, NO simulated disconnections
          PASS:  Execution time validation >= 0.1s
          PASS:  Hard failures for reconnection race conditions
-        "
+"""Empty docstring."""
         start_time = time.time()
         logger.info('[U+1F680] Testing REAL rapid reconnection race conditions')
         try:
@@ -322,7 +322,7 @@ class WebSocketStartupRaceConditionRealTests(BaseE2ETest):
          PASS:  NO mocks, NO fake auth states
          PASS:  Execution time validation >= 0.1s
          PASS:  Hard failures for auth race conditions
-"""
+""""""
         start_time = time.time()
         logger.info('[U+1F680] Testing REAL authentication state race conditions')
         try:
