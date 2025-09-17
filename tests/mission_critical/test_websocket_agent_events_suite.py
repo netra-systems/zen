@@ -53,6 +53,7 @@ SSOT Testing Compliance:
 
 import asyncio
 import time
+import uuid
 from datetime import datetime, UTC
 from typing import Dict, Any, Optional, List
 from unittest.mock import AsyncMock, MagicMock, patch, call
