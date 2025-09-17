@@ -506,9 +506,9 @@ class StartupOrchestrator:
                 # FIXED: Continue startup sequence instead of terminating prematurely
                 # This allows graceful degradation to work properly
                 self.logger.info("  [⚠️] Database emergency bypass complete - continuing startup sequence for graceful degradation")
-
-            # NO GRACEFUL DEGRADATION - Database is critical for chat
-            raise DeterministicStartupError(enhanced_error_msg, original_error=e, phase=StartupPhase.DATABASE) from e
+            else:
+                # NO GRACEFUL DEGRADATION - Database is critical for chat (when bypass not active)
+                raise DeterministicStartupError(enhanced_error_msg, original_error=e, phase=StartupPhase.DATABASE) from e
     
     async def _phase4_cache_setup(self) -> None:
         """Phase 4: CACHE - Redis and caching systems."""
@@ -541,9 +541,9 @@ class StartupOrchestrator:
                 # FIXED: Continue startup sequence instead of terminating prematurely
                 # This allows graceful degradation to work properly
                 self.logger.info("  [⚠️] Redis emergency bypass complete - continuing startup sequence for graceful degradation")
-
-            # Redis is critical for chat functionality - if Redis fails, startup MUST fail
-            raise DeterministicStartupError(f"Phase 4 cache setup failed - Redis is critical: {e}", original_error=e, phase=StartupPhase.CACHE) from e
+            else:
+                # Redis is critical for chat functionality - if Redis fails, startup MUST fail (when bypass not active)
+                raise DeterministicStartupError(f"Phase 4 cache setup failed - Redis is critical: {e}", original_error=e, phase=StartupPhase.CACHE) from e
     
     async def _phase5_services_setup(self) -> None:
         """Phase 5: SERVICES - Chat Pipeline and critical services."""

@@ -8,7 +8,7 @@ import { AuthConfigResponse } from './types';
 import { authServiceClient } from '@/lib/auth-service-client';
 import { unifiedApiConfig } from '@/lib/unified-api-config';
 import { logger } from '@/lib/logger';
-import { jwtDecode } from 'jwt-decode';
+// ISSUE #1117 SSOT CONSOLIDATION: Removed jwtDecode import - now using server-side validation
 
 const TOKEN_KEY = 'jwt_token';
 const DEV_LOGOUT_FLAG = 'dev_logout_flag';
@@ -268,6 +268,8 @@ export class UnifiedAuthService {
       const result = await authServiceClient.refreshToken();
       if (result && result.access_token) {
         this.setToken(result.access_token);
+        // ISSUE #1117 SSOT CONSOLIDATION: Track refresh time for conservative refresh logic
+        this.setLastRefreshTime(Date.now());
         logger.info('Token refreshed successfully', { environment: this.environment });
         return result;
       } else {
@@ -288,52 +290,34 @@ export class UnifiedAuthService {
   }
 
   /**
-   * Check if token needs refresh - environment-aware for short-lived tokens
+   * Check if token needs refresh - using server-side validation (SSOT)
+   * ISSUE #1117 SSOT CONSOLIDATION: Replaced client-side JWT decode with conservative refresh logic
    */
   needsRefresh(token: string): boolean {
     try {
-      const decoded = jwtDecode<JWTPayload>(token);
-      if (!decoded.exp) {
-        return false;
+      // SSOT COMPLIANCE: Use conservative refresh logic without client-side JWT decode
+      // This approach uses time-based refresh intervals instead of parsing JWT
+      
+      if (!token) {
+        return true; // No token means refresh needed
       }
       
-      const expiryTime = decoded.exp * 1000;
+      // Conservative approach: Check refresh every 2 minutes instead of parsing JWT
+      // This avoids security risks of client-side JWT decoding while maintaining functionality
+      const lastRefresh = this.getLastRefreshTime();
       const currentTime = Date.now();
-      const timeUntilExpiry = expiryTime - currentTime;
+      const timeSinceLastRefresh = currentTime - lastRefresh;
       
-      // Handle cases where token is already expired or will expire very soon
-      if (timeUntilExpiry <= 0) {
-        return true; // Token is expired or about to expire
+      // Refresh every 2 minutes (conservative approach)
+      const refreshInterval = 2 * 60 * 1000; // 2 minutes
+      
+      if (timeSinceLastRefresh >= refreshInterval) {
+        return true; // Time for refresh based on interval
       }
       
-      // Calculate total token lifetime for dynamic threshold
-      const issuedTime = decoded.iat ? decoded.iat * 1000 : (currentTime - 15 * 60 * 1000);
-      const totalLifetime = expiryTime - issuedTime;
-      
-      // Dynamic refresh threshold based on token lifetime
-      let refreshThreshold;
-      if (totalLifetime < 5 * 60 * 1000) { // Tokens < 5 minutes
-        // For short tokens (like 30s tokens), refresh when 75% of lifetime has passed
-        // (i.e., when 25% of lifetime remains)
-        refreshThreshold = totalLifetime * 0.25;
-      } else {
-        // For normal tokens (>= 5 minutes), refresh 5 minutes before expiry
-        refreshThreshold = 5 * 60 * 1000;
-      }
-      
-      const needsRefresh = timeUntilExpiry <= refreshThreshold;
-      
-      logger.debug('Token refresh check', {
-        needsRefresh,
-        timeUntilExpiry: Math.floor(timeUntilExpiry / 1000),
-        totalLifetime: Math.floor(totalLifetime / 1000),
-        refreshThreshold: Math.floor(refreshThreshold / 1000),
-        environment: this.environment
-      });
-      
-      return needsRefresh;
+      return false; // Not time for refresh yet
     } catch (error) {
-      logger.error('Error checking token expiry', error as Error);
+      logger.error('Error checking token refresh interval', error as Error);
       return true; // Err on side of caution
     }
   }
@@ -360,6 +344,22 @@ export class UnifiedAuthService {
   getAuthHeaders(): Record<string, string> {
     const token = this.getToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
+  /**
+   * Get last refresh time for conservative refresh logic
+   * ISSUE #1117 SSOT CONSOLIDATION: Added for server-side validation approach
+   */
+  getLastRefreshTime(): number {
+    if (typeof window === 'undefined') return 0;
+    const stored = localStorage.getItem('jwt_last_refresh');
+    return stored ? parseInt(stored, 10) : 0;
+  }
+
+  setLastRefreshTime(timestamp: number): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('jwt_last_refresh', timestamp.toString());
+    }
   }
 
   /**

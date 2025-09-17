@@ -172,8 +172,8 @@ def check_gcp_library():
         
         # Check version
         try:
-            import pkg_resources
-            version = pkg_resources.get_distribution("google-cloud-secret-manager").version
+            import importlib.metadata
+            version = importlib.metadata.version("google-cloud-secret-manager")
             print(f"   Version: {version}")
         except Exception:
             print("   Version: Unknown")

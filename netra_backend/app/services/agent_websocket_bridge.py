@@ -46,7 +46,7 @@ from netra_backend.app.core.monitoring.base import MonitorableComponent
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcherFactory
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.core.configuration.base import get_config
+from netra_backend.app.config import get_config  # SSOT UnifiedConfigManager
 
 if TYPE_CHECKING:
     from shared.monitoring.interfaces import ComponentMonitor

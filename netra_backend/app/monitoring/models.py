@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
@@ -42,7 +42,7 @@ class Metric:
     value: Union[int, float]
     metric_type: MetricType = MetricType.GAUGE
     unit: MetricUnit = MetricUnit.COUNT
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     labels: Dict[str, str] = field(default_factory=dict)
     description: str = ""
     
@@ -104,7 +104,7 @@ class Alert(BaseModel):
     metric_name: Optional[str] = None
     threshold_value: Optional[float] = None
     actual_value: Optional[float] = None
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     labels: Dict[str, str] = Field(default_factory=dict)
     resolved: bool = False
     resolved_at: Optional[datetime] = None
@@ -118,8 +118,8 @@ class MonitoringDashboard(BaseModel):
     panels: List[Dict[str, Any]]
     refresh_interval: int = 30  # seconds
     time_range: str = "1h"
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class HealthCheck(BaseModel):
@@ -129,7 +129,7 @@ class HealthCheck(BaseModel):
     latency_ms: float
     checks: Dict[str, bool]
     message: Optional[str] = None
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class MetricsCollector:

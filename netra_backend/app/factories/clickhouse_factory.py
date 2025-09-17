@@ -24,7 +24,7 @@ import asyncio
 import logging
 import weakref
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
 from uuid import uuid4
 
@@ -58,7 +58,7 @@ class UserClickHouseCache:
         self._hits = 0
         self._misses = 0
         self._lock = asyncio.Lock()
-        self.created_at = datetime.utcnow()
+        self.created_at = datetime.now(timezone.utc)
         
         logger.debug(f"[UserClickHouseCache] Created for user {user_id[:8]}... (max_size: {max_size})")
     
@@ -88,7 +88,7 @@ class UserClickHouseCache:
             key = self._generate_key(query, params)
             entry = self.cache.get(key)
             
-            if entry and datetime.utcnow().timestamp() < entry["expires_at"]:
+            if entry and datetime.now(timezone.utc).timestamp() < entry["expires_at"]:
                 self._hits += 1
                 logger.debug(f"[UserClickHouseCache] Cache hit for user {self.user_id[:8]}... query: {query[:30]}...")
                 return entry["result"]
@@ -116,7 +116,7 @@ class UserClickHouseCache:
                     del self.cache[k]
             
             key = self._generate_key(query, params)
-            now = datetime.utcnow().timestamp()
+            now = datetime.now(timezone.utc).timestamp()
             self.cache[key] = {
                 "result": result,
                 "created_at": now,
@@ -137,7 +137,7 @@ class UserClickHouseCache:
         async with self._lock:
             total = self._hits + self._misses
             hit_rate = (self._hits / total) if total > 0 else 0
-            age_seconds = (datetime.utcnow() - self.created_at).total_seconds()
+            age_seconds = (datetime.now(timezone.utc) - self.created_at).total_seconds()
             
             return {
                 "user_id": f"{self.user_id[:8]}...",
@@ -176,7 +176,7 @@ class UserClickHouseClient:
         self.user_id = user_id
         self.request_id = request_id
         self.thread_id = thread_id
-        self.created_at = datetime.utcnow()
+        self.created_at = datetime.now(timezone.utc)
         
         # User-scoped resources
         self._client: Optional[ClickHouseQueryInterceptor] = None
@@ -218,7 +218,7 @@ class UserClickHouseClient:
                 await asyncio.wait_for(self._client.test_connection(), timeout=10.0)
                 
                 self._initialized = True
-                self._last_activity = datetime.utcnow()
+                self._last_activity = datetime.now(timezone.utc)
                 
                 logger.info(f"[UserClickHouseClient] Initialized for user {self.user_id[:8]}... with isolated connection")
                 
@@ -273,7 +273,7 @@ class UserClickHouseClient:
         
         try:
             self._query_count += 1
-            self._last_activity = datetime.utcnow()
+            self._last_activity = datetime.now(timezone.utc)
             
             # Execute with isolated client
             result = await self._client.execute(query, params)
@@ -377,8 +377,8 @@ class UserClickHouseClient:
         Returns:
             Dictionary with client metrics
         """
-        age_seconds = (datetime.utcnow() - self.created_at).total_seconds()
-        last_activity_seconds = (datetime.utcnow() - self._last_activity).total_seconds()
+        age_seconds = (datetime.now(timezone.utc) - self.created_at).total_seconds()
+        last_activity_seconds = (datetime.now(timezone.utc) - self._last_activity).total_seconds()
         
         return {
             "user_id": f"{self.user_id[:8]}...",
@@ -477,7 +477,7 @@ class ClickHouseFactory:
         # Factory metrics
         self._created_count = 0
         self._cleanup_count = 0
-        self.created_at = datetime.utcnow()
+        self.created_at = datetime.now(timezone.utc)
         
         logger.info(f"[ClickHouseFactory] Initialized with max_clients_per_user={max_clients_per_user}, ttl={client_ttl_seconds}s")
     
@@ -539,8 +539,8 @@ class ClickHouseFactory:
                     "request_id": user_context.request_id,
                     "thread_id": user_context.thread_id,
                     "run_id": user_context.run_id,
-                    "created_at": datetime.utcnow(),
-                    "last_accessed": datetime.utcnow(),
+                    "created_at": datetime.now(timezone.utc),
+                    "last_accessed": datetime.now(timezone.utc),
                     "access_count": 0
                 }
                 
@@ -644,7 +644,7 @@ class ClickHouseFactory:
     
     async def _cleanup_expired_clients(self):
         """Clean up expired clients based on TTL."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         expired_clients = []
         
         for client_id, metadata in self._client_metadata.items():
@@ -688,10 +688,10 @@ class ClickHouseFactory:
         """
         total_clients = len(self._active_clients)
         users_with_clients = len(self._user_client_counts)
-        factory_age = (datetime.utcnow() - self.created_at).total_seconds()
+        factory_age = (datetime.now(timezone.utc) - self.created_at).total_seconds()
         
         # Calculate age distribution
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         age_buckets = {"0-5min": 0, "5-30min": 0, "30min+": 0}
         
         for metadata in self._client_metadata.values():

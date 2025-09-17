@@ -33,7 +33,7 @@ from typing import Any, Dict, Optional, Type, Union
 from datetime import datetime, timezone
 
 from netra_backend.app.logging_config import central_logger
-from .session_metrics_provider import (
+from shared.session_management.session_metrics_provider import (
     UnifiedSessionMetrics,
     SessionMetricsAdapter,
     get_unified_session_metrics_provider

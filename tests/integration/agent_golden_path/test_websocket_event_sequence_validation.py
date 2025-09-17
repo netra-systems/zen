@@ -396,7 +396,7 @@ class WebSocketEventSequenceValidationTests(SSotAsyncTestCase):
             self.timeout = 45.0
         else:
             self.test_env = "test"
-            self.websocket_url = self.env.get("TEST_WEBSOCKET_URL", "ws://localhost:8002/ws")
+            self.websocket_url = self.env.get("TEST_WEBSOCKET_URL", "ws://localhost:8000/ws")
             self.timeout = 30.0
             
         self.e2e_helper = E2EWebSocketAuthHelper(environment=self.test_env)

@@ -105,8 +105,8 @@ class SecurityOriginsConfig:
 
                 # DEPRECATED - Keep for compatibility during migration
                 "https://app.staging.netrasystems.ai",   # DEPRECATED
-                "https://auth.staging.netrasystems.ai",  # DEPRECATED
-                "https://api.staging.netrasystems.ai"    # DEPRECATED
+                "https://auth-staging.netrasystems.ai",  # DEPRECATED
+                "https://api-staging.netrasystems.ai"    # DEPRECATED
             ],
             "cloud_run": [
                 # Cloud Run service URLs for staging

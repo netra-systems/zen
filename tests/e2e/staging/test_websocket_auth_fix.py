@@ -45,9 +45,8 @@ class WebSocketAuthenticationFixTests:
         print("\nTEST JWT SECRET RESOLUTION ORDER:")
         print("1. JWT_SECRET_STAGING")
         print("2. JWT_SECRET_KEY")
-        print("3. E2E_BYPASS_KEY")
-        print("4. STAGING_JWT_SECRET")
-        print("5. Hardcoded fallback")
+        print("3. E2E_BYPASS_KEY") 
+        print("4. Hardcoded fallback")
         
         # Test resolution
         test_secrets = {}
@@ -56,7 +55,6 @@ class WebSocketAuthenticationFixTests:
         test_secrets['env_specific'] = env.get(env_specific_key)
         test_secrets['jwt_secret_key'] = env.get("JWT_SECRET_KEY")
         test_secrets['e2e_bypass'] = env.get("E2E_BYPASS_KEY")
-        test_secrets['staging_jwt_secret'] = env.get("STAGING_JWT_SECRET")
         test_secrets['hardcoded_fallback'] = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
         
         print(f"\nTEST SECRET VALUES:")

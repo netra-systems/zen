@@ -4,7 +4,7 @@ Provides performance monitoring and optimization recommendations.
 """
 
 from typing import Any, Dict, List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from netra_backend.app.logging_config import central_logger
 # Import MemoryCache for compatibility export
@@ -29,7 +29,7 @@ class PerformanceOptimizationManager:
         """Record performance metrics for analysis."""
         metrics_with_timestamp = {
             **metrics,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(UTC)
         }
         self._metrics_history.append(metrics_with_timestamp)
         
@@ -41,7 +41,7 @@ class PerformanceOptimizationManager:
     
     async def get_performance_summary(self, time_window_hours: int = 1) -> Dict[str, Any]:
         """Get performance summary for specified time window."""
-        cutoff_time = datetime.utcnow() - timedelta(hours=time_window_hours)
+        cutoff_time = datetime.now(UTC) - timedelta(hours=time_window_hours)
         recent_metrics = [
             m for m in self._metrics_history 
             if m.get("timestamp", datetime.min) > cutoff_time
@@ -151,7 +151,7 @@ class PerformanceOptimizationManager:
         return {
             "performance_summary": summary,
             "recommendations": recommendations,
-            "report_timestamp": datetime.utcnow(),
+            "report_timestamp": datetime.now(UTC),
             "metrics_analyzed": len(self._metrics_history)
         }
     

@@ -11,11 +11,11 @@ CRITICAL TYPE SAFETY UPDATE:
 - WebSocket event types with routing safety
 """
 
-from .performance_metrics import PerformanceMetrics
-from .user_types import UserBase, UserInfo, UserCreate, UserUpdate, ExtendedUser
+from shared.types.performance_metrics import PerformanceMetrics
+from shared.types.user_types import UserBase, UserInfo, UserCreate, UserUpdate, ExtendedUser
 
 # Core strongly-typed identifiers (prevents ID mixing bugs)
-from .core_types import (
+from shared.types.core_types import (
     UserID, ThreadID, RunID, RequestID, WebSocketID, AgentID, ExecutionID,
     SessionID, TokenString, ConnectionID, DatabaseSessionID, ContextID, MessageID, OrganizationID,
     # Validation utilities
@@ -31,7 +31,7 @@ from .core_types import (
 )
 
 # Execution context and agent types  
-from .execution_types import (
+from shared.types.execution_types import (
     # Context types
     StronglyTypedUserExecutionContext, ContextValidationError, IsolationViolationError,
     # Agent execution types
@@ -47,7 +47,7 @@ from .execution_types import (
 )
 
 # Agent request/response/validation types - SSOT for agent execution flows
-from .agent_types import (
+from shared.types.agent_types import (
     # Core agent execution types
     AgentExecutionRequest, AgentExecutionResult, AgentValidationResult,
     # Enhanced typed result for better validation

@@ -9,11 +9,13 @@ import os
 import asyncio
 import sys
 import websockets
+from shared.isolated_environment import IsolatedEnvironment
 
-# Set environment variables for Windows Docker bypass
-os.environ['DOCKER_BYPASS'] = 'true'
-os.environ['USE_MOCK_WEBSOCKET'] = 'true'
-os.environ['MOCK_WEBSOCKET_URL'] = 'ws://localhost:8001/ws'
+# Set environment variables for Windows Docker bypass using SSOT IsolatedEnvironment
+env = IsolatedEnvironment()
+env.set('DOCKER_BYPASS', 'true', 'test_mock_server_direct')
+env.set('USE_MOCK_WEBSOCKET', 'true', 'test_mock_server_direct')
+env.set('MOCK_WEBSOCKET_URL', 'ws://localhost:8001/ws', 'test_mock_server_direct')
 
 async def test_mock_server():
     """Test mock WebSocket server functionality."""

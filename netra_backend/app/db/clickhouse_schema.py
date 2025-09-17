@@ -545,32 +545,32 @@ class ClickHouseTraceSchema:
                         )
                         completed_steps.append(statement)
                         logger.debug(f"Migration {migration_name}: Completed step {step_num}/{len(migration_steps)}")
-                except Exception as e:
-                    # Classify the error and add migration context
-                    classified_error = classify_error(e)
-                    error_message = (
-                        f"Migration Error: Migration '{migration_name}' failed at step {step_num} of {len(migration_steps)}. "
-                        f"Completed Steps: {len(completed_steps)} statements executed successfully. "
-                        f"Failed Statement: {statement[:100]}... "
-                        f"Rollback Required: Consider reversing the {len(completed_steps)} completed operations. "
-                        f"Error: {classified_error}"
-                    )
-                    
-                    # Raise the appropriate error type with migration context
-                    if isinstance(classified_error, TableCreationError):
-                        raise TableCreationError(error_message) from e
-                    elif isinstance(classified_error, ColumnModificationError):
-                        raise ColumnModificationError(error_message) from e
-                    elif isinstance(classified_error, IndexCreationError):
-                        raise IndexCreationError(error_message) from e
-                    else:
-                        # For other classified errors, raise them with context
-                        if hasattr(classified_error, 'context'):
-                            # It's a custom schema error, create new instance with message
-                            raise classified_error.__class__(error_message) from e
+                    except Exception as e:
+                        # Classify the error and add migration context
+                        classified_error = classify_error(e)
+                        error_message = (
+                            f"Migration Error: Migration '{migration_name}' failed at step {step_num} of {len(migration_steps)}. "
+                            f"Completed Steps: {len(completed_steps)} statements executed successfully. "
+                            f"Failed Statement: {statement[:100]}... "
+                            f"Rollback Required: Consider reversing the {len(completed_steps)} completed operations. "
+                            f"Error: {classified_error}"
+                        )
+                        
+                        # Raise the appropriate error type with migration context
+                        if isinstance(classified_error, TableCreationError):
+                            raise TableCreationError(error_message) from e
+                        elif isinstance(classified_error, ColumnModificationError):
+                            raise ColumnModificationError(error_message) from e
+                        elif isinstance(classified_error, IndexCreationError):
+                            raise IndexCreationError(error_message) from e
                         else:
-                            # It's a SQLAlchemy or other error, just raise the classified error
-                            raise classified_error from e
+                            # For other classified errors, raise them with context
+                            if hasattr(classified_error, 'context'):
+                                # It's a custom schema error, create new instance with message
+                                raise classified_error.__class__(error_message) from e
+                            else:
+                                # It's a SQLAlchemy or other error, just raise the classified error
+                                raise classified_error from e
             
             logger.info(f"Migration {migration_name}: All {len(migration_steps)} steps completed successfully")
             return True

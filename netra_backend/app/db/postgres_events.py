@@ -30,8 +30,8 @@ logger = central_logger.get_logger(__name__)
 def _execute_timeout_statements(cursor):
     """Execute timeout configuration statements."""
     cursor.execute(f"SET statement_timeout = {config.db_statement_timeout}")
-    cursor.execute("SET idle_in_transaction_session_timeout = 60000")
-    cursor.execute("SET lock_timeout = 10000")
+    cursor.execute("SET idle_in_transaction_session_timeout = 300000")  # Issue #1278: 5 minutes for Cloud Run
+    cursor.execute("SET lock_timeout = 60000")  # Issue #1278: 60 seconds for Cloud Run infrastructure
 
 
 def _handle_timeout_config_error(dbapi_conn: Connection, e: Exception):
@@ -114,8 +114,8 @@ def _configure_sync_connection_timeouts(dbapi_conn: Connection):
     """Configure statement and transaction timeouts for sync connection."""
     with dbapi_conn.cursor() as cursor:
         cursor.execute(f"SET statement_timeout = {config.db_statement_timeout}")
-        cursor.execute("SET idle_in_transaction_session_timeout = 60000")
-        cursor.execute("SET lock_timeout = 10000")
+        cursor.execute("SET idle_in_transaction_session_timeout = 300000")  # Issue #1278: 5 minutes for Cloud Run
+        cursor.execute("SET lock_timeout = 60000")  # Issue #1278: 60 seconds for Cloud Run infrastructure
 
 def _set_sync_connection_pid_and_configure(dbapi_conn: Connection, connection_record: ConnectionPoolEntry):
     """Set PID and configure timeouts for sync connection."""

@@ -14,7 +14,7 @@ from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.schemas.core_enums import ExecutionStatus
-from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
@@ -93,7 +93,14 @@ class ModernSyntheticDataSubAgent(BaseAgent):
             reliability_manager = self._create_default_reliability_manager()
         
         self.monitor = ExecutionMonitor(max_history_size=1000)
-        self.execution_engine = BaseExecutionEngine(reliability_manager, self.monitor)
+        # TODO: UserExecutionEngine requires UserExecutionContext - temporary placeholder
+        # self.execution_engine = UserExecutionEngine(
+        #     context=user_context,  # Needs UserExecutionContext
+        #     agent_factory=agent_factory,  # Needs AgentInstanceFactory
+        #     websocket_emitter=websocket_emitter  # Needs UserWebSocketEmitter
+        # )
+        # For now, keeping None until full user context migration is complete
+        self.execution_engine = None
     
     def _create_default_reliability_manager(self) -> ReliabilityManager:
         """Create default reliability manager with synthetic data optimized settings."""

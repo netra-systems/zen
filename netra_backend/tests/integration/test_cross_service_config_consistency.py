@@ -159,7 +159,7 @@ class CrossServiceConfigConsistencyTests(SSotAsyncTestCase):
         """Test service URL configuration consistency."""
         with IsolatedEnvironment() as env:
             auth_service_url = "http://auth-service:8001"
-            analytics_service_url = "http://analytics-service:8002"
+            analytics_service_url = "http://analytics-service:8090"
             backend_service_url = "http://backend-service:8000"
 
             env.set("AUTH_SERVICE_URL", auth_service_url)

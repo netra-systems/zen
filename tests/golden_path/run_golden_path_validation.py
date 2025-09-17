@@ -245,7 +245,7 @@ class GoldenPathValidationRunner:
             from shared.isolated_environment import IsolatedEnvironment
             env = IsolatedEnvironment()
             # Test basic functionality
-            test_value = env.get_env('PATH', 'default')
+            test_value = env.get('PATH', 'default')
             if not test_value:
                 raise Exception("Environment access not working")
         except ImportError:

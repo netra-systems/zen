@@ -581,6 +581,27 @@ async def setup_database_connections(app: FastAPI) -> None:
         
         if health_result['status'] == 'healthy':
             logger.info(" PASS:  DatabaseManager health check passed")
+            
+            # Warmup connection pool for better performance under load
+            try:
+                logger.info(" WARMUP:  Starting database connection pool warmup...")
+                warmup_result = await asyncio.wait_for(
+                    manager.warmup_connection_pool('primary'),
+                    timeout=30.0  # 30 second timeout for warmup
+                )
+                
+                successful_connections = warmup_result.get('successful_connections', 0)
+                target_connections = warmup_result.get('target_connections', 0)
+                
+                if successful_connections > 0:
+                    logger.info(f" PASS:  Connection pool warmup completed: {successful_connections}/{target_connections} connections")
+                else:
+                    logger.warning(f" WARNING: [U+FE0F] Connection pool warmup failed: {warmup_result.get('error', 'No connections established')}")
+                    
+            except asyncio.TimeoutError:
+                logger.warning(" WARNING: [U+FE0F] Connection pool warmup timed out - continuing without warmup")
+            except Exception as warmup_error:
+                logger.warning(f" WARNING: [U+FE0F] Connection pool warmup failed: {warmup_error}")
         else:
             logger.warning(f" WARNING: [U+FE0F] DatabaseManager health check warning: {health_result}")
             if not graceful_startup:

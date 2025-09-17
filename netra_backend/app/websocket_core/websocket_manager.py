@@ -122,7 +122,7 @@ def create_test_fallback_manager(user_context):
         _ssot_authorization_token=secrets.token_urlsafe(32)  # Stronger token for security
     )
 
-class _WebSocketManagerFactory:
+class _WSFactory:
     """
     Factory wrapper that enforces SSOT factory pattern usage.
 
@@ -206,9 +206,10 @@ class _WebSocketManagerFactory:
         factory_func = getattr(current_module, 'get_websocket_manager')
         return factory_func(user_context=user_context, **kwargs)
 
-# SSOT CONSOLIDATION: Export factory wrapper as WebSocketManager
-# This enforces factory pattern usage and prevents direct instantiation
-WebSocketManager = _WebSocketManagerFactory
+# SSOT CONSOLIDATION: Import and re-export unified manager for consistency
+# All WebSocketManager imports should resolve to the same class for SSOT compliance
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+WebSocketManager = UnifiedWebSocketManager
 
 # SSOT PHASE 2 FIX: Remove UnifiedWebSocketManager alias to eliminate duplication
 # CANONICAL LOCATION: Use 'from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager'

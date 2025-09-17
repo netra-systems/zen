@@ -7,8 +7,8 @@ CRITICAL: This is an SSOT compatibility layer that re-exports the unified WebSoc
 to maintain existing import paths while consolidating the actual implementation.
 
 PHASE 1 SSOT CONSOLIDATION: Now imports from canonical websocket_manager.py (SSOT)
-- Legacy: from netra_backend.app.websocket_core.manager import WebSocketManager  
-- SSOT: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+- Legacy: from netra_backend.app.websocket_core.manager import WebSocketManager
+- SSOT: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 Business Justification:
 - Maintains backward compatibility for existing tests and Golden Path functionality
@@ -21,7 +21,7 @@ import warnings
 # ISSUE #1182 REMEDIATION: Add deprecation warning for non-canonical imports
 warnings.warn(
     "ISSUE #1182: Importing from 'netra_backend.app.websocket_core.manager' is deprecated. "
-    "Use 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager' instead. "
+    "Use 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager' instead. "
     "This import path will be removed in Phase 2 of SSOT consolidation.",
     DeprecationWarning,
     stacklevel=2
@@ -29,15 +29,18 @@ warnings.warn(
 
 # ISSUE #824 REMEDIATION: Import from canonical SSOT path
 # SSOT CONSOLIDATION: websocket_manager.py is the canonical import point
-from netra_backend.app.websocket_core.canonical_import_patterns import (
-    UnifiedWebSocketManager,
+from netra_backend.app.websocket_core.websocket_manager import (
+    WebSocketManager as WebSocketManagerCanonical,
+    get_websocket_manager
+)
+from netra_backend.app.websocket_core.types import (
     WebSocketConnection,
     _serialize_message_safely,
     WebSocketManagerMode
 )
 
 # Create compatibility alias
-WebSocketManager = UnifiedWebSocketManager
+WebSocketManager = WebSocketManagerCanonical
 
 # Import protocol for type checking
 try:
@@ -55,11 +58,7 @@ except ImportError:
     WebSocketHeartbeatManager = None
 
 # Import the canonical get_websocket_manager function for deployment compatibility
-try:
-    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
-except ImportError:
-    # Fallback to direct manager instantiation if canonical import fails
-    get_websocket_manager = lambda user_context=None, **kwargs: UnifiedWebSocketManager()
+# Already imported above
 
 # Re-export for compatibility
 __all__ = [
@@ -67,7 +66,7 @@ __all__ = [
     'WebSocketConnection',
     'WebSocketManagerProtocol',
     '_serialize_message_safely',
-    'UnifiedWebSocketManager',
+    'WebSocketManagerCanonical',
     'WebSocketHeartbeat',
     'WebSocketHeartbeatManager',  # Compatibility alias
     'get_websocket_manager'  # Deployment compatibility

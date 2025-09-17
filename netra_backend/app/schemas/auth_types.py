@@ -22,7 +22,7 @@ Business Value Justification (BVJ):
 
 import warnings
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
@@ -292,7 +292,7 @@ class AuthErrorResponse(BaseModel):
     error_code: str
     message: str
     details: Optional[Dict[str, Any]] = None
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 @dataclass
@@ -346,7 +346,7 @@ class HealthResponse(BaseModel):
     service: str = "auth-service"
     version: str = "1.0.0"
     environment: str = "development"
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     redis_connected: Optional[bool] = None
     database_connected: Optional[bool] = None
 
@@ -435,7 +435,7 @@ class TokenExpiryNotification(BaseModel):
     warning_sent: bool = False
     notification_type: str = "expiry_warning"
     metadata: Dict[str, Any] = {}
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class AuditLog(BaseModel):
@@ -449,7 +449,7 @@ class AuditLog(BaseModel):
     success: bool
     error_message: Optional[str] = None
     metadata: Dict[str, Any] = {}
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 @dataclass

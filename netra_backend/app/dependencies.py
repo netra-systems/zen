@@ -351,7 +351,7 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
                 ],
                 "debugging_steps": [
                     "Check if SERVICE_SECRET is properly configured",
-                    "Verify JWT_SECRET configuration",
+                    "Verify JWT_SECRET_KEY configuration",
                     "Check authentication middleware logs",
                     "Verify database connection credentials",
                     "Check if service authentication context is working",
@@ -420,7 +420,7 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
                     next_steps=[
                         "Check authentication middleware logs",
                         "Verify SERVICE_SECRET configuration", 
-                        "Check JWT_SECRET consistency",
+                        "Check JWT_SECRET_KEY consistency",
                         "Validate system user authentication bypass",
                         "Review authentication dependency injection"
                     ]

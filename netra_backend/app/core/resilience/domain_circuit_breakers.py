@@ -4,7 +4,7 @@ Provides specialized circuit breaker configurations for various domains.
 """
 
 from typing import Dict, Any, Optional, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from enum import Enum
 from dataclasses import dataclass
 
@@ -107,7 +107,7 @@ class DomainCircuitBreaker:
         if self._state == CircuitBreakerState.OPEN:
             # Check if recovery timeout has passed
             if (self._last_failure_time and 
-                datetime.utcnow() - self._last_failure_time >= 
+                datetime.now(UTC) - self._last_failure_time >= 
                 timedelta(seconds=self.recovery_timeout_seconds)):
                 self._transition_to_half_open()
                 return True
@@ -137,7 +137,7 @@ class DomainCircuitBreaker:
         """Record a failed operation."""
         self._failure_count += 1
         self._total_calls += 1
-        self._last_failure_time = datetime.utcnow()
+        self._last_failure_time = datetime.now(UTC)
         
         logger.warning(f"{self.domain.value} circuit breaker '{self.name}' recorded failure: {error_message}")
         
@@ -324,7 +324,7 @@ class DomainCircuitBreakerManager:
             "circuit_breakers": status,
             "total_count": len(self._circuit_breakers),
             "domains": list(set(cb.domain for cb in self._circuit_breakers.values())),
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(UTC)
         }
     
     def get_domain_status(self, domain: DomainType) -> Dict[str, Any]:
@@ -353,7 +353,7 @@ class DomainCircuitBreakerManager:
                 "half_open": total_breakers - open_breakers - healthy_breakers,
                 "health_percentage": (healthy_breakers / max(total_breakers, 1)) * 100
             },
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(UTC)
         }
     
     def reset_circuit_breaker(self, domain: DomainType, name: str) -> bool:

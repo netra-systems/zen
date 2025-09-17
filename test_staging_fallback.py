@@ -24,7 +24,7 @@ def main():
     staging_env = {
         "USE_STAGING_FALLBACK": "true",
         "STAGING_WEBSOCKET_URL": "wss://api.staging.netrasystems.ai/ws",
-        "STAGING_JWT_SECRET": "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
+        "JWT_SECRET_KEY": "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
     }
     
     # Update environment

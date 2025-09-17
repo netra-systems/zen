@@ -229,7 +229,7 @@ def get_llm_events_table_schema(table_name: str) -> str:
 # Data model classes for ClickHouse records
 from dataclasses import dataclass
 from typing import Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 import uuid
 
 @dataclass
@@ -248,7 +248,7 @@ class EventRecord:
         """Create a new event record."""
         return cls(
             event_id=str(uuid.uuid4()),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             event_type=event_type,
             event_data=event_data,
             user_id=user_id,
@@ -272,7 +272,7 @@ class MetricsRecord:
         """Create a new metrics record."""
         return cls(
             metric_id=str(uuid.uuid4()),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             metric_name=metric_name,
             metric_value=metric_value,
             metric_unit=metric_unit,
@@ -297,7 +297,7 @@ class UserActivityRecord:
         """Create a new user activity record."""
         return cls(
             activity_id=str(uuid.uuid4()),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             user_id=user_id,
             activity_type=activity_type,
             activity_details=activity_details,

@@ -708,6 +708,44 @@ class IsolatedEnvironment:
                     self._env_cache[key] = None
                     return default
     
+    def get_env(self) -> 'IsolatedEnvironment':
+        """
+        Backward compatibility method for tests that call self.env.get_env().
+        
+        This method returns self to maintain compatibility with old test patterns
+        that used self.env.get_env().get(key) instead of self.env.get(key).
+        
+        Returns:
+            self: The same IsolatedEnvironment instance
+        """
+        return self
+    
+    def set_env(self, key: str, value: str, source: str = "unknown") -> bool:
+        """
+        Backward compatibility method for tests that call self.env.set_env().
+        
+        Args:
+            key: Environment variable name
+            value: Environment variable value
+            source: Source of the variable (for debugging)
+            
+        Returns:
+            True if variable was set successfully
+        """
+        return self.set(key, value, source)
+    
+    def unset_env(self, key: str) -> bool:
+        """
+        Backward compatibility method for tests that call self.env.unset_env().
+        
+        Args:
+            key: Environment variable name to remove
+            
+        Returns:
+            True if variable was removed successfully
+        """
+        return self.delete(key, source="test_unset")
+    
     def set(self, key: str, value: str, source: str = "unknown", force: bool = False) -> bool:
         """
         Set an environment variable with source tracking.
@@ -1323,9 +1361,9 @@ class IsolatedEnvironment:
         # Check for staging URL patterns (domain standardization fix)
         staging_url_indicators = [
             "staging.netrasystems.ai",
-            "api.staging.netrasystems.ai",
-            "auth.staging.netrasystems.ai",  # Legacy pattern support
-            "api.staging.netrasystems.ai",   # Legacy pattern support
+            "api-staging.netrasystems.ai",
+            "auth-staging.netrasystems.ai",  # Legacy pattern support
+            "api-staging.netrasystems.ai",   # Legacy pattern support
             "app.staging.netrasystems.ai"    # Legacy pattern support
         ]
 
@@ -1872,7 +1910,7 @@ class EnvironmentValidator:
         # Check for incorrect staging patterns
         incorrect_patterns = [
             ("localhost", "Localhost URLs not allowed in staging"),
-            ("staging.netrasystems.ai", "Should use api.staging.netrasystems.ai subdomain"),
+            ("staging.netrasystems.ai", "Should use api-staging.netrasystems.ai subdomain"),
             ("http://", "Should use HTTPS in staging")
         ]
         

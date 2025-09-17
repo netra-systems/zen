@@ -393,6 +393,19 @@ class SSotMockFactory:
         mock_manager.user_sessions = {}
         mock_manager.active_user_count = 0
         
+        # Additional WebSocket context attributes for SupervisorAgent testing
+        mock_manager.websocket_context = MagicMock()
+        mock_manager.user_context_registry = {}
+        mock_manager.connection_metadata = {}
+        mock_manager.event_dispatch_registry = MagicMock()
+        mock_manager.connection_lifecycle_manager = AsyncMock()
+        
+        # Agent execution context support
+        mock_manager.create_agent_execution_context = AsyncMock()
+        mock_manager.validate_agent_context = AsyncMock(return_value=True)
+        mock_manager.bind_agent_to_websocket = AsyncMock()
+        mock_manager.unbind_agent_from_websocket = AsyncMock()
+        
         # WebSocket factory methods for integration tests
         mock_manager.create_websocket_connection = AsyncMock()
         mock_manager.get_or_create_user_session = AsyncMock()

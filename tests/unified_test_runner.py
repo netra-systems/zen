@@ -944,6 +944,7 @@ class UnifiedTestRunner:
         self.docker_manager = None
         self.docker_environment = None
         self.docker_ports = None
+        self.docker_enabled = True  # Track whether Docker should be used for this test run
         
         # Test execution timeout fix for iterations 41-60
         from shared.isolated_environment import get_env
@@ -1411,18 +1412,28 @@ class UnifiedTestRunner:
     
     def _initialize_docker_environment(self, args, running_e2e: bool):
         """Initialize Docker environment - automatically starts services if needed."""
-        # Skip Docker for staging (uses remote services)
-        if self._detect_staging_environment(args):
+        # Skip Docker if explicitly disabled via command line (highest priority)
+        if hasattr(args, 'no_docker') and args.no_docker:
+            self.docker_enabled = False
+            print("[INFO] Docker explicitly disabled via --no-docker flag")
             return
         
-        # Skip Docker if explicitly disabled
+        # Skip Docker for staging (uses remote services)
+        if self._detect_staging_environment(args):
+            self.docker_enabled = False
+            print("[INFO] Docker disabled for staging environment - using remote services")
+            return
+        
+        # Skip Docker if explicitly disabled via environment variable
         env = get_env()
         if env.get('TEST_NO_DOCKER', 'false').lower() == 'true':
+            self.docker_enabled = False
             print("[INFO] Docker disabled via TEST_NO_DOCKER environment variable")
             return
         
         # Determine if Docker is actually needed based on test categories
         if not self._docker_required_for_tests(args, running_e2e):
+            self.docker_enabled = False
             print("[INFO] Docker not required for selected test categories")
             print("[INFO] Skipping all Docker operations (initialization, health checks, service management)")
             return
@@ -2078,7 +2089,7 @@ class UnifiedTestRunner:
             self.port_discovery = DockerPortDiscovery(use_test_services=True)
         
         # Update service URLs with centralized Docker manager ports (if available)
-        if CENTRALIZED_DOCKER_AVAILABLE and self.docker_manager and self.docker_ports and args.env != 'staging':
+        if CENTRALIZED_DOCKER_AVAILABLE and self.docker_enabled and self.docker_manager and self.docker_ports and args.env != 'staging':
             env = get_env()
             
             # Update PostgreSQL DATABASE_URL
@@ -5066,6 +5077,12 @@ def main():
     # This ensures environment isolation respects real services flag from the start
     running_e2e = (args.category in ['e2e', 'websocket', 'agent'] if args.category else False) or \
                   (args.categories and any(cat in ['e2e', 'websocket', 'agent'] for cat in args.categories))
+    
+    # CRITICAL: Auto-configure staging environment for e2e tests
+    if running_e2e and not args.env:
+        env.set('TEST_ENV', 'staging', 'e2e_auto_staging')
+        env.set('ENVIRONMENT', 'staging', 'e2e_auto_staging')
+        print(f"[INFO] Auto-configured staging environment for e2e tests")
     
     # WINDOWS SAFETY: Detect Windows and use safe runner for e2e tests
     import platform
