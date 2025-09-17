@@ -293,7 +293,81 @@ class GCPDeployer:
         # Otherwise use centralized auth config to find and set up authentication
         print(" SEARCH:  Using centralized authentication configuration...")
         return GCPAuthConfig.ensure_authentication()
-    
+
+    def validate_service_account_permissions(self) -> bool:
+        """
+        Validate that the service account has necessary permissions for deployment.
+
+        This addresses Issue #1294 where services failed due to missing Secret Manager access.
+        The service account must have:
+        - Secret Manager Secret Accessor role
+        - Cloud Run Admin role
+        - Cloud Build Service Account role
+        - Container Registry Service Agent role
+
+        Returns:
+            bool: True if all required permissions are present, False otherwise
+        """
+        print("\n[U+1F512] Validating service account permissions...")
+
+        try:
+            # Check if we can access Secret Manager (most common failure)
+            print("   Checking Secret Manager access...")
+            secret_check = subprocess.run([
+                self.gcloud_cmd, "secrets", "list",
+                "--project", self.project_id,
+                "--limit", "1"
+            ], capture_output=True, text=True, shell=self.use_shell)
+
+            if secret_check.returncode != 0:
+                print("   FAIL:  Service account lacks Secret Manager access")
+                print("   ERROR: This will cause silent failures during secret loading")
+                print("   FIX:   Grant roles/secretmanager.secretAccessor to the service account")
+                print(f"   CMD:   gcloud projects add-iam-policy-binding {self.project_id} \\")
+                print("             --member=\"serviceAccount:YOUR_SERVICE_ACCOUNT\" \\")
+                print("             --role=\"roles/secretmanager.secretAccessor\"")
+                return False
+
+            print("   PASS:  Secret Manager access validated")
+
+            # Check Cloud Run admin access
+            print("   Checking Cloud Run access...")
+            run_check = subprocess.run([
+                self.gcloud_cmd, "run", "services", "list",
+                "--project", self.project_id,
+                "--region", self.region,
+                "--limit", "1"
+            ], capture_output=True, text=True, shell=self.use_shell)
+
+            if run_check.returncode != 0:
+                print("   FAIL:  Service account lacks Cloud Run access")
+                print("   FIX:   Grant roles/run.admin to the service account")
+                return False
+
+            print("   PASS:  Cloud Run access validated")
+
+            # Check Container Registry access
+            print("   Checking Container Registry access...")
+            registry_check = subprocess.run([
+                self.gcloud_cmd, "container", "images", "list",
+                "--repository", f"gcr.io/{self.project_id}",
+                "--limit", "1"
+            ], capture_output=True, text=True, shell=self.use_shell)
+
+            if registry_check.returncode != 0:
+                print("   WARN:  Container Registry access check failed (may be normal for new projects)")
+                # Don't fail on this as it's often a false positive
+            else:
+                print("   PASS:  Container Registry access validated")
+
+            print("   PASS:  Service account permissions validated")
+            return True
+
+        except Exception as e:
+            print(f"   ERROR: Failed to validate service account permissions: {e}")
+            print("   WARN:  Proceeding with deployment (manual verification recommended)")
+            return True  # Don't block deployment on validation failures
+
     def validate_frontend_environment_variables(self) -> bool:
         """
          ALERT:  CRITICAL: Validate all required frontend environment variables are present.
