@@ -1838,97 +1838,20 @@ class WebSocketService {
           }, 1000);
           return;
         } else {
-          logger.warn('Failed to refresh ticket, falling back to JWT', {
+          logger.warn('Failed to refresh ticket - no JWT fallback available', {
             error: freshTicket.error,
             recoverable: freshTicket.recoverable
           });
-          // Fall through to JWT refresh if ticket refresh fails
+          // No JWT fallback available - end process here
         }
       } catch (error) {
-        logger.error('Ticket refresh failed, attempting JWT fallback', error as Error);
-        // Fall through to JWT refresh
+        logger.error('Ticket refresh failed - no JWT fallback available', error as Error);
+        // No JWT refresh available
       }
     }
     
-    // JWT token refresh logic
-    const now = Date.now();
-    const timeSinceLastRefresh = now - this.lastRefreshAttempt;
-    
-    // Respect the auth service's cooldown period to prevent spam
-    if (timeSinceLastRefresh < this.MIN_REFRESH_INTERVAL_MS) {
-      const waitTime = this.MIN_REFRESH_INTERVAL_MS - timeSinceLastRefresh;
-      logger.debug(`WebSocket: Waiting ${waitTime}ms before token refresh (cooldown)`, {
-        component: 'WebSocketService',
-        action: 'refresh_cooldown',
-        waitTime,
-        timeSinceLastRefresh
-      });
-      
-      // Schedule a delayed retry instead of immediate failure
-      setTimeout(() => {
-        this.attemptTokenRefreshAndReconnect();
-      }, waitTime);
-      return;
-    }
-    
-    this.lastRefreshAttempt = now;
-    
-    try {
-      const newToken = await this.options.refreshToken!();
-      if (newToken) {
-        logger.debug('Auth error recovery: refreshed token, attempting reconnection');
-        this.currentToken = newToken;
-        const newOptions = { ...this.options, token: newToken };
-        
-        // Reset reconnect attempts on successful refresh
-        this.reconnectAttempts = 0;
-        
-        // Wait a bit before reconnecting
-        setTimeout(() => {
-          this.connect(this.url, newOptions);
-        }, 1000);
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      
-      // Handle auth loop protection error specifically
-      if (errorMessage.includes('preventing auth loop') || errorMessage.includes('too soon')) {
-        logger.warn('WebSocket: Auth loop protection triggered, backing off', {
-          component: 'WebSocketService',
-          action: 'auth_loop_protection',
-          error: errorMessage
-        });
-        
-        // Exponential backoff for reconnection
-        this.reconnectAttempts++;
-        const backoffDelay = Math.min(
-          this.baseReconnectDelay * Math.pow(2, this.reconnectAttempts),
-          this.maxReconnectDelay
-        );
-        
-        logger.debug(`WebSocket: Scheduling retry in ${backoffDelay}ms (attempt ${this.reconnectAttempts})`, {
-          component: 'WebSocketService',
-          action: 'schedule_retry',
-          delay: backoffDelay,
-          attempt: this.reconnectAttempts
-        });
-        
-        // Schedule a retry with exponential backoff
-        setTimeout(() => {
-          if (this.reconnectAttempts < this.maxReconnectAttempts) {
-            this.attemptTokenRefreshAndReconnect();
-          } else {
-            logger.error('WebSocket: Max reconnection attempts reached, giving up', {
-              component: 'WebSocketService',
-              action: 'max_attempts_exceeded'
-            });
-          }
-        }, backoffDelay);
-      } else {
-        // Other errors - log and don't retry immediately
-        logger.error('Failed to refresh token for auth error recovery', error as Error);
-      }
-    }
+    // JWT refresh logic removed - only ticket authentication supported
+    logger.error('WebSocket: Authentication failed and no JWT fallback available');
   }
 
   /**
@@ -1983,10 +1906,10 @@ class WebSocketService {
     tokenRefreshEnabled: boolean;
   } {
     return {
-      isSecure: !!this.currentToken,
-      authMethod: this.currentToken ? 'subprotocol' : 'none',
-      hasToken: !!this.currentToken,
-      tokenRefreshEnabled: !!this.options.refreshToken
+      isSecure: !!this.options.useTicketAuth,
+      authMethod: this.options.useTicketAuth ? 'ticket' : 'none', 
+      hasToken: false, // JWT tracking removed
+      tokenRefreshEnabled: false // JWT refresh removed
     };
   }
 }
