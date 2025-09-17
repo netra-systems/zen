@@ -132,8 +132,8 @@ class ConcurrentUsersScalabilityTests(BaseIntegrationTest):
         # Shared auth config for scalability testing
         self.base_auth_config = E2EAuthConfig(
             auth_service_url="http://localhost:8083",
-            backend_url="http://localhost:8002",
-            websocket_url="ws://localhost:8002/ws",
+            backend_url="http://localhost:8000",
+            websocket_url="ws://localhost:8000/ws",
             timeout=30.0  # Longer timeout for scalability tests
         )
         
