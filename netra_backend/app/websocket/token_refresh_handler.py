@@ -16,7 +16,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 
 from netra_backend.app.auth_integration.auth import auth_client
 from netra_backend.app.core.configuration import get_configuration
-from netra_backend.app.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 logger = logging.getLogger(__name__)
 

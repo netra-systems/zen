@@ -14,14 +14,20 @@ Zen allows you to:
 While developing Netra Apex (commerical product)
 our small team has used billions of tokens and run 100s of parrallel claude code instances.
 During that process we got annoyed at the "cognitive overhead"
-of having 10s of terminals open and scrolling mountains of text.
+of each having 10s of terminals open per machine and scrolling mountains of text.
 Did the /command work or not? 
 
-What started as a simple way to make that process more peaceful turned into something we hope will be useful to the community.
-Surprisingly , the time that a command ran and it's presumed difficulty, often had little correlation with actual token usage.
-"Simple" git operations would sometimes eat 10x as many as complex issue resolution commands.
+What started as a simple way to make that process more peaceful turned into something we believe will be useful to the community.
 
 Further, as usage limits become more restrictive, getting up at odd hours just to feed the beast got old fast. So we added scheduling to run it at pre-defined times.
+
+Surprisingly, the duration that a command ran and it's presumed difficulty, often had little correlation with actual token usage.
+"Simple" git operations would sometimes eat 10x as many as complex issue resolution commands.
+
+The market is moving quickly, codex is getting better and other Code CLIs are coming. How effective a code factory is matters. This V1 alpha is just the start of codifying code CLI dev practices and progressing from alchemy to engineering.
+
+Our intent is for Zen to remain OSS, and businesses can seemlessly use Zen with Netra Apex (Commercial Product) for the most effective usage and control of AI spend.
+
 
 ## Quick Start (TBD replaced with path command)
 
