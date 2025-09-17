@@ -40,19 +40,20 @@ As we primarily using structured commands, internally we see 80%+ of our usage t
 Ad hoc questions or validating if a command is working as expected for now is better through Claude directly.
 
 3. What does this assume?
-You have claude code installed, authenticated, and configured already.
-All existing config stays the same unless expressly defined in Zen.
+- You have claude code installed, authenticated, and configured already.
+- All existing config stays the same unless expressly defined in Zen.
 e.g. if your have your model set to Opus and don't change it per command in Zen, then all
-Zen Claude instances use Opus.
+Claude Zen instances use Opus.
 
 4. How do I know if it's working?
-Each command returns fairly clear overall statuses.
-You can also see the duration and token usage.
-By default, each command outputs a truncated version of the output to the console.
-You can optionaly choose to save a report of all output to .json
+- Each command returns fairly clear overall statuses.
+- Budget states etc. are logged.
+- You can also see the duration and token usage.
+- By default, each command outputs a truncated version of the output to the console.
+- You can optionaly choose to save a report of all output to .json
 
 5. Data privacy?
-At this moment zero data is collected. Our intent is to have an opt-out system where (optionally) non-PII usage data is sent to Netra for exclusively aggregated metadata level use to help make our spend management system better.
+At this moment zero data is collected. Our intent is to add an optionaly system where non-PII usage data is sent to Netra for exclusively aggregated metadata level use to help make our spend management system better. (So you can get more from your AI spend!)
 
 
 ## Quick Start (TBD replaced with path command)
