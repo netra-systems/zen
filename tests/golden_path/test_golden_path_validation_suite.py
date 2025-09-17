@@ -61,9 +61,9 @@ class TestGoldenPathValidation(SSotAsyncTestCase):
     Focus on actual user experience and business value delivery
     """
 
-    async def setup_method(self, method):
+    async def asyncSetUp(self):
         """Set up golden path validation test environment"""
-        await super().async_setup_method(method)
+        await super().asyncSetUp()
         
         self.env = IsolatedEnvironment()
         self.websocket_utility = WebSocketTestUtility()

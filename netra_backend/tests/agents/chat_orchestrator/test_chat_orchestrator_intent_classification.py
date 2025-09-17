@@ -296,12 +296,12 @@ class ChatOrchestratorIntentClassificationTests(SSotAsyncTestCase, unittest.Test
         super().tearDown()
 
 
-class IntentClassifierEdgeCasesTests(SSotAsyncTestCase):
+class IntentClassifierEdgeCasesTests(SSotAsyncTestCase, unittest.TestCase):
     """Test edge cases and error scenarios for intent classification."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment for edge case testing."""
-        await super().setUp()
+        super().setUp()
         self.llm_manager = LLMManager()
         self.intent_classifier = IntentClassifier(self.llm_manager)
 
