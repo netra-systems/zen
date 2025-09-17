@@ -1617,6 +1617,20 @@ class ClaudeInstanceOrchestrator:
                 elif 'cell' in content_lower and ('executed' in content_lower or 'output' in content_lower):
                     return 'NotebookEdit'
 
+                # Edit operations
+                elif 'file has been updated' in content_lower or 'result of running' in content_lower:
+                    return 'Edit'
+                elif 'edit' in content_lower and ('success' in content_lower or 'updated' in content_lower):
+                    return 'Edit'
+
+                # Multi-edit operations
+                elif 'edits have been applied' in content_lower or 'multi' in content_lower and 'edit' in content_lower:
+                    return 'MultiEdit'
+
+                # Glob operations (file pattern matching)
+                elif 'files found' in content_lower or content.count('\n') > 10 and '/' in content:
+                    return 'Glob'
+
                 # Generic file operations
                 elif len(content) > 1000 and any(word in content_lower for word in ['function', 'class', 'import', 'def']):
                     return 'Read'
