@@ -21,7 +21,8 @@ COPY auth_service/ ./auth_service/
 COPY netra_backend/app/services/monitoring/ ./netra_backend/app/services/monitoring/
 
 # CloudEnvironmentDetector import validation (Issue #1305)
-RUN python -c "from netra_backend.app.core.environment_context.cloud_environment_detector import CloudEnvironmentDetector; print('✅ CloudEnvironmentDetector import validation successful')" || (echo "❌ CloudEnvironmentDetector import failed" && exit 1)
+RUN ls -la /app/netra_backend/app/core/environment_context/ && \
+    python -c "import sys; sys.path.insert(0, '/app'); import netra_backend.app.core.environment_context.cloud_environment_detector as ced; print('✅ CloudEnvironmentDetector module found and importable'); print(f'✅ CloudEnvironmentDetector class available: {hasattr(ced, \"CloudEnvironmentDetector\")}')" || (echo "❌ CloudEnvironmentDetector import failed" && exit 1)
 
 # Set environment variables
 ENV PYTHONPATH=/app
