@@ -53,23 +53,8 @@ class ComprehensiveImportFixerV2:
             original_content = content
             modified = False
             
-            # Fix DataSubAgentClickHouseOperations import
-            if 'DataSubAgentClickHouseOperations' in content:
-                # This class doesn't exist, comment it out
-                content = re.sub(
-                    r'^from netra_backend\.app\.services\.corpus\.clickhouse_operations import DataSubAgentClickHouseOperations.*$',
-                    r'# FIXME: DataSubAgentClickHouseOperations not available\n# \g<0>',
-                    content,
-                    flags=re.MULTILINE
-                )
-                # Also comment out any usage
-                content = re.sub(
-                    r'^(\s*)(.*)DataSubAgentClickHouseOperations',
-                    r'\1# FIXME: \2DataSubAgentClickHouseOperations',
-                    content,
-                    flags=re.MULTILINE
-                )
-                modified = True
+            # DataSubAgentClickHouseOperations import is now available (resolved)
+            # Removed FIXME logic - class is properly aliased in clickhouse_operations.py
             
             # Fix ExecutionEngine import 
             if 'from netra_backend.app.services.unified_tool_registry.execution_engine import ExecutionEngine' in content:
