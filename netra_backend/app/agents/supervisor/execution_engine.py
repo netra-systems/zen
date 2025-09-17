@@ -10,14 +10,10 @@ by providing the expected import path while redirecting to SSOT implementation.
 
 # PHASE 1 GOLDEN PATH REMEDIATION: Add required SSOT imports for test compliance
 from shared.logging.unified_logging_ssot import get_logger
-from netra_backend.app.core.configuration.base import get_config
+from netra_backend.app.config import get_config  # SSOT UnifiedConfigManager
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-<<<<<<< HEAD
-from netra_backend.app.services.unified_authentication_service import get_unified_auth_service
-=======
 # ISSUE #1177 FIX: Remove cross-service import, auth integration handles token validation
->>>>>>> 676d97d9a0cae0ef51f70704c13a477b77a305a7
 
 # SSOT REDIRECTION: Import from consolidated implementation
 from netra_backend.app.agents.execution_engine_consolidated import *

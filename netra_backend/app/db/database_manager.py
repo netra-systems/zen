@@ -29,7 +29,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncEngin
 from sqlalchemy.pool import NullPool, AsyncAdaptedQueuePool
 from sqlalchemy import text
 
-from netra_backend.app.core.config import get_config
+from netra_backend.app.config import get_config  # SSOT UnifiedConfigManager
 from shared.database_url_builder import DatabaseURLBuilder
 from shared.isolated_environment import get_env
 
