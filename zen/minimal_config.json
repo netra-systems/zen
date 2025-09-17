@@ -1,7 +1,7 @@
 {
   "instances": [
     {
-      "command": "/gitcommitgardener; do not commit the calude_instance_results.json filea",
+      "command": "/gitcommitgardener gruop and commit",
       "name": "git-commit-gardener",
       "description": "Maintains git commit hygiene and standards",
       "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],

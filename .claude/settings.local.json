@@ -16,7 +16,9 @@
       "WebSearch",
       "Bash(python -m pytest tests/ -v)",
       "Bash(python tests/test_pricing_engine.py)",
-      "Bash(python tests/test_agent_interface.py)"
+      "Bash(python tests/test_agent_interface.py)",
+      "Bash(kill:*)",
+      "Bash(python test_tool_detection.py:*)"
     ],
     "deny": [],
     "ask": []

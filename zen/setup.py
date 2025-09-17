@@ -1,5 +1,5 @@
 """
-Setup script for Netra Orchestrator Client
+Setup script for ZEN - Multi-Instance Claude Orchestrator
 """
 from setuptools import setup, find_packages
 
@@ -7,13 +7,13 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="netra-orchestrator-client",
+    name="zen-orchestrator",
     version="1.0.0",
     author="Netra Systems",
-    description="A standalone service for orchestrating multiple Claude Code instances",
+    description="Multi-instance Claude orchestrator for parallel task execution",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    py_modules=["claude_instance_orchestrator"],
+    py_modules=["zen_orchestrator"],
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -39,7 +39,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "netra-orchestrator=claude_instance_orchestrator:main",
+            "zen=zen_orchestrator:main",
         ],
     },
     include_package_data=True,
