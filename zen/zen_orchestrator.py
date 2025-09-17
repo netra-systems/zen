@@ -1561,24 +1561,67 @@ class ClaudeInstanceOrchestrator:
             content = tool_result.get('content', '')
             if isinstance(content, str):
                 # Look for common tool patterns in the output
-                if 'list_dir' in content.lower() or 'total ' in content and '\n-' in content:
-                    return 'list_dir'
-                elif 'rw-r--r--' in content or 'drwxr-xr-x' in content:
-                    return 'list_files'
-                elif content.startswith('total ') and '\n-rw' in content:
-                    return 'ls'
-                elif 'searched' in content.lower() or 'found' in content.lower():
-                    return 'search'
-                elif 'file content' in content.lower() or len(content) > 1000:
-                    return 'read_file'
-                elif 'created' in content.lower() or 'written' in content.lower():
-                    return 'write_file'
-                elif 'command' in content.lower() or 'executed' in content.lower():
-                    return 'bash'
-                elif content.startswith('<!DOCTYPE') or content.startswith('<html'):
-                    return 'web_fetch'
-                elif 'error' in content.lower() and 'permissions' in content.lower():
+                content_lower = content.lower()
+
+                # MCP tools
+                if 'claude requested permissions' in content_lower:
+                    if 'mcp__' in content:
+                        # Extract MCP tool name from permission message
+                        import re
+                        mcp_match = re.search(r'mcp__[a-zA-Z_]+__[a-zA-Z_]+', content)
+                        if mcp_match:
+                            return mcp_match.group(0)
                     return 'permission_request'
+
+                # Todo management
+                elif 'todos have been modified' in content_lower or 'todo list' in content_lower:
+                    return 'TodoWrite'
+
+                # Task/Agent spawning
+                elif 'agent' in content_lower and ('completed' in content_lower or 'spawned' in content_lower):
+                    return 'Task'
+
+                # File operations
+                elif 'file created successfully' in content_lower or 'file written' in content_lower:
+                    return 'Write'
+                elif content.startswith('#!/usr/bin/env') or 'import ' in content or 'def ' in content:
+                    return 'Read'
+                elif 'list_dir' in content_lower or ('total ' in content and '\n-' in content):
+                    return 'Glob'  # Often directory listing
+                elif 'rw-r--r--' in content or 'drwxr-xr-x' in content:
+                    return 'Bash'  # ls command output
+                elif content.startswith('total ') and '\n-rw' in content:
+                    return 'Bash'  # ls command
+
+                # Search operations
+                elif 'matches found' in content_lower or 'pattern' in content_lower:
+                    return 'Grep'
+                elif 'searched' in content_lower or 'found' in content_lower:
+                    return 'Search'
+
+                # Web operations
+                elif content.startswith('<!DOCTYPE') or content.startswith('<html'):
+                    return 'WebFetch'
+                elif 'http' in content_lower and ('request' in content_lower or 'response' in content_lower):
+                    return 'WebFetch'
+
+                # Command execution
+                elif 'command' in content_lower or 'executed' in content_lower or content.startswith('$'):
+                    return 'Bash'
+
+                # Code execution results
+                elif 'traceback' in content_lower or 'error:' in content_lower:
+                    return 'Execute'
+
+                # Notebook operations
+                elif 'cell' in content_lower and ('executed' in content_lower or 'output' in content_lower):
+                    return 'NotebookEdit'
+
+                # Generic file operations
+                elif len(content) > 1000 and any(word in content_lower for word in ['function', 'class', 'import', 'def']):
+                    return 'Read'
+                elif len(content) > 500:
+                    return 'Read'  # Likely file content
 
             # Check for error indicators that might suggest the tool type
             if tool_result.get('is_error'):
