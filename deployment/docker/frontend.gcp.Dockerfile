@@ -5,7 +5,7 @@ WORKDIR /app
 # Copy package files first for better caching
 COPY frontend/package*.json ./
 # Use npm install to handle potential lock file inconsistencies
-RUN npm install --no-audit
+RUN npm install --no-audit --legacy-peer-deps
 
 # Copy all frontend source files
 # The .dockerignore file handles exclusions (node_modules, tests, etc.)
