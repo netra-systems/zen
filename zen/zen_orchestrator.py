@@ -1204,13 +1204,31 @@ class ClaudeInstanceOrchestrator:
                 if 'total_tokens' in usage_data:
                     total = int(usage_data['total_tokens'])
                     prev_total = status.total_tokens
-                    status.total_tokens = max(status.total_tokens, total)
-                    logger.debug(f"🎯 TOTAL from 'total_tokens': {prev_total} → {status.total_tokens}")
+
+                    # BUDGET FIX: Handle both cumulative and individual message tokens
+                    # If this looks like individual message tokens (has message_id), accumulate
+                    # If this looks like cumulative session tokens (no message_id), use max
+                    if message_id:
+                        # Individual message - accumulate if it represents new work
+                        status.total_tokens += total
+                        logger.debug(f"🎯 TOTAL from 'total_tokens' (individual): {prev_total} + {total} → {status.total_tokens}")
+                    else:
+                        # Cumulative session total - use max to handle running totals
+                        status.total_tokens = max(status.total_tokens, total)
+                        logger.debug(f"🎯 TOTAL from 'total_tokens' (cumulative): {prev_total} → {status.total_tokens}")
                 elif 'total' in usage_data:  # Alternative format
                     total = int(usage_data['total'])
                     prev_total = status.total_tokens
-                    status.total_tokens = max(status.total_tokens, total)
-                    logger.debug(f"🎯 TOTAL from 'total': {prev_total} → {status.total_tokens}")
+
+                    # BUDGET FIX: Same logic for alternative format
+                    if message_id:
+                        # Individual message - accumulate
+                        status.total_tokens += total
+                        logger.debug(f"🎯 TOTAL from 'total' (individual): {prev_total} + {total} → {status.total_tokens}")
+                    else:
+                        # Cumulative session total - use max
+                        status.total_tokens = max(status.total_tokens, total)
+                        logger.debug(f"🎯 TOTAL from 'total' (cumulative): {prev_total} → {status.total_tokens}")
                 else:
                     # Calculate total from components if not provided
                     calculated_total = (status.input_tokens + status.output_tokens +
@@ -1355,24 +1373,32 @@ class ClaudeInstanceOrchestrator:
                                             logger.debug(f"🔧 TOOL USE FROM USER CONTENT: {tool_name}")
                             return True
 
-            # Handle direct token fields at root level (without message ID - always accumulate)
+            # Handle direct token fields at root level (without message ID - treat as individual message tokens)
             token_fields_found = False
             if not message_id:  # Only process these if no message ID (prevents double counting)
                 if 'input_tokens' in json_data:
-                    status.input_tokens = max(status.input_tokens, int(json_data['input_tokens']))
+                    # BUDGET FIX: For direct fields without message_id, accumulate as individual messages
+                    new_input = int(json_data['input_tokens'])
+                    status.input_tokens += new_input
                     token_fields_found = True
+                    logger.debug(f"🎯 DIRECT input_tokens: +{new_input} → {status.input_tokens}")
                 if 'output_tokens' in json_data:
-                    status.output_tokens = max(status.output_tokens, int(json_data['output_tokens']))
+                    new_output = int(json_data['output_tokens'])
+                    status.output_tokens += new_output
                     token_fields_found = True
+                    logger.debug(f"🎯 DIRECT output_tokens: +{new_output} → {status.output_tokens}")
                 if 'cached_tokens' in json_data:
                     cached_total = int(json_data['cached_tokens'])
-                    status.cache_read_tokens = max(status.cache_read_tokens, cached_total)
+                    status.cache_read_tokens += cached_total  # Accumulate cache tokens too
                     self._update_cache_tokens_for_compatibility(status)
                     token_fields_found = True
+                    logger.debug(f"🎯 DIRECT cached_tokens: +{cached_total} → {status.cache_read_tokens}")
                 if 'total_tokens' in json_data:
                     total = int(json_data['total_tokens'])
-                    status.total_tokens = max(status.total_tokens, total)
+                    prev_total = status.total_tokens
+                    status.total_tokens += total  # Accumulate total tokens
                     token_fields_found = True
+                    logger.debug(f"🎯 DIRECT total_tokens: {prev_total} + {total} → {status.total_tokens}")
                 if 'tool_calls' in json_data and isinstance(json_data['tool_calls'], (int, float)):
                     status.tool_calls += int(json_data['tool_calls'])
                     token_fields_found = True
@@ -1607,6 +1633,21 @@ class ClaudeInstanceOrchestrator:
 
                 # Command execution
                 elif 'command' in content_lower or 'executed' in content_lower or content.startswith('$'):
+                    return 'Bash'
+
+                # Git command outputs
+                elif any(git_pattern in content_lower for git_pattern in [
+                    'on branch', 'nothing to commit', 'git pull', 'working tree clean',
+                    'commit', 'staged', 'untracked files', 'changes not staged',
+                    'your branch', 'ahead of', 'behind', 'diverged'
+                ]):
+                    return 'Bash'
+
+                # Other common command outputs
+                elif any(cmd_pattern in content_lower for cmd_pattern in [
+                    'permission denied', 'no such file or directory', 'command not found',
+                    'usage:', 'process completed', 'exit code', 'killed', 'terminated'
+                ]):
                     return 'Bash'
 
                 # Code execution results
