@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "metrics",
-    "generated_at": "2025-09-16T14:59:20.490288",
-    "root_directory": "C:\\netra-apex",
-    "total_literals": 318
+    "generated_at": "2025-09-17T09:05:41.693317",
+    "root_directory": "C:\\GitHub\\netra-apex",
+    "total_literals": 322
   },
   "literals": {
     "AND timestamp >= now() - INTERVAL 1 HOUR\n        GROUP BY time_bucket\n        ORDER BY time_bucket": {
@@ -41,7 +41,7 @@
       "locations": [
         "netra_backend/app/websocket_core/canonical_imports.py:229",
         "netra_backend/app/websocket_core/canonical_imports.py:238",
-        "netra_backend/app/websocket_core/unified_manager.py:4197"
+        "netra_backend/app/websocket_core/unified_manager_backup.py:4197"
       ]
     },
     "_count": {
@@ -58,16 +58,16 @@
       "value": "_error_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/websocket_core/unified_manager.py:4092",
-        "netra_backend/app/websocket_core/unified_manager.py:4093",
-        "netra_backend/app/websocket_core/unified_manager.py:4196"
+        "netra_backend/app/websocket_core/unified_manager_backup.py:4092",
+        "netra_backend/app/websocket_core/unified_manager_backup.py:4093",
+        "netra_backend/app/websocket_core/unified_manager_backup.py:4196"
       ]
     },
     "_private_error_count": {
       "value": "_private_error_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/websocket_core/unified_manager.py:3684"
+        "netra_backend/app/websocket_core/unified_manager_backup.py:3684"
       ]
     },
     "_seconds_count": {
@@ -127,12 +127,12 @@
       "value": "active_alerts_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/api/slo_endpoints.py:120",
-        "netra_backend/app/api/slo_endpoints.py:240",
-        "netra_backend/app/api/slo_endpoints.py:240",
+        "netra_backend/app/api/slo_endpoints.py:121",
+        "netra_backend/app/api/slo_endpoints.py:241",
+        "netra_backend/app/api/slo_endpoints.py:241",
         "netra_backend/app/monitoring/performance_alerting.py:207",
         "netra_backend/app/monitoring/websocket_alert_system.py:911",
-        "netra_backend/app/services/slo_monitoring.py:482"
+        "netra_backend/app/services/slo_monitoring.py:483"
       ]
     },
     "active_count": {
@@ -184,12 +184,12 @@
         "netra_backend/app/database/request_scoped_session_factory.py:240",
         "netra_backend/app/database/request_scoped_session_factory.py:361",
         "netra_backend/app/db/database_manager.py:67",
-        "netra_backend/app/db/database_manager.py:281",
-        "netra_backend/app/db/database_manager.py:310",
-        "netra_backend/app/db/database_manager.py:412",
-        "netra_backend/app/db/database_manager.py:427",
-        "netra_backend/app/db/database_manager.py:432",
-        "netra_backend/app/db/database_manager.py:432"
+        "netra_backend/app/db/database_manager.py:332",
+        "netra_backend/app/db/database_manager.py:361",
+        "netra_backend/app/db/database_manager.py:463",
+        "netra_backend/app/db/database_manager.py:478",
+        "netra_backend/app/db/database_manager.py:483",
+        "netra_backend/app/db/database_manager.py:483"
       ]
     },
     "affected_users_count": {
@@ -220,7 +220,7 @@
       "value": "agent_events_total",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:1375"
+        "netra_backend/app/routes/websocket_ssot.py:1423"
       ]
     },
     "agent_execution_count": {
@@ -242,14 +242,14 @@
       "value": "alert_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/monitoring/configuration_drift_alerts.py:916",
-        "netra_backend/app/monitoring/configuration_drift_alerts.py:930",
-        "netra_backend/app/monitoring/configuration_drift_alerts.py:966",
-        "netra_backend/app/monitoring/staging_health_monitor.py:882",
+        "netra_backend/app/monitoring/configuration_drift_alerts.py:917",
+        "netra_backend/app/monitoring/configuration_drift_alerts.py:931",
+        "netra_backend/app/monitoring/configuration_drift_alerts.py:967",
+        "netra_backend/app/monitoring/staging_health_monitor.py:883",
         "netra_backend/app/routes/monitoring.py:566",
         "netra_backend/app/routes/monitoring.py:585",
-        "netra_backend/app/routes/staging_health.py:855",
-        "netra_backend/app/routes/staging_health.py:855",
+        "netra_backend/app/routes/staging_health.py:856",
+        "netra_backend/app/routes/staging_health.py:856",
         "scripts/staging_health_checks.py:712",
         "scripts/staging_health_checks.py:732"
       ]
@@ -338,15 +338,15 @@
       "value": "cancelled_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/services/billing/revenue_calculator.py:249",
-        "netra_backend/app/services/billing/revenue_calculator.py:253"
+        "netra_backend/app/services/billing/revenue_calculator.py:250",
+        "netra_backend/app/services/billing/revenue_calculator.py:254"
       ]
     },
     "change_callbacks_count": {
       "value": "change_callbacks_count",
       "category": "metrics",
       "locations": [
-        "shared/isolated_environment.py:1568"
+        "shared/isolated_environment.py:1606"
       ]
     },
     "chunk_count": {
@@ -454,8 +454,8 @@
       "category": "metrics",
       "locations": [
         "netra_backend/app/core/user_factory_coordinator.py:150",
-        "netra_backend/app/monitoring/staging_health_monitor.py:826",
-        "netra_backend/app/routes/staging_health.py:411"
+        "netra_backend/app/monitoring/staging_health_monitor.py:827",
+        "netra_backend/app/routes/staging_health.py:412"
       ]
     },
     "components_count": {
@@ -469,7 +469,7 @@
       "value": "components_total",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/routes/staging_health.py:458",
+        "netra_backend/app/routes/staging_health.py:459",
         "scripts/staging_health_checks.py:374",
         "scripts/staging_health_checks.py:391"
       ]
@@ -497,10 +497,12 @@
         "netra_backend/app/core/shared_health_types.py:106",
         "netra_backend/app/db/observability_collectors.py:33",
         "netra_backend/app/services/infrastructure_resilience.py:384",
-        "netra_backend/app/websocket_core/unified_manager.py:3676",
-        "netra_backend/app/websocket_core/unified_manager.py:3781",
-        "netra_backend/app/websocket_core/unified_manager.py:3797",
-        "netra_backend/app/websocket_core/unified_manager.py:4225"
+        "netra_backend/app/websocket_core/message_validator.py:331",
+        "netra_backend/app/websocket_core/simple_websocket_creation.py:178",
+        "netra_backend/app/websocket_core/unified_manager_backup.py:3676",
+        "netra_backend/app/websocket_core/unified_manager_backup.py:3781",
+        "netra_backend/app/websocket_core/unified_manager_backup.py:3797",
+        "netra_backend/app/websocket_core/unified_manager_backup.py:4225"
       ]
     },
     "contamination_prevention_count": {
@@ -591,11 +593,11 @@
       "category": "metrics",
       "locations": [
         "netra_backend/app/core/environment_validator.py:276",
-        "netra_backend/app/infrastructure/drift_detection.py:367",
-        "netra_backend/app/infrastructure/drift_detection.py:386",
-        "netra_backend/app/infrastructure/drift_detection.py:402",
-        "netra_backend/app/infrastructure/drift_detection.py:452",
-        "netra_backend/app/infrastructure/drift_detection.py:576",
+        "netra_backend/app/infrastructure/drift_detection.py:349",
+        "netra_backend/app/infrastructure/drift_detection.py:368",
+        "netra_backend/app/infrastructure/drift_detection.py:384",
+        "netra_backend/app/infrastructure/drift_detection.py:434",
+        "netra_backend/app/infrastructure/drift_detection.py:558",
         "netra_backend/app/routes/factory_compliance_reports.py:92",
         "netra_backend/app/routes/monitoring.py:586",
         "scripts/automated_error_remediation.py:56",
@@ -606,10 +608,10 @@
       "value": "critical_drift_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/monitoring/configuration_drift_alerts.py:290",
-        "netra_backend/app/monitoring/configuration_drift_alerts.py:604",
+        "netra_backend/app/monitoring/configuration_drift_alerts.py:291",
+        "netra_backend/app/monitoring/configuration_drift_alerts.py:605",
         "netra_backend/app/monitoring/configuration_drift_monitor.py:704",
-        "netra_backend/app/monitoring/unified_configuration_monitoring.py:409",
+        "netra_backend/app/monitoring/unified_configuration_monitoring.py:410",
         "scripts/validate_configuration_drift_monitoring.py:309",
         "scripts/validate_drift_monitoring_simple.py:307"
       ]
@@ -625,7 +627,7 @@
       "value": "critical_issues_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/infrastructure/service_auth_config.py:312",
+        "netra_backend/app/infrastructure/service_auth_config.py:316",
         "scripts/compliance_validation_ci.py:323"
       ]
     },
@@ -656,7 +658,7 @@
       "value": "databases_total",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/routes/staging_health.py:525",
+        "netra_backend/app/routes/staging_health.py:526",
         "scripts/staging_health_checks.py:410",
         "scripts/staging_health_checks.py:427",
         "scripts/staging_health_checks.py:953",
@@ -740,7 +742,7 @@
       "value": "drift_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/monitoring/unified_configuration_monitoring.py:408"
+        "netra_backend/app/monitoring/unified_configuration_monitoring.py:409"
       ]
     },
     "enabled_rules_count": {
@@ -769,7 +771,7 @@
         "netra_backend/app/core/agent_execution_tracker.py:774",
         "netra_backend/app/core/agent_execution_tracker.py:775",
         "netra_backend/app/core/configuration/startup_validator.py:167",
-        "netra_backend/app/core/managers/unified_lifecycle_manager.py:990",
+        "netra_backend/app/core/managers/unified_lifecycle_manager.py:991",
         "netra_backend/app/core/system_health_monitor.py:248"
       ]
     },
@@ -777,7 +779,8 @@
       "value": "errors_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/agents/base_agent.py:2008"
+        "netra_backend/app/agents/base_agent.py:2054",
+        "netra_backend/app/monitoring/authentication_monitor_service.py:376"
       ]
     },
     "escalation_count": {
@@ -812,7 +815,7 @@
       "value": "events_sent_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/websocket_core/unified_emitter.py:847"
+        "netra_backend/app/websocket_core/unified_emitter.py:871"
       ]
     },
     "evidence_count": {
@@ -834,7 +837,8 @@
       "value": "existing_connections_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/websocket_core/unified_manager.py:598"
+        "netra_backend/app/websocket_core/connection_validator.py:249",
+        "netra_backend/app/websocket_core/unified_manager_backup.py:598"
       ]
     },
     "exporters_count": {
@@ -848,7 +852,7 @@
       "value": "extraction_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/websocket_core/user_context_extractor.py:504"
+        "netra_backend/app/websocket_core/user_context_extractor.py:554"
       ]
     },
     "factories_count": {
@@ -993,8 +997,8 @@
       "value": "gc_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/services/user_execution_context.py:471",
-        "netra_backend/app/services/user_execution_context.py:478"
+        "netra_backend/app/services/user_execution_context.py:472",
+        "netra_backend/app/services/user_execution_context.py:479"
       ]
     },
     "generic_phrase_count": {
@@ -1005,6 +1009,13 @@
         "netra_backend/app/routes/quality_validation_utils.py:58"
       ]
     },
+    "get_active_connection_count": {
+      "value": "get_active_connection_count",
+      "category": "metrics",
+      "locations": [
+        "netra_backend/app/monitoring/authentication_monitor_service.py:254"
+      ]
+    },
     "get_active_connections_count": {
       "value": "get_active_connections_count",
       "category": "metrics",
@@ -1012,11 +1023,18 @@
         "scripts/validate_ssot_progress.py:39"
       ]
     },
+    "get_active_user_count": {
+      "value": "get_active_user_count",
+      "category": "metrics",
+      "locations": [
+        "netra_backend/app/websocket_core/simple_websocket_creation.py:381"
+      ]
+    },
     "get_connection_count": {
       "value": "get_connection_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/core/managers/unified_lifecycle_manager.py:643",
+        "netra_backend/app/core/managers/unified_lifecycle_manager.py:644",
         "scripts/P0_SYSTEM_REGRESSION_TEST.py:67",
         "scripts/validate_ssot_progress.py:75"
       ]
@@ -1058,7 +1076,7 @@
       "value": "headers_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:574",
+        "netra_backend/app/routes/websocket_ssot.py:572",
         "netra_backend/app/services/unified_authentication_service.py:463",
         "netra_backend/app/websocket_core/unified_websocket_auth.py:460",
         "shared/cors_config_builder.py:621"
@@ -1068,7 +1086,7 @@
       "value": "health_snapshots_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/websocket_core/unified_emitter.py:1532"
+        "netra_backend/app/websocket_core/unified_emitter.py:1556"
       ]
     },
     "healthy_count": {
@@ -1189,8 +1207,8 @@
       "value": "info_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/infrastructure/drift_detection.py:365",
-        "netra_backend/app/infrastructure/drift_detection.py:382",
+        "netra_backend/app/infrastructure/drift_detection.py:347",
+        "netra_backend/app/infrastructure/drift_detection.py:364",
         "scripts/check_config_before_deploy.py:291",
         "scripts/check_config_before_deploy.py:354"
       ]
@@ -1246,8 +1264,8 @@
       "value": "isolated_vars_count",
       "category": "metrics",
       "locations": [
-        "shared/configuration/central_config_validator.py:575",
-        "shared/isolated_environment.py:1564"
+        "shared/configuration/central_config_validator.py:631",
+        "shared/isolated_environment.py:1602"
       ]
     },
     "isolation_policies_count": {
@@ -1277,13 +1295,6 @@
       "locations": [
         "scripts/intelligent_docker_remediation.py:1094",
         "scripts/intelligent_docker_remediation.py:1187"
-      ]
-    },
-    "key_insights_count": {
-      "value": "key_insights_count",
-      "category": "metrics",
-      "locations": [
-        "netra_backend/app/agents/summary_extractor_sub_agent.py:375"
       ]
     },
     "kpis_count": {
@@ -1373,8 +1384,8 @@
       "value": "measurements_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/api/slo_endpoints.py:83",
-        "netra_backend/app/monitoring/staging_health_monitor.py:559"
+        "netra_backend/app/api/slo_endpoints.py:84",
+        "netra_backend/app/monitoring/staging_health_monitor.py:560"
       ]
     },
     "medium_confidence_count": {
@@ -1524,7 +1535,7 @@
       "value": "metric_types_included",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/routes/staging_health.py:249"
+        "netra_backend/app/routes/staging_health.py:250"
       ]
     },
     "metric_value": {
@@ -1605,6 +1616,14 @@
       "locations": [
         "netra_backend/app/services/factory_status/metrics_impact.py:121",
         "netra_backend/app/services/factory_status/metrics_impact.py:130"
+      ]
+    },
+    "monitor_observers_count": {
+      "value": "monitor_observers_count",
+      "category": "metrics",
+      "locations": [
+        "netra_backend/app/services/agent_websocket_bridge.py:1105",
+        "netra_backend/app/services/agent_websocket_bridge.py:1137"
       ]
     },
     "monitors_count": {
@@ -1723,7 +1742,7 @@
       "value": "original_backup_count",
       "category": "metrics",
       "locations": [
-        "shared/isolated_environment.py:1569"
+        "shared/isolated_environment.py:1607"
       ]
     },
     "origins_count": {
@@ -1738,7 +1757,7 @@
       "value": "os_environ_count",
       "category": "metrics",
       "locations": [
-        "shared/isolated_environment.py:1565"
+        "shared/isolated_environment.py:1603"
       ]
     },
     "page_view_count": {
@@ -1838,7 +1857,7 @@
       "value": "private_error_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/websocket_core/unified_manager.py:3684"
+        "netra_backend/app/websocket_core/unified_manager_backup.py:3684"
       ]
     },
     "process_count": {
@@ -1884,7 +1903,7 @@
       "value": "queued_messages_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/websocket_core/unified_manager.py:778"
+        "netra_backend/app/websocket_core/unified_manager_backup.py:778"
       ]
     },
     "read_count": {
@@ -1927,10 +1946,10 @@
       "value": "recommendations_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/agents/base_agent.py:2009",
+        "netra_backend/app/agents/base_agent.py:2055",
         "netra_backend/app/formatters/example_response_formatter.py:117",
-        "netra_backend/app/infrastructure/drift_detection.py:577",
-        "netra_backend/app/infrastructure/monitoring.py:592",
+        "netra_backend/app/infrastructure/drift_detection.py:559",
+        "netra_backend/app/infrastructure/monitoring.py:591",
         "netra_backend/app/tools/result_aggregator.py:282"
       ]
     },
@@ -2044,14 +2063,16 @@
       "value": "restart_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/websocket_core/unified_manager.py:2263",
-        "netra_backend/app/websocket_core/unified_manager.py:2664",
-        "netra_backend/app/websocket_core/unified_manager.py:2842",
-        "netra_backend/app/websocket_core/unified_manager.py:2842",
-        "netra_backend/app/websocket_core/unified_manager.py:2845",
-        "netra_backend/app/websocket_core/unified_manager.py:2846",
-        "netra_backend/app/websocket_core/unified_manager.py:2968",
-        "netra_backend/app/websocket_core/unified_manager.py:2976"
+        "netra_backend/app/websocket_core/unified_manager.py:1392",
+        "netra_backend/app/websocket_core/unified_manager.py:1793",
+        "netra_backend/app/websocket_core/unified_manager.py:1971",
+        "netra_backend/app/websocket_core/unified_manager.py:1971",
+        "netra_backend/app/websocket_core/unified_manager.py:1974",
+        "netra_backend/app/websocket_core/unified_manager.py:1975",
+        "netra_backend/app/websocket_core/unified_manager.py:2097",
+        "netra_backend/app/websocket_core/unified_manager.py:2105",
+        "netra_backend/app/websocket_core/unified_manager_backup.py:2263",
+        "netra_backend/app/websocket_core/unified_manager_backup.py:2664"
       ]
     },
     "result_count": {
@@ -2125,6 +2146,13 @@
         "netra_backend/app/services/metrics/resource_monitor.py:490"
       ]
     },
+    "samples_count": {
+      "value": "samples_count",
+      "category": "metrics",
+      "locations": [
+        "netra_backend/app/monitoring/authentication_monitor_service.py:380"
+      ]
+    },
     "secret_count": {
       "value": "secret_count",
       "category": "metrics",
@@ -2168,7 +2196,7 @@
       "value": "services_total",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/routes/staging_health.py:596",
+        "netra_backend/app/routes/staging_health.py:597",
         "netra_backend/app/websocket_core/initialization_progress.py:437",
         "scripts/staging_health_checks.py:447",
         "scripts/staging_health_checks.py:464"
@@ -2318,10 +2346,10 @@
       "value": "subscription_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/services/billing/revenue_calculator.py:196",
-        "netra_backend/app/services/billing/revenue_calculator.py:201",
-        "netra_backend/app/services/billing/revenue_calculator.py:206",
-        "netra_backend/app/services/billing/revenue_calculator.py:208"
+        "netra_backend/app/services/billing/revenue_calculator.py:197",
+        "netra_backend/app/services/billing/revenue_calculator.py:202",
+        "netra_backend/app/services/billing/revenue_calculator.py:207",
+        "netra_backend/app/services/billing/revenue_calculator.py:209"
       ]
     },
     "subscriptions_count": {
@@ -2354,6 +2382,14 @@
         "netra_backend/app/services/token_optimization/integration_service.py:557"
       ]
     },
+    "supervisor_count": {
+      "value": "supervisor_count",
+      "category": "metrics",
+      "locations": [
+        "scripts/validate_staging_supervisor_deployment.py:156",
+        "scripts/validate_staging_supervisor_deployment.py:157"
+      ]
+    },
     "suppression_rules_count": {
       "value": "suppression_rules_count",
       "category": "metrics",
@@ -2375,7 +2411,7 @@
         "netra_backend/app/api/health_clickhouse.py:380",
         "netra_backend/app/core/clickhouse_connection_manager.py:592",
         "netra_backend/app/core/service_dependencies/health_check_validator.py:145",
-        "netra_backend/app/core/startup_validation.py:368",
+        "netra_backend/app/core/startup_validation.py:369",
         "netra_backend/app/services/database/migration_rollback_service.py:697"
       ]
     },
@@ -2390,7 +2426,7 @@
       "value": "task_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/core/startup_validation.py:828"
+        "netra_backend/app/core/startup_validation.py:829"
       ]
     },
     "tcp_keepalives_count": {
@@ -2514,8 +2550,8 @@
       "locations": [
         "netra_backend/app/agents/github_analyzer/metrics_calculator.py:23",
         "netra_backend/app/agents/github_analyzer/recommendation_generator.py:66",
-        "netra_backend/app/core/startup_validation.py:271",
-        "netra_backend/app/core/startup_validation.py:311",
+        "netra_backend/app/core/startup_validation.py:272",
+        "netra_backend/app/core/startup_validation.py:312",
         "netra_backend/app/services/synthetic_data/tools.py:189",
         "netra_backend/app/services/synthetic_data/tools.py:198"
       ]
@@ -2540,7 +2576,7 @@
       "value": "total_drift_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/monitoring/configuration_drift_alerts.py:605",
+        "netra_backend/app/monitoring/configuration_drift_alerts.py:606",
         "netra_backend/app/monitoring/configuration_drift_monitor.py:705"
       ]
     },
@@ -2548,7 +2584,8 @@
       "value": "total_error_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/websocket_core/unified_manager.py:2186"
+        "netra_backend/app/websocket_core/unified_manager.py:1315",
+        "netra_backend/app/websocket_core/unified_manager_backup.py:2186"
       ]
     },
     "transaction_count": {
@@ -2604,7 +2641,7 @@
       "value": "user_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/websocket_core/unified_manager.py:4226"
+        "netra_backend/app/websocket_core/unified_manager_backup.py:4226"
       ]
     },
     "user_semaphores_count": {
@@ -2691,20 +2728,21 @@
         "netra_backend/app/core/agent_execution_tracker.py:772",
         "netra_backend/app/core/agent_execution_tracker.py:773",
         "netra_backend/app/core/configuration/startup_validator.py:168",
+        "netra_backend/app/infrastructure/drift_detection.py:348",
         "netra_backend/app/infrastructure/drift_detection.py:366",
-        "netra_backend/app/infrastructure/drift_detection.py:384",
         "netra_backend/app/services/unified_tool_registry/system_handlers.py:178",
         "netra_backend/app/services/unified_tool_registry/system_handlers.py:178",
         "netra_backend/app/services/websocket_error_validator.py:94",
-        "scripts/analyze_staging_logs.py:30"
+        "netra_backend/app/websocket_core/auth_health_provider.py:280"
       ]
     },
     "warnings_count": {
       "value": "warnings_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/agents/base_agent.py:2007",
-        "netra_backend/app/infrastructure/service_auth_config.py:313"
+        "netra_backend/app/agents/base_agent.py:2053",
+        "netra_backend/app/infrastructure/service_auth_config.py:317",
+        "netra_backend/app/monitoring/authentication_monitor_service.py:377"
       ]
     },
     "websocket_bridges_count": {
