@@ -1,4 +1,4 @@
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 """
 Main FastAPI application module.
 Entry point for the Netra AI Optimization Platform.
@@ -41,7 +41,7 @@ setup_exception_handler()
 
 # Import unified logging first to ensure interceptor is set up
 from shared.logging.unified_logging_ssot import get_logger
-central_logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 # Configure loggers after unified logging is initialized
 logging.getLogger("faker").setLevel(logging.WARNING)
@@ -57,13 +57,13 @@ def validate_environment_at_startup():
     import sys
     from shared.configuration.central_config_validator import validate_platform_configuration
     
-    central_logger.info("🔍 Validating environment configuration with SSOT validators...")
+    logger.info("🔍 Validating environment configuration with SSOT validators...")
     
     try:
         # Use SSOT central validator for comprehensive environment validation
         # This validates JWT secrets, database config, OAuth, Redis, LLM keys etc.
         validate_platform_configuration()
-        central_logger.info("✅ Environment validation completed (SSOT compliant)")
+        logger.info("✅ Environment validation completed (SSOT compliant)")
         
     except ValueError as e:
         error_message = f"""
@@ -83,7 +83,7 @@ Required actions:
 This prevents runtime configuration failures that could impact the Golden Path.
 Service startup ABORTED for safety.
 """
-        central_logger.critical(error_message)
+        logger.critical(error_message)
         sys.exit(1)
     except Exception as e:
         # For unexpected errors, log but don't prevent startup in development
@@ -101,10 +101,10 @@ Error: {str(e)}
 Critical validation infrastructure failure in {environment} environment.
 Service startup ABORTED for safety.
 """
-            central_logger.critical(error_message)
+            logger.critical(error_message)
             sys.exit(1)
         else:
-            central_logger.warning(f"⚠️ Environment validation error in {environment}: {e} - continuing startup")
+            logger.warning(f"⚠️ Environment validation error in {environment}: {e} - continuing startup")
 
 # Run SSOT-compliant validation before creating app
 validate_environment_at_startup()
