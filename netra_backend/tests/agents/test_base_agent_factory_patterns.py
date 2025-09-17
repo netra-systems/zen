@@ -261,6 +261,15 @@ class BaseAgentFactoryPatternsTests(SSotAsyncTestCase):
         assert len(legacy_validation["errors"]) == 0  # legacy_bridge pattern has warnings, not errors
         assert len(legacy_validation["warnings"]) > 0
 
+        # Test with agent that has no execution methods (true "none" pattern)
+        no_method_agent = NoMethodAgent(llm_manager=self.llm_manager)
+        none_validation = no_method_agent.validate_modern_implementation()
+
+        # Verify: Agent with no methods gets "none" pattern with errors
+        assert none_validation["compliant"] is False
+        assert none_validation["pattern"] == "none"
+        assert len(none_validation["errors"]) > 0
+
     def test_agent_assert_user_execution_context_pattern(self):
         """Test agent UserExecutionContext pattern assertions."""
         # Test with compliant modern agent
@@ -279,6 +288,11 @@ class BaseAgentFactoryPatternsTests(SSotAsyncTestCase):
         except RuntimeError:
             # Should not raise RuntimeError for legacy_bridge pattern
             pytest.fail("Legacy bridge pattern should not raise RuntimeError - only warnings")
+
+        # Test with agent that has "none" pattern - should raise RuntimeError
+        no_method_agent = NoMethodAgent(llm_manager=self.llm_manager)
+        with pytest.raises(RuntimeError, match="CRITICAL COMPLIANCE VIOLATIONS"):
+            no_method_agent.assert_user_execution_context_pattern()
 
     def test_agent_get_migration_status_comprehensive(self):
         """Test comprehensive migration status reporting."""
