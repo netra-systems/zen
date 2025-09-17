@@ -254,8 +254,12 @@ class PkgResourcesFutureCompatibilityTests:
             # Test basic functionality
             try:
                 # Try to get a known package
-                version = importlib.metadata.version("pytest")
-                print(f"Successfully got pytest version using importlib.metadata: {version}")
+                if sys.version_info >= (3, 8):
+                    version = importlib.metadata.version("pytest")
+                    print(f"Successfully got pytest version using importlib.metadata: {version}")
+                else:
+                    version = importlib_metadata.version("pytest")
+                    print(f"Successfully got pytest version using importlib_metadata: {version}")
             except Exception as e:
                 pytest.fail(f"importlib.metadata basic functionality test failed: {e}")
 
