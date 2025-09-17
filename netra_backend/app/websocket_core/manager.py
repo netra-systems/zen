@@ -54,6 +54,13 @@ except ImportError:
     WebSocketHeartbeat = None
     WebSocketHeartbeatManager = None
 
+# Import the canonical get_websocket_manager function for deployment compatibility
+try:
+    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+except ImportError:
+    # Fallback to direct manager instantiation if canonical import fails
+    get_websocket_manager = lambda user_context=None, **kwargs: UnifiedWebSocketManager()
+
 # Re-export for compatibility
 __all__ = [
     'WebSocketManager',
@@ -62,5 +69,6 @@ __all__ = [
     '_serialize_message_safely',
     'UnifiedWebSocketManager',
     'WebSocketHeartbeat',
-    'WebSocketHeartbeatManager'  # Compatibility alias
+    'WebSocketHeartbeatManager',  # Compatibility alias
+    'get_websocket_manager'  # Deployment compatibility
 ]

@@ -298,8 +298,14 @@ else:
     redis_manager = canonical_redis_manager
     logger.warning("SSOT Redis manager not available - using canonical import")
 
+# Deployment compatibility function
+def get_redis_manager():
+    """Deployment compatibility function for get_redis_manager imports."""
+    return redis_manager
+
 __all__ = [
     "RedisManager",
-    "RedisConfig", 
-    "redis_manager"
+    "RedisConfig",
+    "redis_manager",
+    "get_redis_manager"  # Deployment compatibility
 ]
