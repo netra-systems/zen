@@ -39,7 +39,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env, IsolatedEnvironment
 import pytest
 from loguru import logger
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext

@@ -19,7 +19,7 @@ if project_root not in sys.path:
 import pytest
 from loguru import logger
 from test_framework.environment_isolation import get_env
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 

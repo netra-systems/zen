@@ -233,7 +233,7 @@ class TestWebSocketManagerFunctionalSSOT(SSotBaseTestCase):
     def _get_websocket_manager_via_direct_import(self):
         """Get WebSocket manager via direct import path"""
         try:
-            from netra_backend.app.websocket_core.unified_manager import (
+            from netra_backend.app.websocket_core.websocket_manager import (
                 _UnifiedWebSocketManagerImplementation
             )
             return _UnifiedWebSocketManagerImplementation()

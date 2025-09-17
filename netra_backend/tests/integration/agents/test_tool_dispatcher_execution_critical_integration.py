@@ -91,7 +91,7 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.unified_tool_registry.models import ToolExecutionResult
 from netra_backend.app.core.tool_models import UnifiedTool
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 
 # Tool and agent integration
 from langchain_core.tools import BaseTool

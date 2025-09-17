@@ -149,7 +149,7 @@ class AuthenticationServiceSSOTComplianceTests(SSotAsyncTestCase):
         logger.info('Testing authentication + WebSocket integration via SSOT...')
         try:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             user_context = UserExecutionContext(user_id=self.test_user_id, websocket_client_id='test_auth_websocket_integration')
             websocket_manager = WebSocketManager(user_context=user_context)
             self.assertIsNotNone(websocket_manager)

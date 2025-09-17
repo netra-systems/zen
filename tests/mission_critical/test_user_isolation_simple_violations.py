@@ -25,7 +25,7 @@ class TestUserIsolationSimpleViolations(SSotBaseTestCase):
         isolation_violations = []
 
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
             # Create contexts for different users
             user1_context = {"user_id": "user_001", "session_id": "session_001"}
@@ -107,7 +107,7 @@ class TestUserIsolationSimpleViolations(SSotBaseTestCase):
         factory_violations = []
 
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
             # Create multiple instances rapidly
             instances = []

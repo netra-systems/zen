@@ -14,7 +14,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock
 
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.core.registry.universal_registry import AgentRegistry as UniversalAgentRegistry
 from netra_backend.app.services.user_execution_context import UserExecutionContext

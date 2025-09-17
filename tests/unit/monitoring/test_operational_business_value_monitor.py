@@ -126,7 +126,7 @@ class OperationalBusinessValueMonitorAsyncTests(SSotAsyncTestCase):
         """Test integration with WebSocket manager for real-time alerts - WILL FAIL initially"""
         with pytest.raises((ImportError, AttributeError)):
             from netra_backend.app.services.operational_business_value_monitor import OperationalBusinessValueMonitor
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             monitor = OperationalBusinessValueMonitor()
             websocket_manager = WebSocketManager()

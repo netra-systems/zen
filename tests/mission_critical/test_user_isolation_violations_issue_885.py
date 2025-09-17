@@ -53,7 +53,7 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
 
         try:
             # Import WebSocket manager components
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
             # Create contexts for different users
             user1_context = self.create_test_user_context("user_001", "session_001")
@@ -130,7 +130,7 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
         message_leakage_violations = []
 
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
             # Create different user contexts
             user_alpha = self.create_test_user_context("alpha_user", "alpha_session")
@@ -253,7 +253,7 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
 
         try:
             # Test agent context isolation
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
             # Create user contexts
             user_gamma = self.create_test_user_context("gamma_user", "gamma_session")
@@ -336,7 +336,7 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
         memory_leak_violations = []
 
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             import gc
 
             # Track initial memory state

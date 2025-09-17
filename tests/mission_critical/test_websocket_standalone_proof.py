@@ -17,7 +17,7 @@ from shared.isolated_environment import IsolatedEnvironment
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 # Import production components
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.manager import WebSocketHeartbeatManager, HeartbeatConfig
 from fastapi.websockets import WebSocketState
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler

@@ -65,7 +65,7 @@ class WebSocketEventsSSotDeliveryTests(SSotAsyncTestCase):
         AFTER REMEDIATION: This test should PASS (all events delivered via SSOT)
         """
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         except ImportError as e:
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
         manager = get_websocket_manager(user_context=self.test_user_context)
@@ -106,7 +106,7 @@ class WebSocketEventsSSotDeliveryTests(SSotAsyncTestCase):
         AFTER REMEDIATION: This test should PASS (events properly targeted)
         """
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         except ImportError as e:
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
         test_users = [{'user_id': 'event_user_1', 'thread_id': 'event_thread_1'}, {'user_id': 'event_user_2', 'thread_id': 'event_thread_2'}]
@@ -160,7 +160,7 @@ class WebSocketEventsSSotDeliveryTests(SSotAsyncTestCase):
         AFTER REMEDIATION: This test should PASS (consistent event ordering)
         """
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         except ImportError as e:
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
         manager = get_websocket_manager(user_context=self.test_user_context)
@@ -200,7 +200,7 @@ class WebSocketEventsSSotDeliveryTests(SSotAsyncTestCase):
         AFTER REMEDIATION: This test should PASS (robust error handling)
         """
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         except ImportError as e:
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
         manager = get_websocket_manager(user_context=self.test_user_context)
@@ -256,7 +256,7 @@ class WebSocketEventsSSotDeliveryTests(SSotAsyncTestCase):
         AFTER REMEDIATION: This test should PASS (seamless integration)
         """
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         except ImportError as e:
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
         manager = get_websocket_manager(user_context=self.test_user_context)

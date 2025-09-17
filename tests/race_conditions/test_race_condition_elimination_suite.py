@@ -49,7 +49,7 @@
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_cache import AuthClientCache
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketConnection
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketConnection
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager

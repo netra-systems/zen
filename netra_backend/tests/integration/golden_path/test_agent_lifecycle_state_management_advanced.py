@@ -46,7 +46,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 from netra_backend.app.models.agent_execution import AgentExecution
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.api.websocket.events import WebSocketEventType
 from shared.types import UserID, ThreadID, RunID, RequestID
 from shared.isolated_environment import get_env

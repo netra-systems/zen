@@ -33,7 +33,7 @@ from loguru import logger
 from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper
 from shared.isolated_environment import get_env
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from tests.mission_critical.test_fallback_handler_degradation_prevention import BusinessValueValidator, MockServiceController
 
 class AgentSupervisorRaceConditionSimulator:

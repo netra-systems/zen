@@ -48,7 +48,7 @@ def ensure_session_id(value: str) -> SessionID:
     return SessionID(value)
 
 # WebSocket and thread routing components
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 
 # Helper function for tests
 def generate_websocket_id() -> str:

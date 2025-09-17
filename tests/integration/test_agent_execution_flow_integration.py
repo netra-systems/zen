@@ -62,7 +62,7 @@ try:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.base_agent import BaseAgent
     from netra_backend.app.schemas.agent_models import DeepAgentState
-    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
     from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
     from netra_backend.app.db.database_manager import DatabaseManager
@@ -158,7 +158,7 @@ class AgentExecutionFlowIntegrationTests(SSotAsyncTestCase):
             
         try:
             # Create real WebSocket manager for agent notifications  
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             self.websocket_manager = get_websocket_manager(user_context=self.user_context)
             
             # Create real WebSocket bridge for agent-websocket integration

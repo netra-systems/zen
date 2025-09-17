@@ -34,7 +34,7 @@ import pytest
 import pytest_asyncio
 
 # SSOT Compliant Imports
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.auth_core.services.auth_service import AuthService
 from shared.isolated_environment import IsolatedEnvironment

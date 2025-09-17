@@ -28,7 +28,7 @@ from dataclasses import dataclass
 import pytest
 
 from test_framework.base_integration_test import BaseIntegrationTest
-from netra_backend.app.websocket_core.unified_manager import (
+from netra_backend.app.websocket_core.websocket_manager import (
     UnifiedWebSocketManager,
     WebSocketConnection
 )

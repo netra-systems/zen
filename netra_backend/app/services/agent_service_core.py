@@ -26,7 +26,7 @@ from netra_backend.app.services.streaming_service import (
     get_streaming_service,
 )
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from shared.id_generation import UnifiedIdGenerator
 from netra_backend.app.dependencies import get_user_session_context
 

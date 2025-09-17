@@ -78,7 +78,7 @@ class GoldenPathIntegrationWithoutFactoryTests(SSotAsyncTestCase):
         logger.info('Testing Golden Path WebSocket initialization without factory...')
         try:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             user_context = UserExecutionContext(user_id=self.test_user_id, websocket_client_id=self.test_websocket_client_id)
             websocket_manager = WebSocketManager(user_context=user_context)
             self.assertIsNotNone(websocket_manager)
@@ -101,7 +101,7 @@ class GoldenPathIntegrationWithoutFactoryTests(SSotAsyncTestCase):
         logger.info('Testing Golden Path agent execution integration without factory...')
         try:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             user_context = UserExecutionContext(user_id=self.test_user_id, websocket_client_id=self.test_websocket_client_id)
             websocket_manager = WebSocketManager(user_context=user_context)
             mock_agent_execution_data = {'agent_type': 'supervisor_agent', 'message': 'Test AI response for Golden Path validation', 'user_id': self.test_user_id, 'websocket_client_id': self.test_websocket_client_id}
@@ -126,7 +126,7 @@ class GoldenPathIntegrationWithoutFactoryTests(SSotAsyncTestCase):
         logger.info('Testing Golden Path WebSocket events delivery without factory...')
         try:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             user_context = UserExecutionContext(user_id=self.test_user_id, websocket_client_id=self.test_websocket_client_id)
             websocket_manager = WebSocketManager(user_context=user_context)
             critical_events = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
@@ -158,7 +158,7 @@ class GoldenPathIntegrationWithoutFactoryTests(SSotAsyncTestCase):
         logger.info('Testing complete Golden Path end-to-end flow without factory...')
         try:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             authenticated_user_context = UserExecutionContext(user_id=self.test_user_id, websocket_client_id=self.test_websocket_client_id)
             websocket_connection = WebSocketManager(user_context=authenticated_user_context)
             agent_request_data = {'user_message': 'Test AI query for Golden Path validation', 'user_id': self.test_user_id, 'session_id': f'session_{self.test_user_id}', 'timestamp': '2025-09-14T12:00:00Z'}
@@ -187,7 +187,7 @@ class GoldenPathIntegrationWithoutFactoryTests(SSotAsyncTestCase):
         import time
         try:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             start_time = time.perf_counter()
             golden_path_sessions = []
             for i in range(20):

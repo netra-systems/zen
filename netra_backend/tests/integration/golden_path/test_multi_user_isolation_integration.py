@@ -22,7 +22,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture, real_redis_fixture
 from shared.isolated_environment import get_env
 from netra_backend.app.core.user_context import UserExecutionContextFactory
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 # ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine

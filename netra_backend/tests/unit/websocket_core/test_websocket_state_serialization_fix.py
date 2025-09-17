@@ -12,7 +12,7 @@ import pytest
 from unittest.mock import AsyncMock, Mock
 from enum import Enum
 from datetime import datetime
-from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
 from starlette.websockets import WebSocketState as StarletteWebSocketState
 from fastapi.websockets import WebSocketState as FastAPIWebSocketState
 

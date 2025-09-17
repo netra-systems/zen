@@ -51,7 +51,7 @@ if project_root not in sys.path:
 from shared.isolated_environment import get_env, IsolatedEnvironment
 from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, E2EAuthConfig, create_authenticated_user_context
 from test_framework.base_e2e_test import BaseE2ETest
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 logger = logging.getLogger(__name__)

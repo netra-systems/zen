@@ -241,7 +241,7 @@ class WebSocketImportCoordinationTests(SSotBaseTestCase):
 
         # Check if components import directly from submodules
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             direct_imports.append("websocket_core.unified_manager")
         except ImportError:
             pass

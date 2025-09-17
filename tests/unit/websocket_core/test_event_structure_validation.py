@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any
 from unittest.mock import AsyncMock, MagicMock
 
-from netra_backend.app.websocket_core.canonical_import_patterns import (
+from netra_backend.app.websocket_core.websocket_manager import (
     WebSocketManager,
     get_websocket_manager,
     WebSocketManagerMode
@@ -71,7 +71,7 @@ class WebSocketEventStructureValidationTests:
 
         # Test that WebSocket manager preserves business structure at top level
         # CRITICAL: This is where the bug manifests - business fields get wrapped incorrectly
-        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+        from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
         wrapped_event = _serialize_message_safely(business_event_data)
 
         # CRITICAL VALIDATIONS (currently failing due to unified_manager.py wrapping)
@@ -108,7 +108,7 @@ class WebSocketEventStructureValidationTests:
         }
 
         # Test WebSocket transmission preserves business data at top level
-        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+        from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
         wrapped_event = _serialize_message_safely(business_event_data)
 
         # CRITICAL VALIDATIONS (currently failing due to incorrect wrapping)
@@ -139,7 +139,7 @@ class WebSocketEventStructureValidationTests:
             "timestamp": time.time()
         }
 
-        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+        from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
         wrapped_event = _serialize_message_safely(business_event_data)
 
         # Validate critical fields preserved at top level
@@ -168,7 +168,7 @@ class WebSocketEventStructureValidationTests:
             "timestamp": time.time()
         }
 
-        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+        from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
         wrapped_event = _serialize_message_safely(business_event_data)
 
         # Critical business fields must be at top level
@@ -197,7 +197,7 @@ class WebSocketEventStructureValidationTests:
             "timestamp": time.time()
         }
 
-        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+        from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
         wrapped_event = _serialize_message_safely(business_event_data)
 
         # Critical thinking content must be at top level for real-time display
@@ -236,7 +236,7 @@ class WebSocketEventStructureValidationTests:
             "timestamp": time.time()
         }
 
-        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+        from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
         wrapped_event = _serialize_message_safely(complex_business_event)
 
         # Verify ALL original fields preserved at top level

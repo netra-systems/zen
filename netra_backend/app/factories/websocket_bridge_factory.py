@@ -31,7 +31,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.logging.unified_logging_ssot import get_logger
 
 if TYPE_CHECKING:
-    from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager
 
 logger = get_logger(__name__)
 

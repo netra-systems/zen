@@ -120,7 +120,7 @@ class TestWebSocketCoreDeprecationWarnings(SSotBaseTestCase, unittest.TestCase):
                 pass
             
             try:
-                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                 self.legitimate_imports_tested += 1
             except ImportError:
                 pass
@@ -285,7 +285,7 @@ class TestImportBehaviorChanges(SSotBaseTestCase):
         # Test that both import methods provide the same class
         try:
             from netra_backend.app.websocket_core import WebSocketManager as InitWebSocketManager
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as SpecificWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as SpecificWebSocketManager
             
             # Both should refer to the same class
             self.assertIs(InitWebSocketManager, SpecificWebSocketManager,
@@ -305,7 +305,7 @@ class TestImportBehaviorChanges(SSotBaseTestCase):
         """
         import_patterns = [
             ("from netra_backend.app.websocket_core import WebSocketManager", "broad_init_import"),
-            ("from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager", "specific_module_import"),
+            ("from netra_backend.app.websocket_core.websocket_manager import WebSocketManager", "specific_module_import"),
             ("from netra_backend.app.websocket_core.event_validator import UnifiedEventValidator", "specific_module_import"),
             ("from netra_backend.app.websocket_core import create_websocket_manager", "broad_init_import"),
         ]

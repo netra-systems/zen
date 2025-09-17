@@ -132,7 +132,7 @@ class MessageRouterImportPathMigrationTests(SSotAsyncTestCase):
 
     async def test_migration_impact_on_websocket_integration(self):
         """Test migration impact on WebSocket integration services."""
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         ws_manager = WebSocketManager(user_context=self.user_context)
         self.assertIsNotNone(ws_manager)
         try:

@@ -1,4 +1,4 @@
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 @pytest.mark.e2e
 class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
@@ -31,7 +31,7 @@ import json
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 import uuid
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from auth_service.core.auth_manager import AuthManager
@@ -48,7 +48,7 @@ from netra_backend.app.core.configuration.manager import ConfigurationManager
 from netra_backend.app.database import get_db, Base
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.models import User, Thread, Message, AgentExecution
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler

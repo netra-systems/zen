@@ -1,4 +1,4 @@
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 # PERFORMANCE: Lazy loading for mission critical tests
 
@@ -151,7 +151,7 @@ class WebSocketManagerGoldenPathFailuresTests(SSotAsyncTestCase):
                 
                 try:
                     # Pattern 2: Direct instantiation
-                    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                     direct_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
                     managers_created.append(('direct', direct_manager))
                     
@@ -334,7 +334,7 @@ class WebSocketManagerGoldenPathFailuresTests(SSotAsyncTestCase):
             pass
         
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             direct_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             managers_to_test.append(('direct', direct_manager))
         except ImportError:

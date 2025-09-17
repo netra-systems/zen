@@ -46,7 +46,7 @@ from test_framework.ssot.user_context_test_helpers import (
 )
 
 # SSOT Import Registry - Canonical imports
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketManagerMode
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
 from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     ContextIsolationError

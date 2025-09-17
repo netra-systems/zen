@@ -53,7 +53,7 @@ try:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
     from shared.types.core_types import UserID, ThreadID, RunID, AgentExecutionContext
-    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
     REAL_COMPONENTS_AVAILABLE = True
 except ImportError as e:
     print(f"Warning: Some real message pipeline components not available: {e}")

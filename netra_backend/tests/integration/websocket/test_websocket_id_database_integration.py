@@ -33,7 +33,7 @@ from test_framework.real_services import get_real_services
 # Import WebSocket core modules for database testing
 from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage, generate_default_message
 from netra_backend.app.websocket_core.context import WebSocketRequestContext
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
 from netra_backend.app.websocket_core.user_session_manager import UserSessionManager
 

@@ -243,7 +243,7 @@ _factory_instance = None
 _factory_lock = type('_MockLock', (), {'__enter__': lambda self: self, '__exit__': lambda self, *args: None})()
 
 # CANONICAL: Unified WebSocket Manager (Direct Use - Use Factory Instead)  
-from netra_backend.app.websocket_core.unified_manager import (
+from netra_backend.app.websocket_core.websocket_manager import (
     WebSocketConnection,
 )
 # CANONICAL: WebSocket Manager (SSOT import path)
@@ -269,7 +269,7 @@ from netra_backend.app.websocket_core.migration_adapter import (
 
 # DEPRECATED: Direct manager imports (use factory instead)
 # from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-# from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
+# from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 # DEPRECATED: Multiple interface imports (use canonical protocol instead)
 # from netra_backend.app.core.interfaces_websocket import WebSocketManagerProtocol
@@ -386,7 +386,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 
 # Singleton patterns (security risk)
-from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 manager = get_websocket_manager()  #  ALERT:  SECURITY VIOLATION
 ```
 

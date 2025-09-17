@@ -47,7 +47,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.factories.tool_dispatcher_factory import get_tool_dispatcher_factory
 from netra_backend.app.tools.enhanced_tool_execution_engine import EnhancedToolExecutionEngine
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.api.websocket.events import WebSocketEventType
 from netra_backend.app.llm.llm_manager import LLMManager
 from shared.types import UserID, ThreadID, RunID, RequestID

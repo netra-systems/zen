@@ -159,13 +159,13 @@ class WebSocketManagerInterfaceViolationsTests(SSotAsyncTestCase):
         manager_classes = []
         
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager_classes.append(('UnifiedWebSocketManager', UnifiedWebSocketManager))
         except ImportError:
             pass
             
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager_classes.append(('WebSocketManager', WebSocketManager))
         except ImportError:
             pass
@@ -206,7 +206,7 @@ class WebSocketManagerInterfaceViolationsTests(SSotAsyncTestCase):
         # Test known problematic constructor patterns
         try:
             from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             # Test 1: Factory method signature vs manager constructor
             factory = WebSocketManagerFactory()
@@ -276,13 +276,13 @@ class WebSocketManagerInterfaceViolationsTests(SSotAsyncTestCase):
         
         manager_classes = []
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager_classes.append(('UnifiedWebSocketManager', UnifiedWebSocketManager))
         except ImportError:
             pass
             
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager  
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager_classes.append(('WebSocketManager', WebSocketManager))
         except ImportError:
             pass
@@ -332,13 +332,13 @@ class WebSocketManagerInterfaceViolationsTests(SSotAsyncTestCase):
         manager_classes = []
         
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager_classes.append(('UnifiedWebSocketManager', UnifiedWebSocketManager))
         except ImportError:
             pass
             
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager_classes.append(('WebSocketManager', WebSocketManager))
         except ImportError:
             pass
@@ -469,13 +469,13 @@ class WebSocketManagerInterfaceViolationsTests(SSotAsyncTestCase):
         
         manager_classes = []
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager_classes.append(('UnifiedWebSocketManager', UnifiedWebSocketManager))
         except ImportError:
             pass
             
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager_classes.append(('WebSocketManager', WebSocketManager))
         except ImportError:
             pass

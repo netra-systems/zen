@@ -26,7 +26,7 @@ try:
         WebSocketEmitterFactory,
         AuthenticationWebSocketEmitter
     )
-    from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     IMPORTS_AVAILABLE = True
 except ImportError as e:

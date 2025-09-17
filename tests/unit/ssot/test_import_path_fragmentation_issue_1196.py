@@ -32,7 +32,7 @@ class ImportPathFragmentationIssue1196Tests(unittest.TestCase):
 
         # Expected SSOT canonical import paths (what should be used)
         self.canonical_imports = {
-            "WebSocketManager": "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
+            "WebSocketManager": "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
             "ExecutionEngine": "from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine",
             "AgentRegistry": "from netra_backend.app.agents.registry import AgentRegistry"
         }

@@ -18,7 +18,7 @@ import warnings
 from functools import wraps
 
 # Import the actual implementation
-from netra_backend.app.websocket_core.unified_manager import (
+from netra_backend.app.websocket_core.websocket_manager import (
     _UnifiedWebSocketManagerImplementation,
     RegistryCompat,
     MAX_CONNECTIONS_PER_USER
@@ -98,7 +98,7 @@ def get_websocket_manager(user_context: Optional[Any] = None,
         Properly configured WebSocket manager instance
 
     Example:
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         manager = get_websocket_manager(user_context=ctx)
     """
     _log_import_usage("Factory Function", "canonical_import_patterns.get_websocket_manager")
@@ -161,7 +161,7 @@ class UnifiedWebSocketManager(_UnifiedWebSocketManagerImplementation):
     For normal usage, prefer get_websocket_manager() factory function.
 
     Example:
-        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 
         # For type hints:
         def process_manager(manager: UnifiedWebSocketManager) -> None: ...
@@ -183,7 +183,7 @@ class WebSocketManagerFactory:
     Provides backwards compatibility with factory-based patterns.
     
     Example:
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerFactory
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerFactory
         
         factory = WebSocketManagerFactory()
         manager = factory.create_manager(user_context=ctx)
@@ -252,7 +252,7 @@ def get_component_interface(component_name: str) -> type:
         Interface class type
 
     Example:
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_component_interface
+        from netra_backend.app.websocket_core.websocket_manager import get_component_interface
 
         connection_interface = get_component_interface('ICoreConnectionManager')
         def validate_component(component: connection_interface) -> bool: ...
@@ -315,29 +315,29 @@ create_manager = create_legacy_compatibility_function(
 MIGRATION_GUIDE = {
     "PATTERN_1_FACTORY": {
         "description": "Factory Function Pattern - Primary method for creating managers",
-        "canonical_import": "from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager",
+        "canonical_import": "from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager",
         "usage": "manager = get_websocket_manager(user_context=ctx)",
         "replaces": [
-            "from netra_backend.app.websocket_core.unified_manager import get_websocket_manager",
-            "from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager",
+            "from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager",
+            "from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager",
             "from netra_backend.app.websocket_core.factory import get_websocket_manager",
             "from netra_backend.app.websocket_core import get_websocket_manager"
         ]
     },
     "PATTERN_2_CLASS": {
         "description": "Class Import Pattern - For type hints and direct access",
-        "canonical_import": "from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager",
+        "canonical_import": "from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager",
         "usage": "def process(manager: UnifiedWebSocketManager): ...",
         "replaces": [
-            "from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager",
-            "from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation",
-            "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
+            "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+            "from netra_backend.app.websocket_core.websocket_manager import _WebSocketManagerImplementation",
+            "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
             "from netra_backend.app.websocket_core import UnifiedWebSocketManager"
         ]
     },
     "PATTERN_3_INTERFACES": {
         "description": "Component Interface Pattern - For component-specific type safety",
-        "canonical_import": "from netra_backend.app.websocket_core.canonical_import_patterns import ICoreConnectionManager",
+        "canonical_import": "from netra_backend.app.websocket_core.websocket_manager import ICoreConnectionManager",
         "usage": "def validate(component: ICoreConnectionManager): ...",
         "replaces": [
             "from netra_backend.app.websocket_core.interfaces import ICoreConnectionManager",
@@ -346,7 +346,7 @@ MIGRATION_GUIDE = {
     },
     "PATTERN_4_LEGACY": {
         "description": "Legacy Compatibility Pattern - Temporary backwards compatibility",
-        "canonical_import": "from netra_backend.app.websocket_core.canonical_import_patterns import create_websocket_manager",
+        "canonical_import": "from netra_backend.app.websocket_core.websocket_manager import create_websocket_manager",
         "usage": "manager = create_websocket_manager(ctx)  # DEPRECATED",
         "replaces": [
             "from netra_backend.app.websocket_core.utils import create_websocket_manager",
@@ -394,7 +394,7 @@ def check_websocket_service_available() -> bool:
         bool: True if WebSocket service is available, False otherwise
 
     Example:
-        from netra_backend.app.websocket_core.canonical_import_patterns import check_websocket_service_available
+        from netra_backend.app.websocket_core.websocket_manager import check_websocket_service_available
 
         if check_websocket_service_available():
             # Proceed with WebSocket operations

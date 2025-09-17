@@ -172,7 +172,7 @@ class Issue416ComprehensiveSuiteTests(SSotBaseTestCase):
         
         # Test migration paths
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             strategy_components['migration_paths_validated'] = True
             print("  ✓ Migration paths validated")
         except Exception as e:

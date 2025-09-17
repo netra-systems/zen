@@ -55,7 +55,7 @@ from netra_backend.app.db.database_manager import get_database_manager
 from netra_backend.app.db.database_manager import DatabaseManager
 
 # WebSocket Integration (Real Connections)
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 
 logger = logging.getLogger(__name__)

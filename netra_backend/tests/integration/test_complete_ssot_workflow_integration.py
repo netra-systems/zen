@@ -55,7 +55,7 @@ from netra_backend.app.core.configuration.base import (
 )
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.core.managers.unified_state_manager import (
     UnifiedStateManager,
     StateScope,
@@ -172,7 +172,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
         mock_websocket = AsyncMock()
         
         # UnifiedWebSocketManager: Establish user connection
-        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
         websocket_conn = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,
@@ -347,7 +347,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
         connection_id = f"conn_{user_id}_{uuid.uuid4()}"
         mock_websocket = AsyncMock()
         
-        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
         websocket_conn = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,
@@ -661,7 +661,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
             
         mock_websocket.send_json = mock_send_json
         
-        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
         websocket_conn = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,
@@ -867,7 +867,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
         connection_id = f"conn_{uuid.uuid4()}"
         mock_websocket = AsyncMock()
         
-        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
         websocket_conn = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,
@@ -1191,7 +1191,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                     connection_id = f"load_conn_{user_id}_{operation_idx}"
                     mock_websocket = AsyncMock()
                     
-                    from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+                    from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
                     websocket_conn = WebSocketConnection(
                         connection_id=connection_id,
                         user_id=user_id,
@@ -1394,7 +1394,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
         
         mock_websocket.send_json = mock_send_json
         
-        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
         websocket_conn = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,
@@ -1602,7 +1602,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
         
         mock_websocket.send_json = mock_send_json
         
-        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
         websocket_conn = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,
@@ -1827,7 +1827,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
         
         mock_websocket.send_json = mock_send_json
         
-        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
         websocket_conn = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,

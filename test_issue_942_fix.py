@@ -14,15 +14,21 @@ def test_dataanalysisresponse_ssot_migration():
         print("✅ SUCCESS: DataAnalysisResponse imports correctly from SSOT location")
         print(f"   Class: {DataAnalysisResponse}")
         
-        # Create an instance to test it works
+        # Create an instance to test it works (using SSOT model structure)
+        from netra_backend.app.schemas.shared_types import PerformanceMetrics
+        import time
+
         response = DataAnalysisResponse(
-            summary="Test summary",
-            key_findings=["Finding 1", "Finding 2"],
-            recommendations=["Recommendation 1"]
+            analysis_id="test_analysis_001",
+            status="completed",
+            results={"insights": ["Finding 1", "Finding 2"], "recommendations": ["Recommendation 1"]},
+            metrics=PerformanceMetrics(duration_ms=100.0),
+            created_at=time.time()
         )
         print(f"✅ SUCCESS: DataAnalysisResponse instance created successfully")
-        print(f"   Summary: {response.summary}")
-        print(f"   Findings: {len(response.key_findings)} items")
+        print(f"   Analysis ID: {response.analysis_id}")
+        print(f"   Status: {response.status}")
+        print(f"   Results: {len(response.results)} items")
         
     except ImportError as e:
         print(f"❌ FAILED: Cannot import DataAnalysisResponse from SSOT location: {e}")

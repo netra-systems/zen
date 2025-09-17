@@ -28,7 +28,7 @@ from enum import Enum
 
 if TYPE_CHECKING:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
-    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from langchain_core.tools import BaseTool
     from netra_backend.app.services.user_execution_context import UserExecutionContext as DeepAgentState
 
@@ -207,7 +207,7 @@ class UnifiedToolDispatcher:
                 logger.info(f"Created WebSocket bridge adapter for AgentWebSocketBridge (user: {user_context.user_id})")
             # Otherwise wrap it
             else:
-                from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
                 websocket_manager = get_websocket_manager(user_context)
                 logger.warning(f"Created fallback WebSocketManager via factory - no bridge connection for user {user_context.user_id}")
         

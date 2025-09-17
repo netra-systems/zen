@@ -28,7 +28,7 @@ from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
 from typing import Dict, Any, List, Optional, Set, Tuple
 from netra_backend.app.services.websocket_broadcast_service import WebSocketBroadcastService, BroadcastResult, create_broadcast_service
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID, ensure_user_id

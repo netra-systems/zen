@@ -13,7 +13,7 @@ These tests run without Docker and demonstrate the exact staging errors.
 import pytest
 import asyncio
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager, get_websocket_manager_async
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, get_websocket_manager_async
 from shared.logging.unified_logging_ssot import get_logger
 
 logger = get_logger(__name__)

@@ -98,7 +98,7 @@ class Issue1094ProductionErrorReproductionTests(BaseIntegrationTest):
         This test confirms that the proposed fix (using get_websocket_manager)
         works correctly in the staging environment.
         """
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         from netra_backend.app.services.user_execution_context import UserExecutionContext
 
         # Create proper user context

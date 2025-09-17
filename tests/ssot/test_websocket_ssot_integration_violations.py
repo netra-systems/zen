@@ -64,7 +64,7 @@ class WebSocketSSotIntegrationViolationsTests(SSotAsyncTestCase):
         
         # Test different communication patterns currently in use
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Test direct manager-agent communication
@@ -141,7 +141,7 @@ class WebSocketSSotIntegrationViolationsTests(SSotAsyncTestCase):
         event_delivery_paths = {}
         
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager = UnifiedWebSocketManager()
             
             # Test event delivery through different possible paths
@@ -236,7 +236,7 @@ class WebSocketSSotIntegrationViolationsTests(SSotAsyncTestCase):
         manager_instances_used = set()
         
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             # Simulate golden path flow stages
             for stage in flow_stages:

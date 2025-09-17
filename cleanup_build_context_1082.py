@@ -13,7 +13,7 @@ from pathlib import Path
 
 def cleanup_python_cache():
     """Remove Python cache files and directories safely"""
-    root_dir = Path("C:/netra-apex")
+    root_dir = Path("C:/GitHub/netra-apex")
 
     print("CLEANING: Starting Python cache cleanup for Issue #1082...")
     print(f"Root directory: {root_dir}")

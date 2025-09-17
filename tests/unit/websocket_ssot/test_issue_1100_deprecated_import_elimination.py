@@ -230,7 +230,7 @@ class DeprecatedImportEliminationTests(BaseIntegrationTest):
         # Validate canonical patterns are present
         assert len(canonical_matches) > 0, (
             "AgentWebSocketBridge should use canonical WebSocket imports. "
-            "Expected patterns like: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager"
+            "Expected patterns like: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager"
         )
     
     @pytest.mark.unit
@@ -402,7 +402,7 @@ class SSotImportPathConsistencyTests(BaseIntegrationTest):
             logger.info(f"  Pattern: {pattern} (used in {len(usages)} files)")
         
         # Should have only one canonical pattern for WebSocketManager imports
-        canonical_pattern = "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager"
+        canonical_pattern = "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager"
         
         non_canonical_imports = []
         for pattern, usages in import_patterns.items():

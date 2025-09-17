@@ -39,7 +39,7 @@ from shared.types.core_types import UserID, ensure_user_id
 # Critical imports for full E2E WebSocket testing  
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from tests.e2e.staging_config import staging_urls
 

@@ -328,8 +328,8 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
         
         # Define SSOT patterns that SHOULD be used
         ssot_patterns = [
-            "from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager",
-            "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
+            "from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager",
+            "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
         ]
         
         for py_file in self._get_websocket_related_files():
@@ -435,8 +435,8 @@ class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
                 print(f"   ❌ {import_stmt}")
         
         print("\n🔧 REMEDIATION REQUIRED:")
-        print("   ✅ Replace with: from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager")
-        print("   ✅ Replace with: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager")
+        print("   ✅ Replace with: from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager")
+        print("   ✅ Replace with: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager")
 
     def _report_deprecated_usage(self, violations: Dict[str, List[str]]):
         """Report deprecated usage violations."""

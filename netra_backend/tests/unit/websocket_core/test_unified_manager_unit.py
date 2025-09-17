@@ -16,7 +16,7 @@ import json
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock, MagicMock
 from enum import Enum
-from netra_backend.app.websocket_core.unified_manager import (
+from netra_backend.app.websocket_core.websocket_manager import (
     UnifiedWebSocketManager, 
     WebSocketConnection,
     _serialize_message_safely
@@ -29,7 +29,7 @@ class UnifiedWebSocketManagerCoreTests:
     @pytest.fixture
     async def websocket_manager(self):
         """Create UnifiedWebSocketManager instance using factory pattern."""
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         return get_websocket_manager()
     
     @pytest.fixture
@@ -372,7 +372,7 @@ class UnifiedWebSocketManagerCompatibilityTests:
     @pytest.fixture
     async def websocket_manager(self):
         """Create UnifiedWebSocketManager instance using factory pattern."""
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         return get_websocket_manager()
     
     @pytest.fixture

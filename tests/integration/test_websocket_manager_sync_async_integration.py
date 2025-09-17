@@ -37,7 +37,7 @@ class TestWebSocketManagerSyncAsyncIntegration(SSotAsyncTestCase):
         work correctly in an integration environment.
         """
         # Test synchronous factory pattern
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
         sync_manager = get_websocket_manager(user_context=self.user_context)
         self.assertIsNotNone(sync_manager)
@@ -153,9 +153,9 @@ class TestWebSocketManagerSyncAsyncIntegration(SSotAsyncTestCase):
         managers and that sync/async usage is consistent.
         """
         # Test all available factory functions
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager as pattern_get
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as pattern_get
 
         # Create managers using different patterns
         sync_manager_1 = get_websocket_manager(user_context=self.user_context)
@@ -202,7 +202,7 @@ class TestWebSocketManagerSyncAsyncIntegration(SSotAsyncTestCase):
             run_id="integration_run_2"
         )
 
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
         # Create managers for different users
         manager_1 = get_websocket_manager(user_context=user_context_1)

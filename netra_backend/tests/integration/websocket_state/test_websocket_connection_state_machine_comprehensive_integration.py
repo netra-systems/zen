@@ -24,7 +24,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.websocket import WebSocketTestClient
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ConnectionID, WebSocketID, ensure_user_id
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from netra_backend.app.core.websocket_recovery_types import ConnectionState as RecoveryConnectionState
 

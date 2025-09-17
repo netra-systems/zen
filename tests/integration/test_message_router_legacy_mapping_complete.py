@@ -24,7 +24,7 @@ from typing import Dict, Any, List
 from fastapi import WebSocket
 from netra_backend.app.websocket_core.handlers import MessageRouter, get_message_router
 from netra_backend.app.websocket_core.types import MessageType, LEGACY_MESSAGE_TYPE_MAP, normalize_message_type, create_standard_message, WebSocketMessage
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
 from test_framework.database.test_database_manager import DatabaseTestManager
 

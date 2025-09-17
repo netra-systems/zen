@@ -33,7 +33,7 @@ class TestWebSocketAwaitErrorMissionCritical(SSotAsyncTestCase):
         This test ensures that WebSocket managers can be created successfully
         using the correct patterns, preventing Golden Path failures.
         """
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
         # CRITICAL: WebSocket manager must be available for Golden Path
         manager = get_websocket_manager(user_context=self.user_context)
@@ -68,7 +68,7 @@ class TestWebSocketAwaitErrorMissionCritical(SSotAsyncTestCase):
         agent_thinking, tool_executing, tool_completed, agent_completed) can still
         be sent even if some components have await errors.
         """
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
         manager = get_websocket_manager(user_context=self.user_context)
         self.assertIsNotNone(manager)
@@ -201,7 +201,7 @@ class TestWebSocketAwaitErrorMissionCritical(SSotAsyncTestCase):
         don't introduce blocking issues that could break the Golden Path user flow.
         """
         # Test synchronous factory (most common pattern)
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
         sync_manager = get_websocket_manager(user_context=self.user_context)
         self.assertIsNotNone(sync_manager, "CRITICAL: Sync WebSocket factory failed")
@@ -251,7 +251,7 @@ class TestWebSocketAwaitErrorMissionCritical(SSotAsyncTestCase):
 
         # Test sync factory
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             manager = get_websocket_manager(user_context=self.user_context)
             impact_assessment['sync_factory_works'] = manager is not None
         except Exception:
@@ -288,7 +288,7 @@ class TestWebSocketAwaitErrorMissionCritical(SSotAsyncTestCase):
 
         # Test event delivery
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             manager = get_websocket_manager(user_context=self.user_context)
             await manager.emit_critical_event(
                 event_type="impact_assessment_test",

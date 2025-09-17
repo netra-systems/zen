@@ -69,8 +69,8 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
 
         # Canonical SSOT WebSocket patterns (MUST BE USED)
         self.canonical_websocket_imports = [
-            "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
-            "from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager",
+            "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+            "from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager",
             "from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry",
         ]
 
@@ -96,7 +96,7 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
                 "websocket_manager_path": "netra_backend/app/websocket_core/websocket_manager.py",
                 "agent_registry_path": "netra_backend/app/agents/supervisor/agent_registry.py",
                 "canonical_imports": [
-                    "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
+                    "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
                     "from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry",
                 ],
                 "forbidden_imports": [
@@ -396,8 +396,8 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
                 f"   import websocket_factory",
                 f"",
                 f"✅ USE CANONICAL SSOT IMPORTS:",
-                f"   from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
-                f"   from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager",
+                f"   from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+                f"   from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager",
                 f"   from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry",
                 f"",
                 f"📋 IMPORT STANDARDIZATION STEPS:",
