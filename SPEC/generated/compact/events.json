@@ -4,6 +4,7 @@
     ":event",
     "_EVENT",
     "_event",
+    "agent_event",
     "auth_event",
     "broadcast:",
     "broadcast_event",

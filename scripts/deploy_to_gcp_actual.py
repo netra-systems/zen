@@ -103,7 +103,7 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
-                    "AUTH_SERVICE_URL": "https://staging.netrasystems.ai",
+                    "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
                     "AUTH_SERVICE_INTERNAL_URL": f"https://netra-auth-service-uc.a.run.app",  # Internal VPC communication
                     "AUTH_SERVICE_ENABLED": "true",  # CRITICAL: Enable auth service integration
                     "FRONTEND_URL": "https://staging.netrasystems.ai",
@@ -144,7 +144,7 @@ class GCPDeployer:
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
                     "FRONTEND_URL": "https://staging.netrasystems.ai",
-                    "AUTH_SERVICE_URL": "https://staging.netrasystems.ai",
+                    "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
                     "JWT_ALGORITHM": "HS256",
                     "JWT_ACCESS_EXPIRY_MINUTES": "15",
                     "JWT_REFRESH_EXPIRY_DAYS": "7",
@@ -185,7 +185,7 @@ class GCPDeployer:
                     "NEXT_PUBLIC_API_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend API endpoint
                     "NEXT_PUBLIC_WS_URL": "wss://api.staging.netrasystems.ai",  # CRITICAL: WebSocket endpoint
                     "NEXT_PUBLIC_AUTH_URL": "https://staging.netrasystems.ai",  # CRITICAL: Auth service endpoint
-                    "NEXT_PUBLIC_AUTH_SERVICE_URL": "https://staging.netrasystems.ai",  # CRITICAL: Auth service alternative
+                    "NEXT_PUBLIC_AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth service alternative
                     "NEXT_PUBLIC_AUTH_API_URL": "https://staging.netrasystems.ai",  # CRITICAL: Auth API endpoint
                     "NEXT_PUBLIC_BACKEND_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend alternative endpoint
                     "NEXT_PUBLIC_FRONTEND_URL": "https://staging.netrasystems.ai",  # CRITICAL: OAuth redirects
@@ -1025,7 +1025,7 @@ CMD ["npm", "start"]
                 "JWT_SECRET_STAGING": "jwt-secret-staging",  # Both names use same secret for consistency
                 "SECRET_KEY": "secret-key-staging",
                 "SERVICE_SECRET": "service-secret-staging",
-                "SERVICE_ID": "service-id-staging"
+                "SERVICE_ID": "netra-backend"
             }
             
             for env_name, gsm_name in auth_mappings.items():

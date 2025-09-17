@@ -363,7 +363,7 @@ class InfrastructureResilienceManager:
             redis_manager = get_redis_manager()
 
             # Simple ping test
-            redis = await redis_manager.get_redis()
+            redis = await redis_manager.get_client()
             if redis:
                 result = await redis.ping()
                 return result is True

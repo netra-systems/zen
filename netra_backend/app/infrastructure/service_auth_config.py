@@ -92,15 +92,21 @@ class ServiceAuthManager:
     def _create_backend_service_config(self) -> Optional[ServiceAuthConfig]:
         """Create backend service authentication configuration."""
         try:
-            # Get environment variables
+            # Get environment variables - strip whitespace to handle newline issues (Issue #1313)
             service_id = os.getenv("SERVICE_ID")
+            if service_id:
+                service_id = service_id.strip()  # Strip whitespace/newlines
             service_secret = os.getenv("SERVICE_SECRET")
+            if service_secret:
+                service_secret = service_secret.strip()  # Strip whitespace/newlines
             # jwt_secret_key removed - JWT operations delegated to auth service (SSOT compliance)
             auth_service_url = os.getenv("AUTH_SERVICE_URL", "")
-            
+            if auth_service_url:
+                auth_service_url = auth_service_url.strip()  # Strip whitespace/newlines
+
             # Validate required fields
             validation_errors = []
-            
+
             if not service_id:
                 validation_errors.append("SERVICE_ID environment variable not set")
             elif not self._validate_service_id(service_id):
@@ -265,7 +271,8 @@ class ServiceAuthManager:
         if self.environment == ServiceEnvironment.STAGING:
             valid_staging_patterns = [
                 "http://auth:8081",                    # Docker compose internal
-                "https://netra-auth",          # GCP Cloud Run
+                "https://netra-auth",                  # GCP Cloud Run
+                "https://auth.staging.netrasystems.ai", # Staging domain (Issue #1313)
                 "http://localhost:8081",               # Local testing
             ]
             

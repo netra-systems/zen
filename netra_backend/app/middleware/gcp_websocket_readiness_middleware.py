@@ -412,17 +412,20 @@ class GCPWebSocketReadinessMiddleware(BaseHTTPMiddleware):
         bypass_staging = self.env_manager.get('BYPASS_WEBSOCKET_READINESS_STAGING', 'false').lower() == 'true'
         if self.environment == 'staging' and bypass_staging:
             self.logger.warning(
-                "🚨 MIDDLEWARE STAGING BYPASS: WebSocket readiness validation bypassed in staging "
-                "for immediate golden path remediation"
+                f"🚨 MIDDLEWARE STAGING BYPASS (Issue #919 fix): WebSocket readiness validation bypassed in staging "
+                f"for immediate golden path remediation. Environment: {self.environment}, "
+                f"GCP: {self.is_gcp_environment}, Project: {self.env_manager.get('GOOGLE_CLOUD_PROJECT', 'unknown')}"
             )
             return True, {
                 "cached": False,
                 "check_time": current_time,
                 "ready": True,
                 "bypass_active": True,
-                "bypass_reason": "staging_middleware_remediation",
+                "bypass_reason": "staging_middleware_remediation_issue_919",
                 "environment": self.environment,
-                "middleware_bypass": True
+                "middleware_bypass": True,
+                "issue_919_fix": True,
+                "google_cloud_project": self.env_manager.get('GOOGLE_CLOUD_PROJECT', 'unknown')
             }
 
         # Use cached result if still valid
@@ -446,14 +449,20 @@ class GCPWebSocketReadinessMiddleware(BaseHTTPMiddleware):
 
             # STAGING GRACEFUL DEGRADATION: Allow connection even if readiness fails in staging
             if not ready and self.environment == 'staging':
+                # Issue #919 specific handling for startup_phase unknown scenarios
+                failed_services = details.get('failed_services', [])
+                startup_phase = details.get('startup_phase', 'unknown')
+
                 self.logger.warning(
-                    "🔄 STAGING GRACEFUL DEGRADATION: Readiness check failed but allowing WebSocket "
-                    f"connection in staging environment. Failed services: {details.get('failed_services', [])}"
+                    f"🔄 STAGING GRACEFUL DEGRADATION (Issue #919 fix): Readiness check failed but allowing WebSocket "
+                    f"connection in staging environment. Failed services: {failed_services}, "
+                    f"Startup phase: {startup_phase}. This prevents 503 Service Unavailable errors in staging."
                 )
                 ready = True  # Override readiness check failure for staging
                 details["graceful_degradation"] = True
                 details["original_ready"] = False
-                details["degradation_reason"] = "staging_environment_graceful_override"
+                details["degradation_reason"] = "staging_environment_graceful_override_issue_919"
+                details["issue_919_fix"] = True
 
             # Cache result
             self._last_readiness_check_time = current_time
@@ -476,14 +485,15 @@ class GCPWebSocketReadinessMiddleware(BaseHTTPMiddleware):
             # STAGING ERROR RECOVERY: Allow connection despite errors in staging
             if self.is_gcp_environment and self.environment == 'staging':
                 self.logger.warning(
-                    f"🔄 STAGING ERROR RECOVERY: Exception during readiness check in staging, "
-                    f"but allowing WebSocket connection for golden path: {e}"
+                    f"🔄 STAGING ERROR RECOVERY (Issue #919 fix): Exception during readiness check in staging, "
+                    f"but allowing WebSocket connection for golden path. Error: {e}"
                 )
                 return True, {
                     "error": str(e),
                     "allowed": True,
                     "error_recovery": True,
-                    "recovery_reason": "staging_exception_recovery"
+                    "recovery_reason": "staging_exception_recovery_issue_919",
+                    "issue_919_fix": True
                 }
             elif self.is_gcp_environment:
                 return False, {"error": str(e), "blocked": True, "bypass_active": False}

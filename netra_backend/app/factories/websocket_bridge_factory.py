@@ -198,27 +198,40 @@ def create_websocket_bridge_with_context(
     )
 
 
-# Global factory instance for singleton pattern support
-_websocket_bridge_factory: Optional[WebSocketBridgeFactory] = None
+# Singleton instance for factory pattern
+_websocket_bridge_factory_instance: Optional[WebSocketBridgeFactory] = None
 
 
 def get_websocket_bridge_factory() -> WebSocketBridgeFactory:
-    """Get or create the singleton WebSocketBridgeFactory instance.
-    
-    This function provides global access to the WebSocketBridgeFactory following
-    the singleton pattern. It ensures that only one factory instance exists
-    globally while providing thread-safe access.
-    
+    """Get WebSocketBridgeFactory instance using singleton pattern.
+
+    This function provides a single source of truth for WebSocketBridgeFactory
+    instances, ensuring consistency across the application while maintaining
+    proper factory pattern support.
+
     Returns:
-        WebSocketBridgeFactory: The singleton factory instance
-        
-    Business Value: Enables global factory access pattern required by 
-    supervisor factory and other system components for WebSocket bridge creation.
+        WebSocketBridgeFactory: Singleton factory instance
     """
-    global _websocket_bridge_factory
-    if _websocket_bridge_factory is None:
-        _websocket_bridge_factory = WebSocketBridgeFactory()
-    return _websocket_bridge_factory
+    global _websocket_bridge_factory_instance
+
+    if _websocket_bridge_factory_instance is None:
+        _websocket_bridge_factory_instance = WebSocketBridgeFactory()
+        logger.info("Created new WebSocketBridgeFactory singleton instance")
+    else:
+        logger.debug("Returning existing WebSocketBridgeFactory singleton instance")
+
+    return _websocket_bridge_factory_instance
+
+
+def reset_websocket_bridge_factory() -> None:
+    """Reset the WebSocketBridgeFactory singleton instance (for testing).
+
+    This function is primarily intended for testing scenarios where you need
+    to reset the singleton state between tests.
+    """
+    global _websocket_bridge_factory_instance
+    _websocket_bridge_factory_instance = None
+    logger.debug("Reset WebSocketBridgeFactory singleton instance")
 
 
 # Export all public classes and functions
@@ -226,7 +239,8 @@ __all__ = [
     "StandardWebSocketBridge",
     "WebSocketBridgeAdapter",
     "WebSocketBridgeFactory",
-    "get_websocket_bridge_factory",
+    "get_websocket_bridge_factory",  # Added missing function
+    "reset_websocket_bridge_factory",
     "create_standard_websocket_bridge",
     "create_agent_bridge_adapter",
     "create_websocket_bridge_for_testing",

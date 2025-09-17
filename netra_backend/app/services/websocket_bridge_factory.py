@@ -19,7 +19,8 @@ from netra_backend.app.factories.websocket_bridge_factory import (
     StandardWebSocketBridge,
     WebSocketBridgeAdapter,
     WebSocketBridgeFactory,
-    get_websocket_bridge_factory,
+    get_websocket_bridge_factory,  # Added missing function
+    reset_websocket_bridge_factory,
     create_standard_websocket_bridge,
     create_agent_bridge_adapter,
     create_websocket_bridge_for_testing,
@@ -46,7 +47,8 @@ __all__ = [
     "StandardWebSocketBridge",
     "WebSocketBridgeAdapter",
     "WebSocketBridgeFactory",
-    "get_websocket_bridge_factory",
+    "get_websocket_bridge_factory",  # Added missing function
+    "reset_websocket_bridge_factory",
     "create_standard_websocket_bridge",
     "create_agent_bridge_adapter",
     "create_websocket_bridge_for_testing",
