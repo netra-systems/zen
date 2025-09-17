@@ -20,7 +20,6 @@ Business Value Justification:
 
 @compliance CLAUDE.md - WebSocket events enable substantive chat interactions
 @compliance SPEC/core.xml - Real services over mocks for authentic testing
-"
 
 import asyncio
 import json
