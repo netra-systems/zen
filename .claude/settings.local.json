@@ -19,7 +19,8 @@
       "Bash(python tests/test_agent_interface.py)",
       "Bash(kill:*)",
       "Bash(python test_tool_detection.py:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Read(//tmp/**)"
     ],
     "deny": [],
     "ask": []
