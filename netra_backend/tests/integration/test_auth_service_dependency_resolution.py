@@ -34,10 +34,17 @@ class TestAuthServiceDependencyResolution(SSotBaseTestCase):
         # EXPECTED: PASS locally
         try:
             # Test various auth_service imports that might be referenced
-            import auth_service
-            from auth_service.auth_core.core.jwt_handler import JWTHandler
-            from auth_service.auth_core.core.session_manager import SessionManager
-            from auth_service.auth_core.core.token_validator import TokenValidator
+            # Use dynamic imports to avoid module-level import failures
+            import importlib
+            
+            auth_service = importlib.import_module('auth_service')
+            jwt_handler_module = importlib.import_module('auth_service.auth_core.core.jwt_handler')
+            session_manager_module = importlib.import_module('auth_service.auth_core.core.session_manager')
+            token_validator_module = importlib.import_module('auth_service.auth_core.core.token_validator')
+            
+            JWTHandler = getattr(jwt_handler_module, 'JWTHandler')
+            SessionManager = getattr(session_manager_module, 'SessionManager')
+            TokenValidator = getattr(token_validator_module, 'TokenValidator')
 
             assert auth_service is not None
             assert JWTHandler is not None

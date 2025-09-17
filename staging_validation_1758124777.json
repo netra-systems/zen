@@ -1,0 +1,125 @@
+{
+  "timestamp": "2025-09-17T08:59:37.003221",
+  "config": {
+    "frontend": "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app",
+    "api": "https://api.staging.netrasystems.ai"
+  },
+  "results": {
+    "frontend_health": {
+      "success": true,
+      "status": 200,
+      "headers": {
+        "content-security-policy": "default-src 'self' https://*.netrasystems.ai https://api-staging.netrasystems.ai; script-src 'self' 'unsafe-inline' blob: https://*.netrasystems.ai https://api-staging.netrasystems.ai https://www.googletagmanager.com https://tagmanager.google.com https://www.clarity.ms https://scripts.clarity.ms https://*.clarity.ms; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://*.netrasystems.ai https://api-staging.netrasystems.ai; img-src 'self' data: blob: https://*.netrasystems.ai https://api-staging.netrasystems.ai https://www.googletagmanager.com https://*.clarity.ms https://c.bing.com; connect-src 'self' https://*.netrasystems.ai https://api-staging.netrasystems.ai wss://api-staging.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://*.clarity.ms https://prodregistryv2.org https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://featureassets.org https://cloudflare-dns.com; font-src 'self' data: https://*.netrasystems.ai https://api-staging.netrasystems.ai; media-src 'self' https://*.netrasystems.ai https://api-staging.netrasystems.ai; frame-src 'self' https://*.netrasystems.ai https://api-staging.netrasystems.ai https://accounts.google.com https://www.googletagmanager.com",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-xss-protection": "1; mode=block",
+        "vary": "RSC, Next-Router-State-Tree, Next-Router-Prefetch",
+        "cache-control": "no-cache, no-store, must-revalidate",
+        "content-type": "application/json",
+        "expires": "0",
+        "pragma": "no-cache",
+        "date": "Wed, 17 Sep 2025 15:59:26 GMT",
+        "server": "Google Frontend",
+        "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "Connection": "close",
+        "Transfer-Encoding": "chunked"
+      },
+      "data": "{\"status\":\"degraded\",\"service\":\"frontend\",\"version\":\"1.0.0\",\"environment\":\"staging\",\"timestamp\":\"2025-09-17T15:59:26.630Z\",\"uptime\":146.192315619,\"memory\":{\"used\":26,\"total\":28,\"rss\":83},\"dependencies\":{\"backend\":{\"status\":\"degraded\",\"details\":{\"error\":\"The operation was aborted due to timeout\"}},\"auth\":{\"status\":\"healthy\",\"details\":{\"status\":\"healthy\",\"service\":\"auth-service\",\"version\":\"1.0.0\",\"timestamp\":\"2025-09-17T15:59:24.743313+00:00\",\"uptime_seconds\":46407.34608,\"database_status\":\"connected\",\"environment\":\"staging\"}}},\"checks\":{\"response_time_ms\":2003,\"environment_config\":\"ok\",\"memory_usage\":\"ok\"},\"urls\":{\"api\":\"https://api.staging.netrasystems.ai\",\"websocket\":\"wss://api.staging.netrasystems.ai\",\"auth\":\"https://auth.staging.netrasystems.ai\",\"frontend\":\"https://app.staging.netrasystems.ai\"}}",
+      "error": null
+    },
+    "frontend_root": {
+      "success": true,
+      "status": 200,
+      "headers": {
+        "content-security-policy": "default-src 'self' https://*.netrasystems.ai https://api-staging.netrasystems.ai; script-src 'self' 'unsafe-inline' blob: https://*.netrasystems.ai https://api-staging.netrasystems.ai https://www.googletagmanager.com https://tagmanager.google.com https://www.clarity.ms https://scripts.clarity.ms https://*.clarity.ms; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://*.netrasystems.ai https://api-staging.netrasystems.ai; img-src 'self' data: blob: https://*.netrasystems.ai https://api-staging.netrasystems.ai https://www.googletagmanager.com https://*.clarity.ms https://c.bing.com; connect-src 'self' https://*.netrasystems.ai https://api-staging.netrasystems.ai wss://api-staging.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://*.clarity.ms https://prodregistryv2.org https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://featureassets.org https://cloudflare-dns.com; font-src 'self' data: https://*.netrasystems.ai https://api-staging.netrasystems.ai; media-src 'self' https://*.netrasystems.ai https://api-staging.netrasystems.ai; frame-src 'self' https://*.netrasystems.ai https://api-staging.netrasystems.ai https://accounts.google.com https://www.googletagmanager.com",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-xss-protection": "1; mode=block",
+        "vary": "RSC, Next-Router-State-Tree, Next-Router-Prefetch, Accept-Encoding",
+        "x-nextjs-cache": "HIT",
+        "x-powered-by": "Next.js",
+        "cache-control": "s-maxage=31536000, stale-while-revalidate",
+        "etag": "\"rnrjnqpito6so\"",
+        "content-type": "text/html; charset=utf-8",
+        "x-cloud-trace-context": "21e6251af7a36675a5b58f8741a2ef48",
+        "date": "Wed, 17 Sep 2025 15:59:26 GMT",
+        "server": "Google Frontend",
+        "Content-Length": "8816",
+        "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "Connection": "close"
+      },
+      "data": "<!DOCTYPE html><html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"preload\" href=\"/_next/static/media/e4af272ccee01ff0-s.p.woff2\" as=\"font\" crossorigin=\"\" type=\"font/woff2\"/><link rel=\"stylesheet\" href=\"/_next/static/css/9e75726c9f5e0906.css\" data-precedence=\"next\"/><link rel=\"stylesheet\" href=\"/_next/static/css/e397bde5f057005f.css\" data-precedence=\"next\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack-7250463612c81626.js\"/><script src=\"/_next/static/chunks/fd9d1056-d1dcf518016c0a94.js\" async=\"\"></script><script src=\"/_next/static/chunks/117-6d47b29347188bb9.js\" async=\"\"></script><script src=\"/_next/static/chunks/main-app-050fd630f446e664.js\" async=\"\"></script><script src=\"/_next/static/chunks/137-9f253eb34c9d6ea7.js\" async=\"\"></script><script src=\"/_next/static/chunks/125-7f026d43f8309792.js\" async=\"\"></script><script src=\"/_next/static/chunks/146-9d72328b705df7d4.js\" async=\"\"></script><script src=\"/_next/static/chunks/208-aea9807b9310fc07.js\" async=\"\"></script><script src=\"/_next/static/chunks/app/page-7dc2bb018d52d0ad.js\" async=\"\"></script><script src=\"/_next/static/chunks/0c177acc-96094e27a5e29b41.js\" async=\"\"></script><script src=\"/_next/static/chunks/581-0ad9ad7e0f691ec3.js\" async=\"\"></script><script src=\"/_next/static/chunks/426-9e1d777951475f58.js\" async=\"\"></script><script src=\"/_next/static/chunks/667-7aed0acbfe34ea21.js\" async=\"\"></script><script src=\"/_next/static/chunks/329-68e2d92542bfb291.js\" async=\"\"></script><script src=\"/_next/static/chunks/app/layout-739bf7f7c49a7b12.js\" async=\"\"></script><title>Netra Beta</title><meta name=\"description\" content=\"Autonomous AI agents for business process optimization - Beta Program\"/><meta name=\"next-size-adjust\"/><script src=\"/_next/static/chunks/polyfills-42372ed130431b0a.js\" noModule=\"\"></script></head><body class=\"__className_f367f3\"><div>Loading...</div><script src=\"/_next/static/chunks/webpack-7250463612c81626.js\" async=\"\"></script><script>(self.__next_f=self.__next_f||[]).push([0]);self.__next_f.push([2,null])</script><script>self.__next_f.push([1,\"1:HL[\\\"/_next/static/media/e4af272ccee01ff0-s.p.woff2\\\",\\\"font\\\",{\\\"crossOrigin\\\":\\\"\\\",\\\"type\\\":\\\"font/woff2\\\"}]\\n2:HL[\\\"/_next/static/css/9e75726c9f5e0906.css\\\",\\\"style\\\"]\\n3:HL[\\\"/_next/static/css/e397bde5f057005f.css\\\",\\\"style\\\"]\\n\"])</script><script>self.__next_f.push([1,\"4:I[12846,[],\\\"\\\"]\\n6:I[19107,[],\\\"ClientPageRoot\\\"]\\n7:I[57340,[\\\"137\\\",\\\"static/chunks/137-9f253eb34c9d6ea7.js\\\",\\\"125\\\",\\\"static/chunks/125-7f026d43f8309792.js\\\",\\\"146\\\",\\\"static/chunks/146-9d72328b705df7d4.js\\\",\\\"208\\\",\\\"static/chunks/208-aea9807b9310fc07.js\\\",\\\"931\\\",\\\"static/chunks/app/page-7dc2bb018d52d0ad.js\\\"],\\\"default\\\",1]\\n8:I[90386,[\\\"1\\\",\\\"static/chunks/0c177acc-96094e27a5e29b41.js\\\",\\\"137\\\",\\\"static/chunks/137-9f253eb34c9d6ea7.js\\\",\\\"125\\\",\\\"static/chunks/125-7f026d43f8309792.js\\\",\\\"581\\\",\\\"static/chunks/581-0ad9ad7e0f691ec3.js\\\",\\\"426\\\",\\\"static/chunks/426-9e1d777951475f58.js\\\",\\\"667\\\",\\\"static/chunks/667-7aed0acbfe34ea21.js\\\",\\\"146\\\",\\\"static/chunks/146-9d72328b705df7d4.js\\\",\\\"208\\\",\\\"static/chunks/208-aea9807b9310fc07.js\\\",\\\"329\\\",\\\"static/chunks/329-68e2d92542bfb291.js\\\",\\\"185\\\",\\\"static/chunks/app/layout-739bf7f7c49a7b12.js\\\"],\\\"SentryInit\\\"]\\n9:I[71270,[\\\"1\\\",\\\"static/chunks/0c177acc-96094e27a5e29b41.js\\\",\\\"137\\\",\\\"static/chunks/137-9f253eb34c9d6ea7.js\\\",\\\"125\\\",\\\"static/chunks/125-7f026d43f8309792.js\\\",\\\"581\\\",\\\"static/chunks/581-0ad9ad7e0f691ec3.js\\\",\\\"426\\\",\\\"static/chunks/426-9e1d777951475f58.js\\\",\\\"667\\\",\\\"static/chunks/667-7aed0acbfe34ea21.js\\\",\\\"146\\\",\\\"static/chunks/146-9d72328b705df7d4.js\\\",\\\"208\\\",\\\"static/chunks/208-aea9807b9310fc07.js\\\",\\\"329\\\",\\\"static/chunks/329-68e2d92542bfb291.js\\\",\\\"185\\\",\\\"static/chunks/app/layout-739bf7f7c49a7b12.js\\\"],\\\"GTMProvider\\\"]\\na:I[94579,[\\\"1\\\",\\\"static/chunks/0c177acc-96094e27a5e29b41.js\\\",\\\"137\\\",\\\"static/chunks/137-9f253eb34c9d6ea7.js\\\",\\\"125\\\",\\\"static/chunks/125-7f026d43f8309792.js\\\",\\\"581\\\",\\\"static/chunks/581-0ad9ad7e0f691ec3.js\\\",\\\"426\\\",\\\"static/chunks/426-9e1d777951475f58.js\\\",\\\"667\\\",\\\"static/chunks/667-7aed0acbfe34ea21.js\\\",\\\"146\\\",\\\"static/chunks/146-9d72328b705df7d4.js\\\",\\\"208\\\",\\\"static/chunks/208-aea9807b9310fc07.js\\\",\\\"329\\\",\\\"static/chunks/329-68e2d92542bfb291.js\\\",\\\"185\\\",\\\"static/chunks/app/layout-739bf7f7c49a7b12.js\\\"],\\\"AuthProvider\\\"]\\nb:I[92267,[\\\"1\\\",\\\"static/chunks/0c177acc-96094e27a5e29b41.js\\\",\\\"137\\\",\\\"static/chunks/137-9f253eb34c9d6ea7.js\\\",\\\"125\\\",\\\"static/chunks/125-7f026d43f8309792.js\\\",\\\"581\\\",\\\"static/chunks/581-0ad9ad7e0f691ec3.js\\\",\\\"426\\\",\\\"static/chunks/426-9e1d777951475f58.js\\\",\\\"667\\\"\"])</script><script>self.__next_f.push([1,\",\\\"static/chunks/667-7aed0acbfe34ea21.js\\\",\\\"146\\\",\\\"static/chunks/146-9d72328b705df7d4.js\\\",\\\"208\\\",\\\"static/chunks/208-aea9807b9310fc07.js\\\",\\\"329\\\",\\\"static/chunks/329-68e2d92542bfb291.js\\\",\\\"185\\\",\\\"static/chunks/app/layout-739bf7f7c49a7b12.js\\\"],\\\"WebSocketProvider\\\"]\\nc:I[93838,[\\\"1\\\",\\\"static/chunks/0c177acc-96094e27a5e29b41.js\\\",\\\"137\\\",\\\"static/chunks/137-9f253eb34c9d6ea7.js\\\",\\\"125\\\",\\\"static/chunks/125-7f026d43f8309792.js\\\",\\\"581\\\",\\\"static/chunks/581-0ad9ad7e0f691ec3.js\\\",\\\"426\\\",\\\"static/chunks/426-9e1d777951475f58.js\\\",\\\"667\\\",\\\"static/chunks/667-7aed0acbfe34ea21.js\\\",\\\"146\\\",\\\"static/chunks/146-9d72328b705df7d4.js\\\",\\\"208\\\",\\\"static/chunks/208-aea9807b9310fc07.js\\\",\\\"329\\\",\\\"static/chunks/329-68e2d92542bfb291.js\\\",\\\"185\\\",\\\"static/chunks/app/layout-739bf7f7c49a7b12.js\\\"],\\\"AppWithLayout\\\"]\\nd:I[4707,[],\\\"\\\"]\\ne:I[36423,[],\\\"\\\"]\\n10:I[61060,[],\\\"\\\"]\\n11:[]\\n\"])</script><script>self.__next_f.push([1,\"0:[\\\"$\\\",\\\"$L4\\\",null,{\\\"buildId\\\":\\\"Fpz_5GDjt6T9P1U0Ds6j5\\\",\\\"assetPrefix\\\":\\\"\\\",\\\"urlParts\\\":[\\\"\\\",\\\"\\\"],\\\"initialTree\\\":[\\\"\\\",{\\\"children\\\":[\\\"__PAGE__\\\",{}]},\\\"$undefined\\\",\\\"$undefined\\\",true],\\\"initialSeedData\\\":[\\\"\\\",{\\\"children\\\":[\\\"__PAGE__\\\",{},[[\\\"$L5\\\",[\\\"$\\\",\\\"$L6\\\",null,{\\\"props\\\":{\\\"params\\\":{},\\\"searchParams\\\":{}},\\\"Component\\\":\\\"$7\\\"}],null],null],null]},[[[[\\\"$\\\",\\\"link\\\",\\\"0\\\",{\\\"rel\\\":\\\"stylesheet\\\",\\\"href\\\":\\\"/_next/static/css/9e75726c9f5e0906.css\\\",\\\"precedence\\\":\\\"next\\\",\\\"crossOrigin\\\":\\\"$undefined\\\"}],[\\\"$\\\",\\\"link\\\",\\\"1\\\",{\\\"rel\\\":\\\"stylesheet\\\",\\\"href\\\":\\\"/_next/static/css/e397bde5f057005f.css\\\",\\\"precedence\\\":\\\"next\\\",\\\"crossOrigin\\\":\\\"$undefined\\\"}]],[\\\"$\\\",\\\"html\\\",null,{\\\"lang\\\":\\\"en\\\",\\\"suppressHydrationWarning\\\":true,\\\"children\\\":[\\\"$\\\",\\\"body\\\",null,{\\\"className\\\":\\\"__className_f367f3\\\",\\\"children\\\":[[\\\"$\\\",\\\"$L8\\\",null,{}],[\\\"$\\\",\\\"$L9\\\",null,{\\\"enabled\\\":true,\\\"children\\\":[\\\"$\\\",\\\"$La\\\",null,{\\\"children\\\":[\\\"$\\\",\\\"$Lb\\\",null,{\\\"children\\\":[\\\"$\\\",\\\"$Lc\\\",null,{\\\"children\\\":[\\\"$\\\",\\\"$Ld\\\",null,{\\\"parallelRouterKey\\\":\\\"children\\\",\\\"segmentPath\\\":[\\\"children\\\"],\\\"error\\\":\\\"$undefined\\\",\\\"errorStyles\\\":\\\"$undefined\\\",\\\"errorScripts\\\":\\\"$undefined\\\",\\\"template\\\":[\\\"$\\\",\\\"$Le\\\",null,{}],\\\"templateStyles\\\":\\\"$undefined\\\",\\\"templateScripts\\\":\\\"$undefined\\\",\\\"notFound\\\":[[\\\"$\\\",\\\"title\\\",null,{\\\"children\\\":\\\"404: This page could not be found.\\\"}],[\\\"$\\\",\\\"div\\\",null,{\\\"style\\\":{\\\"fontFamily\\\":\\\"system-ui,\\\\\\\"Segoe UI\\\\\\\",Roboto,Helvetica,Arial,sans-serif,\\\\\\\"Apple Color Emoji\\\\\\\",\\\\\\\"Segoe UI Emoji\\\\\\\"\\\",\\\"height\\\":\\\"100vh\\\",\\\"textAlign\\\":\\\"center\\\",\\\"display\\\":\\\"flex\\\",\\\"flexDirection\\\":\\\"column\\\",\\\"alignItems\\\":\\\"center\\\",\\\"justifyContent\\\":\\\"center\\\"},\\\"children\\\":[\\\"$\\\",\\\"div\\\",null,{\\\"children\\\":[[\\\"$\\\",\\\"style\\\",null,{\\\"dangerouslySetInnerHTML\\\":{\\\"__html\\\":\\\"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}\\\"}}],[\\\"$\\\",\\\"h1\\\",null,{\\\"className\\\":\\\"next-error-h1\\\",\\\"style\\\":{\\\"display\\\":\\\"inline-block\\\",\\\"margin\\\":\\\"0 20px 0 0\\\",\\\"padding\\\":\\\"0 23px 0 0\\\",\\\"fontSize\\\":24,\\\"fontWeight\\\":500,\\\"verticalAlign\\\":\\\"top\\\",\\\"lineHeight\\\":\\\"49px\\\"},\\\"children\\\":\\\"404\\\"}],[\\\"$\\\",\\\"div\\\",null,{\\\"style\\\":{\\\"display\\\":\\\"inline-block\\\"},\\\"children\\\":[\\\"$\\\",\\\"h2\\\",null,{\\\"style\\\":{\\\"fontSize\\\":14,\\\"fontWeight\\\":400,\\\"lineHeight\\\":\\\"49px\\\",\\\"margin\\\":0},\\\"children\\\":\\\"This page could not be found.\\\"}]}]]}]}]],\\\"notFoundStyles\\\":[]}]}]}]}]}]]}]}]],null],null],\\\"couldBeIntercepted\\\":false,\\\"initialHead\\\":[null,\\\"$Lf\\\"],\\\"globalErrorComponent\\\":\\\"$10\\\",\\\"missingSlots\\\":\\\"$W11\\\"}]\\n\"])</script><script>self.__next_f.push([1,\"f:[[\\\"$\\\",\\\"meta\\\",\\\"0\\\",{\\\"name\\\":\\\"viewport\\\",\\\"content\\\":\\\"width=device-width, initial-scale=1\\\"}],[\\\"$\\\",\\\"meta\\\",\\\"1\\\",{\\\"charSet\\\":\\\"utf-8\\\"}],[\\\"$\\\",\\\"title\\\",\\\"2\\\",{\\\"children\\\":\\\"Netra Beta\\\"}],[\\\"$\\\",\\\"meta\\\",\\\"3\\\",{\\\"name\\\":\\\"description\\\",\\\"content\\\":\\\"Autonomous AI agents for business process optimization - Beta Program\\\"}],[\\\"$\\\",\\\"meta\\\",\\\"4\\\",{\\\"name\\\":\\\"next-size-adjust\\\"}]]\\n5:null\\n\"])</script></body></html>",
+      "error": null
+    },
+    "frontend_config": {
+      "success": true,
+      "status": 200,
+      "headers": {
+        "content-security-policy": "default-src 'self' https://*.netrasystems.ai https://api-staging.netrasystems.ai; script-src 'self' 'unsafe-inline' blob: https://*.netrasystems.ai https://api-staging.netrasystems.ai https://www.googletagmanager.com https://tagmanager.google.com https://www.clarity.ms https://scripts.clarity.ms https://*.clarity.ms; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://*.netrasystems.ai https://api-staging.netrasystems.ai; img-src 'self' data: blob: https://*.netrasystems.ai https://api-staging.netrasystems.ai https://www.googletagmanager.com https://*.clarity.ms https://c.bing.com; connect-src 'self' https://*.netrasystems.ai https://api-staging.netrasystems.ai wss://api-staging.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://*.clarity.ms https://prodregistryv2.org https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://featureassets.org https://cloudflare-dns.com; font-src 'self' data: https://*.netrasystems.ai https://api-staging.netrasystems.ai; media-src 'self' https://*.netrasystems.ai https://api-staging.netrasystems.ai; frame-src 'self' https://*.netrasystems.ai https://api-staging.netrasystems.ai https://accounts.google.com https://www.googletagmanager.com",
+        "x-frame-options": "SAMEORIGIN",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "vary": "RSC, Next-Router-State-Tree, Next-Router-Prefetch,Origin",
+        "access-control-allow-credentials": "true",
+        "access-control-allow-headers": "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With",
+        "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+        "access-control-allow-origin": "",
+        "access-control-expose-headers": "X-Trace-ID, X-Request-ID, Content-Length, Content-Type",
+        "access-control-max-age": "3600",
+        "cache-control": "public, max-age=30, s-maxage=60",
+        "content-type": "application/json",
+        "date": "Wed, 17 Sep 2025 15:59:26 GMT",
+        "server": "Google Frontend",
+        "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "Connection": "close",
+        "Transfer-Encoding": "chunked"
+      },
+      "data": "{\"google_client_id\":\"701982941522-in8iru136ovb8r7mv0d6rje2pkatgk8s.apps.googleusercontent.com\",\"oauth_enabled\":true,\"development_mode\":false,\"endpoints\":{\"login\":\"https://auth.staging.netrasystems.ai/auth/login\",\"logout\":\"https://auth.staging.netrasystems.ai/auth/logout\",\"callback\":\"https://auth.staging.netrasystems.ai/auth/callback\",\"token\":\"https://auth.staging.netrasystems.ai/auth/token\",\"user\":\"https://auth.staging.netrasystems.ai/auth/me\"},\"authorized_javascript_origins\":[\"https://app.staging.netrasystems.ai\"],\"authorized_redirect_uris\":[\"https://app.staging.netrasystems.ai/auth/callback\"],\"oauth_redirect_uri\":\"https://staging.netrasystems.ai/auth/callback\",\"timestamp\":1758124766961,\"cache_status\":\"fresh\",\"last_updated\":\"2025-09-17T15:59:26.961Z\",\"source\":\"backend\"}",
+      "error": null
+    },
+    "api_health": {
+      "success": false,
+      "status": null,
+      "headers": {},
+      "data": null,
+      "error": "Unexpected: The read operation timed out"
+    }
+  },
+  "config_analysis": {
+    "valid": true,
+    "environment": "unknown",
+    "ticket_auth_enabled": false,
+    "config": {
+      "google_client_id": "701982941522-in8iru136ovb8r7mv0d6rje2pkatgk8s.apps.googleusercontent.com",
+      "oauth_enabled": true,
+      "development_mode": false,
+      "endpoints": {
+        "login": "https://auth.staging.netrasystems.ai/auth/login",
+        "logout": "https://auth.staging.netrasystems.ai/auth/logout",
+        "callback": "https://auth.staging.netrasystems.ai/auth/callback",
+        "token": "https://auth.staging.netrasystems.ai/auth/token",
+        "user": "https://auth.staging.netrasystems.ai/auth/me"
+      },
+      "authorized_javascript_origins": [
+        "https://app.staging.netrasystems.ai"
+      ],
+      "authorized_redirect_uris": [
+        "https://app.staging.netrasystems.ai/auth/callback"
+      ],
+      "oauth_redirect_uri": "https://staging.netrasystems.ai/auth/callback",
+      "timestamp": 1758124766961,
+      "cache_status": "fresh",
+      "last_updated": "2025-09-17T15:59:26.961Z",
+      "source": "backend"
+    }
+  },
+  "summary": {
+    "passed": 3,
+    "total": 4,
+    "success_rate": 0.75
+  }
+}

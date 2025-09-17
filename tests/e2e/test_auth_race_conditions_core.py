@@ -57,16 +57,16 @@ import pytest
 
 import jwt as jwt_lib
 
-from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.auth_core.core.session_manager import SessionManager
-from auth_service.auth_core.models.auth_models import (
-    AuthProvider,
-    LoginRequest,
-    LoginResponse,
-    TokenResponse,
-)
-from auth_service.auth_core.services.auth_service import AuthService
-from auth_service.tests.factories.user_factory import UserFactory
+# Use SSOT backend components instead of direct auth service imports
+from netra_backend.app.database.session_manager import SessionManager
+# Import auth service components dynamically in tests to avoid startup failures
+import importlib
+
+# These will be imported dynamically in test methods:
+# - auth_service.auth_core.core.jwt_handler.JWTHandler
+# - auth_service.auth_core.models.auth_models.*
+# - auth_service.auth_core.services.auth_service.AuthService
+# - auth_service.tests.factories.user_factory.UserFactory
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient

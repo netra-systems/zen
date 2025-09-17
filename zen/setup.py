@@ -10,9 +10,18 @@ setup(
     name="zen-orchestrator",
     version="1.0.0",
     author="Netra Systems",
+    author_email="anthony.chaudhary@netrasystems.ai",
     description="Multi-instance Claude orchestrator for parallel task execution",
     long_description=long_description,
     long_description_content_type="text/markdown",
+    url="https://github.com/netra-systems/zen",
+    project_urls={
+        "Bug Tracker": "https://github.com/netra-systems/zen/issues",
+        "Documentation": "https://github.com/netra-systems/zen#readme",
+        "Source Code": "https://github.com/netra-systems/zen",
+        "Changelog": "https://github.com/netra-systems/zen/blob/main/CHANGELOG.md",
+    },
+    keywords="claude, ai, orchestration, parallel, automation, llm, anthropic",
     py_modules=["zen_orchestrator"],
     packages=find_packages(),
     classifiers=[
@@ -29,9 +38,8 @@ setup(
     ],
     python_requires=">=3.8",
     install_requires=[
-        "asyncio-subprocess",
-        "PyYAML",
-        "python-dateutil",
+        "PyYAML>=6.0",
+        "python-dateutil>=2.8.2",
     ],
     extras_require={
         "netra": ["netraoptimizer"],
@@ -39,7 +47,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "zen=zen_orchestrator:main",
+            "zen=zen_orchestrator:run",
         ],
     },
     include_package_data=True,

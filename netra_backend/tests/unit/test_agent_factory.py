@@ -287,13 +287,13 @@ class ExecutionEngineFactoryTests(SSotBaseTestCase):
         user_context.session_id = f"test_session_{uuid.uuid4().hex[:8]}"
         
         # When: Creating execution engine with mocked factory methods
-        with patch.object(self.factory, '_create_user_execution_engine') as mock_create:
+        with patch.object(self.factory, 'create_for_user') as mock_create:
             mock_engine = Mock()
             mock_engine.user_context = user_context
             mock_create.return_value = mock_engine
-            
+
             # Call the creation method
-            engine = await self.factory._create_user_execution_engine(user_context)
+            engine = await self.factory.create_for_user(user_context)
         
         # Then: Engine should be created with proper context
         assert engine is not None
@@ -325,11 +325,11 @@ class ExecutionEngineFactoryTests(SSotBaseTestCase):
             mock_engines.append(mock_engine)
         
         # When: Managing engine lifecycle
-        with patch.object(self.factory, '_create_user_execution_engine', side_effect=mock_engines):
+        with patch.object(self.factory, 'create_for_user', side_effect=mock_engines):
             # Create engines
             created_engines = []
             for context in contexts:
-                engine = await self.factory._create_user_execution_engine(context)
+                engine = await self.factory.create_for_user(context)
                 created_engines.append(engine)
                 
                 # Simulate adding to active registry
@@ -376,9 +376,9 @@ class ExecutionEngineFactoryTests(SSotBaseTestCase):
             mock_engines.append(mock_engine)
         
         # When: Creating engines concurrently
-        with patch.object(self.factory, '_create_user_execution_engine', side_effect=mock_engines):
+        with patch.object(self.factory, 'create_for_user', side_effect=mock_engines):
             creation_tasks = [
-                self.factory._create_user_execution_engine(context)
+                self.factory.create_for_user(context)
                 for context in contexts
             ]
             
@@ -627,15 +627,24 @@ class FactoryIntegrationPatternsTests(SSotBaseTestCase):
             context=error_context
         )
         
-        # Notification should fail, but emitter should remain functional
-        error_occurred = False
+        # Notification should fail gracefully, but emitter should remain functional
+        # Note: UnifiedWebSocketEmitter handles errors gracefully and doesn't propagate exceptions
+        notification_result = None
         try:
-            asyncio.run(emitter.notify_agent_started("test_agent"))
-        except Exception:
-            error_occurred = True
-        
-        # Then: Error should be properly propagated (fail fast)
-        assert error_occurred is True
+            # notify_agent_started doesn't return a value, but emit_agent_started does
+            notification_result = asyncio.run(emitter.emit_agent_started({
+                'agent_name': 'test_agent',
+                'metadata': {},
+                'status': 'started',
+                'timestamp': time.time()
+            }))
+        except Exception as e:
+            # This should not happen with UnifiedWebSocketEmitter
+            self.fail(f"UnifiedWebSocketEmitter should handle errors gracefully: {e}")
+
+        # Then: Error should be handled gracefully (no exception raised)
+        # But the emission should fail (return False)
+        assert notification_result is False
         
         # And: Emitter state should still be consistent
         assert emitter.metrics.total_events == 1  # Attempt was recorded

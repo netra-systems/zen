@@ -227,48 +227,6 @@ class TokenService:
         
         return False
     
-    async def validate_token_jwt(self, token: str) -> Dict[str, Any]:
-        """
-        DEPRECATED: Validate a JWT token - delegates to canonical AuthServiceClient.
-        
-        SSOT ENFORCEMENT: This method now delegates to the canonical auth client
-        to eliminate duplicate token validation implementations.
-        
-        Args:
-            token: JWT token to validate
-            
-        Returns:
-            Validation result with token data
-        """
-        import warnings
-        warnings.warn(
-            "TokenService.validate_token_jwt is DEPRECATED. "
-            "Use netra_backend.app.clients.auth_client_core.auth_client.validate_token_jwt directly.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        
-        # Delegate to canonical implementation
-        from netra_backend.app.clients.auth_client_core import auth_client
-        
-        result = await auth_client.validate_token_jwt(token)
-        
-        # Handle None result from auth service
-        if result is None:
-            return {'valid': False, 'error': 'auth_service_unavailable'}
-            
-        # Ensure consistent return format for backward compatibility
-        if isinstance(result, dict):
-            # Map auth service response to expected format
-            return {
-                'valid': result.get('valid', False),
-                'user_id': result.get('user_id'),
-                'email': result.get('email'), 
-                'permissions': result.get('permissions', []),
-                'error': result.get('error')
-            }
-            
-        return {'valid': False, 'error': 'unexpected_response_format'}
     
     async def validate_with_old_keys(self, token: str) -> bool:
         """

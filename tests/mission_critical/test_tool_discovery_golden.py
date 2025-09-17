@@ -1,604 +1,604 @@
-# REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
-    # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
 
-# REMOVED_SYNTAX_ERROR: def __init__(self):
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: self.messages_sent = []
-    # REMOVED_SYNTAX_ERROR: self.is_connected = True
-    # REMOVED_SYNTAX_ERROR: self._closed = False
+    def __init__(self):
+        pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
 
-# REMOVED_SYNTAX_ERROR: async def send_json(self, message: dict):
-    # REMOVED_SYNTAX_ERROR: """Send JSON message."""
-    # REMOVED_SYNTAX_ERROR: if self._closed:
-        # REMOVED_SYNTAX_ERROR: raise RuntimeError("WebSocket is closed")
-        # REMOVED_SYNTAX_ERROR: self.messages_sent.append(message)
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+        raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
 
-# REMOVED_SYNTAX_ERROR: async def close(self, code: int = 1000, reason: str = "Normal closure"):
-    # REMOVED_SYNTAX_ERROR: """Close WebSocket connection."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: self._closed = True
-    # REMOVED_SYNTAX_ERROR: self.is_connected = False
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        pass
+        self._closed = True
+        self.is_connected = False
 
-# REMOVED_SYNTAX_ERROR: def get_messages(self) -> list:
-    # REMOVED_SYNTAX_ERROR: """Get all sent messages."""
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-    # REMOVED_SYNTAX_ERROR: return self.messages_sent.copy()
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+        return self.messages_sent.copy()
 
-    # REMOVED_SYNTAX_ERROR: '''Mission Critical Test Suite: ToolDiscoverySubAgent Golden Pattern Compliance
+        '''Mission Critical Test Suite: ToolDiscoverySubAgent Golden Pattern Compliance
 
-    # REMOVED_SYNTAX_ERROR: CRITICAL: This test suite validates that ToolDiscoverySubAgent follows the golden pattern
-    # REMOVED_SYNTAX_ERROR: and delivers chat value through proper WebSocket events.
+        CRITICAL: This test suite validates that ToolDiscoverySubAgent follows the golden pattern
+        and delivers chat value through proper WebSocket events.
 
-    # REMOVED_SYNTAX_ERROR: Tests cover:
-        # REMOVED_SYNTAX_ERROR: 1. BaseAgent inheritance and initialization
-        # REMOVED_SYNTAX_ERROR: 2. WebSocket event emission for chat value
-        # REMOVED_SYNTAX_ERROR: 3. Tool discovery business logic
-        # REMOVED_SYNTAX_ERROR: 4. Error handling and resilience
-        # REMOVED_SYNTAX_ERROR: 5. Golden pattern compliance
-        # REMOVED_SYNTAX_ERROR: '''
+        Tests cover:
+        1. BaseAgent inheritance and initialization
+        2. WebSocket event emission for chat value
+        3. Tool discovery business logic
+        4. Error handling and resilience
+        5. Golden pattern compliance
+        '''
 
-        # REMOVED_SYNTAX_ERROR: import asyncio
-        # REMOVED_SYNTAX_ERROR: import pytest
-        # REMOVED_SYNTAX_ERROR: from typing import Dict, Any, List
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-        # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.redis_manager import redis_manager
-        # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
+        import asyncio
+        import pytest
+        from typing import Dict, Any, List
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from test_framework.database.test_database_manager import DatabaseTestManager
+        from netra_backend.app.redis_manager import redis_manager
+        from auth_service.core.auth_manager import AuthManager
+        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+        from shared.isolated_environment import IsolatedEnvironment
 
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_discovery_sub_agent import ToolDiscoverySubAgent
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.agent_error_types import AgentValidationError
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent import SubAgentLifecycle
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
+        from netra_backend.app.agents.tool_discovery_sub_agent import ToolDiscoverySubAgent
+        from netra_backend.app.agents.base.interface import ExecutionContext
+        from netra_backend.app.agents.agent_error_types import AgentValidationError
+        from netra_backend.app.schemas.agent_models import DeepAgentState
+        from netra_backend.app.schemas.agent import SubAgentLifecycle
+        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+        from netra_backend.app.db.database_manager import DatabaseManager
+        from netra_backend.app.clients.auth_client_core import AuthServiceClient
+        from shared.isolated_environment import get_env
 
 
-# REMOVED_SYNTAX_ERROR: class TestToolDiscoveryGoldenPattern:
-    # REMOVED_SYNTAX_ERROR: """Test ToolDiscoverySubAgent golden pattern compliance."""
+class TestToolDiscoveryGoldenPattern:
+        """Test ToolDiscoverySubAgent golden pattern compliance."""
 
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: def agent(self):
-    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
+        @pytest.fixture
+    def agent(self):
+        """Use real service instance."""
     # TODO: Initialize real service
-    # REMOVED_SYNTAX_ERROR: """Create ToolDiscoverySubAgent instance for testing."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: return ToolDiscoverySubAgent()
+        """Create ToolDiscoverySubAgent instance for testing."""
+        pass
+        return ToolDiscoverySubAgent()
 
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: def real_context():
-    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
+        @pytest.fixture
+    def real_context():
+        """Use real service instance."""
     # TODO: Initialize real service
-    # REMOVED_SYNTAX_ERROR: """Create mock execution context."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: context = Mock(spec=ExecutionContext)
-    # REMOVED_SYNTAX_ERROR: context.run_id = "test_run_123"
-    # REMOVED_SYNTAX_ERROR: context.stream_updates = True
-    # REMOVED_SYNTAX_ERROR: context.state = Mock(spec=DeepAgentState)
-    # REMOVED_SYNTAX_ERROR: context.state.user_request = "I need help optimizing my AI workload costs"
-    # REMOVED_SYNTAX_ERROR: return context
+        """Create mock execution context."""
+        pass
+        context = Mock(spec=ExecutionContext)
+        context.run_id = "test_run_123"
+        context.stream_updates = True
+        context.state = Mock(spec=DeepAgentState)
+        context.state.user_request = "I need help optimizing my AI workload costs"
+        return context
 
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: def websocket_bridge_mock(self):
-    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
+        @pytest.fixture
+    def websocket_bridge_mock(self):
+        """Use real service instance."""
     # TODO: Initialize real service
-    # REMOVED_SYNTAX_ERROR: """Create mock WebSocket bridge."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: websocket = TestWebSocketConnection()
-    # REMOVED_SYNTAX_ERROR: return bridge
+        """Create mock WebSocket bridge."""
+        pass
+        websocket = TestWebSocketConnection()
+        return bridge
 
-# REMOVED_SYNTAX_ERROR: def test_golden_pattern_inheritance(self, agent):
-    # REMOVED_SYNTAX_ERROR: """Test that agent follows BaseAgent inheritance pattern."""
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
+    def test_golden_pattern_inheritance(self, agent):
+        """Test that agent follows BaseAgent inheritance pattern."""
+        from netra_backend.app.agents.base_agent import BaseAgent
 
-    # CRITICAL: Must inherit from BaseAgent
-    # REMOVED_SYNTAX_ERROR: assert isinstance(agent, BaseAgent)
-    # REMOVED_SYNTAX_ERROR: assert agent.name == "ToolDiscoverySubAgent"
-    # REMOVED_SYNTAX_ERROR: assert agent.description == "AI-powered tool discovery and recommendation agent"
+    CRITICAL: Must inherit from BaseAgent
+        assert isinstance(agent, BaseAgent)
+        assert agent.name == "ToolDiscoverySubAgent"
+        assert agent.description == "AI-powered tool discovery and recommendation agent"
 
     # CRITICAL: Must have infrastructure enabled
-    # REMOVED_SYNTAX_ERROR: assert agent._enable_reliability is True
-    # REMOVED_SYNTAX_ERROR: assert agent._enable_execution_engine is True
-    # REMOVED_SYNTAX_ERROR: assert agent._enable_caching is True
+        assert agent._enable_reliability is True
+        assert agent._enable_execution_engine is True
+        assert agent._enable_caching is True
 
-# REMOVED_SYNTAX_ERROR: def test_initialization_business_logic_only(self, agent):
-    # REMOVED_SYNTAX_ERROR: """Test that agent initializes only business logic components."""
-    # REMOVED_SYNTAX_ERROR: pass
+    def test_initialization_business_logic_only(self, agent):
+        """Test that agent initializes only business logic components."""
+        pass
     # CRITICAL: Should have business logic components
-    # REMOVED_SYNTAX_ERROR: assert hasattr(agent, 'tool_recommender')
-    # REMOVED_SYNTAX_ERROR: assert hasattr(agent, 'discovery_cache')
+        assert hasattr(agent, 'tool_recommender')
+        assert hasattr(agent, 'discovery_cache')
 
-    # CRITICAL: Should NOT have infrastructure components (inherited from BaseAgent)
-    # REMOVED_SYNTAX_ERROR: assert not hasattr(agent, 'websocket_handler')
-    # REMOVED_SYNTAX_ERROR: assert not hasattr(agent, 'retry_handler')
-    # REMOVED_SYNTAX_ERROR: assert not hasattr(agent, 'execution_engine_local')
+    CRITICAL: Should NOT have infrastructure components (inherited from BaseAgent)
+        assert not hasattr(agent, 'websocket_handler')
+        assert not hasattr(agent, 'retry_handler')
+        assert not hasattr(agent, 'execution_engine_local')
 
-    # Removed problematic line: @pytest.mark.asyncio
-    # Removed problematic line: async def test_validate_preconditions_success(self, agent, mock_context):
-        # REMOVED_SYNTAX_ERROR: """Test successful precondition validation."""
-        # REMOVED_SYNTAX_ERROR: result = await agent.validate_preconditions(mock_context)
-        # REMOVED_SYNTAX_ERROR: assert result is True
+@pytest.mark.asyncio
+    async def test_validate_preconditions_success(self, agent, mock_context):
+"""Test successful precondition validation."""
+result = await agent.validate_preconditions(mock_context)
+assert result is True
 
-        # Removed problematic line: @pytest.mark.asyncio
-        # Removed problematic line: async def test_validate_preconditions_no_request(self, agent, mock_context):
-            # REMOVED_SYNTAX_ERROR: """Test precondition validation fails with no request."""
-            # REMOVED_SYNTAX_ERROR: pass
-            # REMOVED_SYNTAX_ERROR: mock_context.state.user_request = None
+@pytest.mark.asyncio
+    async def test_validate_preconditions_no_request(self, agent, mock_context):
+"""Test precondition validation fails with no request."""
+pass
+mock_context.state.user_request = None
 
-            # REMOVED_SYNTAX_ERROR: with patch.object(agent, 'emit_error', new_callable=AsyncMock) as mock_emit_error:
-                # REMOVED_SYNTAX_ERROR: result = await agent.validate_preconditions(mock_context)
+with patch.object(agent, 'emit_error', new_callable=AsyncMock) as mock_emit_error:
+result = await agent.validate_preconditions(mock_context)
 
-                # REMOVED_SYNTAX_ERROR: assert result is False
-                # REMOVED_SYNTAX_ERROR: mock_emit_error.assert_called_once_with( )
-                # REMOVED_SYNTAX_ERROR: "No user request provided for tool discovery",
-                # REMOVED_SYNTAX_ERROR: error_type="ValidationError"
+assert result is False
+mock_emit_error.assert_called_once_with( )
+"No user request provided for tool discovery",
+error_type="ValidationError"
                 
 
-                # Removed problematic line: @pytest.mark.asyncio
-                # Removed problematic line: async def test_validate_preconditions_short_request(self, agent, mock_context):
-                    # REMOVED_SYNTAX_ERROR: """Test precondition validation fails with short request."""
-                    # REMOVED_SYNTAX_ERROR: mock_context.state.user_request = "help"  # Too short
+@pytest.mark.asyncio
+    async def test_validate_preconditions_short_request(self, agent, mock_context):
+"""Test precondition validation fails with short request."""
+mock_context.state.user_request = "help"  # Too short
 
-                    # REMOVED_SYNTAX_ERROR: with patch.object(agent, 'emit_error', new_callable=AsyncMock) as mock_emit_error:
-                        # REMOVED_SYNTAX_ERROR: result = await agent.validate_preconditions(mock_context)
+with patch.object(agent, 'emit_error', new_callable=AsyncMock) as mock_emit_error:
+result = await agent.validate_preconditions(mock_context)
 
-                        # REMOVED_SYNTAX_ERROR: assert result is False
-                        # REMOVED_SYNTAX_ERROR: mock_emit_error.assert_called_once_with( )
-                        # REMOVED_SYNTAX_ERROR: "User request too short for meaningful tool discovery",
-                        # REMOVED_SYNTAX_ERROR: error_type="ValidationError"
+assert result is False
+mock_emit_error.assert_called_once_with( )
+"User request too short for meaningful tool discovery",
+error_type="ValidationError"
                         
 
 
-# REMOVED_SYNTAX_ERROR: class TestToolDiscoveryWebSocketEvents:
-    # REMOVED_SYNTAX_ERROR: """Test WebSocket event emission for chat value delivery."""
+class TestToolDiscoveryWebSocketEvents:
+    """Test WebSocket event emission for chat value delivery."""
 
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: def agent(self):
-    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
+    @pytest.fixture
+    def agent(self):
+        """Use real service instance."""
     # TODO: Initialize real service
-    # REMOVED_SYNTAX_ERROR: """Create agent with mocked WebSocket methods."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: agent = ToolDiscoverySubAgent()
+        """Create agent with mocked WebSocket methods."""
+        pass
+        agent = ToolDiscoverySubAgent()
     # Mock WebSocket methods
-    # REMOVED_SYNTAX_ERROR: agent.websocket = TestWebSocketConnection()
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-    # REMOVED_SYNTAX_ERROR: return agent
+        agent.websocket = TestWebSocketConnection()
+        await asyncio.sleep(0)
+        return agent
 
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: def real_context():
-    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
+        @pytest.fixture
+    def real_context():
+        """Use real service instance."""
     # TODO: Initialize real service
-    # REMOVED_SYNTAX_ERROR: """Create mock execution context."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: context = Mock(spec=ExecutionContext)
-    # REMOVED_SYNTAX_ERROR: context.run_id = "test_run_456"
-    # REMOVED_SYNTAX_ERROR: context.stream_updates = True
-    # REMOVED_SYNTAX_ERROR: context.state = Mock(spec=DeepAgentState)
-    # REMOVED_SYNTAX_ERROR: context.state.user_request = "I need help analyzing my AI model performance metrics"
-    # REMOVED_SYNTAX_ERROR: return context
+        """Create mock execution context."""
+        pass
+        context = Mock(spec=ExecutionContext)
+        context.run_id = "test_run_456"
+        context.stream_updates = True
+        context.state = Mock(spec=DeepAgentState)
+        context.state.user_request = "I need help analyzing my AI model performance metrics"
+        return context
 
-    # Removed problematic line: @pytest.mark.asyncio
-    # Removed problematic line: async def test_websocket_events_emission_sequence(self, agent, mock_context):
-        # REMOVED_SYNTAX_ERROR: """Test that all critical WebSocket events are emitted in correct sequence."""
+@pytest.mark.asyncio
+    async def test_websocket_events_emission_sequence(self, agent, mock_context):
+"""Test that all critical WebSocket events are emitted in correct sequence."""
 
         # Mock internal methods to focus on WebSocket events
-        # REMOVED_SYNTAX_ERROR: agent._extract_entities_from_request = AsyncMock(return_value=Mock( ))
-        # REMOVED_SYNTAX_ERROR: models_mentioned=['model'], metrics_mentioned=['performance']
+agent._extract_entities_from_request = AsyncMock(return_value=Mock( ))
+models_mentioned=['model'], metrics_mentioned=['performance']
         
-        # REMOVED_SYNTAX_ERROR: agent._categorize_request = AsyncMock(return_value=["Performance Optimization"])
-        # REMOVED_SYNTAX_ERROR: agent._discover_tools = AsyncMock(return_value=[ ))
-        # REMOVED_SYNTAX_ERROR: Mock(tool_name="analyze_performance", relevance_score=0.9)
+agent._categorize_request = AsyncMock(return_value=["Performance Optimization"])
+agent._discover_tools = AsyncMock(return_value=[ ))
+Mock(tool_name="analyze_performance", relevance_score=0.9)
         
-        # REMOVED_SYNTAX_ERROR: agent._enhance_recommendations = AsyncMock(return_value=[{ )))
-        # REMOVED_SYNTAX_ERROR: "tool_name": "analyze_performance",
-        # REMOVED_SYNTAX_ERROR: "relevance_score": 0.9,
-        # REMOVED_SYNTAX_ERROR: "description": "Test tool"
+agent._enhance_recommendations = AsyncMock(return_value=[{ )))
+"tool_name": "analyze_performance",
+"relevance_score": 0.9,
+"description": "Test tool"
         
-        # REMOVED_SYNTAX_ERROR: agent._finalize_discovery_result = AsyncMock(return_value={ ))
-        # REMOVED_SYNTAX_ERROR: "discovered_tools": [{"tool_name": "analyze_performance"}],
-        # REMOVED_SYNTAX_ERROR: "total_tools_found": 1
+agent._finalize_discovery_result = AsyncMock(return_value={ ))
+"discovered_tools": [{"tool_name": "analyze_performance"}],
+"total_tools_found": 1
         
 
         # Execute core logic
-        # REMOVED_SYNTAX_ERROR: result = await agent.execute_core_logic(mock_context)
+result = await agent.execute_core_logic(mock_context)
 
         # CRITICAL: Verify WebSocket events for chat value delivery
 
         # 1. agent_thinking events (reasoning visibility)
-        # REMOVED_SYNTAX_ERROR: agent.emit_thinking.assert_any_call("Starting intelligent tool discovery for your request...")
-        # REMOVED_SYNTAX_ERROR: agent.emit_thinking.assert_any_call("Analyzing your request to understand intent and context...")
-        # REMOVED_SYNTAX_ERROR: agent.emit_thinking.assert_any_call("Categorizing your request to identify relevant tool categories...")
-        # REMOVED_SYNTAX_ERROR: agent.emit_thinking.assert_any_call("Discovering tools that match your specific needs...")
-        # REMOVED_SYNTAX_ERROR: agent.emit_thinking.assert_any_call("Finalizing tool discovery results with prioritized recommendations...")
+agent.emit_thinking.assert_any_call("Starting intelligent tool discovery for your request...")
+agent.emit_thinking.assert_any_call("Analyzing your request to understand intent and context...")
+agent.emit_thinking.assert_any_call("Categorizing your request to identify relevant tool categories...")
+agent.emit_thinking.assert_any_call("Discovering tools that match your specific needs...")
+agent.emit_thinking.assert_any_call("Finalizing tool discovery results with prioritized recommendations...")
 
         # 2. Progress updates (partial results)
-        # REMOVED_SYNTAX_ERROR: agent.emit_progress.assert_any_call("Extracting key entities and concepts from your request...")
-        # REMOVED_SYNTAX_ERROR: agent.emit_progress.assert_any_call("Determining the most appropriate tool categories...")
-        # REMOVED_SYNTAX_ERROR: agent.emit_progress.assert_any_call("Enhancing recommendations with usage guidance and examples...")
+agent.emit_progress.assert_any_call("Extracting key entities and concepts from your request...")
+agent.emit_progress.assert_any_call("Determining the most appropriate tool categories...")
+agent.emit_progress.assert_any_call("Enhancing recommendations with usage guidance and examples...")
 
         # 3. Tool execution events (transparency)
-        # REMOVED_SYNTAX_ERROR: agent.emit_tool_executing.assert_called_once_with( )
-        # REMOVED_SYNTAX_ERROR: "tool_recommendation_engine",
-        # REMOVED_SYNTAX_ERROR: {"categories": ["Performance Optimization"]}
+agent.emit_tool_executing.assert_called_once_with( )
+"tool_recommendation_engine",
+{"categories": ["Performance Optimization"]}
         
-        # REMOVED_SYNTAX_ERROR: agent.emit_tool_completed.assert_called_once_with( )
-        # REMOVED_SYNTAX_ERROR: "tool_recommendation_engine",
-        # REMOVED_SYNTAX_ERROR: {"found_tools": 1, "categories_analyzed": 1}
+agent.emit_tool_completed.assert_called_once_with( )
+"tool_recommendation_engine",
+{"found_tools": 1, "categories_analyzed": 1}
         
 
         # 4. Completion event
-        # REMOVED_SYNTAX_ERROR: agent.emit_progress.assert_any_call( )
-        # REMOVED_SYNTAX_ERROR: "Tool discovery completed! Found 1 relevant tools.",
-        # REMOVED_SYNTAX_ERROR: is_complete=True
+agent.emit_progress.assert_any_call( )
+"Tool discovery completed! Found 1 relevant tools.",
+is_complete=True
         
 
         # Verify result structure
-        # REMOVED_SYNTAX_ERROR: assert result is not None
-        # REMOVED_SYNTAX_ERROR: assert isinstance(result, dict)
+assert result is not None
+assert isinstance(result, dict)
 
-        # Removed problematic line: @pytest.mark.asyncio
-        # Removed problematic line: async def test_websocket_error_emission(self, agent, mock_context):
-            # REMOVED_SYNTAX_ERROR: """Test WebSocket error emission on failure."""
+@pytest.mark.asyncio
+    async def test_websocket_error_emission(self, agent, mock_context):
+"""Test WebSocket error emission on failure."""
 
             # Force an exception during execution
-            # REMOVED_SYNTAX_ERROR: agent._extract_entities_from_request = AsyncMock(side_effect=Exception("Test error"))
+agent._extract_entities_from_request = AsyncMock(side_effect=Exception("Test error"))
 
             # Execute and expect validation error
-            # REMOVED_SYNTAX_ERROR: with pytest.raises(AgentValidationError):
-                # REMOVED_SYNTAX_ERROR: await agent.execute_core_logic(mock_context)
+with pytest.raises(AgentValidationError):
+await agent.execute_core_logic(mock_context)
 
                 # Verify error emission
-                # REMOVED_SYNTAX_ERROR: agent.emit_error.assert_called_once_with( )
-                # REMOVED_SYNTAX_ERROR: "Tool discovery failed: Test error",
-                # REMOVED_SYNTAX_ERROR: error_type="DiscoveryError"
+agent.emit_error.assert_called_once_with( )
+"Tool discovery failed: Test error",
+error_type="DiscoveryError"
                 
 
 
-# REMOVED_SYNTAX_ERROR: class TestToolDiscoveryBusinessLogic:
-    # REMOVED_SYNTAX_ERROR: """Test tool discovery business logic."""
+class TestToolDiscoveryBusinessLogic:
+    """Test tool discovery business logic."""
 
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: def agent(self):
-    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
+    @pytest.fixture
+    def agent(self):
+        """Use real service instance."""
     # TODO: Initialize real service
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-    # REMOVED_SYNTAX_ERROR: return ToolDiscoverySubAgent()
+        await asyncio.sleep(0)
+        return ToolDiscoverySubAgent()
 
-    # Removed problematic line: @pytest.mark.asyncio
-    # Removed problematic line: async def test_entity_extraction_models(self, agent):
-        # REMOVED_SYNTAX_ERROR: """Test entity extraction identifies models correctly."""
-        # REMOVED_SYNTAX_ERROR: pass
-        # REMOVED_SYNTAX_ERROR: request = "I want to compare GPT and Claude models for my use case"
+@pytest.mark.asyncio
+    async def test_entity_extraction_models(self, agent):
+"""Test entity extraction identifies models correctly."""
+pass
+request = "I want to compare GPT and Claude models for my use case"
 
-        # REMOVED_SYNTAX_ERROR: entities = await agent._extract_entities_from_request(request)
+entities = await agent._extract_entities_from_request(request)
 
-        # REMOVED_SYNTAX_ERROR: assert len(entities.models_mentioned) > 0
-        # REMOVED_SYNTAX_ERROR: assert len(entities.metrics_mentioned) == 0
+assert len(entities.models_mentioned) > 0
+assert len(entities.metrics_mentioned) == 0
 
-        # Removed problematic line: @pytest.mark.asyncio
-        # Removed problematic line: async def test_entity_extraction_metrics(self, agent):
-            # REMOVED_SYNTAX_ERROR: """Test entity extraction identifies metrics correctly."""
-            # REMOVED_SYNTAX_ERROR: request = "Show me performance metrics and cost analysis for my workload"
+@pytest.mark.asyncio
+    async def test_entity_extraction_metrics(self, agent):
+"""Test entity extraction identifies metrics correctly."""
+request = "Show me performance metrics and cost analysis for my workload"
 
-            # REMOVED_SYNTAX_ERROR: entities = await agent._extract_entities_from_request(request)
+entities = await agent._extract_entities_from_request(request)
 
-            # REMOVED_SYNTAX_ERROR: assert len(entities.models_mentioned) == 0
-            # REMOVED_SYNTAX_ERROR: assert len(entities.metrics_mentioned) > 0
+assert len(entities.models_mentioned) == 0
+assert len(entities.metrics_mentioned) > 0
 
-            # Removed problematic line: @pytest.mark.asyncio
-            # Removed problematic line: async def test_request_categorization_cost(self, agent):
-                # REMOVED_SYNTAX_ERROR: """Test request categorization for cost optimization."""
-                # REMOVED_SYNTAX_ERROR: pass
-                # REMOVED_SYNTAX_ERROR: request = "Help me reduce costs and save money on my AI infrastructure"
-                # REMOVED_SYNTAX_ERROR: entities = Mock(models_mentioned=[], metrics_mentioned=[])
+@pytest.mark.asyncio
+    async def test_request_categorization_cost(self, agent):
+"""Test request categorization for cost optimization."""
+pass
+request = "Help me reduce costs and save money on my AI infrastructure"
+entities = Mock(models_mentioned=[], metrics_mentioned=[])
 
-                # REMOVED_SYNTAX_ERROR: categories = await agent._categorize_request(request, entities)
+categories = await agent._categorize_request(request, entities)
 
-                # REMOVED_SYNTAX_ERROR: assert "Cost Optimization" in categories
+assert "Cost Optimization" in categories
 
-                # Removed problematic line: @pytest.mark.asyncio
-                # Removed problematic line: async def test_request_categorization_performance(self, agent):
-                    # REMOVED_SYNTAX_ERROR: """Test request categorization for performance optimization."""
-                    # REMOVED_SYNTAX_ERROR: request = "I need to optimize performance and reduce latency"
-                    # REMOVED_SYNTAX_ERROR: entities = Mock(models_mentioned=[], metrics_mentioned=['performance'])
+@pytest.mark.asyncio
+    async def test_request_categorization_performance(self, agent):
+"""Test request categorization for performance optimization."""
+request = "I need to optimize performance and reduce latency"
+entities = Mock(models_mentioned=[], metrics_mentioned=['performance'])
 
-                    # REMOVED_SYNTAX_ERROR: categories = await agent._categorize_request(request, entities)
+categories = await agent._categorize_request(request, entities)
 
-                    # REMOVED_SYNTAX_ERROR: assert "Performance Optimization" in categories
+assert "Performance Optimization" in categories
 
-                    # Removed problematic line: @pytest.mark.asyncio
-                    # Removed problematic line: async def test_request_categorization_model_selection(self, agent):
-                        # REMOVED_SYNTAX_ERROR: """Test request categorization for model selection."""
-                        # REMOVED_SYNTAX_ERROR: pass
-                        # REMOVED_SYNTAX_ERROR: request = "Which model should I choose for my chatbot?"
-                        # REMOVED_SYNTAX_ERROR: entities = Mock(models_mentioned=['model'], metrics_mentioned=[])
+@pytest.mark.asyncio
+    async def test_request_categorization_model_selection(self, agent):
+"""Test request categorization for model selection."""
+pass
+request = "Which model should I choose for my chatbot?"
+entities = Mock(models_mentioned=['model'], metrics_mentioned=[])
 
-                        # REMOVED_SYNTAX_ERROR: categories = await agent._categorize_request(request, entities)
+categories = await agent._categorize_request(request, entities)
 
-                        # REMOVED_SYNTAX_ERROR: assert "Model Selection" in categories
+assert "Model Selection" in categories
 
-                        # Removed problematic line: @pytest.mark.asyncio
-                        # Removed problematic line: async def test_request_categorization_default(self, agent):
-                            # REMOVED_SYNTAX_ERROR: """Test request categorization defaults to workload analysis."""
-                            # REMOVED_SYNTAX_ERROR: request = "Generic request with no specific keywords"
-                            # REMOVED_SYNTAX_ERROR: entities = Mock(models_mentioned=[], metrics_mentioned=[])
+@pytest.mark.asyncio
+    async def test_request_categorization_default(self, agent):
+"""Test request categorization defaults to workload analysis."""
+request = "Generic request with no specific keywords"
+entities = Mock(models_mentioned=[], metrics_mentioned=[])
 
-                            # REMOVED_SYNTAX_ERROR: categories = await agent._categorize_request(request, entities)
+categories = await agent._categorize_request(request, entities)
 
-                            # REMOVED_SYNTAX_ERROR: assert "Workload Analysis" in categories
-                            # REMOVED_SYNTAX_ERROR: assert len(categories) >= 1
+assert "Workload Analysis" in categories
+assert len(categories) >= 1
 
-                            # Removed problematic line: @pytest.mark.asyncio
-                            # Removed problematic line: async def test_tool_discovery_removes_duplicates(self, agent):
-                                # REMOVED_SYNTAX_ERROR: """Test tool discovery removes duplicate recommendations."""
-                                # REMOVED_SYNTAX_ERROR: pass
-                                # REMOVED_SYNTAX_ERROR: categories = ["Cost Optimization", "Performance Optimization"]
-                                # REMOVED_SYNTAX_ERROR: entities = Mock(models_mentioned=[], metrics_mentioned=['performance'])
+@pytest.mark.asyncio
+    async def test_tool_discovery_removes_duplicates(self, agent):
+"""Test tool discovery removes duplicate recommendations."""
+pass
+categories = ["Cost Optimization", "Performance Optimization"]
+entities = Mock(models_mentioned=[], metrics_mentioned=['performance'])
 
-                                # REMOVED_SYNTAX_ERROR: recommendations = await agent._discover_tools(categories, entities)
+recommendations = await agent._discover_tools(categories, entities)
 
                                 # Check for duplicates
-                                # REMOVED_SYNTAX_ERROR: tool_names = [rec.tool_name for rec in recommendations]
-                                # REMOVED_SYNTAX_ERROR: assert len(tool_names) == len(set(tool_names))  # No duplicates
+tool_names = [rec.tool_name for rec in recommendations]
+assert len(tool_names) == len(set(tool_names))  # No duplicates
 
                                 # Should be sorted by relevance
-                                # REMOVED_SYNTAX_ERROR: relevance_scores = [rec.relevance_score for rec in recommendations]
-                                # REMOVED_SYNTAX_ERROR: assert relevance_scores == sorted(relevance_scores, reverse=True)
+relevance_scores = [rec.relevance_score for rec in recommendations]
+assert relevance_scores == sorted(relevance_scores, reverse=True)
 
-                                # Removed problematic line: @pytest.mark.asyncio
-                                # Removed problematic line: async def test_recommendation_enhancement(self, agent):
-                                    # REMOVED_SYNTAX_ERROR: """Test recommendation enhancement adds guidance."""
-                                    # REMOVED_SYNTAX_ERROR: recommendations = [Mock( ))
-                                    # REMOVED_SYNTAX_ERROR: tool_name="analyze_performance",
-                                    # REMOVED_SYNTAX_ERROR: relevance_score=0.9,
-                                    # REMOVED_SYNTAX_ERROR: parameters={}
+@pytest.mark.asyncio
+    async def test_recommendation_enhancement(self, agent):
+"""Test recommendation enhancement adds guidance."""
+recommendations = [Mock( ))
+tool_name="analyze_performance",
+relevance_score=0.9,
+parameters={}
                                     
-                                    # REMOVED_SYNTAX_ERROR: user_request = "I need performance analysis"
+user_request = "I need performance analysis"
 
-                                    # REMOVED_SYNTAX_ERROR: enhanced = await agent._enhance_recommendations(recommendations, user_request)
+enhanced = await agent._enhance_recommendations(recommendations, user_request)
 
-                                    # REMOVED_SYNTAX_ERROR: assert len(enhanced) == 1
-                                    # REMOVED_SYNTAX_ERROR: enhanced_rec = enhanced[0]
+assert len(enhanced) == 1
+enhanced_rec = enhanced[0]
 
-                                    # REMOVED_SYNTAX_ERROR: assert enhanced_rec["tool_name"] == "analyze_performance"
-                                    # REMOVED_SYNTAX_ERROR: assert enhanced_rec["relevance_score"] == 0.9
-                                    # REMOVED_SYNTAX_ERROR: assert "description" in enhanced_rec
-                                    # REMOVED_SYNTAX_ERROR: assert "usage_example" in enhanced_rec
-                                    # REMOVED_SYNTAX_ERROR: assert "category" in enhanced_rec
-                                    # REMOVED_SYNTAX_ERROR: assert enhanced_rec["category"] == "Performance Optimization"
+assert enhanced_rec["tool_name"] == "analyze_performance"
+assert enhanced_rec["relevance_score"] == 0.9
+assert "description" in enhanced_rec
+assert "usage_example" in enhanced_rec
+assert "category" in enhanced_rec
+assert enhanced_rec["category"] == "Performance Optimization"
 
-# REMOVED_SYNTAX_ERROR: def test_tool_description_generation(self, agent):
-    # REMOVED_SYNTAX_ERROR: """Test tool description generation."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: desc = agent._get_tool_description("analyze_performance")
-    # REMOVED_SYNTAX_ERROR: assert "performance analysis" in desc.lower()
+def test_tool_description_generation(self, agent):
+"""Test tool description generation."""
+pass
+desc = agent._get_tool_description("analyze_performance")
+assert "performance analysis" in desc.lower()
 
     # Test unknown tool
-    # REMOVED_SYNTAX_ERROR: desc = agent._get_tool_description("unknown_tool")
-    # REMOVED_SYNTAX_ERROR: assert "unknown tool" in desc.lower()
+desc = agent._get_tool_description("unknown_tool")
+assert "unknown tool" in desc.lower()
 
-# REMOVED_SYNTAX_ERROR: def test_tool_category_determination(self, agent):
-    # REMOVED_SYNTAX_ERROR: """Test tool category determination logic."""
-    # REMOVED_SYNTAX_ERROR: assert agent._determine_tool_category("analyze_workload_events") == "Workload Analysis"
-    # REMOVED_SYNTAX_ERROR: assert agent._determine_tool_category("calculate_cost_savings") == "Cost Optimization"
-    # REMOVED_SYNTAX_ERROR: assert agent._determine_tool_category("optimize_throughput") == "Performance Optimization"
-    # REMOVED_SYNTAX_ERROR: assert agent._determine_tool_category("compare_models") == "Model Selection"
-    # REMOVED_SYNTAX_ERROR: assert agent._determine_tool_category("get_supply_catalog") == "Supply Catalog Management"
-    # REMOVED_SYNTAX_ERROR: assert agent._determine_tool_category("generate_report") == "Monitoring & Reporting"
-    # REMOVED_SYNTAX_ERROR: assert agent._determine_tool_category("unknown_tool") == "Quality Optimization"
+def test_tool_category_determination(self, agent):
+"""Test tool category determination logic."""
+assert agent._determine_tool_category("analyze_workload_events") == "Workload Analysis"
+assert agent._determine_tool_category("calculate_cost_savings") == "Cost Optimization"
+assert agent._determine_tool_category("optimize_throughput") == "Performance Optimization"
+assert agent._determine_tool_category("compare_models") == "Model Selection"
+assert agent._determine_tool_category("get_supply_catalog") == "Supply Catalog Management"
+assert agent._determine_tool_category("generate_report") == "Monitoring & Reporting"
+assert agent._determine_tool_category("unknown_tool") == "Quality Optimization"
 
 
-# REMOVED_SYNTAX_ERROR: class TestToolDiscoveryIntegration:
-    # REMOVED_SYNTAX_ERROR: """Integration tests for ToolDiscoverySubAgent."""
+class TestToolDiscoveryIntegration:
+        """Integration tests for ToolDiscoverySubAgent."""
 
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: def agent(self):
-    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
+        @pytest.fixture
+    def agent(self):
+        """Use real service instance."""
     # TODO: Initialize real service
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-    # REMOVED_SYNTAX_ERROR: return ToolDiscoverySubAgent()
+        await asyncio.sleep(0)
+        return ToolDiscoverySubAgent()
 
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: def real_context(self):
-    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
+        @pytest.fixture
+    def real_context(self):
+        """Use real service instance."""
     # TODO: Initialize real service
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: """Create realistic execution context."""
-    # REMOVED_SYNTAX_ERROR: context = Mock(spec=ExecutionContext)
-    # REMOVED_SYNTAX_ERROR: context.run_id = "integration_test_789"
-    # REMOVED_SYNTAX_ERROR: context.stream_updates = True
-    # REMOVED_SYNTAX_ERROR: context.state = Mock(spec=DeepAgentState)
-    # REMOVED_SYNTAX_ERROR: context.state.user_request = "I need to optimize my GPT-4 model costs and improve performance metrics for my customer service chatbot"
-    # REMOVED_SYNTAX_ERROR: return context
+        pass
+        """Create realistic execution context."""
+        context = Mock(spec=ExecutionContext)
+        context.run_id = "integration_test_789"
+        context.stream_updates = True
+        context.state = Mock(spec=DeepAgentState)
+        context.state.user_request = "I need to optimize my GPT-4 model costs and improve performance metrics for my customer service chatbot"
+        return context
 
-    # Removed problematic line: @pytest.mark.asyncio
-    # Removed problematic line: async def test_end_to_end_tool_discovery(self, agent, real_context):
-        # REMOVED_SYNTAX_ERROR: """Test complete end-to-end tool discovery flow."""
+@pytest.mark.asyncio
+    async def test_end_to_end_tool_discovery(self, agent, real_context):
+"""Test complete end-to-end tool discovery flow."""
 
         # Mock WebSocket events to capture calls
-        # REMOVED_SYNTAX_ERROR: agent.websocket = TestWebSocketConnection()
+agent.websocket = TestWebSocketConnection()
 
         # Test precondition validation
-        # REMOVED_SYNTAX_ERROR: valid = await agent.validate_preconditions(real_context)
-        # REMOVED_SYNTAX_ERROR: assert valid is True
+valid = await agent.validate_preconditions(real_context)
+assert valid is True
 
         # Test core logic execution
-        # REMOVED_SYNTAX_ERROR: result = await agent.execute_core_logic(real_context)
+result = await agent.execute_core_logic(real_context)
 
         # Verify result structure
-        # REMOVED_SYNTAX_ERROR: assert isinstance(result, dict)
-        # REMOVED_SYNTAX_ERROR: assert "discovered_tools" in result
-        # REMOVED_SYNTAX_ERROR: assert "analyzed_categories" in result
-        # REMOVED_SYNTAX_ERROR: assert "total_tools_found" in result
-        # REMOVED_SYNTAX_ERROR: assert "discovery_metadata" in result
+assert isinstance(result, dict)
+assert "discovered_tools" in result
+assert "analyzed_categories" in result
+assert "total_tools_found" in result
+assert "discovery_metadata" in result
 
         # Verify discovered tools
-        # REMOVED_SYNTAX_ERROR: tools = result["discovered_tools"]
-        # REMOVED_SYNTAX_ERROR: assert len(tools) > 0
-        # REMOVED_SYNTAX_ERROR: assert isinstance(tools[0], dict)
-        # REMOVED_SYNTAX_ERROR: assert "tool_name" in tools[0]
-        # REMOVED_SYNTAX_ERROR: assert "relevance_score" in tools[0]
-        # REMOVED_SYNTAX_ERROR: assert "description" in tools[0]
+tools = result["discovered_tools"]
+assert len(tools) > 0
+assert isinstance(tools[0], dict)
+assert "tool_name" in tools[0]
+assert "relevance_score" in tools[0]
+assert "description" in tools[0]
 
         # Verify categories identified
-        # REMOVED_SYNTAX_ERROR: categories = result["analyzed_categories"]
-        # REMOVED_SYNTAX_ERROR: assert len(categories) > 0
+categories = result["analyzed_categories"]
+assert len(categories) > 0
         # Should detect both cost and performance optimization
-        # REMOVED_SYNTAX_ERROR: category_names = set(categories)
-        # REMOVED_SYNTAX_ERROR: assert "Cost Optimization" in category_names or "Performance Optimization" in category_names
+category_names = set(categories)
+assert "Cost Optimization" in category_names or "Performance Optimization" in category_names
 
         # Verify metadata
-        # REMOVED_SYNTAX_ERROR: metadata = result["discovery_metadata"]
-        # REMOVED_SYNTAX_ERROR: assert metadata["run_id"] == "integration_test_789"
-        # REMOVED_SYNTAX_ERROR: assert metadata["agent"] == "ToolDiscoverySubAgent"
-        # REMOVED_SYNTAX_ERROR: assert "duration_ms" in metadata
-        # REMOVED_SYNTAX_ERROR: assert "timestamp" in metadata
+metadata = result["discovery_metadata"]
+assert metadata["run_id"] == "integration_test_789"
+assert metadata["agent"] == "ToolDiscoverySubAgent"
+assert "duration_ms" in metadata
+assert "timestamp" in metadata
 
-        # Removed problematic line: @pytest.mark.asyncio
-        # Removed problematic line: async def test_state_result_storage(self, agent, real_context):
-            # REMOVED_SYNTAX_ERROR: """Test that results are stored in state for other agents."""
-            # REMOVED_SYNTAX_ERROR: pass
-            # REMOVED_SYNTAX_ERROR: agent.websocket = TestWebSocketConnection()
+@pytest.mark.asyncio
+    async def test_state_result_storage(self, agent, real_context):
+"""Test that results are stored in state for other agents."""
+pass
+agent.websocket = TestWebSocketConnection()
 
             # Execute discovery
-            # REMOVED_SYNTAX_ERROR: result = await agent.execute_core_logic(real_context)
+result = await agent.execute_core_logic(real_context)
 
             # Verify state was updated
-            # REMOVED_SYNTAX_ERROR: assert hasattr(real_context.state, 'tool_discovery_result')
-            # REMOVED_SYNTAX_ERROR: assert real_context.state.tool_discovery_result == result
+assert hasattr(real_context.state, 'tool_discovery_result')
+assert real_context.state.tool_discovery_result == result
 
 
-# REMOVED_SYNTAX_ERROR: class TestToolDiscoveryResilience:
-    # REMOVED_SYNTAX_ERROR: """Test error handling and resilience patterns."""
+class TestToolDiscoveryResilience:
+    """Test error handling and resilience patterns."""
 
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: def agent(self):
-    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
+    @pytest.fixture
+    def agent(self):
+        """Use real service instance."""
     # TODO: Initialize real service
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-    # REMOVED_SYNTAX_ERROR: return ToolDiscoverySubAgent()
+        await asyncio.sleep(0)
+        return ToolDiscoverySubAgent()
 
-    # Removed problematic line: @pytest.mark.asyncio
-    # Removed problematic line: async def test_graceful_error_handling(self, agent):
-        # REMOVED_SYNTAX_ERROR: """Test graceful error handling with proper error types."""
-        # REMOVED_SYNTAX_ERROR: pass
-        # REMOVED_SYNTAX_ERROR: context = Mock(spec=ExecutionContext)
-        # REMOVED_SYNTAX_ERROR: context.run_id = "error_test_999"
-        # REMOVED_SYNTAX_ERROR: context.state = Mock(spec=DeepAgentState)
-        # REMOVED_SYNTAX_ERROR: context.state.user_request = "valid request"
+@pytest.mark.asyncio
+    async def test_graceful_error_handling(self, agent):
+"""Test graceful error handling with proper error types."""
+pass
+context = Mock(spec=ExecutionContext)
+context.run_id = "error_test_999"
+context.state = Mock(spec=DeepAgentState)
+context.state.user_request = "valid request"
 
         # Mock emit methods
-        # REMOVED_SYNTAX_ERROR: agent.websocket = TestWebSocketConnection()
+agent.websocket = TestWebSocketConnection()
 
         # Force internal method to fail
-        # REMOVED_SYNTAX_ERROR: agent._extract_entities_from_request = AsyncMock(side_effect=RuntimeError("Simulated error"))
+agent._extract_entities_from_request = AsyncMock(side_effect=RuntimeError("Simulated error"))
 
         # Should raise AgentValidationError
-        # REMOVED_SYNTAX_ERROR: with pytest.raises(AgentValidationError) as exc_info:
-            # REMOVED_SYNTAX_ERROR: await agent.execute_core_logic(context)
+with pytest.raises(AgentValidationError) as exc_info:
+await agent.execute_core_logic(context)
 
             # Verify error handling
-            # REMOVED_SYNTAX_ERROR: assert "Tool discovery execution failed" in str(exc_info.value)
-            # REMOVED_SYNTAX_ERROR: agent.emit_error.assert_called_once_with( )
-            # REMOVED_SYNTAX_ERROR: "Tool discovery failed: Simulated error",
-            # REMOVED_SYNTAX_ERROR: error_type="DiscoveryError"
+assert "Tool discovery execution failed" in str(exc_info.value)
+agent.emit_error.assert_called_once_with( )
+"Tool discovery failed: Simulated error",
+error_type="DiscoveryError"
             
 
-            # Removed problematic line: @pytest.mark.asyncio
-            # Removed problematic line: async def test_empty_tool_recommendations_handling(self, agent):
-                # REMOVED_SYNTAX_ERROR: """Test handling of empty tool recommendations."""
-                # REMOVED_SYNTAX_ERROR: categories = ["NonexistentCategory"]
-                # REMOVED_SYNTAX_ERROR: entities = Mock(models_mentioned=[], metrics_mentioned=[])
+@pytest.mark.asyncio
+    async def test_empty_tool_recommendations_handling(self, agent):
+"""Test handling of empty tool recommendations."""
+categories = ["NonexistentCategory"]
+entities = Mock(models_mentioned=[], metrics_mentioned=[])
 
-                # REMOVED_SYNTAX_ERROR: recommendations = await agent._discover_tools(categories, entities)
+recommendations = await agent._discover_tools(categories, entities)
 
                 # Should handle gracefully and await asyncio.sleep(0)
-                # REMOVED_SYNTAX_ERROR: return empty list
-                # REMOVED_SYNTAX_ERROR: assert isinstance(recommendations, list)
-                # REMOVED_SYNTAX_ERROR: assert len(recommendations) == 0
+return empty list
+assert isinstance(recommendations, list)
+assert len(recommendations) == 0
 
-                # Removed problematic line: @pytest.mark.asyncio
-                # Removed problematic line: async def test_execute_core_implementation(self, agent):
-                    # REMOVED_SYNTAX_ERROR: """Test _execute_core method implementation patterns."""
-                    # REMOVED_SYNTAX_ERROR: pass
+@pytest.mark.asyncio
+    async def test_execute_core_implementation(self, agent):
+"""Test _execute_core method implementation patterns."""
+pass
                     # Verify _execute_core method exists
-                    # REMOVED_SYNTAX_ERROR: assert hasattr(agent, '_execute_core'), "Agent must implement _execute_core method"
+assert hasattr(agent, '_execute_core'), "Agent must implement _execute_core method"
 
                     # Test method is callable and async
-                    # REMOVED_SYNTAX_ERROR: execute_core = getattr(agent, '_execute_core')
-                    # REMOVED_SYNTAX_ERROR: assert callable(execute_core), "_execute_core must be callable"
+execute_core = getattr(agent, '_execute_core')
+assert callable(execute_core), "_execute_core must be callable"
 
-                    # REMOVED_SYNTAX_ERROR: import inspect
-                    # REMOVED_SYNTAX_ERROR: assert inspect.iscoroutinefunction(execute_core), "_execute_core must be async"
+import inspect
+assert inspect.iscoroutinefunction(execute_core), "_execute_core must be async"
 
-                    # Removed problematic line: @pytest.mark.asyncio
-                    # Removed problematic line: async def test_execute_core_error_handling(self, agent):
-                        # REMOVED_SYNTAX_ERROR: """Test _execute_core error handling patterns."""
-                        # REMOVED_SYNTAX_ERROR: context = Mock(spec=ExecutionContext)
-                        # REMOVED_SYNTAX_ERROR: context.run_id = "execute_core_test"
-                        # REMOVED_SYNTAX_ERROR: context.state = Mock(spec=DeepAgentState)
-                        # REMOVED_SYNTAX_ERROR: context.state.user_request = "test request"
+@pytest.mark.asyncio
+    async def test_execute_core_error_handling(self, agent):
+"""Test _execute_core error handling patterns."""
+context = Mock(spec=ExecutionContext)
+context.run_id = "execute_core_test"
+context.state = Mock(spec=DeepAgentState)
+context.state.user_request = "test request"
 
                         # Mock emit methods
-                        # REMOVED_SYNTAX_ERROR: agent.websocket = TestWebSocketConnection()
+agent.websocket = TestWebSocketConnection()
 
                         # Test that _execute_core exists and handles errors properly
-                        # REMOVED_SYNTAX_ERROR: assert hasattr(agent, '_execute_core'), "Must have _execute_core method"
+assert hasattr(agent, '_execute_core'), "Must have _execute_core method"
 
                         # Verify method can be called (even if it fails)
-                        # REMOVED_SYNTAX_ERROR: try:
-                            # REMOVED_SYNTAX_ERROR: await agent._execute_core(context, "test input")
-                            # REMOVED_SYNTAX_ERROR: except Exception as e:
+try:
+await agent._execute_core(context, "test input")
+except Exception as e:
                                 # Error handling should exist
-                                # REMOVED_SYNTAX_ERROR: assert str(e) or True, "Error handling patterns should be present"
+assert str(e) or True, "Error handling patterns should be present"
 
-                                # Removed problematic line: @pytest.mark.asyncio
-                                # Removed problematic line: async def test_resource_cleanup_patterns(self, agent):
-                                    # REMOVED_SYNTAX_ERROR: """Test resource cleanup and shutdown patterns."""
-                                    # REMOVED_SYNTAX_ERROR: pass
+@pytest.mark.asyncio
+    async def test_resource_cleanup_patterns(self, agent):
+"""Test resource cleanup and shutdown patterns."""
+pass
                                     # Test cleanup methods exist
-                                    # REMOVED_SYNTAX_ERROR: cleanup_methods = ['cleanup', 'shutdown', '__del__']
-                                    # REMOVED_SYNTAX_ERROR: has_cleanup = any(hasattr(agent, method) for method in cleanup_methods)
+cleanup_methods = ['cleanup', 'shutdown', '__del__']
+has_cleanup = any(hasattr(agent, method) for method in cleanup_methods)
 
                                     # Should have some form of resource cleanup
-                                    # REMOVED_SYNTAX_ERROR: assert True, "Resource management patterns should be implemented"
+assert True, "Resource management patterns should be implemented"
 
-                                    # Removed problematic line: @pytest.mark.asyncio
-                                    # Removed problematic line: async def test_shutdown_graceful_handling(self, agent):
-                                        # REMOVED_SYNTAX_ERROR: """Test graceful shutdown patterns."""
+@pytest.mark.asyncio
+    async def test_shutdown_graceful_handling(self, agent):
+"""Test graceful shutdown patterns."""
                                         # Test agent can handle shutdown scenarios
-                                        # REMOVED_SYNTAX_ERROR: context = Mock(spec=ExecutionContext)
-                                        # REMOVED_SYNTAX_ERROR: context.run_id = "shutdown_test"
-                                        # REMOVED_SYNTAX_ERROR: context.state = Mock(spec=DeepAgentState)
+context = Mock(spec=ExecutionContext)
+context.run_id = "shutdown_test"
+context.state = Mock(spec=DeepAgentState)
 
                                         # Mock methods to avoid actual execution
-                                        # REMOVED_SYNTAX_ERROR: agent.websocket = TestWebSocketConnection()
+agent.websocket = TestWebSocketConnection()
 
                                         # Should handle shutdown/cleanup gracefully
-                                        # REMOVED_SYNTAX_ERROR: assert hasattr(agent, '__dict__'), "Agent should have proper state management"
+assert hasattr(agent, '__dict__'), "Agent should have proper state management"
 
-                                        # Removed problematic line: @pytest.mark.asyncio
-                                        # Removed problematic line: async def test_resource_management_cleanup(self, agent):
-                                            # REMOVED_SYNTAX_ERROR: """Test proper resource management and cleanup."""
-                                            # REMOVED_SYNTAX_ERROR: pass
+@pytest.mark.asyncio
+    async def test_resource_management_cleanup(self, agent):
+"""Test proper resource management and cleanup."""
+pass
                                             # Test resource management patterns
-                                            # REMOVED_SYNTAX_ERROR: assert hasattr(agent, '__class__'), "Agent must have proper class structure"
+assert hasattr(agent, '__class__'), "Agent must have proper class structure"
 
                                             # Test cleanup can be performed
-                                            # REMOVED_SYNTAX_ERROR: if hasattr(agent, 'cleanup'):
+if hasattr(agent, 'cleanup'):
                                                 # Should be callable
-                                                # REMOVED_SYNTAX_ERROR: assert callable(getattr(agent, 'cleanup')), "cleanup method should be callable"
+assert callable(getattr(agent, 'cleanup')), "cleanup method should be callable"
 
 
-                                                # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
+if __name__ == "__main__":
                                                     # Run mission critical tests
-                                                    # REMOVED_SYNTAX_ERROR: __file__,
-                                                    # REMOVED_SYNTAX_ERROR: "-v",
-                                                    # REMOVED_SYNTAX_ERROR: "--tb=short",
-                                                    # REMOVED_SYNTAX_ERROR: "-x"  # Stop on first failure for faster feedback
+__file__,
+"-v",
+"--tb=short",
+"-x"  # Stop on first failure for faster feedback
                                                     

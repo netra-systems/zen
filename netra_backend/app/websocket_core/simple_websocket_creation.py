@@ -68,18 +68,22 @@ class SimpleUserContext:
 
 class SimpleWebSocketManager:
     """
-    Simplified WebSocket manager without factory complexity.
+    ⚠️  DEPRECATED - SSOT REMEDIATION NOTICE (Issue #1075)
+    This class duplicates functionality that violates SSOT principles.
+    Use UnifiedWebSocketManager from canonical_import_patterns instead.
 
-    Maintains user isolation and core functionality while eliminating:
-    - 720 lines of factory code
-    - Zombie detection complexity
-    - Circuit breaker patterns
-    - Complex cleanup levels
-    - Health monitoring overhead
+    This class will be removed in a future release.
+    Migration: from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
     """
 
     def __init__(self, user_context: SimpleUserContext):
         """Initialize simple WebSocket manager."""
+        import warnings
+        warnings.warn(
+            "SimpleWebSocketManager is deprecated. Use UnifiedWebSocketManager instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         self.user_id = user_context.user_id
         self.thread_id = user_context.thread_id
         self.user_context = user_context

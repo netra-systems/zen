@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-09-16T14:59:20.493294",
-    "root_directory": "C:\\netra-apex",
-    "total_literals": 1949
+    "generated_at": "2025-09-17T09:05:41.695243",
+    "root_directory": "C:\\GitHub\\netra-apex",
+    "total_literals": 1978
   },
   "literals": {
     "\"\n\n# Default to local build with checks\ncommand = [\n    sys.executable,\n    \"scripts/deploy_to_gcp.py\",\n    \"--project\", \"netra-staging\",\n    \"--build-local\",\n    \"--service-account\", SERVICE_ACCOUNT_KEY\n]\n\n# Add any additional arguments passed to this script\nif len(sys.argv) > 1:\n    command.extend(sys.argv[1:])\nelse:\n    # Default to running checks\n    command.append(\"--run-checks\")\n\n# Execute deployment\nsys.exit(subprocess.call(command))": {
@@ -19,6 +19,20 @@
       "category": "paths",
       "locations": [
         "scripts/async_pattern_enforcer.py:487"
+      ]
+    },
+    "# Update timeout values in scripts/deploy_to_gcp_actual.py:": {
+      "value": "# Update timeout values in scripts/deploy_to_gcp_actual.py:",
+      "category": "paths",
+      "locations": [
+        "scripts/validate_staging_environment.py:513"
+      ]
+    },
+    "# Updated by setup_staging_environment.py\\n": {
+      "value": "# Updated by setup_staging_environment.py\\n",
+      "category": "paths",
+      "locations": [
+        "scripts/setup_staging_environment.py:264"
       ]
     },
     "# python tests/unified_test_runner.py": {
@@ -254,7 +268,7 @@
       "value": "*/.pytest_cache/*",
       "category": "paths",
       "locations": [
-        "netra_backend/app/main.py:128"
+        "netra_backend/app/main.py:129"
       ]
     },
     "*/content_corpus.json": {
@@ -530,7 +544,9 @@
       "value": "/0",
       "category": "paths",
       "locations": [
-        "netra_backend/app/redis_manager.py:192"
+        "netra_backend/app/redis_manager.py:192",
+        "scripts/setup_staging_environment.py:228",
+        "scripts/setup_staging_environment.py:232"
       ]
     },
     "/10": {
@@ -595,7 +611,8 @@
       "value": "/1000",
       "category": "paths",
       "locations": [
-        "netra_backend/app/websocket_core/unified_manager.py:3329"
+        "netra_backend/app/websocket_core/unified_manager.py:2458",
+        "netra_backend/app/websocket_core/unified_manager_backup.py:3329"
       ]
     },
     "/100:": {
@@ -727,14 +744,14 @@
       "value": "/5 startup fixes applied - some functionality may be degraded",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:2074"
+        "netra_backend/app/smd.py:2077"
       ]
     },
     "/5 startup fixes applied with": {
       "value": "/5 startup fixes applied with",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:2072"
+        "netra_backend/app/smd.py:2075"
       ]
     },
     "/5 startup phases found": {
@@ -762,7 +779,7 @@
       "value": "/5 successful,",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:2022"
+        "netra_backend/app/smd.py:2025"
       ]
     },
     "/50+ tests)": {
@@ -783,7 +800,7 @@
       "value": "/7",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:2418"
+        "netra_backend/app/smd.py:2421"
       ]
     },
     "/8 tests": {
@@ -827,7 +844,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/monitoring/websocket_logging_enhanced.py:505",
-        "netra_backend/app/services/agent_websocket_bridge.py:3450"
+        "netra_backend/app/services/agent_websocket_bridge.py:3770"
       ]
     },
     "/Users/anthony/Desktop/netra-apex": {
@@ -1048,7 +1065,7 @@
       "value": "/alerts",
       "category": "paths",
       "locations": [
-        "netra_backend/app/api/slo_endpoints.py:96",
+        "netra_backend/app/api/slo_endpoints.py:97",
         "netra_backend/app/monitoring/websocket_monitoring_integration.py:334",
         "netra_backend/app/routes/circuit_breaker_health.py:97",
         "netra_backend/app/routes/database_monitoring/router.py:121",
@@ -1068,7 +1085,7 @@
       "value": "/alerts/history",
       "category": "paths",
       "locations": [
-        "netra_backend/app/api/slo_endpoints.py:130"
+        "netra_backend/app/api/slo_endpoints.py:131"
       ]
     },
     "/analyses": {
@@ -1141,10 +1158,11 @@
       "value": "/api",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:84",
-        "netra_backend/app/core/app_factory_route_configs.py:102",
-        "netra_backend/app/core/app_factory_route_configs.py:103",
-        "netra_backend/app/core/app_factory_route_configs.py:125",
+        "netra_backend/app/core/app_factory_route_configs.py:28",
+        "netra_backend/app/core/app_factory_route_configs.py:86",
+        "netra_backend/app/core/app_factory_route_configs.py:104",
+        "netra_backend/app/core/app_factory_route_configs.py:105",
+        "netra_backend/app/core/app_factory_route_configs.py:127",
         "netra_backend/app/core/network_constants.py:230"
       ]
     },
@@ -1187,7 +1205,7 @@
       "value": "/api/admin",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:83",
+        "netra_backend/app/core/app_factory_route_configs.py:85",
         "netra_backend/app/middleware/security_middleware.py:165",
         "netra_backend/app/middleware/transaction_middleware.py:32"
       ]
@@ -1232,14 +1250,15 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/services/factory_adapter.py:588",
-        "scripts/staging_environment_validation_suite.py:966"
+        "scripts/staging_environment_validation_suite.py:966",
+        "scripts/validate_staging_supervisor_deployment.py:207"
       ]
     },
     "/api/agents/run_agent_v2": {
       "value": "/api/agents/run_agent_v2",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:2211"
+        "netra_backend/app/smd.py:2214"
       ]
     },
     "/api/agents/start": {
@@ -1269,21 +1288,21 @@
       "value": "/api/agents/v2/thread/{thread_id}/runs",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:2214"
+        "netra_backend/app/smd.py:2217"
       ]
     },
     "/api/agents/v2/{run_id}/state": {
       "value": "/api/agents/v2/{run_id}/state",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:2213"
+        "netra_backend/app/smd.py:2216"
       ]
     },
     "/api/agents/v2/{run_id}/status": {
       "value": "/api/agents/v2/{run_id}/status",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:2212"
+        "netra_backend/app/smd.py:2215"
       ]
     },
     "/api/auth": {
@@ -1312,7 +1331,7 @@
       "value": "/api/chat",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:37"
+        "netra_backend/app/core/app_factory_route_configs.py:39"
       ]
     },
     "/api/chat/messages": {
@@ -1403,7 +1422,7 @@
       "value": "/api/corpus",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:105",
+        "netra_backend/app/core/app_factory_route_configs.py:107",
         "netra_backend/app/middleware/transaction_middleware.py:30"
       ]
     },
@@ -1457,7 +1476,7 @@
       "value": "/api/events",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:40"
+        "netra_backend/app/core/app_factory_route_configs.py:42"
       ]
     },
     "/api/example-messages": {
@@ -1486,7 +1505,7 @@
       "value": "/api/generation",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:78",
+        "netra_backend/app/core/app_factory_route_configs.py:80",
         "netra_backend/app/middleware/transaction_middleware.py:33"
       ]
     },
@@ -1505,8 +1524,8 @@
         "netra_backend/app/core/cross_service_validators/contract_validators.py:88",
         "netra_backend/app/core/cross_service_validators/contract_validators.py:535",
         "netra_backend/app/core/cross_service_validators/performance_validators.py:87",
-        "netra_backend/app/middleware/graceful_shutdown_middleware.py:105",
-        "netra_backend/app/middleware/graceful_shutdown_middleware.py:215",
+        "netra_backend/app/middleware/graceful_shutdown_middleware.py:106",
+        "netra_backend/app/middleware/graceful_shutdown_middleware.py:216",
         "scripts/gcp_health_diagnostics.py:63",
         "scripts/simple_staging_health_check.py:31",
         "scripts/staging_environment_validation_suite.py:473",
@@ -1531,14 +1550,14 @@
       "value": "/api/health/live",
       "category": "paths",
       "locations": [
-        "netra_backend/app/middleware/graceful_shutdown_middleware.py:106"
+        "netra_backend/app/middleware/graceful_shutdown_middleware.py:107"
       ]
     },
     "/api/health/ready": {
       "value": "/api/health/ready",
       "category": "paths",
       "locations": [
-        "netra_backend/app/middleware/graceful_shutdown_middleware.py:107"
+        "netra_backend/app/middleware/graceful_shutdown_middleware.py:108"
       ]
     },
     "/api/health/secrets": {
@@ -1580,7 +1599,7 @@
       "value": "/api/llm-cache",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:39"
+        "netra_backend/app/core/app_factory_route_configs.py:41"
       ]
     },
     "/api/llm/health": {
@@ -1601,7 +1620,7 @@
       "value": "/api/mcp",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:47",
+        "netra_backend/app/core/app_factory_route_configs.py:49",
         "netra_backend/app/routes/mcp/config.py:88",
         "netra_backend/app/routes/mcp/config.py:131"
       ]
@@ -1639,7 +1658,7 @@
       "value": "/api/messages",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:38",
+        "netra_backend/app/core/app_factory_route_configs.py:40",
         "netra_backend/app/routes/messages_root.py:46",
         "netra_backend/app/routes/messages_root.py:96",
         "netra_backend/app/routes/messages_root.py:104"
@@ -1677,14 +1696,14 @@
       "value": "/api/shutdown/status",
       "category": "paths",
       "locations": [
-        "netra_backend/app/middleware/graceful_shutdown_middleware.py:76"
+        "netra_backend/app/middleware/graceful_shutdown_middleware.py:77"
       ]
     },
     "/api/slo": {
       "value": "/api/slo",
       "category": "paths",
       "locations": [
-        "netra_backend/app/api/slo_endpoints.py:16"
+        "netra_backend/app/api/slo_endpoints.py:17"
       ]
     },
     "/api/status": {
@@ -1698,7 +1717,7 @@
       "value": "/api/supply",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:77"
+        "netra_backend/app/core/app_factory_route_configs.py:79"
       ]
     },
     "/api/supply/compare": {
@@ -1759,7 +1778,7 @@
       "value": "/api/tools",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:131",
+        "netra_backend/app/core/app_factory_route_configs.py:133",
         "netra_backend/app/middleware/security_middleware.py:165"
       ]
     },
@@ -1809,7 +1828,7 @@
       "value": "/api/v1",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:132"
+        "netra_backend/app/core/app_factory_route_configs.py:134"
       ]
     },
     "/api/v1/auth": {
@@ -1862,16 +1881,16 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/core/middleware_setup.py:326",
-        "netra_backend/app/routes/websocket_ssot.py:333",
-        "netra_backend/app/routes/websocket_ssot.py:334",
-        "netra_backend/app/routes/websocket_ssot.py:341"
+        "netra_backend/app/routes/websocket_ssot.py:331",
+        "netra_backend/app/routes/websocket_ssot.py:332",
+        "netra_backend/app/routes/websocket_ssot.py:339"
       ]
     },
     "/api/v1/websocket/protected": {
       "value": "/api/v1/websocket/protected",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:335"
+        "netra_backend/app/routes/websocket_ssot.py:333"
       ]
     },
     "/api/v1/ws": {
@@ -2477,6 +2496,27 @@
         "auth_service/auth_core/api/websocket_auth.py:63"
       ]
     },
+    "/authentication": {
+      "value": "/authentication",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/routes/health.py:142"
+      ]
+    },
+    "/authentication/metrics": {
+      "value": "/authentication/metrics",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/routes/health.py:153"
+      ]
+    },
+    "/authentication/websocket": {
+      "value": "/authentication/websocket",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/routes/health.py:164"
+      ]
+    },
     "/auto-refresh": {
       "value": "/auto-refresh",
       "category": "paths",
@@ -2549,7 +2589,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/routes/mcp_client.py:359",
-        "scripts/deploy_to_gcp_actual.py:806"
+        "scripts/deploy_to_gcp_actual.py:884"
       ]
     },
     "/cache/clear": {
@@ -2659,7 +2699,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/routes/circuit_breaker_health.py:48",
-        "netra_backend/app/routes/health.py:104"
+        "netra_backend/app/routes/health.py:116"
       ]
     },
     "/circuit_breakers": {
@@ -2749,7 +2789,7 @@
       "category": "paths",
       "locations": [
         "scripts/create_tables.py:16",
-        "scripts/deploy_to_gcp_actual.py:1849",
+        "scripts/deploy_to_gcp_actual.py:1981",
         "scripts/migrate_staging_postgres_secrets.py:64",
         "scripts/migrate_staging_postgres_secrets_auto.py:64"
       ]
@@ -2882,7 +2922,7 @@
       "value": "/connectors/staging-connector-v2",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp_actual.py:1085"
+        "scripts/deploy_to_gcp_actual.py:1163"
       ]
     },
     "/containers/": {
@@ -3040,21 +3080,21 @@
       "value": "/debug/async_tasks",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/system_info.py:387"
+        "netra_backend/app/routes/system_info.py:384"
       ]
     },
     "/debug/routes": {
       "value": "/debug/routes",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/system_info.py:363"
+        "netra_backend/app/routes/system_info.py:360"
       ]
     },
     "/definitions": {
       "value": "/definitions",
       "category": "paths",
       "locations": [
-        "netra_backend/app/api/slo_endpoints.py:194"
+        "netra_backend/app/api/slo_endpoints.py:195"
       ]
     },
     "/demo": {
@@ -3068,7 +3108,7 @@
       "value": "/dependencies/status",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/system_info.py:212"
+        "netra_backend/app/routes/system_info.py:209"
       ]
     },
     "/dev/login": {
@@ -3213,6 +3253,30 @@
         "netra_backend/app/core/validation_rules.py:94"
       ]
     },
+    "/etc/ssl/certs": {
+      "value": "/etc/ssl/certs",
+      "category": "paths",
+      "locations": [
+        "scripts/validate_staging_fixes.py:201"
+      ]
+    },
+    "/etc/ssl/certs/ca-bundle.crt": {
+      "value": "/etc/ssl/certs/ca-bundle.crt",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_staging_postgres_ssl.py:432"
+      ]
+    },
+    "/etc/ssl/certs/ca-certificates.crt": {
+      "value": "/etc/ssl/certs/ca-certificates.crt",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_staging_postgres_ssl.py:55",
+        "scripts/fix_staging_postgres_ssl.py:56",
+        "scripts/fix_staging_postgres_ssl.py:431",
+        "scripts/setup_staging_environment.py:195"
+      ]
+    },
     "/events": {
       "value": "/events",
       "category": "paths",
@@ -3282,7 +3346,7 @@
       "value": "/factory",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:524"
+        "netra_backend/app/routes/websocket_ssot.py:522"
       ]
     },
     "/failingtestsgardener agents": {
@@ -3348,6 +3412,14 @@
         "netra_backend/app/routes/factory_status_simple.py:87"
       ]
     },
+    "/generate-ticket": {
+      "value": "/generate-ticket",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/routes/auth_proxy.py:403",
+        "netra_backend/app/routes/auth_proxy.py:545"
+      ]
+    },
     "/gitcommitgardener": {
       "value": "/gitcommitgardener",
       "category": "paths",
@@ -3404,11 +3476,11 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/api/health_checks.py:41",
-        "netra_backend/app/auth_integration/auth.py:111",
-        "netra_backend/app/auth_integration/auth.py:146",
+        "netra_backend/app/auth_integration/auth.py:112",
+        "netra_backend/app/auth_integration/auth.py:147",
         "netra_backend/app/clients/auth_client_config.py:118",
         "netra_backend/app/clients/auth_client_core.py:571",
-        "netra_backend/app/core/app_factory_route_configs.py:96",
+        "netra_backend/app/core/app_factory_route_configs.py:98",
         "netra_backend/app/core/circuit_breaker_health_checkers.py:40",
         "netra_backend/app/core/cross_service_validators/contract_validators.py:535",
         "netra_backend/app/core/health/unified_health_checker.py:65",
@@ -3429,7 +3501,7 @@
       "value": "/health-score",
       "category": "paths",
       "locations": [
-        "netra_backend/app/api/slo_endpoints.py:228"
+        "netra_backend/app/api/slo_endpoints.py:229"
       ]
     },
     "/health/": {
@@ -3450,7 +3522,7 @@
       "value": "/health/alerts/subscribe",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/staging_health.py:320"
+        "netra_backend/app/routes/staging_health.py:321"
       ]
     },
     "/health/auth": {
@@ -3518,16 +3590,16 @@
       "value": "/health/component/{component_name}",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/unified_health.py:187",
         "netra_backend/app/routes/unified_health.py:188",
-        "netra_backend/app/routes/unified_health.py:189"
+        "netra_backend/app/routes/unified_health.py:189",
+        "netra_backend/app/routes/unified_health.py:190"
       ]
     },
     "/health/critical": {
       "value": "/health/critical",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/staging_health.py:269"
+        "netra_backend/app/routes/staging_health.py:270"
       ]
     },
     "/health/database": {
@@ -3537,7 +3609,7 @@
         "netra_backend/app/routes/circuit_breaker_health.py:160",
         "netra_backend/app/routes/circuit_breaker_health.py:161",
         "netra_backend/app/routes/circuit_breaker_health.py:162",
-        "netra_backend/app/routes/staging_health.py:120",
+        "netra_backend/app/routes/staging_health.py:121",
         "scripts/gcp_health_diagnostics.py:51",
         "scripts/gcp_health_monitor.py:117",
         "scripts/simple_staging_health_check.py:26",
@@ -3572,11 +3644,11 @@
       "value": "/health/live",
       "category": "paths",
       "locations": [
-        "netra_backend/app/middleware/graceful_shutdown_middleware.py:103",
+        "netra_backend/app/middleware/graceful_shutdown_middleware.py:104",
         "netra_backend/app/middleware/security_response_middleware.py:48",
-        "netra_backend/app/routes/unified_health.py:104",
         "netra_backend/app/routes/unified_health.py:105",
-        "netra_backend/app/routes/unified_health.py:106"
+        "netra_backend/app/routes/unified_health.py:106",
+        "netra_backend/app/routes/unified_health.py:107"
       ]
     },
     "/health/llm": {
@@ -3592,7 +3664,7 @@
       "value": "/health/metrics",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/staging_health.py:212"
+        "netra_backend/app/routes/staging_health.py:213"
       ]
     },
     "/health/ready": {
@@ -3601,12 +3673,12 @@
       "locations": [
         "netra_backend/app/core/health/unified_health_checker.py:66",
         "netra_backend/app/middleware/api_gateway_coordinator.py:121",
-        "netra_backend/app/middleware/graceful_shutdown_middleware.py:104",
+        "netra_backend/app/middleware/graceful_shutdown_middleware.py:105",
         "netra_backend/app/middleware/security_response_middleware.py:48",
         "netra_backend/app/monitoring/enhanced_infrastructure_monitor.py:122",
-        "netra_backend/app/routes/unified_health.py:144",
         "netra_backend/app/routes/unified_health.py:145",
         "netra_backend/app/routes/unified_health.py:146",
+        "netra_backend/app/routes/unified_health.py:147",
         "auth_service/auth_core/validation/pre_deployment_validator.py:484",
         "auth_service/main.py:623"
       ]
@@ -3629,7 +3701,7 @@
       "value": "/health/services",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/staging_health.py:166"
+        "netra_backend/app/routes/staging_health.py:167"
       ]
     },
     "/health/startup": {
@@ -3646,7 +3718,7 @@
       "value": "/health/status/summary",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/staging_health.py:364"
+        "netra_backend/app/routes/staging_health.py:365"
       ]
     },
     "/health/summary": {
@@ -3677,7 +3749,7 @@
       "value": "/health/websocket",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/staging_health.py:77"
+        "netra_backend/app/routes/staging_health.py:78"
       ]
     },
     "/help": {
@@ -3699,8 +3771,8 @@
       "value": "/home/",
       "category": "paths",
       "locations": [
-        "netra_backend/app/services/agent_websocket_bridge.py:3450",
-        "netra_backend/app/services/agent_websocket_bridge.py:3450"
+        "netra_backend/app/services/agent_websocket_bridge.py:3770",
+        "netra_backend/app/services/agent_websocket_bridge.py:3770"
       ]
     },
     "/industry/{industry}/templates": {
@@ -3760,7 +3832,7 @@
       "value": "/isolated",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:526"
+        "netra_backend/app/routes/websocket_ssot.py:524"
       ]
     },
     "/isolation/alerts": {
@@ -3865,7 +3937,7 @@
       "value": "/locations/",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp_actual.py:1085"
+        "scripts/deploy_to_gcp_actual.py:1163"
       ]
     },
     "/login": {
@@ -4109,14 +4181,14 @@
       "value": "/mock$",
       "category": "paths",
       "locations": [
-        "netra_backend/app/startup_module.py:380"
+        "netra_backend/app/startup_module.py:409"
       ]
     },
     "/mock?": {
       "value": "/mock?",
       "category": "paths",
       "locations": [
-        "netra_backend/app/startup_module.py:379"
+        "netra_backend/app/startup_module.py:408"
       ]
     },
     "/models": {
@@ -4633,7 +4705,7 @@
       "value": "/record/{slo_name}",
       "category": "paths",
       "locations": [
-        "netra_backend/app/api/slo_endpoints.py:166"
+        "netra_backend/app/api/slo_endpoints.py:167"
       ]
     },
     "/redirect": {
@@ -4751,7 +4823,7 @@
       "value": "/resilience",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/health.py:119"
+        "netra_backend/app/routes/health.py:131"
       ]
     },
     "/resources": {
@@ -5165,7 +5237,7 @@
       "value": "/staging",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/staging_health.py:20"
+        "netra_backend/app/routes/staging_health.py:21"
       ]
     },
     "/staging.tfvars": {
@@ -5303,7 +5375,7 @@
       "value": "/status",
       "category": "paths",
       "locations": [
-        "netra_backend/app/api/slo_endpoints.py:46",
+        "netra_backend/app/api/slo_endpoints.py:47",
         "netra_backend/app/infrastructure/smd_graceful_degradation.py:69",
         "netra_backend/app/infrastructure/smd_graceful_degradation.py:77",
         "netra_backend/app/infrastructure/smd_graceful_degradation.py:85",
@@ -5333,7 +5405,7 @@
       "value": "/status/{slo_name}",
       "category": "paths",
       "locations": [
-        "netra_backend/app/api/slo_endpoints.py:63"
+        "netra_backend/app/api/slo_endpoints.py:64"
       ]
     },
     "/stop": {
@@ -5482,7 +5554,7 @@
       "locations": [
         "netra_backend/app/routes/events_stream.py:193",
         "netra_backend/app/routes/factory_status/router.py:96",
-        "netra_backend/app/websocket_core/unified_manager.py:143",
+        "netra_backend/app/websocket_core/unified_manager_backup.py:143",
         "scripts/check_auth_ssot_compliance.py:210",
         "scripts/compliance/core.py:217",
         "scripts/compliance/severity_tiers.py:253",
@@ -5598,6 +5670,34 @@
       "locations": [
         "scripts/staging_validation_part2_user_flows.py:137",
         "scripts/staging_validation_part2_user_flows.py:568"
+      ]
+    },
+    "/ticket": {
+      "value": "/ticket",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/routes/websocket_ticket.py:71"
+      ]
+    },
+    "/ticket/{ticket_id}": {
+      "value": "/ticket/{ticket_id}",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/routes/websocket_ticket.py:194"
+      ]
+    },
+    "/ticket/{ticket_id}/validate": {
+      "value": "/ticket/{ticket_id}/validate",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/routes/websocket_ticket.py:148"
+      ]
+    },
+    "/tickets/status": {
+      "value": "/tickets/status",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/routes/websocket_ticket.py:247"
       ]
     },
     "/tmp/act-artifacts/": {
@@ -5812,6 +5912,13 @@
         "scripts/claude-instance-orchestrator.py:218"
       ]
     },
+    "/usr/local/share/ca-certificates/": {
+      "value": "/usr/local/share/ca-certificates/",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_staging_postgres_ssl.py:433"
+      ]
+    },
     "/usr/src/app/alembic.ini": {
       "value": "/usr/src/app/alembic.ini",
       "category": "paths",
@@ -5970,10 +6077,10 @@
         "netra_backend/app/middleware/gcp_websocket_readiness_middleware.py:213",
         "netra_backend/app/middleware/security_response_middleware.py:96",
         "netra_backend/app/routes/monitoring.py:641",
-        "netra_backend/app/routes/websocket_ssot.py:528",
+        "netra_backend/app/routes/websocket_ssot.py:526",
+        "netra_backend/app/routes/websocket_ticket.py:26",
         "scripts/staging_validation_part2_corrected.py:603",
-        "scripts/validate_websocket_deployment.py:73",
-        "scripts/validate_websocket_simple.py:56"
+        "scripts/validate_websocket_deployment.py:73"
       ]
     },
     "/websocket/": {
@@ -6026,30 +6133,30 @@
       "value": "/ws/auth/circuit-breaker",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:344"
+        "netra_backend/app/routes/websocket_ssot.py:342"
       ]
     },
     "/ws/auth/health": {
       "value": "/ws/auth/health",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:346"
+        "netra_backend/app/routes/websocket_ssot.py:344"
       ]
     },
     "/ws/auth/permissiveness": {
       "value": "/ws/auth/permissiveness",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:345"
+        "netra_backend/app/routes/websocket_ssot.py:343"
       ]
     },
     "/ws/beacon": {
       "value": "/ws/beacon",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:328",
-        "netra_backend/app/routes/websocket_ssot.py:329",
-        "netra_backend/app/routes/websocket_ssot.py:330"
+        "netra_backend/app/routes/websocket_ssot.py:326",
+        "netra_backend/app/routes/websocket_ssot.py:327",
+        "netra_backend/app/routes/websocket_ssot.py:328"
       ]
     },
     "/ws/config": {
@@ -6059,8 +6166,8 @@
         "netra_backend/app/core/middleware_setup.py:325",
         "netra_backend/app/core/unified_error_handler.py:1257",
         "netra_backend/app/middleware/security_response_middleware.py:96",
-        "netra_backend/app/routes/websocket_ssot.py:326",
-        "netra_backend/app/routes/websocket_ssot.py:1864",
+        "netra_backend/app/routes/websocket_ssot.py:324",
+        "netra_backend/app/routes/websocket_ssot.py:1955",
         "scripts/staging_validation_part2_corrected.py:285",
         "scripts/staging_validation_part2_corrected.py:299",
         "scripts/staging_validation_part2_user_flows.py:328",
@@ -6072,21 +6179,21 @@
       "value": "/ws/factory",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:318"
+        "netra_backend/app/routes/websocket_ssot.py:316"
       ]
     },
     "/ws/factory/health": {
       "value": "/ws/factory/health",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:350"
+        "netra_backend/app/routes/websocket_ssot.py:348"
       ]
     },
     "/ws/factory/status": {
       "value": "/ws/factory/status",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:349"
+        "netra_backend/app/routes/websocket_ssot.py:347"
       ]
     },
     "/ws/health": {
@@ -6096,10 +6203,10 @@
         "netra_backend/app/core/middleware_setup.py:325",
         "netra_backend/app/core/unified_error_handler.py:1257",
         "netra_backend/app/middleware/security_response_middleware.py:96",
+        "netra_backend/app/routes/websocket_ssot.py:320",
+        "netra_backend/app/routes/websocket_ssot.py:321",
         "netra_backend/app/routes/websocket_ssot.py:322",
-        "netra_backend/app/routes/websocket_ssot.py:323",
-        "netra_backend/app/routes/websocket_ssot.py:324",
-        "netra_backend/app/routes/websocket_ssot.py:1863",
+        "netra_backend/app/routes/websocket_ssot.py:1954",
         "scripts/staging_validation_part2_corrected.py:213",
         "scripts/staging_validation_part2_corrected.py:227",
         "scripts/staging_validation_part2_user_flows.py:240"
@@ -6109,28 +6216,28 @@
       "value": "/ws/isolated",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:319"
+        "netra_backend/app/routes/websocket_ssot.py:317"
       ]
     },
     "/ws/isolated/config": {
       "value": "/ws/isolated/config",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:353"
+        "netra_backend/app/routes/websocket_ssot.py:351"
       ]
     },
     "/ws/isolated/health": {
       "value": "/ws/isolated/health",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:351"
+        "netra_backend/app/routes/websocket_ssot.py:349"
       ]
     },
     "/ws/isolated/stats": {
       "value": "/ws/isolated/stats",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:352"
+        "netra_backend/app/routes/websocket_ssot.py:350"
       ]
     },
     "/ws/stats": {
@@ -6140,7 +6247,7 @@
         "netra_backend/app/core/middleware_setup.py:325",
         "netra_backend/app/core/unified_error_handler.py:1257",
         "netra_backend/app/middleware/security_response_middleware.py:96",
-        "netra_backend/app/routes/websocket_ssot.py:327"
+        "netra_backend/app/routes/websocket_ssot.py:325"
       ]
     },
     "/ws/test": {
@@ -6150,7 +6257,7 @@
         "netra_backend/app/core/middleware_setup.py:325",
         "netra_backend/app/core/unified_error_handler.py:1257",
         "netra_backend/app/middleware/security_response_middleware.py:96",
-        "netra_backend/app/routes/websocket_ssot.py:528",
+        "netra_backend/app/routes/websocket_ssot.py:526",
         "scripts/validate_websocket_deployment.py:71",
         "scripts/validate_websocket_deployment.py:216",
         "scripts/validate_websocket_simple.py:56",
@@ -6316,6 +6423,14 @@
         "scripts/demonstrate_config_protection.py:179"
       ]
     },
+    "1. Run E2E tests: python tests/unified_test_runner.py --staging-e2e": {
+      "value": "1. Run E2E tests: python tests/unified_test_runner.py --staging-e2e",
+      "category": "paths",
+      "locations": [
+        "scripts/setup_staging_environment.py:401",
+        "scripts/validate_staging_fixes.py:435"
+      ]
+    },
     "1. Run full test suite: python tests/unified_test_runner.py": {
       "value": "1. Run full test suite: python tests/unified_test_runner.py",
       "category": "paths",
@@ -6381,6 +6496,13 @@
         "scripts/archived/migrate_websocket_to_unified.py:346"
       ]
     },
+    "2. Deploy to staging: python scripts/deploy_to_gcp_actual.py --project netra-staging": {
+      "value": "2. Deploy to staging: python scripts/deploy_to_gcp_actual.py --project netra-staging",
+      "category": "paths",
+      "locations": [
+        "scripts/validate_staging_fixes.py:436"
+      ]
+    },
     "2. Deploy using: python scripts/deploy_to_gcp.py --project netra-staging --service backend": {
       "value": "2. Deploy using: python scripts/deploy_to_gcp.py --project netra-staging --service backend",
       "category": "paths",
@@ -6435,6 +6557,27 @@
       "category": "paths",
       "locations": [
         "scripts/update_staging_clickhouse_secrets.py:208"
+      ]
+    },
+    "2. Test Redis functionality: python scripts/setup_staging_environment.py": {
+      "value": "2. Test Redis functionality: python scripts/setup_staging_environment.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_staging_redis_config.py:367"
+      ]
+    },
+    "2. Test database functionality: python scripts/setup_staging_environment.py": {
+      "value": "2. Test database functionality: python scripts/setup_staging_environment.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_staging_postgres_ssl.py:470"
+      ]
+    },
+    "2. Test specific category: python tests/unified_test_runner.py --category integration --env staging": {
+      "value": "2. Test specific category: python tests/unified_test_runner.py --category integration --env staging",
+      "category": "paths",
+      "locations": [
+        "scripts/setup_staging_environment.py:402"
       ]
     },
     "2. Test with: python scripts/metadata_validator.py --validate-all": {
@@ -6500,11 +6643,32 @@
         "scripts/precommit_duplicate_detector.py:323"
       ]
     },
+    "3. Full staging validation: python tests/unified_test_runner.py --categories unit integration api --env staging": {
+      "value": "3. Full staging validation: python tests/unified_test_runner.py --categories unit integration api --env staging",
+      "category": "paths",
+      "locations": [
+        "scripts/setup_staging_environment.py:403"
+      ]
+    },
     "3. Or run: python scripts/setup_gcp_service_account.py": {
       "value": "3. Or run: python scripts/setup_gcp_service_account.py",
       "category": "paths",
       "locations": [
         "scripts/gcp_auth_config.py:128"
+      ]
+    },
+    "3. Run Redis-dependent tests: python tests/unified_test_runner.py --env staging": {
+      "value": "3. Run Redis-dependent tests: python tests/unified_test_runner.py --env staging",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_staging_redis_config.py:368"
+      ]
+    },
+    "3. Run database-dependent tests: python tests/unified_test_runner.py --env staging": {
+      "value": "3. Run database-dependent tests: python tests/unified_test_runner.py --env staging",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_staging_postgres_ssl.py:471"
       ]
     },
     "3. Run: python scripts/deploy_staging_with_health.py": {
@@ -6799,7 +6963,8 @@
       "value": "Deploy with: python scripts/deploy_to_gcp.py --project",
       "category": "paths",
       "locations": [
-        "scripts/validate_staging_deployment.py:175"
+        "scripts/validate_staging_deployment.py:175",
+        "scripts/validate_staging_golden_path.py:209"
       ]
     },
     "Deployment Configuration Validator\nEnsures GCP deployments match the proven working configuration.\n\nUsage:\n    python scripts/validate_deployment_config.py --environment staging\n    python scripts/validate_deployment_config.py --check-secrets": {
@@ -6897,7 +7062,14 @@
       "value": "Example: python scripts/deploy_to_gcp.py --project {} --build-local",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp_actual.py:2539"
+        "scripts/deploy_to_gcp_actual.py:2671"
+      ]
+    },
+    "Examples:\n    # Basic validation\n    python scripts/validate_service_account_permissions.py --project netra-staging\n\n    # Get fix commands for failures\n    python scripts/validate_service_account_permissions.py --project netra-staging --fix\n\n    # Validate production permissions\n    python scripts/validate_service_account_permissions.py --project netra-production": {
+      "value": "Examples:\n    # Basic validation\n    python scripts/validate_service_account_permissions.py --project netra-staging\n\n    # Get fix commands for failures\n    python scripts/validate_service_account_permissions.py --project netra-staging --fix\n\n    # Validate production permissions\n    python scripts/validate_service_account_permissions.py --project netra-production",
+      "category": "paths",
+      "locations": [
+        "scripts/validate_service_account_permissions.py:175"
       ]
     },
     "Examples:\n    # Validate staging environment\n    python scripts/deployment_validation_integration.py --environment staging\n    \n    # Validate production with strict mode\n    python scripts/deployment_validation_integration.py --environment production --strict\n    \n    # Integration in deployment scripts:\n    from scripts.deployment_validation_integration import integrate_with_deployment_script\n    \n    if not integrate_with_deployment_script('staging'):\n        sys.exit(1)": {
@@ -7233,7 +7405,7 @@
       "value": "Main FastAPI application module.\nEntry point for the Netra AI Optimization Platform.\n\n[U+1F534] CRITICAL AUTH ARCHITECTURE:\n- This is the MAIN BACKEND service, NOT the auth service\n- Auth service runs SEPARATELY on port 8001 (see app/auth/auth_service.py)\n- This backend ONLY uses auth_integration to connect to auth service\n- NEVER implement authentication logic here\n- All auth operations go through auth_client\n\nSee: app/auth_integration/CRITICAL_AUTH_ARCHITECTURE.md",
       "category": "paths",
       "locations": [
-        "netra_backend/app/main.py:1"
+        "netra_backend/app/main.py:2"
       ]
     },
     "Manual ClickHouse table creation for production/staging.\nRun this directly to create required tables in ClickHouse Cloud.\n\nUsage:\n    python scripts/create_clickhouse_tables.py --env staging\n    python scripts/create_clickhouse_tables.py --env production": {
@@ -7278,8 +7450,8 @@
         "scripts/validate_network_constants.py:3"
       ]
     },
-    "Next Steps:\n1. Run full test suite: python tests/unified_test_runner.py --category mission_critical\n2. Test Golden Path user flow manually\n3. Proceed to Phase 2 (Factory Pattern Elimination) if all tests pass\n4. Use rollback_changes() method if issues are detected\n\nSSOT Import Pattern (use this going forward):\nfrom netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager": {
-      "value": "Next Steps:\n1. Run full test suite: python tests/unified_test_runner.py --category mission_critical\n2. Test Golden Path user flow manually\n3. Proceed to Phase 2 (Factory Pattern Elimination) if all tests pass\n4. Use rollback_changes() method if issues are detected\n\nSSOT Import Pattern (use this going forward):\nfrom netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager",
+    "Next Steps:\n1. Run full test suite: python tests/unified_test_runner.py --category mission_critical\n2. Test Golden Path user flow manually\n3. Proceed to Phase 2 (Factory Pattern Elimination) if all tests pass\n4. Use rollback_changes() method if issues are detected\n\nSSOT Import Pattern (use this going forward):\nfrom netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager": {
+      "value": "Next Steps:\n1. Run full test suite: python tests/unified_test_runner.py --category mission_critical\n2. Test Golden Path user flow manually\n3. Proceed to Phase 2 (Factory Pattern Elimination) if all tests pass\n4. Use rollback_changes() method if issues are detected\n\nSSOT Import Pattern (use this going forward):\nfrom netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager",
       "category": "paths",
       "locations": [
         "scripts/issue_885_phase1_import_consolidation.py:324"
@@ -7338,7 +7510,7 @@
       "value": "Or use: python scripts/docker_manual.py start",
       "category": "paths",
       "locations": [
-        "netra_backend/app/startup_module.py:765"
+        "netra_backend/app/startup_module.py:811"
       ]
     },
     "Output file path (default: SPEC/generated/string_literals.json)": {
@@ -7359,7 +7531,7 @@
       "value": "Path to service account JSON key file (default: config/netra-staging-7a1059b7cf26.json)",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp_actual.py:2508"
+        "scripts/deploy_to_gcp_actual.py:2640"
       ]
     },
     "Please restore scripts/deploy_to_gcp_actual.py": {
@@ -7556,14 +7728,14 @@
       "value": "Run: python scripts/validate_secrets.py --environment staging --project",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp_actual.py:2092"
+        "scripts/deploy_to_gcp_actual.py:2224"
       ]
     },
     "Run: python scripts/validate_staging_urls.py --environment staging --fix": {
       "value": "Run: python scripts/validate_staging_urls.py --environment staging --fix",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp_actual.py:399"
+        "scripts/deploy_to_gcp_actual.py:473"
       ]
     },
     "SMD|smd\\.py": {
@@ -7685,21 +7857,21 @@
       "value": "See SPEC/gcp_deployment.xml for deployment guidelines.",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp_actual.py:491"
+        "scripts/deploy_to_gcp_actual.py:569"
       ]
     },
     "See SPEC/learnings/websocket_agent_integration_critical.xml for fix details.": {
       "value": "See SPEC/learnings/websocket_agent_integration_critical.xml for fix details.",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp_actual.py:486"
+        "scripts/deploy_to_gcp_actual.py:564"
       ]
     },
     "See: SPEC/frontend_deployment_critical.xml for documentation": {
       "value": "See: SPEC/frontend_deployment_critical.xml for documentation",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp_actual.py:340"
+        "scripts/deploy_to_gcp_actual.py:414"
       ]
     },
     "See: SPEC/learnings/vpc_egress_cloud_sql_regression_critical.xml": {
@@ -7707,6 +7879,13 @@
       "category": "paths",
       "locations": [
         "scripts/validate_vpc_dependencies.py:372"
+      ]
+    },
+    "Service Account Permission Validation Script\n\nThis script validates that the GCP service account has all necessary permissions\nfor successful deployment to staging/production environments.\n\nAddresses Issue #1294: Service account permission failures causing deployment failures\n\nUsage:\n    python scripts/validate_service_account_permissions.py --project netra-staging\n    python scripts/validate_service_account_permissions.py --project netra-production --fix": {
+      "value": "Service Account Permission Validation Script\n\nThis script validates that the GCP service account has all necessary permissions\nfor successful deployment to staging/production environments.\n\nAddresses Issue #1294: Service account permission failures causing deployment failures\n\nUsage:\n    python scripts/validate_service_account_permissions.py --project netra-staging\n    python scripts/validate_service_account_permissions.py --project netra-production --fix",
+      "category": "paths",
+      "locations": [
+        "scripts/validate_service_account_permissions.py:2"
       ]
     },
     "Setup E2E Bypass Key for Staging Environment\n\nThis script helps set up the E2E authentication bypass key in Google Secrets Manager\nfor the staging environment. It generates a secure key and stores it properly.\n\nUsage:\n    python scripts/setup_E2E_OAUTH_SIMULATION_KEY.py [--project PROJECT_ID]": {
@@ -7721,6 +7900,13 @@
       "category": "paths",
       "locations": [
         "scripts/docker_ssot_enforcer.py:271"
+      ]
+    },
+    "Staging Deployment Validation Script for Issue #1177 Supervisor Consolidation\n\nThis script validates that the supervisor consolidation changes deployed successfully\nto staging and that all critical functionality remains intact.\n\nUsage:\n    python scripts/validate_staging_supervisor_deployment.py\n\nExpected to run AFTER deployment:\n    python scripts/deploy_to_gcp_actual.py --project netra-staging --service backend --build-local": {
+      "value": "Staging Deployment Validation Script for Issue #1177 Supervisor Consolidation\n\nThis script validates that the supervisor consolidation changes deployed successfully\nto staging and that all critical functionality remains intact.\n\nUsage:\n    python scripts/validate_staging_supervisor_deployment.py\n\nExpected to run AFTER deployment:\n    python scripts/deploy_to_gcp_actual.py --project netra-staging --service backend --build-local",
+      "category": "paths",
+      "locations": [
+        "scripts/validate_staging_supervisor_deployment.py:2"
       ]
     },
     "Staging URL Validation Script\nPrevents localhost URLs from being used in staging/production environments.\n\nThis script validates that:\n1. No localhost references exist in staging/production environment variables\n2. All URLs use appropriate protocols (https/wss for staging/production)\n3. Domain names match expected patterns for each environment\n\nUsage:\n    python scripts/validate_staging_urls.py --environment staging\n    python scripts/validate_staging_urls.py --environment production --fix": {
@@ -7889,7 +8075,7 @@
       "value": "WARNING: [U+FE0F] Secret validation script not found (scripts/validate_secrets.py)",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp_actual.py:1825"
+        "scripts/deploy_to_gcp_actual.py:1957"
       ]
     },
     "WebSocket Event Compliance Validator\n\nValidates that the WebSocket implementation follows the specification from \nSPEC/learnings/websocket_agent_integration_critical.xml": {
@@ -8478,8 +8664,7 @@
       "value": "auth_service/**/*.py",
       "category": "paths",
       "locations": [
-        "scripts/fix_modern_websockets_deprecation.py:180",
-        "scripts/fix_websockets_legacy_to_modern.py:105"
+        "scripts/fix_modern_websockets_deprecation.py:180"
       ]
     },
     "auth_service/*.py": {
@@ -8983,8 +9168,7 @@
         "scripts/compliance/ssot_checker.py:224",
         "scripts/compliance/ssot_checker.py:320",
         "scripts/fix_modern_websockets_deprecation.py:179",
-        "scripts/fix_websockets_deprecation.py:74",
-        "scripts/fix_websockets_legacy_to_modern.py:104"
+        "scripts/fix_websockets_deprecation.py:74"
       ]
     },
     "netra_backend/app/agents/actions_agent_execution.py": {
@@ -9220,7 +9404,7 @@
       "value": "netra_backend/app/agents/supervisor_admin_init.py",
       "category": "paths",
       "locations": [
-        "scripts/fix_comprehensive_imports.py:275",
+        "scripts/fix_comprehensive_imports.py:271",
         "scripts/migrate_supervisor_imports_to_ssot.py:51",
         "scripts/migrate_supervisor_simple.py:17"
       ]
@@ -10106,7 +10290,7 @@
       "value": "netra_backend/tests/agents/test_data_sub_agent_consolidated.py",
       "category": "paths",
       "locations": [
-        "scripts/fix_comprehensive_imports.py:276"
+        "scripts/fix_comprehensive_imports.py:272"
       ]
     },
     "netra_backend/tests/agents/test_data_sub_agent_core.py": {
@@ -11548,6 +11732,14 @@
         "scripts/demo_layer_system.py:121"
       ]
     },
+    "python scripts/validate_service_account_permissions.py --project": {
+      "value": "python scripts/validate_service_account_permissions.py --project",
+      "category": "paths",
+      "locations": [
+        "scripts/validate_service_account_permissions.py:143",
+        "scripts/validate_staging_environment.py:520"
+      ]
+    },
     "python tests/e2e/staging/test_1_websocket_events_staging.py": {
       "value": "python tests/e2e/staging/test_1_websocket_events_staging.py",
       "category": "paths",
@@ -11581,7 +11773,7 @@
       "value": "python tests/post_deployment/test_auth_integration.py --environment",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp_actual.py:2265"
+        "scripts/deploy_to_gcp_actual.py:2397"
       ]
     },
     "python tests/unified_test_runner.py --categories smoke": {
@@ -11716,8 +11908,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/core/infrastructure_config_validator.py:105",
-        "scripts/fix_websockets_deprecation.py:75",
-        "scripts/fix_websockets_legacy_to_modern.py:106"
+        "scripts/fix_websockets_deprecation.py:75"
       ]
     },
     "scripts/allocate_test_ports.py": {
@@ -11777,7 +11968,7 @@
       "value": "scripts/check_architecture_compliance.py",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp_actual.py:428",
+        "scripts/deploy_to_gcp_actual.py:506",
         "scripts/execute_ssot_remediation_1076.py:328",
         "scripts/issue_358_deployment_execution.py:125",
         "scripts/ssot_remediation/monitoring_and_tracking.py:163",
@@ -11921,7 +12112,7 @@
       "value": "scripts/scan_string_literals.py",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp_actual.py:433"
+        "scripts/deploy_to_gcp_actual.py:511"
       ]
     },
     "scripts/seed_dev_data.py": {
@@ -11956,7 +12147,14 @@
       "value": "scripts/validate_secrets.py",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp_actual.py:1804"
+        "scripts/deploy_to_gcp_actual.py:1936"
+      ]
+    },
+    "scripts/validate_service_account_permissions.py": {
+      "value": "scripts/validate_service_account_permissions.py",
+      "category": "paths",
+      "locations": [
+        "scripts/validate_staging_environment.py:300"
       ]
     },
     "scripts/validate_staging_config.py": {
@@ -12055,7 +12253,6 @@
         "scripts/compliance/mock_justification_checker.py:66",
         "scripts/fix_modern_websockets_deprecation.py:178",
         "scripts/fix_websockets_deprecation.py:73",
-        "scripts/fix_websockets_legacy_to_modern.py:103",
         "scripts/unicode_cluster_remediation.py:100"
       ]
     },
@@ -12129,6 +12326,13 @@
         "scripts/function_complexity_analyzer.py:149"
       ]
     },
+    "test_framework/ssot/base_test_case.py": {
+      "value": "test_framework/ssot/base_test_case.py",
+      "category": "paths",
+      "locations": [
+        "scripts/infrastructure_health_validator.py:311"
+      ]
+    },
     "test_framework/ssot/e2e_auth_helper.py": {
       "value": "test_framework/ssot/e2e_auth_helper.py",
       "category": "paths",
@@ -12184,8 +12388,8 @@
         "scripts/create_enforcement_tools.py:99",
         "scripts/fix_modern_websockets_deprecation.py:177",
         "scripts/fix_websockets_deprecation.py:72",
-        "scripts/fix_websockets_legacy_to_modern.py:102",
-        "scripts/ssot_remediation/validation_suite.py:225"
+        "scripts/ssot_remediation/validation_suite.py:225",
+        "scripts/ssot_remediation/validation_suite.py:265"
       ]
     },
     "tests/**/*test*.py": {
@@ -12237,6 +12441,13 @@
       "category": "paths",
       "locations": [
         "scripts/fix_deepagentstate_imports.py:107"
+      ]
+    },
+    "tests/critical/test_infrastructure_validator.py::TestInfrastructureValidator::test_subprocess_execution_environment": {
+      "value": "tests/critical/test_infrastructure_validator.py::TestInfrastructureValidator::test_subprocess_execution_environment",
+      "category": "paths",
+      "locations": [
+        "scripts/infrastructure_health_validator.py:122"
       ]
     },
     "tests/critical/test_websocket_agent_startup.py": {
@@ -13577,7 +13788,7 @@
       "value": "tests/mission_critical/test_final_validation.py",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp_actual.py:416"
+        "scripts/deploy_to_gcp_actual.py:494"
       ]
     },
     "tests/mission_critical/test_first_message_experience.py": {
@@ -13742,7 +13953,7 @@
       "value": "tests/mission_critical/test_websocket_agent_events_suite.py::TestRegressionPrevention",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp_actual.py:422"
+        "scripts/deploy_to_gcp_actual.py:500"
       ]
     },
     "tests/mission_critical/test_websocket_agent_performance_benchmarks.py": {
@@ -14311,15 +14522,16 @@
       "value": "tests/unified_test_runner.py",
       "category": "paths",
       "locations": [
+        "scripts/audit_python_execution_patterns.py:216",
         "scripts/coverage_intelligence.py:482",
         "scripts/critical_remediation_tracker.py:528",
         "scripts/deploy_token_optimization_production.py:104",
         "scripts/deploy_token_optimization_production.py:221",
         "scripts/deploy_token_optimization_production.py:222",
+        "scripts/infrastructure_health_validator.py:310",
         "scripts/run_configuration_ssot_tests.py:71",
         "scripts/ssot_migration_automation.py:36",
-        "scripts/ssot_remediation/validation_suite.py:203",
-        "scripts/validate_docker_workflow.py:458"
+        "scripts/ssot_remediation/validation_suite.py:203"
       ]
     },
     "tests/unit/agents/supervisor/test_user_execution_context_correct_patterns.py": {

@@ -612,7 +612,7 @@ class BillingEventGenerationTests:
     """Test comprehensive billing event generation for all scenarios per CLAUDE.md"""
     
     @pytest_asyncio.fixture
-    async def billing_test_env(self, isolated_test_env):
+    async def billing_test_env(self, isolated_test_env_fixture):
         """Setup comprehensive billing test environment with real services"""
         env_manager = get_test_env_manager()
         isolated_env = env_manager.setup_test_environment(
@@ -772,7 +772,7 @@ class CompensationCalculationsTests:
     """Test comprehensive agent compensation calculations per CLAUDE.md"""
     
     @pytest_asyncio.fixture
-    async def compensation_test_env(self, isolated_test_env):
+    async def compensation_test_env(self, isolated_test_env_fixture):
         """Setup compensation test environment"""
         env_manager = get_test_env_manager()
         isolated_env = env_manager.setup_test_environment(
@@ -874,7 +874,7 @@ class BillingAccuracyPerTierTests:
     """Test billing accuracy across all user tiers per CLAUDE.md business requirements"""
     
     @pytest_asyncio.fixture
-    async def tier_billing_env(self, isolated_test_env):
+    async def tier_billing_env(self, isolated_test_env_fixture):
         """Setup tier-specific billing test environment"""
         env_manager = get_test_env_manager()
         isolated_env = env_manager.setup_test_environment(
@@ -1009,7 +1009,7 @@ class BillingEventLifecycleTests:
     """Test complete billing event lifecycle per CLAUDE.md requirements"""
     
     @pytest_asyncio.fixture
-    async def lifecycle_test_env(self, isolated_test_env):
+    async def lifecycle_test_env(self, isolated_test_env_fixture):
         """Setup billing lifecycle test environment"""
         env_manager = get_test_env_manager()
         isolated_env = env_manager.setup_test_environment(
@@ -1163,7 +1163,7 @@ class BillingEdgeCasesTests:
     """Test billing edge cases and error scenarios per CLAUDE.md"""
     
     @pytest_asyncio.fixture
-    async def edge_case_test_env(self, isolated_test_env):
+    async def edge_case_test_env(self, isolated_test_env_fixture):
         """Setup edge case test environment"""
         env_manager = get_test_env_manager()
         isolated_env = env_manager.setup_test_environment(
@@ -1311,7 +1311,7 @@ class BillingPerformanceRequirementsTests:
     """Test billing performance requirements per CLAUDE.md specifications"""
     
     @pytest_asyncio.fixture
-    async def performance_test_env(self, isolated_test_env):
+    async def performance_test_env(self, isolated_test_env_fixture):
         """Setup performance test environment"""
         env_manager = get_test_env_manager()
         isolated_env = env_manager.setup_test_environment(

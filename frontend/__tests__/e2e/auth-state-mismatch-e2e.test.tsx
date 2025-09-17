@@ -130,15 +130,13 @@ jest.mock('@/store/unified-chat', () => ({
   }
 }));
 
-jest.mock('jwt-decode', () => ({
-  jwtDecode: jest.fn(),
-}));
+// jwt-decode mock removed - JWT authentication removed from WebSocket service
 
 const mockUnifiedAuthService = unifiedAuthService as jest.Mocked<typeof unifiedAuthService>;
 const mockLogger = logger as jest.Mocked<typeof logger>;
 const mockMonitorAuthState = monitorAuthState as jest.MockedFunction<typeof monitorAuthState>;
 const mockDebugAuthState = debugAuthState as jest.MockedFunction<typeof debugAuthState>;
-const mockJwtDecode = require('jwt-decode').jwtDecode as jest.MockedFunction<any>;
+// mockJwtDecode removed - JWT authentication removed
 
 // Mock localStorage with persistence simulation
 const mockLocalStorage = (() => {
@@ -283,7 +281,7 @@ describe('Auth State Mismatch E2E Tests - CRITICAL BUG REPRODUCTION', () => {
     mockUnifiedAuthService.getToken.mockReturnValue(null);
     mockUnifiedAuthService.needsRefresh.mockReturnValue(false);
     mockUnifiedAuthService.getDevLogoutFlag.mockReturnValue(false);
-    mockJwtDecode.mockReturnValue(mockUser);
+    // JWT decode mock removed - using ticket authentication instead
   });
 
   describe('CRITICAL BUG: Page Refresh with Token Breaks Chat', () => {
@@ -293,7 +291,7 @@ describe('Auth State Mismatch E2E Tests - CRITICAL BUG REPRODUCTION', () => {
       // 1. User was previously logged in, token exists in localStorage
       mockLocalStorage.setItem('jwt_token', validToken);
       mockUnifiedAuthService.getToken.mockReturnValue(validToken);
-      mockJwtDecode.mockReturnValue(mockUser);
+      // JWT decode mock removed - using ticket authentication instead
       
       console.log('🔄 SIMULATING PAGE REFRESH WITH TOKEN:', {
         tokenInStorage: mockLocalStorage.getStore(),
@@ -374,7 +372,7 @@ describe('Auth State Mismatch E2E Tests - CRITICAL BUG REPRODUCTION', () => {
       // Set up the bug scenario
       mockLocalStorage.setItem('jwt_token', validToken);
       mockUnifiedAuthService.getToken.mockReturnValue(validToken);
-      mockJwtDecode.mockReturnValue(mockUser);
+      // JWT decode mock removed - using ticket authentication instead
       
       const user = userEvent.setup();
 
@@ -421,7 +419,7 @@ describe('Auth State Mismatch E2E Tests - CRITICAL BUG REPRODUCTION', () => {
       // Valid scenario: both token and user are properly set
       mockLocalStorage.setItem('jwt_token', validToken);
       mockUnifiedAuthService.getToken.mockReturnValue(validToken);
-      mockJwtDecode.mockReturnValue(mockUser);
+      // JWT decode mock removed - using ticket authentication instead
       
       // Ensure auth service works correctly
       mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
@@ -480,7 +478,7 @@ describe('Auth State Mismatch E2E Tests - CRITICAL BUG REPRODUCTION', () => {
       // Start with valid auth
       mockLocalStorage.setItem('jwt_token', validToken);
       mockUnifiedAuthService.getToken.mockReturnValue(validToken);
-      mockJwtDecode.mockReturnValue(mockUser);
+      // JWT decode mock removed - using ticket authentication instead
       
       const { rerender } = render(
         <AuthProvider>

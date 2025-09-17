@@ -1,0 +1,37 @@
+# Include documentation
+include README.md
+include LICENSE
+include CHANGELOG.md
+include PACKAGING.md
+
+# Include configuration examples
+include *.json
+
+# Include requirements files
+include requirements*.txt
+
+# Include test files
+recursive-include tests *.py
+recursive-include tests *.json
+recursive-include tests *.yaml
+
+# Include documentation
+recursive-include docs *.md
+recursive-include docs *.rst
+
+# Include package data
+recursive-include agent_interface *.py
+recursive-include token_budget *.py
+recursive-include token_transparency *.py
+
+# Exclude unnecessary files
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude *.swp
+global-exclude .DS_Store
+global-exclude __pycache__
+exclude .gitignore
+exclude .github
+exclude tox.ini
+exclude .coverage
+exclude .pytest_cache

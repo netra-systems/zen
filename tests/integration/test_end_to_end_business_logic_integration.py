@@ -55,10 +55,10 @@ try:
 except ImportError:
     APP_AVAILABLE = False
 
-# Authentication Integration
+# Authentication Integration - Use SSOT backend components
 try:
-    from auth_service.auth_core.core.jwt_handler import JWTHandler
-    from auth_service.auth_core.core.session_manager import SessionManager
+    from netra_backend.app.auth_integration.auth import AuthIntegration
+    from netra_backend.app.database.session_manager import SessionManager
     AUTH_SERVICE_AVAILABLE = True
 except ImportError:
     AUTH_SERVICE_AVAILABLE = False

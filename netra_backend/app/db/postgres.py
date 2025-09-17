@@ -7,8 +7,8 @@ Now enhanced with resilience patterns for pragmatic rigor and degraded operation
 
 from contextlib import asynccontextmanager
 
-# Import configuration
-from netra_backend.app.db.postgres_config import DatabaseConfig
+# Import SSOT configuration (Issue #1075 remediation)
+from netra_backend.app.config import get_config
 
 # Import core functionality
 from netra_backend.app.db.postgres_core import (
@@ -86,7 +86,7 @@ def get_postgres_resilience_status():
 __all__ = [
     # Core functionality
     'Database',
-    'DatabaseConfig', 
+    # DatabaseConfig removed - use netra_backend.app.config.get_config() instead (SSOT) 
     'async_engine',
     'async_session_factory',
     'AsyncSessionLocal',

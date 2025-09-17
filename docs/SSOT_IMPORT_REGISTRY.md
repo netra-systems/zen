@@ -145,7 +145,7 @@ from netra_backend.app.agents.state import DeepAgentState
 
 # Specialized Agents (Requires Verification)
 from netra_backend.app.agents.corpus_admin_sub_agent import CorpusAdminSubAgent  # ❓
-from netra_backend.app.agents.supply_researcher_sub_agent import SupplyResearcherAgent  # ❓
+from netra_backend.app.agents.supply_researcher import SupplyResearcherAgent  # ✅
 ```
 
 #### ❌ BROKEN IMPORTS (Do Not Use):

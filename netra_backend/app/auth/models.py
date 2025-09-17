@@ -26,7 +26,7 @@ from auth_service.auth_core.database.models import (
     PasswordResetToken
 )
 
-from netra_backend.app.auth_integration.models import (
+from netra_backend.app.schemas.auth_types import (
     AuditLog,
     AuthConfig,
     AuthConfigResponse,
@@ -51,12 +51,13 @@ from netra_backend.app.auth_integration.models import (
     TokenResponse,
     TokenType,
     UserPermission,
-    # Backward compatibility aliases
-    HealthCheck,
-    UserToken,
-    AuthRequest,
-    AuthResponse,
 )
+
+# Backward compatibility aliases
+HealthCheck = AuthConfigResponse  
+UserToken = TokenData
+AuthRequest = LoginRequest
+AuthResponse = LoginResponse
 
 # Re-export all functionality
 __all__ = [

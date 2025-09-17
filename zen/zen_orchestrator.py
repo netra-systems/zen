@@ -111,7 +111,7 @@ class InstanceStatus:
     total_cost_usd: Optional[float] = None
 
     # NEW: Model tracking for transparency
-    model_used: str = "claude-3-5-sonnet"  # Default model
+    model_used: str = "claude-sonnet-4"  # Default model
 
     # NEW: Tool usage details
     tool_details: Dict[str, int] = None  # Tool name -> usage count
@@ -1941,157 +1941,12 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
     """Create default instance configurations"""
     return [
         InstanceConfig(
-            command="/gitcommitgardener",
+            command="1+1 ",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
         InstanceConfig(
-            command="/refreshgardener",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/createtestsv2 agent goldenpath messages work, unit",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/gcploggardener",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/createtestsv2 agent goldenpath messages work, integration",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/createtestsv2 agent goldenpath messages work, e2e",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/ssotgardener message routing",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/ssotgardener websockets or auth",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/ssotgardener tests",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/ssotgardener removing legacy",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/ssotgardener agent goldenpath messages work",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/gcploggardener",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/gitissueprogressorv3 agents",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/gitissueprogressorv3 p0",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/gitissueprogressorv3 agents",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/gitissueprogressorv3 goldenpath",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/gitissueprogressorv3 tests p1",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/failingtestsgardener agents",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/failingtestsgardener critical",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/gcploggardener",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/ssotgardener removing legacy",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/gitissueprogressorv3 removing legacy",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/testgardener",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/runtests all, unit",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/runtests critical, e2e",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/runtests all, integration",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/runtests agents, e2e gcp",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/prmergergit",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/gitcommitgardener",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/gcploggardener",
-            permission_mode="acceptEdits",
-            output_format=output_format
-        ),
-        InstanceConfig(
-            command="/ultimate-test-deploy-loop",
+            command="Write a 10k line python script to solve world peace: ",
             permission_mode="acceptEdits",
             output_format=output_format
         )
@@ -2445,5 +2300,9 @@ async def main():
     # Exit with appropriate code
     sys.exit(0 if summary['failed'] == 0 else 1)
 
-if __name__ == "__main__":
+def run():
+    """Synchronous wrapper for the main function to be used as console script entry point."""
     asyncio.run(main())
+
+if __name__ == "__main__":
+    run()

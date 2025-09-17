@@ -34,6 +34,7 @@
     "Using run_id",
     "WebSocketEmitterFactory.create_emitter requires valid user_id",
     "WebSocketEmitterFactory.create_scoped_emitter requires context with valid user_id",
+    "_component_id",
     "_created_at",
     "_current_request_id",
     "_instance_id",

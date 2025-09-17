@@ -1,8 +1,19 @@
 """PostgreSQL configuration and connection parameters module.
 
-Defines database configuration settings and connection parameters.
-Focused module adhering to 25-line function limit and modular architecture.
+⚠️  DEPRECATED - SSOT REMEDIATION NOTICE (Issue #1075)
+This file contains duplicate configuration that violates SSOT principles.
+Use netra_backend.app.config.get_config() instead for all configuration access.
+
+This file will be removed in a future release.
+Migration guide: All configuration should use the unified SSOT configuration system.
 """
+import warnings
+
+warnings.warn(
+    "postgres_config.py is deprecated. Use netra_backend.app.config.get_config() instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 from typing import Optional
 

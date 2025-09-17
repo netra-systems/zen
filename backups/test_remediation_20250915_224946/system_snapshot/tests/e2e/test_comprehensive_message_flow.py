@@ -1,103 +1,99 @@
 #!/usr/bin/env python
-'''Comprehensive Message Flow Test Suite for Netra Apex
+# REMOVED_SYNTAX_ERROR: '''Comprehensive Message Flow Test Suite for Netra Apex
 
-CRITICAL: This test suite validates the entire message pipeline through the Netra stack.
-Tests 20+ message types flowing from Frontend  ->  Backend  ->  WebSocket  ->  Agent  ->  Tool  ->  Result  ->  Frontend
+# REMOVED_SYNTAX_ERROR: CRITICAL: This test suite validates the entire message pipeline through the Netra stack.
+# REMOVED_SYNTAX_ERROR: Tests 20+ message types flowing from Frontend  ->  Backend  ->  WebSocket  ->  Agent  ->  Tool  ->  Result  ->  Frontend
 
-Business Value Justification:
-- Segment: Platform/Internal & All User Segments
-- Business Goal: System Reliability & User Experience
-- Value Impact: Ensures 100% message delivery reliability for core chat functionality
-- Strategic Impact: Prevents message loss that would break user trust and cause churn
+# REMOVED_SYNTAX_ERROR: Business Value Justification:
+    # REMOVED_SYNTAX_ERROR: - Segment: Platform/Internal & All User Segments
+    # REMOVED_SYNTAX_ERROR: - Business Goal: System Reliability & User Experience
+    # REMOVED_SYNTAX_ERROR: - Value Impact: Ensures 100% message delivery reliability for core chat functionality
+    # REMOVED_SYNTAX_ERROR: - Strategic Impact: Prevents message loss that would break user trust and cause churn
 
-Requirements:
-- Tests 20+ message types (text, code, JSON, markdown, large, small, unicode, etc.)
-- Validates complete stack flow and transformations
-- Tests persistence, corruption detection, and performance
-- Uses real services only (no mocks per CLAUDE.md)
-- Meets performance requirements: <100ms processing, <500ms E2E, <2s batch, <5s recovery
-'''
+    # REMOVED_SYNTAX_ERROR: Requirements:
+        # REMOVED_SYNTAX_ERROR: - Tests 20+ message types (text, code, JSON, markdown, large, small, unicode, etc.)
+        # REMOVED_SYNTAX_ERROR: - Validates complete stack flow and transformations
+        # REMOVED_SYNTAX_ERROR: - Tests persistence, corruption detection, and performance
+        # REMOVED_SYNTAX_ERROR: - Uses real services only (no mocks per CLAUDE.md)
+        # REMOVED_SYNTAX_ERROR: - Meets performance requirements: <100ms processing, <500ms E2E, <2s batch, <5s recovery
+        # REMOVED_SYNTAX_ERROR: '''
 
-import asyncio
-import json
-import os
-import sys
-import time
-import uuid
-import gzip
-import base64
-import random
-import threading
-from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Set, Any, Optional, Union
-from dataclasses import dataclass, field
-from enum import Enum
+        # REMOVED_SYNTAX_ERROR: import asyncio
+        # REMOVED_SYNTAX_ERROR: import json
+        # REMOVED_SYNTAX_ERROR: import os
+        # REMOVED_SYNTAX_ERROR: import sys
+        # REMOVED_SYNTAX_ERROR: import time
+        # REMOVED_SYNTAX_ERROR: import uuid
+        # REMOVED_SYNTAX_ERROR: import gzip
+        # REMOVED_SYNTAX_ERROR: import base64
+        # REMOVED_SYNTAX_ERROR: import random
+        # REMOVED_SYNTAX_ERROR: import threading
+        # REMOVED_SYNTAX_ERROR: from concurrent.futures import ThreadPoolExecutor
+        # REMOVED_SYNTAX_ERROR: from datetime import datetime, timezone, timedelta
+        # REMOVED_SYNTAX_ERROR: from typing import Dict, List, Set, Any, Optional, Union
+        # REMOVED_SYNTAX_ERROR: from dataclasses import dataclass, field
+        # REMOVED_SYNTAX_ERROR: from enum import Enum
+        # REMOVED_SYNTAX_ERROR: from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
-# Add project root to path
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
+        # Add project root to path
+        # REMOVED_SYNTAX_ERROR: project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+        # REMOVED_SYNTAX_ERROR: if project_root not in sys.path:
+            # REMOVED_SYNTAX_ERROR: sys.path.insert(0, project_root)
 
-import pytest
-from loguru import logger
+            # REMOVED_SYNTAX_ERROR: import pytest
+            # REMOVED_SYNTAX_ERROR: from loguru import logger
 
-# Real services imports - NO MOCKS
-try:
-    from shared.isolated_environment import get_env, IsolatedEnvironment
-    from test_framework.unified_docker_manager import UnifiedDockerManager
-    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
-    from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
-    from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-    from netra_backend.app.core.registry.universal_registry import AgentRegistry
-    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-    from netra_backend.app.schemas.websocket_models import WebSocketMessage, WebSocketStats
-    from netra_backend.app.schemas.registry import ServerMessage
-    from netra_backend.app.websocket_core.utils import is_websocket_connected
-    from netra_backend.app.websocket_core.message_buffer import get_message_buffer, BufferPriority
-except ImportError as e:
-    logger.warning(f"Some imports failed, running with limited functionality: {e}")
-    # Provide minimal fallbacks for testing
-    WebSocketManager = None
-    get_websocket_manager = lambda: None
+            # Real services imports - NO MOCKS
+            # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager, get_websocket_manager
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.websocket_models import WebSocketMessage, WebSocketStats
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.registry import ServerMessage
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.utils import is_websocket_connected
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.message_buffer import get_message_buffer, BufferPriority
+            # REMOVED_SYNTAX_ERROR: from test_framework.unified_docker_manager import UnifiedDockerManager
 
 
             # ============================================================================
-# MESSAGE TYPES AND TEST DATA
-# ============================================================================
+            # MESSAGE TYPES AND TEST DATA
+            # ============================================================================
 
-
-class MessageType(Enum):
-    """Comprehensive message types for flow testing."""
-    TEXT_SIMPLE = "text_simple"
-    TEXT_LARGE = "text_large"
-    JSON_SIMPLE = "json_simple"
-    JSON_COMPLEX = "json_complex"
-    JSON_NESTED = "json_nested"
-    MARKDOWN = "markdown"
-    CODE_PYTHON = "code_python"
-    CODE_JAVASCRIPT = "code_javascript"
-    CODE_SQL = "code_sql"
-    UNICODE_EMOJI = "unicode_emoji"
-    UNICODE_MULTILANG = "unicode_multilang"
-    BINARY_REF = "binary_ref"
-    STREAMING_CHUNK = "streaming_chunk"
-    BATCH_MESSAGES = "batch_messages"
-    COMMAND_SIMPLE = "command_simple"
-    COMMAND_COMPLEX = "command_complex"
-    SYSTEM_STATUS = "system_status"
-    ERROR_MESSAGE = "error_message"
-    WARNING_MESSAGE = "warning_message"
-    INFO_MESSAGE = "info_message"
-    DEBUG_MESSAGE = "debug_message"
-    METRICS_DATA = "metrics_data"
-    EVENT_NOTIFICATION = "event_notification"
-    AGENT_REQUEST = "agent_request"
-    AGENT_RESPONSE = "agent_response"
-    TOOL_EXECUTION = "tool_execution"
-    STATUS_UPDATE = "status_update"
-    HEARTBEAT = "heartbeat"
-    COMPRESSION_TEST = "compression_test"
+# REMOVED_SYNTAX_ERROR: class MessageType(Enum):
+    # REMOVED_SYNTAX_ERROR: """Comprehensive message types for flow testing."""
+    # REMOVED_SYNTAX_ERROR: TEXT_SIMPLE = "text_simple"
+    # REMOVED_SYNTAX_ERROR: TEXT_LARGE = "text_large"
+    # REMOVED_SYNTAX_ERROR: JSON_SIMPLE = "json_simple"
+    # REMOVED_SYNTAX_ERROR: JSON_COMPLEX = "json_complex"
+    # REMOVED_SYNTAX_ERROR: JSON_NESTED = "json_nested"
+    # REMOVED_SYNTAX_ERROR: MARKDOWN = "markdown"
+    # REMOVED_SYNTAX_ERROR: CODE_PYTHON = "code_python"
+    # REMOVED_SYNTAX_ERROR: CODE_JAVASCRIPT = "code_javascript"
+    # REMOVED_SYNTAX_ERROR: CODE_SQL = "code_sql"
+    # REMOVED_SYNTAX_ERROR: UNICODE_EMOJI = "unicode_emoji"
+    # REMOVED_SYNTAX_ERROR: UNICODE_MULTILANG = "unicode_multilang"
+    # REMOVED_SYNTAX_ERROR: BINARY_REF = "binary_ref"
+    # REMOVED_SYNTAX_ERROR: STREAMING_CHUNK = "streaming_chunk"
+    # REMOVED_SYNTAX_ERROR: BATCH_MESSAGES = "batch_messages"
+    # REMOVED_SYNTAX_ERROR: COMMAND_SIMPLE = "command_simple"
+    # REMOVED_SYNTAX_ERROR: COMMAND_COMPLEX = "command_complex"
+    # REMOVED_SYNTAX_ERROR: SYSTEM_STATUS = "system_status"
+    # REMOVED_SYNTAX_ERROR: ERROR_MESSAGE = "error_message"
+    # REMOVED_SYNTAX_ERROR: WARNING_MESSAGE = "warning_message"
+    # REMOVED_SYNTAX_ERROR: INFO_MESSAGE = "info_message"
+    # REMOVED_SYNTAX_ERROR: DEBUG_MESSAGE = "debug_message"
+    # REMOVED_SYNTAX_ERROR: METRICS_DATA = "metrics_data"
+    # REMOVED_SYNTAX_ERROR: EVENT_NOTIFICATION = "event_notification"
+    # REMOVED_SYNTAX_ERROR: AGENT_REQUEST = "agent_request"
+    # REMOVED_SYNTAX_ERROR: AGENT_RESPONSE = "agent_response"
+    # REMOVED_SYNTAX_ERROR: TOOL_EXECUTION = "tool_execution"
+    # REMOVED_SYNTAX_ERROR: STATUS_UPDATE = "status_update"
+    # REMOVED_SYNTAX_ERROR: HEARTBEAT = "heartbeat"
+    # REMOVED_SYNTAX_ERROR: COMPRESSION_TEST = "compression_test"
 
 
     # REMOVED_SYNTAX_ERROR: @dataclass
@@ -547,7 +543,7 @@ class MessageType(Enum):
 # REMOVED_SYNTAX_ERROR: if (typeof handler !== 'function') { )
 # REMOVED_SYNTAX_ERROR: throw new Error('Handler must be a function');
 
-# REMOVED_SYNTAX_ERROR: this.handlers.set(messageType, handler);
+this.handlers.set(messageType, handler);
 
 
 # REMOVED_SYNTAX_ERROR: async processMessage(message) { )
@@ -564,15 +560,15 @@ class MessageType(Enum):
 # FIXED: return outside function
 pass
 # REMOVED_SYNTAX_ERROR: success: true,
-# REMOVED_SYNTAX_ERROR: result,
-# REMOVED_SYNTAX_ERROR: # REMOVED_SYNTAX_ERROR: timestamp: Date.now()
+result,
+timestamp: Date.now()
 # REMOVED_SYNTAX_ERROR: };
 # REMOVED_SYNTAX_ERROR: } catch (error) {
 # FIXED: return outside function
 pass
 # REMOVED_SYNTAX_ERROR: success: false,
 # REMOVED_SYNTAX_ERROR: error: error.message,
-# REMOVED_SYNTAX_ERROR: timestamp: Date.now()
+timestamp: Date.now()
 # REMOVED_SYNTAX_ERROR: };
 
 
@@ -580,8 +576,8 @@ pass
 # REMOVED_SYNTAX_ERROR: // Queue message for batch processing
 # REMOVED_SYNTAX_ERROR: queueMessage(message) { )
 # REMOVED_SYNTAX_ERROR: this.messageQueue.push({ ))
-# REMOVED_SYNTAX_ERROR: passmessage,
-# REMOVED_SYNTAX_ERROR: queuedAt: Date.now()
+passmessage,
+queuedAt: Date.now()
 # REMOVED_SYNTAX_ERROR: });
 
 

@@ -245,7 +245,7 @@ async def test_auth_backend_desynchronization():
     This test MUST expose the vulnerability where user creation succeeds
     in auth service but fails in backend, leaving system in inconsistent state.
     """
-    harness = await create_e2e_harness()
+    harness = create_e2e_harness()
     tester = TestAuthBackendDesynchronization(harness)
 
     await tester.setup()

@@ -354,7 +354,7 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
         report_lines.extend([
             "",
             "REMEDIATION REQUIRED:",
-            # REMOVED_SYNTAX_ERROR: "1. Replace all direct pytest.main calls with unified_test_runner.py imports",
+    "1. Replace all direct pytest.main calls with unified_test_runner.py imports",
             "2. Update all subprocess pytest calls to use unified_test_runner.py",
             "3. Ensure consistent test execution patterns across all test files",
             "4. Maintain SSOT compliance for test infrastructure"

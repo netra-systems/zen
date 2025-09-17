@@ -2129,7 +2129,7 @@ class StartupOrchestrator:
     
     async def _initialize_factory_patterns(self) -> None:
         """Initialize factory patterns for singleton removal - CRITICAL."""
-        from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, get_websocket_bridge_factory
+        from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory
         # PHASE 2A MIGRATION: Removed deprecated get_agent_instance_factory and configure_agent_instance_factory imports
         # These are no longer needed as we use create_agent_instance_factory(user_context) pattern per-request
         from netra_backend.app.services.factory_adapter import FactoryAdapter, AdapterConfig
@@ -2158,7 +2158,9 @@ class StartupOrchestrator:
             
             # 3. Initialize AgentWebSocketBridge
             # CRITICAL FIX: Always initialize websocket_factory to prevent "not associated with a value" error
-            websocket_factory = get_agent_websocket_bridge()
+            # Use factory directly since get_agent_websocket_bridge requires request parameter
+            from netra_backend.app.factories.websocket_bridge_factory import create_agent_websocket_bridge
+            websocket_factory = create_agent_websocket_bridge()
             
             # Configure with proper parameters including connection pool
             if hasattr(self.app.state, 'agent_supervisor'):

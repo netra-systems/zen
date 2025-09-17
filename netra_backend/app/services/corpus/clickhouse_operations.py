@@ -318,5 +318,6 @@ class CorpusClickHouseOperations:
             raise create_clickhouse_operation_error("get table size", e)
 
 
-# Backward compatibility alias
+# Backward compatibility aliases
 ClickHouseOperations = CorpusClickHouseOperations
+DataSubAgentClickHouseOperations = CorpusClickHouseOperations

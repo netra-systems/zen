@@ -34,7 +34,7 @@ setup_test_path()
 # Use centralized environment management per CLAUDE.md - ABSOLUTE IMPORTS ONLY
 from shared.isolated_environment import get_env
 from netra_backend.app.config import get_config
-from test_framework.environment_isolation import isolated_test_env
+from test_framework.environment_isolation import isolated_test_env_fixture
 from test_framework.fixtures.auth import create_real_jwt_token
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 
@@ -58,15 +58,15 @@ env.set("CIRCUIT_BREAKER_ENABLED", "true", "test_agent_circuit_breaker_simple")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_real_agent_execution_with_circuit_breaker_protection(isolated_test_env):
+async def test_real_agent_execution_with_circuit_breaker_protection(isolated_test_env_fixture):
     """Test REAL agent execution with circuit breaker protection - NO MOCKS.
     
     This test validates that circuit breakers protect real agent execution endpoints
     and maintain business continuity during service failures.
     """
     # Verify test environment is properly isolated
-    assert isolated_test_env.get("TESTING") == "1", "Test should run in isolated environment"
-    assert isolated_test_env.get("ENVIRONMENT") == "testing", "Should be in testing environment"
+    assert isolated_test_env_fixture.get_test_var("TESTING") == "1", "Test should run in isolated environment"
+    assert isolated_test_env_fixture.get_test_var("ENVIRONMENT") == "testing", "Should be in testing environment"
     
     # Setup real authentication for API calls
     config = get_config()
@@ -78,7 +78,7 @@ async def test_real_agent_execution_with_circuit_breaker_protection(isolated_tes
         auth_token = create_real_jwt_token(
             user_id="test_user_cb_simple",
             permissions=["read", "write", "agent_execute"],
-            token_type="access"
+            email="test_user_cb_simple@test.com"
         )
     except (ImportError, ValueError):
         # Fallback to JWT helper if real JWT creation fails
@@ -117,14 +117,14 @@ async def test_real_agent_execution_with_circuit_breaker_protection(isolated_tes
 
 @pytest.mark.asyncio
 @pytest.mark.e2e 
-async def test_real_service_circuit_breaker_state_transitions(isolated_test_env):
+async def test_real_service_circuit_breaker_state_transitions(isolated_test_env_fixture):
     """Test REAL service circuit breaker state transitions during failures - NO MOCKS.
     
     Tests the complete state machine: CLOSED -> OPEN -> HALF_OPEN -> CLOSED
     using real HTTP endpoints and service failures.
     """
     # Verify test environment is properly isolated
-    assert isolated_test_env.get("TESTING") == "1", "Test should run in isolated environment"
+    assert isolated_test_env_fixture.get_test_var("TESTING") == "1", "Test should run in isolated environment"
     
     # Setup real authentication and API endpoints
     config = get_config()
@@ -247,14 +247,14 @@ async def test_real_service_circuit_breaker_state_transitions(isolated_test_env)
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_real_circuit_breaker_metrics_collection_via_api(isolated_test_env):
+async def test_real_circuit_breaker_metrics_collection_via_api(isolated_test_env_fixture):
     """Test REAL circuit breaker metrics collection via API endpoints - NO MOCKS.
     
     Validates that circuit breaker metrics are properly collected and exposed
     through real API endpoints during actual service operations.
     """
     # Verify test environment is properly isolated
-    assert isolated_test_env.get("TESTING") == "1", "Test should run in isolated environment"
+    assert isolated_test_env_fixture.get_test_var("TESTING") == "1", "Test should run in isolated environment"
     
     # Setup real authentication and API endpoints
     config = get_config()
@@ -377,14 +377,14 @@ async def test_real_circuit_breaker_metrics_collection_via_api(isolated_test_env
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_real_service_error_handling_with_circuit_breaker(isolated_test_env):
+async def test_real_service_error_handling_with_circuit_breaker(isolated_test_env_fixture):
     """Test REAL service error handling with circuit breaker protection - NO MOCKS.
     
     Tests how circuit breakers handle real service errors including timeouts,
     connection errors, and service unavailable scenarios.
     """
     # Verify test environment is properly isolated
-    assert isolated_test_env.get("TESTING") == "1", "Test should run in isolated environment"
+    assert isolated_test_env_fixture.get_test_var("TESTING") == "1", "Test should run in isolated environment"
     
     # Setup real authentication and API endpoints
     config = get_config()
@@ -529,7 +529,7 @@ async def test_real_service_error_handling_with_circuit_breaker(isolated_test_en
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_real_websocket_agent_execution_during_circuit_breaker_recovery(isolated_test_env):
+async def test_real_websocket_agent_execution_during_circuit_breaker_recovery(isolated_test_env_fixture):
     """Test REAL WebSocket agent execution during circuit breaker recovery - NO MOCKS.
     
     MISSION CRITICAL per CLAUDE.md: Tests real WebSocket connections and agent events
@@ -537,7 +537,7 @@ async def test_real_websocket_agent_execution_during_circuit_breaker_recovery(is
     that delivers 90% of business value.
     """
     # Verify test environment is properly isolated
-    assert isolated_test_env.get("TESTING") == "1", "Test should run in isolated environment"
+    assert isolated_test_env_fixture.get_test_var("TESTING") == "1", "Test should run in isolated environment"
     
     # Setup real authentication for WebSocket connection
     jwt_helper = JWTTestHelper()
@@ -703,14 +703,14 @@ async def test_real_websocket_agent_execution_during_circuit_breaker_recovery(is
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_real_circuit_breaker_configuration_via_api_endpoints(isolated_test_env):
+async def test_real_circuit_breaker_configuration_via_api_endpoints(isolated_test_env_fixture):
     """Test REAL circuit breaker configuration via API endpoints - NO MOCKS.
     
     Validates that circuit breaker configurations are properly applied and accessible
     through real API endpoints in production-like scenarios.
     """
     # Verify test environment is properly isolated
-    assert isolated_test_env.get("TESTING") == "1", "Test should run in isolated environment"
+    assert isolated_test_env_fixture.get_test_var("TESTING") == "1", "Test should run in isolated environment"
     
     # Setup real authentication and API endpoints
     config = get_config()
