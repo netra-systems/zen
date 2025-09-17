@@ -55,11 +55,11 @@ class UnifiedConfigManager:
         """Lazy load logger to prevent circular dependency."""
         if self._logger is None:
             try:
-                from netra_backend.app.logging_config import central_logger
-                self._logger = central_logger
+                from shared.logging.unified_logging_ssot import get_logger
+                self._logger = get_logger(__name__)
             except ImportError:
-                import logging
-                self._logger = logging.getLogger(__name__)
+                from shared.logging.unified_logging_ssot import get_logger
+                self._logger = get_logger(__name__)
         return self._logger
 
     def get_config(self, key: str = None, default: Any = None) -> AppConfig:

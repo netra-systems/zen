@@ -13,7 +13,8 @@ from netra_backend.app.db.models_clickhouse import (
     SUPPLY_TABLE_SCHEMA,
     WORKLOAD_EVENTS_TABLE_SCHEMA,
 )
-from netra_backend.app.logging_config import central_logger as logger
+from shared.logging.unified_logging_ssot import get_logger
+logger = get_logger(__name__)
 
 # List of table schemas to create on startup
 CLICKHOUSE_TABLES: List[Tuple[str, str]] = [

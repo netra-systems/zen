@@ -15,11 +15,11 @@ from netra_backend.app.db.cache_strategies import (
     EvictionStrategyFactory,
     QueryPatternTracker,
 )
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.config import get_config
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class QueryCache:
