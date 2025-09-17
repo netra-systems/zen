@@ -517,7 +517,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
                     except asyncio.TimeoutError:
                         print(f"[U+23F0] Event timeout - connection stable")
                         continue
-                    except websockets.exceptions.ConnectionClosed:
+                    except websockets.ConnectionClosed:
                         connection_metrics["connection_drops"] += 1
                         print(f"[U+1F50C] Connection dropped (#{connection_metrics['connection_drops']})")
                         break

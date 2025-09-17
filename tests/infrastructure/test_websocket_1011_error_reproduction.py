@@ -378,7 +378,7 @@ class WebSocket1011ErrorReproductionTests(BaseE2ETest):
                     self.logger.warning("Unexpected connection success to invalid service")
                     return False
                     
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 if e.code == 1011:
                     self.logger.info("WebSocket 1011 error reproduced due to factory failure")
                     return True
@@ -434,7 +434,7 @@ class WebSocket1011ErrorReproductionTests(BaseE2ETest):
                     # Should fail with authentication error
                     return False
                     
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 if e.code == 1011:
                     self.logger.info("WebSocket 1011 error reproduced due to auth corruption")
                     return True
@@ -460,7 +460,7 @@ class WebSocket1011ErrorReproductionTests(BaseE2ETest):
                 self.logger.info("Backend service failure correctly detected")
                 return True  # Expected failure
                 
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 if e.code == 1011:
                     return True
                     

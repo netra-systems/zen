@@ -110,7 +110,7 @@ class ConcurrentUserLoadTest:
     
     def _handle_websocket_errors(self, e, results):
         """Handle WebSocket connection errors."""
-        if isinstance(e, websockets.exceptions.WebSocketException):
+        if isinstance(e, websockets.WebSocketException):
             results['errors'].append(f"WebSocket error: {str(e)}")
         elif isinstance(e, asyncio.TimeoutError):
             results['errors'].append("WebSocket response timeout")
@@ -120,7 +120,7 @@ class ConcurrentUserLoadTest:
         ws_start_time = time.time()
         try:
             await self._connect_websocket(session, results, ws_start_time)
-        except (websockets.exceptions.WebSocketException, asyncio.TimeoutError) as e:
+        except (websockets.WebSocketException, asyncio.TimeoutError) as e:
             self._handle_websocket_errors(e, results)
     
     def _get_chat_messages(self) -> List[str]:

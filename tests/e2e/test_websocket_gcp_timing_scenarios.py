@@ -88,7 +88,7 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
                     scenario_result['response_timeout'] = True
                 await asyncio.wait_for(websocket.close(), timeout=2.0)
                 scenario_result['success'] = True
-            except websockets.exceptions.WebSocketException as ws_error:
+            except websockets.WebSocketException as ws_error:
                 scenario_result['websocket_error'] = str(ws_error)
                 if 'get_connection_state_machine' in str(ws_error) and 'not defined' in str(ws_error):
                     scenario_result['import_scope_error'] = True

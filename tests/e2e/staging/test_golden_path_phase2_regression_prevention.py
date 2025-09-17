@@ -330,7 +330,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
                 elapsed = time.time() - start_time
                 print(f"[{elapsed:.1f}s] Waiting for events... Found: {events_found}")
                 continue
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 print("WebSocket connection closed unexpectedly")
                 break
         

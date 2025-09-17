@@ -170,7 +170,7 @@ class GCPColdStartWebSocketRaceTests(BaseE2ETest):
                         
                         self.logger.warning(f"⚠️ WebSocket connection {attempt + 1} established but no response")
                         
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 if e.code == 1011:  # The specific error code we're testing for
                     websocket_errors.append({
                         "attempt": attempt + 1,

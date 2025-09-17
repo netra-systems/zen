@@ -80,7 +80,7 @@ class RealWebSocketTestClient:
                     logger.debug(f"Received WebSocket message: {parsed_message.get('type', 'unknown')}")
                 except json.JSONDecodeError as e:
                     logger.warning(f'Failed to parse WebSocket message: {e}')
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             logger.info(f'WebSocket connection closed for user {self.user_id}')
         except Exception as e:
             logger.error(f'Error in WebSocket listener for user {self.user_id}: {e}')

@@ -69,7 +69,7 @@ class MinimalWebSocketServer:
                         "message": "Invalid JSON format"
                     }))
                     
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             logger.info("Client disconnected")
         except Exception as e:
             logger.error(f"Handler error: {e}")

@@ -150,7 +150,7 @@ async def simulate_thread_navigation_flow(
         except asyncio.TimeoutError:
             # Continue waiting, no message received in this interval
             continue
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             logger.warning("WebSocket connection closed unexpectedly")
             break
         except Exception as e:

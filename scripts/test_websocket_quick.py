@@ -44,7 +44,7 @@ async def test_websocket_connectivity() -> bool:
                 print(f" WARNING: [U+FE0F] Could not parse welcome message: {e}")
                 return True  # Connection succeeded even with parsing issue
                 
-    except websockets.exceptions.ConnectionClosedError as e:
+    except websockets.ConnectionClosedError as e:
         print(f" FAIL:  WebSocket connection closed with error: Code {e.code} - {e.reason}")
         if e.code == 1011:
             print(" ALERT:  CONFIRMED: 1011 internal error still present!")

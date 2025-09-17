@@ -78,14 +78,14 @@ class WebSocketValidationTester:
                     "error": None,
                     "websocket_ready_state": "OPEN"
                 }
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             return {
                 "success": False,
                 "connection_established": False,
                 "error": f"Connection closed: {e}",
                 "error_type": "ConnectionClosedError"
             }
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             return {
                 "success": False,
                 "connection_established": False,

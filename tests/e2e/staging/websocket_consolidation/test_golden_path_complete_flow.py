@@ -164,7 +164,7 @@ class GoldenPathCompleteFlowTests(SSotAsyncTestCase):
             websocket = await websockets.connect(websocket_url, additional_headers=headers, ping_interval=20, ping_timeout=10, close_timeout=10)
             await websocket.ping()
             return {'success': True, 'websocket': websocket, 'connection_established': True}
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             return {'success': False, 'error': f'WebSocket connection failed with status {e.status_code}', 'status_code': e.status_code}
         except Exception as e:
             return {'success': False, 'error': f'WebSocket connection failed: {str(e)}'}

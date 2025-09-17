@@ -125,7 +125,7 @@ class RealWebSocketClient:
                             await self.message_handlers[message_type](data)
                 except json.JSONDecodeError as e:
                     logger.warning(f'Invalid JSON in WebSocket message: {e}')
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             logger.info('WebSocket connection closed')
         except Exception as e:
             logger.error(f'WebSocket message listener error: {e}')

@@ -274,7 +274,7 @@ class WebSocketRegressionTester:
                         test_result["details"]["websocket_auth_success"] = False
                         test_result["details"]["unexpected_message"] = welcome_data
                         
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 if e.code == 1008:  # Authentication error
                     test_result["error"] = f"WebSocket authentication failed with JWT secret mismatch: {e}"
                     return test_result
@@ -336,7 +336,7 @@ class WebSocketRegressionTester:
                     test_result["details"]["message_exchange_successful"] = True
                     test_result["details"]["response_type"] = response_data.get("type")
                     
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 if e.code == 403 or "403" in str(e):
                     test_result["error"] = f"WebSocket handshake returned 403 Forbidden (REGRESSION): {e}"
                     return test_result
@@ -476,7 +476,7 @@ class WebSocketRegressionTester:
                         # Timeout waiting for response - might indicate load balancer issue
                         test_result["details"]["timeout_during_heartbeat"] = True
                         break
-                    except websockets.exceptions.ConnectionClosed as e:
+                    except websockets.ConnectionClosed as e:
                         # Connection closed unexpectedly - potential load balancer timeout
                         test_result["details"]["unexpected_connection_close"] = True
                         test_result["details"]["close_code"] = e.code
@@ -509,7 +509,7 @@ class WebSocketRegressionTester:
             test_result["passed"] = True
             test_result["message"] = "Load balancer timeout regression prevented"
             
-        except websockets.exceptions.InvalidHandshake as e:
+        except websockets.InvalidHandshake as e:
             test_result["error"] = f"WebSocket handshake failed (possible load balancer issue): {e}"
         except Exception as e:
             test_result["error"] = f"Load balancer timeout test failed: {e}"

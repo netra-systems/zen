@@ -220,7 +220,7 @@ class WebSocketAuthenticationTests:
             async with websockets.connect(f"{jwt_helper.websocket_url}/ws", timeout=5) as websocket:
                 await websocket.ping()
                 assert False  # Should not reach here
-        except (websockets.exceptions.ConnectionClosedError, ConnectionRefusedError, OSError):
+        except (websockets.ConnectionClosedError, ConnectionRefusedError, OSError):
             assert True  # Expected behavior
 
 

@@ -117,11 +117,11 @@ class WebSocketTester:
                     print("   [TIMEOUT] No response within 5 seconds (but connection successful)")
                     result["success"] = True  # Connection success is what we care about
                 
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             result["error"] = f"HTTP {e.response.status_code}"
             print(f"   [ERROR] HTTP Error: {result['error']}")
             
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             result["error"] = f"Connection closed: {e.code} - {e.reason}"
             print(f"   [ERROR] Connection closed: {result['error']}")
             

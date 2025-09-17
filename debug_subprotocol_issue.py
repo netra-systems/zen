@@ -80,12 +80,12 @@ async def test_subprotocol_negotiation():
                     
                 print(" SUCCESS: Connection established and working")
                 
-        except websockets.exceptions.NegotiationError as e:
+        except websockets.NegotiationError as e:
             print(f" FAIL: Negotiation error: {e}")
             if "no subprotocols supported" in str(e):
                 print(" INFO: This confirms the subprotocol negotiation issue!")
                 
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             print(f" INFO: HTTP error (likely auth-related): {e}")
             
         except Exception as e:

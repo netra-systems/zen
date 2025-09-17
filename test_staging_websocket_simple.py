@@ -50,7 +50,7 @@ async def test_websocket_protocol():
             
             return True
             
-    except websockets.exceptions.InvalidStatus as e:
+    except websockets.InvalidStatus as e:
         status_code = e.response.status_code if hasattr(e.response, 'status_code') else str(e)
         print(f"WebSocket connection failed with status: {status_code}")
         

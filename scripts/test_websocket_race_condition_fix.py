@@ -95,7 +95,7 @@ class WebSocketRaceConditionTester:
                 except asyncio.TimeoutError:
                     print(f"[INFO] No response within timeout (may be normal for staging)")
                 
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             # Check for WebSocket 1011 errors specifically
             status_code = 0
             if hasattr(e, 'response') and hasattr(e.response, 'status'):
@@ -230,7 +230,7 @@ class WebSocketRaceConditionTester:
                             "duration": time.time() - conn_start,
                             "websocket_1011": False
                         }
-            except websockets.exceptions.InvalidStatus as e:
+            except websockets.InvalidStatus as e:
                 status_code = getattr(e, 'status', 0) or getattr(getattr(e, 'response', None), 'status', 0)
                 is_1011 = status_code == 1011
                 if is_1011:

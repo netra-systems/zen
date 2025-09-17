@@ -258,7 +258,7 @@ class WebSocketEventsIntegrationTests(BaseIntegrationTest):
             except asyncio.TimeoutError:
                 # No more messages in this window
                 continue
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 # Connection closed, stop collecting
                 break
         
@@ -589,7 +589,7 @@ class WebSocketEventsIntegrationTests(BaseIntegrationTest):
             
             logger.info(" PASS:  Unauthenticated connection properly isolated")
             
-        except websockets.exceptions.ConnectionClosedError:
+        except websockets.ConnectionClosedError:
             logger.info(" PASS:  Unauthenticated connection rejected (proper security)")
         except Exception as e:
             logger.info(f"Unauthenticated connection test: {e}")

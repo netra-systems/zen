@@ -85,12 +85,12 @@ class WebSocketAuthIntegrationTests(SSotBaseTestCase):
         preventing authentication bypass scenarios.
         """
         invalid_headers = {'authorization': 'Bearer invalid.jwt.token', 'x-test-mode': 'true'}
-        with self.assertRaises((websockets.exceptions.ConnectionClosedError, websockets.exceptions.InvalidStatusCode, ConnectionError, OSError)) as context:
+        with self.assertRaises((websockets.ConnectionClosedError, websockets.InvalidStatusCode, ConnectionError, OSError)) as context:
             async with websockets.connect(self.websocket_url, additional_headers=invalid_headers, timeout=5.0) as websocket:
                 try:
                     await asyncio.wait_for(websocket.recv(), timeout=2.0)
                     self.fail('Connection with invalid JWT should not succeed')
-                except websockets.exceptions.ConnectionClosedError:
+                except websockets.ConnectionClosedError:
                     pass
         error_msg = str(context.exception)
         auth_related_errors = ['403', '401', 'unauthorized', 'forbidden', 'authentication']
@@ -174,7 +174,7 @@ class WebSocketAuthIntegrationTests(SSotBaseTestCase):
         short_lived_token = self.e2e_helper.create_test_jwt_token(user_id='timeout_test_user', email='timeout@example.com', permissions=['read'], exp_minutes=0.017)
         await asyncio.sleep(2.0)
         expired_headers = self.e2e_helper.get_websocket_headers(short_lived_token)
-        with self.assertRaises((websockets.exceptions.ConnectionClosedError, websockets.exceptions.InvalidStatusCode, ConnectionError, OSError)) as context:
+        with self.assertRaises((websockets.ConnectionClosedError, websockets.InvalidStatusCode, ConnectionError, OSError)) as context:
             async with websockets.connect(self.websocket_url, additional_headers=expired_headers, timeout=3.0) as websocket:
                 self.fail('Connection with expired token should be rejected')
         error_msg = str(context.exception)
@@ -244,7 +244,7 @@ class WebSocketAuthWithRealServicesTests(SSotBaseTestCase):
         if not await self._check_service_availability():
             self.skipTest('WebSocket service not available for integration test')
         missing_auth_headers = {'host': 'localhost:8002', 'connection': 'upgrade', 'upgrade': 'websocket', 'sec-websocket-version': '13', 'sec-websocket-key': 'test-key-12345'}
-        with self.assertRaises((websockets.exceptions.ConnectionClosedError, websockets.exceptions.InvalidStatusCode)) as context:
+        with self.assertRaises((websockets.ConnectionClosedError, websockets.InvalidStatusCode)) as context:
             async with websockets.connect(self.websocket_url, additional_headers=missing_auth_headers, timeout=5.0) as websocket:
                 self.fail('Connection without auth headers should be rejected')
         error = context.exception

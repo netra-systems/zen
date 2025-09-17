@@ -148,7 +148,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                             
                     except asyncio.TimeoutError:
                         continue
-                    except websockets.exceptions.ConnectionClosed as e:
+                    except websockets.ConnectionClosed as e:
                         # CRITICAL: Check for coroutine error in connection close
                         if "coroutine" in str(e):
                             self.fail(f"WebSocket closed with coroutine error: {e}")
@@ -376,7 +376,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                             
                     except asyncio.TimeoutError:
                         continue
-                    except websockets.exceptions.ConnectionClosed as e:
+                    except websockets.ConnectionClosed as e:
                         if "coroutine" in str(e):
                             self.fail(f"Agent events WebSocket closed with coroutine error: {e}")
                         break

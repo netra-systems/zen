@@ -131,7 +131,7 @@ class MissionCriticalWebSocketTester:
                 
                 return connection_result
                 
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             self.failed_connections += 1
             connection_result['error_code'] = e.code
             connection_result['error_message'] = str(e)

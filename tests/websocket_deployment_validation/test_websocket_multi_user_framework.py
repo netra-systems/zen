@@ -424,7 +424,7 @@ class MultiUserWebSocketTester:
                 except asyncio.TimeoutError:
                     # No message received in timeout period, continue
                     continue
-                except websockets.exceptions.ConnectionClosed:
+                except websockets.ConnectionClosed:
                     logger.error(f"Connection closed for user {user.user_id}")
                     user.errors.append("Connection closed during response collection")
                     break

@@ -240,7 +240,7 @@ class MultiUserWebSocketIsolationE2ETests(SSotBaseTestCase):
                 except asyncio.TimeoutError:
                     # No message received in timeout period, continue listening
                     continue
-                except websockets.exceptions.ConnectionClosed:
+                except websockets.ConnectionClosed:
                     # Connection closed, stop listening
                     break
                     

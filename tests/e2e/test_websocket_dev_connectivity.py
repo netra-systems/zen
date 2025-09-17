@@ -67,7 +67,7 @@ class WebSocketDevConnectivityTests:
                 
         except asyncio.TimeoutError:
             raise AssertionError("WebSocket connection timeout - server not responding")
-        except websockets.exceptions.WebSocketException as e:
+        except websockets.WebSocketException as e:
             raise AssertionError(f"WebSocket connection failed: {str(e)}")
         except Exception as e:
             raise AssertionError(f"Unexpected WebSocket error: {str(e)}")

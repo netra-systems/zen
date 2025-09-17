@@ -342,8 +342,8 @@ class RFC6455SubprotocolComplianceTest(SSotAsyncTestCase):
             # Test should fail here - connection should not succeed with current bug
             assert False, "UNEXPECTED SUCCESS: WebSocket connection should fail due to RFC 6455 violation"
             
-        except (websockets.exceptions.ConnectionClosedError, 
-                websockets.exceptions.InvalidStatusCode,
+        except (websockets.ConnectionClosedError, 
+                websockets.InvalidStatusCode,
                 asyncio.TimeoutError,
                 OSError) as e:
             # Expected failure due to RFC 6455 subprotocol violation

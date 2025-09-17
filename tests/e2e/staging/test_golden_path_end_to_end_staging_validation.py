@@ -260,7 +260,7 @@ class GoldenPathEndToEndStagingValidationTests(SSotAsyncTestCase):
                         "This indicates WebSocket handshake or authentication issues."
                     )
                 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             self.fail(
                 f"WEBSOCKET CONNECTION CLOSED:\n"
                 f"Close code: {e.code}\n"

@@ -572,7 +572,7 @@ class MultiUserIsolationSecurityTests(BaseE2ETest):
                     events.append(event)
                 except asyncio.TimeoutError:
                     continue
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             pass
         
         return events

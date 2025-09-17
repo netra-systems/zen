@@ -64,7 +64,7 @@ async def test_websocket_connection():
             ) as ws:
                 print(" FAIL:  ERROR: Connected without authentication!")
                 return False
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             if "403" in str(e):
                 print(" PASS:  Correctly rejected unauthenticated connection")
             else:

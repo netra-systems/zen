@@ -100,7 +100,7 @@ async def test_websocket_ssot_staging():
             
             print("    PASS:  WebSocket SSOT connection validated successfully")
             
-    except websockets.exceptions.InvalidStatus as e:
+    except websockets.InvalidStatus as e:
         error_details = str(e)
         if "503" in error_details:
             print(f"    FAIL:  WebSocket connection failed: Service Unavailable (503)")

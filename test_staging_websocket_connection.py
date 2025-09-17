@@ -93,7 +93,7 @@ async def test_websocket_protocol_connection():
             
             return True
             
-    except websockets.exceptions.InvalidStatusCode as e:
+    except websockets.InvalidStatusCode as e:
         print(f"❌ WebSocket connection failed with status code: {e.status_code}")
         print(f"   Headers: {e.response_headers}")
         
@@ -108,7 +108,7 @@ async def test_websocket_protocol_connection():
             
         return False
         
-    except websockets.exceptions.InvalidHandshake as e:
+    except websockets.InvalidHandshake as e:
         print(f"❌ WebSocket handshake failed: {e}")
         print("🚨 This might indicate protocol negotiation failure")
         return False
@@ -150,7 +150,7 @@ async def test_protocol_format_variations():
                 print(f"   ✅ Success - Selected: {websocket.subprotocol}")
                 results[description] = "SUCCESS"
                 
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             if e.status_code in [401, 403]:
                 print(f"   ✅ Protocol accepted, auth failed (expected)")
                 results[description] = "PROTOCOL_OK"

@@ -164,7 +164,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
                     except asyncio.TimeoutError:
                         # Continue listening until overall timeout
                         continue
-                    except websockets.exceptions.ConnectionClosed:
+                    except websockets.ConnectionClosed:
                         logger.error("❌ WebSocket connection closed unexpectedly")
                         break
                     except json.JSONDecodeError as e:
@@ -305,7 +305,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
                             
                     except asyncio.TimeoutError:
                         continue
-                    except (websockets.exceptions.ConnectionClosed, json.JSONDecodeError):
+                    except (websockets.ConnectionClosed, json.JSONDecodeError):
                         break
                 
                 # Analyze event delivery
@@ -435,7 +435,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
                                     
                             except asyncio.TimeoutError:
                                 continue
-                            except (websockets.exceptions.ConnectionClosed, json.JSONDecodeError):
+                            except (websockets.ConnectionClosed, json.JSONDecodeError):
                                 break
                         
                         user_result.update({

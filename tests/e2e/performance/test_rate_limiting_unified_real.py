@@ -170,7 +170,7 @@ class UnifiedRateLimiterTests:
                             break
                     except asyncio.TimeoutError:
                         continue
-                    except websockets.exceptions.ConnectionClosed:
+                    except websockets.ConnectionClosed:
                         return {'tested': True, 'limited': True, 'messages_count': messages_sent, 'connection_closed': True}
                 return {'tested': True, 'limited': rate_limited, 'messages_count': messages_sent}
         except Exception as e:

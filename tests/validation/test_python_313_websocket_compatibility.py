@@ -84,7 +84,7 @@ class Python313WebSocketCompatibilityTests:
 
                 logger.info("additional_headers parameter works correctly")
 
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             # Expected for some test servers
             logger.info("Connection closed by server (expected for some test endpoints)")
 

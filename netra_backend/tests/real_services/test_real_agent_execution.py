@@ -72,7 +72,7 @@ class RealWebSocketEventCapture:
                 event = json.loads(message)
                 self.events_captured.append({'timestamp': datetime.now(timezone.utc).isoformat(), 'event': event})
                 logger.info(f"Captured WebSocket event: {event.get('type', 'unknown')}")
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             pass
         except Exception as e:
             logger.error(f'Event capture error: {e}')

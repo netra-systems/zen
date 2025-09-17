@@ -260,7 +260,7 @@ class GoldenPathSystemAuthFixTests(SSotBaseTestCase):
                 except asyncio.TimeoutError:
                     logger.warning("[U+23F0] WebSocket timeout waiting for more events")
                     break
-                except websockets.exceptions.ConnectionClosed:
+                except websockets.ConnectionClosed:
                     logger.warning("[U+1F50C] WebSocket connection closed")
                     break
                     

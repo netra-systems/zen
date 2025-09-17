@@ -137,7 +137,7 @@ class WebSocketEventDeliveryE2ETests(BaseE2ETest):
                     except asyncio.TimeoutError:
                         # Continue waiting - some events may take time
                         continue
-                    except websockets.exceptions.ConnectionClosed:
+                    except websockets.ConnectionClosed:
                         break
                     except json.JSONDecodeError:
                         # Skip invalid JSON messages
@@ -170,7 +170,7 @@ class WebSocketEventDeliveryE2ETests(BaseE2ETest):
                     f"received {len(received_events)}"
                 )
 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             pytest.fail(f"WebSocket connection closed unexpectedly: {e}")
         except Exception as e:
             pytest.fail(f"WebSocket event delivery test failed: {e}")
@@ -235,7 +235,7 @@ class WebSocketEventDeliveryE2ETests(BaseE2ETest):
                         # Stop when user 1 gets agent_completed
                         if event_data.get("type") == "agent_completed":
                             break
-                    except (asyncio.TimeoutError, websockets.exceptions.ConnectionClosed):
+                    except (asyncio.TimeoutError, websockets.ConnectionClosed):
                         pass
 
                     # Check user 2 connection (should NOT receive user 1's events)
@@ -243,7 +243,7 @@ class WebSocketEventDeliveryE2ETests(BaseE2ETest):
                         message = await asyncio.wait_for(ws2.recv(), timeout=0.1)
                         event_data = json.loads(message)
                         user_2_events.append(event_data)
-                    except (asyncio.TimeoutError, websockets.exceptions.ConnectionClosed):
+                    except (asyncio.TimeoutError, websockets.ConnectionClosed):
                         pass
 
                 # Validate user isolation

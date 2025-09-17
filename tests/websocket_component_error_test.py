@@ -180,7 +180,7 @@ class WebSocketComponentErrorTester:
                         "error_messages": error_messages
                     }
                     
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 print(f"[U+1F50C] WebSocket connection closed: Code {e.code} - {e.reason}")
                 
                 # Analyze close code for component-specific information

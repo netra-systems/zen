@@ -226,7 +226,7 @@ class GCPLoadBalancerHeadersTests(BaseE2ETest):
                     self.logger.error("WebSocket response timeout - connection may be established but not functional")
                     return False
                     
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             if e.code == 1011:
                 self.logger.error("WebSocket 1011 error - likely authentication failure due to header stripping")
                 return False
@@ -271,7 +271,7 @@ class GCPLoadBalancerHeadersTests(BaseE2ETest):
                 # Send ping to verify bidirectional communication
                 await websocket.ping()
                 
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             if e.status_code == 404:
                 pytest.fail("WebSocket endpoint not found - load balancer routing issue")
             elif e.status_code == 502:
@@ -414,7 +414,7 @@ class GCPLoadBalancerHeadersTests(BaseE2ETest):
                     result["failure_reason"] = f"Invalid JSON response: {json_error}"
                     result["response_data"] = response
                     
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             result["connection_time"] = time.time() - start_time
             result["error_code"] = e.code
             
@@ -427,7 +427,7 @@ class GCPLoadBalancerHeadersTests(BaseE2ETest):
             else:
                 result["failure_reason"] = f"WebSocket connection closed with code {e.code}"
                 
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             result["connection_time"] = time.time() - start_time
             result["error_code"] = e.status_code
             
@@ -488,7 +488,7 @@ class GCPLoadBalancerHeadersTests(BaseE2ETest):
                 
                 self.logger.info("WebSocket connection maintained through load balancer timeout period")
                 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             if time.time() - start_time < duration * 0.8:  # Failed before 80% of expected duration
                 pytest.fail(
                     f"Load balancer prematurely closed WebSocket connection after {time.time() - start_time:.1f}s. "

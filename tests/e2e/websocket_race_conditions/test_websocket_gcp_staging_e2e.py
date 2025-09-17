@@ -116,7 +116,7 @@ class RealGCPWebSocketConnectionLifecycleTests:
                 response = await asyncio.wait_for(websocket_conn.recv(), timeout=10.0)
                 print(f' PASS:  Connection survived {idle_duration}s idle period')
                 connection_survived_idle = True
-            except (asyncio.TimeoutError, websockets.exceptions.ConnectionClosed) as e:
+            except (asyncio.TimeoutError, websockets.ConnectionClosed) as e:
                 print(f' FAIL:  Connection lost during idle period: {e}')
                 connection_survived_idle = False
             await websocket_conn.close()

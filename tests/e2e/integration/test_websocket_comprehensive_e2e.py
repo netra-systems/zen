@@ -97,7 +97,7 @@ class WebSocketE2EerTests:
             async for message in ws:
                 data = json.loads(message)
                 self.received_messages[conn_id].append(data)
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             pass
     
     async def send_message(self, conn_id: str, message: Dict):

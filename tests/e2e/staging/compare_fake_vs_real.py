@@ -88,7 +88,7 @@ class RealTestDemo:
                 # Real connection established
                 network_call = True
                 result = "PASS (real connection)"
-        except websockets.exceptions.ConnectionClosedError:
+        except websockets.ConnectionClosedError:
             # Connection closed due to auth - still real
             network_call = True  
             result = "PASS (real connection, auth required)"

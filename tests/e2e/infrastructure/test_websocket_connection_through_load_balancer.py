@@ -326,7 +326,7 @@ class WebSocketConnectionThroughLoadBalancerTests(SSotBaseTestCase):
             finally:
                 await websocket.close()
             
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             # Check if it's an authentication failure (expected without proper auth)
             if e.status_code in [401, 403]:
                 return {

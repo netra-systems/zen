@@ -224,7 +224,7 @@ class WebSocketAuthConsistencyFixTests(StagingTestBase):
                 except asyncio.TimeoutError:
                     print("      [U+23F0] No response (may be normal)")
                 
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             if e.status_code in [401, 403]:
                 result["auth_error_received"] = True
                 print(f"       WARNING: [U+FE0F]  WebSocket auth rejected (HTTP {e.status_code})")

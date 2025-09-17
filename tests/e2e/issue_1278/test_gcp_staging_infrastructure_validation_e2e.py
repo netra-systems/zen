@@ -272,7 +272,7 @@ class TestGCPStagingInfrastructureHealth(SSotAsyncTestCase):
                             "(Issue #1278 - backend processing failure)"
                         )
 
-            except websockets.exceptions.ConnectionClosed as e:
+            except websockets.ConnectionClosed as e:
                 self.record_metric("websocket_connection_success", False)
                 self.record_metric("websocket_connection_error", str(e))
                 self.record_metric("websocket_test", "FAILED_AS_EXPECTED_CONNECTION_CLOSED")
@@ -282,7 +282,7 @@ class TestGCPStagingInfrastructureHealth(SSotAsyncTestCase):
                     f"WebSocket connection closed immediately (Issue #1278 - backend startup failure): {e}"
                 )
 
-            except websockets.exceptions.InvalidStatusCode as e:
+            except websockets.InvalidStatusCode as e:
                 self.record_metric("websocket_connection_success", False)
                 self.record_metric("websocket_status_code_error", str(e))
                 self.record_metric("websocket_test", "FAILED_AS_EXPECTED_INVALID_STATUS")

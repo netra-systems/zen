@@ -611,14 +611,14 @@ class AuthenticationEdgeCasesBusinessCriticalTests(SSotAsyncTestCase):
                             "BUSINESS IMPACT: HIGH - Chat functionality (90% of platform value) not working."
                         )
             
-            except websockets.exceptions.ConnectionClosed as e:
+            except websockets.ConnectionClosed as e:
                 pytest.fail(
                     f"WebSocket connection closed unexpectedly: {e}. "
                     f"This could indicate authentication failure or network issues. "
                     f"BUSINESS IMPACT: Users cannot access chat functionality."
                 )
             
-            except websockets.exceptions.WebSocketException as e:
+            except websockets.WebSocketException as e:
                 pytest.fail(
                     f"WebSocket error during authentication test: {e}. "
                     f"This could prevent chat functionality from working properly."

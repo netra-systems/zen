@@ -89,7 +89,7 @@ class WebSocketDeploymentValidator:
                 result["status"] = "passed"
                 logger.success(" PASS:  Load balancer timeout fix validated")
                 
-        except websockets.exceptions.InvalidHandshake as e:
+        except websockets.InvalidHandshake as e:
             result["status"] = "failed"
             result["error"] = f"WebSocket handshake failed: {e}"
             result["details"]["handshake_error"] = str(e)
@@ -152,7 +152,7 @@ class WebSocketDeploymentValidator:
                     result["details"]["response"] = response_data
                     logger.success(" PASS:  WebSocket 403 handshake fix validated")
                     
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             if e.code == 403:
                 result["status"] = "failed"
                 result["error"] = f"WebSocket still returning 403 Forbidden: {e}"

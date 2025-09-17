@@ -369,7 +369,7 @@ class RealWebSocketConnection:
                 except json.JSONDecodeError as e:
                     logger.warning(f"⚠️  Invalid JSON in WebSocket message: {e}")
                     
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             logger.info("🔌 WebSocket connection closed by server")
             self.is_connected = False
         except Exception as e:

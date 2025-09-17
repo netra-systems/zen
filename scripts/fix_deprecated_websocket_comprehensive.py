@@ -83,6 +83,13 @@ def fix_websockets_imports(file_path: str) -> bool:
             content
         )
 
+        # Fix websockets.exceptions.* usage in code (not just imports)
+        content = re.sub(
+            r'websockets\.exceptions\.([A-Za-z][A-Za-z0-9]*)',
+            r'websockets.\1',
+            content
+        )
+
         if content != original_content:
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(content)

@@ -131,7 +131,7 @@ class WebSocketReliabilityTester:
                 msg_data["received_at"] = time.time()
                 self.received_messages.append(msg_data)
                 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             print(f"Connection {connection_id} closed: {e}")
             self.connection_states[connection_id]["connected"] = False
             self.connection_states[connection_id]["disconnected_at"] = time.time()
@@ -397,7 +397,7 @@ class FrontendWebSocketReliabilityTests:
                 
                 assert response_data.get("type") in ["error", "auth_required"]
                 
-            except (websockets.exceptions.ConnectionClosed, asyncio.TimeoutError):
+            except (websockets.ConnectionClosed, asyncio.TimeoutError):
                 # Connection closed due to auth expiry
                 assert True
                 

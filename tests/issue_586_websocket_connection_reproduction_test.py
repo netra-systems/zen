@@ -127,7 +127,7 @@ class WebSocketConnectionReproductionTest:
                     })
                     self.error_patterns.append("websocket_communication_timeout")
                     
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             print(f"✅ EXPECTED FAILURE: WebSocket connection closed - {e}")
             test_result.update({
                 "success": True,  # Success at reproducing connection issues
@@ -140,7 +140,7 @@ class WebSocketConnectionReproductionTest:
             })
             self.error_patterns.append("websocket_connection_closed")
             
-        except websockets.exceptions.InvalidHandshake as e:
+        except websockets.InvalidHandshake as e:
             print(f"✅ EXPECTED FAILURE: WebSocket handshake failed - {e}")
             test_result.update({
                 "success": True,  # Success at reproducing handshake issues
@@ -312,7 +312,7 @@ class WebSocketConnectionReproductionTest:
                     ) as websocket:
                         print(f"⚠️  Protocol {protocol_test['name']} connected unexpectedly")
                         
-                except websockets.exceptions.NegotiationError as e:
+                except websockets.NegotiationError as e:
                     print(f"✅ EXPECTED FAILURE: Protocol negotiation failed - {e}")
                     test_result.update({
                         "success": True,

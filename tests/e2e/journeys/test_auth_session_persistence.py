@@ -325,7 +325,7 @@ class AuthSessionPersistenceTests(BaseE2ETest):
                             self.validator.record_session_event('timeout_not_detected', {'token_still_valid': True})
                     except asyncio.TimeoutError:
                         self.validator.record_session_event('timeout_no_response', {'connection_dropped': True})
-            except websockets.exceptions.ConnectionClosed as e:
+            except websockets.ConnectionClosed as e:
                 self.validator.record_session_event('timeout_connection_closed', {'graceful_closure': True, 'close_code': e.code if hasattr(e, 'code') else None})
             except Exception as e:
                 self.validator.record_session_event('timeout_error', {'error': str(e)})

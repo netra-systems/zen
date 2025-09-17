@@ -177,7 +177,7 @@ class AuthenticationSessionManagementTests(SSotBaseTestCase):
                 if not auth_confirmed:
                     print(f" WARNING: [U+FE0F] WebSocket authentication could not be confirmed (no agent response)")
                 
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             if e.status_code == 401:
                 pytest.fail(f"WebSocket authentication failed: {e}")
             else:
@@ -566,7 +566,7 @@ class AuthenticationSessionManagementTests(SSotBaseTestCase):
                 except asyncio.TimeoutError:
                     print(f" PASS:  Unauthenticated request timed out (likely rejected)")
                     
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             if e.status_code == 401:
                 print(f" PASS:  Unauthenticated WebSocket connection properly rejected (401)")
             else:
@@ -610,7 +610,7 @@ class AuthenticationSessionManagementTests(SSotBaseTestCase):
                     except asyncio.TimeoutError:
                         print(f" PASS:  Invalid token #{i+1} timed out (likely rejected)")
                         
-            except websockets.exceptions.InvalidStatus as e:
+            except websockets.InvalidStatus as e:
                 if e.status_code == 401:
                     print(f" PASS:  Invalid token #{i+1} properly rejected at connection (401)")
                 else:
@@ -655,7 +655,7 @@ class AuthenticationSessionManagementTests(SSotBaseTestCase):
                 except asyncio.TimeoutError:
                     print(f" PASS:  Expired token timed out (likely rejected)")
                     
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             if e.status_code == 401:
                 print(f" PASS:  Expired token properly rejected at connection (401)")
             else:
@@ -704,7 +704,7 @@ class AuthenticationSessionManagementTests(SSotBaseTestCase):
                 except asyncio.TimeoutError:
                     print(f" PASS:  Limited permissions request timed out (likely rejected)")
                     
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             if e.status_code == 403:
                 print(f" PASS:  Limited permissions properly rejected (403)")
             elif e.status_code == 401:

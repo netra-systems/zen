@@ -193,7 +193,7 @@ class CriticalWebSocketTests:
             ) as ws:
                 # Should not reach here without auth
                 connection_successful = True
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             # Expected: 403 Forbidden without auth
             if "403" in str(e):
                 got_auth_error = True
@@ -302,7 +302,7 @@ class CriticalWebSocketTests:
                     # Success - break out of retry loop
                     break
                     
-                except websockets.exceptions.InvalidStatus as e:
+                except websockets.InvalidStatus as e:
                     # Auth token might not be valid for staging
                     if "403" in str(e) or "401" in str(e):
                         print(f"Auth token rejected by staging: {e}")
@@ -311,7 +311,7 @@ class CriticalWebSocketTests:
                     else:
                         raise
                         
-                except (asyncio.TimeoutError, ConnectionError, OSError, websockets.exceptions.ConnectionClosedError) as e:
+                except (asyncio.TimeoutError, ConnectionError, OSError, websockets.ConnectionClosedError) as e:
                     print(f"WebSocket connection attempt {attempt + 1} failed: {e}")
                     
                     # Handle connection failures based on infrastructure status
@@ -384,7 +384,7 @@ class CriticalWebSocketTests:
                     "type": "message",
                     "content": "Test without auth"
                 }))
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             if "403" in str(e):
                 auth_enforced = True
                 print(f"Auth correctly enforced: {e}")
@@ -434,7 +434,7 @@ class CriticalWebSocketTests:
                                     auth_accepted = True
                                     break
                             
-                            except (asyncio.TimeoutError, websockets.exceptions.ConnectionClosedError) as welcome_error:
+                            except (asyncio.TimeoutError, websockets.ConnectionClosedError) as welcome_error:
                                 if "1011" in str(welcome_error) or "internal error" in str(welcome_error).lower():
                                     print(f" WARNING: [U+FE0F] WebSocket 1011 internal error during welcome message (staging infrastructure)")
                                     print(f" PASS:  Connection was established, auth succeeded before infrastructure error")
@@ -481,7 +481,7 @@ class CriticalWebSocketTests:
                         # Successfully completed auth test, break retry loop
                         break
                         
-                except (websockets.exceptions.InvalidStatus, websockets.exceptions.ConnectionClosedError, ConnectionError, OSError) as e:
+                except (websockets.InvalidStatus, websockets.ConnectionClosedError, ConnectionError, OSError) as e:
                     print(f"Connection attempt {attempt + 1} failed: {e}")
                     
                     # SSOT FIX: Handle 1011 internal error as staging infrastructure limitation
@@ -590,7 +590,7 @@ class CriticalWebSocketTests:
                     await ws.send(json.dumps(test_message))
                     message_sent = True  # At least attempted
                     
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             if e.status_code in [401, 403]:
                 if auth_attempted:
                     print(f"WARNING: Authentication failed despite providing token: {e}")
@@ -693,7 +693,7 @@ class CriticalWebSocketTests:
                         except asyncio.TimeoutError:
                             return {"index": index, "status": "timeout"}
                         
-            except websockets.exceptions.InvalidStatus as e:
+            except websockets.InvalidStatus as e:
                 return {"index": index, "status": "auth_required", "code": e.status_code}
             except Exception as e:
                 return {"index": index, "status": "error", "error": str(e)[:100]}

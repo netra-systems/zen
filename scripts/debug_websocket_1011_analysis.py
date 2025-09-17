@@ -182,7 +182,7 @@ class WebSocket1011Analyzer:
                             except asyncio.TimeoutError:
                                 print(f"[TIMEOUT] No more responses for message {i}")
                                 break
-                            except websockets.exceptions.ConnectionClosedError as e:
+                            except websockets.ConnectionClosedError as e:
                                 print(f"[CONNECTION_CLOSED] Code: {e.code}, Reason: {e.reason}")
                                 if e.code == 1011:
                                     print("[CRITICAL] Found 1011 WebSocket connection closure!")
@@ -202,7 +202,7 @@ class WebSocket1011Analyzer:
                 
                 print("\n[COMPLETE] All message processing tests completed")
                 
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             print(f"[CONNECTION_CLOSED] Code: {e.code}, Reason: {e.reason}")
             if e.code == 1011:
                 print("[CRITICAL] Found 1011 WebSocket connection closure during initial connection!")

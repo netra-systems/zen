@@ -147,7 +147,7 @@ class Issue544StagingEnvironmentConnectivityTests:
                     logger.warning("⚠️ WebSocket connection made but no response to ping")
                     # Don't fail - connection itself is the important part
                 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             logger.error(f"❌ Staging WebSocket connection closed: {e}")
             pytest.skip(f"Staging WebSocket not accessible: {e}")
         except asyncio.TimeoutError:

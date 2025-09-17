@@ -202,7 +202,7 @@ class GoldenPathAuthDelegationTests(BaseE2ETest):
                         # Timeout is OK - the important thing is auth worked
                         pass
                         
-            except websockets.exceptions.ConnectionClosed as e:
+            except websockets.ConnectionClosed as e:
                 if "401" in str(e) or "Unauthorized" in str(e):
                     pytest.fail("WebSocket auth delegation failed - authentication rejected")
                 else:
@@ -521,7 +521,7 @@ class GoldenPathAuthDelegationTests(BaseE2ETest):
             if "agent_completed" in event_types:
                 self.logger.info("Complete WebSocket event flow confirmed with delegated auth")
             
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             if "401" in str(e):
                 pytest.fail("WebSocket events failed due to auth delegation issue")
             else:

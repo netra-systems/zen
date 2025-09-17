@@ -121,7 +121,7 @@ class WebSocketE2ECrossUserContaminationTests(SSotBaseTestCase):
                     await self._check_message_contamination(username, session, message)
                 except json.JSONDecodeError:
                     session.add_received_message({'type': 'malformed', 'raw_content': raw_message, 'error': 'json_decode_error'})
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             pass
         except Exception as e:
             self.fail(f'Error listening for messages for {username}: {e}')

@@ -196,7 +196,7 @@ class ToolExecutionUserExperienceE2ETest:
                 async for message in websocket:
                     event_data = json.loads(message)
                     received_events.append({'event': event_data, 'received_at': datetime.now(timezone.utc)})
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 connection_health['connected'] = False
                 connection_health['reconnections'] += 1
                 logger.warning('WebSocket connection lost during long operation')

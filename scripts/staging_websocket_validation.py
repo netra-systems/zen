@@ -115,7 +115,7 @@ class StagingWebSocketValidator:
                 except asyncio.TimeoutError:
                     logger.info("[U+23F1][U+FE0F] No response within 5 seconds (expected for test message)")
 
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             websocket_results["close_code"] = e.code
             websocket_results["close_reason"] = e.reason
             websocket_results["errors"].append(f"Connection closed: {e.code} - {e.reason}")

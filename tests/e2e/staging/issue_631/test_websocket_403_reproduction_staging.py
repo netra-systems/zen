@@ -78,7 +78,7 @@ class WebSocket403ReproductionStagingTests(SSotAsyncTestCase):
                 await websocket.send(json.dumps(test_message))
                 response = await asyncio.wait_for(websocket.recv(), timeout=10)
                 logger.info(f'WebSocket response: {response}')
-        except websockets.exceptions.WebSocketException as e:
+        except websockets.WebSocketException as e:
             connection_error = e
             logger.error(f'WebSocket connection failed: {e}')
             if '403' in str(e) or 'Forbidden' in str(e):
@@ -146,7 +146,7 @@ class WebSocket403ReproductionStagingTests(SSotAsyncTestCase):
                 try:
                     async with websockets.connect(self.staging_websocket_url, additional_headers=websocket_headers, timeout=10) as websocket:
                         logger.warning('WebSocket connection succeeded with invalid token - security issue!')
-                except websockets.exceptions.WebSocketException as e:
+                except websockets.WebSocketException as e:
                     if '403' in str(e) or 'Forbidden' in str(e):
                         got_403_error = True
                         logger.info(f'Expected 403 error for invalid token: {e}')

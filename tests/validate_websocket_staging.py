@@ -123,7 +123,7 @@ class WebSocketHealthValidator:
                 except asyncio.TimeoutError:
                     logger.info("⏰ No immediate WebSocket response (expected for non-authenticated connection)")
                 
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             results["close_code"] = e.code
             results["error_message"] = str(e)
             if e.code == 1008:  # Policy violation (auth failure)
@@ -131,7 +131,7 @@ class WebSocketHealthValidator:
             else:
                 logger.error(f"❌ WebSocket closed unexpectedly (code {e.code}): {e}")
             
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             results["error_code"] = e.status_code
             results["error_message"] = str(e)
             if e.status_code == 500:

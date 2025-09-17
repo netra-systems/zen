@@ -192,7 +192,7 @@ class WebSocketAuthFixVerificationTests(StagingTestBase):
                 except asyncio.TimeoutError:
                     print("[INFO] No response received (may be normal)")
                 
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             # Extract status code
             status_code = getattr(e.response, 'status', 0) if hasattr(e, 'response') else 0
             
@@ -304,7 +304,7 @@ class WebSocketAuthFixVerificationTests(StagingTestBase):
                 websocket_success = True
                 print("[SUCCESS] WebSocket accepted same token as REST")
                 
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             status_code = getattr(e.response, 'status', 0) if hasattr(e, 'response') else 0
             
             if status_code == 403:

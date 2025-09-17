@@ -145,7 +145,7 @@ class EnterpriseStreamingTimeoutsTests(SSotAsyncTestCase):
                     except asyncio.TimeoutError:
                         coordination_errors.append({'type': 'websocket_recv_timeout', 'elapsed': time.time() - start_time, 'timeout_limit': staging_websocket_timeout})
                         break
-                    except websockets.exceptions.ConnectionClosed:
+                    except websockets.ConnectionClosed:
                         coordination_errors.append({'type': 'websocket_connection_closed', 'elapsed': time.time() - start_time})
                         break
         except Exception as e:

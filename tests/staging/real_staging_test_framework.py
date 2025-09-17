@@ -1140,7 +1140,7 @@ def handle_staging_network_errors(func: Callable) -> Callable:
                     f"Staging HTTP error ({response.status_code}): {response.text}"
                 ) from e
         
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             raise StagingConnectivityError(
                 f"Staging WebSocket connection closed unexpectedly: {e}"
             ) from e

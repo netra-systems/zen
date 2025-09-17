@@ -479,7 +479,7 @@ class WebSocketHandshakeTimingTests(BaseIntegrationTest):
         invalid_headers = {"Authorization": "Bearer invalid-token-123"}
         
         # Attempt connection with invalid token (should fail)
-        with pytest.raises((websockets.exceptions.ConnectionClosedError, OSError, Exception)):
+        with pytest.raises((websockets.ConnectionClosedError, OSError, Exception)):
             invalid_websocket = await asyncio.wait_for(
                 websockets.connect(
                     self.websocket_base_url,

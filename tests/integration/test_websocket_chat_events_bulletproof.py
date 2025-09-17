@@ -148,7 +148,7 @@ class WebSocketChatClient:
                         logger.info(f'Client {self.client_id} received: {event_type}')
                 except json.JSONDecodeError:
                     logger.warning(f'Invalid JSON received: {message[:100]}')
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             logger.info(f'Client {self.client_id} connection closed')
             self.connected = False
         except Exception as e:

@@ -44,7 +44,7 @@ class MockWebSocketServer:
         try:
             async for message in websocket:
                 await self.process_message(client_id, message)
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             logger.info(f"Client {client_id} disconnected")
         finally:
             if client_id in self.clients:

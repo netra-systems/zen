@@ -109,7 +109,7 @@ class WebSocketAuthModesTests(SSotBaseTestCase):
         env.set('AUTH_VALIDATION_LEVEL', 'STRICT')
         client = WebSocketClient()
         headers = {}
-        with self.assertRaises((websockets.exceptions.ConnectionClosedError, ConnectionError)) as cm:
+        with self.assertRaises((websockets.ConnectionClosedError, ConnectionError)) as cm:
             success = await client.connect(url=self.websocket_url_test, headers=headers, timeout=5.0)
             if success:
                 test_message = {'type': 'user_message', 'text': 'This should fail', 'thread_id': str(uuid.uuid4())}
@@ -219,7 +219,7 @@ class WebSocketAuthModesTests(SSotBaseTestCase):
         original_headers = {'Authorization': f"Bearer {self.strict_user.get('jwt_token', 'fake.jwt.token')}", 'Connection': 'Upgrade', 'Upgrade': 'websocket', 'Sec-WebSocket-Version': '13', 'Sec-WebSocket-Key': 'test-key-12345', 'User-Agent': 'Mozilla/5.0 (Test Browser)'}
         stripped_headers = {'Connection': 'Upgrade', 'Upgrade': 'websocket', 'Sec-WebSocket-Version': '13', 'Sec-WebSocket-Key': 'test-key-12345', 'User-Agent': 'Mozilla/5.0 (Test Browser)'}
         client = WebSocketClient()
-        with self.assertRaises((websockets.exceptions.ConnectionClosedError, ConnectionError)) as cm:
+        with self.assertRaises((websockets.ConnectionClosedError, ConnectionError)) as cm:
             success = await client.connect(url=self.websocket_url_test, headers=stripped_headers, timeout=5.0)
             if success:
                 test_message = {'type': 'user_message', 'text': 'This should fail due to missing auth', 'thread_id': str(uuid.uuid4())}

@@ -129,7 +129,7 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
                 for required_event in required_events:
                     assert required_event in event_types, f"Required WebSocket event '{required_event}' not received. Events received: {event_types}"
                 assert len(events_received) > 0, 'No WebSocket events received during agent execution'
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             if e.status_code == 403:
                 pytest.fail(f"WebSocket authentication failed for user '{failing_user_data['user_id']}' due to user ID validation bug. This blocks deployment user workflows.")
             else:

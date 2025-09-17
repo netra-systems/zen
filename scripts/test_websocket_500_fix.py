@@ -244,7 +244,7 @@ class WebSocketFixValidator:
                     })
                     logger.error(f" FAIL:  {test_name}: FAILED - No welcome message")
                     
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             if e.status_code == 500:
                 results["failed_tests"] += 1
                 results["test_details"].append({

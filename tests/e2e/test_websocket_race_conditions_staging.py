@@ -627,7 +627,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                     # Small sleep to prevent busy loop
                     await asyncio.sleep(1.0)
                     
-                except websockets.exceptions.ConnectionClosed:
+                except websockets.ConnectionClosed:
                     print(f"    FAIL:  Connection closed unexpectedly at {time.time() - connection_start:.0f}s")
                     break
                 except Exception as e:

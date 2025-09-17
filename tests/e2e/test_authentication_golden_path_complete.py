@@ -231,7 +231,7 @@ class AuthenticationGoldenPathCompleteTests(BaseE2ETest):
                     except asyncio.TimeoutError:
                         pytest.fail("WebSocket response timeout - session validation may have failed")
                     
-            except websockets.exceptions.ConnectionClosed as e:
+            except websockets.ConnectionClosed as e:
                 if e.code == 1008:  # Policy violation
                     pytest.fail(" FAIL:  CRITICAL: WebSocket authentication failed - likely due to session validation failure")
                 else:

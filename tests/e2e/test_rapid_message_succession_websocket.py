@@ -55,7 +55,7 @@ class MockWebSocketServer:
         try:
 #             async for message in websocket: # Possibly broken comprehension
                 await self.process_message(websocket, message)
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             pass
         finally:
             self.clients.discard(websocket)

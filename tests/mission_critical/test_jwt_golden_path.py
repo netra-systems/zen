@@ -495,8 +495,8 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                         f"{scenario_name}: WebSocket accepted invalid JWT - security violation"
                     )
                     
-                except (websockets.exceptions.ConnectionClosedError, 
-                        websockets.exceptions.InvalidStatusCode,
+                except (websockets.ConnectionClosedError, 
+                        websockets.InvalidStatusCode,
                         asyncio.TimeoutError):
                     # Expected rejections - this is correct behavior
                     logger.info(f"✓ {scenario_name}: WebSocket correctly rejected invalid JWT")

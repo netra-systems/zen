@@ -165,7 +165,7 @@ class WebSocketAuthHandshakeTester:
                 else:
                     result.error_message = auth_response.get("error", "Authentication failed")
                     
-        except websockets.exceptions.WebSocketException as e:
+        except websockets.WebSocketException as e:
             result.error_message = f"WebSocket error: {str(e)}"
         except asyncio.TimeoutError:
             result.error_message = "Connection timeout"

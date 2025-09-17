@@ -206,7 +206,7 @@ class AuthWebSocketCompleteFlowTests(BaseE2ETest):
                     self.validator.record_flow_step('agent_events_completed', 'success', {'events_received': agent_events_received, 'response_complete': agent_response_complete, 'collection_duration': time.time() - event_start_time})
                     logger.info(' PASS:  STEP 6: Flow Completion Validation')
                     self.validator.record_flow_step('flow_completed', 'success', {'total_events': agent_events_received, 'agent_response_complete': agent_response_complete})
-            except websockets.exceptions.ConnectionClosed as e:
+            except websockets.ConnectionClosed as e:
                 self.validator.record_flow_step('websocket_connection_completed', 'failed', {'connection_error': str(e)})
                 pytest.fail(f'WEBSOCKET FLOW FAILURE: Connection closed - {str(e)}')
             except Exception as e:
@@ -332,7 +332,7 @@ class AuthWebSocketCompleteFlowTests(BaseE2ETest):
                             logger.warning('Invalid token was accepted - potential security issue')
                     except asyncio.TimeoutError:
                         logger.info(' PASS:  Invalid token caused connection drop - secure behavior')
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 logger.info(' PASS:  Invalid token rejected at connection - secure behavior')
         except Exception as e:
             logger.info(f' PASS:  Invalid token connection failed as expected: {e}')

@@ -137,7 +137,7 @@ class LoadTestWebSocketServer:
                     self.connected_clients[client_id]['message_count'] += 1
                     response = {'type': 'echo', 'original_message': json.loads(message), 'server_timestamp': datetime.now(timezone.utc).isoformat(), 'message_id': self.message_count}
                     await websocket.send(json.dumps(response))
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 pass
             finally:
                 if client_id in self.connected_clients:

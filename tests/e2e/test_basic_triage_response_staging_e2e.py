@@ -139,7 +139,7 @@ class StagingWebSocketClient:
                     if len(events) >= 3:
                         break
                     continue
-                except websockets.exceptions.ConnectionClosed:
+                except websockets.ConnectionClosed:
                     raise Exception('WebSocket connection closed by staging server')
         except Exception as e:
             raise Exception(f'Failed to receive events from staging: {e}')
@@ -288,7 +288,7 @@ class BasicTriageResponseStagingE2ETests(SSotAsyncTestCase):
                         test_ws = await asyncio.wait_for(websockets.connect(ws_url, ping_timeout=5), timeout=10.0)
                         await test_ws.close()
                         connectivity_results['websocket_endpoint_available'] = True
-                    except websockets.exceptions.ConnectionClosed:
+                    except websockets.ConnectionClosed:
                         connectivity_results['websocket_endpoint_available'] = True
                     except Exception as e:
                         if '1011' in str(e) or 'unauthorized' in str(e).lower():

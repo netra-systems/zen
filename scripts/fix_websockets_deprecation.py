@@ -4,7 +4,7 @@ Script to fix websockets deprecation warnings by updating import statements.
 
 This script fixes:
 - websockets.client.WebSocketClientProtocol -> websockets.ClientConnection
-- websockets.exceptions.InvalidStatusCode -> websockets.InvalidStatusCode
+- websockets.InvalidStatusCode -> websockets.InvalidStatusCode
 - websockets.ServerConnection -> websockets.ServerConnection
 """
 

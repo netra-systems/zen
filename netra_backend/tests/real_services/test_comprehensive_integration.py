@@ -261,7 +261,7 @@ class ComprehensiveIntegrationClient:
                 message = await self.websocket.recv()
                 data = json.loads(message)
                 self.messages_received.append({'timestamp': time.time(), 'data': data})
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             pass
         except Exception as e:
             logger.error(f'Message receiver error: {e}')

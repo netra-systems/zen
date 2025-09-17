@@ -209,12 +209,12 @@ class WebSocketProtocolFormatDeploymentValidationTests(SSotAsyncTestCase):
                 except asyncio.TimeoutError:
                     logger.info(' TIMEOUT:  No response received (acceptable for test)')
                 return {'success': True, 'selected_protocol': selected_protocol, 'response_time_ms': response_time}
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             error_code = e.status_code
             response_time = (time.time() - start_time) * 1000
             logger.info(f' ERROR:  WebSocket connection failed with status {error_code}: {e}')
             return {'success': False, 'error_code': error_code, 'error_message': f'Invalid status code: {error_code}', 'response_time_ms': response_time}
-        except websockets.exceptions.InvalidSubprotocol as e:
+        except websockets.InvalidSubprotocol as e:
             response_time = (time.time() - start_time) * 1000
             logger.info(f' ERROR:  Invalid subprotocol: {e}')
             return {'success': False, 'error_code': 400, 'error_message': f'Invalid subprotocol: {str(e)}', 'response_time_ms': response_time}

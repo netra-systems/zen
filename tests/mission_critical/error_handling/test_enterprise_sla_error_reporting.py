@@ -230,7 +230,7 @@ class EnterpriseErrorReportingTests(SSotBaseTestCase):
                             "context": error_data
                         })
             
-            except (websockets.exceptions.ConnectionClosedError, asyncio.TimeoutError) as e:
+            except (websockets.ConnectionClosedError, asyncio.TimeoutError) as e:
                 print(f" WARNING: [U+FE0F] WebSocket error test failed: {e}")
                 # This is expected initially - proves WebSocket error handling gaps
                 websocket_error_detected = True  # Continue with validation
