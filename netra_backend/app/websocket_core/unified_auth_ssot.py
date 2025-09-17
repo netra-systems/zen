@@ -323,28 +323,40 @@ class UnifiedWebSocketAuthenticator:
             return await self._fallback_via_legacy_jwt_decoding(token, auth_method)
 
     async def _fallback_via_legacy_jwt_decoding(self, token: str, auth_method: str) -> WebSocketAuthResult:
-        """Legacy JWT decoding fallback (Phase 2 compatibility)."""
+        """
+        ISSUE #1117 SSOT CONSOLIDATION: Legacy JWT decoding removed - use auth service only.
+        
+        All JWT operations now delegated to auth service SSOT pattern.
+        This method now only calls auth service validation.
+        """
         try:
-            import jwt
-            from shared.jwt_secret_manager import get_unified_jwt_secret
-
-            secret = get_unified_jwt_secret()
-            decoded = jwt.decode(token, secret, algorithms=['HS256'])
-
-            return WebSocketAuthResult(
-                success=True,
-                user_id=decoded.get('sub'),
-                email=decoded.get('email'),
-                permissions=decoded.get('permissions', []),
-                auth_method=f"{auth_method}-legacy-fallback"
-            )
+            # SSOT COMPLIANCE: Use only auth service for JWT validation
+            from netra_backend.app.auth_integration.auth import validate_token
+            
+            # Delegate to auth service SSOT 
+            validation_result = await validate_token(token)
+            
+            if validation_result and validation_result.get('valid'):
+                return WebSocketAuthResult(
+                    success=True,
+                    user_id=validation_result.get('user_id'),
+                    email=validation_result.get('email'),
+                    permissions=validation_result.get('permissions', []),
+                    auth_method=f"{auth_method}-ssot-auth-service"
+                )
+            else:
+                return WebSocketAuthResult(
+                    success=False,
+                    error_message="Auth service validation failed",
+                    auth_method=auth_method
+                )
 
         except Exception as e:
-            logger.error(f"❌ Legacy JWT validation failed: {str(e)}")
+            logger.error(f"❌ Auth service validation failed: {str(e)}")
             return WebSocketAuthResult(
                 success=False,
-                error_message=f"Legacy JWT validation failed: {str(e)}",
-                auth_method=auth_method
+                error_message=f"Auth service validation error: {str(e)}",
+                error_code="AUTH_SERVICE_ERROR"
             )
     
     def _is_e2e_test_environment(self) -> bool:
