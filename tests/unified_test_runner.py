@@ -4899,6 +4899,12 @@ def main():
     running_e2e = (args.category in ['e2e', 'websocket', 'agent'] if args.category else False) or \
                   (args.categories and any(cat in ['e2e', 'websocket', 'agent'] for cat in args.categories))
     
+    # CRITICAL: Auto-configure staging environment for e2e tests
+    if running_e2e and not args.env:
+        env.set('TEST_ENV', 'staging', 'e2e_auto_staging')
+        env.set('ENVIRONMENT', 'staging', 'e2e_auto_staging')
+        print(f"[INFO] Auto-configured staging environment for e2e tests")
+    
     # WINDOWS SAFETY: Detect Windows and use safe runner for e2e tests
     import platform
     if platform.system() == 'Windows' and running_e2e:
