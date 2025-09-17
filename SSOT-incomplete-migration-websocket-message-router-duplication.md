@@ -27,10 +27,23 @@ Multiple competing WebSocket message router implementations exist:
 - Factory pattern user isolation can break
 
 ### Test Plan
-- [ ] Find existing WebSocket message routing tests
-- [ ] Create test to validate single router implementation
-- [ ] Test WebSocket event delivery through correct router
-- [ ] Test user isolation in message routing
+
+#### Existing Tests (Found)
+**Mission Critical Tests:**
+- ✅ `/tests/mission_critical/test_websocket_agent_events_suite.py` - Protects $500K ARR golden path
+- ✅ `/tests/unit/message_routing/test_ssot_message_router_consolidation.py` - SSOT validation (expected to fail)
+- ✅ `/tests/integration/websocket/test_user_isolation_message_routing.py` - Enterprise compliance
+
+**Integration Tests:**
+- ✅ `/netra_backend/tests/integration/test_message_routing_integration.py` - Pipeline validation
+- ✅ `/tests/validation/test_canonical_message_router_non_docker.py` - Import validation
+- ✅ `/tests/unit/websocket_core/test_issue_1099_ssot_handler_validation.py` - Handler validation
+
+#### New Tests Needed
+- [ ] Test single CanonicalMessageRouter implementation exists (must pass after fix)
+- [ ] Test no circular router inheritance
+- [ ] Test consistent WebSocket manager imports
+- [ ] Test backwards compatibility preserved
 
 ### Remediation Plan
 - [ ] Consolidate to single CanonicalMessageRouter in canonical_message_router.py
@@ -40,3 +53,5 @@ Multiple competing WebSocket message router implementations exist:
 
 ### Progress Log
 - 2025-09-17: Issue discovered and documented
+- 2025-09-17: GitHub issue to be created manually (gh command restricted)
+- 2025-09-17: Starting test discovery phase
