@@ -1,17 +1,13 @@
 from shared.isolated_environment import get_env
+import pytest
+import os
+
 """
 Isolated conftest for mission-critical WebSocket tests.
 
 This prevents global conftest.py from loading real services for isolated tests.
 
-
-import pytest
-import os
-
-# Force disable real services for this test directory
-env.set('SKIP_REAL_SERVICES', 'true', test=True)
-env.set('USE_REAL_SERVICES', 'false', test=True)
-env.set('RUN_E2E_TESTS', 'false', test=True)
+Force disable real services for this test directory
 """
 
 # Override service availability checks

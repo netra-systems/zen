@@ -9,16 +9,16 @@ import pytest
 import asyncio
 
 # SSOT Environment Access - NO direct os.environ usage
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import get_env
 
 # CRITICAL: Do NOT import heavy backend modules at module level
 # This causes Docker to crash on Windows during pytest collection
 # These will be imported lazily when needed inside fixtures
 
 # Ensure isolated environment using SSOT pattern
-_env = IsolatedEnvironment()
-_env.set_env('WEBSOCKET_TEST_ISOLATED', 'true')
-_env.set_env('SKIP_REAL_SERVICES', 'true')
+_env = get_env()
+_env.set('WEBSOCKET_TEST_ISOLATED', 'true', source='test')
+_env.set('SKIP_REAL_SERVICES', 'true', source='test')
 
 @pytest.fixture(scope="session")
 def event_loop():
@@ -32,7 +32,7 @@ def event_loop():
 def isolated_environment():
     """Fixture to ensure isolated test environment using SSOT pattern."""
     # Use SSOT IsolatedEnvironment - NO direct os.environ access
-    env = IsolatedEnvironment()
+    env = get_env()
 
     # Mock environment variables that might cause real service connections
     old_env = {}
@@ -44,17 +44,17 @@ def isolated_environment():
     }
 
     for key, value in test_env_vars.items():
-        old_env[key] = env.get_env(key)
-        env.set_env(key, value)
+        old_env[key] = env.get(key)
+        env.set(key, value, source='test')
 
     yield env
 
     # Restore original environment using SSOT pattern
     for key, old_value in old_env.items():
         if old_value is None:
-            env.remove_env(key)
+            env.remove(key)
         else:
-            env.set_env(key, old_value)
+            env.set(key, old_value, source='test')
 
 # Auto-use the isolated environment for all tests in this module
 pytest_plugins = []
