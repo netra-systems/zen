@@ -21,6 +21,7 @@ import asyncio
 import json
 import time
 import pytest
+import unittest
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -53,7 +54,7 @@ class GoldenPathTestMetrics:
             self.events_received = []
 
 
-class TestGoldenPathValidation(SSotAsyncTestCase):
+class TestGoldenPathValidation(SSotAsyncTestCase, unittest.TestCase):
     """
     Golden Path Validation Test Suite
 
@@ -61,9 +62,9 @@ class TestGoldenPathValidation(SSotAsyncTestCase):
     Focus on actual user experience and business value delivery
     """
 
-    async def setup_method(self, method):
+    async def asyncSetUp(self):
         """Set up golden path validation test environment"""
-        await super().async_setup_method(method)
+        await super().asyncSetUp()
         
         self.env = IsolatedEnvironment()
         self.websocket_utility = WebSocketTestUtility()
