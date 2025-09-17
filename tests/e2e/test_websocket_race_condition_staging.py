@@ -46,6 +46,7 @@ logger = get_logger(__name__)
 
 
 class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
+    pass
 """Empty docstring."""
     E2E tests for WebSocket race conditions in GCP staging environment.
     
@@ -131,7 +132,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                             response = await asyncio.wait_for(websocket.recv(), timeout=2.0)
                             response_time = time.time() - send_start
                             
-                            logger.info(fAttempt {attempt}: Connection {connection_time:.3f}s, 
+                            logger.info(fAttempt {attempt): Connection {connection_time:.3f)s, 
                                        fResponse {response_time:.3f}s")"
                             
                             # Check for race condition indicators
@@ -645,7 +646,7 @@ class StagingRaceConditionReporter:
         self.findings = []
         self.staging_environment = GCP Cloud Run Staging""
     
-    def record_finding(self, test_name: str, race_type: str, details: Dict[str, Any]:
+    def record_finding(self, test_name: str, race_type: str, details: Dict[str, Any):
         Record a race condition finding.""
         self.findings.append({
             'test_name': test_name,
@@ -675,3 +676,4 @@ class StagingRaceConditionReporter:
             report_lines.append(")"
         
         return "\n".join(report_lines)
+)))))))))))))))))))))))

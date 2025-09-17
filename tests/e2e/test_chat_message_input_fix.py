@@ -1,6 +1,8 @@
 '''
+'''
 Test suite to verify the frontend message input bug fix.
 Tests that messages sent via input field properly start agents.
+'''
 '''
 
 import pytest
@@ -132,8 +134,8 @@ class TestChatMessageInputFix:
     async def test_empty_message_not_sent(self, ws_client):
         """Test that empty or whitespace-only messages are not sent."""
                     # These should not trigger any agent activity
-        invalid_messages = ["", " ", "   ", " )
-        ", "\t"]
+        invalid_messages = ["", " ", "   ", " )"
+        ", "\t"]"
 
         for invalid_msg in invalid_messages:
                         # Attempt to send invalid message
@@ -160,8 +162,8 @@ class TestChatMessageInputFix:
     async def test_message_with_thread_switching(self, ws_client):
         """Test message sending when switching between threads."""
         pass
-        thread1 = "thread-001"
-        thread2 = "thread-002"
+        thread1 = "thread-1"
+        thread2 = "thread-2"
 
                                     # Start first thread
                                     # Removed problematic line: await ws_client.send_json({)
@@ -207,3 +209,5 @@ class TestChatMessageInputFix:
 
         if __name__ == "__main__":
         pytest.main([__file__, "-v", "--tb=short"])
+
+}}}}}}}}}

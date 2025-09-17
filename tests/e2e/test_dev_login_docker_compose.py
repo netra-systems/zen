@@ -1,4 +1,5 @@
 '''
+'''
 End-to-end tests for dev login with Docker Compose.
 Tests the complete auth flow to prevent regression of database connectivity issues.
 
@@ -7,6 +8,7 @@ Business Value Justification (BVJ):
 - Business Goal: Development velocity and reliability
 - Value Impact: Ensures developers can always use dev login in local Docker environment
 - Strategic Impact: Prevents auth service regression that blocks development
+'''
 '''
 import pytest
 import requests
@@ -193,8 +195,8 @@ class TestDevLoginDockerCompose:
     
 
     # Look for database URL log line
-        for line in result.stdout.split(" )
-        "):
+        for line in result.stdout.split(" )"
+        "):"
         if "Database URL:" in line:
             # Should show asyncpg format
         assert "postgresql+asyncpg://" in line or "***" in line  # Might be masked
@@ -241,6 +243,7 @@ class TestDevLoginDockerCompose:
         result = subprocess.run( )
         ["docker", "exec", "netra-dev-auth", "python", "-c",
         '''
+        '''
         from auth_service.auth_core.config import AuthConfig
         from shared.database_url_builder import DatabaseURLBuilder
         from shared.isolated_environment import get_env
@@ -249,11 +252,11 @@ class TestDevLoginDockerCompose:
         url_from_config = AuthConfig.get_database_url()
         print("")
 
-    # Check it's async format
+    # Check it's async format'
         assert "postgresql+asyncpg://" in url_from_config
         assert "dev-postgres" in url_from_config
         print("[U+2713] Database URL correctly formatted")
-        '''],
+        '''],'
         capture_output=True,
         text=True
     
@@ -291,11 +294,12 @@ class TestDockerComposeConfiguration:
         result = subprocess.run( )
         ["docker", "exec", "netra-dev-auth", "python", "-c",
         '''
+        '''
         import socket
         s = socket.socket()
         result = s.connect_ex(('dev-postgres', 5432))
         print("")
-        '''],
+        '''],'
         capture_output=True,
         text=True
     
@@ -306,13 +310,16 @@ class TestDockerComposeConfiguration:
         result = subprocess.run( )
         ["docker", "exec", "netra-dev-auth", "python", "-c",
         '''
+        '''
         import socket
         s = socket.socket()
         result = s.connect_ex(('dev-redis', 6379))
         print("")
-        '''],
+        '''],'
         capture_output=True,
         text=True
     
 
         assert "Success" in result.stdout
+
+'''

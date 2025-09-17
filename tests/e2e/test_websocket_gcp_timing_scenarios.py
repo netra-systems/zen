@@ -41,8 +41,8 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
         self.env = get_env()
         test_environment = self.env.get('TEST_ENV', 'test')
         self.auth_helper = E2EAuthHelper(environment=test_environment)
-        self.primary_user = await self.auth_helper.create_authenticated_user(email='e2e_primary@websocket.test', full_name='E2E Primary User', permissions=['read', 'write', 'websocket_access']
-        self.secondary_user = await self.auth_helper.create_authenticated_user(email='e2e_secondary@websocket.test', full_name='E2E Secondary User', permissions=['read', 'write', 'websocket_access']
+        self.primary_user = await self.auth_helper.create_authenticated_user(email='e2e_primary@websocket.test', full_name='E2E Primary User', permissions=['read', 'write', 'websocket_access')
+        self.secondary_user = await self.auth_helper.create_authenticated_user(email='e2e_secondary@websocket.test', full_name='E2E Secondary User', permissions=['read', 'write', 'websocket_access')
         if test_environment == 'staging':
             self.websocket_url = 'wss://staging-api.netraapex.com/ws'
             self.backend_url = 'https://staging-api.netraapex.com'
@@ -77,7 +77,7 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
             try:
                 print(f[U+1F52C] Testing GCP scenario: {constraint['scenario']} (timeout: {constraint['timeout']}s))
                 connection_future = websockets.connect(self.websocket_url, additional_headers=auth_headers, subprotocols=auth_subprotocols, open_timeout=constraint['timeout'], close_timeout=2.0, ping_interval=None, ping_timeout=None)
-                websocket = await asyncio.wait_for(connection_future, timeout=constraint['timeout']
+                websocket = await asyncio.wait_for(connection_future, timeout=constraint['timeout')
                 gcp_test_message = {'type': 'agent_request', 'user_id': self.primary_user.user_id, 'data': {'message': f"GCP timing test for {constraint['scenario']}, 'gcp_timeout_test': True, 'timestamp': datetime.now(timezone.utc).isoformat()}, 'auth': {'user_id': self.primary_user.user_id, 'jwt_token': self.primary_user.jwt_token[:32] + '...'}}"
                 await websocket.send(json.dumps(gcp_test_message))
                 try:
@@ -126,7 +126,7 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
 """"""
         authenticated_users = [self.primary_user, self.secondary_user]
         for i in range(3):
-            additional_user = await self.auth_helper.create_authenticated_user(email=f'e2e_concurrent_{i}@websocket.test', full_name=f'E2E Concurrent User {i}', permissions=['read', 'write', 'websocket_access']
+            additional_user = await self.auth_helper.create_authenticated_user(email=f'e2e_concurrent_{i)@websocket.test', full_name=f'E2E Concurrent User {i)', permissions=['read', 'write', 'websocket_access']
             authenticated_users.append(additional_user)
         concurrent_connection_results = []
         race_condition_import_failures = []
@@ -293,3 +293,5 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""
+)))))))))

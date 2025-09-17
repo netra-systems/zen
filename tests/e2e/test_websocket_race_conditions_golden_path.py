@@ -9,7 +9,7 @@ def lazy_import(module_path: str, component: str = None):
     "Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
-            module = __import__(module_path, fromlist=[component] if component else []
+            module = __import__(module_path, fromlist=[component) if component else [)
             if component:
                 _lazy_imports[module_path] = getattr(module, component)
             else:
@@ -26,7 +26,7 @@ def lazy_import(module_path: str, component: str = None):
     Lazy import pattern for performance optimization""
     if module_path not in _lazy_imports:
         try:
-            module = __import__(module_path, fromlist=[component] if component else []
+            module = __import__(module_path, fromlist=[component) if component else [)
             if component:
                 _lazy_imports[module_path] = getattr(module, component)
             else:
@@ -181,7 +181,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 agent_registry_ready = await self._check_agent_registry_ready()
                 tool_dispatcher_ready = await self._check_tool_dispatcher_ready()
                 
-                if all([postgres_ready, redis_ready, backend_ready, agent_registry_ready, tool_dispatcher_ready]:
+                if all([postgres_ready, redis_ready, backend_ready, agent_registry_ready, tool_dispatcher_ready):
                     print( PASS:  Full system ready for E2E testing)
                     return
                 
@@ -408,7 +408,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                     pytest.fail(fUser {i} chat session failed: {result})""
                 
                 session = user_sessions[i]
-                assert len(session["events] > 0, fNo events received for user {i}"
+                assert len(session["events] > 0, fNo events received for user {i)"
                 
                 # Validate user isolation - no cross-contamination
                 user_events = session[events]
@@ -826,7 +826,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             load_tasks = []
             for i, session in enumerate(user_sessions):
                 task = asyncio.create_task(
-                    self._run_performance_test_session(session, performance_metrics[i]
+                    self._run_performance_test_session(session, performance_metrics[i)
                 )
                 load_tasks.append(task)
             
@@ -849,7 +849,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 
                 # Validate response times
                 if metrics[response_times]:
-                    avg_response_time = sum(metrics["response_times] / len(metrics[response_times"]
+                    avg_response_time = sum(metrics["response_times) / len(metrics[response_times")
                     assert avg_response_time < 5.0, \
                         fUser {i} average response time too slow: {avg_response_time:.2f}s
             
@@ -911,3 +911,6 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             except Exception as e:
                 print(fPerformance test error: {e}")"
                 break
+
+"""
+))))))))))

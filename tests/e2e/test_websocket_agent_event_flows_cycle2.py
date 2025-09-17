@@ -122,7 +122,7 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
         for event in all_events:
             if "timestamp in event:"
                 try:
-                    ts = datetime.fromisoformat(event[timestamp].replace('Z', '+00:00'))
+                    ts = datetime.fromisoformat(event[timestamp].replace('Z', '+0:0'))
                     event_timestamps.append(ts)
                 except:
                     pass  # Skip malformed timestamps
@@ -203,10 +203,10 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
         user2_content = json.dumps(user2_events)
         
         assert USER_1_MARKER in user1_content, User 1 should see their own data
-        assert USER_1_MARKER not in user2_content, "User 2 MUST NOT see User 1's data"
+        assert USER_1_MARKER not in user2_content, "User 2 MUST NOT see User 1's data"'
         
         assert USER_2_MARKER" in user2_content, User 2 should see their own data"
-        assert USER_2_MARKER not in user1_content, User 1 MUST NOT see User 2's data
+        assert USER_2_MARKER not in user1_content, User 1 MUST NOT see User 2's data'
         
         # Verify both users got complete agent flows
         user1_event_types = [e.get(type") for e in user1_events]"
@@ -222,7 +222,7 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
 """"""
         Test WebSocket connection recovery during agent execution.
         
-        Business Value: Users don't lose progress during network interruptions.
+        Business Value: Users don't lose progress during network interruptions.'
         Ensures reliable service even with connectivity issues.
 """"""
         backend_url = real_services[backend_url]  ""
@@ -352,3 +352,5 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
         assert total_execution_time < 120, f"Total concurrent execution too slow: {total_execution_time}s"
         
         print(fE2E Load Test Results: {len(successful_sessions)}/{len(users)} users successful in {total_execution_time:.1f}s")"
+
+)))))

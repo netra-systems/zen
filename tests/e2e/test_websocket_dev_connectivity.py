@@ -205,7 +205,7 @@ class WebSocketDevConnectivityTests:
             assert error_data.get(type) == error, \
                 fExpected error message, got: {error_data.get('type')}""
             assert "Invalid JSON in error_data.get(message, ), \"
-                fError message doesn't mention JSON: {error_data.get('message')}""
+                fError message doesn't mention JSON: {error_data.get('message')}""'
             
             # Verify connection is still active by sending valid message
             test_message = {
@@ -270,7 +270,7 @@ class WebSocketDevConnectivityTests:
             for i, response in enumerate(received_responses):
                 assert response.get(type) == echo_response, \
                     f"Wrong response type for message {i}"
-                original = response.get(original", {}"
+                original = response.get(original", {)"
                 assert original.get(sequence) == i, \
                     fMessage order not preserved: expected {i}, got {original.get('sequence')}""
                 assert original.get(payload) == fMessage {i}, \
@@ -315,7 +315,7 @@ class WebSocketDevConnectivityTests:
                 
                 # Try to parse ISO format timestamp
                 try:
-                    datetime.fromisoformat(server_time.replace('Z', '+00:00'))
+                    datetime.fromisoformat(server_time.replace('Z', '+0:0'))
                 except ValueError:
                     raise AssertionError(fInvalid server time format: {server_time})""
                 
@@ -370,3 +370,6 @@ if __name__ == "__main__:"
         print(SUCCESS WebSocket connectivity validation successful)""
     else:
         print("FAILED WebSocket connectivity validation failed"")"
+
+)
+}

@@ -57,7 +57,7 @@ class MessageOrderingPreservationTests:
             
             assert response is not None
             assert response.get(ordering_preserved) is True
-            assert response.get(sequence_gaps, [] == []""
+            assert response.get(sequence_gaps, [) == [)""
             assert response.get("out_of_order_count, 0) == 0"
             await client.close()
         except Exception as e:
@@ -320,3 +320,6 @@ class ConcurrentMessageHandlingTests:
             if server not available in str(e).lower():""
                 pytest.skip("WebSocket server not available for isolation test")
             raise
+
+"""
+))

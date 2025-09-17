@@ -1,7 +1,7 @@
 "E2E Staging tests for WebSocket await error impact on Golden Path."""
 
 This test suite validates the complete Golden Path user flow on staging GCP
-to ensure WebSocket await errors don't break the end-to-end user experience.
+to ensure WebSocket await errors don't break the end-to-end user experience.'
 No Docker required - uses staging.netrasystems.ai infrastructure.
 
 Business Value: Validates the complete user journey that delivers 90% of platform value.
@@ -254,7 +254,7 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
 
         # Overall user experience assessment
         critical_components = ['websocket_connection', 'backend_responsiveness']
-        resilience_assessment['user_experience_intact'] = all(
+        resilience_assessment['user_experience_intact') = all(
             resilience_assessment[component] for component in critical_components
         )
 
@@ -325,4 +325,6 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
 
 
 if __name__ == __main__:
-    pytest.main([__file__, -v", "--tb=short"]"
+    pytest.main([__file__, -v", "--tb=short")"
+"""
+)

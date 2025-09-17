@@ -1,4 +1,5 @@
 '''
+'''
 Microservice Isolation Validation Test Suite
 
 Business Value Justification (BVJ):
@@ -18,6 +19,7 @@ Test Categories:
 5. Communication Protocols - Only API-based inter-service communication
 
 Performance: Static analysis only, completes in <5 seconds
+'''
 '''
 
 import ast
@@ -66,7 +68,7 @@ class MicroserviceIsolationValidator:
         return imports
 
     def validate_import_isolation(self) -> Dict[str, Any]:
-        """Validate that services don't import from each other"""
+        """Validate that services don't import from each other"""'
         violations = []
         forbidden_imports = { }
         "auth_service": "app.",
@@ -85,7 +87,7 @@ class MicroserviceIsolationValidator:
         "service": service_name,
         "file": str(file_path.relative_to(self.project_root)),
         "violation": "",
-        "rule": "MS-ARC-002"
+        "rule": "MS-ARC-2"
                         
 
         return {"violations": violations, "total_violations": len(violations), "isolated": len(violations) == 0}
@@ -204,7 +206,8 @@ class TestMicroserviceIsolationValidation:
         results = validation_results["import_isolation"]
         if not results["isolated"]:
         violations = "
-        ".join([""violation"]} in {v["file"]}" for v in results["violations"]])
+        violations = "
+        ".join([""violation"]} in {v["file"]}" for v in results["violations"]])"
         pytest.fail("")
 
         @pytest.mark.e2e
@@ -214,7 +217,8 @@ class TestMicroserviceIsolationValidation:
         results = validation_results["service_independence"]
         if not results["independent"]:
         violations = "
-        ".join(["" for v in results["violations"]])
+        violations = "
+        ".join(["" for v in results["violations"]])"
         pytest.fail("")
 
         @pytest.mark.e2e
@@ -223,7 +227,8 @@ class TestMicroserviceIsolationValidation:
         results = validation_results["code_boundaries"]
         if not results["boundaries_clean"]:
         violations = "
-        ".join(["" for v in results["violations"]])
+        violations = "
+        ".join(["" for v in results["violations"]])"
         pytest.fail("")
 
         @pytest.mark.e2e
@@ -233,7 +238,8 @@ class TestMicroserviceIsolationValidation:
         results = validation_results["configuration_isolation"]
         if not results["isolated_config"]:
         violations = "
-        ".join(["" for v in results["violations"]])
+        violations = "
+        ".join(["" for v in results["violations"]])"
         pytest.fail("")
 
         @pytest.mark.e2e
@@ -242,7 +248,8 @@ class TestMicroserviceIsolationValidation:
         results = validation_results["communication_protocols"]
         if not results["api_only_communication"]:
         violations = "
-        ".join([""violation"]} in {v["file"]}" for v in results["violations"]])
+        violations = "
+        ".join([""violation"]} in {v["file"]}" for v in results["violations"]])"
         pytest.fail("")
 
         @pytest.mark.e2e
@@ -261,7 +268,7 @@ class TestMicroserviceIsolationValidation:
         ("Communication Protocols", "communication_protocols")]
 
         print("")
-         + =" * 25 + " MICROSERVICE ISOLATION REPORT  + =" * 25)
+         + =" * 25 + " MICROSERVICE ISOLATION REPORT  + =" * 25)"
         total_violations = 0
         all_passed = True
 
@@ -277,11 +284,11 @@ class TestMicroserviceIsolationValidation:
         print("")
 
         if all_passed:
-        print("ALL MICROSERVICE ISOLATION TESTS PASSED )
-        Architecture integrity maintained - services are 100% independent")
+        print("ALL MICROSERVICE ISOLATION TESTS PASSED )"
+        Architecture integrity maintained - services are 100% independent")"
         else:
-        print("MICROSERVICE ISOLATION VIOLATIONS DETECTED )
-        Fix isolation violations to maintain system stability")
+        print("MICROSERVICE ISOLATION VIOLATIONS DETECTED )"
+        Fix isolation violations to maintain system stability")"
 
         print("=" * 80)
         assert True, "Microservice isolation validation report generated"

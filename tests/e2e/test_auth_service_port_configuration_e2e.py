@@ -1,8 +1,11 @@
 """
+"""
 E2E Test: Auth Service Port Configuration Validation
 This test exposes the port mismatch issue where E2E tests expect different ports but auth service uses a different default.
 
 BVJ: Enterprise | Infrastructure | Service Discovery | BLOCKING - Port mismatches prevent E2E tests from running"""
+BVJ: Enterprise | Infrastructure | Service Discovery | BLOCKING - Port mismatches prevent E2E tests from running"""
+ISSUE: Auth service defaults to 8080 but E2E tests expect 8001/8081 causing connection failures"""
 ISSUE: Auth service defaults to 8080 but E2E tests expect 8001/8081 causing connection failures"""
 import asyncio
 import os
@@ -12,6 +15,7 @@ from typing import Dict, List, Any
 from shared.isolated_environment import IsolatedEnvironment
 
 # Test configurations that represent the current inconsistent state
+PORT_CONFIGURATIONS = [ ]"""
 PORT_CONFIGURATIONS = [ ]"""
 "name": "CORRECTED_E2E_CONFIG",
 "expected_auth_port": 8081,
@@ -46,6 +50,7 @@ class AuthServicePortConfigurationValidator:
     def __init__(self):
         pass
         self.results: List[Dict[str, Any]] = []
+"""
 """
         """Test all port configurations and expose the mismatch."""
 validation_results = {"success": False,, "configurations_tested": len(PORT_CONFIGURATIONS),, "working_configurations": 0,, "failed_configurations": 0,, "port_mismatch_detected": False,, "configuration_results": [],, "recommended_fix": None}
@@ -99,6 +104,7 @@ result = {"configuration_name": config["name"],, "expected_port": port,, "descri
 
     def _generate_fix_recommendation(self, validation_results: Dict[str, Any]) -> Dict[str, Any]:
         """Generate recommendation for fixing the port mismatch.""""""
+        """Generate recommendation for fixing the port mismatch.""""""
         result for result in validation_results["configuration_results"]
         if result["connection_successful"]
     
@@ -127,6 +133,7 @@ recommendation = {"issue": "Port configuration mismatch detected",, "working_por
 @pytest.mark.e2e
     async def test_auth_service_port_consistency_validation():
 """
+"""
 FAILING TEST: Expose auth service port configuration inconsistencies
 
 This test is DESIGNED TO FAIL to expose the current port mismatch issue:
@@ -134,37 +141,44 @@ This test is DESIGNED TO FAIL to expose the current port mismatch issue:
 - Auth service defaults to port 8080
 - This causes E2E test failures when services are not running on expected ports
 """
+"""
+the need to standardize port configurations across the system."""
 the need to standardize port configurations across the system."""
 pass
 validator = AuthServicePortConfigurationValidator()
 results = await validator.validate_all_port_configurations()
 """
-print(f" )
-=== AUTH SERVICE PORT CONFIGURATION VALIDATION ===")
+"""
+print(f" )"
+=== AUTH SERVICE PORT CONFIGURATION VALIDATION ===")"
 print("formatted_string")
 print("formatted_string")
 print("formatted_string")
 print("formatted_string")
 
-print(f" )
-=== DETAILED RESULTS ===")
+print(f" )"
+=== DETAILED RESULTS ===")"
 for config_result in results['configuration_results']:
 status = " PASS:  WORKING" if config_result['connection_successful'] else " FAIL:  FAILED"
 print("formatted_string")
 print("formatted_string")
 if config_result['error']:
+    pass
 print("formatted_string")
 if config_result['test_files_using']:
+    pass
 print("formatted_string")
 print()
 
 if results['recommended_fix']:
-print(f" )
-=== RECOMMENDED FIX ===")
+    pass
+print(f" )"
+=== RECOMMENDED FIX ===")"
 fix = results['recommended_fix']
 print("formatted_string")
 print("formatted_string")
 if 'working_port' in fix:
+    pass
 print("formatted_string")
 print("formatted_string")
 
@@ -182,14 +196,19 @@ f"Fix by standardizing all E2E tests to use the same auth service port."
 @pytest.mark.e2e
     async def test_specific_port_8001_expectation():
 """
+"""
 Test that specifically checks if auth service is running on port 8001
 as expected by many E2E test configuration files.
 """
+"""
 exposing the mismatch with E2E test expectations."""
+exposing the mismatch with E2E test expectations."""
+pass"""
 pass"""
 health_url = "formatted_string"
 
 try:
+    pass
 async with httpx.AsyncClient(timeout=5.0) as client:
 response = await client.get(health_url)
 
@@ -204,12 +223,15 @@ assert "auth" in response_data.get("service", "").lower(), ( )
 print("formatted_string")
 
 except httpx.ConnectError:
+    pass
 pytest.fail( )
 "formatted_string"
+f"Many E2E tests expect auth service on this port but it"s not available. "
 f"Many E2E tests expect auth service on this port but it"s not available. "
 f"This exposes the port configuration mismatch issue."
                                                             
 except httpx.TimeoutException:
+    pass
 pytest.fail("formatted_string")
 
 
@@ -217,14 +239,19 @@ pytest.fail("formatted_string")
 @pytest.mark.e2e
     async def test_specific_port_8081_expectation():
 """
+"""
 Test that specifically checks if auth service is running on port 8081
 as expected by dev launcher and real service E2E tests.
 """
+"""
 exposing the mismatch with dev launcher expectations."""
+exposing the mismatch with dev launcher expectations."""
+pass"""
 pass"""
 health_url = "formatted_string"
 
 try:
+    pass
 async with httpx.AsyncClient(timeout=5.0) as client:
 response = await client.get(health_url)
 
@@ -239,12 +266,15 @@ assert "auth" in response_data.get("service", "").lower(), ( )
 print("formatted_string")
 
 except httpx.ConnectError:
+    pass
 pytest.fail( )
 "formatted_string"
+f"Dev launcher and real service E2E tests expect auth service on this port but it"s not available. "
 f"Dev launcher and real service E2E tests expect auth service on this port but it"s not available. "
 f"This exposes the port configuration mismatch issue."
                                                                                 
 except httpx.TimeoutException:
+    pass
 pytest.fail("formatted_string")
 
 
@@ -260,3 +290,6 @@ import json
 print(json.dumps(results, indent=2))
 
 asyncio.run(main())
+
+]]]]
+}

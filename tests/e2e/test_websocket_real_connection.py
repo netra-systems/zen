@@ -71,7 +71,7 @@ class WebSocketRealConnectionTester:
     async def create_authenticated_connection(self, user_id: str) -> Dict[str, Any]:
         "Create authenticated WebSocket connection."
         try:
-            # CRITICAL FIX: Skip health check as it's causing false failures
+            # CRITICAL FIX: Skip health check as it's causing false failures'
             # The WebSocket connection attempt itself will verify service availability
             
             # Get or create JWT token
@@ -182,7 +182,7 @@ class WebSocketRealConnectionTester:
         
         while time.time() - start_time < timeout:
             try:
-                # CRITICAL FIX: Use shorter receive timeout but don't break on first timeout
+                # CRITICAL FIX: Use shorter receive timeout but don't break on first timeout'
                 # Allow multiple receive attempts within the overall timeout window
                 response = await client.receive(timeout=0.5)
                 if response:
@@ -190,7 +190,7 @@ class WebSocketRealConnectionTester:
                     # Small delay to allow more responses to arrive
                     await asyncio.sleep(0.1)
             except asyncio.TimeoutError:
-                # Don't break immediately, continue trying until overall timeout
+                # Don't break immediately, continue trying until overall timeout'
                 await asyncio.sleep(0.1)
                 continue
         
@@ -349,7 +349,7 @@ class AgentPipelineValidator:
         
         return responses
     
-    def _filter_agent_responses(self, responses: List[Dict[str, Any]] -> List[Dict[str, Any]]:
+    def _filter_agent_responses(self, responses: List[Dict[str, Any)) -> List[Dict[str, Any)):
         Filter responses to find agent-related messages.""
         agent_message_types = {
             agent_started, agent_update, agent_completed, agent_error","
@@ -384,7 +384,7 @@ class WebSocketRealConnectionTests:
             
             if not connection_result["connected]:"
                 error_msg = str(connection_result[error].lower()
-                if any(keyword in error_msg for keyword in ["connection, timeout", not available, refused]:
+                if any(keyword in error_msg for keyword in ["connection, timeout", not available, refused):
                     pytest.skip(fWebSocket service not available: {connection_result['error']})
                 
             assert connection_result[connected"], f"Authentication failed: {connection_result['error']}
@@ -405,7 +405,7 @@ class WebSocketRealConnectionTests:
             
         except Exception as e:
             error_msg = str(e).lower()
-            if any(keyword in error_msg for keyword in [server not available", connection, timeout, refused]:"
+            if any(keyword in error_msg for keyword in [server not available", connection, timeout, refused):"
                 pytest.skip(WebSocket service not available for authentication test")"
             raise
     
@@ -431,7 +431,7 @@ class WebSocketRealConnectionTests:
                 assert flow[send_success], fFailed to send message: {flow['sent_message']}
                 
                 # Note: Response count may be 0 if agent pipeline is not fully running
-                # This is acceptable as we're testing WebSocket connectivity primarily
+                # This is acceptable as we're testing WebSocket connectivity primarily'
             
             await client.close()
             
@@ -457,7 +457,7 @@ class WebSocketRealConnectionTests:
             routing_result = await validator.validate_agent_message_routing(user_id)
             
             # Validate routing tests were performed
-            assert len(routing_result[message_routing_tests"] > 0, No routing tests performed"
+            assert len(routing_result[message_routing_tests") > 0, No routing tests performed"
             
             # Test that messages were sent successfully (routing validation)
             for routing_test in routing_result[message_routing_tests]:
@@ -467,7 +467,7 @@ class WebSocketRealConnectionTests:
                 assert "payload in test_message, Test message missing 'payload' field"
                 
                 # Agent responses are optional if agent pipeline is not fully running
-                # We're primarily testing WebSocket message routing capability
+                # We're primarily testing WebSocket message routing capability'
             
             await client.close()
             
@@ -533,7 +533,7 @@ class WebSocketRealConnectionTests:
                     
             except Exception as e:
                 error_msg = str(e).lower()
-                if any(keyword in error_msg for keyword in [server not available, connection, timeout]:""
+                if any(keyword in error_msg for keyword in [server not available, connection, timeout):""
                     pytest.skip(WebSocket service not available for invalid auth test")"
                 rejection_results.append({
                     token: invalid_token[:20] + ...,
@@ -685,7 +685,7 @@ class WebSocketRealConnectionTests:
                 
         except Exception as e:
             error_msg = str(e).lower()
-            if any(keyword in error_msg for keyword in [server not available, connection", "timeout]:
+            if any(keyword in error_msg for keyword in [server not available, connection", "timeout):
                 pytest.skip(WebSocket service not available for concurrent test)
             raise
 
@@ -717,3 +717,5 @@ Test Coverage:
 - Concurrent connections with different authenticated users
 - Message structure validation for frontend compatibility
 """Empty docstring."""
+
+)))))))))))))

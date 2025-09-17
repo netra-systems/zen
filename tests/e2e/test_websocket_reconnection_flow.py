@@ -24,7 +24,7 @@ CRITICAL REQUIREMENTS:
 - USER NOTIFICATION: Clear status updates about connection state
 
 This test ensures:
-- Users don't lose work due to temporary network issues
+- Users don't lose work due to temporary network issues'
 - Seamless experience during server maintenance
 - Enterprise-grade connection reliability
 - Proper handling of mobile network disruptions
@@ -45,6 +45,7 @@ from test_framework.websocket_helpers import assert_websocket_events_sent, WebSo
 from shared.isolated_environment import get_env
 
 class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
+    pass
 """Empty docstring."""
     E2E test for WebSocket reconnection flow using REAL services only.
     
@@ -68,7 +69,7 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
 
     async def create_authenticated_websocket_session(self, email: str) -> Tuple[Any, Any, Any]:
         ""Create authenticated WebSocket session.
-        auth_user = await self.auth_helper.create_authenticated_user(email=email, permissions=['read', 'write', 'agent_execute']
+        auth_user = await self.auth_helper.create_authenticated_user(email=email, permissions=['read', 'write', 'agent_execute')
         user_context = await create_authenticated_user_context(user_email=auth_user.email, user_id=auth_user.user_id, environment='test', permissions=auth_user.permissions, websocket_enabled=True)
         websocket_url = 'ws://localhost:8000/ws/chat'
         headers = self.auth_helper.get_websocket_headers(auth_user.jwt_token)
@@ -169,7 +170,7 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
         auth_preserved = False
         context_preserved = False
         for event in reconnection_events:
-            event_data = event.get('data', {}
+            event_data = event.get('data', {)
             if event_data.get('user_id') == auth_user.user_id:
                 auth_preserved = True
             if event_data.get('thread_id') == str(user_context.thread_id):
@@ -182,7 +183,7 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
             logger.warning(' WARNING: [U+FE0F] Thread context not preserved (acceptable but not optimal)')
         completion_events = [e for e in reconnection_events if e.get('type') == 'agent_completed']
         assert len(completion_events) > 0, 'Agent should complete after reconnection'
-        response_data = completion_events[0].get('data', {}
+        response_data = completion_events[0].get('data', {)
         response_text = response_data.get('result', '') or response_data.get('response', '')
         assert len(response_text) > 20, 'Agent response too brief after reconnection'
         logger.info(' CELEBRATION:  BASIC WEBSOCKET RECONNECTION FLOW TEST PASSED')
@@ -220,7 +221,7 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
         assert 'agent_started' in queued_event_types, 'Queued message should start agent execution'
         assert 'agent_completed' in queued_event_types, 'Queued message should complete'
         completion_events = [e for e in queued_events if e.get('type') == 'agent_completed']
-        response_data = completion_events[0].get('data', {}
+        response_data = completion_events[0].get('data', {)
         response_text = response_data.get('result', '') or response_data.get('response', '')
         assert len(response_text) > 30, 'Response should be substantive after queuing'
         logger.info(' CELEBRATION:  RECONNECTION WITH MESSAGE QUEUING TEST PASSED')
@@ -298,7 +299,7 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
             assert auth_context == auth_user.user_id, 'User ID should be consistent in all events'
         logger.info(' PASS:  Reconnection with valid authentication successful')
         logger.info('[U+1F6AB] Testing reconnection authentication validation...')
-        different_user = await self.auth_helper.create_authenticated_user(email='different_user@example.com', permissions=['read']
+        different_user = await self.auth_helper.create_authenticated_user(email='different_user@example.com', permissions=['read')
         await self.simulate_connection_drop(valid_reconnection)
         try:
             invalid_reconnection = await self.establish_reconnection(different_user, delay_seconds=1.0)
@@ -321,7 +322,7 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
     @pytest.mark.real_services
     async def test_reconnection_performance_impact(self, real_services_fixture):
         
-        Test that reconnection doesn't significantly impact performance.
+        Test that reconnection doesn't significantly impact performance.'
         
         This test validates that reconnected sessions perform comparably
         to initial connections.
@@ -364,3 +365,5 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""
+)))))))

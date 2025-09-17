@@ -41,6 +41,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
 class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
+    pass
 """"""
     E2E tests for WebSocket coroutine regression prevention.
     
@@ -66,7 +67,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
             E2E tests require real IsolatedEnvironment instance""
         )
         
-        # CRITICAL: Ensure we're using real services
+        # CRITICAL: Ensure we're using real services'
         self.assertFalse(
             self.env.get(USE_MOCKS, false).lower() == true,""
             E2E tests MUST NOT use mocks - CLAUDE.MD violation""
@@ -166,7 +167,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                     self.assertIsInstance(response, dict)
                     self.assertIn(type", response)"
                     
-                    # CRITICAL: Check response doesn't contain coroutine error indicators
+                    # CRITICAL: Check response doesn't contain coroutine error indicators'
                     response_str = json.dumps(response)
                     self.assertNotIn(
                         coroutine, 
@@ -219,11 +220,11 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                 # CRITICAL: Validate environment detection succeeded without coroutine errors
                 self.assertIsInstance(response_data, dict)
                 
-                # If environment info is included, validate it's proper type
-                if "environment in response_data.get(data, {}:"
+                # If environment info is included, validate it's proper type'
+                if "environment in response_data.get(data, {):"
                     env_value = response_data[data][environment]
                     self.assertIsInstance(env_value, str)
-                    self.assertIn(env_value, ["development, staging", production]
+                    self.assertIn(env_value, ["development, staging", production)
                 
         except Exception as e:
             if coroutine in str(e).lower():""
@@ -392,6 +393,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                 self.fail(fAgent events E2E test failed with coroutine regression: {e}")"
 
     def test_websocket_e2e_environment_validation(self):
+        pass
 """"""
         Test E2E environment validation without coroutine errors.
         
@@ -452,3 +454,5 @@ if __name__ == __main__:""
     
     if __name__ == "__main__":
         run_e2e_tests()
+
+)))))

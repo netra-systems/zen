@@ -103,7 +103,7 @@ class WebSocketServiceDiscoveryTests:
             assert staging in websocket_url, (""
                 "Staging environment should use staging WebSocket URL"
             )
-        elif any(prod_indicator in base_url for prod_indicator in [production, api, .com"]:"
+        elif any(prod_indicator in base_url for prod_indicator in [production, api, .com"):"
             # Production environment
             assert websocket_url.startswith(wss://), (
                 Production environment must use secure WebSocket (wss://)""
@@ -127,7 +127,7 @@ class WebSocketServiceDiscoveryTests:
         # If auth_method is specified, validate it
         if auth_method in config_data:""
             auth_method = config_data["auth_method]"
-            assert auth_method in [jwt, bearer, query"], ("
+            assert auth_method in [jwt, bearer, query"), ("
                 fUnknown auth_method: {auth_method}. Expected: jwt, bearer, or query
             )
         
@@ -205,7 +205,7 @@ class WebSocketServiceDiscoveryTests:
         has_cache_header = any(header.lower() in [h.lower() for h in headers.keys()] for header in cache_headers)
         
         if has_cache_header:
-            # If caching is used, validate it's appropriate for config
+            # If caching is used, validate it's appropriate for config'
             if "cache-control in [h.lower() for h in headers.keys()]:"
                 cache_control = next(v for k, v in headers.items() if k.lower() == cache-control)
                 
@@ -257,7 +257,7 @@ class WebSocketServiceDiscoveryTests:
                 )
         
         # Should use service names or load balancer endpoints
-        if not any(local in websocket_url for local in ["localhost, 127.0.0.1]:"
+        if not any(local in websocket_url for local in ["localhost, 127.0.0.1):"
             # In non-local environments, should use proper service names
             url_parts = websocket_url.split(://)[1].split(/)[0]
             assert not url_parts.endswith(":8080) and not url_parts.endswith(:3000"), (
@@ -298,7 +298,7 @@ class WebSocketServiceDiscoveryTests:
         try:
             response = await backend_client.get(/api/config/websocket?invalid=param)""
             # Should either succeed or return proper error
-            assert response.status_code in [200, 400], (
+            assert response.status_code in [200, 400), (
                 f"Unexpected status code for malformed request: {response.status_code}"
             )
             
@@ -321,3 +321,6 @@ class WebSocketServiceDiscoveryTests:
     def _extract_domain_from_websocket_url(self, websocket_url: str) -> str:
         Extract domain from WebSocket URL.""
         return websocket_url.split(://)[1].split(/)[0].split(:)[0]""
+
+"""
+))

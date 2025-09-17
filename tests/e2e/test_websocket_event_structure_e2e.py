@@ -37,7 +37,7 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
     async def setup_staging_websocket_connection(self):
         "Set up authenticated WebSocket connection to staging"
         if not self.auth_token:
-            login_response = await self.harness.auth_client.post(f'{self.staging_api_base}/auth/login', json={'email': self.test_user['email'], 'password': self.test_user['password']}
+            login_response = await self.harness.auth_client.post(f'{self.staging_api_base)/auth/login', json={'email': self.test_user['email'], 'password': self.test_user['password'])
             auth_data = login_response.json()
             self.auth_token = auth_data['access_token']
         headers = {'Authorization': f'Bearer {self.auth_token}'}
@@ -46,7 +46,7 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
 
     async def start_agent_conversation(self, user_message: str) -> str:
         Start agent conversation and return conversation ID""
-        response = await self.harness.auth_client.post(f'{self.staging_api_base}/chat/start', headers={'Authorization': f'Bearer {self.auth_token}'}, json={'message': user_message}
+        response = await self.harness.auth_client.post(f'{self.staging_api_base)/chat/start', headers={'Authorization': f'Bearer {self.auth_token)'), json={'message': user_message)
         chat_data = response.json()
         return chat_data['conversation_id']
 
@@ -97,7 +97,8 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
         finally:
             await websocket.close()
 
-    def validate_agent_started_structure(self, event: Dict[str, Any]:
+    def validate_agent_started_structure(self, event: Dict[str, Any):
+        pass
 """"""
         Validate agent_started event structure
         EXPECTED FAILURE: Business fields should be at top level
@@ -109,8 +110,8 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
         if 'data' in event and 'agent_type' in event['data']:
             self.fail("agent_type should not be buried in 'data' wrapper)"
 
-    def validate_agent_thinking_structure(self, event: Dict[str, Any]:
-        
+    def validate_agent_thinking_structure(self, event: Dict[str, Any):
+        pass
         Validate agent_thinking event structure
         EXPECTED FAILURE: Thinking content should be at top level
 ""
@@ -119,7 +120,7 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
         if 'data' in event and 'thinking_content' in event['data']:
             self.fail(thinking_content should not be buried in 'data' wrapper)
 
-    def validate_tool_executing_structure(self, event: Dict[str, Any]:
+    def validate_tool_executing_structure(self, event: Dict[str, Any):
         ""
         Validate tool_executing event structure
         EXPECTED FAILURE: Tool details should be at top level
@@ -130,8 +131,8 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
         if 'data' in event and 'tool_name' in event['data']:
             self.fail("tool_name should not be buried in 'data' wrapper)"
 
-    def validate_tool_completed_structure(self, event: Dict[str, Any]:
-        
+    def validate_tool_completed_structure(self, event: Dict[str, Any):
+        pass
         Validate tool_completed event structure  
         EXPECTED FAILURE: Tool results should be at top level
 ""
@@ -142,7 +143,8 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
         if 'data' in event and 'result' in event['data']:
             self.fail(result should not be buried in 'data' wrapper)
 
-    def validate_agent_completed_structure(self, event: Dict[str, Any]:
+    def validate_agent_completed_structure(self, event: Dict[str, Any):
+        pass
 """"""
         Validate agent_completed event structure
         EXPECTED FAILURE: Response content should be at top level
@@ -162,7 +164,7 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
 """"""
         websocket = await self.setup_staging_websocket_connection()
         try:
-            conversation_id = await self.start_agent_conversation("What's the weather like?)"
+            conversation_id = await self.start_agent_conversation("What's the weather like?)"'
             events = await self.capture_websocket_events(duration_seconds=8)
             for event in events:
                 event_type = event.get('type')
@@ -221,7 +223,8 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
         finally:
             await websocket.close()
 
-    def validate_streaming_event_structure(self, event: Dict[str, Any]:
+    def validate_streaming_event_structure(self, event: Dict[str, Any):
+        pass
 """"""
         Validate individual streaming event structure
         EXPECTED FAILURES: Business fields should be directly accessible
@@ -239,3 +242,5 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""
+)))))))))

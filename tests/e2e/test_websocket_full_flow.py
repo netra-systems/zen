@@ -15,15 +15,15 @@ import aiohttp
 
 # Simple color codes for terminal output
 class Colors:
-    RED = '\033[91m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    CYAN = '\033[96m'
-    WHITE = '\033[97m'
-    RESET = '\033[0m'
-    RESET_ALL = '\033[0m'
-    BRIGHT = '\033[1m'
+    RED = '\33[91m'
+    GREEN = '\33[92m'
+    YELLOW = '\33[93m'
+    BLUE = '\33[94m'
+    CYAN = '\33[96m'
+    WHITE = '\33[97m'
+    RESET = '\33[0m'
+    RESET_ALL = '\33[0m'
+    BRIGHT = '\33[1m'
 
 Fore = Colors
 Style = Colors
@@ -65,7 +65,7 @@ class WebSocketEventCapture:
         print(f{Fore.CYAN}Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
         print("=*80 + \n")
         
-    def print_event(self, event: Dict[str, Any]:
+    def print_event(self, event: Dict[str, Any):
         Pretty print a WebSocket event""
         event_type = event.get(type, unknown)
         timestamp = event.get(timestamp, time.time())""
@@ -142,7 +142,7 @@ async def authenticate(session: aiohttp.ClientSession") -> str:"
     
     # Try login first
     # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
-    async with session.post(login_url, json=STAGING_CONFIG[test_user"] as resp:"
+    async with session.post(login_url, json=STAGING_CONFIG[test_user") as resp:"
         if resp.status == 200:
             data = await resp.json()
             print(f{Fore.GREEN}[U+2713] Authentication successful{Style.RESET_ALL}\n)
@@ -150,12 +150,12 @@ async def authenticate(session: aiohttp.ClientSession") -> str:"
         
     # If login fails, try to register
     # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
-    async with session.post(register_url, json=STAGING_CONFIG["test_user] as resp:"
+    async with session.post(register_url, json=STAGING_CONFIG["test_user) as resp:"
         if resp.status in [200, 201]:
             data = await resp.json()
             print(f{Fore.GREEN}[U+2713] Registration successful{Style.RESET_ALL}\n)""
             # Now login
-            async with session.post(login_url, json=STAGING_CONFIG["test_user] as resp:"
+            async with session.post(login_url, json=STAGING_CONFIG["test_user) as resp:"
                 if resp.status == 200:
                     data = await resp.json()
                     return data.get(access_token)
@@ -239,7 +239,7 @@ async def test_multiple_concurrent_users():
             }
             
             # Connect to WebSocket
-            async with websockets.connect(STAGING_CONFIG[ws_url] as websocket:
+            async with websockets.connect(STAGING_CONFIG[ws_url) as websocket:
                 # Send message
                 message = {
                     type: "message,"
@@ -317,3 +317,6 @@ async def main():
 if __name__ == "__main__":
     exit_code = asyncio.run(main())
     exit(exit_code)
+
+)))))
+]]]]]]]]]

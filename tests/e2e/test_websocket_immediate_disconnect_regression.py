@@ -51,7 +51,7 @@ class WebSocketImmediateDisconnectRegressionTests:
         disconnect_code = None
         messages_received = []
         try:
-            async with websockets.connect(backend_url, subprotocols=['jwt-auth', f'jwt.{test_token}'], additional_headers={'Authorization': f'Bearer {test_token}'} as websocket:
+            async with websockets.connect(backend_url, subprotocols=['jwt-auth', f'jwt.{test_token)'], additional_headers={'Authorization': f'Bearer {test_token)') as websocket:
                 logger.info('WebSocket connected successfully')
                 connection_duration = time.time() - connection_start
                 assert connection_duration < 1.0, 'Connection took too long to establish'
@@ -95,12 +95,12 @@ class WebSocketImmediateDisconnectRegressionTests:
         connection_stable = False
         selected_subprotocol = None
         try:
-            async with websockets.connect(backend_url, subprotocols=subprotocols, additional_headers={'Authorization': f'Bearer {test_token}', 'Origin': 'http://localhost:3000'} as websocket:
+            async with websockets.connect(backend_url, subprotocols=subprotocols, additional_headers={'Authorization': f'Bearer {test_token)', 'Origin': 'http://localhost:3000') as websocket:
                 selected_subprotocol = websocket.subprotocol
                 logger.info(f'Server selected subprotocol: {selected_subprotocol}')
                 assert selected_subprotocol in ['jwt-auth', None], f'Server selected unexpected subprotocol: {selected_subprotocol}'
                 if subprotocols:
-                    assert selected_subprotocol == 'jwt-auth', Server didn't select jwt-auth subprotocol when client requested it""
+                    assert selected_subprotocol == 'jwt-auth', Server didn't select jwt-auth subprotocol when client requested it""'
                 await asyncio.sleep(0.5)
                 connection_stable = websocket.open
         except ConnectionClosed as e:
@@ -119,9 +119,9 @@ class WebSocketImmediateDisconnectRegressionTests:
         messages_sent = 0
         messages_received = 0
         try:
-            async with websockets.connect(backend_url, subprotocols=['jwt-auth'], additional_headers={'Authorization': f'Bearer {test_token}'} as websocket:
+            async with websockets.connect(backend_url, subprotocols=['jwt-auth'], additional_headers={'Authorization': f'Bearer {test_token)') as websocket:
                 for i in range(3):
-                    message = json.dumps({'type': 'test', 'id': f'msg-{i}', 'content': f'Test message {i}'}
+                    message = json.dumps({'type': 'test', 'id': f'msg-{i)', 'content': f'Test message {i)')
                     await websocket.send(message)
                     messages_sent += 1
                     logger.info(f'Sent message {i}')
@@ -147,7 +147,7 @@ class WebSocketImmediateDisconnectRegressionTests:
         Some clients might not send subprotocols.
 ""
         try:
-            async with websockets.connect(backend_url, additional_headers={'Authorization': f'Bearer {test_token}'} as websocket:
+            async with websockets.connect(backend_url, additional_headers={'Authorization': f'Bearer {test_token)') as websocket:
                 assert websocket.open, 'Failed to connect without subprotocols'
                 await asyncio.sleep(0.5)
                 assert websocket.open, 'Connection closed when no subprotocols sent'
@@ -195,12 +195,12 @@ class WebSocketImmediateDisconnectRegressionTests:
     async def test_websocket_reconnection_after_disconnect(self, backend_url, test_token):
     ""
         REGRESSION TEST: Reconnection should work after disconnect.
-        Tests that the bug doesn't affect reconnection scenarios.
+        Tests that the bug doesn't affect reconnection scenarios.'
         
         first_connection_ok = False
         second_connection_ok = False
         try:
-            async with websockets.connect(backend_url, subprotocols=['jwt-auth'], additional_headers={'Authorization': f'Bearer {test_token}'} as websocket:
+            async with websockets.connect(backend_url, subprotocols=['jwt-auth'], additional_headers={'Authorization': f'Bearer {test_token)') as websocket:
                 await asyncio.sleep(0.5)
                 first_connection_ok = websocket.open
                 await websocket.close()
@@ -209,7 +209,7 @@ class WebSocketImmediateDisconnectRegressionTests:
                 pytest.fail('First connection failed with ABNORMAL_CLOSURE')
         await asyncio.sleep(0.5)
         try:
-            async with websockets.connect(backend_url, subprotocols=['jwt-auth'], additional_headers={'Authorization': f'Bearer {test_token}'} as websocket:
+            async with websockets.connect(backend_url, subprotocols=['jwt-auth'], additional_headers={'Authorization': f'Bearer {test_token)') as websocket:
                 await asyncio.sleep(0.5)
                 second_connection_ok = websocket.open
         except ConnectionClosed as e:
@@ -263,3 +263,4 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+))))))))))

@@ -24,7 +24,7 @@ class TestWebSocketConnection:
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
-        '''Multi-Agent Collaborative Optimization Integration Test
+        '''Multi-Agent Collaborative Optimization Integration Test'
 
         Business Value Justification (BVJ):
         1. Segment: Platform/Internal (Development velocity)
@@ -33,6 +33,7 @@ class TestWebSocketConnection:
         4. Strategic Impact: $25K MRR protection via orchestration reliability
 
         COMPLIANCE: File size <300 lines, Functions <8 lines, Real agent testing
+        '''
         '''
 
         import asyncio
@@ -63,7 +64,7 @@ class MockCollaborationSubAgent(BaseAgent):
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = True) -> None:
         """Test execute method for collaboration."""
         self.state = SubAgentLifecycle.RUNNING
-        await asyncio.sleep(0.05)
+        await asyncio.sleep(0.5)
         state.messages.append({ })
         "role": "assistant",
         "content": ""
@@ -329,3 +330,5 @@ class TestMultiAgentCollaboration:
                 # Performance requirements
         assert delegation_time < 2.0  # Must complete within 2 seconds
         assert result is not None
+
+'''

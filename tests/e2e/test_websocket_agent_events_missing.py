@@ -37,6 +37,7 @@ logger = logging.getLogger(__name__)
 
 
 class WebSocketAgentEventsMissingTests(BaseE2ETest):
+    pass
 """"""
     E2E test for missing WebSocket agent events with full authentication.
     
@@ -188,7 +189,7 @@ class WebSocketAgentEventsMissingTests(BaseE2ETest):
                         fWEBSOCKET EVENTS ORDER WRONG (E2E): Last event was '{received_events[-1]['type']}', ""
                         fexpected 'agent_completed'. 
                         fEvent sequence: {[e['type'] for e in received_events]}. ""
-                        f"Users won't know when agent finished processing."
+                        f"Users won't know when agent finished processing."'
                     )
                 
         except websockets.ConnectionClosed as e:
@@ -533,3 +534,5 @@ class WebSocketAgentEventsMissingTests(BaseE2ETest):
                 fThis indicates complete failure of real-time user experience. 
                 f"Business-critical functionality broken."
             )
+
+)))))

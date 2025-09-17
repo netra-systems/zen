@@ -1,4 +1,5 @@
 '''
+'''
 CRITICAL Test: Critical Service Imports Validation
 
 Business Value Justification (BVJ):
@@ -23,6 +24,7 @@ Critical Test Coverage:
 - Clear error reporting for import failures
 
 Performance Requirement: Must complete in < 10 seconds
+'''
 '''
 
 import importlib
@@ -258,7 +260,8 @@ class TestCriticalImportsValidation:
         error_details = dependency_validation["dependency_errors"]
 
         failure_msg = ""
-        failure_msg += "Install missing packages:
+        failure_msg += "Install missing packages:"
+        "
         "
 
         for dep in missing_deps:
@@ -278,6 +281,8 @@ class TestCriticalImportsValidation:
         failure_report = ""
         failure_report += ""
         failure_report += "=" * 80 + "
+        failure_report += "=" * 80 + "
+        "
         "
 
         # Report each failure with detailed information
@@ -286,12 +291,17 @@ class TestCriticalImportsValidation:
         failure_report += ""
         failure_report += ""
         failure_report += "-" * 60 + "
+        failure_report += "-" * 60 + "
+        "
         "
 
         failure_report += "
+        failure_report += "
         FIRE:  CRITICAL: These import failures will cause cascading test failures!
         "
-        failure_report += "Fix these imports before running any other tests.
+        "
+        failure_report += "Fix these imports before running any other tests."
+        "
         "
 
         pytest.fail(failure_report)
@@ -302,11 +312,14 @@ class TestCriticalImportsValidation:
         circular_issues = validator.detect_circular_imports()
 
         if circular_issues:
-        failure_msg = "Circular import dependencies detected in critical modules:
+        failure_msg = "Circular import dependencies detected in critical modules:"
+        "
         "
         for issue in circular_issues:
         failure_msg += ""
         failure_msg += "
+        failure_msg += "
+        Circular imports must be resolved to prevent runtime failures."
         Circular imports must be resolved to prevent runtime failures."
 
         pytest.fail(failure_msg)
@@ -361,17 +374,18 @@ class TestCriticalImportsValidation:
 
         if missing_categories:
         pytest.fail( )
-        f"Missing critical service categories:
-        " +
+        f"Missing critical service categories:"
+        " +"
         "
-        ".join("" for cat in missing_categories)
+        "
+        ".join("" for cat in missing_categories)"
                     
 
         @pytest.mark.e2e
     def test_validation_summary_report(self, validation_results):
         """Generate comprehensive validation summary report"""
         print("")
-         + =" * 26 + " CRITICAL IMPORTS VALIDATION  + =" * 26)
+         + =" * 26 + " CRITICAL IMPORTS VALIDATION  + =" * 26)"
         print("")
         print("")
         print("")
@@ -387,13 +401,13 @@ class TestCriticalImportsValidation:
 
         if validation_results["failed_imports"] == 0:
         print("")
-        ALL CRITICAL IMPORTS SUCCESSFUL - Test infrastructure ready!")
+        ALL CRITICAL IMPORTS SUCCESSFUL - Test infrastructure ready!")"
         else:
         print("")
 
         print("=" * 80)
 
-                    # This test always passes - it's for reporting only
+                    # This test always passes - it's for reporting only'
         assert True, "Critical imports validation report generated"
 
 
@@ -405,7 +419,7 @@ class TestCriticalImportsValidation:
         results = validator.validate_critical_imports()
 
         print("")
-         + ="*80)
+         + ="*80)"
         print("CRITICAL IMPORTS VALIDATION RESULTS")
         print("="*80)
 
@@ -416,7 +430,7 @@ class TestCriticalImportsValidation:
         else:
         print("")
         print("")
-        Failed modules:")
+        Failed modules:")"
         for module, error in results["failed_import_details"].items():
         print("")
         return False

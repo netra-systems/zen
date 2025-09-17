@@ -1,6 +1,8 @@
 '''
+'''
 Critical Test: OAuth Redirect URI Configuration
 This test verifies that the auth service uses the correct redirect URI for OAuth callbacks
+'''
 '''
 import os
 import sys
@@ -24,11 +26,12 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 @pytest.mark.e2e
 class TestOAuthRedirectURIConfiguration:
     '''
+    '''
     CRITICAL BUG: Auth service tells Google to redirect to frontend URL instead of auth service URL
 
     Root Cause:
     - Auth service uses frontend URL + /auth/callback as redirect_uri (line 242, 676, 906 in auth_routes.py)
-    - Google redirects to frontend, which expects tokens but doesn"t get them
+    - Google redirects to frontend, which expects tokens but doesn"t get them"
     - Auth service callback endpoint never gets hit
 
     Expected Flow:
@@ -42,6 +45,7 @@ class TestOAuthRedirectURIConfiguration:
     2. Google redirects to FRONTEND with code (auth service never sees it)
     3. Frontend expects tokens but only has code
     4. Authentication fails
+    '''
     '''
 
     @pytest.mark.e2e
@@ -59,7 +63,7 @@ class TestOAuthRedirectURIConfiguration:
         # so it can exchange the OAuth code for tokens
         expected_redirect_uri = ""
 
-        # This is what's currently happening (WRONG)
+        # This is what's currently happening (WRONG)'
         actual_redirect_uri = ""
 
         # This test MUST FAIL in current implementation
@@ -136,7 +140,7 @@ class TestOAuthRedirectURIConfiguration:
         test = TestOAuthRedirectURIConfiguration()
 
         print("")
-         + ="*80)
+         + ="*80)"
         print("CRITICAL OAUTH CONFIGURATION BUG TEST")
         print("="*80)
 
@@ -146,10 +150,10 @@ class TestOAuthRedirectURIConfiguration:
         except AssertionError as e:
         print("")
         print("")
-        This confirms the OAuth redirect URI bug exists!")
+        This confirms the OAuth redirect URI bug exists!")"
 
         print("")
-        REQUIRED FIX:")
+        REQUIRED FIX:")"
         print("1. Change auth_routes.py lines 242, 676, 906 to use AUTH SERVICE URL")
         print("2. Update Google OAuth Console to authorize auth service URLs")
         print("3. Ensure auth service redirects to frontend after processing")

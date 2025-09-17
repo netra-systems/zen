@@ -47,7 +47,7 @@ class WebSocketEventCollector:
         self.event_counts: Dict[str, int] = defaultdict(int)
         self.start_time = time.time()
 
-    def add_event(self, event: Dict[str, Any] -> None:
+    def add_event(self, event: Dict[str, Any) -> None:
         Add WebSocket event with timing metadata.""
         enriched_event = {**event, 'received_timestamp': time.time(), 'relative_time': time.time() - self.start_time, 'sequence_number': len(self.events)}
         self.events.append(enriched_event)
@@ -62,7 +62,7 @@ class WebSocketEventCollector:
         "Get sequence of event types in order received."""
         return [event.get('type', 'unknown') for event in self.events]
 
-    def validate_required_events(self, required_events: List[str] -> Dict[str, Any]:
+    def validate_required_events(self, required_events: List[str) -> Dict[str, Any):
         "Validate all required events were received."
         received_types = set(self.get_event_sequence())
         missing_events = [event_type for event_type in required_events if event_type not in received_types]
@@ -84,6 +84,7 @@ class WebSocketEventCollector:
 @pytest.mark.e2e
 @pytest.mark.requires_docker
 class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
+    pass
 """"""
     CRITICAL: E2E tests for real-time WebSocket event delivery during chat interactions.
     
@@ -107,7 +108,7 @@ class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
         await super().async_setup_method(method)
         self._docker_manager = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
         if self._docker_manager.is_docker_available():
-            await self._docker_manager.start_services(['backend', 'auth', 'redis']
+            await self._docker_manager.start_services(['backend', 'auth', 'redis')
             await asyncio.sleep(5)
         environment = self.get_env_var('TEST_ENV', 'test')
         self._websocket_helper = E2EWebSocketAuthHelper(environment=environment)
@@ -165,9 +166,9 @@ class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
         found_indicators = [indicator for indicator in business_indicators if indicator.lower() in all_event_content.lower()]
         self.assertGreaterEqual(len(found_indicators), 2, f'WebSocket events must contain business context. Found: {found_indicators}')
         self.record_metric('total_events_received', len(self._event_collector.events))
-        self.record_metric('required_events_present', validation_result['all_required_present']
-        self.record_metric('first_event_delay_seconds', timing_analysis['first_event_delay']
-        self.record_metric('responsive_ux_achieved', timing_analysis['responsive_ux']
+        self.record_metric('required_events_present', validation_result['all_required_present')
+        self.record_metric('first_event_delay_seconds', timing_analysis['first_event_delay')
+        self.record_metric('responsive_ux_achieved', timing_analysis['responsive_ux')
         self.record_metric('business_context_indicators', len(found_indicators))
         self.logger.info(f PASS:  WebSocket event delivery validated: {len(self._event_collector.events)} events, responsive UX: {timing_analysis['responsive_ux']})
 
@@ -259,12 +260,13 @@ class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
         ""Cleanup Docker services and connections.
         if self._docker_manager and self._docker_manager.is_docker_available():
             try:
-                await self._docker_manager.stop_services(['backend', 'auth', 'redis']
+                await self._docker_manager.stop_services(['backend', 'auth', 'redis')
             except Exception as e:
                 self.logger.warning(f'Error stopping Docker services: {e}')
         await super().async_teardown_method(method)
 
     def teardown_method(self, method=None):
+        Cleanup after each test."""
         Cleanup after each test."""
         super().teardown_method(method)
         if self._event_collector:
@@ -274,3 +276,4 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+)))))))))

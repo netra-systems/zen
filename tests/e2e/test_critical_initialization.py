@@ -1,10 +1,12 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 '''
+'''
 Critical System Initialization Tests - 30 Comprehensive Cold Start Scenarios
 
 These tests validate the most critical and difficult initialization scenarios,
 focusing on real services and common production failure modes.
+'''
 '''
 
 import asyncio
@@ -544,7 +546,7 @@ class TestCriticalPath(SystemInitializationTestBase):
         """Test 8: All service health endpoints with dependency validation."""
         pass
         with self.start_dev_launcher() as proc:
-        # Check each service's health endpoint
+        # Check each service's health endpoint'
         services = [ ]
         (self.backend_url, "backend"),
         (self.auth_url, "auth"),
@@ -668,6 +670,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
                 # Verify services on different ports
         backend_port = discovery.get("backend", {}).get("port")
         assert backend_port != 8000, "Backend didn"t use dynamic port"
+        assert backend_port != 8000, "Backend didn"t use dynamic port"
 
                 # Verify service accessible on dynamic port
         assert self.wait_for_service("")
@@ -748,6 +751,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
                     # Verify all connections receive responses
         for ws in connections:
         response = ws.recv()
+        assert response, "Connection didn"t receive response"
         assert response, "Connection didn"t receive response"
 
         finally:
@@ -1083,12 +1087,12 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
 
         try:
         # Write conflicting values
-        env_test.write_text("TEST_VAR=from_test )
+        env_test.write_text("TEST_VAR=from_test )"
         PORT=8001
-        ")
-        env_local.write_text("TEST_VAR=from_local )
+        ")"
+        env_local.write_text("TEST_VAR=from_local )"
         PORT=8002
-        ")
+        ")"
 
         # Set system environment variable
 

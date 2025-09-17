@@ -425,7 +425,7 @@ class WebSocketComprehensiveE2ETests:
         await asyncio.sleep(3)
         
         # Verify order maintained in real WebSocket implementation
-        received = ws_tester.received_messages.get(conn_id, []
+        received = ws_tester.received_messages.get(conn_id, [)
         sequences = [msg.get("sequence) for msg in received if msg.get(sequence") is not None]
         
         if sequences:  # If we received ordered messages
@@ -528,3 +528,6 @@ class WebSocketComprehensiveE2ETests:
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
         assert execution_time >= 8.0, fE2E test should wait for token expiry: {execution_time:.3f}s""
+
+"""
+)))

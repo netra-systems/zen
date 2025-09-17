@@ -1,4 +1,4 @@
-"""Test to verify staging auth configuration doesn't expose dev login"""
+"""Test to verify staging auth configuration doesn't expose dev login"""'
 
 import os
 import pytest
@@ -72,7 +72,7 @@ class MockRequest:
         logger.info(f"[U+2713] Staging auth config correctly configured - no dev login exposed")
 
         except Exception as e:
-            # Config might fail due to missing OAuth credentials, but that's ok
+            # Config might fail due to missing OAuth credentials, but that's ok'
             # The important thing is that dev_mode is False
         logger.warning("")
 
@@ -142,6 +142,7 @@ assert frontend_url == "https://netrasystems.ai", ""
 logger.info("[U+2713] Production environment correctly detected")
 
 if __name__ == "__main__":
+    pass
 import asyncio
 
 async def run_tests():
@@ -149,7 +150,7 @@ await test_staging_auth_config_no_dev_login()
 await test_dev_login_blocked_in_staging()
 await test_production_auth_config_no_dev_login()
 print("")
-All tests passed [U+2713]")
+All tests passed [U+2713]")"
 
 asyncio.run(run_tests())
 pass

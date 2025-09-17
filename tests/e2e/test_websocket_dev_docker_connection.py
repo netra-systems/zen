@@ -1,4 +1,5 @@
 '''
+'''
 E2E test to expose WebSocket connection failures in dev docker environment.
 
 This test specifically targets the WebSocket connection issue occurring at:
@@ -9,6 +10,7 @@ Expected Error Pattern:
 - WebSocketService.ts:988 WebSocket connection to 'ws://localhost:8000/ws' failed
 - WebSocket error occurred [WebSocketService] (websocket_error)
 - WebSocket connection error [WebSocketProvider] (connection_error)
+'''
 '''
 
 import asyncio
@@ -51,7 +53,7 @@ class TestWebSocketConnection:
         error_msg = str(error) if error is not None else Unknown WebSocket error""
         print(")"
         self.connection_errors.append(error_msg)
-        self.error_logs.append({}
+        self.error_logs.append({)
         type": "websocket_error,
         message: error_msg,
         timestamp: time.time()""
@@ -62,7 +64,7 @@ class TestWebSocketConnection:
         pass
         print("")
         if close_status_code:
-        self.error_logs.append({}
+        self.error_logs.append({)
         type: "websocket_close,"
         code": close_status_code,"
         message: close_msg,
@@ -112,7 +114,7 @@ class TestWebSocketConnection:
         error_msg = "formatted_string"
         print(formatted_string)""
         self.connection_errors.append(error_msg)
-        self.error_logs.append({}
+        self.error_logs.append({)
         "type: connection_exception,"""
         message: error_msg,
         timestamp": time.time()"
@@ -135,10 +137,10 @@ class TestWebSocketConnection:
         try:
         # Test with various connection methods
         # Note: We avoid setting explicit Origin headers to prevent conflicts with
-        # the websocket-client library's automatic Origin header generation
+        # the websocket-client library's automatic Origin header generation'
         test_cases = ]
-        ("Default connection", {},  # Let client set origin automatically
-        (Test endpoint, {endpoint: /ws/test},  # Try test endpoint
+        ("Default connection", {),  # Let client set origin automatically
+        (Test endpoint, {endpoint: /ws/test),  # Try test endpoint
         
 
         for description, options in test_cases:
@@ -159,7 +161,7 @@ class TestWebSocketConnection:
         except Exception as e:
         error_msg = 
         print(formatted_string)
-        cors_issues.append({}
+        cors_issues.append({)
         "test": description,
         endpoint: endpoint,
         error: str(e),
@@ -167,7 +169,7 @@ class TestWebSocketConnection:
                         
 
         except Exception as e:
-        cors_issues.append({}
+        cors_issues.append({)
         type": cors_test_failure,"
         "error: str(e),"""
         timestamp: time.time()
@@ -233,12 +235,14 @@ class TestWebSocketDevDockerConnection:
         @pytest.mark.websocket
     def test_websocket_connection_failure(self):
         '''
+        '''
         Test that reproduces the WebSocket connection failure in dev docker.
 
         This test is expected to FAIL with the following errors:
         - Connection refused or failed
         - CORS origin validation errors
         - WebSocket handshake failures
+        '''
         '''
         pass
         test_harness = WebSocketConnectionTest()
@@ -329,7 +333,7 @@ class TestWebSocketCORSValidation:
         print(formatted_string)
 
         try:
-            # Don't set explicit Origin headers to avoid duplicates
+            # Don't set explicit Origin headers to avoid duplicates'
         ws = websocket.create_connection( )
         ws_url,
         timeout=5
@@ -351,7 +355,7 @@ class TestWebSocketCORSValidation:
         print(formatted_string)
         errors.append(error_msg)
 
-                                # This assertion is expected to FAIL if WebSocket connections don't work
+                                # This assertion is expected to FAIL if WebSocket connections don't work'
         assert len(errors) == 0, f"WebSocket connection errors:"
          + 
         .join(errors)
@@ -370,7 +374,7 @@ class TestWebSocketCORSValidation:
         print(formatted_string)
 
         try:
-                                                # Don't set explicit Origin header to avoid duplicates with websocket-client library
+                                                # Don't set explicit Origin header to avoid duplicates with websocket-client library'
         ws = websocket.create_connection( )
         ws://localhost:8000/ws/test,  # Use test endpoint to avoid auth issues
         timeout=10
@@ -378,13 +382,13 @@ class TestWebSocketCORSValidation:
 
                                                 # Try to send a test message
         import json
-        test_msg = json.dumps({type: ping"}"
+        test_msg = json.dumps({type: ping")"
         ws.send(test_msg)
         response = ws.recv()
 
         ws.close()
 
-        connection_attempts.append({}
+        connection_attempts.append({)
         attempt: attempt + 1,
         "success: True,"""
         message: Connected successfully
@@ -394,7 +398,7 @@ class TestWebSocketCORSValidation:
 
         except Exception as e:
         error_msg = str(e)
-        connection_attempts.append({}
+        connection_attempts.append({)
         "attempt": attempt + 1,
         success: False,
         error: error_msg
@@ -438,3 +442,6 @@ class TestWebSocketCORSValidation:
                                                                             # Run async test
         import asyncio
         asyncio.run(test_websocket_connection_with_retry()")"
+
+)))))))))
+}}}}

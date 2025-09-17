@@ -1,8 +1,10 @@
 '''
+'''
 WebSocket Message Alignment Integration Test
 
 This test verifies that the backend and frontend can correctly exchange
 all supported message types without parsing errors.
+'''
 '''
 
 import asyncio
@@ -27,14 +29,16 @@ class WebSocketMessageAlignmentTest:
         self.received_messages: List[Dict[str, Any]] = []
         self.parse_errors: List[Dict[str, Any]] = []
 
-    async def simulate_frontend_validation(self, message: Dict[str, Any] -> bool:
+    async def simulate_frontend_validation(self, message: Dict[str, Any) -> bool:
+        '''
         '''
         Simulates frontend message validation logic.
         Returns True if message would be accepted, False if it would trigger parse error.
         '''
+        '''
     # Check if message is valid object
         if not isinstance(message, dict):
-        self.parse_errors.append({}
+        self.parse_errors.append({)
         'error': 'Message is not an object',
         'message': message
         
@@ -42,7 +46,7 @@ class WebSocketMessageAlignmentTest:
 
         # Check for required type field
         if 'type' not in message or not isinstance(message.get('type'), str):
-        self.parse_errors.append({}
+        self.parse_errors.append({)
         'error': 'Missing or invalid type field',
         'message': message
             
@@ -50,7 +54,7 @@ class WebSocketMessageAlignmentTest:
 
         msg_type = message['type']
 
-            # Frontend's current recognized types (before fix)
+            # Frontend's current recognized types (before fix)'
         system_types = ['auth', 'ping', 'pong', 'server_shutdown']  # Missing: system_message, error_message
         agent_types = ['agent_started', 'tool_executing', 'agent_thinking', 'partial_result', 'agent_completed']
         thread_types = ['thread_created', 'thread_loading', 'thread_loaded', 'thread_renamed']
@@ -79,7 +83,7 @@ class WebSocketMessageAlignmentTest:
                         # Specific validation per message category
         if msg_type in agent_types:
         if 'payload' not in message or not isinstance(message.get('payload'), dict):
-        self.parse_errors.append({}
+        self.parse_errors.append({)
         'error': 'formatted_string',
         'message': message
                                 
@@ -87,7 +91,7 @@ class WebSocketMessageAlignmentTest:
 
         if msg_type in thread_types:
         if 'payload' not in message or not isinstance(message.get('payload'), dict):
-        self.parse_errors.append({}
+        self.parse_errors.append({)
         'error': 'formatted_string',
         'message': message
                                         
@@ -107,16 +111,16 @@ tester = WebSocketMessageAlignmentTest()
                                             All message types from backend MessageType enum
 test_messages = ]
                                             # Connection lifecycle
-create_server_message(MessageType.CONNECT, {'status': 'connected'},
-create_server_message(MessageType.DISCONNECT, {'reason': 'server_shutdown'},
-create_server_message(MessageType.HEARTBEAT, {'timestamp': 123456},
-create_server_message(MessageType.HEARTBEAT_ACK, {'timestamp': 123456},
-create_server_message(MessageType.PING, {},
-create_server_message(MessageType.PONG, {'original_timestamp': 123456},
+create_server_message(MessageType.CONNECT, {'status': 'connected'),
+create_server_message(MessageType.DISCONNECT, {'reason': 'server_shutdown'),
+create_server_message(MessageType.HEARTBEAT, {'timestamp': 123456),
+create_server_message(MessageType.HEARTBEAT_ACK, {'timestamp': 123456),
+create_server_message(MessageType.PING, {),
+create_server_message(MessageType.PONG, {'original_timestamp': 123456),
 
                                             # User messages
-create_server_message(MessageType.USER_MESSAGE, {'message': 'test user message'},
-create_server_message(MessageType.SYSTEM_MESSAGE, }
+create_server_message(MessageType.USER_MESSAGE, {'message': 'test user message'),
+create_server_message(MessageType.SYSTEM_MESSAGE, )
 'event': 'connection_established',
 'connection_id': 'test_conn_123',
 'user_id': 'test_user',
@@ -125,24 +129,24 @@ create_server_message(MessageType.SYSTEM_MESSAGE, }
 'max_message_size': 8192
                                             
 },
-create_server_message(MessageType.ERROR_MESSAGE, }
+create_server_message(MessageType.ERROR_MESSAGE, )
 'error': 'Test error',
 'code': 'TEST_ERROR_001'
 },
 
                                             # Agent communication
-create_server_message(MessageType.START_AGENT, {'agent': 'test_agent'},
-create_server_message(MessageType.AGENT_RESPONSE, {'response': 'test response'},
-create_server_message(MessageType.AGENT_PROGRESS, {'progress': 50, 'status': 'processing'},
-create_server_message(MessageType.AGENT_ERROR, {'error': 'Agent error', 'details': 'Test'},
+create_server_message(MessageType.START_AGENT, {'agent': 'test_agent'),
+create_server_message(MessageType.AGENT_RESPONSE, {'response': 'test response'),
+create_server_message(MessageType.AGENT_PROGRESS, {'progress': 50, 'status': 'processing'),
+create_server_message(MessageType.AGENT_ERROR, {'error': 'Agent error', 'details': 'Test'),
 
                                             # Thread/conversation
-create_server_message(MessageType.THREAD_UPDATE, {'thread_id': 'thread_123', 'status': 'updated'},
-create_server_message(MessageType.THREAD_MESSAGE, {'thread_id': 'thread_123', 'message': 'test'},
+create_server_message(MessageType.THREAD_UPDATE, {'thread_id': 'thread_123', 'status': 'updated'),
+create_server_message(MessageType.THREAD_MESSAGE, {'thread_id': 'thread_123', 'message': 'test'),
 
                                             # Broadcasting
-create_server_message(MessageType.BROADCAST, {'message': 'broadcast to all'},
-create_server_message(MessageType.ROOM_MESSAGE, {'room': 'test_room', 'message': 'room msg'},
+create_server_message(MessageType.BROADCAST, {'message': 'broadcast to all'),
+create_server_message(MessageType.ROOM_MESSAGE, {'room': 'test_room', 'message': 'room msg'),
                                             
 
                                             # Test each message through simulated frontend validation
@@ -152,7 +156,7 @@ for msg in test_messages:
 
 success = await tester.simulate_frontend_validation(msg_dict)
 if not success:
-    failed_messages.append({}
+    failed_messages.append({)
 
 'message_type': msg.type,
 'message': msg_dict,
@@ -216,7 +220,7 @@ MessageType.SYSTEM_MESSAGE,
 event: connection_established,
 connection_id: "conn_abc123,"
 user_id": user_123,"
-server_time: 2025-08-29T18:36:00Z,
+server_time: 2025-8-29T18:36:00Z,
 config": }"
 heartbeat_interval: 45,
 max_message_size: 8192""
@@ -283,3 +287,6 @@ asyncio.run(test_all_backend_message_types())
 asyncio.run(test_welcome_message_format())
 asyncio.run(test_data_to_payload_conversion())
 pass
+
+))))))))))))))))))))
+}

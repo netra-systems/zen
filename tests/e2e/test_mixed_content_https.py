@@ -1,6 +1,7 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 '''
+'''
 E2E Test for Mixed Content and HTTPS Protocol Issues
 
 This test reproduces the critical mixed content/HTTPS issues identified in the Five Whys analysis,
@@ -13,6 +14,7 @@ Root Cause Being Tested:
 - WebSocket URLs using WS instead of WSS in secure environments
 - Server-side vs client-side protocol detection inconsistencies
 - Environment detection logic failing in production deployments
+'''
 '''
 
 import os
@@ -49,6 +51,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         @pytest.mark.e2e
     def test_staging_environment_https_detection_FAILING(self):
         '''
+        '''
         pass
         FAILING TEST: secure-api-config.ts should detect staging as secure environment.
 
@@ -57,6 +60,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         leading to HTTP API calls from HTTPS frontend.
 
         Expected failure: isSecureEnvironment() returns false for staging.
+        '''
         '''
     # Mock staging environment variables
         staging_env = { }
@@ -91,10 +95,12 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         @pytest.mark.e2e
     def test_api_urls_use_https_in_staging_FAILING(self):
         '''
+        '''
         FAILING TEST: All API URLs should use HTTPS protocol in staging environment.
 
         This test SHOULD FAIL because API URLs may still use HTTP in staging,
         causing mixed content warnings when frontend is served over HTTPS.
+        '''
         '''
         pass
         staging_env = { }
@@ -124,6 +130,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
                     # This assertion SHOULD FAIL due to HTTP URLs in staging
         assert len(http_violations) == 0, ( )
         """"Real WebSocket connection for testing instead of mocks."""
+        """"Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
         pass
@@ -148,21 +155,26 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
-        " +
+        " +"
         "
-        ".join("" for violation in http_violations) +
+        "
+        ".join("" for violation in http_violations) +"
+        f"
         f"
 
+        All URLs must use HTTPS/WSS in staging to prevent mixed content errors."
         All URLs must use HTTPS/WSS in staging to prevent mixed content errors."
     
 
         @pytest.mark.e2e
     def test_websocket_urls_use_wss_in_staging_FAILING(self):
         '''
+        '''
         FAILING TEST: WebSocket URLs should use WSS protocol in staging environment.
 
         This test SHOULD FAIL because WebSocket URLs may use WS instead of WSS,
         causing connection failures from HTTPS pages due to mixed content restrictions.
+        '''
         '''
         pass
         staging_scenarios = [ ]
@@ -208,19 +220,24 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         assert len(websocket_violations) == 0, ( )
         "" +
         "
-        ".join("" for violation in websocket_violations) +
+        "
+        ".join("" for violation in websocket_violations) +"
+        f"
         f"
 
+        WebSocket URLs must use WSS in secure environments to prevent connection failures."
         WebSocket URLs must use WSS in secure environments to prevent connection failures."
                     
 
         @pytest.mark.e2e
     def test_server_client_protocol_consistency_FAILING(self):
         '''
+        '''
         FAILING TEST: Server-side and client-side should produce consistent protocol decisions.
 
         This test SHOULD FAIL because server-side rendering (SSR) and client-side hydration
         may make different protocol decisions, causing hydration mismatches and errors.
+        '''
         '''
         pass
         test_environments = [ ]
@@ -261,19 +278,24 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         assert len(consistency_issues) == 0, ( )
         "" +
         "
-        ".join("" for issue in consistency_issues) +
+        "
+        ".join("" for issue in consistency_issues) +"
+        f"
         f"
 
+        Server and client must generate consistent protocols to prevent hydration errors."
         Server and client must generate consistent protocols to prevent hydration errors."
                         
 
         @pytest.mark.e2e
     def test_environment_detection_edge_cases_FAILING(self):
         '''
+        '''
         FAILING TEST: Environment detection should handle edge cases correctly.
 
         This test SHOULD FAIL because environment detection may not handle
         complex deployment scenarios like preview branches, custom domains, etc.
+        '''
         '''
         pass
         edge_case_scenarios = [ ]
@@ -327,19 +349,24 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         assert len(detection_failures) == 0, ( )
         "" +
         "
-        ".join("" for failure in detection_failures) +
+        "
+        ".join("" for failure in detection_failures) +"
+        f"
         f"
 
+        Environment detection must handle complex deployment scenarios correctly."
         Environment detection must handle complex deployment scenarios correctly."
                     
 
         @pytest.mark.e2e
     def test_similar_edge_case_cors_origin_protocol_mismatch_FAILING(self):
         '''
+        '''
         FAILING TEST: Similar pattern - CORS origins should match frontend protocol.
 
         This tests a similar failure mode where backend CORS origins are configured
         with HTTP while frontend uses HTTPS, causing CORS errors.
+        '''
         '''
         pass
     # Mock staging environment with HTTPS frontend
@@ -374,9 +401,12 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         assert len(protocol_mismatches) == 0, ( )
         "" +
         "
-        ".join("" for mismatch in protocol_mismatches) +
+        "
+        ".join("" for mismatch in protocol_mismatches) +"
+        f"
         f"
 
+        CORS origins must match frontend protocol to prevent connection errors."
         CORS origins must match frontend protocol to prevent connection errors."
                     
 
@@ -447,14 +477,14 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
 
     # Report mixed content violations for debugging
         if self.mixed_content_violations:
-        print(f" )
-        === Mixed Content Violations ===")
+        print(f" )"
+        === Mixed Content Violations ===")"
         for violation in self.mixed_content_violations:
         print("")
 
         if self.protocol_inconsistencies:
-        print(f" )
-        === Protocol Inconsistencies ===")
+        print(f" )"
+        === Protocol Inconsistencies ===")"
         for inconsistency in self.protocol_inconsistencies:
         print("")
 

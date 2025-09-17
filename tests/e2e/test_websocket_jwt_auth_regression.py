@@ -111,7 +111,7 @@ class JWTSecretMismatchTests:
     async def test_error_message_clarity(self):
 """Empty docstring."""
         Test that error messages clearly indicate the actual problem.
-        This is the key issue - the error says No JWT found when it's actually Invalid JWT.
+        This is the key issue - the error says No JWT found when it's actually Invalid JWT.'
 ""
         from fastapi import HTTPException
         secret_auth = 'auth_secret'
@@ -133,9 +133,10 @@ class SingletonFallbackTests:
 
     @pytest.mark.asyncio
     async def test_no_singleton_fallback_on_auth_failure(self):
-        Verify that auth failure doesn't fall back to insecure singleton pattern.""
+        Verify that auth failure doesn't fall back to insecure singleton pattern.""'
         pass
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""

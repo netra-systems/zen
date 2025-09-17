@@ -80,7 +80,7 @@ class StagingEnvironmentManager:
             loop = asyncio.get_event_loop()
 
             def make_request():
-                response = requests.get(self.health_check_url, timeout=5.0, headers={'User-Agent': 'Issue586-E2E-Test'}
+                response = requests.get(self.health_check_url, timeout=5.0, headers={'User-Agent': 'Issue586-E2E-Test')
                 return response
             response = await loop.run_in_executor(None, make_request)
             if response.status_code == 200:
@@ -116,8 +116,8 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
             pytest.skip('Could not trigger cold start conditions in staging')
         logger.info('Step 2: Attempting WebSocket connections during startup')
         connection_results = await self._attempt_websocket_connections_during_startup(cold_start_config)
-        error_1011_count = len([r for r in connection_results if r.error_code == 1011]
-        successful_connections = len([r for r in connection_results if r.success]
+        error_1011_count = len([r for r in connection_results if r.error_code == 1011)
+        successful_connections = len([r for r in connection_results if r.success)
         logger.info(f'Connection attempts: {len(connection_results)}')
         logger.info(f'1011 errors: {error_1011_count}')
         logger.info(f'Successful connections: {successful_connections}')
@@ -145,7 +145,7 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
             await self.staging_manager.trigger_cold_start()
             await asyncio.sleep(1.0)
             start_time = time.time()
-            connection_result = await self._attempt_single_websocket_connection(timeout=timeout_test['timeout']
+            connection_result = await self._attempt_single_websocket_connection(timeout=timeout_test['timeout')
             timeout_result = {'timeout': timeout_test['timeout'], 'description': timeout_test['description'], 'success': connection_result.success, 'error_code': connection_result.error_code, 'handshake_duration': connection_result.handshake_duration, 'actual_duration': time.time() - start_time}
             timeout_results.append(timeout_result)
             logger.info(f'Result: {timeout_result}')
@@ -180,14 +180,14 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
             await asyncio.sleep(check_interval)
         problematic_points = []
         for point in health_websocket_correlation:
-            if point['health_healthy'] and (not point['websocket_success']:
+            if point['health_healthy') and (not point['websocket_success'):
                 if point['websocket_error_code'] == 1011:
                     problematic_points.append(point)
         logger.info(f'Total correlation points: {len(health_websocket_correlation)}')
         logger.info(f'Problematic points (health OK, WebSocket 1011): {len(problematic_points)}')
         for point in problematic_points:
             logger.error(f"🚨 Health check OK but WebSocket 1011 at {point['timestamp']:.1f}s)"
-        self.assertEqual(len(problematic_points), 0, fEXPECTED FAILURE: Found {len(problematic_points)} cases where health check passed but WebSocket returned 1011 errors. This demonstrates lack of coordination between health checks and WebSocket readiness, causing load balancers to route traffic to instances that aren't ready for WebSocket connections.")"
+        self.assertEqual(len(problematic_points), 0, fEXPECTED FAILURE: Found {len(problematic_points)} cases where health check passed but WebSocket returned 1011 errors. This demonstrates lack of coordination between health checks and WebSocket readiness, causing load balancers to route traffic to instances that aren't ready for WebSocket connections.")"'
 
     @pytest.mark.staging
     async def test_concurrent_websocket_connections_cold_start(self):
@@ -257,7 +257,7 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
         try:
             async with asyncio.timeout(timeout):
                 logger.debug(f'Attempting WebSocket connection to {self.staging_manager.websocket_url}')
-                async with websockets.connect(self.staging_manager.websocket_url, ping_interval=20, ping_timeout=10, close_timeout=5, extra_headers={'User-Agent': f'Issue586-E2E-Test-{attempt_id}', 'Origin': 'https://netra-frontend-staging.example.com'} as websocket:
+                async with websockets.connect(self.staging_manager.websocket_url, ping_interval=20, ping_timeout=10, close_timeout=5, extra_headers={'User-Agent': f'Issue586-E2E-Test-{attempt_id)', 'Origin': 'https://netra-frontend-staging.example.com') as websocket:
                     end_time = time.time()
                     handshake_duration = end_time - start_time
                     test_message = {'type': 'test', 'test_id': f'issue586_{attempt_id}', 'timestamp': time.time()}
@@ -288,3 +288,4 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+))))))

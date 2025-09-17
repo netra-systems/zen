@@ -93,7 +93,7 @@ class WebSocketAgentClient:
         Connect with authentication headers.""
         try:
             if /ws/test" in self.connection_url:"
-                # Test endpoint doesn't require auth headers
+                # Test endpoint doesn't require auth headers'
                 self.websocket = await websockets.connect(
                     self.connection_url,
                     ping_timeout=10
@@ -135,7 +135,7 @@ class SupervisorAgentMessageHandler:
             }
         }
     
-    async def _send_message(self, message: Dict[str, Any] -> bool:
+    async def _send_message(self, message: Dict[str, Any) -> bool:
         Send message via WebSocket.""
         try:
             await self.client.websocket.send(json.dumps(message))
@@ -157,7 +157,7 @@ class StreamingResponseValidator:
     async def collect_streaming_response(self, websocket, timeout: float = 5.0) -> bool:
         Collect streaming response chunks with timing.""
         start_time = time.time()
-        # Reduce timeout since we're testing with a simpler endpoint
+        # Reduce timeout since we're testing with a simpler endpoint'
         return await self._collect_with_timeout(websocket, start_time, min(timeout, 3.0))
     
     async def _collect_with_timeout(self, websocket, start_time: float, timeout: float) -> bool:
@@ -177,7 +177,7 @@ class StreamingResponseValidator:
             logger.info(fWebSocket timeout or closed, collected {len(self.response_chunks)} chunks)  # Debug output""
             return len(self.response_chunks) > 0
     
-    def _process_response_chunk(self, chunk_time: float, parsed: Dict[str, Any] -> None:
+    def _process_response_chunk(self, chunk_time: float, parsed: Dict[str, Any) -> None:
         "Process individual response chunk."""
         if self.first_chunk_time is None:
             self.first_chunk_time = chunk_time
@@ -361,7 +361,7 @@ class AgentStateManagementTests:
         
         return states
     
-    def _validate_state_transitions(self, states: List[Dict[str, Any]] -> None:
+    def _validate_state_transitions(self, states: List[Dict[str, Any)) -> None:
         Validate proper agent state transitions.""
         assert len(states) > 0, "No agent states captured"
         
@@ -407,14 +407,16 @@ class WebSocketReliabilityTests:
         
         assert messages_sent == 5, fMessage delivery failed: {messages_sent}/5
 
-    def _is_complete_response(self, parsed: Dict[str, Any] -> bool:
+    def _is_complete_response(self, parsed: Dict[str, Any) -> bool:
         "Check if response indicates completion."
         # For test endpoint, an ack response indicates completion
-        # Ignore connection_established as it's the initial message, not a response to user input
+        # Ignore connection_established as it's the initial message, not a response to user input'
         msg_type = parsed.get('type')
         return msg_type in ['agent_completed', 'ack', 'echo_response'] and msg_type != 'connection_established'
     
-    def _is_state_update(self, parsed: Dict[str, Any] -> bool:
+    def _is_state_update(self, parsed: Dict[str, Any) -> bool:
         Check if message is an agent state update.""
         # For test endpoint, treat any response as a state update for testing
         return parsed.get('type', '').startswith('agent_') or parsed.get('type') in ['ack', 'echo_response', 'connection_established']
+
+)))))

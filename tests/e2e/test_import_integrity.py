@@ -1,4 +1,5 @@
 '''
+'''
 CRITICAL Test: Import Integrity Validation
 
 Business Value Justification (BVJ):
@@ -16,6 +17,7 @@ Test Coverage:
 - Circular dependency detection
 - Required package validation
 - Performance validation (completes in < 60 seconds)
+'''
 '''
 
 import asyncio
@@ -157,8 +159,8 @@ class ImportIntegrityValidator:
 
         Look for import statements
         imports = []
-        for line in content.split(" )
-        "):
+        for line in content.split(" )"
+        "):"
         line = line.strip()
         if line.startswith("from ") and " import " in line:
                 # Extract module being imported
@@ -326,6 +328,8 @@ class TestImportIntegrity:
         # Build detailed failure report
         failure_report = ""
         failure_report += "=" * 80 + "
+        failure_report += "=" * 80 + "
+        "
         "
 
         import_failures = validation_results["errors"].get("import_failures", {})
@@ -342,10 +346,13 @@ class TestImportIntegrity:
         for error_type, errors in error_groups.items():
         failure_report += ""
         failure_report += "
-        ".join(errors[:10])  # Limit to first 10 per type
+        failure_report += "
+        ".join(errors[:10])  # Limit to first 10 per type"
         if len(errors) > 10:
         failure_report += ""
         failure_report += "
+        failure_report += "
+        "
         "
 
         pytest.fail(failure_report)
@@ -402,7 +409,7 @@ class TestImportIntegrity:
         expected_dirs = set(validator.target_directories)
         missing_dirs = expected_dirs - tested_dirs
 
-        Only fail if we tested 0 files from a directory (indicating it wasn't scanned)
+        Only fail if we tested 0 files from a directory (indicating it wasn't scanned)'
         if validation_results["total_files"] < len(expected_dirs):
             # Check warnings for missing directories
         missing_dir_warnings = validation_results["warnings"].get("missing_directories", [])
@@ -438,7 +445,7 @@ class TestImportIntegrity:
         """Generate and validate comprehensive test summary"""
         pass
         print("")
-         + =" * 80)
+         + =" * 80)"
         print("IMPORT INTEGRITY VALIDATION SUMMARY")
         print("=" * 80)
         print("")
@@ -456,5 +463,5 @@ class TestImportIntegrity:
 
         print("=" * 80)
 
-            # This test always passes - it's just for reporting
+            # This test always passes - it's just for reporting'
         assert True, "Import integrity validation completed"

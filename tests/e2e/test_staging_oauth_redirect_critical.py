@@ -1,7 +1,9 @@
 '''
+'''
 CRITICAL STAGING TESTS - OAuth Redirect URI Configuration
 These tests MUST pass for authentication to work in staging.
 Currently FAILING - exposes critical production issues.
+'''
 '''
 import pytest
 import httpx
@@ -17,12 +19,14 @@ class TestStagingOAuthRedirectCritical:
     @pytest.mark.critical
     async def test_oauth_redirect_uri_uses_app_subdomain(self):
     '''
+    '''
     CRITICAL: OAuth must redirect to app.staging.netrasystems.ai, not auth.staging
 
     CURRENT STATE: FAILING
     - OAuth redirects to auth.staging.netrasystems.ai/auth/callback
     - Should redirect to app.staging.netrasystems.ai/auth/callback
     - This breaks the entire authentication flow
+    '''
     '''
     pass
     auth_url = "https://netra-auth-service-701982941522.us-central1.run.app"
@@ -54,11 +58,13 @@ class TestStagingOAuthRedirectCritical:
     @pytest.mark.critical
     async def test_oauth_config_includes_app_redirect_uris(self):
     '''
+    '''
     OAuth configuration must include app.staging.netrasystems.ai redirect URIs
 
     CURRENT STATE: FAILING
     - Config returns empty redirect_uris array
     - Missing app.staging.netrasystems.ai/auth/callback
+    '''
     '''
     pass
     auth_url = "https://netra-auth-service-701982941522.us-central1.run.app"
@@ -84,9 +90,11 @@ class TestStagingOAuthRedirectCritical:
     @pytest.mark.critical
     async def test_frontend_oauth_callback_route_exists(self):
     '''
+    '''
     Frontend must have /auth/callback route to handle OAuth returns
 
     CURRENT STATE: UNKNOWN - needs verification
+    '''
     '''
     pass
     frontend_url = "https://app.staging.netrasystems.ai"
@@ -102,9 +110,11 @@ class TestStagingOAuthRedirectCritical:
     @pytest.mark.critical
     async def test_cors_allows_app_subdomain(self):
     '''
+    '''
     CORS must allow app.staging.netrasystems.ai origin
 
     CURRENT STATE: PASSING (but needs verification)
+    '''
     '''
     pass
     auth_url = "https://netra-auth-service-701982941522.us-central1.run.app"
@@ -136,11 +146,13 @@ class TestStagingAuthenticationE2E:
     @pytest.mark.integration
     async def test_complete_oauth_flow_with_app_subdomain(self):
     '''
+    '''
     Test complete OAuth flow using app.staging.netrasystems.ai
 
     CURRENT STATE: FAILING
     - OAuth redirects to wrong subdomain
-    - Frontend can"t handle callback
+    - Frontend can"t handle callback"
+    '''
     '''
     pass
         # This would require browser automation to fully test
@@ -169,15 +181,17 @@ class TestStagingAuthenticationE2E:
     @pytest.mark.critical
     async def test_backend_accepts_tokens_from_auth_service(self):
     '''
+    '''
     Backend must accept and validate tokens from auth service
 
     CURRENT STATE: Needs verification
     - JWT secrets must be synchronized
     - Token validation must work cross-service
     '''
+    '''
     pass
                 # This requires a valid token to test properly
-                # We're checking the configuration is correct
+                # We're checking the configuration is correct'
 
     backend_url = "https://netra-backend-staging-701982941522.us-central1.run.app"
 
@@ -200,9 +214,11 @@ class TestStagingEnvironmentConfiguration:
     @pytest.mark.critical
     def test_oauth_secrets_configured_for_staging(self):
         '''
+        '''
         OAuth secrets must be properly configured in staging
 
         CURRENT STATE: Needs verification via Secret Manager
+        '''
         '''
         pass
     # These would be checked via GCP Secret Manager
@@ -220,9 +236,11 @@ class TestStagingEnvironmentConfiguration:
         @pytest.mark.critical
     async def test_no_dev_endpoints_in_staging(self):
         '''
+        '''
         Dev endpoints must be disabled in staging
 
         CURRENT STATE: PASSING
+        '''
         '''
         pass
         auth_url = "https://netra-auth-service-701982941522.us-central1.run.app"
@@ -261,8 +279,8 @@ class TestStagingEnvironmentConfiguration:
         # Run critical failing tests to demonstrate issues
         print("Running critical staging OAuth tests...")
         print("These tests SHOULD be passing but are currently FAILING")
-        print("This exposes critical authentication issues in staging )
-        ")
+        print("This exposes critical authentication issues in staging )"
+        ")"
 
         import subprocess
         result = subprocess.run( )
@@ -274,9 +292,9 @@ class TestStagingEnvironmentConfiguration:
         print(result.stdout)
         if result.returncode != 0:
         print("")
-        [CRITICAL] Tests are failing - authentication is broken in staging!")
+        [CRITICAL] Tests are failing - authentication is broken in staging!")"
         print("The test suite correctly identifies these issues.")
         else:
         print("")
-        [OK] All critical tests passing")
+        [OK] All critical tests passing")"
         pass

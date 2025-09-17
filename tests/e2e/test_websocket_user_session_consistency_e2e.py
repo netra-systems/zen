@@ -7,7 +7,7 @@ ID generation inconsistencies on actual user workflows.
 Root Cause Being Tested:
 - WebSocket connections with authenticated users fail due to thread ID mismatches
 - Real multi-user scenarios break when WebSocket factory IDs conflict with database expectations
-- Session isolation violations occur when ID formats don't match between components
+- Session isolation violations occur when ID formats don't match between components'
 
 Error Pattern Being Exposed:
 Failed to create request-scoped database session req_1757357912444_24_73708c2b: 404: Thread not found
@@ -45,7 +45,7 @@ class WebSocketUserSessionConsistencyE2ETests:
         Business Impact: Users cannot start chat conversations = revenue loss
 """Empty docstring."""
         auth_helper = E2EAuthHelper()
-        user_context = await create_authenticated_user_context(user_email='websocket.test.user@example.com', environment='test', permissions=['read', 'write', 'premium']
+        user_context = await create_authenticated_user_context(user_email='websocket.test.user@example.com', environment='test', permissions=['read', 'write', 'premium')
         jwt_token = user_context.agent_context['jwt_token']
         user_id = str(user_context.user_id)
         auth_headers = {'Authorization': f'Bearer {jwt_token}'}
@@ -54,7 +54,7 @@ class WebSocketUserSessionConsistencyE2ETests:
         def simulate_websocket_factory_id_generation(user_id: str, timestamp: int):
             Simulates the current problematic WebSocket factory ID generation""
             return {'connection_id': f'ws_conn_{user_id}_{timestamp}', 'thread_id': f'websocket_factory_{timestamp}', 'run_id': f'websocket_factory_{timestamp}'}
-        websocket_ids = simulate_websocket_factory_id_generation(user_id, websocket_connection_context['connection_timestamp']
+        websocket_ids = simulate_websocket_factory_id_generation(user_id, websocket_connection_context['connection_timestamp')
         websocket_connection_context.update(websocket_ids)
         session_creation_result = {'success': False, 'error': None, 'thread_id_used': websocket_connection_context['thread_id'], 'session_details': None}
         with patch('netra_backend.app.database.get_db') as mock_get_db, patch('netra_backend.app.services.database.thread_repository.ThreadRepository') as mock_thread_repo, patch('netra_backend.app.database.request_scoped_session_factory.get_isolated_session') as mock_get_session:
@@ -81,7 +81,7 @@ class WebSocketUserSessionConsistencyE2ETests:
             mock_get_session.return_value.__aexit__ = AsyncMock(return_value=None)
             try:
                 from netra_backend.app.database.request_scoped_session_factory import get_isolated_session
-                async with get_isolated_session(user_id=user_id, request_id=None, thread_id=websocket_connection_context['thread_id'] as session:
+                async with get_isolated_session(user_id=user_id, request_id=None, thread_id=websocket_connection_context['thread_id') as session:
                     session_creation_result['success'] = True
                     session_creation_result['session_details'] = {'user_id': user_id, 'thread_id': websocket_connection_context['thread_id'], 'authenticated': True}
             except Exception as e:
@@ -102,7 +102,7 @@ class WebSocketUserSessionConsistencyE2ETests:
         auth_helper = E2EAuthHelper()
         authenticated_users = []
         for i in range(3):
-            user_context = await create_authenticated_user_context(user_email=f'multiuser.test.{i}@example.com', environment='test', permissions=['read', 'write', 'enterprise']
+            user_context = await create_authenticated_user_context(user_email=f'multiuser.test.{i)@example.com', environment='test', permissions=['read', 'write', 'enterprise']
             authenticated_users.append(user_context)
         websocket_sessions = []
         timestamp_base = int(time.time() * 1000)
@@ -123,7 +123,7 @@ class WebSocketUserSessionConsistencyE2ETests:
                 "Create isolated WebSocket session for authenticated user"
                 try:
                     from netra_backend.app.database.request_scoped_session_factory import get_isolated_session
-                    async with get_isolated_session(user_id=session_context['user_id'], request_id=None, thread_id=session_context['websocket_thread_id'] as session:
+                    async with get_isolated_session(user_id=session_context['user_id'), request_id=None, thread_id=session_context['websocket_thread_id') as session:
                         return {'user_id': session_context['user_id'], 'success': True, 'thread_id': session_context['websocket_thread_id'], 'isolation_verified': True, 'error': None}
                 except Exception as e:
                     return {'user_id': session_context['user_id'], 'success': False, 'thread_id': session_context['websocket_thread_id'], 'isolation_verified': False, 'error': str(e)}
@@ -146,7 +146,7 @@ class WebSocketUserSessionConsistencyE2ETests:
         Business Impact: AI agents cannot execute for users = core product value lost
 """Empty docstring."""
         auth_helper = E2EAuthHelper()
-        user_context = await create_authenticated_user_context(user_email='agent.execution.user@example.com', environment='test', permissions=['read', 'write', 'premium']
+        user_context = await create_authenticated_user_context(user_email='agent.execution.user@example.com', environment='test', permissions=['read', 'write', 'premium')
         user_id = str(user_context.user_id)
         jwt_token = user_context.agent_context['jwt_token']
         agent_execution_context = {'user_id': user_id, 'jwt_token': jwt_token, 'agent_type': 'data_analyzer', 'websocket_thread_id': f'websocket_factory_{int(time.time() * 1000)}', 'run_id': f'websocket_factory_{int(time.time() * 1000)}', 'agent_message': 'Analyze my data please'}
@@ -173,7 +173,7 @@ class WebSocketUserSessionConsistencyE2ETests:
             try:
                 execution_pipeline_log.append(f'Starting agent execution for user {user_id}')
                 from netra_backend.app.database.request_scoped_session_factory import get_isolated_session
-                async with get_isolated_session(user_id=user_id, request_id=None, thread_id=agent_execution_context['websocket_thread_id'] as session:
+                async with get_isolated_session(user_id=user_id, request_id=None, thread_id=agent_execution_context['websocket_thread_id') as session:
                     execution_pipeline_log.append('Session created successfully for agent execution')
                     agent_execution_result['agent_response'] = {'status': 'completed', 'result': 'Data analysis completed successfully', 'thread_id': agent_execution_context['websocket_thread_id']}
                     agent_execution_result['success'] = True
@@ -194,7 +194,7 @@ class WebSocketUserSessionConsistencyE2ETests:
         Business Impact: Users lose conversation history = poor user experience
 
         auth_helper = E2EAuthHelper()
-        user_context = await create_authenticated_user_context(user_email='session.persistence.user@example.com', environment='test', permissions=['read', 'write', 'premium']
+        user_context = await create_authenticated_user_context(user_email='session.persistence.user@example.com', environment='test', permissions=['read', 'write', 'premium')
         user_id = str(user_context.user_id)
         jwt_token = user_context.agent_context['jwt_token']
         initial_timestamp = int(time.time() * 1000)
@@ -216,18 +216,18 @@ class WebSocketUserSessionConsistencyE2ETests:
                     persistence_test_log.append(f'Thread lookup FAILED: Invalid format {thread_id}')
                     return None
                 persistence_test_log.append(f'Thread lookup SUCCESS: {thread_id}')
-                return Mock(id=thread_id, conversation_data=initial_connection['conversation_data']
+                return Mock(id=thread_id, conversation_data=initial_connection['conversation_data')
             mock_repo_instance.get_by_id = mock_thread_lookup
             mock_repo_instance.create = AsyncMock(return_value=Mock())
             persistence_result = {'initial_session_created': False, 'reconnection_found_thread': False, 'conversation_restored': False, 'error': None}
             try:
                 persistence_test_log.append('Creating initial WebSocket session')
                 from netra_backend.app.database.request_scoped_session_factory import get_isolated_session
-                async with get_isolated_session(user_id=user_id, request_id=None, thread_id=initial_connection['thread_id'] as session:
+                async with get_isolated_session(user_id=user_id, request_id=None, thread_id=initial_connection['thread_id') as session:
                     persistence_result['initial_session_created'] = True
                     persistence_test_log.append('Initial session created successfully')
                 persistence_test_log.append('Simulating reconnection and thread persistence check')
-                found_thread = await mock_repo_instance.get_by_id(mock_session, reconnection_context['expected_thread_id']
+                found_thread = await mock_repo_instance.get_by_id(mock_session, reconnection_context['expected_thread_id')
                 if found_thread:
                     persistence_result['reconnection_found_thread'] = True
                     persistence_result['conversation_restored'] = hasattr(found_thread, 'conversation_data') and found_thread.conversation_data == reconnection_context['expected_conversation']
@@ -244,3 +244,4 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+)))))))))))

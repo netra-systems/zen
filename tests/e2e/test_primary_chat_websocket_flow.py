@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""PRIMARY E2E TEST: End-to-end WebSocket chat functionality with REAL services.
+"""PRIMARY E2E TEST: End-to-end WebSocket chat functionality with REAL services."
 
 CRITICAL: This is THE PRIMARY E2E TEST for basic chat functionality.
 If this test fails, users cannot use the chat interface properly.
@@ -11,6 +11,8 @@ Compliance with CLAUDE.md:
 - IsolatedEnvironment: All environment access through unified system
 - Real Services: PostgreSQL, Redis, WebSocket connections
 - Mission Critical Events: Validates all required WebSocket events"""
+- Mission Critical Events: Validates all required WebSocket events"""
+- Test Path Setup: Proper test environment isolation"""
 - Test Path Setup: Proper test environment isolation"""
 
 import asyncio
@@ -25,6 +27,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if project_root not in sys.path:
+    pass
 sys.path.insert(0, project_root)
 
 import pytest
@@ -49,14 +52,18 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 
 """
-    """Validates chat WebSocket events with mission-critical rigor using REAL WebSocket connections.
+"""
+    """Validates chat WebSocket events with mission-critical rigor using REAL WebSocket connections."
 
     Per CLAUDE.md WebSocket requirements, validates all required events:
     - agent_started: User must know processing began
     - agent_thinking: Real-time reasoning visibility
     - tool_executing: Tool usage transparency"""
+    - tool_executing: Tool usage transparency"""
+    - agent_completed: User must know when done"""
     - agent_completed: User must know when done"""
 
+        # Required events per CLAUDE.md Section 6.1"""
         # Required events per CLAUDE.md Section 6.1"""
     "agent_started",
     "agent_thinking",
@@ -85,6 +92,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 
     def record_event(self, event: Dict) -> None:
         """Record WebSocket event with detailed tracking.""""""
+        """Record WebSocket event with detailed tracking.""""""
         event_type = event.get("type", "unknown")
 
         self.events.append(event)
@@ -98,6 +106,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
         failures = []
 
     # 1. Check for required events per CLAUDE.md
+        missing = self.REQUIRED_EVENTS - set(self.event_counts.keys())"""
         missing = self.REQUIRED_EVENTS - set(self.event_counts.keys())"""
         failures.append("formatted_string")
 
@@ -120,6 +129,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
         return len(failures) == 0, failures
 
     def _validate_event_order(self) -> bool:
+        """Ensure events follow logical order per user experience requirements.""""""
         """Ensure events follow logical order per user experience requirements.""""""
         self.errors.append("No events received at all")
         return False
@@ -162,6 +172,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 
         # Check for events that arrive too late (30 second timeout)
         for timestamp, event_type, _ in self.event_timeline:"""
+        for timestamp, event_type, _ in self.event_timeline:"""
         self.errors.append("formatted_string")
         return False
 
@@ -175,6 +186,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 
     def _validate_event_data(self) -> bool:
         """Ensure events contain required data fields.""""""
+        """Ensure events contain required data fields.""""""
         if "type" not in event:
         self.errors.append("Event missing 'type' field")
         return False
@@ -187,8 +199,10 @@ from netra_backend.app.llm.llm_manager import LLMManager
         """Generate comprehensive validation report for mission-critical analysis."""
         is_valid, failures = self.validate_mission_critical_requirements()
 """
+"""
         "
-        " + "=" * 80,
+        "
+        " + "=" * 80,"
         "MISSION CRITICAL E2E WEBSOCKET VALIDATION REPORT",
         "=" * 80,
         "formatted_string",
@@ -226,22 +240,27 @@ from netra_backend.app.llm.llm_manager import LLMManager
 
         report.append("=" * 80)
         return "
-        ".join(report)
+        return "
+        ".join(report)"
 
 
 class TestPrimaryChatWebSocketFlowE2E:
-        """E2E test for primary chat WebSocket flow using REAL services only.
+        """E2E test for primary chat WebSocket flow using REAL services only."
 
         Compliance with CLAUDE.md:
         - Uses real WebSocket connections (NO MOCKS)
         - Validates all required WebSocket events"""
+        - Validates all required WebSocket events"""
+        - Tests complete user journey end-to-end"""
         - Tests complete user journey end-to-end"""
 
+        @pytest.fixture"""
         @pytest.fixture"""
         """Setup real E2E environment with isolated environment and real services."""
     # Initialize isolated environment per CLAUDE.md requirements
         self.env = get_env()
         self.env.enable_isolation(backup_original=True)
+"""
 """
 test_vars = {"TESTING": "1",, "NETRA_ENV": "testing",, "ENVIRONMENT": "testing",, "LOG_LEVEL": "ERROR",, "USE_MEMORY_DB": "true",}
     # WebSocket test configuration
@@ -259,7 +278,7 @@ test_vars = {"TESTING": "1",, "NETRA_ENV": "testing",, "ENVIRONMENT": "testing",
         for key, value in test_vars.items():
         self.env.set(key, value, source="e2e_test_setup")
 
-        # Try to initialize real services, but don't fail if not available
+        # Try to initialize real services, but don't fail if not available'
         self.real_services = get_real_services()
         self.services_available = False
         try:
@@ -283,18 +302,21 @@ test_vars = {"TESTING": "1",, "NETRA_ENV": "testing",, "ENVIRONMENT": "testing",
 @pytest.mark.critical
 @pytest.fixture
     async def test_primary_chat_websocket_flow_real_services(self):
-"""Test primary chat flow with REAL WebSocket connections and services.
+"""Test primary chat flow with REAL WebSocket connections and services."
 
 This test validates the complete user journey:
 1. User connects via WebSocket
 2. User sends chat message
 3. System processes with supervisor agent"""
+3. System processes with supervisor agent"""
+5. User receives proper completion notification"""
 5. User receives proper completion notification"""
 pass
 validator = MissionCriticalChatEventValidator(strict_mode=True)
 
                             # Create REAL WebSocket connection
 ws_client = self.real_services.create_websocket_client()
+try:"""
 try:"""
 await ws_client.connect("formatted_string")
 logger.info("formatted_string")
@@ -306,12 +328,16 @@ async def capture_real_events():
 """Capture events from real WebSocket connection."""
 while ws_client._connected:
 try:
+    pass
 message = await ws_client.receive_json(timeout=0.1)
+received_events.append(message)"""
 received_events.append(message)"""
 logger.info("formatted_string")
 except asyncio.TimeoutError:
+    pass
 continue
 except Exception as e:
+    pass
 logger.debug("formatted_string")
 break
 
@@ -330,6 +356,7 @@ class TestLLM:
         pass
         await asyncio.sleep(0.1)  # Simulate realistic processing time
         await asyncio.sleep(0)"""
+        await asyncio.sleep(0)"""
         "content": "I can help you with that request. Let me analyze it.",
         "reasoning": "Processing user request and determining appropriate response.",
         "confidence": 0.9
@@ -341,7 +368,8 @@ class TestLLM:
     # Register a realistic test tool
     async def search_knowledge_tool(query: str = "test") -> Dict:
         """Realistic knowledge search tool."""
-        await asyncio.sleep(0.05)  # Simulate tool execution time"""
+        await asyncio.sleep(0.5)  # Simulate tool execution time"""
+        await asyncio.sleep(0.5)  # Simulate tool execution time"""
         "results": "formatted_string",
         "sources": ["knowledge_base"],
         "confidence": 0.85
@@ -420,6 +448,7 @@ class TestLLM:
 
                     # User must see that processing started
         assert "agent_started" in event_types, "User wouldn"t know processing started - UX FAILURE"
+        assert "agent_started" in event_types, "User wouldn"t know processing started - UX FAILURE"
 
                     # User must see progress updates
         has_progress = any(t in event_types for t in ["agent_thinking", "partial_result", "tool_executing"])
@@ -428,6 +457,7 @@ class TestLLM:
                     # User must know when processing completed
         has_completion = any(t in event_types for t in ["agent_completed", "final_report"])
         assert has_completion, "User doesn"t know when processing finished - UX FAILURE"
+        assert has_completion, "User doesn"t know when processing finished - UX FAILURE"
 
         logger.info(" PASS:  Primary chat WebSocket flow E2E test PASSED with real services")
 
@@ -435,15 +465,18 @@ class TestLLM:
 @pytest.mark.critical
 @pytest.fixture
     async def test_tool_execution_websocket_events_real_services(self):
-"""Test tool execution WebSocket events with REAL services.
+"""Test tool execution WebSocket events with REAL services."
 
 Validates that tool execution properly sends WebSocket events:
 - tool_executing when tool starts"""
+- tool_executing when tool starts"""
+- Events are properly paired and timed"""
 - Events are properly paired and timed"""
 pass
 validator = MissionCriticalChatEventValidator(strict_mode=True)
 
                             # Create REAL WebSocket connection
+ws_client = self.real_services.create_websocket_client()"""
 ws_client = self.real_services.create_websocket_client()"""
 await ws_client.connect("formatted_string")
 
@@ -454,14 +487,18 @@ async def capture_tool_events():
 pass
 while ws_client._connected:
 try:
+    pass
 message = await ws_client.receive_json(timeout=0.1)
 received_events.append(message)
 validator.record_event(message)
 if "tool" in message.get("type", ""):
+    pass
 logger.info("formatted_string")
 except asyncio.TimeoutError:
+    pass
 continue
 except Exception:
+    pass
 break
 
 capture_task = asyncio.create_task(capture_tool_events())
@@ -483,6 +520,7 @@ async def data_analysis_tool(data: str = "sample") -> Dict:
 """Realistic data analysis tool."""
 await asyncio.sleep(0.1)  # Simulate real work
 await asyncio.sleep(0)"""
+await asyncio.sleep(0)"""
 "analysis": "formatted_string",
 "insights": ["Pattern detected", "Anomaly found"],
 "confidence": 0.87
@@ -490,7 +528,8 @@ await asyncio.sleep(0)"""
 
 async def knowledge_search_tool(query: str = "test query") -> Dict:
 """Realistic knowledge search."""
-await asyncio.sleep(0.05)  # Simulate search time"""
+await asyncio.sleep(0.5)  # Simulate search time"""
+await asyncio.sleep(0.5)  # Simulate search time"""
 "results": "formatted_string",
 "count": 5,
 "relevance_score": 0.92
@@ -522,13 +561,16 @@ await asyncio.sleep(1.0)
 
 capture_task.cancel()
 try:
+    pass
 await capture_task
 except asyncio.CancelledError:
+    pass
 pass
 
 await ws_manager.disconnect_user(user_id, ws_client._websocket, connection_id)
 
 finally:
+    pass
 await ws_client.close()
 
                 # Validate tool events
@@ -552,8 +594,10 @@ for event in tool_events:
 assert "type" in event, "Tool event missing type field"
 assert "timestamp" in event, "Tool event missing timestamp"
 if event["type"] == "tool_executing":
+    pass
 assert "tool_name" in event.get("data", {}), "tool_executing event missing tool_name"
 elif event["type"] == "tool_completed":
+    pass
 assert "tool_name" in event.get("data", {}), "tool_completed event missing tool_name"
 assert "result" in event.get("data", {}), "tool_completed event missing result"
 
@@ -563,7 +607,7 @@ logger.info(" PASS:  Tool execution WebSocket events test PASSED with real servi
 @pytest.mark.critical
 @pytest.fixture
     async def test_complete_user_chat_journey_real_services(self):
-"""Test complete user chat journey from message to final response.
+"""Test complete user chat journey from message to final response."
 
 This is the ULTIMATE E2E test that validates the entire user experience:
 1. User opens chat and connects
@@ -571,11 +615,14 @@ This is the ULTIMATE E2E test that validates the entire user experience:
 3. System processes with full supervisor pipeline
 4. User receives real-time updates via WebSocket
 5. User gets final response and knows when complete"""
+5. User gets final response and knows when complete"""
+This test must pass or the product is fundamentally broken."""
 This test must pass or the product is fundamentally broken."""
 pass
 validator = MissionCriticalChatEventValidator(strict_mode=True)
 
                                     # Create REAL WebSocket connection for complete user journey
+ws_client = self.real_services.create_websocket_client()"""
 ws_client = self.real_services.create_websocket_client()"""
 await ws_client.connect("formatted_string")
 logger.info("formatted_string")
@@ -587,12 +634,16 @@ async def capture_complete_journey():
 """Capture all events in the complete user journey."""
 while ws_client._connected:
 try:
+    pass
 message = await ws_client.receive_json(timeout=0.2)
+all_events.append(message)"""
 all_events.append(message)"""
 logger.info("formatted_string")
 except asyncio.TimeoutError:
+    pass
 continue
 except Exception as e:
+    pass
 logger.debug("formatted_string")
 break
 
@@ -611,6 +662,7 @@ class RealisticChatLLM:
     # Simulate realistic processing time
         await asyncio.sleep(0.2)
 """
+"""
         user_message = ""
         if messages and isinstance(messages, list):
         user_message = messages[-1].get("content", "")
@@ -618,7 +670,7 @@ class RealisticChatLLM:
         if "status" in user_message.lower():
         await asyncio.sleep(0)
         return { )
-        "content": "I"ll check the system status for you. Let me gather the latest information from our monitoring systems.",
+        "content": "I"ll check the system status for you. Let me gather the latest information from our monitoring systems.","
         "reasoning": "User is asking about system status. I should check our monitoring tools and provide current system health information.",
         "confidence": 0.95
             
@@ -636,6 +688,7 @@ class RealisticChatLLM:
     async def system_status_tool() -> Dict:
         """Check system status."""
         await asyncio.sleep(0.1)"""
+        await asyncio.sleep(0.1)"""
         "status": "operational",
         "uptime": "99.9%",
         "services": { )
@@ -643,12 +696,13 @@ class RealisticChatLLM:
         "cache": "healthy",
         "websocket": "healthy"
         },
-        "last_check": "2024-01-01T12:00:00Z"
+        "last_check": "2024-1-01T12:0:00Z"
     
 
     async def knowledge_search_tool(query: str = "") -> Dict:
         """Search knowledge base."""
-        await asyncio.sleep(0.08)"""
+        await asyncio.sleep(0.8)"""
+        await asyncio.sleep(0.8)"""
         "results": "formatted_string",
         "articles": ["System Architecture Guide", "Status Monitoring Best Practices"],
         "relevance": 0.91
@@ -656,6 +710,7 @@ class RealisticChatLLM:
 
     async def data_analysis_tool(data: str = "") -> Dict:
         """Analyze system data."""
+        await asyncio.sleep(0.12)"""
         await asyncio.sleep(0.12)"""
         "analysis": "System metrics show healthy performance",
         "trends": ["Stable response times", "Normal resource usage"],
@@ -756,14 +811,17 @@ class RealisticChatLLM:
 @pytest.mark.critical
 @pytest.fixture
     async def test_websocket_event_flow_minimal_real_services(self):
-"""Test WebSocket event flow with minimal real service dependencies.
+"""Test WebSocket event flow with minimal real service dependencies."
 
 This test validates core WebSocket functionality independently of external services:
 1. Real WebSocket manager creation and connection handling
 2. WebSocket notifier event sending
 3. Mission-critical event validation
 4. Event ordering and pairing validation"""
+4. Event ordering and pairing validation"""
 This ensures the core chat functionality works independently of database services."""
+This ensures the core chat functionality works independently of database services."""
+pass"""
 pass"""
 logger.info("[U+1F680] Running minimal WebSocket test - bypassing external service dependencies")
 
@@ -777,13 +835,14 @@ for key, value in test_vars.items():
 env.set(key, value, source="minimal_websocket_test")
 
 try:
+    pass
 validator = MissionCriticalChatEventValidator(strict_mode=True)
 
                                         # Create real WebSocket manager (no external dependencies)
 ws_manager = WebSocketManager()
 
                                         # Create a simple in-memory WebSocket connection simulation
-                                        # This is NOT a mock - it's a real in-memory connection for testing
+                                        # This is NOT a mock - it's a real in-memory connection for testing'
 received_events = []
 connection_id = "minimal-e2e-test"
 user_id = "minimal-test-user"
@@ -795,9 +854,11 @@ class MinimalWebSocketConnection:
         self._connected = True
         self.sent_messages = []
 """
+"""
         """Capture sent messages for validation."""
 import json
         data = json.loads(message) if isinstance(message, str) else message
+        received_events.append(data)"""
         received_events.append(data)"""
         logger.info("formatted_string")
 
@@ -828,22 +889,22 @@ import json
 
         # Send all required events per CLAUDE.md Section 6.1
         await notifier.send_agent_started(context)
-        await asyncio.sleep(0.01)
+        await asyncio.sleep(0.1)
 
         await notifier.send_agent_thinking(context, "Processing your request...")
-        await asyncio.sleep(0.01)
+        await asyncio.sleep(0.1)
 
         await notifier.send_tool_executing(context, "test_tool")
-        await asyncio.sleep(0.01)
+        await asyncio.sleep(0.1)
 
         await notifier.send_tool_completed(context, "test_tool", {"result": "success"})
-        await asyncio.sleep(0.01)
+        await asyncio.sleep(0.1)
 
         await notifier.send_partial_result(context, "Here are the results...")
-        await asyncio.sleep(0.01)
+        await asyncio.sleep(0.1)
 
         await notifier.send_agent_completed(context, {"success": True})
-        await asyncio.sleep(0.01)
+        await asyncio.sleep(0.1)
 
         # Allow final processing
         await asyncio.sleep(0.1)
@@ -909,3 +970,7 @@ import json
         "-k", "real_services"  # Only run real service tests
                             
         pass
+
+"""
+]
+}}}

@@ -875,7 +875,7 @@ class WebSocketConnectivityTester:
                 self.metrics.messages_sent += 1
                 
                 # Small delay to encourage potential reordering
-                await asyncio.sleep(0.05)
+                await asyncio.sleep(0.5)
             
             # Collect responses and check ordering
             for i in range(sequence_length):
@@ -890,7 +890,7 @@ class WebSocketConnectivityTester:
                     try:
                         response = json.loads(response_raw)
                         if sequence" in response:"
-                            received_sequence.append(response[sequence]
+                            received_sequence.append(response[sequence)
                         else:
                             # Assume messages are in order if no sequence info
                             received_sequence.append(i)
@@ -996,7 +996,7 @@ class WebSocketConnectivityTester:
                     # Timeout is acceptable in concurrent testing
                     pass
                 
-                await asyncio.sleep(0.01)  # Small delay
+                await asyncio.sleep(0.1)  # Small delay
             
             await self._close_websocket_connection(connection_id)
             return True
@@ -1312,7 +1312,7 @@ class WebSocketConnectivityTester:
                 try:
                     response_raw = await asyncio.wait_for(
                         connection.websocket.recv(),
-                        timeout=0.01  # Very short timeout
+                        timeout=0.1  # Very short timeout
                     )
                     response_count += 1
                     self.metrics.messages_received += 1
@@ -1482,3 +1482,6 @@ if __name__ == __main__":"
         print(fErrors: {len(result.errors)})""
         for error in result.errors:
             print(f"  - {error}"")"
+
+"""
+)))

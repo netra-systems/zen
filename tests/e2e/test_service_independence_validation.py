@@ -1,6 +1,7 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 '''
+'''
 CRITICAL E2E Test: Service Independence After Launcher Completion
 
 This test addresses the critical service independence issue identified in iteration 7:
@@ -18,6 +19,7 @@ services (auth, backend, frontend) continue running normally after the launcher
 process terminates, which is required for production-like behavior.
 
 Expected: ALL services remain running and responsive after launcher termination
+'''
 '''
 
 import pytest
@@ -266,7 +268,7 @@ class ServiceIndependenceValidator:
 
         for service_name, service_before in self.test_results.services_before_termination.items():
         if service_before.status != "running":
-        continue  # Skip services that weren"t running before
+        continue  # Skip services that weren"t running before"
 
         try:
                 # Check if service is still running
@@ -276,7 +278,7 @@ class ServiceIndependenceValidator:
                 # Determine independence status
         independent = bool(current_pid and responsive)
 
-                # For true independence, PID should be the same (process didn't restart)
+                # For true independence, PID should be the same (process didn't restart)'
                 # or different but still responsive (process restarted independently)
         if service_before.pid and current_pid:
         if service_before.pid == current_pid:
@@ -410,12 +412,14 @@ class TestServiceIndependenceValidation(BaseE2ETest):
 
     def test_services_remain_independent_after_launcher_termination(self):
         '''
+        '''
         CRITICAL TEST: Validate services remain operational after launcher termination
 
         This test addresses the critical issue from iteration 7 analysis:
         "Services not independent after launcher completion"
 
         Expected: Services continue running and responding after launcher exits
+        '''
         '''
         pass
     async def run_independence_test():
@@ -439,8 +443,8 @@ class TestServiceIndependenceValidation(BaseE2ETest):
         total_services = len(result.services_before_termination)
         independence_rate = len(independent_services) / max(total_services, 1)
 
-        print(f" )
-        === SERVICE INDEPENDENCE TEST RESULTS ===")
+        print(f" )"
+        === SERVICE INDEPENDENCE TEST RESULTS ===")"
         print("")
         print("")
         print("")
@@ -448,13 +452,13 @@ class TestServiceIndependenceValidation(BaseE2ETest):
         print("")
 
         if result.errors:
-        print(f" )
-        Errors encountered:")
+        print(f" )"
+        Errors encountered:")"
         for error in result.errors:
         print("")
 
-        print(f" )
-        Service Details:")
+        print(f" )"
+        Service Details:")"
         for service_name, service_before in result.services_before_termination.items():
         service_after = result.services_after_termination.get(service_name)
         if service_after:
@@ -497,7 +501,7 @@ class TestServiceIndependenceValidation(BaseE2ETest):
     def _validate_final_system_state(self, result: TestLauncherResult):
         """Validate final system state after independence test."""
         print("")
-        === FINAL SYSTEM STATE VALIDATION ===")
+        === FINAL SYSTEM STATE VALIDATION ===")"
 
     # Check for zombie processes
         try:

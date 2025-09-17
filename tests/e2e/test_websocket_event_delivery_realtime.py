@@ -101,7 +101,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
         comprehensive_request = {
             type": agent_request, "
             agent: supervisor,
-            message": "Analyze my AI costs and provide optimization recommendations. I'm spending $3000/month on GPT-4 for 20,000 customer service requests.,
+            message": "Analyze my AI costs and provide optimization recommendations. I'm spending $3000/month on GPT-4 for 20,0 customer service requests.,'
             context: {
                 requires_tools: True,  # Ensure tool execution""
                 comprehensive_analysis": True,"
@@ -136,7 +136,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
                         event_type = event['type']
                         
                         all_events.append(event)
-                        event_timestamps[event_type] = event_timestamps.get(event_type, [] + [event_time - start_time]
+                        event_timestamps[event_type) = event_timestamps.get(event_type, [) + [event_time - start_time)
                         
                         print(f"[U+1F4E8] Event #{len(all_events)}: {event_type} (t={event_time - start_time:.2f}s))"
                         
@@ -262,7 +262,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
         Test WebSocket event isolation between multiple concurrent users.
         
         Business Scenario: Multiple users connected simultaneously should only
-        receive their own events, not events from other users' sessions.
+        receive their own events, not events from other users' sessions.'
         
         CRITICAL for multi-tenant security and user experience.
         
@@ -408,7 +408,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
                 if event['type'] == 'agent_completed' and 'data' in event:
                     result_text = str(event['data'].lower()
                     
-                    # Should NOT contain other users' markers
+                    # Should NOT contain other users' markers'
                     for j, other_session in enumerate(successful_sessions):
                         if i == j:
                             continue
@@ -421,7 +421,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
                         
                         # Should not heavily discuss other use cases (some overlap acceptable)
                         contamination_score = result_text.count(other_use_case)
-                        own_use_case_score = result_text.count(user_requests[i][context][use_case]
+                        own_use_case_score = result_text.count(user_requests[i)[context)[use_case)
                         
                         if own_use_case_score > 0:  # Only check if own use case is present
                             contamination_ratio = contamination_score / own_use_case_score
@@ -504,7 +504,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
                         connection_metrics[events_received] += 1
                         last_event_time = current_time
                         
-                        print(f[U+1F4E8] Event #{connection_metrics['events_received']}: {event['type']}  + 
+                        print(f[U+1F4E8] Event #{connection_metrics['events_received']): {event['type'])  + 
                               f(gap: {event_gap:.1f}s")")
                         
                         if event['type'] == 'agent_completed':
@@ -571,7 +571,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
         payload_request = {
             type": "agent_request,
             agent: supervisor,
-            message: "Analyze AI costs for customer service chatbot - currently spending $2000/month on 30,000 requests with GPT-4,"
+            message: "Analyze AI costs for customer service chatbot - currently spending $2000/month on 30,0 requests with GPT-4,"
             context": {"
                 monthly_spend: 2000,
                 monthly_requests": 30000,"
@@ -613,7 +613,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
         
         print(f CHART:  Validating {len(collected_events)} event payloads...)
         
-        # Validate each event type's payload structure
+        # Validate each event type's payload structure'
         event_validation_results = {}
         
         for event in collected_events:
@@ -790,7 +790,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
             if isinstance(result, Exception):
                 failed_sessions.append(str(result))
             elif result.get(error):
-                failed_sessions.append(result[error"]"
+                failed_sessions.append(result[error")"
             else:
                 successful_sessions.append(result)
         
@@ -828,3 +828,6 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
         print(f   [U+2713] Response times within acceptable limits)
         print(f   [U+2713] Event delivery maintained under pressure"")
         print(f   [U+2713] WebSocket scalability demonstrated")"
+
+"""
+))))))))))

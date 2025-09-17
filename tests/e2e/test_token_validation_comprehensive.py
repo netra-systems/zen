@@ -1,4 +1,5 @@
 '''
+'''
 Comprehensive Token Validation Test Suite
 ==========================================
 
@@ -16,6 +17,7 @@ This test suite validates:
 5. WebSocket authentication
 6. API authentication
 7. Service-to-service authentication
+'''
 '''
 
 import pytest
@@ -167,8 +169,8 @@ class TestTokenValidationComprehensive:
         assert authenticator.config is not None
         assert authenticator.rate_limiter is not None
 
-        # Note: We can't fully test token extraction without a real WebSocket connection,
-        # but we've validated the integration points exist
+        # Note: We can't fully test token extraction without a real WebSocket connection,'
+        # but we've validated the integration points exist'
         print("PASS: WebSocket authenticator module loaded and configured")
 
         except ImportError as e:
@@ -185,7 +187,7 @@ class TestTokenValidationComprehensive:
     
 
         for env, should_allow_mock in environments.items():
-        # Note: We can't actually change the environment in a running test,
+        # Note: We can't actually change the environment in a running test,'
         # but we document the expected behavior
         print("")
 
@@ -209,7 +211,7 @@ class TestTokenValidationComprehensive:
         print("")
 
     def test_auth_client_core_security(self):
-        """Test that auth_client_core doesn't create mock tokens."""
+        """Test that auth_client_core doesn't create mock tokens."""'
         try:
         from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
@@ -252,7 +254,7 @@ class TestTokenValidationComprehensive:
     def test_end_to_end_token_flow(self):
         """Test complete token flow from creation to validation."""
         print("")
-        === End-to-End Token Flow Test ===")
+        === End-to-End Token Flow Test ===")"
 
     # Step 1: Create tokens
         print("1. Creating test tokens...")
@@ -292,13 +294,13 @@ class TestTokenValidationComprehensive:
         print("   WARNING: Security monitoring not available")
 
         print("")
-        PASS: End-to-end token flow test completed successfully")
+        PASS: End-to-end token flow test completed successfully")"
 
     def test_comprehensive_validation_summary(self):
         """Summary test that validates all components are working."""
         pass
         print("")
-         + ="*60)
+         + ="*60)"
         print("COMPREHENSIVE TOKEN VALIDATION TEST SUMMARY")
         print("="*60)
 
@@ -317,7 +319,7 @@ class TestTokenValidationComprehensive:
         print("")
 
         print("")
-         + ="*60)
+         + ="*60)"
         print("SECURITY IMPLEMENTATION STATUS: COMPLETE")
         print("="*60)
 
@@ -333,7 +335,7 @@ class TestTokenValidationComprehensive:
         assert "PASS" in results[component], ""
 
         print("")
-        SUCCESS: All critical security components validated successfully!")
+        SUCCESS: All critical security components validated successfully!")"
 
 
         if __name__ == "__main__":

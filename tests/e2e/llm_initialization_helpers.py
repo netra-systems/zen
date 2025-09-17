@@ -21,10 +21,11 @@ class TestWebSocketConnection:
         """Get all sent messages."""
         return self.messages_sent.copy()
 
-        '''LLM Initialization Test Helpers - Supporting classes and utilities
+        '''LLM Initialization Test Helpers - Supporting classes and utilities'
 
         Separated from main test file to comply with 450-line limit
         All functions  <= 8 lines following CLAUDE.md requirements
+        '''
         '''
 
         import asyncio
@@ -152,12 +153,14 @@ class LLMTestHelpers:
     def create_structured_test_prompt():
         """Create structured test prompt"""
         return '''
+        return '''
         Analyze this business scenario and respond in JSON format:
 
         Scenario: LLM service initialization test for revenue-critical system
         Expected: Successful connection with structured response validation
 
         Provide analysis as JSON with: category, confidence (0-1), reasoning, token_count_estimate
+        '''
         '''
 
         @staticmethod
@@ -279,3 +282,6 @@ class ReliabilityTestHelpers:
         if response is not None:
         assert "error" in str(response).lower() or "unavailable" in str(response).lower(), \
         "Response should indicate service unavailable"
+
+'''
+)

@@ -72,7 +72,7 @@ class WebSocketMessagingerTests:
         ws = self.connections[connection_id]
         message = {type: message_type, payload": payload}"
         await ws.send(json.dumps(message))
-        self.message_log[connection_id].append({"sent: message}"
+        self.message_log[connection_id].append({"sent: message)"
         return message
     
     async def receive_message(self, connection_id: str, timeout: float = 5.0):
@@ -80,7 +80,7 @@ class WebSocketMessagingerTests:
         ws = self.connections[connection_id]
         response = await asyncio.wait_for(ws.recv(), timeout=timeout)
         message_data = json.loads(response)
-        self.message_log[connection_id].append({received: message_data}
+        self.message_log[connection_id].append({received: message_data)
         return message_data
     
     async def verify_message_structure(self, message: Dict, expected_type: str):
@@ -154,7 +154,7 @@ async def test_websocket_state_synchronization(messaging_tester):
     assert payload[user_status] == initial_state["user_status]"
     
     # Act - Request state
-    await messaging_tester.send_message(client1", state_request, {}"
+    await messaging_tester.send_message(client1", state_request, {)"
     state_response = await messaging_tester.receive_message(client1)
     
     # Assert - State persisted
@@ -180,13 +180,13 @@ async def test_websocket_reconnection_message_recovery(messaging_tester):
     ws2, _ = await messaging_tester.create_authenticated_connection("client2)"
     
     # Request message recovery
-    await messaging_tester.send_message(client2, recover_messages, {token": token}"
+    await messaging_tester.send_message(client2, recover_messages, {token": token)"
     
     # Assert - Messages recovered
     recovery_response = await messaging_tester.receive_message(client2)
     payload = await messaging_tester.verify_message_structure(recovery_response, messages_recovered)""
     
-    recovered_messages = payload.get("messages, []"
+    recovered_messages = payload.get("messages, [)"
     assert any(msg.get(id) == message_id for msg in recovered_messages)
 
 
@@ -303,3 +303,6 @@ async def test_websocket_agent_communication(messaging_tester):
     payload = await messaging_tester.verify_message_structure(agent_response, agent_response)
     assert payload["request_id] == agent_request[request_id"]
     assert "result in payload or status" in payload
+
+"""
+)))))))

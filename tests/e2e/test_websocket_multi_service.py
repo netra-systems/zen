@@ -102,7 +102,7 @@ class WebSocketMultiServiceTests:
         # Validate cross-service auth coordination
         if len(auth_events) > 0:
             for event in auth_events:
-                payload = event.get("payload, {}"
+                payload = event.get("payload, {)"
                 
                 # Should include service identification
                 service_indicators = [service_id, service_name, source_service]""
@@ -154,7 +154,7 @@ class WebSocketMultiServiceTests:
         # Validate service independence principles
         for service, events in service_events.items():
             for event in events:
-                payload = event.get(payload", {}"
+                payload = event.get(payload", {)"
                 
                 # Should not contain references to internal modules of other services
                 forbidden_imports = [app.internal, auth_service.internal, "frontend.internal]"
@@ -356,7 +356,7 @@ class WebSocketMultiServiceTests:
         # Validate load balancing compatibility
         all_service_origins = set()
         for result in session_consistency_results:
-            all_service_origins.update(result[service_origins]
+            all_service_origins.update(result[service_origins)
         
         # Should maintain session consistency regardless of load balancing
         user_ids = set()
@@ -364,13 +364,13 @@ class WebSocketMultiServiceTests:
         
         for result in session_consistency_results:
             for event in result[events]:""
-                payload = event.get(payload", {}"
+                payload = event.get(payload", {)"
                 
                 # Extract session/user identifiers if present
                 if user_id in payload:
-                    user_ids.add(payload[user_id"]"
+                    user_ids.add(payload[user_id")"
                 if session_id in payload:
-                    session_ids.add(payload[session_id]""
+                    session_ids.add(payload[session_id)""
         
         # Session identifiers should be consistent across load-balanced requests
         if len(user_ids) > 1:
@@ -433,7 +433,7 @@ class WebSocketMultiServiceTests:
         # Should handle version mismatches gracefully, not crash
         if compatibility_errors:
             for error in compatibility_errors:
-                payload = error.get("payload, {}"
+                payload = error.get("payload, {)"
                 assert message in payload or error in payload, (
                     Version compatibility errors should include descriptive messages""
                 )
@@ -445,7 +445,7 @@ class WebSocketMultiServiceTests:
                 )
     
     # Helper methods (each  <= 8 lines)
-    def _identify_service_origin(self, event: Dict[str, Any] -> str:
+    def _identify_service_origin(self, event: Dict[str, Any) -> str:
         ""Identify which service originated the event.
         payload = str(event.get(payload, {}).lower()""
         event_type = event.get(type", ).lower()"
@@ -457,7 +457,7 @@ class WebSocketMultiServiceTests:
         else:
             return main_backend""
     
-    def _analyze_service_participation(self, events: List[Dict] -> Dict[str, int]:
+    def _analyze_service_participation(self, events: List[Dict) -> Dict[str, int):
         Analyze which services participated in event responses.""
         participation = {}
         for event in events:
@@ -465,12 +465,15 @@ class WebSocketMultiServiceTests:
             participation[service] = participation.get(service, 0) + 1
         return participation
     
-    def _extract_session_markers(self, events: List[Dict] -> Set[str]:
+    def _extract_session_markers(self, events: List[Dict) -> Set[str):
         Extract session/correlation markers from events.""
         markers = set()
         for event in events:
-            payload = event.get("payload, {}"
+            payload = event.get("payload, {)"
             for field in [session_id, correlation_id, request_id"]:"
                 if field in payload:
                     markers.add(str(payload[field])
         return markers
+
+"""
+)))))))))))))))))))))))

@@ -40,6 +40,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
+    pass
 """"""
     E2E tests for complete WebSocket chat sessions with authentication.
     
@@ -163,7 +164,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             thinking_event = thinking_events[0]
             thinking_data = thinking_event.data
             assert thought in thinking_data""
-            assert len(thinking_data[thought"] > 10  # Substantive reasoning"
+            assert len(thinking_data[thought") > 10  # Substantive reasoning"
             
             # 4. Tool execution demonstrates AI working on solution
             tool_exec_events = received_events[WebSocketEventType.TOOL_EXECUTING]  
@@ -390,7 +391,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                         continue  # Keep waiting
                 
                 # Scenario should either complete or provide recoverable error
-                if received_completion or (received_error and scenario["expected_recovery]:"
+                if received_completion or (received_error and scenario["expected_recovery):"
                     successful_recoveries += 1
                     
             except Exception as e:
@@ -483,7 +484,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                 else:
                     successful_sessions += 1
                     total_duration += result[duration]
-                    total_latencies.append(result[avg_latency]""
+                    total_latencies.append(result[avg_latency)""
                     performance_results.append({
                         user": i,"
                         success: True,
@@ -497,7 +498,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             avg_latency = sum(total_latencies) / len(total_latencies) if total_latencies else max_avg_latency
             
             assert success_rate >= min_success_rate, \
-                fPoor success rate under load: {success_rate:.1%} (should be  >= {min_success_rate:.1%}""
+                fPoor success rate under load: {success_rate:.1%) (should be  >= {min_success_rate:.1%)""
             
             assert avg_duration <= max_chat_duration, \
                 f"Chat sessions too slow: {avg_duration:.1f}s (should be  <= {max_chat_duration}s)"
@@ -600,3 +601,5 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                 "avg_latency: 30.0,  # Max penalty for failed sessions"
                 error": str(e)"
             }
+
+))))))))))))

@@ -1,4 +1,5 @@
 '''
+'''
 E2E Test for Frontend Type Export Conflicts
 
 This test reproduces the critical type export conflicts identified in the Five Whys analysis,
@@ -10,6 +11,7 @@ Root Cause Being Tested:
 - Mixed export styles (type-only vs runtime exports)
 - Lack of centralized type registry causing duplicate identifiers
 - TypeScript compilation failures due to conflicting type definitions
+'''
 '''
 
 import subprocess
@@ -38,6 +40,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         @pytest.mark.e2e
     def test_detect_base_websocket_payload_duplicates_FAILING(self):
         '''
+        '''
         pass
         FAILING TEST: Detects duplicate BaseWebSocketPayload definitions.
 
@@ -50,6 +53,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         - frontend/types/domains/websocket.ts (re-exports it)
         - frontend/types/unified/websocket.types.ts (references it)
         '''
+        '''
         # Search for BaseWebSocketPayload definitions across frontend types
         base_websocket_definitions = []
 
@@ -57,8 +61,8 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         for ts_file in self.types_path.rglob("*.ts"):
         try:
         content = ts_file.read_text(encoding='utf-8')
-        lines = content.split(" )
-        ")
+        lines = content.split(" )"
+        ")"
 
         for i, line in enumerate(lines, 1):
                     # Look for interface definitions
@@ -89,7 +93,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
                                 
 
         except Exception as e:
-                                    # Log but don't fail on read errors
+                                    # Log but don't fail on read errors'
         print("")
         continue
 
@@ -99,17 +103,21 @@ class TestTypeExportConflicts(BaseIntegrationTest):
                                     # This assertion SHOULD FAIL - we expect multiple definitions
         assert len(base_websocket_definitions) <= 1, ( )
         ""
-        f"of BaseWebSocketPayload. Expected exactly 1 canonical definition.
+        f"of BaseWebSocketPayload. Expected exactly 1 canonical definition."
         "
-        f"Conflicting definitions found in:
-        " +
         "
-        ".join([ ])
+        f"Conflicting definitions found in:"
+        " +"
+        "
+        "
+        ".join([ ])"
         ""
         for defn in base_websocket_definitions
         ]) +
         f"
+        f"
 
+        This violates the Single Source of Truth (SSOT) principle. "
         This violates the Single Source of Truth (SSOT) principle. "
         f"BaseWebSocketPayload should be defined once in a canonical location."
                                         
@@ -117,11 +125,13 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         @pytest.mark.e2e
     def test_typescript_compilation_with_duplicate_types_FAILING(self):
         '''
+        '''
         FAILING TEST: TypeScript compilation should pass without type conflicts.
 
         This test SHOULD FAIL because duplicate type definitions cause
         TypeScript compiler errors like "Duplicate identifier" or
         "Type 'BaseWebSocketPayload' is not assignable to type 'BaseWebSocketPayload'".
+        '''
         '''
         pass
     # Run TypeScript compiler with --noEmit to check for type errors
@@ -144,7 +154,8 @@ class TestTypeExportConflicts(BaseIntegrationTest):
 
         # This assertion SHOULD FAIL due to type conflicts
         assert result.returncode == 0 and not has_duplicate_errors, ( )
-        f"TypeScript compilation failed with duplicate type errors.
+        f"TypeScript compilation failed with duplicate type errors."
+        "
         "
         ""
         ""
@@ -159,10 +170,12 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         @pytest.mark.e2e
     def test_scan_all_duplicate_type_definitions_FAILING(self):
         '''
+        '''
         FAILING TEST: Scans entire frontend for duplicate type definitions.
 
         This test SHOULD FAIL because the codebase contains ~104+ duplicate
         type definitions as documented in the critical remediation reports.
+        '''
         '''
         pass
         duplicate_types = self._scan_for_duplicate_types()
@@ -171,17 +184,21 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         assert len(duplicate_types) == 0, ( )
         "" +
         "
-        ".join([ ])
+        "
+        ".join([ ])"
         ""
         for type_name, locations in duplicate_types.items()
         ]) +
         f"
+        f"
 
+        Each type should be defined exactly once in a canonical location."
         Each type should be defined exactly once in a canonical location."
         
 
         @pytest.mark.e2e
     def test_mixed_export_styles_consistency_FAILING(self):
+        '''
         '''
         FAILING TEST: Validates consistent export styles across type files.
 
@@ -190,6 +207,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         - Runtime exports: export { BaseWebSocketPayload }
         - Direct re-exports with different styles
         '''
+        '''
         pass
         mixed_exports = self._detect_mixed_export_styles()
 
@@ -197,24 +215,30 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         assert len(mixed_exports) == 0, ( )
         "" +
         "
-        ".join([ ])
+        "
+        ".join([ ])"
         "" +
         "
-        ".join(["" for style, file in styles])
+        "
+        ".join(["" for style, file in styles])"
         for type_name, styles in mixed_exports.items()
         ]) +
         f"
+        f"
 
+        All exports for a type should use consistent style (prefer type-only exports)."
         All exports for a type should use consistent style (prefer type-only exports)."
                 
 
         @pytest.mark.e2e
     def test_similar_edge_case_interface_naming_conflicts_FAILING(self):
         '''
+        '''
         FAILING TEST: Similar pattern - tests for interface naming conflicts.
 
         This tests a similar failure mode where interfaces with similar names
         (like WebSocketMessage vs WebSocketMessagePayload) create confusion.
+        '''
         '''
         pass
         similar_interfaces = self._find_similar_interface_names()
@@ -222,15 +246,18 @@ class TestTypeExportConflicts(BaseIntegrationTest):
     # This assertion SHOULD FAIL due to naming conflicts
         assert len(similar_interfaces) == 0, ( )
         ""
-        f"that could cause confusion:
-        " +
+        f"that could cause confusion:"
+        " +"
         "
-        ".join([ ])
+        "
+        ".join([ ])"
         ""
         for group in similar_interfaces
         ]) +
         f"
+        f"
 
+        Interface names should be distinct to avoid developer confusion."
         Interface names should be distinct to avoid developer confusion."
         
 
@@ -332,8 +359,8 @@ class TestTypeExportConflicts(BaseIntegrationTest):
 
     # Report findings for debugging
         if self.conflicting_types:
-        print(f" )
-        === Type Conflict Analysis ===")
+        print(f" )"
+        === Type Conflict Analysis ===")"
         print("")
         for conflict in self.conflicting_types:
         print("")

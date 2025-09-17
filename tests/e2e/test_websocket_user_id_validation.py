@@ -53,7 +53,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 
 @pytest.mark.e2e
 class WebSocketUserIDValidationE2ETests(BaseE2ETest):
-    
+    pass
     E2E tests for complete WebSocket user ID validation bug reproduction.
     
     Tests the complete stack from authentication through WebSocket connection
@@ -102,7 +102,7 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
                 raise
         websocket_url = f'{auth_config.websocket_url}?token={jwt_token}'
         try:
-            async with websockets.connect(websocket_url, timeout=auth_config.timeout, extra_headers={'Authorization': f'Bearer {jwt_token}'} as websocket:
+            async with websockets.connect(websocket_url, timeout=auth_config.timeout, extra_headers={'Authorization': f'Bearer {jwt_token)') as websocket:
                 connection_msg = {'type': 'connection', 'data': {'user_id': failing_user_data['user_id'], 'token': jwt_token, 'connection_id': f'e2e_test_{int(time.time())}'}}
                 await websocket.send(json.dumps(connection_msg))
                 response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
@@ -157,7 +157,7 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
                 user_result = await create_authenticated_user(user_id=user_id, email=user_data['email'], password='deployment_password_123', auth_config=auth_config)
                 jwt_token = user_result['token']
                 websocket_url = f'{auth_config.websocket_url}?token={jwt_token}'
-                async with websockets.connect(websocket_url, timeout=15.0, extra_headers={'Authorization': f'Bearer {jwt_token}'} as websocket:
+                async with websockets.connect(websocket_url, timeout=15.0, extra_headers={'Authorization': f'Bearer {jwt_token)') as websocket:
                     connection_msg = {'type': 'connection', 'data': {'user_id': user_id, 'token': jwt_token, 'connection_id': f'deploy_test_{int(time.time())}'}}
                     await websocket.send(json.dumps(connection_msg))
                     await websocket.recv()
@@ -202,7 +202,7 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
                 authenticated_users.append(user_result)
             for user_result in authenticated_users:
                 websocket_url = f{auth_config.websocket_url}?token={user_result['token']}
-                websocket = await websockets.connect(websocket_url, timeout=10.0, extra_headers={'Authorization': f"Bearer {user_result['token']}}"
+                websocket = await websockets.connect(websocket_url, timeout=10.0, extra_headers={'Authorization': f"Bearer {user_result['token']))"
                 connection_msg = {'type': 'connection', 'data': {'user_id': user_result['user_id'], 'token': user_result['token'], 'connection_id': f'regression_{int(time.time())}'}}
                 await websocket.send(json.dumps(connection_msg))
                 response = await websocket.recv()
@@ -236,7 +236,7 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
         assert user_result['authenticated'] is True
         jwt_token = user_result['token']
         websocket_url = f'{auth_config.websocket_url}?token={jwt_token}'
-        async with websockets.connect(websocket_url, timeout=15.0, extra_headers={'Authorization': f'Bearer {jwt_token}'} as websocket:
+        async with websockets.connect(websocket_url, timeout=15.0, extra_headers={'Authorization': f'Bearer {jwt_token)') as websocket:
             connection_msg = {'type': 'connection', 'data': {'user_id': deployment_pipeline_user['user_id'], 'token': jwt_token, 'connection_id': f'pipeline_final_{int(time.time())}'}}
             await websocket.send(json.dumps(connection_msg))
             connection_response = await websocket.recv()
@@ -265,3 +265,5 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""
+))))

@@ -1,4 +1,4 @@
-'''E2E Test: All 9 Example Prompts with Real LLM Integration
+'''E2E Test: All 9 Example Prompts with Real LLM Integration'
 
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
@@ -17,6 +17,7 @@ ARCHITECTURAL COMPLIANCE:
 - Real LLM API calls when --real-llm flag is set
 - Performance validation: <5 seconds per prompt with real LLM
 - Complete workflow testing from triage to reporting
+'''
 '''
 
 import sys
@@ -63,7 +64,7 @@ class TestExamplePromptsData:
         """Get all 9 example prompt test cases."""
         return [ ]
         ExamplePromptCase( )
-        prompt_id="EP-001",
+        prompt_id="EP-1",
         category="cost-quality",
         prompt_text="I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.",
         expected_agents=["triage", "data", "optimization_core", "actions_to_meet_goals", "reporting"],
@@ -72,25 +73,25 @@ class TestExamplePromptsData:
         plan_tier=PlanTier.PRO
         ),
         ExamplePromptCase( )
-        prompt_id="EP-002",
+        prompt_id="EP-2",
         category="latency-cost",
-        prompt_text="My tools are too slow. I need to reduce the latency by 3x, but I can"t spend more money.",
+        prompt_text="My tools are too slow. I need to reduce the latency by 3x, but I can"t spend more money.","
         expected_agents=["triage", "data", "optimization_core"],
         expected_output_type="latency_optimization_plan",
         complexity_score=7,
         plan_tier=PlanTier.ENTERPRISE
         ),
         ExamplePromptCase( )
-        prompt_id="EP-003",
+        prompt_id="EP-3",
         category="capacity-planning",
-        prompt_text="I"m expecting a 50% increase in agent usage next month. How will this impact my costs and rate limits?",
+        prompt_text="I"m expecting a 50% increase in agent usage next month. How will this impact my costs and rate limits?","
         expected_agents=["triage", "data", "optimization_core", "reporting"],
         expected_output_type="capacity_impact_analysis",
         complexity_score=6,
         plan_tier=PlanTier.ENTERPRISE
         ),
         ExamplePromptCase( )
-        prompt_id="EP-004",
+        prompt_id="EP-4",
         category="function-optimization",
         prompt_text="I need to optimize the 'user_authentication' function. What advanced methods can I use?",
         expected_agents=["triage", "data", "optimization_core", "actions_to_meet_goals"],
@@ -99,16 +100,16 @@ class TestExamplePromptsData:
         plan_tier=PlanTier.PRO
         ),
         ExamplePromptCase( )
-        prompt_id="EP-005",
+        prompt_id="EP-5",
         category="model-selection",
-        prompt_text="I"m considering using the new "gpt-4o" and LLMModel.GEMINI_2_5_FLASH.value models. How effective would they be in my current setup?",
+        prompt_text="I"m considering using the new "gpt-4o" and LLMModel.GEMINI_2_5_FLASH.value models. How effective would they be in my current setup?","
         expected_agents=["triage", "data", "optimization_core", "reporting"],
         expected_output_type="model_effectiveness_analysis",
         complexity_score=9,
         plan_tier=PlanTier.ENTERPRISE
         ),
         ExamplePromptCase( )
-        prompt_id="EP-006",
+        prompt_id="EP-6",
         category="kv-cache-audit",
         prompt_text="I want to audit all uses of KV caching in my system to find optimization opportunities.",
         expected_agents=["triage", "data", "optimization_core", "reporting"],
@@ -117,16 +118,16 @@ class TestExamplePromptsData:
         plan_tier=PlanTier.PRO
         ),
         ExamplePromptCase( )
-        prompt_id="EP-007",
+        prompt_id="EP-7",
         category="multi-constraint",
-        prompt_text="I need to reduce costs by 20% and improve latency by 2x. I"m also expecting a 30% increase in usage. What should I do?",
+        prompt_text="I need to reduce costs by 20% and improve latency by 2x. I"m also expecting a 30% increase in usage. What should I do?","
         expected_agents=["triage", "data", "optimization_core", "actions_to_meet_goals", "reporting"],
         expected_output_type="multi_objective_optimization_plan",
         complexity_score=10,
         plan_tier=PlanTier.ENTERPRISE
         ),
         ExamplePromptCase( )
-        prompt_id="EP-008",
+        prompt_id="EP-8",
         category="tool-upgrade",
         prompt_text="@Netra which of our Agent tools should switch to GPT-5? Which versions? What to set the verbosity to?",
         expected_agents=["triage", "data", "optimization_core", "actions_to_meet_goals"],
@@ -135,9 +136,9 @@ class TestExamplePromptsData:
         plan_tier=PlanTier.ENTERPRISE
         ),
         ExamplePromptCase( )
-        prompt_id="EP-009",
+        prompt_id="EP-9",
         category="rollback-analysis",
-        prompt_text="@Netra was the upgrade yesterday to GPT-5 worth it? Rollback anything where quality didn"t improve much but cost was higher",
+        prompt_text="@Netra was the upgrade yesterday to GPT-5 worth it? Rollback anything where quality didn"t improve much but cost was higher","
         expected_agents=["triage", "data", "optimization_core", "actions_to_meet_goals", "reporting"],
         expected_output_type="upgrade_analysis_with_rollback_decisions",
         complexity_score=9,
@@ -210,8 +211,11 @@ else:
 raise
 
 finally:
+    pass
 if session_data.get("client") and hasattr(session_data["client"], "close"):
+    pass
 try:
+    pass
 await session_data["client"].close()
 except Exception as e:
                                         # Ignore errors during cleanup
@@ -222,6 +226,7 @@ pass
     async def test_high_complexity_prompts_real_llm(self, test_core, use_real_llm, test_data):
 """Test high complexity prompts (score >= 8) with real LLM."""
 if not use_real_llm:
+    pass
 pytest.skip("Real LLM testing not enabled")
 
 high_complexity_cases = [item for item in []]
@@ -230,6 +235,7 @@ assert len(high_complexity_cases) >= 4, "Need at least 4 high complexity test ca
 session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRISE)
 
 try:
+    pass
 results = []
 for test_case in high_complexity_cases:
 result = await self._execute_complete_agent_workflow( )
@@ -243,14 +249,17 @@ assert result["status"] == "success", ""
 assert result.get("agents_executed", 0) >= 4, "formatted_string"
 
 finally:
+    pass
 if session_data.get("client") and hasattr(session_data["client"], "close"):
+    pass
 try:
+    pass
 await session_data["client"].close()
 except Exception as e:
                                                                             # Ignore errors during cleanup
 pass
 
-async def _execute_with_coordination_tracking(self, session_data: Dict[str, Any],
+async def _execute_with_coordination_tracking(self, session_data: Dict[str, Any),
 test_case: ExamplePromptCase,
 use_real_llm: bool,
 coordination_tracker) -> Dict[str, Any]:
@@ -285,8 +294,8 @@ return workflow_result
 @pytest.mark.e2e
     async def test_multi_agent_coordination_validation(self, test_core, use_real_llm):
 """Test multi-agent coordination for complex prompts."""
-                # Use the most complex prompt (EP-007)
-test_case = next(tc for tc in TestExamplePromptsData.get_all_test_cases() if tc.prompt_id == "EP-007")
+                # Use the most complex prompt (EP-7)
+test_case = next(tc for tc in TestExamplePromptsData.get_all_test_cases() if tc.prompt_id == "EP-7")
 
 session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRISE)
 
@@ -306,8 +315,11 @@ context_validation = coordination_tracker.validate_context_continuity()
 assert context_validation["continuity_score"] >= 0.8, "Context not preserved across agents"
 
 finally:
+    pass
 if session_data.get("client") and hasattr(session_data["client"], "close"):
+    pass
 try:
+    pass
 await session_data["client"].close()
 except Exception as e:
                                     # Ignore errors during cleanup
@@ -323,6 +335,7 @@ enterprise_cases = [item for item in []]
 session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRISE)
 
 try:
+    pass
 execution_results = []
 
 for test_case in enterprise_cases:
@@ -337,15 +350,18 @@ assert result["status"] == "success", ""
 assert result.get("business_value_score", 0) >= 7, "formatted_string"
 
 finally:
+    pass
 if session_data.get("client") and hasattr(session_data["client"], "close"):
+    pass
 try:
+    pass
 await session_data["client"].close()
 except Exception as e:
                                                                     # Ignore errors during cleanup
 pass
 
                                                                     # Helper methods
-async def _execute_complete_agent_workflow(self, session_data: Dict[str, Any],
+async def _execute_complete_agent_workflow(self, session_data: Dict[str, Any),
 test_case: ExamplePromptCase,
 use_real_llm: bool) -> Dict[str, Any]:
 """Execute complete agent workflow for a test case."""
@@ -378,7 +394,7 @@ return { }
 "business_value_score": self._calculate_business_value_score(test_case, agents_executed)
         
 
-async def _execute_agent_step(self, session_data: Dict[str, Any], agent_name: str,
+async def _execute_agent_step(self, session_data: Dict[str, Any), agent_name: str,
 workflow_context: Dict[str, Any], workflow_state: Dict[str, Any],
 use_real_llm: bool) -> Dict[str, Any]:
 """Execute individual agent step."""
@@ -414,6 +430,7 @@ return { }
             
 
 except asyncio.TimeoutError:
+    pass
 return {"agent_name": agent_name, "status": "timeout", "real_llm": True}
 except Exception as e:
                     # Handle LLM configuration and authentication errors gracefully for test environments
@@ -442,14 +459,15 @@ return { }
 "real_llm": False
                             
 
-def _build_agent_prompt(self, agent_name: str, workflow_context: Dict[str, Any],
+def _build_agent_prompt(self, agent_name: str, workflow_context: Dict[str, Any),
 workflow_state: Dict[str, Any]) -> str:
 """Build agent-specific prompt."""
-base_prompt = f'''You are the {agent_name} agent in the Netra Apex AI optimization system.
+base_prompt = f'''You are the {agent_name} agent in the Netra Apex AI optimization system.'
 
 User Request: {workflow_context['user_message']}
 Prompt ID: {workflow_context['prompt_id']}
 
+Your specific role:'''
 Your specific role:'''
 
 agent_roles = { }
@@ -465,12 +483,15 @@ role_description = agent_roles.get(agent_name, "Process the request according to
 return ""
 
 def _extract_output_context(self, llm_response) -> Dict[str, Any]:
+    pass
 """Extract structured context from LLM response."""
     # Simplified context extraction - real implementation would parse structured output
     # Handle both dict and LLMResponse object formats
 if hasattr(llm_response, 'content'):
+    pass
 content = llm_response.content
 else:
+    pass
 content = llm_response.get("content", "")
 
 return { }
@@ -499,6 +520,7 @@ final_score = (base_score + success_bonus) * tier_multiplier.get(test_case.plan_
 return min(10, int(final_score))
 
 def _validate_workflow_result(self, result: Dict[str, Any], test_case: ExamplePromptCase, use_real_llm: bool):
+    pass
 """Validate workflow execution result."""
 assert result["status"] == "success", ""
 assert result["agents_executed"] == len(test_case.expected_agents), "Wrong number of agents executed"
@@ -509,7 +531,7 @@ if use_real_llm:
 real_llm_results = [item for item in []]
 api_key_fallbacks = [item for item in []]
 
-        # If we had API key/config fallbacks, that's expected and acceptable in test environments
+        # If we had API key/config fallbacks, that's expected and acceptable in test environments'
 if api_key_fallbacks:
     print("")
 else:

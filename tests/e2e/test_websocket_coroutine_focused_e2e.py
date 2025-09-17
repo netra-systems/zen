@@ -22,6 +22,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 class WebSocketCoroutineFocusedE2ETests(SSotBaseTestCase):
+    pass
 """"""
     Focused E2E test for WebSocket coroutine regression.
     
@@ -39,7 +40,7 @@ class WebSocketCoroutineFocusedE2ETests(SSotBaseTestCase):
         ""Validate E2E test execution time.
         super().tearDown()
         execution_time = time.time() - self.start_time
-        assert execution_time > 0.01, f'E2E test completed in {execution_time:.3f}s - possible test bypassing detected'
+        assert execution_time > 0.1, f'E2E test completed in {execution_time:.3f}s - possible test bypassing detected'
 
     @pytest.mark.e2e
     def test_websocket_e2e_environment_detection_validation(self):
@@ -64,6 +65,7 @@ class WebSocketCoroutineFocusedE2ETests(SSotBaseTestCase):
 
     @pytest.mark.e2e
     def test_websocket_startup_detection_e2e(self):
+        pass
 """"""
         Test WebSocket startup detection logic in E2E context.
         
@@ -100,6 +102,7 @@ class WebSocketCoroutineFocusedE2ETests(SSotBaseTestCase):
 
     @pytest.mark.e2e
     def test_websocket_coroutine_detection_e2e(self):
+        pass
 """"""
         CRITICAL: Test that detects coroutine objects in E2E context.
         
@@ -136,3 +139,4 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""

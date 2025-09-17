@@ -26,6 +26,7 @@ class TestWebSocketConnection:
         return self.messages_sent.copy()
 
         '''
+        '''
         FAILING TESTS for Service Startup Coordination Failures - Iteration 2
 
         This test suite addresses service startup coordination issues identified
@@ -43,6 +44,7 @@ class TestWebSocketConnection:
         - Business Goal: System Reliability, Development Velocity
         - Value Impact: Eliminates startup failures, enables predictable development environment
         - Strategic Impact: Reduces time-to-productivity for developers, prevents lost work sessions
+        '''
         '''
 
         import asyncio
@@ -69,20 +71,24 @@ class TestWebSocketConnection:
 
 class TestServiceStartupSequencing(SSotAsyncTestCase):
         '''
+        '''
         Tests for service startup sequence coordination failures.
 
         Root Cause: Services start in an uncoordinated manner leading to
         dependency resolution failures and timing-related startup issues.
+        '''
         '''
         pass
 
         @pytest.mark.e2e
     def test_dependency_aware_startup_sequencing(self):
         '''
+        '''
         FAILING TEST: Service startup should respect dependency ordering.
 
         Services should start in dependency order: infrastructure -> auth -> backend -> frontend
         This prevents connection failures during startup.
+        '''
         '''
         pass
     # Define service dependency graph
@@ -107,16 +113,18 @@ class TestServiceStartupSequencing(SSotAsyncTestCase):
         for service, deps in service_dependencies.items():
         for dep in deps:
         if dep in startup_times and service in startup_times:
-        self.assertLess(startup_times[dep], startup_times[service],
+        self.assertLess(startup_times[dep), startup_times[service),
         "")
 
         @pytest.mark.e2e
     def test_startup_coordination_timeout_handling(self):
         '''
+        '''
         FAILING TEST: Startup coordination should handle dependency timeouts gracefully.
 
         When dependency services take too long to become ready, dependent services
         should either wait appropriately or start with fallback configurations.
+        '''
         '''
         pass
     # Mock slow dependency startup
@@ -153,10 +161,12 @@ class TestServiceStartupSequencing(SSotAsyncTestCase):
         @pytest.mark.e2e
     def test_parallel_startup_where_possible(self):
         '''
+        '''
         FAILING TEST: Independent services should start in parallel for speed.
 
         Services without dependencies should start in parallel to reduce
         total startup time, while respecting dependency constraints.
+        '''
         '''
         pass
     # Mock independent services that can start in parallel
@@ -188,20 +198,24 @@ class TestServiceStartupSequencing(SSotAsyncTestCase):
 
 class TestReadinessCheckCoordination(SSotAsyncTestCase):
         '''
+        '''
         Tests for readiness check coordination across services.
 
         Root Cause: Readiness checks are performed independently without
         coordination, leading to false failures and timing issues.
+        '''
         '''
         pass
 
         @pytest.mark.e2e
     def test_coordinated_readiness_validation(self):
         '''
+        '''
         FAILING TEST: Readiness checks should be coordinated across service boundaries.
 
         When checking if a service is ready, the check should validate that
         all its dependencies are also ready and stable.
+        '''
         '''
         pass
     # Mock service readiness states
@@ -234,10 +248,12 @@ class TestReadinessCheckCoordination(SSotAsyncTestCase):
         @pytest.mark.e2e
     def test_readiness_check_cascade_prevention(self):
         '''
+        '''
         FAILING TEST: Readiness check failures should not cascade incorrectly.
 
         A temporary readiness check failure in one service should not cause
         permanent readiness failures in dependent services.
+        '''
         '''
         pass
     # Mock intermittent database connectivity
@@ -276,10 +292,12 @@ class TestReadinessCheckCoordination(SSotAsyncTestCase):
         @pytest.mark.e2e
     def test_readiness_check_performance_impact(self):
         '''
+        '''
         FAILING TEST: Readiness checks should not significantly impact service performance.
 
         Frequent readiness checks during startup should not degrade service
         performance or cause resource contention.
+        '''
         '''
         pass
     # Mock service performance metrics during readiness checking
@@ -320,20 +338,24 @@ class TestReadinessCheckCoordination(SSotAsyncTestCase):
 
 class TestServiceDiscoveryCoordination(SSotAsyncTestCase):
         '''
+        '''
         Tests for service discovery coordination during startup.
 
         Root Cause: Service discovery mechanisms fail to properly coordinate
         service availability during dynamic startup scenarios.
+        '''
         '''
         pass
 
         @pytest.mark.e2e
     def test_dynamic_port_discovery_reliability(self):
         '''
+        '''
         FAILING TEST: Service discovery should reliably handle dynamic ports.
 
         When services start with dynamic port allocation, service discovery
         should quickly and reliably detect and propagate the port assignments.
+        '''
         '''
         pass
     # Mock dynamic port assignments
@@ -366,10 +388,12 @@ class TestServiceDiscoveryCoordination(SSotAsyncTestCase):
         @pytest.mark.e2e
     def test_service_discovery_update_propagation(self):
         '''
+        '''
         FAILING TEST: Service discovery updates should propagate quickly.
 
         When a service restarts with a new port, all dependent services
         should quickly discover and adapt to the new endpoint.
+        '''
         '''
         pass
     # Mock service restart scenario
@@ -405,10 +429,12 @@ class TestServiceDiscoveryCoordination(SSotAsyncTestCase):
         @pytest.mark.e2e
     def test_service_discovery_failure_fallback(self):
         '''
+        '''
         FAILING TEST: Service discovery failures should have fallback mechanisms.
 
         When service discovery files are missing or corrupted, services should
         fall back to default configurations or retry mechanisms.
+        '''
         '''
         pass
     # Mock discovery file corruption scenarios
@@ -452,20 +478,24 @@ class TestServiceDiscoveryCoordination(SSotAsyncTestCase):
 
 class TestStartupErrorRecovery(SSotAsyncTestCase):
         '''
+        '''
         Tests for startup error recovery coordination.
 
         Root Cause: When startup errors occur, the recovery coordination
         between services is inadequate or missing.
+        '''
         '''
         pass
 
         @pytest.mark.e2e
     def test_startup_error_isolation(self):
         '''
+        '''
         FAILING TEST: Startup errors in one service should not cascade.
 
         When one service fails to start properly, other independent services
         should continue their startup process successfully.
+        '''
         '''
         pass
     # Mock startup failure in auth service
@@ -481,23 +511,25 @@ class TestStartupErrorRecovery(SSotAsyncTestCase):
     # FAILING ASSERTION: Independent services should succeed despite auth failure
         independent_services = ['database', 'redis', 'clickhouse']
         for service in independent_services:
-        self.assertEqual(service_startup_results[service], 'success',
+        self.assertEqual(service_startup_results[service), 'success',
         "")
 
         # FAILING ASSERTION: Dependent services should handle dependency failures gracefully
         dependent_services = ['backend', 'frontend']
         for service in dependent_services:
             # Should not be 'failed' - should be 'waiting' or 'degraded'
-        self.assertNotEqual(service_startup_results[service], 'failed',
+        self.assertNotEqual(service_startup_results[service), 'failed',
         "")
 
         @pytest.mark.e2e
     def test_startup_retry_coordination(self):
         '''
+        '''
         FAILING TEST: Startup retries should be coordinated across services.
 
         When services retry startup after failures, the retries should be
         coordinated to prevent resource contention and cascade failures.
+        '''
         '''
         pass
     # Mock coordinated retry scenario
@@ -528,10 +560,12 @@ class TestStartupErrorRecovery(SSotAsyncTestCase):
         @pytest.mark.e2e
     def test_startup_recovery_state_management(self):
         '''
+        '''
         FAILING TEST: Startup recovery should maintain consistent state across services.
 
         During startup error recovery, service states should be consistently
         tracked and coordinated to prevent inconsistent system states.
+        '''
         '''
         pass
     # Mock service state during recovery
@@ -553,7 +587,7 @@ class TestStartupErrorRecovery(SSotAsyncTestCase):
 
             # If dependency is healthy, waiting service should not be waiting
         if dependency_status == 'running':
-        self.assertNotEqual(service_states[service]['status'], 'waiting',
+        self.assertNotEqual(service_states[service)['status'), 'waiting',
         "")
 
                 # FAILING ASSERTION: Recovery state should be tracked centrally

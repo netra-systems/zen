@@ -1,4 +1,5 @@
 '''
+'''
 Basic E2E Health Check Tests - Iteration 6-10 Fix
 
 Business Value Justification (BVJ):
@@ -9,6 +10,7 @@ Business Value Justification (BVJ):
 
 CRITICAL: This test is designed to work without requiring services to be running,
 focusing on test infrastructure and basic connectivity validation.
+'''
 '''
 
 import asyncio
@@ -26,6 +28,7 @@ from test_framework.environment_markers import env, env_requires, env_safe, all_
 
 @pytest.fixture
 def health_check_config():
+    pass
 """Configuration for health check tests."""
 return { }
 "services": { }
@@ -172,7 +175,7 @@ class TestBasicHealthChecksE2E:
 """Test that health check infrastructure itself works."""
 tester = TestBasicHealthChecker(health_check_config)
 
-        # This should not fail - we're testing the test infrastructure
+        # This should not fail - we're testing the test infrastructure'
 assert tester is not None
 assert tester.config is not None
 assert "services" in tester.config
@@ -198,14 +201,14 @@ tester = TestBasicHealthChecker(health_check_config)
                 # Run connectivity checks
 results = await tester.check_all_services()
 
-                # Test passes regardless of results - we're validating the test infrastructure
+                # Test passes regardless of results - we're validating the test infrastructure'
 assert results is not None
 assert isinstance(results, dict)
 
                 # Log results for debugging
 summary = tester.get_service_summary(results)
-print(f" )
-Service Connectivity Summary:")
+print(f" )"
+Service Connectivity Summary:")"
 print("")
 print("")
 print("")
@@ -229,7 +232,7 @@ if result.get('response_time'):
 @pytest.fixture
 # @pytest.fixture
     async def test_auth_service_health_if_running(self, health_check_config):
-"""Test auth service health if it's running."""
+"""Test auth service health if it's running."""'
 tester = TestBasicHealthChecker(health_check_config)
 
                                 # Check only auth service
@@ -238,6 +241,7 @@ result = await tester.check_service_connectivity("auth", auth_config)
 
                                 # If service is accessible, validate the health response
 if result["accessible"] and result["healthy"]:
+    pass
 health_data = result["health_data"]
 
                                     # Validate health response structure
@@ -250,8 +254,8 @@ assert health_data.get("service") in ["auth-service", "auth"], "formatted_string
                                     # Status should be healthy
 assert health_data.get("status") in ["healthy", "ok"], "formatted_string"
 
-print(f" )
-[SUCCESS] Auth service is running and healthy:")
+print(f" )"
+[SUCCESS] Auth service is running and healthy:")"
 print("")
 print("")
 print("")
@@ -265,7 +269,7 @@ else:
 @pytest.fixture
 # @pytest.fixture
     async def test_backend_service_health_if_running(self, health_check_config):
-"""Test backend service health if it's running."""
+"""Test backend service health if it's running."""'
 pass
 tester = TestBasicHealthChecker(health_check_config)
 
@@ -275,6 +279,7 @@ result = await tester.check_service_connectivity("backend", backend_config)
 
                                             # If service is accessible, validate the health response
 if result["accessible"] and result["healthy"]:
+    pass
 health_data = result["health_data"]
 
                                                 # Validate health response structure
@@ -285,8 +290,8 @@ expected_fields = ["status", "timestamp"]
 for field in expected_fields:
 assert field in health_data, ""
 
-print(f" )
-[SUCCESS] Backend service is running and healthy:")
+print(f" )"
+[SUCCESS] Backend service is running and healthy:")"
 print("")
 print("")
 if "version" in health_data:
@@ -303,7 +308,7 @@ else:
     async def test_e2e_test_framework_basic_functionality(self, health_check_config):
 """Test basic E2E test framework functionality."""
                                                                 # Test async functionality
-await asyncio.sleep(0.01)  # Minimal async operation
+await asyncio.sleep(0.1)  # Minimal async operation
 
                                                                 # Test HTTP client can be created
 async with aiohttp.ClientSession() as session:
@@ -325,7 +330,7 @@ test_result = { }
 assert all(test_result.values()), "All framework components should be working"
 
 print("")
-[SUCCESS] E2E test framework basic functionality verified:")
+[SUCCESS] E2E test framework basic functionality verified:")"
 for key, value in test_result.items():
     print("")
 

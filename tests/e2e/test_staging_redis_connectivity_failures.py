@@ -1,4 +1,5 @@
 '''
+'''
 Staging Redis Connectivity Failures - Critical Cache and Session Infrastructure Tests
 
 Business Value Justification (BVJ):
@@ -22,7 +23,7 @@ EXPECTED TO FAIL: These tests replicate critical Redis connectivity issues found
 3. **CRITICAL: Redis Fallback Mode Inappropriately Enabled in Staging**
 - REDIS_FALLBACK_ENABLED=true allows service to continue without Redis
 - This masks infrastructure provisioning issues in staging
-- Production will fail when Redis required but staging didn"t validate it
+- Production will fail when Redis required but staging didn"t validate it"
 
 4. **MEDIUM: Redis Client Connection Pool Issues**
 - Connection pool exhaustion due to failed connection attempts
@@ -45,6 +46,7 @@ Environment Requirements:
 - Requires REDIS_URL configuration for staging Redis instance
 - Tests external Redis service dependencies
 - Validates environment-specific behavior (dev vs staging vs prod)
+'''
 '''
 
 import asyncio
@@ -113,6 +115,7 @@ class TestStagingRedisConnectivityFailures:
         @pytest.mark.e2e
     def test_redis_connectivity_failure_with_inappropriate_fallback_masking(self):
         '''
+        '''
         EXPECTED TO FAIL - CRITICAL REDIS CONNECTIVITY WITH FALLBACK ISSUE
 
         Issue: Redis connection fails but service inappropriately continues in no-Redis mode
@@ -121,6 +124,7 @@ class TestStagingRedisConnectivityFailures:
 
         Anti-Pattern: Silent fallbacks in staging hide production readiness problems
         Business Impact: Performance degradation, session persistence broken, cache misses
+        '''
         '''
         pass
     # Test Redis configuration loading and validation
@@ -182,24 +186,33 @@ class TestStagingRedisConnectivityFailures:
         assert False, ( )
         ""
         ""
-        f"Business Impact:
+        f"Business Impact:"
         "
-        f"  - Cache system non-functional (performance degradation)
         "
-        f"  - Session persistence broken (user re-authentication required)
+        f"  - Cache system non-functional (performance degradation)"
         "
-        f"  - Rate limiting bypassed (security risk)
         "
-        f"  - Real-time features degraded
+        f"  - Session persistence broken (user re-authentication required)"
+        "
+        "
+        f"  - Rate limiting bypassed (security risk)"
+        "
+        "
+        f"  - Real-time features degraded"
 
         "
-        f"Root Cause Investigation:
         "
-        f"  1. Check Redis service provisioning in staging
+        f"Root Cause Investigation:"
         "
-        f"  2. Verify network connectivity and firewall rules
         "
-        f"  3. Validate Redis authentication if required
+        f"  1. Check Redis service provisioning in staging"
+        "
+        "
+        f"  2. Verify network connectivity and firewall rules"
+        "
+        "
+        f"  3. Validate Redis authentication if required"
+        "
         "
         f"  4. Test DNS resolution for Redis host"
                                     
@@ -221,6 +234,7 @@ class TestStagingRedisConnectivityFailures:
         @pytest.mark.e2e
     async def test_redis_client_connection_failure_with_session_degradation(self):
         '''
+        '''
         EXPECTED TO FAIL - CRITICAL REDIS CLIENT APPLICATION ISSUE
 
         Issue: Application-level Redis client fails to connect causing session degradation
@@ -228,6 +242,7 @@ class TestStagingRedisConnectivityFailures:
         Actual: Client connection fails but service continues without Redis functionality
 
         Session Impact: User sessions not persisted, cache misses reduce performance
+        '''
         '''
         pass
                                                 Test Redis client import and instantiation
@@ -260,7 +275,8 @@ class TestStagingRedisConnectivityFailures:
 
                                                                     # Connection succeeded
         assert ping_result is True, ( )
-                                                                    # Removed problematic line: "Redis client ping should await asyncio.sleep(0)
+                                                                    # Removed problematic line: "Redis client ping should await asyncio.sleep(0)"
+        return True on successful connection"
         return True on successful connection"
                                                                     
         assert connection_time < 3.0, ( )
@@ -274,19 +290,25 @@ class TestStagingRedisConnectivityFailures:
         connection_time = time.time() - start_time
         assert False, ( )
         ""
-        f"This causes session management to degrade and cache functionality to fail.
+        f"This causes session management to degrade and cache functionality to fail."
 
         "
-        f"Business Impact:
         "
-        f"  - User sessions not persisted across requests
+        f"Business Impact:"
         "
-        f"  - Cache misses cause 5-10x slower response times
         "
-        f"  - Rate limiting bypassed (security vulnerability)
+        f"  - User sessions not persisted across requests"
         "
-        f"  - Real-time features become unreliable
+        "
+        f"  - Cache misses cause 5-10x slower response times"
+        "
+        "
+        f"  - Rate limiting bypassed (security vulnerability)"
+        "
+        "
+        f"  - Real-time features become unreliable"
 
+        "
         "
         f"Service continues in degraded mode masking this critical infrastructure issue."
                                                                             
@@ -326,6 +348,7 @@ class TestStagingRedisConnectivityFailures:
         @pytest.mark.e2e
     def test_redis_fallback_mode_enabled_masking_infrastructure_issues(self):
         '''
+        '''
         EXPECTED TO FAIL - CRITICAL REDIS FALLBACK CONFIGURATION ISSUE
 
         Issue: Redis fallback mode enabled in staging masking infrastructure provisioning issues
@@ -335,13 +358,14 @@ class TestStagingRedisConnectivityFailures:
         Staging/Production Drift: Dev (optional Redis) != Staging (should require Redis) != Prod (requires Redis)
         Anti-Pattern: Silent degradation in staging hides production readiness issues
         '''
+        '''
         pass
     # Test environment detection for staging
         netra_env = self.env.get("NETRA_ENVIRONMENT", "development")
         k_service = self.env.get("K_SERVICE")  # Cloud Run service indicator
         google_cloud_project = self.env.get("GOOGLE_CLOUD_PROJECT")
 
-    # Determine if we're in staging environment
+    # Determine if we're in staging environment'
         staging_indicators = [ ]
         netra_env == "staging",
         k_service is not None,
@@ -390,6 +414,7 @@ class TestStagingRedisConnectivityFailures:
         @pytest.mark.e2e
     def test_redis_configuration_localhost_fallback_inappropriate_staging_behavior(self):
         '''
+        '''
         EXPECTED TO FAIL - CRITICAL REDIS CONFIGURATION FALLBACK ISSUE
 
         Issue: Redis configuration falls back to localhost instead of staging Redis service
@@ -397,6 +422,7 @@ class TestStagingRedisConnectivityFailures:
         Actual: Configuration missing or defaulting to localhost development values
 
         Configuration Cascade: Missing REDIS_URL -> localhost fallback -> wrong Redis -> cache broken
+        '''
         '''
         pass
     # Test Redis URL configuration
@@ -451,6 +477,7 @@ class TestStagingRedisConnectivityFailures:
         @pytest.mark.e2e
     async def test_redis_service_provisioning_gap_staging_infrastructure(self):
         '''
+        '''
         EXPECTED TO FAIL - CRITICAL REDIS SERVICE PROVISIONING ISSUE
 
         Issue: Redis service not properly provisioned in staging infrastructure
@@ -458,6 +485,7 @@ class TestStagingRedisConnectivityFailures:
         Actual: Service not provisioned, DNS resolves but no service listening
 
         Infrastructure Gap: Staging Redis service provisioning incomplete
+        '''
         '''
         pass
         redis_url = self.env.get("REDIS_URL")
@@ -496,7 +524,8 @@ class TestStagingRedisConnectivityFailures:
         if not result.success:
                                             # First failure point indicates infrastructure gap
         progressive_report = "
-        ".join( )
+        progressive_report = "
+        ".join( )"
         ""
         "" +
         ("" if not r['success'] else "")
@@ -531,6 +560,7 @@ class TestStagingRedisConnectivityFailures:
         @pytest.mark.e2e
     async def test_redis_application_client_connection_pool_exhaustion(self):
         '''
+        '''
         EXPECTED TO FAIL - CRITICAL REDIS CLIENT POOL ISSUE
 
         Issue: Redis client connection pool exhausted due to failed connection attempts
@@ -538,6 +568,7 @@ class TestStagingRedisConnectivityFailures:
         Actual: Failed connections accumulate, exhausting pool and degrading performance
 
         Performance Impact: Connection pool exhaustion causes application slowdown
+        '''
         '''
         pass
                                                         # Test Redis client availability and connection pool behavior
@@ -608,6 +639,7 @@ class TestStagingRedisConnectivityFailures:
         @pytest.mark.e2e
     def test_redis_session_persistence_configuration_validation(self):
         '''
+        '''
         EXPECTED TO FAIL - CRITICAL SESSION PERSISTENCE ISSUE
 
         Issue: Redis session persistence configuration missing or invalid
@@ -615,6 +647,7 @@ class TestStagingRedisConnectivityFailures:
         Actual: Session configuration allows fallback breaking persistence guarantees
 
         Session Impact: Users lose session state, forced re-authentication, poor UX
+        '''
         '''
         pass
     # Test session persistence configuration
@@ -669,19 +702,25 @@ class TestStagingRedisConnectivityFailures:
                             # Report session configuration failures
         if session_config_failures:
         failure_report = "
-        ".join("" for failure in session_config_failures)
+        failure_report = "
+        ".join("" for failure in session_config_failures)"
         assert False, ( )
         ""
-        f"These configuration issues cause session persistence to fail or degrade:
+        f"These configuration issues cause session persistence to fail or degrade:"
         "
-        f"  - Users lose session state between requests
         "
-        f"  - Forced re-authentication reduces user experience
+        f"  - Users lose session state between requests"
         "
-        f"  - Session-based features become unreliable
         "
-        f"  - Load balancing breaks without sticky sessions
+        f"  - Forced re-authentication reduces user experience"
+        "
+        "
+        f"  - Session-based features become unreliable"
+        "
+        "
+        f"  - Load balancing breaks without sticky sessions"
 
+        "
         "
         f"Staging should validate session persistence requirements for production readiness."
                                         
@@ -691,6 +730,7 @@ class TestStagingRedisConnectivityFailures:
         @pytest.mark.e2e
     async def test_redis_cache_degradation_performance_impact_validation(self):
         '''
+        '''
         EXPECTED TO FAIL - CRITICAL CACHE PERFORMANCE DEGRADATION ISSUE
 
         Issue: Redis cache failure causes significant performance degradation
@@ -698,6 +738,7 @@ class TestStagingRedisConnectivityFailures:
         Actual: Cache misses cause 5-10x performance degradation, fallback to slow operations
 
         Performance Impact: API response times increase from 100ms to 1000ms+ without cache
+        '''
         '''
         pass
                                             # Test cache configuration and performance requirements
@@ -797,19 +838,25 @@ class TestStagingRedisConnectivityFailures:
                                                                                                             # Report cache configuration and performance failures
         if cache_config_failures:
         failure_report = "
-        ".join("" for failure in cache_config_failures)
+        failure_report = "
+        ".join("" for failure in cache_config_failures)"
         assert False, ( )
         ""
-        f"These issues cause significant performance degradation:
+        f"These issues cause significant performance degradation:"
         "
-        f"  - API response times increase 5-10x without cache
         "
-        f"  - Database load increases causing cascade failures
+        f"  - API response times increase 5-10x without cache"
         "
-        f"  - User experience degrades with slow page loads
         "
-        f"  - System scalability reduced without caching layer
+        f"  - Database load increases causing cascade failures"
+        "
+        "
+        f"  - User experience degrades with slow page loads"
+        "
+        "
+        f"  - System scalability reduced without caching layer"
 
+        "
         "
         f"Staging must validate cache performance requirements for production readiness."
                                                                                                                         
@@ -819,6 +866,7 @@ class TestStagingRedisConnectivityFailures:
         @pytest.mark.e2e
     def test_redis_authentication_credentials_validation_staging_requirements(self):
         '''
+        '''
         EXPECTED TO FAIL - MEDIUM REDIS AUTHENTICATION ISSUE
 
         Issue: Redis authentication credentials missing or invalid for staging
@@ -826,6 +874,7 @@ class TestStagingRedisConnectivityFailures:
         Actual: No authentication or invalid credentials preventing Redis access
 
         Security Impact: Redis authentication required in staging for production parity
+        '''
         '''
         pass
         redis_url = self.env.get("REDIS_URL")
@@ -866,7 +915,7 @@ class TestStagingRedisConnectivityFailures:
         "Check REDIS_URL format or REDIS_USERNAME/REDIS_PASSWORD variables."
                     
 
-                    # If authentication is present, validate it's not using development defaults
+                    # If authentication is present, validate it's not using development defaults'
         if has_url_auth and parsed.username:
         dev_username_patterns = ["dev", "test", "admin", "root"]
         for pattern in dev_username_patterns:
@@ -955,8 +1004,8 @@ class TestStagingRedisConnectivityFailures:
         sock = socket.create_connection((host, port), timeout=5.0)
 
         # Send Redis PING command
-        sock.send(b"PING\r )
-        ")
+        sock.send(b"PING\r )"
+        ")"
         response = sock.recv(1024)
         sock.close()
 
@@ -998,10 +1047,12 @@ class TestStagingRedisConnectivityFailures:
         @pytest.mark.e2e
     async def test_redis_staging_connectivity_quick_validation():
         '''
+        '''
         STANDALONE CRITICAL TEST - Redis Connectivity
 
         EXPECTED TO FAIL: Quick validation of Redis connectivity and fallback configuration
         Purpose: Rapid feedback on Redis provisioning and staging configuration
+        '''
         '''
         pass
         env = IsolatedEnvironment()
@@ -1036,10 +1087,12 @@ class TestStagingRedisConnectivityFailures:
         @pytest.mark.e2e
     async def test_redis_session_store_validation_quick():
         '''
+        '''
         STANDALONE CRITICAL TEST - Redis Session Store
 
         EXPECTED TO FAIL: Quick validation of Redis session storage configuration
         Purpose: Rapid feedback on session persistence setup
+        '''
         '''
         pass
         env = IsolatedEnvironment()

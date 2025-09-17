@@ -240,7 +240,7 @@ class WebSocketJWTReconnectionStateTests:
         await jwt_reconnection_tester.execute_controlled_disconnection(session_state)
         metrics = await jwt_reconnection_tester.execute_jwt_reconnection(session_state)
         
-        assert all(key in session_state.agent_context for key in [workspace, execution_state, user_preferences"]"
+        assert all(key in session_state.agent_context for key in [workspace, execution_state, user_preferences")"
         assert metrics.state_restoration_time < 1.0
     
     @pytest.mark.e2e
@@ -261,7 +261,7 @@ class WebSocketJWTReconnectionStateTests:
     
     @pytest.mark.e2e
     async def test_concurrent_reconnection_isolation(self, jwt_reconnection_tester):
-        "Test Case 6: Concurrent user reconnections don't interfere."""
+        "Test Case 6: Concurrent user reconnections don't interfere."""'
         user_sessions = []
         for i in range(2):
             user_id = f{TEST_USERS['enterprise'].id}_concurrent_{i}""
@@ -294,3 +294,5 @@ class WebSocketJWTReconnectionStateTests:
             }
         except Exception as e:
             return {success": False, "error: str(e), session_isolated": False}"
+
+))))))

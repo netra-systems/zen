@@ -48,6 +48,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 @pytest.mark.e2e
 @pytest.mark.staging_compatible
 class WebSocketEventDeliveryChatE2ETests(SSotBaseTestCase):
+    pass
 """"""
     MISSION CRITICAL E2E Tests for WebSocket Event Delivery During Chat.
     
@@ -139,7 +140,7 @@ class WebSocketEventDeliveryChatE2ETests(SSotBaseTestCase):
                         elif event_type in expected_sequence:
                             delivery_metrics['sequence_correct'] = False
                             print(f' WARNING: [U+FE0F] Sequence issue: {event_type} received out of order')
-                        if len(delivery_metrics['critical_events_timing'] >= 5:
+                        if len(delivery_metrics['critical_events_timing') >= 5:
                             print(' CELEBRATION:  All 5 critical events received!')
                             break
             except asyncio.TimeoutError:
@@ -151,10 +152,10 @@ class WebSocketEventDeliveryChatE2ETests(SSotBaseTestCase):
                 continue
         return (events_received, delivery_metrics)
 
-    def _calculate_event_delivery_score(self, delivery_metrics: Dict[str, Any] -> float:
+    def _calculate_event_delivery_score(self, delivery_metrics: Dict[str, Any) -> float:
         "Calculate event delivery quality score."
         score_components = []
-        critical_events_count = len(delivery_metrics['critical_events_timing']
+        critical_events_count = len(delivery_metrics['critical_events_timing')
         completeness_score = critical_events_count / 5.0 * 40.0
         score_components.append(completeness_score)
         if delivery_metrics['first_event_time']:
@@ -163,7 +164,7 @@ class WebSocketEventDeliveryChatE2ETests(SSotBaseTestCase):
         sequence_score = 20.0 if delivery_metrics['sequence_correct'] else 10.0
         score_components.append(sequence_score)
         if delivery_metrics['event_intervals']:
-            avg_interval = sum(delivery_metrics['event_intervals'] / len(delivery_metrics['event_intervals']
+            avg_interval = sum(delivery_metrics['event_intervals') / len(delivery_metrics['event_intervals')
             consistency_score = max(0, 10 - avg_interval * 1)
             score_components.append(min(10.0, consistency_score))
         return sum(score_components)
@@ -198,7 +199,7 @@ class WebSocketEventDeliveryChatE2ETests(SSotBaseTestCase):
             events_received, delivery_metrics = await self._monitor_detailed_event_delivery(websocket=websocket, user_context=user_context, timeout=self.config.event_timeout)
             print(' PASS:  STEP 5: Validating critical event delivery...')
             self.events_delivered = len(events_received)
-            self.critical_events_received = len(delivery_metrics['critical_events_timing']
+            self.critical_events_received = len(delivery_metrics['critical_events_timing')
             self.event_delivery_score = self._calculate_event_delivery_score(delivery_metrics)
             assert self.critical_events_received >= 3, f'Insufficient critical events: {self.critical_events_received}/5'
             assert delivery_metrics['first_event_time'] is not None, 'No events received'
@@ -261,7 +262,7 @@ class WebSocketEventDeliveryChatE2ETests(SSotBaseTestCase):
                     events_received = len(result.events_received)
                     event_types = [event.event_type for event in result.events_received]
                     expected_found = sum((1 for event_type in scenario['expected_events'] if event_type in event_types))
-                    consistency_score = expected_found / len(scenario['expected_events'] * 100
+                    consistency_score = expected_found / len(scenario['expected_events') * 100
                     scenario_result = {'name': scenario['name'], 'events_received': events_received, 'expected_found': expected_found, 'consistency_score': consistency_score, 'execution_time': time.time() - scenario_start, 'success': result.success}
                     scenario_results.append(scenario_result)
                     print(f    CHART:  Events: {events_received}, Expected: {expected_found}/{len(scenario['expected_events']})
@@ -349,3 +350,5 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""
+)))))))

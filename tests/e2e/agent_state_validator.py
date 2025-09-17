@@ -1,7 +1,8 @@
-'''Agent State Validator - Unified System Testing Phase 5
+'''Agent State Validator - Unified System Testing Phase 5'
 Validates agent initialization, transitions, and resource usage.
 BVJ: Enterprise/Growth segment - $50K+ revenue protection from session failures.
 Architecture:  <= 300 lines,  <= 8 lines per function, modular validators.
+'''
 '''
 
 import asyncio
@@ -114,7 +115,7 @@ class ContextValidator:
         return {}
         return state.metadata.execution_context
 
-        def _verify_context_preservation(self, original: Dict[str, Any],
+        def _verify_context_preservation(self, original: Dict[str, Any),
         injected: Dict[str, Any]) -> bool:
         """Verify context data preservation during injection"""
         for key, value in original.items():
@@ -285,7 +286,7 @@ class AgentStateValidatorTestSuite:
         return DeepAgentState(user_request="", metadata=None)
 
     def _create_test_metadata():
-        return AgentMetadata(execution_context={'test_mode': True},
+        return AgentMetadata(execution_context={'test_mode': True),
         custom_fields={'tier': CustomerTier.ENTERPRISE.value})
 
     def _get_context_params(test_state):
@@ -307,3 +308,5 @@ class AgentStateValidatorTestSuite:
         'sample_agent_states',
         'execution_contexts'
     
+
+'''

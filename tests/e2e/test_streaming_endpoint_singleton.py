@@ -24,10 +24,11 @@ class TestWebSocketConnection:
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
-        '''E2E tests for streaming endpoint singleton behavior.
+        '''E2E tests for streaming endpoint singleton behavior.'
 
         Tests to ensure streaming endpoint uses dependency injection properly.
         See: SPEC/learnings/agent_registration_idempotency.xml
+        '''
         '''
 
         import asyncio
@@ -159,7 +160,7 @@ assert len(service_instances) == 3
         # Removed problematic line: async def test_no_duplicate_registration_logs( )
 self, mock_logger, async_client, auth_headers
 ):
-"""Test that agent registration doesn't occur multiple times."""
+"""Test that agent registration doesn't occur multiple times."""'
 request_data = { }
 "query": "test query",
 "id": "test_id"
@@ -173,7 +174,7 @@ json=request_data,
 headers=auth_headers
                 
 
-                # Check that we don't see repeated registration logs
+                # Check that we don't see repeated registration logs'
 info_calls = [call for call in mock_logger.info.call_args_list )
 if 'Registered agent:' in str(call)]
 
@@ -182,7 +183,7 @@ assert len(info_calls) <= 7
 
 @pytest.mark.asyncio
     async def test_concurrent_stream_requests(self, async_client, auth_headers):
-        """Test that concurrent streaming requests don't cause registration issues."""
+        """Test that concurrent streaming requests don't cause registration issues."""'
 request_data = { }
 "query": "test query",
 "id": "test_id"
@@ -215,7 +216,7 @@ tasks.append(task)
 await asyncio.gather(*tasks)
 
                 # Registration should happen limited number of times (not once per request)
-                # Due to FastAPI's dependency injection, it might be called once per worker
+                # Due to FastAPI's dependency injection, it might be called once per worker'
 assert registration_count['count'] <= 10
 
 @pytest.mark.e2e
@@ -228,9 +229,9 @@ request_data = { }
     
 
 mock_response = MagicNone  # TODO: Use real service instead of Mock
-mock_response.body_iterator = [b"data: test )
+mock_response.body_iterator = [b"data: test )"
 
-"]
+"]"
 mock_response.status_code = 200
 mock_response.headers = {"Content-Type": "text/event-stream"}
 
@@ -284,3 +285,5 @@ headers=auth_headers
 
         # Verify dependency injection was used
 assert mock_get_service.called
+
+'''

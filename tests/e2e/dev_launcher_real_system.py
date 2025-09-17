@@ -1,4 +1,5 @@
 '''
+'''
 Dev Launcher Real System Integration for Testing
 Integrates with the actual dev_launcher module to start real services.
 
@@ -9,6 +10,7 @@ CRITICAL REQUIREMENTS:
 - Handles cleanup on test completion
 - Compatible with existing test infrastructure
 - Robust error handling and service management
+'''
 '''
 
 import asyncio
@@ -96,11 +98,11 @@ class DevLauncherRealSystem:
         config.frontend_port = 3000 if not self.skip_frontend else None
         config.dynamic_ports = False  # Use fixed ports for testing
         config.no_backend_reload = True  # No hot reload for tests
-        config.no_browser = True  # Don"t open browser
+        config.no_browser = True  # Don"t open browser"
         config.verbose = False  # Less output for tests
         config.non_interactive = True  # No prompts
         config.startup_mode = "minimal"  # Fast startup
-        config.no_secrets = True  # Don"t load secrets for tests
+        config.no_secrets = True  # Don"t load secrets for tests"
         config.parallel_startup = True  # Parallel startup for speed
         config.project_root = self._detect_project_root()
         return config
@@ -268,8 +270,8 @@ class DevLauncherRealSystem:
         shell=True, capture_output=True, text=True
             
         if result.stdout:
-        lines = result.stdout.strip().split(" )
-        ")
+        lines = result.stdout.strip().split(" )"
+        ")"
         for line in lines:
         parts = line.split()
         if len(parts) >= 5:
@@ -286,8 +288,8 @@ class DevLauncherRealSystem:
         shell=True, capture_output=True, text=True
                                         
         if result.stdout:
-        pids = result.stdout.strip().split(" )
-        ")
+        pids = result.stdout.strip().split(" )"
+        ")"
         for pid in pids:
         if pid.isdigit():
         subprocess.run("", shell=True)

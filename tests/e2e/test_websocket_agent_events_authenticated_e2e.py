@@ -103,7 +103,7 @@ class WebSocketAgentEventsAuthenticatedE2ETests:
             # Verify authentication context in events
             for event in collected_events:
                 assert timestamp in event
-                if user_id in event.get(payload", {}:"
+                if user_id in event.get(payload", {):"
                     assert event["payload][user_id] == user_id"
         
         finally:
@@ -223,3 +223,6 @@ class WebSocketAgentEventsAuthenticatedE2ETests:
                     return result
                 else:
                     return {success": False, "error": await response.text()}"
+
+"""
+))))))

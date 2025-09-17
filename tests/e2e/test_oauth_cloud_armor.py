@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 '''
+'''
 OAuth Cloud Armor Integration Test
 
 This test validates that:
@@ -8,6 +9,7 @@ This test validates that:
 3. Cloud Armor logs show no false positives for OAuth
 
 Run: python tests/e2e/test_oauth_cloud_armor.py
+'''
 '''
 
 import asyncio
@@ -68,7 +70,7 @@ class TestOAuthCloudArmor:
     async def test_oauth_callback_not_blocked(self) -> Dict:
         """Test that OAuth callback with encoded parameters is not blocked."""
         print("")
-        SEARCH:  Testing OAuth callback endpoint...")
+        SEARCH:  Testing OAuth callback endpoint...")"
 
         # Simulate OAuth callback with encoded parameters that triggered the issue
         callback_url = ""
@@ -201,7 +203,7 @@ class TestOAuthCloudArmor:
     async def test_sql_injection_still_blocked(self) -> Dict:
         """Ensure SQL injection attempts are still blocked on other paths."""
         print("")
-        [U+1F6E1][U+FE0F]  Testing SQL injection protection...")
+        [U+1F6E1][U+FE0F]  Testing SQL injection protection...")"
 
                                 # Test paths that should still be protected
         test_cases = [ ]
@@ -213,7 +215,7 @@ class TestOAuthCloudArmor:
         { }
         "name": "Search with SQL injection",
         "url": "",
-        "params": {"q": ""; DROP TABLE users; --"}
+        "params": {"q": ""; DROP TABLE users; --"}"
                                 
                                 
 
@@ -266,7 +268,7 @@ class TestOAuthCloudArmor:
     def verify_security_policy(self) -> Dict:
         """Verify Cloud Armor security policy configuration."""
         print("")
-        [U+1F510] Verifying security policy configuration...")
+        [U+1F510] Verifying security policy configuration...")"
 
         cmd = [ ]
         "gcloud", "compute", "security-policies", "rules", "describe", "50",
@@ -368,7 +370,7 @@ class TestOAuthCloudArmor:
 
                                 # Print summary
         print("")
-         + =" * 60)
+         + =" * 60)"
         print("[U+1F4CB] TEST SUMMARY")
         print("=" * 60)
         print("")

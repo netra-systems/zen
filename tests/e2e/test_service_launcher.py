@@ -1,8 +1,10 @@
 '''
+'''
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 Simple service launcher for e2e tests.
 Provides lightweight service startup with minimal dependencies.
+'''
 '''
 
 import os
@@ -116,13 +118,13 @@ class TestServiceLauncher:
         ["netstat", "-ano"],
         capture_output=True, text=True
             
-        for line in result.stdout.split(" )
-        "):
+        for line in result.stdout.split(" )"
+        "):"
         if "" in line and "LISTENING" in line:
         parts = line.split()
         if len(parts) > 4:
         pid = parts[-1]
-        subprocess.run(["taskkill", "/F", "/PID", pid],
+        subprocess.run(["taskkill", "/F", "/PID", pid),
         capture_output=True)
         logger.info("")
         else:
@@ -197,7 +199,8 @@ class TestServiceLauncher:
 
 
     async def ensure_test_services_running() -> Dict[str, bool]:
-    # Removed problematic line: '''Ensure test services are running and await asyncio.sleep(0)
+    # Removed problematic line: '''Ensure test services are running and await asyncio.sleep(0)'
+        return their status.'''
         return their status.'''
         pass
         results = { }
@@ -225,3 +228,5 @@ class TestServiceLauncher:
         """Cleanup test services."""
         await test_launcher.stop_all_services()
         pass
+
+'''

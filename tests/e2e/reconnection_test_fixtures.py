@@ -21,12 +21,13 @@ class TestWebSocketConnection:
         """Get all sent messages."""
         return self.messages_sent.copy()
 
-        '''WebSocket Reconnection Test Fixtures
+        '''WebSocket Reconnection Test Fixtures'
 
         Centralized test fixtures and utilities for reconnection testing scenarios.
         Supports state preservation, token management, and connection lifecycle testing.
 
         Business Value: Enables comprehensive reconnection testing for enterprise reliability
+        '''
         '''
 
         import asyncio
@@ -83,3 +84,5 @@ class ReconnectionTestFixture:
         """Create reconnection test fixture with cleanup."""
         fixture = ReconnectionTestFixture()
         return fixture
+
+'''

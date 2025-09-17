@@ -195,6 +195,7 @@ class ErrorMessageToUserNotificationRecoveryTests:
     @pytest.mark.e2e
     async def test_timing_requirements_validation(self):
         Test that timing requirements are validated correctly."""
+        Test that timing requirements are validated correctly."""
         start_time = time.time()
         
         # Simulate processing time
@@ -202,3 +203,5 @@ class ErrorMessageToUserNotificationRecoveryTests:
         
         total_time = time.time() - start_time
         assert total_time < 5.0, Processing time validation works correctly""
+
+)

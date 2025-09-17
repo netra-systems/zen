@@ -1,4 +1,5 @@
 '''
+'''
 WebSocket Authentication Startup Timing Test
 
 Tests WebSocket authentication during service startup to ensure auth service is ready
@@ -6,6 +7,7 @@ before WebSocket connections are attempted, fixing timing issues observed during
 dev launcher startup.
 
 BVJ: Enterprise | Real-time Communication | WebSocket Auth | CRITICAL - $150K+ MRR at risk
+'''
 '''
 
 import asyncio
@@ -83,7 +85,7 @@ class TestWebSocketAuthStartuper:
         try:
         # Try to create a simple test token
         # In real implementation, this would use the JWT helper
-        # For now, we'll test with a basic token structure
+        # For now, we'll test with a basic token structure'
 
         # Create a minimal test token payload
         payload = {
@@ -181,7 +183,7 @@ class TestWebSocketAuthStartuper:
         self.websocket_url,
         timeout=5.0
         ) as websocket:
-                                                                        # If we get here, connection succeeded when it shouldn't have
+                                                                        # If we get here, connection succeeded when it shouldn't have'
         result[error] = "Connection succeeded without authentication (security issue)"
 
         except websockets.exceptions.WebSocketException as e:
@@ -201,10 +203,12 @@ class TestWebSocketAuthStartuper:
 @pytest.mark.e2e
     async def test_services_ready_before_websocket_auth():
         '''
+        '''
 
 Test that both auth and backend services are ready before WebSocket authentication is tested.
 
 This ensures proper startup sequence and prevents timing-related auth failures.
+'''
 '''
 pass
 tester = WebSocketAuthStartupTester()
@@ -224,10 +228,12 @@ print( PASS:  Both auth and backend services are ready for WebSocket testing"")
 @pytest.mark.e2e
     async def test_websocket_authentication_with_valid_token():
         '''
+        '''
 
 Test WebSocket authentication with a valid JWT token.
 
 This validates the WebSocket authentication flow works when both services are ready.
+'''
 '''
 pass
 tester = WebSocketAuthStartupTester()
@@ -263,7 +269,7 @@ if result['websocket_response']:
     print()""
 
 
-                                                                                                                    # For now, we'll validate the connection attempt was made successfully
+                                                                                                                    # For now, we'll validate the connection attempt was made successfully'
                                                                                                                     # Even if auth is not fully implemented, the connection should not be immediately refused
 if result['error'] and connection refused" in result['error'].lower():"
     pytest.fail(""
@@ -280,10 +286,12 @@ formatted_string""
 @pytest.mark.e2e
     async def test_websocket_rejects_connections_without_auth():
         '''
+        '''
 
 Test that WebSocket connections are properly rejected when no authentication is provided.
 
 This validates the security of the WebSocket authentication system.
+'''
 '''
 pass
 tester = WebSocketAuthStartupTester()
@@ -325,10 +333,12 @@ if result['error'] and "connection refused in result['error'].lower():"
 @pytest.mark.e2e
     async def test_websocket_auth_timing_requirements():
         '''
+        '''
 
 Test WebSocket authentication timing meets requirements for real-time communication.
 
 This ensures WebSocket auth is fast enough for good user experience.
+'''
 '''
 pass
 tester = WebSocketAuthStartupTester()
@@ -356,7 +366,7 @@ for i in range(3):
 
 
 if result['connection_successful'] and result['connection_time_ms']:
-    connection_times.append(result['connection_time_ms']
+    connection_times.append(result['connection_time_ms')
 
 successful_connections += 1
 
@@ -420,3 +430,5 @@ else:
 
 
 asyncio.run(main()")"
+
+}}}

@@ -1,4 +1,5 @@
 '''
+'''
 WebSocket Authentication Timing Issue Test Suite
 
 This E2E test reproduces the exact WebSocket authentication timing issue that occurs
@@ -23,6 +24,7 @@ Architecture Compliance:
 - Real service integration with controlled mocking
 - Follows existing E2E test patterns
 - Comprehensive edge case coverage
+'''
 '''
 
 import asyncio
@@ -398,11 +400,13 @@ class TestWebSocketAuthTiminger:
 @pytest.mark.critical
     async def test_websocket_connection_without_token():
         '''
+        '''
 
 Test: WebSocket connection without token fails with error 1008
 
 This reproduces the exact issue reported in DevLauncher startup where
 the frontend attempts WebSocket connection before JWT token is available.
+'''
 '''
 pass
 tester = WebSocketAuthTimingTester()
@@ -448,11 +452,13 @@ print(formatted_string)
 @pytest.mark.critical
     async def test_websocket_connection_with_null_token():
         '''
+        '''
 
 Test: WebSocket connection with token=null handling
 
 Tests the specific case where frontend passes token=null during
 initialization phase of DevLauncher startup.
+'''
 '''
 pass
 tester = WebSocketAuthTimingTester()
@@ -487,11 +493,13 @@ print(formatted_string)
 @pytest.mark.critical
     async def test_websocket_connection_timing_race():
         '''
+        '''
 
 Test: Race condition where token becomes available after connection attempt
 
 Simulates the timing issue where DevLauncher WebSocket connection starts
 before authentication flow completes, then token becomes available.
+'''
 '''
 pass
 tester = WebSocketAuthTimingTester()
@@ -524,11 +532,13 @@ print(formatted_string)
 @pytest.mark.critical
     async def test_websocket_origin_none_handling():
         '''
+        '''
 
 Test: CORS handling when origin header is None
 
 Tests WebSocket behavior with null Origin header, which commonly occurs
 in desktop applications like DevLauncher.
+'''
 '''
 pass
 tester = WebSocketAuthTimingTester()
@@ -560,11 +570,13 @@ print(")"
 @pytest.mark.critical
     async def test_websocket_auth_recovery():
         '''
+        '''
 
 Test: WebSocket recovery after initial auth failure
 
 Tests the ability to establish WebSocket connection after initial
 authentication failure, simulating user retry after DevLauncher startup.
+'''
 '''
 pass
 tester = WebSocketAuthTimingTester()
@@ -600,11 +612,13 @@ print(")"
 @pytest.mark.critical
     async def test_complete_websocket_auth_timing_suite():
         '''
+        '''
 
 Test: Complete WebSocket authentication timing test suite
 
 Runs all timing-related authentication tests to provide comprehensive
 coverage of the WebSocket auth timing issues in DevLauncher startup.
+'''
 '''
 pass
 tester = WebSocketAuthTimingTester()
@@ -680,3 +694,5 @@ assert expected_failures_detected >= 3, \
 ""
 
 print(f[SUCCESS] WebSocket auth timing issues properly reproduced and tested")"
+
+}

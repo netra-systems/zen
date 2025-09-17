@@ -69,8 +69,8 @@ class StagingWebSocketAuthScopingE2ETests:
             user_context = session['user_context']
 
             class E2EStagingWebSocket:
-
-                def __init__(self, jwt_token: str, user_context: Dict[str, Any]:
+                pass
+                def __init__(self, jwt_token: str, user_context: Dict[str, Any):
                     self.headers = {'authorization': f'Bearer {jwt_token}', 'x-e2e-test': 'staging', 'x-environment': 'staging', 'x-user-id': user_context['user_id'], 'host': 'staging-e2e.netra.com', 'user-agent': 'e2e-test-client/1.0'}
                     self.client = type('Client', (), {'host': 'staging-e2e.netra.com', 'port': 443}()
                     self.client_state = 'CONNECTED'
@@ -119,8 +119,8 @@ class StagingWebSocketAuthScopingE2ETests:
             user_context = session['user_context']
 
             class AgentEventWebSocket:
-
-                def __init__(self, jwt_token: str, user_context: Dict[str, Any]:
+                pass
+                def __init__(self, jwt_token: str, user_context: Dict[str, Any):
                     self.headers = {'authorization': f'Bearer {jwt_token}', 'x-e2e-test': 'staging-agent-flow', 'x-agent-test': 'true', 'host': 'staging-agents.netra.com'}
                     self.client = type('Client', (), {'host': 'staging-agents.netra.com', 'port': 8080}()
                     self.client_state = 'CONNECTED'
@@ -156,7 +156,7 @@ class StagingWebSocketAuthScopingE2ETests:
     @pytest.mark.asyncio
     async def test_staging_performance_regression_validation(self, authenticated_e2e_session):
     ""
-        E2E performance test to ensure scoping bug fix doesn't introduce regressions.
+        E2E performance test to ensure scoping bug fix doesn't introduce regressions.'
         
         This test validates that authentication performance remains acceptable
         after fixing the variable scoping bug.
@@ -171,7 +171,7 @@ class StagingWebSocketAuthScopingE2ETests:
         for iteration in range(5):
 
             class PerfTestWebSocket:
-
+                pass
                 def __init__(self, iteration: int):
                     self.headers = {'authorization': f'Bearer {jwt_token}', 'x-e2e-test': f'perf-test-{iteration}', 'x-iteration': str(iteration), 'host': f'perf{iteration}.staging.netra.com'}
                     self.client = type('Client', (), {'host': f'perf{iteration}.staging.netra.com', 'port': 443}()
@@ -224,13 +224,13 @@ class StagingWebSocketAuthScopingE2ETests:
         This test uses actual GCP environment variables and headers that would
         be present in a real staging deployment to validate scoping bug fix.
 """"""
-        real_gcp_staging_env = {'ENVIRONMENT': 'staging', 'GOOGLE_CLOUD_PROJECT': 'netra-staging-gcp-real', 'K_SERVICE': 'netra-backend-staging', 'PORT': '8080', 'K_REVISION': 'netra-backend-staging-00042-zox', 'K_CONFIGURATION': 'netra-backend-staging', 'GAE_ENV': 'standard', 'GCLOUD_PROJECT': 'netra-staging-gcp-real', 'GOOGLE_APPLICATION_CREDENTIALS': '/var/secrets/gcp-key.json', 'E2E_TESTING': '1', 'STAGING_E2E_TEST': '1'}
+        real_gcp_staging_env = {'ENVIRONMENT': 'staging', 'GOOGLE_CLOUD_PROJECT': 'netra-staging-gcp-real', 'K_SERVICE': 'netra-backend-staging', 'PORT': '8080', 'K_REVISION': 'netra-backend-staging-42-zox', 'K_CONFIGURATION': 'netra-backend-staging', 'GAE_ENV': 'standard', 'GCLOUD_PROJECT': 'netra-staging-gcp-real', 'GOOGLE_APPLICATION_CREDENTIALS': '/var/secrets/gcp-key.json', 'E2E_TESTING': '1', 'STAGING_E2E_TEST': '1'}
         session = authenticated_e2e_session
         jwt_token = session['jwt_token']
         user_context = session['user_context']
 
         class RealGCPWebSocket:
-
+            pass
             def __init__(self):
                 self.headers = {'authorization': f'Bearer {jwt_token}', 'x-forwarded-for': '169.254.1.1', 'x-forwarded-proto': 'https', 'x-goog-trace': 'ac64a5b4cdf9b1e8b0e7e8e9d8c7b6a5', 'x-appengine-request-log': 'staging-request-log-id', 'x-cloud-run-service': 'netra-backend-staging', 'x-gcp-environment': 'staging', 'host': 'netra-backend-staging-abc123-uc.a.run.app', 'user-agent': 'Google-Cloud-Functions/2.10'}
                 self.client = type('Client', (), {'host': '169.254.1.1', 'port': 8080}()
@@ -269,7 +269,7 @@ class StagingScopingEdgeCasesTests:
         mixed_env = {'ENVIRONMENT': 'staging', 'GOOGLE_CLOUD_PROJECT': 'netra-prod-staging-test', 'K_SERVICE': 'netra-backend-staging', 'PROD_MODE': 'false', 'STAGING_MODE': 'true', 'E2E_TESTING': '1'}
 
         class MixedEnvironmentWebSocket:
-
+            pass
             def __init__(self):
                 self.headers = {'x-environment': 'staging', 'x-mixed-test': 'prod-staging-edge-case', 'host': 'mixed.staging.netra.com'}
                 self.client = type('Client', (), {'host': 'mixed.staging.netra.com', 'port': 443}()
@@ -298,7 +298,7 @@ class StagingScopingEdgeCasesTests:
             ""Single concurrent authentication test.""
 
             class ConcurrentWebSocket:
-
+                pass
                 def __init__(self, worker_id: int):
                     self.headers = {'x-worker-id': str(worker_id), 'x-concurrent-test': 'race-condition', 'host': f'worker{worker_id}.staging.netra.com'}
                     self.client = type('Client', (), {'host': f'worker{worker_id}.staging.netra.com', 'port': 8000}()
@@ -307,7 +307,7 @@ class StagingScopingEdgeCasesTests:
             websocket = ConcurrentWebSocket(worker_id)
             with patch('shared.isolated_environment.get_env', return_value=concurrent_staging_env):
                 try:
-                    await asyncio.sleep(0.01 * worker_id)
+                    await asyncio.sleep(0.1 * worker_id)
                     e2e_context = extract_e2e_context_from_websocket(websocket)
                     assert e2e_context is not None
                     assert e2e_context['environment'] == 'staging'
@@ -340,3 +340,5 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""
+))))))))

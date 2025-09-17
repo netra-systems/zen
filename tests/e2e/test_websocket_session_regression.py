@@ -25,6 +25,7 @@ class TestWebSocketConnection:
         return self.messages_sent.copy()
 
         '''
+        '''
         Regression Test Suite: WebSocket Session Management and Agent Execution
 
         Tests to prevent regression of SQLAlchemy session management issues that cause
@@ -37,6 +38,7 @@ class TestWebSocketConnection:
         4. Strategic Impact: Prevents customer-facing failures and support tickets
 
         CRITICAL: Tests MUST use real database sessions, not mocks
+        '''
         '''
 
         import asyncio
@@ -69,10 +71,11 @@ class TestWebSocketSessionRegression:
 
     @use_real_services_enforced
     async def test_session_not_passed_to_supervisor(self):
-    '''Verify database session is NOT passed to supervisor agent.
+    '''Verify database session is NOT passed to supervisor agent.'
 
     CRITICAL: This test prevents the root cause of agents hanging in Docker.
     The supervisor must NOT hold a reference to the handlers session.""
+    '''
     '''
     pass
         # Setup
@@ -111,6 +114,7 @@ class TestWebSocketSessionRegression:
         Simulates the Docker environment issue where multiple agents
         running concurrently caused IllegalStateChangeError.
         '''
+        '''
         pass
         handler = AgentMessageHandler()
 
@@ -147,10 +151,11 @@ class TestWebSocketSessionRegression:
 
         @use_real_services_enforced
     async def test_session_lifecycle_with_long_running_agent(self):
-        '''Test session is properly managed during long-running agent operations.
+        '''Test session is properly managed during long-running agent operations.'
 
         This test verifies that the session is closed after handler completes,
         even when the agent operation continues running asynchronously.
+        '''
         '''
         pass
         handler = AgentMessageHandler()
@@ -191,6 +196,7 @@ class TestWebSocketSessionRegression:
         This test ensures the supervisor creates its own sessions as needed
         rather than using a passed reference that may be closed.
         '''
+        '''
         pass
         from netra_backend.app.config import get_config
         from netra_backend.app.llm.llm_manager import LLMManager
@@ -215,8 +221,8 @@ class TestWebSocketSessionRegression:
 
                     # This should not raise any session-related errors
         try:
-                        # Note: We're not actually running the full supervisor here,
-                        # just verifying it's configured correctly without session
+                        # Note: We're not actually running the full supervisor here,'
+                        # just verifying it's configured correctly without session'
         assert supervisor.db_session is None
         except AttributeError as e:
         if db_session in str(e):
@@ -224,9 +230,10 @@ class TestWebSocketSessionRegression:
 
         @use_real_services_enforced
     async def test_session_error_detection(self):
-        '''Test that IllegalStateChangeError is properly detected and handled.
+        '''Test that IllegalStateChangeError is properly detected and handled.'
 
         This test verifies our error detection works to catch future regressions.
+        '''
         '''
         pass
                                     # Simulate the error condition
@@ -254,7 +261,7 @@ class TestWebSocketSessionRegression:
         # The problematic pattern should be avoided
         try:
         agent = await problematic_handler()
-            # Verify agent doesn't have active session reference
+            # Verify agent doesn't have active session reference'
         if hasattr(agent, 'db_session'):
                 # In the fix, db_session should be None
         assert agent.db_session is None or agent.db_session.is_active is False
@@ -265,14 +272,15 @@ class TestWebSocketSessionRegression:
 
 @pytest.mark.asyncio
 class TestAgentPerformanceRegression:
-    "Test suite to ensure agent performance doesn't regress."""
+    "Test suite to ensure agent performance doesn't regress."""'
 
     @use_real_services_enforced
     async def test_agent_response_time_under_threshold(self):
-    '''Verify agents complete within reasonable time in Docker-like environment.
+    '''Verify agents complete within reasonable time in Docker-like environment.'
 
     This test ensures agents dont hang for 20+ seconds as they did
     before the fix.
+    '''
     '''
     pass
     handler = AgentMessageHandler()
@@ -307,6 +315,7 @@ class TestAgentPerformanceRegression:
 
     This verifies that session management doesnt cause cumulative issues.""
     '''
+    '''
     pass
     handler = AgentMessageHandler()
     response_times = []
@@ -332,7 +341,7 @@ class TestAgentPerformanceRegression:
 
                                 # Verify no significant degradation
     if len(response_times) >= 2:
-                                    # Last request shouldn't be significantly slower than first
+                                    # Last request shouldn't be significantly slower than first'
     degradation = response_times[-1] - response_times[0]
     assert degradation < 2.0, formatted_string
 
@@ -343,9 +352,10 @@ class TestSessionCleanup:
 
     @use_real_services_enforced
     async def test_no_session_leaks_after_agent_execution(self):
-    '''Verify no database sessions are leaked after agent execution.
+    '''Verify no database sessions are leaked after agent execution.'
 
     This test ensures proper cleanup even when agents fail or timeout.
+    '''
     '''
     pass
     handler = AgentMessageHandler()
@@ -380,9 +390,10 @@ class TestSessionCleanup:
 
         @use_real_services_enforced
     async def test_session_cleanup_on_handler_error(self):
-        '''Verify session is cleaned up even when handler encounters an error.
+        '''Verify session is cleaned up even when handler encounters an error.'
 
         This prevents session leaks when exceptions occur.
+        '''
         '''
         pass
         handler = AgentMessageHandler()
@@ -422,3 +433,6 @@ class TestSessionCleanup:
 
     # Verify session was still closed despite error
         assert session_closed, "Session should be closed even after error"
+
+"""
+'''

@@ -118,7 +118,7 @@ class WebSocketAuthTestRunner:
         if expected_authenticated:
             if response_data.get(type) == auth_error:
                 raise AssertionError(f"Expected authenticated WebSocket but got auth_error: {response_data})"
-            if user_id" not in response_data.get(payload, {}:"
+            if user_id" not in response_data.get(payload, {):"
                 raise AssertionError(fAuthenticated WebSocket missing user_id in response: {response_data})
         else:
             if response_data.get("type) != auth_error":
@@ -159,13 +159,13 @@ async def test_websocket_jwt_authentication_success(websocket_auth_runner):
     )
     
     # Validate response structure - MUST have required fields
-    payload = auth_response.get("payload, {}"
+    payload = auth_response.get("payload, {)"
     if not payload.get(user_id):
         raise AssertionError(f"Missing user_id in auth response: {auth_response})"
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
-    if execution_time < 0.01:
+    if execution_time < 0.1:
         raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing")"
 
 
@@ -204,7 +204,7 @@ async def test_websocket_invalid_jwt_token(websocket_auth_runner):
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
-    if execution_time < 0.01:
+    if execution_time < 0.1:
         raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing")"
 
 
@@ -249,7 +249,7 @@ async def test_websocket_expired_jwt_token(websocket_auth_runner):
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
-    if execution_time < 0.01:
+    if execution_time < 0.1:
         raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing)
 
 
@@ -283,7 +283,7 @@ async def test_websocket_token_refresh_flow(websocket_auth_runner):
     if response_data.get(type) == error:
         raise AssertionError(fToken refresh failed: {response_data}")"
     
-    payload = response_data.get(payload, {}
+    payload = response_data.get(payload, {)
     new_token = payload.get(new_token)""
     
     # MUST have new token and it MUST be different from original
@@ -294,7 +294,7 @@ async def test_websocket_token_refresh_flow(websocket_auth_runner):
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
-    if execution_time < 0.01:
+    if execution_time < 0.1:
         raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing)
 
 
@@ -325,7 +325,7 @@ async def test_websocket_multi_user_authentication(websocket_auth_runner):
         )
         
         # Validate each user has isolated authentication context
-        payload = auth_response.get("payload, {}"
+        payload = auth_response.get("payload, {)"
         user_id = payload.get(user_id)
         if not user_id:
             raise AssertionError(f"Missing user_id for {user_role}: {auth_response})"
@@ -334,7 +334,7 @@ async def test_websocket_multi_user_authentication(websocket_auth_runner):
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
-    if execution_time < 0.01:
+    if execution_time < 0.1:
         raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing)""
 
 
@@ -382,7 +382,7 @@ async def test_websocket_role_based_permissions(websocket_auth_runner):
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
-    if execution_time < 0.01:
+    if execution_time < 0.1:
         raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing")"
 
 
@@ -419,13 +419,13 @@ async def test_websocket_session_validation(websocket_auth_runner):
     if response_data.get(type") == error:"
         raise AssertionError(fSession validation failed: {response_data})
     
-    payload = response_data.get("payload, {}"
+    payload = response_data.get("payload, {)"
     if session_id not in payload:
         raise AssertionError(fMissing session_id in validation response: {response_data})
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
-    if execution_time < 0.01:
+    if execution_time < 0.1:
         raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing")"
 
 
@@ -475,7 +475,7 @@ async def test_websocket_concurrent_auth_requests(websocket_auth_runner):
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
-    if execution_time < 0.01:
+    if execution_time < 0.1:
         raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing)
 
 
@@ -539,7 +539,7 @@ async def test_websocket_auth_state_recovery(websocket_auth_runner):
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
-    if execution_time < 0.01:
+    if execution_time < 0.1:
         raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing")"
 
 
@@ -596,5 +596,7 @@ async def test_websocket_auth_timeout_handling(websocket_auth_runner):
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
-    if execution_time < 0.01:
+    if execution_time < 0.1:
         raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing")"
+
+)))))))

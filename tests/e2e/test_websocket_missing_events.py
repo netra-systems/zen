@@ -405,9 +405,12 @@ class WebSocketMissingEventsTests:
                 return event
         return None
     
-    def _validate_event_payload_not_empty(self, event: Dict, required_fields: List[str]:
+    def _validate_event_payload_not_empty(self, event: Dict, required_fields: List[str):
         "Validate event payload has non-empty required fields."""
-        payload = event.get("payload, {}"
+        payload = event.get("payload, {)"
         for field in required_fields:
             assert field in payload, fMissing required field: {field}
             assert payload[field], fField {field} cannot be empty""
+
+"""
+))))))))

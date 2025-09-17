@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 class WebSocketRaceConditionsStagingTests(BaseE2ETest):
+    pass
 """Empty docstring."""
     E2E tests that reproduce WebSocket race conditions in GCP staging environment.
     
@@ -179,7 +180,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 print(f   User {i}: {status} ({duration:.2f}s) - {error}")"
         
         # CRITICAL: This test is designed to FAIL to prove race condition reproduction
-        # If we're seeing the expected race condition patterns, the test succeeds at reproducing them
+        # If we're seeing the expected race condition patterns, the test succeeds at reproducing them'
         race_conditions_detected = any(count > 0 for count in race_condition_indicators.values())
         
         if race_conditions_detected:
@@ -210,7 +211,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 fThis proves the race conditions exist and need fixing.""
             )
         else:
-            # If no race conditions detected, that's unexpected
+            # If no race conditions detected, that's unexpected'
             print(f"\n WARNING: [U+FE0F]  NO RACE CONDITIONS DETECTED:)"
             print(f   This may indicate the race conditions have been fixed)""
             print(f"   Or this test needs refinement to trigger them)"
@@ -336,7 +337,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
         if timing_issues_detected:
             print(f\n ALERT:  TIMING ISSUES DETECTED:)
             print(f   Large timing gaps suggest GCP Cloud Run startup race conditions"")
-            print(f   These gaps can cause 'accept' errors when network is ready but app isn't)
+            print(f   These gaps can cause 'accept' errors when network is ready but app isn't)'
             
             # This indicates the race condition exists
             assert False, (
@@ -493,7 +494,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 conn_time = result.get(connection_time, 0)
                 print(f   Attempt {attempt}: Connected in {conn_time:.2f}s, Services: {successful} PASS: /{failed} FAIL: "")
                 
-                for response in result.get(service_responses, []:
+                for response in result.get(service_responses, [):
                     test_type = response.get(test_type", "unknown)
                     success =  PASS:  if response.get(success) else  FAIL: ""
                     resp_time = response.get("response_time, 0)"
@@ -689,3 +690,6 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
             print(f\n PASS:  HEARTBEAT BEHAVIOR APPEARS STABLE:)
             print(f   No systematic failures detected")"
             print(f"   Heartbeat race conditions may have been resolved"")"
+
+"""
+)))))))))))))))

@@ -1,4 +1,4 @@
-'''WebSocket UI Timing Layer Validation Tests.
+'''WebSocket UI Timing Layer Validation Tests.'
 
 Tests UI layer timing requirements per SPEC/websocket_communication.xml:
 - Fast Layer: 0-100ms (immediate feedback)
@@ -10,6 +10,7 @@ preventing user perception of system slowness or unresponsiveness.
 
 BVJ: Enterprise/Early - User Experience - Timing compliance directly impacts
 user retention and perceived platform performance quality.
+'''
 '''
 
 import asyncio
@@ -60,7 +61,7 @@ class TestWebSocketUITiming:
 
                 # Record send time and trigger action
         send_time = time.time()
-                # Removed problematic line: await websocket_client.send_message({}
+                # Removed problematic line: await websocket_client.send_message({)
         type: user_message","
         "payload: {content: Trigger fast feedback events for timing test}"
                 
@@ -83,7 +84,7 @@ class TestWebSocketUITiming:
 
         if isinstance(message, dict) and message.get(type") in fast_layer_events:"
         latency_ms = (receive_time - send_time) * 1000
-        fast_events_timing.append({}
+        fast_events_timing.append({)
         event_type: message[type],
         latency_ms: latency_ms,""
         timestamp": receive_time"
@@ -120,7 +121,7 @@ class TestWebSocketUITiming:
 
                                                 # Trigger action that generates medium layer events
         send_time = time.time()
-                                                # Removed problematic line: await websocket_client.send_message({}
+                                                # Removed problematic line: await websocket_client.send_message({)
         type: user_message,
         payload: {content": "Generate progressive updates with thinking and partial results}
                                                 
@@ -143,7 +144,7 @@ class TestWebSocketUITiming:
 
         if isinstance(message, dict) and message.get(type) in medium_layer_events:
         latency_ms = (receive_time - send_time) * 1000
-        medium_events_timing.append({}
+        medium_events_timing.append({)
         "event_type: message[type"],
         latency_ms: latency_ms,
         timestamp: receive_time""
@@ -172,7 +173,7 @@ class TestWebSocketUITiming:
 
                                                                             # Trigger comprehensive action for slow layer events
         send_time = time.time()
-                                                                            # Removed problematic line: await websocket_client.send_message({}
+                                                                            # Removed problematic line: await websocket_client.send_message({)
         type": "user_message,
         payload: {content: Execute comprehensive analysis for final results timing test}""
                                                                             
@@ -195,7 +196,7 @@ class TestWebSocketUITiming:
 
         if isinstance(message, dict) and message.get("type) in slow_layer_events:"
         latency_ms = (receive_time - send_time) * 1000
-        slow_events_timing.append({}
+        slow_events_timing.append({)
         event_type: message[type],
         latency_ms": latency_ms,"
         timestamp: receive_time
@@ -233,7 +234,7 @@ class TestWebSocketUITiming:
 
                                                                                                         # Trigger comprehensive workflow
         send_time = time.time()
-                                                                                                        # Removed problematic line: await websocket_client.send_message({}
+                                                                                                        # Removed problematic line: await websocket_client.send_message({)
         type": "user_message,
         payload: {content: Full workflow test for timing layer segregation validation}""
                                                                                                         
@@ -258,7 +259,7 @@ class TestWebSocketUITiming:
         event_type = message[type]
         if event_type in expected_layers:
         latency_ms = (receive_time - send_time) * 1000
-        all_events_timing.append({}
+        all_events_timing.append({)
         "event_type: event_type,"
         latency_ms: latency_ms,
         expected_layer: expected_layers[event_type],""
@@ -280,7 +281,7 @@ class TestWebSocketUITiming:
         actual_layer = self._classify_timing_layer(latency)
 
         if actual_layer != expected_layer:
-        layer_violations.append({}
+        layer_violations.append({)
         event_type: event_type,""
         "latency_ms: latency,"
         expected_layer: expected_layer,
@@ -290,7 +291,7 @@ class TestWebSocketUITiming:
                                                                                                                                         # Report violations
         if layer_violations:
         violation_details = 
-        .join(]
+        .join()
         formatted_string""
         formatted_string""
         for v in layer_violations
@@ -304,7 +305,7 @@ class TestWebSocketUITiming:
     async def test_progressive_timing_sequence(self, websocket_client):
         Test events follow progressive timing sequence (fast -> medium -> slow).""
                                                                                                                                                     # Trigger workflow with full timing spectrum
-                                                                                                                                                    # Removed problematic line: await websocket_client.send_message({}
+                                                                                                                                                    # Removed problematic line: await websocket_client.send_message({)
         type": user_message,"
         payload: {content: Progressive timing sequence test with all layer events"}"
                                                                                                                                                     
@@ -331,7 +332,7 @@ class TestWebSocketUITiming:
         latency_ms = (arrival_time - sequence_start) * 1000
         layer = self._classify_timing_layer(latency_ms)
 
-        events_sequence.append({}
+        events_sequence.append({)
         "event_type: event_type,"
         latency_ms: latency_ms,
         "layer: layer,"
@@ -365,7 +366,7 @@ class TestWebSocketUITiming:
                                                                                                                                                                                     # Run multiple identical requests
         for i in range(3):
         send_time = time.time()
-                                                                                                                                                                                        # Removed problematic line: await websocket_client.send_message({}
+                                                                                                                                                                                        # Removed problematic line: await websocket_client.send_message({)
         type: "user_message,"
         payload": {content: formatted_string}"
                                                                                                                                                                                         
@@ -419,7 +420,7 @@ class TestWebSocketUITiming:
         else:
         return slow""
 
-    def _calculate_timing_stats(self, timings: List[float] -> Dict[str, float]:
+    def _calculate_timing_stats(self, timings: List[float) -> Dict[str, float):
         "Calculate timing statistics for analysis."""
         if not timings:
         return {}
@@ -429,3 +430,6 @@ class TestWebSocketUITiming:
         avg: sum(timings) / len(timings),""
         count": len(timings)"
         
+
+'''
+))))))))))))))

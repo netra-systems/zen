@@ -1,6 +1,7 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 '''
+'''
 Dev Launcher Real Startup Test - NO MOCKS
 
 [U+1F534] CRITICAL BUSINESS PROTECTION: This test protects $150K MRR by validating real system startup
@@ -22,6 +23,7 @@ IMPLEMENTATION REQUIREMENTS:
 - Cross-platform compatibility (Windows/Mac/Linux)
 - 30-second timeout protection against infinite startup loops
 - Comprehensive error handling and reporting
+'''
 '''
 
 import asyncio
@@ -48,10 +50,12 @@ from dev_launcher.launcher import DevLauncher
 
 class TestRealDevLauncherer:
     '''
+    '''
     Real dev launcher testing utility - Uses actual processes and HTTP calls.
 
     This class manages real service startup using the actual dev_launcher
     implementation with comprehensive health validation.
+    '''
     '''
 
     def __init__(self):
@@ -172,7 +176,7 @@ class TestRealDevLauncherer:
         if hasattr(self, 'backup_env_vars'):
         for key, original_value in self.backup_env_vars.items():
         if original_value is None:
-                    # Variable didn't exist originally, remove it
+                    # Variable didn't exist originally, remove it'
         if key in os.environ:
         del os.environ[key]
         else:
@@ -232,10 +236,12 @@ class TestRealDevLauncherer:
 @pytest.mark.e2e
 class TestDevLauncherRealStartup:
     '''
+    '''
     pass
     CRITICAL: Real dev launcher startup validation - NO MOCKS
 
     Business Value: $150K MRR protection through actual system startup testing
+    '''
     '''
 
     @pytest.fixture
@@ -273,14 +279,16 @@ class TestDevLauncherRealStartup:
         @pytest.mark.e2e
     async def test_real_dev_launcher_startup_sequence(self, launcher_tester, launcher_config):
         '''
+        '''
         Test real dev launcher starts all 3 services with actual HTTP validation.
 
         This is the most critical test - validates the fundamental ability
         of the dev launcher to start the entire system.
         '''
+        '''
         pass
         print("")
-        === STARTING REAL DEV LAUNCHER STARTUP TEST ===")
+        === STARTING REAL DEV LAUNCHER STARTUP TEST ===")"
 
         # Verify ports are available before starting
         await self._verify_ports_available(launcher_tester)
@@ -339,8 +347,8 @@ class TestDevLauncherRealStartup:
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         if result.stdout:
                 Extract PID from netstat output
-        lines = result.stdout.strip().split(" )
-        ")
+        lines = result.stdout.strip().split(" )"
+        ")"
         for line in lines:
         if 'LISTENING' in line:
         parts = line.split()
@@ -406,7 +414,7 @@ class TestDevLauncherRealStartup:
         pass
         raise asyncio.TimeoutError("Startup timeout after 30 seconds")
 
-                            # If port task completed first (services bound), that's success
+                            # If port task completed first (services bound), that's success'
         if port_task in done:
                                 # Cancel launcher task since we only need services started
         if not launcher_task.done():
@@ -523,13 +531,15 @@ class TestDevLauncherRealStartup:
         @pytest.mark.e2e
     async def test_service_startup_order_validation(self, launcher_tester, launcher_config):
         '''
+        '''
         Test that services start in correct dependency order.
 
         Business Value: Prevents cascade failures that could lose customers
         '''
+        '''
         pass
         print("")
-        === TESTING SERVICE STARTUP ORDER ===")
+        === TESTING SERVICE STARTUP ORDER ===")"
 
                 # Check if critical ports are already in use
         critical_ports_in_use = []
@@ -583,14 +593,16 @@ class TestDevLauncherRealStartup:
         @pytest.mark.e2e
     async def test_health_endpoint_response_validation(self, launcher_tester, launcher_config):
         '''
+        '''
                             # Removed problematic line: Test health endpoints await asyncio.sleep(0)
         return proper responses.
 
         Business Value: Ensures monitoring systems can detect service health
         '''
+        '''
         pass
         print("")
-        === TESTING HEALTH ENDPOINT RESPONSES ===")
+        === TESTING HEALTH ENDPOINT RESPONSES ===")"
 
                             # Start services
         startup_success = await self._start_real_dev_launcher( )
@@ -606,7 +618,7 @@ class TestDevLauncherRealStartup:
         port = launcher_tester.test_ports[service]
 
         if launcher_tester.is_port_available(port):
-        continue  # Skip if service didn"t start
+        continue  # Skip if service didn"t start"
 
         health_result = launcher_tester.check_health_endpoint(service)
 

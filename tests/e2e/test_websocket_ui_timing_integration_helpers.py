@@ -23,6 +23,7 @@ class WebsocketUiTimingIntegrationHelpersTests:
     @pytest.mark.e2e
     def test_basic_functionality(self):
         Basic functionality test placeholder"""
+        Basic functionality test placeholder"""
         pass
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

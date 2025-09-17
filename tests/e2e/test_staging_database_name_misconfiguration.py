@@ -1,4 +1,4 @@
-'''Test to demonstrate staging environment database name misconfiguration.
+'''Test to demonstrate staging environment database name misconfiguration.'
 
 from shared.isolated_environment import get_env
 This test proves that staging is incorrectly configured to use 'netra_dev' database
@@ -10,6 +10,7 @@ Business Value Justification (BVJ):
 - Value Impact: Prevents staging from accidentally using dev database data
 - Strategic Impact: Maintains proper environment isolation and data integrity
 """
+"""
 
 import os
 import pytest
@@ -17,18 +18,22 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e"""
+@pytest.mark.e2e"""
     """Tests that demonstrate staging database name misconfiguration"""
 """
-    def test_staging_should_not_use_dev_database_name(self):"""Staging environment MUST NOT use 'netra_dev' as database name.
+"""
+    def test_staging_should_not_use_dev_database_name(self):"""Staging environment MUST NOT use 'netra_dev' as database name."
 
         This test FAILS because .env.staging incorrectly sets POSTGRES_DB=netra_dev
         when it should be using a staging-specific database name.
+        '''
         '''
         pass
     # Load the staging environment file
         staging_env_path = os.path.join( )
         os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
         '.env.staging'
+    """
     """
         assert os.path.exists(staging_env_path), "formatted_string"
 
@@ -67,6 +72,7 @@ staging_env = {'ENVIRONMENT': 'staging',, 'POSTGRES_HOST': '/cloudsql/netra-stag
         postgres_db = env.get('POSTGRES_DB', '')
 
         # This assertion should now pass - staging correctly configured"""
+        # This assertion should now pass - staging correctly configured"""
         f"Staging environment is configured to use 'netra_dev' database. " \
         f"This is incorrect! Staging should use a staging-specific database " \
         f"like 'netra_staging' or 'postgres', not the dev database."
@@ -89,6 +95,7 @@ from netra_backend.app.core.environment_constants import get_current_environment
         # Testing uses 'netra_test' schema
         # Staging/Production should use 'public' schema
 """
+"""
         if current_env == "development":
         expected_schema = "netra_dev"
         elif current_env in ["testing", "test"]:
@@ -100,7 +107,7 @@ from netra_backend.app.core.environment_constants import get_current_environment
         "formatted_string"
 
                     # But the POSTGRES_DB in .env.staging is still wrong!
-                    # It's set to 'netra_dev' when it should be something else
+                    # It's set to 'netra_dev' when it should be something else'
 
 
         if __name__ == "__main__":
@@ -123,3 +130,6 @@ from netra_backend.app.core.environment_constants import get_current_environment
         print(" FAIL:  Test unexpectedly passed - staging configuration may have been fixed")
         except AssertionError as e:
         print("formatted_string")
+
+"""
+'''

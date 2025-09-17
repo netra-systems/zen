@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 GCP_TEST_CONFIG = {'websocket_url': 'wss://netra-backend-staging-xyz.run.app/ws', 'connection_timeout': 15.0, 'test_user_id': '105945141827451681156', 'max_connections_test': 25, 'rapid_connect_delay': 0.1}
 
 class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
+    pass
 """"""
     CRITICAL E2E Tests for ConnectionHandler issues in GCP Cloud environment.
     
@@ -114,7 +115,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
         returns False in GCP environment, instead of silently returning True.
         
         Expected Behavior:
-        - CURRENT STATE: FAIL - Handler returns True but doesn't send response
+        - CURRENT STATE: FAIL - Handler returns True but doesn't send response'
         - AFTER FIX: PASS - Handler returns False when connection check fails
 """"""
         logger.info('[U+1F9EA] Testing ConnectionHandler silent failure detection in GCP staging')
@@ -149,7 +150,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
         Tests WebSocket state detection in GCP Cloud Run proxy environment.
         
         CRITICAL: This test targets the core issue where GCP proxy layer
-        doesn't expose expected WebSocket state attributes.
+        doesn't expose expected WebSocket state attributes.'
         
         Expected Behavior:
         - CURRENT STATE: FAIL - State detection fails in cloud environment
@@ -180,7 +181,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
             assert connection_detected, f'CRITICAL BUG: is_websocket_connected() returns False but connection actually works. This causes ConnectionHandler to skip responses in GCP Cloud Run environment. Client connectivity: {connection_works_from_client}, State detection: {connection_detected}'
             logger.info(' PASS:  WebSocket state detection correctly identifies working connection')
         else:
-            assert not connection_detected, f"WebSocket state detection inconsistency: Connection doesn't work but detected as connected. Client connectivity: {connection_works_from_client}, State detection: {connection_detected}"
+            assert not connection_detected, f"WebSocket state detection inconsistency: Connection doesn't work but detected as connected. Client connectivity: {connection_works_from_client}, State detection: {connection_detected}"'
             logger.info(' PASS:  WebSocket state detection correctly identifies non-working connection')
         ws_attributes = {}
         for attr in ['state', 'client_state', '_receive', 'closed', 'close_code']:
@@ -189,7 +190,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
             except Exception as e:
                 ws_attributes[attr] = f'ERROR_ACCESSING: {e}'
         logger.info(f'WebSocket attributes in GCP Cloud Run environment: {ws_attributes}')
-        self.connection_logs.append({'test': 'gcp_state_detection', 'client_connectivity': connection_works_from_client, 'state_detection': connection_detected, 'websocket_attributes': ws_attributes, 'environment': self.test_environment}
+        self.connection_logs.append({'test': 'gcp_state_detection', 'client_connectivity': connection_works_from_client, 'state_detection': connection_detected, 'websocket_attributes': ws_attributes, 'environment': self.test_environment)
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -198,7 +199,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
         
         Tests specific user (105945141827451681156) pattern of rapid connections.
         
-        Validates that connection churning doesn't cause resource accumulation
+        Validates that connection churning doesn't cause resource accumulation'
         or connection state detection failures.
         
         Expected Behavior:
@@ -210,7 +211,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
         connection_results = []
         successful_connections = 0
         failed_connections = 0
-        for cycle in range(GCP_TEST_CONFIG['max_connections_test']:
+        for cycle in range(GCP_TEST_CONFIG['max_connections_test'):
             cycle_start = time.time()
             try:
                 websocket = await self._connect_with_auth(timeout=10.0)
@@ -226,7 +227,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
                     self.active_connections.remove(websocket)
                 successful_connections += 1
                 cycle_time = time.time() - cycle_start
-                connection_results.append({'cycle': cycle, 'success': True, 'message_success': message_success, 'cycle_time': cycle_time}
+                connection_results.append({'cycle': cycle, 'success': True, 'message_success': message_success, 'cycle_time': cycle_time)
                 logger.info(f   PASS:  Cycle {cycle + 1}/{GCP_TEST_CONFIG['max_connections_test']}: Connection OK, Message: {('OK' if message_success else 'TIMEOUT')}, Time: {cycle_time:.2f}s)
             except Exception as e:
                 failed_connections += 1
@@ -237,7 +238,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
                     logger.error(' ALERT:  CRITICAL BUG DETECTED: WebSocket manager resource limit reached')
                     logger.error('This indicates resource accumulation and improper cleanup')
                     break
-            await asyncio.sleep(GCP_TEST_CONFIG['rapid_connect_delay']
+            await asyncio.sleep(GCP_TEST_CONFIG['rapid_connect_delay')
         success_rate = successful_connections / len(connection_results) if connection_results else 0
         avg_time = sum((r.get('cycle_time', 0) for r in connection_results)) / len(connection_results) if connection_results else 0
         logger.info(f'Connection churning test results:')
@@ -308,7 +309,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
         ""
         MISSION CRITICAL: Tests complete chat flow for authenticated users in GCP staging.
         
-        Uses real authentication (JWT/OAuth) to test the golden path that's currently broken.
+        Uses real authentication (JWT/OAuth) to test the golden path that's currently broken.'
         
         Expected Behavior:
         - CURRENT STATE: FAIL - User gets no responses due to silent failure
@@ -340,7 +341,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
                             break
                     except json.JSONDecodeError:
                         logger.warning(f'   WARNING: [U+FE0F] Received non-JSON response: {response_text[:100]}...')
-                        responses_received.append({'raw': response_text}
+                        responses_received.append({'raw': response_text)
                 except asyncio.TimeoutError:
                     logger.info('  [U+23F3] Waiting for more responses...')
                     continue
@@ -367,3 +368,5 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""
+))))))))))))

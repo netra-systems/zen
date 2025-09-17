@@ -24,9 +24,10 @@ class TestWebSocketConnection:
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
-        '''Additional test cases for staging deployment configuration issues.
+        '''Additional test cases for staging deployment configuration issues.'
 
         Tests for similar configuration migration problems that could cause staging failures.
+        '''
         '''
 
         import os
@@ -71,9 +72,9 @@ class TestConfigurationImportPatterns:
 
                 # Files should use one pattern or the other, not both
         if has_database_config and has_unified_config:
-                    Check if it's just an import for backward compatibility
-        lines = content.split(" )
-        ")
+                    Check if it's just an import for backward compatibility'
+        lines = content.split(" )"
+        ")"
         database_config_uses = [ ]
         line for line in lines
         if 'DatabaseConfig.' in line and not line.strip().startswith('#')
@@ -161,7 +162,7 @@ class TestServiceDependencyImports:
 
         except ImportError as e:
         if "auth_service" not in str(e):
-                # Only fail if it's not a missing auth_service module
+                # Only fail if it's not a missing auth_service module'
         pytest.fail("")
 
         @pytest.mark.e2e
@@ -312,3 +313,6 @@ app_url = DatabaseManager.get_application_url()
         # Should handle Cloud SQL socket path
 assert '/cloudsql/' in get_env().get('DATABASE_URL') or 'localhost' in app_url
 pass
+
+'''
+]

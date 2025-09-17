@@ -31,6 +31,7 @@ results = {}
 
 for service_name, url in services:
 try:
+    pass
 timeout = aiohttp.ClientTimeout(total=2.0)
 async with aiohttp.ClientSession(timeout=timeout) as session:
 async with session.get(url) as response:
@@ -40,6 +41,7 @@ results[service_name] = { }
 "healthy": response.status == 200
                                 
 except Exception as e:
+    pass
 results[service_name] = { }
 "accessible": False,
 "error": str(e),
@@ -47,13 +49,13 @@ results[service_name] = { }
                                     
 
                                     # Print results
-print(f" )
-[INFO] Service connectivity check:")
+print(f" )"
+[INFO] Service connectivity check:")"
 for service_name, result in results.items():
 if result["accessible"]:
     print("")
 else:
     print("")
 
-                                                # Test always passes - we're just checking infrastructure
+                                                # Test always passes - we're just checking infrastructure'
 assert True, "Infrastructure test completed"

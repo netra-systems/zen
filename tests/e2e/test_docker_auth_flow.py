@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 '''
+'''
 End-to-End Test Suite for Docker Compose Authentication Flow
 Tests the complete authentication flow in Docker development environment
+'''
 '''
 
 import json
@@ -20,12 +22,12 @@ BASE_URL_BACKEND = "http://localhost:8001"
 
 class Colors:
     """ANSI color codes for terminal output"""
-    GREEN = '\033[92m' )
-    RED = '\033[91m' )
-    YELLOW = '\033[93m' )
-    BLUE = '\033[94m' )
-    RESET = '\033[0m' )
-    BOLD = '\033[1m' )
+    GREEN = '\33[92m' )
+    RED = '\33[91m' )
+    YELLOW = '\33[93m' )
+    BLUE = '\33[94m' )
+    RESET = '\33[0m' )
+    BOLD = '\33[1m' )
 
     def print_test_header(test_name: str):
         """Print a formatted test header"""
@@ -191,7 +193,7 @@ class Colors:
         # Test that unauthenticated access redirects to login
         response = requests.get(BASE_URL_FRONTEND, allow_redirects=False, timeout=5)
 
-        # Next.js pages don't do server-side redirects, they do client-side
+        # Next.js pages don't do server-side redirects, they do client-side'
         # So we should get a 200 with the page that will redirect
         if response.status_code == 200:
         print_result(True, "Frontend accessible")
@@ -312,7 +314,7 @@ class Colors:
         timeout=5
                     
 
-                    # Even if this endpoint doesn't exist, we should get 404 not 401
+                    # Even if this endpoint doesn't exist, we should get 404 not 401'
         if api_response.status_code == 401:
         print_result(False, "Authentication not working with backend")
         return False
@@ -345,9 +347,9 @@ class Colors:
         error_patterns = ["ERROR", "CRITICAL", "FATAL", "Failed", "refused"]
         errors_found = []
 
-        for line in result.stdout.split(" )
+        for line in result.stdout.split(" )"
         ') + result.stderr.split('
-        "):
+        "):"
         for pattern in error_patterns:
         if pattern in line and "No token received" not in line:  # Ignore expected errors
         errors_found.append(line[:100])
@@ -431,3 +433,5 @@ class Colors:
 
         if __name__ == "__main__":
         sys.exit(main())
+
+]]]]]]

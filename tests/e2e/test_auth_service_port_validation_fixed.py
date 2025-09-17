@@ -1,4 +1,5 @@
 '''
+'''
 Fixed Auth Service Port Validation Test
 
 This test validates that the auth service is running on the correct port (8081)
@@ -6,6 +7,7 @@ as configured in the dev launcher, fixing the port mismatch issues identified
 in previous test runs.
 
 BVJ: Enterprise | Infrastructure | Service Discovery | BLOCKING - Port consistency for E2E tests
+'''
 '''
 
 import asyncio
@@ -110,18 +112,20 @@ class AuthServicePortValidator:
 @pytest.mark.e2e
     async def test_auth_service_port_8081_accessibility():
 '''
+'''
 Test that auth service is accessible on port 8081 as configured in dev launcher.
 
 This test ensures the port configuration matches between the dev launcher
 configuration and the actual running auth service.
+'''
 '''
 pass
 validator = AuthServicePortValidator()
 result = await validator.validate_auth_service_accessibility()
 
                                     # Print results for debugging
-print(f" )
-=== AUTH SERVICE PORT VALIDATION ===")
+print(f" )"
+=== AUTH SERVICE PORT VALIDATION ===")"
 print("")
 print("")
 print("")
@@ -139,8 +143,9 @@ assert result['health_status'] == 200, ""
                                         # Validate response time is reasonable (under 5 seconds)
 assert result['response_time_ms'] < 5000, ""
 
-                                        # If we can verify it's the auth service, do so
+                                        # If we can verify it's the auth service, do so'
 if 'verified_auth_service' in result:
+    pass
 assert result['verified_auth_service'], ""
 
 
@@ -148,16 +153,18 @@ assert result['verified_auth_service'], ""
 @pytest.mark.e2e
     async def test_auth_service_endpoints_availability():
 '''
+'''
 Test that key auth service endpoints are available.
 
 This validates the auth service is properly initialized with its main endpoints.
+'''
 '''
 pass
 validator = AuthServicePortValidator()
 results = await validator.validate_auth_endpoints()
 
-print(f" )
-=== AUTH SERVICE ENDPOINTS ===")
+print(f" )"
+=== AUTH SERVICE ENDPOINTS ===")"
 for endpoint, result in results.items():
 status = " PASS: " if result['accessible'] else " FAIL: "
 print("")
@@ -187,10 +194,12 @@ assert oauth_google['status_code'] in acceptable_codes, \
 @pytest.mark.e2e
     async def test_auth_service_timing_expectations():
 '''
+'''
 Test auth service response timing meets expectations for WebSocket handshakes.
 
 This ensures the auth service responds quickly enough for WebSocket authentication
 during connection establishment.
+'''
 '''
 pass
 validator = AuthServicePortValidator()
@@ -202,6 +211,7 @@ for i in range(5):
 result = await validator.validate_auth_service_accessibility()
 
 if result['accessible'] and result['response_time_ms']:
+    pass
 request_times.append(result['response_time_ms'])
 
                                                                         # Small delay between requests
@@ -215,8 +225,8 @@ avg_response_time = sum(request_times) / len(request_times)
 max_response_time = max(request_times)
 min_response_time = min(request_times)
 
-print(f" )
-=== AUTH SERVICE TIMING ANALYSIS ===")
+print(f" )"
+=== AUTH SERVICE TIMING ANALYSIS ===")"
 print("")
 print("")
 print("")
@@ -229,11 +239,13 @@ assert max_response_time < 5000, ""
 
                                                                         # Consistency check - responses should be reasonably consistent
 if len(request_times) > 2:
+    pass
 response_range = max_response_time - min_response_time
 assert response_range < 3000, ""
 
 
 if __name__ == "__main__":
+    pass
 async def main():
 pass
 validator = AuthServicePortValidator()
@@ -243,7 +255,7 @@ result = await validator.validate_auth_service_accessibility()
 print("")
 
 print("")
-=== AUTH SERVICE ENDPOINTS ===")
+=== AUTH SERVICE ENDPOINTS ===")"
 endpoints = await validator.validate_auth_endpoints()
 for endpoint, result in endpoints.items():
     print("")
