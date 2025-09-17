@@ -323,8 +323,9 @@ class BaseAgentFactoryPatternsTests(SSotAsyncTestCase):
 
         # Verify: Legacy agent shows needs_migration status
         assert legacy_status["migration_status"] == "needs_migration"
+        assert legacy_status["execution_pattern"] == "legacy_bridge"
         assert legacy_status["user_isolation_safe"] is False
-        assert legacy_status["errors_count"] > 0 or legacy_status["warnings_count"] > 0
+        assert legacy_status["warnings_count"] > 0  # legacy_bridge has warnings, not errors
 
     async def test_agent_validate_migration_completeness(self):
         """Test DeepAgentState migration completeness validation."""

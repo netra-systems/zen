@@ -161,6 +161,7 @@ class DatabaseManager:
 
     async def _test_connection_with_retry(self, engine: AsyncEngine, max_retries: int = 3) -> bool:
         """Test database connection with enhanced retry logic for Issue #1278 infrastructure resilience."""
+        import random
         # Get infrastructure-aware configuration
         env = get_env()
         environment = env.get("ENVIRONMENT", "development").lower()
@@ -185,7 +186,11 @@ class DatabaseManager:
             connection_timeout = base_timeout
             logger.debug(f"Using default connection timeout: {connection_timeout}s")
         
+        # Track timing and success for monitoring
+        start_time = time.time()
+        
         for attempt in range(max_retries):
+            attempt_start = time.time()
             try:
                 # Issue #1278: Use asyncio.wait_for for timeout control
                 async def test_connection():
@@ -193,23 +198,56 @@ class DatabaseManager:
                         await conn.execute(text("SELECT 1"))
                 
                 await asyncio.wait_for(test_connection(), timeout=connection_timeout)
-                logger.info(f"✅ Database connection test successful on attempt {attempt + 1}/{max_retries} ({environment} environment)")
+                attempt_duration = time.time() - attempt_start
+                
+                # Record successful connection attempt for monitoring
+                try:
+                    from netra_backend.app.core.database_timeout_config import monitor_connection_attempt
+                    monitor_connection_attempt(environment, attempt_duration, True)
+                except Exception:
+                    pass  # Don't fail on monitoring errors
+                
+                logger.info(f"✅ Database connection test successful on attempt {attempt + 1}/{max_retries} ({environment} environment, {attempt_duration:.2f}s)")
                 return True
                 
             except asyncio.TimeoutError:
+                attempt_duration = time.time() - attempt_start
                 logger.warning(f"⏰ Database connection test timed out after {connection_timeout}s on attempt {attempt + 1}/{max_retries}")
+                
+                # Record failed connection attempt for monitoring
+                try:
+                    from netra_backend.app.core.database_timeout_config import monitor_connection_attempt
+                    monitor_connection_attempt(environment, attempt_duration, False)
+                except Exception:
+                    pass  # Don't fail on monitoring errors
+                
                 if attempt < max_retries - 1:
-                    # Issue #1278: Exponential backoff for infrastructure recovery
+                    # Enhanced exponential backoff with jitter to prevent thundering herd
                     wait_time = retry_backoff * (2 ** attempt)
-                    logger.info(f"Waiting {wait_time}s before retry (infrastructure recovery time)")
-                    await asyncio.sleep(wait_time)
+                    # Add jitter: ±20% random variation
+                    jitter = random.uniform(-0.2, 0.2) * wait_time
+                    final_wait_time = max(0.1, wait_time + jitter)  # Minimum 100ms wait
+                    logger.info(f"Waiting {final_wait_time:.1f}s before retry (infrastructure recovery time with jitter)")
+                    await asyncio.sleep(final_wait_time)
                 
             except Exception as e:
+                attempt_duration = time.time() - attempt_start
                 error_type = type(e).__name__
                 logger.warning(f"❌ Database connection test failed on attempt {attempt + 1}/{max_retries}: {error_type}: {e}")
+                
+                # Record failed connection attempt for monitoring
+                try:
+                    from netra_backend.app.core.database_timeout_config import monitor_connection_attempt
+                    monitor_connection_attempt(environment, attempt_duration, False)
+                except Exception:
+                    pass  # Don't fail on monitoring errors
+                
                 if attempt < max_retries - 1:
+                    # Enhanced exponential backoff with jitter
                     wait_time = retry_backoff * (2 ** attempt)
-                    await asyncio.sleep(wait_time)
+                    jitter = random.uniform(-0.2, 0.2) * wait_time
+                    final_wait_time = max(0.1, wait_time + jitter)
+                    await asyncio.sleep(final_wait_time)
                 else:
                     logger.error(f"🚨 Database connection test failed after all {max_retries} retry attempts in {environment} environment")
                     return False
@@ -253,10 +291,23 @@ class DatabaseManager:
 
         # Circuit breaker protection for database operations
         try:
-            from netra_backend.app.resilience.circuit_breaker import get_circuit_breaker
+            from netra_backend.app.core.resilience.circuit_breaker import get_circuit_breaker
             database_circuit_breaker = get_circuit_breaker("database")
+            
+            # Check circuit breaker state before attempting connection
+            if database_circuit_breaker and not database_circuit_breaker.can_execute():
+                from netra_backend.app.core.circuit_breaker_types import CircuitBreakerOpenError
+                raise CircuitBreakerOpenError(
+                    f"Database circuit breaker is OPEN for operation: {operation_type}. "
+                    f"Database operations are temporarily blocked due to failures. "
+                    f"User: {user_id or 'system'}"
+                )
         except ImportError:
             # Circuit breaker not available during startup, proceed normally
+            database_circuit_breaker = None
+        except Exception as cb_error:
+            # Log circuit breaker errors but don't fail the operation
+            logger.warning(f"Circuit breaker check failed for {operation_type}: {cb_error}")
             database_circuit_breaker = None
 
         # Extract user information from context for proper isolation

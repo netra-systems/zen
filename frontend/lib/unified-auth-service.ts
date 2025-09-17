@@ -216,183 +216,24 @@ class UnifiedAuthService {
   }
 
   /**
-   * Get the correct ticket endpoint based on environment
-   */
-  private getTicketEndpoint(): string {
-    // In production/staging, use the auth service
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      if (hostname.includes('staging') || hostname.includes('netrasystems.ai')) {
-        return '/api/auth/websocket-ticket';
-      }
-    }
-    
-    // For development, use local auth service endpoint
-    return '/api/auth/websocket-ticket';
-  }
-
-  /**
-   * Check if ticket authentication is supported in current environment
-   */
-  private isTicketAuthSupported(): boolean {
-    try {
-      // Check if the endpoint exists by checking for auth service availability
-      // This is a simple heuristic - in production, you might want to check a feature flag
-      return true; // Always attempt ticket auth, fall back to JWT if it fails
-    } catch (error) {
-      return false;
-    }
-  }
-
-  /**
-   * Request a WebSocket authentication ticket
+   * Request a WebSocket authentication ticket (delegated to dedicated service)
    */
   async requestWebSocketTicket(): Promise<TicketRequestResult> {
-    try {
-      const token = authService.getToken();
-      if (!token) {
-        return { 
-          success: false, 
-          error: 'No authentication token available' 
-        };
-      }
-
-      // Determine the correct endpoint based on environment
-      const ticketEndpoint = this.getTicketEndpoint();
-      
-      const response = await fetch(ticketEndpoint, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        
-        // Handle specific error cases
-        if (response.status === 404) {
-          logger.info('WebSocket ticket endpoint not available, falling back to JWT', {
-            component: 'UnifiedAuthService',
-            action: 'requestWebSocketTicket',
-            metadata: { endpoint: ticketEndpoint }
-          });
-          
-          return { 
-            success: false, 
-            error: 'Ticket endpoint not available' 
-          };
-        } else if (response.status === 401) {
-          logger.warn('WebSocket ticket request unauthorized - token may be expired', {
-            component: 'UnifiedAuthService',
-            action: 'requestWebSocketTicket'
-          });
-          
-          return { 
-            success: false, 
-            error: 'Authentication required for ticket request' 
-          };
-        } else {
-          logger.warn('WebSocket ticket request failed', {
-            component: 'UnifiedAuthService',
-            action: 'requestWebSocketTicket',
-            metadata: {
-              status: response.status,
-              statusText: response.statusText,
-              error: errorText
-            }
-          });
-          
-          return { 
-            success: false, 
-            error: `Ticket request failed: ${response.status} ${response.statusText}` 
-          };
-        }
-      }
-
-      const ticketData = await response.json();
-      
-      if (!ticketData.ticket) {
-        return { 
-          success: false, 
-          error: 'Invalid ticket response format' 
-        };
-      }
-
-      const ticket: WebSocketTicket = {
-        ticket: ticketData.ticket,
-        expires_at: ticketData.expires_at || (Date.now() + 300000) // Default 5min TTL
-      };
-
-      // Cache the ticket
-      this.ticketCache.set('default', ticket);
-
-      logger.debug('WebSocket ticket generated successfully', {
-        component: 'UnifiedAuthService',
-        action: 'requestWebSocketTicket',
-        metadata: {
-          ticketLength: ticket.ticket.length,
-          expiresAt: new Date(ticket.expires_at).toISOString()
-        }
-      });
-
-      return { success: true, ticket };
-
-    } catch (error) {
-      logger.error('WebSocket ticket request failed', error as Error, {
-        component: 'UnifiedAuthService',
-        action: 'requestWebSocketTicket'
-      });
-      
-      return { 
-        success: false, 
-        error: `Ticket request error: ${(error as Error).message}` 
-      };
-    }
+    return await websocketTicketService.acquireTicket();
   }
 
   /**
-   * Get cached WebSocket ticket or request a new one
+   * Get cached WebSocket ticket or request a new one (delegated to dedicated service)
    */
   async getWebSocketTicket(): Promise<TicketRequestResult> {
-    const cached = this.ticketCache.get('default');
-    
-    // Check if cached ticket is still valid with threshold buffer
-    if (cached && (cached.expires_at - Date.now()) > this.TICKET_REFRESH_THRESHOLD) {
-      logger.debug('Using cached WebSocket ticket', {
-        component: 'UnifiedAuthService',
-        action: 'getWebSocketTicket',
-        metadata: {
-          timeUntilExpiry: cached.expires_at - Date.now()
-        }
-      });
-      
-      return { success: true, ticket: cached };
-    }
-
-    // Request new ticket
-    logger.debug('Requesting fresh WebSocket ticket', {
-      component: 'UnifiedAuthService',
-      action: 'getWebSocketTicket',
-      metadata: {
-        hadCachedTicket: !!cached,
-        cacheExpired: cached ? (cached.expires_at - Date.now()) <= this.TICKET_REFRESH_THRESHOLD : false
-      }
-    });
-
-    return await this.requestWebSocketTicket();
+    return await websocketTicketService.acquireTicket();
   }
 
   /**
-   * Clear ticket cache (useful for logout/auth errors)
+   * Clear ticket cache (delegated to dedicated service)
    */
   clearTicketCache(): void {
-    this.ticketCache.clear();
-    logger.debug('WebSocket ticket cache cleared', {
-      component: 'UnifiedAuthService',
-      action: 'clearTicketCache'
-    });
+    websocketTicketService.clearTicketCache();
   }
 
   /**
@@ -400,13 +241,12 @@ class UnifiedAuthService {
    */
   private shouldUseTicketAuth(): boolean {
     // Feature flag for ticket authentication
-    // This can be controlled via environment variables or feature flags
-    const ticketAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_TICKET_AUTH !== 'false';
+    const ticketAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_WEBSOCKET_TICKETS !== 'false';
     
-    // Also check if we're in a supported environment
-    const isSupported = this.isTicketAuthSupported();
+    // Use the dedicated service's configuration
+    const config = websocketTicketService.getConfig();
     
-    return ticketAuthEnabled && isSupported;
+    return ticketAuthEnabled && config.enabled;
   }
 
   /**
@@ -436,8 +276,8 @@ class UnifiedAuthService {
           return null;
         }
       },
-      // Add ticket-based authentication
-      getTicket: () => this.getWebSocketTicket(),
+      // Use dedicated ticket service for ticket-based authentication
+      getTicket: () => websocketTicketService.acquireTicket(),
       useTicketAuth // Feature flag controlled
     };
   }
@@ -451,8 +291,8 @@ class UnifiedAuthService {
       action: 'handleAuthError'
     });
 
-    // Clear ticket cache on auth errors
-    this.clearTicketCache();
+    // Clear ticket cache on auth errors using dedicated service
+    websocketTicketService.clearTicketCache();
 
     // If it's a 401 error, trigger logout
     if (error?.status === 401 || error?.message?.includes('401')) {

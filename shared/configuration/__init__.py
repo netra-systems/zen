@@ -4,7 +4,7 @@ Shared configuration validation and management.
 This module provides centralized configuration validation for all Netra services.
 """
 
-from .central_config_validator import (
+from shared.configuration.central_config_validator import (
     CentralConfigurationValidator,
     get_central_validator,
     validate_platform_configuration,

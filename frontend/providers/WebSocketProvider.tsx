@@ -162,6 +162,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         // Ticket authentication support
         getTicket: authConfig.getTicket,
         useTicketAuth: authConfig.useTicketAuth,
+        clearTicketCache: () => unifiedAuthService.clearTicketCache(),
         refreshToken: async () => {
           try {
             // Use the unified auth service for token refresh
