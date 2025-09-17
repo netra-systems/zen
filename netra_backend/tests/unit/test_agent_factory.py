@@ -287,13 +287,13 @@ class ExecutionEngineFactoryTests(SSotBaseTestCase):
         user_context.session_id = f"test_session_{uuid.uuid4().hex[:8]}"
         
         # When: Creating execution engine with mocked factory methods
-        with patch.object(self.factory, '_create_user_execution_engine') as mock_create:
+        with patch.object(self.factory, 'create_for_user') as mock_create:
             mock_engine = Mock()
             mock_engine.user_context = user_context
             mock_create.return_value = mock_engine
-            
+
             # Call the creation method
-            engine = await self.factory._create_user_execution_engine(user_context)
+            engine = await self.factory.create_for_user(user_context)
         
         # Then: Engine should be created with proper context
         assert engine is not None
@@ -325,11 +325,11 @@ class ExecutionEngineFactoryTests(SSotBaseTestCase):
             mock_engines.append(mock_engine)
         
         # When: Managing engine lifecycle
-        with patch.object(self.factory, '_create_user_execution_engine', side_effect=mock_engines):
+        with patch.object(self.factory, 'create_for_user', side_effect=mock_engines):
             # Create engines
             created_engines = []
             for context in contexts:
-                engine = await self.factory._create_user_execution_engine(context)
+                engine = await self.factory.create_for_user(context)
                 created_engines.append(engine)
                 
                 # Simulate adding to active registry
@@ -376,9 +376,9 @@ class ExecutionEngineFactoryTests(SSotBaseTestCase):
             mock_engines.append(mock_engine)
         
         # When: Creating engines concurrently
-        with patch.object(self.factory, '_create_user_execution_engine', side_effect=mock_engines):
+        with patch.object(self.factory, 'create_for_user', side_effect=mock_engines):
             creation_tasks = [
-                self.factory._create_user_execution_engine(context)
+                self.factory.create_for_user(context)
                 for context in contexts
             ]
             

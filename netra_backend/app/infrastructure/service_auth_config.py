@@ -271,7 +271,8 @@ class ServiceAuthManager:
         if self.environment == ServiceEnvironment.STAGING:
             valid_staging_patterns = [
                 "http://auth:8081",                    # Docker compose internal
-                "https://netra-auth",          # GCP Cloud Run
+                "https://netra-auth",                  # GCP Cloud Run
+                "https://auth.staging.netrasystems.ai", # Staging domain (Issue #1313)
                 "http://localhost:8081",               # Local testing
             ]
             
