@@ -1,4 +1,4 @@
-"
+"""
 Simple SSOT Violation Detection Test
 
 This is a simplified test to validate the SSOT violation detection concept.
@@ -6,8 +6,10 @@ It directly tests the violation at test_framework/ssot/database.py:596.
 
 EXPECTED BEHAVIOR: This test should FAIL initially, exposing the SSOT violation.
 After remediation, the test should PASS.
-"
+"""
 
+"""
+"""
 import asyncio
 import sys
 import time

@@ -1,4 +1,4 @@
-"
+"""
 MISSION CRITICAL: Docker Manager SSOT Regression Prevention Tests
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
@@ -12,6 +12,7 @@ This test suite implements proactive regression prevention for Docker Manager SS
 violations. These tests will enforce SSOT compliance and prevent future duplication.
 
 REGRESSION SCENARIOS PREVENTED:
+"""
 1. Accidental creation of duplicate Docker Manager classes
 2. Import path fragmentation causing inconsistent behavior
 3. Mock implementations leaking into production code paths

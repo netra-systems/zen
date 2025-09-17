@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"
+"""
 MISSION CRITICAL TEST SUITE: WebSocket Agent Events Revenue Protection
 
 THIS TEST SUITE PROTECTS $500K+ ARR - DEPLOYMENT BLOCKED IF FAILED
@@ -26,8 +26,9 @@ COMPLIANCE:
 @compliance SPEC/type_safety.xml - Strongly typed test validation
 
 DEPLOYMENT POLICY: ANY FAILURE HERE BLOCKS PRODUCTION DEPLOYMENT
-"
+"""
 
+"""
 import asyncio
 import json
 import os
@@ -95,7 +96,7 @@ pytestmark = [
 # ============================================================================
 
 class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
-    "
+    """
     MISSION CRITICAL: WebSocket Agent Events Revenue Protection Test Suite
     
     This test class validates the 5 critical WebSocket events that deliver
@@ -103,11 +104,11 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
     
     CRITICAL: ALL tests in this class MUST pass or deployment is blocked.
     Each test failure represents potential revenue loss.
-"
+    """
     
     @classmethod
     def setup_class(cls):
-        "Set up mission critical test environment with real services.
+        """Set up mission critical test environment with real services."""
         super().setup_class()
         
         cls.env = get_env()
@@ -259,12 +260,12 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
     @pytest.mark.critical
     @pytest.mark.asyncio
     async def test_event_timing_performance_requirements(self):
-    "
+    """
         MISSION CRITICAL: Validate event timing meets performance requirements.
         
         Tests that events are delivered within acceptable timeframes to ensure
         good user experience and revenue conversion.
-        "
+        """
         logger.critical( TARGET:  TESTING: Event timing performance requirements")
         
         # Create user context
@@ -295,13 +296,13 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         
         # Total execution must complete in reasonable time
         assert total_time <= 30.0, (
-            fPERFORMANCE FAILURE: Total execution took {total_time:.2f}s > 30.0s. "
+            fPERFORMANCE FAILURE: Total execution took {total_time:.2f}s > 30.0s. """
             fUsers will abandon slow AI interactions!
         )
         
         # Event throughput must be reasonable
         assert result.execution_metrics.throughput_events_per_second >= 0.1, (
-            fTHROUGHPUT FAILURE: {result.execution_metrics.throughput_events_per_second:.2f} events/sec is too slow. "
+            fTHROUGHPUT FAILURE: {result.execution_metrics.throughput_events_per_second:.2f} events/sec is too slow. """
             f"Poor throughput impacts user engagement!
         )
         
@@ -358,7 +359,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         # CRITICAL: Validate sequence
         sequence_valid, sequence_errors = validator.validate_event_sequence()
         assert sequence_valid, (
-            fEVENT SEQUENCE FAILURE: {sequence_errors}. "
+            fEVENT SEQUENCE FAILURE: {sequence_errors}. """
             fOut-of-order events confuse users and reduce trust in AI!
         )
         
@@ -376,7 +377,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
             completed_idx = critical_events_sequence.index(CriticalAgentEventType.AGENT_COMPLETED.value)
             
             assert started_idx < completed_idx, (
-                fSEQUENCE FAILURE: agent_completed before agent_started. "
+                fSEQUENCE FAILURE: agent_completed before agent_started. """
                 f"This breaks logical flow and confuses users!
             )
         
@@ -419,7 +420,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         if CriticalAgentEventType.AGENT_STARTED.value in events_by_type:
             started_event = events_by_type[CriticalAgentEventType.AGENT_STARTED.value]
             assert started_event.data, "agent_started event missing data - users won't see AI activation!
-            assert started_event.data.get(agent), "agent_started missing agent info - no AI identity!"
+            assert started_event.data.get(agent), """agent_started missing agent info - no AI identity!"""
         
         # Validate tool_executing content
         if CriticalAgentEventType.TOOL_EXECUTING.value in events_by_type:
@@ -431,7 +432,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         if CriticalAgentEventType.TOOL_COMPLETED.value in events_by_type:
             completed_event = events_by_type[CriticalAgentEventType.TOOL_COMPLETED.value]
             assert completed_event.data, "tool_completed event missing data - no results shown!
-            assert completed_event.data.get(tool), "tool_completed missing tool info - incomplete context!"
+            assert completed_event.data.get(tool), """tool_completed missing tool info - incomplete context!"""
         
         # Validate agent_completed content
         if CriticalAgentEventType.AGENT_COMPLETED.value in events_by_type:
@@ -448,12 +449,12 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
     @pytest.mark.stress
     @pytest.mark.asyncio
     async def test_high_concurrency_revenue_protection(self):
-    "
+    """
         STRESS TEST: Validate critical events under high concurrency.
         
         Tests 25+ concurrent users to ensure the system maintains
         revenue-critical event delivery under stress.
-        "
+        """
         logger.critical( TARGET:  STRESS TESTING: 25-user high concurrency revenue protection)
         
         # Stress test with 25 concurrent users
@@ -577,7 +578,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
             avg_score = sum(business_value_scores) / len(business_value_scores)
             min_score = min(business_value_scores)
             assert min_score >= 100.0, (
-                fBUSINESS VALUE CONSISTENCY FAILURE: Min score {min_score}% < 100%. "
+                fBUSINESS VALUE CONSISTENCY FAILURE: Min score {min_score}% < 100%. """
                 fInconsistent value delivery impacts revenue!
             )
         
@@ -586,7 +587,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
             avg_time = sum(execution_times) / len(execution_times)
             max_time = max(execution_times)
             assert max_time <= 45.0, (
-                fPERFORMANCE CONSISTENCY FAILURE: Max time {max_time:.2f}s > 45.0s. "
+                fPERFORMANCE CONSISTENCY FAILURE: Max time {max_time:.2f}s > 45.0s. """
                 f"Inconsistent performance hurts user experience!
             )
         
@@ -649,21 +650,21 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         }
         
         assert core_events.issubset(received_event_types), (
-            fRECOVERY FAILURE: Core events {core_events - received_event_types} missing after recovery. "
+            fRECOVERY FAILURE: Core events {core_events - received_event_types} missing after recovery. """
             fConnection issues must not block revenue-critical events!
         )
         
-        logger.success(f PASS:  RECOVERY TEST PASSED: Core events delivered despite potential interruptions)"
+        logger.success(f PASS:  RECOVERY TEST PASSED: Core events delivered despite potential interruptions)"""
     
     @pytest.mark.edge_case
     @pytest.mark.asyncio
     async def test_large_message_event_handling(self):
-    "
+    """
         EDGE CASE: Test event delivery with large message content.
         
         Ensures the system can handle large user requests while still
         delivering all critical events for business value.
-        "
+        """
         logger.critical( TARGET:  EDGE CASE TESTING: Large message event handling")
         
         # Create user context
@@ -675,12 +676,12 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         
         # Create large message (simulating complex user request)
         large_message = (
-            Please analyze this large dataset and provide comprehensive insights. " * 100 +"
+            Please analyze this large dataset and provide comprehensive insights. """ * 100 +"""
             Include detailed recommendations, statistical analysis, trend identification, 
             risk assessment, opportunity analysis, competitive benchmarking, "
             "market segmentation, customer behavior patterns, revenue optimization, 
             cost reduction strategies, operational efficiency improvements, 
-            "technology stack recommendations, security considerations, "
+            """technology stack recommendations, security considerations, """
             scalability planning, and implementation roadmap with timelines.
         )
         
@@ -766,7 +767,7 @@ def pytest_configure(config):
     Configure pytest for mission critical testing.""
     config.addinivalue_line(
         markers, 
-        "mission_critical: mark test as mission critical (blocks deployment if failed)"
+        """mission_critical: mark test as mission critical (blocks deployment if failed)"""
     )
     config.addinivalue_line(
         markers,
@@ -775,13 +776,14 @@ def pytest_configure(config):
 
 
 def pytest_collection_modifyitems(config, items):
+    """Modify test collection for mission critical priority.
     "Modify test collection for mission critical priority.
     # Prioritize mission critical tests
     mission_critical_tests = []
     other_tests = []
     
     for item in items:
-        if "mission_critical in [mark.name for mark in item.iter_markers()]:"
+        if """mission_critical in [mark.name for mark in item.iter_markers()]:"""
             mission_critical_tests.append(item)
         else:
             other_tests.append(item)
@@ -803,7 +805,8 @@ def pytest_runtest_call(pyfuncitem):
 
 @pytest.hookimpl(trylast=True)
 def pytest_runtest_teardown(pyfuncitem, nextitem):
-    "Hook for mission critical test teardown."
+    """Hook for mission critical test teardown."
+    """Hook for mission critical test teardown."""
     if mission_critical in [mark.name for mark in pyfuncitem.iter_markers()]:"
         logger.critical(f" ALERT:  MISSION CRITICAL TEST COMPLETED: {pyfuncitem.name}  ALERT: )
 

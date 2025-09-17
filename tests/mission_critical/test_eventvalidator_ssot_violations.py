@@ -1,4 +1,4 @@
-"
+"""
 MISSION CRITICAL: EventValidator SSOT Violation Detection Test
 
 PURPOSE: This test is DESIGNED TO FAIL initially to prove that SSOT violations exist.
@@ -14,6 +14,7 @@ Expected Behavior:
 - Failure proves SSOT violations exist and need consolidation
 - After SSOT migration, this test SHOULD PASS
 
+"""
 Business Value Impact: $500K+ ARR at risk from inconsistent event validation
 "
 

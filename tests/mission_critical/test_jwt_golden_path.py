@@ -1,4 +1,4 @@
-"
+"""
 JWT Golden Path Protection Tests
 
 PURPOSE: These tests FAIL when JWT changes break the $500K+ ARR Golden Path
@@ -22,6 +22,7 @@ These tests protect Golden Path business value by:
 4. Golden Path error handling with JWT failures
 "
 
+"""
 import asyncio
 import aiohttp
 import httpx

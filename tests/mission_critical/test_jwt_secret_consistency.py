@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 P0 Mission Critical Test: JWT Secret Consistency Validation
 ============================================================
 
@@ -20,6 +20,7 @@ CRITICAL REQUIREMENTS:
 5. Silent authentication failures MUST be detected and reported
 
 Mission Critical because JWT secret sync failures cause:
+"""
 - 100% user lockout from authentication system
 - Complete WebSocket authentication failure
 - Circuit breaker permanently open

@@ -1,4 +1,4 @@
-"
+"""
 Test SSOT Config Manager Violations - Issue #667
 
 EXPECTED TO FAIL - Reproduces Current SSOT Violations
@@ -22,6 +22,7 @@ CRITICAL: This test protects $500K+ ARR by detecting configuration management
 failures that prevent user login and AI chat functionality.
 "
 
+"""
 import pytest
 import sys
 from typing import Any, Dict, List

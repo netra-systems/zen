@@ -23,7 +23,7 @@ import pytest
 from typing import Any, Dict, List
 from shared.isolated_environment import IsolatedEnvironment
 
-    # We'll test against the unified handler
+# We'll test against the unified handler
 from netra_backend.app.core.serialization.unified_json_handler import (
     UnifiedJSONHandler,
     UnifiedJSONEncoder,
@@ -134,341 +134,331 @@ class TestUnifiedJSONHandler:
         assert formatted.count("\n") > 2  # Multiple lines
 
     def test_compact_format(self, handler):
-        "Test compact formatting without whitespace."
-        data = {key: value, "nested: {inner": data}}
+        """Test compact formatting without whitespace."""
+        data = {"key": "value", "nested": {"inner": "data"}}
         compact = handler.compact_format(data)
-        assert    not in compact  # No indentation"
-        assert compact == '{"key:value,nested:{inner:"data}}'"
+        assert "    " not in compact  # No indentation
+        assert compact == '{"key":"value","nested":{"inner":"data"}}'
 
     def test_validate_json_string(self, handler):
-        Test JSON string validation."
-        pass
-        assert handler.validate_json_string('{"valid: true}') is True
+        """Test JSON string validation."""
+        assert handler.validate_json_string('{"valid": true}') is True
         assert handler.validate_json_string('{invalid}') is False
         assert handler.validate_json_string('not json at all') is False
 
     def test_merge_json_objects(self, handler):
-        Test merging multiple JSON objects.""
-        obj1 = {a: 1, b: 2}
-        obj2 = {b: 3, c": 4}
-        obj3 = {"d: 5}
+        """Test merging multiple JSON objects."""
+        obj1 = {"a": 1, "b": 2}
+        obj2 = {"b": 3, "c": 4}
+        obj3 = {"d": 5}
         result = handler.merge_json_objects(obj1, obj2, obj3)
-        assert result == {a: 1, b: 3, c": 4, "d: 5}
+        assert result == {"a": 1, "b": 3, "c": 4, "d": 5}
 
     def test_file_operations(self, handler):
-        Test JSON file I/O operations."
-        pass
-        data = {"test: data, number: 42}
+        """Test JSON file I/O operations."""
+        data = {"test": "data", "number": 42}
 
-        with tempfile.NamedTemporaryFile(suffix=.json", delete=False) as f:"
-        temp_path = Path(f.name)
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
+            temp_path = Path(f.name)
 
         try:
             # Test dump to file
-        handler.dump_to_file(data, temp_path)
-        assert temp_path.exists()
+            handler.dump_to_file(data, temp_path)
+            assert temp_path.exists()
 
-            Test load from file
-        loaded = handler.load_from_file(temp_path)
-        assert loaded == data
+            # Test load from file
+            loaded = handler.load_from_file(temp_path)
+            assert loaded == data
 
             # Test safe load with missing file
-        missing_path = temp_path.parent / missing.json
-        default_value = {default: True}"
-        result = handler.safe_load_from_file(missing_path, default_value)
-        assert result == default_value
+            missing_path = temp_path.parent / "missing.json"
+            default_value = {"default": True}
+            result = handler.safe_load_from_file(missing_path, default_value)
+            assert result == default_value
         finally:
-        temp_path.unlink(missing_ok=True)
+            temp_path.unlink(missing_ok=True)
 
     def test_websocket_message_preparation(self, handler):
-        "Test WebSocket message preparation with datetime conversion.
+        """Test WebSocket message preparation with datetime conversion."""
         message = {
-        type": "event,
-        timestamp: datetime.now(timezone.utc),
-        data: {"
-        id": uuid4(),
-        amount: Decimal(99.99)
-    
-    
+            "type": "event",
+            "timestamp": datetime.now(timezone.utc),
+            "data": {
+                "id": uuid4(),
+                "amount": Decimal("99.99")
+            }
+        }
+
         json_str = handler.dumps(message)
-    # Should be serializable without errors
+        # Should be serializable without errors
         parsed = json.loads(json_str)
-        assert parsed["type] == event"
-        assert isinstance(parsed[timestamp], str)  # ISO format
+        assert parsed["type"] == "event"
+        assert isinstance(parsed["timestamp"], str)  # ISO format
 
 
 
 class TestLLMResponseParsing:
-        "Test LLM response parsing and recovery functionality."
+    """Test LLM response parsing and recovery functionality."""
 
     def test_parse_markdown_json(self):
-        Test extraction from markdown code blocks.""
+        """Test extraction from markdown code blocks."""
         from netra_backend.app.core.serialization.unified_json_handler import llm_parser
 
-    # Use the unified handler's safe_json_parse method
+        # Use the unified handler's safe_json_parse method
         safe_json_parse = llm_parser.safe_json_parse
 
-        markdown = ```json
-        {key: value}
-        ```"
+        markdown = """```json
+        {"key": "value"}
+        ```"""
         result = safe_json_parse(markdown)
-    # This should handle markdown extraction internally
-        assert result == "```json
-        {key: value}
-        ``` or result == {key": "value}
+        # This should handle markdown extraction internally
+        assert result == "```json\\n        {\\\"key\\\": \\\"value\\\"}\\n        ```" or result == {"key": "value"}
 
     def test_parse_truncated_json(self):
-        Test recovery of truncated JSON."
-        pass
+        """Test recovery of truncated JSON."""
         from netra_backend.app.core.serialization.unified_json_handler import llm_parser
 
-    # Use the unified handler's safe_json_parse method
+        # Use the unified handler's safe_json_parse method
         safe_json_parse = llm_parser.safe_json_parse
 
-        truncated = '{"key: value, incomplete:' )
-        result = safe_json_parse(truncated, fallback={}
+        truncated = '{"key": "value", "incomplete":'
+        result = safe_json_parse(truncated, fallback={})
         assert result == {}  # Should return fallback on failure
 
     def test_parse_with_trailing_comma(self):
-        ""Test parsing JSON with trailing comma.
+        """Test parsing JSON with trailing comma."""
         from netra_backend.app.core.serialization.unified_json_handler import llm_parser
 
-    # Use the unified handler's safe_json_parse method
+        # Use the unified handler's safe_json_parse method
         safe_json_parse = llm_parser.safe_json_parse
 
-        json_with_comma = '{key: value",}'
+        json_with_comma = '{"key": "value",}'
         result = safe_json_parse(json_with_comma)
-    # Some parsers may handle this, others won't
+        # Some parsers may handle this, others won't
         assert result in [json_with_comma, None, {}]
 
     def test_command_line_format_detection(self):
-        "Test detection of command-line argument format.
-        pass
+        """Test detection of command-line argument format."""
         from netra_backend.app.core.serialization.unified_json_handler import llm_parser
 
-    # Use the unified handler's safe_json_parse method
+        # Use the unified handler's safe_json_parse method
         safe_json_parse = llm_parser.safe_json_parse
 
         cmd_args = '--option value --flag'
-        result = safe_json_parse(cmd_args, fallback=not_json")"
-        assert result == not_json  # Should recognize its not JSON
+        result = safe_json_parse(cmd_args, fallback="not_json")
+        assert result == "not_json"  # Should recognize its not JSON
 
     def test_ensure_agent_response_is_json(self):
-        "Test ensuring agent response is proper JSON."
+        """Test ensuring agent response is proper JSON."""
         from netra_backend.app.core.serialization.unified_json_handler import ensure_agent_response_is_json
 
-    # Test dict response
-        dict_response = {status: success}
+        # Test dict response
+        dict_response = {"status": "success"}
         result = ensure_agent_response_is_json(dict_response)
         assert result == dict_response
 
-    # Test string response
-        str_response = Plain text response
+        # Test string response
+        str_response = "Plain text response"
         result = ensure_agent_response_is_json(str_response)
-        assert "content" in result or raw_response in result
+        assert "content" in result or "raw_response" in result
 
-    # Test list response
+        # Test list response
         list_response = [1, 2, 3]
         result = ensure_agent_response_is_json(list_response)
-        assert result == {items: [1, 2, 3], type: list_response"}
+        assert result == {"items": [1, 2, 3], "type": "list_response"}
 
 
 class TestCircularReferenceHandling:
-        "Test circular reference detection and handling.
+    """Test circular reference detection and handling."""
 
     def test_circular_dict_reference(self):
-        Test handling of circular references in dictionaries.""
+        """Test handling of circular references in dictionaries."""
         from netra_backend.app.utils.json_utils import JsonUtils
 
         utils = JsonUtils()
 
-    # Create circular reference
-        data = {key: value}
-        data[self] = data
+        # Create circular reference
+        data = {"key": "value"}
+        data["self"] = data
 
-    # Should handle circular reference
+        # Should handle circular reference
         json_str = utils.serialize_safe(data)
-        assert [Circular Reference]" in json_str
+        assert "[Circular Reference]" in json_str
 
     def test_circular_list_reference(self):
-        "Test handling of circular references in lists.
-        pass
+        """Test handling of circular references in lists."""
         from netra_backend.app.utils.json_utils import JsonUtils
 
         utils = JsonUtils()
 
-    # Create circular reference
+        # Create circular reference
         data = [1, 2, 3]
         data.append(data)
 
-    # Should handle circular reference
+        # Should handle circular reference
         json_str = utils.serialize_safe(data)
-        assert [Circular Reference] in json_str
+        assert "[Circular Reference]" in json_str
 
     def test_max_depth_protection(self):
-        "Test max depth protection in serialization."
+        """Test max depth protection in serialization."""
         from netra_backend.app.utils.json_utils import JsonUtils
 
         utils = JsonUtils()
 
-    # Create deeply nested structure
-        data = {level: 0}
+        # Create deeply nested structure
+        data = {"level": 0}
         current = data
         for i in range(100):
-        current[nested] = {level": i + 1}
-        current = current[nested]
+            current["nested"] = {"level": i + 1}
+            current = current["nested"]
 
         # Should handle max depth
         json_str = utils.serialize_safe(data, max_depth=50)
-        assert "[Max Depth Exceeded] in json_str
+        assert "[Max Depth Exceeded]" in json_str
 
 
 class TestJSONErrorRecovery:
-        Test JSON error detection and recovery.
+    """Test JSON error detection and recovery."""
 
     def test_fix_trailing_commas(self):
-        ""Test removal of trailing commas.
+        """Test removal of trailing commas."""
         from netra_backend.app.agents.utils_json_validators import fix_common_json_errors
 
-        malformed = '{key: value", list: [1, 2,],}'
+        malformed = '{"key": "value", "list": [1, 2,],}'
         fixed = fix_common_json_errors(malformed)
-    # Should be parseable after fix
+        # Should be parseable after fix
         parsed = json.loads(fixed)
-        assert parsed == {"key: value, list: [1, 2]}
+        assert parsed == {"key": "value", "list": [1, 2]}
 
     def test_fix_single_quotes(self):
-        "Test conversion of single quotes to double quotes."
-        pass
+        """Test conversion of single quotes to double quotes."""
         from netra_backend.app.agents.utils_json_validators import fix_common_json_errors
 
-        single_quoted = {'key': 'value'}
+        single_quoted = "{'key': 'value'}"
         fixed = fix_common_json_errors(single_quoted)
         parsed = json.loads(fixed)
-        assert parsed == {key: value"}
+        assert parsed == {"key": "value"}
 
     def test_fix_unquoted_keys(self):
-        "Test quoting of unquoted property names.
+        """Test quoting of unquoted property names."""
         from netra_backend.app.agents.utils_json_validators import fix_common_json_errors
 
-        unquoted = '{key: value, number: 42}'
+        unquoted = '{key: "value", number: 42}'
         fixed = fix_common_json_errors(unquoted)
         parsed = json.loads(fixed)
-        assert parsed == {key: "value", number: 42}
+        assert parsed == {"key": "value", "number": 42}
 
     def test_structure_balance_counting(self):
-        Test counting of unbalanced structures."
-        pass
+        """Test counting of unbalanced structures."""
         from netra_backend.app.agents.utils_json_validators import count_structure_balance
 
-        unbalanced = '{key: ["value' ))
+        unbalanced = '{"key": ["value"'
         balance = count_structure_balance(unbalanced)
-        assert balance[braces] == 1  # One unclosed brace
-        assert balance[brackets] == 1  # One unclosed bracket
+        assert balance["braces"] == 1  # One unclosed brace
+        assert balance["brackets"] == 1  # One unclosed bracket
 
     def test_build_closing_sequence(self):
-        "Test building closing sequence for truncated JSON."
+        """Test building closing sequence for truncated JSON."""
         from netra_backend.app.agents.utils_json_validators import build_closing_sequence
 
-        balance = {braces: 2, brackets: 1, quotes": 0}
+        balance = {"braces": 2, "brackets": 1, "quotes": 0}
         closing = build_closing_sequence(balance)
-        assert closing == ]}}
+        assert closing == "]}"
 
 
 class TestEdgeCases:
-        "Test edge cases and error conditions.
+    """Test edge cases and error conditions."""
 
     def test_empty_input(self):
-        "Test handling of empty input."
+        """Test handling of empty input."""
         handler = UnifiedJSONHandler()
 
-    # Empty string
+        # Empty string
         with pytest.raises(JSONDeserializationError):
-        handler.loads()
+            handler.loads("")
 
         # Empty dict/list
-        assert handler.dumps({} == {}
-        assert handler.dumps([] == []"
+        assert handler.dumps({}) == "{}"
+        assert handler.dumps([]) == "[]"
 
     def test_unicode_handling(self):
-        "Test Unicode character handling.
-        pass
+        """Test Unicode character handling."""
         handler = UnifiedJSONHandler()
 
         data = {
-        emoji: [U+1F680],
-        "chinese": [U+4E2D][U+6587],
-        arabic: [U+0627][U+0644][U+0639][U+0631][U+0628][U+064A][U+0629],
-        special": [U+20AC][U+00A3][U+00A5]
-    
+            "emoji": "🚀",
+            "chinese": "中文",
+            "arabic": "العربية",
+            "special": "€£¥"
+        }
         json_str = handler.dumps(data)
         parsed = handler.loads(json_str)
         assert parsed == data
 
     def test_large_numbers(self):
-        "Test handling of large numbers.
+        """Test handling of large numbers."""
         handler = UnifiedJSONHandler()
 
         data = {
-        big_int: 999999999999999999,
-        "big_float": 1.7976931348623157e+308,
-        small_float: 2.2250738585072014e-308
-    
+            "big_int": 999999999999999999,
+            "big_float": 1.7976931348623157e+308,
+            "small_float": 2.2250738585072014e-308
+        }
         json_str = handler.dumps(data)
         parsed = handler.loads(json_str)
-        assert parsed[big_int] == data[big_int]
+        assert parsed["big_int"] == data["big_int"]
 
     def test_special_string_values(self):
-        "Test special string values that might be confused with JSON."
-        pass
+        """Test special string values that might be confused with JSON."""
         handler = UnifiedJSONHandler()
 
         data = {
-        looks_like_bool: true,
-        looks_like_null: "null",
-        looks_like_number: 123,
-        has_quotes: 'quoted"',
-        has_brackets: "[not an array]
-    
+            "looks_like_bool": "true",
+            "looks_like_null": "null",
+            "looks_like_number": "123",
+            "has_quotes": 'quoted"',
+            "has_brackets": "[not an array]"
+        }
         json_str = handler.dumps(data)
         parsed = handler.loads(json_str)
         assert parsed == data
 
 
 class TestPerformance:
-        Test performance with large datasets.
+    """Test performance with large datasets."""
 
     def test_large_array_serialization(self):
-        ""Test serialization of large arrays.
+        """Test serialization of large arrays."""
         handler = UnifiedJSONHandler()
 
-    # Create large array
+        # Create large array
         large_array = list(range(10000))
-        data = {items: large_array}
+        data = {"items": large_array}
 
         json_str = handler.dumps(data)
         parsed = handler.loads(json_str)
-        assert len(parsed[items"] == 10000
+        assert len(parsed["items"]) == 10000
 
     def test_deeply_nested_structure(self):
-        "Test deeply nested structure handling.
-        pass
+        """Test deeply nested structure handling."""
         handler = UnifiedJSONHandler()
 
-    # Create nested structure
-        data = {level: 0}
+        # Create nested structure
+        data = {"level": 0}
         current = data
         for i in range(30):  # Reasonable depth
-        current[child] = {"level": i + 1}
-        current = current[child]
+            current["child"] = {"level": i + 1}
+            current = current["child"]
 
         json_str = handler.dumps(data)
         parsed = handler.loads(json_str)
 
-    # Verify structure
+        # Verify structure
         current = parsed
         for i in range(30):
-        assert current[level] == i
-        current = current.get(child, {}
+            assert current["level"] == i
+            current = current.get("child", {})
 
 
 if __name__ == "__main__":
+    pytest.main([__file__])

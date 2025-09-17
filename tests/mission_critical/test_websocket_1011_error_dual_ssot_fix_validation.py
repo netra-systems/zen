@@ -1,4 +1,4 @@
-"
+"""
 MISSION CRITICAL TEST: WebSocket 1011 Error Dual SSOT Fix Validation
 ================================================================
 
@@ -22,6 +22,7 @@ VALIDATION STRATEGY:
 - Ensure performance impact is minimal
 "
 
+"""
 import asyncio
 import pytest
 import time

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 Mission Critical SSOT Deployment Compliance Tests
 
 Mission critical tests to ensure SSOT refactor preserves deployment functionality
@@ -25,6 +25,7 @@ TEST CATEGORIES:
 - Mission critical deployment protection
 "
 
+"""
 import ast
 import json
 import os

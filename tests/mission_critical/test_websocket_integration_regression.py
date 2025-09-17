@@ -1,4 +1,4 @@
-"
+"""
 Test WebSocket Integration Regression Prevention
 
 Business Value Justification (BVJ):
@@ -20,6 +20,7 @@ This test SHOULD FAIL initially because it detects the current integration gap.
 After fixes, this test becomes the regression prevention guardian.
 "
 
+"""
 import pytest
 import asyncio
 import logging

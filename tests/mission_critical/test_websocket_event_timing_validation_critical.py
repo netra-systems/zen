@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 MISSION CRITICAL: WebSocket Event Timing Validation Tests - Issue #1199
 
 Business Value Justification:
@@ -20,6 +20,7 @@ These tests are designed to fail when timing requirements are not met,
 validating that the system properly enforces performance standards.
 "
 
+"""
 import asyncio
 import time
 import uuid

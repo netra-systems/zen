@@ -49,8 +49,9 @@ import asyncio
 import socket
 import threading
 
-# PHASE 1 GOLDEN PATH REMEDIATION: Add required SSOT auth import
+# PHASE 1 GOLDEN PATH REMEDIATION: Add required SSOT auth and config imports
 from netra_backend.app.services.unified_authentication_service import get_unified_auth_service
+from netra_backend.app.core.configuration.base import get_config
 
 logger = get_logger(__name__)
 
@@ -211,7 +212,7 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 WebSocketManager = UnifiedWebSocketManager
 
 # SSOT PHASE 2 FIX: Remove UnifiedWebSocketManager alias to eliminate duplication
-# CANONICAL LOCATION: Use 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'
+# CANONICAL LOCATION: Use 'from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager'
 # For runtime usage, use get_websocket_manager() factory function
 
 # ISSUE #1182 REMEDIATION COMPLETED: WebSocketManagerFactory consolidated into get_websocket_manager()
@@ -802,14 +803,11 @@ def _validate_ssot_compliance():
                 # Use getattr with default to prevent AttributeError during iteration
                 for attr_name in dir(module):
                     attr = getattr(module, attr_name, None)
-                    # CRITICAL FIX: Use globals().get() to safely reference WebSocketManager
-                    # This prevents hanging during import when WebSocketManager isn't defined yet
-                    websocket_manager_class = globals().get('WebSocketManager')
                     if (attr is not None and
                         inspect.isclass(attr) and
                         'websocket' in attr_name.lower() and
                         'manager' in attr_name.lower() and
-                        (websocket_manager_class is None or attr != websocket_manager_class) and
+                        attr != WebSocketManager and
                         # SSOT PHASE 2 FIX: Exclude canonical SSOT classes and imported types
                         attr_name not in [
                             'UnifiedWebSocketManager',  # Canonical alias

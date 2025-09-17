@@ -1,4 +1,4 @@
-"
+"""
  ALERT:  MISSION CRITICAL: WebSocket UnifiedAuthInterface Bypass SSOT Violation
 
 SSOT VIOLATION REPRODUCTION - Test #2 of 5
@@ -24,6 +24,7 @@ CRITICAL AUTH SSOT REQUIREMENT:
 WebSocket MUST use UnifiedAuthInterface for ALL auth operations - NO local auth logic.
 "
 
+"""
 import asyncio
 import json
 import logging

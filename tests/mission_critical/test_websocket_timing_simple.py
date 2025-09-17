@@ -1,10 +1,10 @@
 # Import SSOT WebSocket test utility
 from test_framework.ssot.websocket_connection_test_utility import TestWebSocketConnection
 
-"
+"""
 Simplified WebSocket timing tests focusing on actual implementation.
 Tests critical timing scenarios with the real WebSocket manager.
-"
+"""
 
 import asyncio
 import uuid
@@ -17,7 +17,7 @@ from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.message_buffer import BufferConfig
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState
@@ -28,11 +28,11 @@ from shared.isolated_environment import get_env
 
 
 class WebSocketTimingSimpleTests:
-    "Test critical WebSocket timing scenarios.
+    """Test critical WebSocket timing scenarios."""
 
     @pytest.fixture
     async def setup(self):
-        "Setup test environment."
+        """Setup test environment."""
         manager = WebSocketManager()
         user_id = str(uuid.uuid4())
         run_id = str(uuid.uuid4())
@@ -50,7 +50,7 @@ class WebSocketTimingSimpleTests:
 
     @pytest.mark.asyncio
     async def test_connection_and_message_flow(self, setup):
-        "Test basic connection and message flow."
+        """Test basic connection and message flow."""
         manager = setup['manager']
         mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.websocket = TestWebSocketConnection()
@@ -61,6 +61,7 @@ class WebSocketTimingSimpleTests:
             setup['user_id'],
             mock_ws,
             thread_id=setup['thread_id']
+        )
         
         # Send message
         test_message = {
@@ -77,7 +78,7 @@ class WebSocketTimingSimpleTests:
 
     @pytest.mark.asyncio
     async def test_message_with_thread_context(self, setup):
-        Test message with thread context.""
+        """Test message with thread context."""
         manager = setup['manager']
         mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.websocket = TestWebSocketConnection()
@@ -88,6 +89,7 @@ class WebSocketTimingSimpleTests:
             setup['user_id'], 
             mock_ws,
             thread_id=setup['thread_id']
+        )
         
         # Send message - use a recognized agent event type
         message = {
@@ -109,7 +111,7 @@ class WebSocketTimingSimpleTests:
 
     @pytest.mark.asyncio
     async def test_multiple_connections(self, setup):
-        Test handling multiple connections."
+        """Test handling multiple connections."""
         manager = setup['manager']
         
         connections = []
@@ -123,19 +125,20 @@ class WebSocketTimingSimpleTests:
                 user_id,
                 mock_ws,
                 thread_id=setup['thread_id']
+            )
             
             connections.append({
                 'ws': mock_ws,
                 'user_id': user_id,
                 'connection_id': connection_id
-            }
+            })
         
         # Send to each connection
         for conn in connections:
             success = await manager.send_to_user(conn['user_id'], {
                 'type': 'test',
                 'data': {'user_id': conn['user_id']}
-            }
+            })
             assert success
         
         # Verify all received
@@ -145,7 +148,7 @@ class WebSocketTimingSimpleTests:
 
     @pytest.mark.asyncio
     async def test_disconnect_and_cleanup(self, setup):
-        "Test disconnection and cleanup.
+        """Test disconnection and cleanup."""
         manager = setup['manager']
         mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.websocket = TestWebSocketConnection()
@@ -156,15 +159,16 @@ class WebSocketTimingSimpleTests:
             setup['user_id'],
             mock_ws,
             thread_id=setup['thread_id']
+        )
         
         # Disconnect
-        await manager.disconnect_user(setup['user_id'], mock_ws, 1000, Test disconnect")"
+        await manager.disconnect_user(setup['user_id'], mock_ws, 1000, "Test disconnect")
         
         # Try to send - should handle gracefully
         result = await manager.send_to_user(setup['user_id'], {
             'type': 'test',
             'data': {}
-        }
+        })
         
         # Should return False since user is disconnected
         assert result is False

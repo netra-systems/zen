@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"
+"""
 MISSION CRITICAL TEST SUITE: SSOT Import Compliance Validation
 
 Business Value: Platform/Internal - $500K+ ARR Golden Path Protection
+"""
 Prevents regression to duplicate imports and ensures all production code imports resolve to SSOT sources.
 
 This test suite validates:

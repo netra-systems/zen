@@ -3,7 +3,7 @@ Synthetic Data Generation API Routes
 Provides endpoints for generating and managing synthetic AI workload data
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
@@ -36,7 +36,7 @@ from netra_backend.app.services.synthetic_data_service import (
     synthetic_data_service,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Request/Response Models
 class ToolConfig(BaseModel):

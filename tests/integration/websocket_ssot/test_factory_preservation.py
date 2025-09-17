@@ -33,7 +33,7 @@ class WebSocketFactoryPreservationTests(BaseIntegrationTest, unittest.TestCase):
         """Test that current WebSocket system uses factory patterns."""
         # Import the current WebSocket manager
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
             # Test that it follows factory pattern
             self.assertTrue(hasattr(UnifiedWebSocketManager, 'create_for_user'),
@@ -169,7 +169,7 @@ class WebSocketFactoryPreservationTests(BaseIntegrationTest, unittest.TestCase):
 
         # Check for factory method presence
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
             factory_methods = [method for method in dir(UnifiedWebSocketManager)
                              if any(pattern in method.lower()
@@ -193,7 +193,7 @@ class WebSocketFactoryPreservationTests(BaseIntegrationTest, unittest.TestCase):
             pass
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
             websocket_managers.append('UnifiedWebSocketManager')
         except ImportError:
             pass

@@ -1,4 +1,4 @@
-"
+"""
 MISSION CRITICAL: ToolExecutorFactory vs UnifiedToolDispatcher SSOT Violation Tests
 
 Business Value Justification (BVJ):
@@ -11,6 +11,7 @@ These tests PROVE the SSOT violation exists and will validate when consolidation
 GitHub Issue: #219
 "
 
+"""
 import pytest
 import asyncio
 import time
@@ -609,4 +610,4 @@ This test SHOULD FAIL until GitHub Issue #219 routing consolidation is complete.
         gc.collect()
         
         super().teardown_method(method)
-"))
+")))

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"
+"""
 MISSION CRITICAL TEST SUITE: SSOT WebSocketNotifier Validation
 
 Business Value: Platform/Internal - $500K+ ARR Golden Path Protection
 Prevents duplicate WebSocketNotifier implementations that cause agent event delivery failures.
 
 This test suite validates:
+"""
 1. Exactly 1 WebSocketNotifier class exists in production code
 2. No duplicate implementations in rollback utilities or deprecated files
 3. All critical WebSocket events work correctly

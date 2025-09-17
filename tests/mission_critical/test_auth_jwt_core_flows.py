@@ -1,4 +1,4 @@
-"
+"""
 [U+1F534] MISSION CRITICAL: Authentication JWT Core Flows Test Suite
 
 Tests the most fundamental authentication paths that ALL users must traverse.
@@ -20,6 +20,7 @@ CRITICAL SUCCESS CRITERIA:
 FAILURE = COMPLETE SYSTEM UNAVAILABLE
 "
 
+"""
 import asyncio
 import json
 import logging

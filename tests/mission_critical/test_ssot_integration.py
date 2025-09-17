@@ -1,5 +1,9 @@
 
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
 class TestSyntaxFix:
     """Test class for orphaned methods"""
 

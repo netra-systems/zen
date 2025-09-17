@@ -35,7 +35,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Union
 from unittest.mock import AsyncMock, MagicMock, patch
 from contextlib import asynccontextmanager
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 # SSOT imports following test architecture patterns
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -55,7 +55,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.schemas.agent_models import DeepAgentState
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 
 class AgentExecutionBusinessValueTests(SSotAsyncTestCase):

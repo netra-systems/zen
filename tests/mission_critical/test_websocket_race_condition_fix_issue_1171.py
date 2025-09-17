@@ -1,4 +1,4 @@
-"
+"""
 Test WebSocket startup race condition fix for Issue #1171.
 
 CRITICAL P0: Fix WebSocket startup race conditions causing 1011 errors
@@ -7,8 +7,10 @@ This test validates the progressive handshake delays and connection queueing
 that prevent 1011 internal server errors during Cloud Run startup.
 
 Business Impact: $500K+ ARR chat functionality reliability
-"
+"""
 
+"""
+"""
 import pytest
 import asyncio
 import time

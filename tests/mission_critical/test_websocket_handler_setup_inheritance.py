@@ -1,6 +1,7 @@
-"
+"""
 WebSocket Handler Setup Method Inheritance Validation Test Suite
 
+"""
 MISSION: Detect and report inheritance issues with setup_method() calls in WebSocket handler test classes.
 
 Business Value Justification (BVJ):

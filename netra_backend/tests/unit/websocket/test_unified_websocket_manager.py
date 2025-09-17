@@ -38,7 +38,7 @@ from shared.isolated_environment import get_env
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.websocket_core import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.types import WebSocketConnection
-from netra_backend.app.websocket_core.websocket_manager import RegistryCompat, _serialize_message_safely
+from netra_backend.app.websocket_core.unified_manager import RegistryCompat, _serialize_message_safely
 
 class WebSocketStateForTesting(Enum):
     """Test enum for WebSocketState serialization testing."""

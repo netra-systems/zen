@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical: Deterministic Startup Validation Test Suite
 
 Infrastructure Test Specialist Update - Team Delta Focus Areas:
@@ -22,7 +22,7 @@ Business Value Justification (BVJ):
     - Business Goal: Ensure zero-downtime deployments and reliable service initialization
     - Value Impact: Prevents customer-facing errors during deployment and scaling
     - Revenue Impact: Critical - startup failures cause complete service outages
-"
+"""
 
 import pytest
 import asyncio
@@ -33,7 +33,7 @@ from fastapi import FastAPI
 
 
 class WebSocketTestHelper:
-    "Real WebSocket connection for testing instead of mocks.
+    """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
         self.messages_sent = []
@@ -41,28 +41,28 @@ class WebSocketTestHelper:
         self._closed = False
 
     async def send_json(self, message: dict):
-        "Send JSON message."
+        """Send JSON message."""
         if self._closed:
-            raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure):
-        Close WebSocket connection.""
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
         self._closed = True
         self.is_connected = False
 
     def get_messages(self) -> list:
-        Get all sent messages."
+        """Get all sent messages."""
         return self.messages_sent.copy()
 
 
 @pytest.mark.mission_critical
 class DeterministicStartupSequenceTests:
-    "Test deterministic startup sequence validation.
+    """Test deterministic startup sequence validation."""
 
     @pytest.mark.asyncio
     async def test_startup_phase_ordering(self):
-        "Test that startup phases execute in correct order."
+        """Test that startup phases execute in correct order."""
         try:
             from netra_backend.app.smd import StartupOrchestrator
             
@@ -73,24 +73,24 @@ class DeterministicStartupSequenceTests:
             # Track phase execution order
             execution_order = []
 
-            async def create_phase_tracker(phase_name):
+            def create_phase_tracker(phase_name):
                 async def phase_mock():
                     execution_order.append(phase_name)
                     await asyncio.sleep(0.01)  # Small delay to ensure ordering
                 return phase_mock
 
             # Mock all phases with order tracking
-            orchestrator._phase1_foundation = create_phase_tracker(INIT)"
-            orchestrator._phase2_core_services = create_phase_tracker("DEPENDENCIES)
-            orchestrator._phase3_database_setup = create_phase_tracker(DATABASE)
-            orchestrator._phase4_cache_setup = create_phase_tracker("CACHE)"
-            orchestrator._phase5_services_setup = create_phase_tracker(SERVICES)
-            orchestrator._phase6_websocket_setup = create_phase_tracker(WEBSOCKET)"
-            orchestrator._phase7_finalization = create_phase_tracker(FINALIZE")
+            orchestrator._phase1_foundation = create_phase_tracker("INIT")
+            orchestrator._phase2_core_services = create_phase_tracker("DEPENDENCIES")
+            orchestrator._phase3_database_setup = create_phase_tracker("DATABASE")
+            orchestrator._phase4_cache_setup = create_phase_tracker("CACHE")
+            orchestrator._phase5_services_setup = create_phase_tracker("SERVICES")
+            orchestrator._phase6_websocket_setup = create_phase_tracker("WEBSOCKET")
+            orchestrator._phase7_finalization = create_phase_tracker("FINALIZE")
             
             # Mock validation to avoid connection issues
             async def mock_validation():
-                execution_order.append(VALIDATION)
+                execution_order.append("VALIDATION")
                 app.state.startup_complete = True
                 await asyncio.sleep(0.01)
             orchestrator._run_comprehensive_validation = mock_validation
@@ -99,20 +99,20 @@ class DeterministicStartupSequenceTests:
             await orchestrator.initialize_system()
 
             # Verify correct order (allowing for validation phase)
-            expected_order = [INIT", "DEPENDENCIES, DATABASE, CACHE, SERVICES, "WEBSOCKET, FINALIZE"]
+            expected_order = ["INIT", "DEPENDENCIES", "DATABASE", "CACHE", "SERVICES", "WEBSOCKET", "FINALIZE"]
             # The actual order might include VALIDATION instead of FINALIZE due to mocking
             acceptable_orders = [
-                [INIT, DEPENDENCIES, "DATABASE, CACHE", SERVICES, WEBSOCKET, FINALIZE],"
-                [INIT", DEPENDENCIES, DATABASE, CACHE, SERVICES", "WEBSOCKET, VALIDATION]
+                ["INIT", "DEPENDENCIES", "DATABASE", "CACHE", "SERVICES", "WEBSOCKET", "FINALIZE"],
+                ["INIT", "DEPENDENCIES", "DATABASE", "CACHE", "SERVICES", "WEBSOCKET", "VALIDATION"]
             ]
-            assert execution_order in acceptable_orders, fExpected one of {acceptable_orders}, got {execution_order}
+            assert execution_order in acceptable_orders, f"Expected one of {acceptable_orders}, got {execution_order}"
 
         except ImportError as e:
-            pytest.skip(fRequired modules not available: {e}")"
+            pytest.skip(f"Required modules not available: {e}")
 
     @pytest.mark.asyncio
     async def test_startup_completion_flag(self):
-        Test that startup completion flag is set correctly."
+        """Test that startup completion flag is set correctly."""
         try:
             from netra_backend.app.smd import StartupOrchestrator
             
@@ -144,14 +144,14 @@ class DeterministicStartupSequenceTests:
             await orchestrator.initialize_system()
 
             # Verify completion flag is set
-            assert app.state.startup_complete is True, Startup completion flag not set"
+            assert app.state.startup_complete is True, "Startup completion flag not set"
 
         except ImportError as e:
-            pytest.skip(fRequired modules not available: {e})
+            pytest.skip(f"Required modules not available: {e}")
 
     @pytest.mark.asyncio
     async def test_startup_timeout_prevention(self):
-        "Test that startup doesn't hang indefinitely."
+        """Test that startup doesn't hang indefinitely."""
         try:
             import os
             from netra_backend.app.smd import StartupOrchestrator
@@ -198,7 +198,7 @@ class DeterministicStartupSequenceTests:
 
             # Verify startup completed within reasonable time
             startup_time = end_time - start_time
-            assert startup_time < 2.0, fStartup took too long: {startup_time}s
+            assert startup_time < 2.0, f"Startup took too long: {startup_time}s"
 
             # Restore original environment variables
             for key, original_value in original_env.items():
@@ -208,45 +208,45 @@ class DeterministicStartupSequenceTests:
                     os.environ[key] = original_value
 
         except ImportError as e:
-            pytest.skip(fRequired modules not available: {e})"
+            pytest.skip(f"Required modules not available: {e}")
         except asyncio.TimeoutError:
-            pytest.fail("Startup hung and exceeded timeout)
+            pytest.fail("Startup hung and exceeded timeout")
 
 
 @pytest.mark.mission_critical
 class WebSocketIntegrationTests:
-    Test WebSocket integration during startup.""
+    """Test WebSocket integration during startup."""
 
     @pytest.mark.asyncio
     async def test_websocket_manager_initialization(self):
-        Test WebSocket manager is properly initialized."
+        """Test WebSocket manager is properly initialized."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Create WebSocket manager
             manager = UnifiedWebSocketManager()
             
             # Verify basic initialization
-            assert manager is not None, WebSocket manager not created"
+            assert manager is not None, "WebSocket manager not created"
             # Check for any connection-related attribute (may vary by implementation)
-            has_connection_attr = any(hasattr(manager, attr) for attr in ['connections', '_connections', 'active_connections', 'websocket_connections']
-            assert has_connection_attr, WebSocket manager missing connection management attributes
+            has_connection_attr = any(hasattr(manager, attr) for attr in ['connections', '_connections', 'active_connections', 'websocket_connections'])
+            assert has_connection_attr, "WebSocket manager missing connection management attributes"
 
         except ImportError as e:
-            pytest.skip(fRequired modules not available: {e}")"
+            pytest.skip(f"Required modules not available: {e}")
 
     @pytest.mark.asyncio
     async def test_websocket_tool_dispatcher_integration(self):
-        Test WebSocket integration with tool dispatcher."
+        """Test WebSocket integration with tool dispatcher."""
         try:
             from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcherFactory
             from netra_backend.app.services.user_execution_context import UserExecutionContext
 
             # Create test context
             user_context = UserExecutionContext(
-                user_id=test_user",
-                run_id=test_run,
-                thread_id=test_thread""
+                user_id="test_user",
+                run_id="test_run",
+                thread_id="test_thread"
             )
 
             # Create mock WebSocket
@@ -259,15 +259,15 @@ class WebSocketIntegrationTests:
             )
 
             # Verify integration
-            assert dispatcher is not None, Tool dispatcher not created
-            assert hasattr(dispatcher, 'websocket_manager'), Tool dispatcher missing WebSocket manager"
+            assert dispatcher is not None, "Tool dispatcher not created"
+            assert hasattr(dispatcher, 'websocket_manager'), "Tool dispatcher missing WebSocket manager"
 
         except ImportError as e:
-            pytest.skip(f"Required modules not available: {e})
+            pytest.skip(f"Required modules not available: {e}")
 
     @pytest.mark.asyncio
     async def test_websocket_agent_registry_integration(self):
-        Test WebSocket integration with agent registry."
+        """Test WebSocket integration with agent registry."""
         try:
             from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
             from netra_backend.app.llm.llm_manager import LLMManager
@@ -287,20 +287,20 @@ class WebSocketIntegrationTests:
             registry.set_websocket_manager(mock_websocket)
 
             # Verify integration
-            assert hasattr(registry, 'websocket_manager'), "Registry missing WebSocket manager
-            assert registry.websocket_manager == mock_websocket, WebSocket manager not properly set
+            assert hasattr(registry, 'websocket_manager'), "Registry missing WebSocket manager"
+            assert registry.websocket_manager == mock_websocket, "WebSocket manager not properly set"
 
         except ImportError as e:
-            pytest.skip(f"Required modules not available: {e})
+            pytest.skip(f"Required modules not available: {e}")
 
 
 @pytest.mark.mission_critical
 class HealthEndpointsTests:
-    "Test health endpoints check startup state.
+    """Test health endpoints check startup state."""
 
     @pytest.mark.asyncio
     async def test_health_endpoint_startup_check(self):
-        "Test health endpoint checks startup completion."
+        """Test health endpoint checks startup completion."""
         try:
             from fastapi import FastAPI
             from fastapi.testclient import TestClient
@@ -309,36 +309,36 @@ class HealthEndpointsTests:
             app.state = MagicMock()
 
             # Add basic health endpoint
-            @app.get(/health)"
+            @app.get("/health")
             async def health():
                 if not getattr(app.state, 'startup_complete', False):
-                    return {"status: starting, ready: False}
-                return {status": "healthy, ready: True}
+                    return {"status": "starting", "ready": False}
+                return {"status": "healthy", "ready": True}
 
             client = TestClient(app)
 
             # Test before startup completion
             app.state.startup_complete = False
-            response = client.get(/health)"
+            response = client.get("/health")
             assert response.status_code == 200
             data = response.json()
-            assert data[ready"] is False
-            assert data[status] == starting
+            assert data["ready"] is False
+            assert data["status"] == "starting"
 
             # Test after startup completion
             app.state.startup_complete = True
-            response = client.get("/health)"
+            response = client.get("/health")
             assert response.status_code == 200
             data = response.json()
-            assert data[ready] is True
-            assert data[status] == healthy"
+            assert data["ready"] is True
+            assert data["status"] == "healthy"
 
         except ImportError as e:
-            pytest.skip(f"Required modules not available: {e})
+            pytest.skip(f"Required modules not available: {e}")
 
     @pytest.mark.asyncio
     async def test_readiness_probe_startup_dependency(self):
-        Test readiness probe depends on startup completion."
+        """Test readiness probe depends on startup completion."""
         try:
             from fastapi import FastAPI
 
@@ -346,40 +346,40 @@ class HealthEndpointsTests:
             app.state = MagicMock()
 
             # Add readiness endpoint
-            @app.get("/ready)
+            @app.get("/ready")
             async def ready():
                 startup_complete = getattr(app.state, 'startup_complete', False)
                 if not startup_complete:
-                    return {ready: False, reason: startup_incomplete"}"
-                return {ready: True}
+                    return {"ready": False, "reason": "startup_incomplete"}
+                return {"ready": True}
 
             from fastapi.testclient import TestClient
             client = TestClient(app)
 
             # Test before startup
             app.state.startup_complete = False
-            response = client.get(/ready)"
+            response = client.get("/ready")
             data = response.json()
-            assert data["ready] is False
-            assert startup_incomplete in data[reason]
+            assert data["ready"] is False
+            assert "startup_incomplete" in data["reason"]
 
             # Test after startup
             app.state.startup_complete = True
-            response = client.get(/ready")"
+            response = client.get("/ready")
             data = response.json()
-            assert data[ready] is True
+            assert data["ready"] is True
 
         except ImportError as e:
-            pytest.skip(fRequired modules not available: {e})"
+            pytest.skip(f"Required modules not available: {e}")
 
 
 @pytest.mark.mission_critical
 class StartupResourceManagementTests:
-    "Test startup resource management and cleanup.
+    """Test startup resource management and cleanup."""
 
     @pytest.mark.asyncio
     async def test_startup_resource_cleanup_on_failure(self):
-        ""Test resources are cleaned up if startup fails.
+        """Test resources are cleaned up if startup fails."""
         try:
             from netra_backend.app.smd import StartupOrchestrator
             
@@ -392,12 +392,12 @@ class StartupResourceManagementTests:
             resources_cleaned = []
 
             async def create_resource_phase():
-                resources_created.append(resource1)"
+                resources_created.append("resource1")
                 await asyncio.sleep(0.01)
 
             async def failing_phase():
-                resources_created.append(resource2")
-                raise RuntimeError(Startup failure)
+                resources_created.append("resource2")
+                raise RuntimeError("Startup failure")
 
             async def cleanup_phase():
                 for resource in resources_created:
@@ -413,14 +413,14 @@ class StartupResourceManagementTests:
 
             # Verify cleanup was called (if implemented)
             # This is a placeholder - actual implementation may vary
-            assert len(resources_created) > 0, No resources were created""
+            assert len(resources_created) > 0, "No resources were created"
 
         except ImportError as e:
-            pytest.skip(fRequired modules not available: {e})
+            pytest.skip(f"Required modules not available: {e}")
 
     @pytest.mark.asyncio
     async def test_startup_memory_leak_prevention(self):
-        Test startup doesn't create memory leaks.""
+        """Test startup doesn't create memory leaks."""
         try:
             import gc
             import psutil
@@ -478,7 +478,7 @@ class StartupResourceManagementTests:
                     gc.collect()
 
                 except ImportError:
-                    pytest.skip(Required modules not available)
+                    pytest.skip("Required modules not available")
 
             # Check final memory usage
             final_memory = process.memory_info().rss
@@ -486,7 +486,7 @@ class StartupResourceManagementTests:
 
             # Allow for some memory increase but not excessive
             max_allowed_increase = 50 * 1024 * 1024  # 50MB
-            assert memory_increase < max_allowed_increase, fMemory leak detected: {memory_increase / 1024 / 1024:.2f}MB increase"
+            assert memory_increase < max_allowed_increase, f"Memory leak detected: {memory_increase / 1024 / 1024:.2f}MB increase"
 
             # ✅ FIXED: Restore original environment variables (Issue #601)
             for key, original_value in original_env.items():
@@ -496,7 +496,7 @@ class StartupResourceManagementTests:
                     os.environ[key] = original_value
 
         except ImportError as e:
-            pytest.skip(f"Required modules not available: {e})
+            pytest.skip(f"Required modules not available: {e}")
         except asyncio.TimeoutError:
             # ✅ FIXED: Handle timeout gracefully (Issue #601)
-            pytest.fail(Memory leak test timed out - possible infinite loop or deadlock")"
+            pytest.fail("Memory leak test timed out - possible infinite loop or deadlock")

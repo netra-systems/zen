@@ -44,7 +44,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from netra_backend.app.websocket_core.handlers import MessageRouter, get_message_router, BaseMessageHandler, ConnectionHandler, TypingHandler, HeartbeatHandler, UserMessageHandler, AgentHandler, ErrorHandler
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage, create_standard_message, create_server_message, create_error_message
 from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory, create_websocket_manager, get_websocket_manager_factory
-from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.message_handlers import MessageHandlerService

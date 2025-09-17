@@ -49,7 +49,7 @@ except ImportError as e:
 
 # WebSocket manager imports - testing the actual implementation
 try:
-    from netra_backend.app.websocket_core.websocket_manager import (
+    from netra_backend.app.websocket_core.canonical_import_patterns import (
         get_websocket_manager,
         _UnifiedWebSocketManagerImplementation,
         WebSocketManagerMode,

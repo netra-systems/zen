@@ -1,6 +1,7 @@
-"
+"""
 SSOT Mock Duplication Violations Test Suite
 
+"""
 Detects duplicate mock classes and patterns that violate Single Source of Truth principles.
 This test is designed to FAIL initially to detect current violations (486+ expected duplicates).
 

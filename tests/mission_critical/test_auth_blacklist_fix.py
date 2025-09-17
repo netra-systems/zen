@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 Mission Critical Test: Auth Service Token Blacklist Fix
 Tests the Five Whys root cause fix for async/await mismatch in blacklist operations.
 
@@ -11,6 +11,7 @@ This test validates:
 5. WHY #5 Fix: SSOT implementation for blacklist operations
 "
 
+"""
 import asyncio
 import pytest
 import logging

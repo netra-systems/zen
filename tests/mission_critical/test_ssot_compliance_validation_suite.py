@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 SSOT Compliance Validation Test Suite - Issue #1075 Implementation
 Tests designed to FAIL initially and detect the specific SSOT violations identified in the analysis.
 
@@ -14,6 +14,7 @@ Test Implementation Strategy:
 
 SSOT Violations to Detect:
 - Production compliance gap: 16.6% between claimed vs actual
+"""
 - 89 duplicate type definitions across modules
 - Test infrastructure fragmentation: -1981.6% compliance
 - Configuration manager duplicates

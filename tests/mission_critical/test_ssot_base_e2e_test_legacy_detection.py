@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical Test: SSOT BaseE2ETest Legacy Detection
 
 This test detects legacy BaseE2ETest usage and ensures complete migration to SSOT patterns.
@@ -14,6 +14,7 @@ CRITICAL: This test protects the Golden Path user flow by ensuring all E2E tests
 use consistent SSOT patterns, preventing race conditions and test reliability issues.
 
 Test Design:
+"""
 - FAILS when legacy BaseE2ETest imports/inheritance found
 - PASSES when proper SSOT patterns (SSotAsyncTestCase) are used
 - Scans target file for legacy patterns

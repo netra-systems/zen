@@ -39,7 +39,7 @@ try:
     USER_SCOPED_ROUTER_AVAILABLE = True
 except ImportError:
     USER_SCOPED_ROUTER_AVAILABLE = False
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from shared.types.core_types import UserID, ensure_user_id
 from shared.logging.unified_logging_ssot import get_logger

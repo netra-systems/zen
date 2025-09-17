@@ -1,10 +1,11 @@
-"
+"""
 Mission Critical Tests: Docker Rate Limiter Integration
 
 TEAM DELTA INFRASTRUCTURE TESTS: Comprehensive rate limiting and backpressure handling
 LIFE OR DEATH CRITICAL: Platform must handle 100+ concurrent Docker operations
 
 This test suite validates that ALL Docker operations go through the rate limiter
+"""
 to prevent Docker daemon crashes from concurrent operation storms.
 
 CRITICAL: These tests protect the $2M+ ARR platform from Docker daemon instability.

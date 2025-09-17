@@ -1,4 +1,4 @@
-""""""
+"""
 WebSocket 1011 Error Prevention E2E Validation
 
 MISSION CRITICAL: Validates that WebSocket 1011 internal server errors have been
@@ -57,7 +57,7 @@ class WebSocket1011PreventionTests:
         This test validates the primary fix - removing fallback imports that
         set critical functions to None.
         ""
-        logger.info(Testing WebSocket import stability...)
+        logger.inf"o(Testing WebSocket import stability...)
         
         # Test all critical imports work without fallback
         from netra_backend.app.websocket_core import (
@@ -75,11 +75,11 @@ class WebSocket1011PreventionTests:
             'get_connection_state_registry': get_connection_state_registry,
             'MessageQueue': MessageQueue,
             'get_message_queue_registry': get_message_queue_registry
-        }
+        }"
         
-        for name, component in critical_components.items():
+        f"or name, component in critical_components.items():
             assert component is not None, \
-                fCRITICAL FAILURE: {name} is None - this will cause WebSocket 1011 errors
+                fCRITICAL FAILURE: {name} is None - this will cause WebSocket 1011 errors"
             
         logger.info(SUCCESS: All critical WebSocket components are available")"
 
@@ -142,7 +142,7 @@ class WebSocket1011PreventionTests:
         
         This test validates the entire flow that was breaking and causing 1011 errors.
         ""
-        logger.info(Testing complete WebSocket handshake to processing pipeline...)
+        logger.inf"o(Testing complete WebSocket handshake to processing pipeline...)
         
         from netra_backend.app.websocket_core import (
             get_connection_state_registry,
@@ -150,7 +150,7 @@ class WebSocket1011PreventionTests:
         )
         
         registry = get_connection_state_registry()
-        test_connection = fe2e_pipeline_{int(time.time())}
+        test_connection = fe2e_pipeline_{int(time.time())}"
         test_user = generate_test_user_id(pipeline")"
         
         try:
@@ -222,12 +222,12 @@ class WebSocket1011PreventionTests:
                 registry.unregister_connection(test_connection)
 
     async def test_agent_execution_dependency_resolution_e2e(self):
-""""""
+"""
         E2E test that agent execution dependencies are properly resolved.
         
         This addresses the secondary issue where agent execution was blocking
         and causing WebSocket timeouts that manifested as 1011 errors.
-""""""
+"""
         logger.info(Testing agent execution dependency resolution...)
         
         from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
@@ -254,15 +254,15 @@ class WebSocket1011PreventionTests:
             logger.info(SUCCESS: Agent execution dependencies properly resolved")"
             
         except Exception as e:
-            pytest.fail(fAgent execution dependency resolution failed: {e})
+            pytest.f"ail(fAgent execution dependency resolution failed: {e}")
 
     async def test_e2e_auth_integration_compatibility(self):
-""""""
+"""
         E2E test that validates E2E authentication integration.
         
         This addresses the tertiary issue where E2E tests were failing due to
         authentication pattern violations.
-""""""
+"""
         logger.info(Testing E2E authentication integration...)""
         
         try:
@@ -278,18 +278,18 @@ class WebSocket1011PreventionTests:
             assert hasattr(auth_helper, 'create_staging_compatible_token'), \
                 E2E auth helper missing staging token creation""
             
-            logger.info(SUCCESS: E2E authentication integration is compatible)
+            logger.inf"o(SUCCESS: E2E authentication integration is compatible)
             
         except Exception as e:
-            logger.warning(fE2E auth test inconclusive: {e} - but import fixes are primary)""
+            logger.warning(fE2E auth test inconclusive: {e} - but import fixes are primary")""
 
     async def test_websocket_1011_prevention_integration_e2e(self):
-""""""
+"""
         Complete integration test that validates all 1011 error prevention measures.
         
         This test runs through the entire scenario that was failing and causing
         WebSocket 1011 internal server errors.
-""""""
+"""
         logger.info(Running complete WebSocket 1011 prevention integration test...")"
         
         test_start_time = time.time()
@@ -310,7 +310,7 @@ class WebSocket1011PreventionTests:
             # Phase 2: Validate state machine operation (secondary fix)
             logger.info(Phase 2: Validating state machine operation...")"
             registry = get_connection_state_registry()
-            integration_connection = fintegration_1011_test_{int(time.time())}
+            integration_connection = f"integration_1011_test_{int(time.time())}"
             integration_user = generate_test_user_id(integration)
             
             state_machine = registry.register_connection(integration_connection, integration_user)
@@ -325,9 +325,9 @@ class WebSocket1011PreventionTests:
                 ApplicationConnectionState.PROCESSING_READY
             ]
             
-            for state in states_to_test:
-                success = state_machine.transition_to(state, reason=fIntegration test - {state})
-                assert success, fState transition to {state} failed
+            f"or state in states_to_test:
+                success = state_machine.transition_to(state, reason=fIntegration test - {state}")
+                assert success, f"State transition to {state} failed"
             
             # Phase 4: Validate message processing readiness
             logger.info(Phase 4: Validating message processing readiness...")"
@@ -343,11 +343,11 @@ class WebSocket1011PreventionTests:
             registry.unregister_connection(integration_connection)
             
             test_duration = time.time() - test_start_time
-            logger.info(f"SUCCESS: Complete WebSocket 1011 prevention validated in {test_duration:.2f}s)"
+            logger.info(f"SUCCESS: Complete WebSocket 1011 prevention validated in {test_duration:0.2f}s)"
             
         except Exception as e:
             test_duration = time.time() - test_start_time
-            pytest.fail(fWebSocket 1011 prevention integration failed after {test_duration:.2f}s: {e})
+            pytest.f"ail(fWebSocket 1011 prevention integration failed after {test_duration:0.2f}s: {e}")
 
     async def test_golden_path_compatibility_e2e(self):
     ""
@@ -391,37 +391,37 @@ class WebSocket1011PreventionTests:
             # Cleanup
             registry.unregister_connection(golden_path_connection)
             
-            logger.info(SUCCESS: Golden Path compatibility maintained)
+            logger.inf"o(SUCCESS: Golden Path compatibility maintained)
             
         except Exception as e:
-            pytest.fail(fGolden Path compatibility test failed: {e})""
+            pytest.fail(fGolden Path compatibility test failed: {e}")""
 
 
 @pytest.mark.asyncio
 class WebSocket1011BusinessValueValidationTests:
-""""""
+"""
     Business value focused validation of WebSocket 1011 error prevention.
     
     These tests validate that the business impact of the fixes meets expectations.
 ""
 
     async def test_chat_functionality_restoration_e2e(self):
-""""""
+"""
         E2E test that validates chat functionality restoration.
         
         BVJ: Segment: All segments, Goal: Revenue Protection,
         Impact: Validates $500K+ ARR chat functionality is operational
-""""""
+"""
         logger.info("Testing chat functionality restoration...)"
         
-        # Chat functionality requires complete WebSocket pipeline
+        # Chat f"unctionality requires complete WebSocket pipeline
         from netra_backend.app.websocket_core import (
             get_connection_state_registry,
             ApplicationConnectionState
         )
         
         registry = get_connection_state_registry()
-        chat_connection = fchat_test_{int(time.time())}
+        chat_connection = fchat_test_{int(time.time())}"
         chat_user = generate_test_user_id("chat)"
         
         try:
@@ -437,9 +437,9 @@ class WebSocket1011BusinessValueValidationTests:
                 (ApplicationConnectionState.PROCESSING_READY, Chat ready for messages")"
             ]
             
-            for state, reason in chat_states:
+            f"or state, reason in chat_states:
                 success = state_machine.transition_to(state, reason=reason)
-                assert success, fChat functionality blocked at {state}
+                assert success, fChat functionality blocked at {state}"
             
             # Verify chat message processing capability
             can_process = state_machine.can_process_messages()
@@ -490,12 +490,12 @@ class WebSocket1011BusinessValueValidationTests:
                 registry.unregister_connection(events_connection)
 
     async def test_staging_deployment_readiness_e2e(self):
-""""""
+"""
         E2E test that validates staging deployment readiness.
         
         BVJ: Segment: Platform, Goal: Deployment Velocity,
         Impact: Ensures staging tests will pass and deployment can proceed
-""""""
+"""
         logger.info(Testing staging deployment readiness...)
         
         # Staging deployment requires all WebSocket functionality to be stable
@@ -512,7 +512,7 @@ class WebSocket1011BusinessValueValidationTests:
             
             # Check 2: State machine operation
             registry = get_connection_state_registry()
-            staging_connection = fstaging_test_{int(time.time())}
+            staging_connection = f"staging_test_{int(time.time())}"
             staging_user = generate_test_user_id(staging)""
             
             state_machine = registry.register_connection(staging_connection, staging_user)
@@ -531,15 +531,15 @@ class WebSocket1011BusinessValueValidationTests:
             # Cleanup
             registry.unregister_connection(staging_connection)
             
-            logger.info(SUCCESS: Staging deployment readiness confirmed)
+            logger.inf"o(SUCCESS: Staging deployment readiness confirmed)
             for check in deployment_checks:
-                logger.info(f  - {check})""
+                logger.info(f  - {check}")""
                 
         except Exception as e:
             logger.error("FAILURE: Staging deployment not ready)"
-            for check in deployment_checks:
-                logger.info(f  - {check})
-            pytest.fail(f"Staging deployment readiness failed: {e})"
+            f"or check in deployment_checks:
+                logger.info(f  - {check}")
+            pytest.fail(f"Staging deployment readiness f"ailed: {e}")"
 
 
 # Test configuration for E2E validation

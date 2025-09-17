@@ -1,5 +1,5 @@
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
-"
+"""
 Mission Critical Server Message Validator Integration Tests
 
 Integration tests that validate the MissionCriticalEventValidator works 
@@ -12,6 +12,7 @@ Issue #892: Integration validation that the validator fix works with
 real WebSocket message structures.
 "
 
+"""
 import asyncio
 import json
 from datetime import datetime, timezone

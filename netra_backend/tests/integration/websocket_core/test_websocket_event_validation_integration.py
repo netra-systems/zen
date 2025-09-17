@@ -41,7 +41,7 @@ from test_framework.websocket_helpers import (
 
 try:
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
     from netra_backend.app.websocket_core.event_validation_framework import EventValidationFramework
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from shared.isolated_environment import get_env

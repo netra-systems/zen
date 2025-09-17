@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical JWT Validation Tests
 
 Tests critical JWT validation functionality that directly impacts business value.
@@ -13,6 +13,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: $120K+ MRR protection through functional authentication
 "
 
+"""
 import pytest
 import asyncio
 import logging

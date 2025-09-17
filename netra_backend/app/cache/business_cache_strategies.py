@@ -13,13 +13,13 @@ Business Value Justification (BVJ):
 
 import hashlib
 import json
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional, Union, List
 from dataclasses import dataclass
 from enum import Enum
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class CacheStrategy(str, Enum):

@@ -155,11 +155,11 @@ class WebSocketSSOTComplianceValidationTests(SSotAsyncTestCase):
         """
         canonical_patterns = [
             {
-                'pattern': 'from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager',
+                'pattern': 'from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager',
                 'expected_callable': 'get_websocket_manager'
             },
             {
-                'pattern': 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
+                'pattern': 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager',
                 'expected_class': 'WebSocketManager'
             }
         ]
@@ -167,14 +167,14 @@ class WebSocketSSOTComplianceValidationTests(SSotAsyncTestCase):
         for pattern_info in canonical_patterns:
             try:
                 if 'expected_callable' in pattern_info:
-                    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                     self.assertTrue(
                         callable(get_websocket_manager),
                         f"SSOT canonical import failed: {pattern_info['pattern']}"
                     )
 
                 elif 'expected_class' in pattern_info:
-                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                     self.assertTrue(
                         inspect.isclass(WebSocketManager),
                         f"SSOT canonical import failed: {pattern_info['pattern']}"
@@ -375,7 +375,7 @@ class WebSocketSSOTComplianceValidationTests(SSotAsyncTestCase):
 
             # Test canonical pattern (should work)
             try:
-                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                 canonical_manager = get_websocket_manager(user_context=test_context)
                 creation_results['canonical_pattern'] = 'SUCCESS'
             except Exception as e:
@@ -383,7 +383,7 @@ class WebSocketSSOTComplianceValidationTests(SSotAsyncTestCase):
 
             # Test direct instantiation (should work)
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 direct_manager = WebSocketManager(user_context=test_context)
                 creation_results['direct_instantiation'] = 'SUCCESS'
             except Exception as e:

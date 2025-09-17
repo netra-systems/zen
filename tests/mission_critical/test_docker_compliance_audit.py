@@ -977,4 +977,4 @@ class DockerComplianceInfrastructureTests:
         logger.error(")
         sys.exit(1)
         pass
-))
+)))

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"
+"""
 MISSION CRITICAL: Comprehensive WebSocket Validation Test Suite
 
 This is the most rigorous test suite for WebSocket notifications in the Netra system.
@@ -20,6 +20,7 @@ Required WebSocket Events (MANDATORY):
 ANY FAILURE HERE BLOCKS DEPLOYMENT.
 "
 
+"""
 import asyncio
 import json
 import os

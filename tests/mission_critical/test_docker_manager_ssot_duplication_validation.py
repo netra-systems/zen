@@ -1,4 +1,4 @@
-"
+"""
 MISSION CRITICAL: Docker Manager SSOT Duplication Validation Tests
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
@@ -19,6 +19,7 @@ SSOT VIOLATION DISCOVERED:
 This violates the SSOT principle of having exactly ONE authoritative implementation.
 "
 
+"""
 import os
 import ast
 import glob

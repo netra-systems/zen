@@ -1,4 +1,4 @@
-"
+"""
 Issue #1176 Phase 2: Authentication Stabilization and Infrastructure Validation
 
 This test validates the complete authentication flow without Docker dependencies,
@@ -20,6 +20,7 @@ Expected Behavior:
 - No bypassing or mocking of critical paths
 "
 
+"""
 import asyncio
 import logging
 import time

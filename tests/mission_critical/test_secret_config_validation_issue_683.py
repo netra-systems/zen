@@ -1,7 +1,8 @@
-"
+"""
 Test Secret Configuration Validation for Issue #683
 
 This test reproduces the configuration validation failures identified in staging environment
+"""
 configuration validation tests. Focus on SecretConfig class validation and secret injection
 bridge gaps between SecretConfig and GCP deployment.
 

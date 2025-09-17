@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical Tests for Basic Triage & Response Revenue Protection - Issue #135
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
@@ -29,6 +29,7 @@ EXPECTED BEHAVIOR:
 - Tests simulate real customer scenarios that generate business value
 "
 
+"""
 import pytest
 import asyncio
 import json

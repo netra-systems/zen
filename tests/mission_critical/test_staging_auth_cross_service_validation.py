@@ -1,4 +1,4 @@
-"
+"""
 CRITICAL MISSION TEST SUITE: Cross-Service JWT Token Validation Failure
 ========================================================================
 
@@ -9,6 +9,7 @@ are being rejected by backend service.
 ISSUE DESCRIPTION:
 - Auth service issues tokens successfully (200 OK)
 - Auth service can verify its own tokens (200 OK) 
+"""
 - Backend service rejects tokens from auth service (401 Unauthorized)
 
 EXPECTED BEHAVIOR: ALL THESE TESTS SHOULD FAIL INITIALLY

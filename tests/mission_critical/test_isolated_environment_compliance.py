@@ -1,4 +1,4 @@
-"
+"""
 MISSION CRITICAL: IsolatedEnvironment Compliance Test Suite
 ==========================================================
 
@@ -20,6 +20,7 @@ Author: Claude Code - Compliance Validation
 Date: 2025-09-02
 "
 
+"""
 import os
 import sys
 import pytest

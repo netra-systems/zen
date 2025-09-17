@@ -1,4 +1,4 @@
-"
+"""
 LLM Manager SSOT Factory Pattern Enforcement Tests
 
 These tests are DESIGNED TO FAIL initially to prove SSOT violations exist.
@@ -16,6 +16,7 @@ IMPORTANT: These tests use static analysis and real code inspection
 to detect SSOT violations that could cause user data mixing.
 "
 
+"""
 import ast
 import inspect
 import os

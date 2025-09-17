@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical Tests for Chat Functionality with ToolRegistry Fixes
 
 This module contains mission critical tests that validate the complete chat functionality
@@ -19,6 +19,7 @@ Business Value:
 See: /Users/rindhujajohnson/Netra/GitHub/netra-apex/audit/staging/auto-solve-loop/toolregistry-duplicate-registration-20250109.md
 "
 
+"""
 import asyncio
 import json
 import logging

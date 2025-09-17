@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 Test suite for Issue #914: AgentRegistry SSOT Duplication
 
 This test suite demonstrates the SSOT violations in AgentRegistry implementations
@@ -7,6 +7,7 @@ across the codebase. These tests are designed to FAIL initially to prove the
 duplication problems exist.
 
 Business Impact:
+"""
 - $500K+ ARR Golden Path functionality at risk from registry inconsistencies
 - Multi-user system stability compromised by duplicate implementations
 - WebSocket bridge integration broken due to registry interface violations

@@ -45,7 +45,7 @@ class TestWebSocketIntegrationWithoutBridge(SSotAsyncTestCase):
     async def test_websocket_manager_creation_integration(self):
         """Test complete WebSocket manager creation flow without bridge."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             from netra_backend.app.websocket_core.types import WebSocketManagerMode
 
             factory = get_websocket_manager()
@@ -81,7 +81,7 @@ class TestWebSocketIntegrationWithoutBridge(SSotAsyncTestCase):
     async def test_websocket_multiple_users_without_bridge(self):
         """Test multi-user WebSocket scenarios work without bridge."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             from netra_backend.app.websocket_core.types import WebSocketManagerMode
 
             factory = get_websocket_manager()
@@ -226,7 +226,7 @@ class TestPerformanceWithoutBridge(SSotAsyncTestCase):
     async def test_websocket_manager_creation_performance(self):
         """Test WebSocket manager creation performance without bridge."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             from netra_backend.app.websocket_core.types import WebSocketManagerMode
 
             factory = get_websocket_manager()
@@ -323,7 +323,7 @@ class TestErrorHandlingWithoutBridge(SSotAsyncTestCase):
     async def test_factory_error_handling_without_bridge(self):
         """Test that factory error handling works without bridge fallbacks."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.websocket_core.types import WebSocketManagerMode
 
             # Create factory with very low limits to test error conditions

@@ -36,7 +36,7 @@ import time
 from unittest.mock import Mock, AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, _serialize_message_safely
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, _serialize_message_safely
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.websocket_core.manager import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager

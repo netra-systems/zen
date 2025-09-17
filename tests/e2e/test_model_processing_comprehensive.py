@@ -46,7 +46,7 @@ from netra_backend.app.schemas.core_models import Message, ThreadMetadata
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 from netra_backend.app.schemas.llm_response_types import LLMResponse, LLMStreamChunk
 from netra_backend.app.schemas.websocket_models import BaseWebSocketPayload, StartAgentPayload, WebSocketMessage
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient

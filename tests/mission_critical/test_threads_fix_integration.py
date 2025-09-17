@@ -1,4 +1,4 @@
-"Integration test to prove the threads 500 error fix works with real database operations.
+"""Integration test to prove the threads 500 error fix works with real database operations."""
 
 import pytest
 import asyncio
@@ -13,61 +13,59 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestThreadsFixIntegration:
-    ""Integration tests proving the fix works with real database.
+    """Integration tests proving the fix works with real database."""
 
     @pytest.fixture
     async def db_engine(self):
-        Create a test database engine.""
-    # Use SQLite for testing (in-memory)
-        engine = create_async_engine( )
-        sqlite+aiosqlite:///:memory:,
-        echo=False
-    
+        """Create a test database engine."""
+        # Use SQLite for testing (in-memory)
+        engine = create_async_engine(
+            "sqlite+aiosqlite:///:memory:",
+            echo=False
+        )
 
-    # Create tables
+        # Create tables
         async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+            await conn.run_sync(Base.metadata.create_all)
 
         yield engine
 
         await engine.dispose()
 
-        @pytest.fixture
+    @pytest.fixture
     async def db_session(self, db_engine):
-        "Create a database session."
-        pass
-        async_session = async_sessionmaker( )
-        db_engine,
-        class_=AsyncSession,
-        expire_on_commit=False
-    
+        """Create a database session."""
+        async_session = async_sessionmaker(
+            db_engine,
+            class_=AsyncSession,
+            expire_on_commit=False
+        )
 
         async with async_session() as session:
-        yield session
+            yield session
 
-        @pytest.fixture
+    @pytest.fixture
     async def thread_repo(self):
-        "Create thread repository."
+        """Create thread repository."""
         await asyncio.sleep(0)
         return ThreadRepository()
 
     async def create_test_thread(self, db: AsyncSession, thread_id: str, metadata: dict = None):
-        Helper to create a test thread.""
-        pass
-        thread = Thread( )
-        id=thread_id,
-        object=thread,
-        created_at=1000000,
-        metadata_=metadata
-    
+        """Helper to create a test thread."""
+        thread = Thread(
+            id=thread_id,
+            object="thread",
+            created_at=1000000,
+            metadata_=metadata
+        )
         db.add(thread)
         await db.commit()
         await asyncio.sleep(0)
         return thread
 
-@pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_normal_case_with_proper_metadata(self, db_session, thread_repo):
-    Test normal case: thread with proper metadata.""
+        """Test normal case: thread with proper metadata."""
         # Create thread with proper metadata
 user_id = 7c5e1032-ed21-4aea-b12a-aeddf3622bec
 await self.create_test_thread( )

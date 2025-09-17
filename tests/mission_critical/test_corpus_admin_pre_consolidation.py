@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"
+"""
 Pre-consolidation tests for Corpus Admin module.
 These tests capture current functionality to ensure nothing is lost during SSOT consolidation.
 
 CRITICAL: These tests must pass BEFORE and AFTER the consolidation.
-"
+"""
+"""
+"""
 import asyncio
 import json
 import os

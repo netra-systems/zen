@@ -1,4 +1,4 @@
-"
+"""
 AgentRegistry SSOT Violation Reproduction Tests - Issue #1080
 
 MISSION: Reproduce AgentRegistry SSOT violations blocking Golden Path
@@ -15,6 +15,7 @@ Created: 2025-09-14 - SSOT Test Plan Step 2
 Priority: P0 Critical - Golden Path blocking
 "
 
+"""
 import pytest
 import asyncio
 from typing import Dict, Any, Optional, Type

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 Comprehensive Chat Responsiveness Under Load Tests - Issue #976 Restoration
 
 Business Value Justification (BVJ):
@@ -25,6 +25,7 @@ SSOT Compliance:
 - No mocks for business-critical chat functionality
 "
 
+"""
 import asyncio
 import time
 import uuid

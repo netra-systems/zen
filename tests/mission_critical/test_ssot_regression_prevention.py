@@ -1,4 +1,4 @@
-"
+"""
 MISSION CRITICAL: SSOT Regression Prevention Test Suite
 
 This test suite prevents regression of SSOT violations and ensures the framework
@@ -12,6 +12,7 @@ CRITICAL: These tests are designed to be STRICT and UNFORGIVING.
 They catch violations that could lead to system instability or cascade failures.
 "
 
+"""
 import asyncio
 import ast
 import importlib

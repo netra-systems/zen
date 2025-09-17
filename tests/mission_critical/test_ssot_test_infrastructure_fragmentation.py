@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 SSOT Test Infrastructure Fragmentation Detection - Issue #1075
 Integration test to detect test infrastructure fragmentation leading to -1981.6% compliance.
 
@@ -7,6 +7,7 @@ CRITICAL BUSINESS IMPACT: Test infrastructure fragmentation causes:
 - Inconsistent test execution across teams
 - False positives/negatives in test results
 - Development velocity reduction
+"""
 - Risk to $500K+ ARR from unreliable test coverage
 
 This test is designed to FAIL initially to prove the massive fragmentation exists.

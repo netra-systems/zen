@@ -36,7 +36,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
     ManagerHealth
 )
 from netra_backend.app.websocket_core.types import WebSocketManagerMode, create_isolated_mode
-from netra_backend.app.websocket_core.websocket_manager import _WebSocketManagerImplementation
+from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
 
 # Dependencies
 from shared.logging.unified_logging_ssot import get_logger

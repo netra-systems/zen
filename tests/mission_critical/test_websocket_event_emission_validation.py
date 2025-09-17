@@ -1,4 +1,4 @@
-"
+"""
 MISSION CRITICAL: WebSocket Event Emission Validation Test
 
 This test validates that all 5 critical WebSocket events are properly emitted
@@ -16,6 +16,7 @@ This test runs without requiring full backend services by using mocks,
 but validates that the integration points are correctly connected.
 "
 
+"""
 import asyncio
 import pytest
 import time

@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical Test: Load Balancer SSL Certificate Validation
 
 Business Value Justification (BVJ):
@@ -14,6 +14,7 @@ warnings and prevent user access, resulting in 100% user impact.
 This addresses GitHub issue #113: GCP Load Balancer SSL Configuration
 "
 
+"""
 import asyncio
 import ssl
 import socket

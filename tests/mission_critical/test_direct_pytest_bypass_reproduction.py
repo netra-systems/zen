@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 Mission Critical Test Suite: Direct # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution Bypass Violation Reproduction - Issue #1075
@@ -30,6 +30,7 @@ Author: SSOT Gardener Agent - Issue #1075 Step 1
 Date: 2025-09-14
 "
 
+"""
 import ast
 import os
 import sys

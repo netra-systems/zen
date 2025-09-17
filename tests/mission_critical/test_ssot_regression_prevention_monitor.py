@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"
+"""
  ALERT:  MISSION CRITICAL: SSOT Regression Prevention Monitor Tests
 
 CRITICAL MISSION: Enhanced tests that serve as automated regression monitors
 Context: Transforms existing violation detection tests into continuous regression monitors
+"""
 Objective: Prevent reintroduction of SSOT violations from resolved GitHub issues
 
 Business Value:

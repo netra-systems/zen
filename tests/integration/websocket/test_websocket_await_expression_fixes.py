@@ -18,16 +18,16 @@ import json
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, patch, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 # SSOT WebSocket Imports
 try:
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     from netra_backend.app.services.agent_websocket_bridge import (
         create_agent_websocket_bridge,
         AgentWebSocketBridge
     )
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     WEBSOCKET_SYSTEM_AVAILABLE = True
 except ImportError:
     WEBSOCKET_SYSTEM_AVAILABLE = False

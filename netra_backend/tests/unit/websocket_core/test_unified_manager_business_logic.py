@@ -152,7 +152,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
 
     def test_serialize_message_handles_enum_objects(self):
         """Test that message serialization correctly handles enum objects."""
-        from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
+        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
 
         class BusinessEnum(Enum):
             AGENT_STARTED = "agent_started"
@@ -187,7 +187,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
 
     def test_serialize_message_handles_websocket_states(self):
         """Test serialization of WebSocket state enums specifically."""
-        from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
+        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
 
         # Mock WebSocket state enum to simulate framework states
         class MockWebSocketState(Enum):
@@ -220,7 +220,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
 
     def test_serialize_message_handles_datetime_objects(self):
         """Test serialization of datetime objects in messages."""
-        from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
+        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
 
         now = datetime.now(timezone.utc)
         message = {
@@ -244,7 +244,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
 
     def test_serialize_message_error_handling_fallback(self):
         """Test that serialization has proper fallback for unhandled types."""
-        from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
+        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
 
         class UnserializableClass:
             def __init__(self):
@@ -372,7 +372,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
 
     def test_manager_mode_consolidation_to_unified(self):
         """Test that all manager modes are consolidated to UNIFIED."""
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
+        from netra_backend.app.websocket_core.unified_manager import WebSocketManagerMode
 
         # BUSINESS LOGIC VALIDATION: All modes should redirect to unified
         self.assertEqual(WebSocketManagerMode.UNIFIED.value, "unified")
@@ -411,7 +411,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
 
     def test_websocket_connection_validates_user_id_format(self):
         """Test that WebSocketConnection validates user ID format."""
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 
         mock_ws = self._create_mock_websocket()
 
@@ -437,7 +437,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
 
     def test_enum_key_representation_handles_different_enum_types(self):
         """Test enum key representation logic for different enum types."""
-        from netra_backend.app.websocket_core.websocket_manager import _get_enum_key_representation
+        from netra_backend.app.websocket_core.unified_manager import _get_enum_key_representation
         from enum import Enum, IntEnum
 
         class StringEnum(Enum):
@@ -461,7 +461,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
 
     def test_enum_key_websocket_state_special_handling(self):
         """Test special handling for WebSocket state enums."""
-        from netra_backend.app.websocket_core.websocket_manager import _get_enum_key_representation
+        from netra_backend.app.websocket_core.unified_manager import _get_enum_key_representation
         from enum import Enum
 
         # Create mock WebSocket state enum
@@ -484,7 +484,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
 
     def test_serialize_message_handles_json_serialization_errors(self):
         """Test that message serialization gracefully handles JSON errors."""
-        from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
+        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
 
         # Create object that can't be JSON serialized
         class CircularRefClass:
@@ -502,7 +502,7 @@ class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
 
     def test_serialize_message_handles_complex_nested_failures(self):
         """Test serialization of complex structures with nested failures."""
-        from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
+        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
         from enum import Enum
 
         class EnumTests(Enum):

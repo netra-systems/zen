@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"
+"""
 MISSION CRITICAL TEST SUITE: Staging WebSocket Agent Events
 
 THIS SUITE VALIDATES WEBSOCKET FUNCTIONALITY IN STAGING ENVIRONMENT.
@@ -15,6 +15,7 @@ This test suite:
 ANY FAILURE HERE INDICATES STAGING WEBSOCKET ISSUES THAT WILL AFFECT PRODUCTION.
 "
 
+"""
 import asyncio
 import json
 import os

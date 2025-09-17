@@ -1,4 +1,4 @@
-"
+"""
 ClickHouse Logging Fix Validation - Mission Critical Regression Prevention Tests
 ==============================================================================
 
@@ -37,6 +37,7 @@ Phase B (After Fix): test_after_fix_behavior_validation should PASS (demonstrate
 All other tests should PASS in both phases with different log patterns
 "
 
+"""
 import asyncio
 import logging
 import pytest

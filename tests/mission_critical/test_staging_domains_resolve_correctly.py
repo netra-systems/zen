@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical Test: Staging Domains Resolve Correctly
 
 Business Value Justification (BVJ):
@@ -8,6 +8,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Validates production-like domain resolution for staging environment
 
 CRITICAL: This test ensures that all *.staging.netrasystems.ai domains resolve correctly
+"""
 and are accessible from the test environment. DNS resolution failures cause complete
 system inaccessibility for all user segments.
 

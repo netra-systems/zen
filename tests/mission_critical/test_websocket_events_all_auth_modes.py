@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical Tests: WebSocket Events with All Authentication Modes
 
 PURPOSE: Validate all 5 critical WebSocket events are delivered with different 
@@ -26,6 +26,7 @@ MISSION CRITICAL TEST STRATEGY:
 
 EXPECTED FAILURES:
 These tests MUST FAIL INITIALLY to prove events are broken:
+"""
 1. Events fail due to WebSocket 1011 errors from auth blocking
 2. Permissive auth modes not implemented, so events can't be tested
 3. Event delivery timing issues with auth failures

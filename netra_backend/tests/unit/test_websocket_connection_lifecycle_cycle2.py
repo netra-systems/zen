@@ -19,7 +19,7 @@ from typing import Dict, Any, List, Optional
 import time
 import uuid
 
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.websocket_core.types import WebSocketConnectionState as ConnectionStatus, ConnectionInfo
 from datetime import datetime, timezone
 

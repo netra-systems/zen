@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical Tests for Chat Business Value Restoration
 
 This module validates that the core chat functionality is restored after
@@ -20,6 +20,7 @@ Business Value Focus:
 See: audit/staging/auto-solve-loop/toolregistry-duplicate-registration-20250109.md
 "
 
+"""
 import asyncio
 import json
 import logging

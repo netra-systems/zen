@@ -1,4 +1,4 @@
-"
+"""
 Redis WebSocket 1011 Regression Test Suite - Mission Critical
 
 BUSINESS VALUE JUSTIFICATION:
@@ -22,6 +22,7 @@ CRITICAL ISSUE #849 VALIDATION:
 GOLDEN PATH PROTECTION: Users login → get AI responses
 "
 
+"""
 import asyncio
 import pytest
 import time

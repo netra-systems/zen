@@ -1,4 +1,4 @@
-"
+"""
 WebSocket Timeout Optimization Validation Tests
 
 CRITICAL: Validates the secondary timeout fixes that resolve 60s/120s WebSocket latency patterns.
@@ -6,8 +6,10 @@ After fixing the primary 179s auth timeout, this test ensures all remaining time
 are optimized for <5s WebSocket responsiveness.
 
 Business Value: $30K+ MRR chat functionality requires <5s response times for user experience.
-"
+"""
 
+"""
+"""
 import pytest
 import asyncio
 import time

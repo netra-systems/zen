@@ -1,6 +1,7 @@
-"
+"""
 SSOT File Reference Migration Tests for Issue #1076
 
+"""
 Test Plan: Detect files that still reference deprecated import paths or modules.
 Should FAIL initially (detecting remaining references) and PASS after migration.
 

@@ -1,4 +1,4 @@
-"
+"""
 MISSION CRITICAL TESTS: WebSocket Supervisor Startup Sequence - 1011 Error Prevention
 
 MISSION CRITICAL STATUS: These tests protect $500K+ ARR by validating the core
@@ -29,6 +29,7 @@ SSOT COMPLIANCE:
 - Follows mission critical test patterns for revenue protection
 "
 
+"""
 import asyncio
 import json
 import logging

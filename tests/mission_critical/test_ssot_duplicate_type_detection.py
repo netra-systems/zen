@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"
+"""
 SSOT Duplicate Type Definition Detection - Issue #1075
+"""
 Focused unit test to detect the specific 89 duplicate type definitions identified in the analysis.
 
 CRITICAL BUSINESS IMPACT: Duplicate type definitions lead to:

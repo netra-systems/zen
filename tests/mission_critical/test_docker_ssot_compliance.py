@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical Test: Docker SSOT Compliance Verification
 
 TEAM DELTA INFRASTRUCTURE TESTS: Comprehensive SSOT validation and compliance
@@ -18,6 +18,7 @@ INFRASTRUCTURE VALIDATION:
 - Multi-environment SSOT consistency
 "
 
+"""
 import asyncio
 import inspect
 import logging

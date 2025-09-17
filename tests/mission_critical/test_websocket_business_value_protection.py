@@ -1,4 +1,4 @@
-"
+"""
 Test WebSocket Business Value Protection - Revenue Protection
 
 Business Value Justification (BVJ):
@@ -16,6 +16,7 @@ customer satisfaction. All tests in this suite are mission-critical and
 must pass for deployment approval.
 "
 
+"""
 import pytest
 import asyncio
 import json

@@ -5,16 +5,16 @@ import pytest
 _lazy_imports = {}
 
 def lazy_import(module_path: str, component: str = None):
-    "Lazy import pattern for performance optimization
+    """Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
-            module = __import__(module_path, fromlist=[component] if component else []
+            module = __import__(module_path, fromlist=[component] if component else [])
             if component:
                 _lazy_imports[module_path] = getattr(module, component)
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(fWarning: Failed to lazy load {module_path}: {e}"")
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
             _lazy_imports[module_path] = None
     
     return _lazy_imports[module_path]
@@ -22,21 +22,21 @@ def lazy_import(module_path: str, component: str = None):
 _lazy_imports = {}
 
 def lazy_import(module_path: str, component: str = None):
-    Lazy import pattern for performance optimization""
+    """Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
-            module = __import__(module_path, fromlist=[component] if component else []
+            module = __import__(module_path, fromlist=[component] if component else [])
             if component:
                 _lazy_imports[module_path] = getattr(module, component)
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(fWarning: Failed to lazy load {module_path}: {e})
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
             _lazy_imports[module_path] = None
     
     return _lazy_imports[module_path]
 
-""
+"""
 Mission Critical Test Suite for 5 WebSocket Events - Business Value Protection
 
 Business Value Justification (BVJ):
@@ -66,7 +66,7 @@ Test Coverage:
 - Performance validation under load
 - Recovery testing when events fail
 - Integration with real agent workflows
-
+"""
 
 import asyncio
 import pytest
@@ -91,7 +91,7 @@ from shared.types.core_types import (
 )
 
 # System Under Test - SSOT imports
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.canonical_import_patterns import (
     WebSocketManager as UnifiedWebSocketManager,
     WebSocketConnection,
     WebSocketManagerMode
@@ -105,42 +105,42 @@ logger = central_logger.get_logger(__name__)
 
 
 class CriticalEventType(Enum):
-    ""The 5 critical WebSocket events that drive business value.
-    AGENT_STARTED = agent_started"
-    AGENT_THINKING = agent_thinking" 
-    TOOL_EXECUTING = tool_executing
-    TOOL_COMPLETED = tool_completed""
-    AGENT_COMPLETED = agent_completed
+    """The 5 critical WebSocket events that drive business value."""
+    AGENT_STARTED = "agent_started"
+    AGENT_THINKING = "agent_thinking" 
+    TOOL_EXECUTING = "tool_executing"
+    TOOL_COMPLETED = "tool_completed"
+    AGENT_COMPLETED = "agent_completed"
 
 
 @dataclass
 class BusinessValueMetrics:
-    "Metrics for measuring business value delivery through events."
+    """Metrics for measuring business value delivery through events."""
     user_confidence_score: float = 0.0  # 0-100, how confident user feels
     engagement_level: float = 0.0       # 0-100, how engaged user is
     value_perception: float = 0.0       # 0-100, how much value user perceives
     completion_satisfaction: float = 0.0 # 0-100, satisfaction with result
     
     def calculate_total_business_value(self) -> float:
-        Calculate total business value score (0-100).""
+        """Calculate total business value score (0-100)."""
         return (self.user_confidence_score + self.engagement_level + 
                 self.value_perception + self.completion_satisfaction) / 4.0
 
 
 class BusinessValueEventValidator:
-    Validates business value delivery through WebSocket events."
+    """Validates business value delivery through WebSocket events."""
     
     def __init__(self):
         self.events_received = []
         self.business_metrics = BusinessValueMetrics()
         self.user_journey_complete = False
         
-    def validate_agent_started_business_value(self, event: Dict[str, Any] -> bool:
-    "
+    def validate_agent_started_business_value(self, event: Dict[str, Any]) -> bool:
+        """
         Validate agent_started event delivers business value.
         
         Business Value: Builds user confidence that AI is working on their problem.
-        "
+        """
         required_fields = ['agent_name', 'task']
         business_indicators = ['analyzing', 'optimizing', 'processing', 'working', 'solving']
         
@@ -158,12 +158,12 @@ class BusinessValueEventValidator:
             
         return has_business_value
         
-    def validate_agent_thinking_business_value(self, event: Dict[str, Any] -> bool:
-        "
+    def validate_agent_thinking_business_value(self, event: Dict[str, Any]) -> bool:
+        """
         Validate agent_thinking event delivers business value.
         
         Business Value: Engages user by showing real-time AI reasoning process.
-"
+        """
         required_fields = ['thought']
         engagement_indicators = ['analyzing', 'considering', 'evaluating', 'determining', 'calculating']
         
@@ -183,12 +183,12 @@ class BusinessValueEventValidator:
             
         return has_engagement_value or has_progress
         
-    def validate_tool_executing_business_value(self, event: Dict[str, Any] -> bool:
-    "
+    def validate_tool_executing_business_value(self, event: Dict[str, Any]) -> bool:
+        """
         Validate tool_executing event delivers business value.
         
         Business Value: Shows AI is using tools to solve user's problem.
-        "
+        """
         required_fields = ['tool']
         value_indicators = ['database', 'api', 'analysis', 'query', 'search', 'compute', 'fetch']
         
@@ -208,12 +208,12 @@ class BusinessValueEventValidator:
             
         return shows_value or has_description
         
-    def validate_tool_completed_business_value(self, event: Dict[str, Any] -> bool:
-        "
+    def validate_tool_completed_business_value(self, event: Dict[str, Any]) -> bool:
+        """
         Validate tool_completed event delivers business value.
         
         Business Value: Proves AI capabilities by showing concrete results.
-"
+        """
         required_fields = ['tool', 'result']
         result_indicators = ['found', 'analyzed', 'calculated', 'identified', 'generated', 'processed']
         
@@ -234,12 +234,12 @@ class BusinessValueEventValidator:
             
         return shows_results or has_quantities
         
-    def validate_agent_completed_business_value(self, event: Dict[str, Any] -> bool:
-    "
+    def validate_agent_completed_business_value(self, event: Dict[str, Any]) -> bool:
+        """
         Validate agent_completed event delivers business value.
         
         Business Value: Completes user journey with actionable results.
-        "
+        """
         required_fields = ['result']
         completion_indicators = ['completed', 'finished', 'ready', 'generated', 'analysis', 'recommendations']
         business_value_indicators = ['savings', '$', 'optimization', 'improvement', 'efficiency', 'cost', 'revenue']
@@ -263,8 +263,8 @@ class BusinessValueEventValidator:
             
         return shows_completion
         
-    def validate_event_business_value(self, event: Dict[str, Any] -> bool:
-        "Validate any event's business value based on its type.
+    def validate_event_business_value(self, event: Dict[str, Any]) -> bool:
+        """Validate any event's business value based on its type."""
         event_type = event.get('type')
         
         validators = {
@@ -281,16 +281,16 @@ class BusinessValueEventValidator:
         return False
         
     def get_business_value_score(self) -> float:
-        "Get overall business value score (0-100)."
+        """Get overall business value score (0-100)."""
         return self.business_metrics.calculate_total_business_value()
         
     def is_user_journey_complete(self) -> bool:
-        "Check if complete user journey was delivered."
+        """Check if complete user journey was delivered."""
         return self.user_journey_complete
 
 
 class RealWebSocketEventTester:
-    Real WebSocket client for testing critical events.""
+    """Real WebSocket client for testing critical events."""
     
     def __init__(self, port: int = 0):
         self.port = port
@@ -301,9 +301,9 @@ class RealWebSocketEventTester:
         self.event_validator = BusinessValueEventValidator()
         
     async def start_test_server(self) -> int:
-        Start a real WebSocket server for event testing."
+        """Start a real WebSocket server for event testing."""
         async def event_handler(websocket):
-            logger.info("WebSocket client connected for event testing)
+            logger.info("WebSocket client connected for event testing")
             
             try:
                 async for message in websocket:
@@ -312,25 +312,25 @@ class RealWebSocketEventTester:
                         'event': event_data,
                         'timestamp': datetime.now(timezone.utc),
                         'business_value': self.event_validator.validate_event_business_value(event_data)
-                    }
+                    })
                     
-                    logger.info(fReceived critical event: {event_data.get('type')})
+                    logger.info(f"Received critical event: {event_data.get('type')}")
                     
             except websockets.exceptions.ConnectionClosed:
-                logger.info("Event testing WebSocket client disconnected)"
+                logger.info("Event testing WebSocket client disconnected")
                 
-        self.server = await websockets.serve(event_handler, localhost, self.port or 0)
+        self.server = await websockets.serve(event_handler, "localhost", self.port or 0)
         
         if self.port == 0:
             self.port = self.server.sockets[0].getsockname()[1]
             
-        logger.info(fEvent testing WebSocket server started on port {self.port})
+        logger.info(f"Event testing WebSocket server started on port {self.port}")
         return self.port
         
     async def connect_as_client(self, user_id: str) -> bool:
-        ""Connect as WebSocket client to receive events.
+        """Connect as WebSocket client to receive events."""
         try:
-            uri = fws://localhost:{self.port}
+            uri = f"ws://localhost:{self.port}"
             self.websocket = await websockets.connect(uri)
             self.connected = True
             
@@ -339,11 +339,11 @@ class RealWebSocketEventTester:
             return True
             
         except Exception as e:
-            logger.error(fFailed to connect WebSocket event client: {e}")"
+            logger.error(f"Failed to connect WebSocket event client: {e}")
             return False
             
     async def _listen_for_events(self):
-        Listen for WebSocket events."
+        """Listen for WebSocket events."""
         try:
             async for message in self.websocket:
                 event_data = json.loads(message)
@@ -351,14 +351,14 @@ class RealWebSocketEventTester:
                     'event': event_data,
                     'timestamp': datetime.now(timezone.utc),
                     'business_value': self.event_validator.validate_event_business_value(event_data)
-                }
+                })
         except websockets.exceptions.ConnectionClosed:
             self.connected = False
         except Exception as e:
-            logger.error(fError listening for events: {e}")
+            logger.error(f"Error listening for events: {e}")
             
     async def stop_server(self):
-        Stop the WebSocket server.""
+        """Stop the WebSocket server."""
         if self.server:
             self.server.close()
             await self.server.wait_closed()
@@ -367,35 +367,35 @@ class RealWebSocketEventTester:
             await self.websocket.close()
             
     def get_events_by_type(self, event_type: str) -> List[Dict[str, Any]]:
-        Get all received events of a specific type."
+        """Get all received events of a specific type."""
         return [event_data for event_data in self.received_events 
                 if event_data['event'].get('type') == event_type]
                 
     def has_all_critical_events(self) -> bool:
-        "Check if all 5 critical events were received.
+        """Check if all 5 critical events were received."""
         critical_types = {event.value for event in CriticalEventType}
         received_types = {event_data['event'].get('type') for event_data in self.received_events}
         return critical_types.issubset(received_types)
         
     def get_business_value_score(self) -> float:
-        ""Get overall business value score.
+        """Get overall business value score."""
         return self.event_validator.get_business_value_score()
 
 
 @pytest.mark.mission_critical
 class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
-    Mission critical tests for the 5 WebSocket events that drive business value.""
+    """Mission critical tests for the 5 WebSocket events that drive business value."""
     
     @pytest.fixture(autouse=True)
     async def setup_websocket_event_testing(self):
-        Set up real WebSocket event testing environment.""
+        """Set up real WebSocket event testing environment."""
         # Set up base test case
         self.setup_method()
         
         # Initialize WebSocket testing components using SSOT factory pattern
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         self.manager = get_websocket_manager()
-        self.test_user_id = ensure_user_id(critical-events-user-123)
+        self.test_user_id = ensure_user_id("critical-events-user-123")
         self.event_tester = RealWebSocketEventTester()
         
         # Start real WebSocket server for event testing
@@ -410,79 +410,80 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
     # ========== MISSION CRITICAL EVENT TESTS ==========
     
     async def test_all_five_critical_events_complete_business_journey_mission_critical(self):
-        "
+        """
         MISSION CRITICAL: Test all 5 critical events deliver complete business journey.
         
         Business Value: $500K+ ARR depends on complete event delivery driving user confidence.
         Can Fail: If any event is missing, user experience breaks and churn increases.
-"
+        """
         # Connect real WebSocket client to receive events
         connected = await self.event_tester.connect_as_client(self.test_user_id)
-        self.assertTrue(connected, Failed to connect real WebSocket event client)"
+        self.assertTrue(connected, "Failed to connect real WebSocket event client")
         
         # Create real connection through unified manager
-        real_websocket = await websockets.connect(fws://localhost:{self.server_port}")
+        real_websocket = await websockets.connect(f"ws://localhost:{self.server_port}")
         
         connection = WebSocketConnection(
             connection_id=str(uuid.uuid4()),
             user_id=self.test_user_id,
             websocket=real_websocket,
             connected_at=datetime.now(timezone.utc),
-            metadata={business_critical: True, test_type: "complete_journey}"
+            metadata={"business_critical": True, "test_type": "complete_journey"}
+        )
         
         await self.manager.add_connection(connection)
         
         # Send all 5 critical events in realistic business sequence
         critical_events_sequence = [
             {
-                type: agent_started,
-                agent_name: "CostOptimizationAgent,
-                task": Analyzing enterprise cloud infrastructure costs,
-                user_id: self.test_user_id,
-                "estimated_savings: Up to $50,000 annually",
-                business_context: Enterprise cost optimization analysis
+                "type": "agent_started",
+                "agent_name": "CostOptimizationAgent",
+                "task": "Analyzing enterprise cloud infrastructure costs",
+                "user_id": self.test_user_id,
+                "estimated_savings": "Up to $50,000 annually",
+                "business_context": "Enterprise cost optimization analysis"
             },
             {
-                type: agent_thinking",
-                "thought: Analyzing 247 AWS services across 15 accounts to identify optimization opportunities...,
-                progress: 25,
-                user_id": self.test_user_id,"
-                current_step: Data collection and baseline establishment
+                "type": "agent_thinking",
+                "thought": "Analyzing 247 AWS services across 15 accounts to identify optimization opportunities...",
+                "progress": 25,
+                "user_id": self.test_user_id,
+                "current_step": "Data collection and baseline establishment"
             },
             {
-                type: tool_executing",
-                "tool: aws_cost_explorer_api,
-                description: Querying AWS Cost Explorer for detailed usage patterns and cost trends,
-                "user_id: self.test_user_id,"
-                progress: 60,
-                data_sources: [CloudWatch", "Cost Explorer, Billing API]
+                "type": "tool_executing",
+                "tool": "aws_cost_explorer_api",
+                "description": "Querying AWS Cost Explorer for detailed usage patterns and cost trends",
+                "user_id": self.test_user_id,
+                "progress": 60,
+                "data_sources": ["CloudWatch", "Cost Explorer", "Billing API"]
             },
             {
-                type: tool_completed,
-                "tool: aws_cost_explorer_api",
-                result: Analyzed 15,847 cost data points and identified 23 optimization opportunities,
-                user_id: self.test_user_id,"
-                findings": {
-                    underutilized_instances: 47,
-                    over_provisioned_storage": "2.3TB,
-                    unused_elastic_ips: 12
+                "type": "tool_completed",
+                "tool": "aws_cost_explorer_api",
+                "result": "Analyzed 15,847 cost data points and identified 23 optimization opportunities",
+                "user_id": self.test_user_id,
+                "findings": {
+                    "underutilized_instances": 47,
+                    "over_provisioned_storage": "2.3TB",
+                    "unused_elastic_ips": 12
                 }
             },
             {
-                type: agent_completed",
-                "result: Cost optimization analysis complete - Generated comprehensive savings plan,
-                user_id: self.test_user_id,
-                total_potential_savings": "$47,234 annually,
-                high_impact_recommendations: 8,
-                implementation_priority: Start with EC2 right-sizing for immediate 15% reduction",
-                "business_impact: Reduces infrastructure spend by 28% while maintaining performance
+                "type": "agent_completed",
+                "result": "Cost optimization analysis complete - Generated comprehensive savings plan",
+                "user_id": self.test_user_id,
+                "total_potential_savings": "$47,234 annually",
+                "high_impact_recommendations": 8,
+                "implementation_priority": "Start with EC2 right-sizing for immediate 15% reduction",
+                "business_impact": "Reduces infrastructure spend by 28% while maintaining performance"
             }
         ]
         
         # Send events with realistic delays
         for i, event in enumerate(critical_events_sequence):
             await self.manager.send_to_user(self.test_user_id, event)
-            logger.info(fSent critical event {i+1}/5: {event['type']})
+            logger.info(f"Sent critical event {i+1}/5: {event['type']}")
             
             # Realistic delay between events (simulates real agent processing)
             if i < len(critical_events_sequence) - 1:
@@ -493,49 +494,49 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         
         # CRITICAL VALIDATION: All 5 events must be received
         self.assertTrue(self.event_tester.has_all_critical_events(),
-                       fMissing critical events! Received: {[e['event'].get('type') for e in self.event_tester.received_events]})"
+                       f"Missing critical events! Received: {[e['event'].get('type') for e in self.event_tester.received_events]}")
         
         # CRITICAL VALIDATION: Events must deliver business value
         business_value_score = self.event_tester.get_business_value_score()
         self.assertGreaterEqual(business_value_score, 80.0,
-                               f"Business value score too low: {business_value_score:.1f}% (minimum 80%))
+                               f"Business value score too low: {business_value_score:.1f}% (minimum 80%)")
         
         # CRITICAL VALIDATION: User journey must be complete
         self.assertTrue(self.event_tester.event_validator.is_user_journey_complete(),
-                       User journey not completed - agent_completed event must indicate completion)
+                       "User journey not completed - agent_completed event must indicate completion")
         
         # Verify each event type was received with business value
         for event_type in CriticalEventType:
             events_of_type = self.event_tester.get_events_by_type(event_type.value)
             self.assertGreater(len(events_of_type), 0,
-                              fCritical event {event_type.value} was not received)
+                              f"Critical event {event_type.value} was not received")
             
             # Verify business value in event
             event_has_value = any(event_data['business_value'] for event_data in events_of_type)
             self.assertTrue(event_has_value,
-                           fCritical event {event_type.value} lacks business value")"
+                           f"Critical event {event_type.value} lacks business value")
         
         # Final validation: Complete business metrics
         metrics = self.event_tester.event_validator.business_metrics
-        self.assertGreater(metrics.user_confidence_score, 0, No user confidence built)
-        self.assertGreater(metrics.engagement_level, 0, No user engagement achieved) "
-        self.assertGreater(metrics.value_perception, 0, "No value perception created)
-        self.assertGreater(metrics.completion_satisfaction, 0, No completion satisfaction delivered)
+        self.assertGreater(metrics.user_confidence_score, 0, "No user confidence built")
+        self.assertGreater(metrics.engagement_level, 0, "No user engagement achieved") 
+        self.assertGreater(metrics.value_perception, 0, "No value perception created")
+        self.assertGreater(metrics.completion_satisfaction, 0, "No completion satisfaction delivered")
         
-        logger.info(f" PASS:  MISSION CRITICAL: All 5 events delivered with {business_value_score:.1f}% business value)
+        logger.info(f" PASS:  MISSION CRITICAL: All 5 events delivered with {business_value_score:.1f}% business value")
         
         await real_websocket.close()
         
     async def test_agent_started_event_builds_user_confidence_business_critical(self):
-        "
+        """
         BUSINESS CRITICAL: Test agent_started event builds user confidence.
         
         Business Value: First impression that builds user confidence in AI capabilities.
         Can Fail: If agent_started lacks business context, users lose confidence immediately.
-"
+        """
         await self.event_tester.connect_as_client(self.test_user_id)
         
-        real_websocket = await websockets.connect(f"ws://localhost:{self.server_port})
+        real_websocket = await websockets.connect(f"ws://localhost:{self.server_port}")
         connection = WebSocketConnection(
             connection_id=str(uuid.uuid4()),
             user_id=self.test_user_id,
@@ -547,50 +548,50 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         
         # Test HIGH VALUE agent_started event
         high_value_event = {
-            type: agent_started,
-            agent_name: "EnterpriseSecurityAnalyzer, 
-            task": Analyzing security vulnerabilities across 500+ enterprise assets,
-            expected_value: Identify critical security gaps and compliance violations,
-            estimated_time": "3-5 minutes,
-            business_impact: Prevent potential $2M+ security breach
+            "type": "agent_started",
+            "agent_name": "EnterpriseSecurityAnalyzer", 
+            "task": "Analyzing security vulnerabilities across 500+ enterprise assets",
+            "expected_value": "Identify critical security gaps and compliance violations",
+            "estimated_time": "3-5 minutes",
+            "business_impact": "Prevent potential $2M+ security breach"
         }
         
         await self.manager.send_to_user(self.test_user_id, high_value_event)
         await asyncio.sleep(1.0)
         
         # Verify event received
-        agent_started_events = self.event_tester.get_events_by_type(agent_started)"
-        self.assertEqual(len(agent_started_events), 1, "agent_started event not received)
+        agent_started_events = self.event_tester.get_events_by_type("agent_started")
+        self.assertEqual(len(agent_started_events), 1, "agent_started event not received")
         
         # Verify business value elements
         event = agent_started_events[0]['event']
-        self.assertIn(agent_name, event, agent_started missing agent_name)
-        self.assertIn(task", event, "agent_started missing task description)
+        self.assertIn("agent_name", event, "agent_started missing agent_name")
+        self.assertIn("task", event, "agent_started missing task description")
         
         # Verify confidence-building elements
-        confidence_indicators = [analyzing, enterprise, security, "vulnerabilities]
+        confidence_indicators = ["analyzing", "enterprise", "security", "vulnerabilities"]
         event_text = str(event).lower()
         confidence_elements = [indicator for indicator in confidence_indicators if indicator in event_text]
         self.assertGreater(len(confidence_elements), 2,
-                          fagent_started lacks confidence-building elements. Found: {confidence_elements}")
+                          f"agent_started lacks confidence-building elements. Found: {confidence_elements}")
         
         # Verify business value score
         business_value_score = self.event_tester.get_business_value_score()
         self.assertGreater(business_value_score, 20.0,
-                          fagent_started business value too low: {business_value_score:.1f}%)
+                          f"agent_started business value too low: {business_value_score:.1f}%")
         
         await real_websocket.close()
         
     async def test_agent_thinking_event_drives_user_engagement_business_critical(self):
-        "
+        """
         BUSINESS CRITICAL: Test agent_thinking event drives user engagement.
         
         Business Value: Keeps users engaged by showing AI reasoning process.
         Can Fail: If thinking events are generic, users lose interest and leave.
-"
+        """
         await self.event_tester.connect_as_client(self.test_user_id)
         
-        real_websocket = await websockets.connect(fws://localhost:{self.server_port})
+        real_websocket = await websockets.connect(f"ws://localhost:{self.server_port}")
         connection = WebSocketConnection(
             connection_id=str(uuid.uuid4()),
             user_id=self.test_user_id,
@@ -603,22 +604,22 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         # Test multiple thinking events showing progression
         thinking_events = [
             {
-                type": "agent_thinking,
-                thought: Evaluating 1,247 database queries to identify performance bottlenecks...,
-                progress: 15,"
-                "current_focus: Query execution time analysis
+                "type": "agent_thinking",
+                "thought": "Evaluating 1,247 database queries to identify performance bottlenecks...",
+                "progress": 15,
+                "current_focus": "Query execution time analysis"
             },
             {
-                type: agent_thinking,
-                "thought: Analyzing index usage patterns - found 23 missing indexes causing slow queries",
-                progress: 45,
-                current_focus: "Database optimization opportunities
+                "type": "agent_thinking",
+                "thought": "Analyzing index usage patterns - found 23 missing indexes causing slow queries",
+                "progress": 45,
+                "current_focus": "Database optimization opportunities"
             },
             {
-                type": agent_thinking,
-                thought: Calculating potential performance improvements - estimated 3x faster query times,
-                progress": 75,"
-                current_focus: Impact assessment and recommendations
+                "type": "agent_thinking",
+                "thought": "Calculating potential performance improvements - estimated 3x faster query times",
+                "progress": 75,
+                "current_focus": "Impact assessment and recommendations"
             }
         ]
         
@@ -629,41 +630,41 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         await asyncio.sleep(1.0)
         
         # Verify all thinking events received
-        thinking_received = self.event_tester.get_events_by_type(agent_thinking)"
-        self.assertEqual(len(thinking_received), 3, Not all agent_thinking events received")
+        thinking_received = self.event_tester.get_events_by_type("agent_thinking")
+        self.assertEqual(len(thinking_received), 3, "Not all agent_thinking events received")
         
         # Verify engagement elements in events
         for i, event_data in enumerate(thinking_received):
             event = event_data['event']
             
             # Must have thought content
-            self.assertIn(thought, event, fThinking event {i} missing thought)
-            self.assertGreater(len(str(event.get("thought, "))), 20,
-                              fThinking event {i} thought too short)
+            self.assertIn("thought", event, f"Thinking event {i} missing thought")
+            self.assertGreater(len(str(event.get("thought", ""))), 20,
+                              f"Thinking event {i} thought too short")
             
             # Should show progress
-            if progress in event:
-                progress = event["progress]"
-                self.assertGreaterEqual(progress, 0, fInvalid progress in event {i})
-                self.assertLessEqual(progress, 100, fInvalid progress in event {i})
+            if "progress" in event:
+                progress = event["progress"]
+                self.assertGreaterEqual(progress, 0, f"Invalid progress in event {i}")
+                self.assertLessEqual(progress, 100, f"Invalid progress in event {i}")
         
         # Verify business value and engagement
         business_value_score = self.event_tester.get_business_value_score()
         self.assertGreater(business_value_score, 20.0,
-                          fagent_thinking business value too low: {business_value_score:.1f}%")"
+                          f"agent_thinking business value too low: {business_value_score:.1f}%")
         
         await real_websocket.close()
         
     async def test_tool_executing_and_completed_show_ai_capabilities_business_critical(self):
-
+        """
         BUSINESS CRITICAL: Test tool events demonstrate AI capabilities.
         
         Business Value: Proves AI is actually doing work and producing results.
         Can Fail: If tool events are vague, users don't see AI value and churn.
-        ""
+        """
         await self.event_tester.connect_as_client(self.test_user_id)
         
-        real_websocket = await websockets.connect(fws://localhost:{self.server_port})
+        real_websocket = await websockets.connect(f"ws://localhost:{self.server_port}")
         connection = WebSocketConnection(
             connection_id=str(uuid.uuid4()),
             user_id=self.test_user_id,
@@ -676,42 +677,42 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         # Test tool execution sequence showing real capabilities
         tool_sequence = [
             {
-                type: tool_executing",
-                "tool: financial_data_analyzer,
-                description: Analyzing 36 months of financial data across 15 business units,
-                "parameters: {"
-                    data_range: 2022-01-01 to 2024-12-31,
-                    metrics: ["revenue, costs", profit_margins, growth_rates],
-                    "granularity: monthly"
+                "type": "tool_executing",
+                "tool": "financial_data_analyzer",
+                "description": "Analyzing 36 months of financial data across 15 business units",
+                "parameters": {
+                    "data_range": "2022-01-01 to 2024-12-31",
+                    "metrics": ["revenue", "costs", "profit_margins", "growth_rates"],
+                    "granularity": "monthly"
                 }
             },
             {
-                type: tool_completed, 
-                tool: financial_data_analyzer",
-                "result: Processed 15,847 financial records and identified 12 revenue optimization opportunities,
-                execution_time: 2.3 seconds,
-                "data_quality: 98.7% complete records",
-                key_findings: {
-                    revenue_growth_opportunities: "$234,567 annually,
-                    cost_reduction_potential": $89,123 annually,
-                    margin_improvement_areas: 5
+                "type": "tool_completed", 
+                "tool": "financial_data_analyzer",
+                "result": "Processed 15,847 financial records and identified 12 revenue optimization opportunities",
+                "execution_time": "2.3 seconds",
+                "data_quality": "98.7% complete records",
+                "key_findings": {
+                    "revenue_growth_opportunities": "$234,567 annually",
+                    "cost_reduction_potential": "$89,123 annually",
+                    "margin_improvement_areas": 5
                 }
             },
             {
-                "type: tool_executing",
-                tool: market_trend_predictor,
-                description: Running predictive models on market trends using ML algorithms",
-                "model_confidence: 94.2%,
-                data_sources: [market_data, "competitor_analysis, economic_indicators"]
+                "type": "tool_executing",
+                "tool": "market_trend_predictor",
+                "description": "Running predictive models on market trends using ML algorithms",
+                "model_confidence": "94.2%",
+                "data_sources": ["market_data", "competitor_analysis", "economic_indicators"]
             },
             {
-                type: tool_completed,
-                tool: market_trend_predictor", 
-                "result: Generated 12-month market forecast with 94.2% confidence,
-                predictions: {
-                    market_growth": "+15.3% next quarter,
-                    competitive_landscape: 2 new competitors expected,
-                    pricing_opportunities: "3% price increase sustainable
+                "type": "tool_completed",
+                "tool": "market_trend_predictor", 
+                "result": "Generated 12-month market forecast with 94.2% confidence",
+                "predictions": {
+                    "market_growth": "+15.3% next quarter",
+                    "competitive_landscape": "2 new competitors expected",
+                    "pricing_opportunities": "3% price increase sustainable"
                 }
             }
         ]
@@ -723,57 +724,57 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         await asyncio.sleep(2.0)
         
         # Verify tool events received
-        tool_executing_events = self.event_tester.get_events_by_type(tool_executing")
-        tool_completed_events = self.event_tester.get_events_by_type(tool_completed)
+        tool_executing_events = self.event_tester.get_events_by_type("tool_executing")
+        tool_completed_events = self.event_tester.get_events_by_type("tool_completed")
         
-        self.assertEqual(len(tool_executing_events), 2, Missing tool_executing events")"
-        self.assertEqual(len(tool_completed_events), 2, Missing tool_completed events)
+        self.assertEqual(len(tool_executing_events), 2, "Missing tool_executing events")
+        self.assertEqual(len(tool_completed_events), 2, "Missing tool_completed events")
         
         # Verify tool_executing events show capabilities
         for event_data in tool_executing_events:
             event = event_data['event']
-            self.assertIn(tool, event, "tool_executing missing tool name)
+            self.assertIn("tool", event, "tool_executing missing tool name")
             
             # Should have description showing what AI is doing
-            if description" in event:
-                description = str(event[description]
-                self.assertGreater(len(description), 20, tool_executing description too short")"
+            if "description" in event:
+                description = str(event["description"])
+                self.assertGreater(len(description), 20, "tool_executing description too short")
                 
                 # Should indicate sophisticated capabilities
-                capability_indicators = [analyzing, processing, predicting, calculating", "modeling]
+                capability_indicators = ["analyzing", "processing", "predicting", "calculating", "modeling"]
                 has_capabilities = any(indicator in description.lower() for indicator in capability_indicators)
-                self.assertTrue(has_capabilities, ftool_executing lacks capability indicators: {description})
+                self.assertTrue(has_capabilities, f"tool_executing lacks capability indicators: {description}")
         
         # Verify tool_completed events show concrete results
         for event_data in tool_completed_events:
             event = event_data['event']
-            self.assertIn("tool, event, tool_completed missing tool name")
-            self.assertIn(result, event, tool_completed missing result)
+            self.assertIn("tool", event, "tool_completed missing tool name")
+            self.assertIn("result", event, "tool_completed missing result")
             
-            result_text = str(event[result]"
-            self.assertGreater(len(result_text), 20, tool_completed result too short")
+            result_text = str(event["result"])
+            self.assertGreater(len(result_text), 20, "tool_completed result too short")
             
             # Should show quantitative results
             has_numbers = any(char.isdigit() for char in result_text)
-            self.assertTrue(has_numbers, ftool_completed lacks quantitative results: {result_text})
+            self.assertTrue(has_numbers, f"tool_completed lacks quantitative results: {result_text}")
         
         # Verify overall business value
         business_value_score = self.event_tester.get_business_value_score()
         self.assertGreater(business_value_score, 40.0,
-                          fTool events business value too low: {business_value_score:.1f}%)"
+                          f"Tool events business value too low: {business_value_score:.1f}%")
         
         await real_websocket.close()
         
     async def test_agent_completed_delivers_actionable_business_value_business_critical(self):
-    "
+        """
         BUSINESS CRITICAL: Test agent_completed delivers actionable business value.
         
         Business Value: Final event must deliver clear, actionable business value.
         Can Fail: If completion lacks business value, entire interaction fails.
-        "
+        """
         await self.event_tester.connect_as_client(self.test_user_id)
         
-        real_websocket = await websockets.connect(fws://localhost:{self.server_port}")
+        real_websocket = await websockets.connect(f"ws://localhost:{self.server_port}")
         connection = WebSocketConnection(
             connection_id=str(uuid.uuid4()),
             user_id=self.test_user_id,
@@ -785,30 +786,30 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         
         # Test high-value agent_completed event
         completion_event = {
-            type: agent_completed,
-            "result: Enterprise security analysis complete - Generated comprehensive security improvement plan",
-            executive_summary: Identified 23 critical vulnerabilities and 47 improvement opportunities,
-            business_impact: {"
-                risk_reduction": 87% reduction in critical security risks,
-                cost_savings: $2.3M prevented breach costs annually,
-                compliance_improvement": "Achieves SOC2 Type II compliance,
-                implementation_cost: $45,000 for priority fixes
+            "type": "agent_completed",
+            "result": "Enterprise security analysis complete - Generated comprehensive security improvement plan",
+            "executive_summary": "Identified 23 critical vulnerabilities and 47 improvement opportunities",
+            "business_impact": {
+                "risk_reduction": "87% reduction in critical security risks",
+                "cost_savings": "$2.3M prevented breach costs annually",
+                "compliance_improvement": "Achieves SOC2 Type II compliance",
+                "implementation_cost": "$45,000 for priority fixes"
             },
-            immediate_actions: ["
-                "Patch 5 critical vulnerabilities within 48 hours,
-                Implement MFA for all admin accounts within 1 week, 
+            "immediate_actions": [
+                "Patch 5 critical vulnerabilities within 48 hours",
+                "Implement MFA for all admin accounts within 1 week", 
                 "Update firewall rules to close 12 unnecessary ports"
             ],
-            long_term_roadmap: {
-                30_days: Complete security audit remediation",
-                "90_days: Implement zero-trust architecture,
-                180_days: Achieve full compliance certification
+            "long_term_roadmap": {
+                "30_days": "Complete security audit remediation",
+                "90_days": "Implement zero-trust architecture",
+                "180_days": "Achieve full compliance certification"
             },
-            "roi_analysis: {"
-                investment: $45,000,
-                annual_savings: "$2,300,000,
-                payback_period": 8 days,
-                5_year_value: $11,500,000
+            "roi_analysis": {
+                "investment": "$45,000",
+                "annual_savings": "$2,300,000",
+                "payback_period": "8 days",
+                "5_year_value": "$11,500,000"
             }
         }
         
@@ -816,60 +817,60 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         await asyncio.sleep(1.0)
         
         # Verify completion event received
-        completed_events = self.event_tester.get_events_by_type(agent_completed")"
-        self.assertEqual(len(completed_events), 1, agent_completed event not received)
+        completed_events = self.event_tester.get_events_by_type("agent_completed")
+        self.assertEqual(len(completed_events), 1, "agent_completed event not received")
         
         event = completed_events[0]['event']
         
         # Verify required completion elements
-        self.assertIn(result, event, "agent_completed missing result)
+        self.assertIn("result", event, "agent_completed missing result")
         
         # Verify business value indicators
-        business_value_keywords = [savings", cost, improvement, roi, value", "benefit, $]
+        business_value_keywords = ["savings", "cost", "improvement", "roi", "value", "benefit", "$"]
         event_text = str(event).lower()
         business_indicators_found = [kw for kw in business_value_keywords if kw in event_text]
         
         self.assertGreater(len(business_indicators_found), 3,
-                          fagent_completed lacks business value indicators. Found: {business_indicators_found})
+                          f"agent_completed lacks business value indicators. Found: {business_indicators_found}")
         
         # Verify actionable elements
-        actionable_keywords = [implement", "patch, update, complete, achieve, "fix]
+        actionable_keywords = ["implement", "patch", "update", "complete", "achieve", "fix"]
         actionable_indicators = [kw for kw in actionable_keywords if kw in event_text]
         
         self.assertGreater(len(actionable_indicators), 2,
-                          fagent_completed lacks actionable elements. Found: {actionable_indicators}")
+                          f"agent_completed lacks actionable elements. Found: {actionable_indicators}")
         
         # Verify quantitative results
-        has_dollar_amounts = $ in event_text
-        has_percentages = %" in event_text"
-        has_timeframes = any(timeframe in event_text for timeframe in [days, weeks, months, hours"]
+        has_dollar_amounts = "$" in event_text
+        has_percentages = "%" in event_text
+        has_timeframes = any(timeframe in event_text for timeframe in ["days", "weeks", "months", "hours"])
         
-        quantitative_score = sum([has_dollar_amounts, has_percentages, has_timeframes]
+        quantitative_score = sum([has_dollar_amounts, has_percentages, has_timeframes])
         self.assertGreaterEqual(quantitative_score, 2,
-                               f"agent_completed lacks quantitative results. Score: {quantitative_score}/3)
+                               f"agent_completed lacks quantitative results. Score: {quantitative_score}/3")
         
         # Verify overall business value and journey completion
         business_value_score = self.event_tester.get_business_value_score()
         self.assertGreater(business_value_score, 60.0,
-                          fCompletion business value too low: {business_value_score:.1f}%)
+                          f"Completion business value too low: {business_value_score:.1f}%")
         
         self.assertTrue(self.event_tester.event_validator.is_user_journey_complete(),
-                       User journey not marked complete by agent_completed event)"
+                       "User journey not marked complete by agent_completed event")
         
         await real_websocket.close()
         
     # ========== ERROR RECOVERY AND EDGE CASE TESTS ==========
     
     async def test_missing_critical_events_breaks_business_value(self):
-        "
+        """
         Test that missing critical events breaks business value delivery.
         
         Business Value: Demonstrates why all 5 events are required.
         Can Fail: If business value is achieved without all events, our model is wrong.
-"
+        """
         await self.event_tester.connect_as_client(self.test_user_id)
         
-        real_websocket = await websockets.connect(f"ws://localhost:{self.server_port})
+        real_websocket = await websockets.connect(f"ws://localhost:{self.server_port}")
         connection = WebSocketConnection(
             connection_id=str(uuid.uuid4()),
             user_id=self.test_user_id,
@@ -881,9 +882,9 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         
         # Send only 3 of 5 critical events (missing agent_thinking and tool_completed)
         incomplete_sequence = [
-            {type: agent_started, agent_name: "TestAgent, task": Testing incomplete sequence},
-            {type: tool_executing, tool": "test_tool, description: Testing tool},
-            {type: "agent_completed, result": Task completed}
+            {"type": "agent_started", "agent_name": "TestAgent", "task": "Testing incomplete sequence"},
+            {"type": "tool_executing", "tool": "test_tool", "description": "Testing tool"},
+            {"type": "agent_completed", "result": "Task completed"}
         ]
         
         for event in incomplete_sequence:
@@ -894,29 +895,29 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         
         # Verify incomplete event sequence
         self.assertFalse(self.event_tester.has_all_critical_events(),
-                        Should not have all critical events with incomplete sequence)
+                        "Should not have all critical events with incomplete sequence")
         
         # Verify business value is significantly reduced
         business_value_score = self.event_tester.get_business_value_score()
         self.assertLess(business_value_score, 75.0,
-                       f"Business value should be reduced with missing events: {business_value_score:.1f}%)
+                       f"Business value should be reduced with missing events: {business_value_score:.1f}%")
         
         # Verify user journey is not complete
         self.assertFalse(self.event_tester.event_validator.is_user_journey_complete(),
-                        User journey should not be complete with missing events")
+                        "User journey should not be complete with missing events")
         
         await real_websocket.close()
         
     async def test_events_with_no_business_context_fail_value_delivery(self):
-    "
+        """
         Test that events without business context fail to deliver value.
         
         Business Value: Events must contain meaningful business information.
         Can Fail: If generic events still deliver value, our validation is too weak.
-        "
+        """
         await self.event_tester.connect_as_client(self.test_user_id)
         
-        real_websocket = await websockets.connect(fws://localhost:{self.server_port})
+        real_websocket = await websockets.connect(f"ws://localhost:{self.server_port}")
         connection = WebSocketConnection(
             connection_id=str(uuid.uuid4()),
             user_id=self.test_user_id,
@@ -928,11 +929,11 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         
         # Send generic events with no business value
         generic_events = [
-            {"type: agent_started", agent_name: Agent, task: Task"},
-            {"type: agent_thinking, thought: Thinking...},
-            {"type: tool_executing", tool: tool},
-            {type: tool_completed", "tool: tool, result: Done},
-            {"type: agent_completed", result: Complete}
+            {"type": "agent_started", "agent_name": "Agent", "task": "Task"},
+            {"type": "agent_thinking", "thought": "Thinking..."},
+            {"type": "tool_executing", "tool": "tool"},
+            {"type": "tool_completed", "tool": "tool", "result": "Done"},
+            {"type": "agent_completed", "result": "Complete"}
         ]
         
         for event in generic_events:
@@ -943,22 +944,22 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         
         # Verify all events received but business value is low
         self.assertTrue(self.event_tester.has_all_critical_events(),
-                       Should have all event types)"
+                       "Should have all event types")
         
         # Verify low business value due to generic content
         business_value_score = self.event_tester.get_business_value_score()
         self.assertLess(business_value_score, 30.0,
-                       fGeneric events should have low business value: {business_value_score:.1f}%")
+                       f"Generic events should have low business value: {business_value_score:.1f}%")
         
         await real_websocket.close()
         
     async def test_event_delivery_performance_under_load(self):
-    "
+        """
         Test event delivery performance under concurrent load.
         
         Business Value: Events must be delivered reliably even under load.
         Can Fail: If events are lost under load, business value is not delivered.
-        "
+        """
         # Create multiple event testers for concurrent users
         num_concurrent_users = 5
         event_testers = []
@@ -967,11 +968,11 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         for i in range(num_concurrent_users):
             tester = RealWebSocketEventTester()
             port = await tester.start_test_server()
-            await tester.connect_as_client(fload-test-user-{i})
+            await tester.connect_as_client(f"load-test-user-{i}")
             event_testers.append(tester)
             
-            user_id = ensure_user_id(f"load-test-user-{i})
-            real_websocket = await websockets.connect(fws://localhost:{port}")
+            user_id = ensure_user_id(f"load-test-user-{i}")
+            real_websocket = await websockets.connect(f"ws://localhost:{port}")
             
             connection = WebSocketConnection(
                 connection_id=str(uuid.uuid4()),
@@ -988,10 +989,10 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         
         for user_id, connection, websocket in connections:
             critical_event = {
-                type: agent_completed,
-                "result: fLoad test completed for {user_id}",
-                business_value: $10,000 cost savings identified,
-                performance_test: True"
+                "type": "agent_completed",
+                "result": f"Load test completed for {user_id}",
+                "business_value": "$10,000 cost savings identified",
+                "performance_test": True
             }
             
             event_tasks.append(self.manager.send_to_user(user_id, critical_event))
@@ -1004,14 +1005,14 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         await asyncio.sleep(2.0)
         
         # Verify performance
-        self.assertLess(delivery_time, 2.0, fEvent delivery too slow under load: {delivery_time:.2f}s")
+        self.assertLess(delivery_time, 2.0, f"Event delivery too slow under load: {delivery_time:.2f}s")
         
         # Verify all users received events
         successful_deliveries = 0
         total_business_value = 0
         
         for tester in event_testers:
-            completed_events = tester.get_events_by_type(agent_completed)
+            completed_events = tester.get_events_by_type("agent_completed")
             if len(completed_events) > 0:
                 successful_deliveries += 1
                 total_business_value += tester.get_business_value_score()
@@ -1020,10 +1021,10 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         avg_business_value = total_business_value / num_concurrent_users
         
         self.assertGreaterEqual(delivery_success_rate, 0.8,
-                               fEvent delivery success rate too low: {delivery_success_rate:.1%}")"
+                               f"Event delivery success rate too low: {delivery_success_rate:.1%}")
         
         self.assertGreater(avg_business_value, 15.0,
-                          fAverage business value too low under load: {avg_business_value:.1f}%)
+                          f"Average business value too low under load: {avg_business_value:.1f}%")
         
         # Clean up
         for user_id, connection, websocket in connections:
@@ -1033,13 +1034,13 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
             await tester.stop_server()
 
 
-if __name__ == __main__:
+if __name__ == "__main__":
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print("MIGRATION NOTICE: This file previously used direct pytest execution.")
-    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
     print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
-    # sys.exit(result")
+    # sys.exit(result)

@@ -31,13 +31,13 @@ from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.canonical_import_patterns import (
     get_websocket_manager,
     UnifiedWebSocketManager,
     WebSocketConnection,
     create_test_user_context
 )
-from netra_backend.app.websocket_core.websocket_manager import MAX_CONNECTIONS_PER_USER
+from netra_backend.app.websocket_core.unified_manager import MAX_CONNECTIONS_PER_USER
 from netra_backend.app.websocket_core.types import WebSocketManagerMode
 from shared.types.core_types import ensure_user_id, ensure_websocket_id
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType

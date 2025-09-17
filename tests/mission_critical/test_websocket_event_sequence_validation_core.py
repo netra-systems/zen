@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 MISSION CRITICAL: Core WebSocket Event Sequence Validation Tests - Issue #1199
 
 Business Value Justification:
@@ -20,6 +20,7 @@ These tests are intentionally designed to fail initially to prove they are worki
 They validate real-world scenarios where WebSocket events might be missing or malformed.
 "
 
+"""
 import asyncio
 import json
 import time

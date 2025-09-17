@@ -1,4 +1,4 @@
-"
+"""
  ALERT:  MISSION CRITICAL: WebSocket JWT Bypass Violation Reproduction Test
 
 SSOT VIOLATION REPRODUCTION - Test #1 of 5
@@ -23,6 +23,7 @@ AUTH SSOT REQUIREMENT:
 All JWT operations MUST go through UnifiedAuthInterface - NO local JWT validation.
 "
 
+"""
 import asyncio
 import json
 import logging

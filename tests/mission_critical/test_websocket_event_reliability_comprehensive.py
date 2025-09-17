@@ -681,7 +681,7 @@ class TestComprehensiveWebSocketEventReliability:
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-# # @pytest.fixture
+# # # @pytest.fixture
     async def test_enhanced_event_content_quality_per_user(self):
     Test event content quality with per-user validation.
 pass
@@ -720,7 +720,7 @@ print(formatted_string)
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-# # @pytest.fixture
+# # # @pytest.fixture
     async def test_timing_analysis_with_user_isolation(self):
     "Test timing analysis with user isolation and silence detection.
 print([U+23F1][U+FE0F] Testing timing analysis with user isolation)
@@ -764,7 +764,7 @@ print("")
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-# # @pytest.fixture
+# # # @pytest.fixture
     async def test_concurrent_user_reliability_isolation(self):
     Test reliability under concurrent load with complete user isolation.
 pass
@@ -814,7 +814,7 @@ print()
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-# # @pytest.fixture
+# # # @pytest.fixture
     async def test_edge_case_recovery_with_user_isolation(self"):
     "Test edge case recovery with user isolation.
 print( ALERT:  Testing edge case recovery with user isolation")
@@ -879,7 +879,7 @@ print()
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-# # @pytest.fixture
+# # # @pytest.fixture
     async def test_user_experience_reliability_validation(self"):
     "Test user experience reliability with factory pattern.
 pass
@@ -938,7 +938,7 @@ print( PASS:  User experience reliability test passed)
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-# # @pytest.fixture
+# # # @pytest.fixture
     async def test_comprehensive_reliability_suite_factory_pattern(self"):
     "Run the complete comprehensive reliability suite for factory pattern.
     print("")

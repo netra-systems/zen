@@ -21,7 +21,7 @@ from typing import Dict, Any, List
 # Add project root to path
 sys.path.insert(0, '/Users/rindhujajohnson/Netra/GitHub/netra-apex')
 
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.unified_emitter import (
     UnifiedWebSocketEmitter,
     AuthenticationWebSocketEmitter,
@@ -138,7 +138,7 @@ class WebSocketSecurityVerifier:
             mock_ws = MockWebSocket(should_fail=True)
             
             # Add connection 
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+            from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
             connection = WebSocketConnection(
                 connection_id="test_conn",
                 user_id=test_user,
@@ -218,7 +218,7 @@ class WebSocketSecurityVerifier:
             mock_ws1 = MockWebSocket()
             mock_ws2 = MockWebSocket()
             
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+            from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
             
             conn1 = WebSocketConnection(
                 connection_id="conn1",

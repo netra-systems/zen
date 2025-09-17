@@ -1,10 +1,11 @@
-"
+"""
 SSOT WebSocket Integration Tests for Issue #1076
 
 Test Plan: Verify WebSocket integration follows SSOT patterns and golden path works.
 Should FAIL initially (detecting integration violations) and PASS after remediation.
 
 Key violations to detect:
+"""
 1. WebSocket manager imports not using SSOT patterns
 2. Agent execution not properly integrated with SSOT WebSocket events
 3. Auth integration in WebSocket not using SSOT auth service

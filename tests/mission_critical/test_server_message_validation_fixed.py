@@ -1,5 +1,5 @@
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
-"
+"""
 Mission Critical Server Message Validation Tests - POST FIX
 
 This module tests the FIXED MissionCriticalEventValidator's ability to handle 
@@ -12,6 +12,7 @@ Issue #892: Validation that MissionCriticalEventValidator now handles
 both flat event structures and ServerMessage format with nested payload.
 "
 
+"""
 import json
 from datetime import datetime, timezone
 from typing import Dict, Any

@@ -1,7 +1,7 @@
 # Import SSOT WebSocket test utility
 from test_framework.ssot.websocket_connection_test_utility import TestWebSocketConnection
 
-"
+"""
 MISSION CRITICAL: SSOT Backward Compatibility Test Suite
 
 This test suite ensures that the SSOT consolidation doesn't break existing code.
@@ -15,6 +15,7 @@ CRITICAL: These tests validate that existing patterns work while identifying
 areas that need migration. They test the compatibility bridge components.
 "
 
+"""
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import inspect

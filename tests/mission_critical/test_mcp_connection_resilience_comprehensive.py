@@ -1,4 +1,4 @@
-"
+"""
 MISSION CRITICAL: Comprehensive MCP Connection Manager Resilience Tests
 
 Tests the fixed MCP Connection Manager to ensure:
@@ -21,6 +21,7 @@ CRITICAL BUSINESS VALUE:
 - Validates resilience patterns used throughout the system
 "
 
+"""
 import asyncio
 import pytest
 import time

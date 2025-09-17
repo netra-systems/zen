@@ -1,4 +1,4 @@
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 #!/usr/bin/env python
 """Integration Tests for Execution Engine Factory Pattern Consolidation
 
@@ -68,7 +68,7 @@ except ImportError as e:
 
 # Import WebSocket components for real integration testing
 try:
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 except ImportError as e:
     logger.warning(f"Could not import UnifiedWebSocketManager: {e}")
     UnifiedWebSocketManager = None

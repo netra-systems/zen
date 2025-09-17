@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 Issue #690 - Staging Backend Health Validation Failure Reproduction Test
 =========================================================================
 
@@ -18,6 +18,7 @@ issues observed in staging deployment logs, specifically:
 1. Phase 7 health validation returns 1 critical services unhealthy
 2. LLM manager health check issues in staging environment
 3. External dependency blocking health checks
+"""
 4. 503 Service Unavailable from staging backend health endpoint
 "
 

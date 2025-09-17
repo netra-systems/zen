@@ -200,7 +200,7 @@ class WebSocketManagerUserIsolationFragmentationTests(SSotBaseTestCase, unittest
         user2_context = UserExecutionContext(user_id='user_2_test', thread_id='thread_2', run_id='run_2', request_id='req_2')
         managers = []
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager1 = WebSocketManager(user_context=user1_context)
             manager2 = WebSocketManager(user_context=user2_context)
             managers.extend([manager1, manager2])
@@ -224,14 +224,14 @@ class WebSocketManagerUserIsolationFragmentationTests(SSotBaseTestCase, unittest
         managers_created = []
         creation_methods = []
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager1 = WebSocketManager(user_context=test_context)
             managers_created.append(manager1)
             creation_methods.append('Direct WebSocketManager')
         except Exception as e:
             self.logger.warning(f'Direct WebSocketManager creation failed: {e}')
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             import asyncio
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)

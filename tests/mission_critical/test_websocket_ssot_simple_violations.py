@@ -1,10 +1,12 @@
-"
+"""
 Simple SSOT Violation Test for Issue #885
 
 This test validates that multiple WebSocket manager implementations exist,
 proving the 0.0% SSOT compliance issue.
-"
+"""
 
+"""
+"""
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 

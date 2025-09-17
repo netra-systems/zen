@@ -1,7 +1,8 @@
-"
+"""
 Test for WebSocket Authentication SSOT Violation: Duplicate UnifiedWebSocketAuthenticator Classes
 
 BUSINESS IMPACT: $500K+ ARR - WebSocket authentication chaos blocking Golden Path
+"""
 ISSUE: #1076 - Two complete UnifiedWebSocketAuthenticator classes exist in unified_websocket_auth.py
 
 This test SHOULD FAIL INITIALLY (reproducing the SSOT violation) and PASS AFTER REMEDIATION.

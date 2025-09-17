@@ -42,7 +42,7 @@ import gc
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 # SSOT imports - Issue #824 remediation
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.canonical_imports import (
     ConnectionLifecycleManager,
     FactoryInitializationError,
@@ -60,7 +60,7 @@ from netra_backend.app.monitoring.websocket_metrics import (
     ManagerMetrics
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 
 

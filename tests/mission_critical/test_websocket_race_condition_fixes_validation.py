@@ -1,4 +1,4 @@
-"
+"""
 WebSocket Authentication Race Condition Fixes Validation
 
 This test validates that the five-whys root cause analysis fixes are working properly:
@@ -12,6 +12,7 @@ This test validates that the five-whys root cause analysis fixes are working pro
 Business Impact: $500K+ ARR protection through reliable WebSocket authentication.
 "
 
+"""
 import asyncio
 import json
 import logging

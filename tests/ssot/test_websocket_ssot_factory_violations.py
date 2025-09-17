@@ -49,7 +49,7 @@ class WebSocketSSotFactoryViolationsTests(SSotAsyncTestCase):
         
         # Test current factory creation patterns
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             # SSOT: Direct manager instantiation - no factory needed
             manager1 = WebSocketManager()
             factory_creation_results['websocket_manager_ssot'] = manager1 is not None
@@ -66,7 +66,7 @@ class WebSocketSSotFactoryViolationsTests(SSotAsyncTestCase):
             
         try:
             # Direct instantiation (should be prevented after SSOT)
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             direct_manager = UnifiedWebSocketManager()
             factory_creation_results['direct_instantiation'] = direct_manager is not None
         except (ImportError, TypeError):
@@ -100,7 +100,7 @@ class WebSocketSSotFactoryViolationsTests(SSotAsyncTestCase):
         
         # Create managers for each user
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             for user_id in users:
                 # Create manager instance for user
@@ -187,7 +187,7 @@ class WebSocketSSotFactoryViolationsTests(SSotAsyncTestCase):
         connection_count = 50
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager = UnifiedWebSocketManager()
             
             # Create many connections for single user

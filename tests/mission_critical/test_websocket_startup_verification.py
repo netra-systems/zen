@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical Test Suite: WebSocket Startup Verification
 
 This module tests the critical WebSocket startup verification process that protects
@@ -14,7 +14,7 @@ Test Categories:
 
 SSOT Compliance: Uses SSotAsyncTestCase for all tests
 Real Services: Integration tests use real components (no mocks)
-"
+"""
 
 import asyncio
 import pytest
@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, CategoryType
 # Core application components  
 from fastapi import FastAPI
 from netra_backend.app.smd import StartupOrchestrator, StartupPhase, DeterministicStartupError
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, IntegrationState
 from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
 
@@ -38,69 +38,69 @@ from shared.isolated_environment import get_env
 
 
 class WebSocketStartupVerificationUnitTests(SSotAsyncTestCase):
-    "Unit tests for WebSocket startup verification components.
+    """Unit tests for WebSocket startup verification components."""
 
     def setup_method(self, method):
-        "Setup method for unit tests."
+        """Setup method for unit tests."""
         super().setup_method(method)
-        self.set_env_var(TESTING, "true)
-        self.set_env_var(ENVIRONMENT", test)
+        self.set_env_var("TESTING", "true")
+        self.set_env_var("ENVIRONMENT", "test")
         self._test_context.test_category = CategoryType.UNIT
     
     @pytest.mark.asyncio
     async def test_websocket_manager_creation_without_user_context(self):
-        Test WebSocket manager behavior without user context.
+        """Test WebSocket manager behavior without user context.
         
         This test verifies that while WebSocket managers can be created, 
         they should enforce proper user context architecture during operations.
-""
-        self.record_metric(test_purpose, user_context_architecture_enforcement)
+        """
+        self.record_metric("test_purpose", "user_context_architecture_enforcement")
         
         # WebSocket manager can be created (for per-request instantiation)
         # but should handle operations appropriately without proper user context
         try:
             manager = UnifiedWebSocketManager()
-            self.record_metric("manager_creation, success")
+            self.record_metric("manager_creation", "success")
             
             # Test that operations without proper context handle gracefully
-            result = await manager.send_to_thread(test_thread, {type: test}"
+            result = await manager.send_to_thread("test_thread", {"type": "test"})
             
             # The result should indicate no connections (expected for startup testing)
             # This is appropriate behavior - no connections exist during startup
-            assert result is False, Expected False when no connections exist"
-            self.record_metric(send_without_connections, handled_gracefully)
+            assert result is False, "Expected False when no connections exist"
+            self.record_metric("send_without_connections", "handled_gracefully")
             
         except Exception as e:
             # Document any exceptions that occur
-            self.record_metric("manager_operation_error, str(e))"
+            self.record_metric("manager_operation_error", str(e))
             # This is also valid - the system may enforce stricter context requirements
             pass
     
     @pytest.mark.asyncio  
     async def test_startup_orchestrator_websocket_verification_logic(self):
-        Test the startup orchestrator WebSocket verification logic."
-        self.record_metric("test_purpose, startup_verification_logic)
+        """Test the startup orchestrator WebSocket verification logic."""
+        self.record_metric("test_purpose", "startup_verification_logic")
         
         # Create minimal FastAPI app for testing
         app = FastAPI()
-        app.state.tool_classes = {test_tool: Mock}  # Minimal tool configuration
+        app.state.tool_classes = {"test_tool": Mock}  # Minimal tool configuration
         
         orchestrator = StartupOrchestrator(app)
         
         # The _verify_websocket_events method should succeed with proper configuration
         try:
             await orchestrator._verify_websocket_events()
-            self.record_metric(websocket_verification_result", "success)
+            self.record_metric("websocket_verification_result", "success")
         except DeterministicStartupError as e:
-            self.record_metric(websocket_verification_result, failed)
-            self.record_metric(websocket_verification_error, str(e))"
+            self.record_metric("websocket_verification_result", "failed")
+            self.record_metric("websocket_verification_error", str(e))
             # Re-raise to fail the test if verification fails unexpectedly
             raise
     
     @pytest.mark.asyncio
     async def test_deterministic_startup_error_conditions(self):
-        "Test conditions that should trigger DeterministicStartupError.
-        self.record_metric(test_purpose", "startup_error_conditions)
+        """Test conditions that should trigger DeterministicStartupError."""
+        self.record_metric("test_purpose", "startup_error_conditions")
         
         # Create app with missing tool configuration
         app = FastAPI()
@@ -109,33 +109,33 @@ class WebSocketStartupVerificationUnitTests(SSotAsyncTestCase):
         orchestrator = StartupOrchestrator(app)
         
         # This should raise DeterministicStartupError due to missing tool configuration
-        with self.expect_exception(DeterministicStartupError, rTool classes configuration not found):
+        with self.expect_exception(DeterministicStartupError, r"Tool classes configuration not found"):
             await orchestrator._verify_websocket_events()
         
-        self.record_metric(error_condition_test, passed")
+        self.record_metric("error_condition_test", "passed")
 
 
 class WebSocketStartupVerificationIntegrationTests(SSotAsyncTestCase):
-    "Integration tests for WebSocket startup verification process.
+    """Integration tests for WebSocket startup verification process."""
 
     def setup_method(self, method):
-        ""Setup method for integration tests.
+        """Setup method for integration tests."""
         super().setup_method(method)
-        self.set_env_var(TESTING, true")
-        self.set_env_var("ENVIRONMENT, test)
+        self.set_env_var("TESTING", "true")
+        self.set_env_var("ENVIRONMENT", "test")
         self._test_context.test_category = CategoryType.INTEGRATION
         
         # Create reusable test app
         self.app = FastAPI()
         self.app.state.tool_classes = {
-            test_tool: Mock,
-            mock_tool": AsyncMock"
+            "test_tool": Mock,
+            "mock_tool": AsyncMock
         }
     
     @pytest.mark.asyncio
     async def test_complete_websocket_startup_phase(self):
-        Test complete WebSocket startup phase (Phase 6) execution."
-        self.record_metric(test_purpose", complete_startup_phase)
+        """Test complete WebSocket startup phase (Phase 6) execution."""
+        self.record_metric("test_purpose", "complete_startup_phase")
         
         orchestrator = StartupOrchestrator(self.app)
         
@@ -169,42 +169,42 @@ class WebSocketStartupVerificationIntegrationTests(SSotAsyncTestCase):
             # Note: Phase completion may be tracked differently in the actual orchestrator
             # The important thing is that the phase executed without exceptions
             assert StartupPhase.WEBSOCKET not in orchestrator.failed_phases
-            self.record_metric(phase_completion_status, success_no_failures)
+            self.record_metric("phase_completion_status", "success_no_failures")
             
-            self.record_metric(phase6_execution_time", execution_time)"
-            self.record_metric(phase6_result, success)
+            self.record_metric("phase6_execution_time", execution_time)
+            self.record_metric("phase6_result", "success")
     
     @pytest.mark.asyncio
     async def test_websocket_verification_with_different_environments(self):
-        Test WebSocket verification behavior across different environments.""
-        self.record_metric(test_purpose, environment_specific_behavior)
+        """Test WebSocket verification behavior across different environments."""
+        self.record_metric("test_purpose", "environment_specific_behavior")
         
         # Test different environment configurations
-        environments = [test", "development, staging, production]
+        environments = ["test", "development", "staging", "production"]
         
         for env_name in environments:
-            with self.temp_env_vars(ENVIRONMENT=env_name, TESTING=false):"
+            with self.temp_env_vars(ENVIRONMENT=env_name, TESTING="false"):
                 orchestrator = StartupOrchestrator(self.app)
                 
                 try:
                     await orchestrator._verify_websocket_events()
-                    result = "success
+                    result = "success"
                     error = None
                 except DeterministicStartupError as e:
-                    result = failed
+                    result = "failed"
                     error = str(e)
                 except Exception as e:
                     result = "unexpected_error"
                     error = str(e)
                 
-                self.record_metric(fenvironment_{env_name}_result, result)
+                self.record_metric(f"environment_{env_name}_result", result)
                 if error:
-                    self.record_metric(fenvironment_{env_name}_error, error)
+                    self.record_metric(f"environment_{env_name}_error", error)
     
     @pytest.mark.asyncio
     async def test_bridge_health_verification_integration(self):
-        ""Test AgentWebSocketBridge health verification integration.
-        self.record_metric(test_purpose, bridge_health_integration")
+        """Test AgentWebSocketBridge health verification integration."""
+        self.record_metric("test_purpose", "bridge_health_integration")
         
         orchestrator = StartupOrchestrator(self.app)
         
@@ -224,52 +224,52 @@ class WebSocketStartupVerificationIntegrationTests(SSotAsyncTestCase):
                 'total_initializations': 5
             },
             'dependencies': {}
-        }
+        })
         
         self.app.state.agent_websocket_bridge = mock_bridge
         
         # Test bridge health verification
         try:
             await orchestrator._verify_bridge_health()
-            self.record_metric("bridge_health_result, success)
+            self.record_metric("bridge_health_result", "success")
         except DeterministicStartupError as e:
-            self.record_metric(bridge_health_result, failed)
-            self.record_metric("bridge_health_error, str(e))"
+            self.record_metric("bridge_health_result", "failed")
+            self.record_metric("bridge_health_error", str(e))
             raise
 
 
 class WebSocketStartupVerificationMissionCriticalTests(SSotAsyncTestCase):
-    Mission critical tests protecting business value and Golden Path functionality."
+    """Mission critical tests protecting business value and Golden Path functionality."""
 
     def setup_method(self, method):
-        "Setup method for mission critical tests.
+        """Setup method for mission critical tests."""
         super().setup_method(method)
-        self.set_env_var(TESTING", "true)
-        self.set_env_var(ENVIRONMENT, test)
+        self.set_env_var("TESTING", "true")
+        self.set_env_var("ENVIRONMENT", "test")
         self._test_context.test_category = CategoryType.CRITICAL
         
         # Record business context
-        self.record_metric(business_value_segment, "Platform/Critical)
-        self.record_metric(arr_protection", $500K+)
-        self.record_metric(functional_area, Chat WebSocket Events)
+        self.record_metric("business_value_segment", "Platform/Critical")
+        self.record_metric("arr_protection", "$500K+")
+        self.record_metric("functional_area", "Chat WebSocket Events")
 
     @pytest.mark.asyncio
     async def test_golden_path_websocket_startup_protection(self):
-        ""MISSION CRITICAL: Test that WebSocket startup protects Golden Path functionality.
+        """MISSION CRITICAL: Test that WebSocket startup protects Golden Path functionality.
         
         This test ensures that the WebSocket startup verification process protects
         the core chat functionality that delivers 90% of platform value.
-
-        self.record_metric("test_purpose, golden_path_protection")
-        self.record_metric(criticality, mission_critical)
+        """
+        self.record_metric("test_purpose", "golden_path_protection")
+        self.record_metric("criticality", "mission_critical")
         
         # Create production-like app configuration
         app = FastAPI()
         app.state.tool_classes = {
-            supervisor_agent: Mock,"
-            data_helper_agent": Mock,
-            triage_agent: Mock,
-            apex_optimizer_agent": Mock"
+            "supervisor_agent": Mock,
+            "data_helper_agent": Mock,
+            "triage_agent": Mock,
+            "apex_optimizer_agent": Mock
         }
         app.state.startup_complete = False
         app.state.startup_in_progress = True
@@ -284,30 +284,30 @@ class WebSocketStartupVerificationMissionCriticalTests(SSotAsyncTestCase):
             
             # WebSocket verification success protects Golden Path
             verification_time = time.time() - start_time
-            self.record_metric(golden_path_protection_result, success)
-            self.record_metric(websocket_verification_time, verification_time)"
+            self.record_metric("golden_path_protection_result", "success")
+            self.record_metric("websocket_verification_time", verification_time)
             
             # Ensure verification time is reasonable for production startup
-            assert verification_time < 2.0, fWebSocket verification took too long: {verification_time:.3f}s"
+            assert verification_time < 2.0, f"WebSocket verification took too long: {verification_time:.3f}s"
             
         except DeterministicStartupError as e:
             # Critical failure that would block Golden Path
-            self.record_metric(golden_path_protection_result, critical_failure)
-            self.record_metric("critical_failure_reason, str(e))"
+            self.record_metric("golden_path_protection_result", "critical_failure")
+            self.record_metric("critical_failure_reason", str(e))
             
             # This is a mission critical failure - system cannot start without WebSocket support
-            pytest.fail(fMISSION CRITICAL FAILURE: WebSocket verification failed, blocking Golden Path: {e})
+            pytest.fail(f"MISSION CRITICAL FAILURE: WebSocket verification failed, blocking Golden Path: {e}")
     
     @pytest.mark.asyncio
     async def test_websocket_startup_business_continuity(self):
-        Test WebSocket startup under business continuity scenarios.""
-        self.record_metric(test_purpose, business_continuity)
+        """Test WebSocket startup under business continuity scenarios."""
+        self.record_metric("test_purpose", "business_continuity")
         
         # Test various failure recovery scenarios that could impact business
         failure_scenarios = [
-            (missing_tool_classes", {},"
-            (empty_tool_classes, {tool_classes: {}},
-            (partial_tool_config, {tool_classes": {"incomplete: Mock}}
+            ("missing_tool_classes", {}),
+            ("empty_tool_classes", {"tool_classes": {}}),
+            ("partial_tool_config", {"tool_classes": {"incomplete": Mock}})
         ]
         
         for scenario_name, state_config in failure_scenarios:
@@ -321,27 +321,27 @@ class WebSocketStartupVerificationMissionCriticalTests(SSotAsyncTestCase):
             
             try:
                 await orchestrator._verify_websocket_events()
-                result = unexpected_success
+                result = "unexpected_success"
                 error = None
             except DeterministicStartupError as e:
                 result = "expected_failure"
                 error = str(e)
             except Exception as e:
-                result = unexpected_error
+                result = "unexpected_error"
                 error = str(e)
             
-            self.record_metric(fscenario_{scenario_name}_result, result)
+            self.record_metric(f"scenario_{scenario_name}_result", result)
             if error:
-                self.record_metric(fscenario_{scenario_name}_error", error)"
+                self.record_metric(f"scenario_{scenario_name}_error", error)
     
     @pytest.mark.asyncio
     async def test_websocket_verification_performance_requirements(self):
-        Test WebSocket verification meets performance requirements for production."
-        self.record_metric(test_purpose", performance_requirements)
+        """Test WebSocket verification meets performance requirements for production."""
+        self.record_metric("test_purpose", "performance_requirements")
         
         # Production app configuration
         app = FastAPI()
-        app.state.tool_classes = {ftool_{i}: Mock for i in range(10)}  # Realistic tool count
+        app.state.tool_classes = {f"tool_{i}": Mock for i in range(10)}  # Realistic tool count
         
         orchestrator = StartupOrchestrator(app)
         
@@ -357,31 +357,31 @@ class WebSocketStartupVerificationMissionCriticalTests(SSotAsyncTestCase):
                 verification_times.append(verification_time)
                 
             except Exception as e:
-                pytest.fail(f"WebSocket verification failed on run {run + 1}: {e})
+                pytest.fail(f"WebSocket verification failed on run {run + 1}: {e}")
         
         # Calculate performance metrics
         avg_time = sum(verification_times) / len(verification_times)
         max_time = max(verification_times)
         min_time = min(verification_times)
         
-        self.record_metric(avg_verification_time", avg_time)
-        self.record_metric(max_verification_time, max_time)
-        self.record_metric(min_verification_time", min_time)"
+        self.record_metric("avg_verification_time", avg_time)
+        self.record_metric("max_verification_time", max_time)
+        self.record_metric("min_verification_time", min_time)
         
         # Performance requirements for production startup
-        assert avg_time < 1.0, fAverage verification time too slow: {avg_time:.3f}s
-        assert max_time < 2.0, fMaximum verification time too slow: {max_time:.3f}s
+        assert avg_time < 1.0, f"Average verification time too slow: {avg_time:.3f}s"
+        assert max_time < 2.0, f"Maximum verification time too slow: {max_time:.3f}s"
         
-        self.record_metric("performance_test_result, passed")
+        self.record_metric("performance_test_result", "passed")
 
 
 # Test discovery and collection validation
 def test_websocket_startup_verification_test_discovery():
-    Validate that all WebSocket startup verification tests can be discovered."
+    """Validate that all WebSocket startup verification tests can be discovered.
     
     This is a meta-test ensuring the test file is properly structured for
     pytest collection and execution.
-    "
+    """
     test_classes = [
         WebSocketStartupVerificationUnitTests,
         WebSocketStartupVerificationIntegrationTests,
@@ -390,18 +390,18 @@ def test_websocket_startup_verification_test_discovery():
     
     for test_class in test_classes:
         # Verify test class inherits from SSOT base
-        assert issubclass(test_class, SSotAsyncTestCase), f{test_class.__name__} must inherit from SSotAsyncTestCase
+        assert issubclass(test_class, SSotAsyncTestCase), f"{test_class.__name__} must inherit from SSotAsyncTestCase"
         
         # Verify test methods exist
         test_methods = [method for method in dir(test_class) if method.startswith('test_')]
-        assert len(test_methods) > 0, f"{test_class.__name__} has no test methods
+        assert len(test_methods) > 0, f"{test_class.__name__} has no test methods"
         
         # Verify async test methods are properly marked
         for method_name in test_methods:
             method = getattr(test_class, method_name)
             if asyncio.iscoroutinefunction(method):
                 # Check if method has pytest.mark.asyncio
-                marks = getattr(method, 'pytestmark', []
+                marks = getattr(method, 'pytestmark', [])
                 has_asyncio_mark = any(
                     hasattr(mark, 'name') and mark.name == 'asyncio' 
                     for mark in marks
@@ -410,13 +410,13 @@ def test_websocket_startup_verification_test_discovery():
                 # so we don't assert, just document the requirement
 
 
-if __name__ == __main__":
+if __name__ == "__main__":
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-    print(MIGRATION NOTICE: This file previously used direct pytest execution.)"
-    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")
-    print(For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
-    # sys.exit(result")
+    # sys.exit(result)

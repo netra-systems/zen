@@ -65,7 +65,7 @@ class WebSocketSSotValidationTests(BaseIntegrationTest):
         """
         try:
             # Import SSOT components
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
 
             # Create test user context following SSOT pattern
@@ -101,7 +101,7 @@ class WebSocketSSotValidationTests(BaseIntegrationTest):
         This is essential for enterprise compliance and security.
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
 
             # Create two different user contexts
@@ -146,7 +146,7 @@ class WebSocketSSotValidationTests(BaseIntegrationTest):
         CRITICAL: Validates that events sent through SSOT pattern reach only the intended user.
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
 
             # Create user context and manager
@@ -286,7 +286,7 @@ class WebSocketSSotValidationTests(BaseIntegrationTest):
         in multi-user scenarios.
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
 
             # Create multiple user contexts concurrently
@@ -340,7 +340,7 @@ class WebSocketSSotValidationTests(BaseIntegrationTest):
         between users.
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
 
             # Create two managers
@@ -436,7 +436,7 @@ class SSotWebSocketDeprecationTransitionTests:
         """
         try:
             # CANONICAL SSOT IMPORT (preferred)
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
 
             user_context = UserExecutionContextFactory.create_test_context()

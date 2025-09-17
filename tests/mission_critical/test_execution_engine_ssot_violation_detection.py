@@ -1,4 +1,4 @@
-"
+"""
 MISSION CRITICAL: Execution Engine SSOT Violation Detection Tests
 
 These tests are designed to FAIL if the system regresses to multiple execution engines.
@@ -6,8 +6,10 @@ They enforce the SSOT principle that only UserExecutionEngine should exist.
 
 Issue #1146: Prevent execution engine fragmentation blocking Golden Path
 Business Impact: $500K+ ARR chat functionality protection
-"
+"""
 
+"""
+"""
 import pytest
 import os
 import ast

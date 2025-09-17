@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 import time
 from typing import Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field
@@ -24,7 +24,7 @@ from netra_backend.app.core.resilience.unified_circuit_breaker import (
     UnifiedCircuitBreakerState
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass

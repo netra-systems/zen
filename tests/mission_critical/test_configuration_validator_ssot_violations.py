@@ -1,4 +1,4 @@
-"
+"""
 PHASE 1: SSOT Violation Reproduction Tests
 Tests that expose current ConfigurationValidator SSOT violations and PASS before consolidation.
 
@@ -13,6 +13,7 @@ CRITICAL: These tests PASS initially (showing violations exist) and will FAIL af
 Business Impact: OAuth authentication failures threaten $500K+ ARR
 "
 
+"""
 import asyncio
 import logging
 from typing import Dict, Any, Optional

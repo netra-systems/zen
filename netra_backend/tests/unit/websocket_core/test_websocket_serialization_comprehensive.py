@@ -19,7 +19,7 @@ import json
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Dict, Any
-from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
+from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
 
 class SerializationTestEnum(Enum):
     """Test enum for serialization testing."""
@@ -144,7 +144,7 @@ class ConnectionDiagnosticsTests:
         """Test that connection diagnostics can be JSON serialized without errors."""
         try:
             from starlette.websockets import WebSocketState
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+            from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
             from datetime import datetime
 
             class MockWebSocket:
@@ -152,7 +152,7 @@ class ConnectionDiagnosticsTests:
                 def __init__(self):
                     self.client_state = WebSocketState.CONNECTED
             connection = WebSocketConnection(connection_id='test_conn_123', user_id='test_user', websocket=MockWebSocket(), connected_at=datetime.utcnow())
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
             manager = UnifiedWebSocketManager()
             diagnostics = manager._get_connection_diagnostics(connection)
             json_str = json.dumps(diagnostics)
@@ -164,7 +164,7 @@ class ConnectionDiagnosticsTests:
 
     def test_diagnostics_with_no_websocket(self):
         """Test diagnostics when websocket is None."""
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection, WebSocketManager
+        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection, UnifiedWebSocketManager
         from datetime import datetime
         connection = WebSocketConnection(connection_id='test_conn_456', user_id='test_user', websocket=None, connected_at=datetime.utcnow())
         manager = UnifiedWebSocketManager()

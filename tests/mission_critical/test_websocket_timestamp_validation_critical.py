@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical Tests for WebSocket Timestamp Validation
 
 Business Value Justification:
@@ -20,6 +20,7 @@ WebSocketMessage timestamp - Input should be a valid number, unable to parse str
 CRITICAL: If these tests fail, WebSocket chat is BROKEN and deployment must be BLOCKED.
 "
 
+"""
 import pytest
 import time
 import json

@@ -1,12 +1,14 @@
-"
+"""
 Test Handler Registration Grace Period Fix
 
 This test validates that the startup grace period prevents false ZERO handlers" warnings
 during normal application startup.
 
 CRITICAL: This test ensures startup stability by validating grace period behavior.
-"
+"""
 
+"""
+"""
 import time
 import pytest
 from shared.isolated_environment import IsolatedEnvironment

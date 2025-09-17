@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 DEPRECATION WARNING: This mission critical test runner is deprecated in favor of UnifiedTestRunner SSOT.
 
 This isolation security test runner now redirects to the unified test runner's mission critical mode
@@ -15,6 +15,7 @@ Migration Path:
 All original test execution flags and options are preserved and forwarded to the SSOT implementation.
 "
 
+"""
 import sys
 import subprocess
 from pathlib import Path

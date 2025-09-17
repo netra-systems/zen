@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 Mission Critical Test Suite: Configuration Manager SSOT Compliance Violations Detection
 
 Business Value: Platform/Internal - System Reliability & Configuration Management
@@ -27,6 +27,7 @@ Author: SSOT Gardener Agent - Step 2 Test Plan Execution
 Date: 2025-09-13
 "
 
+"""
 import ast
 import os
 import sys

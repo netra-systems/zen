@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"
+"""
 MISSION CRITICAL TEST SUITE: WebSocket Agent Events - GCP STAGING ONLY
 
 THIS SUITE MUST PASS OR THE GOLDEN PATH IS BROKEN.
@@ -22,6 +22,7 @@ ARCHITECTURAL COMPLIANCE:
 ANY FAILURE HERE BLOCKS GOLDEN PATH DEPLOYMENT.
 "
 
+"""
 import asyncio
 import json
 import os

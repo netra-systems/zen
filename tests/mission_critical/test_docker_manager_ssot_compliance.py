@@ -1,4 +1,4 @@
-"
+"""
 SSOT Docker Manager Compliance Validation Tests
 ============================================
 
@@ -6,6 +6,7 @@ CRITICAL MISSION: Prove Docker Manager SSOT violation exists and validate fix wo
 
 This test suite validates:
 1. SSOT ENFORCEMENT: Only ONE Docker Manager implementation should exist and be used
+"""
 2. IMPORT VALIDATION: All imports must resolve to the same real implementation
 3. GOLDEN PATH PROTECTION: Real services vs mocks for $500K+ ARR functionality
 4. SSOT COMPLIANCE: Prevents regression of Docker Manager duplication

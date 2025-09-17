@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical: JWT SSOT Violations Blocking Golden Path
 
 MISSION CRITICAL: These tests detect SSOT violations that block Golden Path user flow.
@@ -13,6 +13,7 @@ CRITICAL BUSINESS IMPACT:
 These tests are designed to FAIL initially, proving P0 SSOT violations block Golden Path.
 "
 
+"""
 import asyncio
 import json
 import os

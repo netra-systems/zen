@@ -135,7 +135,7 @@ async def real_thread_service():
 async def real_websocket_manager():
     """Real WebSocket manager for E2E tests."""
     try:
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
         manager = UnifiedWebSocketManager()
         yield manager
     except Exception as e:
@@ -163,7 +163,7 @@ async def real_agent_setup():
         llm_manager = LLMManager(config)
         
         # Real WebSocket manager
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
         websocket_manager = UnifiedWebSocketManager()
         
         # Real tool dispatcher

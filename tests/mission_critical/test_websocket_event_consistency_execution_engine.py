@@ -1,4 +1,4 @@
-"
+"""
 Test WebSocket Event Consistency for ExecutionEngine
 
 MISSION CRITICAL: WebSocket events are 90% of platform business value - they enable chat functionality.
@@ -32,6 +32,7 @@ Test Coverage:
 7. Event persistence and reliability
 "
 
+"""
 import asyncio
 import pytest
 import time

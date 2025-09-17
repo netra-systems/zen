@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical Business Value Protection Tests for ClickHouse Exception Handling - Issue #731.
 
 These tests protect business-critical functionality by ensuring that ClickHouse
@@ -7,6 +7,7 @@ exception handling maintains system stability and prevents revenue-impacting fai
 Business Value Protection:
 - $500K+ ARR: Protects analytics pipeline reliability
 - Customer Experience: Ensures clear error reporting and graceful degradation
+"""
 - System Stability: Prevents cascading failures from ClickHouse issues
 - Operational Efficiency: Enables faster troubleshooting through specific exceptions
 "

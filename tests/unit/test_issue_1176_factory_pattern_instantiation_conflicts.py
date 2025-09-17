@@ -45,7 +45,7 @@ class TestFactoryPatternInstantiationConflicts(SSotBaseTestCase):
         """
         try:
             # Attempt to import WebSocketManager
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
             # Try direct instantiation - should be prevented by factory wrapper
             with pytest.raises(RuntimeError, match="Direct WebSocketManager instantiation not allowed"):

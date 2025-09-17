@@ -1,4 +1,4 @@
-"
+"""
 Golden Path Protection Tests for JWT SSOT Migration
 
 This test suite ensures that SSOT consolidation of JWT validation does NOT break
@@ -16,6 +16,7 @@ Strategic Impact: Maintains customer trust and system reliability
 Test Strategy: These tests must ALWAYS PASS (both before and after SSOT changes)
 "
 
+"""
 import asyncio
 import json
 import time

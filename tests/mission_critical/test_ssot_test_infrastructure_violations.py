@@ -1,4 +1,4 @@
-"
+"""
 SSOT Test Infrastructure Violations Test Suite
 
 Detects test infrastructure conflicts that violate Single Source of Truth principles.
@@ -9,6 +9,7 @@ Validates SSOT test infrastructure compliance to eliminate conftest.py conflicts
 
 Test Strategy:
 1. Scan entire codebase for duplicate conftest.py files
+"""
 2. Identify conflicting fixture definitions across modules
 3. Flag pytest configuration conflicts
 4. Detect test runner duplication patterns

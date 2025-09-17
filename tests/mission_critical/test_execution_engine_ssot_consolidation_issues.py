@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"MISSION CRITICAL: Execution Engine SSOT Consolidation Issue Detection Tests
+"""MISSION CRITICAL: Execution Engine SSOT Consolidation Issue Detection Tests
 
 PURPOSE: Demonstrate remaining SSOT violations and consolidation issues in execution engine
 implementations to support issue #182 strategic testing.
@@ -14,7 +14,7 @@ Business Impact: $500K+ ARR at risk from execution engine inconsistencies
 Architecture Impact: 60% reduction in duplicated execution logic needed
 
 NO DOCKER DEPENDENCIES - Unit/Integration/E2E Staging only
-
+"""
 
 import asyncio
 import gc
@@ -63,7 +63,7 @@ from netra_backend.app.agents.supervisor.execution_engine_factory import (
 # Import context and user management
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 # Base test case
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -71,22 +71,22 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Helper for creating mock dependencies
 class MockWebSocketBridge:
-    ""Minimal mock WebSocket bridge for testing factory patterns.
+    """Minimal mock WebSocket bridge for testing factory patterns."""
     async def emit_agent_event(self, *args, **kwargs):
         pass
 
 
 def create_test_factory():
-    Create a test factory with minimal dependencies.""
+    """Create a test factory with minimal dependencies."""
     mock_bridge = MockWebSocketBridge()
     return SupervisorFactory(websocket_bridge=mock_bridge)
 
 
 class ExecutionEngineSSotViolationDetectionTests(SSotAsyncTestCase):
-    Test 1 & 2: SSOT Violation Detection - Multiple execution engine implementations""
+    """Test 1 & 2: SSOT Violation Detection - Multiple execution engine implementations"""
     
     async def test_execution_engine_implementation_duplicates_detected(self):
-        DESIGNED TO FAIL: Detect duplicate execution engine implementations."
+        """DESIGNED TO FAIL: Detect duplicate execution engine implementations.
         
         This test should FAIL because we have multiple execution engine 
         implementations that violate SSOT principles.
@@ -95,7 +95,7 @@ class ExecutionEngineSSotViolationDetectionTests(SSotAsyncTestCase):
         - SupervisorExecutionEngine vs UnifiedExecutionEngine
         - Multiple factory patterns 
         - Inconsistent interfaces
-        "
+        """
         # Collect all AGENT execution engine classes (exclude tool execution engines)
         execution_engines = [
             SupervisorExecutionEngine,
@@ -114,7 +114,7 @@ class ExecutionEngineSSotViolationDetectionTests(SSotAsyncTestCase):
             source_file = inspect.getfile(engine_class)
             
             # Use module + class name to avoid key conflicts with same-named classes
-            key = f{engine_class.__module__}.{engine_class.__name__}
+            key = f"{engine_class.__module__}.{engine_class.__name__}"
             engine_analysis[key] = {
                 'methods': methods,
                 'source_file': source_file,
@@ -122,7 +122,7 @@ class ExecutionEngineSSotViolationDetectionTests(SSotAsyncTestCase):
                 'method_count': len(methods)
             }
         
-        logger.info(f"Execution Engine Analysis: {engine_analysis})
+        logger.info(f"Execution Engine Analysis: {engine_analysis}")
         
         # Check for SSOT violations
         ssot_violations = []
@@ -136,41 +136,41 @@ class ExecutionEngineSSotViolationDetectionTests(SSotAsyncTestCase):
         # Find methods implemented in multiple engines (SSOT violation)
         core_methods = ['execute', 'run', 'process', 'handle_request', 'execute_pipeline']
         for method in core_methods:
-            if method in all_methods and len(all_methods[method] > 1:
-                ssot_violations.append(fMethod '{method}' implemented in multiple engines: {all_methods[method]}")
+            if method in all_methods and len(all_methods[method]) > 1:
+                ssot_violations.append(f"Method '{method}' implemented in multiple engines: {all_methods[method]}")
         
         # Check for file duplication
         source_files = [analysis['source_file'] for analysis in engine_analysis.values()]
         if len(set(source_files)) < len(source_files):
-            ssot_violations.append(Multiple execution engines reference same source file)
+            ssot_violations.append("Multiple execution engines reference same source file")
         
         # Check for inconsistent interfaces
         method_counts = [analysis['method_count'] for analysis in engine_analysis.values()]
         if max(method_counts) - min(method_counts) > 3:
-            ssot_violations.append(fInconsistent interface sizes: {method_counts}")"
+            ssot_violations.append(f"Inconsistent interface sizes: {method_counts}")
         
         # This test should FAIL - we expect SSOT violations
         assert len(ssot_violations) > 0, (
-            fExpected SSOT violations in execution engines, but found none. 
-            fThis indicates the consolidation might already be complete. 
-            f"Analysis: {engine_analysis}
+            f"Expected SSOT violations in execution engines, but found none. "
+            f"This indicates the consolidation might already be complete. "
+            f"Analysis: {engine_analysis}"
         )
         
         # Log the violations for debugging
         for violation in ssot_violations:
-            logger.error(fSSOT Violation Detected: {violation}")
+            logger.error(f"SSOT Violation Detected: {violation}")
             
         # Fail the test to demonstrate the problem
-        pytest.fail(fSSOT Violations Detected ({len(ssot_violations)} issues): {ssot_violations})
+        pytest.fail(f"SSOT Violations Detected ({len(ssot_violations)} issues): {ssot_violations}")
 
     async def test_factory_pattern_duplication_detected(self):
-        "DESIGNED TO FAIL: Detect multiple factory pattern implementations.
+        """DESIGNED TO FAIL: Detect multiple factory pattern implementations.
         
         Expected Issues:
         - SupervisorFactory vs ConsolidatedFactory
         - Inconsistent factory interfaces
         - Multiple creation patterns
-"
+        """
         # Collect factory implementations
         factories = [
             SupervisorFactory,
@@ -191,7 +191,7 @@ class ExecutionEngineSSotViolationDetectionTests(SSotAsyncTestCase):
                 'creation_methods': [m for m in methods if 'create' in m.lower() or 'build' in m.lower()]
             }
         
-        logger.info(fFactory Analysis: {factory_analysis})
+        logger.info(f"Factory Analysis: {factory_analysis}")
         
         # Detect factory pattern violations
         factory_violations = []
@@ -200,47 +200,47 @@ class ExecutionEngineSSotViolationDetectionTests(SSotAsyncTestCase):
         creation_patterns = []
         for name, analysis in factory_analysis.items():
             if analysis['is_class']:
-                creation_patterns.append(fClass-based factory: {name}")"
+                creation_patterns.append(f"Class-based factory: {name}")
             else:
-                creation_patterns.append(fFunction-based factory: {name})
+                creation_patterns.append(f"Function-based factory: {name}")
         
         if len(creation_patterns) > 1:
-            factory_violations.append(fMultiple factory patterns: {creation_patterns})
+            factory_violations.append(f"Multiple factory patterns: {creation_patterns}")
         
         # Check for method duplication
         all_creation_methods = []
         for analysis in factory_analysis.values():
-            all_creation_methods.extend(analysis['creation_methods']
+            all_creation_methods.extend(analysis['creation_methods'])
         
         method_counts = Counter(all_creation_methods)
         duplicate_methods = [method for method, count in method_counts.items() if count > 1]
         if duplicate_methods:
-            factory_violations.append(f"Duplicate factory methods: {duplicate_methods})
+            factory_violations.append(f"Duplicate factory methods: {duplicate_methods}")
         
         # This test should FAIL - we expect factory violations
         assert len(factory_violations) > 0, (
-            fExpected factory pattern violations, but found none. "
-            fAnalysis: {factory_analysis}
+            f"Expected factory pattern violations, but found none. "
+            f"Analysis: {factory_analysis}"
         )
         
         # Log violations
         for violation in factory_violations:
-            logger.error(fFactory Pattern Violation: {violation})"
+            logger.error(f"Factory Pattern Violation: {violation}")
             
-        pytest.fail(f"Factory Pattern Violations Detected ({len(factory_violations)} issues): {factory_violations})
+        pytest.fail(f"Factory Pattern Violations Detected ({len(factory_violations)} issues): {factory_violations}")
 
 
 class UserIsolationFailuresTests(SSotAsyncTestCase):
-    Test 3 & 4: User Isolation Failures - Shared state and event collisions"
+    """Test 3 & 4: User Isolation Failures - Shared state and event collisions"""
     
     async def test_user_execution_context_shared_state_detected(self):
-        "DESIGNED TO FAIL: Detect shared state between user execution contexts.
+        """DESIGNED TO FAIL: Detect shared state between user execution contexts.
         
         Expected Issues:
         - Global state in execution engines
         - Shared caches or registries
         - User data bleeding between contexts
-        ""
+        """
         # Create multiple user contexts
         user1_id = str(uuid.uuid4())
         user2_id = str(uuid.uuid4())
@@ -279,8 +279,8 @@ class UserIsolationFailuresTests(SSotAsyncTestCase):
                         # Skip immutable types that can be safely shared
                         if not isinstance(value1, (str, int, float, bool, type(None), tuple)):
                             shared_state_violations.append(
-                                fShared mutable object detected: {attr1} = {type(value1).__name__} 
-                                f(id: {id(value1)}
+                                f"Shared mutable object detected: {attr1} = {type(value1).__name__} "
+                                f"(id: {id(value1)})"
                             )
             
             # Test for global state pollution
@@ -293,38 +293,38 @@ class UserIsolationFailuresTests(SSotAsyncTestCase):
             # Check if state is properly isolated
             if (hasattr(engine1, '_user_data') and hasattr(engine2, '_user_data') and 
                 engine1._user_data is engine2._user_data):
-                shared_state_violations.append(User data dictionaries are shared between engines")"
+                shared_state_violations.append("User data dictionaries are shared between engines")
             
             # Check for shared registries or caches
             shared_attrs = ['_registry', '_cache', '_state', '_context', '_manager']
             for attr in shared_attrs:
                 if (hasattr(engine1, attr) and hasattr(engine2, attr) and 
                     getattr(engine1, attr) is getattr(engine2, attr)):
-                    shared_state_violations.append(fShared {attr} detected between user engines)
+                    shared_state_violations.append(f"Shared {attr} detected between user engines")
             
         except Exception as e:
-            shared_state_violations.append(fFailed to create isolated user engines: {e})
+            shared_state_violations.append(f"Failed to create isolated user engines: {e}")
         
         # This test should FAIL - we expect isolation violations
         assert len(shared_state_violations) > 0, (
-            f"Expected user isolation violations, but found none. 
-            fUser engines may already be properly isolated."
+            f"Expected user isolation violations, but found none. "
+            f"User engines may already be properly isolated."
         )
         
         # Log violations
         for violation in shared_state_violations:
-            logger.error(fUser Isolation Violation: {violation})
+            logger.error(f"User Isolation Violation: {violation}")
             
-        pytest.fail(fUser Isolation Violations Detected ({len(shared_state_violations)} issues): {shared_state_violations})"
+        pytest.fail(f"User Isolation Violations Detected ({len(shared_state_violations)} issues): {shared_state_violations}")
 
     async def test_user_websocket_event_collision_detected(self):
-        "DESIGNED TO FAIL: Detect WebSocket events being mixed between users.
+        """DESIGNED TO FAIL: Detect WebSocket events being mixed between users.
         
         Expected Issues:
         - Events sent to wrong user connections
         - Shared WebSocket managers
         - User event queue pollution
-        ""
+        """
         event_collision_violations = []
         
         try:
@@ -342,20 +342,20 @@ class UserIsolationFailuresTests(SSotAsyncTestCase):
                     'context': user_context,
                     'events_received': [],
                     'expected_events': set()
-                }
+                })
             
             # Simulate concurrent execution with event tracking
             async def simulate_user_execution(user_data):
                 try:
                     # Create execution engine for user
                     factory = create_test_factory()
-                    engine = await factory.create_for_user(user_data['context']
+                    engine = await factory.create_for_user(user_data['context'])
                     
                     # Track expected events for this user
                     expected_events = {
-                        fagent_started_{user_data['id']},
-                        fagent_thinking_{user_data['id']},
-                        fagent_completed_{user_data['id']}""
+                        f"agent_started_{user_data['id']}",
+                        f"agent_thinking_{user_data['id']}",
+                        f"agent_completed_{user_data['id']}"
                     }
                     user_data['expected_events'] = expected_events
                     
@@ -366,7 +366,7 @@ class UserIsolationFailuresTests(SSotAsyncTestCase):
                     
                     return user_data
                 except Exception as e:
-                    event_collision_violations.append(fFailed to simulate user {user_data['id']}: {e})
+                    event_collision_violations.append(f"Failed to simulate user {user_data['id']}: {e}")
                     return user_data
             
             # Run concurrent simulations
@@ -377,7 +377,7 @@ class UserIsolationFailuresTests(SSotAsyncTestCase):
             all_events = []
             for user in completed_users:
                 if isinstance(user, dict):
-                    all_events.extend(user['events_received']
+                    all_events.extend(user['events_received'])
             
             # Look for events that don't match their intended user
             for user in completed_users:
@@ -389,53 +389,53 @@ class UserIsolationFailuresTests(SSotAsyncTestCase):
                     for event in received_events:
                         if user_id not in event:
                             event_collision_violations.append(
-                                fUser {user_id} received event not intended for them: {event}
+                                f"User {user_id} received event not intended for them: {event}"
                             )
             
             # Check for missing events
             for user in completed_users:
                 if isinstance(user, dict):
                     expected = user['expected_events']
-                    received = set(user['events_received']
+                    received = set(user['events_received'])
                     missing = expected - received
                     if missing:
                         event_collision_violations.append(
-                            f"User {user['id']} missing expected events: {missing}
+                            f"User {user['id']} missing expected events: {missing}"
                         )
             
             # Add known violation for test failure
             if len(event_collision_violations) == 0:
                 # Force a failure to demonstrate the test concept
                 event_collision_violations.append(
-                    Simulated WebSocket event collision - multiple users may share event channels"
+                    "Simulated WebSocket event collision - multiple users may share event channels"
                 )
                 
         except Exception as e:
-            event_collision_violations.append(fWebSocket event collision test failed: {e})
+            event_collision_violations.append(f"WebSocket event collision test failed: {e}")
         
         # This test should FAIL to demonstrate the problem
         assert len(event_collision_violations) > 0, (
-            fExpected WebSocket event collision violations, but found none."
+            f"Expected WebSocket event collision violations, but found none."
         )
         
         # Log violations
         for violation in event_collision_violations:
-            logger.error(f"WebSocket Event Collision: {violation})
+            logger.error(f"WebSocket Event Collision: {violation}")
             
-        pytest.fail(fWebSocket Event Collisions Detected ({len(event_collision_violations)} issues): {event_collision_violations})
+        pytest.fail(f"WebSocket Event Collisions Detected ({len(event_collision_violations)} issues): {event_collision_violations}")
 
 
 class FactoryPatternIssuesTests(SSotAsyncTestCase):
-    Test 5 & 6: Factory Pattern Issues - Resource leaks and performance degradation""
+    """Test 5 & 6: Factory Pattern Issues - Resource leaks and performance degradation"""
     
     async def test_factory_resource_leakage_detected(self):
-        DESIGNED TO FAIL: Detect memory and resource leaks in factory patterns.
+        """DESIGNED TO FAIL: Detect memory and resource leaks in factory patterns.
         
         Expected Issues:
         - Memory not released after user sessions
         - File handles or connections not closed
         - Growing memory usage with each factory call
-""
+        """
         resource_leak_violations = []
         
         # Start memory tracking
@@ -474,7 +474,7 @@ class FactoryPatternIssuesTests(SSotAsyncTestCase):
                 try:
                     await factory.cleanup_engine(engine)
                 except Exception as e:
-                    resource_leak_violations.append(fFailed to cleanup engine: {e})
+                    resource_leak_violations.append(f"Failed to cleanup engine: {e}")
                     
             # Clear strong references
             created_engines.clear()
@@ -502,50 +502,50 @@ class FactoryPatternIssuesTests(SSotAsyncTestCase):
             
             if memory_growth > memory_threshold:
                 resource_leak_violations.append(
-                    fMemory leak detected: {memory_growth / (1024*1024):.2f}MB growth"
+                    f"Memory leak detected: {memory_growth / (1024*1024):.2f}MB growth"
                 )
             
             if handle_growth > handle_threshold:
                 resource_leak_violations.append(
-                    f"Handle leak detected: {handle_growth} handles not released
+                    f"Handle leak detected: {handle_growth} handles not released"
                 )
             
             if alive_engines > alive_threshold:
                 resource_leak_violations.append(
-                    fObject leak detected: {alive_engines} engines not garbage collected
+                    f"Object leak detected: {alive_engines} engines not garbage collected"
                 )
                 
             # Force at least one violation for test demonstration
             if len(resource_leak_violations) == 0:
                 resource_leak_violations.append(
-                    fPotential resource leak - {memory_growth} bytes allocated, 
-                    f{alive_engines} objects still alive""
+                    f"Potential resource leak - {memory_growth} bytes allocated, "
+                    f"{alive_engines} objects still alive"
                 )
                 
         except Exception as e:
-            resource_leak_violations.append(fResource leak test failed: {e})
+            resource_leak_violations.append(f"Resource leak test failed: {e}")
         finally:
             tracemalloc.stop()
         
         # This test should FAIL to demonstrate resource issues
         assert len(resource_leak_violations) > 0, (
-            fExpected resource leak violations, but found none.
+            f"Expected resource leak violations, but found none."
         )
         
         # Log violations
         for violation in resource_leak_violations:
-            logger.error(f"Resource Leak Violation: {violation})
+            logger.error(f"Resource Leak Violation: {violation}")
             
-        pytest.fail(fResource Leak Violations Detected ({len(resource_leak_violations)} issues): {resource_leak_violations}")
+        pytest.fail(f"Resource Leak Violations Detected ({len(resource_leak_violations)} issues): {resource_leak_violations}")
 
     async def test_factory_performance_degradation_detected(self):
-        DESIGNED TO FAIL: Detect performance issues in factory patterns.""
+        """DESIGNED TO FAIL: Detect performance issues in factory patterns.
         
         Expected Issues:
         - Slow engine creation times
         - Performance degradation with multiple users
         - Inefficient factory patterns
-        
+        """
         performance_violations = []
         
         try:
@@ -575,7 +575,7 @@ class FactoryPatternIssuesTests(SSotAsyncTestCase):
             # Create many engines concurrently
             concurrent_count = 20
             start_concurrent = time.perf_counter()
-            concurrent_times = await asyncio.gather(*[create_engine() for _ in range(concurrent_count)]
+            concurrent_times = await asyncio.gather(*[create_engine() for _ in range(concurrent_count)])
             total_concurrent_time = time.perf_counter() - start_concurrent
             
             # Analyze performance metrics
@@ -589,58 +589,58 @@ class FactoryPatternIssuesTests(SSotAsyncTestCase):
             
             if single_creation_time > single_threshold:
                 performance_violations.append(
-                    fSlow single engine creation: {single_creation_time:.3f}s > {single_threshold}s"
+                    f"Slow single engine creation: {single_creation_time:.3f}s > {single_threshold}s"
                 )
             
             if avg_concurrent_time > concurrent_threshold:
                 performance_violations.append(
-                    f"Slow concurrent engine creation: {avg_concurrent_time:.3f}s average > {concurrent_threshold}s
+                    f"Slow concurrent engine creation: {avg_concurrent_time:.3f}s average > {concurrent_threshold}s"
                 )
             
             if max_concurrent_time > max_threshold:
                 performance_violations.append(
-                    fExtremely slow engine creation detected: {max_concurrent_time:.3f}s > {max_threshold}s
+                    f"Extremely slow engine creation detected: {max_concurrent_time:.3f}s > {max_threshold}s"
                 )
             
             # Check for degradation pattern
             if avg_concurrent_time > single_creation_time * 2:
                 performance_violations.append(
-                    fPerformance degradation under load: {avg_concurrent_time:.3f}s vs {single_creation_time:.3f}s
+                    f"Performance degradation under load: {avg_concurrent_time:.3f}s vs {single_creation_time:.3f}s"
                 )
                 
             # Force violation for test demonstration if none found
             if len(performance_violations) == 0:
                 performance_violations.append(
-                    fPerformance concern - single: {single_creation_time:.3f}s, ""
-                    fconcurrent avg: {avg_concurrent_time:.3f}s, max: {max_concurrent_time:.3f}s
+                    f"Performance concern - single: {single_creation_time:.3f}s, "
+                    f"concurrent avg: {avg_concurrent_time:.3f}s, max: {max_concurrent_time:.3f}s"
                 )
                 
         except Exception as e:
-            performance_violations.append(fPerformance test failed: {e})
+            performance_violations.append(f"Performance test failed: {e}")
         
         # This test should FAIL to demonstrate performance issues
         assert len(performance_violations) > 0, (
-            f"Expected performance violations, but found none.
+            f"Expected performance violations, but found none."
         )
         
         # Log violations
         for violation in performance_violations:
-            logger.error(fPerformance Violation: {violation}")
+            logger.error(f"Performance Violation: {violation}")
             
-        pytest.fail(fPerformance Violations Detected ({len(performance_violations)} issues): {performance_violations})
+        pytest.fail(f"Performance Violations Detected ({len(performance_violations)} issues): {performance_violations}")
 
 
 class GoldenPathProtectionTests(SSotAsyncTestCase):
-    "Test 7: Golden Path Protection - End-to-end user flow integrity"
+    """Test 7: Golden Path Protection - End-to-end user flow integrity"""
     
     async def test_golden_path_execution_engine_integration_protected(self):
-        DESIGNED TO FAIL: Protect golden path user flow from execution engine issues.""
+        """DESIGNED TO FAIL: Protect golden path user flow from execution engine issues.
         
         This test validates the complete user journey: login  ->  agent execution  ->  response.
         Should fail if execution engine consolidation issues break the golden path.
         
         Business Impact: $500K+ ARR dependency on reliable execution flow
-        
+        """
         golden_path_violations = []
         
         try:
@@ -664,7 +664,7 @@ class GoldenPathProtectionTests(SSotAsyncTestCase):
                 execution_engine = await factory.create_for_user(user_context)
                 engine_creation_time = time.perf_counter() - engine_creation_start
             except Exception as e:
-                golden_path_violations.append(fGolden Path BLOCKED: Engine creation failed - {e})"
+                golden_path_violations.append(f"Golden Path BLOCKED: Engine creation failed - {e}")
                 execution_engine = None
                 engine_creation_time = 0
             
@@ -688,10 +688,10 @@ class GoldenPathProtectionTests(SSotAsyncTestCase):
                         execution_success = True
                     else:
                         golden_path_violations.append(
-                            "Golden Path BLOCKED: No execution method available
+                            "Golden Path BLOCKED: No execution method available"
                         )
                 except Exception as e:
-                    golden_path_violations.append(fGolden Path BLOCKED: Execution failed - {e})
+                    golden_path_violations.append(f"Golden Path BLOCKED: Execution failed - {e}")
             
             execution_time = time.perf_counter() - execution_start
             total_time = time.perf_counter() - start_time
@@ -700,17 +700,17 @@ class GoldenPathProtectionTests(SSotAsyncTestCase):
             # Performance requirements for golden path
             if engine_creation_time > 2.0:  # 2 second max for engine creation
                 golden_path_violations.append(
-                    f"Golden Path DEGRADED: Slow engine creation {engine_creation_time:.3f}s
+                    f"Golden Path DEGRADED: Slow engine creation {engine_creation_time:.3f}s"
                 )
             
             if total_time > 5.0:  # 5 second max for complete flow
                 golden_path_violations.append(
-                    fGolden Path DEGRADED: Slow total flow {total_time:.3f}s"
+                    f"Golden Path DEGRADED: Slow total flow {total_time:.3f}s"
                 )
             
             if not execution_success:
                 golden_path_violations.append(
-                    Golden Path BLOCKED: Execution engine interface not available
+                    "Golden Path BLOCKED: Execution engine interface not available"
                 )
             
             # Step 5: Test multiple concurrent users (golden path under load)
@@ -738,39 +738,39 @@ class GoldenPathProtectionTests(SSotAsyncTestCase):
             successful_paths = sum(1 for result in concurrent_results if result is True)
             if successful_paths < 8:  # At least 80% success rate required
                 golden_path_violations.append(
-                    fGolden Path DEGRADED: Only {successful_paths}/10 concurrent paths succeeded""
+                    f"Golden Path DEGRADED: Only {successful_paths}/10 concurrent paths succeeded"
                 )
             
             # Force at least one violation for test demonstration
             if len(golden_path_violations) == 0:
                 golden_path_violations.append(
-                    fGolden Path MONITORING: Engine creation {engine_creation_time:.3f}s, 
-                    ftotal flow {total_time:.3f}s, concurrent success {successful_paths}/10
+                    f"Golden Path MONITORING: Engine creation {engine_creation_time:.3f}s, "
+                    f"total flow {total_time:.3f}s, concurrent success {successful_paths}/10"
                 )
                 
         except Exception as e:
-            golden_path_violations.append(f"Golden Path CRITICAL FAILURE: {e})
+            golden_path_violations.append(f"Golden Path CRITICAL FAILURE: {e}")
         
         # This test should FAIL to demonstrate golden path protection
         assert len(golden_path_violations) > 0, (
-            fExpected golden path violations, but found none. "
-            fGolden path may already be protected.
+            f"Expected golden path violations, but found none. "
+            f"Golden path may already be protected."
         )
         
         # Log violations with high severity
         for violation in golden_path_violations:
-            logger.error(fGOLDEN PATH VIOLATION: {violation})"
+            logger.error(f"GOLDEN PATH VIOLATION: {violation}")
             
-        pytest.fail(f"Golden Path Violations Detected ({len(golden_path_violations)} issues): {golden_path_violations})
+        pytest.fail(f"Golden Path Violations Detected ({len(golden_path_violations)} issues): {golden_path_violations}")
 
 
-if __name__ == __main__:
+if __name__ == "__main__":
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-    print(MIGRATION NOTICE: This file previously used direct pytest execution.")"
-    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
     print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
-    # sys.exit(result")
+    # sys.exit(result)

@@ -1,4 +1,4 @@
-"
+"""
  ALERT:  MISSION CRITICAL: JWT Secret Consistency SSOT Violation
 
 SSOT VIOLATION REPRODUCTION - Test #3 of 5
@@ -25,6 +25,7 @@ CRITICAL JWT CONSISTENCY REQUIREMENT:
 ALL services MUST use identical JWT validation logic through UnifiedAuthInterface.
 "
 
+"""
 import asyncio
 import json
 import logging  

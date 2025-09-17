@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical Test Suite: MessageRouter Chat Message Type Fix
 
 Business Value Justification:
@@ -14,6 +14,7 @@ CRITICAL: These tests validate that the 'chat_message' mapping fix in LEGACY_MES
 is working properly and business value is restored.
 "
 
+"""
 import asyncio
 import json
 import pytest

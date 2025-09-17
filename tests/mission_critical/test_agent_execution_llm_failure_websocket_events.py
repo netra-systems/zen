@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical Test: WebSocket Events During LLM API Failures
 
 MISSION CRITICAL: This test validates that the 5 essential WebSocket events
@@ -21,6 +21,7 @@ This test ensures that regardless of LLM API failure patterns:
 CRITICAL: This test MUST pass or the platform loses all user value during LLM outages.
 "
 
+"""
 import asyncio
 import json
 import time

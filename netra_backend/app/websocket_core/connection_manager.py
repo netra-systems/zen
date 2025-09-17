@@ -11,7 +11,7 @@ This module provides the SSOT alias for WebSocketConnectionManager imports that 
 Following CLAUDE.md SSOT principles by creating proper aliases rather than duplicating code.
 """
 
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from shared.logging.unified_logging_ssot import get_logger
 from typing import Dict, Any, Optional
 from datetime import datetime, timezone
@@ -122,10 +122,10 @@ class ConnectionInfo:
 
 
 # SSOT COMPLIANCE: Use direct alias instead of class inheritance
-# DEPRECATED: WebSocketConnectionManager is now an alias to WebSocketManager
-# Use WebSocketManager directly for new code
+# DEPRECATED: WebSocketConnectionManager is now an alias to UnifiedWebSocketManager
+# Use UnifiedWebSocketManager directly for new code
 # This eliminates the duplicate class definition while maintaining backward compatibility
-WebSocketConnectionManager = WebSocketManager
+WebSocketConnectionManager = UnifiedWebSocketManager
 
 
 # SSOT alias for backward compatibility

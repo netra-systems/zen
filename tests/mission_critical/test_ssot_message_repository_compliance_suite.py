@@ -1,4 +1,4 @@
-"
+"""
 MISSION CRITICAL: SSOT Message Repository Compliance Test Suite
 
 This test suite is designed to EXPOSE and VALIDATE the SSOT violation in:
@@ -10,6 +10,7 @@ After proper SSOT remediation, these tests should PASS.
 Business Value:
 - Ensures consistent message creation across the entire platform
 - Validates proper message structure and metadata handling
+"""
 - Prevents data corruption from bypassing repository patterns
 - Maintains audit trails and business logic consistency
 

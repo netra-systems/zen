@@ -19,7 +19,7 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 import json
 from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager
@@ -27,7 +27,7 @@ from datetime import datetime, UTC
 from typing import Any, Dict, List, Optional, Union
 from uuid import uuid4
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class UserDataContext(ABC):

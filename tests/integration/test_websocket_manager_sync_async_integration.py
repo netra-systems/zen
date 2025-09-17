@@ -1,4 +1,4 @@
-"Integration tests for WebSocket manager sync/async factory patterns."""
+"""Integration tests for WebSocket manager sync/async factory patterns.
 
 This test suite validates proper WebSocket manager creation patterns and exposes
 issues with mixed sync/async usage in integration scenarios. These tests use
@@ -6,7 +6,7 @@ real services (no Docker required) to validate the Golden Path user flow.
 
 Business Value: Validates critical WebSocket infrastructure that enables
 AI chat interactions (90% of platform value).
-""
+"""
 
 import pytest
 import asyncio
@@ -16,28 +16,28 @@ from netra_backend.app.core.configuration.base import get_config
 
 
 class TestWebSocketManagerSyncAsyncIntegration(SSotAsyncTestCase):
-    Integration tests for WebSocket manager factory patterns.""
+    """Integration tests for WebSocket manager factory patterns."""
 
     def setUp(self):
-        "Set up integration test environment."""
+        """Set up integration test environment."""
         super().setUp()
         self.config = get_config()
         self.user_context = UserExecutionContext(
-            user_id=integration_test_user","
-            thread_id=integration_test_thread,
-            run_id=integration_test_run""
+            user_id="integration_test_user",
+            thread_id="integration_test_thread",
+            run_id="integration_test_run"
         )
 
     @pytest.mark.integration
     async def test_websocket_manager_creation_patterns_integration(self):
-"""Empty docstring."""
+        """
         Test WebSocket manager creation using different factory patterns.
 
         This test validates that both sync and async factory functions
         work correctly in an integration environment.
-"""Empty docstring."""
+        """
         # Test synchronous factory pattern
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
         sync_manager = get_websocket_manager(user_context=self.user_context)
         self.assertIsNotNone(sync_manager)
@@ -56,12 +56,12 @@ class TestWebSocketManagerSyncAsyncIntegration(SSotAsyncTestCase):
 
     @pytest.mark.integration
     async def test_example_message_processor_websocket_integration(self):
-"""Empty docstring."""
+        """
         Test ExampleMessageProcessor WebSocket integration to expose await errors.
 
         This test attempts to use ExampleMessageProcessor in a realistic scenario
         to trigger the await error at line 671.
-"""Empty docstring."""
+        """
         from netra_backend.app.agents.example_message_processor import ExampleMessageProcessor
 
         processor = ExampleMessageProcessor(user_id=self.user_context.user_id)
@@ -75,8 +75,8 @@ class TestWebSocketManagerSyncAsyncIntegration(SSotAsyncTestCase):
 
         except TypeError as e:
             # If we get TypeError about await, this confirms the issue
-            if "await in str(e) or awaitable in str(e):"
-                self.fail(fISSUE #1184 CONFIRMED: {e})
+            if "await" in str(e) or "awaitable" in str(e):
+                self.fail(f"ISSUE #1184 CONFIRMED: {e}")
             else:
                 raise
 
@@ -96,19 +96,19 @@ class TestWebSocketManagerSyncAsyncIntegration(SSotAsyncTestCase):
             self.assertIsNotNone(result)
 
         except TypeError as e:
-            if await in str(e) or "awaitable in str(e):"
-                pytest.fail(fAWAIT ERROR IN PROCESS_MESSAGE: {e}")"
+            if "await" in str(e) or "awaitable" in str(e):
+                pytest.fail(f"AWAIT ERROR IN PROCESS_MESSAGE: {e}")
             else:
                 raise
 
     @pytest.mark.integration
     async def test_clickhouse_operations_websocket_integration(self):
-"""Empty docstring."""
+        """
         Test ClickHouseCorpusOperations WebSocket integration to expose await errors.
 
         This test attempts to use ClickHouseCorpusOperations in realistic scenarios
         to trigger the await errors at lines 134 and 174.
-"""Empty docstring."""
+        """
         from netra_backend.app.services.corpus.clickhouse_operations import ClickHouseCorpusOperations
 
         operations = ClickHouseCorpusOperations(user_context=self.user_context)
@@ -116,46 +116,46 @@ class TestWebSocketManagerSyncAsyncIntegration(SSotAsyncTestCase):
         # Test success notification scenario (line 134 error)
         try:
             await operations._send_success_notification(
-                corpus_id=test_corpus_integration,
+                corpus_id="test_corpus_integration",
                 table_name="test_table_integration"
             )
             # If we reach here, no await error occurred
 
         except TypeError as e:
-            if await in str(e) or awaitable in str(e):
-                pytest.fail(fAWAIT ERROR AT LINE 134: {e})""
+            if "await" in str(e) or "awaitable" in str(e):
+                pytest.fail(f"AWAIT ERROR AT LINE 134: {e}")
             else:
                 # Other errors are acceptable for this test
                 pass
 
         # Test error notification scenario (line 174 error)
         try:
-            test_error = Exception("Integration test corpus error)"
+            test_error = Exception("Integration test corpus error")
             await operations._send_error_notification(
-                corpus_id=test_corpus_error_integration,
+                corpus_id="test_corpus_error_integration",
                 error=test_error
             )
             # If we reach here, no await error occurred
 
         except TypeError as e:
-            if "await in str(e) or awaitable" in str(e):
-                pytest.fail(fAWAIT ERROR AT LINE 174: {e})
+            if "await" in str(e) or "awaitable" in str(e):
+                pytest.fail(f"AWAIT ERROR AT LINE 174: {e}")
             else:
                 # Other errors are acceptable for this test
                 pass
 
     @pytest.mark.integration
     async def test_websocket_manager_factory_consistency_integration(self):
-        
+        """
         Test WebSocket manager factory consistency across integration scenarios.
 
         This test validates that different factory patterns create compatible
         managers and that sync/async usage is consistent.
-""
+        """
         # Test all available factory functions
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as pattern_get
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager as pattern_get
 
         # Create managers using different patterns
         sync_manager_1 = get_websocket_manager(user_context=self.user_context)
@@ -165,8 +165,8 @@ class TestWebSocketManagerSyncAsyncIntegration(SSotAsyncTestCase):
         # Verify all managers are created successfully
         managers = [sync_manager_1, sync_manager_2, async_manager]
         for i, manager in enumerate(managers):
-            self.assertIsNotNone(manager, fManager {i} should not be None)
-            self.assertTrue(hasattr(manager, 'user_context'), fManager {i} should have user_context)""
+            self.assertIsNotNone(manager, f"Manager {i} should not be None")
+            self.assertTrue(hasattr(manager, 'user_context'), f"Manager {i} should have user_context")
             self.assertEqual(
                 manager.user_context.user_id,
                 self.user_context.user_id,
@@ -179,30 +179,30 @@ class TestWebSocketManagerSyncAsyncIntegration(SSotAsyncTestCase):
             for method in expected_methods:
                 self.assertTrue(
                     hasattr(manager, method),
-                    fManager {i} should have method {method}
+                    f"Manager {i} should have method {method}"
                 )
 
     @pytest.mark.integration
     async def test_websocket_manager_user_isolation_integration(self):
-    ""
+        """
         Test WebSocket manager user isolation in integration scenarios.
 
         This test validates that different users get isolated managers
         and that factory patterns maintain proper user separation.
-        
+        """
         # Create multiple user contexts
         user_context_1 = UserExecutionContext(
-            user_id=integration_user_1,""
-            thread_id="integration_thread_1,"
-            run_id=integration_run_1
+            user_id="integration_user_1",
+            thread_id="integration_thread_1",
+            run_id="integration_run_1"
         )
         user_context_2 = UserExecutionContext(
-            user_id="integration_user_2,"
-            thread_id=integration_thread_2,
-            run_id=integration_run_2""
+            user_id="integration_user_2",
+            thread_id="integration_thread_2",
+            run_id="integration_run_2"
         )
 
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
         # Create managers for different users
         manager_1 = get_websocket_manager(user_context=user_context_1)
@@ -214,13 +214,13 @@ class TestWebSocketManagerSyncAsyncIntegration(SSotAsyncTestCase):
         self.assertNotEqual(
             manager_1.user_context.user_id,
             manager_2.user_context.user_id,
-            Managers should have different user IDs""
+            "Managers should have different user IDs"
         )
 
         # Verify each manager has correct user context
-        self.assertEqual(manager_1.user_context.user_id, integration_user_1)
-        self.assertEqual(manager_2.user_context.user_id, integration_user_2")"
+        self.assertEqual(manager_1.user_context.user_id, "integration_user_1")
+        self.assertEqual(manager_2.user_context.user_id, "integration_user_2")
 
 
-if __name__ == __main__:
-    pytest.main([__file__, -v, "--tb=short"]""
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "--tb=short"])

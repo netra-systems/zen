@@ -1,4 +1,4 @@
-"
+"""
 Test Secret Injection Bridge for Issue #683
 
 This test reproduces the secret injection bridge gaps between SecretConfig and GCP deployment
@@ -9,6 +9,7 @@ Priority: P0 - Mission Critical
 
 Issue #683: Staging environment configuration validation failures
 Root Cause: Secret injection bridge gaps between SecretConfig configuration and actual GCP secret values
+"""
 Test Strategy: Reproduce the bridge failures between config definition and runtime secret injection
 "
 

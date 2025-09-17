@@ -1,4 +1,4 @@
-"
+"""
 Standalone WebSocket Bridge Performance Test - Mission Critical
 
 This test validates the performance test infrastructure and generates
@@ -24,6 +24,7 @@ a baseline performance report without requiring the full application stack.
 - Performance requirement validation
 "
 
+"""
 import asyncio
 import json
 import time

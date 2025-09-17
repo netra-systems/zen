@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"
+"""
 Simple Mission Critical Test: SERVICE_SECRET Configuration Validation
+"""
 Tests core SERVICE_SECRET dependency patterns without complex imports
-"
+"""
 
+"""
 import pytest
 import os
 import sys

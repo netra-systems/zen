@@ -391,7 +391,7 @@ def get_websocket_supervisor_health() -> dict:
         try:
             # SECURITY FIX: Test SSOT pattern instead of unsafe singleton
             # Health check should verify the secure SSOT function is working
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             # Test that SSOT function is available (doesn't require user context for health check)
             factory_available = get_websocket_manager is not None

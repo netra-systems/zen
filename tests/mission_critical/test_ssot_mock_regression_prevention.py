@@ -1,4 +1,4 @@
-"
+"""
 SSOT Mock Factory Regression Prevention Tests
 Test 4 - Important Priority
 
@@ -15,6 +15,7 @@ Phase: 2 - Test Creation
 Priority: Important (Mission Critical)
 "
 
+"""
 import pytest
 import ast
 import os

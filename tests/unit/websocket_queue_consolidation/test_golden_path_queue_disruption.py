@@ -34,7 +34,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 from netra_backend.app.websocket_core.message_queue import MessageQueue, MessagePriority
 from netra_backend.app.websocket_core.message_buffer import WebSocketMessageBuffer, BufferPriority
 from netra_backend.app.websocket_core.utils import WebSocketMessageQueue
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
 from shared.types.core_types import UserID, ConnectionID
 

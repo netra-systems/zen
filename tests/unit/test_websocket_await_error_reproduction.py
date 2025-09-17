@@ -136,7 +136,7 @@ class TestWebSocketManagerAwaitErrorReproduction(SSotAsyncTestCase):
         This test documents the correct usage patterns and shows the difference
         between sync and async factory functions.
         """
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
 
         # CORRECT: Synchronous factory function (no await)

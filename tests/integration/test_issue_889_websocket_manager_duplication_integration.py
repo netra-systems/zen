@@ -1,4 +1,4 @@
-"""Empty docstring."""
+"""
 Issue #889 WebSocket Manager Duplication Integration Tests - REPRODUCTION SUITE
 
 This integration test suite reproduces WebSocket manager duplication violations
@@ -34,7 +34,7 @@ Business Value Justification (BVJ):
 - Business Goal: Stability - ensure service integration doesn't break WebSocket isolation
 - Value Impact: Critical infrastructure reliability for $500K+ ARR chat functionality
 - Revenue Impact: Prevent service integration failures affecting customer experience
-"""Empty docstring."""
+"""
 
 import asyncio
 import unittest
@@ -58,7 +58,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 
 # Import integration test utilities
 try:
-    from netra_backend.app.websocket_core.websocket_manager import (
+    from netra_backend.app.websocket_core.canonical_import_patterns import (
         WebSocketManager,
         UnifiedWebSocketManager,
         WebSocketManagerFactory,
@@ -71,7 +71,7 @@ try:
         WebSocketConnection,
         create_isolated_mode
     )
-    from netra_backend.app.websocket_core.websocket_manager import (
+    from netra_backend.app.websocket_core.unified_manager import (
         _UnifiedWebSocketManagerImplementation
     )
     from netra_backend.app.agents.registry import (
@@ -82,13 +82,13 @@ try:
     from shared.types.core_types import ensure_user_id, ensure_thread_id
     IMPORTS_AVAILABLE = True
 except ImportError as e:
-    logging.warning(fIntegration imports not available: {e}")"
+    logging.warning(f"Integration imports not available: {e}")
     IMPORTS_AVAILABLE = False
 
 
 @dataclass
 class IntegrationTestContext:
-    Integration test context for service-level testing.""
+    """Integration test context for service-level testing."""
     user_id: str
     session_id: str
     service_name: str
@@ -100,40 +100,40 @@ class IntegrationTestContext:
 
     def __post_init__(self):
         if not self.thread_id:
-            self.thread_id = fthread-{self.service_name}-{self.session_id}
+            self.thread_id = f"thread-{self.service_name}-{self.session_id}"
         if not self.request_id:
-            self.request_id = freq-{self.service_name}-{self.session_id}
+            self.request_id = f"req-{self.service_name}-{self.session_id}"
 
 
 class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
-    ""
+    """
     Integration tests to reproduce WebSocket manager duplication in service contexts.
 
     These tests MUST FAIL initially to demonstrate the current integration violations.
     Success would indicate the issue is already fixed at the integration level.
-
+    """
 
     def setup_method(self, method):
-        "Setup for each test method."
+        """Setup for each test method."""
         super().setup_method(method)
         self.logger = logging.getLogger(self.__class__.__name__)
 
         # Create integration test contexts for multiple services
         self.service_contexts = {
             'chat_service': IntegrationTestContext(
-                user_id=demo-user-001,""
-                session_id="session-chat-integration,"
-                service_name=chat_service
+                user_id="demo-user-001",
+                session_id="session-chat-integration",
+                service_name="chat_service"
             ),
             'agent_service': IntegrationTestContext(
-                user_id="demo-user-001,"
-                session_id=session-agent-integration,
-                service_name=agent_service""
+                user_id="demo-user-001",
+                session_id="session-agent-integration",
+                service_name="agent_service"
             ),
             'websocket_service': IntegrationTestContext(
-                user_id=demo-user-001","
-                session_id=session-websocket-integration,
-                service_name=websocket_service""
+                user_id="demo-user-001",
+                session_id="session-websocket-integration",
+                service_name="websocket_service"
             )
         }
 
@@ -142,10 +142,10 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
         self.service_manager_registry = {}
         self.duplication_events = []
 
-        self.logger.info(fSetup integration test: {method.__name__} with {len(self.service_contexts)} services)
+        self.logger.info(f"Setup integration test: {method.__name__} with {len(self.service_contexts)} services")
 
     def teardown_method(self, method):
-        Cleanup after each test method.""
+        """Cleanup after each test method."""
         # Clear all tracking data
         self.all_managers_created.clear()
         self.service_manager_registry.clear()
@@ -155,15 +155,15 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
             context.websocket_managers.clear()
 
         super().teardown_method(method)
-        self.logger.info(fTeardown integration test: {method.__name__})
+        self.logger.info(f"Teardown integration test: {method.__name__}")
 
     async def _simulate_service_startup_with_websocket_manager(self, context: IntegrationTestContext) -> Dict[str, Any]:
-        
+        """
         Simulate service startup that creates WebSocket managers.
 
         This reproduces the patterns where services independently create
         WebSocket managers during startup, leading to duplication.
-""
+        """
         service_result = {
             'service_name': context.service_name,
             'user_id': context.user_id,
@@ -173,7 +173,7 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
         }
 
         try:
-            self.logger.info(fSimulating startup for {context.service_name})
+            self.logger.info(f"Simulating startup for {context.service_name}")
 
             # Pattern 1: Service creates manager during initialization
             init_manager = get_websocket_manager(user_context=context)
@@ -183,7 +183,7 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
                     'stage': 'initialization',
                     'manager_id': id(init_manager),
                     'type': type(init_manager).__name__
-                }
+                })
 
             # Pattern 2: Service creates additional manager for agent integration
             if context.service_name == 'agent_service':
@@ -194,7 +194,7 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
                         'stage': 'agent_integration',
                         'manager_id': id(agent_manager),
                         'type': type(agent_manager).__name__
-                    }
+                    })
 
                     # Check if same as init manager (should be, but might not be)
                     if id(agent_manager) != id(init_manager):
@@ -204,7 +204,7 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
                             'type': 'agent_integration_duplicate',
                             'init_manager_id': id(init_manager),
                             'agent_manager_id': id(agent_manager)
-                        }
+                        })
 
             # Pattern 3: Service creates manager for WebSocket event handling
             if context.service_name in ['chat_service', 'websocket_service']:
@@ -215,7 +215,7 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
                         'stage': 'event_handling',
                         'manager_id': id(event_manager),
                         'type': type(event_manager).__name__
-                    }
+                    })
 
                     # Check for duplication with previous managers
                     previous_ids = {id(m) for m in context.websocket_managers[:-1]}
@@ -226,21 +226,21 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
                             'type': 'event_handling_duplicate',
                             'existing_ids': list(previous_ids),
                             'new_manager_id': id(event_manager)
-                        }
+                        })
 
             service_result['startup_success'] = True
             self.all_managers_created.extend(context.websocket_managers)
             self.service_manager_registry[context.service_name] = context.websocket_managers
 
         except Exception as e:
-            self.logger.error(fService startup failed for {context.service_name}: {e})""
+            self.logger.error(f"Service startup failed for {context.service_name}: {e}")
             service_result['error'] = str(e)
 
         return service_result
 
-    @unittest.skipUnless(IMPORTS_AVAILABLE, "Integration imports not available)"
+    @unittest.skipUnless(IMPORTS_AVAILABLE, "Integration imports not available")
     async def test_service_integration_manager_duplication(self):
-        
+        """
         TEST MUST FAIL: Reproduce manager duplication across service integration.
 
         EXPECTED FAILURE: Multiple services for the same user create separate
@@ -248,8 +248,8 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
 
         This reproduces the core integration violation where service boundaries
         break the SSOT factory pattern enforcement.
-""
-        self.logger.info(REPRODUCING: Service integration manager duplication for demo-user-001)
+        """
+        self.logger.info("REPRODUCING: Service integration manager duplication for demo-user-001")
 
         # Start all services concurrently (as happens in real deployments)
         service_results = {}
@@ -266,9 +266,9 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
             try:
                 result = await task
                 service_results[service_name] = result
-                self.logger.info(fService {service_name} startup result: {result}")"
+                self.logger.info(f"Service {service_name} startup result: {result}")
             except Exception as e:
-                self.logger.error(fService {service_name} startup failed: {e})
+                self.logger.error(f"Service {service_name} startup failed: {e}")
                 service_results[service_name] = {'error': str(e)}
 
         # Analyze manager duplication across services
@@ -288,40 +288,40 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
                         'service': service_name,
                         'duplicate_of': [s for s, ms in self.service_manager_registry.items()
                                        if s != service_name and any(id(m) == manager_id for m in ms)]
-                    }
+                    })
                 else:
                     all_manager_ids.add(manager_id)
 
         total_managers = len(all_manager_ids)
-        services_with_managers = len([s for s, count in service_manager_counts.items() if count > 0]
+        services_with_managers = len([s for s, count in service_manager_counts.items() if count > 0])
 
         self.logger.critical(
-            fINTEGRATION DUPLICATION ANALYSIS: 
+            f"INTEGRATION DUPLICATION ANALYSIS: "
             f"{total_managers} unique managers across {services_with_managers} services. "
-            fService counts: {service_manager_counts}. ""
-            fCross-service duplicates: {len(cross_service_duplicates)}
+            f"Service counts: {service_manager_counts}. "
+            f"Cross-service duplicates: {len(cross_service_duplicates)}"
         )
 
         # EXPECTED FAILURE: All services should share the same manager for demo-user-001
         # If this passes, the SSOT pattern is working correctly across services
         self.assertEqual(
             total_managers, 1,
-            fSERVICE INTEGRATION DUPLICATION: Expected 1 shared manager for demo-user-001 across all services, ""
+            f"SERVICE INTEGRATION DUPLICATION: Expected 1 shared manager for demo-user-001 across all services, "
             f"got {total_managers} managers. Service breakdown: {service_manager_counts}. "
-            fThis reproduces Issue #889 at the service integration level.
+            f"This reproduces Issue #889 at the service integration level."
         )
 
         # EXPECTED FAILURE: No cross-service manager duplication should occur
         self.assertEqual(
             len(cross_service_duplicates), services_with_managers - 1 if services_with_managers > 0 else 0,
-            fCROSS-SERVICE SHARING FAILURE: Expected {services_with_managers - 1} cross-service shares, 
-            fgot {len(cross_service_duplicates)} duplicates: {cross_service_duplicates}. ""
-            fThis indicates SSOT factory is not working across service boundaries.
+            f"CROSS-SERVICE SHARING FAILURE: Expected {services_with_managers - 1} cross-service shares, "
+            f"got {len(cross_service_duplicates)} duplicates: {cross_service_duplicates}. "
+            f"This indicates SSOT factory is not working across service boundaries."
         )
 
-    @unittest.skipUnless(IMPORTS_AVAILABLE, Integration imports not available)
+    @unittest.skipUnless(IMPORTS_AVAILABLE, "Integration imports not available")
     async def test_agent_websocket_binding_violations(self):
-    ""
+        """
         TEST MUST FAIL: Reproduce agent-WebSocket manager binding violations.
 
         EXPECTED FAILURE: Agent instances bind to different WebSocket managers
@@ -329,8 +329,8 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
 
         This reproduces the binding inconsistency that causes WebSocket events
         to be sent to wrong connections or lost entirely.
-        
-        self.logger.info(REPRODUCING: Agent-WebSocket binding violations for demo-user-001")"
+        """
+        self.logger.info("REPRODUCING: Agent-WebSocket binding violations for demo-user-001")
 
         binding_violations = []
         agent_manager_bindings = {}
@@ -360,7 +360,7 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
                             'binding_time': datetime.now()
                         }
 
-                        self.logger.info(fAgent {agent_name} bound to manager {id(agent_manager)})
+                        self.logger.info(f"Agent {agent_name} bound to manager {id(agent_manager)}")
 
                         # Simulate agent requesting additional WebSocket access
                         secondary_manager = get_websocket_manager(user_context=agent_context)
@@ -370,19 +370,19 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
                                 'violation_type': 'secondary_manager_different',
                                 'primary_manager_id': id(agent_manager),
                                 'secondary_manager_id': id(secondary_manager)
-                            }
+                            })
                             self.logger.error(
-                                fBINDING VIOLATION: {agent_name} got different secondary manager 
+                                f"BINDING VIOLATION: {agent_name} got different secondary manager "
                                 f"{id(secondary_manager)} vs primary {id(agent_manager)}"
                             )
 
                 except Exception as e:
-                    self.logger.error(fFailed to bind WebSocket manager for {agent_name}: {e}")"
+                    self.logger.error(f"Failed to bind WebSocket manager for {agent_name}: {e}")
                     binding_violations.append({
                         'agent': agent_name,
                         'violation_type': 'binding_failed',
                         'error': str(e)
-                    }
+                    })
 
             # Analyze manager consistency across agent bindings
             manager_ids_used = {binding['manager_id'] for binding in agent_manager_bindings.values()}
@@ -401,35 +401,35 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
                                 'agent_manager_id': binding['manager_id'],
                                 'other_agent': other_agent_name,
                                 'other_manager_id': other_binding['manager_id']
-                            }
+                            })
 
             self.logger.critical(
-                fAGENT BINDING ANALYSIS: {agents_bound} agents bound, 
-                f{unique_managers} unique managers, {len(binding_violations)} violations""
+                f"AGENT BINDING ANALYSIS: {agents_bound} agents bound, "
+                f"{unique_managers} unique managers, {len(binding_violations)} violations"
             )
 
             # EXPECTED FAILURE: All agents for same user should bind to same manager
             self.assertEqual(
                 unique_managers, 1,
                 f"AGENT BINDING VIOLATION: Expected 1 shared manager for all demo-user-001 agents, "
-                fgot {unique_managers} different managers. Agent bindings: {agent_manager_bindings}. 
-                fThis reproduces Issue #889 agent binding inconsistency.
+                f"got {unique_managers} different managers. Agent bindings: {agent_manager_bindings}. "
+                f"This reproduces Issue #889 agent binding inconsistency."
             )
 
             # EXPECTED FAILURE: No binding violations should occur
             self.assertEqual(
                 len(binding_violations), 0,
-                fAGENT WEBSOCKET BINDING FAILURES: {len(binding_violations)} violations detected: {binding_violations}. ""
-                fThis reproduces Issue #889 agent-WebSocket coordination failures.
+                f"AGENT WEBSOCKET BINDING FAILURES: {len(binding_violations)} violations detected: {binding_violations}. "
+                f"This reproduces Issue #889 agent-WebSocket coordination failures."
             )
 
         except Exception as e:
-            self.logger.error(fFailed to test agent WebSocket binding: {e})
-            self.fail(f"Could not reproduce agent binding violations: {e})"
+            self.logger.error(f"Failed to test agent WebSocket binding: {e}")
+            self.fail(f"Could not reproduce agent binding violations: {e}")
 
-    @unittest.skipUnless(IMPORTS_AVAILABLE, Integration imports not available")"
+    @unittest.skipUnless(IMPORTS_AVAILABLE, "Integration imports not available")
     async def test_concurrent_service_startup_violations(self):
-"""Empty docstring."""
+        """
         TEST MUST FAIL: Reproduce race conditions in concurrent service startup.
 
         EXPECTED FAILURE: When multiple services start concurrently for the same user,
@@ -437,8 +437,8 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
 
         This reproduces the timing-based duplication that occurs in production
         deployments where services initialize in parallel.
-"""Empty docstring."""
-        self.logger.info(REPRODUCING: Concurrent service startup race conditions for demo-user-001)
+        """
+        self.logger.info("REPRODUCING: Concurrent service startup race conditions for demo-user-001")
 
         race_condition_results = []
         concurrent_managers = {}
@@ -448,14 +448,14 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
         concurrent_contexts = []
         for i in range(5):
             context = IntegrationTestContext(
-                user_id="demo-user-001,"
-                session_id=fsession-concurrent-{i},
-                service_name=fconcurrent_service_{i}
+                user_id="demo-user-001",
+                session_id=f"session-concurrent-{i}",
+                service_name=f"concurrent_service_{i}"
             )
             concurrent_contexts.append(context)
 
         async def concurrent_manager_creation(context, delay_ms=0):
-            ""Create manager with optional delay to trigger race conditions.
+            """Create manager with optional delay to trigger race conditions."""
             if delay_ms > 0:
                 await asyncio.sleep(delay_ms / 1000.0)
 
@@ -501,7 +501,7 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
             'successful_creations': len(successful_simultaneous),
             'unique_managers': len(manager_ids_simultaneous),
             'manager_ids': list(manager_ids_simultaneous)
-        }
+        })
 
         # Test 2: Staggered creation (small delays to trigger race conditions)
         staggered_delays = [0, 10, 20, 30, 40]  # milliseconds
@@ -522,7 +522,7 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
             'unique_managers': len(manager_ids_staggered),
             'manager_ids': list(manager_ids_staggered),
             'delays_used': staggered_delays
-        }
+        })
 
         # Analyze timing patterns for race conditions
         all_successful_results = successful_simultaneous + successful_staggered
@@ -538,10 +538,10 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
             }
 
         self.logger.critical(
-            fCONCURRENT STARTUP ANALYSIS: 
-            fSimultaneous: {len(manager_ids_simultaneous)} unique managers. ""
-            fStaggered: {len(manager_ids_staggered)} unique managers. 
-            fTiming window: {timing_analysis.get('total_time_window', 0):.3f}s
+            f"CONCURRENT STARTUP ANALYSIS: "
+            f"Simultaneous: {len(manager_ids_simultaneous)} unique managers. "
+            f"Staggered: {len(manager_ids_staggered)} unique managers. "
+            f"Timing window: {timing_analysis.get('total_time_window', 0):.3f}s"
         )
 
         # EXPECTED FAILURE: All concurrent creations should return same manager
@@ -549,30 +549,30 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
         self.assertEqual(
             total_unique_managers, 1,
             f"CONCURRENT STARTUP RACE CONDITION: Expected 1 shared manager across all concurrent creation attempts, "
-            fgot {total_unique_managers} unique managers. ""
-            fSimultaneous: {manager_ids_simultaneous}, Staggered: {manager_ids_staggered}. 
-            fThis reproduces Issue #889 race condition violations.""
+            f"got {total_unique_managers} unique managers. "
+            f"Simultaneous: {manager_ids_simultaneous}, Staggered: {manager_ids_staggered}. "
+            f"This reproduces Issue #889 race condition violations."
         )
 
         # EXPECTED FAILURE: Simultaneous creation should be consistent
         self.assertEqual(
             len(manager_ids_simultaneous), 1,
             f"SIMULTANEOUS CREATION RACE: Expected 1 manager from simultaneous creation, "
-            fgot {len(manager_ids_simultaneous)} managers: {manager_ids_simultaneous}. 
-            fThis reproduces timing-based duplication in Issue #889.
+            f"got {len(manager_ids_simultaneous)} managers: {manager_ids_simultaneous}. "
+            f"This reproduces timing-based duplication in Issue #889."
         )
 
         # EXPECTED FAILURE: Staggered creation should maintain consistency
         self.assertEqual(
             len(manager_ids_staggered), 1,
-            fSTAGGERED CREATION RACE: Expected 1 manager from staggered creation, ""
-            fgot {len(manager_ids_staggered)} managers: {manager_ids_staggered}. 
-            fThis reproduces delay-based duplication in Issue #889.
+            f"STAGGERED CREATION RACE: Expected 1 manager from staggered creation, "
+            f"got {len(manager_ids_staggered)} managers: {manager_ids_staggered}. "
+            f"This reproduces delay-based duplication in Issue #889."
         )
 
-    @unittest.skipUnless(IMPORTS_AVAILABLE, "Integration imports not available)"
+    @unittest.skipUnless(IMPORTS_AVAILABLE, "Integration imports not available")
     async def test_user_context_factory_integration_failures(self):
-        
+        """
         TEST MUST FAIL: Reproduce user context factory integration bypass patterns.
 
         EXPECTED FAILURE: Services bypass the UserExecutionContextFactory and create
@@ -580,8 +580,8 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
 
         This reproduces the integration-level bypass where services use ad-hoc
         context creation instead of the SSOT factory pattern.
-""
-        self.logger.info(REPRODUCING: User context factory integration bypass patterns)
+        """
+        self.logger.info("REPRODUCING: User context factory integration bypass patterns")
 
         factory_bypass_results = []
         context_consistency_violations = []
@@ -591,7 +591,7 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
             creation_patterns = [
                 {
                     'name': 'factory_proper',
-                    'method': lambda: UserExecutionContextFactory.create_test_context(user_id=demo-user-001)""
+                    'method': lambda: UserExecutionContextFactory.create_test_context(user_id="demo-user-001")
                 },
                 {
                     'name': 'fallback_creation',
@@ -604,7 +604,7 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
                         'session_id': 'direct-session-001',
                         'request_id': 'direct-req-001',
                         'is_test': True
-                    }()
+                    })()
                 }
             ]
 
@@ -628,16 +628,16 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
 
                     self.logger.info(
                         f"Pattern {pattern['name']}: context={type(context).__name__}, "
-                        fmanager={id(manager) if manager else None}
+                        f"manager={id(manager) if manager else None}"
                     )
 
                 except Exception as e:
-                    self.logger.error(fContext creation failed for {pattern['name']}: {e})
+                    self.logger.error(f"Context creation failed for {pattern['name']}: {e}")
                     factory_bypass_results.append({
                         'pattern': pattern['name'],
                         'bypass_type': 'creation_failed',
                         'error': str(e)
-                    }
+                    })
 
             # Analyze consistency across context creation patterns
             manager_ids_by_pattern = {
@@ -657,7 +657,7 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
                         'violation_type': 'user_id_mismatch',
                         'expected_user': 'demo-user-001',
                         'actual_user': user_id
-                    }
+                    })
 
                 # Check for manager inconsistency across patterns
                 if len(unique_managers_across_patterns) > 1:
@@ -671,42 +671,42 @@ class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
                             'bypass_type': 'manager_inconsistency',
                             'manager_id': info['manager_id'],
                             'conflicting_patterns': other_managers
-                        }
+                        })
 
             self.logger.critical(
-                fFACTORY INTEGRATION ANALYSIS: ""
-                f{len(contexts_created)} contexts created, 
-                f{len(unique_managers_across_patterns)} unique managers, 
+                f"FACTORY INTEGRATION ANALYSIS: "
+                f"{len(contexts_created)} contexts created, "
+                f"{len(unique_managers_across_patterns)} unique managers, "
                 f"{len(factory_bypass_results)} bypass violations, "
-                f{len(context_consistency_violations)} context violations""
+                f"{len(context_consistency_violations)} context violations"
             )
 
             # EXPECTED FAILURE: All patterns should produce same manager for demo-user-001
             self.assertEqual(
                 len(unique_managers_across_patterns), 1,
-                fFACTORY INTEGRATION BYPASS: Expected 1 shared manager across all context creation patterns, 
-                fgot {len(unique_managers_across_patterns)} managers: {unique_managers_across_patterns}. ""
+                f"FACTORY INTEGRATION BYPASS: Expected 1 shared manager across all context creation patterns, "
+                f"got {len(unique_managers_across_patterns)} managers: {unique_managers_across_patterns}. "
                 f"Pattern breakdown: {manager_ids_by_pattern}. "
-                fThis reproduces Issue #889 factory bypass violations.
+                f"This reproduces Issue #889 factory bypass violations."
             )
 
             # EXPECTED FAILURE: No factory bypass violations should occur
             self.assertEqual(
                 len(factory_bypass_results), 0,
-                fFACTORY BYPASS VIOLATIONS: {len(factory_bypass_results)} bypass patterns detected: {factory_bypass_results}. 
-                fThis reproduces Issue #889 SSOT factory integration failures.""
+                f"FACTORY BYPASS VIOLATIONS: {len(factory_bypass_results)} bypass patterns detected: {factory_bypass_results}. "
+                f"This reproduces Issue #889 SSOT factory integration failures."
             )
 
             # EXPECTED FAILURE: No context consistency violations should occur
             self.assertEqual(
                 len(context_consistency_violations), 0,
-                fCONTEXT CONSISTENCY VIOLATIONS: {len(context_consistency_violations)} violations detected: {context_consistency_violations}. 
-                fThis reproduces Issue #889 context creation inconsistencies.
+                f"CONTEXT CONSISTENCY VIOLATIONS: {len(context_consistency_violations)} violations detected: {context_consistency_violations}. "
+                f"This reproduces Issue #889 context creation inconsistencies."
             )
 
         except Exception as e:
-            self.logger.error(f"Failed to test user context factory integration: {e})"
-            self.fail(fCould not reproduce factory integration failures: {e}")"
+            self.logger.error(f"Failed to test user context factory integration: {e}")
+            self.fail(f"Could not reproduce factory integration failures: {e}")
 
 
 if __name__ == '__main__':

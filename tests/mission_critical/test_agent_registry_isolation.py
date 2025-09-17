@@ -1,4 +1,4 @@
-"
+"""
 CRITICAL TEST SUITE: AgentRegistry Isolation Issues
 ================================================================
 
@@ -21,6 +21,7 @@ Business Value Justification:
 These tests are intentionally DIFFICULT and COMPREHENSIVE to expose all isolation bugs.
 "
 
+"""
 import asyncio
 import logging
 import time

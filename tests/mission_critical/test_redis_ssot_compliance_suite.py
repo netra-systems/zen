@@ -1,4 +1,4 @@
-"
+"""
 Redis SSOT Compliance Test Suite - Mission Critical Validation
 
 BUSINESS VALUE JUSTIFICATION:
@@ -17,6 +17,7 @@ This test suite validates that:
 CRITICAL: Uses REAL Redis services (non-Docker) as specified in requirements
 "
 
+"""
 import asyncio
 import pytest
 import time

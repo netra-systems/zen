@@ -165,6 +165,26 @@ def fix_invalid_syntax(content: str) -> str:
         line = lines[i]
         original_line = line
 
+        # CRITICAL FIX: Lone quote pattern (most common issue - 85%+ of errors)
+        # Pattern: Line starts with just '"' - this is the primary syntax error
+        if line.strip() == '"' and i < 10:  # Usually in first few lines
+            # This should be start of a docstring
+            line = '"""'
+            # Find the end of the docstring and close it properly
+            docstring_end_found = False
+            for j in range(i + 1, min(len(lines), i + 50)):  # Look ahead max 50 lines
+                if (lines[j].strip() and
+                    not lines[j].strip().startswith(('#', '"')) and
+                    any(keyword in lines[j] for keyword in ['import', 'from', 'def', 'class'])):
+                    # Insert closing docstring before imports/definitions
+                    lines.insert(j, '"""')
+                    docstring_end_found = True
+                    break
+            if not docstring_end_found:
+                # If no clear end found, add it after reasonable distance
+                insert_pos = min(i + 20, len(lines))
+                lines.insert(insert_pos, '"""')
+
         # CRITICAL FIX: Pattern found in 808 errors - unterminated docstrings
         # Pattern: "Real WebSocket connection for testing instead of mocks.""
         if '"Real WebSocket connection for testing instead of mocks.""' in line:
@@ -382,7 +402,7 @@ def main():
                 if not errors:
                     print(f"✓ Syntax validated: {filepath}")
                 else:
-                    print(f"⚠ Still has errors: {filepath}")
+                    print(f"Still has errors: {filepath}")
             else:
                 print(f"No changes needed: {filepath}")
         return

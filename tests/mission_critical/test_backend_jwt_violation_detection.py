@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 P0 Mission Critical Test: Backend JWT SSOT Violation Detection
 =============================================================
 
@@ -8,6 +8,7 @@ that exist in the backend and MUST FAIL when violations are removed during
 refactor. This provides proof that violations exist and validates refactor success.
 
 Business Value:
+"""
 - Protects $500K+ ARR from JWT secret cascade failures
 - Documents SSOT compliance baseline (current 40/100 score)
 - Validates that backend JWT decoding violations are removed during refactor

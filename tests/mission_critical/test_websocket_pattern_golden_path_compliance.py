@@ -1,4 +1,4 @@
-"WebSocket Pattern Golden Path Compliance Test Suite
+"""WebSocket Pattern Golden Path Compliance Test Suite
 
 MISSION: Create FAILING mission-critical tests that validate SSOT compliance in the
 Golden Path user flow WebSocket event delivery patterns.
@@ -28,7 +28,7 @@ MISSION-CRITICAL TEST STRATEGY:
 - Test real WebSocket event sequences in chat scenarios
 - Validate SSOT compliance for all 5 critical events
 - Ensure consistent behavior for multi-user scenarios
-""
+"""
 
 import asyncio
 import pytest
@@ -47,7 +47,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.factories.websocket_bridge_factory import StandardWebSocketBridge
 from netra_backend.app.agents.base.interface import ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
@@ -55,7 +55,7 @@ from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 @dataclass
 class GoldenPathWebSocketEvent:
-    Track Golden Path WebSocket events for compliance analysis."
+    """Track Golden Path WebSocket events for compliance analysis."""
     event_type: str
     user_id: str
     agent_name: str
@@ -67,10 +67,10 @@ class GoldenPathWebSocketEvent:
 
 
 class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
-    "Mission-critical tests for Golden Path WebSocket SSOT compliance - MUST FAIL initially.
+    """Mission-critical tests for Golden Path WebSocket SSOT compliance - MUST FAIL initially."""
 
     def setup_method(self, method):
-        ""Set up mission-critical test fixtures.
+        """Set up mission-critical test fixtures."""
         super().setup_method(method)
 
         # Track Golden Path WebSocket events
@@ -92,55 +92,56 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
         self.mock_websocket_manager.send_event = AsyncMock(side_effect=self._capture_golden_path_event)
 
         # Test users for multi-user Golden Path validation
-        self.golden_path_user_1 = self._create_golden_path_user(golden_user_1)"
-        self.golden_path_user_2 = self._create_golden_path_user(golden_user_2")
+        self.golden_path_user_1 = self._create_golden_path_user("golden_user_1")
+        self.golden_path_user_2 = self._create_golden_path_user("golden_user_2")
 
     def teardown_method(self, method):
-        Clean up mission-critical test fixtures.""
+        """Clean up mission-critical test fixtures."""
         super().teardown_method(method)
 
     def _create_golden_path_user(self, user_id: str) -> UserExecutionContext:
-        Create Golden Path user execution context."
+        """Create Golden Path user execution context."""
         context = UserExecutionContext(
             user_id=user_id,
-            thread_id=f"golden_thread_{user_id},
-            run_id=fgolden_run_{user_id}_{int(time.time())},
-            agent_context={agent_name: golden_path_agent", "golden_path: True},
+            thread_id=f"golden_thread_{user_id}",
+            run_id=f"golden_run_{user_id}_{int(time.time())}",
+            agent_context={"agent_name": "golden_path_agent", "golden_path": True},
             audit_metadata={}
+        )
         return context
 
-    async def _capture_golden_path_event(self, event_type: str, data: Dict[str, Any] -> None:
-        Capture Golden Path WebSocket events for compliance analysis.""
+    async def _capture_golden_path_event(self, event_type: str, data: Dict[str, Any]) -> None:
+        """Capture Golden Path WebSocket events for compliance analysis."""
         import traceback
 
         # Determine pattern used from call stack
         stack = traceback.format_stack()
         stack_str = ''.join(stack)
 
-        pattern_used = unknown
+        pattern_used = "unknown"
         if 'self._websocket_adapter.emit_' in stack_str:
-            pattern_used = websocket_adapter_ssot"
+            pattern_used = "websocket_adapter_ssot"
         elif 'WebSocketEmitterFactory' in stack_str:
-            pattern_used = "emitter_factory_ssot
+            pattern_used = "emitter_factory_ssot"
         elif '_emit_websocket_event' in stack_str:
-            pattern_used = direct_event_violation
+            pattern_used = "direct_event_violation"
         elif 'context.websocket_manager' in stack_str:
             pattern_used = "context_manager_violation"
         elif 'user_emitter.notify_' in stack_str:
-            pattern_used = user_emitter_violation
+            pattern_used = "user_emitter_violation"
 
         # Determine Golden Path stage
-        golden_path_stage = unknown"
+        golden_path_stage = "unknown"
         if event_type == 'agent_started':
-            golden_path_stage = stage_1_processing"
+            golden_path_stage = "stage_1_processing"
         elif event_type == 'agent_thinking':
-            golden_path_stage = stage_2_reasoning
+            golden_path_stage = "stage_2_reasoning"
         elif event_type == 'tool_executing':
-            golden_path_stage = stage_3_tool_usage""
+            golden_path_stage = "stage_3_tool_usage"
         elif event_type == 'tool_completed':
-            golden_path_stage = stage_4_tool_results
+            golden_path_stage = "stage_4_tool_results"
         elif event_type == 'agent_completed':
-            golden_path_stage = stage_5_completion"
+            golden_path_stage = "stage_5_completion"
 
         # Capture the Golden Path event
         event = GoldenPathWebSocketEvent(
@@ -162,10 +163,10 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                 'pattern': pattern_used,
                 'stage': golden_path_stage,
                 'user_id': event.user_id
-            }
+            })
 
     async def _execute_complete_golden_path_sequence(self, user_context: UserExecutionContext) -> BaseAgent:
-        "Execute complete Golden Path WebSocket event sequence.
+        """Execute complete Golden Path WebSocket event sequence."""
         # Create agent with WebSocket bridge
         agent = BaseAgent()
         bridge = StandardWebSocketBridge(user_context)
@@ -174,28 +175,28 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
         agent._execution_context = user_context
 
         # Execute complete Golden Path sequence
-        await agent.emit_agent_started(fGolden Path started for {user_context.user_id}")"
+        await agent.emit_agent_started(f"Golden Path started for {user_context.user_id}")
         await asyncio.sleep(0.01)  # Simulate processing time
 
-        await agent.emit_thinking(Golden Path reasoning phase, step_number=1, context=user_context)
+        await agent.emit_thinking("Golden Path reasoning phase", step_number=1, context=user_context)
         await asyncio.sleep(0.01)
 
-        await agent.emit_tool_executing(golden_path_tool, {"user_id: user_context.user_id}
+        await agent.emit_tool_executing("golden_path_tool", {"user_id": user_context.user_id})
         await asyncio.sleep(0.01)
 
-        await agent.emit_tool_completed(golden_path_tool", {result: Golden Path success}
+        await agent.emit_tool_completed("golden_path_tool", {"result": "Golden Path success"})
         await asyncio.sleep(0.01)
 
-        await agent.emit_agent_completed({"golden_path: complete"}, context=user_context)
+        await agent.emit_agent_completed({"golden_path": "complete"}, context=user_context)
 
         return agent
 
     def test_golden_path_websocket_ssot_pattern_consistency(self):
-        TEST MUST FAIL: Validate SSOT pattern consistency across all Golden Path events."
+        """TEST MUST FAIL: Validate SSOT pattern consistency across all Golden Path events.
 
         Mission-critical test ensuring all 5 Golden Path WebSocket events use the same
         SSOT pattern. Failures here directly impact $500K+ ARR user experience.
-        "
+        """
         async def run_golden_path_ssot_test():
             ssot_violations = []
 
@@ -221,7 +222,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                         'patterns_used': list(patterns_used),
                         'event_pattern_mapping': event_patterns,
                         'total_events': len(self.golden_path_events)
-                    }
+                    })
 
                 # Check for violation patterns specifically
                 violation_patterns = [p for p in patterns_used if 'violation' in p]
@@ -230,7 +231,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                         'type': 'ssot_violation_patterns_detected',
                         'violation_patterns': violation_patterns,
                         'violations': self.pattern_violations
-                    }
+                    })
 
                 # Check for missing Golden Path events
                 captured_event_types = set(e.event_type for e in self.golden_path_events)
@@ -240,7 +241,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                         'type': 'missing_golden_path_events',
                         'missing_events': list(missing_events),
                         'captured_events': list(captured_event_types)
-                    }
+                    })
 
                 # Check for event sequence violations
                 actual_sequence = [e.event_type for e in self.golden_path_events]
@@ -249,13 +250,13 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                         'type': 'golden_path_sequence_violation',
                         'expected': self.expected_golden_path_sequence,
                         'actual': actual_sequence
-                    }
+                    })
 
             except Exception as e:
                 ssot_violations.append({
                     'type': 'golden_path_ssot_test_failure',
                     'error': str(e)
-                }
+                })
 
             return ssot_violations
 
@@ -264,20 +265,20 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
 
         # TEST ASSERTION: This MUST FAIL if SSOT violations exist in Golden Path
         assert len(violations) == 0, (
-            fGOLDEN PATH WEBSOCKET SSOT VIOLATIONS DETECTED: Found {len(violations)} 
-            f"SSOT compliance violations in Golden Path WebSocket events. 
-            fThis directly impacts $500K+ ARR user experience. "
-            fViolations: {violations}. 
-            fEvents captured: {len(self.golden_path_events)}. "
-            f"CRITICAL REMEDIATION REQUIRED: Standardize all Golden Path events to single SSOT pattern.
+            f"GOLDEN PATH WEBSOCKET SSOT VIOLATIONS DETECTED: Found {len(violations)} "
+            f"SSOT compliance violations in Golden Path WebSocket events. "
+            f"This directly impacts $500K+ ARR user experience. "
+            f"Violations: {violations}. "
+            f"Events captured: {len(self.golden_path_events)}. "
+            f"CRITICAL REMEDIATION REQUIRED: Standardize all Golden Path events to single SSOT pattern."
         )
 
     def test_golden_path_multi_user_websocket_isolation(self):
-        TEST MUST FAIL: Validate WebSocket isolation in multi-user Golden Path scenarios.
+        """TEST MUST FAIL: Validate WebSocket isolation in multi-user Golden Path scenarios.
 
         Mission-critical test ensuring WebSocket SSOT patterns maintain proper user
         isolation during concurrent Golden Path executions.
-""
+        """
         async def run_multi_user_golden_path_test():
             isolation_violations = []
 
@@ -295,8 +296,8 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                 await asyncio.sleep(0.1)
 
                 # Analyze user isolation
-                user1_events = [e for e in self.golden_path_events if e.user_id == golden_user_1]
-                user2_events = [e for e in self.golden_path_events if e.user_id == golden_user_2]"
+                user1_events = [e for e in self.golden_path_events if e.user_id == "golden_user_1"]
+                user2_events = [e for e in self.golden_path_events if e.user_id == "golden_user_2"]
 
                 # Check for proper event distribution
                 if len(user1_events) == 0 or len(user2_events) == 0:
@@ -304,7 +305,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                         'type': 'missing_user_golden_path_events',
                         'user1_events': len(user1_events),
                         'user2_events': len(user2_events)
-                    }
+                    })
 
                 # Check for cross-user contamination
                 user1_expected = len(self.expected_golden_path_sequence)
@@ -317,7 +318,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                         'user1_actual': len(user1_events),
                         'user2_expected': user2_expected,
                         'user2_actual': len(user2_events)
-                    }
+                    })
 
                 # Check for pattern consistency across users
                 user1_patterns = set(e.pattern_used for e in user1_events)
@@ -328,7 +329,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                         'type': 'inconsistent_patterns_across_users',
                         'user1_patterns': list(user1_patterns),
                         'user2_patterns': list(user2_patterns)
-                    }
+                    })
 
                 # Check for timing isolation (events should be independent)
                 if len(user1_events) > 0 and len(user2_events) > 0:
@@ -345,13 +346,13 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                         isolation_violations.append({
                             'type': 'timing_isolation_violation',
                             'min_time_diff_ms': min(min_time_diffs)
-                        }
+                        })
 
             except Exception as e:
                 isolation_violations.append({
                     'type': 'multi_user_golden_path_test_failure',
                     'error': str(e)
-                }
+                })
 
             return isolation_violations
 
@@ -360,20 +361,20 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
 
         # TEST ASSERTION: This MUST FAIL if user isolation violations exist
         assert len(violations) == 0, (
-            f"MULTI-USER GOLDEN PATH WEBSOCKET ISOLATION VIOLATIONS DETECTED: 
-            fFound {len(violations)} user isolation violations in Golden Path WebSocket events. 
-            fThis compromises $500K+ ARR multi-user reliability. 
-            fViolations: {violations}. ""
-            fTotal events: {len(self.golden_path_events)}. 
-            fCRITICAL REMEDIATION REQUIRED: Fix user isolation in Golden Path WebSocket patterns.
+            f"MULTI-USER GOLDEN PATH WEBSOCKET ISOLATION VIOLATIONS DETECTED: "
+            f"Found {len(violations)} user isolation violations in Golden Path WebSocket events. "
+            f"This compromises $500K+ ARR multi-user reliability. "
+            f"Violations: {violations}. "
+            f"Total events: {len(self.golden_path_events)}. "
+            f"CRITICAL REMEDIATION REQUIRED: Fix user isolation in Golden Path WebSocket patterns."
         )
 
     def test_golden_path_websocket_event_reliability(self):
-        "TEST MUST FAIL: Validate WebSocket event delivery reliability in Golden Path."
+        """TEST MUST FAIL: Validate WebSocket event delivery reliability in Golden Path.
 
         Mission-critical test ensuring all Golden Path WebSocket events are delivered
         reliably without failures or missing events that break chat UX.
-        "
+        """
         async def run_golden_path_reliability_test():
             reliability_failures = []
 
@@ -381,7 +382,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                 # Execute multiple Golden Path sequences to test reliability
                 reliability_test_count = 3
                 for i in range(reliability_test_count):
-                    test_user = self._create_golden_path_user(freliability_user_{i}")
+                    test_user = self._create_golden_path_user(f"reliability_user_{i}")
                     await self._execute_complete_golden_path_sequence(test_user)
                     await asyncio.sleep(0.05)  # Small delay between tests
 
@@ -398,7 +399,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                         'expected_total': expected_total_events,
                         'actual_total': actual_total_events,
                         'test_runs': reliability_test_count
-                    }
+                    })
 
                 # Check for event delivery failures by user
                 events_by_user = {}
@@ -420,7 +421,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                             'user_id': user_id,
                             'missing_events': list(missing_events),
                             'captured_events': user_event_types
-                        }
+                        })
 
                     # Check for duplicate events (reliability issue)
                     event_counts = {}
@@ -433,7 +434,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                             'type': 'duplicate_events_for_user',
                             'user_id': user_id,
                             'duplicates': duplicates
-                        }
+                        })
 
                 # Check for pattern switching during execution (reliability issue)
                 pattern_switches = []
@@ -447,7 +448,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                             'to_pattern': event.pattern_used,
                             'at_event': event.event_type,
                             'user_id': event.user_id
-                        }
+                        })
                         current_pattern = event.pattern_used
 
                 if pattern_switches:
@@ -455,13 +456,13 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                         'type': 'pattern_switching_during_execution',
                         'switches': pattern_switches,
                         'total_switches': len(pattern_switches)
-                    }
+                    })
 
             except Exception as e:
                 reliability_failures.append({
                     'type': 'golden_path_reliability_test_failure',
                     'error': str(e)
-                }
+                })
 
             return reliability_failures
 
@@ -470,20 +471,20 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
 
         # TEST ASSERTION: This MUST FAIL if reliability issues exist
         assert len(failures) == 0, (
-            fGOLDEN PATH WEBSOCKET RELIABILITY FAILURES DETECTED: 
-            fFound {len(failures)} reliability failures in Golden Path WebSocket event delivery. "
-            f"This breaks $500K+ ARR chat experience reliability. 
-            fFailures: {failures}. 
-            fTotal events analyzed: {len(self.golden_path_events)}. 
-            fCRITICAL REMEDIATION REQUIRED: Fix WebSocket reliability issues in Golden Path.""
+            f"GOLDEN PATH WEBSOCKET RELIABILITY FAILURES DETECTED: "
+            f"Found {len(failures)} reliability failures in Golden Path WebSocket event delivery. "
+            f"This breaks $500K+ ARR chat experience reliability. "
+            f"Failures: {failures}. "
+            f"Total events analyzed: {len(self.golden_path_events)}. "
+            f"CRITICAL REMEDIATION REQUIRED: Fix WebSocket reliability issues in Golden Path."
         )
 
     def test_golden_path_websocket_performance_consistency(self):
-        TEST MUST FAIL: Validate WebSocket performance consistency in Golden Path."
+        """TEST MUST FAIL: Validate WebSocket performance consistency in Golden Path.
 
         Mission-critical test ensuring WebSocket SSOT patterns deliver consistent
         performance across Golden Path executions.
-        "
+        """
         async def run_golden_path_performance_test():
             performance_issues = []
 
@@ -522,7 +523,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                                 'max_gap_ms': max_gap,
                                 'min_gap_ms': min_gap,
                                 'variance_ms': max_gap - min_gap
-                            }
+                            })
 
                 # Check for overall performance degradation
                 expected_max_execution_time_ms = 1000  # 1 second for Golden Path
@@ -531,7 +532,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                         'type': 'golden_path_performance_degradation',
                         'execution_time_ms': total_execution_time_ms,
                         'expected_max_ms': expected_max_execution_time_ms
-                    }
+                    })
 
                 # Check for pattern-related performance issues
                 pattern_timings = {}
@@ -545,13 +546,13 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
                         'type': 'multiple_patterns_performance_impact',
                         'patterns_detected': list(pattern_timings.keys()),
                         'pattern_count': len(pattern_timings)
-                    }
+                    })
 
             except Exception as e:
                 performance_issues.append({
                     'type': 'golden_path_performance_test_failure',
                     'error': str(e)
-                }
+                })
 
             return performance_issues
 
@@ -560,11 +561,11 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
 
         # TEST ASSERTION: This MUST FAIL if performance issues exist
         assert len(issues) == 0, (
-            fGOLDEN PATH WEBSOCKET PERFORMANCE ISSUES DETECTED: 
-            f"Found {len(issues)} performance consistency issues in Golden Path WebSocket events. 
-            fThis impacts $500K+ ARR user experience performance. "
-            fIssues: {issues}. 
-            fCRITICAL REMEDIATION REQUIRED: Optimize WebSocket performance consistency in Golden Path."
+            f"GOLDEN PATH WEBSOCKET PERFORMANCE ISSUES DETECTED: "
+            f"Found {len(issues)} performance consistency issues in Golden Path WebSocket events. "
+            f"This impacts $500K+ ARR user experience performance. "
+            f"Issues: {issues}. "
+            f"CRITICAL REMEDIATION REQUIRED: Optimize WebSocket performance consistency in Golden Path."
         )
 
 

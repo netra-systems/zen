@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 MISSION CRITICAL: SSOT Test Runner Enforcement
 ==============================================
 
@@ -31,6 +31,7 @@ VIOLATION IMPACT:
 - Security bypasses in critical business flows
 "
 
+"""
 import sys
 from pathlib import Path
 

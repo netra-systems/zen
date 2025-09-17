@@ -1,4 +1,4 @@
-"
+"""
 MISSION CRITICAL: ReportingSubAgent SSOT JSON Compliance Tests
 
 Business Value Justification (BVJ):
@@ -15,6 +15,7 @@ EXPECTED BEHAVIOR:
 - Tests PASS after migrating to unified_json_handler SSOT
 "
 
+"""
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import ast
 import inspect

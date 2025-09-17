@@ -1,5 +1,5 @@
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
-"
+"""
 Mission Critical Server Message Validation Tests
 
 This module tests the MissionCriticalEventValidator's ability to handle 
@@ -12,6 +12,7 @@ Issue #892: MissionCriticalEventValidator expects flat event structures
 but actual ServerMessage format has nested payload structure.
 "
 
+"""
 import json
 from datetime import datetime, timezone
 from typing import Dict, Any

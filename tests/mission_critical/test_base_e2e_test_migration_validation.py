@@ -1,6 +1,7 @@
-"
+"""
 BaseE2ETest to SSotAsyncTestCase Migration Validation Test
 
+"""
 CRITICAL MISSION: Track and validate the migration from BaseE2ETest to SSotAsyncTestCase
 ensuring SSOT compliance across all E2E test files.
 

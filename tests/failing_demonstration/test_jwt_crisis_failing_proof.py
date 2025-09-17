@@ -188,7 +188,7 @@ class JWTCrisisBusinessImpactProofTests(SSotBaseTestCase):
                 from netra_backend.app.core.configuration.unified_secrets import get_jwt_secret
                 unified_secret = get_jwt_secret()
                 revenue_functionality_steps.append('Middleware integration available')
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 manager = WebSocketManager()
                 revenue_functionality_steps.append('Agent events infrastructure available')
                 logger.warning('UNEXPECTED: $50K MRR WebSocket functionality available')

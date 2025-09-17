@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 # Import target module components - SSOT after Issue #824
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.unified_manager import (
     WebSocketManagerMode,
     _get_enum_key_representation,
     _serialize_message_safely,
@@ -46,7 +46,7 @@ from netra_backend.app.websocket_core.websocket_manager import (
     UnifiedWebSocketManager
 )
 # Import get_websocket_manager from SSOT location
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 # Import related types and dependencies
 from shared.types.core_types import (

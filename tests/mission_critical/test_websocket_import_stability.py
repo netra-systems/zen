@@ -1,8 +1,9 @@
-"
+"""
 Mission Critical: WebSocket Import Stability Tests
 
 Business Value Justification:
 - Segment: Platform/Internal (Mission Critical Infrastructure)
+"""
 - Business Goal: Prevent $120K+ MRR loss from chat outages
 - Value Impact: Ensure 90% of business value (chat) never fails due to import errors
 - Strategic Impact: Continuous monitoring of Cloud Run import stability

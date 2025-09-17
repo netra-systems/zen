@@ -1,4 +1,4 @@
-"
+"""
 WebSocket Factory User Isolation SSOT Compliance Test
 
 PURPOSE: Enterprise user isolation validation with SSOT patterns
@@ -17,6 +17,7 @@ This test validates that:
 CRITICAL: This is a mission critical test protecting enterprise compliance.
 "
 
+"""
 import asyncio
 import threading
 import time

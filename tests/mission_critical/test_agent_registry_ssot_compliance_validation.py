@@ -1,4 +1,4 @@
-"
+"""
 AgentRegistry SSOT Compliance Validation Tests - Issue #1080
 
 MISSION: Validate AgentRegistry SSOT compliance after fixes
@@ -14,6 +14,7 @@ Created: 2025-09-14 - SSOT Test Plan Step 2
 Priority: P0 Critical - Golden Path validation
 "
 
+"""
 import pytest
 import asyncio
 from typing import Dict, Any, Optional, Type, List

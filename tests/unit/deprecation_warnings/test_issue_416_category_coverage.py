@@ -39,7 +39,7 @@ class DeprecationCategoryCoverageTests(SSotBaseTestCase):
                 'description': 'Agent implementation files',
                 'critical': True,  # Agents are critical for chat functionality
                 'expected_canonical_imports': [
-                    'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
+                    'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager',
                     'from netra_backend.app.websocket_core.event_validation_framework import get_websocket_validator'
                 ]
             },
@@ -48,7 +48,7 @@ class DeprecationCategoryCoverageTests(SSotBaseTestCase):
                 'description': 'Service layer files',
                 'critical': True,  # Services support core functionality
                 'expected_canonical_imports': [
-                    'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
+                    'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager',
                     'from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter'
                 ]
             },
@@ -57,7 +57,7 @@ class DeprecationCategoryCoverageTests(SSotBaseTestCase):
                 'description': 'WebSocket core and related files',
                 'critical': True,  # WebSocket enables real-time chat
                 'expected_canonical_imports': [
-                    'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
+                    'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager',
                     'from netra_backend.app.websocket_core.event_validation_framework import get_websocket_validator',
                     'from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter'
                 ]
@@ -67,7 +67,7 @@ class DeprecationCategoryCoverageTests(SSotBaseTestCase):
                 'description': 'API route handler files',
                 'critical': True,  # Routes handle user requests
                 'expected_canonical_imports': [
-                    'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'
+                    'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager'
                 ]
             },
             'test_files': {
@@ -75,7 +75,7 @@ class DeprecationCategoryCoverageTests(SSotBaseTestCase):
                 'description': 'Test infrastructure files',
                 'critical': False,  # Tests support development
                 'expected_canonical_imports': [
-                    'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
+                    'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager',
                     'from netra_backend.app.websocket_core.event_validation_framework import get_websocket_validator'
                 ]
             },

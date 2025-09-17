@@ -1,4 +1,4 @@
-"
+"""
 SSOT Factory Pattern Violation Detection Tests
 
 Business Value Justification (BVJ):
@@ -16,6 +16,7 @@ Target Violation: Direct UnifiedStateManager() instantiation bypassing StateMana
 PURPOSE: Detect and prevent SSOT violations that compromise user isolation.
 "
 
+"""
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import pytest
 import ast

@@ -65,7 +65,7 @@ def apply_import_fix(repo_path: Path) -> bool:
 
         # Apply the specific import replacement
         old_import = "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager"
-        new_import = "from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager"
+        new_import = "from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager"
 
         if old_import in content:
             content = content.replace(old_import, new_import)

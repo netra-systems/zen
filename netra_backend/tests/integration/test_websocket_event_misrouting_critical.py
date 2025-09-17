@@ -72,7 +72,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 # Import problematic WebSocket modules to test
 try:
     from netra_backend.app.websocket_core.websocket_manager import create_websocket_manager
-    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
     from netra_backend.app.websocket_core.protocols import WebSocketEventProtocol
 except ImportError:
     # Create mocks for testing if actual classes don't exist yet

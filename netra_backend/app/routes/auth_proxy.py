@@ -3,7 +3,7 @@ Auth proxy routes - Forward auth requests to auth service.
 This provides backward compatibility for tests while maintaining auth service separation.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Any, Dict
 
 import httpx
@@ -12,7 +12,7 @@ from fastapi import APIRouter, HTTPException, Request
 from netra_backend.app.clients.auth_client_core import auth_client
 from shared.isolated_environment import get_env
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 router = APIRouter(prefix="/api/v1/auth", tags=["auth-proxy"])
 
 # Additional router for backward compatibility with tests expecting /auth/config

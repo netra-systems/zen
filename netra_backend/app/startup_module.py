@@ -433,8 +433,8 @@ def _is_postgres_service_mock_mode() -> bool:
     
     # Check configuration for postgres mode
     try:
-        from netra_backend.app.config import get_config
-        config = get_config()
+        from netra_backend.app.core.configuration.base import get_unified_config
+        config = get_unified_config()
         return getattr(config, 'postgres_mode', '').lower() == 'mock'
     except Exception:
         # Fallback for bootstrap
@@ -1148,7 +1148,7 @@ def _create_agent_supervisor(app: FastAPI) -> None:
         
         # Validate WebSocket manager is available as SSOT import
         # SSOT COMPLIANCE: Direct import from websocket_manager.py as single source of truth
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         try:
             # Verify the class is available - no factory needed for validation
             if not WebSocketManager:
@@ -1254,7 +1254,7 @@ async def initialize_websocket_components(logger: logging.Logger) -> None:
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
     
     try:
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         # SSOT COMPLIANCE: Direct WebSocketManager import as single source of truth
         # Individual managers are created per-request with UserExecutionContext
         

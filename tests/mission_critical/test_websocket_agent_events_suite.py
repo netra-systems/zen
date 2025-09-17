@@ -198,11 +198,11 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         self.mock_factory = SSotMockFactory()
         
         # Core mocked dependencies (external only - keep business logic real)
-        self.mock_execution_engine = self.mock_factory.create_mock("ExecutionEngine)
+        self.mock_execution_engine = self.mock_factory.create_mock("ExecutionEngine")
         self.mock_websocket_manager = self.mock_factory.create_mock(WebSocketManager)
-        self.mock_db_session = self.mock_factory.create_mock("AsyncSession)"
+        self.mock_db_session = self.mock_factory.create_mock("AsyncSession")
         self.mock_state_persistence = self.mock_factory.create_mock(StatePersistenceService)
-        self.mock_flow_logger = self.mock_factory.create_mock(SupervisorFlowLogger)"
+        self.mock_flow_logger = self.mock_factory.create_mock(SupervisorFlowLogger)
         
         # Test user context for isolation testing (create a mock with required methods)
         self.test_user_context = MagicMock()
@@ -226,14 +226,17 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         # Test pipeline steps
         self.test_pipeline_steps = [
             PipelineStepConfig(
-                agent_name=triage_agent,"
-                metadata={step_number": 1, description: Initial request triage},
+                agent_name="triage_agent",
+                metadata={"step_number": 1, "description": "Initial request triage"}
+            ),
             PipelineStepConfig(
-                agent_name="data_helper_agent, "
-                metadata={step_number: 2, description: Data collection},"
+                agent_name="data_helper_agent",
+                metadata={"step_number": 2, "description": "Data collection"}
+            ),
             PipelineStepConfig(
-                agent_name="reporting_agent,
-                metadata={step_number: 3, description: Final report generation"}"
+                agent_name="reporting_agent",
+                metadata={"step_number": 3, "description": "Final report generation"}
+            )
         ]
         
         # Track execution events

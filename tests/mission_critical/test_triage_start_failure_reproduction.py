@@ -1,6 +1,7 @@
-"
+"""
 Mission Critical Test: Triage Agent Start Failure Reproduction
 
+"""
 This test reproduces the EXACT failure that prevents triage agents from starting,
 which directly impacts the Golden Path user flow and $500K+ ARR chat functionality.
 

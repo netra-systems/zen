@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"
+"""
 E2E SSOT Compliance Enhancement Suite - Mission Critical Test Suite
 
 Business Value: Platform/Internal - Test Infrastructure SSOT Enhancement
 Enhances existing SSOT framework for E2E-specific validation and compliance.
 
 This suite validates and enhances SSOT framework integration for E2E tests:
+"""
     1. Validates get_test_base_for_category('e2e') returns correct SSOT class
 2. Ensures validate_test_class() function works on E2E tests
 3. Validates E2E tests follow all SSOT patterns and conventions

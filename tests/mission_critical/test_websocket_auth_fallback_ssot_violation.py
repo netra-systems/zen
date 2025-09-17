@@ -1,4 +1,4 @@
-"
+"""
  ALERT:  MISSION CRITICAL: WebSocket Auth Fallback SSOT Violation
 
 SSOT VIOLATION REPRODUCTION - Test #4 of 5  
@@ -17,6 +17,7 @@ EXPECTED BEHAVIOR:
 Business Value Justification (BVJ):
 - Segment: Platform/Engineering - SSOT compliance and maintainability
 - Business Goal: System Stability - Eliminate duplicate auth logic maintenance 
+"""
 - Value Impact: Reduces auth bugs and security vulnerabilities from logic duplication
 - Revenue Impact: Auth fallback bugs could cause service outages ($100K+ revenue risk)
 

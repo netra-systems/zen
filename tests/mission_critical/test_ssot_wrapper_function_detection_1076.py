@@ -1,4 +1,4 @@
-"
+"""
 SSOT Wrapper Function Detection Tests for Issue #1076
 
 Test Plan: Detect backward compatibility wrapper functions that create SSOT violations.
@@ -13,6 +13,7 @@ Related Issues: #1076 - SSOT compliance verification
 Priority: CRITICAL - These tests protect against regression during SSOT migration
 "
 
+"""
 import pytest
 import ast
 import os

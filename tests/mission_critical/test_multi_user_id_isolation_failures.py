@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical Test Suite for Multi-User ID Isolation Failures
 
 MISSION CRITICAL: This test suite validates that ID generation provides proper
@@ -24,6 +24,7 @@ Critical Violations to Detect:
 - Session management failures due to ID format inconsistencies
 "
 
+"""
 import pytest
 import asyncio
 import uuid

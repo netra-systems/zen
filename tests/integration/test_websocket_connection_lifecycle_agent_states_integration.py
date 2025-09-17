@@ -1,4 +1,4 @@
-"""Empty docstring."""
+"""
 P0 Critical Integration Tests: WebSocket Connection Lifecycle with Agent States Integration
 
 Business Value Justification (BVJ):
@@ -29,7 +29,7 @@ ARCHITECTURE ALIGNMENT:
 - Uses WebSocketManager for connection lifecycle management
 - Tests AgentWebSocketBridge with connection state coordination
 - Validates agent state persistence across WebSocket connection events
-"""Empty docstring."""
+"""
 import asyncio
 import uuid
 import json
@@ -40,7 +40,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.orchestration import get_orchestration_config
 from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.websocket.connection_handler import ConnectionHandler
 from netra_backend.app.websocket_core.auth import WebSocketAuthenticator
@@ -55,7 +55,7 @@ from netra_backend.app.schemas.message_models import MessageRequest, MessageType
 from netra_backend.app.core.configuration.services import get_service_config
 
 class WebSocketConnectionLifecycleTracker:
-    "Tracks WebSocket connection lifecycle events with agent state correlation."""
+    """Tracks WebSocket connection lifecycle events with agent state correlation."""
 
     def __init__(self, user_id: str):
         self.user_id = user_id
@@ -65,8 +65,8 @@ class WebSocketConnectionLifecycleTracker:
         self.agent_states: Dict[str, Any] = {}
         self.start_time = datetime.now()
 
-    async def track_connection_event(self, event_type: str, data: Dict[str, Any]:
-        "Track WebSocket connection lifecycle events."
+    async def track_connection_event(self, event_type: str, data: Dict[str, Any]):
+        """Track WebSocket connection lifecycle events."""
         event_time = datetime.now()
         event_data = {'event_type': event_type, 'data': data.copy(), 'timestamp': event_time.isoformat(), 'relative_time_ms': (event_time - self.start_time).total_seconds() * 1000, 'connection_state': self.connection_state}
         self.connection_events.append(event_data)
@@ -76,10 +76,10 @@ class WebSocketConnectionLifecycleTracker:
             self.connection_state = 'disconnected'
         elif event_type == 'reconnecting':
             self.connection_state = 'reconnecting'
-        print(f[CONNECTION] {event_type}: {data.get('details', 'No details')} (State: {self.connection_state})""
+        print(f"[CONNECTION] {event_type}: {data.get('details', 'No details')} (State: {self.connection_state})")
 
-    async def track_agent_state_event(self, agent_type: AgentType, state_event: str, state_data: Dict[str, Any]:
-        "Track agent state changes correlated with connection events."""
+    async def track_agent_state_event(self, agent_type: AgentType, state_event: str, state_data: Dict[str, Any]):
+        """Track agent state changes correlated with connection events."""
         event_time = datetime.now()
         agent_key = f'{agent_type.value}'
         state_event_data = {'agent_type': agent_type.value, 'state_event': state_event, 'state_data': state_data.copy(), 'timestamp': event_time.isoformat(), 'relative_time_ms': (event_time - self.start_time).total_seconds() * 1000, 'connection_state': self.connection_state}
@@ -88,7 +88,7 @@ class WebSocketConnectionLifecycleTracker:
         print(f'[AGENT-STATE] {agent_type.value} - {state_event}: Connection {self.connection_state}')
 
     def validate_connection_agent_correlation(self) -> Dict[str, Any]:
-        ""Validate correlation between connection lifecycle and agent states.
+        """Validate correlation between connection lifecycle and agent states."""
         connection_up_events = [e for e in self.connection_events if e['event_type'] in ['connected', 'authenticated']]
         connection_down_events = [e for e in self.connection_events if e['event_type'] in ['disconnected', 'connection_error']]
         agent_active_events = [e for e in self.agent_state_events if e['state_event'] in ['started', 'processing']]
@@ -97,10 +97,10 @@ class WebSocketConnectionLifecycleTracker:
 
 @pytest.mark.integration
 class WebSocketConnectionLifecycleAgentStatesIntegrationTests(SSotAsyncTestCase):
-    Integration tests for WebSocket connection lifecycle with agent states.""
+    """Integration tests for WebSocket connection lifecycle with agent states."""
 
     def setUp(self):
-        Set up test environment with WebSocket and agent components.""
+        """Set up test environment with WebSocket and agent components."""
         super().setUp()
         self.orchestration_config = get_orchestration_config()
         self.websocket_test_manager = WebSocketTestUtility()
@@ -116,20 +116,20 @@ class WebSocketConnectionLifecycleAgentStatesIntegrationTests(SSotAsyncTestCase)
 
     @pytest.mark.asyncio
     async def test_connection_establishment_with_agent_initialization(self):
-        Test WebSocket connection establishment initializes agent states correctly.""
+        """Test WebSocket connection establishment initializes agent states correctly."""
         websocket_manager = Mock(spec=WebSocketManager)
         websocket_manager.connect_user = AsyncMock()
         websocket_manager.is_connected = Mock(return_value=True)
         websocket_manager.send_message = AsyncMock()
-        await self.connection_tracker.track_connection_event('connecting', {'user_id': self.user_id, 'details': 'Initiating connection'}
+        await self.connection_tracker.track_connection_event('connecting', {'user_id': self.user_id, 'details': 'Initiating connection'})
         connection_handler = Mock(spec=ConnectionHandler)
         connection_handler.authenticate = AsyncMock(return_value=True)
-        await self.connection_tracker.track_connection_event('connected', {'user_id': self.user_id, 'connection_id': 'conn_123'}
+        await self.connection_tracker.track_connection_event('connected', {'user_id': self.user_id, 'connection_id': 'conn_123'})
         websocket_bridge = AgentWebSocketBridge(user_id=self.user_id, run_id=self.run_id, websocket_manager=websocket_manager)
         supervisor_agent = SupervisorAgent(agent_type=AgentType.SUPERVISOR, websocket_manager=websocket_manager, user_context=self.user_context)
-        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'initialized', {'state': 'ready', 'websocket_connected': True}
-        await self.connection_tracker.track_connection_event('authenticated', {'user_id': self.user_id, 'auth_status': 'success'}
-        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'activated', {'state': 'active', 'ready_for_messages': True}
+        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'initialized', {'state': 'ready', 'websocket_connected': True})
+        await self.connection_tracker.track_connection_event('authenticated', {'user_id': self.user_id, 'auth_status': 'success'})
+        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'activated', {'state': 'active', 'ready_for_messages': True})
         validation = self.connection_tracker.validate_connection_agent_correlation()
         self.assertTrue(validation['has_connection_events'], 'Should have connection lifecycle events')
         self.assertTrue(validation['has_agent_events'], 'Should have agent state events')
@@ -139,20 +139,20 @@ class WebSocketConnectionLifecycleAgentStatesIntegrationTests(SSotAsyncTestCase)
 
     @pytest.mark.asyncio
     async def test_connection_disruption_agent_state_persistence(self):
-        "Test agent state persistence during connection disruptions."""
+        """Test agent state persistence during connection disruptions."""
         websocket_manager = Mock(spec=WebSocketManager)
         websocket_manager.is_connected = Mock(return_value=True)
         websocket_manager.send_message = AsyncMock()
-        await self.connection_tracker.track_connection_event('connected', {'user_id': self.user_id, 'connection_id': 'conn_123'}
-        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'processing', {'state': 'active', 'message_count': 5, 'context': 'important_analysis'}
+        await self.connection_tracker.track_connection_event('connected', {'user_id': self.user_id, 'connection_id': 'conn_123'})
+        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'processing', {'state': 'active', 'message_count': 5, 'context': 'important_analysis'})
         websocket_manager.is_connected = Mock(return_value=False)
-        await self.connection_tracker.track_connection_event('disconnected', {'user_id': self.user_id, 'reason': 'network_error'}
-        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'state_persisted', {'state': 'suspended', 'context_preserved': True, 'message_count': 5}
+        await self.connection_tracker.track_connection_event('disconnected', {'user_id': self.user_id, 'reason': 'network_error'})
+        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'state_persisted', {'state': 'suspended', 'context_preserved': True, 'message_count': 5})
         websocket_manager.is_connected = Mock(return_value=True)
-        await self.connection_tracker.track_connection_event('reconnecting', {'user_id': self.user_id, 'attempt': 1}
+        await self.connection_tracker.track_connection_event('reconnecting', {'user_id': self.user_id, 'attempt': 1})
         await asyncio.sleep(0.2)
-        await self.connection_tracker.track_connection_event('connected', {'user_id': self.user_id, 'connection_id': 'conn_124', 'reconnected': True}
-        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'recovered', {'state': 'active', 'context_restored': True, 'message_count': 5}
+        await self.connection_tracker.track_connection_event('connected', {'user_id': self.user_id, 'connection_id': 'conn_124', 'reconnected': True})
+        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'recovered', {'state': 'active', 'context_restored': True, 'message_count': 5})
         validation = self.connection_tracker.validate_connection_agent_correlation()
         self.assertGreaterEqual(validation['connection_down_count'], 1, 'Should have connection disruption events')
         self.assertGreaterEqual(validation['agent_recovery_count'], 1, 'Should have agent recovery events')
@@ -167,7 +167,7 @@ class WebSocketConnectionLifecycleAgentStatesIntegrationTests(SSotAsyncTestCase)
 
     @pytest.mark.asyncio
     async def test_multi_user_connection_isolation_with_agent_states(self):
-        "Test connection isolation maintains separate agent states per user."
+        """Test connection isolation maintains separate agent states per user."""
         user_2_id = f'test_user_2_{uuid.uuid4().hex[:8]}'
         user_2_context = UserExecutionContext(user_id=user_2_id, run_id=f'test_run_2_{uuid.uuid4().hex[:8]}', session_id=f'session_2_{uuid.uuid4().hex[:8]}', thread_id=f'thread_2_{uuid.uuid4().hex[:8]}')
         connection_tracker_2 = WebSocketConnectionLifecycleTracker(user_2_id)
@@ -177,49 +177,49 @@ class WebSocketConnectionLifecycleAgentStatesIntegrationTests(SSotAsyncTestCase)
         websocket_manager_2 = Mock(spec=WebSocketManager)
         websocket_manager_2.is_connected = Mock(return_value=True)
         websocket_manager_2.send_message = AsyncMock()
-        await self.connection_tracker.track_connection_event('connected', {'user_id': self.user_id, 'connection_id': 'conn_user_1'}
-        await connection_tracker_2.track_connection_event('connected', {'user_id': user_2_id, 'connection_id': 'conn_user_2'}
-        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'started', {'user_task': 'financial_analysis', 'priority': 'high'}
-        await connection_tracker_2.track_agent_state_event(AgentType.SUPERVISOR, 'started', {'user_task': 'performance_optimization', 'priority': 'medium'}
+        await self.connection_tracker.track_connection_event('connected', {'user_id': self.user_id, 'connection_id': 'conn_user_1'})
+        await connection_tracker_2.track_connection_event('connected', {'user_id': user_2_id, 'connection_id': 'conn_user_2'})
+        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'started', {'user_task': 'financial_analysis', 'priority': 'high'})
+        await connection_tracker_2.track_agent_state_event(AgentType.SUPERVISOR, 'started', {'user_task': 'performance_optimization', 'priority': 'medium'})
         websocket_manager_1.is_connected = Mock(return_value=False)
-        await self.connection_tracker.track_connection_event('disconnected', {'user_id': self.user_id, 'reason': 'timeout'}
-        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'suspended', {'user_task': 'financial_analysis', 'state': 'suspended'}
-        await connection_tracker_2.track_agent_state_event(AgentType.SUPERVISOR, 'processing', {'user_task': 'performance_optimization', 'state': 'active'}
+        await self.connection_tracker.track_connection_event('disconnected', {'user_id': self.user_id, 'reason': 'timeout'})
+        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'suspended', {'user_task': 'financial_analysis', 'state': 'suspended'})
+        await connection_tracker_2.track_agent_state_event(AgentType.SUPERVISOR, 'processing', {'user_task': 'performance_optimization', 'state': 'active'})
         websocket_manager_1.is_connected = Mock(return_value=True)
-        await self.connection_tracker.track_connection_event('connected', {'user_id': self.user_id, 'connection_id': 'conn_user_1_new'}
-        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'recovered', {'user_task': 'financial_analysis', 'state': 'resumed'}
+        await self.connection_tracker.track_connection_event('connected', {'user_id': self.user_id, 'connection_id': 'conn_user_1_new'})
+        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'recovered', {'user_task': 'financial_analysis', 'state': 'resumed'})
         validation_1 = self.connection_tracker.validate_connection_agent_correlation()
         validation_2 = connection_tracker_2.validate_connection_agent_correlation()
         self.assertTrue(validation_1['has_connection_events'], 'User 1 should have connection events')
         self.assertTrue(validation_2['has_connection_events'], 'User 2 should have connection events')
         user_1_agent_states = self.connection_tracker.agent_states
         user_2_agent_states = connection_tracker_2.agent_states
-        self.assertNotEqual(user_1_agent_states.get('supervisor', {}.get('user_task'), user_2_agent_states.get('supervisor', {}.get('user_task'), 'Users should have different agent tasks')
+        self.assertNotEqual(user_1_agent_states.get('supervisor', {}).get('user_task'), user_2_agent_states.get('supervisor', {}).get('user_task'), 'Users should have different agent tasks')
         user_1_disconnections = [e for e in self.connection_tracker.connection_events if e['event_type'] == 'disconnected']
         user_2_disconnections = [e for e in connection_tracker_2.connection_events if e['event_type'] == 'disconnected']
         self.assertGreater(len(user_1_disconnections), len(user_2_disconnections), 'User 1 should have more disconnection events than User 2')
 
     @pytest.mark.asyncio
     async def test_websocket_connection_performance_impact_on_agents(self):
-        "Test WebSocket connection performance doesn't degrade agent execution."
+        """Test WebSocket connection performance doesn't degrade agent execution."""
         performance_metrics = []
         websocket_manager = Mock(spec=WebSocketManager)
         websocket_manager.is_connected = Mock(return_value=True)
         websocket_manager.send_message = AsyncMock()
         connection_start = datetime.now()
-        await self.connection_tracker.track_connection_event('connecting', {'user_id': self.user_id, 'start_time': connection_start.isoformat()}
+        await self.connection_tracker.track_connection_event('connecting', {'user_id': self.user_id, 'start_time': connection_start.isoformat()})
         await asyncio.sleep(0.1)
         connection_end = datetime.now()
         connection_duration = (connection_end - connection_start).total_seconds() * 1000
-        await self.connection_tracker.track_connection_event('connected', {'user_id': self.user_id, 'duration_ms': connection_duration, 'performance': 'high'}
+        await self.connection_tracker.track_connection_event('connected', {'user_id': self.user_id, 'duration_ms': connection_duration, 'performance': 'high'})
         for i in range(3):
             agent_start = datetime.now()
-            await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'processing', {'task_id': f'task_{i}', 'start_time': agent_start.isoformat()}
+            await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'processing', {'task_id': f'task_{i}', 'start_time': agent_start.isoformat()})
             await asyncio.sleep(0.05)
             agent_end = datetime.now()
             agent_duration = (agent_end - agent_start).total_seconds() * 1000
-            await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'completed', {'task_id': f'task_{i}', 'duration_ms': agent_duration}
-            performance_metrics.append({'task_id': f'task_{i}', 'duration_ms': agent_duration, 'connection_active': True}
+            await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'completed', {'task_id': f'task_{i}', 'duration_ms': agent_duration})
+            performance_metrics.append({'task_id': f'task_{i}', 'duration_ms': agent_duration, 'connection_active': True})
         if performance_metrics:
             avg_duration = sum((m['duration_ms'] for m in performance_metrics)) / len(performance_metrics)
             max_duration = max((m['duration_ms'] for m in performance_metrics))
@@ -232,26 +232,26 @@ class WebSocketConnectionLifecycleAgentStatesIntegrationTests(SSotAsyncTestCase)
 
     @pytest.mark.asyncio
     async def test_websocket_connection_error_recovery_with_agent_continuity(self):
-        Test connection error recovery maintains agent execution continuity.""
+        """Test connection error recovery maintains agent execution continuity."""
         websocket_manager = Mock(spec=WebSocketManager)
         websocket_manager.is_connected = Mock(return_value=True)
         websocket_manager.send_message = AsyncMock()
-        await self.connection_tracker.track_connection_event('connected', {'user_id': self.user_id, 'health': 'good'}
-        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'processing', {'task': 'long_running_analysis', 'progress': '25%'}
+        await self.connection_tracker.track_connection_event('connected', {'user_id': self.user_id, 'health': 'good'})
+        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'processing', {'task': 'long_running_analysis', 'progress': '25%'})
         websocket_manager.is_connected = Mock(return_value=False)
         websocket_manager.send_message = AsyncMock(side_effect=ConnectionError('Connection lost'))
-        await self.connection_tracker.track_connection_event('connection_error', {'user_id': self.user_id, 'error': 'ConnectionError'}
-        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'connection_degraded', {'task': 'long_running_analysis', 'progress': '25%', 'mode': 'offline'}
+        await self.connection_tracker.track_connection_event('connection_error', {'user_id': self.user_id, 'error': 'ConnectionError'})
+        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'connection_degraded', {'task': 'long_running_analysis', 'progress': '25%', 'mode': 'offline'})
         for attempt in range(1, 4):
-            await self.connection_tracker.track_connection_event('reconnecting', {'user_id': self.user_id, 'attempt': attempt}
+            await self.connection_tracker.track_connection_event('reconnecting', {'user_id': self.user_id, 'attempt': attempt})
             await asyncio.sleep(0.1)
             if attempt == 3:
                 websocket_manager.is_connected = Mock(return_value=True)
                 websocket_manager.send_message = AsyncMock()
-                await self.connection_tracker.track_connection_event('connected', {'user_id': self.user_id, 'recovery_attempt': attempt}
+                await self.connection_tracker.track_connection_event('connected', {'user_id': self.user_id, 'recovery_attempt': attempt})
                 break
-        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'resumed', {'task': 'long_running_analysis', 'progress': '25%', 'mode': 'online'}
-        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'completed', {'task': 'long_running_analysis', 'progress': '100%', 'result': 'success'}
+        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'resumed', {'task': 'long_running_analysis', 'progress': '25%', 'mode': 'online'})
+        await self.connection_tracker.track_agent_state_event(AgentType.SUPERVISOR, 'completed', {'task': 'long_running_analysis', 'progress': '100%', 'result': 'success'})
         validation = self.connection_tracker.validate_connection_agent_correlation()
         error_events = [e for e in self.connection_tracker.connection_events if e['event_type'] in ['connection_error', 'reconnecting']]
         recovery_events = [e for e in self.connection_tracker.agent_state_events if e['state_event'] in ['resumed', 'completed']]

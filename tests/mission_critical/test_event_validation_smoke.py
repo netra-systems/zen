@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"
+"""
 MISSION CRITICAL SMOKE TEST: Event Validation Infrastructure
 ============================================================
 
@@ -18,6 +18,7 @@ This test serves as a quick sanity check that the validation infrastructure
 is functioning correctly before running comprehensive tests.
 "
 
+"""
 import os
 import sys
 import time

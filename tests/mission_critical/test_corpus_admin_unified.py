@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"
+"""
 Unified Corpus Admin tests - Testing the new SSOT implementation.
 These tests ensure the unified corpus admin works correctly after consolidation.
 
 CRITICAL: These tests validate the new UnifiedCorpusAdmin implementation.
-"
+"""
+"""
+"""
 import asyncio
 import unittest
 import sys

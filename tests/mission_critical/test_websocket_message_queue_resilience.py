@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 MISSION CRITICAL: WebSocket Message Queue Resilience Test
 
 This test validates that the WebSocket message queue never permanently loses messages
@@ -14,6 +14,7 @@ CRITICAL REQUIREMENTS VALIDATED:
 6. Comprehensive state transitions and logging
 "
 
+"""
 import asyncio
 import json
 import pytest

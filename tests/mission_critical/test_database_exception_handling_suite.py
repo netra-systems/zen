@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical Test Suite for Issue #374: Database Exception Handling
 
 This comprehensive test suite validates the core business impact of broad database 
@@ -9,6 +9,7 @@ BUSINESS IMPACT: $500K+ ARR depends on reliable database error diagnosis
 EXPECTED BEHAVIOR: All tests should FAIL initially, proving the systemic issue exists
 
 This suite demonstrates:
+"""
 1. Broad exception patterns prevent specific error classification
 2. Support teams cannot quickly identify database issue root causes  
 3. Incident resolution times increase from minutes to hours

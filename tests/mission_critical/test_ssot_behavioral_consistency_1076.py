@@ -1,4 +1,4 @@
-"
+"""
 SSOT Function Behavioral Consistency Tests for Issue #1076
 
 Test Plan: Verify that SSOT functions behave consistently and don't have behavioral duplicates.
@@ -14,6 +14,7 @@ Related Issues: #1076 - SSOT compliance verification
 Priority: CRITICAL - These tests ensure behavioral consistency in SSOT architecture
 "
 
+"""
 import pytest
 from pathlib import Path
 import sys
@@ -557,4 +558,4 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
 
 
 if __name__ == '__main__':
-    pytest.main([__file__, '-v']))
+    pytest.main([__file__, '-v'])))

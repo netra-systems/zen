@@ -1,4 +1,4 @@
-"
+"""
 SSOT WebSocket Bridge Integration Protection Tests
 
 Issue #845: Critical P0 test suite protecting $500K+ ARR WebSocket functionality
@@ -15,6 +15,7 @@ Created: 2025-01-13 - SSOT Gardner agents focus
 Priority: P0 (Critical/Blocking) - WebSocket events = chat functionality = 90% platform value
 "
 
+"""
 import pytest
 import asyncio
 import json

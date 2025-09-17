@@ -13,7 +13,7 @@ from netra_backend.app.database import get_db
 from netra_backend.app.llm.client_unified import ResilientLLMClient
 from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.services.security_service import SecurityService
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 # CRITICAL: Import for proper session lifecycle management
 from contextlib import asynccontextmanager

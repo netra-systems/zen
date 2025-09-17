@@ -205,18 +205,18 @@ print("")
 if results['failed'] == 0:
     print("[EXCELLENT] - All refresh robustness improvements verified!")
     print("   - WebSocket reconnection enhanced with exponential backoff")
-print("   - Chat state persistence implemented")
+    print("   - Chat state persistence implemented")
 print("   - Comprehensive test coverage created")
 print("   - System is now robust against page refreshes")
 elif results['passed'] >= results['total'] * 0.8:
     print("[GOOD] - Most improvements successfully implemented")
     print("")
-print("   - Core functionality enhanced")
+    print("   - Core functionality enhanced")
 print("   - Minor issues may need attention")
 elif results['passed'] >= results['total'] * 0.6:
     print("[ACCEPTABLE] - Basic improvements in place")
     print("")
-print("   - Review failed items for completion")
+    print("   - Review failed items for completion")
 else:
     print("[NEEDS WORK] - Significant improvements needed")
     print("")
@@ -299,7 +299,7 @@ print("")
 if not can_run_browser_tests:
     print("   - Install Playwright browsers: playwright install chromium")
     print("   - Run frontend: cd frontend && npm run dev")
-print("   - Run backend: docker-compose up")
+    print("   - Run backend: docker-compose up")
 print("   - Execute full test suite when services are running")
 
         # Exit code based on results

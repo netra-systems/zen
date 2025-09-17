@@ -31,7 +31,7 @@ from test_framework.ssot.e2e_auth_helper import create_authenticated_user_contex
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage, create_standard_message, normalize_message_type
 from test_framework.real_services import RealServicesManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
@@ -341,7 +341,7 @@ class WebSocketIntegrationTestSuite(WebSocketIntegrationTest):
         websocket, user_id, jwt_token = await self.create_authenticated_websocket_connection()
         try:
             from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
             bridge = AgentWebSocketBridge()
             websocket_manager = UnifiedWebSocketManager()
             assert bridge is not None, 'AgentWebSocketBridge failed to initialize'

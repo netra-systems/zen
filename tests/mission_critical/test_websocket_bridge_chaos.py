@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"
+"""
 Comprehensive Chaos Engineering Tests for WebSocket Bridge
 
 Business Value Justification:
@@ -28,6 +28,7 @@ Test Categories:
 7. System Recovery Validation
 "
 
+"""
 import asyncio
 import json
 import random

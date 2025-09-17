@@ -1,4 +1,4 @@
-"
+"""
 Mission Critical WebSocket Error Messaging Reliability Tests
 
 BUSINESS CRITICAL: These tests protect $500K+ ARR by ensuring WebSocket error messaging
@@ -20,6 +20,7 @@ FAILURE IMPACT:
 This test suite MUST pass before any deployment to production.
 "
 
+"""
 import asyncio
 import json
 import time

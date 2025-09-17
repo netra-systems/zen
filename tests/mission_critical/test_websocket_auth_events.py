@@ -1,4 +1,4 @@
-"
+"""
 [U+1F534] MISSION CRITICAL: WebSocket Authentication Events Test Suite
 
 Tests WebSocket authentication integration with agent events - the core of our chat value.
@@ -20,6 +20,7 @@ CRITICAL SUCCESS CRITERIA:
 FAILURE = NO CHAT FUNCTIONALITY = NO CUSTOMER VALUE = $0 REVENUE
 "
 
+"""
 import asyncio
 import json
 import logging
