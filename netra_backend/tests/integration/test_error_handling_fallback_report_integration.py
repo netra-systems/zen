@@ -21,7 +21,7 @@ import pytest
 import json
 import uuid
 from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from decimal import Decimal
 
 from test_framework.base_integration_test import BaseIntegrationTest
@@ -144,7 +144,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
                 INSERT INTO data_source_results (id, execution_id, source_name, status, data_content, timestamp)
                 VALUES ($1, $2, $3, $4, $5, $6)
             """, UnifiedIdGenerator.generate_base_id("data_success"), execution_id, source, 
-                data["status"], json.dumps(data), datetime.utcnow())
+                data["status"], json.dumps(data), datetime.now(UTC))
         
         # Store failed data source attempts
         for source, error_info in failed_data_sources:
@@ -152,7 +152,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
                 INSERT INTO data_source_errors (id, execution_id, source_name, error_type, error_message, timestamp)
                 VALUES ($1, $2, $3, $4, $5, $6)
             """, UnifiedIdGenerator.generate_base_id("data_error"), execution_id, source,
-                "api_failure", error_info["error"], datetime.utcnow())
+                "api_failure", error_info["error"], datetime.now(UTC))
         
         # Generate partial report based on available data
         partial_report = {
@@ -184,7 +184,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, execution_id, title, content, is_fallback, business_value_score, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         """, report_id, user_id, execution_id, partial_report["title"], json.dumps(partial_report), 
-            True, 6.5, datetime.utcnow())
+            True, 6.5, datetime.now(UTC))
         
         # Create error response for user notification
         error_response = {
@@ -230,8 +230,8 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
         await real_services_fixture["db"].execute("""
             INSERT INTO execution_contexts (id, user_id, agent_type, status, created_at, timeout_at, config)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
-        """, execution_id, user_id, "comprehensive_analysis", "timeout", datetime.utcnow(),
-            datetime.utcnow() + timedelta(minutes=15), '{"timeout_minutes": 15, "max_execution_time": 900}')
+        """, execution_id, user_id, "comprehensive_analysis", "timeout", datetime.now(UTC),
+            datetime.now(UTC) + timedelta(minutes=15), '{"timeout_minutes": 15, "max_execution_time": 900}')
         
         # Store progress made before timeout
         progress_stages = [
@@ -246,7 +246,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
                 INSERT INTO execution_progress (id, execution_id, stage, status, description, partial_score, timestamp)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
             """, UnifiedIdGenerator.generate_base_id("progress"), execution_id, stage, status, 
-                description, partial_score, datetime.utcnow())
+                description, partial_score, datetime.now(UTC))
         
         # Generate progress preservation report
         progress_report = {
@@ -291,7 +291,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, execution_id, title, content, is_fallback, business_value_score, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         """, report_id, user_id, execution_id, progress_report["title"], json.dumps(progress_report),
-            True, 6.0, datetime.utcnow())
+            True, 6.0, datetime.now(UTC))
         
         # Create timeout error response
         timeout_error = {
@@ -357,7 +357,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
                 INSERT INTO external_api_failures (id, execution_id, api_name, failure_type, error_message, timestamp, retry_attempted)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
             """, UnifiedIdGenerator.generate_base_id("api_fail"), execution_id, api_name, failure_type,
-                error_message, datetime.utcnow(), True)
+                error_message, datetime.now(UTC), True)
         
         # Create degraded service response using internal data only
         degraded_report = {
@@ -402,7 +402,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, execution_id, title, content, is_fallback, service_mode, business_value_score, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         """, report_id, user_id, execution_id, degraded_report["title"], json.dumps(degraded_report),
-            True, "degraded", 4.0, datetime.utcnow())
+            True, "degraded", 4.0, datetime.now(UTC))
         
         # Create cascading failure error response
         cascade_error = {
@@ -471,7 +471,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
                 ]
             },
             "system_status": {
-                "cached_at": datetime.utcnow().isoformat(),
+                "cached_at": datetime.now(UTC).isoformat(),
                 "data_freshness": "6_hours_old",
                 "confidence": 0.3
             }
@@ -570,7 +570,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
             VALUES ($1, $2, $3, $4, $5, $6, $7)
         """, UnifiedIdGenerator.generate_base_id("llm_fail"), execution_id, "llm_service", 
             "service_unavailable", "LLM service returning 503 errors - model servers overloaded", 
-            datetime.utcnow(), 3)
+            datetime.now(UTC), 3)
         
         # Generate raw data that would normally be processed by LLM
         raw_analysis_data = {
@@ -600,7 +600,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO raw_analysis_data (id, execution_id, data_content, timestamp)
             VALUES ($1, $2, $3, $4)
         """, UnifiedIdGenerator.generate_base_id("raw_data"), execution_id, 
-            json.dumps(raw_analysis_data), datetime.utcnow())
+            json.dumps(raw_analysis_data), datetime.now(UTC))
         
         # Generate template-based report without LLM processing
         template_report = {
@@ -651,7 +651,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, execution_id, title, content, is_fallback, generation_method, business_value_score, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         """, report_id, user_id, execution_id, template_report["title"], json.dumps(template_report),
-            True, "template_based", 7.0, datetime.utcnow())
+            True, "template_based", 7.0, datetime.now(UTC))
         
         # Create LLM failure error response
         llm_failure_error = {
@@ -701,8 +701,8 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO system_resources (id, execution_id, resource_type, usage_percent, threshold_exceeded, timestamp)
             VALUES ($1, $2, $3, $4, $5, $6),
                    ($7, $8, $9, $10, $11, $12)
-        """, UnifiedIdGenerator.generate_base_id("memory"), execution_id, "memory", 92.5, True, datetime.utcnow(),
-             UnifiedIdGenerator.generate_base_id("cpu"), execution_id, "cpu", 78.3, False, datetime.utcnow())
+        """, UnifiedIdGenerator.generate_base_id("memory"), execution_id, "memory", 92.5, True, datetime.now(UTC),
+             UnifiedIdGenerator.generate_base_id("cpu"), execution_id, "cpu", 78.3, False, datetime.now(UTC))
         
         # Store resource exhaustion event
         await real_services_fixture["db"].execute("""
@@ -710,7 +710,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
             VALUES ($1, $2, $3, $4, $5, $6)
         """, UnifiedIdGenerator.generate_base_id("resource_event"), execution_id, "memory_exhaustion",
             "Memory usage exceeded 90% threshold during complex analysis - switching to simplified mode",
-            "reduced_complexity_analysis", datetime.utcnow())
+            "reduced_complexity_analysis", datetime.now(UTC))
         
         # Generate simplified analysis report
         simplified_report = {
@@ -761,7 +761,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, execution_id, title, content, is_fallback, analysis_mode, business_value_score, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         """, report_id, user_id, execution_id, simplified_report["title"], json.dumps(simplified_report),
-            True, "simplified", 8.0, datetime.utcnow())
+            True, "simplified", 8.0, datetime.now(UTC))
         
         # Create memory exhaustion error response
         memory_error = {
@@ -827,7 +827,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO user_permissions (id, user_id, permissions_scope, access_level, restricted_resources, created_at)
             VALUES ($1, $2, $3, $4, $5, $6)
         """, UnifiedIdGenerator.generate_base_id("permissions"), user_id, json.dumps(user_permissions),
-            "limited", json.dumps(user_permissions["denied_resources"]), datetime.utcnow())
+            "limited", json.dumps(user_permissions["denied_resources"]), datetime.now(UTC))
         
         # Simulate permission denials during analysis
         permission_denials = [
@@ -840,7 +840,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["db"].execute("""
                 INSERT INTO permission_denials (id, execution_id, user_id, analysis_type, denial_reason, timestamp)
                 VALUES ($1, $2, $3, $4, $5, $6)
-            """, UnifiedIdGenerator.generate_base_id("denial"), execution_id, user_id, analysis_type, reason, datetime.utcnow())
+            """, UnifiedIdGenerator.generate_base_id("denial"), execution_id, user_id, analysis_type, reason, datetime.now(UTC))
         
         # Generate scoped analysis report within allowed permissions
         scoped_report = {
@@ -888,7 +888,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, execution_id, title, content, is_fallback, access_scope, business_value_score, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         """, report_id, user_id, execution_id, scoped_report["title"], json.dumps(scoped_report),
-            True, "limited_permissions", 7.5, datetime.utcnow())
+            True, "limited_permissions", 7.5, datetime.now(UTC))
         
         # Create permission-aware error response
         permission_error = {
@@ -948,10 +948,10 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
         
         # Simulate network retry attempts with eventual success
         retry_attempts = [
-            (1, "timeout", "Connection timeout after 30 seconds", datetime.utcnow()),
-            (2, "dns_failure", "DNS resolution failed for external service", datetime.utcnow() + timedelta(seconds=30)),
-            (3, "connection_refused", "Connection refused by external service", datetime.utcnow() + timedelta(seconds=90)), 
-            (4, "success", "Connection established successfully", datetime.utcnow() + timedelta(seconds=150))
+            (1, "timeout", "Connection timeout after 30 seconds", datetime.now(UTC)),
+            (2, "dns_failure", "DNS resolution failed for external service", datetime.now(UTC) + timedelta(seconds=30)),
+            (3, "connection_refused", "Connection refused by external service", datetime.now(UTC) + timedelta(seconds=90)), 
+            (4, "success", "Connection established successfully", datetime.now(UTC) + timedelta(seconds=150))
         ]
         
         # Store retry attempts
@@ -1008,7 +1008,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, execution_id, title, content, completion_status, retry_count, business_value_score, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         """, report_id, user_id, execution_id, retry_success_report["title"], json.dumps(retry_success_report),
-            "success_after_retries", 4, 9.5, datetime.utcnow())
+            "success_after_retries", 4, 9.5, datetime.now(UTC))
         
         # Create successful retry completion response
         retry_success_response = {
@@ -1089,7 +1089,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
                 INSERT INTO execution_errors (id, execution_id, error_type, severity, description, impact_type, timestamp)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
             """, UnifiedIdGenerator.generate_base_id(f"error_{error_type}"), execution_id, error_type, 
-                severity, description, impact, datetime.utcnow())
+                severity, description, impact, datetime.now(UTC))
         
         # Execute error triage and prioritization
         error_triage = {
@@ -1167,7 +1167,7 @@ class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, execution_id, title, content, is_fallback, error_count, business_value_score, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         """, report_id, user_id, execution_id, triaged_report["title"], json.dumps(triaged_report),
-            True, len(error_scenarios), 6.0, datetime.utcnow())
+            True, len(error_scenarios), 6.0, datetime.now(UTC))
         
         # Create comprehensive error response
         multi_error_response = {

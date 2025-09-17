@@ -18,7 +18,7 @@ import asyncio
 import uuid
 import pytest
 import json
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock, MagicMock, patch, Mock
 from contextlib import asynccontextmanager
@@ -114,7 +114,7 @@ class WebSocketNotificationIntegrationTests(BaseIntegrationTest):
                     thread_id=thread_id,
                     request_id=request_id,
                     data=event_data,
-                    timestamp=datetime.utcnow()
+                    timestamp=datetime.now(UTC)
                 )
                 
                 # Send the message through the WebSocket system
@@ -366,7 +366,7 @@ class WebSocketNotificationIntegrationTests(BaseIntegrationTest):
             async def send_json(self, data: Dict[str, Any]) -> None:
                 self.messages_with_timing.append({
                     "message": data,
-                    "received_at": datetime.utcnow()
+                    "received_at": datetime.now(UTC)
                 })
         
         timing_connection = TimingTrackingConnection(websocket_id, user_id)
@@ -393,7 +393,7 @@ class WebSocketNotificationIntegrationTests(BaseIntegrationTest):
                     data={
                         "sequence_number": i,
                         "description": description,
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     }
                 )
                 

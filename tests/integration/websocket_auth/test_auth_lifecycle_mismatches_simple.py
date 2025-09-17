@@ -14,7 +14,7 @@ timing mismatches that cause golden path auth to "get in its own way."
 import pytest
 import time
 import jwt
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from unittest import mock
 import uuid
 from shared.isolated_environment import get_env
@@ -42,7 +42,7 @@ class AuthLifecycleMismatchesPOCTests:
 
     def _create_jwt_token(self, user_id: str, expires_in_seconds: int) -> str:
         """Create JWT token with specific expiry for lifecycle testing."""
-        payload = {'user_id': user_id, 'exp': datetime.utcnow() + timedelta(seconds=expires_in_seconds), 'iat': datetime.utcnow(), 'iss': 'netra-test-lifecycle-poc'}
+        payload = {'user_id': user_id, 'exp': datetime.now(UTC) + timedelta(seconds=expires_in_seconds), 'iat': datetime.now(UTC), 'iss': 'netra-test-lifecycle-poc'}
         return jwt.encode(payload, self.jwt_secret, algorithm='HS256')
 
     def _simulate_websocket_connection_start(self, user_id: str) -> dict:
@@ -52,8 +52,8 @@ class AuthLifecycleMismatchesPOCTests:
         This creates the timing conflict: connection persists beyond auth validity.
         """
         jwt_token = self._create_jwt_token(user_id, expires_in_seconds=self.jwt_expiry_duration)
-        connection_info = {'user_id': user_id, 'connection_id': str(uuid.uuid4()), 'jwt_token': jwt_token, 'created_at': datetime.utcnow(), 'expected_duration': self.websocket_session_duration, 'jwt_expires_at': datetime.utcnow() + timedelta(seconds=self.jwt_expiry_duration)}
-        self.connection_created_at = datetime.utcnow()
+        connection_info = {'user_id': user_id, 'connection_id': str(uuid.uuid4()), 'jwt_token': jwt_token, 'created_at': datetime.now(UTC), 'expected_duration': self.websocket_session_duration, 'jwt_expires_at': datetime.now(UTC) + timedelta(seconds=self.jwt_expiry_duration)}
+        self.connection_created_at = datetime.now(UTC)
         print(f'[CONNECT] WEBSOCKET CONNECTION ESTABLISHED:')
         print(f'   User: {user_id}')
         print(f'   Connection Duration: {self.websocket_session_duration}s')

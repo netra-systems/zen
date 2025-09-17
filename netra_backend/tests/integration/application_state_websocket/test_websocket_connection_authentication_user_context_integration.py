@@ -15,7 +15,7 @@ import pytest
 import asyncio
 import json
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional
 
 from test_framework.base_integration_test import BaseIntegrationTest
@@ -34,7 +34,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
         env = get_env()
         secret = env.get("JWT_SECRET", "test_secret_key_for_integration_testing")
         
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         payload = {
             "user_id": user_id,
             "email": f"user_{user_id}@netrasystems.ai",
@@ -139,7 +139,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
             'plan': decoded_token['plan'],
             'permissions': decoded_token['permissions'],
             'session_id': session_data['session_key'],
-            'authenticated_at': datetime.utcnow().isoformat()
+            'authenticated_at': datetime.now(UTC).isoformat()
         }
         
         mock_websocket.authenticate(user_context)
@@ -148,7 +148,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
             connection_id=connection_id,
             user_id=user_id,
             websocket=mock_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={
                 "connection_type": "authenticated",
                 "user_context": user_context,
@@ -198,7 +198,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
                 "message": "This requires authentication",
                 "user_context": user_context
             },
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         await websocket_manager.send_to_user(user_id, auth_message)
@@ -250,7 +250,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
         
         # Test Case 1: Expired JWT Token
         expired_token = self._create_test_jwt_token(user_id, {
-            'exp': datetime.utcnow() - timedelta(hours=1)  # Expired 1 hour ago
+            'exp': datetime.now(UTC) - timedelta(hours=1)  # Expired 1 hour ago
         })
         
         class InvalidAuthWebSocket:
@@ -292,7 +292,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
             connection_id=connection_id,
             user_id=user_id,
             websocket=invalid_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={
                 "connection_type": "failed_authentication",
                 "authentication_method": "jwt",
@@ -313,7 +313,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
         auth_test_message = {
             "type": "auth_required_message",
             "data": {"sensitive": "data"},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         # This should fail and trigger connection cleanup
@@ -331,7 +331,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
             invalid_token_wrong_secret = jwt.encode(
                 {
                     "user_id": user_id,
-                    "exp": datetime.utcnow() + timedelta(hours=1)
+                    "exp": datetime.now(UTC) + timedelta(hours=1)
                 },
                 "wrong_secret",  # Wrong secret
                 algorithm="HS256"
@@ -395,7 +395,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
             connection_id=valid_connection_id,
             user_id=user_id,
             websocket=valid_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={
                 "connection_type": "valid_authentication",
                 "authentication_method": "jwt",
@@ -410,7 +410,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
         recovery_message = {
             "type": "recovery_after_auth_failure",
             "data": {"message": "Authentication recovered successfully"},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         await websocket_manager.send_to_user(user_id, recovery_message)
@@ -545,7 +545,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
                 connection_id=connection_id,
                 user_id=user_id,
                 websocket=mock_websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={
                     "connection_type": "isolated_multi_user",
                     "user_context": user_context,
@@ -584,7 +584,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
                     "permissions": target_conn['user_context']['permissions'],
                     "sensitive_data": f"data_for_user_{i}"
                 },
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             await websocket_manager.send_to_user(target_user_id, user_specific_message)

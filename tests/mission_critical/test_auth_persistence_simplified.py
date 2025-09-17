@@ -6,7 +6,7 @@ Tests core auth persistence patterns without importing modules with singleton is
 import asyncio
 import uuid
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -27,8 +27,8 @@ class AuthPersistenceCoreTests:
         payload = {
             "sub": "test-user-123",
             "email": "test@example.com",
-            "exp": datetime.utcnow() + timedelta(hours=1),
-            "iat": datetime.utcnow()
+            "exp": datetime.now(UTC) + timedelta(hours=1),
+            "iat": datetime.now(UTC)
         }
         return jwt.encode(payload, "test-secret", algorithm="HS256")
     
@@ -154,16 +154,16 @@ class AuthPersistenceCoreTests:
         # Original token
         original_token = jwt.encode({
             "sub": user_id,
-            "exp": datetime.utcnow() + timedelta(seconds=30),
-            "iat": datetime.utcnow(),
+            "exp": datetime.now(UTC) + timedelta(seconds=30),
+            "iat": datetime.now(UTC),
             "session_id": "session-001"
         }, "test-secret", algorithm="HS256")
         
         # Refreshed token (same user, new expiry)
         refreshed_token = jwt.encode({
             "sub": user_id,  # Same user ID
-            "exp": datetime.utcnow() + timedelta(hours=1),
-            "iat": datetime.utcnow(),
+            "exp": datetime.now(UTC) + timedelta(hours=1),
+            "iat": datetime.now(UTC),
             "session_id": "session-001"  # Same session
         }, "test-secret", algorithm="HS256")
         

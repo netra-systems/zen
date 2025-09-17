@@ -39,7 +39,7 @@ import weakref
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, List, Set, Any, Optional, Tuple
 from unittest.mock import patch
 import psutil
@@ -112,7 +112,7 @@ class MockWebSocketConnection:
         
         self.messages_sent.append({
             "message": message,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "connection_id": self.connection_id,
             "user_id": self.user_id
         })
@@ -240,14 +240,14 @@ class SingletonPatternPreventionTests:
             connection_id="conn1",
             user_id=user1_id,
             websocket=conn1,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         
         ws_conn2 = WebSocketConnection(
             connection_id="conn2", 
             user_id=user2_id,
             websocket=conn2,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         
         await manager1.add_connection(ws_conn1)
@@ -380,7 +380,7 @@ class FactoryPatternUserIsolationTests:
                 connection_id=f"conn_{i}",
                 user_id=user.user_id,
                 websocket=conn,
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             )
             
             await user.websocket_manager.add_connection(ws_conn)
@@ -400,7 +400,7 @@ class FactoryPatternUserIsolationTests:
         for i, user in enumerate(users):
             test_message = {
                 "type": "test_message",
-                "data": {"user_index": i, "timestamp": datetime.utcnow().isoformat()},
+                "data": {"user_index": i, "timestamp": datetime.now(UTC).isoformat()},
                 "source": f"user_{i}"
             }
             
@@ -721,7 +721,7 @@ class ConcurrentMultiUserSecurityTests:
                 connection_id=f"concurrent_conn_{i}",
                 user_id=user.user_id,
                 websocket=conn,
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             )
             await user.websocket_manager.add_connection(ws_conn)
             user.connection_ids.append(f"concurrent_conn_{i}")
@@ -737,7 +737,7 @@ class ConcurrentMultiUserSecurityTests:
                         "user_index": user_index,
                         "message_number": msg_num,
                         "user_id": user.user_id,
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     }
                 }
                 
@@ -792,7 +792,7 @@ class ConcurrentMultiUserSecurityTests:
                 connection_id=f"race_conn_{connection_num}",
                 user_id=test_user_id,
                 websocket=conn,
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             )
             await manager.add_connection(ws_conn)
             return connection_num
@@ -802,7 +802,7 @@ class ConcurrentMultiUserSecurityTests:
             message = {
                 "type": "race_test",
                 "data": {"message_number": message_num},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             await manager.send_to_user(test_user_id, message)
             return message_num
@@ -860,7 +860,7 @@ class ConcurrentMultiUserSecurityTests:
                     connection_id=f"leak_conn_{batch}_{i}",
                     user_id=user_id,
                     websocket=conn,
-                    connected_at=datetime.utcnow()
+                    connected_at=datetime.now(UTC)
                 )
                 
                 await manager.add_connection(ws_conn)
@@ -961,7 +961,7 @@ class WebSocketAuthenticationFailureHandlingTests:
             connection_id="failing_conn",
             user_id=test_user_id,
             websocket=failing_conn,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         
         await manager.add_connection(ws_conn)
@@ -983,7 +983,7 @@ class WebSocketAuthenticationFailureHandlingTests:
             connection_id="working_conn",
             user_id=test_user_id,
             websocket=working_conn,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         
         await manager.add_connection(ws_conn)
@@ -1009,7 +1009,7 @@ class WebSocketAuthenticationFailureHandlingTests:
                 connection_id=f"auth_conn_{i}",
                 user_id=user.user_id,
                 websocket=conn,
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             )
             await user.websocket_manager.add_connection(ws_conn)
             user.connection_ids.append(f"auth_conn_{i}")

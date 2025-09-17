@@ -15,7 +15,7 @@ import pytest
 import asyncio
 from typing import Dict, Any
 from unittest.mock import Mock, patch
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from test_framework.ssot.base_test_case import BaseTestCase
 from shared.isolated_environment import get_env
@@ -71,7 +71,7 @@ class AuthServiceBackendCommunicationTests(BaseTestCase):
                     json={
                         "action": "session_created",
                         "user_context": user_session,
-                        "notification_timestamp": datetime.utcnow().isoformat()
+                        "notification_timestamp": datetime.now(UTC).isoformat()
                     },
                     headers={
                         "Authorization": f"Bearer {env.get('SERVICE_SECRET')}",
@@ -123,7 +123,7 @@ class AuthServiceBackendCommunicationTests(BaseTestCase):
             "user_id": "user-logout-test-456",
             "session_id": "sess_logout_789",
             "invalidation_reason": "user_logout",
-            "invalidated_at": datetime.utcnow().isoformat(),
+            "invalidated_at": datetime.now(UTC).isoformat(),
             "invalidated_by": "user_action"
         }
         
@@ -200,7 +200,7 @@ class AuthServiceBackendCommunicationTests(BaseTestCase):
                 "from": "mid",
                 "to": "enterprise"
             },
-            "changed_at": datetime.utcnow().isoformat(),
+            "changed_at": datetime.now(UTC).isoformat(),
             "changed_by": "billing_system"
         }
         

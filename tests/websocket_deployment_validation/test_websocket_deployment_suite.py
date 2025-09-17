@@ -18,7 +18,7 @@ import time
 import uuid
 import pytest
 import websockets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Any
 from urllib.parse import urlparse
 
@@ -65,7 +65,7 @@ class WebSocketDeploymentValidator:
                 # Send ping to establish connection
                 await websocket.send(json.dumps({
                     "type": "ping",
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }))
                 
                 # Wait for pong response
@@ -80,7 +80,7 @@ class WebSocketDeploymentValidator:
                 # Send heartbeat to test timeout handling
                 await websocket.send(json.dumps({
                     "type": "heartbeat",
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }))
                 
                 heartbeat_response = await asyncio.wait_for(websocket.recv(), timeout=10)
@@ -275,7 +275,7 @@ class WebSocketDeploymentValidator:
                         received_events.append(event_type)
                         result["details"]["received_events"].append({
                             "type": event_type,
-                            "timestamp": datetime.utcnow().isoformat(),
+                            "timestamp": datetime.now(UTC).isoformat(),
                             "data": event_data
                         })
                         
@@ -505,7 +505,7 @@ class WebSocketDeploymentTestSuite:
         test_suite_results = {
             "test_suite": "websocket_deployment_validation",
             "environment": self.validator.environment,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "tests": {},
             "summary": {}
         }

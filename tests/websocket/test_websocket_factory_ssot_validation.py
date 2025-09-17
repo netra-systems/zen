@@ -14,7 +14,7 @@ CRITICAL FIXES TESTED:
 import pytest
 import asyncio
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from unittest.mock import Mock, patch, AsyncMock
 from typing import Any, Dict
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager, FactoryInitializationError, _validate_ssot_user_context, get_websocket_manager_factory
@@ -189,7 +189,7 @@ class WebSocketFactoryErrorRecoveryTests:
         user_context = UserExecutionContext(user_id='test_user_isolation', thread_id='thread_456', run_id='run_789', websocket_client_id='ws_connection_isolation')
         manager = create_websocket_manager(user_context)
         mock_websocket = Mock()
-        mock_connection = type('Connection', (), {'connection_id': 'test_conn_123', 'user_id': 'test_user_isolation', 'websocket': mock_websocket, 'connected_at': datetime.utcnow()})()
+        mock_connection = type('Connection', (), {'connection_id': 'test_conn_123', 'user_id': 'test_user_isolation', 'websocket': mock_websocket, 'connected_at': datetime.now(UTC)})()
         await manager.add_connection(mock_connection)
         retrieved_conn = manager.get_connection('test_conn_123')
         assert retrieved_conn is mock_connection
@@ -204,7 +204,7 @@ class WebSocketFactoryErrorRecoveryTests:
         user_context = UserExecutionContext(user_id='secure_user_123', thread_id='thread_456', run_id='run_789', websocket_client_id='ws_secure_connection')
         manager = create_websocket_manager(user_context)
         mock_websocket = Mock()
-        mock_connection = type('Connection', (), {'connection_id': 'malicious_conn_456', 'user_id': 'different_user_789', 'websocket': mock_websocket, 'connected_at': datetime.utcnow()})()
+        mock_connection = type('Connection', (), {'connection_id': 'malicious_conn_456', 'user_id': 'different_user_789', 'websocket': mock_websocket, 'connected_at': datetime.now(UTC)})()
         with pytest.raises(ValueError) as exc_info:
             await manager.add_connection(mock_connection)
         error_message = str(exc_info.value)

@@ -18,7 +18,7 @@ This test suite validates the complete agent execution pipeline:
 import asyncio
 import uuid
 import pytest
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -67,7 +67,7 @@ class AgentExecutionPipelineIntegrationTests(BaseIntegrationTest):
             id=str(user_id),
             email="test.agent@example.com",
             name="Agent Test User",
-            created_at=datetime.utcnow()
+            created_at=datetime.now(UTC)
         )
         
         db.add(test_user)
@@ -79,7 +79,7 @@ class AgentExecutionPipelineIntegrationTests(BaseIntegrationTest):
             id=str(thread_id),
             user_id=str(user_id),
             title="Agent Execution Test",
-            created_at=datetime.utcnow()
+            created_at=datetime.now(UTC)
         )
         
         db.add(test_thread)

@@ -18,7 +18,7 @@ import asyncio
 import json
 import secrets
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List
 from concurrent.futures import ThreadPoolExecutor
 import pytest
@@ -76,13 +76,13 @@ class RealAuthDatabaseIntegrityTests:
 
     def create_test_user_data(self, user_id: int) -> Dict[str, Any]:
         """Create test user data for database operations."""
-        return {'id': user_id, 'email': f'user{user_id}@netrasystems.ai', 'full_name': f'Test User {user_id}', 'password_hash': secrets.token_hex(32), 'is_active': True, 'created_at': datetime.utcnow(), 'last_login_at': None, 'failed_login_attempts': 0, 'account_locked_until': None, 'oauth_provider': 'google', 'oauth_external_id': f'oauth_{user_id}_{secrets.token_hex(8)}'}
+        return {'id': user_id, 'email': f'user{user_id}@netrasystems.ai', 'full_name': f'Test User {user_id}', 'password_hash': secrets.token_hex(32), 'is_active': True, 'created_at': datetime.now(UTC), 'last_login_at': None, 'failed_login_attempts': 0, 'account_locked_until': None, 'oauth_provider': 'google', 'oauth_external_id': f'oauth_{user_id}_{secrets.token_hex(8)}'}
 
     def create_test_session_data(self, user_id: int, session_id: str=None) -> Dict[str, Any]:
         """Create test session data for database operations."""
         if not session_id:
             session_id = secrets.token_hex(16)
-        return {'id': session_id, 'user_id': user_id, 'session_token': secrets.token_hex(32), 'refresh_token': secrets.token_hex(32), 'created_at': datetime.utcnow(), 'expires_at': datetime.utcnow() + timedelta(hours=24), 'last_activity': datetime.utcnow(), 'ip_address': '127.0.0.1', 'user_agent': 'pytest-integrity-test', 'is_active': True}
+        return {'id': session_id, 'user_id': user_id, 'session_token': secrets.token_hex(32), 'refresh_token': secrets.token_hex(32), 'created_at': datetime.now(UTC), 'expires_at': datetime.now(UTC) + timedelta(hours=24), 'last_activity': datetime.now(UTC), 'ip_address': '127.0.0.1', 'user_agent': 'pytest-integrity-test', 'is_active': True}
 
     @pytest.mark.asyncio
     async def test_user_creation_transaction_integrity(self, real_db_session):
@@ -309,7 +309,7 @@ class RealAuthDatabaseIntegrityTests:
             print(' PASS:  Database connection health check passed')
             try:
                 async with real_db_session.begin():
-                    await real_db_session.execute(text('UPDATE users SET last_login_at = :now WHERE id = :user_id'), {'now': datetime.utcnow(), 'user_id': created_user[0]})
+                    await real_db_session.execute(text('UPDATE users SET last_login_at = :now WHERE id = :user_id'), {'now': datetime.now(UTC), 'user_id': created_user[0]})
                     await real_db_session.execute(text('INSERT INTO non_existent_table VALUES (1)'))
             except Exception as e:
                 print(f' PASS:  Transaction error handled gracefully: {type(e).__name__}')

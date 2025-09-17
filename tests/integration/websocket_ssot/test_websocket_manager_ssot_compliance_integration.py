@@ -26,7 +26,7 @@ import os
 import sys
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, List, Optional, Any
 import pytest
 from loguru import logger
@@ -142,7 +142,7 @@ class WebSocketManagerSSOTComplianceIntegrationTests(SSotAsyncTestCase):
                 manager._connections[connection_id] = mock_connection
             for event_type in required_events:
                 try:
-                    await manager.send_agent_event(event_type=event_type, data={'message': f'Test {event_type} event', 'timestamp': datetime.utcnow().isoformat()}, user_context=self.user_context)
+                    await manager.send_agent_event(event_type=event_type, data={'message': f'Test {event_type} event', 'timestamp': datetime.now(UTC).isoformat()}, user_context=self.user_context)
                     await asyncio.sleep(0.1)
                 except Exception as e:
                     logger.error(f'Failed to send {event_type} event: {e}')
@@ -268,7 +268,7 @@ class WebSocketManagerSSOTComplianceIntegrationTests(SSotAsyncTestCase):
                 ws_url = staging_url.replace('https:', 'wss:') + '/ws'
                 try:
                     async with session.ws_connect(ws_url) as ws:
-                        test_message = {'type': 'test_connection', 'user_id': self.user_context.user_id, 'timestamp': datetime.utcnow().isoformat()}
+                        test_message = {'type': 'test_connection', 'user_id': self.user_context.user_id, 'timestamp': datetime.now(UTC).isoformat()}
                         await ws.send_str(json.dumps(test_message))
                         response = await asyncio.wait_for(ws.receive(), timeout=10)
                         self.assertIsNotNone(response)

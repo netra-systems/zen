@@ -35,7 +35,7 @@ import pytest
 import time
 import uuid
 import websockets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional, Set
 from unittest.mock import AsyncMock, patch
 from websockets import ConnectionClosed, WebSocketException
@@ -200,7 +200,7 @@ class CompleteGoldenPathE2EStagingTests(SSotAsyncTestCase):
             logger.error(f' FAIL:  Failed to connect to staging WebSocket: {e}')
             pytest.skip(f'Staging WebSocket connection failed: {e}')
         logger.info('[U+1F680] Phase 2: Chat Message Submission')
-        chat_message = {'type': 'user_message', 'text': 'Analyze my cloud infrastructure costs and provide optimization recommendations with estimated savings', 'thread_id': str(uuid.uuid4()), 'timestamp': datetime.utcnow().isoformat()}
+        chat_message = {'type': 'user_message', 'text': 'Analyze my cloud infrastructure costs and provide optimization recommendations with estimated savings', 'thread_id': str(uuid.uuid4()), 'timestamp': datetime.now(UTC).isoformat()}
         message_send_time = time.time()
         await websocket.send(json.dumps(chat_message))
         logger.info(' PASS:  Chat message sent to staging')
@@ -224,7 +224,7 @@ class CompleteGoldenPathE2EStagingTests(SSotAsyncTestCase):
                     try:
                         event_data = json.loads(raw_event)
                         event_type = event_data.get('type')
-                        events_received.append({'type': event_type, 'data': event_data.get('data', {}), 'timestamp': datetime.utcnow(), 'receive_time': event_receive_time, 'latency_from_start': event_receive_time - message_send_time})
+                        events_received.append({'type': event_type, 'data': event_data.get('data', {}), 'timestamp': datetime.now(UTC), 'receive_time': event_receive_time, 'latency_from_start': event_receive_time - message_send_time})
                         if event_type in required_events:
                             required_events[event_type] = True
                             logger.info(f' PASS:  Received critical event: {event_type}')

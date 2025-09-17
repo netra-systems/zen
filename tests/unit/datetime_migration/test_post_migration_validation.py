@@ -50,7 +50,7 @@ class PostMigrationValidationTests(unittest.TestCase):
                         f"Expected all {len(modules_to_test)} modules to import successfully")
 
     def test_no_deprecated_patterns_remain(self):
-        """Test that no deprecated datetime.utcnow() patterns remain in target files."""
+        """Test that no deprecated datetime.now(UTC) patterns remain in target files."""
         target_files = [
             "netra_backend/app/websocket_core/protocols.py",
             "netra_backend/app/db/clickhouse.py",
@@ -68,11 +68,11 @@ class PostMigrationValidationTests(unittest.TestCase):
                     content = f.read()
 
                 # Count deprecated patterns
-                patterns = content.count('datetime.utcnow()')
+                patterns = content.count('datetime.now(UTC)')
                 total_deprecated_patterns += patterns
 
                 self.assertEqual(patterns, 0,
-                               f"Found {patterns} deprecated datetime.utcnow() patterns in {file_path}")
+                               f"Found {patterns} deprecated datetime.now(UTC) patterns in {file_path}")
 
         self.assertEqual(total_deprecated_patterns, 0,
                         f"Expected 0 deprecated patterns total, found {total_deprecated_patterns}")
@@ -99,7 +99,7 @@ class PostMigrationValidationTests(unittest.TestCase):
     def test_behavioral_equivalence(self):
         """Test that old and new patterns produce equivalent UTC times."""
         # Compare timestamps (allowing for small execution time differences)
-        old_timestamp = datetime.utcnow()  # Still works for comparison
+        old_timestamp = datetime.now(UTC)  # Still works for comparison
         new_timestamp = datetime.now(timezone.utc)
 
         # Convert new timestamp to naive for comparison

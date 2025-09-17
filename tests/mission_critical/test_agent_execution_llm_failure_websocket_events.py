@@ -24,7 +24,7 @@ CRITICAL: This test MUST pass or the platform loses all user value during LLM ou
 import asyncio
 import json
 import time
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
@@ -409,7 +409,7 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
             "id": thread_id,
             "user_id": user_id,
             "title": "Mission Critical LLM Failure Test",
-            "created_at": datetime.utcnow()
+            "created_at": datetime.now(UTC)
         })
         
         await db_session.commit()

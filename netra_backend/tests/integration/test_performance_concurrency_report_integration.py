@@ -22,7 +22,7 @@ import json
 import uuid
 import time
 from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from test_framework.base_integration_test import BaseIntegrationTest
@@ -156,7 +156,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["db"].execute("""
                 INSERT INTO test_data_sets (id, user_id, data_type, data_content, size_indicator, created_at)
                 VALUES ($1, $2, $3, $4, $5, $6)
-            """, data_id, user_id, report_type, json.dumps(test_data), config["data_points"], datetime.utcnow())
+            """, data_id, user_id, report_type, json.dumps(test_data), config["data_points"], datetime.now(UTC))
             
             # Measure report generation performance
             start_time = time.time()
@@ -176,7 +176,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 INSERT INTO reports (id, user_id, title, content, report_type, data_points, business_value_score, created_at)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             """, report_id, user_id, report_content["title"], json.dumps(report_content), 
-                report_type, config["data_points"], 8.0, datetime.utcnow())
+                report_type, config["data_points"], 8.0, datetime.now(UTC))
             
             generation_time = time.time() - start_time
             
@@ -192,7 +192,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 INSERT INTO performance_metrics (id, report_id, metrics_data, measurement_type, measured_at)
                 VALUES ($1, $2, $3, $4, $5)
             """, UnifiedIdGenerator.generate_base_id("perf_metric"), report_id, json.dumps(perf_metrics),
-                "baseline_performance", datetime.utcnow())
+                "baseline_performance", datetime.now(UTC))
             
             # Validate performance
             perf_validation = await validator.validate_report_generation_performance(perf_metrics)
@@ -241,7 +241,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 report_data = {
                     "title": f"Concurrent User {user_index} Cost Analysis Report",
                     "user_index": user_index,
-                    "generated_at": datetime.utcnow().isoformat(),
+                    "generated_at": datetime.now(UTC).isoformat(),
                     "data_summary": f"Cost analysis for user {user_index} with concurrent processing",
                     "key_insights": [
                         f"User {user_index} cost trend analysis shows 12% optimization opportunity",
@@ -264,7 +264,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                     INSERT INTO reports (id, user_id, title, content, business_value_score, created_at, concurrent_user_index)
                     VALUES ($1, $2, $3, $4, $5, $6, $7)
                 """, report_id, user_id, report_data["title"], json.dumps(report_data), 
-                    7.5, datetime.utcnow(), user_index)
+                    7.5, datetime.now(UTC), user_index)
                 
                 generation_time = time.time() - generation_start
                 
@@ -304,7 +304,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 await real_services_fixture["db"].execute("""
                     INSERT INTO performance_metrics (id, metrics_data, measurement_type, concurrent_users, measured_at)
                     VALUES ($1, $2, $3, $4, $5)
-                """, metrics_id, json.dumps(concurrency_metrics), "concurrency_test", concurrent_users, datetime.utcnow())
+                """, metrics_id, json.dumps(concurrency_metrics), "concurrency_test", concurrent_users, datetime.now(UTC))
                 
                 # Validate concurrent performance
                 concurrency_validation = await validator.validate_concurrent_user_handling(concurrency_metrics)
@@ -355,7 +355,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 "priority": "normal" if i % 3 != 0 else "high",
                 "report_type": "standard_analysis",
                 "data_complexity": "medium",
-                "requested_at": datetime.utcnow()
+                "requested_at": datetime.now(UTC)
             }
             queued_requests.append(request_data)
         
@@ -394,14 +394,14 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 INSERT INTO reports (id, user_id, title, content, request_id, queue_position, business_value_score, created_at)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             """, report_id, user_id, report_content["title"], json.dumps(report_content),
-                request["request_id"], i+1, 7.0, datetime.utcnow())
+                request["request_id"], i+1, 7.0, datetime.now(UTC))
             
             # Update queue status
             await real_services_fixture["db"].execute("""
                 UPDATE report_queue 
                 SET status = 'completed', processed_at = $1, processing_duration = $2
                 WHERE id = $3
-            """, datetime.utcnow(), time.time() - processing_start, request["request_id"])
+            """, datetime.now(UTC), time.time() - processing_start, request["request_id"])
             
             processing_time = time.time() - processing_start
             processed_reports.append({
@@ -428,7 +428,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO performance_metrics (id, user_id, metrics_data, measurement_type, measured_at)
             VALUES ($1, $2, $3, $4, $5)  
         """, UnifiedIdGenerator.generate_base_id("throughput_metrics"), user_id, 
-            json.dumps(throughput_metrics), "throughput_test", datetime.utcnow())
+            json.dumps(throughput_metrics), "throughput_test", datetime.now(UTC))
         
         # Validate throughput performance
         perf_validation = await validator.validate_report_generation_performance({
@@ -475,11 +475,11 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO large_datasets (id, user_id, size_datapoints, metadata, created_at, processing_strategy)
             VALUES ($1, $2, $3, $4, $5, $6)
         """, dataset_id, user_id, large_dataset_size, json.dumps(dataset_metadata), 
-            datetime.utcnow(), "streaming")
+            datetime.now(UTC), "streaming")
         
         # Measure memory usage before processing
         initial_memory_info = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "estimated_usage_mb": 150,  # Baseline system memory
             "available_memory_mb": 4000  # Available for processing
         }
@@ -547,7 +547,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, title, content, dataset_id, data_points, business_value_score, created_at, processing_time)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         """, report_id, user_id, large_dataset_report["title"], json.dumps(large_dataset_report),
-            dataset_id, large_dataset_size, 9.0, datetime.utcnow(), processing_time)
+            dataset_id, large_dataset_size, 9.0, datetime.now(UTC), processing_time)
         
         # Store memory performance metrics
         memory_metrics = {
@@ -563,7 +563,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO performance_metrics (id, report_id, metrics_data, measurement_type, measured_at)
             VALUES ($1, $2, $3, $4, $5)
         """, UnifiedIdGenerator.generate_base_id("memory_metrics"), report_id, 
-            json.dumps(memory_metrics), "memory_efficiency", datetime.utcnow())
+            json.dumps(memory_metrics), "memory_efficiency", datetime.now(UTC))
         
         # Validate memory efficiency
         assert peak_memory_usage <= 2000  # Under 2GB peak usage
@@ -623,7 +623,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 INSERT INTO reports (id, user_id, title, content, business_value_score, created_at)
                 VALUES ($1, $2, $3, $4, $5, $6)
             """, test_report_id, user_id, f"DB Load Test Report {operation_id}", 
-                json.dumps({"operation_id": operation_id, "load_test": True}), 7.0, datetime.utcnow())
+                json.dumps({"operation_id": operation_id, "load_test": True}), 7.0, datetime.now(UTC))
             queries_performed.append({
                 "query_type": "insertion",
                 "duration": time.time() - insert_query_start
@@ -681,7 +681,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 INSERT INTO performance_metrics (id, user_id, metrics_data, measurement_type, measured_at)
                 VALUES ($1, $2, $3, $4, $5)
             """, UnifiedIdGenerator.generate_base_id("db_load_metrics"), user_id,
-                json.dumps(db_load_metrics), "database_load_test", datetime.utcnow())
+                json.dumps(db_load_metrics), "database_load_test", datetime.now(UTC))
             
             # Validate database performance under load
             assert db_success_rate >= 95.0  # High success rate under load
@@ -716,7 +716,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 "complex_calculations": [f"calculation_result_{i}" for i in range(100)],
                 "insights": [f"Performance insight {i}" for i in range(20)]
             },
-            "generated_at": datetime.utcnow().isoformat()
+            "generated_at": datetime.now(UTC).isoformat()
         }
         
         # Store original report in database
@@ -724,7 +724,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
         await real_services_fixture["db"].execute("""
             INSERT INTO reports (id, user_id, title, content, business_value_score, created_at)
             VALUES ($1, $2, $3, $4, $5, $6)
-        """, report_id, user_id, base_report["title"], json.dumps(base_report), 8.5, datetime.utcnow())
+        """, report_id, user_id, base_report["title"], json.dumps(base_report), 8.5, datetime.now(UTC))
         
         # Test 1: Database retrieval performance (no cache)
         db_retrieval_times = []
@@ -790,7 +790,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 INSERT INTO performance_metrics (id, report_id, metrics_data, measurement_type, measured_at)
                 VALUES ($1, $2, $3, $4, $5)
             """, UnifiedIdGenerator.generate_base_id("cache_perf"), report_id,
-                json.dumps(cache_perf_metrics), "cache_performance", datetime.utcnow())
+                json.dumps(cache_perf_metrics), "cache_performance", datetime.now(UTC))
             
             # Validate cache performance benefits
             assert cache_speedup_factor >= 5.0  # Cache should be at least 5x faster
@@ -835,7 +835,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO performance_metrics (id, report_id, metrics_data, measurement_type, measured_at)
             VALUES ($1, $2, $3, $4, $5)
         """, UnifiedIdGenerator.generate_base_id("cache_ratio"), report_id,
-            json.dumps(cache_ratio_metrics), "cache_hit_ratio", datetime.utcnow())
+            json.dumps(cache_ratio_metrics), "cache_hit_ratio", datetime.now(UTC))
         
         # Validate cache hit ratio performance
         expected_hit_ratio = 0.6  # ~67% of requests should be cache hits in this test
@@ -865,7 +865,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
             connection_data = {
                 "connection_id": connection_id,
                 "user_id": user_id,
-                "established_at": datetime.utcnow().isoformat()
+                "established_at": datetime.now(UTC).isoformat()
             }
             
             # Store connection record
@@ -873,7 +873,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["db"].execute("""
                 INSERT INTO websocket_connections (id, user_id, connection_id, established_at, status)
                 VALUES ($1, $2, $3, $4, $5)
-            """, conn_id, user_id, connection_id, datetime.utcnow(), "active")
+            """, conn_id, user_id, connection_id, datetime.now(UTC), "active")
             
             # Simulate event delivery for this connection
             event_delivery_times = []
@@ -897,7 +897,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 await real_services_fixture["db"].execute("""
                     INSERT INTO websocket_events (id, connection_id, event_type, event_data, timestamp)
                     VALUES ($1, $2, $3, $4, $5)
-                """, event_id, conn_id, event_data["event_type"], json.dumps(event_data), datetime.utcnow())
+                """, event_id, conn_id, event_data["event_type"], json.dumps(event_data), datetime.now(UTC))
                 
                 event_time = time.time() - event_start
                 event_delivery_times.append(event_time)
@@ -956,7 +956,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 INSERT INTO performance_metrics (id, metrics_data, measurement_type, measured_at)
                 VALUES ($1, $2, $3, $4)
             """, UnifiedIdGenerator.generate_base_id("ws_perf"), json.dumps(ws_perf_metrics),
-                "websocket_performance", datetime.utcnow())
+                "websocket_performance", datetime.now(UTC))
             
             # Validate WebSocket performance under load
             assert ws_success_rate >= 95.0  # High success rate for concurrent connections
@@ -1027,7 +1027,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 INSERT INTO api_requests (id, user_id, endpoint, request_data, response_time_seconds, timestamp, status)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
             """, api_request_id, user_id, endpoint, json.dumps({"request_id": request_id}),
-                processing_time, datetime.utcnow(), "success")
+                processing_time, datetime.now(UTC), "success")
             
             return {
                 "request_id": request_id,
@@ -1088,7 +1088,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 INSERT INTO performance_metrics (id, user_id, metrics_data, measurement_type, measured_at)
                 VALUES ($1, $2, $3, $4, $5)
             """, UnifiedIdGenerator.generate_base_id("api_perf"), user_id, json.dumps(api_perf_metrics),
-                "api_performance", datetime.utcnow())
+                "api_performance", datetime.now(UTC))
             
             # Validate API performance requirements
             assert api_success_rate >= 98.0  # Very high success rate for API requests
@@ -1133,7 +1133,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO monitoring_thresholds (id, user_id, thresholds_config, created_at)
             VALUES ($1, $2, $3, $4)
         """, UnifiedIdGenerator.generate_base_id("thresholds"), monitoring_user_id,
-            json.dumps(resource_thresholds), datetime.utcnow())
+            json.dumps(resource_thresholds), datetime.now(UTC))
         
         # Simulate various resource usage scenarios
         resource_scenarios = [
@@ -1160,14 +1160,14 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 "disk_usage_percent": scenario["disk"],
                 "database_connections": scenario["db_conn"],
                 "response_time_seconds": scenario["response_time"],
-                "measurement_timestamp": datetime.utcnow().isoformat()
+                "measurement_timestamp": datetime.now(UTC).isoformat()
             }
             
             await real_services_fixture["db"].execute("""
                 INSERT INTO resource_measurements (id, user_id, resource_data, scenario_status, measured_at)
                 VALUES ($1, $2, $3, $4, $5)
             """, measurement_id, monitoring_user_id, json.dumps(resource_data), 
-                scenario["status"], datetime.utcnow())
+                scenario["status"], datetime.now(UTC))
             
             # Evaluate thresholds and generate alerts
             alerts_generated = []
@@ -1194,7 +1194,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 await real_services_fixture["db"].execute("""
                     INSERT INTO system_alerts (id, measurement_id, resource_type, alert_level, alert_message, threshold_exceeded, created_at)
                     VALUES ($1, $2, $3, $4, $5, $6, $7)
-                """, alert_id, measurement_id, resource, alert_level, alert_message, value, datetime.utcnow())
+                """, alert_id, measurement_id, resource, alert_level, alert_message, value, datetime.now(UTC))
                 
                 alerts_generated.append({
                     "resource": resource,
@@ -1231,7 +1231,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO performance_metrics (id, user_id, metrics_data, measurement_type, measured_at)
             VALUES ($1, $2, $3, $4, $5)
         """, UnifiedIdGenerator.generate_base_id("monitoring_perf"), monitoring_user_id,
-            json.dumps(monitoring_perf), "resource_monitoring", datetime.utcnow())
+            json.dumps(monitoring_perf), "resource_monitoring", datetime.now(UTC))
         
         # Validate monitoring system performance
         
@@ -1335,7 +1335,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
                 INSERT INTO auto_scaling_events (id, user_id, load_level, scaling_data, scaling_action, instances_before, instances_after, created_at)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             """, scaling_record_id, scaling_user_id, scenario["load_level"], json.dumps(scaling_data),
-                scaling_action, current_instances, new_instances, datetime.utcnow())
+                scaling_action, current_instances, new_instances, datetime.now(UTC))
             
             # Update current instance count for next scenario
             current_instances = new_instances
@@ -1396,7 +1396,7 @@ class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
             INSERT INTO performance_metrics (id, user_id, metrics_data, measurement_type, measured_at)
             VALUES ($1, $2, $3, $4, $5)
         """, UnifiedIdGenerator.generate_base_id("autoscaling_perf"), scaling_user_id,
-            json.dumps(autoscaling_perf), "auto_scaling_simulation", datetime.utcnow())
+            json.dumps(autoscaling_perf), "auto_scaling_simulation", datetime.now(UTC))
         
         # Validate auto-scaling effectiveness
         assert autoscaling_perf["scaling_effectiveness_percent"] >= 80.0  # At least 80% of scenarios met performance targets

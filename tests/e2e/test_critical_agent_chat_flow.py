@@ -39,7 +39,7 @@ import websockets
 from collections import defaultdict
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Set, Any, Optional, AsyncGenerator, Tuple
 from unittest.mock import AsyncMock
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -78,7 +78,7 @@ class WebSocketEventValidator:
 
     def record_event(self, event: Dict[str, Any]) -> None:
         """Record and categorize WebSocket event."""
-        self.events.append({**event, 'timestamp': time.time() - self.start_time, 'received_at': datetime.utcnow().isoformat()})
+        self.events.append({**event, 'timestamp': time.time() - self.start_time, 'received_at': datetime.now(UTC).isoformat()})
         event_type = event.get('type', '').lower()
         event_data = event.get('data', {})
         logger.info(f'[U+1F4E5] WebSocket Event Received: {event_type}')
@@ -242,7 +242,7 @@ class CriticalAgentChatFlowTests(SSotBaseTestCase):
             await ws_manager.connect_user(user_id, mock_websocket, connection_id)
             logger.success(f' PASS:  WebSocket connected for user {user_id}')
             logger.info('[U+1F4AC] Step 5: Sending test message through chat system...')
-            test_message = {'type': 'chat_message', 'content': 'What is the current status of the AI optimization system?', 'user_id': user_id, 'thread_id': thread_id, 'connection_id': connection_id, 'timestamp': datetime.utcnow().isoformat()}
+            test_message = {'type': 'chat_message', 'content': 'What is the current status of the AI optimization system?', 'user_id': user_id, 'thread_id': thread_id, 'connection_id': connection_id, 'timestamp': datetime.now(UTC).isoformat()}
             await self._simulate_agent_processing(ws_manager, test_message)
             logger.info('[U+23F3] Step 6: Waiting for agent processing and WebSocket events...')
             await asyncio.sleep(2.0)

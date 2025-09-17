@@ -11,7 +11,7 @@ import uuid
 import json
 import time
 from typing import Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 from netra_backend.app.websocket_core.manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -139,7 +139,7 @@ class MessageHandlingTests:
                                                             type=MessageType.START_AGENT,
                                                             payload={"user_request": "Test", "thread_id": "thread-test"},
                                                             thread_id="thread-test",
-                                                            timestamp=datetime.utcnow().isoformat()
+                                                            timestamp=datetime.now(UTC).isoformat()
                                                             )
 
                                                             await handler.handle_message("user-test", self.mock_websocket, message)
@@ -301,7 +301,7 @@ class MessageHandlingTests:
                                                                                                                                                                 type=MessageType.START_AGENT,
                                                                                                                                                                 payload={"user_request": "Valid request", "thread_id": "thread-1"},
                                                                                                                                                                 thread_id="thread-1",
-                                                                                                                                                                timestamp=datetime.utcnow().isoformat()
+                                                                                                                                                                timestamp=datetime.now(UTC).isoformat()
                                                                                                                                                                 )
 
                                                                                                                                                                 result = await handler.handle_message("user-valid", self.mock_websocket, valid_message)
@@ -312,7 +312,7 @@ class MessageHandlingTests:
                                                                                                                                                                 type=MessageType.START_AGENT,
                                                                                                                                                                 payload={"thread_id": "thread-2"},  # Missing user_request
                                                                                                                                                                 thread_id="thread-2",
-                                                                                                                                                                timestamp=datetime.utcnow().isoformat()
+                                                                                                                                                                timestamp=datetime.now(UTC).isoformat()
                                                                                                                                                                 )
 
                                                                                                                                                                 result = await handler.handle_message("user-invalid", self.mock_websocket, invalid_message)
@@ -323,7 +323,7 @@ class MessageHandlingTests:
                                                                                                                                                                 type=MessageType.START_AGENT,
                                                                                                                                                                 payload={"user_request": "", "thread_id": "thread-3"},
                                                                                                                                                                 thread_id="thread-3",
-                                                                                                                                                                timestamp=datetime.utcnow().isoformat()
+                                                                                                                                                                timestamp=datetime.now(UTC).isoformat()
                                                                                                                                                                 )
 
                                                                                                                                                                 result = await handler.handle_message("user-empty", self.mock_websocket, empty_message)
@@ -334,7 +334,7 @@ class MessageHandlingTests:
                                                                                                                                                                 type=MessageType.START_AGENT,
                                                                                                                                                                 payload={"user_request": None, "thread_id": "thread-4"},
                                                                                                                                                                 thread_id="thread-4",
-                                                                                                                                                                timestamp=datetime.utcnow().isoformat()
+                                                                                                                                                                timestamp=datetime.now(UTC).isoformat()
                                                                                                                                                                 )
 
                                                                                                                                                                 result = await handler.handle_message("user-null", self.mock_websocket, null_message)

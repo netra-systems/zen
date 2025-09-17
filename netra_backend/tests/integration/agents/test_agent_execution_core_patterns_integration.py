@@ -29,7 +29,7 @@ import gc
 import pytest
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Any, Dict, List, Optional, Callable
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
@@ -309,7 +309,7 @@ class AgentExecutionCorePatternsTests(SSotAsyncTestCase):
         async def track_execution_event(event_type, *args, **kwargs):
             mock_bridge.execution_events.append({
                 "event_type": event_type,
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(UTC),
                 "args": args,
                 "kwargs": kwargs
             })

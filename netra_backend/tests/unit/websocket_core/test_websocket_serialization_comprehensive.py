@@ -16,7 +16,7 @@ Tests the comprehensive _serialize_message_safely function to handle:
 """
 import pytest
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from enum import Enum
 from typing import Dict, Any
 from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
@@ -145,13 +145,13 @@ class ConnectionDiagnosticsTests:
         try:
             from starlette.websockets import WebSocketState
             from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
-            from datetime import datetime
+            from datetime import datetime, UTC
 
             class MockWebSocket:
 
                 def __init__(self):
                     self.client_state = WebSocketState.CONNECTED
-            connection = WebSocketConnection(connection_id='test_conn_123', user_id='test_user', websocket=MockWebSocket(), connected_at=datetime.utcnow())
+            connection = WebSocketConnection(connection_id='test_conn_123', user_id='test_user', websocket=MockWebSocket(), connected_at=datetime.now(UTC))
             from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
             manager = UnifiedWebSocketManager()
             diagnostics = manager._get_connection_diagnostics(connection)
@@ -165,8 +165,8 @@ class ConnectionDiagnosticsTests:
     def test_diagnostics_with_no_websocket(self):
         """Test diagnostics when websocket is None."""
         from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection, WebSocketManager
-        from datetime import datetime
-        connection = WebSocketConnection(connection_id='test_conn_456', user_id='test_user', websocket=None, connected_at=datetime.utcnow())
+        from datetime import datetime, UTC
+        connection = WebSocketConnection(connection_id='test_conn_456', user_id='test_user', websocket=None, connected_at=datetime.now(UTC))
         manager = UnifiedWebSocketManager()
         diagnostics = manager._get_connection_diagnostics(connection)
         json_str = json.dumps(diagnostics)

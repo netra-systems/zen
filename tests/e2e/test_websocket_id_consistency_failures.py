@@ -29,7 +29,7 @@ import json
 import uuid
 import re
 from typing import Dict, Any, List, Optional, Set
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 # E2E test framework
 from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
@@ -196,7 +196,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                 conn_data = {
                     "connection_id": str(uuid.uuid4()),  # VIOLATION: Raw UUID
                     "user_id": user_context.user_id,
-                    "created_at": datetime.utcnow().isoformat()
+                    "created_at": datetime.now(UTC).isoformat()
                 }
                 simulated_connections.append(conn_data)
             
@@ -379,7 +379,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                     "data": {"sender_user": i, "private_data": f"secret_{i}"},
                     "user_id": context.user_id,
                     "thread_id": context.thread_id,
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 test_messages.append((context, manager, message))
                 
@@ -492,7 +492,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                     "user_id": str(uuid.uuid4()),  # VIOLATION: Raw UUID
                     "thread_id": str(uuid.uuid4()),  # VIOLATION: Raw UUID
                     "run_id": str(uuid.uuid4()),  # VIOLATION: Raw UUID
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
             },
             {
@@ -505,7 +505,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                     },
                     "user_id": user_context.user_id,  # May be compliant
                     "thread_id": f"thread_{uuid.uuid4()}",  # VIOLATION: Mixed format
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
             },
             {
@@ -518,7 +518,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                     },
                     "user_id": user_context.user_id,
                     "correlation_id": str(uuid.uuid4()),  # VIOLATION: Raw UUID
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
             }
         ]
@@ -615,7 +615,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
             "thread_id": user_context.thread_id,
             "run_id": user_context.run_id,
             "correlation_id": UnifiedIdGenerator.generate_base_id("correlation"),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         # This should work without issues after migration

@@ -19,7 +19,7 @@ Tests cover:
 
 import pytest
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import patch, MagicMock
 import time
 
@@ -68,8 +68,8 @@ class JWTValidationPermissiveTests(SSotAsyncTestCase):
             "email": "demo@demo.com",
             "aud": "netra-demo",
             "iss": "netra-auth",
-            "exp": int((datetime.utcnow() + timedelta(hours=expires_in_hours)).timestamp()),
-            "iat": int(datetime.utcnow().timestamp()),
+            "exp": int((datetime.now(UTC) + timedelta(hours=expires_in_hours)).timestamp()),
+            "iat": int(datetime.now(UTC).timestamp()),
             "jti": f"demo_token_{int(time.time())}"
         }
         
@@ -183,8 +183,8 @@ class JWTValidationPermissiveTests(SSotAsyncTestCase):
         expired_payload = {
             "sub": "demo_user_123",
             "email": "demo@demo.com",
-            "exp": int((datetime.utcnow() - timedelta(hours=1)).timestamp()),
-            "iat": int((datetime.utcnow() - timedelta(hours=2)).timestamp()),
+            "exp": int((datetime.now(UTC) - timedelta(hours=1)).timestamp()),
+            "iat": int((datetime.now(UTC) - timedelta(hours=2)).timestamp()),
         }
         expired_token = jwt.encode(expired_payload, self.jwt_secret, algorithm="HS256")
         
@@ -199,7 +199,7 @@ class JWTValidationPermissiveTests(SSotAsyncTestCase):
             
             # New token should have extended expiration
             decoded_new = jwt.decode(result.new_token, self.jwt_secret, algorithms=["HS256"])
-            assert decoded_new["exp"] > (datetime.utcnow() + timedelta(hours=24)).timestamp()
+            assert decoded_new["exp"] > (datetime.now(UTC) + timedelta(hours=24)).timestamp()
 
     @pytest.mark.asyncio
     async def test_demo_mode_relaxed_signature_validation(self):
@@ -220,7 +220,7 @@ class JWTValidationPermissiveTests(SSotAsyncTestCase):
         wrong_secret = "slightly_different_secret"
         token = jwt.encode(
             {"sub": "demo_user", "email": "demo@demo.com", 
-             "exp": int((datetime.utcnow() + timedelta(hours=1)).timestamp())},
+             "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp())},
             wrong_secret, 
             algorithm="HS256"
         )

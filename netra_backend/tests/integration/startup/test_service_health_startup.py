@@ -20,7 +20,7 @@ from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, patch, MagicMock
 from dataclasses import dataclass
 import json
-from datetime import datetime
+from datetime import datetime, UTC
 from test_framework.base_integration_test import ServiceOrchestrationIntegrationTest
 from shared.isolated_environment import get_env
 
@@ -56,7 +56,7 @@ class ServiceHealthStartupTests(ServiceOrchestrationIntegrationTest):
         self.env.set('TESTING', '1', source='startup_test')
         self.env.set('ENVIRONMENT', 'test', source='startup_test')
         self.health_endpoints = [HealthCheckEndpoint(path='/health', method='GET', expected_status=200, timeout_seconds=5, business_critical=True, dependencies=[]), HealthCheckEndpoint(path='/health/ready', method='GET', expected_status=200, timeout_seconds=10, business_critical=True, dependencies=['database', 'redis', 'auth_service']), HealthCheckEndpoint(path='/health/live', method='GET', expected_status=200, timeout_seconds=3, business_critical=True, dependencies=[]), HealthCheckEndpoint(path='/metrics', method='GET', expected_status=200, timeout_seconds=5, business_critical=False, dependencies=[]), HealthCheckEndpoint(path='/health/detailed', method='GET', expected_status=200, timeout_seconds=15, business_critical=False, dependencies=['database', 'redis', 'auth_service', 'llm_service'])]
-        self.service_metrics = [ServiceHealthMetrics(service_name='database', status='healthy', response_time_ms=25.5, error_rate=0.001, uptime_percentage=99.95, last_check=datetime.utcnow()), ServiceHealthMetrics(service_name='redis', status='healthy', response_time_ms=5.2, error_rate=0.0, uptime_percentage=99.98, last_check=datetime.utcnow()), ServiceHealthMetrics(service_name='auth_service', status='healthy', response_time_ms=150.0, error_rate=0.002, uptime_percentage=99.9, last_check=datetime.utcnow()), ServiceHealthMetrics(service_name='llm_service', status='healthy', response_time_ms=2500.0, error_rate=0.01, uptime_percentage=99.5, last_check=datetime.utcnow())]
+        self.service_metrics = [ServiceHealthMetrics(service_name='database', status='healthy', response_time_ms=25.5, error_rate=0.001, uptime_percentage=99.95, last_check=datetime.now(UTC)), ServiceHealthMetrics(service_name='redis', status='healthy', response_time_ms=5.2, error_rate=0.0, uptime_percentage=99.98, last_check=datetime.now(UTC)), ServiceHealthMetrics(service_name='auth_service', status='healthy', response_time_ms=150.0, error_rate=0.002, uptime_percentage=99.9, last_check=datetime.now(UTC)), ServiceHealthMetrics(service_name='llm_service', status='healthy', response_time_ms=2500.0, error_rate=0.01, uptime_percentage=99.5, last_check=datetime.now(UTC))]
 
     def test_health_check_endpoint_registration(self):
         """

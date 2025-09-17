@@ -30,7 +30,7 @@ class WebSocketConnectionTests:
                 import pytest
                 import asyncio
                 import os
-                from datetime import datetime
+                from datetime import datetime, UTC
                 from starlette.requests import Request
                 from starlette.websockets import WebSocket, WebSocketState
                 from sqlalchemy.ext.asyncio import AsyncSession
@@ -61,7 +61,7 @@ class WebSocketConnectionTests:
                         pass
                         mock_websocket = Mock(spec=WebSocket)
                         mock_websocket.client_state = WebSocketState.CONNECTED
-                        context = WebSocketContext(connection_id='test_conn', websocket=mock_websocket, user_id='test_user', thread_id='test_thread', run_id='test_run', connected_at=datetime.utcnow(), last_activity=datetime.utcnow())
+                        context = WebSocketContext(connection_id='test_conn', websocket=mock_websocket, user_id='test_user', thread_id='test_thread', run_id='test_run', connected_at=datetime.now(UTC), last_activity=datetime.now(UTC))
                         assert hasattr(context, 'websocket'), 'Should have websocket attribute'
                         assert hasattr(context, 'connection_id'), 'Should have connection_id'
                         assert hasattr(context, 'is_active'), 'Should have is_active property'
@@ -115,7 +115,7 @@ class WebSocketConnectionTests:
                                         pass
                                         mock_websocket = Mock(spec=WebSocket)
                                         mock_websocket.client_state = WebSocketState.CONNECTED
-                                        context = WebSocketContext(connection_id='test_conn', websocket=mock_websocket, user_id='test_user', thread_id='test_thread', run_id='test_run', connected_at=datetime.utcnow(), last_activity=datetime.utcnow())
+                                        context = WebSocketContext(connection_id='test_conn', websocket=mock_websocket, user_id='test_user', thread_id='test_thread', run_id='test_run', connected_at=datetime.now(UTC), last_activity=datetime.now(UTC))
                                         assert context.is_active, 'Should be active when CONNECTED'
                                         mock_websocket.client_state = WebSocketState.DISCONNECTED
                                         assert not context.is_active, 'Should be inactive when DISCONNECTED'

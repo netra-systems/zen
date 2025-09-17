@@ -16,7 +16,7 @@ import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Any, Set, Tuple
 import threading
 from pathlib import Path
@@ -124,8 +124,8 @@ class MultiUserWebSocketTester:
                     timeout=15
                 )
                 
-                user.connection_time = datetime.utcnow()
-                user.last_activity = datetime.utcnow()
+                user.connection_time = datetime.now(UTC)
+                user.last_activity = datetime.now(UTC)
                 
                 # Wait for connection established message
                 try:
@@ -168,7 +168,7 @@ class MultiUserWebSocketTester:
         scenario_results = {
             "scenario": scenario.name,
             "description": scenario.description,
-            "start_time": datetime.utcnow().isoformat(),
+            "start_time": datetime.now(UTC).isoformat(),
             "users": {},
             "summary": {},
             "isolation_validated": False,
@@ -223,7 +223,7 @@ class MultiUserWebSocketTester:
                     "events_received_count": len(user.events_received),
                     "events_received": user.events_received,
                     "errors": user.errors,
-                    "connection_duration": (datetime.utcnow() - user.connection_time).total_seconds() if user.connection_time else 0
+                    "connection_duration": (datetime.now(UTC) - user.connection_time).total_seconds() if user.connection_time else 0
                 }
                 scenario_results["users"][user.user_id] = user_result
                 
@@ -259,7 +259,7 @@ class MultiUserWebSocketTester:
             scenario_results["summary"] = {"overall_success": False}
             
         finally:
-            scenario_results["end_time"] = datetime.utcnow().isoformat()
+            scenario_results["end_time"] = datetime.now(UTC).isoformat()
             
         return scenario_results
         
@@ -285,7 +285,7 @@ class MultiUserWebSocketTester:
                     
                     await user.websocket.send(json.dumps(message))
                     user.messages_sent += 1
-                    user.last_activity = datetime.utcnow()
+                    user.last_activity = datetime.now(UTC)
                     
                     logger.debug(f"[U+1F4E4] User {user.user_id} sent message {round_num + 1}")
                     
@@ -362,7 +362,7 @@ class MultiUserWebSocketTester:
                     
                     await user.websocket.send(json.dumps(message))
                     user.messages_sent += 1
-                    user.last_activity = datetime.utcnow()
+                    user.last_activity = datetime.now(UTC)
                     
                     logger.debug(f" TARGET:  User {user.user_id} sent targeted message to {target_user.user_id}")
                     
@@ -391,7 +391,7 @@ class MultiUserWebSocketTester:
             
             await user.websocket.send(json.dumps(message))
             user.messages_sent += 1
-            user.last_activity = datetime.utcnow()
+            user.last_activity = datetime.now(UTC)
             
         except Exception as e:
             logger.error(f"Error sending message for user {user.user_id}: {e}")
@@ -412,7 +412,7 @@ class MultiUserWebSocketTester:
                     
                     user.messages_received += 1
                     user.events_received.append({
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(UTC).isoformat(),
                         "event": response_data
                     })
                     
@@ -642,7 +642,7 @@ class MultiUserWebSocketTestSuite:
         suite_results = {
             "test_suite": "multi_user_websocket",
             "environment": self.environment,
-            "start_time": datetime.utcnow().isoformat(),
+            "start_time": datetime.now(UTC).isoformat(),
             "scenarios": {},
             "summary": {}
         }
@@ -684,7 +684,7 @@ class MultiUserWebSocketTestSuite:
         
         success_rate = (successful_scenarios / total_scenarios * 100) if total_scenarios > 0 else 0
         
-        suite_results["end_time"] = datetime.utcnow().isoformat()
+        suite_results["end_time"] = datetime.now(UTC).isoformat()
         suite_results["summary"] = {
             "total_scenarios": total_scenarios,
             "successful_scenarios": successful_scenarios,

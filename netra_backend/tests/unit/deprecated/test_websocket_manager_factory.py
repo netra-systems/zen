@@ -34,7 +34,7 @@ import asyncio
 import pytest
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from threading import Thread
 from typing import Dict, List
 from unittest.mock import AsyncMock, Mock, patch
@@ -95,7 +95,7 @@ class ManagerMetricsTests(SSotBaseTestCase):
     @pytest.mark.unit
     def test_manager_metrics_to_dict_with_datetime(self):
         """Test ManagerMetrics to_dict with datetime handling."""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         metrics = ManagerMetrics(connections_managed=2, messages_sent_total=10, last_activity=now)
         metrics_dict = metrics.to_dict()
         assert metrics_dict['connections_managed'] == 2
@@ -305,7 +305,7 @@ class WebSocketManagerFactoryTests(SSotAsyncTestCase):
         """Test cleanup of expired managers based on timeout."""
         manager = self.factory.create_manager(self.test_user_context)
         isolation_key = self.factory._generate_isolation_key(self.test_user_context)
-        past_time = datetime.utcnow() - timedelta(seconds=self.factory.connection_timeout_seconds + 1)
+        past_time = datetime.now(UTC) - timedelta(seconds=self.factory.connection_timeout_seconds + 1)
         self.factory._manager_creation_time[isolation_key] = past_time
         manager._metrics.last_activity = past_time
         await self.factory._cleanup_expired_managers()
@@ -650,7 +650,7 @@ class ConnectionLifecycleManagerTests(SSotAsyncTestCase):
         mock_websocket = self.mock_factory.create_websocket_connection_mock()
         connection = WebSocketConnection(websocket=mock_websocket, connection_id='test_conn_001', user_id=self.test_user_context.user_id)
         self.lifecycle_manager.register_connection(connection)
-        expired_time = datetime.utcnow() - timedelta(minutes=31)
+        expired_time = datetime.now(UTC) - timedelta(minutes=31)
         self.lifecycle_manager._connection_health['test_conn_001'] = expired_time
         self.ws_manager.remove_connection = AsyncMock()
         cleaned_count = await self.lifecycle_manager.auto_cleanup_expired()

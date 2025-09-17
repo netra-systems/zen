@@ -46,7 +46,7 @@ import gc
 import psutil
 import os
 import threading
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Set, Optional, Any, Tuple
 import logging
 import random
@@ -536,7 +536,7 @@ class ProductionLeakReproducer:
                 
                 # Simulate brief usage then mark for cleanup (but don't actually clean up)
                 # This simulates the scenario where cleanup is scheduled but delayed
-                old_time = datetime.utcnow() - timedelta(minutes=10)
+                old_time = datetime.now(UTC) - timedelta(minutes=10)
                 manager._metrics.last_activity = old_time
                 
             except RuntimeError as e:

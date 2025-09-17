@@ -138,7 +138,7 @@ class DateTimeMigrationTestRunner:
                         lines = f.readlines()
 
                     for line_num, line in enumerate(lines, 1):
-                        if "datetime.utcnow()" in line:
+                        if "datetime.now(UTC)" in line:
                             patterns_found.append(f"Line {line_num}: {line.strip()}")
 
                     results[file_path] = patterns_found
@@ -181,14 +181,14 @@ class DateTimeMigrationTestRunner:
         print("=" * 70)
 
         # Test that old and new patterns produce equivalent results
-        from datetime import datetime, timezone
+        from datetime import datetime, timezone, UTC
         import time
 
         test_results = {}
 
         # Test 1: Timestamp equivalence
         print("\n🧪 Testing timestamp equivalence...")
-        old_timestamp = datetime.utcnow()
+        old_timestamp = datetime.now(UTC)
         time.sleep(0.001)  # Tiny delay
         new_timestamp = datetime.now(timezone.utc)
 
@@ -207,7 +207,7 @@ class DateTimeMigrationTestRunner:
 
         # Test 2: ISO format compatibility
         print("\n🧪 Testing ISO format compatibility...")
-        old_iso = datetime.utcnow().isoformat()
+        old_iso = datetime.now(UTC).isoformat()
         new_iso = datetime.now(timezone.utc).isoformat()
 
         old_parseable = True
@@ -255,8 +255,8 @@ class DateTimeMigrationTestRunner:
                 warnings.simplefilter("always")
 
                 # Execute some datetime operations
-                from datetime import datetime
-                test_timestamp = datetime.utcnow()  # Deprecated in Python 3.12+
+                from datetime import datetime, UTC
+                test_timestamp = datetime.now(UTC)  # Deprecated in Python 3.12+
 
                 # Check for warnings
                 datetime_warnings = [warning for warning in w
@@ -332,7 +332,7 @@ class DateTimeMigrationTestRunner:
         # Migration recommendations
         report.append("🎯 MIGRATION RECOMMENDATIONS")
         report.append("-" * 30)
-        report.append("1. Apply datetime.utcnow() → datetime.now(timezone.utc) migration to all 5 files")
+        report.append("1. Apply datetime.now(UTC) → datetime.now(timezone.utc) migration to all 5 files")
         report.append("2. Update import statements to include timezone")
         report.append("3. Run post-migration tests to validate functionality")
         report.append("4. Monitor for deprecation warnings in Python 3.12+")
@@ -342,11 +342,11 @@ class DateTimeMigrationTestRunner:
         report.append("🔄 MIGRATION PATTERN")
         report.append("-" * 20)
         report.append("BEFORE:")
-        report.append("  from datetime import datetime")
-        report.append("  timestamp = datetime.utcnow()")
+        report.append("  from datetime import datetime"), UTC
+        report.append("  timestamp = datetime.now(UTC)")
         report.append("")
         report.append("AFTER:")
-        report.append("  from datetime import datetime, timezone")
+        report.append("  from datetime import datetime, timezone"), UTC
         report.append("  timestamp = datetime.now(timezone.utc)")
         report.append("")
 

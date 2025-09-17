@@ -26,7 +26,7 @@ import os
 import sys
 import time
 from typing import Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 
 try:
     import websockets
@@ -113,7 +113,7 @@ class WebSocket1011ReproductionTest:
                 # Wait for server response or closure
                 try:
                     # Send a test message to trigger authentication flow
-                    test_message = {"type": "ping", "test_id": "reproduction_1", "timestamp": datetime.utcnow().isoformat()}
+                    test_message = {"type": "ping", "test_id": "reproduction_1", "timestamp": datetime.now(UTC).isoformat()}
                     await websocket.send(json.dumps(test_message))
                     logger.info("[U+1F4E4] Sent test message")
                     
@@ -208,7 +208,7 @@ class WebSocket1011ReproductionTest:
                     "type": "authenticate", 
                     "test_id": "auth_reproduction_2",
                     "e2e_testing": True,
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 await websocket.send(json.dumps(auth_test_message))
                 logger.info("[U+1F4E4] Sent authentication test message")
@@ -317,7 +317,7 @@ class WebSocket1011ReproductionTest:
                         "type": "e2e_validation",
                         "test_sequence": i + 1,
                         "message": f"Fix validation test {i + 1}",
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     }
                     await websocket.send(json.dumps(test_message))
                     logger.info(f"[U+1F4E4] Sent validation message {i + 1}/3")

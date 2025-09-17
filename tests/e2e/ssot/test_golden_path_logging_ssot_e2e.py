@@ -35,7 +35,7 @@ import uuid
 import json
 import websockets
 import aiohttp
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Set, Tuple
 from contextlib import asynccontextmanager
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -117,18 +117,18 @@ class GoldenPathLoggingSSOTE2ETests(SSotAsyncTestCase):
         
         Flow: Login  ->  WebSocket  ->  Agent Execution  ->  Response  ->  Logging Validation
         """
-        golden_path_start = datetime.utcnow()
+        golden_path_start = datetime.now(UTC)
         async with self.authenticated_session() as session:
             auth_log_correlation = await self._validate_auth_logging_correlation()
             async with self.websocket_connection_with_logging() as ws:
                 ws_log_correlation = await self._validate_websocket_logging_correlation()
-                agent_execution_start = datetime.utcnow()
+                agent_execution_start = datetime.now(UTC)
                 agent_request = {'type': 'agent_request', 'data': {'message': 'Test Golden Path logging correlation', 'request_id': self.test_request_id, 'user_id': self.test_user_id}}
                 await ws.send(json.dumps(agent_request))
                 agent_log_correlation = await self._monitor_agent_execution_logging(ws)
-                agent_execution_end = datetime.utcnow()
+                agent_execution_end = datetime.now(UTC)
                 response_log_correlation = await self._validate_response_logging_correlation()
-        golden_path_end = datetime.utcnow()
+        golden_path_end = datetime.now(UTC)
         golden_path_analysis = self._analyze_complete_golden_path_logging(auth_log_correlation, ws_log_correlation, agent_log_correlation, response_log_correlation, golden_path_start, golden_path_end)
         failure_message = f"\nGOLDEN PATH LOGGING SSOT FRAGMENTATION DETECTED!\n\nGolden Path Execution Time: {(golden_path_end - golden_path_start).total_seconds():.2f}s\nAgent Execution Time: {(agent_execution_end - agent_execution_start).total_seconds():.2f}s\n\nGolden Path Logging Analysis:\n{json.dumps(golden_path_analysis, indent=2, default=str)}\n\nSSOT VIOLATIONS DETECTED:\n- Authentication logging gaps: {golden_path_analysis['auth_logging_gaps']}\n- WebSocket logging inconsistencies: {golden_path_analysis['websocket_logging_issues']}\n- Agent execution correlation breaks: {golden_path_analysis['agent_correlation_breaks']}\n- Response logging fragmentation: {golden_path_analysis['response_logging_fragmentation']}\n- Cross-phase correlation failures: {golden_path_analysis['cross_phase_correlation_failures']}\n\nREMEDIATION REQUIRED:\n1. Implement unified SSOT logging across complete Golden Path\n2. Ensure consistent correlation ID propagation from auth  ->  response\n3. Implement unified WebSocket event logging correlation\n4. Create consistent agent execution logging across all phases\n5. Standardize Golden Path performance monitoring logging\n\nBUSINESS IMPACT: Fragmented Golden Path logging prevents effective\ndebugging of customer issues, directly impacting $500K+ ARR platform reliability.\nCustomer incidents cannot be resolved efficiently without unified correlation.\n"
         assert golden_path_analysis['is_unified_golden_path_logging'], failure_message
@@ -165,12 +165,12 @@ class GoldenPathLoggingSSOTE2ETests(SSotAsyncTestCase):
         error_scenarios = ['invalid_auth_token', 'websocket_connection_failure', 'agent_execution_timeout', 'service_unavailable']
         error_logging_analysis = {}
         for scenario in error_scenarios:
-            scenario_start = datetime.utcnow()
+            scenario_start = datetime.now(UTC)
             try:
                 scenario_logs = await self._execute_error_scenario(scenario)
-                error_logging_analysis[scenario] = {'logs_captured': len(scenario_logs), 'has_unified_error_format': self._validate_unified_error_format(scenario_logs), 'has_correlation': self._validate_error_correlation(scenario_logs), 'execution_time': (datetime.utcnow() - scenario_start).total_seconds()}
+                error_logging_analysis[scenario] = {'logs_captured': len(scenario_logs), 'has_unified_error_format': self._validate_unified_error_format(scenario_logs), 'has_correlation': self._validate_error_correlation(scenario_logs), 'execution_time': (datetime.now(UTC) - scenario_start).total_seconds()}
             except Exception as e:
-                error_logging_analysis[scenario] = {'error': str(e), 'logs_captured': 0, 'has_unified_error_format': False, 'has_correlation': False, 'execution_time': (datetime.utcnow() - scenario_start).total_seconds()}
+                error_logging_analysis[scenario] = {'error': str(e), 'logs_captured': 0, 'has_unified_error_format': False, 'has_correlation': False, 'execution_time': (datetime.now(UTC) - scenario_start).total_seconds()}
         overall_error_analysis = self._analyze_error_logging_consistency(error_logging_analysis)
         failure_message = f"\nGOLDEN PATH ERROR LOGGING SSOT VIOLATIONS DETECTED!\n\nError Scenarios Tested: {len(error_scenarios)}\n\nError Logging Analysis:\n{json.dumps(error_logging_analysis, indent=2, default=str)}\n\nOverall Error Analysis:\n{json.dumps(overall_error_analysis, indent=2, default=str)}\n\nSSOT VIOLATIONS:\n- Inconsistent error formats: {overall_error_analysis['inconsistent_error_formats']}\n- Missing error correlation: {overall_error_analysis['missing_error_correlation']}\n- Fragmented error logging: {overall_error_analysis['fragmented_error_logging']}\n- Incomplete error context: {overall_error_analysis['incomplete_error_context']}\n\nREMEDIATION REQUIRED:\n1. Implement unified SSOT error logging format across all services\n2. Ensure consistent error correlation ID propagation\n3. Standardize error context information in logs\n4. Create unified error logging interface for Golden Path\n\nBUSINESS IMPACT: Inconsistent error logging prevents rapid incident\nresolution and impacts customer support efficiency.\n"
         assert overall_error_analysis['is_unified_error_logging'], failure_message
@@ -186,9 +186,9 @@ class GoldenPathLoggingSSOTE2ETests(SSotAsyncTestCase):
     async def _monitor_agent_execution_logging(self, ws) -> Dict:
         """Monitor agent execution logging correlation."""
         agent_events = []
-        timeout_start = datetime.utcnow()
+        timeout_start = datetime.now(UTC)
         try:
-            while (datetime.utcnow() - timeout_start).total_seconds() < 30:
+            while (datetime.now(UTC) - timeout_start).total_seconds() < 30:
                 try:
                     message = await asyncio.wait_for(ws.recv(), timeout=5.0)
                     event_data = json.loads(message)

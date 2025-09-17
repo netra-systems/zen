@@ -11,7 +11,7 @@ import json
 import pytest
 from unittest.mock import AsyncMock, Mock
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, UTC
 from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
 from starlette.websockets import WebSocketState as StarletteWebSocketState
 from fastapi.websockets import WebSocketState as FastAPIWebSocketState
@@ -35,7 +35,7 @@ class WebSocketStateSerializationTests:
 
     def test_serialize_dict_with_websocket_state(self):
         """Test serialization of dict containing WebSocketState."""
-        message = {'type': 'connection_status', 'websocket_state': StarletteWebSocketState.CONNECTED, 'timestamp': datetime.utcnow(), 'user_id': 'test_user'}
+        message = {'type': 'connection_status', 'websocket_state': StarletteWebSocketState.CONNECTED, 'timestamp': datetime.now(UTC), 'user_id': 'test_user'}
         result = _serialize_message_safely(message)
         assert result['websocket_state'] == 'connected'
         assert isinstance(result['timestamp'], str)
@@ -76,7 +76,7 @@ class WebSocketStateSerializationTests:
 
     def test_serialize_complex_message_structure(self):
         """Test serialization of complex message structure that could cause the original error."""
-        message = {'type': 'websocket_diagnostics', 'connection_diagnostics': {'websocket_state': StarletteWebSocketState.CONNECTED, 'client_state': FastAPIWebSocketState.CONNECTED, 'last_ping': datetime.utcnow(), 'error_count': 0}, 'user_context': {'user_id': 'test_user_123', 'connection_count': 1, 'active_states': [StarletteWebSocketState.CONNECTED, FastAPIWebSocketState.CONNECTED]}, 'raw_websocket_info': {StarletteWebSocketState.CONNECTED: {'count': 1, 'details': {'state': FastAPIWebSocketState.CONNECTED, 'timestamp': datetime.utcnow()}}}}
+        message = {'type': 'websocket_diagnostics', 'connection_diagnostics': {'websocket_state': StarletteWebSocketState.CONNECTED, 'client_state': FastAPIWebSocketState.CONNECTED, 'last_ping': datetime.now(UTC), 'error_count': 0}, 'user_context': {'user_id': 'test_user_123', 'connection_count': 1, 'active_states': [StarletteWebSocketState.CONNECTED, FastAPIWebSocketState.CONNECTED]}, 'raw_websocket_info': {StarletteWebSocketState.CONNECTED: {'count': 1, 'details': {'state': FastAPIWebSocketState.CONNECTED, 'timestamp': datetime.now(UTC)}}}}
         result = _serialize_message_safely(message)
         assert result['connection_diagnostics']['websocket_state'] == 'connected'
         assert result['connection_diagnostics']['client_state'] == 'connected'
@@ -107,7 +107,7 @@ class WebSocketStateSerializationTests:
     def test_performance_impact_of_serialization(self):
         """Test that safe serialization doesn't significantly impact performance."""
         import time
-        message = {'type': 'performance_test', 'states': [StarletteWebSocketState.CONNECTED] * 100, 'nested': {'data': [{'state': FastAPIWebSocketState.CONNECTED}] * 50}, 'timestamp': datetime.utcnow()}
+        message = {'type': 'performance_test', 'states': [StarletteWebSocketState.CONNECTED] * 100, 'nested': {'data': [{'state': FastAPIWebSocketState.CONNECTED}] * 50}, 'timestamp': datetime.now(UTC)}
         start_time = time.time()
         for _ in range(10):
             result = _serialize_message_safely(message)
@@ -136,7 +136,7 @@ class WebSocketMessageSendingTests:
     async def test_websocket_send_with_state_objects(self):
         """Test WebSocket send operation with state objects (simulated)."""
         mock_websocket = AsyncMock()
-        message = {'type': 'connection_update', 'state': StarletteWebSocketState.CONNECTED, 'client_state': FastAPIWebSocketState.CONNECTED, 'timestamp': datetime.utcnow()}
+        message = {'type': 'connection_update', 'state': StarletteWebSocketState.CONNECTED, 'client_state': FastAPIWebSocketState.CONNECTED, 'timestamp': datetime.now(UTC)}
         safe_message = _serialize_message_safely(message)
         await mock_websocket.send_json(safe_message)
         mock_websocket.send_json.assert_called_once()

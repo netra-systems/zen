@@ -11,7 +11,7 @@ Tests that authentication context is properly maintained across:
 import asyncio
 import uuid
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Any
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -43,8 +43,8 @@ class AuthPersistenceMultiAgentTests:
         payload = {
             "sub": "test-user-123",
             "email": "test@example.com",
-            "exp": datetime.utcnow() + timedelta(hours=1),
-            "iat": datetime.utcnow()
+            "exp": datetime.now(UTC) + timedelta(hours=1),
+            "iat": datetime.now(UTC)
         }
         return jwt.encode(payload, "test-secret", algorithm="HS256")
     
@@ -193,18 +193,18 @@ class AuthPersistenceMultiAgentTests:
         thread_id = "refresh-thread"
         
         # Create token that will expire soon
-        soon_expiry = datetime.utcnow() + timedelta(seconds=30)
+        soon_expiry = datetime.now(UTC) + timedelta(seconds=30)
         expiring_token = jwt.encode({
             "sub": user_id,
             "exp": soon_expiry,
-            "iat": datetime.utcnow()
+            "iat": datetime.now(UTC)
         }, "test-secret", algorithm="HS256")
         
         # New refreshed token
         refreshed_token = jwt.encode({
             "sub": user_id,
-            "exp": datetime.utcnow() + timedelta(hours=1),
-            "iat": datetime.utcnow()
+            "exp": datetime.now(UTC) + timedelta(hours=1),
+            "iat": datetime.now(UTC)
         }, "test-secret", algorithm="HS256")
         
         handler = AgentMessageHandler(AsyncMock(), mock_websocket)

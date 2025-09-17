@@ -20,7 +20,7 @@ import time
 import uuid
 from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import jwt
 import pytest
 from unittest.mock import AsyncMock, MagicMock
@@ -225,7 +225,7 @@ def create_real_jwt_token(user_id: str, permissions: List[str], email: Optional[
     if email is None:
         email = f"{user_id}@test.netrasystems.ai"
     
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     payload = {
         "sub": user_id,
         "email": email,

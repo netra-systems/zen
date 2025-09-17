@@ -16,7 +16,7 @@ import asyncio
 import httpx
 from typing import Dict, Any, List
 from unittest.mock import Mock, patch, call
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from test_framework.ssot.base_test_case import BaseTestCase
 from shared.isolated_environment import get_env
@@ -246,7 +246,7 @@ class ErrorHandlingRetryMechanismsTests(BaseTestCase):
                 "error": upstream_error["error_type"],
                 "message": upstream_error["message"],
                 "service": upstream_error["service"],
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             with patch('httpx.AsyncClient.post', return_value=mock_response):
@@ -272,7 +272,7 @@ class ErrorHandlingRetryMechanismsTests(BaseTestCase):
                     "message": expected_downstream["message"],
                     "upstream_error": upstream_error["message"],
                     "service": expected_downstream["service"],
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "request_id": f"req_{scenario['name']}"
                 }
                 
@@ -332,7 +332,7 @@ class ErrorHandlingRetryMechanismsTests(BaseTestCase):
             fallback_event = {
                 "event_id": f"local_{agent_result['execution_id']}",
                 "queued_for_retry": True,
-                "retry_after": datetime.utcnow() + timedelta(minutes=5),
+                "retry_after": datetime.now(UTC) + timedelta(minutes=5),
                 "event_data": {
                     "user_id": "user-degradation-test",
                     "event_type": "agent_execution",

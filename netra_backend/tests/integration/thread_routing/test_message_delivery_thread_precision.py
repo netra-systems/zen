@@ -22,7 +22,7 @@ import uuid
 import pytest
 import json
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Dict, Any, List, Optional, Set, Tuple
 from unittest.mock import patch
 from collections import defaultdict
@@ -145,7 +145,7 @@ class MessageDeliveryThreadPrecisionTests(BaseIntegrationTest):
                             "target_user": str(user_id),
                             "target_thread_index": thread_idx,
                             "message_sequence": msg_idx,
-                            "delivery_timestamp": datetime.utcnow().isoformat()
+                            "delivery_timestamp": datetime.now(UTC).isoformat()
                         }
                     )
                     
@@ -565,7 +565,7 @@ class MessageDeliveryThreadPrecisionTests(BaseIntegrationTest):
                 "websocket_id": str(thread_websocket_id),
                 "user_id": str(user_id),
                 "thread_id": thread.id,
-                "connected_at": datetime.utcnow().isoformat(),
+                "connected_at": datetime.now(UTC).isoformat(),
                 "fullstack_test": True
             }
             
@@ -597,7 +597,7 @@ class MessageDeliveryThreadPrecisionTests(BaseIntegrationTest):
                 "thread_id": thread_id,
                 "websocket_id": str(websocket_info["websocket_id"]),
                 "content": f"Full stack test message {message_index} for thread {thread_id}",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "request_id": str(uuid.uuid4()),
                 "fullstack_test": True
             }
@@ -613,7 +613,7 @@ class MessageDeliveryThreadPrecisionTests(BaseIntegrationTest):
                     "request_id": incoming_message["request_id"],
                     "fullstack_test": True,
                     "message_index": message_index,
-                    "processing_timestamp": datetime.utcnow().isoformat()
+                    "processing_timestamp": datetime.now(UTC).isoformat()
                 }
             )
             flow_log.append("message_stored_database")
@@ -629,7 +629,7 @@ class MessageDeliveryThreadPrecisionTests(BaseIntegrationTest):
                     "request_id": incoming_message["request_id"],
                     "fullstack_test": True,
                     "response_to_message": stored_message.id,
-                    "agent_processing_timestamp": datetime.utcnow().isoformat()
+                    "agent_processing_timestamp": datetime.now(UTC).isoformat()
                 }
             )
             flow_log.append("agent_response_stored")
@@ -640,7 +640,7 @@ class MessageDeliveryThreadPrecisionTests(BaseIntegrationTest):
                 "thread_id": thread_id,
                 "message_id": agent_response_message.id,
                 "content": agent_response_message.content,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "request_id": incoming_message["request_id"]
             }
             

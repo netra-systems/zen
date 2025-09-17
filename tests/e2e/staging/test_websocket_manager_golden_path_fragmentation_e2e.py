@@ -27,7 +27,7 @@ import os
 import sys
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Any, Set
 import pytest
 from loguru import logger
@@ -101,7 +101,7 @@ class WebSocketManagerGoldenPathFragmentationE2ETests(SSotAsyncTestCase):
                 try:
                     async with session.ws_connect(self.staging_ws_url, heartbeat=30) as ws:
                         logger.info('Phase 2: Simulating Golden Path user request...')
-                        agent_request = {'type': 'agent_request', 'user_id': self.test_user_id, 'thread_id': self.test_thread_id, 'session_id': self.test_session_id, 'message': 'Help me optimize my AI costs for better efficiency', 'timestamp': datetime.utcnow().isoformat()}
+                        agent_request = {'type': 'agent_request', 'user_id': self.test_user_id, 'thread_id': self.test_thread_id, 'session_id': self.test_session_id, 'message': 'Help me optimize my AI costs for better efficiency', 'timestamp': datetime.now(UTC).isoformat()}
                         await ws.send_str(json.dumps(agent_request))
                         logger.info(f"Sent Golden Path request: {agent_request['message']}")
                         logger.info('Phase 3: Monitoring for Golden Path WebSocket events...')
@@ -176,7 +176,7 @@ class WebSocketManagerGoldenPathFragmentationE2ETests(SSotAsyncTestCase):
                 timeout = aiohttp.ClientTimeout(total=45)
                 async with aiohttp.ClientSession(timeout=timeout) as session:
                     async with session.ws_connect(self.staging_ws_url, heartbeat=30) as ws:
-                        agent_request = {'type': 'agent_request', 'user_id': user_id, 'thread_id': thread_id, 'session_id': session_id, 'message': f'User {user_index} Golden Path test request', 'timestamp': datetime.utcnow().isoformat()}
+                        agent_request = {'type': 'agent_request', 'user_id': user_id, 'thread_id': thread_id, 'session_id': session_id, 'message': f'User {user_index} Golden Path test request', 'timestamp': datetime.now(UTC).isoformat()}
                         await ws.send_str(json.dumps(agent_request))
                         event_timeout = 30
                         start_time = time.time()
@@ -237,7 +237,7 @@ class WebSocketManagerGoldenPathFragmentationE2ETests(SSotAsyncTestCase):
                 async with aiohttp.ClientSession(timeout=timeout) as session:
                     async with session.ws_connect(self.staging_ws_url, heartbeat=10) as ws:
                         connection_time = time.time() - start_time
-                        test_message = {'type': 'race_condition_test', 'connection_id': connection_id, 'connection_index': connection_index, 'timestamp': datetime.utcnow().isoformat()}
+                        test_message = {'type': 'race_condition_test', 'connection_id': connection_id, 'connection_index': connection_index, 'timestamp': datetime.now(UTC).isoformat()}
                         await ws.send_str(json.dumps(test_message))
                         response = await asyncio.wait_for(ws.receive(), timeout=5)
                         return {'connection_index': connection_index, 'connection_id': connection_id, 'connection_time': connection_time, 'success': True, 'response_received': response.type == aiohttp.WSMsgType.TEXT}
@@ -296,7 +296,7 @@ class WebSocketManagerGoldenPathFragmentationE2ETests(SSotAsyncTestCase):
                 timeout = aiohttp.ClientTimeout(total=20)
                 async with aiohttp.ClientSession(timeout=timeout) as session:
                     async with session.ws_connect(self.staging_ws_url, heartbeat=20) as ws:
-                        agent_request = {'type': 'agent_request', 'user_id': user_id, 'thread_id': f'load_thread_{request_index}', 'message': f'Load test request {request_index}', 'timestamp': datetime.utcnow().isoformat()}
+                        agent_request = {'type': 'agent_request', 'user_id': user_id, 'thread_id': f'load_thread_{request_index}', 'message': f'Load test request {request_index}', 'timestamp': datetime.now(UTC).isoformat()}
                         await ws.send_str(json.dumps(agent_request))
                         event_timeout = 15
                         start_time = time.time()

@@ -25,7 +25,7 @@ import json
 from typing import Dict, Any, Optional, List, Tuple
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 # SSOT integration test infrastructure
 from test_framework.ssot.base_integration_test import BaseIntegrationTest
@@ -365,8 +365,8 @@ class GoldenPathAuthFragmentationTests(BaseIntegrationTest):
                 "email": user_data["email"],
                 "subscription": user_data["subscription"],
                 "permissions": user_data["expected_permissions"],
-                "iat": int(datetime.utcnow().timestamp()),
-                "exp": int((datetime.utcnow() + timedelta(hours=2)).timestamp())
+                "iat": int(datetime.now(UTC).timestamp()),
+                "exp": int((datetime.now(UTC) + timedelta(hours=2)).timestamp())
             }
 
             # Mock login success with token generation
@@ -465,7 +465,7 @@ class GoldenPathAuthFragmentationTests(BaseIntegrationTest):
             "subscription": user_data["subscription"],
             "permissions": user_data["expected_permissions"],
             "session_token": jwt.encode(
-                {"user_id": user_data["user_id"], "exp": int((datetime.utcnow() + timedelta(hours=1)).timestamp())},
+                {"user_id": user_data["user_id"], "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp())},
                 "context-secret",
                 algorithm="HS256"
             )
@@ -519,7 +519,7 @@ class GoldenPathAuthFragmentationTests(BaseIntegrationTest):
         """Test Golden Path session persistence"""
         return {
             "session_token": jwt.encode(
-                {"user_id": user_data["user_id"], "exp": int((datetime.utcnow() + timedelta(hours=1)).timestamp())},
+                {"user_id": user_data["user_id"], "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp())},
                 "session-secret",
                 algorithm="HS256"
             ),

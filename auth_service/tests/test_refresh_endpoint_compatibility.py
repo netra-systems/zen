@@ -6,7 +6,7 @@ Tests various field naming conventions and error scenarios.
 import json
 import jwt
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from fastapi.testclient import TestClient
 # Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
@@ -37,8 +37,8 @@ class RefreshEndpointCompatibilityTests:
         payload = {
         "sub": "test_user_id",
         "type": "refresh",
-        "exp": datetime.utcnow() + timedelta(days=7),
-        "iat": datetime.utcnow()
+        "exp": datetime.now(UTC) + timedelta(days=7),
+        "iat": datetime.now(UTC)
         }
         return jwt.encode(payload, secret, algorithm="HS256")
 
@@ -52,8 +52,8 @@ class RefreshEndpointCompatibilityTests:
         payload = {
         "sub": "test_user_id",
         "type": "refresh",
-        "exp": datetime.utcnow() - timedelta(days=1),
-        "iat": datetime.utcnow() - timedelta(days=8)
+        "exp": datetime.now(UTC) - timedelta(days=1),
+        "iat": datetime.now(UTC) - timedelta(days=8)
         }
         return jwt.encode(payload, secret, algorithm="HS256")
 

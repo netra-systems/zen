@@ -17,7 +17,7 @@ import time
 import sys
 import os
 from typing import Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 
 # Add project root to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -58,7 +58,7 @@ class BackendService503ReproductionTest:
         
         test_result = {
             "test_name": "backend_health_endpoint_503_error",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "expected_failure": True,
             "purpose": "Reproduce Issue #586 backend service 503 error",
             "success": False,
@@ -176,7 +176,7 @@ class BackendService503ReproductionTest:
         
         test_result = {
             "test_name": "backend_readiness_probe_failure",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "expected_failure": True,
             "purpose": "Demonstrate backend service readiness issues",
             "success": False
@@ -227,7 +227,7 @@ class BackendService503ReproductionTest:
         
         test_result = {
             "test_name": "backend_liveness_probe_failure", 
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "expected_failure": True,
             "purpose": "Demonstrate backend service liveness issues",
             "success": False

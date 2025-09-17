@@ -36,7 +36,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Dict, List, Optional, Any, Set
 from unittest.mock import AsyncMock, MagicMock, patch
 import threading
@@ -189,7 +189,7 @@ class WebSocketCoreInterplayTests(BaseIntegrationTest):
             connection_id=connection_id,
             user_id=user_id,
             websocket=mock_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"test": True}
         )
         
@@ -362,7 +362,7 @@ class WebSocketCoreInterplayTests(BaseIntegrationTest):
             connection_id=connection_id,
             user_id="failing_user",
             websocket=failing_websocket,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         
         await manager.add_connection(failing_connection)

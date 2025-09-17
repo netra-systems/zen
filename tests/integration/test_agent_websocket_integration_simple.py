@@ -17,7 +17,7 @@ import asyncio
 import json
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Any, Dict, List, Optional
 import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
@@ -51,7 +51,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
         try:
             websocket_url = 'ws://localhost:8000/ws'
             async with websockets.connect(websocket_url, open_timeout=10.0, close_timeout=5.0) as websocket:
-                test_message = {'type': 'ping', 'user_id': self.test_user_id, 'timestamp': datetime.utcnow().isoformat()}
+                test_message = {'type': 'ping', 'user_id': self.test_user_id, 'timestamp': datetime.now(UTC).isoformat()}
                 await websocket.send(json.dumps(test_message))
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
@@ -73,7 +73,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
         execution and user context isolation is functional.
         """
         db = real_services_fixture['db']
-        test_data = {'user_id': self.test_user_id, 'context_type': 'agent_execution', 'data': {'test': 'integration_test'}, 'created_at': datetime.utcnow()}
+        test_data = {'user_id': self.test_user_id, 'context_type': 'agent_execution', 'data': {'test': 'integration_test'}, 'created_at': datetime.now(UTC)}
         try:
             result = await db.execute('SELECT 1 as test')
             assert result, 'Database connection failed'
@@ -91,7 +91,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
         """
         redis = real_services_fixture['redis']
         test_key = f'test:integration:{self.test_user_id}'
-        test_value = json.dumps({'user_id': self.test_user_id, 'session_type': 'agent_websocket_integration', 'timestamp': datetime.utcnow().isoformat()})
+        test_value = json.dumps({'user_id': self.test_user_id, 'session_type': 'agent_websocket_integration', 'timestamp': datetime.now(UTC).isoformat()})
         try:
             await redis.set(test_key, test_value, ex=60)
             retrieved_value = await redis.get(test_key)
@@ -128,7 +128,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
         """
         critical_events = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
         for event_type in critical_events:
-            event_structure = {'type': event_type, 'user_id': self.test_user_id, 'thread_id': self.test_thread_id, 'data': {}, 'timestamp': datetime.utcnow().isoformat()}
+            event_structure = {'type': event_type, 'user_id': self.test_user_id, 'thread_id': self.test_thread_id, 'data': {}, 'timestamp': datetime.now(UTC).isoformat()}
             assert event_structure['type'], f'Event {event_type} missing type field'
             assert event_structure['user_id'], f'Event {event_type} missing user_id field'
             assert event_structure['thread_id'], f'Event {event_type} missing thread_id field'

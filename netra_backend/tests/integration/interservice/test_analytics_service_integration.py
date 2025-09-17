@@ -16,7 +16,7 @@ import pytest
 import httpx
 from typing import Dict, Any, List
 from unittest.mock import Mock, patch
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.base_test_case import BaseTestCase
@@ -59,7 +59,7 @@ class BackendAnalyticsServiceIntegrationTests(BaseTestCase):
                 "cost_usd": 0.0234,
                 "result_quality": "high"
             },
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "session_id": "session-abc123"
         }
         
@@ -268,7 +268,7 @@ class BackendAnalyticsServiceIntegrationTests(BaseTestCase):
             "user_id": "user-resilience-test",
             "event_type": "agent_execution",
             "event_data": {"agent_type": "test_agent"},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         # Mock connection failure

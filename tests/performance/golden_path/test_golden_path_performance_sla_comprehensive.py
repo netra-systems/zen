@@ -37,7 +37,7 @@ import statistics
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -251,7 +251,7 @@ class GoldenPathPerformanceSLAComprehensiveTests(SSotAsyncTestCase):
         event_types = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
         for test_round in range(num_event_tests // len(event_types)):
             for event_type in event_types:
-                event_data = {'test_round': test_round, 'event_type': event_type, 'timestamp': datetime.utcnow().isoformat(), 'data': f'performance_test_data_{test_round}'}
+                event_data = {'test_round': test_round, 'event_type': event_type, 'timestamp': datetime.now(UTC).isoformat(), 'data': f'performance_test_data_{test_round}'}
                 try:
                     await emitter.send_event(event_type, event_data, user_id=str(uuid.uuid4()), thread_id=str(uuid.uuid4()))
                 except AttributeError:
@@ -293,7 +293,7 @@ class GoldenPathPerformanceSLAComprehensiveTests(SSotAsyncTestCase):
             factory = ExecutionEngineFactory(websocket_bridge=websocket_bridge)
             engine = await factory.create_for_user(context)
             engines.append(engine)
-            large_data = {'user_data': f'user_{i}_' * 100, 'execution_history': [f'step_{j}' for j in range(50)], 'metadata': {'user_index': i, 'created_at': datetime.utcnow().isoformat()}}
+            large_data = {'user_data': f'user_{i}_' * 100, 'execution_history': [f'step_{j}' for j in range(50)], 'metadata': {'user_index': i, 'created_at': datetime.now(UTC).isoformat()}}
             engine.set_agent_state('performance_test_data', large_data)
             engine.set_execution_state('current_task', {'task': f'memory_test_{i}'})
             if (i + 1) % 5 == 0:
@@ -399,7 +399,7 @@ class GoldenPathPerformanceSLAComprehensiveTests(SSotAsyncTestCase):
 
     def _generate_performance_report(self) -> Dict[str, Any]:
         """Generate comprehensive performance report."""
-        return {'test_timestamp': datetime.utcnow().isoformat(), 'sla_requirements': self.sla_requirements, 'performance_measurements': self.performance_measurements, 'memory_samples': self.memory_samples, 'overall_sla_compliance': all((measurement.get('sla_compliance', False) for measurement in self.performance_measurements)), 'total_measurements': len(self.performance_measurements), 'test_environment': 'unit_test'}
+        return {'test_timestamp': datetime.now(UTC).isoformat(), 'sla_requirements': self.sla_requirements, 'performance_measurements': self.performance_measurements, 'memory_samples': self.memory_samples, 'overall_sla_compliance': all((measurement.get('sla_compliance', False) for measurement in self.performance_measurements)), 'total_measurements': len(self.performance_measurements), 'test_environment': 'unit_test'}
 
     def teardown_method(self, method):
         """Cleanup after performance tests."""

@@ -87,14 +87,14 @@ class ServiceAvailability:
     def summary(self) -> Dict[str, Any]:
         """Get summary of service availability."""
         return {}
-        "databases": {}
-        "postgresql": self.postgresql.available,
-        "redis": self.redis.available,
-        "clickhouse": self.clickhouse.available,
+        "databases": {
+            "postgresql": self.postgresql.available,
+            "redis": self.redis.available,
+            "clickhouse": self.clickhouse.available,
         },
-        "apis": {}
-        "openai": self.openai_api.available,
-        "anthropic": self.anthropic_api.available,
+        "apis": {
+            "openai": self.openai_api.available,
+            "anthropic": self.anthropic_api.available,
         },
         "configuration": {}
         "use_real_services": self.use_real_services,

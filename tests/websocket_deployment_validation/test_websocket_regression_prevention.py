@@ -15,7 +15,7 @@ import sys
 import time
 import uuid
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Set, Tuple
 import hashlib
@@ -113,7 +113,7 @@ class WebSocketRegressionTester:
         suite_results = {
             "test_suite": "websocket_regression_prevention",
             "environment": self.environment,
-            "start_time": datetime.utcnow().isoformat(),
+            "start_time": datetime.now(UTC).isoformat(),
             "tests": {},
             "summary": {}
         }
@@ -171,7 +171,7 @@ class WebSocketRegressionTester:
         total_tests = passed_tests + failed_tests
         success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
         
-        suite_results["end_time"] = datetime.utcnow().isoformat()
+        suite_results["end_time"] = datetime.now(UTC).isoformat()
         suite_results["summary"] = {
             "total_tests": total_tests,
             "passed_tests": passed_tests,
@@ -326,7 +326,7 @@ class WebSocketRegressionTester:
                     # Send a test message to ensure full connection works
                     test_message = {
                         "type": "ping",
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     }
                     
                     await websocket.send(json.dumps(test_message))
@@ -455,7 +455,7 @@ class WebSocketRegressionTester:
                         # Send heartbeat
                         heartbeat_msg = {
                             "type": "ping",
-                            "timestamp": datetime.utcnow().isoformat(),
+                            "timestamp": datetime.now(UTC).isoformat(),
                             "sequence": heartbeat_count
                         }
                         
@@ -665,7 +665,7 @@ class WebSocketRegressionTester:
                         
                         received_events.append({
                             "type": event_type,
-                            "timestamp": datetime.utcnow().isoformat(),
+                            "timestamp": datetime.now(UTC).isoformat(),
                             "data": event_data
                         })
                         

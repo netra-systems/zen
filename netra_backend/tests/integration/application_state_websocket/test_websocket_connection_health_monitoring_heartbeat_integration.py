@@ -14,7 +14,7 @@ mechanisms work correctly while maintaining application state consistency.
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List, Callable
 
 from test_framework.base_integration_test import BaseIntegrationTest
@@ -46,7 +46,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
                 self.messages_sent = []
                 self.is_closed = False
                 self.health_status = HealthStatus.HEALTHY
-                self.last_heartbeat = datetime.utcnow()
+                self.last_heartbeat = datetime.now(UTC)
                 self.heartbeat_interval = 30.0  # seconds
                 self.health_checks = []
                 self.missed_heartbeats = 0
@@ -60,7 +60,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
             def _start_health_monitoring(self):
                 """Initialize health monitoring."""
                 self.health_checks.append({
-                    'timestamp': datetime.utcnow().isoformat(),
+                    'timestamp': datetime.now(UTC).isoformat(),
                     'status': self.health_status,
                     'response_time_ms': 0,
                     'connection_quality': self.connection_quality
@@ -70,7 +70,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
                 if self.is_closed:
                     raise ConnectionError("Connection is closed")
                 
-                send_start = datetime.utcnow()
+                send_start = datetime.now(UTC)
                 
                 # Simulate network conditions
                 if self.simulate_issues:
@@ -86,7 +86,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
                         raise ConnectionError("Simulated network error")
                 
                 # Calculate response time
-                response_time = (datetime.utcnow() - send_start).total_seconds() * 1000
+                response_time = (datetime.now(UTC) - send_start).total_seconds() * 1000
                 self.response_times.append(response_time)
                 
                 # Update connection quality based on response time
@@ -104,7 +104,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
                     'response_time_ms': response_time,
                     'connection_quality': self.connection_quality,
                     'health_status': self.health_status,
-                    'heartbeat_age_seconds': (datetime.utcnow() - self.last_heartbeat).total_seconds()
+                    'heartbeat_age_seconds': (datetime.now(UTC) - self.last_heartbeat).total_seconds()
                 }
                 
                 self.messages_sent.append(data)
@@ -123,7 +123,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
                 
                 # Record health check
                 self.health_checks.append({
-                    'timestamp': datetime.utcnow().isoformat(),
+                    'timestamp': datetime.now(UTC).isoformat(),
                     'status': self.health_status,
                     'response_time_ms': self.response_times[-1] if self.response_times else 0,
                     'connection_quality': self.connection_quality,
@@ -145,12 +145,12 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
                 try:
                     heartbeat_message = {
                         'type': 'heartbeat',
-                        'timestamp': datetime.utcnow().isoformat(),
+                        'timestamp': datetime.now(UTC).isoformat(),
                         'connection_id': self.connection_id
                     }
                     
                     await self.send_json(heartbeat_message)
-                    self.last_heartbeat = datetime.utcnow()
+                    self.last_heartbeat = datetime.now(UTC)
                     return True
                 except Exception:
                     self.missed_heartbeats += 1
@@ -159,7 +159,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
             
             def get_health_metrics(self) -> Dict[str, Any]:
                 """Get comprehensive health metrics."""
-                now = datetime.utcnow()
+                now = datetime.now(UTC)
                 avg_response_time = sum(self.response_times) / len(self.response_times) if self.response_times else 0
                 
                 return {
@@ -194,8 +194,8 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
         health_data = {
             'user_id': user_id,
             'connection_id': connection_id,
-            'created_at': datetime.utcnow().isoformat(),
-            'last_health_check': datetime.utcnow().isoformat(),
+            'created_at': datetime.now(UTC).isoformat(),
+            'last_health_check': datetime.now(UTC).isoformat(),
             'status': HealthStatus.HEALTHY,
             'missed_heartbeats': 0
         }
@@ -239,7 +239,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
         health_data = {
             'user_id': health_metrics['user_id'],
             'connection_id': connection_id,
-            'last_health_check': datetime.utcnow().isoformat(),
+            'last_health_check': datetime.now(UTC).isoformat(),
             'status': health_metrics['health_status'],
             'connection_quality': health_metrics['connection_quality'],
             'missed_heartbeats': health_metrics['missed_heartbeats'],
@@ -294,7 +294,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
         
         def track_health_changes(old_status, new_status, metrics):
             health_status_changes.append({
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'old_status': old_status,
                 'new_status': new_status,
                 'metrics': metrics
@@ -318,7 +318,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
             connection_id=connection_id,
             user_id=user_id,
             websocket=health_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={
                 "connection_type": "health_monitoring_test",
                 "health_monitoring_enabled": True,
@@ -346,7 +346,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
             test_message = {
                 "type": "health_test_message",
                 "data": {"message_index": i, "test_type": "health_monitoring"},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             await websocket_manager.send_to_user(user_id, test_message)
@@ -457,7 +457,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
         
         def track_health_transitions(old_status, new_status, metrics):
             health_transitions.append({
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'transition': f"{old_status} -> {new_status}",
                 'connection_quality': metrics['connection_quality'],
                 'missed_heartbeats': metrics['missed_heartbeats']
@@ -470,7 +470,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
             connection_id=connection_id,
             user_id=user_id,
             websocket=degraded_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"connection_type": "health_degraded_test"}
         )
         
@@ -485,7 +485,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
                 test_message = {
                     "type": "degraded_test_message",
                     "data": {"message_index": i},
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 
                 await websocket_manager.send_to_user(user_id, test_message)
@@ -538,7 +538,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
             connection_id=recovery_connection_id,
             user_id=user_id,
             websocket=recovery_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"connection_type": "health_recovery_test"}
         )
         
@@ -557,7 +557,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
             recovery_message = {
                 "type": "recovery_test_message",
                 "data": {"message_index": i, "recovery": True},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             await websocket_manager.send_to_user(user_id, recovery_message)
@@ -642,7 +642,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
                     connection_id=connection_id,
                     user_id=user_id,
                     websocket=health_websocket,
-                    connected_at=datetime.utcnow(),
+                    connected_at=datetime.now(UTC),
                     metadata={
                         "connection_type": "multi_health_test",
                         "user_index": user_index,
@@ -682,7 +682,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
                 test_message = {
                     "type": "multi_health_test",
                     "data": {"user_id": user_id, "message_index": i},
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 
                 await websocket_manager.send_to_user(user_id, test_message)

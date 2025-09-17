@@ -6,7 +6,7 @@ Tests are designed to detect deprecated patterns and validate migration behavior
 """
 
 import warnings
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from pathlib import Path
 from typing import Dict, Any, Optional
 import unittest
@@ -26,7 +26,7 @@ class HealthCheckDateTimeMigrationTests(unittest.TestCase):
         self.warnings_captured = []
 
     def test_deprecated_datetime_patterns_in_health_checks(self):
-        """FAILING TEST: Detects deprecated datetime.utcnow() usage in health checks."""
+        """FAILING TEST: Detects deprecated datetime.now(UTC) usage in health checks."""
         target_file = project_root / "netra_backend" / "app" / "api" / "health_checks.py"
 
         with open(target_file, 'r', encoding='utf-8') as f:
@@ -34,9 +34,9 @@ class HealthCheckDateTimeMigrationTests(unittest.TestCase):
 
         # Check for deprecated patterns
         deprecated_patterns = [
-            "datetime.utcnow()",
-            "checked_at=datetime.utcnow()",
-            "_last_check[service_name] = datetime.utcnow()",
+            "datetime.now(UTC)",
+            "checked_at=datetime.now(UTC)",
+            "_last_check[service_name] = datetime.now(UTC)",
         ]
 
         found_deprecated = []
@@ -63,7 +63,7 @@ class HealthCheckDateTimeMigrationTests(unittest.TestCase):
 
         def create_health_status_old_pattern() -> HealthStatus:
             """Create health status using old datetime pattern."""
-            return HealthStatus(checked_at=datetime.utcnow())
+            return HealthStatus(checked_at=datetime.now(UTC))
 
         def create_health_status_new_pattern() -> HealthStatus:
             """Create health status using new datetime pattern."""
@@ -93,8 +93,8 @@ class HealthCheckDateTimeMigrationTests(unittest.TestCase):
             def calculate_cache_age_old(self, service_name: str) -> float:
                 """Calculate cache age using old pattern."""
                 # Simulate a check that happened 30 seconds ago
-                self._last_check[service_name] = datetime.utcnow() - timedelta(seconds=30)
-                return (datetime.utcnow() - self._last_check[service_name]).total_seconds()
+                self._last_check[service_name] = datetime.now(UTC) - timedelta(seconds=30)
+                return (datetime.now(UTC) - self._last_check[service_name]).total_seconds()
 
             def calculate_cache_age_new(self, service_name: str) -> float:
                 """Calculate cache age using new pattern."""
@@ -124,7 +124,7 @@ class HealthCheckDateTimeMigrationTests(unittest.TestCase):
         """FAILING TEST: Validates timezone awareness in health check timestamps."""
 
         # Mock getting current timestamp from health checks
-        current_timestamp = datetime.utcnow()  # Current implementation
+        current_timestamp = datetime.now(UTC)  # Current implementation
 
         # This test SHOULD FAIL before migration (naive datetime objects)
         self.assertIsNotNone(current_timestamp.tzinfo,
@@ -137,9 +137,9 @@ class HealthCheckDateTimeMigrationTests(unittest.TestCase):
         def create_health_status_dict_old() -> Dict[str, Any]:
             """Create health status dict using old pattern."""
             return {
-                "startup_time": datetime.utcnow().isoformat(),
+                "startup_time": datetime.now(UTC).isoformat(),
                 "status": "healthy",
-                "checked_at": datetime.utcnow()
+                "checked_at": datetime.now(UTC)
             }
 
         def create_health_status_dict_new() -> Dict[str, Any]:
@@ -183,7 +183,7 @@ class HealthCheckCachingTests(unittest.TestCase):
         # Mock cache expiration check
         def is_cache_expired_old(last_check_time: datetime, ttl_seconds: int = 30) -> bool:
             """Check if cache is expired using old pattern."""
-            return (datetime.utcnow() - last_check_time).total_seconds() > ttl_seconds
+            return (datetime.now(UTC) - last_check_time).total_seconds() > ttl_seconds
 
         def is_cache_expired_new(last_check_time: datetime, ttl_seconds: int = 30) -> bool:
             """Check if cache is expired using new pattern."""
@@ -192,13 +192,13 @@ class HealthCheckCachingTests(unittest.TestCase):
             return (current_time - last_check_time).total_seconds() > ttl_seconds
 
         # Test with expired cache (1 minute ago)
-        expired_time = datetime.utcnow() - timedelta(minutes=1)
+        expired_time = datetime.now(UTC) - timedelta(minutes=1)
 
         self.assertTrue(is_cache_expired_old(expired_time, 30))
         self.assertTrue(is_cache_expired_new(expired_time, 30))
 
         # Test with fresh cache (10 seconds ago)
-        fresh_time = datetime.utcnow() - timedelta(seconds=10)
+        fresh_time = datetime.now(UTC) - timedelta(seconds=10)
 
         self.assertFalse(is_cache_expired_old(fresh_time, 30))
         self.assertFalse(is_cache_expired_new(fresh_time, 30))
@@ -209,11 +209,11 @@ class HealthCheckCachingTests(unittest.TestCase):
         # This addresses the requirement that cache_age >= 0
         def calculate_cache_age(last_check: datetime) -> float:
             """Calculate cache age ensuring non-negative result."""
-            age = (datetime.utcnow() - last_check).total_seconds()
+            age = (datetime.now(UTC) - last_check).total_seconds()
             return max(0.0, age)  # Ensure non-negative
 
         # Test with various scenarios
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
 
         # Past time should give positive age
         past_time = now - timedelta(seconds=30)
@@ -230,7 +230,7 @@ class HealthCheckCachingTests(unittest.TestCase):
         """Test that startup time format is consistent."""
 
         # Mock startup time creation
-        startup_time_old = datetime.utcnow().isoformat()
+        startup_time_old = datetime.now(UTC).isoformat()
         startup_time_new = datetime.now(timezone.utc).isoformat()
 
         # Both should be valid ISO format strings

@@ -839,12 +839,15 @@ except Exception as e:
     logger.error(f"WebSocket Manager SSOT validation failed: {e}")
 
 
-async def get_websocket_manager_async(user_context: Optional[Any] = None, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED) -> _UnifiedWebSocketManagerImplementation:
+async def get_websocket_manager_async(user_context: Optional[Any] = None, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED, app: Optional[Any] = None) -> _UnifiedWebSocketManagerImplementation:
     """
     Get a WebSocket manager instance asynchronously following SSOT patterns.
 
     ISSUE #1184 REMEDIATION: This async wrapper properly handles service availability checking
     and provides the correct interface for async contexts that need to await WebSocket manager creation.
+
+    ISSUE #895 IMPLEMENTATION: Enhanced with comprehensive service availability detection
+    to prevent 1011 WebSocket errors when services are unavailable.
 
     Business Value Justification:
     - Segment: ALL (Free -> Enterprise)
@@ -855,12 +858,14 @@ async def get_websocket_manager_async(user_context: Optional[Any] = None, mode: 
     Args:
         user_context: UserExecutionContext for user isolation (optional for testing)
         mode: WebSocket manager operational mode (DEPRECATED: all modes use UNIFIED)
+        app: FastAPI application instance for service availability checking
 
     Returns:
         UnifiedWebSocketManager instance - single instance per user context
 
     Raises:
         ValueError: If user_context is required but not provided in production modes
+        RuntimeError: If critical services are unavailable and WebSocket connections should be denied
     """
     # Extract user key for registry lookup
     user_key = _get_user_key(user_context)
@@ -875,15 +880,43 @@ async def get_websocket_manager_async(user_context: Optional[Any] = None, mode: 
 
         # No existing manager - create new one following original logic
         try:
-            # ISSUE #1184 FIX: Proper async service availability check
+            # ISSUE #895 IMPLEMENTATION: Comprehensive service availability check
+            from netra_backend.app.websocket_core.service_availability_manager import get_service_availability_manager
+
+            service_manager = get_service_availability_manager(app)
+            health_report = await service_manager.get_health_report()
+
+            # Check if WebSocket connections should be allowed
+            allow_connection, denial_reason = service_manager.should_allow_websocket_connection()
+
+            if not allow_connection:
+                logger.error(f"WebSocket connection denied due to service availability: {denial_reason}")
+                logger.error(f"Service health summary: {health_report['summary']['health_summary']}")
+
+                # Log details about failed services for debugging
+                failed_services = health_report['summary']['failed_services']
+                degraded_services = health_report['summary']['degraded_services']
+                if failed_services:
+                    logger.error(f"Failed services: {', '.join(failed_services)}")
+                if degraded_services:
+                    logger.warning(f"Degraded services: {', '.join(degraded_services)}")
+
+                # For testing environments, allow degraded operation
+                config = get_config()
+                if hasattr(config, 'allow_degraded_websocket') and config.allow_degraded_websocket:
+                    logger.warning("Allowing degraded WebSocket operation due to configuration override")
+                else:
+                    raise RuntimeError(f"WebSocket connection denied: {denial_reason}")
+
+            # ISSUE #1184 FIX: Use legacy check as fallback
             service_available = await check_websocket_service_available()
 
-            if not service_available:
-                logger.warning("WebSocket service not available, creating test-only manager")
+            if not service_available and allow_connection:
+                logger.warning("Legacy WebSocket service check failed but service manager allows connection")
                 # Force unified mode for test scenarios when service is unavailable
                 mode = WebSocketManagerMode.UNIFIED
 
-            logger.info(f"Creating NEW WebSocket manager for user {user_key} with mode={mode.value}, service_available={service_available}")
+            logger.info(f"Creating NEW WebSocket manager for user {user_key} with mode={mode.value}, service_available={service_available}, health_status={health_report['overall_status']}")
 
             # ISSUE #889 FIX: Create isolated mode instance to prevent enum sharing
             isolated_mode = create_isolated_mode(mode.value)

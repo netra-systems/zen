@@ -35,7 +35,7 @@ class TestWebSocketConnection:
 
         import asyncio
         import pytest
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, UTC
         from typing import Dict, Any
 
         from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
@@ -84,7 +84,7 @@ connection = WebSocketConnection( )
 connection_id="test_conn",
 user_id=self.user_id,
 websocket=failing_websocket,
-connected_at=datetime.utcnow()
+connected_at=datetime.now(UTC)
                 
 
 await self.manager.add_connection(connection)

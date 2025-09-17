@@ -14,7 +14,7 @@ are properly managed while maintaining strict state isolation between connection
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List
 
 from test_framework.base_integration_test import BaseIntegrationTest
@@ -56,7 +56,7 @@ class WebSocketMultipleConcurrentConnectionsStateIsolationIntegrationTests(BaseI
                     data['_connection_metadata'] = {
                         'connection_index': self.connection_index,
                         'device_id': self.device_id,
-                        'received_at': datetime.utcnow().isoformat()
+                        'received_at': datetime.now(UTC).isoformat()
                     }
                     self.messages_sent.append(data)
                 
@@ -75,7 +75,7 @@ class WebSocketMultipleConcurrentConnectionsStateIsolationIntegrationTests(BaseI
                 connection_id=connection_id,
                 user_id=user_id,
                 websocket=websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={
                     "connection_type": "multi_concurrent",
                     "device_id": f"device_{i}",
@@ -101,7 +101,7 @@ class WebSocketMultipleConcurrentConnectionsStateIsolationIntegrationTests(BaseI
             message = {
                 "type": "broadcast_message",
                 "data": {"message_index": i, "broadcast": True},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             await websocket_manager.send_to_user(user_id, message)
         
@@ -167,7 +167,7 @@ class WebSocketMultipleConcurrentConnectionsStateIsolationIntegrationTests(BaseI
                 connection_id=connection_id,
                 user_id=user_id,
                 websocket=websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={
                     "connection_type": "contextual",
                     "device_context": context

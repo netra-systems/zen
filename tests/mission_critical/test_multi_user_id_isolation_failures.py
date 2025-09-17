@@ -30,7 +30,7 @@ import uuid
 import re
 import random
 from typing import Dict, Any, List, Optional, Set, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from concurrent.futures import ThreadPoolExecutor
 
 # Test framework imports
@@ -308,7 +308,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
                     "type": "isolation_test",
                     "data": {"sender": i, "private_data": f"secret_user_{i}"},
                     "user_id": ctx.user_id,
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 test_messages.append((i, ctx, mgr, message))
             
@@ -356,7 +356,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
                         "type": "concurrent_test",
                         "data": {"operation_id": operation_id},
                         "user_id": ctx.user_id,
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     }
                     await mgr.send_to_user(message)
                     return f"success_{operation_id}"
@@ -587,7 +587,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
                             "type": "concurrent_message",
                             "data": {"user": user_idx, "message_idx": i, "private": f"secret_{user_idx}_{i}"},
                             "user_id": ctx.user_id,
-                            "timestamp": datetime.utcnow().isoformat()
+                            "timestamp": datetime.now(UTC).isoformat()
                         }
                         await manager.send_to_user(message)
                         
@@ -745,7 +745,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
                     "type": "isolation_compliance_test",
                     "data": {"user": i},
                     "user_id": ctx.user_id,
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 
                 # Should work without errors
@@ -797,7 +797,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
                     "type": "concurrent_test",
                     "data": {"user": user_idx},
                     "user_id": ctx.user_id,
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 await manager.send_to_user(message)
                 return f"success_{user_idx}"

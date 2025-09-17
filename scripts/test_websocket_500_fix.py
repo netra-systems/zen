@@ -9,7 +9,7 @@ import json
 import logging
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, List, Optional
 
 import aiohttp
@@ -39,7 +39,7 @@ class WebSocketFixValidator:
         logger.info(f"Target: {self.base_url} (SSL: {self.use_ssl})")
         
         test_results = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "target": self.base_url,
             "total_tests": 0,
             "passed_tests": 0,

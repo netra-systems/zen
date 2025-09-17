@@ -21,7 +21,7 @@ import time
 import warnings
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Set
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import aiohttp
 import websockets
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -374,8 +374,8 @@ class WebSocketEventDeliveryE2ETests(BaseE2ETest):
             # Create a simple test JWT (not for production use)
             payload = {
                 "user_id": user_id,
-                "exp": datetime.utcnow() + timedelta(hours=1),
-                "iat": datetime.utcnow(),
+                "exp": datetime.now(UTC) + timedelta(hours=1),
+                "iat": datetime.now(UTC),
                 "test": True
             }
 

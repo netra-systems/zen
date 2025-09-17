@@ -18,7 +18,7 @@ import asyncio
 import json
 import secrets
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, Tuple
 from unittest.mock import patch
 import pytest
@@ -92,7 +92,7 @@ class RealTokenRefreshTests:
 
     def create_token_pair(self, user_id: int, jwt_secret_key: str) -> Tuple[str, str]:
         """Create access and refresh token pair."""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         access_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netrasystems.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(minutes=15)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.ACCESS_TOKEN_TYPE, 'user_id': user_id, 'permissions': ['read', 'write']}
         refresh_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netrasystems.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(days=7)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.REFRESH_TOKEN_TYPE, 'user_id': user_id, 'refresh_id': secrets.token_hex(16)}
         access_token = jwt.encode(access_payload, jwt_secret_key, algorithm=JWTConstants.HS256_ALGORITHM)
@@ -124,7 +124,7 @@ class RealTokenRefreshTests:
         refresh_decoded = jwt.decode(refresh_token, jwt_secret_key, algorithms=[JWTConstants.HS256_ALGORITHM])
         refresh_id = refresh_decoded['refresh_id']
         refresh_key = f'{CacheConstants.SERVICE_TOKEN_PREFIX}refresh:{user_id}:{refresh_id}'
-        refresh_data = {'user_id': user_id, 'refresh_token': refresh_token, 'refresh_id': refresh_id, 'created_at': datetime.utcnow().isoformat(), 'is_active': True, 'use_count': 0}
+        refresh_data = {'user_id': user_id, 'refresh_token': refresh_token, 'refresh_id': refresh_id, 'created_at': datetime.now(UTC).isoformat(), 'is_active': True, 'use_count': 0}
         try:
             await redis_client.setex(refresh_key, CacheConstants.SERVICE_TOKEN_CACHE_TTL, json.dumps(refresh_data))
             stored_data = await redis_client.get(refresh_key)
@@ -152,7 +152,7 @@ class RealTokenRefreshTests:
             assert stored_refresh is not None
             parsed_refresh = json.loads(stored_refresh)
             assert parsed_refresh['is_active'] is True
-            now = datetime.utcnow()
+            now = datetime.now(UTC)
             new_access_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netrasystems.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(minutes=15)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.ACCESS_TOKEN_TYPE, 'user_id': user_id, 'permissions': ['read', 'write'], 'refreshed_at': now.isoformat()}
             new_access_token = jwt.encode(new_access_payload, jwt_secret_key, algorithm=JWTConstants.HS256_ALGORITHM)
             parsed_refresh['use_count'] += 1
@@ -182,7 +182,7 @@ class RealTokenRefreshTests:
         refresh_data = {'user_id': user_id, 'refresh_token': old_refresh_token, 'refresh_id': old_refresh_id, 'is_active': True, 'use_count': 0}
         try:
             await redis_client.setex(old_refresh_key, CacheConstants.SERVICE_TOKEN_CACHE_TTL, json.dumps(refresh_data))
-            now = datetime.utcnow()
+            now = datetime.now(UTC)
             new_refresh_id = secrets.token_hex(16)
             new_access_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netrasystems.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(minutes=15)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.ACCESS_TOKEN_TYPE, 'user_id': user_id, 'permissions': ['read', 'write'], 'generation': 2}
             new_refresh_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netrasystems.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(days=7)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.REFRESH_TOKEN_TYPE, 'user_id': user_id, 'refresh_id': new_refresh_id, 'generation': 2}
@@ -212,7 +212,7 @@ class RealTokenRefreshTests:
     async def test_expired_refresh_token_rejection(self, redis_client, jwt_secret_key: str):
         """Test rejection of expired refresh tokens."""
         user_id = 55555
-        expired_time = datetime.utcnow() - timedelta(hours=1)
+        expired_time = datetime.now(UTC) - timedelta(hours=1)
         expired_refresh_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netrasystems.ai', JWTConstants.ISSUED_AT: int(expired_time.timestamp()), JWTConstants.EXPIRES_AT: int(expired_time.timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.REFRESH_TOKEN_TYPE, 'user_id': user_id, 'refresh_id': secrets.token_hex(16)}
         expired_refresh_token = jwt.encode(expired_refresh_payload, jwt_secret_key, algorithm=JWTConstants.HS256_ALGORITHM)
         with pytest.raises(jwt.ExpiredSignatureError):
@@ -233,7 +233,7 @@ class RealTokenRefreshTests:
             stored_data = json.loads(await redis_client.get(refresh_key))
             assert stored_data['is_active'] is True
             stored_data['is_active'] = False
-            stored_data['revoked_at'] = datetime.utcnow().isoformat()
+            stored_data['revoked_at'] = datetime.now(UTC).isoformat()
             stored_data['revocation_reason'] = 'user_logout'
             await redis_client.setex(refresh_key, 3600, json.dumps(stored_data))
             revoked_data = json.loads(await redis_client.get(refresh_key))
@@ -271,7 +271,7 @@ class RealTokenRefreshTests:
                         return {'attempt_id': attempt_id, 'success': False, 'reason': 'refresh_token_inactive'}
                     await asyncio.sleep(0.1)
                     parsed_data['use_count'] += 1
-                    parsed_data['last_used'] = datetime.utcnow().isoformat()
+                    parsed_data['last_used'] = datetime.now(UTC).isoformat()
                     await redis_client.setex(refresh_key, CacheConstants.SERVICE_TOKEN_CACHE_TTL, json.dumps(parsed_data))
                     return {'attempt_id': attempt_id, 'success': True, 'use_count': parsed_data['use_count']}
                 finally:
@@ -309,7 +309,7 @@ class RealTokenRefreshTests:
             for refresh_key in refresh_keys:
                 data = json.loads(await redis_client.get(refresh_key))
                 assert data['is_active'] is True
-            invalidation_time = datetime.utcnow().isoformat()
+            invalidation_time = datetime.now(UTC).isoformat()
             for refresh_key in refresh_keys:
                 data = json.loads(await redis_client.get(refresh_key))
                 data['is_active'] = False

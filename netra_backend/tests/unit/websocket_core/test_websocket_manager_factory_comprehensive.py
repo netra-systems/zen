@@ -33,7 +33,7 @@ CRITICAL COVERAGE REQUIREMENTS:
 import asyncio
 import pytest
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from typing import Dict, List, Set, Any, Optional
 import logging
@@ -113,7 +113,7 @@ class WebSocketManagerComprehensiveTests(SSotAsyncTestCase):
             connection_id=connection_id,
             user_id=user_id,
             websocket=mock_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={}
         )
 
@@ -804,7 +804,7 @@ class WebSocketManagerComprehensiveTests(SSotAsyncTestCase):
         isolation_key = factory._generate_isolation_key(user_context)
         
         # Manually set old creation time to simulate expiration
-        old_time = datetime.utcnow() - timedelta(seconds=10)
+        old_time = datetime.now(UTC) - timedelta(seconds=10)
         factory._manager_creation_time[isolation_key] = old_time
         
         # Set old activity time  

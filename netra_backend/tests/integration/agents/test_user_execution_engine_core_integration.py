@@ -30,7 +30,7 @@ import pytest
 import time
 import uuid
 import weakref
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Any, Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from concurrent.futures import ThreadPoolExecutor
@@ -167,7 +167,7 @@ class UserExecutionEngineCoreIntegrationTests(SSotAsyncTestCase):
                 mock_bridge.user_events[user_id] = []
             mock_bridge.user_events[user_id].append({
                 "event_type": event_type,
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(UTC),
                 "args": args,
                 "kwargs": kwargs
             })

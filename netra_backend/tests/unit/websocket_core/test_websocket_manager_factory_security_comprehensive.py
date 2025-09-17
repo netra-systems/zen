@@ -33,7 +33,7 @@ CRITICAL COVERAGE REQUIREMENTS:
 import asyncio
 import pytest
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from typing import Dict, List, Set, Any, Optional
 import logging
@@ -447,7 +447,7 @@ class ConnectionLifecycleManagerComprehensiveTests(SSotAsyncTestCase):
         # Verify health timestamp
         health_time = self.lifecycle_manager._connection_health[connection.connection_id]
         assert isinstance(health_time, datetime)
-        assert (datetime.utcnow() - health_time).total_seconds() < 1  # Recent
+        assert (datetime.now(UTC) - health_time).total_seconds() < 1  # Recent
 
 
 class WebSocketFactorySecurityIsolationTests(SSotAsyncTestCase):

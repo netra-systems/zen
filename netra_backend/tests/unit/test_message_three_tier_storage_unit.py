@@ -13,7 +13,7 @@ import asyncio
 import pytest
 import time
 from unittest.mock import Mock, AsyncMock, patch
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from netra_backend.app.services.database.message_repository import MessageRepository
 from shared.types import RunID, UserID, ThreadID
 
@@ -25,7 +25,7 @@ class MockMessage:
         self.content = content
         self.thread_id = thread_id
         self.user_id = user_id
-        self.created_at = datetime.utcnow()
+        self.created_at = datetime.now(UTC)
         self.role = 'user'
 
 class ThreeTierStorageArchitectureTests:
@@ -39,7 +39,7 @@ class ThreeTierStorageArchitectureTests:
     @pytest.fixture
     def sample_message_data(self):
         """Create sample message data."""
-        return {'thread_id': str(ThreadID.generate()), 'user_id': str(UserID.generate()), 'content': 'Test message content for three-tier storage', 'role': 'user', 'created_at': datetime.utcnow()}
+        return {'thread_id': str(ThreadID.generate()), 'user_id': str(UserID.generate()), 'content': 'Test message content for three-tier storage', 'role': 'user', 'created_at': datetime.now(UTC)}
 
     def test_should_have_redis_as_primary_storage(self, message_repository):
         """FAILING TEST: Should use Redis as primary message storage layer."""
@@ -128,8 +128,8 @@ class ThreeTierPerformanceBenchmarksTests:
     def test_storage_tier_selection_logic(self):
         """FAILING TEST: Should select appropriate storage tier based on data characteristics."""
         repository = MessageRepository()
-        recent_message = {'created_at': datetime.utcnow(), 'access_frequency': 'high', 'thread_active': True}
-        old_message = {'created_at': datetime.utcnow() - timedelta(days=60), 'access_frequency': 'low', 'thread_active': False}
+        recent_message = {'created_at': datetime.now(UTC), 'access_frequency': 'high', 'thread_active': True}
+        old_message = {'created_at': datetime.now(UTC) - timedelta(days=60), 'access_frequency': 'low', 'thread_active': False}
         recent_tier = repository.select_storage_tier(recent_message)
         old_tier = repository.select_storage_tier(old_message)
         assert hasattr(repository, 'select_storage_tier'), 'Should have logic to select appropriate storage tier'

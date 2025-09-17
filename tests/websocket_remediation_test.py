@@ -20,7 +20,7 @@ import websockets
 from typing import Dict, Any
 import requests
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 
 class WebSocketRemediationValidator:
@@ -128,7 +128,7 @@ class WebSocketRemediationValidator:
             payload = {
                 "user_id": "test-user-websocket-remediation",
                 "email": "remediation-test@example.com",
-                "exp": datetime.utcnow() + timedelta(minutes=30)
+                "exp": datetime.now(UTC) + timedelta(minutes=30)
             }
             token = jwt.encode(payload, secret, algorithm="HS256")
             print(f"  [U+2713] Created test auth token")

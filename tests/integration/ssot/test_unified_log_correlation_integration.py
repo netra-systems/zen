@@ -27,7 +27,7 @@ import uuid
 import time
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Set
 from unittest.mock import patch, MagicMock
 from contextlib import asynccontextmanager
@@ -64,7 +64,7 @@ class UnifiedLogCorrelationIntegrationTests(SSotAsyncTestCase):
                 self.captured_logs = captured_logs
 
             def emit(self, record):
-                log_data = {'timestamp': datetime.utcnow().isoformat(), 'level': record.levelname, 'message': record.getMessage(), 'module': record.name, 'service': getattr(record, 'service', 'unknown'), 'request_id': getattr(record, 'request_id', None), 'user_id': getattr(record, 'user_id', None), 'correlation_id': getattr(record, 'correlation_id', None), 'trace_id': getattr(record, 'trace_id', None)}
+                log_data = {'timestamp': datetime.now(UTC).isoformat(), 'level': record.levelname, 'message': record.getMessage(), 'module': record.name, 'service': getattr(record, 'service', 'unknown'), 'request_id': getattr(record, 'request_id', None), 'user_id': getattr(record, 'user_id', None), 'correlation_id': getattr(record, 'correlation_id', None), 'trace_id': getattr(record, 'trace_id', None)}
                 self.captured_logs.append(log_data)
         handler = LogCaptureHandler(self.captured_logs)
         logging.getLogger().addHandler(handler)

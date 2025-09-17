@@ -54,7 +54,7 @@ import weakref
 import gc
 import psutil
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Set, Optional, Any
 import logging
 
@@ -423,7 +423,7 @@ class WebSocketResourceLeakDetectionTests(SSotAsyncTestCase):
             connection_id=connection_id,
             user_id=user_id,
             websocket=test_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={}
         )
 
@@ -759,7 +759,7 @@ class WebSocketResourceLeakDetectionTests(SSotAsyncTestCase):
             
             # Make first 6 managers "old" by setting their activity time  
             if i < 6:
-                old_time = datetime.utcnow() - timedelta(minutes=10)
+                old_time = datetime.now(UTC) - timedelta(minutes=10)
                 manager._metrics.last_activity = old_time
                 # Also update creation time in factory
                 for key, active_manager in self.factory._active_managers.items():

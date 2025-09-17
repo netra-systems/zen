@@ -17,7 +17,7 @@ user flow works end-to-end with proper state management and recovery.
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Any
 from enum import Enum
 
@@ -84,11 +84,11 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                                        duration_seconds: float = 10.0) -> List[Dict[str, Any]]:
         """Monitor WebSocket connection states during E2E test."""
         connection_events = []
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         
         async def state_monitor():
             """Monitor connection state changes."""
-            while (datetime.utcnow() - start_time).total_seconds() < duration_seconds:
+            while (datetime.now(UTC) - start_time).total_seconds() < duration_seconds:
                 try:
                     # Listen for WebSocket events
                     event = await asyncio.wait_for(
@@ -99,7 +99,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                     # Track connection-related events
                     if event.get('type') in ['connection_state', 'agent_started', 'agent_completed', 'error']:
                         connection_events.append({
-                            'timestamp': datetime.utcnow().isoformat(),
+                            'timestamp': datetime.now(UTC).isoformat(),
                             'event': event,
                             'connection_state': event.get('connection_state', 'unknown')
                         })
@@ -110,7 +110,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                 except Exception as e:
                     # Connection issue - record as state event
                     connection_events.append({
-                        'timestamp': datetime.utcnow().isoformat(),
+                        'timestamp': datetime.now(UTC).isoformat(),
                         'event': {'type': 'connection_error', 'error': str(e)},
                         'connection_state': 'error'
                     })
@@ -147,12 +147,12 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
         
         try:
             # Phase 1: Connection Establishment (INITIALIZING -> CONNECTING -> CONNECTED)
-            connection_start = datetime.utcnow()
+            connection_start = datetime.now(UTC)
             await websocket_client.connect()
             
             connection_states.append({
                 'state': E2EConnectionState.CONNECTED.value,
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'phase': 'connection_establishment'
             })
             
@@ -178,7 +178,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             
             connection_states.append({
                 'state': E2EConnectionState.AUTHENTICATED.value,
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'phase': 'authentication',
                 'auth_response': auth_response
             })
@@ -193,7 +193,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             
             connection_states.append({
                 'state': E2EConnectionState.AGENT_READY.value,
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'phase': 'agent_ready'
             })
             
@@ -205,7 +205,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                 "message": "Help me analyze my cloud infrastructure costs",
                 "user_id": user_id,
                 "thread_id": f"golden_path_thread_{user_id}",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             await websocket_client.send_json(agent_request)
@@ -227,7 +227,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                     if event.get('type') == expected_event:
                         connection_states.append({
                             'state': E2EConnectionState.ACTIVE_CHAT.value,
-                            'timestamp': datetime.utcnow().isoformat(),
+                            'timestamp': datetime.now(UTC).isoformat(),
                             'phase': 'active_chat',
                             'agent_event': expected_event,
                             'event_data': event
@@ -256,7 +256,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             
             connection_states.append({
                 'state': E2EConnectionState.DEGRADED.value,
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'phase': 'degradation_test'
             })
             
@@ -278,14 +278,14 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             
             connection_states.append({
                 'state': E2EConnectionState.RECOVERING.value,
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'phase': 'recovery_test'
             })
             
             # Return to active chat
             connection_states.append({
                 'state': E2EConnectionState.ACTIVE_CHAT.value,
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'phase': 'post_recovery'
             })
             
@@ -299,7 +299,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             
             connection_states.append({
                 'state': E2EConnectionState.DISCONNECTING.value,
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'phase': 'graceful_disconnect'
             })
             
@@ -309,7 +309,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             
             connection_states.append({
                 'state': E2EConnectionState.DISCONNECTED.value,
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'phase': 'final_disconnect'
             })
         
@@ -374,7 +374,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             try:
                 # Connect and authenticate
                 await websocket_client.connect()
-                user_states.append(('connected', datetime.utcnow()))
+                user_states.append(('connected', datetime.now(UTC)))
                 
                 auth_message = {
                     "type": "authenticate",
@@ -388,7 +388,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                     timeout=10.0
                 )
                 assert auth_response.get('type') == 'authentication_success'
-                user_states.append(('authenticated', datetime.utcnow()))
+                user_states.append(('authenticated', datetime.now(UTC)))
                 
                 # Each user has different agent interaction pattern
                 if user_index == 0:
@@ -417,7 +417,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                     }
                 
                 await websocket_client.send_json(agent_request)
-                user_states.append(('agent_request_sent', datetime.utcnow()))
+                user_states.append(('agent_request_sent', datetime.now(UTC)))
                 
                 # Collect agent response events
                 agent_events = []
@@ -433,10 +433,10 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                         agent_events.append(event)
                         
                         if event.get('type') == 'agent_completed':
-                            user_states.append(('agent_completed', datetime.utcnow()))
+                            user_states.append(('agent_completed', datetime.now(UTC)))
                             break
                         elif event.get('type') == 'agent_started':
-                            user_states.append(('agent_started', datetime.utcnow()))
+                            user_states.append(('agent_started', datetime.now(UTC)))
                         
                     except asyncio.TimeoutError:
                         timeout_count += 1
@@ -453,14 +453,14 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                     await websocket_client.send_json(follow_up)
                     await asyncio.sleep(0.1)  # Prevent message flooding
                 
-                user_states.append(('follow_up_complete', datetime.utcnow()))
+                user_states.append(('follow_up_complete', datetime.now(UTC)))
                 
             except Exception as e:
-                user_states.append(('error', datetime.utcnow(), str(e)))
+                user_states.append(('error', datetime.now(UTC), str(e)))
             
             finally:
                 await websocket_client.disconnect()
-                user_states.append(('disconnected', datetime.utcnow()))
+                user_states.append(('disconnected', datetime.now(UTC)))
             
             return {
                 'user_index': user_index,
@@ -551,7 +551,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             
             recovery_log.append({
                 'phase': 'normal_connection',
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'status': 'success'
             })
             
@@ -573,7 +573,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             
             recovery_log.append({
                 'phase': 'normal_operation',
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'status': 'success',
                 'response': normal_response.get('type')
             })
@@ -582,7 +582,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             await websocket_client.disconnect()
             recovery_log.append({
                 'phase': 'connection_lost',
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'status': 'disconnected'
             })
             
@@ -593,7 +593,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             await websocket_client.connect()
             recovery_log.append({
                 'phase': 'reconnection_attempt',
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'status': 'connected'
             })
             
@@ -613,7 +613,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             
             recovery_log.append({
                 'phase': 'reauthentication',
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'status': 'success'
             })
             
@@ -634,7 +634,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             
             recovery_log.append({
                 'phase': 'post_recovery_test',
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'status': 'success',
                 'response': recovery_response.get('type')
             })
@@ -670,7 +670,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                 recovery_log.append({
                     'phase': 'rapid_reconnection',
                     'attempt': reconnect_attempt + 1,
-                    'timestamp': datetime.utcnow().isoformat(),
+                    'timestamp': datetime.now(UTC).isoformat(),
                     'status': 'success' if success else 'timeout'
                 })
             
@@ -691,7 +691,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             
             recovery_log.append({
                 'phase': 'final_functionality_test',
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'status': 'success',
                 'response': final_response.get('type')
             })
@@ -700,7 +700,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             await websocket_client.disconnect()
             recovery_log.append({
                 'phase': 'final_disconnect',
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'status': 'disconnected'
             })
         
@@ -792,7 +792,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             
             connection_state_events.append({
                 'state': 'authenticated',
-                'timestamp': datetime.utcnow().isoformat()
+                'timestamp': datetime.now(UTC).isoformat()
             })
             
             # Phase 2: Agent interaction with full event monitoring
@@ -802,14 +802,14 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                 "message": "Help me understand my cloud infrastructure and provide optimization recommendations",
                 "user_id": user_id,
                 "thread_id": f"lifecycle_test_thread_{user_id}",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             await websocket_client.send_json(agent_request)
             
             connection_state_events.append({
                 'state': 'agent_request_sent',
-                'timestamp': datetime.utcnow().isoformat()
+                'timestamp': datetime.now(UTC).isoformat()
             })
             
             # Monitor complete agent lifecycle
@@ -835,7 +835,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                     agent_lifecycle_events.append({
                         'expected': expected_event,
                         'received': event.get('type'),
-                        'timestamp': datetime.utcnow().isoformat(),
+                        'timestamp': datetime.now(UTC).isoformat(),
                         'data': event
                     })
                     
@@ -843,12 +843,12 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                     if event.get('type') == 'agent_started':
                         connection_state_events.append({
                             'state': 'agent_executing',
-                            'timestamp': datetime.utcnow().isoformat()
+                            'timestamp': datetime.now(UTC).isoformat()
                         })
                     elif event.get('type') == 'agent_completed':
                         connection_state_events.append({
                             'state': 'agent_completed',
-                            'timestamp': datetime.utcnow().isoformat()
+                            'timestamp': datetime.now(UTC).isoformat()
                         })
                         break
                     
@@ -859,7 +859,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                     agent_lifecycle_events.append({
                         'expected': expected_event,
                         'received': 'TIMEOUT',
-                        'timestamp': datetime.utcnow().isoformat(),
+                        'timestamp': datetime.now(UTC).isoformat(),
                         'timeout_seconds': event_timeout
                     })
                     # Continue to next event - some events might be optional
@@ -872,7 +872,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                 "message": "Can you provide more details about the recommendations?",
                 "user_id": user_id,
                 "thread_id": f"lifecycle_test_thread_{user_id}",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             await websocket_client.send_json(followup_request)
@@ -887,20 +887,20 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                 agent_lifecycle_events.append({
                     'phase': 'followup',
                     'received': followup_response.get('type'),
-                    'timestamp': datetime.utcnow().isoformat(),
+                    'timestamp': datetime.now(UTC).isoformat(),
                     'data': followup_response
                 })
                 
                 connection_state_events.append({
                     'state': 'followup_completed',
-                    'timestamp': datetime.utcnow().isoformat()
+                    'timestamp': datetime.now(UTC).isoformat()
                 })
                 
             except asyncio.TimeoutError:
                 agent_lifecycle_events.append({
                     'phase': 'followup',
                     'received': 'TIMEOUT',
-                    'timestamp': datetime.utcnow().isoformat()
+                    'timestamp': datetime.now(UTC).isoformat()
                 })
             
             # Phase 4: Test multiple concurrent agent requests (state isolation)
@@ -912,7 +912,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
                     "message": f"Concurrent test request {i + 1}",
                     "user_id": user_id,
                     "thread_id": f"concurrent_thread_{i}_{user_id}",
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 concurrent_requests.append(concurrent_request)
                 await websocket_client.send_json(concurrent_request)
@@ -933,7 +933,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             
             connection_state_events.append({
                 'state': 'concurrent_testing_completed',
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'concurrent_responses': len(concurrent_responses)
             })
             
@@ -941,7 +941,7 @@ class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
             await websocket_client.disconnect()
             connection_state_events.append({
                 'state': 'disconnected',
-                'timestamp': datetime.utcnow().isoformat()
+                'timestamp': datetime.now(UTC).isoformat()
             })
         
         # Verify agent lifecycle completion

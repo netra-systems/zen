@@ -19,7 +19,7 @@ import asyncio
 import json
 import secrets
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List, Set
 from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import patch
@@ -100,13 +100,13 @@ class RealMultiUserIsolationTests:
 
     def create_isolated_user_context(self, user_id: int, **kwargs) -> Dict[str, Any]:
         """Create isolated user context data following factory pattern."""
-        return {'user_id': user_id, 'session_id': secrets.token_hex(16), 'email': kwargs.get('email', f'user{user_id}@netrasystems.ai'), 'full_name': kwargs.get('full_name', f'Test User {user_id}'), 'workspace_id': kwargs.get('workspace_id', f'workspace_{user_id}'), 'tenant_id': kwargs.get('tenant_id', f'tenant_{user_id}'), 'permissions': kwargs.get('permissions', ['read']), 'context_id': str(uuid.uuid4()), 'created_at': datetime.utcnow().isoformat(), 'isolation_boundary': f'user_{user_id}_boundary', 'data_namespace': f'ns_user_{user_id}', 'execution_context': {'user_id': user_id, 'session_id': secrets.token_hex(8), 'request_id': str(uuid.uuid4())}}
+        return {'user_id': user_id, 'session_id': secrets.token_hex(16), 'email': kwargs.get('email', f'user{user_id}@netrasystems.ai'), 'full_name': kwargs.get('full_name', f'Test User {user_id}'), 'workspace_id': kwargs.get('workspace_id', f'workspace_{user_id}'), 'tenant_id': kwargs.get('tenant_id', f'tenant_{user_id}'), 'permissions': kwargs.get('permissions', ['read']), 'context_id': str(uuid.uuid4()), 'created_at': datetime.now(UTC).isoformat(), 'isolation_boundary': f'user_{user_id}_boundary', 'data_namespace': f'ns_user_{user_id}', 'execution_context': {'user_id': user_id, 'session_id': secrets.token_hex(8), 'request_id': str(uuid.uuid4())}}
 
     def create_user_specific_data(self, user_id: int, data_type: str='general') -> Dict[str, Any]:
         """Create user-specific data that should be isolated."""
         base_data = {'owner_user_id': user_id, 'data_id': str(uuid.uuid4()), 'created_by': user_id, 'tenant_id': f'tenant_{user_id}', 'workspace_id': f'workspace_{user_id}', 'visibility': 'private', 'access_level': 'owner_only', 'data_classification': 'user_private'}
         if data_type == 'conversation':
-            return {**base_data, 'type': 'conversation', 'title': f'User {user_id} Private Conversation', 'messages': [{'id': str(uuid.uuid4()), 'content': f'This is private message for user {user_id}', 'timestamp': datetime.utcnow().isoformat(), 'user_id': user_id}], 'thread_id': f'thread_{user_id}_{secrets.token_hex(8)}'}
+            return {**base_data, 'type': 'conversation', 'title': f'User {user_id} Private Conversation', 'messages': [{'id': str(uuid.uuid4()), 'content': f'This is private message for user {user_id}', 'timestamp': datetime.now(UTC).isoformat(), 'user_id': user_id}], 'thread_id': f'thread_{user_id}_{secrets.token_hex(8)}'}
         elif data_type == 'document':
             return {**base_data, 'type': 'document', 'title': f'User {user_id} Private Document', 'content': f'Confidential content for user {user_id}', 'tags': [f'user{user_id}', 'private', 'confidential']}
         else:
@@ -186,7 +186,7 @@ class RealMultiUserIsolationTests:
             user_context = self.create_isolated_user_context(user_id)
             operations_data = []
             for i in range(operation_count):
-                operation_data = {'operation_id': str(uuid.uuid4()), 'user_id': user_id, 'operation_type': f'test_op_{i}', 'data': self.create_user_specific_data(user_id), 'context': user_context['execution_context'], 'timestamp': datetime.utcnow().isoformat()}
+                operation_data = {'operation_id': str(uuid.uuid4()), 'user_id': user_id, 'operation_type': f'test_op_{i}', 'data': self.create_user_specific_data(user_id), 'context': user_context['execution_context'], 'timestamp': datetime.now(UTC).isoformat()}
                 operations_data.append(operation_data)
                 cache_key = f"operation:{user_context['data_namespace']}:{operation_data['operation_id']}"
                 await redis_client.setex(cache_key, 60, json.dumps(operation_data))
@@ -241,7 +241,7 @@ class RealMultiUserIsolationTests:
                 await redis_client.setex(cache_key, CacheConstants.DEFAULT_TOKEN_CACHE_TTL, json.dumps(ws_context))
             for user_id in websocket_users:
                 context = websocket_contexts[user_id]
-                ws_message = {'message_id': str(uuid.uuid4()), 'user_id': user_id, 'connection_id': context['connection_id'], 'message_type': 'agent_response', 'payload': {'response': f'AI response for user {user_id}', 'thread_id': f'thread_{user_id}_{secrets.token_hex(4)}', 'context': context['execution_context']}, 'namespace': context['message_namespace'], 'timestamp': datetime.utcnow().isoformat()}
+                ws_message = {'message_id': str(uuid.uuid4()), 'user_id': user_id, 'connection_id': context['connection_id'], 'message_type': 'agent_response', 'payload': {'response': f'AI response for user {user_id}', 'thread_id': f'thread_{user_id}_{secrets.token_hex(4)}', 'context': context['execution_context']}, 'namespace': context['message_namespace'], 'timestamp': datetime.now(UTC).isoformat()}
                 msg_cache_key = f"ws_message:{context['message_namespace']}:{ws_message['message_id']}"
                 await redis_client.setex(msg_cache_key, 300, json.dumps(ws_message))
             for user_id in websocket_users:

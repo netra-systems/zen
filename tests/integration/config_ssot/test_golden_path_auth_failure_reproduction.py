@@ -36,7 +36,7 @@ import time
 import warnings
 import jwt
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional, Tuple
 from unittest.mock import patch, MagicMock
 
@@ -118,8 +118,8 @@ class GoldenPathAuthFailureReproductionTests(SSotAsyncTestCase):
             'user_id': 'golden_path_test_user',
             'email': 'test@goldenpathtest.com',
             'role': 'premium_user',
-            'exp': datetime.utcnow() + timedelta(minutes=expire_minutes),
-            'iat': datetime.utcnow(),
+            'exp': datetime.now(UTC) + timedelta(minutes=expire_minutes),
+            'iat': datetime.now(UTC),
             'jti': str(uuid.uuid4())
         }
 

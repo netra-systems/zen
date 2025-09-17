@@ -25,7 +25,7 @@ import time
 from typing import Dict, Any, Optional, List
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 # SSOT integration test base - all integration tests must inherit from this
 from test_framework.ssot.base_integration_test import BaseIntegrationTest
@@ -63,8 +63,8 @@ class AuthServiceIntegrationConsistencyTests(BaseIntegrationTest):
         # JWT test payload
         self.test_jwt_payload = {
             **self.test_user_data,
-            "iat": int(datetime.utcnow().timestamp()),
-            "exp": int((datetime.utcnow() + timedelta(hours=1)).timestamp())
+            "iat": int(datetime.now(UTC).timestamp()),
+            "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp())
         }
 
         # Service communication timeouts

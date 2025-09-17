@@ -13,7 +13,7 @@ import json
 import os
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
 
@@ -52,7 +52,7 @@ class WebSocketDeploymentTestRunner:
         
         validation_result = {
             "phase": "pre_deployment",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "environment": self.environment,
             "status": "pending",
             "results": {}
@@ -106,7 +106,7 @@ class WebSocketDeploymentTestRunner:
         
         validation_result = {
             "phase": "post_deployment", 
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "environment": self.environment,
             "status": "pending",
             "results": {}
@@ -164,7 +164,7 @@ class WebSocketDeploymentTestRunner:
         monitoring_result = {
             "phase": "health_monitoring",
             "duration_minutes": duration_minutes,
-            "start_time": datetime.utcnow().isoformat(),
+            "start_time": datetime.now(UTC).isoformat(),
             "environment": self.environment,
             "status": "running",
             "health_checks": []
@@ -184,7 +184,7 @@ class WebSocketDeploymentTestRunner:
                 # Run health check
                 health_result = await validator.validate_websocket_health_endpoint()
                 health_check = {
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "check_number": total_checks,
                     "status": health_result["status"],
                     "details": health_result.get("details", {})
@@ -214,7 +214,7 @@ class WebSocketDeploymentTestRunner:
             monitoring_result["error"] = str(e)
             
         # Final results
-        monitoring_result["end_time"] = datetime.utcnow().isoformat()
+        monitoring_result["end_time"] = datetime.now(UTC).isoformat()
         monitoring_result["total_checks"] = total_checks
         monitoring_result["healthy_checks"] = healthy_checks
         monitoring_result["health_rate"] = (healthy_checks / total_checks * 100) if total_checks > 0 else 0
@@ -230,7 +230,7 @@ class WebSocketDeploymentTestRunner:
         
         regression_result = {
             "phase": "regression_testing",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "environment": self.environment,
             "tests": {},
             "summary": {}
@@ -325,7 +325,7 @@ class WebSocketDeploymentTestRunner:
         report_lines = [
             "# WebSocket Deployment Validation Report",
             f"**Environment:** {self.environment}",
-            f"**Timestamp:** {datetime.utcnow().isoformat()}",
+            f"**Timestamp:** {datetime.now(UTC).isoformat()}",
             "",
             "## Executive Summary",
             ""
