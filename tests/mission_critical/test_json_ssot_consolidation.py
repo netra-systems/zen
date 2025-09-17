@@ -116,25 +116,22 @@ class TestUnifiedJSONHandler:
         assert isinstance(parsed, dict)
 
     def test_deserialization(self, handler):
-        Test JSON deserialization."
-        pass
-        json_str = '{key": value, number: 42}'
+        """Test JSON deserialization."""
+        json_str = '{"key": "value", "number": 42}'
         data = handler.loads(json_str)
-        assert data == {"key: value", number: 42}
+        assert data == {"key": "value", "number": 42}
 
     def test_invalid_json_deserialization(self, handler):
-        "Test deserialization of invalid JSON."
+        """Test deserialization of invalid JSON."""
         with pytest.raises(JSONDeserializationError):
-        handler.loads({invalid json})
+            handler.loads("{invalid json}")
 
     def test_pretty_format(self, handler):
-        ""Test pretty formatting with indentation.
-        pass
-        data = {key: value", "nested: {inner: data}}
+        """Test pretty formatting with indentation."""
+        data = {"key": "value", "nested": {"inner": "data"}}
         formatted = handler.pretty_format(data)
-        assert   " in formatted  # Check for indentation"
-        assert formatted.count( )
-        ) > 2  # Multiple lines
+        assert "  " in formatted  # Check for indentation
+        assert formatted.count("\n") > 2  # Multiple lines
 
     def test_compact_format(self, handler):
         "Test compact formatting without whitespace."
@@ -474,4 +471,4 @@ class TestPerformance:
         current = current.get(child, {}
 
 
-        if __name__ == __main__":
+if __name__ == "__main__":

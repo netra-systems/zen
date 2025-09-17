@@ -1,26 +1,24 @@
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.
+    """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
-        pass
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
 
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        """Send JSON message."""
         if self._closed:
-        raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = Normal closure"):
-        Close WebSocket connection.""
-        pass
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
         self._closed = True
         self.is_connected = False
 
     async def get_messages(self) -> list:
-        Get all sent messages."
+        """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 

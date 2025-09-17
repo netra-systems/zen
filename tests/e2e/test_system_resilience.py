@@ -202,21 +202,21 @@ class TestSystemResilienceE2E:
         service_level = degradation_manager.get_current_service_level()
         resilience_metrics.service_level_changes.append(f"Degraded to {service_level}")
 
-            # Verify system operates in degraded mode
-            # TODO: Uncomment when ServiceLevel is available
-            # assert service_level in [ServiceLevel.DEGRADED, ServiceLevel.READ_ONLY]
+        # Verify system operates in degraded mode
+        # TODO: Uncomment when ServiceLevel is available
+        # assert service_level in [ServiceLevel.DEGRADED, ServiceLevel.READ_ONLY]
 
-            # Test cache-only operations
-            with patch.object(degradation_manager, 'use_cache_only', return_value=True):
-                cache_result = await degradation_manager.get_cached_data("test_key")
-                if cache_result:
-                    resilience_metrics.cache_hits += 1
+        # Test cache-only operations
+        with patch.object(degradation_manager, 'use_cache_only', return_value=True):
+            cache_result = await degradation_manager.get_cached_data("test_key")
+            if cache_result:
+                resilience_metrics.cache_hits += 1
 
         # Simulate database recovery
         # TODO: Uncomment when DatabaseStatus is available
         # with patch.object(degradation_manager, 'get_database_status', return_value=DatabaseStatus.CONNECTED):
-            service_level = degradation_manager.get_current_service_level()
-            resilience_metrics.service_level_changes.append(f"Recovered to {service_level}")
+        service_level = degradation_manager.get_current_service_level()
+        resilience_metrics.service_level_changes.append(f"Recovered to {service_level}")
 
         resilience_metrics.end_time = time.time()
 

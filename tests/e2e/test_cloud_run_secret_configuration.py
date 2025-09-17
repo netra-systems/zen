@@ -66,44 +66,44 @@ class CloudRunSecretValidator:
         """Validate secretKeyRef configurations have proper name fields."""
         issues = []
 
-    # Navigate to container env vars
+        # Navigate to container env vars
         try:
-        containers = config["spec"]["template"]["spec"]["containers"]
-        if not containers:
-        issues.append("")
-        return issues
+            containers = config["spec"]["template"]["spec"]["containers"]
+            if not containers:
+                issues.append("No containers found in service configuration")
+                return issues
 
-        env_vars = containers[0].get("env", [])
+            env_vars = containers[0].get("env", [])
 
             # Check required secrets based on service type
-        required_secrets = ( )
-        self.REQUIRED_BACKEND_SECRETS if service_type == "backend"
-        else self.REQUIRED_AUTH_SECRETS if service_type == "auth"
-        else []
+            required_secrets = (
+                self.REQUIRED_BACKEND_SECRETS if service_type == "backend"
+                else self.REQUIRED_AUTH_SECRETS if service_type == "auth"
+                else []
+            )
             
 
-        for required_secret in required_secrets:
-        found = False
-        for env_var in env_vars:
-        if env_var.get("name") == required_secret:
-        found = True
+            for required_secret in required_secrets:
+                found = False
+                for env_var in env_vars:
+                    if env_var.get("name") == required_secret:
+                        found = True
                         # Check if it has secretKeyRef
-        if "valueFrom" in env_var:
-        secret_ref = env_var["valueFrom"].get("secretKeyRe"formatted_string"name"):
-        expected_name = ""
-        issues.append( )
-        ""
-        ""
-                                
-        elif not secret_ref.get("key"):
-        issues.append("")
-        break
+                        if "valueFrom" in env_var:
+                            secret_ref = env_var["valueFrom"].get("secretKeyRef", {})
+                            expected_name = f"netra-{service_type}-secrets"
+                            if secret_ref.get("name") != expected_name:
+                                issues.append(f"Secret {required_secret} uses wrong secret name: {secret_ref.get('name')} (expected: {expected_name})")
 
-        if not found:
-        issues.append("")
+                            if not secret_ref.get("key"):
+                                issues.append(f"Secret {required_secret} missing key field")
+                        break
+
+                if not found:
+                    issues.append(f"Required secret {required_secret} not found in environment variables")
 
         except KeyError as e:
-        issues.append("")
+            issues.append(f"Configuration structure error: {e}")
 
         return issues
 
@@ -112,18 +112,18 @@ class CloudRunSecretValidator:
         all_issues = {}
 
         for service_type, cloud_run_name in self.SERVICE_MAPPINGS.items():
-        print("")
+            print(f"Validating {service_type} service: {cloud_run_name}")
 
-        config = self.get_service_config(cloud_run_name)
-        if not config:
-        all_issues[service_type] = [f"Could not fetch service configuration"]
-        continue
+            config = self.get_service_config(cloud_run_name)
+            if not config:
+                all_issues[service_type] = [f"Could not fetch service configuration"]
+                continue
 
-        issues = self.validate_secret_refs(config, service_type)
-        if issues:
-        all_issues[service_type] = issues
-        else:
-        print("")
+            issues = self.validate_secret_refs(config, service_type)
+            if issues:
+                all_issues[service_type] = issues
+            else:
+                print(f"  ✓ {service_type} service configuration is valid")
 
         return len(all_issues) == 0, all_issues
 
@@ -132,26 +132,22 @@ class CloudRunSecretValidator:
         fix_commands = []
 
         for service_type, service_issues in issues.items():
-        if not service_issues:
-        continue
+            if not service_issues:
+                continue
 
-        cloud_run_name = self.SERVICE_MAPPINGS[service_type]
-        secrets_to_fix = []
+            cloud_run_name = self.SERVICE_MAPPINGS[service_type]
+            secrets_to_fix = []
 
-        for issue in service_issues:
-        if "Missing 'name' field" in issue:
-                    Extract the secret name from the issue
-        secret_var = issue.split(":")[0]
-        secret_name = ""
-        secrets_to_fix.append("")
+            for issue in service_issues:
+                if "Missing 'name' field" in issue:
+                    # Extract the secret name from the issue
+                    secret_var = issue.split(":")[0]
+                    secret_name = f"netra-{service_type}-secrets"
+                    secrets_to_fix.append(f"{secret_var}={secret_name}:{secret_var}")
 
-        if secrets_to_fix:
-        cmd = ( )
-        ""
-        ""
-        ""
-                        
-        fix_commands.append(cmd)
+            if secrets_to_fix:
+                cmd = f"gcloud run services update {cloud_run_name} --region={self.region} --update-secrets={','.join(secrets_to_fix)}"
+                fix_commands.append(cmd)
 
         return fix_commands
 

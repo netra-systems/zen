@@ -17,14 +17,40 @@ Protects $500K+ ARR by maintaining Golden Path functionality during consolidatio
 from typing import Any, Optional
 
 # Import the SSOT unified configuration manager and functions
-from netra_backend.app.config import (
-    config_manager as unified_config_manager,
-    get_config as get_unified_config,
-    get_config,  # Golden Path SSOT function
-    reload_config as reload_unified_config,
-    validate_configuration as validate_config_integrity,
-    UnifiedConfigManager,
-)
+# NOTE: These imports are delayed to avoid circular dependencies
+def get_unified_config():
+    """Get unified config - lazy import to avoid circular dependency."""
+    from netra_backend.app.config import get_config
+    return get_config()
+
+def get_config():
+    """Get config - lazy import to avoid circular dependency."""
+    from netra_backend.app.config import get_config as _get_config
+    return _get_config()
+
+def reload_unified_config():
+    """Reload config - lazy import to avoid circular dependency."""
+    from netra_backend.app.config import reload_config
+    return reload_config()
+
+def validate_config_integrity():
+    """Validate config - lazy import to avoid circular dependency."""
+    from netra_backend.app.config import validate_configuration
+    return validate_configuration()
+
+class UnifiedConfigManager:
+    """Lazy proxy for UnifiedConfigManager to avoid circular imports."""
+    def __new__(cls, *args, **kwargs):
+        from netra_backend.app.config import UnifiedConfigManager as _UnifiedConfigManager
+        return _UnifiedConfigManager(*args, **kwargs)
+
+# Lazy proxy for config_manager
+class _ConfigManagerProxy:
+    def __getattr__(self, name):
+        from netra_backend.app.config import config_manager
+        return getattr(config_manager, name)
+
+unified_config_manager = _ConfigManagerProxy()
 
 # Import configuration loader and validator
 from netra_backend.app.core.configuration.loader import ConfigurationLoader
@@ -100,9 +126,16 @@ def get_polymorphic_config(key: Optional[str] = None, default: Any = None):
         except (AttributeError, TypeError):
             return default
 
-# SSOT validation
-assert hasattr(UnifiedConfigManager, 'get_config'), "SSOT config manager missing get_config method"
-assert callable(get_config), "SSOT get_config function not callable"
+# SSOT validation (delayed to avoid circular imports)
+def _validate_ssot():
+    """Validate SSOT configuration system."""
+    from netra_backend.app.config import UnifiedConfigManager as _UnifiedConfigManager, get_config as _get_config
+    assert hasattr(_UnifiedConfigManager, 'get_config'), "SSOT config manager missing get_config method"
+    assert callable(_get_config), "SSOT get_config function not callable"
+
+# Defer validation to avoid circular import during module loading
+import atexit
+atexit.register(_validate_ssot)
 
 # Export all components including compatibility bridge
 __all__ = [
