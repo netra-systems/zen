@@ -196,15 +196,15 @@ class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
                 e2e_violations = []
                 unique_services = set(end_to_end_jwt_calls)
                 if len(unique_services) > 1:
-                        e2e_violations.append(f'E2E flow uses multiple JWT services: {list(unique_services)}')
+                    e2e_violations.append(f'E2E flow uses multiple JWT services: {list(unique_services)}')
                 if 'JWTHandler' not in end_to_end_jwt_calls:
                     e2e_violations.append('E2E flow bypasses SSOT JWTHandler completely')
                 non_ssot_services = [s for s in end_to_end_jwt_calls if s != 'JWTHandler']
                 if non_ssot_services:
                     e2e_violations.append(f'E2E flow uses non-SSOT services: {non_ssot_services}')
-                    if 'RemedationAuth' in end_to_end_jwt_calls:
-                        e2e_violations.append('E2E flow uses remediation auth instead of SSOT')
-                    self.assertEqual(len(e2e_violations), 0, f'END-TO-END SSOT VIOLATIONS: {e2e_violations}. Complete E2E flow must use ONLY JWTHandler.validate_token()')
+                if 'RemedationAuth' in end_to_end_jwt_calls:
+                    e2e_violations.append('E2E flow uses remediation auth instead of SSOT')
+                self.assertEqual(len(e2e_violations), 0, f'END-TO-END SSOT VIOLATIONS: {e2e_violations}. Complete E2E flow must use ONLY JWTHandler.validate_token()')
 
     def test_integration_ssot_websocket_context_creation_uses_ssot_validation(self):
         """
