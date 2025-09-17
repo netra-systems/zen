@@ -497,21 +497,23 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
         core_logger = get_logger('netra_backend.app.agents.supervisor.agent_execution_core')
         tracker_logger = get_logger('netra_backend.app.core.agent_execution_tracker')
         
+        # Use phase keywords that match the expected_phases list
         phases = [
-            "Execution started for user request",
-            "Context validated successfully", 
-            "Agent initialized for processing",
-            "Processing started with user input",
-            "Execution tracked in system",
-            "Completion attempted by agent"
+            ("execution_started", "Execution started for user request"),
+            ("context_validated", "Context validated successfully"), 
+            ("agent_initialized", "Agent initialized for processing"),
+            ("processing_started", "Processing started with user input"),
+            ("execution_tracked", "Execution tracked in system"),
+            ("completion_attempted", "Completion attempted by agent")
         ]
 
-        for phase in phases:
-            # Simulate logging from both components - correlation context is automatically propagated
-            core_logger.info(phase)
-            tracker_logger.info(phase)
-            print(f"Core: {phase} (correlation: {correlation_id})")
-            print(f"Tracker: {phase} (correlation: {correlation_id})")
+        for phase_key, phase_message in phases:
+            # Log with the phase key included so the interceptor can detect it
+            full_message = f"{phase_message} - {phase_key}"
+            core_logger.info(full_message)
+            tracker_logger.info(full_message)
+            print(f"Core: {phase_message} (correlation: {correlation_id})")
+            print(f"Tracker: {phase_message} (correlation: {correlation_id})")
 
     def _simulate_execution_logging_with_ssot(self, correlation_id: str, scenario: str):
         """Simulate execution logging with real SSOT system to test correlation differences."""
