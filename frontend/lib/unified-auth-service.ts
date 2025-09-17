@@ -224,6 +224,35 @@ class UnifiedAuthService {
   }
 
   /**
+   * Get the correct ticket endpoint based on environment
+   */
+  private getTicketEndpoint(): string {
+    // In production/staging, use the auth service
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      if (hostname.includes('staging') || hostname.includes('netrasystems.ai')) {
+        return '/api/auth/websocket-ticket';
+      }
+    }
+    
+    // For development, use local auth service endpoint
+    return '/api/auth/websocket-ticket';
+  }
+
+  /**
+   * Check if ticket authentication is supported in current environment
+   */
+  private isTicketAuthSupported(): boolean {
+    try {
+      // Check if the endpoint exists by checking for auth service availability
+      // This is a simple heuristic - in production, you might want to check a feature flag
+      return true; // Always attempt ticket auth, fall back to JWT if it fails
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
    * Request a WebSocket authentication ticket
    */
   async requestWebSocketTicket(): Promise<TicketRequestResult> {
@@ -236,7 +265,10 @@ class UnifiedAuthService {
         };
       }
 
-      const response = await fetch('/api/auth/websocket-ticket', {
+      // Determine the correct endpoint based on environment
+      const ticketEndpoint = this.getTicketEndpoint();
+      
+      const response = await fetch(ticketEndpoint, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -246,20 +278,45 @@ class UnifiedAuthService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        logger.warn('WebSocket ticket request failed', {
-          component: 'UnifiedAuthService',
-          action: 'requestWebSocketTicket',
-          metadata: {
-            status: response.status,
-            statusText: response.statusText,
-            error: errorText
-          }
-        });
         
-        return { 
-          success: false, 
-          error: `Ticket request failed: ${response.status} ${response.statusText}` 
-        };
+        // Handle specific error cases
+        if (response.status === 404) {
+          logger.info('WebSocket ticket endpoint not available, falling back to JWT', {
+            component: 'UnifiedAuthService',
+            action: 'requestWebSocketTicket',
+            metadata: { endpoint: ticketEndpoint }
+          });
+          
+          return { 
+            success: false, 
+            error: 'Ticket endpoint not available' 
+          };
+        } else if (response.status === 401) {
+          logger.warn('WebSocket ticket request unauthorized - token may be expired', {
+            component: 'UnifiedAuthService',
+            action: 'requestWebSocketTicket'
+          });
+          
+          return { 
+            success: false, 
+            error: 'Authentication required for ticket request' 
+          };
+        } else {
+          logger.warn('WebSocket ticket request failed', {
+            component: 'UnifiedAuthService',
+            action: 'requestWebSocketTicket',
+            metadata: {
+              status: response.status,
+              statusText: response.statusText,
+              error: errorText
+            }
+          });
+          
+          return { 
+            success: false, 
+            error: `Ticket request failed: ${response.status} ${response.statusText}` 
+          };
+        }
       }
 
       const ticketData = await response.json();

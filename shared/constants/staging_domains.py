@@ -79,7 +79,7 @@ DEPRECATED_STAGING_DOMAINS = {
         "*.staging.netrasystems.ai",  # Wrong subdomain format
         "https://app.staging.netrasystems.ai",
         "https://api.staging.netrasystems.ai",
-        "https://auth.staging.netrasystems.ai",
+        "https://auth-staging.netrasystems.ai",
     ],
     "CLOUD_RUN_DIRECT": [
         "https://netra-backend-staging-701982941522.us-central1.run.app",
@@ -236,10 +236,10 @@ def is_deprecated_staging_domain(domain_url: str) -> bool:
 LEGACY_DOMAIN_MAPPING = {
     # Map old domain patterns to new ones
     "https://app.staging.netrasystems.ai": STAGING_DOMAINS["FRONTEND_URL"],
-    "https://api.staging.netrasystems.ai": STAGING_DOMAINS["API_BASE_URL"],
-    "https://auth.staging.netrasystems.ai": STAGING_DOMAINS["AUTH_SERVICE_URL"],
-    "wss://api.staging.netrasystems.ai": STAGING_DOMAINS["WEBSOCKET_URL"],
-    "wss://api.staging.netrasystems.ai": STAGING_DOMAINS["WEBSOCKET_URL"],
+    "https://api-staging.netrasystems.ai": STAGING_DOMAINS["API_BASE_URL"],
+    "https://auth-staging.netrasystems.ai": STAGING_DOMAINS["AUTH_SERVICE_URL"],
+    "wss://api-staging.netrasystems.ai": STAGING_DOMAINS["WEBSOCKET_URL"],
+    "wss://api-staging.netrasystems.ai": STAGING_DOMAINS["WEBSOCKET_URL"],
 }
 
 
