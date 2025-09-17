@@ -532,10 +532,9 @@ class AgentCommunicationUserManagementTests(SSotBaseTestCase):
         
         # Test: Run in background
         await self.agent.run_in_background(mock_context, self.run_id, True)
-        
-        # Note: Background task creation doesn't wait for completion
-        # Verify this method executes without error
-        assert True
+
+        # Verify: run method was called with correct parameters
+        self.agent.run.assert_called_once_with(mock_context, self.run_id, True)
 
 
 class AgentCommunicationRetryMechanismsTests(SSotAsyncTestCase):
