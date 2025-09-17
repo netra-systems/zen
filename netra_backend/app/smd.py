@@ -2156,28 +2156,50 @@ class StartupOrchestrator:
             self.app.state.websocket_connection_pool = connection_pool
             self.logger.info("    [U+2713] WebSocketConnectionPool initialized")
             
-            # 3. Initialize AgentWebSocketBridge
-            # CRITICAL FIX: Always initialize websocket_factory to prevent "not associated with a value" error
-            # Use factory directly since get_agent_websocket_bridge requires request parameter
-            from netra_backend.app.factories.websocket_bridge_factory import create_agent_websocket_bridge
-            websocket_factory = create_agent_websocket_bridge()
-            
-            # Configure with proper parameters including connection pool
+            # 3. Initialize AgentWebSocketBridge using proper factory pattern
+            # CRITICAL FIX: Use WebSocketBridgeFactory.configure() method instead of create_agent_websocket_bridge()
+            # The factory pattern provides proper configuration interface
+            from netra_backend.app.factories.websocket_bridge_factory import get_websocket_bridge_factory
+            websocket_factory = get_websocket_bridge_factory()
+
+            # Configure the factory (this is what provides the configure method)
+            websocket_factory.configure()
+
+            # Create the actual bridge instance for app.state storage
+            # Use the factory method to create a proper bridge instance
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            from shared.id_generation import UnifiedIdGenerator
+
+            # Create a system context for startup configuration
+            system_context = UserExecutionContext(
+                user_id="system-startup",
+                thread_id=UnifiedIdGenerator.generate_base_id("system_thread"),
+                run_id=UnifiedIdGenerator.generate_base_id("system_run"),
+                request_id=UnifiedIdGenerator.generate_base_id("system_req")
+            )
+
+            # Create the actual bridge instance using the factory
+            bridge_instance = websocket_factory.create_agent_bridge(user_context=system_context)
+
+            # Configure the bridge instance with runtime dependencies
             if hasattr(self.app.state, 'agent_supervisor'):
                 # Create a simple health monitor for now
                 class SimpleHealthMonitor:
                     async def check_health(self):
                         return {"status": "healthy"}
-                
+
                 health_monitor = SimpleHealthMonitor()
-                
+
                 # Note: With UserExecutionContext pattern, registry is created per-request
-                websocket_factory.configure(
+                bridge_instance.configure(
                     connection_pool=connection_pool,
                     agent_registry=None,  # Per-request in UserExecutionContext pattern
                     health_monitor=health_monitor
                 )
+
+            # Store both factory and bridge instance in app.state
             self.app.state.websocket_bridge_factory = websocket_factory
+            self.app.state.agent_websocket_bridge = bridge_instance
             self.logger.info("    [U+2713] AgentWebSocketBridge configured with connection pool")
             
             # 4. AgentInstanceFactory - REMOVED SINGLETON PATTERN
