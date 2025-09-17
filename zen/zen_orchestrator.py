@@ -1941,7 +1941,12 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
     """Create default instance configurations"""
     return [
         InstanceConfig(
-            command="1+1 = ",
+            command="1+1 ",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="Write a 10k line python script to solve world peace: ",
             permission_mode="acceptEdits",
             output_format=output_format
         )
