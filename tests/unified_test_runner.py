@@ -2299,7 +2299,37 @@ class UnifiedTestRunner:
         except Exception as e:
             print(f"[WARNING] Failed to configure E2E bypass key: {e}")
             print("[WARNING] E2E tests requiring authentication may fail")
-    
+
+    def _configure_docker_bypass_environment(self, args: argparse.Namespace):
+        """Configure environment for Docker bypass fallback (Issue #1082).
+
+        Sets up staging environment configuration to allow tests to run
+        when Docker infrastructure fails.
+        """
+        print("[ISSUE-1082] Configuring Docker bypass environment...")
+
+        from dev_launcher.isolated_environment import IsolatedEnvironment
+        env = IsolatedEnvironment()
+
+        # Force staging environment configuration
+        env.set('ENVIRONMENT', 'staging', 'docker_bypass_1082')
+        env.set('BYPASS_STAGING_HEALTH_CHECK', 'true', 'docker_bypass_1082')
+
+        # Configure staging URLs (Issue #1278 domain update)
+        env.set('BACKEND_URL', 'https://staging.netrasystems.ai', 'docker_bypass_1082')
+        env.set('FRONTEND_URL', 'https://staging.netrasystems.ai', 'docker_bypass_1082')
+        env.set('WEBSOCKET_URL', 'wss://api.staging.netrasystems.ai/api/v1/websocket', 'docker_bypass_1082')
+
+        # Configure Docker bypass flags
+        env.set('DOCKER_BYPASS_MODE', 'true', 'docker_bypass_1082')
+        env.set('USE_STAGING_SERVICES', 'true', 'docker_bypass_1082')
+
+        # Enable E2E auth bypass for staging tests
+        if not env.get_env('E2E_OAUTH_SIMULATION_KEY'):
+            env.set('E2E_OAUTH_SIMULATION_KEY', 'docker-bypass-e2e-key-1082', 'docker_bypass_1082')
+
+        print("[ISSUE-1082] Docker bypass environment configured - tests will use staging services")
+
     def _check_service_availability(self, args: argparse.Namespace):
         """Check availability of required real services before running tests."""
         
@@ -2392,11 +2422,18 @@ class UnifiedTestRunner:
             if self._detect_staging_environment(args) and hasattr(args, 'prefer_staging') and args.prefer_staging:
                 print("[INFO] Staging environment with --prefer-staging: using remote services instead of Docker")
                 return False
-            # Special handling for staging environment  
+            # Special handling for staging environment
             elif self._detect_staging_environment(args):
                 print("[INFO] Staging environment: using remote staging services instead of Docker")
                 return False
             # For other environments with --no-docker, truly disable Docker
+            return False
+
+        # Issue #1082: Docker bypass mechanism for infrastructure failure fallback
+        if hasattr(args, 'docker_bypass') and args.docker_bypass:
+            print("[ISSUE-1082] Docker bypass enabled - using staging environment fallback")
+            print("[ISSUE-1082] This allows critical test execution when Docker Alpine builds fail")
+            self._configure_docker_bypass_environment(args)
             return False
         
         # Always require Docker if explicitly requested (but --no-docker overrides this above)
@@ -4367,6 +4404,12 @@ def main():
         "--skip-docker",
         action="store_true",
         help="Skip Docker initialization for tests that don't need it (e.g., unit tests)"
+    )
+
+    parser.add_argument(
+        "--docker-bypass",
+        action="store_true",
+        help="Bypass Docker requirements and use staging environment for testing (Issue #1082 fallback)"
     )
     
     parser.add_argument(

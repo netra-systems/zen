@@ -166,7 +166,7 @@ def load_auth_security_config() -> AuthClientSecurityConfig:
     
     config = AuthClientSecurityConfig(
         service_secret=env.get("SERVICE_SECRET"),
-        jwt_secret=env.get("JWT_SECRET_KEY"),
+        jwt_secret=None,  # JWT operations delegated to auth service - SSOT compliance
         encryption_key=env.get("FERNET_KEY"),
         require_https=env.get("REQUIRE_HTTPS", "false").lower() == "true",
         token_validation_enabled=env.get("TOKEN_VALIDATION_ENABLED", "true").lower() == "true",

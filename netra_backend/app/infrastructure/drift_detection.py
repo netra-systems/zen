@@ -277,28 +277,10 @@ class ServiceConfigurationValidator:
         """Validate authentication configuration consistency."""
         results = []
         
-        # Check JWT secret configuration
-        jwt_secret = self.env.get("JWT_SECRET_KEY")
+        # JWT secret configuration check removed - JWT operations delegated to auth service (SSOT compliance)
         auth_service_url = self.env.get("AUTH_SERVICE_URL")
-        
-        if auth_service_url and not jwt_secret:
-            results.append(DriftDetectionResult(
-                item_key="auth_jwt_consistency",
-                expected_value="JWT secret when auth service configured",
-                actual_value="auth_service configured, jwt_secret missing",
-                severity=DriftSeverity.CRITICAL,
-                message="Auth service is configured but JWT secret is missing",
-                source="environment"
-            ))
-        elif jwt_secret and auth_service_url:
-            results.append(DriftDetectionResult(
-                item_key="auth_jwt_consistency",
-                expected_value="JWT secret and auth service both configured",
-                actual_value="both configured",
-                severity=DriftSeverity.INFO,
-                message="Authentication configuration is consistent",
-                source="environment"
-            ))
+
+        # JWT consistency check removed - JWT validation is now auth service responsibility
         
         return results
     

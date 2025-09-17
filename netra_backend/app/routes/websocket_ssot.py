@@ -1382,7 +1382,15 @@ class WebSocketSSOTRouter:
                         if not is_websocket_connected_and_ready(websocket, connection_id):
                             logger.error(f"WebSocket not ready after handshake timeout for connection {connection_id}")
                             break
-                    
+
+                    # CRITICAL FIX FOR ISSUE #1061: Final state validation immediately before receive_text()
+                    # Recent staging logs (Sept 14, 2025) show the error still occurs after several successful messages,
+                    # indicating a race condition between handshake validation and the actual receive operation
+                    final_validation_start = time.time()
+                    if not is_websocket_connected_and_ready(websocket, connection_id):
+                        logger.warning(f"WebSocket state changed between handshake validation and receive for connection {connection_id}")
+                        break
+
                     receive_start = time.time()
                     raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=websocket_timeout)
                     receive_duration = time.time() - receive_start
@@ -1611,7 +1619,11 @@ class WebSocketSSOTRouter:
                         if not is_websocket_connected_and_ready(websocket, connection_id):
                             logger.error(f"[FACTORY MODE] WebSocket not ready after handshake timeout for user {user_id[:8]}")
                             break
-                    
+                    # CRITICAL FIX FOR ISSUE #1061: Final state validation immediately before receive_text() in factory mode
+                    if not is_websocket_connected_and_ready(websocket, connection_id):
+                        logger.warning(f"[FACTORY MODE] WebSocket state changed between handshake validation and receive for user {user_id[:8]}")
+                        break
+
                     raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=websocket_timeout)
                     message_data = json.loads(raw_message)
 
@@ -1655,8 +1667,13 @@ class WebSocketSSOTRouter:
                 connection_id = getattr(user_context, 'websocket_connection_id', None)
                 if not is_websocket_connected_and_ready(websocket, connection_id):
                     break
-                
+
                 try:
+                    # CRITICAL FIX FOR ISSUE #1061: Final state validation immediately before receive_text() in isolated mode
+                    if not is_websocket_connected_and_ready(websocket, connection_id):
+                        logger.warning(f"[ISOLATED MODE] WebSocket state changed between validation and receive for user {user_id[:8]}")
+                        break
+
                     raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=websocket_timeout)
                     message_data = json.loads(raw_message)
                     

@@ -2,6 +2,8 @@
 # Only includes services needed for integration tests
 # Avoids Docker Hub rate limits and build complexity
 
+version: '3.8'
+
 services:
   # ============================================
   # MINIMAL INFRASTRUCTURE FOR INTEGRATION TESTS
