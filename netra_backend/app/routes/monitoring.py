@@ -641,6 +641,132 @@ if WEBSOCKET_MONITORING_AVAILABLE:
     router.include_router(websocket_monitoring_router, prefix="/websocket", tags=["websocket-monitoring"])
     logger.info(" PASS:  Phase 2: WebSocket monitoring endpoints included in main monitoring router")
 
+# =============================================================================
+# PERFORMANCE AND SYSTEM MONITORING ENDPOINTS (Issue #966)
+# =============================================================================
+
+class PerformanceResponse(BaseModel):
+    """Response model for performance endpoint"""
+    timestamp: datetime = Field(..., description="Metrics timestamp")
+    response_times: Dict[str, Any] = Field(..., description="Response time statistics")
+    throughput: Dict[str, Any] = Field(..., description="Throughput metrics")
+    resources: Dict[str, Any] = Field(..., description="Resource utilization")
+    health_score: float = Field(..., description="Overall performance health score")
+
+class SystemStatsResponse(BaseModel):
+    """Response model for stats endpoint"""
+    timestamp: datetime = Field(..., description="Stats timestamp")
+    request_counts: Dict[str, Any] = Field(..., description="24-hour request statistics")
+    agent_stats: Dict[str, Any] = Field(..., description="Agent execution statistics")
+    websocket_metrics: Dict[str, Any] = Field(..., description="WebSocket connection statistics")
+    error_rates: Dict[str, Any] = Field(..., description="Error rate statistics")
+
+@router.get("/performance", response_model=PerformanceResponse)
+async def get_performance_metrics(current_user: Dict[str, Any] = Depends(get_current_user)) -> PerformanceResponse:
+    """Get comprehensive performance metrics including response times, throughput, and resource usage."""
+    try:
+        logger.info(f"Performance metrics requested by user: {current_user.get('user_id', 'unknown')}")
+        
+        # Import performance collector
+        from netra_backend.app.monitoring.performance_collector import get_performance_collector
+        
+        collector = get_performance_collector()
+        performance_data = await collector.get_performance_summary()
+        
+        return PerformanceResponse(
+            timestamp=datetime.now(),
+            response_times=performance_data.get("response_times", {}),
+            throughput=performance_data.get("throughput", {}),
+            resources=performance_data.get("resources", {}),
+            health_score=performance_data.get("health_score", 100.0)
+        )
+        
+    except ImportError as e:
+        logger.warning(f"Performance collector not available: {e}")
+        # Fallback to basic metrics
+        return PerformanceResponse(
+            timestamp=datetime.now(),
+            response_times={"message": "Performance collector not available"},
+            throughput={"message": "Performance collector not available"},
+            resources={"message": "Performance collector not available"},
+            health_score=0.0
+        )
+    except Exception as e:
+        logger.error(f"Error getting performance metrics: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get performance metrics: {str(e)}")
+
+@router.get("/health/metrics")
+async def get_health_metrics(current_user: Dict[str, Any] = Depends(get_current_user)) -> Dict[str, Any]:
+    """Get comprehensive health metrics including service health and component status."""
+    try:
+        logger.info(f"Health metrics requested by user: {current_user.get('user_id', 'unknown')}")
+        
+        # Get health monitor data
+        from netra_backend.app.core.health_checks import get_health_monitor
+        
+        health_monitor = get_health_monitor()
+        health_status = await health_monitor.get_health_status()
+        
+        # Get database health
+        db_status = await get_connection_status()
+        
+        # Combine health data
+        metrics = {
+            "timestamp": datetime.now().isoformat(),
+            "service_health": health_status,
+            "database_health": db_status,
+            "component_status": {
+                check_name: {
+                    "status": check_data["status"],
+                    "message": check_data["message"],
+                    "duration_ms": check_data.get("duration_ms", 0),
+                    "last_checked": check_data.get("last_checked")
+                }
+                for check_name, check_data in health_status.get("checks", {}).items()
+            },
+            "overall_status": health_status.get("status", "unknown")
+        }
+        
+        return metrics
+        
+    except Exception as e:
+        logger.error(f"Error getting health metrics: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get health metrics: {str(e)}")
+
+@router.get("/stats", response_model=SystemStatsResponse)
+async def get_system_stats(current_user: Dict[str, Any] = Depends(get_current_user)) -> SystemStatsResponse:
+    """Get 24-hour rolling statistics including request counts, agent stats, and WebSocket metrics."""
+    try:
+        logger.info(f"System stats requested by user: {current_user.get('user_id', 'unknown')}")
+        
+        # Import stats aggregator
+        from netra_backend.app.monitoring.stats_aggregator import get_stats_aggregator
+        
+        aggregator = get_stats_aggregator()
+        stats_data = await aggregator.get_24h_stats()
+        
+        return SystemStatsResponse(
+            timestamp=datetime.now(),
+            request_counts=stats_data.get("request_counts", {}),
+            agent_stats=stats_data.get("agent_stats", {}),
+            websocket_metrics=stats_data.get("websocket_metrics", {}),
+            error_rates=stats_data.get("error_rates", {})
+        )
+        
+    except ImportError as e:
+        logger.warning(f"Stats aggregator not available: {e}")
+        # Fallback to basic stats
+        return SystemStatsResponse(
+            timestamp=datetime.now(),
+            request_counts={"message": "Stats aggregator not available"},
+            agent_stats={"message": "Stats aggregator not available"},
+            websocket_metrics={"message": "Stats aggregator not available"},
+            error_rates={"message": "Stats aggregator not available"}
+        )
+    except Exception as e:
+        logger.error(f"Error getting system stats: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get system stats: {str(e)}")
+
 @router.get("/websocket/status")
 async def get_websocket_monitoring_status(
     current_user: Dict[str, Any] = Depends(get_current_user)

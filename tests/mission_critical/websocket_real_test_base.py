@@ -1503,21 +1503,21 @@ async def assert_agent_events_received(
     
     if not success:
         validation = test_context.validate_agent_events(required_events)
-        missing = validation[missing_events]
-        captured = validation[captured_events"]"
+        missing = validation["missing_events"]
+        captured = validation["captured_events"]
         
         raise AssertionError(
-            fMissing required agent events: {missing}. 
-            fCaptured events: {captured}
+            f"Missing required agent events: {missing}. "
+            f"Captured events: {captured}"
         )
 
 
 async def send_test_agent_request(
     test_context: WebSocketContext,
-    agent_name: str = "test_agent,"
-    task: str = Perform a simple test task
+    agent_name: str = "test_agent",
+    task: str = "Perform a simple test task"
 ) -> Dict[str, Any]:
-""
+    """
     Send a test agent request and return the message sent.
     
     Args:
@@ -1527,18 +1527,15 @@ async def send_test_agent_request(
         
     Returns:
         The message that was sent
-    
+    """
     message = {
-        type: "agent_request,"
-        agent_name": agent_name,"
-        task: task,
-        user_id": test_context.user_context.user_id,"
-        thread_id: test_context.user_context.thread_id,
-        timestamp: datetime.now(timezone.utc).isoformat()"
-        timestamp: datetime.now(timezone.utc).isoformat()"
+        "type": "agent_request",
+        "agent_name": agent_name,
+        "task": task,
+        "user_id": test_context.user_context.user_id,
+        "thread_id": test_context.user_context.thread_id,
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }
     
     await test_context.send_message(message)
     return message
-
-"""
