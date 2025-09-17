@@ -111,7 +111,7 @@ Create a JSON file with your tasks:
 - [Changelog](docs/changelog.md) - Version history and changes
 
 ## Zen --help
-`zen --help`
+```zen --help```
 yields:
 ```
 usage: zen [-h] [--workspace WORKSPACE] [--config CONFIG] [--dry-run] [--list-commands] [--inspect-command INSPECT_COMMAND]
