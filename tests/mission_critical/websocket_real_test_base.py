@@ -60,7 +60,7 @@ def require_docker_services() -> None:
     try:
         manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
         if not manager.is_docker_available():
-            pytest.fail("Docker services required but not available. Start Docker and run: docker compose -f docker-compose.alpine-test.yml up -d")"
+            pytest.fail("Docker services required but not available. Start Docker and run: docker compose -f docker-compose.alpine-test.yml up -d")
     except Exception as e:
         pytest.fail(f"Docker services check failed: {e}. Ensure Docker is running.")
 

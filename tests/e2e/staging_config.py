@@ -28,11 +28,11 @@ class StagingURLs:
     auth_url: str = "https://staging.netrasystems.ai"
     frontend_url: str = "https://staging.netrasystems.ai"
     
-    # WebSocket URL (FIXED: Use api-staging.netrasystems.ai for WebSocket)
+    # WebSocket URL (FIXED: Use staging.netrasystems.ai for WebSocket since api-staging does not resolve)
     @property
     def websocket_url(self) -> str:
-        """Get WebSocket URL using correct api-staging domain."""
-        return "wss://api-staging.netrasystems.ai/ws"
+        """Get WebSocket URL using correct staging domain."""
+        return "wss://staging.netrasystems.ai/ws"
     
     # API endpoints
     @property

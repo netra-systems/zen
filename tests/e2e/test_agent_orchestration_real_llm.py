@@ -35,27 +35,27 @@ from shared.isolated_environment import get_env
 
         # CLAUDE.md COMPLIANCE: Absolute imports only
 from netra_backend.app.schemas.user_plan import PlanTier
-from tests.e2e.agent_conversation_helpers import ( )
-AgentConversationTestCore,
-ConversationFlowSimulator,
-ConversationFlowValidator,
-AgentConversationTestUtils,
-RealTimeUpdateValidator)
+from tests.e2e.agent_conversation_helpers import (
+    AgentConversationTestCore,
+    ConversationFlowSimulator,
+    ConversationFlowValidator,
+    AgentConversationTestUtils,
+    RealTimeUpdateValidator
+)
 
         # Mission Critical WebSocket Validation
 class MissionCriticalWebSocketValidator:
     """Validates WebSocket events per CLAUDE.md requirements."""
 
-    REQUIRED_EVENTS = { }
-    "agent_started",
-    "agent_thinking",
-    "tool_executing",
-    "tool_completed",
-    "agent_completed"
-    
+    REQUIRED_EVENTS = {
+        "agent_started",
+        "agent_thinking",
+        "tool_executing",
+        "tool_completed",
+        "agent_completed"
+    }
 
     def __init__(self):
-        pass
         self.received_events: List[Dict] = []
         self.event_counts: Dict[str, int] = {}
         self.start_time = time.time()
@@ -64,37 +64,37 @@ class MissionCriticalWebSocketValidator:
     def record_event(self, event: Dict) -> None:
         """Record a WebSocket event."""
         event_type = event.get("type", "unknown")
-        self.received_events.append({ })
-        **event,
-        "received_at": time.time() - self.start_time
-    
+        self.received_events.append({
+            **event,
+            "received_at": time.time() - self.start_time
+        })
         self.event_counts[event_type] = self.event_counts.get(event_type, 0) + 1
-        logger.info("")
+        logger.info(f"WebSocket event recorded: {event_type}")
 
     def validate_mission_critical_events(self) -> tuple[bool, List[str]]:
         """Validate all mission critical events were received."""
         failures = []
 
-    # Check for missing required events
+        # Check for missing required events
         missing = self.REQUIRED_EVENTS - set(self.event_counts.keys())
         if missing:
-        failures.append("")
+            failures.append(f"Missing required events: {missing}")
 
         # Validate event ordering
         if self.received_events:
-        first_event = self.received_events[0].get("type")
-        if first_event != "agent_started":
-        failures.append("")
+            first_event = self.received_events[0].get("type")
+            if first_event != "agent_started":
+                failures.append(f"First event should be agent_started, got {first_event}")
 
-        last_event = self.received_events[-1].get("type")
-        if last_event not in ["agent_completed", "final_report"]:
-        failures.append("")
+            last_event = self.received_events[-1].get("type")
+            if last_event not in ["agent_completed", "final_report"]:
+                failures.append(f"Last event should be completion event, got {last_event}")
 
-                    # Validate tool event pairing
+        # Validate tool event pairing
         tool_starts = self.event_counts.get("tool_executing", 0)
         tool_ends = self.event_counts.get("tool_completed", 0)
         if tool_starts != tool_ends:
-        failures.append("")
+            failures.append(f"Tool events mismatch: {tool_starts} starts vs {tool_ends} ends")
 
         return len(failures) == 0, failures
 
@@ -102,17 +102,13 @@ class MissionCriticalWebSocketValidator:
         """Generate comprehensive validation report."""
         is_valid, failures = self.validate_mission_critical_events()
 
-        report = [ ]
-        "
-         + =" * 80,
-        "MISSION CRITICAL WEBSOCKET EVENT VALIDATION",
-        "=" * 80,
-        "",
-        "",
-        "",
-        "
-        Required Events Coverage:"
-    
+        report = [
+            "=" * 80,
+            "MISSION CRITICAL WEBSOCKET EVENT VALIDATION",
+            "=" * 80,
+            "",
+            "Required Events Coverage:"
+        ]
 
         for event in self.REQUIRED_EVENTS:
         count = self.event_counts.get(event, 0)
