@@ -52,8 +52,9 @@ Netra Apex is built as a microservice architecture with the following core servi
 
 4. **Docker Development Environment**
    ```bash
-   # Start all services
-   docker-compose up -d
+   # Start all services using Docker configuration
+   cd docker
+   docker-compose -f docker-compose.alpine-dev.yml up -d
 
    # Or use the unified test runner for development
    python tests/unified_test_runner.py --real-services
