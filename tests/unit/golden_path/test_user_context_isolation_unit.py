@@ -222,7 +222,7 @@ class AdvancedUserContextFactory:
         mock_notifier.user_context = user_context
         
         # Track events with isolation validation
-        async def isolated_send_event(event_type: str, event_data: Dict[str, Any]):
+        def isolated_send_event(event_type: str, event_data: Dict[str, Any]):
             """Send event with isolation validation."""
             event = {
                 "type": event_type,
@@ -237,9 +237,11 @@ class AdvancedUserContextFactory:
                 event,
                 user_context
             )
+            # Return None to avoid coroutine warning
+            return None
         
-        # Configure event methods with isolation
-        mock_notifier.send_event = AsyncMock(side_effect=isolated_send_event)
+        # Configure event methods with isolation (using AsyncMock with proper return values)
+        mock_notifier.send_event = AsyncMock(side_effect=lambda event_type, data: isolated_send_event(event_type, data))
         mock_notifier.notify_agent_started = AsyncMock(side_effect=lambda data: isolated_send_event("agent_started", data))
         mock_notifier.notify_agent_thinking = AsyncMock(side_effect=lambda data: isolated_send_event("agent_thinking", data))
         mock_notifier.notify_tool_executing = AsyncMock(side_effect=lambda data: isolated_send_event("tool_executing", data))
