@@ -162,13 +162,35 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
             def log_interceptor(record):
                 """Intercept loguru logs and extract correlation data."""
                 try:
-                    # Extract correlation context from loguru record
-                    extra = record.get('extra', {})
-                    correlation_id = extra.get('request_id') or extra.get('correlation_id')
+                    # Debug the record structure
+                    print(f"Record type: {type(record)}")
+                    print(f"Record attributes: {dir(record)}")
+                    
+                    # Handle loguru record object properly - try accessing via attributes
+                    if hasattr(record, 'extra'):
+                        extra = record.extra
+                    else:
+                        extra = {}
+                    
+                    correlation_id = extra.get('request_id') or extra.get('correlation_id') or extra.get('trace_id')
+                    
+                    # Get component name from the record's name
+                    if hasattr(record, 'name'):
+                        logger_name = record.name
+                    else:
+                        logger_name = 'unknown'
+                        
+                    component = logger_name.split('.')[-1] if '.' in logger_name else logger_name
+                    
+                    # Get message
+                    if hasattr(record, 'message'):
+                        message = str(record.message)
+                    else:
+                        message = str(record)
                     
                     correlation_data = {
-                        'component': record.get('name', 'unknown').split('.')[-1] if '.' in record.get('name', '') else record.get('name', 'unknown'),
-                        'message': record.get('message', ''),
+                        'component': component,
+                        'message': message,
                         'correlation_id': correlation_id,
                         'timestamp': time.time(),
                         'trackable': bool(correlation_id)
@@ -281,19 +303,22 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
             def phase_interceptor(record):
                 """Intercept loguru logs and extract phase data."""
                 try:
-                    # Extract correlation context from loguru record
-                    extra = record.get('extra', {})
-                    correlation_id_from_record = extra.get('request_id') or extra.get('correlation_id')
+                    # Handle loguru record object properly
+                    extra = record['extra'] if 'extra' in record else {}
+                    correlation_id_from_record = extra.get('request_id') or extra.get('correlation_id') or extra.get('trace_id')
                     
                     if correlation_id_from_record == correlation_id:
-                        msg_lower = record.get('message', '').lower()
+                        message = str(record['message']) if 'message' in record else str(record)
+                        msg_lower = message.lower()
                         for phase in expected_phases:
                             # Enhanced phase matching with flexible keyword detection
                             phase_keywords = phase.replace('_', ' ').split()
                             if all(keyword in msg_lower for keyword in phase_keywords):
+                                logger_name = record.get('name', 'unknown')
+                                component = logger_name.split('.')[-1] if '.' in logger_name else logger_name
                                 tracked_phases.append({
                                     'phase': phase,
-                                    'component': record.get('name', 'unknown').split('.')[-1] if '.' in record.get('name', '') else record.get('name', 'unknown'),
+                                    'component': component,
                                     'traceable': True
                                 })
                                 break

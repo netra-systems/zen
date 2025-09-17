@@ -16,12 +16,12 @@ import { render, screen, waitFor, act, renderHook } from '@testing-library/react
 import { AuthProvider, useAuth } from '@/auth/context';
 import { AuthGuard } from '@/components/AuthGuard';
 import { unifiedAuthService } from '@/auth/unified-auth-service';
-import { jwtDecode } from 'jwt-decode';
+// jwt-decode removed - using auth service for token handling
 import { User } from '@/types';
 
 // Mock dependencies
 jest.mock('@/auth/unified-auth-service');
-jest.mock('jwt-decode');
+// jwt-decode mock removed - auth service handles token parsing
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: jest.fn(),
@@ -72,10 +72,13 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       const token2 = generateMockToken({ email: 'user2@example.com' });
       const token3 = generateMockToken({ email: 'user3@example.com' });
       
-      (jwtDecode as jest.Mock).mockImplementation((token) => {
+      // Mock auth service to return user info for different tokens
+      (unifiedAuthService.getCurrentUser as jest.Mock).mockImplementation(() => {
+        const token = (unifiedAuthService.getToken as jest.Mock)();
         if (token === token1) return generateMockUser({ email: 'user1@example.com' });
         if (token === token2) return generateMockUser({ email: 'user2@example.com' });
         if (token === token3) return generateMockUser({ email: 'user3@example.com' });
+        return null;
       });
       
       const { rerender } = render(
