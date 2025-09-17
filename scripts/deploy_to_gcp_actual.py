@@ -182,12 +182,12 @@ class GCPDeployer:
                 environment_vars={
                     "NODE_ENV": "production",
                     "NEXT_PUBLIC_ENVIRONMENT": "staging",  # CRITICAL: Controls environment-specific behavior
-                    "NEXT_PUBLIC_API_URL": "https://api-staging.netrasystems.ai",  # CRITICAL: Backend API endpoint
-                    "NEXT_PUBLIC_WS_URL": "wss://api-staging.netrasystems.ai",  # CRITICAL: WebSocket endpoint
+                    "NEXT_PUBLIC_API_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend API endpoint
+                    "NEXT_PUBLIC_WS_URL": "wss://api.staging.netrasystems.ai",  # CRITICAL: WebSocket endpoint
                     "NEXT_PUBLIC_AUTH_URL": "https://staging.netrasystems.ai",  # CRITICAL: Auth service endpoint
                     "NEXT_PUBLIC_AUTH_SERVICE_URL": "https://staging.netrasystems.ai",  # CRITICAL: Auth service alternative
                     "NEXT_PUBLIC_AUTH_API_URL": "https://staging.netrasystems.ai",  # CRITICAL: Auth API endpoint
-                    "NEXT_PUBLIC_BACKEND_URL": "https://api-staging.netrasystems.ai",  # CRITICAL: Backend alternative endpoint
+                    "NEXT_PUBLIC_BACKEND_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend alternative endpoint
                     "NEXT_PUBLIC_FRONTEND_URL": "https://staging.netrasystems.ai",  # CRITICAL: OAuth redirects
                     "NEXT_PUBLIC_FORCE_HTTPS": "true",  # CRITICAL: Security enforcement
                     "NEXT_PUBLIC_GTM_CONTAINER_ID": "GTM-WKP28PNQ",  # Analytics tracking
@@ -2621,7 +2621,7 @@ DOMAIN CONFIGURATION (CRITICAL - Issue #1278):
   - Backend: https://staging.netrasystems.ai
   - Auth: https://staging.netrasystems.ai  
   - Frontend: https://staging.netrasystems.ai
-  - WebSocket: wss://api-staging.netrasystems.ai
+  - WebSocket: wss://api.staging.netrasystems.ai
 
 See SPEC/gcp_deployment.xml for detailed guidelines.
         """

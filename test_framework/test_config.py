@@ -284,7 +284,7 @@ def configure_gcp_staging_environment():
     # CRITICAL DOMAIN CONFIGURATION UPDATE (Issue #1278): Use correct staging URLs
     # Use SSOT staging domains instead of deprecated *.staging.netrasystems.ai
     staging_url = env.get("STAGING_URL", "https://staging.netrasystems.ai")
-    staging_api_url = env.get("STAGING_API_URL", "https://api-staging.netrasystems.ai")
+    staging_api_url = env.get("STAGING_API_URL", "https://api.staging.netrasystems.ai")
     staging_auth_url = env.get("STAGING_AUTH_URL", "https://staging.netrasystems.ai")
     staging_frontend_url = env.get("STAGING_FRONTEND_URL", "https://staging.netrasystems.ai")
     
@@ -300,7 +300,7 @@ def configure_gcp_staging_environment():
     env.set("FRONTEND_URL", staging_frontend_url, source="gcp_staging_config")
     
     # WebSocket URL - CRITICAL: Use correct staging domain
-    env.set("WS_BASE_URL", env.get("WS_BASE_URL", "wss://api-staging.netrasystems.ai/ws"), source="gcp_staging_config")
+    env.set("WS_BASE_URL", env.get("WS_BASE_URL", "wss://api.staging.netrasystems.ai/ws"), source="gcp_staging_config")
     
     # Enable observability
     env.set("ENABLE_OBSERVABILITY", "true", source="gcp_staging_config")

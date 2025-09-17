@@ -4255,7 +4255,7 @@ def infrastructure_resilience_check():
             try:
                 import socket
                 # Test if we can reach typical staging endpoints
-                test_hosts = ['staging.netrasystems.ai', 'api-staging.netrasystems.ai']
+                test_hosts = ['staging.netrasystems.ai', 'api.staging.netrasystems.ai']
                 for host in test_hosts:
                     try:
                         socket.gethostbyname(host)

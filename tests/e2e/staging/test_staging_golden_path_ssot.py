@@ -51,7 +51,7 @@ logger = get_logger(__name__)
 class StagingEnvironmentConfig:
     """Configuration for staging environment testing."""
     base_url: str = "https://staging.netrasystems.ai"
-    websocket_url: str = "wss://api-staging.netrasystems.ai"
+    websocket_url: str = "wss://api.staging.netrasystems.ai"
     auth_endpoint: str = "/auth/test-login"
     websocket_endpoint: str = "/ws"
     timeout: int = 60

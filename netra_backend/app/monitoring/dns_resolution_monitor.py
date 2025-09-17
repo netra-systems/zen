@@ -2,14 +2,14 @@
 DNS Resolution Monitor for Issue #1278
 
 CRITICAL PURPOSE: Monitor DNS resolution for critical staging domains,
-specifically api-staging.netrasystems.ai, to detect infrastructure
+specifically api.staging.netrasystems.ai, to detect infrastructure
 issues before they impact the application.
 
 Business Impact: Prevents DNS-related outages affecting $500K+ ARR platform
 by providing early warning of DNS resolution failures.
 
 Issue #1278 Focus:
-- Monitor api-staging.netrasystems.ai resolution
+- Monitor api.staging.netrasystems.ai resolution
 - Track resolution times and failures
 - Detect DNS propagation issues
 - Validate load balancer IP assignments
@@ -97,7 +97,7 @@ class DNSResolutionMonitor:
         # Critical domains for Issue #1278
         self.critical_domains = [
             "staging.netrasystems.ai",
-            "api-staging.netrasystems.ai"
+            "api.staging.netrasystems.ai"
         ]
         
         # DNS servers to test against (Google, Cloudflare, system default)
@@ -528,7 +528,7 @@ class DNSResolutionMonitor:
         
         output.append("\n" + "!" * 60)
         output.append("DNS MONITORING SYSTEM ACTIVE:")
-        output.append("✅ Continuous monitoring of api-staging.netrasystems.ai")
+        output.append("✅ Continuous monitoring of api.staging.netrasystems.ai")
         output.append("✅ Multiple DNS server validation (Google, Cloudflare, System)")
         output.append("✅ Resolution time and consistency tracking")
         output.append("✅ Early warning for DNS infrastructure issues")

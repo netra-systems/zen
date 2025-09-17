@@ -49,7 +49,7 @@ class TestGoldenPathValidationStaging(SSotAsyncTestCase):
         return {
             "backend_url": "https://staging.netrasystems.ai",
             "frontend_url": "https://staging.netrasystems.ai",
-            "websocket_url": "wss://api-staging.netrasystems.ai/ws",
+            "websocket_url": "wss://api.staging.netrasystems.ai/ws",
             "auth_service_url": "https://staging.netrasystems.ai/auth",
             "demo_mode": env.get("DEMO_MODE", "1") == "1"
         }

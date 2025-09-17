@@ -48,7 +48,7 @@ class TestIssue1278GoldenPathUserFlow(SSotAsyncTestCase):
         cls.staging_endpoints = {
             'frontend': 'https://staging.netrasystems.ai',
             'backend': 'https://staging.netrasystems.ai', 
-            'websocket': 'wss://api-staging.netrasystems.ai/ws',
+            'websocket': 'wss://api.staging.netrasystems.ai/ws',
             'auth': 'https://staging.netrasystems.ai/api/auth'
         }
         cls.test_user_credentials = {

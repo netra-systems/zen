@@ -27,8 +27,8 @@ class StagingConfig:
     FRONTEND_URL: str = "https://staging.netrasystems.ai"
 
     # WebSocket coordination endpoints
-    WEBSOCKET_URL: str = "wss://api-staging.netrasystems.ai/ws"
-    WEBSOCKET_HTTP_URL: str = "https://api-staging.netrasystems.ai"
+    WEBSOCKET_URL: str = "wss://api.staging.netrasystems.ai/ws"
+    WEBSOCKET_HTTP_URL: str = "https://api.staging.netrasystems.ai"
 
     # Service coordination timeouts (Issue #1176 coordination gap mitigation)
     SERVICE_DISCOVERY_TIMEOUT: int = 30

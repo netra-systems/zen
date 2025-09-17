@@ -33,7 +33,7 @@ class TestIssue1278PostFixValidation(SSotAsyncTestCase):
         self.staging_endpoints = {
             'backend': 'https://staging.netrasystems.ai',
             'api': 'https://staging.netrasystems.ai/api',
-            'websocket': 'wss://api-staging.netrasystems.ai/ws',
+            'websocket': 'wss://api.staging.netrasystems.ai/ws',
             'auth': 'https://staging.netrasystems.ai/auth'
         }
 

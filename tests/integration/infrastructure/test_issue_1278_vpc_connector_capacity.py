@@ -25,7 +25,7 @@ Business Value Justification (BVJ):
 
 **CRITICAL INFRASTRUCTURE DOMAINS (Issue #1278):**
 - staging.netrasystems.ai (frontend/backend) - CURRENT WORKING DOMAINS
-- api-staging.netrasystems.ai (websocket) - CURRENT WORKING DOMAINS
+- api.staging.netrasystems.ai (websocket) - CURRENT WORKING DOMAINS
 - *.staging.netrasystems.ai - DEPRECATED (SSL certificate failures)
 
 Test Plan:
@@ -89,7 +89,7 @@ class Issue1278VpcConnectorCapacityTests(SSotAsyncTestCase):
             # Current working domains (Issue #1278 resolution)
             'FRONTEND_DOMAIN': 'staging.netrasystems.ai',
             'BACKEND_DOMAIN': 'staging.netrasystems.ai',
-            'WEBSOCKET_DOMAIN': 'api-staging.netrasystems.ai',
+            'WEBSOCKET_DOMAIN': 'api.staging.netrasystems.ai',
 
             # Database connectivity through VPC
             'POSTGRES_HOST': '10.140.0.3',  # Private IP requiring VPC connector
@@ -362,7 +362,7 @@ class Issue1278VpcConnectorCapacityTests(SSotAsyncTestCase):
                 'current_status': 'working'  # Current working domain
             },
             {
-                'domain': 'api-staging.netrasystems.ai',
+                'domain': 'api.staging.netrasystems.ai',
                 'service': 'websocket_api',
                 'expected_valid': True,
                 'current_status': 'working'  # Current working domain

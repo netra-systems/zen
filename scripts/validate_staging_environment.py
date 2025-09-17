@@ -52,10 +52,10 @@ class StagingEnvironmentValidator:
 
         # Expected staging endpoints (Issue #1278 fix)
         self.expected_domains = {
-            "backend": "https://api-staging.netrasystems.ai",
+            "backend": "https://api.staging.netrasystems.ai",
             "auth": "https://staging.netrasystems.ai",
             "frontend": "https://staging.netrasystems.ai",
-            "websocket": "wss://api-staging.netrasystems.ai"
+            "websocket": "wss://api.staging.netrasystems.ai"
         }
 
         # Deprecated domains that should NOT be used

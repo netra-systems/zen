@@ -23,7 +23,7 @@ def test_staging_connectivity():
         "Backend API": "https://staging.netrasystems.ai/health",
         "Auth Service": "https://staging.netrasystems.ai/auth/health",
         "Frontend": "https://staging.netrasystems.ai",
-        "WebSocket Endpoint": "wss://api-staging.netrasystems.ai/api/v1/websocket"
+        "WebSocket Endpoint": "wss://api.staging.netrasystems.ai/api/v1/websocket"
     }
 
     for service_name, url in endpoints.items():

@@ -1323,7 +1323,7 @@ class IsolatedEnvironment:
         # Check for staging URL patterns (domain standardization fix)
         staging_url_indicators = [
             "staging.netrasystems.ai",
-            "api-staging.netrasystems.ai",
+            "api.staging.netrasystems.ai",
             "auth.staging.netrasystems.ai",  # Legacy pattern support
             "api.staging.netrasystems.ai",   # Legacy pattern support
             "app.staging.netrasystems.ai"    # Legacy pattern support

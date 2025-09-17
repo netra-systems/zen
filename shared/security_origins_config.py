@@ -101,7 +101,7 @@ class SecurityOriginsConfig:
                 STAGING_DOMAINS["FRONTEND_URL"],      # https://staging.netrasystems.ai
                 STAGING_DOMAINS["BACKEND_URL"],       # https://staging.netrasystems.ai
                 STAGING_DOMAINS["AUTH_SERVICE_URL"],  # https://staging.netrasystems.ai
-                STAGING_DOMAINS["API_BASE_URL"],      # https://api-staging.netrasystems.ai
+                STAGING_DOMAINS["API_BASE_URL"],      # https://api.staging.netrasystems.ai
 
                 # DEPRECATED - Keep for compatibility during migration
                 "https://app.staging.netrasystems.ai",   # DEPRECATED
@@ -115,7 +115,7 @@ class SecurityOriginsConfig:
                 "https://auth-service-staging-pnovr5vsba-uc.a.run.app"
             ],
             "websocket": [
-                STAGING_DOMAINS["WEBSOCKET_URL"],     # wss://api-staging.netrasystems.ai
+                STAGING_DOMAINS["WEBSOCKET_URL"],     # wss://api.staging.netrasystems.ai
 
                 # DEPRECATED - Keep for compatibility during migration
                 "wss://app.staging.netrasystems.ai",  # DEPRECATED

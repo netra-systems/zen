@@ -61,7 +61,7 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
         self.logger = logging.getLogger(__name__)
 
         # Test configuration
-        self.websocket_url = "wss://api-staging.netrasystems.ai/ws"
+        self.websocket_url = "wss://api.staging.netrasystems.ai/ws"
         self.test_iterations = 20  # Test multiple connections
         self.connection_timeout = 10.0
 

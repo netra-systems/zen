@@ -11,7 +11,7 @@ infrastructure issues with improved diagnostics for faster resolution.
 Remediation Focus:
 - Enhanced error categorization for VPC, DNS, Cloud SQL issues
 - Real-time infrastructure health dashboard 
-- DNS resolution monitoring for api-staging.netrasystems.ai
+- DNS resolution monitoring for api.staging.netrasystems.ai
 - Structured context for GCP error reporting integration
 """
 
@@ -95,13 +95,13 @@ class EnhancedInfrastructureMonitor:
             "backend": "https://staging.netrasystems.ai",
             "auth": "https://staging.netrasystems.ai",
             "frontend": "https://staging.netrasystems.ai",
-            "websocket": "wss://api-staging.netrasystems.ai"
+            "websocket": "wss://api.staging.netrasystems.ai"
         }
         
         # DNS targets for resolution monitoring
         self.dns_targets = [
             "staging.netrasystems.ai",
-            "api-staging.netrasystems.ai"
+            "api.staging.netrasystems.ai"
         ]
         
         # Deprecated domains that should NOT be used (Issue #1278)

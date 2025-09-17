@@ -106,9 +106,9 @@ class StagingValidator:
         """Validate correct domain usage (not deprecated *.staging.netrasystems.ai)."""
         correct_domains = {
             "frontend": "https://staging.netrasystems.ai",
-            "api": "https://api-staging.netrasystems.ai",
+            "api": "https://api.staging.netrasystems.ai",
             "auth": "https://staging.netrasystems.ai",
-            "websocket": "wss://api-staging.netrasystems.ai"
+            "websocket": "wss://api.staging.netrasystems.ai"
         }
 
         # Check deploy_to_gcp_actual.py for correct domains

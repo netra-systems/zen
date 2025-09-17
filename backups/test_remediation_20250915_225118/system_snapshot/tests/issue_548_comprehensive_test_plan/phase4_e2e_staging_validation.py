@@ -74,7 +74,7 @@ class TestPhase4E2EStagingValidation(SSotAsyncTestCase):
         """
         if not self._staging_available:
             pytest.skip('Staging environment not available - demonstrates Issue #548 is about local Docker')
-        staging_config = {'base_url': os.getenv('STAGING_URL', 'https://staging.netra-apex.com'), 'api_url': os.getenv('STAGING_API_URL', 'https://api-staging.netra-apex.com'), 'ws_url': os.getenv('STAGING_WS_URL', 'wss://ws-staging.netra-apex.com'), 'environment': 'staging'}
+        staging_config = {'base_url': os.getenv('STAGING_URL', 'https://staging.netra-apex.com'), 'api_url': os.getenv('STAGING_API_URL', 'https://api.staging.netra-apex.com'), 'ws_url': os.getenv('STAGING_WS_URL', 'wss://ws-staging.netra-apex.com'), 'environment': 'staging'}
         test_context = {'user_id': self._id_generator.generate_base_id('staging-user'), 'thread_id': self._id_generator.generate_base_id('staging-thread'), 'run_id': self._id_generator.generate_base_id('staging-run'), 'test_session': f'issue-548-validation-{int(time.time())}'}
         golden_path_steps = []
         auth_step = await self._simulate_staging_authentication(staging_config, test_context)

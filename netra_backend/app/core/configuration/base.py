@@ -235,7 +235,7 @@ class UnifiedConfigManager:
         if environment == "staging":
             # Override localhost defaults with staging-appropriate URLs (Issue #1278 fix)
             fallback_config.frontend_url = "https://staging.netrasystems.ai"
-            fallback_config.api_base_url = "https://api-staging.netrasystems.ai"
+            fallback_config.api_base_url = "https://api.staging.netrasystems.ai"
             fallback_config.auth_service_url = "https://staging.netrasystems.ai"
             logger.info("Applied staging URL defaults to prevent localhost in staging environment")
             

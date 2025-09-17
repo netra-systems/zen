@@ -1307,7 +1307,7 @@ class StagingConfig(AppConfig):
     # Issue resolved: Configuration validation failed for environment 'staging'
     # CRITICAL DOMAIN CONFIGURATION UPDATE (Issue #1278): Use SSOT staging domains
     frontend_url: str = "https://staging.netrasystems.ai"    # SSOT from shared.constants.staging_domains
-    api_base_url: str = "https://api-staging.netrasystems.ai"  # SSOT from shared.constants.staging_domains
+    api_base_url: str = "https://api.staging.netrasystems.ai"  # SSOT from shared.constants.staging_domains
     auth_service_url: str = "https://staging.netrasystems.ai"  # SSOT from shared.constants.staging_domains
     
     # Staging telemetry settings

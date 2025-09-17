@@ -140,7 +140,7 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
     def _get_staging_websocket_url(self) -> str:
         """Get the staging WebSocket URL from configuration."""
         # Use the corrected staging domain per Issue #1278 fix
-        return "wss://api-staging.netrasystems.ai/ws"
+        return "wss://api.staging.netrasystems.ai/ws"
 
     def _get_staging_api_url(self) -> str:
         """Get the staging API URL from configuration."""

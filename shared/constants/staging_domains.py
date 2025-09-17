@@ -59,10 +59,10 @@ STAGING_DOMAINS = {
     "BACKEND_URL": "https://staging.netrasystems.ai",
     "AUTH_SERVICE_URL": "https://staging.netrasystems.ai",
 
-    # API-specific domains (using main staging domain - api-staging.netrasystems.ai DNS not configured)
+    # API-specific domains (using main staging domain - api.staging.netrasystems.ai DNS not configured)
     "API_BASE_URL": "https://staging.netrasystems.ai",
 
-    # WebSocket domains (using main staging domain - api-staging.netrasystems.ai DNS not configured)
+    # WebSocket domains (using main staging domain - api.staging.netrasystems.ai DNS not configured)
     "WEBSOCKET_URL": "wss://staging.netrasystems.ai",
     "WEBSOCKET_BASE": "wss://staging.netrasystems.ai/ws",
 
@@ -239,7 +239,7 @@ LEGACY_DOMAIN_MAPPING = {
     "https://api.staging.netrasystems.ai": STAGING_DOMAINS["API_BASE_URL"],
     "https://auth.staging.netrasystems.ai": STAGING_DOMAINS["AUTH_SERVICE_URL"],
     "wss://api.staging.netrasystems.ai": STAGING_DOMAINS["WEBSOCKET_URL"],
-    "wss://api-staging.netrasystems.ai": STAGING_DOMAINS["WEBSOCKET_URL"],
+    "wss://api.staging.netrasystems.ai": STAGING_DOMAINS["WEBSOCKET_URL"],
 }
 
 
