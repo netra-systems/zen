@@ -362,10 +362,10 @@ class ChatOrchestratorIntegrationTests(SSotAsyncTestCase, unittest.TestCase):
 
     def tearDown(self):
         """Clean up integration test environment."""
-        # Clean up WebSocket connections (sync cleanup)
+        # Clean up WebSocket connections (async cleanup in sync tearDown)
         if hasattr(self, 'websocket_util'):
-            # Note: Using sync cleanup since tearDown is not async
-            self.websocket_util.cleanup_sync()
+            # Run async cleanup in sync tearDown
+            asyncio.run(self.websocket_util.cleanup())
 
         super().tearDown()
 
