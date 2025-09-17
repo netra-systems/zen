@@ -262,6 +262,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                     "step_number": getattr(context, 'step_number', 0),
                     "timestamp": time.time()
                 }
+            )
             
             # Track execution event
             self.captured_execution_events.append({
@@ -365,7 +366,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         from shared.isolated_environment import get_env
         
         env = get_env()
-        ws_url = env.get(WEBSOCKET_URL", ws://localhost:8000/ws)
+        ws_url = env.get("WEBSOCKET_URL", "ws://localhost:8000/ws")
         
         validator = MissionCriticalEventValidator()
         ws_client = WebSocketTestClient(ws_url)
@@ -391,17 +392,17 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                         events_collected += 1
                         
                         # Log critical events
-                        event_type = event.get(type, unknown)
+                        event_type = event.get("type", "unknown")
                         if event_type in validator.REQUIRED_EVENTS:
-                            logger.inf"o(f✅ Required event received: {event_type}")"
+                            logger.info(f"✅ Required event received: {event_type}")
                         
                         # Stop after completion event
-                        if event_type == "agent_completed:
-                            logger.info(🏁 Agent completion event received - stopping collection)
+                        if event_type == "agent_completed":
+                            logger.info("🏁 Agent completion event received - stopping collection")
                             break
                             
                 except asyncio.TimeoutError:
-                    logger.warning("⚠️ WebSocket receive timeout)"
+                    logger.warning("⚠️ WebSocket receive timeout")
                     continue
             
             # Assert: Validate all required events were received
