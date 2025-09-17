@@ -31,7 +31,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.config import get_config
 from shared.isolated_environment import get_env
 
 logger = central_logger.get_logger(__name__)
@@ -173,7 +173,7 @@ class AuthConfigLoader:
         
         try:
             # Load from unified config system
-            app_config = get_unified_config()
+            app_config = get_config()
             env = get_env()
             
             # Build configuration
