@@ -1,9 +1,9 @@
 """
 Universal Real WebSocket Test Base - NO MOCKS
 
-"""
 This is the central base class for ALL WebSocket tests across the project.
-CRITICAL: Uses ONLY real WebSocket connections - NO MOCKS per CLAUDE.md MOCKS = Abomination"
+CRITICAL: Uses ONLY real WebSocket connections - NO MOCKS per CLAUDE.md MOCKS = Abomination
+"""
 
 Features:
 - Real WebSocket connection management with Docker services
