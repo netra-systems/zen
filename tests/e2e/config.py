@@ -186,7 +186,7 @@ TEST_CONFIG = {
     "staging_auth_url": "https://staging.netrasystems.ai",
     "staging_backend_url": "https://staging.netrasystems.ai",
     "staging_frontend_url": "https://staging.netrasystems.ai",
-    "staging_websocket_url": "wss://api-staging.netrasystems.ai/ws",
+    "staging_websocket_url": "wss://api.staging.netrasystems.ai/ws",
     
     # Database URLs
     "postgres_url": "postgresql://postgres:netra@localhost:5434/netra_test",

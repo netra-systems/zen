@@ -119,7 +119,7 @@ async def create_websocket_manager(user_context=None, **kwargs):
         UnifiedWebSocketManager: The SSOT WebSocket manager instance
     """
     # Import the SSOT function
-    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
     import warnings
     
     # Issue deprecation warning to guide migration
@@ -147,7 +147,7 @@ def create_websocket_manager_sync(user_context=None, **kwargs):
         UnifiedWebSocketManager: The SSOT WebSocket manager instance
     """
     # Import the SSOT function
-    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
     import warnings
     
     # Issue deprecation warning to guide migration
@@ -179,7 +179,7 @@ def get_websocket_manager_factory():
             """
             PHASE 2 ENHANCEMENT: Create a manager by routing to SSOT get_websocket_manager.
             """
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             import warnings
             
             # Issue deprecation warning
@@ -247,7 +247,7 @@ from netra_backend.app.websocket_core.unified_manager import (
     WebSocketConnection,
 )
 # CANONICAL: WebSocket Manager (SSOT import path)
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 # Backward compatibility alias
 UnifiedWebSocketManager = WebSocketManager
 
@@ -268,14 +268,14 @@ from netra_backend.app.websocket_core.migration_adapter import (
 # ============================================================================
 
 # DEPRECATED: Direct manager imports (use factory instead)
-# from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+# from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 # from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
 
-# DEPRECATED: Multiple interface imports (use canonical protocol instead)  
+# DEPRECATED: Multiple interface imports (use canonical protocol instead)
 # from netra_backend.app.core.interfaces_websocket import WebSocketManagerProtocol
 
 # DEPRECATED: Global function access (use factory pattern instead)
-# from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+# from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 # ============================================================================
 # CANONICAL EXPORT INTERFACE
@@ -369,7 +369,7 @@ CANONICAL WEBSOCKET IMPORT GUIDE
 
  PASS:  CORRECT (Use these patterns):
 ```python
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from netra_backend.app.websocket_core.canonical_imports import (
     WebSocketManagerProtocol,
 )
@@ -381,9 +381,9 @@ manager = get_websocket_manager(user_context)
  FAIL:  INCORRECT (Don't use these patterns):
 ```python
 # Multiple import paths (causes SSOT violations)
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager  # WRONG: Use canonical alias instead
-from netra_backend.app.core.interfaces_websocket import WebSocketManagerProtocol
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+# CANONICAL: Use WebSocketManager from websocket_manager.py (SSOT)
+from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 
 # Singleton patterns (security risk)
 from netra_backend.app.websocket_core.unified_manager import get_websocket_manager

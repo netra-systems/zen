@@ -96,7 +96,7 @@ async def _discover_auth_service_endpoint() -> Optional[str]:
     # Fallback chain for auth service discovery
     candidate_endpoints = [
         env.get('AUTH_SERVICE_URL'),  # Primary configured endpoint
-        'https://api.staging.netrasystems.ai',  # Staging canonical
+        'https://staging.netrasystems.ai',  # Staging canonical (Issue #1278 fix)
         'http://localhost:8081',  # Development default
         'http://localhost:8001',  # Alternative development port
         'http://auth-service:8081',  # Docker compose

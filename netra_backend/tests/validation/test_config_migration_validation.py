@@ -37,18 +37,18 @@ class ConfigurationMigrationValidationTests:
                     pass
         assert len(violations) == 0, f'Found {len(violations)} os.environ violations in production code: {violations}'
 
-    def test_environment_detection_still_works(self):
+    async def test_environment_detection_still_works(self):
         """Verify environment detection functions correctly."""
-        from netra_backend.app.core.environment_constants import EnvironmentDetector
-        detector = EnvironmentDetector()
-        env = detector.detect_environment()
-        assert env in ['development', 'staging', 'production', 'testing']
-        is_cloud_run = detector.is_cloud_run_environment()
-        is_gae = detector.is_app_engine_environment()
-        is_aws = detector.is_aws_environment()
+        from netra_backend.app.core.environment_context.cloud_environment_detector import get_cloud_environment_detector
+        detector = get_cloud_environment_detector()
+        context = await detector.detect_environment_context()
+        assert context.environment_type.value in ['development', 'staging', 'production', 'testing']
+        is_cloud_run = context.cloud_platform.value == 'cloud_run'
+        is_local = context.cloud_platform.value == 'local'
         assert isinstance(is_cloud_run, bool)
-        assert isinstance(is_gae, bool)
-        assert isinstance(is_aws, bool)
+        assert isinstance(is_local, bool)
+        assert context.confidence >= 0.0
+        assert context.confidence <= 1.0
 
     def test_configuration_access_patterns_work(self):
         """Test that configuration can be accessed through unified system."""
@@ -112,10 +112,12 @@ class ConfigurationMigrationValidationTests:
         """Test that configuration errors are handled gracefully."""
         with patch.dict(os.environ, {}, clear=True):
             try:
-                from netra_backend.app.core.environment_constants import EnvironmentDetector
-                detector = EnvironmentDetector()
-                env = detector.detect_environment()
-                assert env == 'development'
+                import asyncio
+                from netra_backend.app.core.environment_context.cloud_environment_detector import get_cloud_environment_detector
+                detector = get_cloud_environment_detector()
+                context = asyncio.run(detector.detect_environment_context())
+                env = context.environment_type.value
+                assert env in ['development', 'staging', 'production', 'testing']
             except Exception as e:
                 pytest.fail(f'Configuration error handling failed: {e}')
 

@@ -44,7 +44,7 @@ class TestGCPStagingInfrastructureHealth(SSotAsyncTestCase):
         # GCP staging infrastructure endpoints
         self.staging_backend_url = "https://staging.netrasystems.ai"
         self.staging_frontend_url = "https://staging.netrasystems.ai"
-        self.staging_websocket_url = "wss://api-staging.netrasystems.ai"
+        self.staging_websocket_url = "wss://api.staging.netrasystems.ai"
 
         # Database configuration (internal VPC)
         self.set_env_var("POSTGRES_HOST", "10.52.0.3")

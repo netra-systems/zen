@@ -2,7 +2,7 @@
 
 import asyncio
 from typing import Dict, Any, List
-from datetime import datetime
+from datetime import datetime, UTC
 
 
 class ObservabilityCollector:
@@ -15,7 +15,7 @@ class ObservabilityCollector:
     async def collect_metrics(self) -> Dict[str, Any]:
         """Collect metrics data."""
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "collector_type": "base",
             "metrics": {}
         }
@@ -27,7 +27,7 @@ class DatabaseObservabilityCollector(ObservabilityCollector):
     async def collect_metrics(self) -> Dict[str, Any]:
         """Collect database metrics."""
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "collector_type": "database",
             "metrics": {
                 "connection_count": 5,
@@ -43,7 +43,7 @@ class SystemObservabilityCollector(ObservabilityCollector):
     async def collect_metrics(self) -> Dict[str, Any]:
         """Collect system metrics."""
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "collector_type": "system",
             "metrics": {
                 "cpu_usage": 23.5,
@@ -75,7 +75,7 @@ class MetricsCollectionOrchestrator:
                 metrics.append({
                     "collector_type": type(collector).__name__,
                     "error": str(e),
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 })
         return metrics
     
@@ -83,7 +83,7 @@ class MetricsCollectionOrchestrator:
         """Get aggregated metrics summary."""
         all_metrics = await self.collect_all_metrics()
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "collector_count": len(self.collectors),
             "metrics": all_metrics,
             "summary": {
@@ -124,5 +124,5 @@ class MonitoringCycleManager:
             "is_running": self.is_running,
             "collection_interval": self.collection_interval,
             "collector_count": len(self.orchestrator.collectors),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }

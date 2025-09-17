@@ -62,7 +62,7 @@ class TestRedisGCPStagingValidation(SSotAsyncTestCase):
             # Updated staging domains per Issue #1278 fix
             "BACKEND_URL": "https://staging.netrasystems.ai",
             "FRONTEND_URL": "https://staging.netrasystems.ai",
-            "WEBSOCKET_URL": "wss://api-staging.netrasystems.ai",
+            "WEBSOCKET_URL": "wss://api.staging.netrasystems.ai",
             "REDIS_URL": "redis://10.0.0.3:6379/0",  # GCP internal Redis
             "VPC_CONNECTOR": "staging-connector"
         }

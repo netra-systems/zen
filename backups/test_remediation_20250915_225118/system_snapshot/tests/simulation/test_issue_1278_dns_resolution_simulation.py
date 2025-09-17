@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Value Impact: Validates WebSocket connectivity and SSL certificate handling
 - Revenue Impact: Prevents DNS-related failures affecting $500K+ ARR
 
-These tests simulate DNS resolution failures for api-staging.netrasystems.ai
+These tests simulate DNS resolution failures for api.staging.netrasystems.ai
 and SSL certificate validation issues observed in Issue #1278.
 """
 
@@ -32,7 +32,7 @@ class TestIssue1278DNSResolutionSimulation(AsyncBaseTestCase):
         self.domain_config = {
             'correct_domains': [
                 'staging.netrasystems.ai',      # Backend
-                'api-staging.netrasystems.ai'   # WebSocket API
+                'api.staging.netrasystems.ai'   # WebSocket API
             ],
             'problematic_domains': [
                 'api.staging.netrasystems.ai',  # Incorrect pattern
@@ -56,7 +56,7 @@ class TestIssue1278DNSResolutionSimulation(AsyncBaseTestCase):
         """Simulate WebSocket DNS resolution failure (Issue #1278 pattern)."""
         self.logger.info("Simulating WebSocket DNS resolution failure")
 
-        websocket_domain = 'api-staging.netrasystems.ai'
+        websocket_domain = 'api.staging.netrasystems.ai'
         websocket_port = 443  # HTTPS/WSS port
         
         # Simulate DNS resolution attempts with different failure patterns
@@ -171,7 +171,7 @@ class TestIssue1278DNSResolutionSimulation(AsyncBaseTestCase):
                 'description': 'Correct subdomain pattern'
             },
             {
-                'domain': 'api-staging.netrasystems.ai',
+                'domain': 'api.staging.netrasystems.ai',
                 'expected_match': True,
                 'description': 'Correct WebSocket domain pattern'
             },

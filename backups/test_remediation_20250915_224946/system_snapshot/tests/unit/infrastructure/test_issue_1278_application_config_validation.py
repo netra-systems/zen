@@ -34,7 +34,7 @@ class TestIssue1278ApplicationConfigValidation(BaseTestCase):
             'vpc_egress': 'all-traffic',
             'ssl_domain': '*.netrasystems.ai',
             'backend_domain': 'staging.netrasystems.ai',
-            'websocket_domain': 'api-staging.netrasystems.ai'
+            'websocket_domain': 'api.staging.netrasystems.ai'
         }
 
     @pytest.mark.unit
@@ -127,8 +127,8 @@ class TestIssue1278ApplicationConfigValidation(BaseTestCase):
         # Issue #1278: Correct domains (*.netrasystems.ai)
         correct_domains = [
             'staging.netrasystems.ai',
-            'api-staging.netrasystems.ai',
-            'auth-staging.netrasystems.ai'
+            'api.staging.netrasystems.ai',
+            'auth.staging.netrasystems.ai'
         ]
 
         # Issue #1278: Incorrect domains (should not be used)

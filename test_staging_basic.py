@@ -15,9 +15,9 @@ def test_staging_connectivity():
     
     endpoints = [
         "https://staging.netrasystems.ai/health",
-        "https://api-staging.netrasystems.ai/health", 
+        "https://api.staging.netrasystems.ai/health", 
         "https://staging.netrasystems.ai",
-        "https://api-staging.netrasystems.ai"
+        "https://api.staging.netrasystems.ai"
     ]
     
     for url in endpoints:

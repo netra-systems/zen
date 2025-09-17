@@ -40,9 +40,9 @@ from netra_backend.app.clients.auth_client_core import (
     validate_jwt_format
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 def _safe_websocket_state_for_logging(state) -> str:

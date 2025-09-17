@@ -257,8 +257,8 @@ __all__ = [
 ]
 
 # Log consolidation success
-from netra_backend.app.logging_config import central_logger
-logger = central_logger.get_logger(__name__)
+from shared.logging.unified_logging_ssot import get_logger
+logger = get_logger(__name__)
 logger.info(
     f"WebSocket infrastructure consolidated - "
     f"Version: {__version__}, "

@@ -4,7 +4,7 @@ Provides distributed tracing, metrics collection, and monitoring capabilities.
 """
 
 from typing import Any, Dict, Optional, List, Union
-from datetime import datetime
+from datetime import datetime, timedelta, UTC
 import uuid
 import time
 from contextlib import contextmanager
@@ -53,7 +53,7 @@ class Span:
     def add_log(self, message: str, level: str = "info", **kwargs) -> None:
         """Add a log entry to the span."""
         log_entry = {
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(UTC),
             "message": message,
             "level": level,
             **kwargs
@@ -63,7 +63,7 @@ class Span:
     def finish(self, status: str = "success") -> None:
         """Mark span as finished."""
         if self.end_time is None:
-            self.end_time = datetime.utcnow()
+            self.end_time = datetime.now(UTC)
             self.duration_ms = (self.end_time - self.start_time).total_seconds() * 1000
             self.status = status
     
@@ -110,7 +110,7 @@ class TelemetryCollector:
             span_id=span_id,
             trace_id=trace_id,
             operation_name=operation_name,
-            start_time=datetime.utcnow(),
+            start_time=datetime.now(UTC),
             parent_span_id=parent_span_id,
             tags=tags or {}
         )
@@ -147,7 +147,7 @@ class TelemetryCollector:
             "name": name,
             "value": value,
             "tags": tags or {},
-            "timestamp": timestamp or datetime.utcnow()
+            "timestamp": timestamp or datetime.now(UTC)
         }
         
         self._metrics.append(metric)
@@ -163,7 +163,7 @@ class TelemetryCollector:
         """Get metrics, optionally filtered by name and time."""
         from datetime import timedelta
         
-        cutoff_time = datetime.utcnow() - timedelta(hours=hours)
+        cutoff_time = datetime.now(UTC) - timedelta(hours=hours)
         filtered_metrics = [
             m for m in self._metrics 
             if m.get("timestamp", datetime.min) > cutoff_time
@@ -202,7 +202,7 @@ class TelemetryCollector:
             "total_duration_ms": total_duration,
             "spans": [span.to_dict() for span in trace_spans],
             "start_time": min(span.start_time for span in trace_spans),
-            "end_time": max(span.end_time or datetime.utcnow() for span in trace_spans)
+            "end_time": max(span.end_time or datetime.now(UTC) for span in trace_spans)
         }
     
     @contextmanager
@@ -221,7 +221,7 @@ class TelemetryCollector:
         """Clear old telemetry data."""
         from datetime import timedelta
         
-        cutoff_time = datetime.utcnow() - timedelta(hours=hours)
+        cutoff_time = datetime.now(UTC) - timedelta(hours=hours)
         
         # Clear old spans
         old_spans = [
@@ -331,7 +331,7 @@ class TelemetryManager:
         # Calculate error rate from recent spans
         recent_finished_spans = [
             span for span in self.collector._spans.values()
-            if span.end_time and (datetime.utcnow() - span.end_time).total_seconds() < 3600
+            if span.end_time and (datetime.now(UTC) - span.end_time).total_seconds() < 3600
         ]
         
         if recent_finished_spans:
@@ -348,7 +348,7 @@ class TelemetryManager:
             "total_spans": len(self.collector._spans),
             "recent_metrics": len(recent_metrics),
             "enabled": self._enabled,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(UTC)
         }
 
 

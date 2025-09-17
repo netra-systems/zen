@@ -44,7 +44,7 @@ class TestIssue1278WebSocketInfrastructureValidation(SSotAsyncTestCase):
         """Set up test class with staging environment"""
         super().setUpClass()
         cls.env = IsolatedEnvironment("staging")
-        cls.websocket_url = "wss://api-staging.netrasystems.ai/ws"
+        cls.websocket_url = "wss://api.staging.netrasystems.ai/ws"
         cls.backend_url = "https://staging.netrasystems.ai"
         
     async def test_websocket_basic_connectivity(self):

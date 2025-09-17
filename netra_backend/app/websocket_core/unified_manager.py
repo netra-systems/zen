@@ -763,12 +763,14 @@ class _UnifiedWebSocketManagerImplementation:
                 return {
                     "type": event_type,
                     "tool_name": data.get("tool_name", data.get("name", "unknown_tool")),
-                    "parameters": data.get("parameters", data.get("params", {})),
+                    "tool_args": data.get("tool_args", data.get("parameters", data.get("params", {}))),
+                    "parameters": data.get("parameters", data.get("params", {})),  # Keep for backward compatibility
+                    "execution_id": data.get("execution_id"),  # Explicitly preserve execution_id
                     "timestamp": data.get("timestamp", time.time()),
                     "user_id": data.get("user_id"),
                     "thread_id": data.get("thread_id"),
                     # Preserve additional fields
-                    **{k: v for k, v in data.items() if k not in ["tool_name", "parameters", "timestamp", "user_id", "thread_id"]}
+                    **{k: v for k, v in data.items() if k not in ["tool_name", "tool_args", "parameters", "execution_id", "timestamp", "user_id", "thread_id"]}
                 }
             
             # Handle tool_completed events
@@ -777,13 +779,15 @@ class _UnifiedWebSocketManagerImplementation:
                     "type": event_type,
                     "tool_name": data.get("tool_name", data.get("name", "unknown_tool")),
                     "results": data.get("results", data.get("result", data.get("output", {}))),
-                    "duration": data.get("duration", data.get("duration_ms", data.get("elapsed_time", 0))),
+                    "execution_time": data.get("execution_time", data.get("duration", data.get("duration_ms", data.get("elapsed_time", 0)))),
+                    "duration": data.get("duration", data.get("duration_ms", data.get("elapsed_time", 0))),  # Keep for backward compatibility
+                    "execution_id": data.get("execution_id"),  # Explicitly preserve execution_id
                     "timestamp": data.get("timestamp", time.time()),
                     "success": data.get("success", True),
                     "user_id": data.get("user_id"),
                     "thread_id": data.get("thread_id"),
                     # Preserve additional fields
-                    **{k: v for k, v in data.items() if k not in ["tool_name", "results", "duration", "timestamp", "success", "user_id", "thread_id"]}
+                    **{k: v for k, v in data.items() if k not in ["tool_name", "results", "execution_time", "duration", "execution_id", "timestamp", "success", "user_id", "thread_id"]}
                 }
             
             # Handle agent_started events

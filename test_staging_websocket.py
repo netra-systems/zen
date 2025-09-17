@@ -14,7 +14,7 @@ import time
 from datetime import datetime
 
 async def test_websocket():
-    uri = "wss://api-staging.netrasystems.ai/ws"
+    uri = "wss://api.staging.netrasystems.ai/ws"
     
     print(f"[{datetime.now()}] Connecting to staging WebSocket: {uri}")
     start_time = time.time()

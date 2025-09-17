@@ -379,7 +379,7 @@ class StagingConfigurationValidationFailuresTests(SSotBaseTestCase):
             ],
             'api_base_url_patterns': [
                 'https://netra-backend-staging-*.a.run.app',
-                'https://api-staging.netrasystems.ai', 
+                'https://api.staging.netrasystems.ai', 
                 'https://staging-api.netra.dev',
                 'https://backend-staging.netra.gcp.dev'
             ],

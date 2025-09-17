@@ -29,17 +29,17 @@ resource "google_vpc_access_connector" "staging_connector" {
   # Redis is in 10.166.0.0/16 network, so using 10.2.0.0/28 for connector (non-overlapping)
   ip_cidr_range = "10.2.0.0/28" # Non-overlapping CIDR for VPC connector routing to Redis network
 
-  # PHASE 1 FIX: Enhanced scaling configuration for VPC capacity exhaustion (Issue #1278)
-  # Based on Five Whys analysis - increase capacity to handle staging load
-  min_instances = 5  # Increased for better baseline availability
-  max_instances = 50 # Significantly increased to prevent capacity exhaustion during test runs
+  # EMERGENCY PHASE 2 FIX: Critical scaling for golden path test execution (Issue #1278)
+  # Based on Five Whys analysis - emergency capacity increase to handle concurrent test execution
+  min_instances = 10  # EMERGENCY: Doubled from 5 to 10 for immediate baseline capacity
+  max_instances = 100 # EMERGENCY: Doubled from 50 to 100 for emergency peak capacity
 
-  # Enhanced throughput settings to support multiple concurrent services
-  min_throughput = 300 # Minimum throughput in Mbps
-  max_throughput = 1000 # Maximum throughput in Mbps
+  # EMERGENCY: Enhanced throughput settings for concurrent test execution load
+  min_throughput = 500 # EMERGENCY: Increased from 300 to 500 for higher baseline
+  max_throughput = 2000 # EMERGENCY: Doubled from 1000 to 2000 for emergency peak
 
-  # ISSUE #1177 + #1278 FIX: Enhanced machine type for better performance and capacity
-  machine_type = "e2-standard-4" # Upgraded for higher throughput and resilience
+  # EMERGENCY PHASE 2 FIX: Upgraded machine type for critical test execution capacity
+  machine_type = "e2-standard-8" # EMERGENCY: Upgraded from e2-standard-4 to e2-standard-8
 
   # ISSUE #1177 FIX: Enhanced lifecycle management
   lifecycle {

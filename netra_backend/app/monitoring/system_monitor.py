@@ -4,7 +4,7 @@ Central orchestrator for system-wide monitoring capabilities.
 """
 
 from typing import Any, Dict, List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import asyncio
 import psutil
 import time
@@ -73,7 +73,7 @@ class SystemPerformanceMonitor:
             net_io = psutil.net_io_counters()
             
             return {
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(UTC),
                 "cpu_percent": cpu_percent,
                 "cpu_count": cpu_count,
                 "memory_total_gb": memory.total / (1024**3),
@@ -93,7 +93,7 @@ class SystemPerformanceMonitor:
         except Exception as e:
             logger.error(f"Error collecting system metrics: {e}")
             return {
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(UTC),
                 "error": str(e)
             }
     
@@ -103,7 +103,7 @@ class SystemPerformanceMonitor:
     
     async def get_metrics_history(self, hours: int = 1) -> List[Dict[str, Any]]:
         """Get metrics history for specified time period."""
-        cutoff_time = datetime.utcnow() - timedelta(hours=hours)
+        cutoff_time = datetime.now(UTC) - timedelta(hours=hours)
         return [
             m for m in self._metrics_history
             if m.get("timestamp", datetime.min) > cutoff_time
@@ -134,7 +134,7 @@ class SystemPerformanceMonitor:
             "max_memory_percent": max(memory_values) if memory_values else 0,
             "avg_disk_percent": sum(disk_values) / len(disk_values) if disk_values else 0,
             "max_disk_percent": max(disk_values) if disk_values else 0,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(UTC)
         }
 
 
@@ -173,7 +173,7 @@ class MonitoringManager:
             "score": health_status["score"],
             "issues": health_status["issues"],
             "current_metrics": current_metrics,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(UTC)
         }
     
     def _calculate_health_status(self, metrics: Dict[str, Any]) -> Dict[str, Any]:
@@ -233,7 +233,7 @@ class MonitoringManager:
             "system_health": health,
             "performance_summary": performance_summary,
             "monitoring_active": self.performance_monitor._monitoring_active,
-            "report_timestamp": datetime.utcnow()
+            "report_timestamp": datetime.now(UTC)
         }
 
 

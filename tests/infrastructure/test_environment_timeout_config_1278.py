@@ -90,7 +90,7 @@ class TestEnvironmentDetection1278(SSotAsyncTestCase):
             "VPC_CONNECTOR": "Must be configured for staging-connector",
             "API_BASE_URL": "Must use staging.netrasystems.ai domain",
             "FRONTEND_URL": "Must use staging.netrasystems.ai domain",
-            "WEBSOCKET_URL": "Must use api-staging.netrasystems.ai domain"
+            "WEBSOCKET_URL": "Must use api.staging.netrasystems.ai domain"
         }
 
         configuration_issues = []
@@ -102,7 +102,7 @@ class TestEnvironmentDetection1278(SSotAsyncTestCase):
                 configuration_issues.append(f"{config_key}: Missing - {requirement}")
             elif config_key in ["API_BASE_URL", "FRONTEND_URL"] and "staging.netrasystems.ai" not in config_value:
                 configuration_issues.append(f"{config_key}: {config_value} - {requirement}")
-            elif config_key == "WEBSOCKET_URL" and "api-staging.netrasystems.ai" not in config_value:
+            elif config_key == "WEBSOCKET_URL" and "api.staging.netrasystems.ai" not in config_value:
                 configuration_issues.append(f"{config_key}: {config_value} - {requirement}")
 
         print(f"Staging Configuration Validation:")

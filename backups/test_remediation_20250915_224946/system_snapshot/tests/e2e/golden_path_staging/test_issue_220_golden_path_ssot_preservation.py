@@ -29,7 +29,7 @@ class GoldenPathSSOTPreservationTests(SSotAsyncTestCase):
         super().setUp()
         self.staging_config = {
             'backend_url': 'https://staging.netrasystems.ai',
-            'websocket_url': 'wss://api-staging.netrasystems.ai',
+            'websocket_url': 'wss://api.staging.netrasystems.ai',
             'auth_timeout': 30,
             'agent_timeout': 60
         }

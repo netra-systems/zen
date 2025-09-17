@@ -559,7 +559,7 @@ class ConfigurationScenario:
             'OAUTH_CLIENT_ID': 'staging_oauth_client_id',
             'OAUTH_CLIENT_SECRET': 'staging_oauth_client_secret',
             'FRONTEND_URL': 'https://staging.netrasystems.ai',
-            'BACKEND_URL': 'https://api-staging.netrasystems.ai',
+            'BACKEND_URL': 'https://api.staging.netrasystems.ai',
             'ENABLE_MONITORING': 'true',
             'RATE_LIMITING': 'true'
         }

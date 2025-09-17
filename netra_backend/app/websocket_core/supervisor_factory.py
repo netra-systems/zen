@@ -344,8 +344,8 @@ async def create_websocket_supervisor_with_validation(
             # Don't fail - connection might have been closed but we still need to process
         
         # Check for stale connections
-        from datetime import datetime, timedelta
-        age = datetime.utcnow() - context.connected_at
+        from datetime import datetime, timedelta, UTC
+        age = datetime.now(UTC) - context.connected_at
         if age > timedelta(hours=24):  # 24 hour threshold
             logger.warning(
                 f"Creating supervisor for very old WebSocket connection: "

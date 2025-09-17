@@ -5,7 +5,7 @@ UVS Requirement: Works with NO data, partial data, or full data.
 """
 
 from typing import Dict, Any, List
-from datetime import datetime
+from datetime import datetime, UTC
 
 
 class ReportTemplates:
@@ -100,7 +100,7 @@ class ReportTemplates:
             },
             'metadata': {
                 'template_version': '1.0',
-                'generated_at': datetime.utcnow().isoformat(),
+                'generated_at': datetime.now(UTC).isoformat(),
                 'uvs_compliant': True
             }
         }

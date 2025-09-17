@@ -30,6 +30,16 @@ def test_monitoring_imports():
         from netra_backend.app.services.monitoring import GCPClientManager
         print("✓ GCPClientManager import successful")
 
+        # Test the specific imports that were failing in issue #1204
+        from netra_backend.app.services.monitoring.gcp_error_reporter import set_request_context, clear_request_context
+        print("✓ set_request_context import successful")
+        print("✓ clear_request_context import successful")
+
+        # Test that these functions are also available from the module init
+        from netra_backend.app.services.monitoring import set_request_context, clear_request_context
+        print("✓ set_request_context from __init__ import successful")
+        print("✓ clear_request_context from __init__ import successful")
+
         from netra_backend.app.services.monitoring.error_tracker import ErrorTracker
         print("✓ ErrorTracker import successful")
 
@@ -40,8 +50,16 @@ def test_monitoring_imports():
         error_formatter = ErrorFormatter()
         print("✓ ErrorFormatter instantiation successful")
 
+        # Test context functions work
+        set_request_context(user_id="test_user", trace_id="test_trace")
+        print("✓ set_request_context function call successful")
+
+        clear_request_context()
+        print("✓ clear_request_context function call successful")
+
         print("\n🎉 ALL MONITORING IMPORTS SUCCESSFUL!")
         print("✓ Docker packaging fix is working correctly")
+        print("✅ Issue #1204 specific imports verified")
         return True
 
     except ImportError as e:

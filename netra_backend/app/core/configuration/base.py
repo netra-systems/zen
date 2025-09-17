@@ -147,6 +147,15 @@ class UnifiedConfigManager:
                     from shared.isolated_environment import IsolatedEnvironment
                     env = IsolatedEnvironment()
                     service_secret = env.get('SERVICE_SECRET') or env.get('JWT_SECRET_KEY')
+
+                    # STAGING LENIENT MODE: For staging environments, use lenient secret validation
+                    validation_mode = env.get('JWT_SECRET_VALIDATION_MODE', 'strict').lower()
+                    if environment == "staging" and validation_mode == "lenient":
+                        # Allow weaker secrets in staging for development purposes
+                        if not service_secret:
+                            service_secret = env.get('STAGING_JWT_SECRET', 'staging-development-secret-2025')
+                            self._get_logger().info(f"Using lenient staging JWT secret for environment: {environment}")
+
                     if service_secret:
                         config.service_secret = service_secret.strip()
                         self._get_logger().info("Loaded SERVICE_SECRET from IsolatedEnvironment (SSOT compliant)")
@@ -224,10 +233,10 @@ class UnifiedConfigManager:
         
         # CRITICAL FIX: Apply environment-specific URL defaults instead of localhost
         if environment == "staging":
-            # Override localhost defaults with staging-appropriate URLs
-            fallback_config.frontend_url = "https://app.staging.netrasystems.ai"
-            fallback_config.api_base_url = "https://api.staging.netrasystems.ai"  
-            fallback_config.auth_service_url = "https://auth.staging.netrasystems.ai"
+            # Override localhost defaults with staging-appropriate URLs (Issue #1278 fix)
+            fallback_config.frontend_url = "https://staging.netrasystems.ai"
+            fallback_config.api_base_url = "https://api.staging.netrasystems.ai"
+            fallback_config.auth_service_url = "https://staging.netrasystems.ai"
             logger.info("Applied staging URL defaults to prevent localhost in staging environment")
             
         elif environment == "production":

@@ -38,7 +38,7 @@ def test_golden_path_staging():
     # Test 3: WebSocket endpoint readiness
     try:
         # Test if WebSocket endpoint responds (we don't establish WS, just check HTTP)
-        response = requests.get('https://api-staging.netrasystems.ai/', timeout=30)
+        response = requests.get('https://api.staging.netrasystems.ai/', timeout=30)
         print(f"WebSocket endpoint: {response.status_code}")
         # Even 404 is acceptable - it means the service is running
         websocket_ok = response.status_code in [200, 404, 405]

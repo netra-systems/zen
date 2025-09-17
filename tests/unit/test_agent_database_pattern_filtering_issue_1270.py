@@ -28,12 +28,13 @@ import pytest
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.category_system import CategorySystem, TestCategory, CategoryPriority, TestOrganizationType
 from tests.unified_test_runner import UnifiedTestRunner
 from test_framework.config.category_config import CategoryConfigLoader
 
 
-class TestAgentDatabasePatternFilteringIssue1270:
+class TestAgentDatabasePatternFilteringIssue1270(SSotBaseTestCase):
     """Reproduce Issue #1270 pattern filtering failures in agent database tests."""
 
     def test_database_category_agent_pattern_filtering_failure(self):
@@ -328,7 +329,7 @@ class TestAgentDatabasePatternFilteringIssue1270:
 @pytest.mark.unit
 @pytest.mark.issue_1270
 @pytest.mark.pattern_filtering
-class TestIssue1270PatternFilteringReproduction:
+class TestIssue1270PatternFilteringReproduction(SSotBaseTestCase):
     """Additional tests specifically for Issue #1270 pattern filtering reproduction."""
 
     def test_pattern_filter_logic_edge_cases_failure(self):

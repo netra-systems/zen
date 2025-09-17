@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set
 
-from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.base.interface import (
     ExecutionContext,
     ExecutionResult,
@@ -234,10 +234,14 @@ class MCPExecutionOrchestrator(ABC):
     def _setup_execution_engine(self) -> None:
         """Setup execution engine with reliability patterns."""
         reliability_manager = self._create_reliability_manager()
-        self.execution_engine = BaseExecutionEngine(
-            reliability_manager=reliability_manager,
-            monitor=self.execution_monitor
-        )
+        # TODO: UserExecutionEngine requires UserExecutionContext - temporary placeholder
+        # self.execution_engine = UserExecutionEngine(
+        #     context=user_context,  # Needs UserExecutionContext
+        #     agent_factory=agent_factory,  # Needs AgentInstanceFactory
+        #     websocket_emitter=websocket_emitter  # Needs UserWebSocketEmitter
+        # )
+        # For now, keeping None until full user context migration is complete
+        self.execution_engine = None
     
     def _create_reliability_manager(self) -> ReliabilityManager:
         """Create reliability manager with circuit breaker and retry."""

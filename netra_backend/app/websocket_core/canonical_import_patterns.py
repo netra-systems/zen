@@ -104,7 +104,7 @@ def get_websocket_manager(user_context: Optional[Any] = None,
     _log_import_usage("Factory Function", "canonical_import_patterns.get_websocket_manager")
 
     # Use the existing factory function from websocket_manager.py
-    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager as _get_manager
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as _get_manager
     return _get_manager(user_context=user_context, mode=mode, **kwargs)
 
 

@@ -67,22 +67,62 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 import unittest
 
-from shared.isolated_environment import IsolatedEnvironment, get_env
-# from test_framework.unified import (
-#     TestResult, TestExecutionState, CategoryType, TestConfiguration
-# )
-# Note: Commenting out unified imports for now to avoid import errors
+# Resilient imports with proper error handling
+try:
+    from shared.isolated_environment import IsolatedEnvironment, get_env
+except ImportError as e:
+    # Create minimal fallback for isolated environment if not available
+    print(f"[WARNING] IsolatedEnvironment not available: {e}")
+    print("[WARNING] Using fallback environment handling")
 
-# Temporary CategoryType enum
-from enum import Enum
+    class IsolatedEnvironment:
+        """Fallback environment handler for tests when shared module unavailable."""
+        def __init__(self):
+            self._env = {}
 
-class CategoryType(Enum):
-    """Test category types."""
-    UNIT = "unit"
-    INTEGRATION = "integration"
-    E2E = "e2e"
-    SMOKE = "smoke"
-    CRITICAL = "critical"
+        def get(self, key, default=None):
+            import os
+            return self._env.get(key) or os.environ.get(key, default)
+
+        def set(self, key, value, source="fallback"):
+            self._env[key] = value
+
+    def get_env():
+        return IsolatedEnvironment()
+
+# Try to import unified test framework components
+try:
+    from test_framework.unified import (
+        TestResult, TestExecutionState, CategoryType, TestConfiguration
+    )
+except ImportError:
+    # Define fallback types if unified framework not available
+    from enum import Enum
+
+    class CategoryType(Enum):
+        """Test category types."""
+        UNIT = "unit"
+        INTEGRATION = "integration"
+        E2E = "e2e"
+        SMOKE = "smoke"
+        CRITICAL = "critical"
+
+    # Define minimal fallback classes
+    class TestResult:
+        def __init__(self, **kwargs):
+            for k, v in kwargs.items():
+                setattr(self, k, v)
+
+    class TestExecutionState:
+        PENDING = "pending"
+        RUNNING = "running"
+        COMPLETED = "completed"
+        FAILED = "failed"
+
+    class TestConfiguration:
+        def __init__(self, **kwargs):
+            for k, v in kwargs.items():
+                setattr(self, k, v)
 
 
 logger = logging.getLogger(__name__)

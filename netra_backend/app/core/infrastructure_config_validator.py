@@ -86,7 +86,7 @@ class InfrastructureConfigValidator:
         # Correct domain patterns
         self.correct_patterns = [
             r'staging\.netrasystems\.ai',
-            r'api-staging\.netrasystems\.ai',
+            r'api.staging\.netrasystems\.ai',
             r'[a-zA-Z0-9-]+\.netrasystems\.ai'
         ]
         
@@ -132,7 +132,7 @@ class InfrastructureConfigValidator:
                         # Replace subdomain.staging.netrasystems.ai with subdomain.netrasystems.ai
                         recommended = deprecated_domain.replace('.staging.netrasystems.ai', '.netrasystems.ai')
                     else:
-                        recommended = "staging.netrasystems.ai or api-staging.netrasystems.ai"
+                        recommended = "staging.netrasystems.ai or api.staging.netrasystems.ai"
                     
                     issues.append(ConfigIssue(
                         issue_type=ConfigIssueType.DEPRECATED_DOMAIN,

@@ -4,7 +4,7 @@ Handles retry logic, backoff strategies, and failure analysis.
 """
 
 from typing import Any, Callable, Awaitable, Optional, Dict, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import asyncio
 import random
 from enum import Enum
@@ -83,7 +83,7 @@ class RetryManager:
         Returns:
             RetryResult with success status and result/error
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         attempts = max_attempts or self.max_attempts
         last_error = None
         
@@ -109,7 +109,7 @@ class RetryManager:
                 result = await operation()
                 
                 # Success
-                total_duration = (datetime.utcnow() - start_time).total_seconds()
+                total_duration = (datetime.now(UTC) - start_time).total_seconds()
                 retry_result = RetryResult(
                     success=True,
                     result=result,
@@ -141,7 +141,7 @@ class RetryManager:
                     logger.debug(f"Will retry {operation_name} in {self._calculate_delay(attempt + 1):.2f}s")
         
         # All attempts failed
-        total_duration = (datetime.utcnow() - start_time).total_seconds()
+        total_duration = (datetime.now(UTC) - start_time).total_seconds()
         retry_result = RetryResult(
             success=False,
             result=None,
@@ -184,7 +184,7 @@ class RetryManager:
         """Record retry statistics."""
         stat_entry = {
             "operation_name": operation_name,
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(UTC),
             "success": result.success,
             "attempts": result.attempts,
             "total_duration": result.total_duration,
@@ -200,7 +200,7 @@ class RetryManager:
     
     def get_retry_statistics(self, hours: int = 24) -> Dict[str, Any]:
         """Get retry statistics for specified time period."""
-        cutoff_time = datetime.utcnow() - timedelta(hours=hours)
+        cutoff_time = datetime.now(UTC) - timedelta(hours=hours)
         recent_stats = [
             s for s in self._retry_stats
             if s.get("timestamp", datetime.min) > cutoff_time
@@ -298,7 +298,7 @@ class RetryManager:
             "status": health_status,
             "issues": issues,
             "recent_performance": recent_stats,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(UTC)
         }
 
 

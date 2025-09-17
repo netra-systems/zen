@@ -47,7 +47,7 @@ class TestIssue1278GoldenPathValidationNonDocker(SSotAsyncTestCase):
         # Staging infrastructure endpoints
         self.staging_backend_url = "https://staging.netrasystems.ai"
         self.staging_frontend_url = "https://staging.netrasystems.ai"
-        self.staging_websocket_url = "wss://api-staging.netrasystems.ai"
+        self.staging_websocket_url = "wss://api.staging.netrasystems.ai"
 
         self.record_metric("test_category", "issue_1278_golden_path_non_docker")
         self.record_metric("test_environment", "staging_direct")
