@@ -183,8 +183,8 @@ This is an active development beta project. Key contribution guidelines:
 
 - **Architecture:** `docs/` - Comprehensive system architecture documentation
 - **API Documentation:** Available at runtime endpoints
-- **Deployment Guides:** `docs/deployment/` - Environment-specific deployment instructions
-- **Development Guides:** `CLAUDE.md` - Detailed development guidelines and architecture rules
+- **Deployment Guides:** See `docs/` for deployment-related documentation
+- **Development Guidelines:** `CLAUDE.md` - Detailed development rules and architecture patterns
 
 ## 🔍 Troubleshooting
 

@@ -1025,7 +1025,7 @@ CMD ["npm", "start"]
                 "JWT_SECRET_STAGING": "jwt-secret-staging",  # Both names use same secret for consistency
                 "SECRET_KEY": "secret-key-staging",
                 "SERVICE_SECRET": "service-secret-staging",
-                "SERVICE_ID": "service-id-staging"
+                "SERVICE_ID": "netra-backend"
             }
             
             for env_name, gsm_name in auth_mappings.items():
