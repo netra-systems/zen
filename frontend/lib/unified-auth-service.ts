@@ -404,6 +404,20 @@ class UnifiedAuthService {
   }
 
   /**
+   * Check if ticket authentication should be used
+   */
+  private shouldUseTicketAuth(): boolean {
+    // Feature flag for ticket authentication
+    // This can be controlled via environment variables or feature flags
+    const ticketAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_TICKET_AUTH !== 'false';
+    
+    // Also check if we're in a supported environment
+    const isSupported = this.isTicketAuthSupported();
+    
+    return ticketAuthEnabled && isSupported;
+  }
+
+  /**
    * Set up authentication for WebSocket connections (updated for ticket support)
    */
   getWebSocketAuthConfig(): { 
@@ -412,6 +426,8 @@ class UnifiedAuthService {
     getTicket: () => Promise<TicketRequestResult>;
     useTicketAuth: boolean;
   } {
+    const useTicketAuth = this.shouldUseTicketAuth();
+    
     return {
       // Maintain JWT token for backward compatibility
       token: authService.getToken(),
@@ -430,7 +446,7 @@ class UnifiedAuthService {
       },
       // Add ticket-based authentication
       getTicket: () => this.getWebSocketTicket(),
-      useTicketAuth: true // Feature flag for ticket authentication
+      useTicketAuth // Feature flag controlled
     };
   }
 
