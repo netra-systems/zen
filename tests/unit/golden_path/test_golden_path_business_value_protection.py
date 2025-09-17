@@ -60,8 +60,11 @@ import asyncio
 import time
 import unittest
 import uuid
+import logging
 from typing import Dict, Any, List
 from unittest import mock
+from contextlib import contextmanager
+from datetime import datetime
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
@@ -69,6 +72,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
 )
+from shared.logging.unified_logging_ssot import get_logger, request_context
 
 
 @pytest.mark.unit
@@ -127,6 +131,14 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
         # Initialize correlation tracking test data
         self._correlation_logs = []
         
+        # Initialize SSOT logging for real correlation tracking
+        self._captured_logs = []
+        self._log_handler = None
+        
+        # Initialize real SSOT loggers
+        self._core_logger = get_logger('netra_backend.app.agents.supervisor.agent_execution_core')
+        self._tracker_logger = get_logger('netra_backend.app.core.agent_execution_tracker')
+        
     def test_customer_support_correlation_tracking_works(self):
         """
         Validates that customer support can correlate logs across execution chain.
@@ -136,47 +148,61 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
         
         BUSINESS IMPACT: $500K+ ARR customer retention depends on quick issue resolution.
         """
-        async def _async_test():
-            correlation_id = self.golden_path_context['correlation_id']
+        correlation_id = self.golden_path_context['correlation_id']
         
-        # Simulate customer support correlation tracking
+        # Set up LogCapture for real SSOT logging
         correlation_chain = []
         
-        def track_correlation(component: str, message: str, extra_context: Dict = None):
-            """Simulate how customer support tracks correlation across components."""
-            correlation_chain.append({
-                'component': component,
-                'message': message,
-                'correlation_id': extra_context.get('correlation_id') if extra_context else None,
-                'timestamp': time.time(),
-                'trackable': extra_context.get('correlation_id') == correlation_id if extra_context else False
-            })
+        @contextmanager
+        def log_capture():
+            """Capture real SSOT logger output for correlation analysis."""
+            class LogCaptureHandler(logging.Handler):
+                def __init__(self, captured_logs):
+                    super().__init__()
+                    self.captured_logs = captured_logs
+                    
+                def emit(self, record):
+                    # Extract correlation data from real log records
+                    correlation_data = {
+                        'component': record.name.split('.')[-1] if '.' in record.name else record.name,
+                        'message': record.getMessage(),
+                        'correlation_id': getattr(record, 'correlation_id', None) or 
+                                        getattr(record, 'request_id', None),
+                        'timestamp': time.time(),
+                        'trackable': bool(getattr(record, 'correlation_id', None) or 
+                                        getattr(record, 'request_id', None))
+                    }
+                    self.captured_logs.append(correlation_data)
+            
+            # Set up log capture handler
+            handler = LogCaptureHandler(correlation_chain)
+            root_logger = logging.getLogger()
+            root_logger.addHandler(handler)
+            root_logger.setLevel(logging.DEBUG)
+            
+            try:
+                yield
+            finally:
+                root_logger.removeHandler(handler)
         
-        # Mock both logging systems to track correlation
-        with mock.patch('netra_backend.app.agents.supervisor.agent_execution_core.logger') as mock_core_logger:
-            with mock.patch('netra_backend.app.core.agent_execution_tracker.logger') as mock_tracker_logger:
+        # Use real SSOT logging with correlation context
+        with log_capture():
+            with request_context(request_id=correlation_id, 
+                               user_id=self.golden_path_context['user_id'],
+                               trace_id=correlation_id):
                 
-                # Set up correlation tracking
-                def core_log_capture(msg, *args, **kwargs):
-                    track_correlation('agent_execution_core', msg, kwargs.get('extra', {}))
-                
-                def tracker_log_capture(msg, *args, **kwargs):
-                    track_correlation('agent_execution_tracker', msg, kwargs.get('extra', {}))
-                
-                mock_core_logger.info.side_effect = core_log_capture
-                mock_core_logger.error.side_effect = core_log_capture
-                mock_tracker_logger.info.side_effect = tracker_log_capture
-                mock_tracker_logger.error.side_effect = tracker_log_capture
-                
-                # Simulate Golden Path execution with correlation context
-                async def _async_execution():
-                    return await self._simulate_golden_path_execution(correlation_id)
-                
+                # Simulate real Golden Path execution with SSOT loggers
                 try:
-                    asyncio.run(_async_execution())
+                    asyncio.run(self._simulate_golden_path_execution_with_ssot(correlation_id))
                 except Exception as e:
                     # Customer issues often involve exceptions
-                    track_correlation('test_harness', f"Exception in Golden Path: {e}")
+                    correlation_chain.append({
+                        'component': 'test_harness',
+                        'message': f"Exception in Golden Path: {e}",
+                        'correlation_id': correlation_id,
+                        'timestamp': time.time(),
+                        'trackable': True
+                    })
         
         # Analyze correlation tracking effectiveness
         total_logs = len(correlation_chain)
@@ -237,35 +263,51 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
         
         tracked_phases = []
         
-        # Mock execution components to track phases
-        with mock.patch('netra_backend.app.agents.supervisor.agent_execution_core.logger') as mock_core:
-            with mock.patch('netra_backend.app.core.agent_execution_tracker.logger') as mock_tracker:
-                
-                def capture_phases(component, msg, *args, **kwargs):
-                    extra = kwargs.get('extra', {})
-                    if extra.get('correlation_id') == correlation_id:
-                        # Extract phase from message - improved phase detection logic
-                        msg_lower = msg.lower()
+        # Use real SSOT logging with LogCapture for phase tracking
+        @contextmanager
+        def phase_capture():
+            """Capture real SSOT phase logging for traceability analysis."""
+            class PhaseCaptureHandler(logging.Handler):
+                def __init__(self, tracked_phases):
+                    super().__init__()
+                    self.tracked_phases = tracked_phases
+                    
+                def emit(self, record):
+                    # Extract phase data from real log records with correlation
+                    correlation_id_from_record = getattr(record, 'correlation_id', None) or \
+                                               getattr(record, 'request_id', None)
+                    
+                    if correlation_id_from_record == correlation_id:
+                        msg_lower = record.getMessage().lower()
                         for phase in expected_phases:
-                            # Enhanced phase matching with more flexible keyword detection
+                            # Enhanced phase matching with flexible keyword detection
                             phase_keywords = phase.replace('_', ' ').split()
-                            # Check if all keywords from phase are present in message
                             if all(keyword in msg_lower for keyword in phase_keywords):
-                                tracked_phases.append({
+                                self.tracked_phases.append({
                                     'phase': phase,
-                                    'component': component,
+                                    'component': record.name.split('.')[-1] if '.' in record.name else record.name,
                                     'traceable': True
                                 })
                                 break
-                
-                # Set up phase tracking
-                mock_core.info.side_effect = lambda msg, **kw: capture_phases('core', msg, **kw)
-                mock_core.error.side_effect = lambda msg, **kw: capture_phases('core', msg, **kw)
-                mock_tracker.info.side_effect = lambda msg, **kw: capture_phases('tracker', msg, **kw)
-                mock_tracker.error.side_effect = lambda msg, **kw: capture_phases('tracker', msg, **kw)
-                
-                # Simulate phase logging
-                self._simulate_golden_path_phases(correlation_id, mock_core, mock_tracker)
+            
+            # Set up phase capture handler
+            handler = PhaseCaptureHandler(tracked_phases)
+            root_logger = logging.getLogger()
+            root_logger.addHandler(handler)
+            root_logger.setLevel(logging.DEBUG)
+            
+            try:
+                yield
+            finally:
+                root_logger.removeHandler(handler)
+        
+        # Use real SSOT logging with correlation context for phase simulation
+        with phase_capture():
+            with request_context(request_id=correlation_id, 
+                               user_id=self.golden_path_context['user_id'],
+                               trace_id=correlation_id):
+                # Simulate phase logging with SSOT loggers
+                self._simulate_golden_path_phases_with_ssot(correlation_id)
         
         # Analyze phase traceability
         unique_tracked_phases = list(set(p['phase'] for p in tracked_phases))
@@ -387,20 +429,26 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
         print(" PASS:  BUSINESS VALUE PROVEN: SSOT logging provides measurable debugging improvement")
         print(f" PASS:  ROI JUSTIFIED: Estimated ${annual_support_cost_savings:,.0f} annual savings from improved debugging")
         
-    async def _simulate_golden_path_execution(self, correlation_id: str):
-        """Simulate realistic Golden Path execution with correlation context."""
-        # Simulate agent execution core operations
-        mock_core_logger = mock.MagicMock()
-        mock_core_logger.info("Agent execution started", extra={'correlation_id': correlation_id})
-        mock_core_logger.info("Context validation passed", extra={'correlation_id': correlation_id})
+    async def _simulate_golden_path_execution_with_ssot(self, correlation_id: str):
+        """Simulate realistic Golden Path execution with real SSOT logging and correlation context."""
+        # Use real SSOT loggers - correlation context is automatically propagated
+        core_logger = get_logger('netra_backend.app.agents.supervisor.agent_execution_core')
+        tracker_logger = get_logger('netra_backend.app.core.agent_execution_tracker')
         
-        # Simulate tracker operations
-        mock_tracker_logger = mock.MagicMock()
-        mock_tracker_logger.info("Execution tracking initialized", extra={'correlation_id': correlation_id})
-        mock_tracker_logger.info("State transition recorded", extra={'correlation_id': correlation_id})
+        # Simulate agent execution core operations with real logging
+        core_logger.info("Agent execution started")
+        core_logger.info("Context validation passed")
+        
+        # Simulate tracker operations with real logging
+        tracker_logger.info("Execution tracking initialized")
+        tracker_logger.info("State transition recorded")
         
         # Simulate some processing delay
         await asyncio.sleep(0.01)
+        
+        # Log completion
+        core_logger.info("Agent execution completed")
+        tracker_logger.info("Tracking finalized")
     
     def _simulate_golden_path_phases(self, correlation_id: str, mock_core=None, mock_tracker=None):
         """Simulate Golden Path phases being logged."""
