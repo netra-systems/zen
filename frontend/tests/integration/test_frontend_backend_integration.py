@@ -25,7 +25,7 @@ from typing import Dict, Any, List, Optional
 
 import pytest
 import websockets
-from websockets.exceptions import WebSocketException
+from websockets import WebSocketException
 import requests
 from requests.exceptions import RequestException, Timeout, ConnectionError
 

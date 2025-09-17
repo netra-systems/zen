@@ -19,7 +19,7 @@ from enum import Enum
 from typing import Any, Dict, Optional, Union
 import httpx
 import websockets
-from websockets.exceptions import ConnectionClosedError
+from websockets import ConnectionClosedError
 from pathlib import Path
 
 

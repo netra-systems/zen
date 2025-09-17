@@ -7,7 +7,7 @@ This test directly connects to staging to validate HTTP 500 vs other errors
 import asyncio
 import websockets
 import time
-from websockets.exceptions import InvalidStatus, ConnectionClosedError
+from websockets import InvalidStatus, ConnectionClosedError
 
 async def test_staging_websocket():
     """Test staging WebSocket connection to reproduce Issue #517 HTTP 500 errors"""

@@ -19,7 +19,7 @@ from typing import Any, Callable, Dict, List, Optional, Union, Set
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 import websockets
-from websockets.exceptions import WebSocketException, ConnectionClosedError, InvalidURI
+from websockets import WebSocketException, ConnectionClosedError, InvalidURI
 import urllib.parse
 
 from tests.e2e.staging_config import get_staging_config

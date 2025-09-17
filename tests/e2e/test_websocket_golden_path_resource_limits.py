@@ -52,7 +52,7 @@ except ImportError:
 # Import WebSocket client for real connection testing
 try:
     import websockets
-    from websockets.exceptions import ConnectionClosed, InvalidURI
+    from websockets import ConnectionClosed, InvalidURI
     WEBSOCKET_CLIENT_AVAILABLE = True
 except ImportError:
     WEBSOCKET_CLIENT_AVAILABLE = False
