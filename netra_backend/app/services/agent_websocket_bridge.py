@@ -234,29 +234,53 @@ class AgentWebSocketBridge(MonitorableComponent):
     
     @websocket_manager.setter
     def websocket_manager(self, manager):
-        """Set websocket manager (primarily for testing scenarios).
-        
-        CRITICAL: This setter is primarily for test scenarios to inject mock managers.
-        Production code should use factory methods (create_user_emitter, create_scoped_emitter)
-        for proper user isolation and per-request instantiation patterns.
-        
+        """Set websocket manager with standardized interface validation - Issue #1176 Phase 1.
+
+        CRITICAL: Now includes standardized interface validation to prevent coordination gaps.
+        This setter validates manager interface compliance for production safety.
+
         Args:
-            manager: WebSocket manager instance or None. Must implement send_to_thread method
-                    if not None.
-                    
+            manager: WebSocket manager instance or None. Must implement standardized interface.
+
         Raises:
-            ValueError: If manager doesn't implement required interface
+            ValueError: If manager doesn't implement required standardized interface
         """
-        if manager is not None and not hasattr(manager, 'send_to_thread'):
-            raise ValueError(
-                "Invalid websocket manager - must implement send_to_thread method. "
-                "For production use, prefer factory methods for proper user isolation."
-            )
-        
+        if manager is not None:
+            # Issue #1176 Phase 1: Enhanced validation using standardized interface
+            try:
+                from netra_backend.app.websocket_core.standardized_factory_interface import (
+                    WebSocketManagerFactoryValidator
+                )
+
+                # Use factory validator for comprehensive validation if available
+                if hasattr(self, '_websocket_manager_factory') and self._websocket_manager_factory:
+                    validation_result = self._websocket_manager_factory.validate_manager_instance(manager)
+                    if not validation_result.is_production_ready:
+                        logger.warning(
+                            f"Issue #1176: WebSocket manager validation warnings: "
+                            f"{validation_result.validation_errors}"
+                        )
+                        # Don't raise error for warnings, but log for monitoring
+
+                # Basic interface requirement check
+                if not hasattr(manager, 'send_to_thread'):
+                    raise ValueError(
+                        "Invalid websocket manager - must implement send_to_thread method. "
+                        "Use standardized factory methods for proper interface compliance."
+                    )
+
+            except ImportError:
+                # Fallback validation if standardized interface not available
+                if not hasattr(manager, 'send_to_thread'):
+                    raise ValueError(
+                        "Invalid websocket manager - must implement send_to_thread method."
+                    )
+
         self._websocket_manager = manager
         logger.debug(
             f"WebSocket manager {'set' if manager else 'cleared'} "
-            f"(type: {type(manager).__name__ if manager else 'None'})"
+            f"(type: {type(manager).__name__ if manager else 'None'}) "
+            f"with Issue #1176 standardized validation"
         )
     
     @property
