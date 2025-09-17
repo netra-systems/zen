@@ -213,4 +213,4 @@ if __name__ == "__main__":
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
     # sys.exit(result)
-        # REMOVED_SYNTAX_ERROR: print(f"   - {test}: {traceback.split('Error:')[-1].strip()}")
+print(f"   - {test}: {traceback.split('Error:')[-1].strip()}")

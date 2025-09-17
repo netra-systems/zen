@@ -39,7 +39,7 @@ class TestRestorationManager:
     def __init__(self, project_root: Path):
         self.project_root = project_root
         self.backup_dir = project_root / "backups" / f"test_restoration_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        self.corruption_pattern = re.compile(r'^(\s*)# REMOVED_SYNTAX_ERROR:\s*(.*)$', re.MULTILINE)
+    self.corruption_pattern = re.compile(r'^(\s*)\s*(.*)$', re.MULTILINE)
 
         # Business value prioritization
         self.tier_1_patterns = [
