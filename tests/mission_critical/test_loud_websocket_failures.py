@@ -19,7 +19,7 @@ from loguru import logger
 
 # Core WebSocket infrastructure imports
 try:
-    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.services.websocket_bridge_factory import (
         WebSocketBridgeFactory,
         UserWebSocketEmitter,

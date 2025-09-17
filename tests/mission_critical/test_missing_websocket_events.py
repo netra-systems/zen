@@ -27,7 +27,7 @@ try:
     from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
     from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
     from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
-    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
     from netra_backend.app.schemas.websocket_models import WebSocketMessage
     from netra_backend.app.logging_config import central_logger
 except ImportError as e:
