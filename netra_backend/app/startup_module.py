@@ -1325,7 +1325,7 @@ async def _emergency_cleanup(logger: logging.Logger) -> None:
     try:
         await _cleanup_connections()
         cleanup_multiprocessing()
-        await central_logger.shutdown()
+        # SSOT: No need for explicit logger shutdown with unified logging
     except Exception as cleanup_error:
         logger.error(f"Error during cleanup: {cleanup_error}")
 
