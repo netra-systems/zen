@@ -811,9 +811,19 @@ def setup_middleware(app: FastAPI) -> None:
         except Exception as auth_check_error:
             logger.warning(f"⚠️ Auth service pre-validation failed: {auth_check_error}")
 
-        # PHASE 1: WebSocket Protection Middleware (FIRST - bottom of stack)
+        # PHASE 1: Core Infrastructure Middleware (FIRST)
+        # SESSION MIDDLEWARE MUST BE FIRST - All other middleware may depend on it
+        logger.debug("Setting up session middleware (Phase 1)...")
+        try:
+            setup_session_middleware(app)
+            logger.debug("✅ Session middleware setup completed successfully")
+        except Exception as session_error:
+            logger.error(f"❌ Session middleware setup failed: {session_error}")
+            raise RuntimeError(f"Critical infrastructure failure - session middleware required: {session_error}")
+
+        # PHASE 2: WebSocket Protection Middleware
         # Add WebSocket-aware middleware wrapper to prevent HTTP middleware interference
-        logger.debug("Setting up WebSocket exclusion middleware (Phase 1)...")
+        logger.debug("Setting up WebSocket exclusion middleware (Phase 2)...")
         try:
             _add_websocket_exclusion_middleware(app)
             logger.debug("✅ WebSocket exclusion middleware setup completed successfully")
@@ -827,26 +837,15 @@ def setup_middleware(app: FastAPI) -> None:
                 logger.error(f"❌ Fallback WebSocket middleware also failed: {fallback_error}")
                 logger.warning("Continuing without WebSocket exclusion middleware - may cause issues")
 
-        # PHASE 2: Authentication and Context Middleware
-        # GCP Authentication Context middleware BEFORE session in middleware stack (runs AFTER session due to FastAPI reverse order)
-        logger.debug("Setting up GCP auth context middleware (Phase 2)...")
+        # PHASE 3: Authentication and Context Middleware
+        # GCP Authentication Context middleware AFTER session (needs request.session access)
+        logger.debug("Setting up GCP auth context middleware (Phase 3)...")
         try:
             setup_gcp_auth_context_middleware(app)
             logger.debug("✅ GCP auth context middleware setup completed successfully")
         except Exception as auth_context_error:
             logger.error(f"❌ GCP auth context middleware setup failed: {auth_context_error}")
             logger.warning("Continuing without GCP auth context middleware - authentication may be degraded")
-
-        # PHASE 3: Core Infrastructure Middleware (LAST - top of stack)
-        # SESSION MIDDLEWARE MUST BE LAST TO BE ADDED - Will run FIRST due to FastAPI reverse order
-        # This ensures request.session is available for all other middleware
-        logger.debug("Setting up session middleware (Phase 3 - LAST to run FIRST)...")
-        try:
-            setup_session_middleware(app)
-            logger.debug("✅ Session middleware setup completed successfully - will run FIRST")
-        except Exception as session_error:
-            logger.error(f"❌ Session middleware setup failed: {session_error}")
-            raise RuntimeError(f"Critical infrastructure failure - session middleware required: {session_error}")
 
         # PHASE 4: Request Handling Middleware
         # CORS middleware handles cross-origin requests with WebSocket awareness
