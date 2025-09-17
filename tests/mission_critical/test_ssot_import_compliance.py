@@ -20,7 +20,7 @@ CRITICAL: Tests must run without Docker dependency for CI/CD integration.
 
 Author: Agent Events Remediation Team
 Date: 2025-09-12
-""
+"
 
 import ast
 import importlib
@@ -47,7 +47,7 @@ from shared.isolated_environment import get_env, IsolatedEnvironment
 
 @dataclass
 class ImportViolation:
-    ""Represents an SSOT import violation."
+    "Represents an SSOT import violation.
     file_path: str
     line_number: int
     import_statement: str
@@ -58,7 +58,7 @@ class ImportViolation:
 
 @dataclass
 class ImportComplianceReport:
-    "Comprehensive import compliance validation report.""
+    "Comprehensive import compliance validation report."
     total_files_scanned: int
     total_imports_analyzed: int
     websocket_notifier_imports: List[Dict[str, Any]]
@@ -71,7 +71,7 @@ class ImportComplianceReport:
 
 
 class ImportAnalyzer:
-    ""Analyzes import statements for SSOT compliance."
+    "Analyzes import statements for SSOT compliance."
 
     def __init__(self, project_root: Path):
         self.project_root = project_root
@@ -86,7 +86,7 @@ class ImportAnalyzer:
         }
 
     def extract_imports_from_file(self, file_path: str) -> List[Dict[str, Any]]:
-        "Extract all import statements from a Python file.""
+        Extract all import statements from a Python file.""
         imports = []
 
         try:
@@ -120,12 +120,12 @@ class ImportAnalyzer:
                         }
 
         except Exception as e:
-            logger.warning(fError parsing imports from {file_path}: {e}")
+            logger.warning(fError parsing imports from {file_path}: {e})
 
         return imports
 
     def analyze_websocket_notifier_imports(self, imports: List[Dict[str, Any]], file_path: str) -> List[ImportViolation]:
-        "Analyze WebSocketNotifier imports for SSOT violations.""
+        Analyze WebSocketNotifier imports for SSOT violations.""
         violations = []
 
         for imp in imports:
@@ -160,10 +160,10 @@ class ImportAnalyzer:
 
 
 class SSotImportComplianceTests(SSotBaseTestCase):
-    ""Mission Critical Test Suite: SSOT Import Compliance Validation."
+    Mission Critical Test Suite: SSOT Import Compliance Validation.""
 
     def setup_method(self, method):
-        "Setup test method with SSOT base configuration.""
+        Setup test method with SSOT base configuration."
         super().setup_method(method)
         self.project_root = Path(project_root)
         self.analyzer = ImportAnalyzer(self.project_root)
@@ -179,7 +179,7 @@ class SSotImportComplianceTests(SSotBaseTestCase):
         }
 
     def _is_production_file(self, file_path: str) -> bool:
-        ""Check if file is production code that must follow SSOT compliance."
+        "Check if file is production code that must follow SSOT compliance.
         file_path_str = str(file_path).replace('\\', '/')
 
         # Exclude non-production paths
@@ -198,12 +198,12 @@ class SSotImportComplianceTests(SSotBaseTestCase):
         return any(pattern in file_path_str for pattern in production_patterns)
 
     def _scan_production_files_for_imports(self) -> Tuple[List[str], List[Dict[str, Any]]]:
-        "Scan all production Python files and extract import statements.""
+        "Scan all production Python files and extract import statements."
         production_files = []
         all_imports = []
 
         # Find all Python files
-        python_files = glob.glob(str(self.project_root / **" / "*.py), recursive=True)
+        python_files = glob.glob(str(self.project_root / ** / "*.py), recursive=True)
 
         for file_path in python_files:
             if self._is_production_file(file_path):
@@ -218,8 +218,8 @@ class SSotImportComplianceTests(SSotBaseTestCase):
         return production_files, all_imports
 
     def test_no_rollback_utility_imports_in_production(self):
-        ""Test that no production code imports rollback utility WebSocketNotifier."
-        logger.info("Testing for rollback utility imports in production code)
+        "Test that no production code imports rollback utility WebSocketNotifier.
+        logger.info("Testing for rollback utility imports in production code)"
 
         production_files, all_imports = self._scan_production_files_for_imports()
         rollback_violations = []
@@ -232,25 +232,25 @@ class SSotImportComplianceTests(SSotBaseTestCase):
             rollback_violations.extend([v for v in violations if v.violation_type == 'ROLLBACK_IMPORT']
 
         # Log findings
-        logger.info(fScanned {len(production_files)} production files")
-        logger.info(f"Found {len(rollback_violations)} rollback utility import violations)
+        logger.info(fScanned {len(production_files)} production files)
+        logger.info(fFound {len(rollback_violations)} rollback utility import violations)
 
         if rollback_violations:
-            logger.error(CRITICAL: Rollback utility imports found in production code:")
+            logger.error(CRITICAL: Rollback utility imports found in production code:")"
             for violation in rollback_violations:
-                logger.error(f"  {violation.file_path}:{violation.line_number} - {violation.import_statement})
+                logger.error(f  {violation.file_path}:{violation.line_number} - {violation.import_statement})
 
         # CRITICAL ASSERTION: No rollback utility imports in production
         assert len(rollback_violations) == 0, (
-            fCRITICAL: Found {len(rollback_violations)} rollback utility imports in production code. "
+            fCRITICAL: Found {len(rollback_violations)} rollback utility imports in production code. 
             f"These must be removed. Violations: {[v.file_path for v in rollback_violations]}
         )
 
         logger.info(✅ No rollback utility imports found in production code")
 
     def test_websocket_notifier_import_consistency(self):
-        "Test that all WebSocketNotifier imports use consistent SSOT source.""
-        logger.info(Testing WebSocketNotifier import consistency")
+        Test that all WebSocketNotifier imports use consistent SSOT source.""
+        logger.info(Testing WebSocketNotifier import consistency)
 
         production_files, all_imports = self._scan_production_files_for_imports()
 
@@ -268,8 +268,8 @@ class SSotImportComplianceTests(SSotBaseTestCase):
                 import_sources[module] = []
             import_sources[module].append(imp)
 
-        logger.info(f"Found {len(websocket_notifier_imports)} WebSocketNotifier imports)
-        logger.info(fImport sources: {list(import_sources.keys())}")
+        logger.info(fFound {len(websocket_notifier_imports)} WebSocketNotifier imports)
+        logger.info(fImport sources: {list(import_sources.keys())}")"
 
         # Check for canonical SSOT source
         canonical_source = 'netra_backend.app.services.agent_websocket_bridge'
@@ -290,27 +290,27 @@ class SSotImportComplianceTests(SSotBaseTestCase):
                     ))
 
         if violations:
-            logger.error("Import consistency violations found:)
+            logger.error(Import consistency violations found:)
             for violation in violations:
-                logger.error(f  {violation.file_path}:{violation.line_number} - {violation.import_statement}")
+                logger.error(f  {violation.file_path}:{violation.line_number} - {violation.import_statement})"
 
         # ASSERTION: All WebSocketNotifier imports should use canonical source
         # (Allow some flexibility during migration, but log violations)
         if violations:
             logger.warning(f"Found {len(violations)} non-canonical WebSocketNotifier imports)
-            logger.warning(These should be migrated to canonical SSOT source during next refactoring")
+            logger.warning(These should be migrated to canonical SSOT source during next refactoring)
 
         # CRITICAL ASSERTION: Must have at least one canonical import
         assert has_canonical, (
-            f"No imports from canonical WebSocketNotifier source: {canonical_source}. 
-            fFound sources: {list(import_sources.keys())}"
+            fNo imports from canonical WebSocketNotifier source: {canonical_source}. 
+            fFound sources: {list(import_sources.keys())}""
         )
 
-        logger.info("✅ WebSocketNotifier import consistency validated)
+        logger.info(✅ WebSocketNotifier import consistency validated)
 
     def test_circular_dependency_prevention(self):
-        ""Test that WebSocketNotifier imports don't create circular dependencies."
-        logger.info("Testing circular dependency prevention)
+        "Test that WebSocketNotifier imports don't create circular dependencies."
+        logger.info(Testing circular dependency prevention)
 
         # Test key import paths for circular dependencies
         critical_imports = [
@@ -328,9 +328,9 @@ class SSotImportComplianceTests(SSotBaseTestCase):
                     del sys.modules[module_path]
 
                 module = importlib.import_module(module_path)
-                assert module is not None, fModule {module_path} imported as None"
+                assert module is not None, fModule {module_path} imported as None""
 
-                logger.debug(f"✓ Successfully imported {module_path})
+                logger.debug(f✓ Successfully imported {module_path})
 
             except ImportError as e:
                 import_failures.append({
@@ -348,7 +348,7 @@ class SSotImportComplianceTests(SSotBaseTestCase):
 
         # Log import failures
         if import_failures:
-            logger.error(Circular dependency or import failures detected:")
+            logger.error(Circular dependency or import failures detected:)
             for failure in import_failures:
                 logger.error(f"  {failure['module']}: {failure['type']} - {failure['error']})
 
@@ -357,16 +357,16 @@ class SSotImportComplianceTests(SSotBaseTestCase):
             fImport failures detected (possible circular dependencies): {import_failures}"
         )
 
-        logger.info("✅ Circular dependency prevention validated)
+        logger.info(✅ Circular dependency prevention validated)
 
     def test_agent_websocket_bridge_has_single_websocket_notifier(self):
-        ""Test that agent_websocket_bridge.py has exactly one WebSocketNotifier class."
-        logger.info("Testing agent_websocket_bridge.py for single WebSocketNotifier class)
+        ""Test that agent_websocket_bridge.py has exactly one WebSocketNotifier class.
+        logger.info(Testing agent_websocket_bridge.py for single WebSocketNotifier class)"
 
-        bridge_file = self.project_root / netra_backend" / "app / services" / "agent_websocket_bridge.py
+        bridge_file = self.project_root / netra_backend" / app / services / agent_websocket_bridge.py
 
         assert bridge_file.exists(), (
-            fCanonical WebSocketNotifier file not found: {bridge_file}"
+            fCanonical WebSocketNotifier file not found: {bridge_file}""
         )
 
         try:
@@ -377,11 +377,11 @@ class SSotImportComplianceTests(SSotBaseTestCase):
             class_pattern = r'^class WebSocketNotifier[^(]*(?:\([^)]*\))?:'
             matches = list(re.finditer(class_pattern, content, re.MULTILINE))
 
-            logger.info(f"Found {len(matches)} WebSocketNotifier class definitions in agent_websocket_bridge.py)
+            logger.info(fFound {len(matches)} WebSocketNotifier class definitions in agent_websocket_bridge.py)
 
             # CRITICAL ASSERTION: Exactly one WebSocketNotifier class
             assert len(matches) == 1, (
-                fagent_websocket_bridge.py must have exactly 1 WebSocketNotifier class, found {len(matches)}"
+                fagent_websocket_bridge.py must have exactly 1 WebSocketNotifier class, found {len(matches)}
             )
 
             # Verify it's not a duplicate/backup
@@ -389,17 +389,17 @@ class SSotImportComplianceTests(SSotBaseTestCase):
             class_definition = match.group(0)
 
             assert 'Rollback' not in class_definition, (
-                "WebSocketNotifier class should not be a rollback implementation
+                "WebSocketNotifier class should not be a rollback implementation"
             )
 
-            logger.info(✅ agent_websocket_bridge.py has single canonical WebSocketNotifier class")
+            logger.info(✅ agent_websocket_bridge.py has single canonical WebSocketNotifier class)
 
         except Exception as e:
-            pytest.fail(f"Error analyzing agent_websocket_bridge.py: {e})
+            pytest.fail(fError analyzing agent_websocket_bridge.py: {e})
 
     def test_generate_import_compliance_report(self):
-        ""Generate comprehensive import compliance report."
-        logger.info("Generating import compliance report)
+        ""Generate comprehensive import compliance report.
+        logger.info(Generating import compliance report)"
 
         production_files, all_imports = self._scan_production_files_for_imports()
 
@@ -431,7 +431,7 @@ class SSotImportComplianceTests(SSotBaseTestCase):
         if rollback_violations:
             recommendations.append(Remove all rollback utility imports from production code")
         if duplicate_source_violations:
-            recommendations.append("Migrate all WebSocketNotifier imports to canonical SSOT source)
+            recommendations.append(Migrate all WebSocketNotifier imports to canonical SSOT source)
 
         # Create report
         report = ImportComplianceReport(
@@ -447,13 +447,13 @@ class SSotImportComplianceTests(SSotBaseTestCase):
         )
 
         # Log report
-        logger.info(Import Compliance Report:")
-        logger.info(f"  Files scanned: {report.total_files_scanned})
-        logger.info(f  Imports analyzed: {report.total_imports_analyzed}")
+        logger.info(Import Compliance Report:")"
+        logger.info(f  Files scanned: {report.total_files_scanned})
+        logger.info(f  Imports analyzed: {report.total_imports_analyzed})
         logger.info(f"  WebSocketNotifier imports: {len(report.websocket_notifier_imports)})
         logger.info(f  Rollback violations: {len(report.rollback_import_violations)}")
-        logger.info(f"  Duplicate source violations: {len(report.duplicate_source_violations)})
-        logger.info(f  Compliance score: {report.compliance_score}%")
+        logger.info(f  Duplicate source violations: {len(report.duplicate_source_violations)})
+        logger.info(f  Compliance score: {report.compliance_score}%)"
         logger.info(f"  Critical violations: {report.critical_violations})
 
         # Store report for use by other tests
@@ -461,15 +461,15 @@ class SSotImportComplianceTests(SSotBaseTestCase):
 
         # ASSERTION: Compliance score must be reasonable for Golden Path protection
         assert report.compliance_score >= 80, (
-            fImport compliance score too low: {report.compliance_score}%. Must be >= 80% for Golden Path protection."
+            fImport compliance score too low: {report.compliance_score}%. Must be >= 80% for Golden Path protection.
         )
 
-        logger.info("✅ Import compliance report generated successfully)
+        logger.info(✅ Import compliance report generated successfully)"
 
         return report
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # Direct execution for rapid testing
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

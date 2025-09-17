@@ -18,7 +18,7 @@ CRITICAL SUCCESS CRITERIA:
 5. Connection drops MUST recover without losing auth context
 
 FAILURE = NO CHAT FUNCTIONALITY = NO CUSTOMER VALUE = $0 REVENUE
-""
+"
 
 import asyncio
 import json
@@ -41,14 +41,14 @@ logger = logging.getLogger(__name__)
 
 
 class WebSocketAuthEventValidator:
-    ""Validates WebSocket authentication and agent events for business value delivery."
+    "Validates WebSocket authentication and agent events for business value delivery.
     
     REQUIRED_AGENT_EVENTS = {
-        "agent_started,
-        agent_thinking", 
-        "tool_executing,
+        "agent_started,"
+        agent_thinking, 
+        tool_executing,"
         tool_completed",
-        "agent_completed
+        agent_completed
     }
     
     def __init__(self):
@@ -56,73 +56,73 @@ class WebSocketAuthEventValidator:
         self.auth_events = []
         self.connection_events = []
         
-    def record_event(self, event_data: Dict[str, Any], event_source: str = websocket"):
-        "Record event for validation.""
+    def record_event(self, event_data: Dict[str, Any], event_source: str = websocket"):"
+        Record event for validation."
         event_record = {
             data": event_data,
-            "timestamp: time.time(),
-            source": event_source,
-            "event_type: event_data.get(type"),
-            "user_context: event_data.get(user_id") or event_data.get("sub)
+            timestamp: time.time(),
+            source": event_source,"
+            event_type: event_data.get(type),
+            user_context: event_data.get(user_id") or event_data.get("sub)
         }
         
         self.events_received.append(event_record)
         
         # Categorize events
-        if event_data.get(type") in self.REQUIRED_AGENT_EVENTS:
+        if event_data.get(type) in self.REQUIRED_AGENT_EVENTS:
             self.auth_events.append(event_record)
-        elif event_data.get("type) in [connection", "auth, token_refresh"]:
+        elif event_data.get("type) in [connection", auth, token_refresh]:
             self.connection_events.append(event_record)
     
     def validate_agent_event_delivery(self, user_id: str) -> Dict[str, Any]:
-        "Validate that all required agent events were delivered for user.""
-        user_events = [e for e in self.auth_events if e.get(user_context") == user_id]
-        received_event_types = {e["event_type] for e in user_events}
+        Validate that all required agent events were delivered for user.""
+        user_events = [e for e in self.auth_events if e.get(user_context) == user_id]
+        received_event_types = {e["event_type] for e in user_events}"
         
         validation = {
-            all_events_received": self.REQUIRED_AGENT_EVENTS.issubset(received_event_types),
-            "missing_events: self.REQUIRED_AGENT_EVENTS - received_event_types,
+            all_events_received: self.REQUIRED_AGENT_EVENTS.issubset(received_event_types),
+            missing_events: self.REQUIRED_AGENT_EVENTS - received_event_types,"
             extra_events": received_event_types - self.REQUIRED_AGENT_EVENTS,
-            "event_count: len(user_events),
+            event_count: len(user_events),
             event_timeline": [e["timestamp] for e in user_events],
-            business_impact": "
+            business_impact: 
         }
         
-        if not validation[all_events_received"]:
-            validation["business_impact] = fCRITICAL: Missing agent events {validation['missing_events']} - Chat experience broken"
+        if not validation[all_events_received]:"
+            validation["business_impact] = fCRITICAL: Missing agent events {validation['missing_events']} - Chat experience broken
         else:
-            validation["business_impact] = NONE: All agent events delivered - Chat experience intact"
+            validation[business_impact] = NONE: All agent events delivered - Chat experience intact
             
         return validation
     
     def validate_multi_user_isolation(self, user_ids: List[str] -> Dict[str, Any]:
-        "Validate that WebSocket events are properly isolated between users.""
+        "Validate that WebSocket events are properly isolated between users."
         validation = {
-            isolation_maintained": True,
+            isolation_maintained: True,"
             "user_event_counts: {},
-            crossover_events": [],
+            crossover_events: [],
             "business_impact: "
         }
         
         for user_id in user_ids:
-            user_events = [e for e in self.events_received if e.get("user_context) == user_id]
-            validation[user_event_counts"][user_id] = len(user_events)
+            user_events = [e for e in self.events_received if e.get(user_context) == user_id]
+            validation[user_event_counts][user_id] = len(user_events)"
             
             # Check for events intended for other users
             for event in user_events:
-                intended_user = event["data].get(target_user_id") 
+                intended_user = event["data].get(target_user_id) 
                 if intended_user and intended_user != user_id:
-                    validation["crossover_events].append({
+                    validation[crossover_events].append({
                         event": event["event_type],
-                        intended_for": intended_user,
-                        "received_by: user_id
+                        intended_for: intended_user,
+                        received_by: user_id"
                     }
         
         if validation[crossover_events"]:
-            validation["isolation_maintained] = False
+            validation[isolation_maintained] = False
             validation[business_impact"] = "CRITICAL: Event crossover detected - User data leak risk
         else:
-            validation[business_impact"] = "NONE: Multi-user isolation maintained
+            validation[business_impact] = NONE: Multi-user isolation maintained
             
         return validation
 
@@ -131,40 +131,40 @@ class WebSocketAuthEventValidator:
 @pytest.mark.real_services
 @pytest.mark.websocket
 class WebSocketAuthEventsTests(SSotAsyncTestCase):
-    ""Mission Critical: WebSocket authentication with agent events for chat value."
+    "Mission Critical: WebSocket authentication with agent events for chat value."
     
     @pytest.fixture(autouse=True)
     async def setup_websocket_auth_testing(self, real_services_fixture):
-        "Setup real services for WebSocket auth testing.""
+        Setup real services for WebSocket auth testing.""
         self.services = real_services_fixture
         self.validator = WebSocketAuthEventValidator()
         self.auth_helper = E2EWebSocketAuthHelper()
         
         # Ensure backend service is available for WebSocket connections
-        if not self.services.get(services_available", {}.get("backend, False):
-            pytest.skip(Backend service required for WebSocket auth testing")
+        if not self.services.get(services_available, {}.get(backend, False):
+            pytest.skip(Backend service required for WebSocket auth testing)"
             
         # Configure WebSocket URL
         backend_url = self.services["backend_url]
-        websocket_url = backend_url.replace(http://", "ws://) + /ws"
+        websocket_url = backend_url.replace(http://, ws://) + /ws""
         self.auth_helper.config.websocket_url = websocket_url
     
     async def test_websocket_authentication_core_flow(self):
-        "
+
         MISSION CRITICAL: WebSocket authentication for chat access.
         
         BUSINESS IMPACT: Without WebSocket auth, users cannot use chat = $0 value delivery
         ""
-        logger.info([U+1F534] MISSION CRITICAL: Testing WebSocket authentication core flow")
+        logger.info([U+1F534] MISSION CRITICAL: Testing WebSocket authentication core flow)
         
         # Create authenticated user
-        user_id = f"ws-auth-{uuid.uuid4().hex[:8]}
-        email = fwsauth-{int(time.time())}@netra.test"
+        user_id = fws-auth-{uuid.uuid4().hex[:8]}
+        email = fwsauth-{int(time.time())}@netra.test""
         
         token = self.auth_helper.create_test_jwt_token(
             user_id=user_id,
             email=email,
-            permissions=["chat, websocket", "agent:execute]
+            permissions=[chat, websocket, agent:execute]"
         
         # CRITICAL TEST: WebSocket connection with authentication
         try:
@@ -177,9 +177,9 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
                 
                 # Send authentication verification message
                 auth_message = {
-                    "type: auth_verify",
-                    "user_id: user_id,
-                    timestamp": datetime.now().isoformat()
+                    type: auth_verify,
+                    "user_id: user_id,"
+                    timestamp: datetime.now().isoformat()
                 }
                 
                 await websocket.send(json.dumps(auth_message))
@@ -188,31 +188,31 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
                 response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                 response_data = json.loads(response)
                 
-                self.validator.record_event(response_data, "auth_verification)
+                self.validator.record_event(response_data, auth_verification)"
                 
                 # CRITICAL VALIDATION: WebSocket authentication must work
-                assert response_data.get(type") in ["auth_success, pong", "connection_established], \
-                    fMISSION CRITICAL: WebSocket auth failed - {response_data}"
+                assert response_data.get(type") in [auth_success, pong, connection_established], \
+                    fMISSION CRITICAL: WebSocket auth failed - {response_data}""
                 
                 # Verify authenticated context
-                if "user_id in response_data:
-                    assert response_data[user_id"] == user_id, \
+                if user_id in response_data:
+                    assert response_data[user_id] == user_id, \"
                         "CRITICAL: User context lost in WebSocket authentication
                         
         except asyncio.TimeoutError:
-            pytest.fail(MISSION CRITICAL: WebSocket authentication timeout - connection failed")
+            pytest.fail(MISSION CRITICAL: WebSocket authentication timeout - connection failed)
         except Exception as e:
             pytest.fail(f"MISSION CRITICAL: WebSocket authentication failed - {str(e)})
         
         logger.info( PASS:  MISSION CRITICAL: WebSocket authentication validated")
     
     async def test_agent_events_with_websocket_auth(self):
-        "
+    "
         MISSION CRITICAL: Agent events delivered via authenticated WebSocket.
         
         BUSINESS IMPACT: Without agent events, chat has no value = Users see no AI responses
-        ""
-        logger.info([U+1F534] MISSION CRITICAL: Testing agent events with WebSocket auth")
+        "
+        logger.info([U+1F534] MISSION CRITICAL: Testing agent events with WebSocket auth)
         
         # Setup authenticated user
         user_id = f"agent-events-{uuid.uuid4().hex[:8]}
@@ -221,7 +221,7 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
         token = self.auth_helper.create_test_jwt_token(
             user_id=user_id,
             email=email,
-            permissions=["chat, agent:execute"]
+            permissions=[chat, agent:execute]
         
         try:
             websocket_url = f"{self.auth_helper.config.websocket_url}?token={token}
@@ -233,11 +233,11 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
                 
                 # Simulate agent execution request
                 agent_request = {
-                    type": "agent_request,
-                    agent_name": "test_agent,
+                    type": agent_request,
+                    agent_name: test_agent,
                     query": "Test query for agent events,
-                    user_id": user_id,
-                    "thread_id: fthread-{uuid.uuid4().hex[:8]}"
+                    user_id: user_id,
+                    thread_id: fthread-{uuid.uuid4().hex[:8]}"
                 }
                 
                 await websocket.send(json.dumps(agent_request))
@@ -256,41 +256,41 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
                         events_collected += 1
                         
                         # Check if we received completion event
-                        if event_data.get(type") == "agent_completed:
+                        if event_data.get(type) == agent_completed:
                             break
                             
                     except asyncio.TimeoutError:
                         # Stop collecting if no more events
                         break
                     except json.JSONDecodeError as e:
-                        logger.warning(fInvalid JSON in WebSocket message: {e}")
+                        logger.warning(fInvalid JSON in WebSocket message: {e}")"
                         continue
                 
                 # CRITICAL VALIDATION: Agent events must be delivered
                 validation = self.validator.validate_agent_event_delivery(user_id)
                 
-                if not validation["all_events_received]:
-                    pytest.fail(fMISSION CRITICAL: {validation['business_impact']}")
+                if not validation[all_events_received]:
+                    pytest.fail(fMISSION CRITICAL: {validation['business_impact']})"
                 
                 # Validate event timeline (events should be in reasonable order)
                 timeline = validation["event_timeline]
                 if len(timeline) > 1:
                     time_span = timeline[-1] - timeline[0]
-                    assert time_span > 0, CRITICAL: Events delivered out of order"
+                    assert time_span > 0, CRITICAL: Events delivered out of order
                     assert time_span < 30, f"CRITICAL: Agent execution took {time_span:.1f}s - too slow for chat UX
                 
         except Exception as e:
             pytest.fail(fMISSION CRITICAL: Agent events with WebSocket auth failed - {str(e)}")
         
-        logger.info(" PASS:  MISSION CRITICAL: Agent events with WebSocket auth validated)
+        logger.info( PASS:  MISSION CRITICAL: Agent events with WebSocket auth validated)
     
     async def test_multi_user_websocket_isolation(self):
         ""
         MISSION CRITICAL: Multiple users get isolated WebSocket events.
         
         BUSINESS IMPACT: Event crossover = Users see each other's data = Privacy breach
-        "
-        logger.info("[U+1F534] MISSION CRITICAL: Testing multi-user WebSocket isolation)
+
+        logger.info("[U+1F534] MISSION CRITICAL: Testing multi-user WebSocket isolation)"
         
         user_count = 3
         websocket_connections = []
@@ -299,15 +299,15 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
         try:
             # Create multiple authenticated users
             for i in range(user_count):
-                user_id = fmulti-user-{i}-{uuid.uuid4().hex[:6]}"
-                email = f"multiuser{i}-{int(time.time())}@netra.test
+                user_id = fmulti-user-{i}-{uuid.uuid4().hex[:6]}
+                email = fmultiuser{i}-{int(time.time())}@netra.test
                 
                 token = self.auth_helper.create_test_jwt_token(
                     user_id=user_id,
                     email=email,
                     permissions=[chat", "agent:execute]
                 
-                websocket_url = f{self.auth_helper.config.websocket_url}?token={token}"
+                websocket_url = f{self.auth_helper.config.websocket_url}?token={token}
                 
                 # Connect each user
                 websocket = await websockets.connect(
@@ -316,18 +316,18 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
                 )
                 
                 websocket_connections.append(websocket)
-                user_data.append({"user_id: user_id, email": email, "websocket: websocket}
+                user_data.append({user_id: user_id, email": email, "websocket: websocket}
             
             # Send different messages from each user
             for i, user in enumerate(user_data):
                 message = {
-                    type": "user_message, 
+                    type: user_message, 
                     content": f"User {i} private message,
-                    user_id": user["user_id],
-                    thread_id": f"private-thread-{user['user_id']}
+                    user_id: user[user_id],
+                    thread_id: fprivate-thread-{user['user_id']}
                 }
                 
-                await user[websocket"].send(json.dumps(message))
+                await user[websocket].send(json.dumps(message))"
                 
                 # Record the message
                 self.validator.record_event(message, f"user_{i}_message)
@@ -341,10 +341,10 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
                         for _ in range(3):  # Collect a few responses
                             response = await asyncio.wait_for(user_websocket.recv(), timeout=2.0)
                             response_data = json.loads(response)
-                            response_data[_received_by"] = user_id
+                            response_data[_received_by] = user_id
                             responses.append(response_data)
                             
-                            self.validator.record_event(response_data, f"user_{user_index}_response)
+                            self.validator.record_event(response_data, fuser_{user_index}_response)
                     except asyncio.TimeoutError:
                         pass  # Normal - no more messages
                     return responses
@@ -358,16 +358,16 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
             all_responses = await asyncio.gather(*response_tasks, return_exceptions=True)
             
             # CRITICAL VALIDATION: User isolation must be maintained
-            user_ids = [user[user_id"] for user in user_data]
+            user_ids = [user[user_id] for user in user_data]
             isolation_validation = self.validator.validate_multi_user_isolation(user_ids)
             
-            if not isolation_validation["isolation_maintained]:
+            if not isolation_validation[isolation_maintained]:"
                 pytest.fail(fMISSION CRITICAL: {isolation_validation['business_impact']}")
             
             # Verify each user received appropriate events
             for user_id in user_ids:
-                user_events = [e for e in self.validator.events_received if e.get("user_context) == user_id]
-                assert len(user_events) > 0, fCRITICAL: User {user_id} received no events"
+                user_events = [e for e in self.validator.events_received if e.get(user_context) == user_id]
+                assert len(user_events) > 0, fCRITICAL: User {user_id} received no events""
             
         finally:
             # Cleanup connections
@@ -377,18 +377,18 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
                 except:
                     pass
         
-        logger.info(f" PASS:  MISSION CRITICAL: Multi-user WebSocket isolation validated for {user_count} users)
+        logger.info(f PASS:  MISSION CRITICAL: Multi-user WebSocket isolation validated for {user_count} users)
     
     async def test_websocket_token_refresh_seamless(self):
-        ""
+        
         MISSION CRITICAL: WebSocket connections survive token refresh.
         
         BUSINESS IMPACT: Token refresh disconnects = Chat interruption = Bad UX
-        "
-        logger.info("[U+1F534] MISSION CRITICAL: Testing WebSocket token refresh)
+""
+        logger.info([U+1F534] MISSION CRITICAL: Testing WebSocket token refresh)
         
-        user_id = ftoken-refresh-{uuid.uuid4().hex[:8]}"
-        email = f"tokenrefresh-{int(time.time())}@netra.test
+        user_id = ftoken-refresh-{uuid.uuid4().hex[:8]}""
+        email = ftokenrefresh-{int(time.time())}@netra.test
         
         # Create short-lived token
         initial_token = self.auth_helper.create_test_jwt_token(
@@ -398,7 +398,7 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
         )
         
         try:
-            websocket_url = f{self.auth_helper.config.websocket_url}?token={initial_token}"
+            websocket_url = f{self.auth_helper.config.websocket_url}?token={initial_token}
             
             async with websockets.connect(
                 websocket_url,
@@ -408,8 +408,8 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
                 # Send initial message
                 initial_message = {
                     "type: ping",
-                    "user_id: user_id,
-                    message": "Before token refresh
+                    user_id: user_id,
+                    message: "Before token refresh
                 }
                 await websocket.send(json.dumps(initial_message))
                 
@@ -426,46 +426,46 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
                 
                 # Send token refresh notification (if protocol supports it)
                 refresh_message = {
-                    "type: token_refresh",
-                    "user_id: user_id,
-                    new_token": refreshed_token
+                    type: token_refresh,
+                    "user_id: user_id,"
+                    new_token: refreshed_token
                 }
                 await websocket.send(json.dumps(refresh_message))
                 
                 # Test continued functionality after refresh
                 post_refresh_message = {
-                    "type: ping",
+                    type: ping",
                     "user_id: user_id, 
-                    message": "After token refresh
+                    message: After token refresh
                 }
                 await websocket.send(json.dumps(post_refresh_message))
                 
                 # Collect post-refresh response
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                    self.validator.record_event(json.loads(response), post_refresh")
+                    self.validator.record_event(json.loads(response), post_refresh")"
                     
                     # CRITICAL VALIDATION: Connection should remain stable
                     assert True  # If we get here, connection survived
                     
                 except asyncio.TimeoutError:
-                    pytest.fail("MISSION CRITICAL: WebSocket connection failed after token refresh)
+                    pytest.fail(MISSION CRITICAL: WebSocket connection failed after token refresh)
                 
         except Exception as e:
-            pytest.fail(fMISSION CRITICAL: WebSocket token refresh failed - {str(e)}")
+            pytest.fail(fMISSION CRITICAL: WebSocket token refresh failed - {str(e)})"
         
         logger.info(" PASS:  MISSION CRITICAL: WebSocket token refresh validated)
     
     async def test_websocket_connection_recovery(self):
-        ""
+        
         MISSION CRITICAL: WebSocket connections recover from temporary disconnections.
         
         BUSINESS IMPACT: Connection drops without recovery = Chat stops working
-        "
-        logger.info("[U+1F534] MISSION CRITICAL: Testing WebSocket connection recovery)
+""
+        logger.info([U+1F534] MISSION CRITICAL: Testing WebSocket connection recovery)
         
-        user_id = frecovery-test-{uuid.uuid4().hex[:8]}"
-        email = f"recovery-{int(time.time())}@netra.test
+        user_id = frecovery-test-{uuid.uuid4().hex[:8]}""
+        email = frecovery-{int(time.time())}@netra.test
         
         token = self.auth_helper.create_test_jwt_token(
             user_id=user_id,
@@ -476,7 +476,7 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
         recovery_successful = False
         
         try:
-            websocket_url = f{self.auth_helper.config.websocket_url}?token={token}"
+            websocket_url = f{self.auth_helper.config.websocket_url}?token={token}
             
             # Initial connection
             websocket1 = await websockets.connect(
@@ -487,8 +487,8 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
             # Send message to establish connection
             initial_message = {
                 "type: ping",
-                "user_id: user_id,
-                message": "Initial connection
+                user_id: user_id,
+                message: "Initial connection
             }
             await websocket1.send(json.dumps(initial_message))
             
@@ -508,15 +508,15 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
             
             # Test reconnected functionality
             recovery_message = {
-                "type: ping",
-                "user_id: user_id,
-                message": "After reconnection
+                type: ping,
+                "user_id: user_id,"
+                message: After reconnection
             }
             await websocket2.send(json.dumps(recovery_message))
             
             # Verify reconnection works
             response = await asyncio.wait_for(websocket2.recv(), timeout=5.0)
-            self.validator.record_event(json.loads(response), after_recovery")
+            self.validator.record_event(json.loads(response), after_recovery)"
             
             await websocket2.close()
             recovery_successful = True
@@ -524,24 +524,24 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
         except Exception as e:
             pytest.fail(f"MISSION CRITICAL: WebSocket connection recovery failed - {str(e)})
         
-        assert recovery_successful, MISSION CRITICAL: WebSocket recovery not completed"
+        assert recovery_successful, MISSION CRITICAL: WebSocket recovery not completed
         
-        logger.info(" PASS:  MISSION CRITICAL: WebSocket connection recovery validated)
+        logger.info( PASS:  MISSION CRITICAL: WebSocket connection recovery validated)"
 
 
 @pytest.mark.mission_critical
 @pytest.mark.real_services
 @pytest.mark.websocket
 class WebSocketAuthPerformanceTests(SSotAsyncTestCase):
-    ""Mission Critical: WebSocket authentication performance under load."
+    "Mission Critical: WebSocket authentication performance under load.
     
     async def test_websocket_auth_concurrent_connections(self):
-        "
+    ""
         MISSION CRITICAL: WebSocket auth handles concurrent user connections.
         
         BUSINESS IMPACT: Auth bottlenecks = Users can't connect = Lost engagement
-        ""
-        logger.info([U+1F534] MISSION CRITICAL: Testing concurrent WebSocket auth connections")
+        
+        logger.info([U+1F534] MISSION CRITICAL: Testing concurrent WebSocket auth connections")"
         
         concurrent_users = 10
         auth_helper = E2EWebSocketAuthHelper()
@@ -549,10 +549,10 @@ class WebSocketAuthPerformanceTests(SSotAsyncTestCase):
         connection_results = []
         
         async def connect_user(user_index: int) -> Dict[str, Any]:
-            "Connect one user via WebSocket.""
+            Connect one user via WebSocket."
             start_time = time.time()
             user_id = fconcurrent-{user_index}-{uuid.uuid4().hex[:6]}"
-            email = f"concurrent{user_index}@netra.test
+            email = fconcurrent{user_index}@netra.test
             
             try:
                 token = auth_helper.create_test_jwt_token(
@@ -569,9 +569,9 @@ class WebSocketAuthPerformanceTests(SSotAsyncTestCase):
                 
                 # Test connection
                 test_message = {
-                    "type: ping",
-                    "user_id: user_id,
-                    index": user_index
+                    "type: ping,
+                    user_id: user_id,
+                    index": user_index"
                 }
                 await websocket.send(json.dumps(test_message))
                 
@@ -580,20 +580,20 @@ class WebSocketAuthPerformanceTests(SSotAsyncTestCase):
                 connections.append(websocket)
                 
                 return {
-                    "user_index: user_index,
-                    user_id": user_id,
+                    user_index: user_index,
+                    user_id: user_id,"
                     "success: True,
-                    duration": time.time() - start_time,
-                    "websocket: websocket
+                    duration: time.time() - start_time,
+                    "websocket: websocket"
                 }
                 
             except Exception as e:
                 return {
-                    user_index": user_index,
-                    "user_id: user_id,
+                    user_index: user_index,
+                    user_id: user_id,"
                     success": False,
-                    "error: str(e),
-                    duration": time.time() - start_time
+                    error: str(e),
+                    duration": time.time() - start_time"
                 }
         
         try:
@@ -602,22 +602,22 @@ class WebSocketAuthPerformanceTests(SSotAsyncTestCase):
             connection_results = await asyncio.gather(*connection_tasks)
             
             # CRITICAL VALIDATION: All connections must succeed
-            successful_connections = [r for r in connection_results if r["success]]
-            failed_connections = [r for r in connection_results if not r[success"]]
+            successful_connections = [r for r in connection_results if r[success]]
+            failed_connections = [r for r in connection_results if not r[success]]"
             
             if len(failed_connections) > 0:
                 failure_details = [f"User {r['user_index']}: {r.get('error')} for r in failed_connections]
-                pytest.fail(fMISSION CRITICAL: {len(failed_connections)}/{concurrent_users} WebSocket auth failures: {failure_details}")
+                pytest.fail(fMISSION CRITICAL: {len(failed_connections)}/{concurrent_users} WebSocket auth failures: {failure_details})
             
             # Performance validation
-            connection_durations = [r["duration] for r in successful_connections]
+            connection_durations = [r[duration] for r in successful_connections]"
             avg_duration = sum(connection_durations) / len(connection_durations)
             max_duration = max(connection_durations)
             
             assert avg_duration < 1.0, fBUSINESS CRITICAL: Average WebSocket auth {avg_duration:.3f}s too slow"
-            assert max_duration < 3.0, f"BUSINESS CRITICAL: Max WebSocket auth {max_duration:.3f}s unacceptable
+            assert max_duration < 3.0, fBUSINESS CRITICAL: Max WebSocket auth {max_duration:.3f}s unacceptable
             
-            logger.info(f PASS:  MISSION CRITICAL: {len(successful_connections)} concurrent WebSocket auths, avg {avg_duration:.3f}s")
+            logger.info(f PASS:  MISSION CRITICAL: {len(successful_connections)} concurrent WebSocket auths, avg {avg_duration:.3f}s)"
             
         finally:
             # Cleanup connections
@@ -629,7 +629,7 @@ class WebSocketAuthPerformanceTests(SSotAsyncTestCase):
 
 
 if __name__ == "__main__:
-    ""Run mission critical WebSocket auth event tests."
+    Run mission critical WebSocket auth event tests.""
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

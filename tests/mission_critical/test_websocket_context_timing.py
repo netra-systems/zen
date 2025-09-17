@@ -12,7 +12,7 @@ Critical scenarios covered:
 4. Multiple simultaneous connections with different timing
 5. Agent execution starting before WebSocket ready
 6. Thread context update failures and retries
-""
+"
 
 import asyncio
 import time
@@ -36,11 +36,11 @@ from shared.isolated_environment import get_env
 
 
 class WebSocketContextTimingTests:
-    ""Test critical WebSocket timing and race condition scenarios."
+    "Test critical WebSocket timing and race condition scenarios.
 
     @pytest.fixture
     async def setup(self):
-        "Setup test environment with WebSocket infrastructure.""
+        "Setup test environment with WebSocket infrastructure."
         # Create WebSocket manager
         manager = WebSocketManager()
         
@@ -67,7 +67,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_connection_without_initial_thread_id(self, setup):
-        ""Test WebSocket connection without initial thread_id."
+        "Test WebSocket connection without initial thread_id."
         manager = setup['manager']
         mock_ws = setup['mock_ws']
         user_id = setup['user_id']
@@ -109,7 +109,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_message_arrives_before_thread_context(self, setup):
-        "Test message arriving before thread context is established.""
+        Test message arriving before thread context is established.""
         manager = setup['manager']
         mock_ws = setup['mock_ws']
         user_id = setup['user_id']
@@ -150,7 +150,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_rapid_thread_switching(self, setup):
-        ""Test rapid thread switching during message processing."
+        Test rapid thread switching during message processing."
         manager = setup['manager']
         mock_ws = setup['mock_ws']
         user_id = setup['user_id']
@@ -192,7 +192,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_multiple_simultaneous_connections_timing(self, setup):
-        "Test multiple simultaneous connections with different timing.""
+        "Test multiple simultaneous connections with different timing.
         manager = setup['manager']
         
         # Create multiple connections with different timing
@@ -242,7 +242,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_agent_execution_before_websocket_ready(self, setup):
-        ""Test agent execution starting before WebSocket is ready."
+        ""Test agent execution starting before WebSocket is ready.
         manager = setup['manager']
         user_id = setup['user_id']
         
@@ -276,7 +276,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_thread_context_update_failures_and_retries(self, setup):
-        "Test handling of thread context update failures and retries.""
+        Test handling of thread context update failures and retries.""
         manager = setup['manager']
         mock_ws = setup['mock_ws']
         user_id = setup['user_id']
@@ -316,7 +316,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_concurrent_message_and_thread_update(self, setup):
-        ""Test concurrent message sending and thread updates."
+        Test concurrent message sending and thread updates.""
         manager = setup['manager']
         mock_ws = setup['mock_ws']
         user_id = setup['user_id']
@@ -357,7 +357,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_websocket_disconnection_during_thread_update(self, setup):
-        "Test WebSocket disconnection during thread update.""
+        Test WebSocket disconnection during thread update."
         manager = setup['manager']
         mock_ws = setup['mock_ws']
         user_id = setup['user_id']
@@ -401,7 +401,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_thread_id_propagation_to_message_handler(self, setup):
-        "Test thread_id propagation from WebSocket to message handler.""
+        Test thread_id propagation from WebSocket to message handler.""
         manager = setup['manager']
         user_id = setup['user_id']
         thread_id = setup['thread_id']
@@ -436,7 +436,7 @@ class WebSocketContextTimingTests:
         assert conn['thread_id'] == thread_id
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

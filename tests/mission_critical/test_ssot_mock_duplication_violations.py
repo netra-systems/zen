@@ -23,7 +23,7 @@ Compliance Rules:
 - All agent mocks must use SSotMockFactory.create_agent_mock()
 - All WebSocket mocks must use SSotMockFactory.create_websocket_mock()
 - All database mocks must use SSotMockFactory.create_database_session_mock()
-""
+"
 
 import ast
 import os
@@ -38,7 +38,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @dataclass
 class MockDuplicationViolation:
-    ""Represents a detected mock duplication violation."
+    "Represents a detected mock duplication violation.
     file_path: str
     line_number: int
     mock_type: str
@@ -48,17 +48,17 @@ class MockDuplicationViolation:
 
 
 class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
-    "
+    ""
     Mission Critical test suite to detect and validate SSOT mock compliance.
     
     This test is designed to FAIL initially to expose current violations,
     providing actionable remediation targets for SSOT mock consolidation.
-    ""
+    
     
     def setup_method(self, method):
-        ""Set up test environment."
+        ""Set up test environment.
         super().setup_method(method)
-        self.project_root = Path("/Users/anthony/Desktop/netra-apex)
+        self.project_root = Path(/Users/anthony/Desktop/netra-apex)"
         self.violations = []
         self.mock_patterns = {
             # Agent mock patterns
@@ -92,12 +92,12 @@ class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
         }
         
     def test_detect_agent_mock_duplications(self):
-        ""
+        "
         CRITICAL: Detect duplicate agent mock implementations.
         
         Expected violations: 150+ duplicate agent mocks
         Target: All agent mocks use SSotMockFactory.create_agent_mock()
-        "
+"
         agent_violations = self._scan_for_mock_violations('agent_mock')
         
         # This test SHOULD FAIL initially to expose violations
@@ -107,20 +107,20 @@ class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
             violation_details = self._format_violations(agent_violations)
             pytest.fail(
                 f"DETECTED {violation_count} agent mock SSOT violations.\n
-                fAll agent mocks MUST use SSotMockFactory.create_agent_mock().\n\n"
-                f"Violations found:\n{violation_details}\n\n
-                fREMEDIATION: Replace direct mock creation with:\n"
-                f"from test_framework.ssot.mock_factory import SSotMockFactory\n
-                fmock_agent = SSotMockFactory.create_agent_mock(agent_type='your_type')"
+                fAll agent mocks MUST use SSotMockFactory.create_agent_mock().\n\n
+                fViolations found:\n{violation_details}\n\n
+                fREMEDIATION: Replace direct mock creation with:\n""
+                ffrom test_framework.ssot.mock_factory import SSotMockFactory\n
+                fmock_agent = SSotMockFactory.create_agent_mock(agent_type='your_type')
             )
             
     def test_detect_websocket_mock_duplications(self):
-        "
+    ""
         HIGH: Detect duplicate WebSocket mock implementations.
         
         Expected violations: 120+ duplicate WebSocket mocks
         Target: All WebSocket mocks use SSotMockFactory.create_websocket_mock()
-        ""
+        
         websocket_violations = self._scan_for_mock_violations('websocket_mock')
         
         violation_count = len(websocket_violations)
@@ -128,21 +128,21 @@ class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
         if violation_count > 0:
             violation_details = self._format_violations(websocket_violations)
             pytest.fail(
-                fDETECTED {violation_count} WebSocket mock SSOT violations.\n"
-                f"All WebSocket mocks MUST use SSotMockFactory.create_websocket_mock().\n\n
-                fViolations found:\n{violation_details}\n\n"
+                fDETECTED {violation_count} WebSocket mock SSOT violations.\n""
+                fAll WebSocket mocks MUST use SSotMockFactory.create_websocket_mock().\n\n
+                fViolations found:\n{violation_details}\n\n
                 f"REMEDIATION: Replace direct WebSocket mock creation with:\n
                 ffrom test_framework.ssot.mock_factory import SSotMockFactory\n"
-                f"mock_websocket = SSotMockFactory.create_websocket_mock()
+                fmock_websocket = SSotMockFactory.create_websocket_mock()
             )
             
     def test_detect_database_mock_duplications(self):
-        ""
+        "
         HIGH: Detect duplicate database mock implementations.
         
         Expected violations: 100+ duplicate database mocks  
         Target: All database mocks use SSotMockFactory.create_database_session_mock()
-        "
+"
         database_violations = self._scan_for_mock_violations('database_mock')
         
         violation_count = len(database_violations)
@@ -150,21 +150,21 @@ class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
         if violation_count > 0:
             violation_details = self._format_violations(database_violations)
             pytest.fail(
-                f"DETECTED {violation_count} database mock SSOT violations.\n
-                fAll database mocks MUST use SSotMockFactory.create_database_session_mock().\n\n"
-                f"Violations found:\n{violation_details}\n\n
-                fREMEDIATION: Replace direct database mock creation with:\n"
+                fDETECTED {violation_count} database mock SSOT violations.\n
+                fAll database mocks MUST use SSotMockFactory.create_database_session_mock().\n\n""
+                fViolations found:\n{violation_details}\n\n
+                fREMEDIATION: Replace direct database mock creation with:\n
                 f"from test_framework.ssot.mock_factory import SSotMockFactory\n
                 fmock_session = SSotMockFactory.create_database_session_mock()"
             )
             
     def test_detect_generic_mock_duplications(self):
-        "
+    "
         MEDIUM: Detect generic mock patterns that should use SSOT factory.
         
         Expected violations: 116+ generic mock violations
         Target: Centralized mock creation through SSOT patterns
-        ""
+        "
         generic_violations = self._scan_for_mock_violations('generic_mock')
         
         # Filter out legitimate direct Mock usage (reduce false positives)
@@ -183,19 +183,19 @@ class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
         if violation_count > 0:
             violation_details = self._format_violations(filtered_violations[:20]  # Show first 20
             pytest.fail(
-                fDETECTED {violation_count} generic mock SSOT violations.\n"
+                fDETECTED {violation_count} generic mock SSOT violations.\n
                 f"Consider using SSOT MockFactory for consistent mock behavior.\n\n
                 fSample violations (showing first 20):\n{violation_details}\n\n"
-                f"REMEDIATION: Evaluate if mock can use SSotMockFactory patterns.\n
+                fREMEDIATION: Evaluate if mock can use SSotMockFactory patterns.\n
                 fFor specialized mocks, document justification for direct creation."
             )
             
     def test_comprehensive_mock_violation_report(self):
-        "
+    "
         Generate comprehensive SSOT mock violation report.
         
         This test provides actionable intelligence for SSOT mock remediation.
-        ""
+        "
         all_violations = []
         
         for mock_type in self.mock_patterns.keys():
@@ -222,7 +222,7 @@ class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
         # Generate remediation priorities
         high_impact_files = [f for f, count in violation_by_file.items() if count >= 5]
         
-        report = f""
+        report = f"
 SSOT MOCK DUPLICATION VIOLATIONS REPORT
 ======================================
 
@@ -245,22 +245,22 @@ BUSINESS IMPACT:
 - Development Velocity: Reduce mock maintenance overhead by 80%
 - Test Reliability: Eliminate mock configuration drift
 - Code Quality: Centralize mock behavior for consistency
-        ""
+        
         
         # This test SHOULD FAIL to provide actionable violation report
         if total_violations > 0:
-            pytest.fail(fSSOT Mock Violation Report:\n{report}")
+            pytest.fail(fSSOT Mock Violation Report:\n{report})"
             
     def _scan_for_mock_violations(self, mock_type: str) -> List[MockDuplicationViolation]:
-        "Scan codebase for specific type of mock violations.""
+        "Scan codebase for specific type of mock violations.
         violations = []
         patterns = self.mock_patterns.get(mock_type, []
         
         # Scan relevant directories
         scan_dirs = [
-            self.project_root / tests",
-            self.project_root / "netra_backend/tests, 
-            self.project_root / auth_service/tests",
+            self.project_root / tests","
+            self.project_root / netra_backend/tests, 
+            self.project_root / auth_service/tests,"
             self.project_root / "test_framework,
         ]
         
@@ -271,10 +271,10 @@ BUSINESS IMPACT:
         return violations
         
     def _scan_directory_for_patterns(self, directory: Path, mock_type: str, patterns: List[str] -> List[MockDuplicationViolation]:
-        ""Scan a directory for mock pattern violations."
+        Scan a directory for mock pattern violations.""
         violations = []
         
-        for file_path in directory.rglob("*.py):
+        for file_path in directory.rglob(*.py):
             try:
                 with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                     content = f.read()
@@ -298,15 +298,15 @@ BUSINESS IMPACT:
         return violations
         
     def _extract_mock_name(self, line: str) -> str:
-        ""Extract mock name from code line."
+        "Extract mock name from code line."
         # Simple extraction - could be enhanced
         mock_match = re.search(r'(\w*mock\w*)', line, re.IGNORECASE)
         if mock_match:
             return mock_match.group(1)
-        return "unknown_mock
+        return unknown_mock
         
     def _determine_severity(self, mock_type: str) -> str:
-        ""Determine violation severity based on mock type."
+        ""Determine violation severity based on mock type.
         severity_map = {
             'agent_mock': 'CRITICAL',
             'websocket_mock': 'HIGH', 
@@ -316,9 +316,9 @@ BUSINESS IMPACT:
         return severity_map.get(mock_type, 'LOW')
         
     def _format_violations(self, violations: List[MockDuplicationViolation] -> str:
-        "Format violations for display.""
+        Format violations for display.""
         if not violations:
-            return No violations found."
+            return No violations found.
             
         formatted = []
         for violation in violations[:10]:  # Show first 10 violations
@@ -328,13 +328,13 @@ BUSINESS IMPACT:
             )
             
         if len(violations) > 10:
-            formatted.append(f"  ... and {len(violations) - 10} more violations)
+            formatted.append(f  ... and {len(violations) - 10} more violations)
             
-        return \n".join(formatted)
+        return \n.join(formatted)"
         
     def _format_violation_counts(self, violation_counts: Dict[str, int] -> str:
-        "Format violation counts by type.""
+        "Format violation counts by type.
         formatted = []
         for mock_type, count in sorted(violation_counts.items(), key=lambda x: x[1], reverse=True):
-            formatted.append(f- {mock_type}: {count} violations")
+            formatted.append(f- {mock_type}: {count} violations")"
         return "\n".join(formatted)

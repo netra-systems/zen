@@ -27,7 +27,7 @@ from test_framework.ssot.websocket_connection_test_utility import TestWebSocketC
 
 
 class WebSocketEventCapture:
-    "Captures WebSocket events for validation.""
+    "Captures WebSocket events for validation.
     
     def __init__(self):
         self.events: List[Dict[str, Any]] = []
@@ -35,7 +35,7 @@ class WebSocketEventCapture:
         self.start_time = time.time()
     
     def capture_event(self, event_type: str, **kwargs):
-        ""Capture a WebSocket event."
+        ""Capture a WebSocket event.
         timestamp = time.time() - self.start_time
         event_data = {
             'type': event_type,
@@ -46,11 +46,11 @@ class WebSocketEventCapture:
         self.event_timeline.append((timestamp, event_type, event_data))
     
     def get_event_types(self) -> List[str]:
-        "Get list of event types in order.""
+        Get list of event types in order.""
         return [event['type'] for event in self.events]
     
     def get_event_counts(self) -> Dict[str, int]:
-        ""Get count of each event type."
+        Get count of each event type.""
         counts = {}
         for event in self.events:
             event_type = event['type']
@@ -58,29 +58,29 @@ class WebSocketEventCapture:
         return counts
     
     def clear(self):
-        "Clear captured events.""
+        Clear captured events."
         self.events.clear()
         self.event_timeline.clear()
         self.start_time = time.time()
 
 
 class ActionsAgentWebSocketComplianceTests:
-    ""Test ActionsAgent WebSocket event compliance."
+    "Test ActionsAgent WebSocket event compliance.
     
     REQUIRED_EVENTS = {
-        "agent_started,
-        agent_thinking",
-        "tool_executing, 
+        "agent_started,"
+        agent_thinking,
+        tool_executing, "
         tool_completed",
-        "agent_completed
+        agent_completed
     }
     
     @pytest.fixture(autouse=True)
     async def setup_test_environment(self):
-        ""Setup test environment with mocks."
+        ""Setup test environment with mocks.
         # Create mock LLM manager
         self.mock_llm_manager = Mock(spec=LLMManager)
-        self.mock_llm_manager.ask_llm = AsyncMock(return_value='{"steps: [], reasoning": "test}')
+        self.mock_llm_manager.ask_llm = AsyncMock(return_value='{steps: [], reasoning": "test}')
         
         # Create mock tool dispatcher
         self.mock_tool_dispatcher = Mock(spec=ToolDispatcher)
@@ -96,7 +96,7 @@ class ActionsAgentWebSocketComplianceTests:
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_actions_agent_inherits_websocket_methods(self):
-        ""CRITICAL: Test that ActionsAgent inherits required WebSocket methods from BaseAgent."
+        CRITICAL: Test that ActionsAgent inherits required WebSocket methods from BaseAgent.""
         agent = ActionsToMeetGoalsSubAgent(self.mock_llm_manager, self.mock_tool_dispatcher)
         
         # Verify all required WebSocket methods exist
@@ -110,14 +110,14 @@ class ActionsAgentWebSocketComplianceTests:
         ]
         
         for method_name in required_methods:
-            assert hasattr(agent, method_name), f"CRITICAL VIOLATION: ActionsAgent missing {method_name}
+            assert hasattr(agent, method_name), fCRITICAL VIOLATION: ActionsAgent missing {method_name}
             method = getattr(agent, method_name)
-            assert callable(method), fCRITICAL VIOLATION: {method_name} is not callable"
+            assert callable(method), fCRITICAL VIOLATION: {method_name} is not callable
     
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_actions_agent_uses_custom_websocket_instead_of_emit_methods(self):
-        "CRITICAL VIOLATION TEST: ActionsAgent uses custom WebSocket instead of emit methods.""
+        "CRITICAL VIOLATION TEST: ActionsAgent uses custom WebSocket instead of emit methods."
         agent = ActionsToMeetGoalsSubAgent(self.mock_llm_manager, self.mock_tool_dispatcher)
         
         # Mock the WebSocket bridge to capture events
@@ -127,20 +127,20 @@ class ActionsAgentWebSocketComplianceTests:
         mock_bridge = Mock()
         
         # Set up bridge
-        agent.set_websocket_bridge(mock_bridge, test-run")
+        agent.set_websocket_bridge(mock_bridge, test-run)"
         
         # Create test state
         state = DeepAgentState(
             user_request="test request,
             optimizations_result=OptimizationsResult(
-                optimization_type=test",
-                recommendations=["test rec],
+                optimization_type=test,
+                recommendations=["test rec],"
                 confidence_score=0.8
             ),
             data_result=DataAnalysisResponse(
-                analysis_id=test-analysis-001",
-                status="completed,
-                results={test": "result, insights": {"test: insight"}, "metadata: {test": "meta}},
+                analysis_id=test-analysis-001,
+                status=completed,"
+                results={test": result, insights: {test: insight"}, "metadata: {test: meta}},
                 metrics=PerformanceMetrics(duration_ms=100.0),
                 created_at=time.time()
             )
@@ -154,19 +154,19 @@ class ActionsAgentWebSocketComplianceTests:
              patch.object(agent, 'emit_agent_completed', new_callable=AsyncMock) as mock_completed:
             
             # Execute the agent
-            await agent.execute(state, test-run-123", stream_updates=True)
+            await agent.execute(state, test-run-123, stream_updates=True)"
             
             # CRITICAL VIOLATION: The agent should call emit methods but doesn't
             assert mock_started.call_count == 0, "VIOLATION: Agent should call emit_agent_started but doesn't
-            assert mock_thinking.call_count == 0, VIOLATION: Agent should call emit_thinking but doesn't" 
-            assert mock_tool_exec.call_count == 0, "VIOLATION: Agent should call emit_tool_executing but doesn't
-            assert mock_tool_comp.call_count == 0, VIOLATION: Agent should call emit_tool_completed but doesn't"
-            assert mock_completed.call_count == 0, "VIOLATION: Agent should call emit_agent_completed but doesn't
+            assert mock_thinking.call_count == 0, VIOLATION: Agent should call emit_thinking but doesn't 
+            assert mock_tool_exec.call_count == 0, "VIOLATION: Agent should call emit_tool_executing but doesn't"
+            assert mock_tool_comp.call_count == 0, VIOLATION: Agent should call emit_tool_completed but doesn't
+            assert mock_completed.call_count == 0, VIOLATION: Agent should call emit_agent_completed but doesn't"
     
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_actions_agent_websocket_events_missing_completely(self):
-        ""CRITICAL: Test that ActionsAgent does NOT send required WebSocket events."
+        "CRITICAL: Test that ActionsAgent does NOT send required WebSocket events.
         agent = ActionsToMeetGoalsSubAgent(self.mock_llm_manager, self.mock_tool_dispatcher)
         
         # Mock WebSocket bridge to capture what events are actually sent
@@ -181,23 +181,23 @@ class ActionsAgentWebSocketComplianceTests:
             
             # Create test state
             state = DeepAgentState(
-                user_request="test request for websocket events,
+                user_request="test request for websocket events,"
                 optimizations_result=OptimizationsResult(
-                    optimization_type=performance",
-                    recommendations=["optimize database queries],
+                    optimization_type=performance,
+                    recommendations=[optimize database queries],"
                     confidence_score=0.9
                 ),
                 data_result=DataAnalysisResponse(
                     analysis_id=performance-analysis-001",
-                    status="completed,
-                    results={queries": ["slow query detected], insights": {"performance: needs improvement"}, "metadata: {source": "database_logs}, recommendations": ["add indexes, optimize queries"]},
+                    status=completed,
+                    results={queries": ["slow query detected], insights: {performance: needs improvement}, "metadata: {source": database_logs}, recommendations: [add indexes, optimize queries"]},"
                     metrics=PerformanceMetrics(duration_ms=250.0),
                     created_at=time.time()
                 )
             )
             
             # Execute the agent
-            await agent.execute(state, "websocket-test-run, stream_updates=True)
+            await agent.execute(state, websocket-test-run, stream_updates=True)
         
         # Analyze what events were actually sent
         event_types_sent = set()
@@ -221,25 +221,25 @@ class ActionsAgentWebSocketComplianceTests:
         # Document the specific violations
         expected_missing = {
             "agent_started,  # Never sent - users don't know processing started
-            tool_executing", # Never sent - no tool transparency
-            "tool_completed, # Never sent - no tool results visibility
+            tool_executing, # Never sent - no tool transparency
+            "tool_completed, # Never sent - no tool results visibility"
         }
         
         actual_missing = missing_events
         assert expected_missing.issubset(actual_missing), \
-            fExpected these critical events to be missing: {expected_missing}, but missing: {actual_missing}"
+            fExpected these critical events to be missing: {expected_missing}, but missing: {actual_missing}
     
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_actions_agent_business_impact_of_missing_events(self):
-        "CRITICAL BUSINESS IMPACT: Test the user experience impact of missing WebSocket events.""
+        CRITICAL BUSINESS IMPACT: Test the user experience impact of missing WebSocket events.""
         agent = ActionsToMeetGoalsSubAgent(self.mock_llm_manager, self.mock_tool_dispatcher)
         
         # Simulate what a user would see
         user_visible_events = []
         
         async def capture_user_event(run_id, update_data):
-            ""Capture what the user would actually see."
+            Capture what the user would actually see.""
             if isinstance(update_data, dict):
                 status = update_data.get('status', 'unknown')
                 message = update_data.get('message', '')
@@ -258,34 +258,34 @@ class ActionsAgentWebSocketComplianceTests:
             
             # Create realistic state
             state = DeepAgentState(
-                user_request="Analyze our system performance and create an optimization plan,
+                user_request=Analyze our system performance and create an optimization plan,
                 optimizations_result=OptimizationsResult(
-                    optimization_type=system_performance",
+                    optimization_type=system_performance,"
                     recommendations=[
                         "Optimize database queries,
-                        Implement caching strategy", 
-                        "Scale horizontally
+                        Implement caching strategy, 
+                        "Scale horizontally"
                     ],
                     confidence_score=0.85
                 ),
                 data_result=DataAnalysisResponse(
-                    analysis_id=system-performance-analysis-001",
-                    status="completed,
+                    analysis_id=system-performance-analysis-001,
+                    status=completed,"
                     results={
                         analysis_results": [
-                            "Database query time: 2.3s avg,
-                            Memory usage: 85%",
-                            "CPU utilization: 70%
+                            Database query time: 2.3s avg,
+                            Memory usage: 85%","
+                            CPU utilization: 70%
                         ],
-                        insights": {
-                            "bottlenecks: [database", "memory],
+                        insights: {"
+                            "bottlenecks: [database, memory],
                             optimization_potential": "high
                         },
-                        metadata": {"analysis_date: 2025-09-02"},
+                        metadata: {analysis_date: 2025-09-02},"
                         "recommendations: [
-                            Add database indexes",
-                            "Implement Redis caching,
-                            Monitor memory usage"
+                            Add database indexes,
+                            "Implement Redis caching,"
+                            Monitor memory usage
                         ]
                     },
                     metrics=PerformanceMetrics(duration_ms=1500.0),
@@ -294,7 +294,7 @@ class ActionsAgentWebSocketComplianceTests:
             )
             
             # Execute and capture user experience
-            await agent.execute(state, "business-impact-test, stream_updates=True)
+            await agent.execute(state, business-impact-test, stream_updates=True)"
         
         # Analyze user experience
         total_events = len(user_visible_events)
@@ -319,11 +319,11 @@ class ActionsAgentWebSocketComplianceTests:
         
         user_experience_issues = []
         if transparency_score < 80:
-            user_experience_issues.append("Low transparency - users don't see AI reasoning)
+            user_experience_issues.append(Low transparency - users don't see AI reasoning)
         if progress_visibility_score < 60:
-            user_experience_issues.append(Poor progress visibility - users unsure if system is working")
+            user_experience_issues.append(Poor progress visibility - users unsure if system is working")"
         if completion_clarity_score < 80:
-            user_experience_issues.append("Unclear completion - users unsure when processing finished)
+            user_experience_issues.append(Unclear completion - users unsure when processing finished)
         
         # This documents the current business impact
         assert len(user_experience_issues) > 0, \
@@ -332,7 +332,7 @@ class ActionsAgentWebSocketComplianceTests:
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_actions_agent_websocket_integration_compliance(self):
-        "CRITICAL: Test ActionsAgent compliance with WebSocket integration requirements.""
+        "CRITICAL: Test ActionsAgent compliance with WebSocket integration requirements.
         agent = ActionsToMeetGoalsSubAgent(self.mock_llm_manager, self.mock_tool_dispatcher)
         
         # Test 1: WebSocket bridge integration
@@ -342,8 +342,8 @@ class ActionsAgentWebSocketComplianceTests:
         mock_bridge = Mock()
         
         # Should be able to set WebSocket bridge (inherited from BaseAgent)
-        agent.set_websocket_bridge(mock_bridge, compliance-test")
-        assert agent.has_websocket_context(), "Agent should have WebSocket context after bridge set
+        agent.set_websocket_bridge(mock_bridge, compliance-test")"
+        assert agent.has_websocket_context(), Agent should have WebSocket context after bridge set
         
         # Test 2: Agent should use inherited emit methods but doesn't
         compliance_violations = []
@@ -364,7 +364,7 @@ class ActionsAgentWebSocketComplianceTests:
                 method_class = method.__self__.__class__
                 if method_class.__name__ == 'ActionsToMeetGoalsSubAgent':
                     # Method is overridden in ActionsAgent
-                    compliance_violations.append(fOverrides {method_name} (should use BaseAgent implementation)")
+                    compliance_violations.append(fOverrides {method_name} (should use BaseAgent implementation))"
                 elif method_class.__name__ != 'BaseAgent':
                     # Method comes from some other class
                     compliance_violations.append(f"{method_name} from {method_class.__name__} (should be BaseAgent))
@@ -375,16 +375,16 @@ class ActionsAgentWebSocketComplianceTests:
             
             # Create minimal state for testing
             state = DeepAgentState(
-                user_request=compliance test",
+                user_request=compliance test,
                 optimizations_result=OptimizationsResult(
-                    optimization_type="test, 
+                    optimization_type=test, "
                     recommendations=[test"], 
                     confidence_score=0.5
                 ),
                 data_result=DataAnalysisResponse(
-                    analysis_id="compliance-test-001,
-                    status=completed",
-                    results={"insights: {}, metadata": {}, "recommendations: []},
+                    analysis_id=compliance-test-001,
+                    status=completed","
+                    results={insights: {}, metadata: {}, recommendations: []},"
                     metrics=PerformanceMetrics(duration_ms=50.0),
                     created_at=time.time()
                 )
@@ -395,9 +395,9 @@ class ActionsAgentWebSocketComplianceTests:
             
             # Should have called emit methods but doesn't
             if mock_started.call_count == 0:
-                compliance_violations.append("Never calls emit_agent_started during execution)
+                compliance_violations.append(Never calls emit_agent_started during execution)
             if mock_thinking.call_count == 0:
-                compliance_violations.append(Never calls emit_thinking during execution")
+                compliance_violations.append(Never calls emit_thinking during execution")"
         
         # Test 4: Uses custom WebSocket pattern instead of standardized bridge
         uses_send_update = hasattr(agent, '_send_update') and callable(agent._send_update)
@@ -408,9 +408,9 @@ class ActionsAgentWebSocketComplianceTests:
         )
         
         if uses_send_update:
-            compliance_violations.append("Uses custom _send_update instead of BaseAgent emit methods)
+            compliance_violations.append(Uses custom _send_update instead of BaseAgent emit methods)
         if uses_custom_websocket:
-            compliance_violations.append(Implements custom WebSocket logic instead of using BaseAgent bridge")
+            compliance_violations.append(Implements custom WebSocket logic instead of using BaseAgent bridge)"
         
         # CRITICAL COMPLIANCE FAILURE
         assert len(compliance_violations) > 0, \
@@ -419,12 +419,12 @@ class ActionsAgentWebSocketComplianceTests:
         # Document specific violations for fixing
         critical_violations = [v for v in compliance_violations if 'Never calls emit_' in v]
         assert len(critical_violations) >= 2, \
-            fExpected multiple critical emit method violations: {critical_violations}"
+            fExpected multiple critical emit method violations: {critical_violations}
     
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_websocket_event_performance_requirements(self):
-        "CRITICAL: Test WebSocket event performance requirements.""
+        CRITICAL: Test WebSocket event performance requirements.""
         agent = ActionsToMeetGoalsSubAgent(self.mock_llm_manager, self.mock_tool_dispatcher)
         
         # Setup performance monitoring
@@ -442,19 +442,19 @@ class ActionsAgentWebSocketComplianceTests:
             
             # Create realistic workload
             state = DeepAgentState(
-                user_request=Performance test - analyze and optimize",
+                user_request=Performance test - analyze and optimize,
                 optimizations_result=OptimizationsResult(
-                    optimization_type="performance_test,
-                    recommendations=[fRecommendation {i}" for i in range(10)],
+                    optimization_type="performance_test,"
+                    recommendations=[fRecommendation {i} for i in range(10)],
                     confidence_score=0.95
                 ),
                 data_result=DataAnalysisResponse(
-                    analysis_id="performance-test-analysis-001,
+                    analysis_id=performance-test-analysis-001,"
                     status=completed",
                     results={
-                        "analysis_results: [fResult {i}" for i in range(100)],
-                        "insights: {finsight_{i}": f"value_{i} for i in range(20)},
-                        metadata": {"large_dataset: True},
+                        analysis_results: [fResult {i} for i in range(100)],
+                        "insights: {finsight_{i}": fvalue_{i} for i in range(20)},
+                        metadata: {large_dataset: True},
                         recommendations": [f"Performance rec {i} for i in range(15)]
                     },
                     metrics=PerformanceMetrics(duration_ms=2500.0),
@@ -464,7 +464,7 @@ class ActionsAgentWebSocketComplianceTests:
             
             # Measure execution performance
             start_time = time.time()
-            await agent.execute(state, performance-test", stream_updates=True)
+            await agent.execute(state, performance-test, stream_updates=True)
             total_execution_time = time.time() - start_time
         
         # Performance analysis
@@ -475,7 +475,7 @@ class ActionsAgentWebSocketComplianceTests:
         
         # Performance requirements (current broken state)
         assert total_websocket_calls < 10, \
-            f"Too few WebSocket calls: {total_websocket_calls} (missing required events)
+            fToo few WebSocket calls: {total_websocket_calls} (missing required events)
         
         # Should have more events for proper user experience
         expected_minimum_events = 5  # start, thinking, tool_exec, tool_comp, complete
@@ -485,28 +485,28 @@ class ActionsAgentWebSocketComplianceTests:
     @pytest.mark.asyncio 
     @pytest.mark.critical
     async def test_websocket_graceful_degradation_when_bridge_unavailable(self):
-        "CRITICAL: Test that agent execution continues when WebSocket bridge unavailable.""
+        "CRITICAL: Test that agent execution continues when WebSocket bridge unavailable.
         agent = ActionsToMeetGoalsSubAgent(self.mock_llm_manager, self.mock_tool_dispatcher)
         
         # Don't set WebSocket bridge - simulating unavailable WebSocket
-        assert not agent.has_websocket_context(), Agent should not have WebSocket context initially"
+        assert not agent.has_websocket_context(), Agent should not have WebSocket context initially""
         
         # Create test state
         state = DeepAgentState(
-            user_request="Test graceful degradation,
+            user_request=Test graceful degradation,
             optimizations_result=OptimizationsResult(
-                optimization_type=degradation_test",
+                optimization_type=degradation_test,"
                 recommendations=["Test gracefully],
                 confidence_score=0.7
             ),
             data_result=DataAnalysisResponse(
-                analysis_id=degradation-test-analysis-001",
-                status="completed,
+                analysis_id=degradation-test-analysis-001,
+                status="completed,"
                 results={
-                    analysis_results": ["degradation result],
-                    insights": {"test: degradation"},
-                    "metadata: {mode": "graceful_degradation},
-                    recommendations": ["handle gracefully]
+                    analysis_results: [degradation result],
+                    insights: {"test: degradation"},
+                    metadata: {mode: "graceful_degradation},"
+                    recommendations: [handle gracefully]
                 },
                 metrics=PerformanceMetrics(duration_ms=75.0),
                 created_at=time.time()
@@ -515,7 +515,7 @@ class ActionsAgentWebSocketComplianceTests:
         
         # Execution should succeed even without WebSocket bridge
         try:
-            await agent.execute(state, degradation-test", stream_updates=True)
+            await agent.execute(state, degradation-test, stream_updates=True)"
             execution_succeeded = True
         except Exception as e:
             execution_succeeded = False
@@ -525,13 +525,13 @@ class ActionsAgentWebSocketComplianceTests:
         assert execution_succeeded, f"Agent execution failed without WebSocket bridge: {execution_error if not execution_succeeded else 'N/A'}
         
         # State should be updated with results
-        assert state.action_plan_result is not None, Agent should produce results even without WebSocket"
+        assert state.action_plan_result is not None, Agent should produce results even without WebSocket
         
         # But user experience is degraded (no real-time updates)
         # This is acceptable for graceful degradation
 
 
-if __name__ == "__main__":
+if __name__ == __main__":
     # Run specific ActionsAgent WebSocket compliance tests
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

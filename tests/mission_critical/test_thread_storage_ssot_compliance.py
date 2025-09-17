@@ -3,7 +3,7 @@ Mission-Critical Test Suite: Thread Storage SSOT Compliance
 
 This test suite verifies that thread storage/loading operations follow SSOT principles
 and all legacy code has been properly removed.
-""
+"
 
 import asyncio
 import pytest
@@ -32,10 +32,10 @@ from shared.isolated_environment import get_env
 
 
 class ThreadSSOTComplianceTests:
-    ""Test suite for thread storage SSOT compliance."
+    "Test suite for thread storage SSOT compliance.
 
     def test_no_legacy_stub_functions_exist(self):
-        "Verify all legacy stub functions have been removed from thread_service module.""
+        "Verify all legacy stub functions have been removed from thread_service module."
         # These functions should NOT exist at module level anymore
         legacy_functions = [
             'get_thread_by_id',
@@ -61,18 +61,18 @@ class ThreadSSOTComplianceTests:
                 fLegacy stub function '{func_name}' still exists in thread_service module"
 
     def test_thread_service_class_exists(self):
-        "Verify ThreadService class is the canonical implementation.""
+        "Verify ThreadService class is the canonical implementation.
         assert hasattr(thread_service, 'ThreadService'), \
-            ThreadService class must exist"
+            ThreadService class must exist""
         assert hasattr(thread_service, 'thread_service'), \
-            "thread_service singleton instance must exist
+            thread_service singleton instance must exist
 
         # Verify it's an instance of ThreadService
         assert isinstance(thread_service.thread_service, ThreadService), \
             thread_service must be an instance of ThreadService class"
 
     def test_no_legacy_aliases_in_thread_helpers(self):
-        "Verify all legacy underscore aliases have been removed from thread_helpers.""
+        "Verify all legacy underscore aliases have been removed from thread_helpers.
         # These underscore-prefixed functions should NOT exist
         legacy_aliases = [
             '_extract_thread_title',
@@ -94,10 +94,10 @@ class ThreadSSOTComplianceTests:
 
         for alias_name in legacy_aliases:
             assert not hasattr(thread_helpers, alias_name), \
-                fLegacy alias '{alias_name}' still exists in thread_helpers"
+                fLegacy alias '{alias_name}' still exists in thread_helpers""
 
     def test_thread_id_generation_uses_unified_manager(self):
-        "Verify thread ID generation uses UnifiedIDManager for consistency.""
+        Verify thread ID generation uses UnifiedIDManager for consistency."
         # Generate a thread ID
         thread_id = generate_thread_id()
 
@@ -107,11 +107,11 @@ class ThreadSSOTComplianceTests:
 
         # Should contain the session pattern from UnifiedIDManager
         assert 'session_' in thread_id, \
-            f"Thread ID should use UnifiedIDManager pattern, got: {thread_id}
+            fThread ID should use UnifiedIDManager pattern, got: {thread_id}
 
     @pytest.mark.asyncio
     async def test_thread_repository_uses_unified_id_manager(self):
-        ""Verify ThreadRepository uses UnifiedIDManager for ID generation."
+        "Verify ThreadRepository uses UnifiedIDManager for ID generation."
         repo = ThreadRepository()
 
         # Mock database session
@@ -124,8 +124,8 @@ class ThreadSSOTComplianceTests:
         # Test get_or_create_for_user
         with patch.object(repo, 'get_active_thread', return_value=None), \
              patch.object(repo, 'create') as mock_create:
-            mock_create.return_value = MagicMock(id="test_thread)
-            await repo.get_or_create_for_user(mock_session, test_user")
+            mock_create.return_value = MagicMock(id=test_thread)
+            await repo.get_or_create_for_user(mock_session, test_user")"
 
         # Verify create was called with proper thread ID format
         mock_create.assert_called_once()
@@ -133,12 +133,12 @@ class ThreadSSOTComplianceTests:
         thread_id = call_args['id']
 
         assert thread_id.startswith('thread_'), \
-            f"Thread ID must start with 'thread_' prefix, got: {thread_id}
+            fThread ID must start with 'thread_' prefix, got: {thread_id}
         assert 'session_' in thread_id, \
-            fThread ID should use UnifiedIDManager pattern, got: {thread_id}"
+            fThread ID should use UnifiedIDManager pattern, got: {thread_id}
 
     def test_thread_service_methods_are_properly_defined(self):
-        "Verify ThreadService has all required methods properly defined.""
+        "Verify ThreadService has all required methods properly defined."
         service = ThreadService()
 
         required_methods = [
@@ -164,11 +164,11 @@ class ThreadSSOTComplianceTests:
 
             # Verify it's an async method
             assert asyncio.iscoroutinefunction(method), \
-                fThreadService.{method_name} must be async"
+                fThreadService.{method_name} must be async
 
     @pytest.mark.asyncio
     async def test_thread_service_websocket_events(self):
-        "Verify ThreadService sends correct WebSocket events.""
+        Verify ThreadService sends correct WebSocket events.""
         service = ThreadService()
 
         # Mock WebSocket manager
@@ -176,18 +176,18 @@ class ThreadSSOTComplianceTests:
             mock_manager.websocket = TestWebSocketConnection()
 
             # Test thread created event
-            await service._send_thread_created_event(user123", "thread_abc)
+            await service._send_thread_created_event(user123, thread_abc)
 
             mock_manager.send_to_user.assert_called_once()
             call_args = mock_manager.send_to_user.call_args[0]
 
-            assert call_args[0] == user123"
-            assert call_args[1]["type] == thread_created"
-            assert call_args[1]["payload][thread_id"] == "thread_abc
-            assert timestamp" in call_args[1]["payload]
+            assert call_args[0] == user123""
+            assert call_args[1][type] == thread_created
+            assert call_args[1][payload][thread_id"] == "thread_abc
+            assert timestamp in call_args[1][payload]
 
     def test_no_duplicate_thread_operations(self):
-        ""Verify there are no duplicate implementations of thread operations."
+        ""Verify there are no duplicate implementations of thread operations.
         # Check that thread_service module only exports ThreadService and instance
         module_exports = dir(thread_service)
 
@@ -214,11 +214,11 @@ class ThreadSSOTComplianceTests:
                 item = getattr(thread_service, func_name)
                 # If it exists, it should be a method, not a standalone function
                 assert not inspect.isfunction(item), \
-                    f"{func_name} should not be a standalone function
+                    f{func_name} should not be a standalone function
 
     @pytest.mark.asyncio
     async def test_thread_id_consistency_across_components(self):
-        ""Verify thread ID generation is consistent across all components."
+        ""Verify thread ID generation is consistent across all components.
         # Test UnifiedIDManager
         unified_id = UnifiedIDManager.generate_thread_id()
 
@@ -231,10 +231,10 @@ class ThreadSSOTComplianceTests:
         assert 'session_' in creator_id
 
         # Length should be similar (allowing for timestamp variations)
-        assert abs(len(creator_id) - len(f"thread_{unified_id})) <= 5
+        assert abs(len(creator_id) - len(fthread_{unified_id})) <= 5
 
     def test_thread_repository_error_handling(self):
-        ""Verify ThreadRepository has proper error handling."
+        ""Verify ThreadRepository has proper error handling.
         repo = ThreadRepository()
 
         # Verify find_by_user has fallback error handling
@@ -252,7 +252,7 @@ class ThreadSSOTComplianceTests:
 
     @pytest.mark.asyncio
     async def test_thread_service_uses_unit_of_work_pattern(self):
-        "Verify ThreadService uses Unit of Work pattern correctly.""
+        Verify ThreadService uses Unit of Work pattern correctly.""
         service = ThreadService()
 
         # Mock UoW
@@ -261,31 +261,31 @@ class ThreadSSOTComplianceTests:
         mock_uow.__aenter__ = AsyncMock(return_value=mock_uow)
         mock_uow.websocket = TestWebSocketConnection()
         mock_uow.threads.get_or_create_for_user = AsyncMock(
-            return_value=MagicMock(id=thread_123")
+            return_value=MagicMock(id=thread_123)
         )
 
         # Test thread creation
-        thread = await service.get_or_create_thread("user123)
+        thread = await service.get_or_create_thread("user123)"
 
         # Verify UoW was used
         mock_uow.threads.get_or_create_for_user.assert_called_once()
-        assert thread.id == thread_123"
+        assert thread.id == thread_123
 
     def test_ssot_compliance_checklist(self):
-        "Comprehensive SSOT compliance verification.""
+        Comprehensive SSOT compliance verification.""
         compliance_checks = {
-            No legacy stub functions": not any(
+            No legacy stub functions: not any(
                 hasattr(thread_service, func) for func in [
                     'get_thread_by_id', 'delete_thread', 'update_thread'
                 ],
-            "ThreadService class exists: hasattr(thread_service, 'ThreadService'),
-            Singleton instance exists": hasattr(thread_service, 'thread_service'),
-            "No legacy aliases: not any(
+            "ThreadService class exists: hasattr(thread_service, 'ThreadService'),"
+            Singleton instance exists: hasattr(thread_service, 'thread_service'),
+            No legacy aliases: not any("
                 hasattr(thread_helpers, alias) for alias in [
                     '_extract_thread_title', '_format_single_message'
                 ],
             Unified ID generation": 'UnifiedIDManager' in inspect.getsource(generate_thread_id),
-            "Repository uses UnifiedIDManager: 'UnifiedIDManager' in inspect.getsource(
+            Repository uses UnifiedIDManager: 'UnifiedIDManager' in inspect.getsource(
                 ThreadRepository.get_or_create_for_user
             )
         }
@@ -295,7 +295,7 @@ class ThreadSSOTComplianceTests:
         ]
 
         assert failed_checks == [], \
-            fSSOT compliance failed for: {failed_checks}"
+            fSSOT compliance failed for: {failed_checks}""
 
 
 if __name__ == "__main__":

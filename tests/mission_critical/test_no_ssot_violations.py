@@ -50,7 +50,7 @@ except ImportError as e:
 
 @dataclass
 class IsolationTestResult:
-    ""Results from isolation testing."
+    Results from isolation testing."
     test_name: str
     user_count: int
     success: bool
@@ -62,7 +62,7 @@ class IsolationTestResult:
 
 
 class UserContextSimulator:
-    "Simulates isolated user contexts for concurrent testing.""
+    "Simulates isolated user contexts for concurrent testing.
     
     def __init__(self, user_id: str):
         self.user_id = user_id
@@ -71,14 +71,14 @@ class UserContextSimulator:
         self.errors = []
     
     def execute_user_operation(self, operation_data: Dict[str, Any] -> Dict[str, Any]:
-        ""Execute operation within user context."
+        ""Execute operation within user context.
         try:
             # Simulate user-specific data processing
             result = {
-                "user_id: self.user_id,
+                user_id: self.user_id,"
                 session_id": self.session_id,
-                "operation_result: fprocessed_for_{self.user_id}",
-                "timestamp: datetime.now().isoformat()
+                operation_result: fprocessed_for_{self.user_id},
+                "timestamp: datetime.now().isoformat()"
             }
             
             self.data_cache[operation_data.get('key', 'default')] = result
@@ -90,16 +90,16 @@ class UserContextSimulator:
 
 @pytest.mark.mission_critical
 class NoSSotViolationsWithIsolationTests:
-    ""CRITICAL: Comprehensive SSOT compliance and isolation testing."
+    CRITICAL: Comprehensive SSOT compliance and isolation testing."
 
     @pytest.fixture
     def setup_test_environment(self):
-        "Setup isolated test environment for all tests.""
+        "Setup isolated test environment for all tests.
         try:
             env = IsolatedEnvironment()
             env.set(USE_REAL_SERVICES", "true)
-            env.set(TEST_CONCURRENT_USERS", "15)
-            env.set(TEST_ISOLATION_ENABLED", "true)
+            env.set(TEST_CONCURRENT_USERS, 15)
+            env.set(TEST_ISOLATION_ENABLED, "true)
 
             # Performance monitoring
             start_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
@@ -114,20 +114,20 @@ class NoSSotViolationsWithIsolationTests:
             pytest.skip(fEnvironment setup failed: {e}")
 
     def test_concurrent_10_users_no_data_leakage(self, setup_test_environment):
-        "CRITICAL: Test 10+ concurrent users with zero data leakage.""
+        CRITICAL: Test 10+ concurrent users with zero data leakage.""
         user_count = 12
-        users = [UserContextSimulator(fuser_{i}") for i in range(user_count)]
+        users = [UserContextSimulator(fuser_{i}) for i in range(user_count)]
         results = []
         errors = []
 
         def execute_user_session(user: UserContextSimulator):
-            "Execute isolated user session.""
+            Execute isolated user session.""
             try:
                 # Create user-specific data
                 user_data = {
-                    type": "sensitive_operation,
+                    type: sensitive_operation,
                     key": f"secret_key_{user.user_id},
-                    secret_value": f"secret_value_{user.user_id}
+                    secret_value: fsecret_value_{user.user_id}
                 }
 
                 # Process in isolated context
@@ -135,12 +135,12 @@ class NoSSotViolationsWithIsolationTests:
                 results.append(result)
 
                 # Verify isolation
-                assert result[user_id"] == user.user_id
-                assert result["session_id] == user.session_id
+                assert result[user_id] == user.user_id
+                assert result["session_id] == user.session_id"
 
                 return result
             except Exception as e:
-                errors.append(fUser {user.user_id} error: {str(e)}")
+                errors.append(fUser {user.user_id} error: {str(e)})
                 raise
 
         # Execute concurrent user sessions
@@ -151,25 +151,25 @@ class NoSSotViolationsWithIsolationTests:
             execution_time = time.time() - start_time
 
         # Verify no data leakage between users
-        user_ids = {result["user_id] for result in results}
+        user_ids = {result[user_id] for result in results}"
         session_ids = {result[session_id"] for result in results}
 
-        assert len(user_ids) == user_count, f"Expected {user_count} unique user IDs, got {len(user_ids)}
+        assert len(user_ids) == user_count, fExpected {user_count} unique user IDs, got {len(user_ids)}
         assert len(session_ids) == user_count, fExpected {user_count} unique session IDs, got {len(session_ids)}"
         assert len(errors) == 0, f"Errors occurred during execution: {errors}
 
         # Performance validation
-        assert execution_time < 10.0, fExecution took too long: {execution_time}s"
+        assert execution_time < 10.0, fExecution took too long: {execution_time}s
 
     def test_user_context_thread_safety(self, setup_test_environment):
-        "CRITICAL: Verify thread safety in user context operations.""
+        CRITICAL: Verify thread safety in user context operations.""
         shared_counter = {'value': 0}
         thread_results = []
         lock = threading.Lock()
 
         def thread_operation(thread_id: int):
-            ""Thread-safe user operation."
-            user = UserContextSimulator(f"thread_user_{thread_id})
+            Thread-safe user operation.""
+            user = UserContextSimulator(fthread_user_{thread_id})
 
             # Simulate race condition scenario
             for i in range(100):
@@ -180,9 +180,9 @@ class NoSSotViolationsWithIsolationTests:
 
                 # User-specific operation
                 result = user.execute_user_operation({
-                    type": "thread_test,
-                    iteration": i,
-                    "thread_id: thread_id
+                    type: thread_test,
+                    iteration": i,"
+                    thread_id: thread_id
                 }
                 thread_results.append(result)
 
@@ -210,7 +210,7 @@ class NoSSotViolationsWithIsolationTests:
         assert len(user_operations) == thread_count, f"User isolation violated. Expected {thread_count} users, got {len(user_operations)}
 
     def test_websocket_channel_user_separation(self, setup_test_environment):
-        ""CRITICAL: Verify WebSocket channels maintain user separation."
+        CRITICAL: Verify WebSocket channels maintain user separation."
         user_count = 8
         websocket_channels = {}
         message_routing = defaultdict(list)
@@ -218,13 +218,13 @@ class NoSSotViolationsWithIsolationTests:
         # Create isolated WebSocket channels per user
         for i in range(user_count):
             user_id = f"ws_user_{i}
-            channel_id = fchannel_{user_id}_{uuid.uuid4()}"
+            channel_id = fchannel_{user_id}_{uuid.uuid4()}
             websocket_channels[user_id] = channel_id
 
         # Simulate WebSocket message routing
         for user_id, channel_id in websocket_channels.items():
             test_messages = [
-                {"type: user_message", "content: fmessage_{j}_from_{user_id}", "user_id: user_id}
+                {type: user_message", "content: fmessage_{j}_from_{user_id}, user_id: user_id}
                 for j in range(5)
             ]
 
@@ -238,7 +238,7 @@ class NoSSotViolationsWithIsolationTests:
 
             # All messages in channel should be from the same user
             message_user_ids = {msg['user_id'] for msg in channel_messages}
-            assert len(message_user_ids) == 1, fChannel {channel_id} has messages from multiple users: {message_user_ids}"
+            assert len(message_user_ids) == 1, fChannel {channel_id} has messages from multiple users: {message_user_ids}""
             assert list(message_user_ids)[0] == user_id
 
         # Verify no cross-channel leakage
@@ -246,6 +246,6 @@ class NoSSotViolationsWithIsolationTests:
         assert len(all_channels) == user_count, f"Expected {user_count} unique channels, got {len(all_channels)}
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # This test file should be run through unified test runner
     pytest.main([__file__]

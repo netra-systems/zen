@@ -17,7 +17,7 @@ This test suite validates WebSocket error handling patterns with real services:
 
 CRITICAL: Uses REAL PostgreSQL, Redis, and WebSocket connections - NO MOCKS for integration testing.
 Tests validate actual WebSocket behavior, reconnection timing, and message integrity.
-""
+"
 import asyncio
 import time
 import uuid
@@ -36,7 +36,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 class WebSocketState(Enum):
-    ""WebSocket connection state levels."
+    "WebSocket connection state levels.
     CONNECTED = 'connected'
     DISCONNECTED = 'disconnected'
     RECONNECTING = 'reconnecting'
@@ -44,7 +44,7 @@ class WebSocketState(Enum):
     AUTHENTICATION_PENDING = 'authentication_pending'
 
 class WebSocketMessage:
-    "Represents a WebSocket message with metadata.""
+    "Represents a WebSocket message with metadata."
 
     def __init__(self, message_type: str, data: Dict[str, Any], user_id: str=None):
         self.id = str(uuid.uuid4())
@@ -56,16 +56,16 @@ class WebSocketMessage:
         self.delivered = False
 
     def to_dict(self) -> Dict[str, Any]:
-        ""Convert message to dictionary for transmission."
+        "Convert message to dictionary for transmission."
         return {'id': self.id, 'type': self.type, 'data': self.data, 'timestamp': self.timestamp.isoformat(), 'user_id': self.user_id}
 
     def to_json(self) -> str:
-        "Convert message to JSON string.""
+        Convert message to JSON string.""
         return json.dumps(self.to_dict())
 
     @classmethod
     def from_json(cls, json_str: str) -> 'WebSocketMessage':
-        ""Create message from JSON string."
+        Create message from JSON string."
         data = json.loads(json_str)
         msg = cls(data['type'], data['data'], data.get('user_id'))
         msg.id = data['id']
@@ -73,7 +73,7 @@ class WebSocketMessage:
         return msg
 
 class ReconnectingWebSocketClient:
-    "WebSocket client with automatic reconnection and message persistence.""
+    "WebSocket client with automatic reconnection and message persistence.
 
     def __init__(self, url: str, auth_token: str, user_id: str, max_reconnect_attempts: int=5, reconnect_delay: float=1.0):
         self.url = url
@@ -102,7 +102,7 @@ class ReconnectingWebSocketClient:
         self.on_reconnect_attempt = None
 
     async def connect(self) -> bool:
-        ""Establish WebSocket connection with authentication."
+        ""Establish WebSocket connection with authentication.
         self.connection_attempts += 1
         connect_start = time.time()
         try:
@@ -138,7 +138,7 @@ class ReconnectingWebSocketClient:
             return False
 
     async def send_message(self, message_type: str, data: Dict[str, Any] -> bool:
-        "Send message with delivery confirmation and queuing.""
+        Send message with delivery confirmation and queuing.""
         message = WebSocketMessage(message_type, data, self.user_id)
         if self.state == WebSocketState.CONNECTED and self.websocket:
             try:
@@ -157,7 +157,7 @@ class ReconnectingWebSocketClient:
             return False
 
     async def disconnect(self):
-        ""Gracefully disconnect WebSocket."
+        Gracefully disconnect WebSocket.""
         if self.websocket:
             self.state = WebSocketState.DISCONNECTED
             await self.websocket.close()
@@ -166,7 +166,7 @@ class ReconnectingWebSocketClient:
                 await self.on_disconnected('graceful_disconnect')
 
     async def force_disconnect(self):
-        "Simulate network failure by forcefully closing connection.""
+        Simulate network failure by forcefully closing connection."
         if self.websocket:
             self.state = WebSocketState.DISCONNECTED
             self.websocket.transport.close()
@@ -174,7 +174,7 @@ class ReconnectingWebSocketClient:
             await self._handle_connection_loss()
 
     async def _message_handler(self):
-        ""Handle incoming WebSocket messages."
+        "Handle incoming WebSocket messages.
         try:
             async for raw_message in self.websocket:
                 try:
@@ -207,7 +207,7 @@ class ReconnectingWebSocketClient:
             await self._handle_connection_loss()
 
     async def _heartbeat_handler(self):
-        "Monitor connection health with heartbeats.""
+        "Monitor connection health with heartbeats."
         while self.state == WebSocketState.CONNECTED:
             try:
                 await asyncio.sleep(30)
@@ -220,7 +220,7 @@ class ReconnectingWebSocketClient:
                 break
 
     async def _handle_connection_loss(self):
-        ""Handle connection loss and attempt reconnection."
+        "Handle connection loss and attempt reconnection."
         if self.state == WebSocketState.RECONNECTING:
             return
         self.state = WebSocketState.DISCONNECTED
@@ -230,7 +230,7 @@ class ReconnectingWebSocketClient:
         await self._attempt_reconnection()
 
     async def _attempt_reconnection(self):
-        "Attempt to reconnect with exponential backoff.""
+        Attempt to reconnect with exponential backoff.""
         self.state = WebSocketState.RECONNECTING
         while self.reconnect_attempts < self.max_reconnect_attempts:
             self.reconnect_attempts += 1
@@ -250,7 +250,7 @@ class ReconnectingWebSocketClient:
         return False
 
     async def _send_queued_messages(self):
-        ""Send all queued messages after reconnection."
+        Send all queued messages after reconnection."
         if not self.message_queue:
             return
         queued_count = len(self.message_queue)
@@ -272,14 +272,14 @@ class ReconnectingWebSocketClient:
         logger.info(f'Sent {successful_sends}/{queued_count} queued messages after reconnection')
 
     def get_connection_stats(self) -> Dict[str, Any]:
-        "Get comprehensive connection statistics.""
+        "Get comprehensive connection statistics.
         return {'current_state': self.state.value, 'connection_attempts': self.connection_attempts, 'successful_connections': self.successful_connections, 'connection_failures': self.connection_failures, 'reconnect_attempts': self.reconnect_attempts, 'messages_sent': self.messages_sent, 'messages_received': self.messages_received, 'queued_messages': len(self.message_queue), 'pending_messages': len(self.pending_messages), 'connection_success_rate': self.successful_connections / max(self.connection_attempts, 1), 'reconnection_events_count': len(self.reconnection_events), 'connection_id': self.connection_id}
 
 class WebSocketErrorHandlingTests(BaseIntegrationTest):
-    ""Integration tests for WebSocket error handling and reconnection patterns."
+    ""Integration tests for WebSocket error handling and reconnection patterns.
 
     def setup_method(self):
-        "Set up test environment.""
+        Set up test environment.""
         super().setup_method()
         self.env = get_env()
         self.env.set('TEST_MODE', 'true', source='test')
@@ -289,7 +289,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
 
     @pytest.fixture
     async def authenticated_websocket_client(self):
-        ""Create authenticated WebSocket client for testing."
+        Create authenticated WebSocket client for testing.""
         user_context = await create_authenticated_user_context(user_email='websocket_test@example.com', user_id='websocket_test_user', environment='test')
         client = ReconnectingWebSocketClient(url=self.websocket_url, auth_token=user_context.agent_context.get('jwt_token'), user_id=str(user_context.user_id), max_reconnect_attempts=3, reconnect_delay=0.5)
         return (client, user_context)
@@ -297,7 +297,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_websocket_connection_and_authentication(self, real_services_fixture, authenticated_websocket_client):
-        "Test WebSocket connection establishment and authentication.""
+        Test WebSocket connection establishment and authentication."
         client, user_context = authenticated_websocket_client
         postgres = real_services_fixture['postgres']
         await postgres.execute('\n            CREATE TABLE IF NOT EXISTS websocket_connections (\n                id SERIAL PRIMARY KEY,\n                user_id TEXT NOT NULL,\n                connection_id TEXT,\n                event_type TEXT NOT NULL,\n                timestamp TIMESTAMP DEFAULT NOW(),\n                duration_ms DECIMAL,\n                success BOOLEAN\n            )\n        ')
@@ -320,7 +320,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
             assert stats['messages_sent'] >= 1
             await client.disconnect()
             assert client.state == WebSocketState.DISCONNECTED
-            await postgres.execute("\n                INSERT INTO websocket_connections (user_id, connection_id, event_type, success)\n                VALUES ($1, $2, 'graceful_disconnect', true)\n            , str(user_context.user_id), client.connection_id)
+            await postgres.execute(\n                INSERT INTO websocket_connections (user_id, connection_id, event_type, success)\n                VALUES ($1, $2, 'graceful_disconnect', true)\n            , str(user_context.user_id), client.connection_id)
         finally:
             await postgres.execute('DROP TABLE IF EXISTS websocket_connections')
         logger.info(' PASS:  WebSocket connection and authentication test passed')
@@ -328,7 +328,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_automatic_reconnection_after_network_failure(self, real_services_fixture, authenticated_websocket_client):
-        ""Test automatic reconnection after simulated network failure."
+        ""Test automatic reconnection after simulated network failure.
         client, user_context = authenticated_websocket_client
         redis = real_services_fixture['redis']
         reconnection_events = []
@@ -385,7 +385,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_message_persistence_and_replay_after_reconnection(self, real_services_fixture, authenticated_websocket_client):
-        "Test message persistence and replay after connection recovery.""
+        Test message persistence and replay after connection recovery.""
         client, user_context = authenticated_websocket_client
         postgres = real_services_fixture['postgres']
         await postgres.execute('\n            CREATE TABLE IF NOT EXISTS websocket_message_log (\n                id SERIAL PRIMARY KEY,\n                user_id TEXT NOT NULL,\n                message_id TEXT NOT NULL,\n                message_type TEXT NOT NULL,\n                message_data JSONB NOT NULL,\n                sent_timestamp TIMESTAMP,\n                delivered_timestamp TIMESTAMP,\n                delivery_attempts INTEGER DEFAULT 0,\n                connection_id TEXT\n            )\n        ')
@@ -448,7 +448,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_concurrent_websocket_connection_isolation(self, real_services_fixture):
-        ""Test WebSocket connection isolation between concurrent users."
+        Test WebSocket connection isolation between concurrent users.""
         redis = real_services_fixture['redis']
         user_count = 4
         websocket_clients = []
@@ -465,7 +465,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
             assert successful_connections >= user_count - 1
 
             async def send_user_messages(client, user_index, message_count):
-                "Send messages from specific user.""
+                Send messages from specific user."
                 sent_messages = []
                 for i in range(message_count):
                     message_data = {'user_index': user_index, 'message_index': i, 'content': f'User {user_index} message {i}', 'timestamp': datetime.now(timezone.utc).isoformat(), 'private_data': f'secret_data_user_{user_index}_{i}'}
@@ -513,7 +513,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_websocket_error_recovery_with_authentication_renewal(self, real_services_fixture, authenticated_websocket_client):
-        ""Test WebSocket recovery with authentication token renewal."
+        "Test WebSocket recovery with authentication token renewal.
         client, user_context = authenticated_websocket_client
         postgres = real_services_fixture['postgres']
         await postgres.execute('\n            CREATE TABLE IF NOT EXISTS auth_renewal_log (\n                id SERIAL PRIMARY KEY,\n                user_id TEXT NOT NULL,\n                old_token_hash TEXT,\n                new_token_hash TEXT,\n                renewal_reason TEXT,\n                success BOOLEAN,\n                timestamp TIMESTAMP DEFAULT NOW()\n            )\n        ')
@@ -528,7 +528,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
             new_user_context = await create_authenticated_user_context(user_email=user_context.agent_context['user_email'], user_id=str(user_context.user_id), environment='test')
             new_token = new_user_context.agent_context.get('jwt_token')
             new_token_hash = hash(new_token)
-            await postgres.execute("\n                INSERT INTO auth_renewal_log (user_id, old_token_hash, new_token_hash, renewal_reason)\n                VALUES ($1, $2, $3, 'token_expiration_simulation')\n            , str(user_context.user_id), str(original_token_hash), str(new_token_hash))
+            await postgres.execute("\n                INSERT INTO auth_renewal_log (user_id, old_token_hash, new_token_hash, renewal_reason)\n                VALUES ($1, $2, $3, 'token_expiration_simulation')\n            , str(user_context.user_id), str(original_token_hash), str(new_token_hash))"
             client.auth_token = new_token
             await client.force_disconnect()
             reconnection_timeout = 10
@@ -570,7 +570,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
             assert renewal_summary['unique_tokens'] >= 3
             final_stats = client.get_connection_stats()
             auth_renewal_results = {'renewal_summary': dict(renewal_summary), 'final_connection_stats': final_stats, 'renewal_success_rate': renewal_success_rate, 'total_messages_with_renewals': final_stats['messages_sent']}
-            await postgres.execute(\n                INSERT INTO auth_renewal_log (user_id, renewal_reason, success)\n                VALUES ($1, 'test_completion_summary', true)\n            ", str(user_context.user_id))
+            await postgres.execute(\n                INSERT INTO auth_renewal_log (user_id, renewal_reason, success)\n                VALUES ($1, 'test_completion_summary', true)\n            ", str(user_context.user_id))"
         finally:
             await postgres.execute('DROP TABLE IF EXISTS auth_renewal_log')
             await client.disconnect()

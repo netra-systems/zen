@@ -19,7 +19,7 @@ CRITICAL BUSINESS VALUE:
 - Prevents MCP server connection cascade failures
 - Ensures external tool integrations remain operational
 - Validates resilience patterns used throughout the system
-""
+"
 
 import asyncio
 import pytest
@@ -41,21 +41,21 @@ from netra_backend.app.mcp_client.connection_manager import (
 
 
 class MCPConnectionRecoveryComprehensiveTests:
-    ""Test comprehensive MCP connection recovery functionality."
+    "Test comprehensive MCP connection recovery functionality.
 
     @pytest.fixture
     async def connection_manager(self):
-        "Create connection manager for testing.""
+        "Create connection manager for testing."
         manager = MCPConnectionManager(max_connections_per_server=5)
         yield manager
         await manager.close_all_connections()
 
     @pytest.fixture
     def mock_config(self):
-        ""Mock MCP server configuration."
+        "Mock MCP server configuration."
         return MCPServerConfig(
-            name="test_server,
-            url=http://localhost:8000",
+            name=test_server,
+            url=http://localhost:8000","
             transport=MCPTransport.HTTP,
             timeout=30000,
             max_retries=3
@@ -63,10 +63,10 @@ class MCPConnectionRecoveryComprehensiveTests:
 
     @pytest.fixture
     def mock_failing_connection(self):
-        "Mock a connection that will fail.""
+        Mock a connection that will fail."
         connection = MCPConnection(
             id=test-conn-1",
-            server_name="test_server,
+            server_name=test_server,
             transport=Mock(),
             status=ConnectionStatus.CONNECTED,
             created_at=datetime.now()
@@ -77,7 +77,7 @@ class MCPConnectionRecoveryComprehensiveTests:
     async def test_failed_connections_move_to_recovery_queue(
         self, connection_manager, mock_failing_connection
     ):
-        ""Test that failed connections move to recovery queue instead of being removed."
+        ""Test that failed connections move to recovery queue instead of being removed.
         server_name = mock_failing_connection.server_name
         
         # Initialize pools and circuit breaker
@@ -86,7 +86,7 @@ class MCPConnectionRecoveryComprehensiveTests:
         
         # Handle connection failure
         await connection_manager._handle_connection_failure(
-            mock_failing_connection, "test_error
+            mock_failing_connection, test_error"
         )
         
         # Verify connection is in recovery queue
@@ -102,10 +102,10 @@ class MCPConnectionRecoveryComprehensiveTests:
     async def test_exponential_backoff_resets_on_success(
         self, connection_manager, mock_config
     ):
-        ""Test that exponential backoff resets after successful reconnection."
+        "Test that exponential backoff resets after successful reconnection.
         # Create a connection with high backoff delay
         connection = MCPConnection(
-            id="test-conn-2,
+            id="test-conn-2,"
             server_name=mock_config.name,
             transport=Mock(),
             status=ConnectionStatus.FAILED,
@@ -120,7 +120,7 @@ class MCPConnectionRecoveryComprehensiveTests:
             return_value=AsyncMock()
         ) as mock_create:
             new_connection = MCPConnection(
-                id=test-conn-new",
+                id=test-conn-new,
                 server_name=mock_config.name,
                 transport=Mock(),
                 status=ConnectionStatus.CONNECTED,
@@ -150,10 +150,10 @@ class MCPConnectionRecoveryComprehensiveTests:
     async def test_no_permanent_failure_states(
         self, connection_manager, mock_config
     ):
-        "Test that connections are never permanently abandoned.""
+        Test that connections are never permanently abandoned.""
         # Create connection that has exceeded max retries
         connection = MCPConnection(
-            id=test-conn-3",
+            id=test-conn-3,
             server_name=mock_config.name,
             transport=Mock(),
             status=ConnectionStatus.FAILED,
@@ -177,7 +177,7 @@ class MCPConnectionRecoveryComprehensiveTests:
             return_value=AsyncMock()
         ), patch.object(
             connection_manager, '_negotiate_session',
-            return_value="test-session
+            return_value="test-session"
         ):
             # Attempt reconnection
             result = await connection_manager.reconnect(connection)
@@ -192,7 +192,7 @@ class MCPConnectionRecoveryComprehensiveTests:
     async def test_background_recovery_task_functionality(
         self, connection_manager, mock_config
     ):
-        ""Test that background recovery task processes failed connections."
+        Test that background recovery task processes failed connections."
         # Setup failed connection
         connection = MCPConnection(
             id="test-conn-4,
@@ -215,7 +215,7 @@ class MCPConnectionRecoveryComprehensiveTests:
             connection_manager, 'create_connection'
         ) as mock_create:
             new_connection = MCPConnection(
-                id=test-conn-new",
+                id=test-conn-new,
                 server_name=mock_config.name,
                 transport=Mock(),
                 status=ConnectionStatus.CONNECTED,
@@ -240,7 +240,7 @@ class MCPConnectionRecoveryComprehensiveTests:
     async def test_circuit_breaker_integration_comprehensive(
         self, connection_manager, mock_config
     ):
-        "Test comprehensive circuit breaker integration.""
+        "Test comprehensive circuit breaker integration."
         # Initialize system
         await connection_manager._initialize_pool(mock_config.name)
         await connection_manager._ensure_circuit_breaker(mock_config.name)
@@ -254,7 +254,7 @@ class MCPConnectionRecoveryComprehensiveTests:
         # Simulate multiple failures to open circuit breaker
         for i in range(6):  # Exceed threshold
             connection = MCPConnection(
-                id=ftest-conn-{i}",
+                id=ftest-conn-{i},"
                 server_name=mock_config.name,
                 transport=Mock(),
                 status=ConnectionStatus.CONNECTED,
@@ -279,7 +279,7 @@ class MCPConnectionRecoveryComprehensiveTests:
     async def test_health_monitoring_triggers_recovery(
         self, connection_manager, mock_config
     ):
-        ""Test that health monitoring triggers recovery for empty pools."
+        Test that health monitoring triggers recovery for empty pools."
         # Setup system with empty pool and failed connections
         await connection_manager._initialize_pool(mock_config.name)
         await connection_manager._ensure_circuit_breaker(mock_config.name)
@@ -313,7 +313,7 @@ class MCPConnectionRecoveryComprehensiveTests:
     async def test_force_recovery_resets_backoff_and_circuit_breaker(
         self, connection_manager, mock_config
     ):
-        ""Test that force recovery resets backoff delays and circuit breaker."
+        Test that force recovery resets backoff delays and circuit breaker.""
         # Setup system
         await connection_manager._initialize_pool(mock_config.name)
         await connection_manager._ensure_circuit_breaker(mock_config.name)
@@ -323,7 +323,7 @@ class MCPConnectionRecoveryComprehensiveTests:
         failed_connections = []
         for i in range(3):
             conn = MCPConnection(
-                id=f"test-conn-{i},
+                id=ftest-conn-{i},
                 server_name=mock_config.name,
                 transport=Mock(),
                 status=ConnectionStatus.FAILED,
@@ -355,7 +355,7 @@ class MCPConnectionRecoveryComprehensiveTests:
     async def test_connection_status_reporting_comprehensive(
         self, connection_manager, mock_config
     ):
-        ""Test comprehensive connection status reporting."
+        Test comprehensive connection status reporting.""
         # Setup system with various connection states
         await connection_manager._initialize_pool(mock_config.name)
         await connection_manager._ensure_circuit_breaker(mock_config.name)
@@ -363,7 +363,7 @@ class MCPConnectionRecoveryComprehensiveTests:
         
         # Add healthy connection to pool
         healthy_connection = MCPConnection(
-            id="healthy-conn,
+            id=healthy-conn,
             server_name=mock_config.name,
             transport=Mock(),
             status=ConnectionStatus.CONNECTED,
@@ -373,7 +373,7 @@ class MCPConnectionRecoveryComprehensiveTests:
         
         # Add failed connection
         failed_connection = MCPConnection(
-            id=failed-conn",
+            id=failed-conn,"
             server_name=mock_config.name,
             transport=Mock(),
             status=ConnectionStatus.FAILED,
@@ -393,20 +393,20 @@ class MCPConnectionRecoveryComprehensiveTests:
         # Verify comprehensive status reporting
         server_status = status[mock_config.name]
         
-        assert server_status["server_config][name"] == mock_config.name
-        assert server_status["pool_status][available"] == 1
-        assert server_status["failed_connections] == 1
-        assert server_status[metrics"]["total_created] == 5
-        assert server_status[metrics"]["recovery_attempts] == 3
-        assert server_status[metrics"]["successful_recoveries] == 2
-        assert server_status[circuit_breaker"] is not None
+        assert server_status["server_config][name] == mock_config.name
+        assert server_status[pool_status][available] == 1
+        assert server_status["failed_connections] == 1"
+        assert server_status[metrics][total_created] == 5
+        assert server_status[metrics]["recovery_attempts] == 3
+        assert server_status[metrics"][successful_recoveries] == 2
+        assert server_status[circuit_breaker] is not None
         assert server_status["health_status] == healthy"  # Pool has connections
 
     @pytest.mark.asyncio
     async def test_comprehensive_error_logging(
         self, connection_manager, mock_config, caplog
     ):
-        "Test that all state transitions are logged comprehensively.""
+        Test that all state transitions are logged comprehensively."
         import logging
         caplog.set_level(logging.INFO)
         
@@ -425,26 +425,26 @@ class MCPConnectionRecoveryComprehensiveTests:
         )
         
         # Test failure logging
-        await connection_manager._handle_connection_failure(connection, "test_error)
+        await connection_manager._handle_connection_failure(connection, test_error)
         
         # Verify comprehensive logging
         log_messages = [record.message for record in caplog.records]
         
         # Check for key log messages
-        failure_logs = [msg for msg in log_messages if Connection test-conn-logging failed: test_error" in msg]
+        failure_logs = [msg for msg in log_messages if Connection test-conn-logging failed: test_error" in msg]"
         assert len(failure_logs) > 0
         
-        recovery_logs = [msg for msg in log_messages if "recovery queue in msg]
+        recovery_logs = [msg for msg in log_messages if recovery queue in msg]
         assert len(recovery_logs) > 0
 
     @pytest.mark.asyncio
     async def test_recovery_with_jitter_prevents_thundering_herd(
         self, connection_manager, mock_config
     ):
-        ""Test that recovery attempts include jitter to prevent thundering herd."
+        "Test that recovery attempts include jitter to prevent thundering herd."
         # Create connection ready for recovery
         connection = MCPConnection(
-            id="test-conn-jitter,
+            id=test-conn-jitter,
             server_name=mock_config.name,
             transport=Mock(),
             status=ConnectionStatus.FAILED,
@@ -472,13 +472,13 @@ class MCPConnectionRecoveryComprehensiveTests:
     async def test_force_recovery_all_servers(
         self, connection_manager
     ):
-        ""Test force recovery for all servers with failed connections."
+        ""Test force recovery for all servers with failed connections.
         # Setup multiple servers
         configs = []
         for i in range(3):
             config = MCPServerConfig(
-                name=f"test_server_{i},
-                url=fhttp://localhost:800{i}",
+                name=ftest_server_{i},
+                url=fhttp://localhost:800{i}","
                 transport=MCPTransport.HTTP
             )
             configs.append(config)
@@ -490,7 +490,7 @@ class MCPConnectionRecoveryComprehensiveTests:
             
             # Add failed connection for each server
             failed_conn = MCPConnection(
-                id=f"failed-conn-{i},
+                id=ffailed-conn-{i},
                 server_name=config.name,
                 transport=Mock(),
                 status=ConnectionStatus.FAILED,
@@ -515,11 +515,11 @@ class MCPConnectionRecoveryComprehensiveTests:
 
 
 class MCPConnectionManagerShutdownTests:
-    ""Test proper shutdown and cleanup of MCP Connection Manager."
+    Test proper shutdown and cleanup of MCP Connection Manager.""
 
     @pytest.mark.asyncio
     async def test_graceful_shutdown_cancels_all_tasks(self):
-        "Test that graceful shutdown properly cancels all background tasks.""
+        Test that graceful shutdown properly cancels all background tasks."
         manager = MCPConnectionManager()
         
         # Start background tasks
@@ -544,12 +544,12 @@ class MCPConnectionManagerShutdownTests:
 
     @pytest.mark.asyncio
     async def test_circuit_breakers_cleaned_up_on_shutdown(self):
-        ""Test that circuit breakers are properly cleaned up on shutdown."
+        "Test that circuit breakers are properly cleaned up on shutdown.
         manager = MCPConnectionManager()
         
         # Create some circuit breakers
-        await manager._ensure_circuit_breaker("server1)
-        await manager._ensure_circuit_breaker(server2")
+        await manager._ensure_circuit_breaker("server1)"
+        await manager._ensure_circuit_breaker(server2)
         
         assert len(manager._circuit_breakers) == 2
         
@@ -565,7 +565,7 @@ class MCPConnectionManagerShutdownTests:
             breaker.cleanup.assert_called_once()
 
 
-if __name__ == "__main__":
+if __name__ == __main__":
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

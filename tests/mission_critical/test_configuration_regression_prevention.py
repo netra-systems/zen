@@ -7,7 +7,7 @@ like the OAuth 503 errors documented in reports. They run in CI/CD to catch
 configuration regressions before deployment.
 
 Based on CRITICAL_CONFIG_REGRESSION_AUDIT_REPORT.md findings.
-""
+"
 
 import os
 import sys
@@ -28,12 +28,12 @@ from test_framework.ssot.isolated_test_helper import IsolatedTestCase
 
 
 class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
-    ""
-    Critical tests to prevent configuration regressions that cause cascade failures.
     "
+    Critical tests to prevent configuration regressions that cause cascade failures.
+"
     
     def setup_method(self, method=None):
-        "Set up test environment.""
+        "Set up test environment.
         super().setup_method(method)
         self.critical_configs = {
             'SERVICE_SECRET': 'Critical for inter-service auth',
@@ -51,7 +51,7 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
         - 100% authentication failure
         - Circuit breaker permanently open
         - Complete system unusable
-        "
+
         environments = ['development', 'test', 'staging', 'production']
         
         for env_name in environments:
@@ -79,15 +79,15 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
                     if env_file.exists():
                         content = env_file.read_text()
                         self.assertIn('SERVICE_SECRET', content,
-                                    f"SERVICE_SECRET missing from {env_file})
+                                    fSERVICE_SECRET missing from {env_file})
     
     def test_jwt_secret_resolution_consistency(self):
-        ""
+        "
         Test JWT secret resolution is consistent across services.
         
         Validates the unified JWT secret manager properly resolves
         secrets for all environments without conflicts.
-        "
+"
         from shared.jwt_secret_manager import get_jwt_secret_manager
         
         environments = ['development', 'test', 'staging', 'production']
@@ -108,15 +108,15 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
                 
                 if env_name in ['staging', 'production']:
                     self.assertNotIn(jwt_secret, weak_values,
-                                   f"Weak JWT secret in {env_name})
+                                   fWeak JWT secret in {env_name})
                     
                     # Production should have strong secrets
                     if env_name == 'production' and jwt_secret:
                         self.assertGreaterEqual(len(jwt_secret), 64,
-                                              Production JWT secret too short")
+                                              Production JWT secret too short")"
     
     def test_oauth_dual_naming_consistency(self):
-        "
+
         Test OAuth dual naming convention is properly maintained.
         
         Backend uses: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
@@ -132,16 +132,16 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
                 
                 # Check backend pattern exists
                 self.assertIn('GOOGLE_CLIENT_ID', mappings,
-                            fBackend OAuth pattern missing in {env_name}")
+                            fBackend OAuth pattern missing in {env_name})
                 self.assertIn('GOOGLE_CLIENT_SECRET', mappings,
-                            f"Backend OAuth secret missing in {env_name})
+                            fBackend OAuth secret missing in {env_name})
                 
                 # Check auth service pattern exists
                 env_upper = env_name.upper()
                 self.assertIn(f'GOOGLE_OAUTH_CLIENT_ID_{env_upper}', mappings,
-                            fAuth service OAuth ID missing in {env_name}")
+                            fAuth service OAuth ID missing in {env_name}")"
                 self.assertIn(f'GOOGLE_OAUTH_CLIENT_SECRET_{env_upper}', mappings,
-                            f"Auth service OAuth secret missing in {env_name})
+                            fAuth service OAuth secret missing in {env_name})
                 
                 # Verify they map to same underlying secrets
                 backend_id = mappings['GOOGLE_CLIENT_ID']
@@ -149,16 +149,16 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
                 
                 # Both should reference the same secret (with possible formatting differences)
                 self.assertIn(env_name.lower(), backend_id.lower(),
-                            Backend OAuth should reference environment")
+                            Backend OAuth should reference environment)
                 self.assertIn(env_name.lower(), auth_id.lower(),
-                            "Auth OAuth should reference environment)
+                            "Auth OAuth should reference environment)"
     
     def test_no_environment_variable_leakage(self):
-        ""
+        
         Test that environment variables don't leak between test runs.
         
         Uses IsolatedEnvironment to ensure proper isolation.
-        "
+""
         # Set a test variable
         test_key = 'TEST_LEAK_CHECK'
         test_value = 'should_not_leak'
@@ -177,19 +177,19 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
         
         # Verify no leakage
         self.assertIsNone(env2.get(test_key),
-                        "Environment variable leaked between isolated instances)
+                        Environment variable leaked between isolated instances)
         
         # Clean up
         env1.reset()
         env2.reset()
     
     def test_critical_config_dependencies(self):
-        ""
+        "
         Test that removing critical configs would be caught.
         
         Simulates what happens if someone tries to consolidate
         a critical config without understanding dependencies.
-        ""
+        "
         critical_impacts = {
             'SERVICE_SECRET': [
                 'auth_service.auth_core.routes.auth_routes',
@@ -212,7 +212,7 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
             with self.subTest(config=config_key):
                 # Verify the config is documented as critical
                 self.assertIn(config_key, self.critical_configs,
-                            f{config_key} not documented as critical")
+                            f{config_key} not documented as critical)
                 
                 # Verify at least some dependent modules exist
                 for module_path in dependent_modules[:2]:  # Check first 2
@@ -226,11 +226,11 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
                                     f{module_path} doesn't reference {config_key}")
     
     def test_config_validation_at_startup(self):
-        "
+    "
         Test that configuration validation happens at startup.
         
         Ensures AuthStartupValidator properly validates SERVICE_SECRET.
-        ""
+        "
         from netra_backend.app.core.auth_startup_validator import (
             AuthStartupValidator, AuthComponent
         )
@@ -255,7 +255,7 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
                 
                 # Should fail due to missing SERVICE_SECRET
                 self.assertFalse(success,
-                               Validation should fail with missing SERVICE_SECRET")
+                               Validation should fail with missing SERVICE_SECRET)
                 
                 # Find SERVICE_SECRET validation result
                 service_result = next(
@@ -265,11 +265,11 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
                 )
                 
                 self.assertIsNotNone(service_result,
-                                   "SERVICE_CREDENTIALS validation not found)
+                                   "SERVICE_CREDENTIALS validation not found)"
                 self.assertFalse(service_result.valid,
-                               SERVICE_CREDENTIALS should be invalid")
+                               SERVICE_CREDENTIALS should be invalid)
                 self.assertTrue(service_result.is_critical,
-                              "Missing SERVICE_SECRET should be critical)
+                              Missing SERVICE_SECRET should be critical)"
                 self.assertIn('SINGLE POINT OF FAILURE', service_result.error,
                             Should identify as single point of failure")
         
@@ -277,9 +277,9 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
         asyncio.run(run_validation())
     
     def test_service_secret_strength_validation(self):
-        "
+    "
         Test that weak SERVICE_SECRET values are rejected.
-        ""
+        "
         from netra_backend.app.core.auth_startup_validator import AuthStartupValidator
         
         weak_secrets = [
@@ -324,14 +324,14 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
                 
                 if 'test' in weak_secret or 'password' in weak_secret or 'secret' in weak_secret:
                     self.assertFalse(result.valid,
-                                   fWeak pattern '{weak_secret[:20]}...' should be rejected")
+                                   fWeak pattern '{weak_secret[:20]}...' should be rejected)
     
     def test_environment_specific_config_isolation(self):
-        "
+    ""
         Test that environment-specific configs don't leak across environments.
         
         E.g., staging configs should never appear in production.
-        ""
+        
         # Check that staging-specific variables don't leak to production
         staging_only = [
             'GOOGLE_OAUTH_CLIENT_ID_STAGING',
@@ -373,7 +373,7 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
         
         This is a placeholder for the configuration change tracker
         that will be implemented next.
-        "
+
         # Track critical configuration keys
         critical_keys = [
             'SERVICE_SECRET',
@@ -403,12 +403,12 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
 
 
 class ConfigurationRegressionIntegrationTests(SSotBaseTestCase, unittest.TestCase):
-    ""
-    Integration tests for configuration regression prevention.
     "
+    Integration tests for configuration regression prevention.
+"
     
     def setup_method(self, method=None):
-        "Set up test environment.""
+        "Set up test environment.
         super().setup_method(method)
         self.critical_configs = {
             'SERVICE_SECRET': 'Critical for inter-service auth',
@@ -421,7 +421,7 @@ class ConfigurationRegressionIntegrationTests(SSotBaseTestCase, unittest.TestCas
     def test_cross_service_config_consistency(self):
         ""
         Test that configuration is consistent across services.
-        "
+
         # This would normally import from actual services
         # For now, we verify the configuration structure
         
@@ -436,11 +436,11 @@ class ConfigurationRegressionIntegrationTests(SSotBaseTestCase, unittest.TestCas
                     self.assertIn(config, self.critical_configs)
     
     @pytest.mark.skipif(os.getenv('SKIP_DEPLOYMENT_TESTS', 'true').lower() == 'true',
-                     reason="Deployment tests skipped)
+                     reason="Deployment tests skipped)"
     def test_deployment_config_validation(self):
-        ""
+        
         Test that deployment configurations are valid.
-        "
+""
         from deployment.secrets_config import validate_secret_mappings
         
         environments = ['staging', 'production']
@@ -451,16 +451,16 @@ class ConfigurationRegressionIntegrationTests(SSotBaseTestCase, unittest.TestCas
                 is_valid, errors = validate_secret_mappings(env_name)
                 
                 self.assertTrue(is_valid,
-                              f"Invalid secret mappings for {env_name}: {errors})
+                              fInvalid secret mappings for {env_name}: {errors})
 
 
-if __name__ == __main__":
+if __name__ == __main__:
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-    print("MIGRATION NOTICE: This file previously used direct pytest execution.)
-    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
     print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
-    # sys.exit(result)
+    # sys.exit(result")

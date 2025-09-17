@@ -22,7 +22,7 @@ COMPREHENSIVE AUDIT SCOPE:
 10. Performance under concurrent load
 
 THESE TESTS MUST BE EXTREMELY THOROUGH AND UNFORGIVING.
-""
+
 
 import asyncio
 import json
@@ -67,7 +67,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 @dataclass
 class EventCapture:
-    ""Captures WebSocket events for validation."
+    ""Captures WebSocket events for validation.
     events: List[Dict[str, Any]] = field(default_factory=list)
     event_times: List[datetime] = field(default_factory=list)
     event_sequence: List[str] = field(default_factory=list)
@@ -75,7 +75,7 @@ class EventCapture:
     lock: threading.Lock = field(default_factory=threading.Lock)
     
     def capture_event(self, event_type: str, data: Dict[str, Any]:
-        "Thread-safe event capture.""
+        Thread-safe event capture.""
         with self.lock:
             event_data = {
                 'type': event_type,
@@ -88,7 +88,7 @@ class EventCapture:
             self.event_sequence.append(event_type)
             
     def capture_error(self, error_type: str, error: str, context: Dict[str, Any] = None):
-        ""Capture error events."
+        Capture error events.""
         with self.lock:
             error_data = {
                 'type': error_type,
@@ -99,19 +99,19 @@ class EventCapture:
             self.error_events.append(error_data)
     
     def get_events_by_type(self, event_type: str) -> List[Dict[str, Any]]:
-        "Get all events of a specific type.""
+        Get all events of a specific type."
         with self.lock:
             return [e for e in self.events if e['type'] == event_type]
     
     def validate_event_sequence(self, expected_sequence: List[str] -> bool:
-        ""Validate that events occurred in expected sequence."
+        "Validate that events occurred in expected sequence.
         with self.lock:
             if len(self.event_sequence) < len(expected_sequence):
                 return False
             return self.event_sequence[:len(expected_sequence)] == expected_sequence
     
     def clear(self):
-        "Clear all captured events.""
+        "Clear all captured events."
         with self.lock:
             self.events.clear()
             self.event_times.clear()
@@ -120,7 +120,7 @@ class EventCapture:
 
 
 class MockWebSocketConnection:
-    ""Mock WebSocket connection for testing."
+    "Mock WebSocket connection for testing."
     
     def __init__(self, user_id: str = None):
         self.user_id = user_id or str(uuid.uuid4())
@@ -130,9 +130,9 @@ class MockWebSocketConnection:
         self.connection_time = datetime.now()
         
     async def send(self, message: str):
-        "Mock WebSocket send.""
+        Mock WebSocket send.""
         if not self.is_connected:
-            raise Exception(WebSocket not connected")
+            raise Exception(WebSocket not connected)
         
         try:
             data = json.loads(message)
@@ -143,19 +143,19 @@ class MockWebSocketConnection:
             self.event_capture.capture_event('raw_message', {'message': message}
     
     async def close(self):
-        "Mock WebSocket close.""
+        Mock WebSocket close.""
         self.is_connected = False
     
     def get_messages_by_type(self, message_type: str) -> List[Dict[str, Any]]:
-        ""Get messages of specific type."
+        Get messages of specific type.""
         return [msg for msg in self.sent_messages if msg.get('type') == message_type]
 
 
 class AgentTests(BaseAgent):
-    "Test agent for WebSocket bridge lifecycle testing.""
+    Test agent for WebSocket bridge lifecycle testing."
     
     def __init__(self, name: str = AgentTests", should_fail: bool = False, execution_time: float = 0.1):
-        super().__init__(name=name, description=f"Test agent: {name})
+        super().__init__(name=name, description=fTest agent: {name})
         self.should_fail = should_fail
         self.execution_time = execution_time
         self.websocket_bridge_set = False
@@ -165,14 +165,14 @@ class AgentTests(BaseAgent):
         self.tool_calls = []
         
     def set_websocket_bridge(self, bridge, run_id: str) -> None:
-        ""Override to track bridge setting."
+        "Override to track bridge setting."
         super().set_websocket_bridge(bridge, run_id)
         self.websocket_bridge_set = True
         self.websocket_bridge_instance = bridge
         self.run_id_received = run_id
         
     async def execute(self, state: DeepAgentState, run_id: str, stream: bool = False) -> Dict[str, Any]:
-        "Test agent execution with WebSocket event emission.""
+        Test agent execution with WebSocket event emission.""
         execution_start = time.time()
         
         # Record execution call
@@ -185,36 +185,36 @@ class AgentTests(BaseAgent):
         }
         
         if not self.websocket_bridge_set:
-            raise RuntimeError(fCRITICAL: WebSocket bridge not set on agent {self.name}")
+            raise RuntimeError(fCRITICAL: WebSocket bridge not set on agent {self.name})
         
         # Emit thinking event
-        await self.emit_thinking(f"Starting execution for {self.name})
+        await self.emit_thinking(fStarting execution for {self.name})
         
         # Simulate tool usage with events
-        await self.emit_tool_executing(mock_tool", {"param: value"}
+        await self.emit_tool_executing(mock_tool", {"param: value}
         await asyncio.sleep(self.execution_time / 2)  # Simulate tool execution
         
         if self.should_fail:
-            await self.emit_error("Intentional test failure)
+            await self.emit_error(Intentional test failure)"
             raise RuntimeError(Test agent failure")
         
-        await self.emit_tool_completed("mock_tool, {result": "success}
+        await self.emit_tool_completed(mock_tool, {result: "success}"
         
         # Simulate some processing
         await asyncio.sleep(self.execution_time / 2)
         
         execution_time = time.time() - execution_start
         return {
-            success": True,
-            "agent_name: self.name,
+            success: True,
+            agent_name: self.name,"
             execution_time": execution_time,
-            "bridge_available: self.websocket_bridge_set,
-            run_id": run_id
+            bridge_available: self.websocket_bridge_set,
+            run_id": run_id"
         }
 
 
 class WebSocketBridgeLifecycleAuditor:
-    "Comprehensive auditor for WebSocket bridge lifecycle.""
+    Comprehensive auditor for WebSocket bridge lifecycle."
     
     def __init__(self):
         self.mock_connections: Dict[str, MockWebSocketConnection] = {}
@@ -224,7 +224,7 @@ class WebSocketBridgeLifecycleAuditor:
         self.event_captures: Dict[str, EventCapture] = {}
         
     async def setup_test_environment(self, num_connections: int = 1):
-        ""Set up complete test environment with mocked WebSocket infrastructure."
+        "Set up complete test environment with mocked WebSocket infrastructure.
         
         # Create mock WebSocket connections
         for i in range(num_connections):
@@ -256,14 +256,14 @@ class WebSocketBridgeLifecycleAuditor:
         return self.execution_engine, self.registry, self.bridge_instances
     
     async def _create_send_to_user_mock(self, user_id: str):
-        "Create a mock send_to_user function for a specific user.""
+        Create a mock send_to_user function for a specific user.""
         async def mock_send_to_user(target_user_id: str, message: str):
             if target_user_id == user_id and user_id in self.mock_connections:
                 await self.mock_connections[user_id].send(message)
         return mock_send_to_user
     
     async def cleanup_test_environment(self):
-        ""Clean up test environment."
+        Clean up test environment."
         for connection in self.mock_connections.values():
             await connection.close()
         self.mock_connections.clear()
@@ -273,32 +273,32 @@ class WebSocketBridgeLifecycleAuditor:
 
 @pytest.fixture
 async def bridge_auditor():
-    "Fixture providing WebSocket bridge lifecycle auditor.""
+    "Fixture providing WebSocket bridge lifecycle auditor.
     auditor = WebSocketBridgeLifecycleAuditor()
     yield auditor
     await auditor.cleanup_test_environment()
 
 
 class WebSocketBridgeLifecycleTests:
-    ""Comprehensive WebSocket bridge lifecycle tests."
+    ""Comprehensive WebSocket bridge lifecycle tests.
     
     @pytest.mark.asyncio
     async def test_agent_execution_core_sets_websocket_bridge(self, bridge_auditor):
-        "Test that AgentExecutionCore properly sets websocket_bridge on agents.""
+        Test that AgentExecutionCore properly sets websocket_bridge on agents.""
         
         # Setup
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
         
         # Create test agent
-        test_agent = AgentTests(BridgeTestAgent")
-        registry.register("BridgeTestAgent, test_agent)
+        test_agent = AgentTests(BridgeTestAgent)
+        registry.register("BridgeTestAgent, test_agent)"
         
         # Create execution context
         context = AgentExecutionContext(
-            agent_name=BridgeTestAgent",
+            agent_name=BridgeTestAgent,
             run_id=str(uuid.uuid4())
         )
-        state = DeepAgentState(user_id="test_user_0)
+        state = DeepAgentState(user_id=test_user_0)"
         
         # Execute through AgentExecutionCore
         agent_core = execution_engine.agent_core
@@ -306,9 +306,9 @@ class WebSocketBridgeLifecycleTests:
         
         # CRITICAL VALIDATIONS
         assert result.success, fAgent execution failed: {result.error}"
-        assert test_agent.websocket_bridge_set, "CRITICAL: WebSocket bridge not set on agent
-        assert test_agent.websocket_bridge_instance is not None, Bridge instance not stored"
-        assert test_agent.run_id_received == context.run_id, "Run ID not propagated correctly
+        assert test_agent.websocket_bridge_set, CRITICAL: WebSocket bridge not set on agent
+        assert test_agent.websocket_bridge_instance is not None, Bridge instance not stored""
+        assert test_agent.run_id_received == context.run_id, Run ID not propagated correctly
         
         # Validate bridge was set before execution
         assert len(test_agent.execution_calls) > 0, Agent execution not recorded"
@@ -317,22 +317,22 @@ class WebSocketBridgeLifecycleTests:
     
     @pytest.mark.asyncio
     async def test_all_critical_websocket_events_emitted(self, bridge_auditor):
-        ""Test that all 5 critical WebSocket events are emitted during agent execution."
+        Test that all 5 critical WebSocket events are emitted during agent execution.""
         
         # Setup
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
         
-        test_agent = AgentTests("EventTestAgent, execution_time=0.2)
-        registry.register(EventTestAgent", test_agent)
+        test_agent = AgentTests(EventTestAgent, execution_time=0.2)
+        registry.register(EventTestAgent, test_agent)"
         
         context = AgentExecutionContext(
             agent_name="EventTestAgent,
             run_id=str(uuid.uuid4())
         )
-        state = DeepAgentState(user_id=test_user_0")
+        state = DeepAgentState(user_id=test_user_0)
         
         # Clear event capture
-        bridge_auditor.event_captures["test_user_0].clear()
+        bridge_auditor.event_captures["test_user_0].clear()"
         
         # Execute agent
         result = await execution_engine.agent_core.execute_agent(context, state)
@@ -341,36 +341,36 @@ class WebSocketBridgeLifecycleTests:
         await asyncio.sleep(0.1)
         
         # Validate all 5 critical events
-        event_capture = bridge_auditor.event_captures[test_user_0"]
+        event_capture = bridge_auditor.event_captures[test_user_0]
         
         # 1. agent_started
-        started_events = event_capture.get_events_by_type("agent_started)
+        started_events = event_capture.get_events_by_type(agent_started)"
         assert len(started_events) > 0, CRITICAL: agent_started event not emitted"
         
         # 2. agent_thinking
-        thinking_events = event_capture.get_events_by_type("agent_thinking)
-        assert len(thinking_events) > 0, CRITICAL: agent_thinking event not emitted"
+        thinking_events = event_capture.get_events_by_type(agent_thinking)
+        assert len(thinking_events) > 0, CRITICAL: agent_thinking event not emitted""
         
         # 3. tool_executing
-        tool_executing_events = event_capture.get_events_by_type("tool_executing)
+        tool_executing_events = event_capture.get_events_by_type(tool_executing)
         assert len(tool_executing_events) > 0, CRITICAL: tool_executing event not emitted"
         
         # 4. tool_completed
         tool_completed_events = event_capture.get_events_by_type("tool_completed)
-        assert len(tool_completed_events) > 0, CRITICAL: tool_completed event not emitted"
+        assert len(tool_completed_events) > 0, CRITICAL: tool_completed event not emitted
         
         # 5. agent_completed
-        completed_events = event_capture.get_events_by_type("agent_completed)
-        assert len(completed_events) > 0, CRITICAL: agent_completed event not emitted"
+        completed_events = event_capture.get_events_by_type("agent_completed)"
+        assert len(completed_events) > 0, CRITICAL: agent_completed event not emitted
         
         # Validate event sequence
-        expected_sequence = ["agent_started, agent_thinking", "tool_executing]
+        expected_sequence = [agent_started, agent_thinking", "tool_executing]
         assert event_capture.validate_event_sequence(expected_sequence), \
-            fEvents not in expected sequence. Got: {event_capture.event_sequence[:3]}"
+            fEvents not in expected sequence. Got: {event_capture.event_sequence[:3]}
     
     @pytest.mark.asyncio
     async def test_error_scenarios_and_recovery(self, bridge_auditor):
-        "Test error scenarios and recovery mechanisms.""
+        "Test error scenarios and recovery mechanisms."
         
         # Setup
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
@@ -384,28 +384,28 @@ class WebSocketBridgeLifecycleTests:
                 return {"success: True}
         
         legacy_agent = LegacyAgent()
-        registry.register(LegacyAgent", legacy_agent)
+        registry.register(LegacyAgent, legacy_agent)
         
         context = AgentExecutionContext(
-            agent_name="LegacyAgent,
+            agent_name="LegacyAgent,"
             run_id=str(uuid.uuid4())
         )
-        state = DeepAgentState(user_id=test_user_0")
+        state = DeepAgentState(user_id=test_user_0)
         
         # Should not fail - just log warning
         result = await execution_engine.agent_core.execute_agent(context, state)
-        assert result.success, "Legacy agent without bridge support should still work
+        assert result.success, Legacy agent without bridge support should still work"
         
         # Test 2: Agent that fails during execution
         failing_agent = AgentTests(FailingAgent", should_fail=True)
-        registry.register("FailingAgent, failing_agent)
+        registry.register(FailingAgent, failing_agent)
         
         context = AgentExecutionContext(
-            agent_name=FailingAgent",
+            agent_name=FailingAgent","
             run_id=str(uuid.uuid4())
         )
         
-        bridge_auditor.event_captures["test_user_0].clear()
+        bridge_auditor.event_captures[test_user_0].clear()
         
         result = await execution_engine.agent_core.execute_agent(context, state)
         assert not result.success, Failing agent should return failure result"
@@ -414,23 +414,23 @@ class WebSocketBridgeLifecycleTests:
         assert failing_agent.websocket_bridge_set, "Bridge should be set even for failing agents
         
         # Should emit error event
-        event_capture = bridge_auditor.event_captures[test_user_0"]
-        error_events = event_capture.get_events_by_type("agent_error)
-        assert len(error_events) > 0, Error event should be emitted for failing agents"
+        event_capture = bridge_auditor.event_captures[test_user_0]
+        error_events = event_capture.get_events_by_type("agent_error)"
+        assert len(error_events) > 0, Error event should be emitted for failing agents
         
         # Test 3: Agent not found
         context = AgentExecutionContext(
-            agent_name="NonExistentAgent,
+            agent_name=NonExistentAgent,"
             run_id=str(uuid.uuid4())
         )
         
         result = await execution_engine.agent_core.execute_agent(context, state)
         assert not result.success, Non-existent agent should return failure"
-        assert "not found in result.error.lower(), Error should mention agent not found"
+        assert not found in result.error.lower(), Error should mention agent not found
     
     @pytest.mark.asyncio
     async def test_concurrent_agent_executions_with_bridge_isolation(self, bridge_auditor):
-        "Test concurrent agent executions maintain proper bridge isolation.""
+        "Test concurrent agent executions maintain proper bridge isolation."
         
         # Setup with multiple connections
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment(num_connections=3)
@@ -438,7 +438,7 @@ class WebSocketBridgeLifecycleTests:
         # Create test agents
         agents = []
         for i in range(3):
-            agent = AgentTests(fConcurrentAgent_{i}", execution_time=0.3)
+            agent = AgentTests(fConcurrentAgent_{i}, execution_time=0.3)"
             agents.append(agent)
             registry.register(f"ConcurrentAgent_{i}, agent)
         
@@ -446,10 +446,10 @@ class WebSocketBridgeLifecycleTests:
         tasks = []
         for i in range(3):
             context = AgentExecutionContext(
-                agent_name=fConcurrentAgent_{i}",
+                agent_name=fConcurrentAgent_{i},
                 run_id=str(uuid.uuid4())
             )
-            state = DeepAgentState(user_id=f"test_user_{i})
+            state = DeepAgentState(user_id=ftest_user_{i})
             
             # Create execution engine with appropriate bridge
             bridge = list(bridges.values())[i]
@@ -464,13 +464,13 @@ class WebSocketBridgeLifecycleTests:
         execution_time = time.time() - start_time
         
         # Validate concurrent execution worked
-        assert execution_time < 0.6, fConcurrent execution took too long: {execution_time}s"
+        assert execution_time < 0.6, fConcurrent execution took too long: {execution_time}s""
         
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                pytest.fail(f"Agent {i} failed with exception: {result})
+                pytest.fail(fAgent {i} failed with exception: {result})
             
-            assert result.success, fAgent {i} execution failed: {result.error}"
+            assert result.success, fAgent {i} execution failed: {result.error}
             
             # Validate bridge isolation
             agent = agents[i]
@@ -481,37 +481,37 @@ class WebSocketBridgeLifecycleTests:
             for j, other_agent in enumerate(agents):
                 if i != j:
                     assert agent.run_id_received != other_agent.run_id_received, \
-                        f"Agents {i} and {j} have same run_id - bridge isolation broken
+                        fAgents {i} and {j} have same run_id - bridge isolation broken
     
     @pytest.mark.asyncio
     async def test_heartbeat_integration_with_websocket_notifications(self, bridge_auditor):
-        ""Test that heartbeat integration works with WebSocket notifications."
+        "Test that heartbeat integration works with WebSocket notifications."
         
         # Setup
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
         
-        test_agent = AgentTests("HeartbeatAgent, execution_time=0.5)  # Longer execution
-        registry.register(HeartbeatAgent", test_agent)
+        test_agent = AgentTests(HeartbeatAgent, execution_time=0.5)  # Longer execution
+        registry.register(HeartbeatAgent", test_agent)"
         
         context = AgentExecutionContext(
-            agent_name="HeartbeatAgent,
+            agent_name=HeartbeatAgent,
             run_id=str(uuid.uuid4())
         )
-        state = DeepAgentState(user_id=test_user_0")
+        state = DeepAgentState(user_id=test_user_0)"
         
         bridge_auditor.event_captures["test_user_0].clear()
         
         # Execute with heartbeat monitoring
         result = await execution_engine.agent_core.execute_agent(context, state, timeout=2.0)
         
-        assert result.success, fHeartbeat agent execution failed: {result.error}"
+        assert result.success, fHeartbeat agent execution failed: {result.error}
         
         # Should have multiple thinking events from heartbeats
-        event_capture = bridge_auditor.event_captures["test_user_0]
-        thinking_events = event_capture.get_events_by_type(agent_thinking")
+        event_capture = bridge_auditor.event_captures["test_user_0]"
+        thinking_events = event_capture.get_events_by_type(agent_thinking)
         
         # Should have at least initial thinking + heartbeat thinking events
-        assert len(thinking_events) >= 2, "Should have multiple thinking events from heartbeat
+        assert len(thinking_events) >= 2, Should have multiple thinking events from heartbeat"
         
         # Validate heartbeat timing
         event_times = [e['timestamp'] for e in thinking_events]
@@ -522,26 +522,26 @@ class WebSocketBridgeLifecycleTests:
     
     @pytest.mark.asyncio
     async def test_bridge_lifecycle_with_execution_engine(self, bridge_auditor):
-        "Test complete bridge lifecycle through ExecutionEngine.""
+        Test complete bridge lifecycle through ExecutionEngine.""
         
         # Setup
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
         
-        test_agent = AgentTests(ExecutionEngineAgent")
-        registry.register("ExecutionEngineAgent, test_agent)
+        test_agent = AgentTests(ExecutionEngineAgent)
+        registry.register(ExecutionEngineAgent, test_agent)"
         
         # Test pipeline execution through ExecutionEngine
         pipeline_steps = [
             {
-                agent_name": "ExecutionEngineAgent,
-                params": {"test_param: value"}
+                agent_name": ExecutionEngineAgent,
+                params: {test_param: value"}"
             }
         ]
         
         run_id = str(uuid.uuid4())
-        state = DeepAgentState(user_id="test_user_0)
+        state = DeepAgentState(user_id=test_user_0)
         
-        bridge_auditor.event_captures[test_user_0"].clear()
+        bridge_auditor.event_captures[test_user_0].clear()"
         
         # Execute through ExecutionEngine (this would normally be called by supervisor)
         context = AgentExecutionContext(
@@ -552,20 +552,20 @@ class WebSocketBridgeLifecycleTests:
         result = await execution_engine.agent_core.execute_agent(context, state)
         
         # Comprehensive validation
-        assert result.success, fExecutionEngine pipeline failed: {result.error}"
-        assert test_agent.websocket_bridge_set, "Bridge not set through ExecutionEngine
+        assert result.success, fExecutionEngine pipeline failed: {result.error}
+        assert test_agent.websocket_bridge_set, "Bridge not set through ExecutionEngine"
         
         # Validate all events emitted
-        event_capture = bridge_auditor.event_captures[test_user_0"]
+        event_capture = bridge_auditor.event_captures[test_user_0]
         
-        expected_events = ["agent_started, agent_thinking", "tool_executing, tool_completed", "agent_completed]
+        expected_events = [agent_started, agent_thinking", "tool_executing, tool_completed, agent_completed]
         for event_type in expected_events:
             events = event_capture.get_events_by_type(event_type)
-            assert len(events) > 0, fMissing {event_type} event in ExecutionEngine flow"
+            assert len(events) > 0, fMissing {event_type} event in ExecutionEngine flow""
     
     @pytest.mark.asyncio
     async def test_bridge_error_handling_when_not_set(self, bridge_auditor):
-        "Test proper error handling when bridge is not set.""
+        Test proper error handling when bridge is not set."
         
         # Setup
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
@@ -577,28 +577,28 @@ class WebSocketBridgeLifecycleTests:
                 
             async def execute(self, state, run_id, stream=False):
                 # This should fail if bridge not set properly
-                await self.emit_thinking("Testing bridge requirement)
-                return {success": True}
+                await self.emit_thinking(Testing bridge requirement)
+                return {success": True}"
         
         agent = BridgeRequiredAgent()
-        registry.register("BridgeRequiredAgent, agent)
+        registry.register(BridgeRequiredAgent, agent)
         
         # Create execution core WITHOUT bridge
         execution_core_no_bridge = AgentExecutionCore(registry, websocket_bridge=None)
         
         context = AgentExecutionContext(
-            agent_name=BridgeRequiredAgent",
+            agent_name=BridgeRequiredAgent,"
             run_id=str(uuid.uuid4())
         )
         state = DeepAgentState(user_id="test_user_0)
         
         # Should still complete (bridge is optional for base functionality)
         result = await execution_core_no_bridge.execute_agent(context, state)
-        assert result.success, Agent should work without bridge (with warnings)"
+        assert result.success, Agent should work without bridge (with warnings)
     
     @pytest.mark.asyncio
     async def test_websocket_events_proper_ordering(self, bridge_auditor):
-        "Test that WebSocket events maintain proper ordering under load.""
+        "Test that WebSocket events maintain proper ordering under load."
         
         # Setup
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
@@ -606,38 +606,38 @@ class WebSocketBridgeLifecycleTests:
         # Create agent that emits many events
         class EventIntensiveAgent(BaseAgent):
             async def __init__(self):
-                super().__init__(name=EventIntensiveAgent")
+                super().__init__(name=EventIntensiveAgent)"
                 
             async def execute(self, state, run_id, stream=False):
                 # Emit many events in specific order
                 for i in range(5):
                     await self.emit_thinking(f"Step {i})
-                    await self.emit_tool_executing(ftool_{i}", {"step: i}
+                    await self.emit_tool_executing(ftool_{i}, {step: i}
                     await asyncio.sleep(0.01)  # Small delay
-                    await self.emit_tool_completed(ftool_{i}", {"result: fresult_{i}"}
+                    await self.emit_tool_completed(ftool_{i}, {"result: fresult_{i}"}
                 
-                return {"success: True, steps_completed": 5}
+                return {success: True, steps_completed: 5}
         
         agent = EventIntensiveAgent()
-        registry.register("EventIntensiveAgent, agent)
+        registry.register("EventIntensiveAgent, agent)"
         
         context = AgentExecutionContext(
-            agent_name=EventIntensiveAgent",
+            agent_name=EventIntensiveAgent,
             run_id=str(uuid.uuid4())
         )
-        state = DeepAgentState(user_id="test_user_0)
+        state = DeepAgentState(user_id=test_user_0)"
         
         bridge_auditor.event_captures[test_user_0"].clear()
         
         result = await execution_engine.agent_core.execute_agent(context, state)
-        assert result.success, "Event intensive agent should complete successfully
+        assert result.success, Event intensive agent should complete successfully
         
         # Validate event ordering
-        event_capture = bridge_auditor.event_captures[test_user_0"]
+        event_capture = bridge_auditor.event_captures[test_user_0"]"
         all_events = event_capture.events
         
         # Should have proper sequence: started -> thinking/tool events -> completed
-        assert len(all_events) > 10, "Should have many events from intensive agent
+        assert len(all_events) > 10, Should have many events from intensive agent
         
         # First event should be agent_started
         assert all_events[0]['type'] == 'agent_started', First event should be agent_started"
@@ -646,17 +646,17 @@ class WebSocketBridgeLifecycleTests:
         assert all_events[-1]['type'] == 'agent_completed', "Last event should be agent_completed
         
         # Validate thinking and tool events are properly interleaved
-        thinking_events = event_capture.get_events_by_type(agent_thinking")
-        tool_executing_events = event_capture.get_events_by_type("tool_executing)
-        tool_completed_events = event_capture.get_events_by_type(tool_completed")
+        thinking_events = event_capture.get_events_by_type(agent_thinking)
+        tool_executing_events = event_capture.get_events_by_type("tool_executing)"
+        tool_completed_events = event_capture.get_events_by_type(tool_completed)
         
-        assert len(thinking_events) >= 5, "Should have at least 5 thinking events
+        assert len(thinking_events) >= 5, Should have at least 5 thinking events"
         assert len(tool_executing_events) >= 5, Should have at least 5 tool_executing events"
-        assert len(tool_completed_events) >= 5, "Should have at least 5 tool_completed events
+        assert len(tool_completed_events) >= 5, Should have at least 5 tool_completed events
     
     @pytest.mark.asyncio
     async def test_bridge_lifecycle_performance_under_load(self, bridge_auditor):
-        ""Test bridge lifecycle performance under concurrent load."
+        ""Test bridge lifecycle performance under concurrent load.
         
         # Setup with multiple connections for load testing
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment(num_connections=5)
@@ -664,8 +664,8 @@ class WebSocketBridgeLifecycleTests:
         # Create multiple test agents
         num_agents = 10
         for i in range(num_agents):
-            agent = AgentTests(f"LoadTestAgent_{i}, execution_time=0.1)
-            registry.register(fLoadTestAgent_{i}", agent)
+            agent = AgentTests(fLoadTestAgent_{i}, execution_time=0.1)
+            registry.register(fLoadTestAgent_{i}", agent)"
         
         # Create concurrent execution tasks
         tasks = []
@@ -673,10 +673,10 @@ class WebSocketBridgeLifecycleTests:
         
         for i in range(num_agents):
             context = AgentExecutionContext(
-                agent_name=f"LoadTestAgent_{i},
+                agent_name=fLoadTestAgent_{i},
                 run_id=str(uuid.uuid4())
             )
-            state = DeepAgentState(user_id=ftest_user_{i % 5}")  # Distribute across 5 users
+            state = DeepAgentState(user_id=ftest_user_{i % 5})  # Distribute across 5 users
             
             # Use appropriate bridge for user
             bridge = list(bridges.values())[i % 5]
@@ -703,7 +703,7 @@ class WebSocketBridgeLifecycleTests:
                 success_count += 1
         
         success_rate = success_count / num_agents
-        assert success_rate >= 0.9, f"Success rate too low under load: {success_rate}
+        assert success_rate >= 0.9, fSuccess rate too low under load: {success_rate}
         
         # Validate WebSocket events were emitted for all executions
         total_events = 0
@@ -713,11 +713,11 @@ class WebSocketBridgeLifecycleTests:
         # Should have substantial number of events (at least 3 per successful agent)
         expected_min_events = success_count * 3
         assert total_events >= expected_min_events, \
-            fNot enough WebSocket events under load: {total_events} < {expected_min_events}"
+            fNot enough WebSocket events under load: {total_events} < {expected_min_events}""
     
     @pytest.mark.asyncio
     async def test_real_websocket_connection_integration(self, bridge_auditor):
-        "Test with real WebSocket connections (if available).""
+        Test with real WebSocket connections (if available)."
         
         # This test attempts to use real WebSocket infrastructure
         # Falls back to mocks if real infrastructure not available
@@ -730,13 +730,13 @@ class WebSocketBridgeLifecycleTests:
             execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
             
             test_agent = AgentTests(RealWebSocketAgent")
-            registry.register("RealWebSocketAgent, test_agent)
+            registry.register(RealWebSocketAgent, test_agent)
             
             context = AgentExecutionContext(
-                agent_name=RealWebSocketAgent",
+                agent_name=RealWebSocketAgent","
                 run_id=str(uuid.uuid4())
             )
-            state = DeepAgentState(user_id="test_user_0)
+            state = DeepAgentState(user_id=test_user_0)
             
             # Execute agent
             result = await execution_engine.agent_core.execute_agent(context, state)
@@ -746,29 +746,29 @@ class WebSocketBridgeLifecycleTests:
             
         except ImportError:
             # Real WebSocket infrastructure not available - test with mocks
-            pytest.skip(Real WebSocket infrastructure not available - using mocks only")
+            pytest.skip(Real WebSocket infrastructure not available - using mocks only)
         except Exception as e:
             # Real WebSocket infrastructure failed - test should still pass with mocks
-            print(f"Real WebSocket test failed (expected in isolated environment): {e})
-            assert True, Mock-based testing is sufficient for isolated environments"
+            print(f"Real WebSocket test failed (expected in isolated environment): {e}")
+            assert True, Mock-based testing is sufficient for isolated environments
 
 
 # Additional edge case and regression tests
 class WebSocketBridgeEdgeCasesTests:
-    "Edge cases and regression tests for WebSocket bridge lifecycle.""
+    Edge cases and regression tests for WebSocket bridge lifecycle.""
     
     @pytest.mark.asyncio
     async def test_bridge_with_malformed_agent_responses(self, bridge_auditor):
-        ""Test bridge handling with malformed agent responses."
+        Test bridge handling with malformed agent responses.""
         
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
         
         class MalformedResponseAgent(BaseAgent):
             async def __init__(self):
-                super().__init__(name="MalformedAgent)
+                super().__init__(name=MalformedAgent)
                 
             async def execute(self, state, run_id, stream=False):
-                await self.emit_thinking(About to return malformed response")
+                await self.emit_thinking(About to return malformed response)"
                 # Return None instead of proper response
                 return None
         
@@ -776,22 +776,22 @@ class WebSocketBridgeEdgeCasesTests:
         registry.register("MalformedAgent, agent)
         
         context = AgentExecutionContext(
-            agent_name=MalformedAgent",
+            agent_name=MalformedAgent,
             run_id=str(uuid.uuid4())
         )
-        state = DeepAgentState(user_id="test_user_0)
+        state = DeepAgentState(user_id="test_user_0)"
         
         # Should handle malformed response gracefully
         result = await execution_engine.agent_core.execute_agent(context, state)
         
         # Should detect the malformed response and handle it
-        assert not result.success, Should detect malformed response (None)"
-        assert "died silently in result.error or returned None" in result.error, \
+        assert not result.success, Should detect malformed response (None)
+        assert died silently in result.error or returned None" in result.error, \
             f"Should detect None return as death signature: {result.error}
     
     @pytest.mark.asyncio
     async def test_bridge_timeout_scenarios(self, bridge_auditor):
-        ""Test bridge behavior during timeout scenarios."
+        Test bridge behavior during timeout scenarios."
         
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
         
@@ -800,78 +800,78 @@ class WebSocketBridgeEdgeCasesTests:
                 super().__init__(name="SlowAgent)
                 
             async def execute(self, state, run_id, stream=False):
-                await self.emit_thinking(Starting slow operation")
+                await self.emit_thinking(Starting slow operation)
                 # Sleep longer than timeout
                 await asyncio.sleep(2.0)
-                await self.emit_thinking("This should not be reached)
-                return {success": True}
+                await self.emit_thinking("This should not be reached)"
+                return {success: True}
         
         agent = SlowAgent()
-        registry.register("SlowAgent, agent)
+        registry.register(SlowAgent, agent)"
         
         context = AgentExecutionContext(
             agent_name=SlowAgent",
             run_id=str(uuid.uuid4())
         )
-        state = DeepAgentState(user_id="test_user_0)
+        state = DeepAgentState(user_id=test_user_0)
         
-        bridge_auditor.event_captures[test_user_0"].clear()
+        bridge_auditor.event_captures[test_user_0"].clear()"
         
         # Execute with short timeout
         result = await execution_engine.agent_core.execute_agent(context, state, timeout=0.5)
         
         # Should timeout
-        assert not result.success, "Should timeout on slow agent
-        assert timeout" in result.error.lower(), f"Should be timeout error: {result.error}
+        assert not result.success, Should timeout on slow agent
+        assert timeout in result.error.lower(), f"Should be timeout error: {result.error}
         
         # Should still have initial events before timeout
-        event_capture = bridge_auditor.event_captures[test_user_0"]
-        started_events = event_capture.get_events_by_type("agent_started)
-        thinking_events = event_capture.get_events_by_type(agent_thinking")
+        event_capture = bridge_auditor.event_captures[test_user_0]"
+        started_events = event_capture.get_events_by_type(agent_started)
+        thinking_events = event_capture.get_events_by_type(agent_thinking)"
         
         assert len(started_events) > 0, "Should have agent_started before timeout
-        assert len(thinking_events) >= 1, Should have some thinking events before timeout"
+        assert len(thinking_events) >= 1, Should have some thinking events before timeout
     
     @pytest.mark.asyncio
     async def test_bridge_memory_leak_prevention(self, bridge_auditor):
-        "Test that bridge lifecycle prevents memory leaks.""
+        "Test that bridge lifecycle prevents memory leaks."
         
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
         
         # Create many short-lived agents to test cleanup
         num_iterations = 50
         
-        initial_event_count = len(bridge_auditor.event_captures[test_user_0"].events)
+        initial_event_count = len(bridge_auditor.event_captures[test_user_0].events)"
         
         for i in range(num_iterations):
             agent = AgentTests(f"LeakTestAgent_{i}, execution_time=0.01)
-            registry.register(fLeakTestAgent_{i}", agent)
+            registry.register(fLeakTestAgent_{i}, agent)
             
             context = AgentExecutionContext(
-                agent_name=f"LeakTestAgent_{i},
+                agent_name=fLeakTestAgent_{i},
                 run_id=str(uuid.uuid4())
             )
-            state = DeepAgentState(user_id=test_user_0")
+            state = DeepAgentState(user_id=test_user_0")"
             
             result = await execution_engine.agent_core.execute_agent(context, state)
-            assert result.success, f"Leak test agent {i} should succeed
+            assert result.success, fLeak test agent {i} should succeed
             
             # Clean up agent from registry to simulate real usage
-            registry._agents.pop(fLeakTestAgent_{i}", None)
+            registry._agents.pop(fLeakTestAgent_{i}, None)
         
         # Validate memory usage is reasonable
-        final_event_count = len(bridge_auditor.event_captures["test_user_0].events)
+        final_event_count = len(bridge_auditor.event_captures["test_user_0].events)"
         events_per_agent = (final_event_count - initial_event_count) / num_iterations
         
         # Should be reasonable number of events per agent (not growing exponentially)
-        assert events_per_agent < 20, fToo many events per agent: {events_per_agent}"
+        assert events_per_agent < 20, fToo many events per agent: {events_per_agent}
         
         # Test WebSocket bridge history management
         # (In real implementation, bridge should limit history size)
-        assert final_event_count < 10000, "Event capture growing without bounds - potential memory leak
+        assert final_event_count < 10000, Event capture growing without bounds - potential memory leak"
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # Run the tests
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

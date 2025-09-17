@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 
 CRITICAL: These tests MUST pass before deployment. Failure indicates business
 value is at risk and deployment should be blocked.
-""
+"
 
 import pytest
 import asyncio
@@ -23,26 +23,26 @@ logger = get_logger(__name__)
 
 
 class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
-    ""Mission critical WebSocket SSOT validation tests."
+    "Mission critical WebSocket SSOT validation tests.
     
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_all_websocket_events_sent_post_ssot_migration(self):
-        "
+    ""
         MUST PASS: All 5 WebSocket events sent after SSOT migration.
         
         This test MUST pass or deployment is blocked. Validates that all
         business-critical WebSocket events are delivered consistently
         after SSOT consolidation.
-        ""
-        logger.info(MISSION CRITICAL: Validating all WebSocket events post-SSOT migration")
+        
+        logger.info(MISSION CRITICAL: Validating all WebSocket events post-SSOT migration")"
         
         required_events = [
-            "agent_started,
-            agent_thinking", 
+            agent_started,
+            agent_thinking, "
             "tool_executing,
-            tool_completed",
-            "agent_completed
+            tool_completed,
+            "agent_completed"
         ]
         
         event_delivery_results = {}
@@ -51,8 +51,8 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
         try:
             # Execute agent with monitoring to capture all events
             result = await self.execute_agent_with_monitoring(
-                agent=triage_agent",
-                message="Mission critical validation: system status check,
+                agent=triage_agent,
+                message=Mission critical validation: system status check,"
                 timeout=60  # Extended timeout for critical validation
             )
             
@@ -75,7 +75,7 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
             # Validate event order and timing
             if len(result.event_order) > 0:
                 # Check for required event sequence  
-                expected_sequence = [agent_started", "agent_completed]  # Minimum required
+                expected_sequence = [agent_started", agent_completed]  # Minimum required
                 sequence_valid = all(event in result.event_order for event in expected_sequence)
                 
                 if not sequence_valid:
@@ -88,7 +88,7 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
                     }
             
         except Exception as e:
-            logger.error(fMISSION CRITICAL: Agent execution failed: {e}")
+            logger.error(fMISSION CRITICAL: Agent execution failed: {e})
             critical_failures.append({
                 'event_type': 'agent_execution',
                 'failure_reason': f'execution_exception: {str(e)}',
@@ -103,27 +103,27 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
         # These assertions are NON-NEGOTIABLE for deployment
         for event_type in required_events:
             assert event_delivery_results.get(event_type, {}.get('delivered', False), (
-                f"MISSION CRITICAL: WebSocket event '{event_type}' not delivered. 
+                fMISSION CRITICAL: WebSocket event '{event_type}' not delivered. 
                 fThis blocks deployment as it indicates $500K+ ARR functionality is broken. "
                 f"Event counts: {event_delivery_results}
             )
         
         assert len(critical_failures) == 0, (
-            fMISSION CRITICAL: {len(critical_failures)} failures detected. "
-            f"Deployment blocked due to business-critical WebSocket functionality issues: 
-            f{critical_failures}"
+            fMISSION CRITICAL: {len(critical_failures)} failures detected. 
+            fDeployment blocked due to business-critical WebSocket functionality issues: 
+            f{critical_failures}""
         )
     
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_websocket_manager_ssot_violation_detection(self):
-        "
+
         MUST PASS: No SSOT violations detected in WebSocket management.
         
         This test ensures single source of truth compliance and prevents
         dual implementation patterns that could cause race conditions.
         ""
-        logger.info(MISSION CRITICAL: Detecting WebSocket manager SSOT violations")
+        logger.info(MISSION CRITICAL: Detecting WebSocket manager SSOT violations)
         
         ssot_violations = []
         implementation_analysis = {}
@@ -132,7 +132,7 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
             # Check for canonical SSOT implementation
             from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             implementation_analysis['canonical_available'] = True
-            logger.info("Canonical WebSocketManager implementation available)
+            logger.info(Canonical WebSocketManager implementation available)"
             
         except ImportError as e:
             implementation_analysis['canonical_available'] = False
@@ -155,7 +155,7 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
             
         except ImportError:
             implementation_analysis['factory_available'] = False
-            logger.info("Deprecated WebSocketManagerFactory not available (correct))
+            logger.info(Deprecated WebSocketManagerFactory not available (correct))
         
         # Test WebSocket manager instantiation consistency
         if implementation_analysis.get('canonical_available'):
@@ -169,8 +169,8 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
                 test_user_id = ensure_user_id(str(uuid.uuid4()))
                 test_context = UserExecutionContext(
                     user_id=test_user_id,
-                    thread_id=mission_critical_thread",
-                    run_id="mission_critical_run,
+                    thread_id=mission_critical_thread","
+                    run_id=mission_critical_run,
                     request_id=ssot_validation_test"
                 )
                 
@@ -218,39 +218,39 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
         
         implementation_analysis['factory_functions_available'] = available_factory_functions
         
-        logger.info(fSSOT implementation analysis: {implementation_analysis}")
+        logger.info(fSSOT implementation analysis: {implementation_analysis})
         
         # These assertions are NON-NEGOTIABLE for SSOT compliance
         assert implementation_analysis.get('canonical_available', False), (
-            "MISSION CRITICAL: Canonical WebSocketManager implementation must be available. 
-            SSOT compliance requires the canonical implementation."
+            "MISSION CRITICAL: Canonical WebSocketManager implementation must be available. "
+            SSOT compliance requires the canonical implementation.
         )
         
         assert not implementation_analysis.get('factory_available', False), (
-            "MISSION CRITICAL: Deprecated WebSocketManagerFactory must be eliminated. 
+            MISSION CRITICAL: Deprecated WebSocketManagerFactory must be eliminated. "
             SSOT compliance prohibits multiple WebSocket manager implementations."
         )
         
         assert len(available_factory_functions) == 0, (
-            f"MISSION CRITICAL: Factory functions must be eliminated for SSOT compliance: 
+            fMISSION CRITICAL: Factory functions must be eliminated for SSOT compliance: 
             f{available_factory_functions}"
         )
         
         assert len(ssot_violations) == 0, (
             f"MISSION CRITICAL: {len(ssot_violations)} SSOT violations detected. 
-            fDeployment blocked due to SSOT compliance failures: {ssot_violations}"
+            fDeployment blocked due to SSOT compliance failures: {ssot_violations}
         )
     
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_business_value_protection_during_migration(self):
-        "
+    ""
         MUST PASS: Business value protected during import migration.
         
         This test validates that chat functionality continues operating
         during the SSOT migration process, protecting $500K+ ARR.
-        ""
-        logger.info(MISSION CRITICAL: Validating business value protection during migration")
+        
+        logger.info(MISSION CRITICAL: Validating business value protection during migration)"
         
         business_value_indicators = {
             'chat_functionality_working': False,
@@ -265,7 +265,7 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
             # Test core chat functionality
             chat_test_result = await self.execute_agent_with_monitoring(
                 agent="triage_agent,
-                message=Business value test: provide user assistance",
+                message=Business value test: provide user assistance,
                 timeout=45
             )
             
@@ -302,7 +302,7 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
                 'impact': 'revenue_risk'
             }
         
-        logger.info(f"Business value indicators: {business_value_indicators})
+        logger.info(fBusiness value indicators: {business_value_indicators})
         
         # These assertions protect $500K+ ARR functionality
         assert business_value_indicators['chat_functionality_working'], (
@@ -311,30 +311,30 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
         )
         
         assert business_value_indicators['agent_responses_delivered'], (
-            MISSION CRITICAL: Agent responses not delivered. "
-            "Core business value depends on agent response delivery.
+            MISSION CRITICAL: Agent responses not delivered. 
+            "Core business value depends on agent response delivery."
         )
         
         assert business_value_indicators['websocket_connections_stable'], (
-            MISSION CRITICAL: WebSocket connections unstable. "
-            "Real-time functionality is essential for user experience.
+            MISSION CRITICAL: WebSocket connections unstable. 
+            Real-time functionality is essential for user experience."
         )
         
         assert len(business_critical_failures) == 0, (
             fMISSION CRITICAL: {len(business_critical_failures)} business value failures. "
-            f"$500K+ ARR functionality compromised: {business_critical_failures}
+            f$500K+ ARR functionality compromised: {business_critical_failures}
         )
     
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_websocket_ssot_import_migration_completion(self):
-        ""
+        "
         MUST PASS: WebSocket SSOT import migration completion validation.
         
         Validates that all 25+ identified files have completed migration
         to SSOT import patterns and no deprecated imports remain.
-        "
-        logger.info("MISSION CRITICAL: Validating WebSocket SSOT import migration completion)
+"
+        logger.info(MISSION CRITICAL: Validating WebSocket SSOT import migration completion)"
         
         import os
         import re
@@ -355,16 +355,16 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
         
         # Priority files that were identified in Issue #1100
         priority_files = [
-            "netra_backend/app/agents/supervisor/agent_instance_factory.py,
-            netra_backend/app/agents/tool_executor_factory.py",
-            "netra_backend/app/services/agent_websocket_bridge.py
+            netra_backend/app/agents/supervisor/agent_instance_factory.py,
+            netra_backend/app/agents/tool_executor_factory.py","
+            netra_backend/app/services/agent_websocket_bridge.py
         ]
         
         # Deprecated patterns that must not exist
         deprecated_patterns = [
-            rfrom\s+netra_backend\.app\.websocket_core\.websocket_manager_factory\s+import",
+            rfrom\s+netra_backend\.app\.websocket_core\.websocket_manager_factory\s+import,"
             r"import\s+netra_backend\.app\.websocket_core\.websocket_manager_factory,
-            rwebsocket_manager_factory\."
+            rwebsocket_manager_factory\.
         ]
         
         try:
@@ -372,8 +372,8 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
             app_dir = project_root / "netra_backend / app"
             
             if app_dir.exists():
-                for py_file in app_dir.rglob("*.py):
-                    if __pycache__" not in str(py_file) and "test_ not in py_file.name:
+                for py_file in app_dir.rglob(*.py):
+                    if __pycache__ not in str(py_file) and "test_ not in py_file.name:
                         migration_status['files_scanned'] += 1
                         
                         try:
@@ -419,7 +419,7 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
             logger.error(fMISSION CRITICAL: Import migration scan failed: {e}")
             migration_status['scan_error'] = str(e)
         
-        logger.info(f"Migration status: {migration_status})
+        logger.info(fMigration status: {migration_status})
         
         # These assertions ensure SSOT migration completion
         assert migration_status['files_scanned'] > 0, (
@@ -428,23 +428,23 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
         )
         
         assert migration_status['deprecated_imports_found'] == 0, (
-            fMISSION CRITICAL: {migration_status['deprecated_imports_found']} deprecated imports found. "
+            fMISSION CRITICAL: {migration_status['deprecated_imports_found']} deprecated imports found. 
             f"SSOT migration incomplete. Violations: {migration_status['violation_files']}
         )
         
         assert migration_status['migration_complete'], (
             fMISSION CRITICAL: WebSocket SSOT import migration not complete. "
-            f"Files scanned: {migration_status['files_scanned']}, 
+            fFiles scanned: {migration_status['files_scanned']}, 
             fDeprecated imports: {migration_status['deprecated_imports_found']}"
         )
     
     async def _test_websocket_connection_stability(self) -> Dict[str, Any]:
-        "
+    "
         Test WebSocket connection stability.
         
         Returns:
             Connection stability test results
-        ""
+        "
         stability_result = {
             'stable': False,
             'connection_attempts': 0,
@@ -478,12 +478,12 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
         return stability_result
     
     async def _test_user_experience_preservation(self) -> Dict[str, Any]:
-        "
+    "
         Test user experience preservation during migration.
         
         Returns:
             User experience test results
-        ""
+        "
         ux_result = {
             'preserved': False,
             'response_quality': False,
@@ -494,8 +494,8 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
         try:
             # Test agent response quality
             agent_result = await self.execute_agent_with_monitoring(
-                agent=triage_agent",
-                message="UX test: provide helpful response,
+                agent=triage_agent,
+                message="UX test: provide helpful response,"
                 timeout=30
             )
             
@@ -521,7 +521,7 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
             ux_result['preserved'] = ux_indicators_passed >= 2  # At least 2 of 3 indicators
             
         except Exception as e:
-            logger.warning(fUser experience test error: {e}")
+            logger.warning(fUser experience test error: {e}")"
             ux_result['error'] = str(e)
         
         return ux_result

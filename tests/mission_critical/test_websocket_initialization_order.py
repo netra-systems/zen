@@ -1,23 +1,23 @@
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.""
+    "Real WebSocket connection for testing instead of mocks.
     def __init__(self):
         pass
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.
         if self._closed:
-            raise RuntimeError("WebSocket is closed)
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):
-        "Close WebSocket connection.""
+        Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
     async def get_messages(self) -> list:
-        ""Get all sent messages."
+        Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
         '''
@@ -61,9 +61,9 @@ class TestWebSocketConnection:
         from netra_backend.app.clients.auth_client_core import AuthServiceClient
         from shared.isolated_environment import get_env
 class TestWebSocketInitializationOrder(SSotAsyncTestCase):
-        "Test suite to prevent WebSocket initialization order regression."
+        Test suite to prevent WebSocket initialization order regression.
     def setUp(self):
-        ""Set up test fixtures.""
+        ""Set up test fixtures.
         self.db_session = AsyncMock(spec=AsyncSession)
         self.llm_manager = Mock(spec=LLMManager)
         self.tool_dispatcher = Mock(spec=ToolDispatcher)
@@ -99,7 +99,7 @@ class TestWebSocketInitializationOrder(SSotAsyncTestCase):
     def test_all_agents_receive_websocket_manager(self):
         '''
         Test that ALL registered agents receive the WebSocket manager.
-        This ensures the fix results in "WebSocket manager set for 8/8 agents".
+        This ensures the fix results in WebSocket manager set for 8/8 agents".
         '''
         pass
     # Create real supervisor to test actual behavior
@@ -120,7 +120,7 @@ class TestWebSocketInitializationOrder(SSotAsyncTestCase):
         # Check if agent has websocket_manager attribute
         if hasattr(agent, 'websocket_manager'):
         self.assertIsNotNone(agent.websocket_manager,
-        "")
+        ")
         self.assertEqual(agent.websocket_manager, self.websocket_manager,
         formatted_string)
     def test_websocket_manager_not_set_before_registration(self):
@@ -210,7 +210,7 @@ class TestWebSocketInitializationOrder(SSotAsyncTestCase):
         websocket_manager=self.websocket_manager
     
     # Verify all critical components exist
-        self.assertIsNotNone(supervisor.registry, "Registry not initialized!")
+        self.assertIsNotNone(supervisor.registry, Registry not initialized!)
         self.assertIsNotNone(supervisor.engine, ExecutionEngine not initialized!)
         self.assertIsNotNone(supervisor.pipeline_executor, "PipelineExecutor not initialized!")
     # Verify alias for backward compatibility
@@ -219,7 +219,7 @@ class TestWebSocketInitializationOrder(SSotAsyncTestCase):
     def test_agent_count_after_initialization(self):
         '''
         Test that the expected number of agents are registered.
-        The fix should result in "WebSocket manager set for 8/8 agents".
+        The fix should result in WebSocket manager set for 8/8 agents.
         '''
         pass
         supervisor = SupervisorAgent( )
@@ -234,7 +234,7 @@ class TestWebSocketInitializationOrder(SSotAsyncTestCase):
         self.assertGreaterEqual(agent_count, 8,
         formatted_string)
     # Log the actual agents for debugging
-        print("")
+        print(")
         print(formatted_string)
     def test_websocket_manager_propagation_to_agents(self):
         '''
@@ -259,18 +259,18 @@ class TestWebSocketInitializationOrder(SSotAsyncTestCase):
         else:
         agents_without_ws_manager.append(agent_name)
                 # All agents should have WebSocket manager
-        self.assertEqual(len(agents_without_ws_manager), 0,
-        f"These agents don"t have WebSocket manager: {agents_without_ws_manager})
+        self.assertEqual(len(agents_without_ws_manager"), 0,
+        fThese agents dont have WebSocket manager: {agents_without_ws_manager})
                 # Verify count matches expected
         total_agents = len(agents_with_ws_manager)
-        print(formatted_string")
-                # The fix ensures this is "8/8 not 0/0"
+        print(formatted_string)"
+                # The fix ensures this is "8/8 not 0/0
         self.assertGreater(total_agents, 0,
-        "CRITICAL: No agents have WebSocket manager! The bug has regressed!)
+        CRITICAL: No agents have WebSocket manager! The bug has regressed!)
 class TestInitializationRaceConditions(SSotAsyncTestCase):
-        ""Test for potential race conditions in initialization."
+        ""Test for potential race conditions in initialization.
     def setUp(self):
-        "Set up test fixtures.""
+        Set up test fixtures.""
         self.db_session = AsyncMock(spec=AsyncSession)
         self.llm_manager = Mock(spec=LLMManager)
         self.tool_dispatcher = Mock(spec=ToolDispatcher)
@@ -301,7 +301,7 @@ class TestInitializationRaceConditions(SSotAsyncTestCase):
         for supervisor in supervisors:
         agents = supervisor.registry.agents
         self.assertGreater(len(agents), 0,
-        Concurrent initialization failed to register agents!")
+        Concurrent initialization failed to register agents!)
         # Run the async test
         asyncio.run(run_concurrent())
     def test_reinitialization_preserves_order(self):
@@ -327,9 +327,9 @@ class TestInitializationRaceConditions(SSotAsyncTestCase):
     # Verify agents still exist and have new WebSocket manager
         final_agents = len(supervisor.registry.agents)
         self.assertEqual(initial_agents, final_agents,
-        "Reinitialization changed agent count!)
+        "Reinitialization changed agent count!)"
     def run_tests():
-        ""Run all tests and report results."
+        Run all tests and report results."
     # Create test suite
         loader = unittest.TestLoader()
         suite = unittest.TestSuite()
@@ -341,26 +341,26 @@ class TestInitializationRaceConditions(SSotAsyncTestCase):
         result = runner.run(suite)
     # Report summary
         print(")
-         + "="*70)
+         + ="*70)
         print(WEBSOCKET INITIALIZATION ORDER TEST RESULTS)
-        print("="*70)
+        print("=*70)
         print(formatted_string)
-        print("")
+        print(")
         print(formatted_string)
-        if result.wasSuccessful():
-        print("")
+        if result.wasSuccessful("):
+        print()
         [SUCCESS] ALL TESTS PASSED - WebSocket initialization order is correct!)
         else:
-        print(")
-        [FAILED] TESTS FAILED - WebSocket initialization order bug may have regressed!")
+        print("")
+        [FAILED] TESTS FAILED - WebSocket initialization order bug may have regressed!)
         if result.failures:
         print()
-        Failures:")
+        Failures:")"
         for test, trace in result.failures:
-        print("formatted_string)
+        print()"
         if result.errors:
         print(")
-        Errors:")
+        Errors:)"
         for test, trace in result.errors:
         print(formatted_string)
         await asyncio.sleep(0)

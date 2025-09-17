@@ -4,7 +4,7 @@ from test_framework.ssot.websocket_connection_test_utility import TestWebSocketC
 "
 Simplified WebSocket timing tests focusing on actual implementation.
 Tests critical timing scenarios with the real WebSocket manager.
-""
+"
 
 import asyncio
 import uuid
@@ -28,11 +28,11 @@ from shared.isolated_environment import get_env
 
 
 class WebSocketTimingSimpleTests:
-    ""Test critical WebSocket timing scenarios."
+    "Test critical WebSocket timing scenarios.
 
     @pytest.fixture
     async def setup(self):
-        "Setup test environment.""
+        "Setup test environment."
         manager = WebSocketManager()
         user_id = str(uuid.uuid4())
         run_id = str(uuid.uuid4())
@@ -50,7 +50,7 @@ class WebSocketTimingSimpleTests:
 
     @pytest.mark.asyncio
     async def test_connection_and_message_flow(self, setup):
-        ""Test basic connection and message flow."
+        "Test basic connection and message flow."
         manager = setup['manager']
         mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.websocket = TestWebSocketConnection()
@@ -77,7 +77,7 @@ class WebSocketTimingSimpleTests:
 
     @pytest.mark.asyncio
     async def test_message_with_thread_context(self, setup):
-        "Test message with thread context.""
+        Test message with thread context.""
         manager = setup['manager']
         mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.websocket = TestWebSocketConnection()
@@ -109,7 +109,7 @@ class WebSocketTimingSimpleTests:
 
     @pytest.mark.asyncio
     async def test_multiple_connections(self, setup):
-        ""Test handling multiple connections."
+        Test handling multiple connections."
         manager = setup['manager']
         
         connections = []
@@ -145,7 +145,7 @@ class WebSocketTimingSimpleTests:
 
     @pytest.mark.asyncio
     async def test_disconnect_and_cleanup(self, setup):
-        "Test disconnection and cleanup.""
+        "Test disconnection and cleanup.
         manager = setup['manager']
         mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.websocket = TestWebSocketConnection()
@@ -158,7 +158,7 @@ class WebSocketTimingSimpleTests:
             thread_id=setup['thread_id']
         
         # Disconnect
-        await manager.disconnect_user(setup['user_id'], mock_ws, 1000, Test disconnect")
+        await manager.disconnect_user(setup['user_id'], mock_ws, 1000, Test disconnect")"
         
         # Try to send - should handle gracefully
         result = await manager.send_to_user(setup['user_id'], {

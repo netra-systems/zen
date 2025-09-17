@@ -8,7 +8,7 @@ CRITICAL REQUIREMENTS:
 3. User must not see any auth errors or disconnections
 4. Token refresh must complete within 2 seconds
 5. New token must be used for subsequent API calls
-""
+"
 
 import asyncio
 import json
@@ -38,7 +38,7 @@ from shared.isolated_environment import get_env
 
 
 class TokenRefreshTestScenarios:
-    ""Test scenarios for token refresh during active chat."
+    "Test scenarios for token refresh during active chat.
     
     async def __init__(self):
         self.auth_manager = AuthJWTTestManager()
@@ -48,52 +48,52 @@ class TokenRefreshTestScenarios:
         self.config = get_configuration()
         
     async def setup(self):
-        "Setup test environment.""
+        "Setup test environment."
         await self.service_manager.start_services()
         
     async def teardown(self):
-        ""Cleanup test environment."
+        "Cleanup test environment."
         await self.service_manager.stop_services()
         
     async def create_expiring_token(self, expires_in_seconds: int = 30) -> str:
-        "Create a token that expires soon via SSOT auth service.""
+        Create a token that expires soon via SSOT auth service.""
         # Use SSOT auth helper to create token via auth service
         user_data = await self.ssot_auth_helper.create_test_user_with_token(
-            email=test@example.com", 
-            user_id="test_user_123,
-            permissions=[chat", "agent:run],
+            email=test@example.com, 
+            user_id=test_user_123,"
+            permissions=[chat", agent:run],
             expires_in=expires_in_seconds
         )
-        return user_data[access_token"]
+        return user_data[access_token]
     
     async def create_refreshed_token(self, original_token: str) -> str:
-        "Create a refreshed version of a token via SSOT auth service.""
+        "Create a refreshed version of a token via SSOT auth service."
         # Use auth service to refresh token instead of direct JWT operations
         return await self.ssot_auth_helper.refresh_token_via_service(original_token)
         
     async def validate_token_transition(self, old_token: str, new_token: str) -> bool:
-        ""Validate that token transition preserves user identity via SSOT auth service."
+        "Validate that token transition preserves user identity via SSOT auth service."
         # Use auth service to validate tokens instead of direct JWT operations
         old_validation = await self.ssot_auth_helper.validate_token_via_service(old_token)
         new_validation = await self.ssot_auth_helper.validate_token_via_service(new_token)
         
         # Validate both tokens are valid and from same user
-        if not old_validation.get("valid) or not new_validation.get(valid"):
+        if not old_validation.get(valid) or not new_validation.get(valid):
             return False
             
         # User identity must remain same (check via auth service response)
-        old_user_id = old_validation.get("user_id)
-        new_user_id = new_validation.get(user_id")
+        old_user_id = old_validation.get("user_id)"
+        new_user_id = new_validation.get(user_id)
         
         return old_user_id == new_user_id and old_user_id is not None
 
 
 @pytest.mark.asyncio
 class TokenRefreshDuringActiveChatTests:
-    "Test token refresh during active WebSocket chat sessions.""
+    Test token refresh during active WebSocket chat sessions.""
     
     async def test_seamless_token_refresh_mid_conversation(self):
-        ""Test that token refresh doesn't interrupt active conversation."
+        Test that token refresh doesn't interrupt active conversation.""
         scenarios = TokenRefreshTestScenarios()
         await scenarios.setup()
         
@@ -102,7 +102,7 @@ class TokenRefreshDuringActiveChatTests:
             initial_token = await scenarios.create_expiring_token(30)
             
             # Establish WebSocket connection
-            ws_url = f"ws://localhost:8000/ws?token={initial_token}
+            ws_url = fws://localhost:8000/ws?token={initial_token}
             
             events_received = []
             refresh_completed = False
@@ -110,17 +110,17 @@ class TokenRefreshDuringActiveChatTests:
             async with websockets.connect(ws_url) as websocket:
                 # Start agent execution
                 await websocket.send(json.dumps({
-                    type": "agent_start,
+                    type: agent_start,
                     agent_name": "test_agent,
-                    task": "Process data
+                    task: Process data
                 })
                 
                 # Simulate ongoing agent work
                 for i in range(10):
                     # Send agent progress events
                     await websocket.send(json.dumps({
-                        type": "agent_thinking,
-                        content": f"Processing step {i+1}/10
+                        type: "agent_thinking,
+                        content": fProcessing step {i+1}/10
                     })
                     
                     # Receive acknowledgment
@@ -134,8 +134,8 @@ class TokenRefreshDuringActiveChatTests:
                         
                         # Send token refresh notification
                         await websocket.send(json.dumps({
-                            type": "token_refresh,
-                            new_token": new_token
+                            type: token_refresh,
+                            new_token: new_token"
                         })
                         
                         # Validate token transition
@@ -146,8 +146,8 @@ class TokenRefreshDuringActiveChatTests:
                 
                 # Complete agent execution
                 await websocket.send(json.dumps({
-                    "type: agent_completed",
-                    "result: Task completed successfully"
+                    "type: agent_completed,
+                    result: Task completed successfully
                 })
                 
                 # Verify all events received
@@ -158,7 +158,7 @@ class TokenRefreshDuringActiveChatTests:
             await scenarios.teardown()
     
     async def test_token_refresh_with_concurrent_api_calls(self):
-        "Test token refresh while making concurrent API calls.""
+        "Test token refresh while making concurrent API calls."
         scenarios = TokenRefreshTestScenarios()
         await scenarios.setup()
         
@@ -167,14 +167,14 @@ class TokenRefreshDuringActiveChatTests:
             client = TestClient(app)
             
             async def make_api_call(token: str, endpoint: str) -> Dict:
-                ""Make an API call with the given token."
-                headers = {"Authorization: fBearer {token}"}
+                "Make an API call with the given token."
+                headers = {Authorization: fBearer {token}}
                 response = client.get(endpoint, headers=headers)
                 return {"status: response.status_code, data": response.json()}
             
             # Start multiple concurrent API calls
             api_tasks = []
-            endpoints = ["/api/user/profile, /api/agents/list", "/api/chat/history]
+            endpoints = [/api/user/profile, /api/agents/list, /api/chat/history]"
             
             for endpoint in endpoints:
                 task = asyncio.create_task(make_api_call(initial_token, endpoint))
@@ -188,7 +188,7 @@ class TokenRefreshDuringActiveChatTests:
             with patch.object(auth_client, 'validate_token_jwt', new_callable=AsyncMock) as mock_validate:
                 mock_validate.return_value = {
                     valid": True,
-                    "user_id: test_user_123",
+                    user_id: test_user_123,
                     "email: test@example.com"
                 }
                 
@@ -198,13 +198,13 @@ class TokenRefreshDuringActiveChatTests:
                 # Verify no auth failures
                 for result in results:
                     if isinstance(result, dict):
-                        assert result["status] in [200, 201]
+                        assert result[status] in [200, 201]
                     
         finally:
             await scenarios.teardown()
     
     async def test_token_refresh_recovery_from_network_failure(self):
-        ""Test token refresh recovery when network temporarily fails."
+        "Test token refresh recovery when network temporarily fails."
         scenarios = TokenRefreshTestScenarios()
         await scenarios.setup()
         
@@ -213,20 +213,20 @@ class TokenRefreshDuringActiveChatTests:
             refresh_attempts = []
             
             async def simulate_network_failure_recovery():
-                "Simulate network failure then recovery.""
+                Simulate network failure then recovery.""
                 await asyncio.sleep(0.5)
-                # Network fails"
-                refresh_attempts.append({"status: failed", "time: time.time()}
+                # Network fails
+                refresh_attempts.append({status: failed, "time: time.time()}"
                 
                 await asyncio.sleep(1.0)
-                # Network recovers"
-                refresh_attempts.append({"status: recovered", "time: time.time()}
+                # Network recovers
+                refresh_attempts.append({status: recovered, "time: time.time()}"
                 
                 # Successful refresh
                 new_token = await scenarios.create_refreshed_token(initial_token)
                 refresh_attempts.append({
-                    status": "success,
-                    time": time.time(),
+                    status: success,
+                    time: time.time(),"
                     "new_token: new_token
                 }
                 return new_token
@@ -246,19 +246,19 @@ class TokenRefreshDuringActiveChatTests:
             # Verify recovery succeeded
             assert refresh_token is not None
             assert len(refresh_attempts) >= 2
-            assert refresh_attempts[-1][status"] == "success
+            assert refresh_attempts[-1][status] == success
             
         finally:
             await scenarios.teardown()
     
     async def test_websocket_event_continuity_during_refresh(self):
-        ""Test that WebSocket events continue flowing during token refresh."
+        ""Test that WebSocket events continue flowing during token refresh.
         scenarios = TokenRefreshTestScenarios()
         await scenarios.setup()
         
         try:
             initial_token = await scenarios.create_expiring_token(60)
-            ws_url = f"ws://localhost:8000/ws?token={initial_token}
+            ws_url = fws://localhost:8000/ws?token={initial_token}
             
             event_timeline = []
             refresh_start_time = None
@@ -280,7 +280,7 @@ class TokenRefreshDuringActiveChatTests:
                 
                 await websocket.send(json.dumps({
                     type": "token_refresh,
-                    new_token": new_token
+                    new_token: new_token
                 })
                 
                 refresh_end_time = time.time()
@@ -296,7 +296,7 @@ class TokenRefreshDuringActiveChatTests:
                 refresh_duration = refresh_end_time - refresh_start_time
                 events_during_refresh = [
                     e for e in event_timeline
-                    if refresh_start_time <= e["timestamp] <= refresh_end_time
+                    if refresh_start_time <= e[timestamp] <= refresh_end_time"
                 ]
                 
                 # Verify no interruption
@@ -305,39 +305,39 @@ class TokenRefreshDuringActiveChatTests:
                 
                 # Check for gaps in event sequence
                 for i in range(1, len(event_timeline)):
-                    time_gap = event_timeline[i][timestamp"] - event_timeline[i-1]["timestamp]
+                    time_gap = event_timeline[i][timestamp"] - event_timeline[i-1][timestamp]
                     assert time_gap < 0.5  # No gaps larger than 500ms
                     
         finally:
             await scenarios.teardown()
     
     async def _continuous_event_sender(self, websocket, event_timeline: List):
-        ""Send continuous events to simulate active agent."
+        Send continuous events to simulate active agent.""
         sequence = 0
         while True:
             await websocket.send(json.dumps({
-                "type: agent_thinking",
-                "sequence: sequence,
+                type: agent_thinking,
+                sequence: sequence,"
                 timestamp": time.time()
             })
             event_timeline.append({
-                "type: sent",
-                "sequence: sequence,
-                timestamp": time.time()
+                type: sent,
+                "sequence: sequence,"
+                timestamp: time.time()
             }
             sequence += 1
             await asyncio.sleep(0.1)
     
     async def _event_monitor(self, websocket, event_timeline: List):
-        "Monitor received events.""
+        Monitor received events.""
         while True:
             try:
                 message = await websocket.recv()
                 event = json.loads(message)
                 event_timeline.append({
-                    type": "received,
-                    data": event,
-                    "timestamp: time.time()
+                    type: received,
+                    data": event,"
+                    timestamp: time.time()
                 }
             except Exception as e:
                 break
@@ -345,10 +345,10 @@ class TokenRefreshDuringActiveChatTests:
 
 @pytest.mark.asyncio
 class TokenRefreshRaceConditionsTests:
-    ""Test race conditions during token refresh."
+    "Test race conditions during token refresh."
     
     async def test_simultaneous_refresh_requests(self):
-        "Test handling of simultaneous token refresh requests.""
+        Test handling of simultaneous token refresh requests.""
         scenarios = TokenRefreshTestScenarios()
         await scenarios.setup()
         
@@ -357,7 +357,7 @@ class TokenRefreshRaceConditionsTests:
             
             # Create multiple refresh tasks
             async def attempt_refresh(token: str, id: int) -> Dict:
-                ""Attempt to refresh token."
+                Attempt to refresh token."
                 start_time = time.time()
                 
                 # Simulate refresh API call
@@ -367,9 +367,9 @@ class TokenRefreshRaceConditionsTests:
                 
                 return {
                     "id: id,
-                    start_time": start_time,
-                    "end_time: time.time(),
-                    new_token": new_token
+                    start_time: start_time,
+                    "end_time: time.time(),"
+                    new_token: new_token
                 }
             
             # Launch 10 simultaneous refresh attempts
@@ -381,14 +381,14 @@ class TokenRefreshRaceConditionsTests:
             results = await asyncio.gather(*refresh_tasks)
             
             # Verify only one refresh succeeded (or all got same token)
-            unique_tokens = set(r["new_token] for r in results)
+            unique_tokens = set(r[new_token] for r in results)"
             assert len(unique_tokens) == 1  # All should get same refreshed token
             
         finally:
             await scenarios.teardown()
     
     async def test_refresh_during_logout(self):
-        ""Test token refresh attempt during logout process."
+        "Test token refresh attempt during logout process.
         scenarios = TokenRefreshTestScenarios()
         await scenarios.setup()
         
@@ -399,20 +399,20 @@ class TokenRefreshRaceConditionsTests:
             refresh_attempted = False
             
             async def attempt_logout():
-                "Attempt logout.""
+                "Attempt logout."
                 nonlocal logout_started
                 logout_started = True
                 await asyncio.sleep(0.5)  # Simulate logout processing
-                return {status": "logged_out}
+                return {status: "logged_out}
             
             async def attempt_refresh():
-                ""Attempt token refresh."
+                "Attempt token refresh.
                 nonlocal refresh_attempted
                 await asyncio.sleep(0.1)  # Small delay
                 refresh_attempted = True
                 
                 if logout_started:
-                    raise Exception("Cannot refresh - logout in progress)
+                    raise Exception("Cannot refresh - logout in progress)"
                 
                 return await scenarios.create_refreshed_token(initial_token)
             
@@ -434,10 +434,10 @@ class TokenRefreshRaceConditionsTests:
 
 @pytest.mark.asyncio
 class TokenRefreshPerformanceTests:
-    ""Test performance characteristics of token refresh."
+    Test performance characteristics of token refresh."
     
     async def test_refresh_latency_under_load(self):
-        "Test token refresh latency under heavy load.""
+        "Test token refresh latency under heavy load.
         scenarios = TokenRefreshTestScenarios()
         await scenarios.setup()
         
@@ -451,7 +451,7 @@ class TokenRefreshPerformanceTests:
             refresh_latencies = []
             
             async def measure_refresh_latency(token: str) -> float:
-                ""Measure refresh latency."
+                ""Measure refresh latency.
                 start = time.time()
                 new_token = await scenarios.create_refreshed_token(token)
                 latency = time.time() - start
@@ -471,13 +471,13 @@ class TokenRefreshPerformanceTests:
             assert p95_latency < 0.5  # 95th percentile under 500ms
             assert max_latency < 2.0  # Max under 2 seconds
             
-            print(f"Refresh Performance: Avg={avg_latency:.3f}s, P95={p95_latency:.3f}s, Max={max_latency:.3f}s)
+            print(fRefresh Performance: Avg={avg_latency:.3f}s, P95={p95_latency:.3f}s, Max={max_latency:.3f}s)
             
         finally:
             await scenarios.teardown()
     
-    async def test_refresh_with_websocket_message_flood(self):
-        ""Test token refresh while handling WebSocket message flood."
+    async def test_refresh_with_websocket_message_flood(self"):
+        "Test token refresh while handling WebSocket message flood.
         scenarios = TokenRefreshTestScenarios()
         await scenarios.setup()
         
@@ -492,18 +492,18 @@ class TokenRefreshPerformanceTests:
             async with websockets.connect(ws_url) as websocket:
                 
                 async def flood_messages():
-                    ""Send rapid messages."
+                    "Send rapid messages.
                     nonlocal messages_sent
                     for i in range(1000):
                         await websocket.send(json.dumps({
                             "type: ping",
-                            "id: i
+                            id: i
                         })
                         messages_sent += 1
                         await asyncio.sleep(0.001)  # 1ms between messages
                 
                 async def receive_messages():
-                    ""Receive messages."
+                    "Receive messages."
                     nonlocal messages_received
                     while messages_received < 900:  # Stop before all sent
                         try:
@@ -513,7 +513,7 @@ class TokenRefreshPerformanceTests:
                             continue
                 
                 async def refresh_token():
-                    "Refresh token mid-flood.""
+                    Refresh token mid-flood.""
                     nonlocal refresh_completed
                     await asyncio.sleep(0.5)  # Wait for flood to start
                     
@@ -521,8 +521,8 @@ class TokenRefreshPerformanceTests:
                     new_token = await scenarios.create_refreshed_token(initial_token)
                     
                     await websocket.send(json.dumps({
-                        type": "token_refresh,
-                        new_token": new_token
+                        type: token_refresh,
+                        new_token: new_token"
                     })
                     
                     refresh_duration = time.time() - start_time
@@ -555,17 +555,17 @@ if __name__ == "__main__:
     # Run specific test scenarios
     import sys
     
-    test_suite = sys.argv[1] if len(sys.argv) > 1 else all"
+    test_suite = sys.argv[1] if len(sys.argv) > 1 else all
     
-    if test_suite == "seamless:
+    if test_suite == "seamless:"
         asyncio.run(TokenRefreshDuringActiveChatTests().test_seamless_token_refresh_mid_conversation())
-    elif test_suite == concurrent":
+    elif test_suite == concurrent:
         asyncio.run(TokenRefreshDuringActiveChatTests().test_token_refresh_with_concurrent_api_calls())
-    elif test_suite == "race:
+    elif test_suite == race:"
         asyncio.run(TokenRefreshRaceConditionsTests().test_simultaneous_refresh_requests())
     elif test_suite == performance":
         asyncio.run(TokenRefreshPerformanceTests().test_refresh_latency_under_load())
     else:
         # Run all tests
-        print("Please use: python tests/unified_test_runner.py --category mission_critical)
-        print(For more info: reports/TEST_EXECUTION_GUIDE.md")
+        print(Please use: python tests/unified_test_runner.py --category mission_critical)"
+        print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"

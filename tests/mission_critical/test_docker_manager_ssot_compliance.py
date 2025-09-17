@@ -16,7 +16,7 @@ EXPECTED CURRENT STATE: These tests will FAIL, proving the SSOT violation exists
 EXPECTED AFTER REMEDIATION: These tests will PASS, proving SSOT compliance.
 
 Business Impact: Protects $500K+ ARR Golden Path functionality by ensuring real services.
-""
+"
 
 # CRITICAL: Import path configuration for direct test execution
 # Ensures tests work both directly and through unified_test_runner.py
@@ -46,27 +46,27 @@ env = get_env()
 
 
 class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
-    ""
+    "
     Test suite to prove Docker Manager SSOT violation and validate fix.
 
     These tests DELIBERATELY FAIL to prove the violation exists.
     After remediation, they will PASS to prove SSOT compliance.
-    "
+"
 
     def setup_method(self, method):
-        "Set up test environment with SSOT compliance checking.""
+        "Set up test environment with SSOT compliance checking.
         super().setup_method(method)
-        self.project_root = Path(/c/GitHub/netra-apex")
-        self.mock_docker_manager_path = self.project_root / "test_framework / docker" / "unified_docker_manager.py
-        self.real_docker_manager_path = self.project_root / test_framework" / "unified_docker_manager.py
+        self.project_root = Path(/c/GitHub/netra-apex")"
+        self.mock_docker_manager_path = self.project_root / test_framework / docker / unified_docker_manager.py"
+        self.real_docker_manager_path = self.project_root / test_framework" / unified_docker_manager.py
 
     def test_ssot_violation_exists_duplicate_docker_managers(self):
-        ""
+        
         PROVES SSOT VIOLATION: Multiple Docker Manager implementations exist.
 
         CURRENT EXPECTATION: FAIL - Mock and real implementations both exist
         POST-REMEDIATION: PASS - Only real implementation exists
-        "
+""
         # Check if mock Docker Manager exists (violation)
         mock_exists = self.mock_docker_manager_path.exists()
         real_exists = self.real_docker_manager_path.exists()
@@ -74,20 +74,20 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
         # This test FAILS if both exist (proving violation)
         # Expected: This assertion will FAIL, proving SSOT violation exists
         assert not (mock_exists and real_exists), \
-               f"SSOT VIOLATION DETECTED:\n \
-               fMock Docker Manager: {self.mock_docker_manager_path} (exists: {mock_exists}\n" \
+               fSSOT VIOLATION DETECTED:\n \
+               fMock Docker Manager: {self.mock_docker_manager_path} (exists: {mock_exists}\n \"
                f"Real Docker Manager: {self.real_docker_manager_path} (exists: {real_exists}\n \
-               fExpected: Only real implementation should exist - This FAILURE proves violation exists"
+               fExpected: Only real implementation should exist - This FAILURE proves violation exists
 
     def test_ssot_violation_mock_docker_manager_has_mock_implementations(self):
-        "
+    ""
         PROVES VIOLATION: Mock Docker Manager contains MagicMock/AsyncMock implementations.
 
         CURRENT EXPECTATION: FAIL - Mock implementations detected
         POST-REMEDIATION: N/A - Mock file should not exist
-        ""
+        
         if not self.mock_docker_manager_path.exists():
-            self.skipTest(Mock Docker Manager file does not exist - already remediated")
+            self.skipTest(Mock Docker Manager file does not exist - already remediated)"
 
         # Parse the mock Docker Manager file
         with open(self.mock_docker_manager_path, 'r') as f:
@@ -96,10 +96,10 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
         # Check for mock implementations (violation indicators)
         mock_indicators = [
             "MagicMock,
-            AsyncMock",
-            "Mock,
-            mock_docker_manager",
-            "Mock Docker manager
+            AsyncMock,
+            "Mock,"
+            mock_docker_manager,
+            Mock Docker manager"
         ]
 
         found_mocks = [indicator for indicator in mock_indicators if indicator in content]
@@ -107,19 +107,19 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
         # This test FAILS if mock implementations are found (proving violation)
         assert found_mocks != [], \
                fSSOT VIOLATION: Mock implementations found in Docker Manager: {found_mocks}\n" \
-               f"This proves the violation exists - tests are using mock instead of real services
+               fThis proves the violation exists - tests are using mock instead of real services
 
     def test_ssot_violation_tests_import_mock_docker_manager(self):
-        ""
+        "
         PROVES VIOLATION: Tests import from test_framework.docker.unified_docker_manager (mock).
 
         CURRENT EXPECTATION: FAIL - Mock imports found in test files
         POST-REMEDIATION: PASS - No mock imports exist
-        "
+"
         # Find all Python files in tests directory
         test_files = []
         for root, _, files in os.walk(self.project_root):
-            if "test in root.lower():
+            if test in root.lower():"
                 for file in files:
                     if file.endswith('.py'):
                         test_files.append(Path(root) / file)
@@ -138,12 +138,12 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
 
         # This test FAILS if mock imports are found (proving violation)
         assert mock_import_files != [], \
-               f"SSOT VIOLATION: {len(mock_import_files)} test files import mock Docker Manager:\n + \
-               \n".join(mock_import_files[:10] + \
-               (f"\n... and {len(mock_import_files) - 10} more if len(mock_import_files) > 10 else ")
+               fSSOT VIOLATION: {len(mock_import_files)} test files import mock Docker Manager:\n + \
+               \n.join(mock_import_files[:10] + \"
+               (f"\n... and {len(mock_import_files) - 10} more if len(mock_import_files) > 10 else )
 
     def test_golden_path_functionality_mock_vs_real_docker_manager(self):
-        "
+
         VALIDATES GOLDEN PATH: Real Docker Manager provides actual service connections.
 
         CURRENT EXPECTATION: FAIL - Mock provides fake functionality
@@ -155,7 +155,7 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
 
         # Import mock Docker Manager (if it exists)
         try:
-            mock_module_path = test_framework.docker.unified_docker_manager"
+            mock_module_path = test_framework.docker.unified_docker_manager
             if mock_module_path in sys.modules:
                 del sys.modules[mock_module_path]
             mock_module = importlib.import_module(mock_module_path)
@@ -165,7 +165,7 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
 
         # Import real Docker Manager
         try:
-            real_module_path = "test_framework.unified_docker_manager
+            real_module_path = test_framework.unified_docker_manager"
             if real_module_path in sys.modules:
                 del sys.modules[real_module_path]
             real_module = importlib.import_module(real_module_path)
@@ -174,7 +174,7 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
             self.fail(CRITICAL: Real Docker Manager cannot be imported - Golden Path broken!")
 
         if mock_manager is None:
-            self.skipTest("Mock Docker Manager not found - already remediated)
+            self.skipTest(Mock Docker Manager not found - already remediated)
 
         # Check if mock manager has MagicMock client (violation indicator)
         mock_has_magic_mock = isinstance(getattr(mock_manager, 'client', None), MagicMock)
@@ -185,18 +185,18 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
         # This test FAILS if mock is being used instead of real services
         # Expected: This assertion will FAIL, proving Golden Path violation exists
         assert mock_has_magic_mock and not real_has_actual_client, \
-               fGOLDEN PATH VIOLATION:\n" \
-               f"Mock manager has MagicMock client: {mock_has_magic_mock}\n \
-               fReal manager has actual client: {real_has_actual_client}\n" \
+               fGOLDEN PATH VIOLATION:\n" \"
+               fMock manager has MagicMock client: {mock_has_magic_mock}\n \
+               fReal manager has actual client: {real_has_actual_client}\n \
                f"Tests using mock instead of real services breaks $500K+ ARR functionality
 
     def test_ssot_compliance_only_one_docker_manager_implementation(self):
-        ""
+        "
         ENFORCES SSOT: Only one Docker Manager implementation should exist.
 
         CURRENT EXPECTATION: FAIL - Two implementations exist
         POST-REMEDIATION: PASS - Only real implementation exists
-        "
+"
         # Find all UnifiedDockerManager class definitions
         docker_manager_files = []
 
@@ -208,7 +208,7 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
                     try:
                         with open(file_path, 'r', encoding='utf-8') as f:
                             content = f.read()
-                            if class UnifiedDockerManager" in content:
+                            if class UnifiedDockerManager in content:
                                 docker_manager_files.append(str(file_path))
                     except (UnicodeDecodeError, PermissionError):
                         continue
@@ -223,15 +223,15 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
                \n".join(docker_manager_files)
 
     def test_import_consistency_all_imports_resolve_to_same_implementation(self):
-        "
+    "
         VALIDATES IMPORT CONSISTENCY: All Docker Manager imports resolve to same instance.
 
         CURRENT EXPECTATION: FAIL - Imports resolve to different implementations
         POST-REMEDIATION: PASS - All imports resolve to real implementation
-        ""
+        "
         import_paths = [
-            test_framework.unified_docker_manager",
-            "test_framework.docker.unified_docker_manager  # Should not exist after remediation
+            test_framework.unified_docker_manager,
+            "test_framework.docker.unified_docker_manager  # Should not exist after remediation"
         ]
 
         implementations = {}
@@ -249,7 +249,7 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
                     # Check if it's a real implementation (has real methods) vs mock
                     is_mock = any(
                         hasattr(manager_class, attr) and
-                        str(type(getattr(manager_class, attr))) == <class 'unittest.mock.MagicMock'>"
+                        str(type(getattr(manager_class, attr))) == <class 'unittest.mock.MagicMock'>
                         for attr in ['client']
                     implementations[import_path] = {
                         'class': manager_class,
@@ -269,18 +269,18 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
 
             # This test FAILS if both mock and real imports work (proving violation)
             assert len(mock_imports) != 0, \
-                   f"SSOT VIOLATION: Mock Docker Manager imports still working:\n \
-                   fMock imports: {mock_imports}\n" \
-                   f"Real imports: {real_imports}\n \
-                   fAll imports should resolve to real implementation only"
+                   fSSOT VIOLATION: Mock Docker Manager imports still working:\n \
+                   fMock imports: {mock_imports}\n" \"
+                   fReal imports: {real_imports}\n \
+                   fAll imports should resolve to real implementation only
 
     def test_golden_path_websocket_events_require_real_services(self):
-        "
+    ""
         VALIDATES GOLDEN PATH: WebSocket events require real Docker services for $500K+ ARR.
 
         CURRENT EXPECTATION: FAIL - Mock services cannot provide real WebSocket events
         POST-REMEDIATION: PASS - Real services enable Golden Path functionality
-        ""
+        
         # This test validates that Docker Manager enables real service connections
         # which are required for WebSocket events in Golden Path user flow
 
@@ -314,24 +314,24 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
 
             # This test FAILS if Golden Path functionality is mocked (proving violation)
             assert not golden_path_compatible, \
-                   fGOLDEN PATH VIOLATION: Docker Manager lacks real service capabilities:\n" \
-                   f"Methods that are mocks: {mock_method_count}/{len(required_real_methods)}\n \
-                   fMissing methods: {missing_methods}\n" \
+                   fGOLDEN PATH VIOLATION: Docker Manager lacks real service capabilities:\n" \"
+                   fMethods that are mocks: {mock_method_count}/{len(required_real_methods)}\n \
+                   fMissing methods: {missing_methods}\n \
                    f"Golden Path WebSocket events require real service connections for $500K+ ARR
 
         except ImportError as e:
             self.fail(fCRITICAL: Cannot import Docker Manager - Golden Path broken: {e}")
 
     def test_ssot_enforcement_prevents_future_regression(self):
-        "
+    "
         ENFORCES SSOT: Validates that SSOT patterns prevent future Docker Manager duplication.
 
         CURRENT EXPECTATION: FAIL - SSOT enforcement not active
         POST-REMEDIATION: PASS - SSOT patterns prevent regression
-        ""
+        "
         # Check that only the correct import path is documented/used
-        correct_import_path = test_framework.unified_docker_manager"
-        incorrect_import_path = "test_framework.docker.unified_docker_manager
+        correct_import_path = test_framework.unified_docker_manager
+        incorrect_import_path = "test_framework.docker.unified_docker_manager"
 
         # Verify the correct path works
         try:
@@ -352,31 +352,31 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
 
         # This test FAILS if SSOT is not enforced (proving violation exists)
         self.assertTrue(ssot_enforced,
-                       fSSOT ENFORCEMENT VIOLATION:\n"
-                       f"Correct import ({correct_import_path} works: {correct_import_works}\n
-                       fIncorrect import ({incorrect_import_path} works: {incorrect_import_works}\n"
-                       f"Expected: Only correct import should work (SSOT compliance))
+                       fSSOT ENFORCEMENT VIOLATION:\n
+                       fCorrect import ({correct_import_path} works: {correct_import_works}\n
+                       fIncorrect import ({incorrect_import_path} works: {incorrect_import_works}\n""
+                       fExpected: Only correct import should work (SSOT compliance))
 
 
 class DockerManagerMissionCriticalIntegrationTests(SSotBaseTestCase):
-    ""
+    
     Mission critical tests for Docker Manager SSOT compliance.
 
     These tests validate that Docker Manager SSOT compliance protects
     mission critical business functionality worth $500K+ ARR.
-    "
+""
 
     def setup_method(self, method):
-        "Set up mission critical test environment.""
+        Set up mission critical test environment.""
         super().setup_method(method)
 
     def test_mission_critical_websocket_events_require_real_docker_services(self):
-        ""
+        
         MISSION CRITICAL: WebSocket agent events require real Docker services.
 
         Business Impact: $500K+ ARR depends on WebSocket events working with real services.
         SSOT compliance ensures tests use real services, not mocks.
-        "
+""
         # This test validates the critical business requirement:
         # WebSocket agent events (agent_started, agent_thinking, tool_executing,
         # tool_completed, agent_completed) require real service connections
@@ -411,22 +411,22 @@ class DockerManagerMissionCriticalIntegrationTests(SSotBaseTestCase):
             mission_critical_compliance = len(methods_mocked) == 0
 
             self.assertTrue(mission_critical_compliance,
-                           f"MISSION CRITICAL VIOLATION: WebSocket functionality compromised:\n
-                           fReal methods available: {methods_available}\n"
+                           fMISSION CRITICAL VIOLATION: WebSocket functionality compromised:\n
+                           fReal methods available: {methods_available}\n
                            f"Methods mocked (VIOLATION): {methods_mocked}\n
                            fMethods missing: {methods_missing}\n"
-                           f"Business Impact: $500K+ ARR WebSocket events require real services)
+                           fBusiness Impact: $500K+ ARR WebSocket events require real services)
 
         except ImportError as e:
-            self.fail(fMISSION CRITICAL FAILURE: Docker Manager import failed: {e}")
+            self.fail(fMISSION CRITICAL FAILURE: Docker Manager import failed: {e})"
 
     def test_mission_critical_golden_path_service_integration(self):
-        "
+    "
         MISSION CRITICAL: Golden Path requires integrated service management.
 
         Validates that Docker Manager provides integrated service management
         required for the complete Golden Path user flow.
-        ""
+        "
         try:
             from test_framework.unified_docker_manager import UnifiedDockerManager
             manager = UnifiedDockerManager()
@@ -456,13 +456,13 @@ class DockerManagerMissionCriticalIntegrationTests(SSotBaseTestCase):
 
             self.assertTrue(golden_path_ready,
                            fGOLDEN PATH VIOLATION: Insufficient service integration:\n"
-                           f"Integration score: {integration_score}/{len(integration_requirements)}\n
+                           fIntegration score: {integration_score}/{len(integration_requirements)}\n
                            fMinimum required: {min_required_score}\n"
                            f"Missing integrations: {missing_integrations}\n
-                           fGolden Path user flow requires integrated service management")
+                           fGolden Path user flow requires integrated service management)
 
         except ImportError as e:
-            self.fail(f"GOLDEN PATH FAILURE: Service integration unavailable: {e}")
+            self.fail(fGOLDEN PATH FAILURE: Service integration unavailable: {e}")
 
 
 if __name__ == '__main__':

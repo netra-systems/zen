@@ -25,7 +25,7 @@ TEST DESIGN:
 - AFTER FIX: Tests PASS with successful connections showing SSOT remediation
 - REAL ENVIRONMENT: Executes against actual GCP staging infrastructure
 - COMPREHENSIVE: Validates complete golden path user experience
-""
+"
 import asyncio
 import json
 import time
@@ -40,10 +40,10 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.e2e
 class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
-    ""E2E tests for WebSocket 1011 SSOT remediation on GCP staging."
+    "E2E tests for WebSocket 1011 SSOT remediation on GCP staging.
 
     def setUp(self):
-        "Set up E2E testing environment for GCP staging.""
+        "Set up E2E testing environment for GCP staging."
         super().setUp()
         self.staging_env = IsolatedEnvironment()
         self.staging_base_url = self.staging_env.get('GCP_STAGING_BASE_URL', 'https://staging-backend-dot-netra-staging.uc.r.appspot.com')
@@ -54,7 +54,7 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
         self.golden_path_results = []
 
     async def test_websocket_1011_errors_eliminated_after_ssot_fix(self):
-        ""
+        "
         Main validation test: WebSocket 1011 errors eliminated after SSOT fix.
         
         E2E SCOPE: Complete WebSocket connection flow on GCP staging
@@ -62,7 +62,7 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
         EXPECTED BEHAVIOR:
         - BEFORE FIX: FAIL - WebSocket 1011 connection errors due to SSOT violations
         - AFTER FIX: PASS - Successful WebSocket connections with SSOT configuration
-        "
+"
         connection_attempts = []
         connection_successes = []
         connection_1011_errors = []
@@ -81,7 +81,7 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
             except Exception as e:
                 connection_attempts.append({'user': user_config['email'], 'step': 'websocket_connection', 'status': 'error', 'error': str(e)}
         if connection_1011_errors:
-            error_report = '\n'.join([f"- User {error['user']}: {error['error_message']} (Code: {error['error_code']} for error in connection_1011_errors]
+            error_report = '\n'.join([f- User {error['user']}: {error['error_message']} (Code: {error['error_code']} for error in connection_1011_errors]
             self.fail(f'WEBSOCKET 1011 ERRORS DETECTED ON GCP STAGING:\n{error_report}\nThese 1011 errors indicate SSOT violations in configuration base causing authentication inconsistencies. This represents $500K+ ARR risk from broken chat functionality.')
         success_rate = len(connection_successes) / len(self.test_users) if self.test_users else 0
         self.assertGreaterEqual(success_rate, 0.8, f'WebSocket connection success rate should be  >= 80% after SSOT fix. Current: {success_rate:.1%} ({len(connection_successes)}/{len(self.test_users)}')
@@ -95,7 +95,7 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
         EXPECTED BEHAVIOR:
         - BEFORE FIX: FAIL - golden path broken due to configuration inconsistencies
         - AFTER FIX: PASS - seamless golden path execution with SSOT
-        "
+
         golden_path_results = []
         primary_user = self.test_users[0]
         try:
@@ -111,13 +111,13 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
             if websocket_result.get('status_code') == 1011:
                 self.fail(fGOLDEN PATH FAILURE: WebSocket 1011 error for {primary_user['email']} indicates SSOT configuration violation. Error: {websocket_result.get('error_message')}")
             if websocket_result.get('status') != 'success':
-                self.fail(f"GOLDEN PATH FAILURE: WebSocket connection failed for {primary_user['email']} Status: {websocket_result.get('status')}, Error: {websocket_result.get('error_message')})
+                self.fail(fGOLDEN PATH FAILURE: WebSocket connection failed for {primary_user['email']} Status: {websocket_result.get('status')}, Error: {websocket_result.get('error_message')})
             golden_path_results.append({'step': 'websocket_connection', 'status': 'success', 'duration': websocket_time, 'timestamp': time.time()}
             chat_start_time = time.time()
             chat_result = await self._test_agent_execution(auth_token, primary_user['email']
             chat_time = time.time() - chat_start_time
             if chat_result.get('status') != 'success':
-                self.fail(fGOLDEN PATH FAILURE: Agent execution failed for {primary_user['email']} Chat functionality broken. Error: {chat_result.get('error_message')}")
+                self.fail(fGOLDEN PATH FAILURE: Agent execution failed for {primary_user['email']} Chat functionality broken. Error: {chat_result.get('error_message')})"
             golden_path_results.append({'step': 'agent_execution', 'status': 'success', 'duration': chat_time, 'response_quality': chat_result.get('response_quality', 'unknown'), 'timestamp': time.time()}
         except Exception as e:
             self.fail(f"GOLDEN PATH EXCEPTION: Unexpected error in user flow for {primary_user['email']}: {e})
@@ -128,7 +128,7 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
         self.assertLess(total_golden_path_time, 30.0, f'Complete golden path should complete in <30 seconds. Current: {total_golden_path_time:.2f}s')
 
     async def test_websocket_connection_success_rate_after_fix(self):
-        ""
+        
         Test WebSocket connection success rate after SSOT remediation.
         
         E2E SCOPE: Connection reliability validation on GCP staging
@@ -136,7 +136,7 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
         EXPECTED BEHAVIOR:
         - BEFORE FIX: FAIL - low success rate due to 1011 errors
         - AFTER FIX: PASS - high success rate with consistent configuration
-        "
+""
         connection_stats = {'attempts': 0, 'successes': 0, 'failures': 0, 'error_1011': 0, 'other_errors': 0}
         connection_times = []
         for user_config in self.test_users:
@@ -164,8 +164,8 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
         success_rate = connection_stats['successes'] / connection_stats['attempts'] if connection_stats['attempts'] > 0 else 0
         error_1011_rate = connection_stats['error_1011'] / connection_stats['attempts'] if connection_stats['attempts'] > 0 else 0
         if connection_stats['error_1011'] > 0:
-            self.fail(f"WEBSOCKET 1011 ERRORS STILL OCCURRING: {connection_stats['error_1011']} out of {connection_stats['attempts']} attempts resulted in 1011 errors ({error_1011_rate:.1%}. This indicates SSOT remediation is not complete.)
-        self.assertGreaterEqual(success_rate, 0.9, fWebSocket connection success rate should be  >= 90% after SSOT remediation. Current: {success_rate:.1%} ({connection_stats['successes']}/{connection_stats['attempts']}")
+            self.fail(fWEBSOCKET 1011 ERRORS STILL OCCURRING: {connection_stats['error_1011']} out of {connection_stats['attempts']} attempts resulted in 1011 errors ({error_1011_rate:.1%}. This indicates SSOT remediation is not complete.)
+        self.assertGreaterEqual(success_rate, 0.9, fWebSocket connection success rate should be  >= 90% after SSOT remediation. Current: {success_rate:.1%} ({connection_stats['successes']}/{connection_stats['attempts']})
         if connection_times:
             avg_connection_time = sum(connection_times) / len(connection_times)
             max_connection_time = max(connection_times)
@@ -173,7 +173,7 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
             self.assertLess(max_connection_time, 10.0, 'Max connection time should be <10 seconds')
 
     async def test_multi_user_websocket_isolation_ssot(self):
-        "
+    ""
         Test multi-user WebSocket isolation with SSOT configuration.
         
         E2E SCOPE: User isolation validation on GCP staging
@@ -181,12 +181,12 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
         EXPECTED BEHAVIOR:
         - BEFORE FIX: FAIL - user isolation broken, cross-contamination
         - AFTER FIX: PASS - proper user isolation through SSOT
-        ""
+        
         user_isolation_results = {}
         isolation_violations = []
 
         async def test_user_isolation(user_config: Dict[str, str] -> Dict[str, Any]:
-            ""Test WebSocket isolation for individual user."
+            ""Test WebSocket isolation for individual user.
             try:
                 auth_token = await self._authenticate_staging_user(user_config)
                 if not auth_token:
@@ -205,17 +205,17 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
                 user_email = result.get('user', 'unknown')
                 user_isolation_results[user_email] = result
                 if result.get('status') != 'success':
-                    isolation_violations.append({'user': user_email, 'issue': f"User isolation test failed: {result.get('error', 'Unknown error')}, 'severity': 'medium'}
+                    isolation_violations.append({'user': user_email, 'issue': fUser isolation test failed: {result.get('error', 'Unknown error')}, 'severity': 'medium'}
                 if not result.get('user_context_isolated', True):
                     isolation_violations.append({'user': user_email, 'issue': 'User context not properly isolated', 'severity': 'high'}
         if isolation_violations:
-            violation_report = '\n'.join([f- {violation.get('user', 'system')}: {violation['issue']} (Severity: {violation['severity']}" for violation in isolation_violations]
+            violation_report = '\n'.join([f- {violation.get('user', 'system')}: {violation['issue']} (Severity: {violation['severity']}" for violation in isolation_violations]"
             self.fail(f'USER ISOLATION VIOLATIONS DETECTED:\n{violation_report}\nSSOT violations in configuration allow user context contamination, causing WebSocket 1011 errors and broken multi-user functionality.')
         successful_isolations = sum((1 for result in user_isolation_results.values() if result.get('status') == 'success'))
         self.assertEqual(successful_isolations, len(self.test_users), f'All users should have proper isolation after SSOT fix. Isolated: {successful_isolations}/{len(self.test_users)}')
 
     async def _authenticate_staging_user(self, user_config: Dict[str, str] -> Optional[str]:
-        "Authenticate user on GCP staging and return auth token.""
+        Authenticate user on GCP staging and return auth token."
         try:
             auth_url = urljoin(self.staging_base_url, '/auth/login')
             response = requests.post(auth_url, json={'email': user_config['email'], 'password': user_config['password']}, timeout=10)
@@ -228,7 +228,7 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
             return None
 
     async def _test_websocket_connection(self, auth_token: str, user_email: str) -> Dict[str, Any]:
-        ""Test WebSocket connection to GCP staging."
+        "Test WebSocket connection to GCP staging.
         try:
             headers = {'Authorization': f'Bearer {auth_token}'}
             ws = websocket.WebSocket()
@@ -247,14 +247,14 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
             return {'status': 'error', 'error_message': str(e), 'user': user_email}
 
     async def _test_agent_execution(self, auth_token: str, user_email: str) -> Dict[str, Any]:
-        "Test agent execution through WebSocket on GCP staging.""
+        "Test agent execution through WebSocket on GCP staging."
         try:
             return {'status': 'success', 'response_quality': 'good', 'user_context_isolated': True, 'user': user_email}
         except Exception as e:
             return {'status': 'error', 'error_message': str(e), 'user': user_email}
 
     def tearDown(self):
-        ""Clean up E2E test resources."
+        "Clean up E2E test resources.""
         super().tearDown()
         self.record_test_result({'connection_attempts': len(self.connection_results), 'websocket_1011_errors': len(self.websocket_1011_errors), 'golden_path_tests': len(self.golden_path_results), 'test_category': 'e2e_websocket_1011_ssot', 'gcp_staging_environment': True}
 if __name__ == '__main__':

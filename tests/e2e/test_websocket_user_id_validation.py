@@ -2,7 +2,7 @@
 E2E TESTS - Complete WebSocket User ID Validation Bug Reproduction
 
 These E2E tests validate complete end-to-end WebSocket flows with problematic user ID patterns
-that currently cause "Invalid user_id format" errors in production-like scenarios.
+that currently cause Invalid user_id format" errors in production-like scenarios.
 
 Business Value Justification:
 - Segment: All User Segments + Platform/Internal
@@ -29,7 +29,7 @@ EXPECTED BEHAVIOR:
 - Tests 3-4: MUST PASS (proving complete system works after fix)
 
 CRITICAL: ALL E2E tests MUST use authentication - no exceptions per CLAUDE.md requirements.
-""
+"
 import sys
 from pathlib import Path
 PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
@@ -53,28 +53,28 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 
 @pytest.mark.e2e
 class WebSocketUserIDValidationE2ETests(BaseE2ETest):
-    ""
+    
     E2E tests for complete WebSocket user ID validation bug reproduction.
     
     Tests the complete stack from authentication through WebSocket connection
     to agent execution with real services and databases.
     
     CRITICAL: Uses REAL authentication per CLAUDE.md E2E requirements.
-    "
+""
 
     @pytest.fixture
     def auth_config(self) -> E2EAuthConfig:
-        "Create E2E auth configuration for testing.""
+        Create E2E auth configuration for testing.""
         return E2EAuthConfig(auth_service_url=get_env().get('TEST_AUTH_SERVICE_URL', 'http://localhost:8083'), backend_url=get_env().get('TEST_BACKEND_URL', 'http://localhost:8002'), websocket_url=get_env().get('TEST_WEBSOCKET_URL', 'ws://localhost:8002/ws'), test_user_email='e2e_validation_test@example.com', test_user_password='secure_test_password_123', timeout=30.0)
 
     @pytest.fixture
     def failing_deployment_users(self) -> List[Dict[str, str]]:
-        ""Deployment user patterns that currently fail E2E WebSocket flows."
+        Deployment user patterns that currently fail E2E WebSocket flows."
         return [{'user_id': 'e2e-staging_pipeline', 'email': 'e2e-staging_pipeline@deployment.example.com', 'environment': 'staging'}, {'user_id': 'e2e-production_deploy', 'email': 'e2e-production_deploy@deployment.example.com', 'environment': 'production'}, {'user_id': 'e2e-test_environment', 'email': 'e2e-test_environment@deployment.example.com', 'environment': 'test'}, {'user_id': 'e2e-dev_pipeline_v2', 'email': 'e2e-dev_pipeline_v2@deployment.example.com', 'environment': 'development'}]
 
     @pytest.fixture
     def valid_deployment_users(self) -> List[Dict[str, str]]:
-        "Valid user patterns for regression testing.""
+        "Valid user patterns for regression testing.
         return [{'user_id': 'test-user-regression', 'email': 'test-user-regression@example.com', 'environment': 'test'}, {'user_id': str(uuid.uuid4()), 'email': 'uuid-user@example.com', 'environment': 'test'}, {'user_id': 'usr_9f2e8c4b7a1d', 'email': 'concurrent_user_99@example.com', 'environment': 'test'}]
 
     @pytest.mark.asyncio
@@ -87,7 +87,7 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
         Tests: Authentication  ->  WebSocket Connection  ->  Agent Execution  ->  Chat Response
         
         EXPECTED: FAILURE (before fix) - WebSocket connection fails at user ID validation
-        "
+
         failing_user_data = {'user_id': 'e2e-staging_pipeline', 'email': 'e2e-staging_pipeline@deployment.example.com', 'password': 'secure_deployment_password'}
         auth_helper = E2EAuthHelper(auth_config)
         try:
@@ -131,25 +131,25 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
                 assert len(events_received) > 0, 'No WebSocket events received during agent execution'
         except websockets.exceptions.InvalidStatusCode as e:
             if e.status_code == 403:
-                pytest.fail(f"WebSocket authentication failed for user '{failing_user_data['user_id']}' due to user ID validation bug. This blocks deployment user workflows.)
+                pytest.fail(fWebSocket authentication failed for user '{failing_user_data['user_id']}' due to user ID validation bug. This blocks deployment user workflows.)
             else:
                 raise
         except ValueError as e:
             if 'Invalid user_id format' in str(e):
-                pytest.fail(fEXPECTED FAILURE CONFIRMED: Complete chat flow fails for deployment user '{failing_user_data['user_id']}' due to ID validation bug: {e}")
+                pytest.fail(fEXPECTED FAILURE CONFIRMED: Complete chat flow fails for deployment user '{failing_user_data['user_id']}' due to ID validation bug: {e})"
             else:
                 raise
 
     @pytest.mark.asyncio
     @pytest.mark.real_services
     async def test_agent_execution_with_deployment_users(self, failing_deployment_users, auth_config):
-        "
+    "
         TEST 2: Agent execution WebSocket events with multiple deployment user patterns.
         
         Tests that agent execution generates proper WebSocket events for deployment users.
         
         EXPECTED: SUCCESS after fix - all deployment users should work
-        ""
+        "
         auth_helper = E2EAuthHelper(auth_config)
         for user_data in failing_deployment_users[:2]:
             user_id = user_data['user_id']
@@ -186,13 +186,13 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
     @pytest.mark.asyncio
     @pytest.mark.real_services
     async def test_multi_user_websocket_connections(self, valid_deployment_users, auth_config):
-        "
+    "
         TEST 3: REGRESSION PREVENTION - Multiple valid users with concurrent WebSocket connections.
         
         Ensures existing user patterns continue to work with concurrent connections.
         
         EXPECTED: SUCCESS (always)
-        ""
+        "
         auth_helper = E2EAuthHelper(auth_config)
         active_connections = []
         try:
@@ -201,7 +201,7 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
                 user_result = await create_authenticated_user(user_id=user_data['user_id'], email=user_data['email'], password='regression_test_password', auth_config=auth_config)
                 authenticated_users.append(user_result)
             for user_result in authenticated_users:
-                websocket_url = f{auth_config.websocket_url}?token={user_result['token']}"
+                websocket_url = f{auth_config.websocket_url}?token={user_result['token']}
                 websocket = await websockets.connect(websocket_url, timeout=10.0, extra_headers={'Authorization': f"Bearer {user_result['token']}}
                 connection_msg = {'type': 'connection', 'data': {'user_id': user_result['user_id'], 'token': user_result['token'], 'connection_id': f'regression_{int(time.time())}'}}
                 await websocket.send(json.dumps(connection_msg))
@@ -223,13 +223,13 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
     @pytest.mark.asyncio
     @pytest.mark.real_services
     async def test_websocket_pipeline_end_to_end(self, auth_config):
-        ""
+        "
         TEST 4: Complete pipeline test simulating deployment environment.
         
         Tests the complete deployment pipeline workflow with WebSocket integration.
         
         EXPECTED: SUCCESS after fix
-        "
+"
         deployment_pipeline_user = {'user_id': 'e2e-pipeline_deployment_final', 'email': 'pipeline_deployment@test.example.com', 'password': 'pipeline_secure_password_123'}
         auth_helper = E2EAuthHelper(auth_config)
         user_result = await create_authenticated_user(user_id=deployment_pipeline_user['user_id'], email=deployment_pipeline_user['email'], password=deployment_pipeline_user['password'], auth_config=auth_config)

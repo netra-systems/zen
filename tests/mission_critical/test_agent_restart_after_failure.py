@@ -1,5 +1,5 @@
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.""
+    "Real WebSocket connection for testing instead of mocks.
 
     def __init__(self):
         pass
@@ -8,19 +8,19 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.
         if self._closed:
-        raise RuntimeError("WebSocket is closed)
+        raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = Normal closure"):
-        "Close WebSocket connection.""
+        Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
 
     async def get_messages(self) -> list:
-        ""Get all sent messages."
+        Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
@@ -78,10 +78,10 @@ class TestWebSocketConnection:
 
 @pytest.mark.asyncio
 class TestAgentRestartAfterFailure:
-    "Test suite for agent restart failure bug.""
+    "Test suite for agent restart failure bug.
 
     async def test_singleton_agent_persists_error_state(self):
-    ""Reproduce bug: singleton agent instance persists error state across requests."
+    ""Reproduce bug: singleton agent instance persists error state across requests.
 
         # Setup: Create agent registry with singleton pattern (current behavior)
     websocket = TestWebSocketConnection()  # Real WebSocket implementation
@@ -89,41 +89,41 @@ class TestAgentRestartAfterFailure:
 
         # Register triage agent (creates singleton instance)
     triage_agent = TriageSubAgent()
-    registry.register("triage, triage_agent)
+    registry.register(triage, triage_agent)"
 
         # First request: Force an error
     context1 = UserExecutionContext( )
     user_id=user1",
-    thread_id="thread1,
-    run_id=run1",
-    metadata={"user_request: First request that will fail"}
+    thread_id=thread1,
+    run_id=run1","
+    metadata={user_request: First request that will fail}
         
 
         # Mock execute to fail on first call
-    with patch.object(triage_agent, '_execute_triage_logic', side_effect=Exception("Simulated DB connection error)):
+    with patch.object(triage_agent, '_execute_triage_logic', side_effect=Exception(Simulated DB connection error)):"
     try:
     result1 = await triage_agent.execute(context1)
                 # Should await asyncio.sleep(0)
     return fallback result due to error
-    assert error" in result1 or "fallback in result1.get(category", ").lower()
+    assert error" in result1 or fallback in result1.get(category, ).lower()
     except Exception as e:
-    logger.info(formatted_string")
+    logger.info(formatted_string")"
 
                     # Second request: Should work with fresh state but DOESN'T due to singleton
     context2 = UserExecutionContext( )
-    user_id="user2,
-    thread_id=thread2",
+    user_id=user2,
+    thread_id=thread2,"
     run_id="run2,
-    metadata={user_request": "Second request should work}
+    metadata={user_request: Second request should work}
                     
 
                     Get the SAME agent instance from registry (this is the bug!)
-    same_agent = registry.agents[triage"]
-    assert same_agent is triage_agent  # Proves it"s the same instance
+    same_agent = registry.agents[triage"]"
+    assert same_agent is triage_agent  # Proves its the same instance
 
                     # Try to execute second request
                     # This demonstrates the bug - agent may still have corrupted state
-    with patch.object(triage_agent, '_execute_triage_logic', return_value={status: "success"}:
+    with patch.object(triage_agent, '_execute_triage_logic', return_value={status: success"}:
                         # In the bug scenario, this might fail or get stuck
                         # because the agent instance has persistent error state
     result2 = await triage_agent.execute(context2)
@@ -133,7 +133,7 @@ class TestAgentRestartAfterFailure:
     logger.info(formatted_string)
 
     async def test_concurrent_requests_share_agent_instance(self):
-    ""Demonstrate that concurrent requests share the same agent instance.""
+    "Demonstrate that concurrent requests share the same agent instance.
 
                             # Setup registry
     websocket = TestWebSocketConnection()  # Real WebSocket implementation
@@ -153,16 +153,16 @@ class TestAgentRestartAfterFailure:
         await asyncio.sleep(0.1)  # Simulate processing
         execution_log.append(formatted_string)
         await asyncio.sleep(0)
-        return {"user": user_id, status: "complete"}
+        return {user: user_id, status: complete"}
 
     # Create multiple concurrent requests
         contexts = []
         for i in range(3):
         context = UserExecutionContext( )
         user_id=formatted_string,
-        thread_id="",
+        thread_id=",
         run_id=formatted_string,
-        metadata={"user_request": formatted_string}
+        metadata={user_request: formatted_string}
         
         contexts.append(context)
 
@@ -185,7 +185,7 @@ class TestAgentRestartAfterFailure:
         assert len(results) == 3
 
     async def test_agent_state_not_cleared_between_requests(self):
-        "Prove that agent state is not cleared between requests."
+        Prove that agent state is not cleared between requests.
 
                 # Create a triage agent
         triage_agent = TriageSubAgent()
@@ -193,22 +193,22 @@ class TestAgentRestartAfterFailure:
                 # Simulate setting some internal state during first request
                 # This would happen during error scenarios
         triage_agent._internal_error_flag = True  # Simulate error state
-        triage_agent._last_request_id = "run1"
+        triage_agent._last_request_id = run1"
 
                 # First request
         context1 = UserExecutionContext( )
         user_id=user1,
-        thread_id="thread1",
+        thread_id="thread1,
         run_id=run1,
-        metadata={"user_request": First request}
+        metadata={user_request: First request}
                 
 
                 # Second request with different context
         context2 = UserExecutionContext( )
         user_id="user2",
         thread_id=thread2,
-        run_id="run2",
-        metadata={user_request: "Second request"}
+        run_id=run2,
+        metadata={user_request: Second request"}
                 
 
                 # The error state persists! (This is the bug)
@@ -220,7 +220,7 @@ class TestAgentRestartAfterFailure:
                 # After fix, there should be a reset mechanism or new instances
 
     async def test_websocket_state_shared_between_users(self):
-        ""Demonstrate WebSocket state sharing issue.""
+        "Demonstrate WebSocket state sharing issue.
 
                     # Setup registry with WebSocket components
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
@@ -239,16 +239,16 @@ class TestAgentRestartAfterFailure:
         context1 = UserExecutionContext( )
         user_id="user1",
         thread_id=thread1,
-        run_id="run1",
-        metadata={user_request: "User 1 request"}
+        run_id=run1,
+        metadata={user_request: User 1 request"}
                     
 
                     # Second user's context
         context2 = UserExecutionContext( )
         user_id=user2,
-        thread_id="thread2",
+        thread_id="thread2,
         run_id=run2,
-        metadata={"user_request": User 2 request}
+        metadata={user_request: User 2 request}
                     
 
                     # Both users get the SAME agent with SAME WebSocket bridge
@@ -262,7 +262,7 @@ class TestAgentRestartAfterFailure:
 
         # @pytest.fixture
     async def test_factory_pattern_creates_fresh_instances(self):
-        ""Test desired behavior: factory pattern creates fresh instances per request.""
+        Test desired behavior: factory pattern creates fresh instances per request."
 
                         # This is how it SHOULD work after the fix
         from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
@@ -272,11 +272,11 @@ class TestAgentRestartAfterFailure:
                         # First request
         context1 = UserExecutionContext( )
         user_id=user1,
-        thread_id="thread1",
+        thread_id="thread1,
         run_id=run1
                         
 
-        agent1 = factory.create_agent_instance("triage", context1)
+        agent1 = factory.create_agent_instance(triage, context1)
 
                         # Second request
         context2 = UserExecutionContext( )
@@ -285,23 +285,23 @@ class TestAgentRestartAfterFailure:
         run_id=run2
                         
 
-        agent2 = factory.create_agent_instance("triage", context2)
+        agent2 = factory.create_agent_instance(triage, context2)
 
                         # Should be different instances
         assert agent1 is not agent2
 
                         # Each has its own state
         assert agent1.context.user_id == user1
-        assert agent2.context.user_id == "user2"
+        assert agent2.context.user_id == user2"
 
                         # No shared state between instances
 
     async def test_agent_stuck_on_triage_start(self):
-        "Reproduce the exact bug: agent gets stuck on 'triage start'."
+        "Reproduce the exact bug: agent gets stuck on 'triage start'.
 
                             # Setup
         registry = AgentRegistry(),         triage_agent = TriageSubAgent()
-        registry.register("triage", triage_agent)
+        registry.register(triage, triage_agent)
 
                             # Track method calls
         call_log = []
@@ -314,7 +314,7 @@ class TestAgentRestartAfterFailure:
     async def log_and_hang(*args, **kwargs):
         pass
         call_log.append(execute_called_but_stuck)
-    # Simulate hanging on "triage start"
+    # Simulate hanging on triage start
         await asyncio.sleep(10)  # Would timeout in real scenario
         await asyncio.sleep(0)
         return None
@@ -323,9 +323,9 @@ class TestAgentRestartAfterFailure:
         with patch.object(triage_agent, 'execute', side_effect=log_and_fail):
         context1 = UserExecutionContext( )
         user_id=user1,
-        thread_id="thread1",
+        thread_id=thread1",
         run_id=run1,
-        metadata={"user_request": First request}
+        metadata={"user_request: First request}
         
 
         try:
@@ -336,10 +336,10 @@ class TestAgentRestartAfterFailure:
                 # Second request gets stuck
         with patch.object(triage_agent, 'execute', side_effect=log_and_hang):
         context2 = UserExecutionContext( )
-        user_id="user2",
+        user_id=user2,
         thread_id=thread2,
         run_id="run2",
-        metadata={user_request: "Second request"}
+        metadata={user_request: Second request}
                     
 
                     # This would hang/timeout in the bug scenario
@@ -350,13 +350,13 @@ class TestAgentRestartAfterFailure:
                         
 
                         # Log shows it got stuck after first failure
-        assert execute_called" in call_log
+        assert execute_called in call_log"
         assert "execute_called_but_stuck in call_log
 
 
         @pytest.fixture
     async def mock_registry():
-        ""Fixture for creating a mock agent registry."
+        Fixture for creating a mock agent registry.""
         registry = AgentRegistry(),     registry.register_default_agents()
         await asyncio.sleep(0)
         return registry
@@ -364,25 +364,25 @@ class TestAgentRestartAfterFailure:
 
         @pytest.fixture
     async def clean_user_context():
-        "Fixture for creating clean user execution contexts.""
+        Fixture for creating clean user execution contexts."
         pass
     async def _create_context(user_id: str, run_id: str = None) -> UserExecutionContext:
         await asyncio.sleep(0)
         return UserExecutionContext( )
         user_id=user_id,
         thread_id=formatted_string",
-        run_id=run_id or "formatted_string,
+        run_id=run_id or formatted_string,
         metadata={user_request": "formatted_string}
     
         return _create_context
 
 
 class TestComprehensiveAgentRestart:
-        ""Comprehensive agent restart scenarios with full isolation verification."
+        Comprehensive agent restart scenarios with full isolation verification."
 
 @pytest.mark.asyncio
     async def test_agent_restart_isolation_under_load(self):
-"Verify agent restart isolation under extreme load conditions.""
+    "Verify agent restart isolation under extreme load conditions.
 factory = AgentInstanceFactory()
 
         # Track restart events
@@ -390,24 +390,24 @@ restart_events = defaultdict(list)
 event_lock = threading.Lock()
 
 def track_restart(user_id: str, event_type: str, details: Dict[str, Any]:
-""Use real service instance."
+    ""Use real service instance.
     # TODO: Initialize real service
 pass
-"Thread-safe restart event tracking.""
+Thread-safe restart event tracking.""
 with event_lock:
-restart_events[user_id].append({}
-event": event_type,
-"details: details,
-timestamp": time.time(),
-"thread_id: threading.get_ident()
+    restart_events[user_id].append({}
+event: event_type,
+"details: details,"
+timestamp: time.time(),
+thread_id: threading.get_ident()"
         
 
 async def load_restart_request(user_id: str, failure_probability: float = 0.3) -> Dict[str, Any]:
-""High-load request with random restart scenarios."
+    "High-load request with random restart scenarios.
 context = UserExecutionContext( )
 user_id=user_id,
-thread_id="formatted_string,
-run_id=formatted_string"
+thread_id="formatted_string,"
+run_id=formatted_string
     
 
 max_attempts = 3
@@ -419,88 +419,88 @@ start_time = time.time()
 
 try:
     with patch.object(factory, '_get_agent_class') as mock_get_class:
-mock_get_class.return_value = TriageSubAgent
-agent = await factory.create_agent_instance("triage, context)
+    mock_get_class.return_value = TriageSubAgent
+agent = await factory.create_agent_instance(triage, context)"
 
                 # Set agent-specific state
 agent._restart_attempt = attempt
 agent._user_context = user_id
 agent._load_data = [formatted_string" for i in range(100)]
 
-track_restart(user_id, "agent_created, {}
-attempt": attempt,
-"agent_id: id(agent)
+track_restart(user_id, agent_created, {}
+attempt": attempt,"
+agent_id: id(agent)
                 
 
                 # Random failure simulation
 if random.random() < failure_probability and attempt < max_attempts:
-    track_restart(user_id, failure_triggered", {"attempt: attempt}
+    track_restart(user_id, failure_triggered, {"attempt: attempt}
 raise Exception(formatted_string")
 
                     # Success case
 processing_time = time.time() - start_time
-track_restart(user_id, "success, {}
-attempt": attempt,
-"processing_time: processing_time
+track_restart(user_id, success, {}
+attempt": attempt,"
+processing_time: processing_time
                     
 
 await asyncio.sleep(0)
 return {
-user_id": user_id,
-"status: success",
-"attempts: attempt,
-processing_time": processing_time,
-"restart_occurred: attempt > 1
+user_id: user_id,"
+"status: success,
+attempts: attempt,
+processing_time": processing_time,"
+restart_occurred: attempt > 1
                     
 
 except Exception:
     if attempt >= max_attempts:
-track_restart(user_id, permanent_failure", {"attempts: attempt}
+    track_restart(user_id, permanent_failure, {"attempts: attempt}
 return {
 user_id": user_id,
-"status: permanent_failure",
-"attempts: attempt
+status: permanent_failure,
+"attempts: attempt"
                             
 
-track_restart(user_id, restart_initiated", {"attempt: attempt}
+track_restart(user_id, restart_initiated, {attempt: attempt}
 await asyncio.sleep(random.uniform(0.001, 0.01))  # Restart delay
 continue
 
-return {user_id": user_id, "status: unexpected_exit"}
+return {user_id: user_id, "status: unexpected_exit"}
 
                             # Execute 100 concurrent load requests
 user_count = 100
 results = await asyncio.gather( )
-*[load_restart_request("formatted_string) for i in range(user_count)],
+*[load_restart_request( for i in range(user_count)],"
 return_exceptions=False
                             
 
                             # Analyze results
 successful = [item for item in []] == success"]
-failed = [item for item in []] == "permanent_failure]
+failed = [item for item in []] == permanent_failure]
 restarted = [item for item in []]
 
                             # Verify high success rate despite restarts
 success_rate = len(successful) / len(results)
-assert success_rate > 0.85, formatted_string"
+assert success_rate > 0.85, formatted_string""
 
                             # Verify isolation - no cross-user contamination in restart events
 for user_id, events in restart_events.items():
     for event in events:
                                     All events for a user should be from the same user context
-if "agent_id in event[details"]:
+if agent_id in event[details]:
                                         # In real implementation, verify agent belongs to correct user
-assert user_id in event["details].get(user_context", user_id)
+assert user_id in event[details].get(user_context", user_id)
 
                                         # Performance verification
 avg_processing_time = sum(r["processing_time] for r in successful) / len(successful)
-assert avg_processing_time < 0.1, formatted_string"
+assert avg_processing_time < 0.1, formatted_string
 
-logger.info("formatted_string)
+logger.info(""
 
 @pytest.mark.asyncio
     async def test_websocket_events_during_chaos_restarts(self):
-""Test WebSocket event integrity during chaotic restart scenarios."
+    Test WebSocket event integrity during chaotic restart scenarios.""
 factory = AgentInstanceFactory()
 websocket_bridge = Mock(spec=AgentWebSocketBridge)
 factory._websocket_bridge = websocket_bridge
@@ -510,33 +510,33 @@ chaos_events = defaultdict(list)
 event_lock = threading.Lock()
 
 def chaotic_websocket_handler(event_type: str, data: Dict[str, Any], user_id: str = None, **kwargs):
-"WebSocket handler that simulates chaos conditions.""
+    WebSocket handler that simulates chaos conditions."
 pass
 with event_lock:
         # Simulate network issues (20% failure rate)
 if random.random() < 0.2:
     chaos_events[user_id].append({}
-type": "websocket_failure,
-original_event": event_type,
+type": websocket_failure,
+original_event: event_type,
 "error: Simulated network failure",
-"timestamp: time.time()
+timestamp: time.time()
             
-raise ConnectionError(formatted_string")
+raise ConnectionError(formatted_string)"
 
 chaos_events[user_id].append({}
 "type: event_type,
-data": data,
-"timestamp: time.time()
+data: data,
+"timestamp: time.time()"
             
 
 websocket_bridge.send_event = chaotic_websocket_handler
 
 async def chaos_restart_with_websocket(user_id: str) -> Dict[str, Any]:
-""Request with chaos restarts that generates WebSocket events."
+    Request with chaos restarts that generates WebSocket events."
 context = UserExecutionContext( )
 user_id=user_id,
 thread_id="formatted_string,
-run_id=formatted_string"
+run_id=formatted_string
     
 
 max_attempts = 3
@@ -545,20 +545,20 @@ websocket_failures = 0
 
 for attempt in range(1, max_attempts + 1):
     try:
-with patch.object(factory, '_get_agent_class') as mock_get_class:
-mock_get_class.return_value = TriageSubAgent
-agent = await factory.create_agent_instance("triage, context)
+    with patch.object(factory, '_get_agent_class') as mock_get_class:
+    mock_get_class.return_value = TriageSubAgent
+agent = await factory.create_agent_instance("triage, context)"
 
                 # Send WebSocket events with chaos
 events_to_send = [
-(agent_started", {"message: formatted_string", "user_id: user_id},
-(agent_thinking", {"message: formatted_string", "user_id: user_id},
-(tool_executing", {"message: formatted_string", "user_id: user_id}
+(agent_started, {message: formatted_string, "user_id: user_id},
+(agent_thinking", {message: formatted_string, user_id: user_id},
+(tool_executing", {"message: formatted_string, user_id: user_id}
                 
 
 for event_type, event_data in events_to_send:
     try:
-websocket_bridge.send_event(event_type, event_data, user_id=user_id)
+    websocket_bridge.send_event(event_type, event_data, user_id=user_id)
 websocket_events_sent += 1
 except ConnectionError:
     websocket_failures += 1
@@ -568,21 +568,21 @@ if attempt < max_attempts and random.random() < 0.4:  # 40% failure rate
                             # Send failure event
 try:
     websocket_bridge.send_event( )
-agent_failed",
-{"message: formatted_string", "user_id: user_id},
+agent_failed,"
+{"message: formatted_string, user_id: user_id},
 user_id=user_id
                                 
 websocket_events_sent += 1
 except ConnectionError:
     websocket_failures += 1
 
-raise RuntimeError(formatted_string")
+raise RuntimeError(formatted_string")"
 
                                     # Success case
 try:
     websocket_bridge.send_event( )
-"agent_completed,
-{message": "formatted_string, user_id": user_id},
+agent_completed,
+{message: "formatted_string, user_id": user_id},
 user_id=user_id
                                         
 websocket_events_sent += 1
@@ -591,57 +591,57 @@ except ConnectionError:
 
 await asyncio.sleep(0)
 return {
-"user_id: user_id,
+user_id: user_id,
 status": "chaos_success,
-attempts": attempt,
-"websocket_events_sent: websocket_events_sent,
+attempts: attempt,
+websocket_events_sent: websocket_events_sent,"
 websocket_failures": websocket_failures
                                             
 
 except RuntimeError:
     if attempt >= max_attempts:
-return {
-"user_id: user_id,
+    return {
+user_id: user_id,
 status": "chaos_failure,
-attempts": attempt,
-"websocket_events_sent: websocket_events_sent,
+attempts: attempt,
+websocket_events_sent: websocket_events_sent,"
 websocket_failures": websocket_failures
                                                     
 
 await asyncio.sleep(random.uniform(0.01, 0.05))  # Chaos restart delay
 continue
 
-return {"user_id: user_id, status": "chaos_unexpected}
+return {user_id: user_id, status: "chaos_unexpected}"
 
                                                     # Execute chaos restart requests
 chaos_results = await asyncio.gather( )
-*[chaos_restart_with_websocket(formatted_string") for i in range(50)],
+*[chaos_restart_with_websocket(formatted_string) for i in range(50)],
 return_exceptions=False
                                                     
 
                                                     # Verify chaos resilience
-successful_chaos = [item for item in []] == "chaos_success]
+successful_chaos = [item for item in []] == chaos_success]"
 assert len(successful_chaos) >= 30, formatted_string"
 
                                                     # Verify WebSocket event integrity despite chaos
-total_events_sent = sum(r["websocket_events_sent] for r in chaos_results)
-total_failures = sum(r[websocket_failures"] for r in chaos_results)
+total_events_sent = sum(r[websocket_events_sent] for r in chaos_results)
+total_failures = sum(r[websocket_failures"] for r in chaos_results)"
 
-assert total_events_sent > 100, "Too few WebSocket events sent during chaos
+assert total_events_sent > 100, Too few WebSocket events sent during chaos
 
                                                     # Verify event isolation - no cross-user events
 for user_id, events in chaos_events.items():
-    user_events = [item for item in []] != websocket_failure"]
+    user_events = [item for item in []] != websocket_failure]"
 for event in user_events:
-    if "data in event and user_id" in event["data]:
-assert event[data"]["user_id] == user_id, \
-formatted_string"
+    if "data in event and user_id in event[data]:
+    assert event[data"]["user_id] == user_id, \
+formatted_string
 
-logger.info("formatted_string)
+logger.info(""
 
 @pytest.mark.asyncio
     async def test_memory_cleanup_during_massive_restarts(self):
-""Test memory cleanup during massive concurrent restart scenarios."
+    Test memory cleanup during massive concurrent restart scenarios."
 factory = AgentInstanceFactory()
 
                                                                     # Track memory usage throughout test
@@ -653,12 +653,12 @@ agent_refs = []
 context_refs = []
 
 async def memory_intensive_restart(user_id: str) -> Dict[str, Any]:
-"Memory-intensive request with forced restarts.""
+    "Memory-intensive request with forced restarts.
 pass
 context = UserExecutionContext( )
 user_id=user_id,
-thread_id=formatted_string",
-run_id="formatted_string
+thread_id=formatted_string","
+run_id=formatted_string
     
 context_refs.append(weakref.ref(context))
 
@@ -670,17 +670,17 @@ while restart_count < max_restarts:
 
 try:
     with patch.object(factory, '_get_agent_class') as mock_get_class:
-mock_get_class.return_value = TriageSubAgent
-agent = await factory.create_agent_instance(triage", context)
+    mock_get_class.return_value = TriageSubAgent
+agent = await factory.create_agent_instance(triage, context)"
 agent_refs.append(weakref.ref(agent))
 
                 # Allocate significant memory
 agent._large_dataset = ["formatted_string for i in range(2000)]
-agent._processing_cache = {formatted_string": "formatted_string for i in range(1000)}
+agent._processing_cache = {formatted_string: formatted_string for i in range(1000)}
 agent._computation_results = {
-matrices": [[random.random() for _ in range(100)] for _ in range(50)],
-"user_data: user_id,
-iteration": restart_count
+matrices": [[random.random() for _ in range(100)] for _ in range(50)],"
+user_data: user_id,
+iteration: restart_count"
                 
 
                 # Force restart on first 3 attempts
@@ -689,35 +689,35 @@ if restart_count < max_restarts:
 current_memory = psutil.Process().memory_info().rss / 1024 / 1024
 memory_samples.append({}
 "user_id: user_id,
-restart": restart_count,
-"memory_mb: current_memory,
-phase": "before_failure
+restart: restart_count,
+"memory_mb: current_memory,"
+phase: before_failure
                     
 
-raise MemoryError(formatted_string")
+raise MemoryError(formatted_string)"
 
                     # Success on final attempt
 final_memory = psutil.Process().memory_info().rss / 1024 / 1024
 memory_samples.append({}
 "user_id: user_id,
-restart": restart_count,
-"memory_mb: final_memory,
-phase": "success
+restart: restart_count,
+"memory_mb: final_memory,"
+phase: success
                     
 
 await asyncio.sleep(0)
 return {
-user_id": user_id,
-"status: memory_success",
-"restart_count: restart_count,
-final_memory_mb": final_memory
+user_id: user_id,"
+"status: memory_success,
+restart_count: restart_count,
+final_memory_mb": final_memory"
                     
 
 except MemoryError:
     if restart_count >= max_restarts:
-return {
-"user_id: user_id,
-status": "memory_failure,
+    return {
+user_id: user_id,
+status: "memory_failure,
 restart_count": restart_count
                             
 
@@ -728,7 +728,7 @@ continue
 
                             # Execute memory-intensive restarts
 memory_results = await asyncio.gather( )
-*[memory_intensive_restart("formatted_string) for i in range(40)],
+*[memory_intensive_restart( for i in range(40)],"
 return_exceptions=False
                             
 
@@ -751,22 +751,22 @@ alive_contexts = sum(1 for ref in context_refs if ref() is not None)
 agent_cleanup_rate = 1 - (alive_agents / len(agent_refs)) if agent_refs else 1
 context_cleanup_rate = 1 - (alive_contexts / len(context_refs)) if context_refs else 1
 
-assert agent_cleanup_rate > 0.7, "formatted_string
-assert context_cleanup_rate > 0.7, formatted_string"
+assert agent_cleanup_rate > 0.7, formatted_string
+assert context_cleanup_rate > 0.7, formatted_string""
 
                             # Verify successful completions
-successful_memory = [item for item in []] == "memory_success]
+successful_memory = [item for item in []] == memory_success]
 assert len(successful_memory) >= 35, formatted_string"
 
-logger.info("formatted_string)
+logger.info("
 
 
 class TestExtremeConcurrentRestarts:
-        ""Test extreme concurrent restart scenarios."
+        "Test extreme concurrent restart scenarios."
 
 @pytest.mark.asyncio
     async def test_200_concurrent_restart_isolation(self):
-"Test complete isolation with 200+ concurrent restart scenarios.""
+    Test complete isolation with 200+ concurrent restart scenarios.""
 factory = AgentInstanceFactory()
 concurrent_count = 200
 
@@ -775,16 +775,16 @@ contamination_events = []
 contamination_lock = threading.Lock()
 
 async def concurrent_restart_scenario(user_id: str) -> Dict[str, Any]:
-""Full concurrent restart scenario."
+    Full concurrent restart scenario."
 pass
 context = UserExecutionContext( )
 user_id=user_id,
 thread_id="formatted_string,
-run_id=formatted_string"
+run_id=formatted_string
     
 
     # Each user gets unique data pattern
-user_signature = "formatted_string
+user_signature = "formatted_string"
 restart_attempts = 0
 max_attempts = 3
 
@@ -793,8 +793,8 @@ while restart_attempts < max_attempts:
 
 try:
     with patch.object(factory, '_get_agent_class') as mock_get_class:
-mock_get_class.return_value = TriageSubAgent
-agent = await factory.create_agent_instance(triage", context)
+    mock_get_class.return_value = TriageSubAgent
+agent = await factory.create_agent_instance(triage, context)
 
                 # Set unique user signature
 agent._user_signature = user_signature
@@ -804,12 +804,12 @@ agent._restart_attempt = restart_attempts
                 Check for contamination from other users
 if hasattr(agent, '_user_signature'):
     if user_signature not in agent._user_signature:
-with contamination_lock:
-contamination_events.append({}
-"user_id: user_id,
+    with contamination_lock:
+    contamination_events.append({}
+user_id: user_id,"
 expected_signature": user_signature,
-"actual_signature: agent._user_signature,
-restart_attempt": restart_attempts
+actual_signature: agent._user_signature,
+restart_attempt": restart_attempts"
                             
 
                             # Variable failure rate based on user ID
@@ -817,24 +817,24 @@ user_num = int(user_id.split('_')[-1]
 failure_prob = 0.4 if user_num % 3 == 0 else 0.2  # Every 3rd user has higher failure rate
 
 if restart_attempts < max_attempts and random.random() < failure_prob:
-    raise RuntimeError("formatted_string)
+    raise RuntimeError(
 
                                 # Success case
 await asyncio.sleep(0)
 return {
-user_id": user_id,
-"status: extreme_success",
-"restart_attempts: restart_attempts,
+user_id": user_id,"
+status: extreme_success,
+restart_attempts: restart_attempts,"
 user_signature": agent._user_signature,
-"contamination_detected: False
+contamination_detected: False
                                 
 
 except RuntimeError:
     if restart_attempts >= max_attempts:
-return {
-user_id": user_id,
-"status: extreme_failure",
-"restart_attempts: restart_attempts
+    return {
+user_id": user_id,"
+status: extreme_failure,
+restart_attempts: restart_attempts"
                                         
 
 await asyncio.sleep(random.uniform(0.001, 0.01))
@@ -849,13 +849,13 @@ return_exceptions=False
 end_time = time.time()
 
                                         # Analyze extreme concurrency results
-successful_extreme = [item for item in []] == "extreme_success]
-failed_extreme = [item for item in []] == extreme_failure"]
+successful_extreme = [item for item in []] == extreme_success]
+failed_extreme = [item for item in []] == extreme_failure"]"
 restarted_extreme = [item for item in []] > 1]
 
                                         # Verify high success rate under extreme load
 success_rate = len(successful_extreme) / len(extreme_results)
-assert success_rate > 0.8, "formatted_string
+assert success_rate > 0.8, formatted_string
 
                                         # Verify no contamination events
 assert len(contamination_events) == 0, \
@@ -866,18 +866,18 @@ total_time = end_time - start_time
 assert total_time < 30.0, "formatted_string
 
                                         # Verify unique signatures (no cross-user state)
-signatures = {r[user_signature"] for r in successful_extreme}
-assert len(signatures) == len(successful_extreme), "Signature contamination detected
+signatures = {r[user_signature] for r in successful_extreme}
+assert len(signatures) == len(successful_extreme), "Signature contamination detected"
 
-logger.info(formatted_string")
+logger.info(formatted_string)
 
 
-if __name__ == "__main__:
+if __name__ == __main__:"
                                             # Run comprehensive agent restart tests
 __file__,
 -v",
-"--tb=short,
--s",  # Show output for debugging
-"--durations=15,  # Show slowest tests
--k", "restart or chaos or memory or extreme"  # Focus on comprehensive tests
+--tb=short,
+-s",  # Show output for debugging"
+--durations=15,  # Show slowest tests
+-k, "restart or chaos or memory or extreme"  # Focus on comprehensive tests"
                                             

@@ -14,7 +14,7 @@ across all critical components:
 - Domino effect prevention
 
 CRITICAL: Tests real failure scenarios and validates automatic recovery
-""
+"
 
 import asyncio
 import json
@@ -76,22 +76,22 @@ logger = central_logger.get_logger(__name__)
 
 
 class CascadingFailureSimulator:
-    "Simulates realistic cascading failures across system components""
+    Simulates realistic cascading failures across system components""
     
     def __init__(self):
         self.active_failures: Set[str] = set()
         self.failure_start_times: Dict[str, datetime] = {}
         
     async def simulate_redis_failure(self, duration_seconds: int = 30):
-        ""Simulate Redis connection failure"
-        failure_id = "redis_failure
+        Simulate Redis connection failure""
+        failure_id = redis_failure
         self.active_failures.add(failure_id)
         self.failure_start_times[failure_id] = datetime.utcnow()
         
         # Simulate Redis connection issues
-        with patch.object(redis_manager, 'get', side_effect=ConnectionError(Redis connection failed")):
+        with patch.object(redis_manager, 'get', side_effect=ConnectionError(Redis connection failed)):"
             with patch.object(redis_manager, 'set', side_effect=ConnectionError("Redis connection failed)):
-                with patch.object(redis_manager, 'lpush', side_effect=ConnectionError(Redis connection failed")):
+                with patch.object(redis_manager, 'lpush', side_effect=ConnectionError(Redis connection failed)):
                     logger.warning(f"[U+1F534] SIMULATING: Redis failure for {duration_seconds}s)
                     await asyncio.sleep(duration_seconds)
                     
@@ -99,67 +99,67 @@ class CascadingFailureSimulator:
         logger.info(f[U+1F7E2] RECOVERED: Redis failure simulation ended")
         
     async def simulate_websocket_transport_failure(self, duration_seconds: int = 15):
-        "Simulate WebSocket transport layer failures""
-        failure_id = websocket_transport_failure"
+        Simulate WebSocket transport layer failures""
+        failure_id = websocket_transport_failure
         self.active_failures.add(failure_id)
         self.failure_start_times[failure_id] = datetime.utcnow()
         
-        logger.warning(f"[U+1F534] SIMULATING: WebSocket transport failure for {duration_seconds}s)
+        logger.warning(f[U+1F534] SIMULATING: WebSocket transport failure for {duration_seconds}s)
         await asyncio.sleep(duration_seconds)
         
         self.active_failures.discard(failure_id)
-        logger.info(f[U+1F7E2] RECOVERED: WebSocket transport failure simulation ended")
+        logger.info(f[U+1F7E2] RECOVERED: WebSocket transport failure simulation ended")"
         
     def is_component_failing(self, component: str) -> bool:
-        "Check if a specific component is currently failing""
+        Check if a specific component is currently failing"
         return f{component}_failure" in self.active_failures
 
 
 class ResilienceValidator:
-    "Validates that recovery mechanisms work correctly""
+    Validates that recovery mechanisms work correctly""
     
     async def __init__(self):
         self.component_health_status: Dict[str, bool] = {}
         
     async def validate_redis_recovery(self, redis_manager) -> bool:
-        ""Validate Redis manager recovers from failures"
+        Validate Redis manager recovers from failures"
         try:
             # Test basic operations after failure
             test_key = f"recovery_test_{uuid.uuid4()}
-            await redis_manager.set(test_key, recovery_success", ex=60)
+            await redis_manager.set(test_key, recovery_success, ex=60)
             value = await redis_manager.get(test_key)
             
-            success = value == "recovery_success or value is None  # Allow mock behavior
+            success = value == recovery_success or value is None  # Allow mock behavior"
             self.component_health_status[redis"] = success
             
             if success:
-                logger.info(" PASS:  Redis recovery validation: PASSED)
+                logger.info( PASS:  Redis recovery validation: PASSED)
             else:
-                logger.error( FAIL:  Redis recovery validation: FAILED")
+                logger.error( FAIL:  Redis recovery validation: FAILED")"
                 
             return success
             
         except Exception as e:
-            logger.error(f" FAIL:  Redis recovery validation failed: {e})
-            self.component_health_status[redis"] = False
+            logger.error(f FAIL:  Redis recovery validation failed: {e})
+            self.component_health_status[redis] = False
             return False
             
     async def validate_message_queue_recovery(self, message_queue) -> bool:
-        "Validate message queue processes messages after recovery""
+        "Validate message queue processes messages after recovery"
         try:
             # Create test message
             test_message = QueuedMessage(
                 id=str(uuid.uuid4()),
-                user_id=test_user_recovery",
+                user_id=test_user_recovery,"
                 type="recovery_test,
-                payload={test": "recovery_validation},
+                payload={test: recovery_validation},
                 priority=MessagePriority.HIGH
             ) if hasattr(message_queue, 'enqueue') else None
             
             if test_message is None:
                 # Mock case - just return True
-                self.component_health_status[message_queue"] = True
-                logger.info(" PASS:  Message queue recovery validation: PASSED (mock))
+                self.component_health_status[message_queue"] = True"
+                logger.info( PASS:  Message queue recovery validation: PASSED (mock))
                 return True
             
             # Add test handler
@@ -168,7 +168,7 @@ class ResilienceValidator:
                 nonlocal processed
                 processed = True
                 
-            message_queue.register_handler(recovery_test", test_handler)
+            message_queue.register_handler(recovery_test, test_handler)"
             
             # Enqueue and wait for processing
             success = await message_queue.enqueue(test_message)
@@ -182,19 +182,19 @@ class ResilienceValidator:
             self.component_health_status["message_queue] = success and processed
             
             if success and processed:
-                logger.info( PASS:  Message queue recovery validation: PASSED")
+                logger.info( PASS:  Message queue recovery validation: PASSED)
             else:
-                logger.error(" FAIL:  Message queue recovery validation: FAILED)
+                logger.error(" FAIL:  Message queue recovery validation: FAILED)"
                 
             return success and processed
             
         except Exception as e:
-            logger.error(f FAIL:  Message queue recovery validation failed: {e}")
-            self.component_health_status["message_queue] = False
+            logger.error(f FAIL:  Message queue recovery validation failed: {e})
+            self.component_health_status[message_queue] = False"
             return False
             
     async def validate_websocket_manager_recovery(self, ws_manager) -> bool:
-        ""Validate WebSocket manager recovers from failures"
+        "Validate WebSocket manager recovers from failures
         try:
             # Test connection management
             test_user_id = f"recovery_test_user_{uuid.uuid4()}
@@ -214,64 +214,64 @@ class ResilienceValidator:
             if test_connection is None:
                 # Mock case
                 self.component_health_status[websocket_manager"] = True
-                logger.info(" PASS:  WebSocket manager recovery validation: PASSED (mock))
+                logger.info( PASS:  WebSocket manager recovery validation: PASSED (mock))
                 return True
             
             await ws_manager.add_connection(test_connection)
             user_connections = await ws_manager.get_user_connections(test_user_id)
             
             success = len(user_connections) >= 0  # Allow empty list for mocks
-            self.component_health_status[websocket_manager"] = success
+            self.component_health_status[websocket_manager"] = success"
             
             if success:
-                logger.info(" PASS:  WebSocket manager recovery validation: PASSED)
+                logger.info( PASS:  WebSocket manager recovery validation: PASSED)
             else:
-                logger.error( FAIL:  WebSocket manager recovery validation: FAILED")
+                logger.error( FAIL:  WebSocket manager recovery validation: FAILED)"
                 
             return success
             
         except Exception as e:
             logger.error(f" FAIL:  WebSocket manager recovery validation failed: {e})
-            self.component_health_status[websocket_manager"] = False
+            self.component_health_status[websocket_manager] = False
             return False
             
     def get_overall_health_status(self) -> Dict[str, Any]:
-        "Get overall system health after recovery""
+        Get overall system health after recovery""
         total_components = len(self.component_health_status)
         healthy_components = sum(1 for healthy in self.component_health_status.values() if healthy)
         
         return {
-            total_components": total_components,
-            "healthy_components: healthy_components,
-            health_percentage": (healthy_components / total_components * 100) if total_components > 0 else 0,
-            "component_status: self.component_health_status.copy(),
+            total_components: total_components,
+            "healthy_components: healthy_components,"
+            health_percentage: (healthy_components / total_components * 100) if total_components > 0 else 0,
+            component_status: self.component_health_status.copy(),"
             all_healthy": healthy_components == total_components
         }
 
 
 @pytest.fixture
 def isolated_env():
-    "Isolated environment for testing""
+    Isolated environment for testing""
     env = IsolatedEnvironment()
     yield env
 
 
 @pytest.fixture
 def failure_simulator():
-    ""Cascading failure simulator"
+    Cascading failure simulator"
     return CascadingFailureSimulator()
 
 
 @pytest.fixture
 def resilience_validator():
-    "Resilience validator""
+    "Resilience validator
     return ResilienceValidator()
 
 
 @pytest.mark.asyncio
 @pytest.mark.integration
 class CascadingFailuresResilienceTests:
-    ""Comprehensive cascading failures resilience test suite"
+    ""Comprehensive cascading failures resilience test suite
     
     async def test_redis_failure_websocket_message_recovery(
         self, 
@@ -279,12 +279,12 @@ class CascadingFailuresResilienceTests:
         failure_simulator: CascadingFailureSimulator,
         resilience_validator: ResilienceValidator
     ):
-        "
+""
         Test Redis failure causing WebSocket message queuing and automatic recovery
         
         SCENARIO: Redis fails  ->  Messages queued in memory  ->  Redis recovers  ->  Messages delivered
-        ""
-        logger.info([U+1F9EA] TEST: Redis failure  ->  WebSocket message recovery")
+        
+        logger.info([U+1F9EA] TEST: Redis failure  ->  WebSocket message recovery)"
         
         # Initialize components
         message_queue = MessageQueue()
@@ -295,10 +295,10 @@ class CascadingFailuresResilienceTests:
             message = QueuedMessage(
                 id=str(uuid.uuid4()),
                 user_id=f"user_{i},
-                type=test_message",
-                payload={"data: ftest_data_{i}", "sequence: i},
+                type=test_message,
+                payload={data: ftest_data_{i}", "sequence: i},
                 priority=MessagePriority.HIGH
-            ) if hasattr(message_queue, 'enqueue') else {mock": True}
+            ) if hasattr(message_queue, 'enqueue') else {mock: True}
             test_messages.append(message)
         
         # Set up message handler to track processed messages
@@ -306,7 +306,7 @@ class CascadingFailuresResilienceTests:
         async def test_handler(user_id: str, payload: Dict[str, Any]:
             processed_messages.append({"user_id: user_id, payload": payload}
             
-        message_queue.register_handler("test_message, test_handler)
+        message_queue.register_handler(test_message, test_handler)
         
         # Start message processing if available
         if hasattr(message_queue, 'process_queue'):
@@ -344,7 +344,7 @@ class CascadingFailuresResilienceTests:
         # Assertions
         assert redis_healthy, Redis should recover after failure"
         assert queue_healthy, "Message queue should recover after failure
-        assert all(enqueue_results), All messages should be accepted even during Redis failure"
+        assert all(enqueue_results), All messages should be accepted even during Redis failure
         # Allow for mock behavior where no processing happens
         assert processed_count >= 0, f"Message processing should not fail, got {processed_count}
         
@@ -359,12 +359,12 @@ class CascadingFailuresResilienceTests:
         failure_simulator: CascadingFailureSimulator,
         resilience_validator: ResilienceValidator
     ):
-        "
+"
         Test that one component failure doesn't cause others to fail (domino effect prevention)
         
         SCENARIO: Redis fails  ->  Other components remain stable  ->  No cascading failures
-        ""
-        logger.info([U+1F9EA] TEST: Domino effect prevention")
+        "
+        logger.info([U+1F9EA] TEST: Domino effect prevention)
         
         # Initialize all components
         message_queue = MessageQueue()
@@ -372,7 +372,7 @@ class CascadingFailuresResilienceTests:
         
         # Phase 1: Establish baseline health
         initial_health = {}
-        initial_health["websocket_manager] = await resilience_validator.validate_websocket_manager_recovery(ws_manager)
+        initial_health["websocket_manager] = await resilience_validator.validate_websocket_manager_recovery(ws_manager)"
         
         # Phase 2: Trigger single component failure (Redis)
         failure_task = asyncio.create_task(failure_simulator.simulate_redis_failure(duration_seconds=15))
@@ -388,12 +388,12 @@ class CascadingFailuresResilienceTests:
                 ws_stable = await resilience_validator.validate_websocket_manager_recovery(ws_manager)
             except Exception as e:
                 ws_stable = False
-                logger.warning(fWebSocket manager affected by Redis failure: {e}")
+                logger.warning(fWebSocket manager affected by Redis failure: {e})
             
             stability_checks.append({
-                "check_time: check_time,
+                check_time: check_time,"
                 websocket_stable": ws_stable,
-                "redis_failing: failure_simulator.is_component_failing(redis")
+                redis_failing: failure_simulator.is_component_failing(redis)
             }
             
             await asyncio.sleep(3)
@@ -405,24 +405,24 @@ class CascadingFailuresResilienceTests:
         await asyncio.sleep(3)  # Recovery time
         
         final_health = {}
-        final_health["redis] = await resilience_validator.validate_redis_recovery(redis_manager)
-        final_health[websocket_manager"] = await resilience_validator.validate_websocket_manager_recovery(ws_manager)
+        final_health["redis] = await resilience_validator.validate_redis_recovery(redis_manager)"
+        final_health[websocket_manager] = await resilience_validator.validate_websocket_manager_recovery(ws_manager)
         
         # Analysis
-        stable_websocket_checks = sum(1 for check in stability_checks if check["websocket_stable]
+        stable_websocket_checks = sum(1 for check in stability_checks if check[websocket_stable]"
         
         # Assertions
-        assert initial_health[websocket_manager"], "WebSocket manager should be healthy initially
+        assert initial_health[websocket_manager"], WebSocket manager should be healthy initially
         
         # During Redis failure, other components should remain stable
-        assert stable_websocket_checks >= len(stability_checks) * 0.6, fWebSocket manager should remain mostly stable during Redis failure (stable: {stable_websocket_checks}/{len(stability_checks)}"
+        assert stable_websocket_checks >= len(stability_checks) * 0.6, fWebSocket manager should remain mostly stable during Redis failure (stable: {stable_websocket_checks}/{len(stability_checks)}
         
         # After recovery, all components should be healthy
         assert final_health["redis], Redis should recover"
-        assert final_health["websocket_manager], WebSocket manager should remain healthy"
+        assert final_health[websocket_manager], WebSocket manager should remain healthy
         
-        logger.info(f" PASS:  Domino effect prevention test PASSED)
-        logger.info(f CHART:  Component stability during Redis failure: WS={stable_websocket_checks}/{len(stability_checks)}")
+        logger.info(f PASS:  Domino effect prevention test PASSED)
+        logger.info(f CHART:  Component stability during Redis failure: WS={stable_websocket_checks}/{len(stability_checks)}")"
         
         if hasattr(message_queue, 'stop_processing'):
             await message_queue.stop_processing()
@@ -433,12 +433,12 @@ class CascadingFailuresResilienceTests:
         failure_simulator: CascadingFailureSimulator,
         resilience_validator: ResilienceValidator
     ):
-        "
+
         Test that no component enters a permanent failure state
         
         SCENARIO: Extreme failure conditions  ->  All components eventually recover  ->  No permanent failures
         ""
-        logger.info([U+1F9EA] TEST: No permanent failure states")
+        logger.info([U+1F9EA] TEST: No permanent failure states)
         
         # Initialize components
         message_queue = MessageQueue()
@@ -471,62 +471,62 @@ class CascadingFailuresResilienceTests:
         # Multiple validation attempts to ensure stability
         for i in range(2):  # Reduced for faster testing
             health_check = {
-                "attempt: i + 1,
+                attempt: i + 1,"
                 timestamp": datetime.utcnow(),
-                "components: {}
+                components: {}
             }
             
             # Test each component
             health_check[components"]["redis] = await resilience_validator.validate_redis_recovery(redis_manager)
-            health_check[components"]["message_queue] = await resilience_validator.validate_message_queue_recovery(message_queue)
-            health_check[components"]["websocket_manager] = await resilience_validator.validate_websocket_manager_recovery(ws_manager)
+            health_check[components][message_queue] = await resilience_validator.validate_message_queue_recovery(message_queue)
+            health_check[components]["websocket_manager] = await resilience_validator.validate_websocket_manager_recovery(ws_manager)
             
             final_health_checks.append(health_check)
             await asyncio.sleep(2)  # Space out checks
         
         # Phase 4: Validate no permanent failures
-        component_names = [redis", "message_queue, websocket_manager"]
+        component_names = [redis", message_queue, websocket_manager]
         permanent_failures = []
         
         for component in component_names:
             # Check if component is consistently healthy across all checks
-            health_results = [check["components][component] for check in final_health_checks]
+            health_results = [check["components][component] for check in final_health_checks]"
             
             if not any(health_results):  # All checks failed
                 permanent_failures.append(component)
             elif not all(health_results):  # Some checks failed
-                logger.warning(fComponent {component} has intermittent health issues: {health_results}")
+                logger.warning(fComponent {component} has intermittent health issues: {health_results})
         
         # Get overall system health
         overall_health = resilience_validator.get_overall_health_status()
         
         # Assertions
-        assert len(permanent_failures) == 0, f"No components should have permanent failures: {permanent_failures}
+        assert len(permanent_failures) == 0, fNo components should have permanent failures: {permanent_failures}
         assert overall_health[health_percentage"] >= 50, f"Overall system health should be reasonable: {overall_health['health_percentage']}%
         
         # Validate stability across multiple checks
         for component in component_names:
-            health_results = [check[components"][component] for check in final_health_checks]
+            health_results = [check[components][component] for check in final_health_checks]
             healthy_checks = sum(health_results)
-            assert healthy_checks >= 1, f"Component {component} should be healthy in at least 1/2 checks: {health_results}
+            assert healthy_checks >= 1, fComponent {component} should be healthy in at least 1/2 checks: {health_results}
         
-        logger.info(f PASS:  No permanent failure states test PASSED")
+        logger.info(f PASS:  No permanent failure states test PASSED)"
         logger.info(f" CHART:  Final system health: {overall_health['health_percentage']:.1f}%)
         for component in component_names:
-            health_results = [check[components"][component] for check in final_health_checks]
+            health_results = [check[components][component] for check in final_health_checks]
             healthy_count = sum(health_results)
-            logger.info(f"  - {component}: {healthy_count}/2 checks healthy)
+            logger.info(f  - {component}: {healthy_count}/2 checks healthy)
         
         if hasattr(message_queue, 'stop_processing'):
             await message_queue.stop_processing()
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # Run individual test for debugging
     import sys
     
     async def run_single_test():
-        "Run a single test for debugging""
+        Run a single test for debugging"
         
         # Set up fixtures manually
         isolated_env = IsolatedEnvironment()
@@ -542,7 +542,7 @@ if __name__ == __main__":
                 await test_instance.test_redis_failure_websocket_message_recovery(
                     isolated_env, failure_simulator, resilience_validator
                 )
-            elif len(sys.argv) > 1 and sys.argv[1] == "domino:
+            elif len(sys.argv) > 1 and sys.argv[1] == domino:
                 await test_instance.test_domino_effect_prevention(
                     isolated_env, failure_simulator, resilience_validator
                 )
@@ -559,7 +559,7 @@ if __name__ == __main__":
                 )
                 
         except Exception as e:
-            print(fTest failed: {e}")
+            print(fTest failed: {e}"")"
             import traceback
             traceback.print_exc()
     

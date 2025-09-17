@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 
 
 class DockerComplianceAuditor:
-    "Audits codebase for Docker management compliance""
+    "Audits codebase for Docker management compliance
 
     # Files that are allowed to have docker-compose references for documentation
     DOCUMENTATION_EXCEPTIONS = {
@@ -91,7 +91,7 @@ class DockerComplianceAuditor:
         self.manager = get_default_manager()
 
     def audit_file_for_docker_commands(self, file_path: Path) -> List[Dict]:
-        ""Check a file for direct docker/docker-compose commands"
+        ""Check a file for direct docker/docker-compose commands
         violations = []
 
     # Skip non-Python and non-script files for command analysis
@@ -101,7 +101,7 @@ class DockerComplianceAuditor:
         try:
         with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
         content = f.read()
-        lines = content.split(" )
+        lines = content.split( )"
         )
 
         for line_num, line in enumerate(lines, 1):
@@ -110,12 +110,12 @@ class DockerComplianceAuditor:
         continue
 
                         # Check for subprocess calls to docker/docker-compose
-        if re.search(rsubprocess\.(run|call|check_call|check_output|Popen)\s*\([^)]*["\"]docker(-compose)?[\s], line):
+        if re.search(rsubprocess\.(run|call|check_call|check_output|Popen)\s*\([^)]*["\]docker(-compose)?[\s], line):
                             # Check if it's using UnifiedDockerManager context
         context_start = max(0, line_num - 10)
         context_end = min(len(lines), line_num + 10)
-        context = "
-        ".join(lines[context_start:context_end]
+        context = 
+        ".join(lines[context_start:context_end]"
 
         if 'UnifiedDockerManager' not in context and 'get_default_manager' not in context:
         violations.append({}
@@ -126,7 +126,7 @@ class DockerComplianceAuditor:
                                 
 
                                 # Check for os.system calls to docker
-        if re.search(ros\.system\s*\([^)]*[\"]docker(-compose)?[\s"], line):
+        if re.search(ros\.system\s*\([^)]*[\]docker(-compose)?[\s], line):
         violations.append({}
         'file': str(file_path.relative_to(self.project_root)),
         'line': line_num,
@@ -146,12 +146,12 @@ class DockerComplianceAuditor:
                                             
 
         except Exception as e:
-        logger.warning(formatted_string")
+        logger.warning(formatted_string)"
 
         return violations
 
     def verify_unified_manager_usage(self, file_path: Path) -> bool:
-        "Verify that a file properly uses UnifiedDockerManager""
+        "Verify that a file properly uses UnifiedDockerManager
         if file_path.suffix != '.py':
         return True
 
@@ -180,11 +180,11 @@ class DockerComplianceAuditor:
         return True
 
         except Exception as e:
-        logger.warning(formatted_string")
+        logger.warning(formatted_string")"
         return True
 
     def audit_frontend_service_integration(self) -> Dict:
-        "Verify frontend service is properly integrated in UnifiedDockerManager""
+        Verify frontend service is properly integrated in UnifiedDockerManager"
         results = {
         'frontend_in_configs': False,
         'frontend_in_health_checks': False,
@@ -207,7 +207,7 @@ class DockerComplianceAuditor:
         results['frontend_in_health_checks'] = True
 
                     # Check port mappings
-        if '"frontend: 3000' in content or 'frontend': 3000" in content:
+        if 'frontend: 3000' in content or 'frontend': 3000 in content:
         results['frontend_in_port_mappings'] = True
 
                         # Check for frontend Dockerfile
@@ -218,8 +218,8 @@ class DockerComplianceAuditor:
         return results
 
     def run_audit(self) -> Dict:
-        "Run complete Docker compliance audit""
-        logger.info( SEARCH:  Starting Docker Management Compliance Audit...")
+        "Run complete Docker compliance audit"
+        logger.info( SEARCH:  Starting Docker Management Compliance Audit...)"
 
     # Find all relevant files
         patterns = ['**/*.py', '**/*.sh', '**/*.bat', '**/*.ps1']
@@ -271,36 +271,36 @@ class DockerComplianceAuditor:
         return report
 
     def generate_remediation_script(self) -> str:
-        "Generate a script to fix violations""
+        "Generate a script to fix violations
         script = []
-        script.append(#!/usr/bin/env python3")
-        script.append("# Auto-generated Docker compliance remediation script)
-        script.append(")
+        script.append(#!/usr/bin/env python3")"
+        script.append(# Auto-generated Docker compliance remediation script)
+        script.append()"
         script.append("import sys)
-        script.append(from pathlib import Path")
-        script.append("sys.path.insert(0, str(Path(__file__).parent.parent)))
+        script.append(from pathlib import Path)
+        script.append("sys.path.insert(0, str(Path(__file__).parent.parent)))"
+        script.append()
+        script.append(from test_framework.unified_docker_manager import get_default_manager)"
         script.append(")
-        script.append("from test_framework.unified_docker_manager import get_default_manager)
-        script.append(")
-        script.append("# Initialize central Docker manager)
-        script.append(manager = get_default_manager()")
-        script.append(")
+        script.append(# Initialize central Docker manager)
+        script.append(manager = get_default_manager()")"
+        script.append()
 
     # Add remediation for each violation type
         for violation in self.violations:
         if violation['type'] == 'subprocess_docker_call':
-        script.append(formatted_string")
-        script.append("formatted_string)
-        script.append(# With: manager.execute_docker_command(...)")
+        script.append(formatted_string)"
+        script.append("
+        script.append(# With: manager.execute_docker_command(...))"
         script.append(")
 
         return 
-        ".join(script)
+        .join(script)
 
 
         @dataclass
 class ComplianceMetrics:
-        "Metrics for Docker compliance auditing.""
+        "Metrics for Docker compliance auditing."
         total_files_scanned: int = 0
         violations_detected: int = 0
         compliance_score: float = 0.0
@@ -313,16 +313,16 @@ class ComplianceMetrics:
 
 
 class DockerComplianceInfrastructureTests:
-        ""Infrastructure tests for Docker compliance auditing."
+        "Infrastructure tests for Docker compliance auditing."
 
     def __init__(self):
         pass
-        self.logger = logging.getLogger("formatted_string)
+        self.logger = logging.getLogger("
         self.project_root = project_root
 
     def test_compliance_audit_performance_scalability(self) -> ComplianceMetrics:
-        ""Test performance and scalability of compliance auditing."
-        self.logger.info(" CHART:  Testing compliance audit performance scalability)
+        "Test performance and scalability of compliance auditing.
+        self.logger.info(" CHART:  Testing compliance audit performance scalability)"
 
         initial_memory = psutil.virtual_memory().used / (1024 * 1024)
         start_time = time.time()
@@ -349,25 +349,25 @@ class DockerComplianceInfrastructureTests:
         files_per_second = metrics.total_files_scanned / (audit_duration / 1000) if audit_duration > 0 else 0
         memory_per_file = memory_usage / metrics.total_files_scanned if metrics.total_files_scanned > 0 else 0
 
-        self.logger.info(f PASS:  Compliance audit performance:")
-        self.logger.info("formatted_string)
-        self.logger.info(formatted_string")
-        self.logger.info("formatted_string)
-        self.logger.info(formatted_string")
-        self.logger.info("formatted_string)
-        self.logger.info(formatted_string")
-        self.logger.info("formatted_string)
+        self.logger.info(f PASS:  Compliance audit performance:)
+        self.logger.info(""
+        self.logger.info(formatted_string)
+        self.logger.info(""
+        self.logger.info(formatted_string)
+        self.logger.info(""
+        self.logger.info(formatted_string)
+        self.logger.info(""
 
     # Performance assertions
-        assert files_per_second > 50, formatted_string"
-        assert memory_per_file < 0.5, "formatted_string
+        assert files_per_second > 50, formatted_string
+        assert memory_per_file < 0.5, formatted_string"
         assert audit_duration < 30000, formatted_string"
 
         return metrics
 
     def test_compliance_violation_detection_accuracy(self) -> Dict[str, Any]:
-        "Test accuracy of compliance violation detection.""
-        self.logger.info( SEARCH:  Testing compliance violation detection accuracy")
+        Test accuracy of compliance violation detection.""
+        self.logger.info( SEARCH:  Testing compliance violation detection accuracy)
 
     # Create test files with known violations and compliant code
         test_cases = self._create_compliance_test_cases()
@@ -375,7 +375,7 @@ class DockerComplianceInfrastructureTests:
         detection_results = []
         for test_case in test_cases:
         # Write test file
-        test_file = self.project_root / "temp_compliance_test.py
+        test_file = self.project_root / temp_compliance_test.py"
         try:
         with open(test_file, 'w') as f:
         f.write(test_case['code']
@@ -415,15 +415,15 @@ class DockerComplianceInfrastructureTests:
         false_negative_rate = (total_false_negatives / total_tests) if total_tests > 0 else 0
 
         self.logger.info(f PASS:  Violation detection accuracy:")
-        self.logger.info("formatted_string)
+        self.logger.info("
         self.logger.info(formatted_string")
-        self.logger.info("formatted_string)
+        self.logger.info("
         self.logger.info(formatted_string")
 
                         # Accuracy assertions
-        assert accuracy_rate >= 90, "formatted_string
-        assert false_positive_rate <= 0.1, formatted_string"
-        assert false_negative_rate <= 0.05, "formatted_string
+        assert accuracy_rate >= 90, formatted_string
+        assert false_positive_rate <= 0.1, formatted_string""
+        assert false_negative_rate <= 0.05, formatted_string
 
         return {
         'accuracy_rate': accuracy_rate,
@@ -433,8 +433,8 @@ class DockerComplianceInfrastructureTests:
                         
 
     def test_automated_remediation_effectiveness(self) -> Dict[str, Any]:
-        ""Test effectiveness of automated compliance remediation."
-        self.logger.info("[U+1F527] Testing automated remediation effectiveness)
+        "Test effectiveness of automated compliance remediation."
+        self.logger.info([U+1F527] Testing automated remediation effectiveness)
 
     # Create files with known violations
         violations_created = []
@@ -444,19 +444,19 @@ class DockerComplianceInfrastructureTests:
         {
         'name': 'subprocess_docker_call',
         code": "import subprocess
-        subprocess.run([docker, "ps"],
+        subprocess.run([docker, ps],
         'expected_fix': 'manager.execute_docker_command'
         },
         {
         'name': 'os_system_docker_call',
-        code": "import os
+        code: "import os
         os.system(docker-compose up)",
         'expected_fix': 'manager.docker_compose_command'
     
     
 
         for violation in test_violations:
-        test_file = self.project_root / "formatted_string
+        test_file = self.project_root / formatted_string
         try:
             # Create violation
         with open(test_file, 'w') as f:
@@ -498,14 +498,14 @@ class DockerComplianceInfrastructureTests:
 
         effectiveness_rate = (successful_remediations / total_remediations) * 100 if total_remediations > 0 else 0
 
-        self.logger.info(f PASS:  Automated remediation effectiveness:")
-        self.logger.info("formatted_string)
-        self.logger.info(formatted_string")
-        self.logger.info("formatted_string)
+        self.logger.info(f PASS:  Automated remediation effectiveness:)
+        self.logger.info(""
+        self.logger.info(formatted_string)
+        self.logger.info(""
 
                         # Effectiveness assertions
-        assert effectiveness_rate >= 80, formatted_string"
-        assert avg_quality >= 6.0, "formatted_string
+        assert effectiveness_rate >= 80, formatted_string
+        assert avg_quality >= 6.0, formatted_string"
 
         return {
         'effectiveness_rate': effectiveness_rate,
@@ -514,13 +514,13 @@ class DockerComplianceInfrastructureTests:
                         
 
     def test_continuous_monitoring_performance(self) -> Dict[str, Any]:
-        ""Test performance of continuous compliance monitoring."
-        self.logger.info(" CHART:  Testing continuous compliance monitoring)
+        "Test performance of continuous compliance monitoring.
+        self.logger.info(" CHART:  Testing continuous compliance monitoring)"
 
         monitoring_results = []
 
     def compliance_monitoring_cycle(cycle_id: int) -> Dict[str, Any]:
-        ""Single monitoring cycle for performance testing."
+        Single monitoring cycle for performance testing."
         start_time = time.time()
         initial_memory = psutil.virtual_memory().used / (1024 * 1024)
 
@@ -597,20 +597,20 @@ class DockerComplianceInfrastructureTests:
 
         success_rate = (len(successful_cycles) / len(monitoring_results)) * 100 if monitoring_results else 0
 
-        self.logger.info(f PASS:  Continuous monitoring performance:")
-        self.logger.info("formatted_string)
-        self.logger.info(formatted_string")
-        self.logger.info("formatted_string)
-        self.logger.info(formatted_string")
-        self.logger.info("formatted_string)
-        self.logger.info(formatted_string")
-        self.logger.info("formatted_string)
+        self.logger.info(f PASS:  Continuous monitoring performance:)
+        self.logger.info(""
+        self.logger.info(formatted_string)
+        self.logger.info(""
+        self.logger.info(formatted_string)
+        self.logger.info(""
+        self.logger.info(formatted_string)
+        self.logger.info(""
 
                                             # Performance assertions
-        assert success_rate >= 95, formatted_string"
-        assert avg_monitoring_time < 1000, "formatted_string
-        assert max_monitoring_time < 5000, formatted_string"
-        assert failed_cycles == 0, "formatted_string
+        assert success_rate >= 95, formatted_string
+        assert avg_monitoring_time < 1000, "formatted_string"
+        assert max_monitoring_time < 5000, formatted_string
+        assert failed_cycles == 0, formatted_string"
 
         return {
         'success_rate': success_rate,
@@ -622,8 +622,8 @@ class DockerComplianceInfrastructureTests:
                                             
 
     def test_risk_assessment_and_impact_analysis(self) -> Dict[str, Any]:
-        ""Test risk assessment and impact analysis for compliance violations."
-        self.logger.info(" WARNING: [U+FE0F] Testing risk assessment and impact analysis)
+        "Test risk assessment and impact analysis for compliance violations.
+        self.logger.info(" WARNING: [U+FE0F] Testing risk assessment and impact analysis)"
 
     # Run compliance audit to get current violations
         auditor = DockerComplianceAuditor()
@@ -708,19 +708,19 @@ class DockerComplianceInfrastructureTests:
                                 # Assume 1 hour per effort unit
         estimated_remediation_hours = total_remediation_effort
 
-        self.logger.info(f PASS:  Risk assessment and impact analysis:")
-        self.logger.info("formatted_string)
-        self.logger.info(formatted_string")
-        self.logger.info("formatted_string)
-        self.logger.info(formatted_string")
+        self.logger.info(f PASS:  Risk assessment and impact analysis:)
+        self.logger.info(""
+        self.logger.info(formatted_string)
+        self.logger.info(""
+        self.logger.info(formatted_string)
 
                                 # Log violation breakdown
         for violation_type, count in violation_counts.items():
-        self.logger.info("formatted_string)
+        self.logger.info(""
 
                                     # Risk assertions - adjust based on acceptable risk levels
-        assert overall_risk_level in ['LOW', 'MEDIUM'], formatted_string"
-        assert avg_risk_score < 7.0, "formatted_string
+        assert overall_risk_level in ['LOW', 'MEDIUM'], formatted_string
+        assert avg_risk_score < 7.0, formatted_string"
         assert estimated_remediation_hours < 40, formatted_string"
 
         return {
@@ -733,8 +733,8 @@ class DockerComplianceInfrastructureTests:
                                     
 
     def test_cross_platform_compliance_validation(self) -> Dict[str, Any]:
-        "Test compliance validation across different platforms.""
-        self.logger.info([U+1F310] Testing cross-platform compliance validation")
+        Test compliance validation across different platforms.""
+        self.logger.info([U+1F310] Testing cross-platform compliance validation)
 
         platform_results = {}
         current_platform = os.name
@@ -817,19 +817,19 @@ class DockerComplianceInfrastructureTests:
 
         cross_platform_compliance = ((total_files_checked - total_violations) / total_files_checked * 100) if total_files_checked > 0 else 100
 
-        self.logger.info(f" PASS:  Cross-platform compliance validation:)
-        self.logger.info(formatted_string")
-        self.logger.info("formatted_string)
-        self.logger.info(formatted_string")
-        self.logger.info("formatted_string)
+        self.logger.info(f PASS:  Cross-platform compliance validation:)
+        self.logger.info(formatted_string")"
+        self.logger.info(
+        self.logger.info(formatted_string")"
+        self.logger.info(
 
                                                 # Log platform-specific results
         for pattern, result in platform_results.items():
         if 'error' not in result:
-        self.logger.info(formatted_string")
+        self.logger.info(formatted_string")"
 
                                                         # Cross-platform assertions
-        assert cross_platform_compliance >= 95, "formatted_string
+        assert cross_platform_compliance >= 95, formatted_string
 
                                                         # Ensure at least one Docker Compose file exists
         existing_compose_files = [item for item in []]
@@ -846,7 +846,7 @@ class DockerComplianceInfrastructureTests:
 
                                                         # Helper methods
     def _categorize_violations(self, violations: List[Dict] -> Dict[str, int]:
-        "Categorize violations by type.""
+        "Categorize violations by type.
         categories = {}
         for violation in violations:
         violation_type = violation.get('type', 'unknown')
@@ -854,45 +854,45 @@ class DockerComplianceInfrastructureTests:
         return categories
 
     def _create_compliance_test_cases(self) -> List[Dict[str, Any]]:
-        ""Create test cases for compliance violation detection."
+        ""Create test cases for compliance violation detection.
         return [
         {
         'name': 'compliant_code',
-        "code: from test_framework.unified_docker_manager import get_default_manager
+        code: from test_framework.unified_docker_manager import get_default_manager"
         manager = get_default_manager()
         manager.start_services()",
         'expected_violations': 0
         },
         {
         'name': 'subprocess_violation',
-        "code: import subprocess
-        subprocess.run(["docker", ps]",
+        code: import subprocess
+        subprocess.run(["docker", ps],
         'expected_violations': 1
         },
         {
         'name': 'os_system_violation',
-        "code: import os
-        os.system("docker-compose up -d"),
+        code: import os"
+        os.system("docker-compose up -d),
         'expected_violations': 1
         },
         {
         'name': 'multiple_violations',
-        code": "import subprocess
+        code: import subprocess
         import os
         subprocess.run([docker, "ps"]
-        os.system(docker stop container)",
+        os.system(docker stop container),
         'expected_violations': 2
         },
         {
         'name': 'commented_violation',
-        "code: # subprocess.run(["docker", ps]
-        print("This is fine"),
+        code: # subprocess.run(["docker", ps]
+        print(This is fine),
         'expected_violations': 0
     
     
 
-    def _assess_remediation_quality(self, original_code: str, remediation_script: str, expected_fix: str) -> Dict[str, Any]:
-        ""Assess the quality of generated remediation script."
+    def _assess_remediation_quality(self, original_code: str, remediation_script: str, expected_fix: str") -> Dict[str, Any]:
+        "Assess the quality of generated remediation script.
 
     # Basic quality indicators
         quality_score = 0
@@ -919,28 +919,28 @@ class DockerComplianceInfrastructureTests:
 
 
     def test_docker_compliance():
-        "Main test function for Docker compliance""
+        "Main test function for Docker compliance"
         auditor = DockerComplianceAuditor()
         report = auditor.run_audit()
 
     # Print report
-        print(")
-        " + =*80)
+        print(")"
+         + =*80)
         print("DOCKER MANAGEMENT COMPLIANCE AUDIT REPORT")
         print(=*80)
-        print("")
-        print(formatted_string)
-        print("")
+        print()
+        print(formatted_string")
+        print(")
         print(formatted_string)
 
-        print("")
+        print(")
         [U+1F4E6] Frontend Service Integration Status:)
-        for key, value in report['frontend_integration'].items():
-        status =  PASS: " if value else " FAIL: 
-        print(formatted_string")
+        for key, value in report['frontend_integration'].items("):
+        status =  PASS:  if value else  FAIL: 
+        print(formatted_string")"
 
         if report['violations']:
-        print(")
+        print()
         WARNING: [U+FE0F] Violations Found (showing first 10):)
         for v in report['violations'][:10]:
         print("")
@@ -952,29 +952,29 @@ class DockerComplianceInfrastructureTests:
         script_path = auditor.project_root / 'scripts' / 'docker_compliance_remediation.py'
         with open(script_path, 'w') as f:
         f.write(remediation_script)
-        print("")
+        print()
 
                         # Fail test if compliance score is below threshold
         assert report['compliance_score'] >= 95, formatted_string
 
                         # Verify frontend integration
         frontend_checks = report['frontend_integration']
-        assert all(frontend_checks.values()), ""
+        assert all(frontend_checks.values()"), "
 
         print()
-        PASS:  Docker Management Compliance Test PASSED")
+        PASS:  Docker Management Compliance Test PASSED)
         return True
 
 
-        if __name__ == "__main__:
+        if __name__ == "__main__:"
         try:
         success = test_docker_compliance()
         sys.exit(0 if success else 1)
         except AssertionError as e:
-        logger.error(formatted_string")
+        logger.error(formatted_string)
         sys.exit(1)
         except Exception as e:
-        logger.error("")
+        logger.error(")
         sys.exit(1)
         pass
 )

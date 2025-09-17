@@ -15,7 +15,7 @@ Business Value:
 
 SSOT Reference: netra_backend/app/services/database/message_repository.py
 Violation Location: test_framework/ssot/database.py:596
-""
+"
 
 import asyncio
 import json
@@ -47,12 +47,12 @@ logger = central_logger.get_logger(__name__)
 
 
 class SSotMessageRepositoryComplianceTests:
-    ""
+    "
     Mission Critical Test Suite: SSOT Message Repository Compliance
     
     These tests are designed to FAIL when the SSOT violation exists,
     and PASS after proper remediation is applied.
-    "
+"
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs) if hasattr(super(), '__init__') else None
@@ -60,35 +60,35 @@ class SSotMessageRepositoryComplianceTests:
         self.db_helper = DatabaseTestUtilities(service="netra_backend)
         
     async def setup_method(self):
-        ""Setup for each test with clean database state."
+        Setup for each test with clean database state.""
         # Ensure we have a test thread for message operations
-        self.test_thread_id = f"thread_{uuid.uuid4().hex[:8]}
+        self.test_thread_id = fthread_{uuid.uuid4().hex[:8]}
         
         # Clean up any existing test data
         await self._cleanup_test_data()
         
-        logger.info(fSSOT Test Setup Complete - Thread ID: {self.test_thread_id}")
+        logger.info(fSSOT Test Setup Complete - Thread ID: {self.test_thread_id})
         
     async def teardown_method(self):
-        "Clean up test data.""
+        "Clean up test data."
         await self._cleanup_test_data()
         
     async def _cleanup_test_data(self):
-        ""Remove test data from database."
+        "Remove test data from database."
         async with self.db_helper.get_async_session() as session:
             # Clean messages
             await session.execute(
-                text("DELETE FROM message WHERE thread_id LIKE :pattern),
+                text(DELETE FROM message WHERE thread_id LIKE :pattern),
                 {pattern": f"{self.test_thread_id}%}
             # Clean threads  
             await session.execute(
-                text(DELETE FROM thread WHERE id LIKE :pattern"),
-                {"pattern: f{self.test_thread_id}%"}
+                text(DELETE FROM thread WHERE id LIKE :pattern),
+                {pattern: f{self.test_thread_id}%}
             await session.commit()
             
     @pytest.mark.asyncio
     async def test_ssot_message_creation_structure_compliance(self):
-        "
+    ""
         CRITICAL TEST: Validate SSOT message creation produces proper structure.
         
         This test EXPOSES the violation by comparing:
@@ -96,17 +96,17 @@ class SSotMessageRepositoryComplianceTests:
         2. Messages created via test framework's direct session.add() violation
         
         EXPECTED BEHAVIOR: Test should FAIL initially due to structure differences.
-        ""
-        logger.info(=== SSOT MESSAGE STRUCTURE COMPLIANCE TEST ===")
+        
+        logger.info(=== SSOT MESSAGE STRUCTURE COMPLIANCE TEST ===")"
         
         async with self.db_helper.get_async_session() as session:
             # 1. Create message using PROPER SSOT method (MessageRepository)
             ssot_message = await self.message_repository.create_message(
                 db=session,
                 thread_id=self.test_thread_id,
-                role="user,
-                content=SSOT test message",
-                metadata={"test_source: ssot_repository"}
+                role=user,
+                content=SSOT test message,"
+                metadata={"test_source: ssot_repository}
             await session.commit()
             
             # 2. Create message using TEST FRAMEWORK (which has SSOT violation)
@@ -114,20 +114,20 @@ class SSotMessageRepositoryComplianceTests:
             violation_message = await self.db_helper.create_test_message(
                 session=session,
                 thread_id=self.test_thread_id,
-                role="user, 
-                content=[{type": "text, text": {"value: Test framework violation message"}}],
-                metadata_={"test_source: test_framework"}
+                role=user, 
+                content=[{type": "text, text: {value: Test framework violation message}}],"
+                metadata_={"test_source: test_framework}
             
             # 3. CRITICAL COMPARISON - These should be IDENTICAL in structure
             # If they differ, it exposes the SSOT violation
             
             # Validate SSOT message structure (proper format)
-            self.assertIsNotNone(ssot_message, "SSOT repository should create message)
+            self.assertIsNotNone(ssot_message, SSOT repository should create message)
             self.assertEqual(ssot_message.object, thread.message", "SSOT message should have proper object type)
-            self.assertIsInstance(ssot_message.content, list, SSOT message content should be list")
-            self.assertEqual(len(ssot_message.content), 1, "SSOT message should have one content item)
-            self.assertEqual(ssot_message.content[0][type"], "text, SSOT content should be text type")
-            self.assertIn("value, ssot_message.content[0][text"], "SSOT text should have value field)
+            self.assertIsInstance(ssot_message.content, list, SSOT message content should be list)
+            self.assertEqual(len(ssot_message.content), 1, SSOT message should have one content item)"
+            self.assertEqual(ssot_message.content[0][type"], text, SSOT content should be text type)
+            self.assertIn("value, ssot_message.content[0][text"], SSOT text should have value field)
             
             # Validate violation message structure (will be different due to violation)
             # This part will expose the violation by showing structural differences
@@ -144,7 +144,7 @@ class SSotMessageRepositoryComplianceTests:
                     violation_db_message = msg
                     break
                     
-            self.assertIsNotNone(violation_db_message, Test framework should create message")
+            self.assertIsNotNone(violation_db_message, Test framework should create message)"
             
             # CRITICAL ASSERTION: Structure should be IDENTICAL (will FAIL due to violation)
             self.assertEqual(
@@ -156,32 +156,32 @@ class SSotMessageRepositoryComplianceTests:
             self.assertEqual(
                 type(ssot_message.content),
                 type(violation_db_message.content),
-                SSOT VIOLATION DETECTED: content type mismatch between SSOT and test framework"
+                SSOT VIOLATION DETECTED: content type mismatch between SSOT and test framework
             )
             
             # This assertion will FAIL and expose the violation
             self.assertEqual(
-                ssot_message.content[0]["type] if ssot_message.content else None,
-                violation_db_message.content[0][type"] if violation_db_message.content else None,
-                "SSOT VIOLATION DETECTED: content structure differs between SSOT repository and test framework
+                ssot_message.content[0]["type] if ssot_message.content else None,"
+                violation_db_message.content[0][type] if violation_db_message.content else None,
+                SSOT VIOLATION DETECTED: content structure differs between SSOT repository and test framework"
             )
             
         logger.info(SSOT Message Structure Compliance Test Completed")
         
     @pytest.mark.asyncio  
     async def test_ssot_message_metadata_consistency(self):
-        "
+    "
         CRITICAL TEST: Validate metadata handling consistency.
         
         This test exposes violations in metadata field handling between
         the proper SSOT repository and the test framework violation.
-        ""
-        logger.info(=== SSOT MESSAGE METADATA CONSISTENCY TEST ===")
+        "
+        logger.info(=== SSOT MESSAGE METADATA CONSISTENCY TEST ===)
         
         test_metadata = {
             "source: compliance_test",
-            "priority: high",
-            "tags: [ssot", "validation]
+            priority: high,
+            tags: [ssot", "validation]
         }
         
         async with self.db_helper.get_async_session() as session:
@@ -189,8 +189,8 @@ class SSotMessageRepositoryComplianceTests:
             ssot_message = await self.message_repository.create_message(
                 db=session,
                 thread_id=self.test_thread_id,
-                role=assistant", 
-                content="SSOT metadata test,
+                role=assistant, 
+                content="SSOT metadata test,"
                 metadata=test_metadata
             )
             await session.commit()
@@ -198,8 +198,8 @@ class SSotMessageRepositoryComplianceTests:
             # 2. Create via test framework (violation)
             await self.db_helper.create_message(
                 thread_id=self.test_thread_id,
-                role=assistant",
-                content="Violation metadata test, 
+                role=assistant,
+                content=Violation metadata test, "
                 metadata=test_metadata
             )
             
@@ -210,7 +210,7 @@ class SSotMessageRepositoryComplianceTests:
             )
             messages = all_messages.scalars().all()
             
-            self.assertEqual(len(messages), 2, "Should have two assistant messages)
+            self.assertEqual(len(messages), 2, Should have two assistant messages)
             
             # Find SSOT vs violation messages
             ssot_msg = next(msg for msg in messages if msg.id == ssot_message.id)
@@ -220,7 +220,7 @@ class SSotMessageRepositoryComplianceTests:
             self.assertEqual(
                 ssot_msg.metadata_,
                 violation_msg.metadata_,
-                SSOT VIOLATION DETECTED: Metadata handling differs between SSOT and test framework"
+                SSOT VIOLATION DETECTED: Metadata handling differs between SSOT and test framework""
             )
             
             # Validate specific metadata fields
@@ -231,24 +231,24 @@ class SSotMessageRepositoryComplianceTests:
                 self.assertEqual(
                     ssot_value,
                     violation_value, 
-                    f"SSOT VIOLATION DETECTED: Metadata field '{key}' differs between SSOT and test framework
+                    fSSOT VIOLATION DETECTED: Metadata field '{key}' differs between SSOT and test framework
                 )
                 
-        logger.info(SSOT Message Metadata Consistency Test Completed")
+        logger.info(SSOT Message Metadata Consistency Test Completed)
         
     @pytest.mark.asyncio
     async def test_ssot_message_field_completeness(self):
-        "
+    ""
         CRITICAL TEST: Validate all required fields are set properly.
         
         This test ensures the SSOT repository creates complete message records
         while exposing any field omissions in the test framework violation.
-        ""
-        logger.info(=== SSOT MESSAGE FIELD COMPLETENESS TEST ===")
+        
+        logger.info(=== SSOT MESSAGE FIELD COMPLETENESS TEST ===")"
         
         required_fields = [
-            "id, object", "created_at, thread_id", "role, 
-            content", "assistant_id, run_id", "file_ids, metadata_"
+            id, object, created_at, thread_id", "role, 
+            content, assistant_id, run_id", "file_ids, metadata_
         ]
         
         async with self.db_helper.get_async_session() as session:
@@ -256,10 +256,10 @@ class SSotMessageRepositoryComplianceTests:
             ssot_message = await self.message_repository.create_message(
                 db=session,
                 thread_id=self.test_thread_id,
-                role="user,
+                role=user,"
                 content=Field completeness test",
-                assistant_id="asst_test,
-                run_id=run_test"
+                assistant_id=asst_test,
+                run_id=run_test""
             )
             await session.commit()
             
@@ -268,29 +268,29 @@ class SSotMessageRepositoryComplianceTests:
                 field_value = getattr(ssot_message, field, None)
                 
                 # Critical assertions for proper SSOT structure
-                if field == "object:
-                    self.assertEqual(field_value, thread.message", f"Field '{field}' should be 'thread.message')
-                elif field == content":
-                    self.assertIsInstance(field_value, list, f"Field '{field}' should be list)
-                    self.assertGreater(len(field_value), 0, fField '{field}' should not be empty")
-                elif field == "file_ids:
-                    self.assertIsInstance(field_value, list, fField '{field}' should be list")
-                elif field == "metadata_:
+                if field == object:
+                    self.assertEqual(field_value, thread.message, f"Field '{field}' should be 'thread.message')
+                elif field == content:"
+                    self.assertIsInstance(field_value, list, fField '{field}' should be list)
+                    self.assertGreater(len(field_value), 0, fField '{field}' should not be empty)
+                elif field == "file_ids:"
+                    self.assertIsInstance(field_value, list, fField '{field}' should be list)
+                elif field == metadata_:"
                     self.assertIsInstance(field_value, dict, fField '{field}' should be dict")
-                elif field in ["id, thread_id"]:
+                elif field in [id, thread_id]:
                     self.assertIsNotNone(field_value, f"Field '{field}' should not be None)
                     self.assertIsInstance(field_value, str, fField '{field}' should be string")
-                elif field == "created_at:
-                    self.assertIsNotNone(field_value, fField '{field}' should not be None")
-                    self.assertIsInstance(field_value, int, f"Field '{field}' should be integer timestamp)
+                elif field == created_at:
+                    self.assertIsNotNone(field_value, fField '{field}' should not be None")"
+                    self.assertIsInstance(field_value, int, fField '{field}' should be integer timestamp)
                     
             # Now test the framework violation path
             await self.db_helper.create_message(
                 thread_id=self.test_thread_id,
-                role=user",
-                content="Framework violation test,
-                assistant_id=asst_test",
-                run_id="run_test
+                role=user,
+                content="Framework violation test,"
+                assistant_id=asst_test,
+                run_id=run_test"
             )
             
             # Get the violation message
@@ -311,28 +311,28 @@ class SSotMessageRepositoryComplianceTests:
                 self.assertEqual(
                     type(ssot_value),
                     type(violation_value),
-                    f"SSOT VIOLATION DETECTED: Field '{field}' type differs between SSOT and test framework
+                    fSSOT VIOLATION DETECTED: Field '{field}' type differs between SSOT and test framework
                 )
                 
                 # Special validation for critical fields
-                if field == object":
+                if field == object:"
                     self.assertEqual(
                         ssot_value,
                         violation_value,
                         f"SSOT VIOLATION DETECTED: Critical field '{field}' differs between SSOT and test framework
                     )
                     
-        logger.info(SSOT Message Field Completeness Test Completed")
+        logger.info(SSOT Message Field Completeness Test Completed)
         
     @pytest.mark.asyncio
     async def test_ssot_message_creation_audit_trail(self):
-        "
+    ""
         CRITICAL TEST: Validate audit trail and business logic consistency.
         
         This test ensures the SSOT repository maintains proper audit trails
         while exposing any business logic bypassing in the violation.
-        ""
-        logger.info(=== SSOT MESSAGE AUDIT TRAIL TEST ===")
+        
+        logger.info(=== SSOT MESSAGE AUDIT TRAIL TEST ===)"
         
         async with self.db_helper.get_async_session() as session:
             # Track creation timestamps before operations
@@ -343,7 +343,7 @@ class SSotMessageRepositoryComplianceTests:
                 db=session,
                 thread_id=self.test_thread_id,
                 role="user,
-                content=Audit trail test SSOT"
+                content=Audit trail test SSOT
             )
             await session.commit()
             
@@ -355,8 +355,8 @@ class SSotMessageRepositoryComplianceTests:
             # Create via test framework (violation - may bypass business logic)
             await self.db_helper.create_message(
                 thread_id=self.test_thread_id,
-                role="user, 
-                content=Audit trail test violation"
+                role="user, "
+                content=Audit trail test violation
             )
             
             after_violation_time = int(time.time())
@@ -374,7 +374,7 @@ class SSotMessageRepositoryComplianceTests:
             )
             violation_message = violation_result.scalar_one_or_none()
             
-            self.assertIsNotNone(violation_message, "Test framework should create message)
+            self.assertIsNotNone(violation_message, Test framework should create message)"
             
             # 3. CRITICAL: Timestamp handling should be consistent (may expose violation)
             timestamp_difference = abs(ssot_message.created_at - violation_message.created_at)
@@ -388,12 +388,12 @@ class SSotMessageRepositoryComplianceTests:
             
             # 4. ID generation pattern should be consistent
             self.assertTrue(
-                ssot_message.id.startswith("msg_),
-                SSOT message ID should follow proper pattern"
+                ssot_message.id.startswith(msg_),
+                SSOT message ID should follow proper pattern""
             )
             
             self.assertTrue(
-                violation_message.id.startswith("msg_),
+                violation_message.id.startswith(msg_),
                 SSOT VIOLATION DETECTED: Test framework message ID should follow SSOT pattern"
             )
             
@@ -401,20 +401,20 @@ class SSotMessageRepositoryComplianceTests:
 
 
 class SSotMessageRepositoryIntegrationTests:
-    ""
+    
     Additional integration tests for SSOT message repository compliance
     that require broader system integration.
-    "
+""
     
     @pytest.mark.asyncio
     async def test_ssot_message_repository_transaction_consistency(self):
-        "
+    "
         CRITICAL TEST: Validate transaction consistency between SSOT and test framework.
         
         This test ensures both creation methods handle transactions properly
         and expose any transaction handling differences.
-        ""
-        db_helper = DatabaseTestUtilities(service=netra_backend")
+        "
+        db_helper = DatabaseTestUtilities(service=netra_backend)
         message_repository = MessageRepository()
         test_thread_id = f"thread_{uuid.uuid4().hex[:8]}
         
@@ -425,19 +425,19 @@ class SSotMessageRepositoryIntegrationTests:
                     db=session,
                     thread_id=test_thread_id,
                     role=user",
-                    content="Transaction test 1
+                    content=Transaction test 1
                 )
                 
                 # Don't commit yet - test transaction state
                 violation_msg = await db_helper.create_message(
                     thread_id=test_thread_id,
-                    role=assistant",
-                    content="Transaction test 2
+                    role=assistant","
+                    content=Transaction test 2
                 )
                 
                 # Both should be in same transaction state
                 uncommitted_count = await session.execute(
-                    select(text(count(*)")).select_from(
+                    select(text(count(*))).select_from("
                         select(Message).where(Message.thread_id == test_thread_id)
                     )
                 )
@@ -454,17 +454,17 @@ class SSotMessageRepositoryIntegrationTests:
                 )
                 final_messages = final_result.scalars().all()
                 
-                assert len(final_messages) == 2, Both messages should be committed"
+                assert len(final_messages) == 2, Both messages should be committed
                 
             finally:
                 # Cleanup
                 await session.execute(
-                    text("DELETE FROM message WHERE thread_id = :thread_id),
-                    {thread_id": test_thread_id}
+                    text("DELETE FROM message WHERE thread_id = :thread_id),"
+                    {thread_id: test_thread_id}
                 await session.commit()
 
 
-if __name__ == "__main__:
+if __name__ == __main__:"
     # Run the compliance test suite
     import sys
     import os
@@ -477,7 +477,7 @@ if __name__ == "__main__:
     import logging
     logging.basicConfig(
         level=logging.INFO,
-        format=%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        format=%(asctime)s - %(name)s - %(levelname)s - %(message)s""
     )
     
     # Run tests

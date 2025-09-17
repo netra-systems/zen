@@ -5,7 +5,7 @@ This test validates the core fix for Issue #601 without complex infrastructure d
 It demonstrates that strategic mocking of _run_comprehensive_validation prevents deadlocks.
 
 Business Value: $500K+ ARR platform reliability protection
-""
+"
 
 import asyncio
 import gc
@@ -18,10 +18,10 @@ from fastapi import FastAPI
 
 # Simple test without complex SSOT dependencies
 class Issue601ValidationFixTests:
-    ""Simple validation of Issue #601 fix without infrastructure dependencies."
+    "Simple validation of Issue #601 fix without infrastructure dependencies.
 
     def setup_method(self):
-        "Set up test environment.""
+        "Set up test environment."
         # Environment isolation
         self.original_env = {}
         test_env_vars = {
@@ -35,7 +35,7 @@ class Issue601ValidationFixTests:
             os.environ[key] = value
 
     def teardown_method(self):
-        ""Clean up test environment."
+        "Clean up test environment."
         # Restore environment
         for key, original_value in self.original_env.items():
             if original_value is None:
@@ -46,11 +46,11 @@ class Issue601ValidationFixTests:
 
     @pytest.mark.asyncio
     async def test_strategic_validation_mocking_prevents_hang(self):
-        "Test that strategic validation mocking prevents the Issue #601 hang.""
+        Test that strategic validation mocking prevents the Issue #601 hang.""
         try:
             from netra_backend.app.smd import StartupOrchestrator
         except ImportError:
-            pytest.skip(StartupOrchestrator not available")
+            pytest.skip(StartupOrchestrator not available)
 
         # Create minimal FastAPI app
         app = FastAPI()
@@ -90,22 +90,22 @@ class Issue601ValidationFixTests:
             duration = end_time - start_time
             
             # Validate successful execution
-            assert duration < 5.0, f"Startup took too long: {duration}s
-            assert validation_mocked, Validation method was not called"
-            assert app.state.startup_complete, "Startup completion flag not set
+            assert duration < 5.0, fStartup took too long: {duration}s
+            assert validation_mocked, Validation method was not called""
+            assert app.state.startup_complete, Startup completion flag not set
             
-            print(f✅ Issue #601 Fix Validated - Duration: {duration:.3f}s")
+            print(f✅ Issue #601 Fix Validated - Duration: {duration:.3f}s")"
             
         except asyncio.TimeoutError:
-            pytest.fail("ISSUE #601 NOT FIXED: Test still hangs despite strategic mocking)
+            pytest.fail(ISSUE #601 NOT FIXED: Test still hangs despite strategic mocking)
 
     @pytest.mark.asyncio
     async def test_memory_leak_detection_still_works_with_fix(self):
-        ""Test that memory leak detection still works even with strategic mocking."
+        "Test that memory leak detection still works even with strategic mocking."
         try:
             from netra_backend.app.smd import StartupOrchestrator
         except ImportError:
-            pytest.skip("StartupOrchestrator not available)
+            pytest.skip(StartupOrchestrator not available)
 
         initial_memory = psutil.Process().memory_info().rss
         memory_measurements = []
@@ -154,17 +154,17 @@ class Issue601ValidationFixTests:
         max_allowed_increase = 20 * 1024 * 1024  # 20MB reasonable limit
 
         assert total_increase < max_allowed_increase, \
-            fMemory leak detected: {total_increase / 1024 / 1024:.2f}MB increase"
+            fMemory leak detected: {total_increase / 1024 / 1024:.2f}MB increase""
 
-        print(f"✅ Memory leak detection works with fix - Total increase: {total_increase / 1024 / 1024:.2f}MB)
+        print(f✅ Memory leak detection works with fix - Total increase: {total_increase / 1024 / 1024:.2f}MB)
 
     @pytest.mark.asyncio
     async def test_original_hang_scenario_reproduction(self):
-        ""Test that reproduces the original hanging scenario before applying fix."
+        "Test that reproduces the original hanging scenario before applying fix."
         try:
             from netra_backend.app.smd import StartupOrchestrator
         except ImportError:
-            pytest.skip("StartupOrchestrator not available)
+            pytest.skip(StartupOrchestrator not available)
 
         app = FastAPI()
         app.state = MagicMock()
@@ -191,17 +191,17 @@ class Issue601ValidationFixTests:
             await asyncio.wait_for(orchestrator.initialize_system(), timeout=3.0)
         
         duration = time.time() - start_time
-        assert duration >= 2.5, fShould have timed out, but completed in {duration}s"
+        assert duration >= 2.5, fShould have timed out, but completed in {duration}s""
         
-        print(f"✅ Original hang scenario reproduced - timed out after {duration:.3f}s)
+        print(f✅ Original hang scenario reproduced - timed out after {duration:.3f}s)
 
 
 # Direct execution for quick validation
-if __name__ == __main__":
+if __name__ == __main__:"
     import unittest
     
     print("Issue #601 Simple Validation Test)
-    print(=" * 50)
+    print(= * 50")"
     
     # Run specific test
     suite = unittest.TestLoader().loadTestsFromTestCase(Issue601ValidationFixTests)
@@ -209,6 +209,6 @@ if __name__ == __main__":
     result = runner.run(suite)
     
     if result.wasSuccessful():
-        print("✅ Issue #601 fix validation PASSED)
+        print(✅ Issue #601 fix validation PASSED)
     else:
-        print(❌ Issue #601 fix validation FAILED")
+        print(❌ Issue #601 fix validation FAILED"")"

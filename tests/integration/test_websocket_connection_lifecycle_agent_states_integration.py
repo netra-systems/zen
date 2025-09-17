@@ -29,7 +29,7 @@ ARCHITECTURE ALIGNMENT:
 - Uses WebSocketManager for connection lifecycle management
 - Tests AgentWebSocketBridge with connection state coordination
 - Validates agent state persistence across WebSocket connection events
-""
+"
 import asyncio
 import uuid
 import json
@@ -55,7 +55,7 @@ from netra_backend.app.schemas.message_models import MessageRequest, MessageType
 from netra_backend.app.core.configuration.services import get_service_config
 
 class WebSocketConnectionLifecycleTracker:
-    ""Tracks WebSocket connection lifecycle events with agent state correlation."
+    "Tracks WebSocket connection lifecycle events with agent state correlation.
 
     def __init__(self, user_id: str):
         self.user_id = user_id
@@ -66,7 +66,7 @@ class WebSocketConnectionLifecycleTracker:
         self.start_time = datetime.now()
 
     async def track_connection_event(self, event_type: str, data: Dict[str, Any]:
-        "Track WebSocket connection lifecycle events.""
+        "Track WebSocket connection lifecycle events."
         event_time = datetime.now()
         event_data = {'event_type': event_type, 'data': data.copy(), 'timestamp': event_time.isoformat(), 'relative_time_ms': (event_time - self.start_time).total_seconds() * 1000, 'connection_state': self.connection_state}
         self.connection_events.append(event_data)
@@ -76,10 +76,10 @@ class WebSocketConnectionLifecycleTracker:
             self.connection_state = 'disconnected'
         elif event_type == 'reconnecting':
             self.connection_state = 'reconnecting'
-        print(f[CONNECTION] {event_type}: {data.get('details', 'No details')} (State: {self.connection_state}")
+        print(f[CONNECTION] {event_type}: {data.get('details', 'No details')} (State: {self.connection_state})"
 
     async def track_agent_state_event(self, agent_type: AgentType, state_event: str, state_data: Dict[str, Any]:
-        "Track agent state changes correlated with connection events.""
+        "Track agent state changes correlated with connection events.
         event_time = datetime.now()
         agent_key = f'{agent_type.value}'
         state_event_data = {'agent_type': agent_type.value, 'state_event': state_event, 'state_data': state_data.copy(), 'timestamp': event_time.isoformat(), 'relative_time_ms': (event_time - self.start_time).total_seconds() * 1000, 'connection_state': self.connection_state}
@@ -88,7 +88,7 @@ class WebSocketConnectionLifecycleTracker:
         print(f'[AGENT-STATE] {agent_type.value} - {state_event}: Connection {self.connection_state}')
 
     def validate_connection_agent_correlation(self) -> Dict[str, Any]:
-        ""Validate correlation between connection lifecycle and agent states."
+        ""Validate correlation between connection lifecycle and agent states.
         connection_up_events = [e for e in self.connection_events if e['event_type'] in ['connected', 'authenticated']]
         connection_down_events = [e for e in self.connection_events if e['event_type'] in ['disconnected', 'connection_error']]
         agent_active_events = [e for e in self.agent_state_events if e['state_event'] in ['started', 'processing']]
@@ -97,10 +97,10 @@ class WebSocketConnectionLifecycleTracker:
 
 @pytest.mark.integration
 class WebSocketConnectionLifecycleAgentStatesIntegrationTests(SSotAsyncTestCase):
-    "Integration tests for WebSocket connection lifecycle with agent states.""
+    Integration tests for WebSocket connection lifecycle with agent states.""
 
     def setUp(self):
-        ""Set up test environment with WebSocket and agent components."
+        Set up test environment with WebSocket and agent components.""
         super().setUp()
         self.orchestration_config = get_orchestration_config()
         self.websocket_test_manager = WebSocketTestUtility()
@@ -116,7 +116,7 @@ class WebSocketConnectionLifecycleAgentStatesIntegrationTests(SSotAsyncTestCase)
 
     @pytest.mark.asyncio
     async def test_connection_establishment_with_agent_initialization(self):
-        "Test WebSocket connection establishment initializes agent states correctly.""
+        Test WebSocket connection establishment initializes agent states correctly."
         websocket_manager = Mock(spec=WebSocketManager)
         websocket_manager.connect_user = AsyncMock()
         websocket_manager.is_connected = Mock(return_value=True)
@@ -139,7 +139,7 @@ class WebSocketConnectionLifecycleAgentStatesIntegrationTests(SSotAsyncTestCase)
 
     @pytest.mark.asyncio
     async def test_connection_disruption_agent_state_persistence(self):
-        ""Test agent state persistence during connection disruptions."
+        "Test agent state persistence during connection disruptions.
         websocket_manager = Mock(spec=WebSocketManager)
         websocket_manager.is_connected = Mock(return_value=True)
         websocket_manager.send_message = AsyncMock()
@@ -167,7 +167,7 @@ class WebSocketConnectionLifecycleAgentStatesIntegrationTests(SSotAsyncTestCase)
 
     @pytest.mark.asyncio
     async def test_multi_user_connection_isolation_with_agent_states(self):
-        "Test connection isolation maintains separate agent states per user.""
+        "Test connection isolation maintains separate agent states per user."
         user_2_id = f'test_user_2_{uuid.uuid4().hex[:8]}'
         user_2_context = UserExecutionContext(user_id=user_2_id, run_id=f'test_run_2_{uuid.uuid4().hex[:8]}', session_id=f'session_2_{uuid.uuid4().hex[:8]}', thread_id=f'thread_2_{uuid.uuid4().hex[:8]}')
         connection_tracker_2 = WebSocketConnectionLifecycleTracker(user_2_id)
@@ -201,7 +201,7 @@ class WebSocketConnectionLifecycleAgentStatesIntegrationTests(SSotAsyncTestCase)
 
     @pytest.mark.asyncio
     async def test_websocket_connection_performance_impact_on_agents(self):
-        ""Test WebSocket connection performance doesn't degrade agent execution."
+        "Test WebSocket connection performance doesn't degrade agent execution."
         performance_metrics = []
         websocket_manager = Mock(spec=WebSocketManager)
         websocket_manager.is_connected = Mock(return_value=True)
@@ -232,7 +232,7 @@ class WebSocketConnectionLifecycleAgentStatesIntegrationTests(SSotAsyncTestCase)
 
     @pytest.mark.asyncio
     async def test_websocket_connection_error_recovery_with_agent_continuity(self):
-        "Test connection error recovery maintains agent execution continuity."""
+        Test connection error recovery maintains agent execution continuity.""
         websocket_manager = Mock(spec=WebSocketManager)
         websocket_manager.is_connected = Mock(return_value=True)
         websocket_manager.send_message = AsyncMock()

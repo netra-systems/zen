@@ -1,22 +1,22 @@
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.""
+    "Real WebSocket connection for testing instead of mocks.
     def __init__(self):
         pass
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.
         if self._closed:
-            raise RuntimeError("WebSocket is closed)
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):
-        "Close WebSocket connection.""
+        Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
     async def get_messages(self) -> list:
-        ""Get all sent messages."
+        Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
         '''
@@ -44,14 +44,14 @@ class TestWebSocketConnection:
         _build_mcp_service_instance
     
 class TestMCPServiceInitialization:
-        "Test MCP service initialization after fix.""
+        "Test MCP service initialization after fix.
     def test_mcp_service_requires_agent_service(self):
-        ""Test that MCP service creation fails without agent_service."
+        ""Test that MCP service creation fails without agent_service.
         with pytest.raises(ValueError) as exc_info:
         _create_mcp_service(agent_service=None)
-        assert "agent_service is required in str(exc_info.value)
+        assert agent_service is required in str(exc_info.value)"
     def test_mcp_service_creation_with_mock_agent(self):
-        ""Test MCP service creation with mock agent service."
+        "Test MCP service creation with mock agent service.
         pass
     # Create mock agent service
         mock_agent = Mock(spec=AgentService)
@@ -61,7 +61,7 @@ class TestMCPServiceInitialization:
         assert isinstance(mcp_service, MCPService)
         assert mcp_service.agent_service == mock_agent
     def test_route_service_factory_builds_correctly(self):
-        "Test that route service factory builds MCP service correctly.""
+        "Test that route service factory builds MCP service correctly."
     # Create mocks for all required services
         mock_agent = Mock(spec=AgentService)
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
@@ -80,7 +80,7 @@ class TestMCPServiceInitialization:
         assert mcp_service.security_service == mock_security
 @pytest.mark.asyncio
     async def test_route_get_mcp_service_with_dependencies(self):
-""Test that route get_mcp_service works with proper dependencies."
+    "Test that route get_mcp_service works with proper dependencies."
 pass
         # Create mocks
 mock_agent = Mock(spec=AgentService)
@@ -96,7 +96,7 @@ security_service=mock_security
 assert isinstance(mcp_service, MCPService)
 assert mcp_service.agent_service == mock_agent
 def test_mcp_service_has_all_required_attributes(self):
-"Test that MCP service has all required attributes after initialization.""
+    Test that MCP service has all required attributes after initialization.""
     # Create mocks for all services
 mock_agent = Mock(spec=AgentService)
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
@@ -122,7 +122,7 @@ assert hasattr(mcp_service, 'client_repository')
 assert hasattr(mcp_service, 'execution_repository')
 assert hasattr(mcp_service, 'mcp_server')
 def test_service_factory_get_mcp_service_with_agent(self):
-""Test service factory get_mcp_service with agent_service provided."
+    Test service factory get_mcp_service with agent_service provided."
 pass
 mock_agent = Mock(spec=AgentService)
     # Call get_mcp_service with agent_service

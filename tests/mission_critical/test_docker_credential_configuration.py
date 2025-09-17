@@ -1,5 +1,5 @@
 class WebSocketTestHelper:
-    "Real WebSocket connection for testing instead of mocks.""
+    "Real WebSocket connection for testing instead of mocks.
     
     def __init__(self):
         self.messages_sent = []
@@ -7,18 +7,18 @@ class WebSocketTestHelper:
         self._closed = False
         
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.
         if self._closed:
-            raise RuntimeError("WebSocket is closed)
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
         
     async def close(self, code: int = 1000, reason: str = Normal closure"):
-        "Close WebSocket connection.""
+        Close WebSocket connection.""
         self._closed = True
         self.is_connected = False
         
     def get_messages(self) -> list:
-        ""Get all sent messages."
+        Get all sent messages."
         return self.messages_sent.copy()
 
 "
@@ -41,7 +41,7 @@ INFRASTRUCTURE VALIDATION:
 - Security vulnerability detection
 - Credential rotation and management
 - Compliance with security standards
-""
+"
 
 import os
 import sys
@@ -80,29 +80,29 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class DockerCredentialConfigurationTests:
-    ""Test suite for Docker credential configuration mismatches."
+    "Test suite for Docker credential configuration mismatches.
     
     # Expected credentials per environment (from docker-compose files)
     EXPECTED_CREDENTIALS = {
-        "development: {
-            postgres_user": "netra,
-            postgres_password": "netra123, 
-            postgres_db": "netra_dev
+        "development: {"
+            postgres_user: netra,
+            postgres_password: "netra123, 
+            postgres_db": netra_dev
         },
-        test": {
+        test: {
             "postgres_user: test_user",
-            "postgres_password: test_pass",
-            "postgres_db: netra_test"
+            postgres_password: test_pass,
+            postgres_db: netra_test"
         },
         "alpine_test: {
-            postgres_user": "test,
+            postgres_user: test,
             postgres_password": "test,
-            postgres_db": "netra_test
+            postgres_db: netra_test
         }
     }
     
     def test_postgres_credentials_match_docker_compose_development(self):
-        ""Test that development environment uses correct PostgreSQL credentials."
+        "Test that development environment uses correct PostgreSQL credentials."
         manager = UnifiedDockerManager(
             environment_type=EnvironmentType.DEVELOPMENT,
             use_alpine=False
@@ -110,20 +110,20 @@ class DockerCredentialConfigurationTests:
         
         # Test _build_service_url  
         port = 5432
-        url = manager._build_service_url_from_port("postgres, port)
+        url = manager._build_service_url_from_port(postgres, port)
         
         # Current implementation uses hardcoded test:test
         # Should use netra:netra123 for development
-        expected_url = fpostgresql://netra:netra123@localhost:{port}/netra_dev"
+        expected_url = fpostgresql://netra:netra123@localhost:{port}/netra_dev""
         
         # This test should FAIL because current implementation uses test:test
         assert url == expected_url, (
-            f"Development environment should use netra:netra123, 
-            fbut got URL: {url}"
+            fDevelopment environment should use netra:netra123, 
+            fbut got URL: {url}
         )
     
     def test_postgres_credentials_match_docker_compose_test(self):
-        "Test that test environment uses correct PostgreSQL credentials.""
+        "Test that test environment uses correct PostgreSQL credentials."
         manager = UnifiedDockerManager(
             environment_type=EnvironmentType.TEST,
             use_alpine=False
@@ -131,18 +131,18 @@ class DockerCredentialConfigurationTests:
         
         # Test _build_service_url
         port = 5434
-        url = manager._build_service_url_from_port(postgres", port)
+        url = manager._build_service_url_from_port(postgres, port)"
         
         # Should use test_user:test_pass for test
         expected_url = f"postgresql://test_user:test_pass@localhost:{port}/netra_test
         
         assert url == expected_url, (
-            fTest environment should use test_user:test_pass, "
-            f"but got URL: {url}
+            fTest environment should use test_user:test_pass, 
+            fbut got URL: {url}
         )
     
     def test_postgres_credentials_match_docker_compose_alpine(self):
-        ""Test that Alpine test environment uses correct PostgreSQL credentials."
+        ""Test that Alpine test environment uses correct PostgreSQL credentials.
         manager = UnifiedDockerManager(
             environment_type=EnvironmentType.TEST,
             use_alpine=True
@@ -150,92 +150,92 @@ class DockerCredentialConfigurationTests:
         
         # Test _build_service_url
         port = 5435
-        url = manager._build_service_url_from_port("postgres, port)
+        url = manager._build_service_url_from_port(postgres, port)"
         
         # Should use test:test for Alpine
         expected_url = fpostgresql://test:test@localhost:{port}/netra_test"
         
         assert url == expected_url, (
-            f"Alpine test environment should use test:test, 
+            fAlpine test environment should use test:test, 
             fbut got URL: {url}"
         )
     
     def test_environment_detection_based_on_compose_file(self):
-        "Test that UnifiedDockerManager detects environment from active docker-compose.""
+        "Test that UnifiedDockerManager detects environment from active docker-compose.
         manager = UnifiedDockerManager()
         
         # Should have a method to detect environment
         assert hasattr(manager, 'detect_environment'), (
-            UnifiedDockerManager should have detect_environment method"
+            UnifiedDockerManager should have detect_environment method""
         )
         
         # Test detection logic
         env_type = manager.detect_environment()
         assert env_type in [EnvironmentType.DEVELOPMENT, EnvironmentType.TEST, EnvironmentType.DEDICATED], (
-            f"Environment detection should return valid EnvironmentType, got {env_type}
+            fEnvironment detection should return valid EnvironmentType, got {env_type}
         )
     
     def test_dynamic_credential_loading_from_config(self):
-        ""Test that credentials are loaded dynamically based on environment."
+        Test that credentials are loaded dynamically based on environment.""
         manager = UnifiedDockerManager(
             environment_type=EnvironmentType.DEVELOPMENT
         )
         
         # Should have environment-specific credentials
         assert hasattr(manager, 'get_database_credentials'), (
-            "UnifiedDockerManager should have get_database_credentials method
+            UnifiedDockerManager should have get_database_credentials method
         )
         
         creds = manager.get_database_credentials()
         assert creds['user'] == 'netra', fDevelopment should use 'netra' user, got {creds['user']}"
         assert creds['password'] == 'netra123', f"Development should use 'netra123' password
-        assert creds['database'] == 'netra_dev', fDevelopment should use 'netra_dev' database"
+        assert creds['database'] == 'netra_dev', fDevelopment should use 'netra_dev' database
 
 
 class PortDiscoveryTests:
-    "Test suite for port discovery and allocation issues.""
+    Test suite for port discovery and allocation issues.""
     
     def test_port_discovery_from_existing_containers(self):
-        ""Test that port discovery correctly identifies running container ports."
+        Test that port discovery correctly identifies running container ports.""
         manager = UnifiedDockerManager()
         
         # Mock docker ps output with real container data
-        mock_output = "
+        mock_output = 
         CONTAINER ID   IMAGE                   COMMAND                  CREATED          STATUS          PORTS                    NAMES
-        abc123         netra-dev-backend       "python app.py"          10 minutes ago   Up 10 minutes   0.0.0.0:8000->8000/tcp   netra-core-generation-1-dev-backend-1
+        abc123         netra-dev-backend       python app.py"          10 minutes ago   Up 10 minutes   0.0.0.0:8000->8000/tcp   netra-core-generation-1-dev-backend-1
         def456         netra-dev-postgres      postgres               10 minutes ago   Up 10 minutes   0.0.0.0:5433->5432/tcp   netra-core-generation-1-dev-postgres-1
-        ""
+        "
         
         with patch('subprocess.run') as mock_run:
             mock_run.return_value = MagicMock(
                 stdout=mock_output,
-                stderr=",
+                stderr=,
                 returncode=0
             )
             
             # This should discover ports from running containers
             ports = manager._discover_ports_from_existing_containers()
             
-            assert 'backend' in ports, "Should discover backend service
-            assert ports['backend'] == 8000, Backend should be on port 8000"
-            assert 'postgres' in ports, "Should discover postgres service
+            assert 'backend' in ports, "Should discover backend service"
+            assert ports['backend'] == 8000, Backend should be on port 8000
+            assert 'postgres' in ports, Should discover postgres service"
             assert ports['postgres'] == 5433, Postgres should be on port 5433"
     
     def test_port_allocator_respects_compose_mappings(self):
-        "Test that port allocator respects docker-compose port mappings.""
+        Test that port allocator respects docker-compose port mappings.""
         allocator = DynamicPortAllocator(
             port_range=PortRange.DEVELOPMENT,
-            environment_id=dev"
+            environment_id=dev
         )
         
         # Should respect existing compose file mappings
         # Development uses: postgres=5433, backend=8000, auth=8081
-        result = allocator.allocate_port("postgres, preferred_port=5433)
+        result = allocator.allocate_port(postgres, preferred_port=5433)"
         assert result.success, Should allocate preferred port when available"
-        assert result.port == 5433, f"Should use compose-defined port 5433, got {result.port}
+        assert result.port == 5433, fShould use compose-defined port 5433, got {result.port}
     
     def test_port_conflict_resolution(self):
-        ""Test that port conflicts are properly resolved."
+        "Test that port conflicts are properly resolved."
         manager = UnifiedDockerManager(
             environment_type=EnvironmentType.TEST
         )
@@ -248,18 +248,18 @@ class PortDiscoveryTests:
             ports = manager._allocate_service_ports()
             
             # Should have allocated alternative ports
-            assert len(ports) > 0, "Should allocate ports despite conflicts
+            assert len(ports) > 0, Should allocate ports despite conflicts
 
 
 class ServiceURLConstructionTests:
-    ""Test suite for service URL construction issues."
+    ""Test suite for service URL construction issues.
     
     def test_service_url_uses_environment_credentials(self):
-        "Test that service URLs include correct environment-specific credentials.""
+        Test that service URLs include correct environment-specific credentials.""
         # Test for each environment
         environments = [
-            (EnvironmentType.DEVELOPMENT, netra", "netra123, netra_dev"),
-            (EnvironmentType.TEST, "test_user, test_pass", "netra_test),
+            (EnvironmentType.DEVELOPMENT, netra, netra123, netra_dev"),"
+            (EnvironmentType.TEST, test_user, test_pass, netra_test),"
         ]
         
         for env_type, expected_user, expected_pass, expected_db in environments:
@@ -270,12 +270,12 @@ class ServiceURLConstructionTests:
             url = manager._build_service_url_from_port(postgres", port)
             
             # Parse and validate URL
-            assert expected_user in url, f"URL should contain user '{expected_user}' for {env_type}
+            assert expected_user in url, fURL should contain user '{expected_user}' for {env_type}
             assert expected_pass in url, fURL should contain password '{expected_pass}' for {env_type}"
             assert expected_db in url, f"URL should contain database '{expected_db}' for {env_type}
     
     def test_database_url_environment_variable_setting(self):
-        ""Test that #removed-legacyis set with correct credentials."
+        Test that #removed-legacyis set with correct credentials."
         env = IsolatedEnvironment()
         
         with patch.object(env, 'set') as mock_set:
@@ -296,17 +296,17 @@ class ServiceURLConstructionTests:
             
             assert db_url_call is not None, "#removed-legacyshould be set
             db_url = db_url_call[0][1]
-            assert 'netra:netra123' in db_url, fDevelopment #removed-legacyshould use netra:netra123"
+            assert 'netra:netra123' in db_url, fDevelopment #removed-legacyshould use netra:netra123
 
 
 class EnvironmentIsolationTests:
-    "Test suite for environment isolation and configuration.""
+    "Test suite for environment isolation and configuration."
     
     def test_container_name_patterns_match_environment(self):
-        ""Test that container names follow environment-specific patterns."
+        "Test that container names follow environment-specific patterns."
         patterns = {
-            EnvironmentType.DEVELOPMENT: "netra-core-generation-1-dev-,
-            EnvironmentType.TEST: netra-core-generation-1-test-",
+            EnvironmentType.DEVELOPMENT: netra-core-generation-1-dev-,
+            EnvironmentType.TEST: netra-core-generation-1-test-","
         }
         
         for env_type, expected_prefix in patterns.items():
@@ -316,12 +316,12 @@ class EnvironmentIsolationTests:
             for service in manager.SERVICES:
                 container_name = manager._get_container_name(service)
                 assert container_name.startswith(expected_prefix), (
-                    f"Container name should start with '{expected_prefix}' 
-                    ffor {env_type}, got {container_name}"
+                    fContainer name should start with '{expected_prefix}' 
+                    ffor {env_type}, got {container_name}
                 )
     
     def test_network_isolation_between_environments(self):
-        "Test that different environments use isolated networks.""
+        "Test that different environments use isolated networks."
         dev_manager = UnifiedDockerManager(environment_type=EnvironmentType.DEVELOPMENT)
         test_manager = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
         
@@ -335,26 +335,26 @@ class EnvironmentIsolationTests:
 
 
 class ConfigurationValidationTests:
-    ""Test suite for configuration validation."
+    Test suite for configuration validation."
     
     def test_validate_compose_file_matches_manager_config(self):
-        "Test that docker-compose files match UnifiedDockerManager configuration.""
+        "Test that docker-compose files match UnifiedDockerManager configuration.
         manager = UnifiedDockerManager()
         
         # Should have validation method
         assert hasattr(manager, 'validate_configuration'), (
-            UnifiedDockerManager should have validate_configuration method"
+            UnifiedDockerManager should have validate_configuration method""
         )
         
         # Validate configuration
         validation_result = manager.validate_configuration()
         
         assert validation_result['is_valid'], (
-            f"Configuration validation failed: {validation_result.get('errors', []}
+            fConfiguration validation failed: {validation_result.get('errors', []}
         )
     
     def test_startup_credential_check(self):
-        ""Test that startup includes credential validation."
+        Test that startup includes credential validation.""
         manager = UnifiedDockerManager()
         
         with patch('subprocess.run') as mock_run:
@@ -365,7 +365,7 @@ class ConfigurationValidationTests:
             result = manager.start_services(['postgres']
             
             # Should have attempted credential validation
-            assert mock_run.called, "Should validate database credentials on startup
+            assert mock_run.called, Should validate database credentials on startup
 
 
 # Configure logging
@@ -375,7 +375,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class CredentialSecurityMetrics:
-    ""Metrics for credential security validation."
+    "Metrics for credential security validation."
     total_credentials_tested: int = 0
     secure_credentials: int = 0
     insecure_credentials: int = 0
@@ -387,23 +387,23 @@ class CredentialSecurityMetrics:
 
 
 class DockerCredentialSecurityInfrastructureTests:
-    "Infrastructure tests for Docker credential security and configuration.""
+    Infrastructure tests for Docker credential security and configuration.""
     
     def __init__(self):
-        self.logger = logging.getLogger(f{__name__}.Security")
+        self.logger = logging.getLogger(f{__name__}.Security)
         self.project_root = project_root
         
     def test_credential_security_validation(self) -> CredentialSecurityMetrics:
-        "Test security validation of all credential configurations.""
-        self.logger.info([U+1F510] Testing credential security validation")
+        Test security validation of all credential configurations.""
+        self.logger.info([U+1F510] Testing credential security validation)
         
         security_metrics = CredentialSecurityMetrics()
         
         # Test credentials for each environment
         environments_to_test = [
-            (EnvironmentType.DEVELOPMENT, False, "Development Standard),
-            (EnvironmentType.DEVELOPMENT, True, Development Alpine"),
-            (EnvironmentType.TEST, False, "Test Standard),
+            (EnvironmentType.DEVELOPMENT, False, "Development Standard),"
+            (EnvironmentType.DEVELOPMENT, True, Development Alpine),
+            (EnvironmentType.TEST, False, Test Standard),"
             (EnvironmentType.TEST, True, Test Alpine"),
         ]
         
@@ -424,11 +424,11 @@ class DockerCredentialSecurityInfrastructureTests:
                 # Check 1: Password strength
                 password = creds.get('password', '')
                 if len(password) < 8:
-                    security_issues.append(f"Weak password in {env_description}: length < 8)
+                    security_issues.append(fWeak password in {env_description}: length < 8)
                     security_metrics.vulnerability_count += 1
                 
                 if password in ['password', '123456', 'admin', 'test', 'root']:
-                    security_issues.append(fCommon/default password in {env_description}")
+                    security_issues.append(fCommon/default password in {env_description})"
                     security_metrics.vulnerability_count += 1
                 
                 # Check 2: Username security
@@ -440,10 +440,10 @@ class DockerCredentialSecurityInfrastructureTests:
                 # Check 3: Database name reveals environment info
                 database = creds.get('database', '')
                 if 'test' in database.lower() and env_type == EnvironmentType.DEVELOPMENT:
-                    security_issues.append(fDatabase name mismatch in {env_description}: {database}")
+                    security_issues.append(fDatabase name mismatch in {env_description}: {database})
                 
                 # Check 4: Credential exposure in URLs
-                url = manager._build_service_url_from_port("postgres, 5432)
+                url = manager._build_service_url_from_port(postgres, 5432)"
                 if password in url and len(password) > 0:
                     # This is expected, but we check if it's done securely
                     if not url.startswith('postgresql://'):
@@ -457,9 +457,9 @@ class DockerCredentialSecurityInfrastructureTests:
                     security_metrics.insecure_credentials += 1
                     security_metrics.credential_exposure_risks.extend(security_issues)
                 
-                self.logger.info(f"   {env_description}: {len(security_issues)} security issues)
+                self.logger.info(f   {env_description}: {len(security_issues)} security issues)
                 for issue in security_issues:
-                    self.logger.warning(f     - {issue}")
+                    self.logger.warning(f     - {issue})"
                 
             except Exception as e:
                 security_metrics.vulnerability_count += 1
@@ -469,23 +469,23 @@ class DockerCredentialSecurityInfrastructureTests:
         if security_metrics.total_credentials_tested > 0:
             security_metrics.security_score = (security_metrics.secure_credentials / security_metrics.total_credentials_tested) * 100
         
-        self.logger.info(f PASS:  Credential security validation:")
-        self.logger.info(f"   Total credentials tested: {security_metrics.total_credentials_tested})
-        self.logger.info(f   Secure credentials: {security_metrics.secure_credentials}")
-        self.logger.info(f"   Insecure credentials: {security_metrics.insecure_credentials})
-        self.logger.info(f   Security score: {security_metrics.security_score:.1f}%")
+        self.logger.info(f PASS:  Credential security validation:)
+        self.logger.info(f   Total credentials tested: {security_metrics.total_credentials_tested})
+        self.logger.info(f   Secure credentials: {security_metrics.secure_credentials}")"
+        self.logger.info(f   Insecure credentials: {security_metrics.insecure_credentials})
+        self.logger.info(f   Security score: {security_metrics.security_score:.1f}%)
         self.logger.info(f"   Vulnerabilities found: {security_metrics.vulnerability_count})
         
         # Security assertions
         assert security_metrics.security_score >= 75, fOverall security score too low: {security_metrics.security_score:.1f}%"
-        assert security_metrics.vulnerability_count < 5, f"Too many vulnerabilities found: {security_metrics.vulnerability_count}
+        assert security_metrics.vulnerability_count < 5, fToo many vulnerabilities found: {security_metrics.vulnerability_count}
         assert security_metrics.insecure_credentials <= security_metrics.total_credentials_tested * 0.25, Too many insecure credentials"
         
         return security_metrics
     
     def test_credential_performance_impact(self) -> Dict[str, Any]:
-        "Test performance impact of credential operations.""
-        self.logger.info( CHART:  Testing credential performance impact")
+        "Test performance impact of credential operations.
+        self.logger.info( CHART:  Testing credential performance impact")"
         
         performance_results = {}
         
@@ -502,7 +502,7 @@ class DockerCredentialSecurityInfrastructureTests:
                 retrieval_times.append(retrieval_time)
                 
             except Exception as e:
-                self.logger.warning(f"Credential retrieval test {i} failed: {e})
+                self.logger.warning(fCredential retrieval test {i} failed: {e})
         
         if retrieval_times:
             avg_retrieval_time = statistics.mean(retrieval_times)
@@ -525,7 +525,7 @@ class DockerCredentialSecurityInfrastructureTests:
             
             try:
                 manager = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
-                url = manager._build_service_url_from_port(postgres", 5432 + i)
+                url = manager._build_service_url_from_port(postgres, 5432 + i)
                 
                 construction_time = (time.time() - start_time) * 1000
                 url_construction_times.append(construction_time)
@@ -582,21 +582,21 @@ class DockerCredentialSecurityInfrastructureTests:
         }
         
         # Performance analysis
-        self.logger.info(f" PASS:  Credential performance impact:)
-        self.logger.info(f   Credential retrieval: {avg_retrieval_time:.2f}ms avg, {max_retrieval_time:.2f}ms max")
+        self.logger.info(f PASS:  Credential performance impact:)
+        self.logger.info(f   Credential retrieval: {avg_retrieval_time:.2f}ms avg, {max_retrieval_time:.2f}ms max)"
         self.logger.info(f"   URL construction: {avg_construction_time:.2f}ms avg, {max_construction_time:.2f}ms max)
-        self.logger.info(f   Concurrent access: {avg_concurrent_time:.2f}ms avg, {len(concurrent_times)}/15 successful")
+        self.logger.info(f   Concurrent access: {avg_concurrent_time:.2f}ms avg, {len(concurrent_times)}/15 successful)
         
         # Performance assertions
-        assert avg_retrieval_time < 100, f"Credential retrieval too slow: {avg_retrieval_time:.2f}ms
-        assert avg_construction_time < 50, fURL construction too slow: {avg_construction_time:.2f}ms"
-        assert len(concurrent_times) >= 12, f"Too many concurrent failures: {len(concurrent_times)}/15
+        assert avg_retrieval_time < 100, fCredential retrieval too slow: {avg_retrieval_time:.2f}ms
+        assert avg_construction_time < 50, fURL construction too slow: {avg_construction_time:.2f}ms""
+        assert len(concurrent_times) >= 12, fToo many concurrent failures: {len(concurrent_times)}/15
         
         return performance_results
     
     def test_cross_environment_credential_isolation(self) -> Dict[str, Any]:
-        ""Test credential isolation between environments."
-        self.logger.info("[U+1F512] Testing cross-environment credential isolation)
+        Test credential isolation between environments.""
+        self.logger.info([U+1F512] Testing cross-environment credential isolation)
         
         isolation_results = {
             'credential_leaks': [],
@@ -633,7 +633,7 @@ class DockerCredentialSecurityInfrastructureTests:
                 
                 # Test 2: URLs should be environment-specific
                 url1 = manager1._build_service_url_from_port("postgres, 5432)
-                url2 = manager2._build_service_url_from_port(postgres", 5432)
+                url2 = manager2._build_service_url_from_port(postgres, 5432)
                 
                 if url1 == url2:
                     isolation_results['environment_confusion'].append(
@@ -648,11 +648,11 @@ class DockerCredentialSecurityInfrastructureTests:
                 
                 if env2 == EnvironmentType.TEST and 'test' not in creds2['database']:
                     isolation_results['environment_confusion'].append(
-                        f"Shared environment using non-test database: {creds2['database']}
+                        fShared environment using non-test database: {creds2['database']}
                     )
                 
             except Exception as e:
-                isolation_results['credential_leaks'].append(fIsolation test failed: {str(e)}")
+                isolation_results['credential_leaks'].append(fIsolation test failed: {str(e)})"
         
         # Calculate isolation score
         if isolation_results['total_tests'] > 0:
@@ -661,27 +661,27 @@ class DockerCredentialSecurityInfrastructureTests:
         total_violations = len(isolation_results['credential_leaks'] + len(isolation_results['environment_confusion']
         
         self.logger.info(f" PASS:  Cross-environment credential isolation:)
-        self.logger.info(f   Isolation score: {isolation_results['isolation_score']:.1f}%")
-        self.logger.info(f"   Tests passed: {isolation_results['passed_tests']}/{isolation_results['total_tests']})
-        self.logger.info(f   Credential leaks: {len(isolation_results['credential_leaks']}")
-        self.logger.info(f"   Environment confusion: {len(isolation_results['environment_confusion']})
+        self.logger.info(f   Isolation score: {isolation_results['isolation_score']:.1f}%)
+        self.logger.info(f   Tests passed: {isolation_results['passed_tests']}/{isolation_results['total_tests']})
+        self.logger.info(f   Credential leaks: {len(isolation_results['credential_leaks']}")"
+        self.logger.info(f   Environment confusion: {len(isolation_results['environment_confusion']})
         
         # Log violations
         for leak in isolation_results['credential_leaks']:
-            self.logger.warning(f   LEAK: {leak}")
+            self.logger.warning(f   LEAK: {leak})
         for confusion in isolation_results['environment_confusion']:
             self.logger.warning(f"   CONFUSION: {confusion})
         
         # Isolation assertions
         assert isolation_results['isolation_score'] >= 80, fIsolation score too low: {isolation_results['isolation_score']:.1f}%"
-        assert len(isolation_results['credential_leaks'] == 0, f"Credential leaks detected: {isolation_results['credential_leaks']}
+        assert len(isolation_results['credential_leaks'] == 0, fCredential leaks detected: {isolation_results['credential_leaks']}
         assert total_violations < 3, fToo many isolation violations: {total_violations}"
         
         return isolation_results
     
     def test_security_vulnerability_detection(self) -> Dict[str, Any]:
-        "Test detection of credential security vulnerabilities.""
-        self.logger.info( ALERT:  Testing security vulnerability detection")
+        "Test detection of credential security vulnerabilities.
+        self.logger.info( ALERT:  Testing security vulnerability detection")"
         
         vulnerability_results = {
             'vulnerabilities_found': [],
@@ -710,29 +710,29 @@ class DockerCredentialSecurityInfrastructureTests:
         if vulnerability_results['total_checks'] > 0:
             vulnerability_results['security_compliance_score'] = max(0, 100 - (total_vulnerabilities / vulnerability_results['total_checks'] * 10))
         
-        self.logger.info(f" PASS:  Security vulnerability detection:)
-        self.logger.info(f   Total checks performed: {vulnerability_results['total_checks']}")
+        self.logger.info(f PASS:  Security vulnerability detection:)
+        self.logger.info(f   Total checks performed: {vulnerability_results['total_checks']})
         self.logger.info(f"   Vulnerabilities found: {total_vulnerabilities})
         self.logger.info(f   Security compliance score: {vulnerability_results['security_compliance_score']:.1f}%")
         
         for severity, count in vulnerability_results['severity_levels'].items():
             if count > 0:
-                self.logger.info(f"     {severity}: {count})
+                self.logger.info(f     {severity}: {count})
         
         # Log vulnerabilities
         for vuln in vulnerability_results['vulnerabilities_found'][:10]:  # Show first 10
-            self.logger.warning(f   VULNERABILITY: {vuln['description']} (Severity: {vuln['severity']}")
+            self.logger.warning(f   VULNERABILITY: {vuln['description']} (Severity: {vuln['severity']})"
         
         # Security assertions
         assert vulnerability_results['severity_levels']['CRITICAL'] == 0, f"Critical vulnerabilities found: {vulnerability_results['severity_levels']['CRITICAL']}
-        assert vulnerability_results['severity_levels']['HIGH'] < 3, fToo many high-severity vulnerabilities: {vulnerability_results['severity_levels']['HIGH']}"
-        assert vulnerability_results['security_compliance_score'] >= 70, f"Security compliance too low: {vulnerability_results['security_compliance_score']:.1f}%
+        assert vulnerability_results['severity_levels']['HIGH'] < 3, fToo many high-severity vulnerabilities: {vulnerability_results['severity_levels']['HIGH']}
+        assert vulnerability_results['security_compliance_score'] >= 70, fSecurity compliance too low: {vulnerability_results['security_compliance_score']:.1f}%
         
         return vulnerability_results
     
     def test_credential_rotation_readiness(self) -> Dict[str, Any]:
-        ""Test readiness for credential rotation scenarios."
-        self.logger.info(" CYCLE:  Testing credential rotation readiness)
+        ""Test readiness for credential rotation scenarios.
+        self.logger.info( CYCLE:  Testing credential rotation readiness)"
         
         rotation_results = {
             'rotation_capabilities': [],
@@ -855,25 +855,25 @@ class DockerCredentialSecurityInfrastructureTests:
         avg_downtime = statistics.mean([d.get('estimated_downtime_seconds', 60) for d in rotation_results['downtime_estimates']] if rotation_results['downtime_estimates'] else 60
         
         self.logger.info(f PASS:  Credential rotation readiness:")
-        self.logger.info(f"   Rotation score: {rotation_results['rotation_score']:.1f}%)
-        self.logger.info(f   Capabilities passed: {capabilities_passed}/{capabilities_tested}")
+        self.logger.info(f   Rotation score: {rotation_results['rotation_score']:.1f}%)
+        self.logger.info(f   Capabilities passed: {capabilities_passed}/{capabilities_tested})"
         self.logger.info(f"   Rollback ready: {rotation_results['rollback_readiness']})
-        self.logger.info(f   Average estimated downtime: {avg_downtime:.1f}s")
+        self.logger.info(f   Average estimated downtime: {avg_downtime:.1f}s)
         
         # Log capability details
         for capability in rotation_results['rotation_capabilities']:
-            status = "[U+2713] if capability['supported'] else [U+2717]"
+            status = [U+2713] if capability['supported'] else [U+2717]"
             self.logger.info(f"     {status} {capability['capability']})
         
         # Rotation readiness assertions
-        assert rotation_results['rotation_score'] >= 50, fRotation readiness too low: {rotation_results['rotation_score']:.1f}%"
-        assert avg_downtime < 45, f"Estimated downtime too high: {avg_downtime:.1f}s
+        assert rotation_results['rotation_score'] >= 50, fRotation readiness too low: {rotation_results['rotation_score']:.1f}%
+        assert avg_downtime < 45, fEstimated downtime too high: {avg_downtime:.1f}s
         
         return rotation_results
     
     def test_compliance_with_security_standards(self) -> Dict[str, Any]:
-        ""Test compliance with security standards and best practices."
-        self.logger.info("[U+1F4CB] Testing compliance with security standards)
+        ""Test compliance with security standards and best practices.
+        self.logger.info([U+1F4CB] Testing compliance with security standards)"
         
         compliance_results = {
             'standards_checked': [],
@@ -907,33 +907,33 @@ class DockerCredentialSecurityInfrastructureTests:
             compliance_results['overall_compliance_score'] = statistics.mean(compliance_results['compliance_scores'].values())
         
         self.logger.info(f PASS:  Security standards compliance:")
-        self.logger.info(f"   Overall compliance: {compliance_results['overall_compliance_score']:.1f}%)
+        self.logger.info(f   Overall compliance: {compliance_results['overall_compliance_score']:.1f}%)
         
         for standard, score in compliance_results['compliance_scores'].items():
-            self.logger.info(f     {standard}: {score:.1f}%")
+            self.logger.info(f     {standard}: {score:.1f}%)"
         
         # Log violations
         for violation in compliance_results['violations'][:10]:  # Show first 10
             self.logger.warning(f"   VIOLATION: {violation})
         
         # Compliance assertions
-        assert compliance_results['overall_compliance_score'] >= 70, fOverall compliance too low: {compliance_results['overall_compliance_score']:.1f}%"
-        assert len(compliance_results['violations'] < 10, f"Too many compliance violations: {len(compliance_results['violations']}
+        assert compliance_results['overall_compliance_score'] >= 70, fOverall compliance too low: {compliance_results['overall_compliance_score']:.1f}%
+        assert len(compliance_results['violations'] < 10, fToo many compliance violations: {len(compliance_results['violations']}
         
         return compliance_results
     
     # Helper methods for vulnerability detection and compliance checking
     def _check_hardcoded_credentials(self, results: Dict[str, Any] -> None:
-        ""Check for hardcoded credentials in source code."
+        ""Check for hardcoded credentials in source code.
         results['total_checks'] += 1
         
         # Patterns that might indicate hardcoded credentials
         suspicious_patterns = [
-            r'password\s*=\s*["\'][^\']{1,}[\']',
-            r'passwd\s*=\s*["\'][^"\']{1,}[\']',
-            r'pwd\s*=\s*[\'][^"\']{1,}["\']',
-            r'user\s*=\s*[\'][^\']{1,}["\']',
-            r'username\s*=\s*["\'][^\']{1,}[\']',
+            r'password\s*=\s*[\'][^\']{1,}[\']',"
+            r'passwd\s*=\s*["\'][^\']{1,}[\']',
+            r'pwd\s*=\s*[\'][^\']{1,}[\']',
+            r'user\s*=\s*[\'][^\']{1,}["\']',"
+            r'username\s*=\s*[\'][^\']{1,}[\']',
         ]
         
         # Check source files
@@ -954,7 +954,7 @@ class DockerCredentialSecurityInfrastructureTests:
                             results['vulnerabilities_found'].append({
                                 'type': 'hardcoded_credential',
                                 'severity': 'HIGH',
-                                'description': f"Potential hardcoded credential in {file_path.relative_to(self.project_root)}",
+                                'description': fPotential hardcoded credential in {file_path.relative_to(self.project_root)},
                                 'pattern_matched': pattern,
                                 'file': str(file_path.relative_to(self.project_root))
                             }
@@ -983,7 +983,7 @@ class DockerCredentialSecurityInfrastructureTests:
                     results['vulnerabilities_found'].append({
                         'type': 'weak_password',
                         'severity': 'MEDIUM',
-                        'description': f"Weak password length in {env_type.name} environment",
+                        'description': fWeak password length in {env_type.name} environment,
                         'environment': env_type.name
                     }
                     results['severity_levels']['MEDIUM'] += 1
@@ -1005,7 +1005,7 @@ class DockerCredentialSecurityInfrastructureTests:
                     results['vulnerabilities_found'].append({
                         'type': 'privileged_username',
                         'severity': 'MEDIUM',
-                        'description': f"High-privilege username in {env_type.name} environment: {username}",
+                        'description': fHigh-privilege username in {env_type.name} environment: {username},
                         'environment': env_type.name
                     }
                     results['severity_levels']['MEDIUM'] += 1
@@ -1020,7 +1020,7 @@ class DockerCredentialSecurityInfrastructureTests:
         try:
             # Check if credentials appear in constructed URLs (expected but should be noted)
             manager = UnifiedDockerManager(environment_type=EnvironmentType.DEVELOPMENT)
-            url = manager._build_service_url_from_port("postgres", 5432)
+            url = manager._build_service_url_from_port(postgres, 5432)
             
             # This is actually expected behavior, but we should ensure it's handled securely
             if '@' in url and '//' in url:
@@ -1029,7 +1029,7 @@ class DockerCredentialSecurityInfrastructureTests:
                     'type': 'credential_in_url',
                     'severity': 'LOW',
                     'description': Credentials embedded in database URL (normal but ensure secure handling),
-                    'url_pattern': url[:20] + "..." if len(url) > 20 else url
+                    'url_pattern': url[:20] + ..." if len(url) > 20 else url
                 }
                 results['severity_levels']['LOW'] += 1
                 
@@ -1037,7 +1037,7 @@ class DockerCredentialSecurityInfrastructureTests:
             pass
     
     def _check_environment_variable_security(self, results: Dict[str, Any] -> None:
-        "Check environment variable security practices."
+        "Check environment variable security practices.
         results['total_checks'] += 1
         
         # Check if sensitive environment variables are being set
@@ -1058,13 +1058,13 @@ class DockerCredentialSecurityInfrastructureTests:
             results['vulnerabilities_found'].append({
                 'type': 'sensitive_env_vars',
                 'severity': 'LOW',
-                'description': f"Sensitive environment variables detected: {', '.join(exposed_vars)}",
+                'description': fSensitive environment variables detected: {', '.join(exposed_vars)},
                 'variables': exposed_vars
             }
             results['severity_levels']['LOW'] += 1
     
     def _check_configuration_file_security(self, results: Dict[str, Any] -> None:
-        "Check security of configuration files."
+        Check security of configuration files."
         results['total_checks'] += 1
         
         config_files = [
@@ -1086,7 +1086,7 @@ class DockerCredentialSecurityInfrastructureTests:
                         results['vulnerabilities_found'].append({
                             'type': 'config_embedded_password',
                             'severity': 'MEDIUM',
-                            'description': f"Password found in configuration file: {config_file}",
+                            'description': f"Password found in configuration file: {config_file},
                             'file': config_file
                         }
                         results['severity_levels']['MEDIUM'] += 1
@@ -1095,7 +1095,7 @@ class DockerCredentialSecurityInfrastructureTests:
                     pass
     
     def _check_owasp_compliance(self) -> float:
-        "Check OWASP Top 10 compliance."
+        Check OWASP Top 10 compliance.
         # Simplified OWASP compliance check
         compliance_score = 85.0  # Base score
         
@@ -1118,7 +1118,7 @@ class DockerCredentialSecurityInfrastructureTests:
         return max(0, compliance_score)
     
     def _check_nist_compliance(self) -> float:
-        ""Check NIST Cybersecurity Framework compliance.""
+        "Check NIST Cybersecurity Framework compliance."
         # Simplified NIST compliance check
         compliance_score = 80.0  # Base score
         
@@ -1133,7 +1133,7 @@ class DockerCredentialSecurityInfrastructureTests:
         return max(0, compliance_score)
     
     def _check_docker_security_practices(self) -> float:
-        "Check Docker security best practices."
+        Check Docker security best practices.
         compliance_score = 75.0  # Base score
         
         # Check for non-root user usage
@@ -1153,7 +1153,7 @@ class DockerCredentialSecurityInfrastructureTests:
         return min(100, compliance_score)
     
     def _check_database_security_standards(self) -> float:
-        ""Check database security standards.""
+        ""Check database security standards.
         compliance_score = 70.0  # Base score
         
         # Check credential strength across environments
@@ -1179,16 +1179,16 @@ class DockerCredentialSecurityInfrastructureTests:
         return min(100, max(0, compliance_score))
     
     def _get_config_hash(self, manager: UnifiedDockerManager) -> str:
-        "Get a hash of the current configuration."
+        Get a hash of the current configuration."
         try:
             creds = manager.get_database_credentials()
-            config_string = f"{creds['user']}{creds['password']}{creds['database']}"
+            config_string = f"{creds['user']}{creds['password']}{creds['database']}
             return hashlib.md5(config_string.encode()).hexdigest()
         except Exception:
             return unknown
     
     def _check_config_backup_support(self) -> bool:
-        ""Check if configuration backup/restore is supported.""
+        Check if configuration backup/restore is supported."
         # Check if backup mechanisms exist
         backup_indicators = [
             'backup', 'restore', 'snapshot', 'checkpoint'

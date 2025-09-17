@@ -15,7 +15,7 @@ then PASS after Phase 3 remediation to validate the fix is successful.
 
 CRITICAL: These tests protect mission-critical WebSocket functionality by preventing
 fragmented import patterns that could cause race conditions or silent failures.
-""
+"
 
 import warnings
 import pytest
@@ -30,10 +30,10 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
-    ""Mission Critical validation for Issue #1090 SSOT WebSocket import fragmentation."
+    "Mission Critical validation for Issue #1090 SSOT WebSocket import fragmentation.
     
     def setUp(self):
-        "Setup test environment for mission critical validation.""
+        "Setup test environment for mission critical validation."
         super().setUp()
         self.test_context.test_category = mission_critical"
         self.test_context.record_custom('issue_number', '1090')
@@ -47,7 +47,7 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
         self.ssot_compliance_checks = 0
         
     def tearDown(self):
-        "Clean up and record mission critical metrics.""
+        "Clean up and record mission critical metrics.
         self.test_context.record_custom('import_violations_detected', self.import_violations_detected)
         self.test_context.record_custom('legitimate_imports_tested', self.legitimate_imports_tested)
         self.test_context.record_custom('deprecation_warnings_found', self.deprecation_warnings_found)
@@ -67,9 +67,9 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
         
         Business Impact: Protects developer experience and prevents confusion about
         proper import patterns in mission-critical WebSocket infrastructure.
-        "
+
         with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always)
+            warnings.simplefilter("always)"
             
             # This is the exact import from line 32 of websocket_error_validator.py
             # This is a LEGITIMATE specific module import that should NOT trigger warnings
@@ -79,10 +79,10 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
                 
                 # Verify the import actually works
                 self.assertIsNotNone(UnifiedEventValidator, 
-                                   UnifiedEventValidator should be importable")
+                                   UnifiedEventValidator should be importable)
                 
             except ImportError:
-                pytest.skip("UnifiedEventValidator not available - cannot test issue)
+                pytest.skip(UnifiedEventValidator not available - cannot test issue)"
             
             # Check for websocket_core deprecation warnings
             websocket_warnings = [
@@ -106,21 +106,21 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
             # TARGET STATE: This SHOULD PASS after Phase 3 fix (no warnings for legitimate imports)
             self.assertEqual(len(websocket_warnings), 0, 
                 fISSUE #1090: Specific module import should not trigger deprecation warning. "
-                f"Found {len(websocket_warnings)} warnings: {[str(w.message) for w in websocket_warnings]}. 
+                fFound {len(websocket_warnings)} warnings: {[str(w.message) for w in websocket_warnings]}. 
                 fThis indicates the deprecation warning logic is too broad and needs to be narrowed "
                 f"to only target problematic import patterns, not legitimate specific module imports.)
 
     @pytest.mark.mission_critical
     @pytest.mark.issue_1090
     def test_broad_websocket_core_imports_should_warn(self):
-        ""MISSION CRITICAL: Test that broad WebSocket core imports DO trigger warnings.
+        MISSION CRITICAL: Test that broad WebSocket core imports DO trigger warnings.
         
         This test validates that after Phase 3 fix, problematic import patterns
         still trigger appropriate warnings while legitimate imports are warning-free.
         
         Business Impact: Ensures developers are guided away from problematic
         import patterns that can cause race conditions.
-        "
+""
         problematic_imports = [
             'from netra_backend.app.websocket_core import WebSocketManager',
             'from netra_backend.app.websocket_core import create_websocket_manager'
@@ -130,7 +130,7 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
         
         for import_statement in problematic_imports:
             with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter("always)
+                warnings.simplefilter(always)
                 
                 try:
                     # Execute the problematic import
@@ -167,7 +167,7 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.issue_1090
     def test_websocket_import_pattern_consistency(self):
-        ""MISSION CRITICAL: Test consistent warning behavior across import patterns.
+        MISSION CRITICAL: Test consistent warning behavior across import patterns.
         
         This test ensures that the Phase 3 fix creates consistent behavior:
         - Specific module imports: NO warnings
@@ -175,7 +175,7 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
         
         Business Impact: Ensures predictable developer experience and clear
         guidance on proper import patterns.
-        "
+""
         # Test patterns that should NOT warn (legitimate specific imports)
         legitimate_patterns = [
             'from netra_backend.app.websocket_core.event_validator import UnifiedEventValidator',
@@ -195,7 +195,7 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
         # Test legitimate patterns (should not warn)
         for pattern in legitimate_patterns:
             with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter("always)
+                warnings.simplefilter(always)
                 
                 try:
                     exec(pattern)
@@ -221,7 +221,7 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
         # Test problematic patterns (should warn)
         for pattern in problematic_patterns:
             with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter(always")
+                warnings.simplefilter(always")"
                 
                 try:
                     exec(pattern)
@@ -249,27 +249,27 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
         # CURRENT STATE: This will likely FAIL because legitimate imports trigger warnings
         # TARGET STATE: This SHOULD PASS after Phase 3 (no warnings for legitimate imports)
         self.assertEqual(legitimate_warnings, 0,
-                        f"ISSUE #1090: Legitimate specific module imports should not trigger warnings. 
-                        fFound {legitimate_warnings} false warnings. This indicates the deprecation "
+                        fISSUE #1090: Legitimate specific module imports should not trigger warnings. 
+                        fFound {legitimate_warnings} false warnings. This indicates the deprecation 
                         f"warning scope is too broad and needs to be narrowed in Phase 3 remediation.)
 
     @pytest.mark.mission_critical
     @pytest.mark.issue_1090
     def test_websocket_manager_factory_elimination_verification(self):
-        ""MISSION CRITICAL: Verify WebSocket manager factory has been eliminated.
+        "MISSION CRITICAL: Verify WebSocket manager factory has been eliminated.
         
         This test confirms that the core Issue #1090 problem (factory fragmentation)
         has been successfully resolved through SSOT migration.
         
         Business Impact: Ensures no regression to fragmented factory patterns
         that could cause race conditions or user isolation failures.
-        "
+"
         # Verify factory file has been removed
         factory_file_path = Path("/Users/anthony/Desktop/netra-apex/netra_backend/app/websocket_core/websocket_manager_factory.py)
         
         self.assertFalse(factory_file_path.exists(),
-                        WebSocket manager factory file should have been removed as part of SSOT migration. "
-                        "If this file exists, it indicates regression to fragmented factory patterns.)
+                        WebSocket manager factory file should have been removed as part of SSOT migration. 
+                        "If this file exists, it indicates regression to fragmented factory patterns.)"
         
         # Verify factory imports fail
         factory_import_attempts = [
@@ -293,23 +293,23 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
                 self.test_context.record_custom('factory_import_error', {'import': import_attempt, 'error': str(e)}
         
         self.assertEqual(successful_factory_imports, 0,
-                        fFactory import patterns should fail (SSOT migration complete). "
-                        f"Found {successful_factory_imports} successful factory imports, indicating 
-                        fpotential regression to fragmented factory patterns.")
+                        fFactory import patterns should fail (SSOT migration complete). 
+                        fFound {successful_factory_imports} successful factory imports, indicating 
+                        fpotential regression to fragmented factory patterns.")"
         
         self.ssot_compliance_checks += len(factory_import_attempts)
 
     @pytest.mark.mission_critical
     @pytest.mark.issue_1090
     def test_canonical_websocket_imports_functional(self):
-        "MISSION CRITICAL: Verify canonical WebSocket imports are functional.
+        MISSION CRITICAL: Verify canonical WebSocket imports are functional."
         
         This test ensures that the SSOT migration has provided working canonical
         import patterns that developers should use.
         
         Business Impact: Validates that the Golden Path WebSocket functionality
         remains intact through canonical import patterns.
-        ""
+        "
         canonical_imports = [
             {
                 'import': 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
@@ -340,7 +340,7 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
                 imported_class = eval(class_name)
                 
                 self.assertIsNotNone(imported_class,
-                                   fCanonical import should provide {class_name}")
+                                   fCanonical import should provide {class_name})
                 
                 successful_canonical_imports += 1
                 self.test_context.record_custom('canonical_import_success', {
@@ -371,18 +371,18 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
         self.assertGreater(success_rate, 0.5,
                           f"Most canonical imports should work. Success rate: {success_rate:.2%}. 
                           fIf this fails, SSOT migration may not be complete or canonical patterns "
-                          f"may not be properly implemented.)
+                          fmay not be properly implemented.)
 
     @pytest.mark.mission_critical
     @pytest.mark.issue_1090
     def test_issue_1090_phase_2_test_readiness(self):
-        ""MISSION CRITICAL: Validate that Issue #1090 Phase 2 tests are ready.
+        "MISSION CRITICAL: Validate that Issue #1090 Phase 2 tests are ready.
         
         This test ensures that the comprehensive test suite created for Issue #1090
         is properly structured and ready for Phase 3 remediation validation.
         
         Business Impact: Ensures proper test coverage for validating the Phase 3 fix.
-        "
+"
         required_test_files = [
             '/Users/anthony/Desktop/netra-apex/tests/unit/deprecation_cleanup/test_websocket_core_deprecation_warnings.py',
             '/Users/anthony/Desktop/netra-apex/tests/integration/deprecation_cleanup/test_websocket_event_delivery_post_cleanup.py',
@@ -425,20 +425,20 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
         self.test_context.record_custom('test_file_coverage', test_file_coverage)
         
         self.assertGreater(test_file_coverage, 0.8,
-                          f"Most required test files should exist for Issue #1090 Phase 2. 
-                          fCoverage: {test_file_coverage:.2%} ({existing_test_files}/{total_required}. "
-                          f"Missing test files could indicate incomplete Phase 2 preparation.)
+                          fMost required test files should exist for Issue #1090 Phase 2. 
+                          fCoverage: {test_file_coverage:.2%} ({existing_test_files}/{total_required}. ""
+                          fMissing test files could indicate incomplete Phase 2 preparation.)
 
     @pytest.mark.mission_critical
     @pytest.mark.issue_1090
     def test_golden_path_websocket_functionality_protection(self):
-        ""MISSION CRITICAL: Ensure Golden Path WebSocket functionality is protected.
+        MISSION CRITICAL: Ensure Golden Path WebSocket functionality is protected.
         
         This test validates that Issue #1090 deprecation warning cleanup does not
         impact the core WebSocket functionality that supports $500K+ ARR.
         
         Business Impact: Direct protection of revenue-critical functionality.
-        "
+""
         # Test core WebSocket functionality components
         core_components = [
             'netra_backend.app.websocket_core.event_validator',
@@ -451,13 +451,13 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
         for component in core_components:
             try:
                 module = importlib.import_module(component)
-                self.assertIsNotNone(module, f"Core component {component} should be importable)
+                self.assertIsNotNone(module, fCore component {component} should be importable)
                 
                 # Check for key functionality
                 if hasattr(module, '__all__'):
                     exports = getattr(module, '__all__')
                     self.assertGreater(len(exports), 0, 
-                                     fCore component {component} should export functionality")
+                                     fCore component {component} should export functionality)"
                 
                 functional_components += 1
                 self.test_context.record_custom('functional_core_component', component)
@@ -480,9 +480,9 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
         
         self.assertGreater(functionality_protection_rate, 0.8,
                           f"Core WebSocket functionality must be protected during Issue #1090 cleanup. 
-                          fProtection rate: {functionality_protection_rate:.2%} "
-                          f"({functional_components}/{total_components}. 
-                          fIf this fails, deprecation warning changes may have broken core functionality.")
+                          fProtection rate: {functionality_protection_rate:.2%} 
+                          f({functional_components}/{total_components}. 
+                          fIf this fails, deprecation warning changes may have broken core functionality.")"
 
 
 if __name__ == '__main__':

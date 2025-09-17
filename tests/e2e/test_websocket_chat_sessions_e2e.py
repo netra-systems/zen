@@ -20,7 +20,7 @@ CHAT BUSINESS VALUE VALIDATION:
 
 This suite tests complete chat sessions from user request through AI response
 with full authentication, WebSocket events, and business value delivery.
-""
+"
 
 import asyncio
 import json
@@ -40,28 +40,28 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
-    ""
+    "
     E2E tests for complete WebSocket chat sessions with authentication.
     
     These tests validate the entire chat business value chain:
     User Request -> Authentication -> WebSocket Connection -> Agent Execution 
     -> Real-time Events -> Final Response -> Business Value Delivered
-    "
+"
     
     @pytest.fixture
     async def auth_helper(self):
-        "Create authenticated E2E test helper.""
+        "Create authenticated E2E test helper.
         config = E2EAuthConfig()
         return E2EAuthHelper(config)
     
     @pytest.fixture 
     async def authenticated_chat_session(self, auth_helper):
-        ""Create authenticated chat session with WebSocket connection."
+        ""Create authenticated chat session with WebSocket connection.
         # Get authentication token
         auth_result = await auth_helper.authenticate_test_user()
         
         if not auth_result.success:
-            pytest.skip(f"Authentication failed: {auth_result.error})
+            pytest.skip(fAuthentication failed: {auth_result.error})
         
         # Create WebSocket utility with auth
         ws_util = WebSocketTestUtility()
@@ -76,36 +76,36 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
         # Connect with real authentication
         connected = await client.connect(timeout=15.0)
         if not connected:
-            pytest.skip(WebSocket connection with authentication failed")
+            pytest.skip(WebSocket connection with authentication failed")"
             
         return {
-            "ws_util: ws_util,
-            client": client,
+            ws_util: ws_util,
+            client: client,"
             "auth_result: auth_result,
-            user_id": auth_result.user_id
+            user_id: auth_result.user_id
         }
 
     @pytest.mark.e2e
     @pytest.mark.requires_auth
     async def test_complete_authenticated_chat_session(self, authenticated_chat_session):
-        "
+    ""
         Test complete authenticated chat session delivers business value.
         
         BUSINESS VALUE: Validates that authenticated users can have complete
         chat conversations that deliver real AI-powered solutions to business problems.
-        ""
+        
         session = authenticated_chat_session
-        client = session[client"]
-        user_id = session["user_id]
+        client = session[client"]"
+        user_id = session[user_id]
         
         # Arrange - Business-focused user request
         business_request = {
-            content": "I need to analyze our Q3 sales data to identify the top 3 growth opportunities for Q4 planning. Please focus on revenue trends, customer segments, and regional performance.,
-            priority": "high,
-            expected_deliverables": [
-                "Revenue trend analysis,
-                Customer segment insights", 
-                "Regional performance comparison,
+            content: "I need to analyze our Q3 sales data to identify the top 3 growth opportunities for Q4 planning. Please focus on revenue trends, customer segments, and regional performance.,
+            priority": high,
+            expected_deliverables: [
+                "Revenue trend analysis,"
+                Customer segment insights, 
+                Regional performance comparison,"
                 Top 3 actionable recommendations"
             ]
         }
@@ -118,10 +118,10 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             WebSocketEventType.MESSAGE_CREATED,
             {
                 **business_request,
-                "role: user",
-                "timestamp: datetime.now().isoformat(),
-                user_id": user_id,
-                "session_id: fchat_{uuid.uuid4().hex[:8]}"
+                role: user,
+                "timestamp: datetime.now().isoformat(),"
+                user_id: user_id,
+                session_id: fchat_{uuid.uuid4().hex[:8]}"
             }
         
         # Expected chat business value events
@@ -153,7 +153,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             agent_started_events = received_events[WebSocketEventType.AGENT_STARTED]
             assert len(agent_started_events) > 0
             first_event = agent_started_events[0]
-            assert agent_name" in first_event.data
+            assert agent_name in first_event.data
             assert first_event.user_id == user_id  # Proper user isolation
             
             # 3. Real-time thinking provides user confidence
@@ -162,7 +162,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             
             thinking_event = thinking_events[0]
             thinking_data = thinking_event.data
-            assert "thought in thinking_data
+            assert thought in thinking_data"
             assert len(thinking_data[thought"] > 10  # Substantive reasoning
             
             # 4. Tool execution demonstrates AI working on solution
@@ -171,7 +171,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             
             tool_event = tool_exec_events[0]
             tool_data = tool_event.data
-            assert "tool_name in tool_data
+            assert tool_name in tool_data
             assert purpose" in tool_data or "tool_purpose in tool_data
             
             # 5. Tool completion delivers actionable results
@@ -180,8 +180,8 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             
             tool_result = tool_completed_events[0]
             result_data = tool_result.data
-            assert result" in result_data
-            assert result_data["result] is not None
+            assert result in result_data
+            assert result_data[result] is not None"
             
             # 6. Agent completion signals full business value delivered
             completion_events = received_events[WebSocketEventType.AGENT_COMPLETED]
@@ -189,31 +189,31 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             
             completion_event = completion_events[0]
             completion_data = completion_event.data
-            assert result" in completion_data or "summary in completion_data
+            assert result" in completion_data or summary in completion_data
             
             # 7. Performance meets user expectations
-            assert chat_duration < 60.0, fChat session took {chat_duration}s (should be < 60s)"
+            assert chat_duration < 60.0, fChat session took {chat_duration}s (should be < 60s)
             
             # 8. User receives complete business value
             total_events = sum(len(events) for events in received_events.values())
             assert total_events >= len(expected_business_events), \
-                "Insufficient event detail for business transparency
+                "Insufficient event detail for business transparency"
                 
         except asyncio.TimeoutError:
-            pytest.fail(fChat session timeout - business value not delivered within 45s")
+            pytest.fail(fChat session timeout - business value not delivered within 45s)
         
         finally:
-            await session["ws_util].cleanup()
+            await session[ws_util].cleanup()"
 
     @pytest.mark.e2e
     @pytest.mark.requires_auth 
     async def test_multi_user_chat_isolation(self, auth_helper):
-        ""
+        "
         Test multi-user chat sessions maintain proper isolation.
         
         BUSINESS VALUE: Enterprise customers need guaranteed conversation privacy.
         Users must only see their own chat events and AI responses.
-        "
+"
         # Create multiple authenticated users
         user_sessions = []
         
@@ -225,7 +225,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                 )
                 
                 if not auth_result.success:
-                    pytest.skip(fAuthentication failed for user {i}")
+                    pytest.skip(fAuthentication failed for user {i})
                 
                 ws_util = WebSocketTestUtility()
                 await ws_util.initialize()
@@ -237,13 +237,13 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                 
                 connected = await client.connect(timeout=10.0)
                 if not connected:
-                    pytest.skip(f"WebSocket connection failed for user {i})
+                    pytest.skip(fWebSocket connection failed for user {i})
                 
                 user_sessions.append({
-                    user_id": auth_result.user_id,
-                    "client: client,
-                    ws_util": ws_util,
-                    "thread_id: fthread_{i}_{uuid.uuid4().hex[:8]}"
+                    user_id": auth_result.user_id,"
+                    client: client,
+                    ws_util: ws_util,"
+                    "thread_id: fthread_{i}_{uuid.uuid4().hex[:8]}
                 }
             
             # Act - Start concurrent chat sessions
@@ -251,9 +251,9 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             for i, session in enumerate(user_sessions):
                 task = asyncio.create_task(
                     self._simulate_user_chat_session(
-                        session["client],
-                        session[user_id"], 
-                        f"User {i} confidential request: Analyze our competitive position vs Company-{i}
+                        session[client],
+                        session[user_id"], "
+                        fUser {i} confidential request: Analyze our competitive position vs Company-{i}
                     )
                 )
                 chat_tasks.append(task)
@@ -266,14 +266,14 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             # 1. All sessions should succeed independently
             for i, result in enumerate(results):
                 assert not isinstance(result, Exception), \
-                    fUser {i} chat session failed: {result}"
-                assert result["success] is True
+                    fUser {i} chat session failed: {result}
+                assert result["success] is True"
             
             # 2. Verify event isolation - users only receive their own events
             user_agent_events = {}
             for i, session in enumerate(user_sessions):
-                client = session[client"]
-                user_id = session["user_id]
+                client = session[client]
+                user_id = session[user_id]"
                 
                 # Get agent events for this user
                 agent_started = client.get_messages_by_type(WebSocketEventType.AGENT_STARTED)
@@ -281,24 +281,24 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                 
                 user_agent_events[user_id] = {
                     started": agent_started,
-                    "completed: agent_completed
+                    completed: agent_completed
                 }
                 
                 # Each user should have exactly their own events
-                assert len(agent_started) >= 1, fUser {i} missing agent_started events"
-                assert len(agent_completed) >= 1, f"User {i} missing agent_completed events
+                assert len(agent_started) >= 1, fUser {i} missing agent_started events""
+                assert len(agent_completed) >= 1, fUser {i} missing agent_completed events
                 
                 # Verify events belong to this user
                 for event in agent_started + agent_completed:
                     if hasattr(event, 'user_id') and event.user_id:
                         assert event.user_id == user_id, \
-                            fUser {i} received event for different user: {event.user_id}"
+                            fUser {i} received event for different user: {event.user_id}
             
             # 3. Verify no cross-contamination between users
-            all_user_ids = [session["user_id] for session in user_sessions]
+            all_user_ids = [session["user_id] for session in user_sessions]"
             for i, session in enumerate(user_sessions):
-                client = session[client"]
-                current_user_id = session["user_id]
+                client = session[client]
+                current_user_id = session[user_id]"
                 
                 # Check all received messages
                 for message in client.received_messages:
@@ -310,43 +310,43 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             # Clean up all sessions
             for session in user_sessions:
                 try:
-                    await session["client].disconnect()
-                    await session[ws_util"].cleanup()
+                    await session[client].disconnect()
+                    await session[ws_util"].cleanup()"
                 except Exception as e:
-                    print(f"Cleanup error: {e})
+                    print(fCleanup error: {e})
 
     @pytest.mark.e2e
     @pytest.mark.requires_auth
     async def test_chat_error_recovery_with_auth(self, authenticated_chat_session):
-        ""
+        "
         Test chat error scenarios provide good user experience with recovery.
         
         BUSINESS VALUE: When AI processing fails, authenticated users get clear
         guidance and can recover their session without losing context.
-        "
+"
         session = authenticated_chat_session
-        client = session["client]
+        client = session[client]"
         user_id = session[user_id"]
         
         # Act - Simulate various error scenarios
         error_scenarios = [
             {
-                "scenario: rate_limit_recovery",
+                scenario: rate_limit_recovery,
                 "request: Analyze massive dataset (trigger rate limit)",
-                "expected_recovery: True,
-                max_retry_time": 30.0
+                expected_recovery: True,
+                max_retry_time: 30.0"
             },
             {
-                "scenario: timeout_graceful_handling", 
-                "request: Complex analysis that may timeout",
-                "expected_recovery: True,
-                max_retry_time": 45.0
+                "scenario: timeout_graceful_handling, 
+                request: Complex analysis that may timeout,
+                "expected_recovery: True,"
+                max_retry_time: 45.0
             },
             {
-                "scenario: invalid_request_guidance",
-                "request: ",  # Empty request should be handled gracefully
-                "expected_recovery: True,
-                max_retry_time": 5.0
+                scenario: invalid_request_guidance",
+                "request: ,  # Empty request should be handled gracefully
+                expected_recovery: True,
+                max_retry_time": 5.0"
             }
         ]
         
@@ -358,10 +358,10 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                 await client.send_message(
                     WebSocketEventType.MESSAGE_CREATED,
                     {
-                        "content: scenario[request"],
-                        "role: user",
+                        content: scenario[request],
+                        role: user",
                         "user_id: user_id,
-                        scenario": scenario["scenario]
+                        scenario: scenario[scenario]
                     }
                 
                 # Wait for response (error or success)
@@ -369,7 +369,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                 received_completion = False
                 received_error = False
                 
-                while time.time() - start_time < scenario[max_retry_time"]:
+                while time.time() - start_time < scenario[max_retry_time"]:"
                     try:
                         # Check for completion or error
                         message = await client.wait_for_message(timeout=2.0)
@@ -382,8 +382,8 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                             
                             # Verify error provides recovery guidance
                             error_data = message.data
-                            assert "recovery_suggestions in error_data or user_guidance" in error_data
-                            assert error_data.get("is_recoverable, False) == scenario[expected_recovery"]
+                            assert recovery_suggestions in error_data or user_guidance in error_data
+                            assert error_data.get(is_recoverable, False) == scenario[expected_recovery"]
                             break
                             
                     except asyncio.TimeoutError:
@@ -395,7 +395,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                     
             except Exception as e:
                 # Even exceptions should be handled gracefully
-                print(fError scenario {scenario['scenario']} exception: {e}")
+                print(fError scenario {scenario['scenario']} exception: {e})"
                 continue
         
         # Assert - Most error scenarios should be handled well
@@ -407,12 +407,12 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
     @pytest.mark.requires_auth
     @pytest.mark.performance
     async def test_chat_performance_under_load(self, auth_helper):
-        ""
+        
         Test chat system performance with multiple concurrent authenticated users.
         
         BUSINESS VALUE: System scales to support multiple paying customers
         simultaneously without degraded experience.
-        "
+""
         # Performance targets for chat business value
         max_users = 5  # Concurrent authenticated users
         max_chat_duration = 30.0  # Seconds per chat
@@ -426,7 +426,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             # Arrange - Create concurrent authenticated users
             for i in range(max_users):
                 auth_result = await auth_helper.authenticate_test_user(
-                    user_email=f"perf_user_{i}_{uuid.uuid4().hex[:6]}@example.com
+                    user_email=fperf_user_{i}_{uuid.uuid4().hex[:6]}@example.com
                 )
                 
                 if not auth_result.success:
@@ -443,13 +443,13 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                 connected = await client.connect(timeout=10.0)
                 if connected:
                     user_sessions.append({
-                        user_id": auth_result.user_id,
-                        "client: client,
-                        ws_util": ws_util
+                        user_id: auth_result.user_id,
+                        "client: client,"
+                        ws_util: ws_util
                     }
             
             if len(user_sessions) < 2:
-                pytest.skip("Insufficient authenticated users for performance test)
+                pytest.skip(Insufficient authenticated users for performance test)"
             
             # Act - Run concurrent chat sessions
             performance_tasks = []
@@ -457,8 +457,8 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                 task = asyncio.create_task(
                     self._measure_chat_performance(
                         session[client"],
-                        session["user_id],
-                        fPerformance test {i}: Quick revenue analysis"
+                        session[user_id],
+                        fPerformance test {i}: Quick revenue analysis""
                     )
                 )
                 performance_tasks.append(task)
@@ -474,21 +474,21 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             for i, result in enumerate(results):
                 if isinstance(result, Exception):
                     performance_results.append({
-                        "user: i,
-                        success": False,
+                        user: i,
+                        success: False,"
                         "error: str(result),
-                        duration": max_chat_duration,
-                        "latency: max_chat_duration
+                        duration: max_chat_duration,
+                        "latency: max_chat_duration"
                     }
                 else:
                     successful_sessions += 1
-                    total_duration += result[duration"]
-                    total_latencies.append(result["avg_latency]
+                    total_duration += result[duration]
+                    total_latencies.append(result[avg_latency]"
                     performance_results.append({
                         user": i,
-                        "success: True,
+                        success: True,
                         duration": result["duration],
-                        latency": result["avg_latency]
+                        latency: result[avg_latency]
                     }
             
             # Assert - Performance requirements met
@@ -503,20 +503,20 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                 f"Chat sessions too slow: {avg_duration:.1f}s (should be  <= {max_chat_duration}s)
             
             assert avg_latency <= max_avg_latency, \
-                fResponse latency too high: {avg_latency:.1f}s (should be  <= {max_avg_latency}s)"
+                fResponse latency too high: {avg_latency:.1f}s (should be  <= {max_avg_latency}s)
                 
         finally:
             # Clean up all sessions
             for session in user_sessions:
                 try:
-                    await session["client].disconnect()
+                    await session[client].disconnect()"
                     await session[ws_util"].cleanup()
                 except Exception:
                     pass
 
     async def _simulate_user_chat_session(self, client: WebSocketTestClient, 
                                         user_id: str, request_content: str) -> Dict[str, Any]:
-        "Helper method to simulate a complete user chat session.""
+        Helper method to simulate a complete user chat session.""
         start_time = time.time()
         
         try:
@@ -524,10 +524,10 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             await client.send_message(
                 WebSocketEventType.MESSAGE_CREATED,
                 {
-                    content": request_content,
-                    "role: user",
+                    content: request_content,
+                    role: user",
                     "user_id: user_id,
-                    timestamp": datetime.now().isoformat()
+                    timestamp: datetime.now().isoformat()
                 }
             
             # Wait for agent completion
@@ -539,24 +539,24 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             duration = time.time() - start_time
             
             return {
-                "success: True,
-                user_id": user_id,
-                "duration: duration,
+                "success: True,"
+                user_id: user_id,
+                duration: duration,"
                 events_received": len(client.received_messages),
-                "completion_data: completion_event.data if completion_event else None
+                completion_data: completion_event.data if completion_event else None
             }
             
         except Exception as e:
             return {
-                success": False,
-                "user_id: user_id,
-                duration": time.time() - start_time,
+                success": False,"
+                user_id: user_id,
+                duration: time.time() - start_time,"
                 "error: str(e)
             }
 
     async def _measure_chat_performance(self, client: WebSocketTestClient,
                                       user_id: str, request_content: str) -> Dict[str, Any]:
-        ""Helper method to measure chat session performance metrics."
+        Helper method to measure chat session performance metrics.""
         start_time = time.time()
         event_times = []
         
@@ -565,8 +565,8 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             await client.send_message(
                 WebSocketEventType.MESSAGE_CREATED,
                 {
-                    "content: request_content,
-                    role": "user, 
+                    content: request_content,
+                    role: "user, 
                     user_id": user_id
                 }
             
@@ -587,16 +587,16 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             avg_latency = sum(event_times) / len(event_times) if event_times else 0.0
             
             return {
-                "success: True,
-                duration": total_duration,
-                "avg_latency: avg_latency,
-                events_count": len(client.received_messages)
+                success: True,
+                duration": total_duration,"
+                avg_latency: avg_latency,
+                events_count: len(client.received_messages)"
             }
             
         except Exception as e:
             return {
                 "success: False,
-                duration": time.time() - start_time,
-                "avg_latency: 30.0,  # Max penalty for failed sessions
-                error": str(e)
+                duration: time.time() - start_time,
+                "avg_latency: 30.0,  # Max penalty for failed sessions"
+                error": str(e)"
             }

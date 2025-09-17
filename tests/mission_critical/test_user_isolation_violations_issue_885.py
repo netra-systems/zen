@@ -6,7 +6,7 @@ They validate the $500K+ ARR dependency on secure multi-user WebSocket execution
 
 Business Value: Proves security vulnerabilities in user isolation
 Expected Result: ALL TESTS SHOULD FAIL proving violations exist
-""
+"
 
 import asyncio
 import pytest
@@ -22,33 +22,33 @@ logger = get_logger(__name__)
 
 
 class TestUserIsolationViolations(SSotAsyncTestCase):
-    ""Test suite to prove user isolation violations in WebSocket system."
+    "Test suite to prove user isolation violations in WebSocket system.
 
     async def asyncSetUp(self):
-        "Setup for user isolation violation tests.""
+        "Setup for user isolation violation tests."
         await super().asyncSetUp()
         self.security_violations = []
         self.user_contexts = []
 
     def create_test_user_context(self, user_id: str, session_id: str = None) -> Dict[str, Any]:
-        ""Create test user context for isolation testing."
+        "Create test user context for isolation testing."
         context = {
-            "user_id: ensure_user_id(user_id),
+            user_id: ensure_user_id(user_id),
             session_id": session_id or f"session_{user_id},
-            thread_id": f"thread_{user_id},
-            connection_id": f"conn_{user_id},
-            permissions": ["read, write"],
-            "tenant_id: ftenant_{user_id}"
+            thread_id: fthread_{user_id},
+            connection_id: fconn_{user_id},
+            permissions: ["read, write"],
+            tenant_id: ftenant_{user_id}
         }
         self.user_contexts.append(context)
         return context
 
     async def test_shared_connection_registry_violation(self):
-        "
+    ""
         EXPECTED TO FAIL: Test should detect shared connection registries between users.
 
         This proves that WebSocket managers share connection state, violating user isolation.
-        ""
+        
         connection_sharing_violations = []
 
         try:
@@ -57,7 +57,7 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
 
             # Create contexts for different users
             user1_context = self.create_test_user_context(user_001", "session_001)
-            user2_context = self.create_test_user_context(user_002", "session_002)
+            user2_context = self.create_test_user_context(user_002, session_002)
 
             # Get managers for different users
             manager1 = get_websocket_manager(user_context=user1_context)
@@ -85,16 +85,16 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
             if hasattr(manager1, 'add_connection') and hasattr(manager2, 'add_connection'):
                 # Add connection to user1's manager
                 await manager1.add_connection({
-                    connection_id": "conn_user1_test,
+                    connection_id: conn_user1_test,
                     user_id": user1_context["user_id],
-                    websocket": mock_websocket1,
-                    "thread_id: user1_context[thread_id"]
+                    websocket: mock_websocket1,
+                    thread_id: user1_context[thread_id"]
                 }
 
                 # Check if this connection appears in user2's manager
                 if hasattr(manager2, 'get_user_connections'):
                     user2_connections = manager2.get_user_connections(user2_context["user_id]
-                    user1_connections_in_manager2 = manager2.get_user_connections(user1_context[user_id"]
+                    user1_connections_in_manager2 = manager2.get_user_connections(user1_context[user_id]
 
                     if user1_connections_in_manager2:
                         violation = f"CRITICAL: User1 connections visible in User2 manager: {len(user1_connections_in_manager2)} connections
@@ -107,7 +107,7 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
             self.security_violations.append(violation)
 
         except Exception as e:
-            violation = f"User isolation test failed with error: {e}
+            violation = fUser isolation test failed with error: {e}
             connection_sharing_violations.append(violation)
             self.security_violations.append(violation)
 
@@ -116,17 +116,17 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
             len(connection_sharing_violations), 0,
             fUSER ISOLATION VIOLATION: Found {len(connection_sharing_violations)} connection sharing violations. "
             f"This proves users can access each other's WebSocket connections. 
-            fViolations: {connection_sharing_violations}"
+            fViolations: {connection_sharing_violations}
         )
 
-        logger.error(f"CONNECTION ISOLATION VIOLATIONS: {len(connection_sharing_violations)} violations detected)
+        logger.error(fCONNECTION ISOLATION VIOLATIONS: {len(connection_sharing_violations)} violations detected)
 
     async def test_cross_user_message_delivery_violation(self):
         ""
         EXPECTED TO FAIL: Test should detect messages being delivered to wrong users.
 
         This proves cross-user message leakage violations.
-        "
+
         message_leakage_violations = []
 
         try:
@@ -134,7 +134,7 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
 
             # Create different user contexts
             user_alpha = self.create_test_user_context("alpha_user, alpha_session")
-            user_beta = self.create_test_user_context("beta_user, beta_session")
+            user_beta = self.create_test_user_context(beta_user, beta_session)
 
             # Get managers
             manager_alpha = get_websocket_manager(user_context=user_alpha)
@@ -160,51 +160,51 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
             # Add connections
             if hasattr(manager_alpha, 'add_connection'):
                 await manager_alpha.add_connection({
-                    "connection_id: alpha_conn",
-                    "user_id: user_alpha[user_id"],
-                    "websocket: mock_ws_alpha,
+                    connection_id: alpha_conn",
+                    "user_id: user_alpha[user_id],
+                    websocket: mock_ws_alpha,
                     thread_id": user_alpha["thread_id]
                 }
 
             if hasattr(manager_beta, 'add_connection'):
                 await manager_beta.add_connection({
-                    connection_id": "beta_conn,
-                    user_id": user_beta["user_id],
+                    connection_id: beta_conn,
+                    user_id: user_beta["user_id],
                     websocket": mock_ws_beta,
-                    "thread_id: user_beta[thread_id"]
+                    thread_id: user_beta[thread_id]
                 }
 
             # Send message to alpha user only
             test_message = {
                 "type: test_message",
-                "content: Secret message for alpha user only",
-                "timestamp: 2024-01-01T00:00:00Z",
-                "sensitive_data: alpha_secret_123"
+                content: Secret message for alpha user only,
+                timestamp: 2024-01-01T00:00:00Z",
+                "sensitive_data: alpha_secret_123
             }
 
             # Send message specifically to alpha user
             if hasattr(manager_alpha, 'send_to_user'):
-                await manager_alpha.send_to_user(user_alpha["user_id], test_message)
+                await manager_alpha.send_to_user(user_alpha[user_id], test_message)
             elif hasattr(manager_alpha, 'broadcast_to_user'):
-                await manager_alpha.broadcast_to_user(user_alpha[user_id"], test_message)
+                await manager_alpha.broadcast_to_user(user_alpha[user_id"], test_message)"
 
             # Check if beta user received the message (violation)
             await asyncio.sleep(0.1)  # Allow time for message processing
 
             if beta_messages:
-                violation = f"CRITICAL: Cross-user message leakage - Beta user received {len(beta_messages)} messages intended for Alpha
+                violation = fCRITICAL: Cross-user message leakage - Beta user received {len(beta_messages)} messages intended for Alpha
                 message_leakage_violations.append(violation)
                 self.security_violations.append(violation)
 
                 # Check if sensitive data leaked
                 for msg in beta_messages:
                     if isinstance(msg, str):
-                        msg_data = json.loads(msg) if msg.startswith('{') else {content": msg}
+                        msg_data = json.loads(msg) if msg.startswith('{') else {content: msg}
                     else:
                         msg_data = msg
 
-                    if "alpha_secret in str(msg_data):
-                        violation = fCRITICAL: Sensitive data leaked to wrong user: {msg_data}"
+                    if "alpha_secret in str(msg_data):"
+                        violation = fCRITICAL: Sensitive data leaked to wrong user: {msg_data}
                         message_leakage_violations.append(violation)
                         self.security_violations.append(violation)
 
@@ -215,7 +215,7 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
                 beta_messages.clear()
 
                 # Send global broadcast from one manager
-                global_message = {"type: system", "content: System maintenance"}
+                global_message = {type: system", "content: System maintenance}
 
                 if hasattr(manager_alpha, 'broadcast'):
                     await manager_alpha.broadcast(global_message)
@@ -224,7 +224,7 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
 
                 # Check if broadcast went to both users (potential violation if not properly isolated)
                 if alpha_messages and beta_messages:
-                    violation = f"CRITICAL: Global broadcast not properly isolated between user contexts
+                    violation = fCRITICAL: Global broadcast not properly isolated between user contexts
                     message_leakage_violations.append(violation)
                     self.security_violations.append(violation)
 
@@ -237,14 +237,14 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
         self.assertGreater(
             len(message_leakage_violations), 0,
             f"MESSAGE ISOLATION VIOLATION: Found {len(message_leakage_violations)} message leakage violations. 
-            fThis proves messages can be delivered to wrong users. "
-            f"Violations: {message_leakage_violations}
+            fThis proves messages can be delivered to wrong users. 
+            fViolations: {message_leakage_violations}
         )
 
-        logger.error(fMESSAGE LEAKAGE VIOLATIONS: {len(message_leakage_violations)} violations detected")
+        logger.error(fMESSAGE LEAKAGE VIOLATIONS: {len(message_leakage_violations)} violations detected")"
 
     async def test_agent_context_sharing_violation(self):
-        "
+
         EXPECTED TO FAIL: Test should detect agent execution context sharing between users.
 
         This proves that agent execution contexts are not properly isolated.
@@ -256,8 +256,8 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
             # Create user contexts
-            user_gamma = self.create_test_user_context(gamma_user", "gamma_session)
-            user_delta = self.create_test_user_context(delta_user", "delta_session)
+            user_gamma = self.create_test_user_context(gamma_user, gamma_session)
+            user_delta = self.create_test_user_context(delta_user, "delta_session)
 
             # Get managers
             manager_gamma = get_websocket_manager(user_context=user_gamma)
@@ -273,42 +273,42 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
             # Check execution context sharing
             if hasattr(manager_gamma, '_execution_context') and hasattr(manager_delta, '_execution_context'):
                 if manager_gamma._execution_context is manager_delta._execution_context:
-                    violation = "CRITICAL: Shared agent execution context
+                    violation = CRITICAL: Shared agent execution context
                     agent_context_violations.append(violation)
                     self.security_violations.append(violation)
 
             # Check WebSocket manager registry sharing
             if hasattr(manager_gamma, 'registry') and hasattr(manager_delta, 'registry'):
                 if manager_gamma.registry is manager_delta.registry:
-                    violation = CRITICAL: Shared WebSocket registry between users"
+                    violation = CRITICAL: Shared WebSocket registry between users""
                     agent_context_violations.append(violation)
                     self.security_violations.append(violation)
 
             # Test agent state isolation
             # Simulate agent state changes for one user
             test_agent_state = {
-                "agent_id: test_agent_gamma",
-                "status: executing",
-                "user_data: fprivate_data_for_{user_gamma['user_id']}",
-                "sensitive_context: gamma_secret_context"
+                agent_id: test_agent_gamma,
+                status: executing",
+                "user_data: fprivate_data_for_{user_gamma['user_id']},
+                sensitive_context: gamma_secret_context
             }
 
             # Store state in gamma's manager
             if hasattr(manager_gamma, 'set_agent_state'):
-                manager_gamma.set_agent_state(user_gamma["user_id], test_agent_state)
+                manager_gamma.set_agent_state(user_gamma["user_id], test_agent_state)"
             elif hasattr(manager_gamma, '_agent_states'):
                 manager_gamma._agent_states = manager_gamma._agent_states or {}
-                manager_gamma._agent_states[user_gamma[user_id"]] = test_agent_state
+                manager_gamma._agent_states[user_gamma[user_id]] = test_agent_state
 
             # Check if delta user can access gamma's agent state
             gamma_state_in_delta = None
             if hasattr(manager_delta, 'get_agent_state'):
-                gamma_state_in_delta = manager_delta.get_agent_state(user_gamma["user_id]
+                gamma_state_in_delta = manager_delta.get_agent_state(user_gamma[user_id]"
             elif hasattr(manager_delta, '_agent_states') and manager_delta._agent_states:
                 gamma_state_in_delta = manager_delta._agent_states.get(user_gamma[user_id"]
 
             if gamma_state_in_delta:
-                violation = f"CRITICAL: User delta can access user gamma's agent state: {gamma_state_in_delta}
+                violation = fCRITICAL: User delta can access user gamma's agent state: {gamma_state_in_delta}
                 agent_context_violations.append(violation)
                 self.security_violations.append(violation)
 
@@ -321,14 +321,14 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
         self.assertGreater(
             len(agent_context_violations), 0,
             f"AGENT CONTEXT VIOLATION: Found {len(agent_context_violations)} agent context sharing violations. 
-            fThis proves agent execution contexts are not properly isolated between users. "
-            f"Violations: {agent_context_violations}
+            fThis proves agent execution contexts are not properly isolated between users. 
+            fViolations: {agent_context_violations}
         )
 
-        logger.error(fAGENT CONTEXT VIOLATIONS: {len(agent_context_violations)} violations detected")
+        logger.error(fAGENT CONTEXT VIOLATIONS: {len(agent_context_violations)} violations detected")"
 
     async def test_memory_leak_from_user_sharing_violation(self):
-        "
+
         EXPECTED TO FAIL: Test should detect memory leaks from shared user data.
 
         This proves that user data accumulates in shared objects.
@@ -345,17 +345,17 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
             # Create multiple users and managers
             managers = []
             for i in range(10):  # Create 10 users
-                user_context = self.create_test_user_context(fuser_{i:03d}", f"session_{i:03d})
+                user_context = self.create_test_user_context(fuser_{i:03d}, fsession_{i:03d})
                 manager = get_websocket_manager(user_context=user_context)
                 managers.append(manager)
 
                 # Add some data to each manager
                 if hasattr(manager, '_user_data'):
                     manager._user_data = manager._user_data or {}
-                    manager._user_data[user_context[user_id"]] = {
+                    manager._user_data[user_context[user_id]] = {
                         "large_data: x" * 10000,  # 10KB per user
-                        "connections: [fconn_{j}" for j in range(100)],  # 100 fake connections
-                        "history: [fmessage_{k}" for k in range(1000)]  # 1000 fake messages
+                        connections: [fconn_{j} for j in range(100)],  # 100 fake connections
+                        history: [fmessage_{k}" for k in range(1000)]  # 1000 fake messages
                     }
 
             # Check if all managers share the same data structure
@@ -392,41 +392,41 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
             # If objects are shared, growth will be much less than expected
             expected_min_growth = len(managers) * 10  # At least 10 objects per manager
             if object_growth < expected_min_growth:
-                violation = fCRITICAL: Insufficient object growth ({object_growth} suggests shared objects"
+                violation = fCRITICAL: Insufficient object growth ({object_growth} suggests shared objects
                 memory_leak_violations.append(violation)
                 self.security_violations.append(violation)
 
         except Exception as e:
-            violation = f"Memory leak test failed: {e}
+            violation = fMemory leak test failed: {e}
             memory_leak_violations.append(violation)
             self.security_violations.append(violation)
 
         # ASSERTION THAT SHOULD FAIL: Memory leak violations detected
         self.assertGreater(
             len(memory_leak_violations), 0,
-            fMEMORY LEAK VIOLATION: Found {len(memory_leak_violations)} memory leak indicators. "
-            f"This proves user data is accumulated in shared objects causing memory leaks. 
-            fViolations: {memory_leak_violations}"
+            fMEMORY LEAK VIOLATION: Found {len(memory_leak_violations)} memory leak indicators. ""
+            fThis proves user data is accumulated in shared objects causing memory leaks. 
+            fViolations: {memory_leak_violations}
         )
 
         logger.error(f"MEMORY LEAK VIOLATIONS: {len(memory_leak_violations)} violations detected)
 
     def tearDown(self):
-        ""Report all security violations found."
+        "Report all security violations found.
         if self.security_violations:
-            logger.error("=*80)
-            logger.error(USER ISOLATION SECURITY VIOLATIONS SUMMARY")
-            logger.error("=*80)
+            logger.error("=*80)"
+            logger.error(USER ISOLATION SECURITY VIOLATIONS SUMMARY)
+            logger.error(=*80)"
             for i, violation in enumerate(self.security_violations, 1):
                 logger.error(f{i:2d}. {violation}")
-            logger.error("=*80)
-            logger.error(fTOTAL SECURITY VIOLATIONS: {len(self.security_violations)}")
-            logger.error("THIS REPRESENTS A CRITICAL SECURITY RISK FOR $500K+ ARR)
-            logger.error(="*80)
+            logger.error(=*80)
+            logger.error(fTOTAL SECURITY VIOLATIONS: {len(self.security_violations)}")"
+            logger.error(THIS REPRESENTS A CRITICAL SECURITY RISK FOR $500K+ ARR)
+            logger.error(=*80)"
 
         # Clean up test contexts
         self.user_contexts.clear()
 
 
 if __name__ == "__main__:
-    pytest.main([__file__, -v", "-s, --tb=short"]
+    pytest.main([__file__, -v, -s, --tb=short"]"

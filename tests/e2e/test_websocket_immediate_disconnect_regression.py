@@ -2,7 +2,7 @@
 End-to-end tests for WebSocket immediate disconnect regression prevention.
 
 These tests verify the complete WebSocket connection lifecycle works correctly,
-preventing the "Loading chat..." issue where connections immediately disconnect
+preventing the Loading chat..." issue where connections immediately disconnect
 with ABNORMAL_CLOSURE (1006).
 
 To verify these tests catch the regression:
@@ -25,27 +25,27 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class WebSocketImmediateDisconnectRegressionTests:
-    "E2E tests to prevent regression of immediate disconnect bug.""
+    E2E tests to prevent regression of immediate disconnect bug.""
 
     @pytest.fixture
     def backend_url(self):
-        ""Get backend WebSocket URL."
+        Get backend WebSocket URL.""
         return 'ws://localhost:8000/ws'
 
     @pytest.fixture
     @pytest.mark.websocket
     @pytest.mark.e2e
     def test_token(self):
-        "Get a test JWT token.""
+        Get a test JWT token."
         return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZXYtdGVtcC10ZXN0IiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiZXhwIjoxNzU2NDE5MzY5LCJpYXQiOjE3MjQ3OTczNjkifQ.test'
 
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_websocket_must_not_immediately_disconnect(self, backend_url, test_token):
-        ""
+        "
         REGRESSION TEST: WebSocket must stay connected, not immediately disconnect.
         This is the primary symptom users experienced - immediate ABNORMAL_CLOSURE.
-        "
+"
         connection_start = time.time()
         connection_duration = 0
         disconnect_code = None
@@ -86,10 +86,10 @@ class WebSocketImmediateDisconnectRegressionTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_websocket_with_frontend_like_subprotocols(self, backend_url, test_token):
-        "
+    "
         REGRESSION TEST: Test with exact subprotocols the frontend sends.
         Frontend sends: jwt-auth, jwt.<token>, sometimes compression protocols.
-        ""
+        "
         encoded_token = test_token.replace('+', '-').replace('/', '_').replace('=', '')
         subprotocols = ['jwt-auth', f'jwt.{encoded_token}']
         connection_stable = False
@@ -112,10 +112,10 @@ class WebSocketImmediateDisconnectRegressionTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_websocket_message_exchange(self, backend_url, test_token):
-        "
+    "
         REGRESSION TEST: Full message exchange must work.
         Tests that connection stays open long enough for bidirectional communication.
-        ""
+        "
         messages_sent = 0
         messages_received = 0
         try:
@@ -142,10 +142,10 @@ class WebSocketImmediateDisconnectRegressionTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_websocket_without_subprotocols(self, backend_url, test_token):
-        ""
+        
         REGRESSION TEST: Connection should work even without subprotocols.
         Some clients might not send subprotocols.
-        "
+""
         try:
             async with websockets.connect(backend_url, additional_headers={'Authorization': f'Bearer {test_token}'} as websocket:
                 assert websocket.open, 'Failed to connect without subprotocols'
@@ -159,10 +159,10 @@ class WebSocketImmediateDisconnectRegressionTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_multiple_concurrent_websocket_connections(self, backend_url, test_token):
-        "
+    "
         REGRESSION TEST: Multiple connections should work simultaneously.
         Tests that the fix works under concurrent connection load.
-        ""
+        "
         num_connections = 5
         connections = []
         connection_results = []
@@ -185,7 +185,7 @@ class WebSocketImmediateDisconnectRegressionTests:
         failed = [r for r in connection_results if not r.get('success')]
         logger.info(f'Connections: {len(successful)} successful, {len(failed)} failed')
         for failure in failed:
-            logger.error(fConnection {failure['id']} failed: {failure.get('error')}")
+            logger.error(fConnection {failure['id']} failed: {failure.get('error')})
         assert len(successful) >= num_connections * 0.8, f'Too many connections failed: {len(failed)}/{num_connections}'
         immediate_1006 = [f for f in failed if 'Code 1006' in f.get('error', '')]
         assert len(immediate_1006) == 0, f'REGRESSION: {len(immediate_1006)} connections had immediate ABNORMAL_CLOSURE'
@@ -193,10 +193,10 @@ class WebSocketImmediateDisconnectRegressionTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_websocket_reconnection_after_disconnect(self, backend_url, test_token):
-        "
+    ""
         REGRESSION TEST: Reconnection should work after disconnect.
         Tests that the bug doesn't affect reconnection scenarios.
-        ""
+        
         first_connection_ok = False
         second_connection_ok = False
         try:
@@ -220,15 +220,15 @@ class WebSocketImmediateDisconnectRegressionTests:
         logger.info('Both initial connection and reconnection successful')
 
 class WebSocketChatUIIntegrationTests:
-    ""Test that the fix resolves the actual Loading chat... issue.""
+    ""Test that the fix resolves the actual Loading chat... issue.
 
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_chat_ui_websocket_connection(self):
-        ""
+        "
         REGRESSION TEST: Simulate the exact chat UI connection flow.
         This should resolve the Loading chat... issue.
-        ""
+        "
         backend_url = 'ws://localhost:8000/ws'
         auth_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZXYtdGVtcC11aSIsImVtYWlsIjoidWlAZXhhbXBsZS5jb20ifQ.test'
         chat_ready = False
@@ -251,14 +251,14 @@ class WebSocketChatUIIntegrationTests:
                     chat_ready = True
         except ConnectionClosed as e:
             if e.code == 1006:
-                error_message = fREGRESSION: Chat UI connection failed with ABNORMAL_CLOSURE - 'Loading chat...' bug!"
+                error_message = fREGRESSION: Chat UI connection failed with ABNORMAL_CLOSURE - 'Loading chat...' bug!
             else:
                 error_message = f'Chat UI connection failed with code {e.code}'
         except Exception as e:
             error_message = f'Chat UI connection error: {str(e)}'
         assert chat_ready, f"Chat UI not ready: {error_message or 'Unknown error'}
-        assert not error_message, error_message
-        logger.info(Chat UI WebSocket connection successful - no more 'Loading chat...'!")
+        assert not error_message, "error_message
+        logger.info(Chat UI WebSocket connection successful - no more 'Loading chat...'!")"
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

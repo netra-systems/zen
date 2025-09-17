@@ -11,7 +11,7 @@ Key violations to detect:
 
 Related Issues: #1076 - SSOT compliance verification
 Priority: CRITICAL - These tests protect against regression during SSOT migration
-""
+"
 
 import pytest
 import ast
@@ -29,31 +29,31 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
-    ""Tests to detect SSOT wrapper function violations that need remediation."
+    "Tests to detect SSOT wrapper function violations that need remediation.
 
     def setUp(self):
-        "Set up test environment.""
+        "Set up test environment."
         super().setUp()
         self.project_root = Path(__file__).parent.parent.parent
         self.wrapper_violations = []
         self.backward_compatibility_violations = []
 
     def test_auth_integration_wrapper_detection(self):
-        ""
+        "
         CRITICAL: Detect wrapper functions in auth integration that bypass SSOT.
 
         EXPECTED: Should FAIL initially - detects remaining wrapper functions
         REMEDIATION: Remove wrapper functions, use SSOT auth service directly
-        "
-        auth_integration_path = self.project_root / "netra_backend / app" / "auth_integration
+"
+        auth_integration_path = self.project_root / netra_backend / app" / "auth_integration
 
         if not auth_integration_path.exists():
-            self.fail(fAuth integration path not found: {auth_integration_path}")
+            self.fail(fAuth integration path not found: {auth_integration_path})
 
         wrapper_functions_found = []
 
-        for py_file in auth_integration_path.glob("*.py):
-            if py_file.name.startswith(__"):
+        for py_file in auth_integration_path.glob("*.py):"
+            if py_file.name.startswith(__):
                 continue
 
             try:
@@ -77,60 +77,60 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
 
             except Exception as e:
                 # Continue processing other files if one fails
-                print(f"Warning: Could not parse {py_file}: {e})
+                print(fWarning: Could not parse {py_file}: {e}")
                 continue
 
         # This test should FAIL initially if wrapper functions exist
         if wrapper_functions_found:
             violation_details = \n".join([
-                f"  - {v['file']}:{v['line']} - {v['function']} ({v['reason']}
+                f  - {v['file']}:{v['line']} - {v['function']} ({v['reason']}
                 for v in wrapper_functions_found
             ]
 
             self.fail(
                 fSSOT VIOLATION: Found {len(wrapper_functions_found)} wrapper functions in auth integration:\n"
                 f"{violation_details}\n\n
-                fREMEDIATION REQUIRED:\n"
-                f"1. Remove wrapper functions\n
-                f2. Update callers to use SSOT auth service directly\n"
-                f"3. Ensure auth_service is the single source of truth for auth operations
+                fREMEDIATION REQUIRED:\n
+                f1. Remove wrapper functions\n
+                f2. Update callers to use SSOT auth service directly\n""
+                f3. Ensure auth_service is the single source of truth for auth operations
             )
 
     def test_backward_compatibility_function_detection(self):
-        ""
+        
         CRITICAL: Detect backward compatibility functions that should be removed.
 
         EXPECTED: Should FAIL initially - detects remaining backward compatibility
         REMEDIATION: Remove backward compatibility, enforce SSOT patterns
-        "
+""
         suspicious_patterns = [
-            "legacy_,
-            _legacy",
-            "backward_compat,
-            deprecated_",
+            legacy_,
+            _legacy","
+            backward_compat,
+            deprecated_,"
             "_deprecated,
-            fallback_",
-            "_fallback,
-            compat_",
-            "_compat
+            fallback_,
+            "_fallback,"
+            compat_,
+            _compat"
         ]
 
         backward_compat_functions = []
 
         # Search in key SSOT directories
         search_paths = [
-            self.project_root / netra_backend" / "app / auth_integration",
-            self.project_root / "netra_backend / app" / "core,
-            self.project_root / netra_backend" / "app / websocket_core",
-            self.project_root / "shared
+            self.project_root / netra_backend" / app / auth_integration,
+            self.project_root / "netra_backend / app" / core,
+            self.project_root / netra_backend / "app / websocket_core",
+            self.project_root / shared
         ]
 
         for search_path in search_paths:
             if not search_path.exists():
                 continue
 
-            for py_file in search_path.rglob(*.py"):
-                if py_file.name.startswith("__):
+            for py_file in search_path.rglob(*.py"):"
+                if py_file.name.startswith(__):
                     continue
 
                 try:
@@ -158,49 +158,49 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
 
         # This test should FAIL initially if backward compatibility functions exist
         if backward_compat_functions:
-            violation_details = \n".join([
+            violation_details = \n.join(["
                 f"  - {v['file']}:{v['line']} - {v['function']} (pattern: {v['pattern']}
                 for v in backward_compat_functions
             ]
 
             self.fail(
-                fSSOT VIOLATION: Found {len(backward_compat_functions)} backward compatibility functions:\n"
-                f"{violation_details}\n\n
-                fREMEDIATION REQUIRED:\n"
-                f"1. Remove all backward compatibility functions\n
-                f2. Update callers to use SSOT patterns directly\n"
+                fSSOT VIOLATION: Found {len(backward_compat_functions)} backward compatibility functions:\n
+                f{violation_details}\n\n
+                fREMEDIATION REQUIRED:\n""
+                f1. Remove all backward compatibility functions\n
+                f2. Update callers to use SSOT patterns directly\n
                 f"3. Ensure complete migration to SSOT architecture
             )
 
     def test_function_delegation_pattern_detection(self):
-        ""
+        "
         CRITICAL: Detect functions that delegate to legacy patterns instead of SSOT.
 
         EXPECTED: Should FAIL initially - detects delegation violations
         REMEDIATION: Update functions to use SSOT directly
-        "
+"
         delegation_violations = []
 
         # Search for functions that import and delegate to legacy modules
         legacy_import_patterns = [
             "from netra_backend.app.logging_config import,
-            import netra_backend.app.logging_config",
-            "from auth_service.legacy import,
-            import auth_service.legacy"
+            import netra_backend.app.logging_config,
+            "from auth_service.legacy import,"
+            import auth_service.legacy
         ]
 
         search_paths = [
-            self.project_root / "netra_backend / app",
+            self.project_root / netra_backend / app",
             self.project_root / "auth_service,
-            self.project_root / shared"
+            self.project_root / shared
         ]
 
         for search_path in search_paths:
             if not search_path.exists():
                 continue
 
-            for py_file in search_path.rglob("*.py):
-                if py_file.name.startswith(__"):
+            for py_file in search_path.rglob("*.py):"
+                if py_file.name.startswith(__):
                     continue
 
                 try:
@@ -226,22 +226,22 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
 
         # This test should FAIL initially if delegation violations exist
         if delegation_violations:
-            violation_details = "\n.join([
+            violation_details = \n.join(["
                 f  - {v['file']}:{v['line']} - {v['content']} (pattern: {v['pattern']}"
                 for v in delegation_violations
             ]
 
             self.fail(
-                f"SSOT VIOLATION: Found {len(delegation_violations)} function delegation violations:\n
+                fSSOT VIOLATION: Found {len(delegation_violations)} function delegation violations:\n
                 f{violation_details}\n\n"
                 f"REMEDIATION REQUIRED:\n
-                f1. Replace legacy imports with SSOT imports\n"
-                f"2. Update function implementations to use SSOT directly\n
-                f3. Remove all delegation to legacy modules"
+                f1. Replace legacy imports with SSOT imports\n
+                f2. Update function implementations to use SSOT directly\n
+                f3. Remove all delegation to legacy modules""
             )
 
     def test_duplicate_function_implementation_detection(self):
-        "
+
         CRITICAL: Detect duplicate function implementations across services.
 
         EXPECTED: Should FAIL initially - detects duplicate implementations
@@ -251,10 +251,10 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
         duplicate_implementations = []
 
         # Search in all Python files
-        for py_file in self.project_root.rglob(*.py"):
+        for py_file in self.project_root.rglob(*.py):
             if any(skip in str(py_file) for skip in [
-                "__pycache__, .git", "venv, node_modules",
-                "tests/, test_", "_test
+                __pycache__, .git", "venv, node_modules,
+                tests/, test_, "_test"
             ]:
                 continue
 
@@ -268,7 +268,7 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
                         # Create a signature based on function name and parameters
                         func_name = node.name
                         params = [arg.arg for arg in node.args.args]
-                        signature = f{func_name}({', '.join(params)}"
+                        signature = f{func_name}({', '.join(params)}
 
                         # Skip common/generic function names
                         if func_name in ['__init__', '__str__', '__repr__', 'setup', 'teardown']:
@@ -301,23 +301,23 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
 
         # This test should FAIL initially if business logic duplicates exist
         if business_duplicates:
-            violation_details = "\n.join([
+            violation_details = \n.join(["
                 f  - {dup['function']}: {dup['file1']} vs {dup['file2']}"
                 for dup in business_duplicates[:10]  # Limit output
             ]
 
             self.fail(
-                f"SSOT VIOLATION: Found {len(business_duplicates)} duplicate function implementations:\n
+                fSSOT VIOLATION: Found {len(business_duplicates)} duplicate function implementations:\n
                 f{violation_details}\n"
                 f"{'... and more' if len(business_duplicates) > 10 else ''}\n\n
-                fREMEDIATION REQUIRED:\n"
-                f"1. Consolidate duplicate implementations to single SSOT location\n
-                f2. Update all callers to use SSOT implementation\n"
-                f"3. Remove duplicate implementations
+                fREMEDIATION REQUIRED:\n
+                f1. Consolidate duplicate implementations to single SSOT location\n
+                f2. Update all callers to use SSOT implementation\n""
+                f3. Remove duplicate implementations
             )
 
     def _is_wrapper_function(self, node: ast.FunctionDef, content: str) -> bool:
-        ""Check if a function appears to be a wrapper function."
+        Check if a function appears to be a wrapper function.""
         # Get the function body as string
         func_lines = content.split('\n')[node.lineno-1:node.end_lineno]
         func_body = '\n'.join(func_lines)

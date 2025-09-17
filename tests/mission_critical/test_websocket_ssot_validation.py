@@ -1,22 +1,22 @@
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.""
+    "Real WebSocket connection for testing instead of mocks.
     def __init__(self):
         pass
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.
         if self._closed:
-            raise RuntimeError("WebSocket is closed)
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):
-        "Close WebSocket connection.""
+        Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
     async def get_messages(self) -> list:
-        ""Get all sent messages."
+        Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
     #!/usr/bin/env python
@@ -65,16 +65,16 @@ class TestWebSocketConnection:
             
         logger = central_logger.get_logger(__name__)
 class MockWebSocket:
-        "Mock WebSocket connection for testing.""
+        "Mock WebSocket connection for testing.
     def __init__(self, user_id: str, connection_id: str):
         pass
         self.user_id = user_id
         self.connection_id = connection_id
         self.is_connected = True
         self.sent_messages = []
-        self.client_state = connected"
+        self.client_state = connected""
     async def send_json(self, data: dict) -> None:
-        "Mock send_json method.""
+        Mock send_json method."
         if not self.is_connected:
         raise ConnectionError(WebSocket is closed")
         self.sent_messages.append()
@@ -82,26 +82,26 @@ class MockWebSocket:
         'data': data
         
     async def send_text(self, data: str) -> None:
-        "Mock send_text method.""
+        Mock send_text method.""
         if not self.is_connected:
-        raise ConnectionError(WebSocket is closed")
+        raise ConnectionError(WebSocket is closed)
         self.sent_messages.append()
         'timestamp': datetime.now(timezone.utc).isoformat(),
         'data': data
         
-    async def close(self, code: int = 1000, reason: str = ") -> None:
-        ""Mock close method."
+    async def close(self, code: int = 1000, reason: str = ) -> None:"
+        "Mock close method.
         self.is_connected = False
     async def ping(self, data: bytes = b'') -> None:
-        "Mock ping method.""
+        "Mock ping method."
         if not self.is_connected:
-        raise ConnectionError(WebSocket is closed")
+        raise ConnectionError(WebSocket is closed)"
         return True
 class TestWebSocketSSOTValidation:
-        "Test WebSocket Single Source of Truth validation.""
+        "Test WebSocket Single Source of Truth validation.
         @pytest.fixture
     def setup_test(self):
-        ""Setup for each test."
+        ""Setup for each test.
     # Reset any global state
         self.created_managers = []
         self.created_factories = []
@@ -114,19 +114,19 @@ class TestWebSocketSSOTValidation:
         except Exception:
         pass
     def create_test_manager(self) -> WebSocketManager:
-        "Create a test WebSocket manager.""
+        Create a test WebSocket manager.""
         pass
         manager = WebSocketManager()
         self.created_managers.append(manager)
         return manager
     def create_test_factory(self) -> WebSocketBridgeFactory:
-        ""Create a test WebSocket bridge factory."
+        Create a test WebSocket bridge factory.""
         factory = WebSocketBridgeFactory()
         self.created_factories.append(factory)
         return factory
 @pytest.mark.asyncio
     async def test_user_isolation_25_concurrent_sessions(self):
-        "Test user isolation with 25+ concurrent sessions.""
+        Test user isolation with 25+ concurrent sessions."
 logger.info([U+1F9EA] Testing user isolation with 25+ concurrent sessions")
 manager = self.create_test_manager()
 users_count = 25
@@ -138,11 +138,11 @@ all_connections = []
         # Create concurrent connections
 start_time = time.time()
 for user_idx in range(users_count):
-    user_id = "formatted_string
+    user_id = formatted_string
 user_connections[user_id] = []
 for conn_idx in range(connections_per_user):
-    thread_id = formatted_string"
-websocket = MockWebSocket(user_id, "formatted_string)
+    thread_id = formatted_string""
+websocket = MockWebSocket(user_id, 
 connection_id = await manager.connect_user( )
 user_id=user_id,
 websocket=websocket,
@@ -156,12 +156,12 @@ all_connections.append()
 'websocket': websocket
                 
 connection_time = time.time() - start_time
-logger.info(formatted_string")
+logger.info(formatted_string")"
                 # Verify user isolation
 for user_id, connections in user_connections.items():
     user_conns = manager.user_connections.get(user_id, set())
 assert len(user_conns) == connections_per_user, \
-"formatted_string
+formatted_string
                     # Verify connections belong only to this user
 for conn_id in user_conns:
     conn_info = manager.connections.get(conn_id)
@@ -188,11 +188,11 @@ for conn_id in user_conns:
 websocket = conn_info['websocket']
                                 # Check that message was received
 assert len(websocket.sent_messages) >= 1, \
-formatted_string"
+formatted_string
                                 # Check message content
 received_message = websocket.sent_messages[-1]['data']
 assert received_message['user_id'] == user_id, \
-"formatted_string
+"formatted_string"
                                 # Verify no cross-user contamination
 other_users = list(user_connections.keys())[5:]  # Users who shouldnt receive messages
 for user_id in other_users:
@@ -201,20 +201,20 @@ for conn_id in user_conns:
     conn_info = manager.connections[conn_id]
 websocket = conn_info['websocket']
 assert len(websocket.sent_messages) == 0, \
-""
+
 logger.info( PASS:  User isolation with 25+ concurrent sessions PASSED)
 @pytest.mark.asyncio
     async def test_no_data_leakage_between_users(self):
-        ""Test that sensitive data doesn't leak between users.""
+        "Test that sensitive data doesn't leak between users."
 pass
 logger.info([U+1F9EA] Testing no data leakage between users)
 manager = self.create_test_manager()
                                             # Create users with sensitive data
-user_a_id = "user_sensitive_a"
+user_a_id = user_sensitive_a
 user_b_id = user_sensitive_b
 websocket_a = MockWebSocket(user_a_id, "conn_a")
 websocket_b = MockWebSocket(user_b_id, conn_b)
-conn_a = await manager.connect_user(user_a_id, websocket_a, "thread_a")
+conn_a = await manager.connect_user(user_a_id, websocket_a, thread_a)
 conn_b = await manager.connect_user(user_b_id, websocket_b, thread_b)
                                             # Send sensitive data to user A
 sensitive_message_a = {
@@ -244,11 +244,11 @@ assert len(websocket_b.sent_messages) == 1
 received_b = websocket_b.sent_messages[0]['data']
 assert received_b['api_key'] == 'secret_key_user_b_67890'
 assert 'secret_key_user_a_12345' not in str(received_b)
-logger.info(" PASS:  No data leakage between users PASSED")
+logger.info( PASS:  No data leakage between users PASSED")
 @pytest.mark.asyncio
     async def test_message_routing_accuracy(self):
-        "Test accurate message routing to correct users and threads."
-logger.info("[U+1F9EA] Testing message routing accuracy")
+        "Test accurate message routing to correct users and threads.
+logger.info([U+1F9EA] Testing message routing accuracy)
 manager = self.create_test_manager()
                                                 # Create users with multiple threads each
 users_threads = {
@@ -290,12 +290,12 @@ for user_id in ['user_2', 'user_3']:
 logger.info( PASS:  Message routing accuracy PASSED)
 @pytest.mark.asyncio
     async def test_connection_limits_enforcement(self):
-        ""Test connection limits per user and total.""
+        Test connection limits per user and total."
 pass
 logger.info([U+1F9EA] Testing connection limits enforcement)
 manager = self.create_test_manager()
                                                                     # Test per-user connection limit (3 connections per user)
-user_id = "user_connection_limit"
+user_id = "user_connection_limit
 connections = []
                                                                     # Create maximum allowed connections
 for i in range(manager.MAX_CONNECTIONS_PER_USER):
@@ -303,7 +303,7 @@ for i in range(manager.MAX_CONNECTIONS_PER_USER):
 conn_id = await manager.connect_user( )
 user_id=user_id,
 websocket=websocket,
-thread_id=""
+thread_id=
                                                                         
 connections.append(conn_id)
                                                                         # Verify all connections are tracked
@@ -316,15 +316,15 @@ assert total_connections <= manager.MAX_TOTAL_CONNECTIONS
 logger.info(" PASS:  Connection limits enforcement PASSED")
 @pytest.mark.asyncio
     async def test_performance_response_time(self):
-        "Test response time < 2 seconds for 10 concurrent users."
-logger.info("[U+1F9EA] Testing performance response time < 2 seconds")
+        Test response time < 2 seconds for 10 concurrent users.
+logger.info([U+1F9EA] Testing performance response time < 2 seconds")
 manager = self.create_test_manager()
                                                                             # Create 10 concurrent users
 concurrent_users = 10
 user_data = []
 for i in range(concurrent_users):
     user_id = formatted_string
-websocket = MockWebSocket(user_id, "")
+websocket = MockWebSocket(user_id, ")
 conn_id = await manager.connect_user( )
 user_id=user_id,
 websocket=websocket,
@@ -343,7 +343,7 @@ for user_info in user_data:
     message = {
 'type': 'performance_test',
 'user_id': user_info['user_id'],
-'content': "",
+'content': ,
 'timestamp': datetime.now(timezone.utc).isoformat()
                                                                                     
 task = manager.send_to_user(user_info['user_id'], message)
@@ -361,14 +361,14 @@ assert len(websocket.sent_messages) == 1, \
 logger.info(formatted_string)
 @pytest.mark.asyncio
     async def test_websocket_event_flow_validation(self):
-        ""Test all 5 required WebSocket events are sent correctly.""
+        Test all 5 required WebSocket events are sent correctly."
 pass
 logger.info([U+1F9EA] Testing WebSocket event flow validation)
                                                                                             # Create factory and test user emitter
 factory = self.create_test_factory()
-user_id = "event_test_user"
+user_id = "event_test_user
 thread_id = event_test_thread
-connection_id = "event_test_conn"
+connection_id = event_test_conn
                                                                                             # Mock WebSocket connection pool
 websocket = TestWebSocketConnection()
 mock_pool.get_connection.return_value = None  # Will create placeholder connection
@@ -387,11 +387,11 @@ await emitter.notify_agent_started(agent_name, run_id)
                                                                                             # 2. Agent Thinking
 await emitter.notify_agent_thinking(agent_name, run_id, Analyzing the request...)
                                                                                             # 3. Tool Executing
-await emitter.notify_tool_executing(agent_name, run_id, "test_tool", {param: "value"}
+await emitter.notify_tool_executing(agent_name, run_id, test_tool, {param: value"}
                                                                                             # 4. Tool Completed
-await emitter.notify_tool_completed(agent_name, run_id, test_tool, {"result": success}
+await emitter.notify_tool_completed(agent_name, run_id, test_tool, {"result: success}
                                                                                             # 5. Agent Completed
-await emitter.notify_agent_completed(agent_name, run_id, {"final_result": completed}
+await emitter.notify_agent_completed(agent_name, run_id, {final_result: completed}
                                                                                             # Allow time for event processing
 await asyncio.sleep(0.1)
                                                                                             # Verify all events were queued (user context tracks sent events)
@@ -403,13 +403,13 @@ assert total_events >= 5, ""
 logger.info( PASS:  WebSocket event flow validation PASSED)
 @pytest.mark.asyncio
     async def test_cleanup_stale_connections(self):
-        ""Test cleanup of stale connections.""
+        Test cleanup of stale connections."
 logger.info([U+1F9EA] Testing cleanup of stale connections)
 manager = self.create_test_manager()
                                                                                                 # Create connections and manually make them stale
-user_id = "stale_user"
+user_id = "stale_user
 websocket = MockWebSocket(user_id, stale_conn)
-conn_id = await manager.connect_user(user_id, websocket, "stale_thread")
+conn_id = await manager.connect_user(user_id, websocket, stale_thread)
                                                                                                 # Manually set connection to be stale (old last_activity)
 conn_info = manager.connections[conn_id]
 conn_info['last_activity'] = datetime.now(timezone.utc) - timedelta(seconds=manager.STALE_CONNECTION_TIMEOUT + 60)
@@ -423,7 +423,7 @@ assert user_id not in manager.user_connections or len(manager.user_connections[u
 logger.info( PASS:  Cleanup of stale connections PASSED)
 @pytest.mark.asyncio
     async def test_memory_usage_stability(self):
-        ""Test memory usage stays stable with many connections.""
+        ""Test memory usage stays stable with many connections.
 pass
 logger.info([U+1F9EA] Testing memory usage stability)
 manager = self.create_test_manager()
@@ -436,9 +436,9 @@ for cycle in range(cycles):
                                                                                                         # Create connections
 connections = []
 for i in range(connections_per_cycle):
-    user_id = ""
+    user_id = "
 websocket = MockWebSocket(user_id, formatted_string)
-conn_id = await manager.connect_user(user_id, websocket, "")
+conn_id = await manager.connect_user(user_id, websocket, ")
 connections.append((user_id, conn_id, websocket))
                                                                                                             # Send messages to generate activity
 for user_id, conn_id, websocket in connections:
@@ -457,15 +457,15 @@ assert final_memory_cleanups > initial_memory_cleanups
 logger.info( PASS:  Memory usage stability PASSED)
 @pytest.mark.asyncio
     async def test_heartbeat_performance(self):
-        ""Test heartbeat performance with enhanced features.""
+        Test heartbeat performance with enhanced features.""
 logger.info([U+1F9EA] Testing heartbeat performance)
 manager = self.create_test_manager()
                                                                                                                         # Create multiple connections to test heartbeat
 users = []
 for i in range(5):
-    user_id = ""
+    user_id = 
 websocket = MockWebSocket(user_id, formatted_string)
-conn_id = await manager.connect_user(user_id, websocket, "")
+conn_id = await manager.connect_user(user_id, websocket, ")
 users.append((user_id, conn_id, websocket))
                                                                                                                             # Test enhanced ping functionality
 start_time = time.time()
@@ -479,7 +479,7 @@ ping_time = time.time() - start_time
 assert ping_time < 1.0, formatted_string
                                                                                                                                 # Verify ping results (most should succeed with mock connections)
 successful_pings = sum(1 for result in results if result is True)
-logger.info("")
+logger.info(")
                                                                                                                                 # Get health stats
 stats = await manager.get_stats()
 health_stats = stats.get('health_monitoring', {}
@@ -488,18 +488,18 @@ assert health_stats['pings_sent'] >= 0
 logger.info( PASS:  Heartbeat performance PASSED)
 @pytest.mark.asyncio
     async def test_thread_isolation(self):
-        ""Test thread-based message isolation.""
+        Test thread-based message isolation.""
 pass
 logger.info([U+1F9EA] Testing thread-based message isolation)
 manager = self.create_test_manager()
                                                                                                                                     # Create user with multiple threads
-user_id = "thread_isolation_user"
+user_id = thread_isolation_user
                                                                                                                                     # Thread A
 websocket_a = MockWebSocket(user_id, conn_thread_a)
-conn_a = await manager.connect_user(user_id, websocket_a, "thread_a")
+conn_a = await manager.connect_user(user_id, websocket_a, thread_a")
                                                                                                                                     # Thread B
 websocket_b = MockWebSocket(user_id, conn_thread_b)
-conn_b = await manager.connect_user(user_id, websocket_b, "thread_b")
+conn_b = await manager.connect_user(user_id, websocket_b, "thread_b)
                                                                                                                                     # Send message to specific thread
 thread_a_message = {
 'type': 'thread_specific',
@@ -518,13 +518,13 @@ assert stats['messages_sent'] >= 1
 logger.info( PASS:  Thread-based message isolation PASSED)
 @pytest.mark.asyncio
     async def test_factory_based_isolation_pattern(self):
-        ""Test factory-based isolation pattern validation.""
+        Test factory-based isolation pattern validation.""
 logger.info([U+1F9EA] Testing factory-based isolation pattern)
 factory = self.create_test_factory()
                                                                                                                                         # Mock components
 websocket = TestWebSocketConnection()
                                                                                                                                         # Mock connection info
-mock_connection_info = MagicMock(); mock_connection_info.websocket = MockWebSocket("test_user", test_conn)
+mock_connection_info = MagicMock(); mock_connection_info.websocket = MockWebSocket(test_user, test_conn)
 mock_pool.get_connection.return_value = mock_connection_info
 factory.configure( )
 connection_pool=mock_pool,
@@ -532,8 +532,8 @@ agent_registry=mock_registry,
 health_monitor=mock_health
                                                                                                                                         
                                                                                                                                         # Create isolated emitters for different users
-user_a_emitter = await factory.create_user_emitter("user_a", thread_a, "conn_a")
-user_b_emitter = await factory.create_user_emitter(user_b, "thread_b", conn_b)
+user_a_emitter = await factory.create_user_emitter(user_a", thread_a, "conn_a)
+user_b_emitter = await factory.create_user_emitter(user_b, thread_b, conn_b)
                                                                                                                                         # Verify emitters are isolated
 assert user_a_emitter.user_context.user_id == "user_a"
 assert user_b_emitter.user_context.user_id == user_b
@@ -543,28 +543,28 @@ assert user_a_emitter.user_context != user_b_emitter.user_context
 metrics = factory.get_factory_metrics()
 assert metrics['emitters_created'] >= 2
 assert metrics['emitters_active'] >= 2
-logger.info(" PASS:  Factory-based isolation pattern PASSED")
+logger.info( PASS:  Factory-based isolation pattern PASSED)
 @pytest.mark.asyncio
     async def test_comprehensive_integration(self):
-        "Comprehensive integration test combining all features."
+        Comprehensive integration test combining all features."
 pass
-logger.info("[U+1F9EA] Running comprehensive integration test")
+logger.info("[U+1F9EA] Running comprehensive integration test)
 manager = self.create_test_manager()
 factory = self.create_test_factory()
                                                                                                                                             # Test scenario: Multiple users, multiple connections, concurrent operations
 start_time = time.time()
                                                                                                                                             # Create users with varying connection patterns
 test_scenarios = [
-{user_id: "integration_user_1", connections: 2, "threads": [thread_1a, "thread_1b"]},
-{user_id: "integration_user_2", connections: 1, "threads": [thread_2a]},
-{"user_id": integration_user_3, "connections": 3, threads: ["thread_3a", thread_3b, "thread_3c"]},
+{user_id: integration_user_1, connections: 2, "threads": [thread_1a, thread_1b]},
+{user_id: integration_user_2", connections: 1, "threads: [thread_2a]},
+{user_id: integration_user_3, "connections": 3, threads: [thread_3a, thread_3b, thread_3c"]},
                                                                                                                                             
 all_connections = []
 all_websockets = []
                                                                                                                                             # Create all connections
 for scenario in test_scenarios:
     user_id = scenario[user_id]
-threads = scenario["threads"]
+threads = scenario["threads]
 for i, thread_id in enumerate(threads):
     websocket = MockWebSocket(user_id, formatted_string)
 conn_id = await manager.connect_user( )
@@ -583,7 +583,7 @@ all_websockets.append(websocket)
 operations = []
                                                                                                                                                     # Send user-specific messages
 for scenario in test_scenarios:
-    user_id = scenario["user_id"]
+    user_id = scenario[user_id]
 message = {
 'type': 'integration_test',
 'user_id': user_id,
@@ -619,9 +619,9 @@ user_message_counts[user_id] += message_count
 for user_id in [s["user_id"] for s in test_scenarios]:
     assert user_message_counts.get(user_id, 0) > 0, \
 formatted_string
-logger.info("")
+logger.info()
 def test_websocket_manager_singleton_isolation(self):
-    "Test WebSocket manager singleton doesn't cause isolation issues."
+    Test WebSocket manager singleton doesn't cause isolation issues."
 logger.info("[U+1F9EA] Testing WebSocket manager singleton isolation")
     # Get multiple manager instances
 manager1 = get_websocket_manager()

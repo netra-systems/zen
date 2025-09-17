@@ -14,7 +14,7 @@ This test suite validates that:
 4. Legacy authentication implementations are completely eliminated
 
 CRITICAL: These tests MUST pass to ensure SSOT compliance is maintained.
-""
+"
 import asyncio
 import json
 import pytest
@@ -32,16 +32,16 @@ from test_framework.fixtures.websocket_fixtures import create_mock_websocket
 from test_framework.ssot.integration_auth_manager import IntegrationAuthServiceManager
 
 class SSOTWebSocketAuthenticationComplianceTests:
-    ""Test suite for SSOT WebSocket authentication compliance."
+    "Test suite for SSOT WebSocket authentication compliance.
 
     @pytest.fixture
     def auth_manager(self):
-        "Create integration auth manager for testing.""
+        "Create integration auth manager for testing."
         return IntegrationAuthServiceManager()
 
     @pytest.fixture
     def mock_websocket(self):
-        ""Create mock WebSocket with JWT token in headers."
+        "Create mock WebSocket with JWT token in headers."
         websocket = create_mock_websocket()
         test_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXItMTIzIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNjAwMDAwMDAwLCJleHAiOjk5OTk5OTk5OTl9.test_signature'
         websocket.headers = {'authorization': f'Bearer {test_token}', 'user-agent': 'WebSocket Test Client', 'origin': 'https://test.example.com'}
@@ -49,14 +49,14 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
     @pytest.fixture
     def mock_websocket_no_token(self):
-        "Create mock WebSocket without JWT token.""
+        Create mock WebSocket without JWT token.""
         websocket = create_mock_websocket()
         websocket.headers = {'user-agent': 'WebSocket Test Client', 'origin': 'https://test.example.com'}
         return websocket
 
     @pytest.mark.asyncio
     async def test_unified_authentication_service_ssot_compliance(self):
-        ""Test that UnifiedAuthenticationService is SSOT for all authentication."
+        Test that UnifiedAuthenticationService is SSOT for all authentication."
         auth_service = get_unified_auth_service()
         assert isinstance(auth_service, UnifiedAuthenticationService)
         assert hasattr(auth_service, '_auth_client')
@@ -66,7 +66,7 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
     @pytest.mark.asyncio
     async def test_websocket_authenticator_uses_ssot(self):
-        "Test that WebSocket authenticator uses SSOT authentication service.""
+        "Test that WebSocket authenticator uses SSOT authentication service.
         ws_authenticator = get_websocket_authenticator()
         assert isinstance(ws_authenticator, UnifiedWebSocketAuthenticator)
         assert hasattr(ws_authenticator, '_auth_service')
@@ -76,7 +76,7 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
     @pytest.mark.asyncio
     async def test_websocket_authentication_success_flow(self, mock_websocket):
-        ""Test successful WebSocket authentication using SSOT implementation."
+        ""Test successful WebSocket authentication using SSOT implementation.
         with patch('netra_backend.app.clients.auth_client_core.AuthServiceClient.validate_token') as mock_validate:
             mock_validate.return_value = {'valid': True, 'user_id': 'test-user-123', 'email': 'test@example.com', 'permissions': ['read', 'write']}
             auth_result = await authenticate_websocket_ssot(mock_websocket)
@@ -98,7 +98,7 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
     @pytest.mark.asyncio
     async def test_websocket_authentication_failure_flow(self, mock_websocket_no_token):
-        "Test WebSocket authentication failure using SSOT implementation.""
+        Test WebSocket authentication failure using SSOT implementation.""
         auth_result = await authenticate_websocket_ssot(mock_websocket_no_token)
         assert auth_result.success is False
         assert auth_result.user_context is None
@@ -112,7 +112,7 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
     @pytest.mark.asyncio
     async def test_websocket_authentication_invalid_token(self, mock_websocket):
-        ""Test WebSocket authentication with invalid token."
+        Test WebSocket authentication with invalid token.""
         mock_websocket.headers['authorization'] = 'Bearer invalid-token'
         with patch('netra_backend.app.clients.auth_client_core.AuthServiceClient.validate_token') as mock_validate:
             mock_validate.return_value = {'valid': False, 'error': 'Invalid token signature'}
@@ -125,7 +125,7 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
     @pytest.mark.asyncio
     async def test_no_duplicate_authentication_paths_exist(self):
-        "Test that no duplicate authentication paths exist (SSOT violation check).""
+        Test that no duplicate authentication paths exist (SSOT violation check)."
         try:
             from netra_backend.app.websocket_core import auth as old_auth_module
             if hasattr(old_auth_module, 'WebSocketAuthenticator'):
@@ -140,7 +140,7 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
     @pytest.mark.asyncio
     async def test_authentication_statistics_tracking(self):
-        ""Test that SSOT authentication service tracks statistics correctly."
+        "Test that SSOT authentication service tracks statistics correctly.
         auth_service = get_unified_auth_service()
         ws_authenticator = get_websocket_authenticator()
         initial_auth_stats = auth_service.get_authentication_stats()
@@ -154,7 +154,7 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
     @pytest.mark.asyncio
     async def test_unified_authentication_health_check(self):
-        "Test that unified authentication service health check works.""
+        "Test that unified authentication service health check works."
         auth_service = get_unified_auth_service()
         health_status = await auth_service.health_check()
         assert 'status' in health_status
@@ -166,7 +166,7 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
     @pytest.mark.asyncio
     async def test_websocket_auth_context_tracking(self, mock_websocket):
-        ""Test that authentication context is properly tracked for WebSocket."
+        "Test that authentication context is properly tracked for WebSocket."
         with patch('netra_backend.app.clients.auth_client_core.AuthServiceClient.validate_token') as mock_validate:
             mock_validate.return_value = {'valid': True, 'user_id': 'test-user-456', 'email': 'test2@example.com', 'permissions': ['websocket_access']}
             auth_service = get_unified_auth_service()
@@ -181,7 +181,7 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
     @pytest.mark.asyncio
     async def test_jwt_token_extraction_methods(self, auth_manager):
-        "Test JWT token extraction from different WebSocket headers.""
+        Test JWT token extraction from different WebSocket headers.""
         websocket1 = create_mock_websocket()
         test_token = auth_manager.create_test_jwt_token('auth-header-user')
         websocket1.headers = {'authorization': f'Bearer {test_token}'}
@@ -202,7 +202,7 @@ class SSOTWebSocketAuthenticationComplianceTests:
         print(' PASS:  SSOT COMPLIANCE: JWT token extraction methods work correctly')
 
     def test_ssot_enforcement_imports(self):
-        ""Test that only SSOT-compliant imports are allowed."
+        Test that only SSOT-compliant imports are allowed."
         from netra_backend.app.services.unified_authentication_service import get_unified_auth_service
         from netra_backend.app.websocket_core.unified_websocket_auth import get_websocket_authenticator
         auth_service = get_unified_auth_service()
@@ -217,11 +217,11 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
 @pytest.mark.integration
 class SSOTWebSocketAuthenticationEndToEndTests:
-    "End-to-end integration tests for SSOT WebSocket authentication.""
+    "End-to-end integration tests for SSOT WebSocket authentication.
 
     @pytest.mark.asyncio
     async def test_full_websocket_auth_flow_integration(self):
-        ""Test complete WebSocket authentication flow with real services."
+        ""Test complete WebSocket authentication flow with real services.
         pytest.importorskip('test_framework.conftest_real_services', reason='Requires real services')
         from test_framework.ssot.websocket import create_authenticated_websocket_connection
         try:
@@ -239,7 +239,7 @@ class SSOTWebSocketAuthenticationEndToEndTests:
 
     @pytest.mark.asyncio
     async def test_ssot_authentication_prevents_chaos_regression(self):
-        "Test that SSOT implementation prevents regression to authentication chaos."""
+        Test that SSOT implementation prevents regression to authentication chaos."""
         auth_service = get_unified_auth_service()
         test_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXItc3NvdCIsImVtYWlsIjoidGVzdEBzc290LmNvbSIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjo5OTk5OTk5OTk5fQ.test_signature'
         with patch('netra_backend.app.clients.auth_client_core.AuthServiceClient.validate_token') as mock_validate:

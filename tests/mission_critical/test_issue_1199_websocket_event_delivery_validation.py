@@ -41,27 +41,27 @@ from netra_backend.app.websocket_core.websocket_manager import (
 
 
 class Issue1199LocalValidationTests(SSotAsyncTestCase):
-    ""LOCAL VALIDATION TESTS - Validate WebSocket event methods exist and have correct signatures
+    LOCAL VALIDATION TESTS - Validate WebSocket event methods exist and have correct signatures
 
     These tests should PASS - they validate the development work is complete.
-    "
+""
 
     def setup_method(self, method=None):
-        "Set up test fixtures.""
+        Set up test fixtures."
         super().setup_method(method)
         self.adapter = WebSocketBridgeAdapter()
         self.mock_bridge = Mock()
         self.test_run_id = test-run-123"
-        self.test_agent_name = "TestAgent
+        self.test_agent_name = TestAgent
 
     def test_websocket_bridge_adapter_initialization(self):
-        ""Test WebSocketBridgeAdapter can be initialized."
+        ""Test WebSocketBridgeAdapter can be initialized.
         adapter = WebSocketBridgeAdapter()
         self.assertIsNotNone(adapter)
         self.assertFalse(adapter.has_websocket_bridge())
 
     def test_websocket_bridge_adapter_has_all_required_methods(self):
-        "Test that WebSocketBridgeAdapter has all 5 required event methods.""
+        Test that WebSocketBridgeAdapter has all 5 required event methods.""
         required_methods = [
             'emit_agent_started',
             'emit_thinking',
@@ -74,7 +74,7 @@ class Issue1199LocalValidationTests(SSotAsyncTestCase):
             # Individual assertions instead of subTest
             self.assertTrue(
                 hasattr(self.adapter, method_name),
-                fWebSocketBridgeAdapter missing required method: {method_name}"
+                fWebSocketBridgeAdapter missing required method: {method_name}
             )
             method = getattr(self.adapter, method_name)
             self.assertTrue(
@@ -83,22 +83,22 @@ class Issue1199LocalValidationTests(SSotAsyncTestCase):
             )
 
     async def test_event_method_signatures_without_bridge(self):
-        ""Test event methods have correct signatures and handle missing bridge correctly."
+        "Test event methods have correct signatures and handle missing bridge correctly.
         # Enable test mode to prevent exceptions
         self.adapter.enable_test_mode()
 
         # Test each method can be called without raising exceptions in test mode
         test_cases = [
             ('emit_agent_started', (), {},
-            ('emit_agent_started', ("Starting agent,), {},
-            ('emit_thinking', (Processing request",), {},
-            ('emit_thinking', ("Step 1 analysis, 1), {},
+            ('emit_agent_started', ("Starting agent,), {},"
+            ('emit_thinking', (Processing request,), {},
+            ('emit_thinking', (Step 1 analysis, 1), {},"
             ('emit_tool_executing', (data_analyzer",), {},
-            ('emit_tool_executing', ("data_analyzer, {param": "value}, {},
-            ('emit_tool_completed', (data_analyzer",), {},
-            ('emit_tool_completed', ("data_analyzer, {result": "success}, {},
+            ('emit_tool_executing', (data_analyzer, {param: "value}, {},"
+            ('emit_tool_completed', (data_analyzer,), {},
+            ('emit_tool_completed', (data_analyzer, {result": "success}, {},
             ('emit_agent_completed', (), {},
-            ('emit_agent_completed', ({status": "completed},), {},
+            ('emit_agent_completed', ({status: completed},), {},
         ]
 
         for method_name, args, kwargs in test_cases:
@@ -108,10 +108,10 @@ class Issue1199LocalValidationTests(SSotAsyncTestCase):
             try:
                 await method(*args, **kwargs)
             except Exception as e:
-                self.fail(fMethod {method_name} with args {args} raised unexpected exception: {e}")
+                self.fail(fMethod {method_name} with args {args} raised unexpected exception: {e}")"
 
     async def test_event_methods_with_mock_bridge(self):
-        "Test event methods work correctly when bridge is configured.""
+        Test event methods work correctly when bridge is configured."
         # Set up mock bridge
         mock_bridge = AsyncMock()
         self.adapter.set_websocket_bridge(mock_bridge, self.test_run_id, self.test_agent_name)
@@ -119,35 +119,35 @@ class Issue1199LocalValidationTests(SSotAsyncTestCase):
         # Test agent_started
         await self.adapter.emit_agent_started(Starting agent")
         mock_bridge.notify_agent_started.assert_called_once_with(
-            self.test_run_id, self.test_agent_name, context={"message: Starting agent"}
+            self.test_run_id, self.test_agent_name, context={message: Starting agent}
 
         # Test agent_thinking
         mock_bridge.reset_mock()
-        await self.adapter.emit_thinking("Processing request, step_number=1)
+        await self.adapter.emit_thinking("Processing request, step_number=1)"
         mock_bridge.notify_agent_thinking.assert_called_once_with(
-            self.test_run_id, self.test_agent_name, Processing request", step_number=1
+            self.test_run_id, self.test_agent_name, Processing request, step_number=1
         )
 
         # Test tool_executing
         mock_bridge.reset_mock()
-        await self.adapter.emit_tool_executing("data_analyzer, {param": "value}
+        await self.adapter.emit_tool_executing(data_analyzer, {param": "value}
         mock_bridge.notify_tool_executing.assert_called_once_with(
-            self.test_run_id, self.test_agent_name, data_analyzer", parameters={"param: value"}
+            self.test_run_id, self.test_agent_name, data_analyzer, parameters={param: value"}"
 
         # Test tool_completed
         mock_bridge.reset_mock()
-        await self.adapter.emit_tool_completed("data_analyzer, {result": "success}
+        await self.adapter.emit_tool_completed(data_analyzer, {result: success}"
         mock_bridge.notify_tool_completed.assert_called_once_with(
-            self.test_run_id, self.test_agent_name, data_analyzer", result={"result: success"}
+            self.test_run_id, self.test_agent_name, data_analyzer", result={result: success}
 
         # Test agent_completed
         mock_bridge.reset_mock()
         await self.adapter.emit_agent_completed({"status: completed"}
         mock_bridge.notify_agent_completed.assert_called_once_with(
-            self.test_run_id, self.test_agent_name, result={"status: completed"}
+            self.test_run_id, self.test_agent_name, result={status: completed}
 
     def test_websocket_manager_factory_utilities_exist(self):
-        "Test that WebSocket manager factory utilities exist and are callable.""
+        Test that WebSocket manager factory utilities exist and are callable.""
         utilities = [
             'create_test_user_context',
             'create_test_fallback_manager',
@@ -163,22 +163,22 @@ class Issue1199LocalValidationTests(SSotAsyncTestCase):
 
         # Test create_test_user_context
         result = create_test_user_context()
-        self.assertIsNotNone(result, create_test_user_context failed")
+        self.assertIsNotNone(result, create_test_user_context failed)
 
         # Test create_test_fallback_manager
         user_context = create_test_user_context()
         manager = create_test_fallback_manager(user_context)
-        self.assertIsNotNone(manager, "create_test_fallback_manager failed)
+        self.assertIsNotNone(manager, "create_test_fallback_manager failed)"
 
         # Test check_websocket_service_available
-        self.assertTrue(callable(check_websocket_service_available), check_websocket_service_available not callable")
+        self.assertTrue(callable(check_websocket_service_available), check_websocket_service_available not callable)
 
 
 class Issue1199StartupValidationTests(SSotAsyncTestCase):
-    "STARTUP TESTS - Verify WebSocket components load correctly""
+    STARTUP TESTS - Verify WebSocket components load correctly""
 
     def test_websocket_core_imports_successful(self):
-        ""Test that all WebSocket core modules can be imported successfully."
+        Test that all WebSocket core modules can be imported successfully.""
         import_tests = [
             ('netra_backend.app.websocket_core.websocket_manager', 'UnifiedWebSocketManager'),
             ('netra_backend.app.websocket_core.manager', 'WebSocketManager'),
@@ -191,14 +191,14 @@ class Issue1199StartupValidationTests(SSotAsyncTestCase):
             try:
                 module = __import__(module_path, fromlist=[class_name]
                 cls = getattr(module, class_name)
-                self.assertIsNotNone(cls, f"Class {class_name} from {module_path} is None)
+                self.assertIsNotNone(cls, fClass {class_name} from {module_path} is None)
             except ImportError as e:
-                self.fail(fFailed to import {class_name} from {module_path}: {e}")
+                self.fail(fFailed to import {class_name} from {module_path}: {e})
             except AttributeError as e:
                 self.fail(f"Class {class_name} not found in {module_path}: {e})
 
     def test_websocket_factory_pattern_enforcement(self):
-        ""Test that WebSocket factory pattern is properly enforced."
+        "Test that WebSocket factory pattern is properly enforced.
         from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
         # Test that direct instantiation is blocked
@@ -206,11 +206,11 @@ class Issue1199StartupValidationTests(SSotAsyncTestCase):
             WebSocketManager()
 
         error_message = str(exc_info.value)
-        assert "Direct WebSocketManager instantiation not allowed in error_message
-        assert Use get_websocket_manager() factory function" in error_message
+        assert "Direct WebSocketManager instantiation not allowed in error_message"
+        assert Use get_websocket_manager() factory function in error_message
 
     async def test_websocket_service_availability_check(self):
-        "Test WebSocket service availability check function.""
+        Test WebSocket service availability check function.""
         # This test validates the availability check works, regardless of result
         is_available = await check_websocket_service_available()
         self.assertIsInstance(is_available, bool)
@@ -218,15 +218,15 @@ class Issue1199StartupValidationTests(SSotAsyncTestCase):
 
 
 class Issue1199MockEventValidationTests(SSotAsyncTestCase):
-    ""MOCK EVENT TESTS - Validate event sending logic without requiring live connections"
+    MOCK EVENT TESTS - Validate event sending logic without requiring live connections""
 
     def setup_method(self, method=None):
-        "Set up test fixtures.""
+        Set up test fixtures."
         super().setup_method(method)
         self.adapter = WebSocketBridgeAdapter()
 
     async def test_event_validation_with_mock_validator(self):
-        ""Test that event validation works with mock WebSocket validator."
+        "Test that event validation works with mock WebSocket validator.
         # Test that the adapter attempts to validate events
         with patch('netra_backend.app.agents.mixins.websocket_bridge_adapter.get_websocket_validator') as mock_validator:
             mock_validation_result = Mock()
@@ -239,7 +239,7 @@ class Issue1199MockEventValidationTests(SSotAsyncTestCase):
             self.adapter.set_websocket_bridge(mock_bridge, "test-run, TestAgent")
 
             # Test event emission triggers validation
-            await self.adapter.emit_agent_started("Test message)
+            await self.adapter.emit_agent_started(Test message)
 
             # Verify validation was called
             mock_validator.return_value.validate_event.assert_called_once()
@@ -247,27 +247,27 @@ class Issue1199MockEventValidationTests(SSotAsyncTestCase):
             event_data = call_args[0]
 
             # Verify event structure
-            self.assertEqual(event_data[type"], "agent_started)
-            self.assertEqual(event_data[run_id"], "test-run)
-            self.assertEqual(event_data[agent_name"], "TestAgent)
-            self.assertIn(payload", event_data)
+            self.assertEqual(event_data[type], "agent_started)
+            self.assertEqual(event_data[run_id"], test-run)
+            self.assertEqual(event_data[agent_name], TestAgent)
+            self.assertIn(payload", event_data)"
 
     async def test_event_emission_error_handling(self):
-        "Test error handling when event emission fails.""
+        Test error handling when event emission fails."
         # Set up mock bridge that raises exceptions
         mock_bridge = AsyncMock()
         mock_bridge.notify_agent_started.side_effect = Exception(Connection lost")
 
-        self.adapter.set_websocket_bridge(mock_bridge, "test-run, TestAgent")
+        self.adapter.set_websocket_bridge(mock_bridge, test-run, TestAgent)
 
         # Event emission should not raise exceptions, but should log errors
         try:
-            await self.adapter.emit_agent_started("Test message)
+            await self.adapter.emit_agent_started("Test message)"
         except Exception as e:
-            self.fail(fEvent emission should not raise exceptions, but raised: {e}")
+            self.fail(fEvent emission should not raise exceptions, but raised: {e})
 
     def test_test_mode_configuration(self):
-        "Test that test mode can be enabled and works correctly.""
+        Test that test mode can be enabled and works correctly.""
         self.adapter.enable_test_mode()
         self.assertTrue(self.adapter._test_mode)
 
@@ -276,11 +276,11 @@ class Issue1199MockEventValidationTests(SSotAsyncTestCase):
 
 
 class Issue1199DeploymentValidationTests(SSotAsyncTestCase):
-    ""DEPLOYMENT VALIDATION TESTS - These tests should initially FAIL until deployment resolved"
+    DEPLOYMENT VALIDATION TESTS - These tests should initially FAIL until deployment resolved""
 
-    @pytest.mark.skipif(True, reason="Deployment tests - expected to fail until staging backend is fixed)
+    @pytest.mark.skipif(True, reason=Deployment tests - expected to fail until staging backend is fixed)
     async def test_staging_backend_health(self):
-        ""Test staging backend health - EXPECTED TO FAIL until deployment fixed."
+        "Test staging backend health - EXPECTED TO FAIL until deployment fixed."
         # This test will be enabled once we know staging endpoints
         # For now, it's a placeholder that would test actual staging health
         import aiohttp
@@ -288,17 +288,17 @@ class Issue1199DeploymentValidationTests(SSotAsyncTestCase):
         try:
             async with aiohttp.ClientSession() as session:
                 # Replace with actual staging health endpoint
-                async with session.get("https://api.staging.netrasystems.ai/health, timeout=10) as response:
+                async with session.get(https://api.staging.netrasystems.ai/health, timeout=10) as response:
                     self.assertEqual(response.status, 200)
                     data = await response.json()
-                    self.assertIn(status", data)
-                    self.assertEqual(data["status], healthy")
+                    self.assertIn(status", data)"
+                    self.assertEqual(data[status], healthy)
         except Exception as e:
-            self.fail(f"Staging backend health check failed: {e})
+            self.fail(fStaging backend health check failed: {e})
 
-    @pytest.mark.skipif(True, reason=Deployment tests - expected to fail until staging backend is fixed")
+    @pytest.mark.skipif(True, reason=Deployment tests - expected to fail until staging backend is fixed")"
     async def test_staging_websocket_endpoint_reachability(self):
-        "Test staging WebSocket endpoint reachability - EXPECTED TO FAIL until deployment fixed.""
+        Test staging WebSocket endpoint reachability - EXPECTED TO FAIL until deployment fixed."
         # This test will be enabled once we know WebSocket endpoints
         # For now, it's a placeholder
         import websockets
@@ -308,15 +308,15 @@ class Issue1199DeploymentValidationTests(SSotAsyncTestCase):
             async with websockets.connect(wss://api.staging.netrasystems.ai/ws", timeout=10) as websocket:
                 await websocket.ping()
         except Exception as e:
-            self.fail(f"Staging WebSocket endpoint not reachable: {e})
+            self.fail(fStaging WebSocket endpoint not reachable: {e})
 
 
 class Issue1199E2EEventFlowTests(SSotAsyncTestCase):
-    ""E2E EVENT FLOW TESTS - Test complete 5-event sequence (post-deployment)"
+    "E2E EVENT FLOW TESTS - Test complete 5-event sequence (post-deployment)"
 
-    @pytest.mark.skipif(True, reason="E2E tests - expected to fail until deployment resolved)
+    @pytest.mark.skipif(True, reason=E2E tests - expected to fail until deployment resolved)
     async def test_complete_5_event_sequence(self):
-        ""Test complete 5-event sequence - EXPECTED TO FAIL until deployment resolved."
+        ""Test complete 5-event sequence - EXPECTED TO FAIL until deployment resolved.
         # This test would validate the complete Golden Path event flow
         # Once staging is working, this will test:
         # 1. agent_started
@@ -327,17 +327,17 @@ class Issue1199E2EEventFlowTests(SSotAsyncTestCase):
 
         # For now, this is a placeholder structure
         events_to_test = [
-            "agent_started,
+            agent_started,"
             agent_thinking",
-            "tool_executing,
-            tool_completed",
-            "agent_completed
+            tool_executing,
+            tool_completed","
+            agent_completed
         ]
 
         # TODO: Implement actual E2E test once staging is operational
         for event in events_to_test:
             # Placeholder - would test actual event delivery
-            self.assertIn(event, events_to_test, fEvent {event} missing from test suite")
+            self.assertIn(event, events_to_test, fEvent {event} missing from test suite)"
 
 
 if __name__ == "__main__":

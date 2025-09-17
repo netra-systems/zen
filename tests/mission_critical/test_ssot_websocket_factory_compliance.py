@@ -23,7 +23,7 @@ VALIDATION APPROACH:
 BUSINESS IMPACT:
 If these tests fail, WebSocket user isolation is broken, preventing users 
 from receiving AI responses (90% of platform value).
-""
+
 
 import asyncio
 import os
@@ -65,15 +65,15 @@ class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
     2. SSOT patterns work correctly  
     3. User isolation is maintained during the migration
     4. Factory deprecation remediation preserves functionality
-    "
+
     
     def setup_method(self, method):
-        "Set up test environment for factory compliance testing.""
+        "Set up test environment for factory compliance testing."
         super().setup_method(method)
         
         self.test_user_id = ftest_user_{uuid.uuid4().hex[:8]}"
         self.test_thread_id = f"thread_{uuid.uuid4().hex[:8]}
-        self.test_run_id = frun_{uuid.uuid4().hex[:8]}"
+        self.test_run_id = frun_{uuid.uuid4().hex[:8]}
         
         # Create user execution context for SSOT testing
         self.user_context = UserExecutionContext(
@@ -82,12 +82,12 @@ class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
             run_id=self.test_run_id
         )
         
-        logger.info(f"[SSOT FACTORY TEST] Setup complete for user: {self.test_user_id})
+        logger.info(f[SSOT FACTORY TEST] Setup complete for user: {self.test_user_id})
 
     def teardown_method(self, method):
-        ""Clean up test environment."
+        ""Clean up test environment.
         super().teardown_method(method)
-        logger.info(f"[SSOT FACTORY TEST] Teardown complete for user: {self.test_user_id})
+        logger.info(f[SSOT FACTORY TEST] Teardown complete for user: {self.test_user_id})
 
     @pytest.mark.asyncio
     async def test_deprecated_factory_import_detection(self):
@@ -98,8 +98,8 @@ class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
         then FAIL after remediation (no violations found).
         
         BUSINESS VALUE: Ensures migration doesn't miss any deprecated patterns.
-        "
-        logger.info("[SSOT COMPLIANCE] Testing deprecated factory import detection...)
+
+        logger.info("[SSOT COMPLIANCE] Testing deprecated factory import detection...)"
         
         # Test 1: Try to import deprecated factory (this should be detectable)
         deprecated_import_detected = False
@@ -107,9 +107,9 @@ class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
             # This import should exist but be deprecated
             from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
             deprecated_import_detected = True
-            logger.warning([DEPRECATED DETECTED] Found deprecated websocket_manager_factory import")
+            logger.warning([DEPRECATED DETECTED] Found deprecated websocket_manager_factory import)
         except ImportError:
-            logger.info("[MIGRATION COMPLETE] Deprecated factory import no longer available)
+            logger.info([MIGRATION COMPLETE] Deprecated factory import no longer available)"
         
         # Test 2: Check if deprecated factory function exists in critical files
         violation_files = []
@@ -124,29 +124,29 @@ class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
                     content = f.read()
                     if 'get_websocket_manager_factory' in content:
                         violation_files.append(file_path)
-                        logger.warning(f"[VIOLATION FOUND] Deprecated factory pattern in: {file_path})
+                        logger.warning(f[VIOLATION FOUND] Deprecated factory pattern in: {file_path})
         
         # ASSERTION LOGIC: During migration phase, we EXPECT violations
         # After remediation, this test should pass with no violations found
         if violation_files:
-            logger.info(f[PRE-REMEDIATION STATE] Found {len(violation_files)} files with deprecated patterns")
+            logger.info(f[PRE-REMEDIATION STATE] Found {len(violation_files)} files with deprecated patterns)"
             # This is expected during migration phase
             assert len(violation_files) > 0, "Deprecated factory patterns detected as expected during migration
         else:
-            logger.info([POST-REMEDIATION STATE] No deprecated factory patterns found - migration complete!")
+            logger.info([POST-REMEDIATION STATE] No deprecated factory patterns found - migration complete!)
             # This is expected after successful remediation
-            assert len(violation_files) == 0, "No deprecated factory patterns found - migration successful
+            assert len(violation_files) == 0, "No deprecated factory patterns found - migration successful"
 
     @pytest.mark.asyncio  
     async def test_ssot_websocket_manager_creation(self):
-        ""TEST: SSOT WebSocketManager.create_for_user() works correctly
+        TEST: SSOT WebSocketManager.create_for_user() works correctly
         
         PURPOSE: Validates that the SSOT pattern for WebSocket manager creation
         works properly and maintains user isolation.
         
         BUSINESS VALUE: Core functionality for $500K+ ARR chat features.
-        "
-        logger.info("[SSOT COMPLIANCE] Testing SSOT WebSocket manager creation...)
+""
+        logger.info([SSOT COMPLIANCE] Testing SSOT WebSocket manager creation...)
         
         try:
             # Test SSOT pattern - use the factory method
@@ -157,45 +157,45 @@ class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
             
             # Validate user isolation is maintained  
             assert hasattr(websocket_manager, 'user_context'), "WebSocket manager missing user context
-            assert websocket_manager.user_context.user_id == self.test_user_id, User ID not preserved in manager"
+            assert websocket_manager.user_context.user_id == self.test_user_id, User ID not preserved in manager
             
             logger.info(f"[SSOT SUCCESS] WebSocket manager created for user: {self.test_user_id})
             
             # Test that manager provides required functionality
             assert hasattr(websocket_manager, 'send_agent_event'), WebSocket manager missing send_agent_event method"
-            assert hasattr(websocket_manager, 'remove_connection'), "WebSocket manager missing remove_connection method
+            assert hasattr(websocket_manager, 'remove_connection'), WebSocket manager missing remove_connection method
             
-            logger.info([SSOT COMPLIANCE] All SSOT WebSocket manager functionality validated")
+            logger.info([SSOT COMPLIANCE] All SSOT WebSocket manager functionality validated")"
             
         except Exception as e:
-            logger.error(f"[SSOT FAILURE] SSOT WebSocket manager creation failed: {e})
-            pytest.fail(fCRITICAL: SSOT WebSocket pattern failed - {e}")
+            logger.error(f[SSOT FAILURE] SSOT WebSocket manager creation failed: {e})
+            pytest.fail(fCRITICAL: SSOT WebSocket pattern failed - {e})
 
     @pytest.mark.asyncio
     async def test_user_isolation_with_ssot_pattern(self):
-        "TEST: User isolation maintained with SSOT WebSocket pattern
+        "TEST: User isolation maintained with SSOT WebSocket pattern"
         
         PURPOSE: Validates that SSOT pattern properly isolates users,
         preventing WebSocket race conditions and cross-user data leaks.
         
         BUSINESS VALUE: Prevents user data corruption and ensures reliable chat.
-        ""
+        "
         logger.info([USER ISOLATION] Testing user isolation with SSOT pattern...")
         
         # Create two different user contexts
-        user1_id = f"user1_{uuid.uuid4().hex[:8]}
+        user1_id = fuser1_{uuid.uuid4().hex[:8]}
         user2_id = fuser2_{uuid.uuid4().hex[:8]}"
         
         user1_context = UserExecutionContext(
             user_id=user1_id,
             thread_id=f"thread1_{uuid.uuid4().hex[:8]},
-            run_id=frun1_{uuid.uuid4().hex[:8]}"
+            run_id=frun1_{uuid.uuid4().hex[:8]}
         )
         
         user2_context = UserExecutionContext(
             user_id=user2_id,
-            thread_id=f"thread2_{uuid.uuid4().hex[:8]},
-            run_id=frun2_{uuid.uuid4().hex[:8]}"
+            thread_id=fthread2_{uuid.uuid4().hex[:8]},
+            run_id=frun2_{uuid.uuid4().hex[:8]}""
         )
         
         try:
@@ -204,14 +204,14 @@ class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
             manager2 = await WebSocketManagerFactory.create_isolated(user2_context)
             
             # Validate managers are different instances
-            assert manager1 is not manager2, "CRITICAL: WebSocket managers not properly isolated
+            assert manager1 is not manager2, CRITICAL: WebSocket managers not properly isolated
             
             # Validate each manager has correct user context
             assert manager1.user_context.user_id == user1_id, User 1 context not preserved"
             assert manager2.user_context.user_id == user2_id, "User 2 context not preserved
             
             # Validate user contexts are isolated (no cross-contamination)
-            assert manager1.user_context.user_id != manager2.user_context.user_id, User contexts not isolated"
+            assert manager1.user_context.user_id != manager2.user_context.user_id, User contexts not isolated
             
             logger.info(f"[USER ISOLATION SUCCESS] Users {user1_id} and {user2_id} properly isolated)
             
@@ -223,25 +223,25 @@ class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
             assert manager1.user_context.agent_context is not manager2.user_context.agent_context, Agent contexts not isolated"
             
             # Validate contexts retained their unique user IDs (the core isolation test)
-            assert manager1.user_context.user_id == user1_id, "User 1 ID corrupted
-            assert manager2.user_context.user_id == user2_id, User 2 ID corrupted"
+            assert manager1.user_context.user_id == user1_id, User 1 ID corrupted
+            assert manager2.user_context.user_id == user2_id, User 2 ID corrupted""
             
-            logger.info("[USER ISOLATION SUCCESS] Session data properly isolated between users)
+            logger.info([USER ISOLATION SUCCESS] Session data properly isolated between users)
             
         except Exception as e:
-            logger.error(f[USER ISOLATION FAILURE] User isolation test failed: {e}")
+            logger.error(f[USER ISOLATION FAILURE] User isolation test failed: {e})"
             pytest.fail(f"CRITICAL: User isolation failed with SSOT pattern - {e})
 
     @pytest.mark.asyncio
     async def test_migration_compatibility_verification(self):
-        ""TEST: Verify migration maintains backward compatibility
+        TEST: Verify migration maintains backward compatibility
         
         PURPOSE: Ensures that migrating from deprecated factory pattern to SSOT
         pattern maintains all existing functionality and doesn't break anything.
         
         BUSINESS VALUE: Zero downtime migration protecting $500K+ ARR.
-        "
-        logger.info("[MIGRATION COMPATIBILITY] Testing migration compatibility...)
+""
+        logger.info([MIGRATION COMPATIBILITY] Testing migration compatibility...)
         
         # Test that all expected WebSocket functionality is available in SSOT pattern
         manager = await WebSocketManagerFactory.create_isolated(self.user_context)
@@ -259,7 +259,7 @@ class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
         for method_name in required_methods:
             if not hasattr(manager, method_name):
                 missing_methods.append(method_name)
-                logger.error(f[COMPATIBILITY FAILURE] Missing method: {method_name}")
+                logger.error(f[COMPATIBILITY FAILURE] Missing method: {method_name})"
         
         assert len(missing_methods) == 0, f"CRITICAL: Missing methods after migration: {missing_methods}
         
@@ -267,32 +267,32 @@ class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
         try:
             # Simulate typical WebSocket event sending
             test_event = {
-                type": "agent_started,
-                data": {"message: Test agent started"},
-                "timestamp: datetime.now().isoformat()
+                type: agent_started,
+                data: {"message: Test agent started"},
+                timestamp: datetime.now().isoformat()
             }
             
             # This should work without throwing exceptions
             # Note: We don't actually send since no real WebSocket connection
             # Just validate the method signature and basic functionality
-            assert callable(getattr(manager, 'send_agent_event')), send_agent_event not callable"
+            assert callable(getattr(manager, 'send_agent_event')), send_agent_event not callable""
             
-            logger.info("[MIGRATION COMPATIBILITY SUCCESS] All required functionality available)
+            logger.info([MIGRATION COMPATIBILITY SUCCESS] All required functionality available)
             
         except Exception as e:
-            logger.error(f[MIGRATION COMPATIBILITY FAILURE] Compatibility test failed: {e}")
+            logger.error(f[MIGRATION COMPATIBILITY FAILURE] Compatibility test failed: {e})"
             pytest.fail(f"CRITICAL: Migration broke existing functionality - {e})
 
     @pytest.mark.asyncio
     async def test_factory_pattern_security_validation(self):
-        ""TEST: Validate SSOT pattern prevents known security issues
+        TEST: Validate SSOT pattern prevents known security issues
         
         PURPOSE: Ensures SSOT pattern prevents the security vulnerabilities
         that existed in the deprecated factory pattern.
         
         BUSINESS VALUE: Prevents user data leaks and unauthorized access.
-        "
-        logger.info("[SECURITY VALIDATION] Testing factory pattern security...)
+""
+        logger.info([SECURITY VALIDATION] Testing factory pattern security...)
         
         # Test 1: Ensure user context cannot be modified by other users
         manager = await WebSocketManagerFactory.create_isolated(self.user_context)
@@ -310,7 +310,7 @@ class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
                 # This indicates a potential security issue but isn't necessarily fatal
                 # depending on the implementation
             else:
-                logger.info([SECURITY SUCCESS] User context modification properly blocked")
+                logger.info([SECURITY SUCCESS] User context modification properly blocked)
                 
         except Exception as e:
             # This is actually good - modifications should be prevented
@@ -321,7 +321,7 @@ class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
         for i in range(3):
             test_context = UserExecutionContext(
                 user_id=ftest_user_{i}_{uuid.uuid4().hex[:8]}",
-                thread_id=f"thread_{i}_{uuid.uuid4().hex[:8]},
+                thread_id=fthread_{i}_{uuid.uuid4().hex[:8]},
                 run_id=frun_{i}_{uuid.uuid4().hex[:8]}"
             )
             contexts_created.append(test_context)
@@ -330,15 +330,15 @@ class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
         user_ids = [ctx.user_id for ctx in contexts_created]
         assert len(set(user_ids)) == len(user_ids), "CRITICAL: User contexts not properly isolated
         
-        logger.info([SECURITY VALIDATION SUCCESS] All security checks passed")
+        logger.info([SECURITY VALIDATION SUCCESS] All security checks passed)
 
 
-if __name__ == "__main__:
+if __name__ == "__main__:"
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-    print(MIGRATION NOTICE: This file previously used direct pytest execution.")
-    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>)
-    print(For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print(MIGRATION NOTICE: This file previously used direct pytest execution.)
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md)"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

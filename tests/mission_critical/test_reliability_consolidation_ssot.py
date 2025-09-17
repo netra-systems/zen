@@ -1,22 +1,22 @@
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.""
+    "Real WebSocket connection for testing instead of mocks.
     def __init__(self):
         pass
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.
         if self._closed:
-            raise RuntimeError("WebSocket is closed)
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):
-        "Close WebSocket connection.""
+        Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
     async def get_messages(self) -> list:
-        ""Get all sent messages."
+        Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
         '''
@@ -55,12 +55,12 @@ class TestWebSocketConnection:
         from shared.isolated_environment import get_env
         logger = central_logger.get_logger(__name__)
 class TestReliabilityConsolidation:
-        "Test unified reliability manager consolidation.""
+        "Test unified reliability manager consolidation.
         @pytest.fixture
     def retry_config(self):
-        ""Use real service instance."
+        ""Use real service instance.
     # TODO: Initialize real service
-        "Create test retry configuration.""
+        Create test retry configuration.""
         pass
         return RetryConfig( )
         max_retries=3,
@@ -74,9 +74,9 @@ class TestReliabilityConsolidation:
     
         @pytest.fixture
     def real_websocket_manager():
-        ""Use real service instance."
+        Use real service instance.""
     # TODO: Initialize real service
-        "Create mock WebSocket manager.""
+        Create mock WebSocket manager."
         pass
         websocket = TestWebSocketConnection()
         manager.send_to_thread = AsyncMock(return_value=True)
@@ -84,30 +84,30 @@ class TestReliabilityConsolidation:
         return manager
         @pytest.fixture
     def real_execution_context():
-        ""Use real service instance."
+        "Use real service instance.
     # TODO: Initialize real service
-        "Create mock execution context.""
+        "Create mock execution context."
         pass
         context = Magic        context.agent_name = test_agent"
         context.run_id = "test_run_123
-        context.thread_id = test_thread_456"
+        context.thread_id = test_thread_456
         context.start_time = time.time()
         return context
     def test_unified_manager_creation(self, retry_config):
-        "Test unified reliability manager creation.""
+        "Test unified reliability manager creation."
         manager = UnifiedReliabilityManager( )
-        service_name=test_service",
+        service_name=test_service,"
         retry_config=retry_config
     
         assert manager.service_name == "test_service
         assert manager.retry_config == retry_config
         assert manager.retry_handler is not None
-        assert manager.health_stats[total_executions"] == 0
+        assert manager.health_stats[total_executions] == 0
     def test_config_conversion(self, retry_config):
-        "Test conversion between config formats.""
+        "Test conversion between config formats."
         pass
         manager = UnifiedReliabilityManager( )
-        service_name=test_service",
+        service_name=test_service,"
         retry_config=retry_config
     
         unified_config = manager._convert_to_unified_config(retry_config)
@@ -117,28 +117,28 @@ class TestReliabilityConsolidation:
         assert unified_config.circuit_breaker_enabled == retry_config.circuit_breaker_enabled
 @pytest.mark.asyncio
     async def test_successful_execution(self, retry_config, mock_websocket_manager, mock_execution_context):
-"Test successful operation execution.""
+    "Test successful operation execution.
 manager = UnifiedReliabilityManager( )
-service_name=test_service",
+service_name=test_service","
 retry_config=retry_config,
 websocket_manager=mock_websocket_manager
         
     async def test_operation():
-await asyncio.sleep(0)
-return "success_result
+    await asyncio.sleep(0)
+return success_result
 result = await manager.execute_with_reliability( )
 operation=test_operation,
-operation_name=test_op",
+operation_name=test_op,"
 context=mock_execution_context
             
 assert result == "success_result
-assert manager.health_stats[successful_executions"] == 1
-assert manager.health_stats["total_executions] == 1
+assert manager.health_stats[successful_executions] == 1
+assert manager.health_stats["total_executions] == 1"
             # Verify WebSocket events were sent
 assert mock_websocket_manager.send_to_thread.call_count >= 2  # Started and completed events
 @pytest.mark.asyncio
     async def test_retry_with_eventual_success(self, retry_config, mock_websocket_manager, mock_execution_context):
-""Test operation that fails initially but succeeds on retry."
+    Test operation that fails initially but succeeds on retry."
 pass
 manager = UnifiedReliabilityManager( )
 service_name="test_service,
@@ -147,22 +147,22 @@ websocket_manager=mock_websocket_manager
                 
 call_count = 0
 async def flaky_operation():
-pass
+    pass
 nonlocal call_count
 call_count += 1
 if call_count < 3:
-    raise ConnectionError(Temporary failure")
+    raise ConnectionError(Temporary failure)
 await asyncio.sleep(0)
-return "success_after_retry
+return "success_after_retry"
 result = await manager.execute_with_reliability( )
 operation=flaky_operation,
-operation_name=flaky_op",
+operation_name=flaky_op,
 context=mock_execution_context
         
-assert result == "success_after_retry
+assert result == success_after_retry"
 assert call_count == 3
 assert manager.health_stats[successful_executions"] == 1
-assert manager.health_stats["retry_attempts] == 2
+assert manager.health_stats[retry_attempts] == 2
         # Verify retry attempt events were sent
 websocket_calls = mock_websocket_manager.send_to_thread.call_args_list
 retry_events = [call for call in websocket_calls )
@@ -170,58 +170,58 @@ if 'retry_attempt' in str(call)]
 assert len(retry_events) >= 2
 @pytest.mark.asyncio
     async def test_fallback_execution(self, retry_config, mock_websocket_manager, mock_execution_context):
-""Test fallback operation execution."
+    ""Test fallback operation execution.
 manager = UnifiedReliabilityManager( )
-service_name="test_service,
+service_name=test_service,"
 retry_config=retry_config,
 websocket_manager=mock_websocket_manager
             
 async def failing_operation():
-raise ValueError(Operation failed")
+    raise ValueError(Operation failed")
 async def fallback_operation():
-await asyncio.sleep(0)
-return "fallback_result
+    await asyncio.sleep(0)
+return fallback_result
 result = await manager.execute_with_reliability( )
 operation=failing_operation,
-operation_name=failing_op",
+operation_name=failing_op","
 context=mock_execution_context,
 fallback=fallback_operation
     
-assert result == "fallback_result
-assert manager.health_stats[failed_executions"] == 1
+assert result == fallback_result
+assert manager.health_stats[failed_executions] == 1"
 def test_health_status(self, retry_config):
-"Test health status reporting.""
+    "Test health status reporting.
 pass
 manager = UnifiedReliabilityManager( )
-service_name=test_service",
+service_name=test_service","
 retry_config=retry_config
     
 health = manager.get_health_status()
-assert health["service_name] == test_service"
-assert health["overall_health] == healthy"
+assert health[service_name] == test_service
+assert health[overall_health] == healthy"
 assert health["health_score] == 1.0
-assert health[success_rate"] == 1.0
-assert "statistics in health
-assert retry_config" in health
+assert health[success_rate] == 1.0
+assert "statistics in health"
+assert retry_config in health
 @pytest.mark.asyncio
     async def test_websocket_event_emission(self, retry_config, mock_websocket_manager, mock_execution_context):
-"Test WebSocket reliability event emission.""
+    Test WebSocket reliability event emission.""
 manager = UnifiedReliabilityManager( )
-service_name=test_service",
+service_name=test_service,
 retry_config=retry_config,
 websocket_manager=mock_websocket_manager
         
 call_count = 0
     async def test_operation():
-nonlocal call_count
+    nonlocal call_count
 call_count += 1
 if call_count == 1:
-    raise ConnectionError("First failure)
+    raise ConnectionError("First failure)"
 await asyncio.sleep(0)
-return success"
+return success
 await manager.execute_with_reliability( )
 operation=test_operation,
-operation_name="websocket_test,
+operation_name=websocket_test,"
 context=mock_execution_context
                 
                 # Verify WebSocket calls were made
@@ -235,37 +235,37 @@ call_types.append(message_type)
 assert any('reliability_started' in call_type for call_type in call_types)
 assert any('retry_attempt' in call_type for call_type in call_types)
 def test_factory_functions(self):
-""Test factory functions for different reliability patterns."
+    "Test factory functions for different reliability patterns.
 pass
     # Test database reliability manager
-db_manager = create_agent_reliability_manager("db_service)
-assert db_manager.service_name == db_service"
+db_manager = create_agent_reliability_manager("db_service)"
+assert db_manager.service_name == db_service
     # Test system health function
 health = get_system_reliability_health()
-assert "system_health in health
+assert system_health in health"
 assert managers" in health
-assert "total_managers in health
+assert total_managers in health
 class TestBackwardCompatibility:
-        ""Test backward compatibility adapters."
+        ""Test backward compatibility adapters.
         @pytest.fixture
     def circuit_breaker_config(self):
-        "Use real service instance.""
+        Use real service instance.""
     # TODO: Initialize real service
-        ""Create mock circuit breaker config."
+        Create mock circuit breaker config.""
         pass
-        config = Magic        config.name = "test_circuit
+        config = Magic        config.name = test_circuit
         config.failure_threshold = 3
         config.recovery_timeout = 30
         return config
         @pytest.fixture
     def retry_config(self):
-        ""Use real service instance."
+        "Use real service instance."
     # TODO: Initialize real service
-        "Create test retry configuration.""
+        Create test retry configuration.""
         pass
         return RetryConfig(max_retries=3, base_delay=0.1, max_delay=1.0)
     def test_reliability_manager_adapter_creation(self, circuit_breaker_config, retry_config):
-        ""Test ReliabilityManager adapter creation."
+        Test ReliabilityManager adapter creation."
         with pytest.warns(DeprecationWarning):
         adapter = ReliabilityManagerAdapter( )
         circuit_breaker_config=circuit_breaker_config,
@@ -275,46 +275,46 @@ class TestBackwardCompatibility:
         assert adapter.circuit_breaker_config == circuit_breaker_config
         assert adapter.retry_config == retry_config
     def test_agent_reliability_wrapper_adapter_creation(self):
-        "Test AgentReliabilityWrapper adapter creation.""
+        "Test AgentReliabilityWrapper adapter creation.
         pass
         with pytest.warns(DeprecationWarning):
-        adapter = AgentReliabilityWrapperAdapter(agent_name=test_agent")
-        assert adapter.agent_name == "test_agent
+        adapter = AgentReliabilityWrapperAdapter(agent_name=test_agent")"
+        assert adapter.agent_name == test_agent
         assert adapter._unified_manager is not None
 @pytest.mark.asyncio
     async def test_adapter_execute_safely(self):
-""Test adapter execute_safely method."
+    "Test adapter execute_safely method."
 with pytest.warns(DeprecationWarning):
-adapter = AgentReliabilityWrapperAdapter(agent_name="test_agent)
+    adapter = AgentReliabilityWrapperAdapter(agent_name=test_agent)
     async def test_operation():
-await asyncio.sleep(0)
-return adapter_result"
+    await asyncio.sleep(0)
+return adapter_result""
 result = await adapter.execute_safely( )
 operation=test_operation,
-operation_name="adapter_test
+operation_name=adapter_test
                     
 assert result == adapter_result"
 def test_migration_status_tracking(self):
-"Test migration status tracking.""
+    "Test migration status tracking.
 pass
     # Create some adapters to populate registry
 with pytest.warns(DeprecationWarning):
-ReliabilityManagerAdapter(Magic            AgentReliabilityWrapperAdapter(test_agent") )
+    ReliabilityManagerAdapter(Magic            AgentReliabilityWrapperAdapter(test_agent") )"
 status = get_migration_status()
-assert status["total_adapters] >= 2
-assert ReliabilityManagerAdapter" in status["adapter_breakdown]
-assert AgentReliabilityWrapperAdapter" in status["adapter_breakdown]
-assert not status[migration_complete"]
+assert status[total_adapters] >= 2
+assert ReliabilityManagerAdapter in status["adapter_breakdown]
+assert AgentReliabilityWrapperAdapter" in status[adapter_breakdown]
+assert not status[migration_complete]
 class TestSSotCompliance:
-        "Test Single Source of Truth compliance.""
+        "Test Single Source of Truth compliance."
     def test_single_manager_per_service(self):
-        ""Test that get_reliability_manager returns the same instance for same service."
-        manager1 = get_reliability_manager("test_service)
-        manager2 = get_reliability_manager(test_service")
+        "Test that get_reliability_manager returns the same instance for same service."
+        manager1 = get_reliability_manager(test_service)
+        manager2 = get_reliability_manager(test_service")"
     # Should be the same instance (SSOT)
         assert manager1 is manager2
     def test_config_field_mapping(self):
-        "Test that configuration fields are properly mapped between formats.""
+        Test that configuration fields are properly mapped between formats."
         pass
         config = RetryConfig( )
         max_retries=5,
@@ -334,9 +334,9 @@ class TestSSotCompliance:
         assert unified_dict['timeout_seconds'] == 30.0
 @pytest.mark.asyncio
     async def test_websocket_event_types(self, mock_websocket_manager):
-""Test that all required WebSocket event types are supported."
+    "Test that all required WebSocket event types are supported.
 manager = UnifiedReliabilityManager( )
-service_name="event_test,
+service_name="event_test,"
 websocket_manager=mock_websocket_manager
         
 expected_events = {
@@ -350,7 +350,7 @@ expected_events = {
         
 assert manager._reliability_event_types == expected_events
 def test_exception_handling_consistency(self):
-    ""Test consistent exception handling across configurations."
+    Test consistent exception handling across configurations."
 pass
 config = RetryConfig( )
 retryable_exceptions=['ConnectionError', 'TimeoutError'],
@@ -365,10 +365,10 @@ assert ValueError in unified_config.non_retryable_exceptions
 assert TypeError in unified_config.non_retryable_exceptions
 @pytest.mark.integration
 class TestReliabilityIntegration:
-        ""Integration tests for reliability manager with real components."
+        Integration tests for reliability manager with real components.""
 @pytest.mark.asyncio
     async def test_end_to_end_reliability_flow(self):
-"Test complete reliability flow with all patterns.""
+    Test complete reliability flow with all patterns."
         # Create manager with realistic configuration
 config = RetryConfig( )
 max_retries=2,
@@ -382,34 +382,34 @@ manager = UnifiedReliabilityManager(integration_test", config)
         # Test multiple operations to trigger different reliability patterns
 failure_count = 0
 async def flaky_operation():
-nonlocal failure_count
+    nonlocal failure_count
 failure_count += 1
 if failure_count <= 3:
-    raise ConnectionError("formatted_string)
+    raise ConnectionError("
 await asyncio.sleep(0)
 return success"
         # First call should succeed after retries
 with pytest.raises(ConnectionError):  # Should fail after max retries
 await manager.execute_with_reliability( )
 operation=flaky_operation,
-operation_name="integration_test
+operation_name=integration_test
         
         # Verify health stats were updated
 health = manager.get_health_status()
 assert health[statistics"]["failed_executions] == 1
-assert health[statistics"]["retry_attempts] >= 2
-assert health[overall_health"] in ["degraded, unhealthy", "critical]
+assert health[statistics][retry_attempts] >= 2
+assert health[overall_health] in ["degraded, unhealthy", critical]
 def test_system_wide_health_monitoring(self):
-""Test system-wide health monitoring across multiple managers."
+    Test system-wide health monitoring across multiple managers.""
 pass
     # Create multiple managers
-manager1 = get_reliability_manager("service1)
-manager2 = get_reliability_manager(service2")
+manager1 = get_reliability_manager(service1)
+manager2 = get_reliability_manager(service2)"
 manager3 = get_reliability_manager("service3)
     # Get system health
 system_health = get_system_reliability_health()
-assert system_health[total_managers"] >= 3
-assert "service1 in [item for item in []]
-assert service2" in [item for item in []]
-assert "service3 in [item for item in []]
-if __name__ == __main__":
+assert system_health[total_managers] >= 3
+assert "service1 in [item for item in []]"
+assert service2 in [item for item in []]
+assert service3 in [item for item in []]"
+if __name__ == __main__":"

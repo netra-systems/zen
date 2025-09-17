@@ -13,7 +13,7 @@ WebSocket Events Protected:
 
 Created: 2025-01-13 - SSOT Gardner agents focus
 Priority: P0 (Critical/Blocking) - WebSocket events = chat functionality = 90% platform value
-""
+"
 
 import pytest
 import asyncio
@@ -38,10 +38,10 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 
 
 class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
-    ""Critical P0 tests protecting $500K+ ARR WebSocket functionality during SSOT consolidation"
+    "Critical P0 tests protecting $500K+ ARR WebSocket functionality during SSOT consolidation
     
     def setUp(self):
-        "Set up WebSocket bridge test environment with SSOT patterns""
+        "Set up WebSocket bridge test environment with SSOT patterns"
         super().setUp()
         self.env = IsolatedEnvironment()
         self.mock_factory = SSotMockFactory()
@@ -56,10 +56,10 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
         
         # Critical WebSocket events we must protect
         self.critical_events = [
-            agent_started",
-            "agent_thinking, 
-            tool_executing",
-            "tool_completed,
+            agent_started,
+            "agent_thinking, "
+            tool_executing,
+            tool_completed,"
             agent_completed"
         ]
         
@@ -67,12 +67,12 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
         self.mock_websocket_manager = self.mock_factory.create_websocket_manager()
         
     async def test_websocket_events_delivery_consistency(self):
-        "
+    "
         CRITICAL: Validate all 5 critical events still deliver properly
         
         Business Impact: $500K+ ARR depends on real-time chat functionality
         Expected: PASS - all events must be delivered after consolidation
-        ""
+        "
         # Set up WebSocket manager integration
         await self.registry.set_websocket_manager(self.mock_websocket_manager)
         
@@ -80,7 +80,7 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
         user_session = await self.registry.create_user_session(
             self.test_user_id, self.test_session_id
         )
-        self.assertIsNotNone(user_session, User session creation required for WebSocket events")
+        self.assertIsNotNone(user_session, User session creation required for WebSocket events)
         
         # Test each critical event delivery
         delivered_events = []
@@ -100,40 +100,40 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
         try:
             # Trigger agent_started
             await self.registry._emit_websocket_event(
-                self.test_user_id, "agent_started, 
-                {agent_type": "test_agent, session_id": self.test_session_id}
+                self.test_user_id, "agent_started, "
+                {agent_type: test_agent, session_id: self.test_session_id}"
             
             # Trigger agent_thinking  
             await self.registry._emit_websocket_event(
                 self.test_user_id, "agent_thinking,
-                {reasoning": "Processing user request, session_id": self.test_session_id}
+                {reasoning: Processing user request, session_id": self.test_session_id}"
             
             # Trigger tool_executing
             await self.registry._emit_websocket_event(
-                self.test_user_id, "tool_executing,
-                {tool_name": "test_tool, session_id": self.test_session_id}
+                self.test_user_id, tool_executing,
+                {tool_name: "test_tool, session_id": self.test_session_id}
             
             # Trigger tool_completed
             await self.registry._emit_websocket_event(
-                self.test_user_id, "tool_completed, 
-                {tool_name": "test_tool, result": "success, session_id": self.test_session_id}
+                self.test_user_id, tool_completed, 
+                {tool_name": "test_tool, result: success, session_id: self.test_session_id}"
             
             # Trigger agent_completed
             await self.registry._emit_websocket_event(
                 self.test_user_id, "agent_completed,
-                {response": "Test response, session_id": self.test_session_id}
+                {response: Test response, session_id": self.test_session_id}"
             
         except AttributeError:
             # Registry might not have _emit_websocket_event method yet
             # This is expected and good - test will guide implementation
-            self.skipTest("Registry WebSocket integration not yet implemented)
+            self.skipTest(Registry WebSocket integration not yet implemented)
         
         # Validate all critical events were delivered
         delivered_event_types = [event['type'] for event in delivered_events]
         
         for critical_event in self.critical_events:
             self.assertIn(critical_event, delivered_event_types,
-                         fCritical event {critical_event} was not delivered")
+                         fCritical event {critical_event} was not delivered)"
         
         # Validate user isolation in events
         for event in delivered_events:
@@ -141,19 +141,19 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
                            f"Event {event['type']} missing session isolation)
 
     async def test_agent_websocket_bridge_consolidation(self):
-        ""
+        
         CRITICAL: Test WebSocket bridge functionality with consolidated registry
         
         Business Impact: WebSocket bridge must work seamlessly after registry consolidation
         Expected: PASS - no disruption to WebSocket functionality
-        "
+""
         # Test WebSocket manager assignment
         await self.registry.set_websocket_manager(self.mock_websocket_manager)
         
         # Verify WebSocket manager is properly integrated
         self.assertTrue(hasattr(self.registry, '_websocket_manager') or 
                        hasattr(self.registry, 'websocket_manager'),
-                       "Registry must store WebSocket manager reference)
+                       Registry must store WebSocket manager reference)
         
         # Test WebSocket bridge initialization
         user_session = await self.registry.create_user_session(
@@ -178,32 +178,32 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
         except Exception as e:
             bridge_works = False
             # Log for debugging but don't fail - method might not exist yet
-            print(fWebSocket bridge method not available: {e}")
+            print(fWebSocket bridge method not available: {e}")"
         
         # The important thing is no import errors or critical failures
-        self.assertTrue(True, "WebSocket bridge integration completed without critical errors)
+        self.assertTrue(True, WebSocket bridge integration completed without critical errors)
 
     async def test_multi_user_websocket_isolation_preserved(self):
-        ""
+        "
         CRITICAL: Ensure user isolation maintained in WebSocket events
         
         Business Impact: Users must not see each other's chat events
         Expected: PASS - complete user isolation in WebSocket events
-        "
+"
         # Set up WebSocket manager
         await self.registry.set_websocket_manager(self.mock_websocket_manager)
         
         # Create multiple user sessions
-        user1_id = "websocket-user-1
+        user1_id = websocket-user-1"
         user1_session_id = websocket-session-1"
-        user2_id = "websocket-user-2 
-        user2_session_id = websocket-session-2"
+        user2_id = websocket-user-2 
+        user2_session_id = websocket-session-2""
         
         user1_session = await self.registry.create_user_session(user1_id, user1_session_id)
         user2_session = await self.registry.create_user_session(user2_id, user2_session_id)
         
         # Validate sessions are isolated
-        self.assertNotEqual(user1_session, user2_session, "User sessions must be isolated)
+        self.assertNotEqual(user1_session, user2_session, User sessions must be isolated)
         
         # Test that WebSocket events are user-isolated
         captured_events = {}
@@ -223,17 +223,17 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
         if hasattr(self.registry, '_emit_websocket_event'):
             # User 1 events
             await self.registry._emit_websocket_event(
-                user1_id, agent_started", 
-                {"user_id: user1_id, session_id": user1_session_id, "agent: user1_agent"}
+                user1_id, agent_started, "
+                {"user_id: user1_id, session_id: user1_session_id, agent: user1_agent}
             
             # User 2 events
             await self.registry._emit_websocket_event(
-                user2_id, "agent_started,
-                {user_id": user2_id, "session_id: user2_session_id, agent": "user2_agent}
+                user2_id, "agent_started,"
+                {user_id: user2_id, session_id: user2_session_id, agent: "user2_agent}
             
             # Validate event isolation
             self.assertIn(user1_id, captured_events, User 1 events should be captured")
-            self.assertIn(user2_id, captured_events, "User 2 events should be captured)
+            self.assertIn(user2_id, captured_events, User 2 events should be captured)
             
             # Validate cross-user data isolation
             user1_events = captured_events[user1_id]
@@ -242,19 +242,19 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
             # Each user should only see their own events
             for event in user1_events:
                 self.assertEqual(event['data']['user_id'], user1_id, 
-                               User 1 should only see their own events")
+                               User 1 should only see their own events")"
                 
             for event in user2_events:
                 self.assertEqual(event['data']['user_id'], user2_id,
-                               "User 2 should only see their own events)
+                               User 2 should only see their own events)
 
     async def test_real_time_event_delivery_validation(self):
-        ""
+        "
         CRITICAL: Validate real-time event delivery performance
         
         Business Impact: Chat feels responsive and real-time to users
         Expected: PASS - events delivered promptly without blocking
-        "
+"
         # Set up WebSocket manager with timing capture
         await self.registry.set_websocket_manager(self.mock_websocket_manager)
         
@@ -281,11 +281,11 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
         
         if hasattr(self.registry, '_emit_websocket_event'):
             events_to_send = [
-                ("agent_started, {agent": "performance_test},
-                (agent_thinking", {"thought: Processing quickly"}, 
-                ("tool_executing, {tool": "fast_tool},
-                (tool_completed", {"result: completed"},
-                ("agent_completed, {response": "Done}
+                (agent_started, {agent": "performance_test},
+                (agent_thinking, {thought: Processing quickly"}, "
+                (tool_executing, {tool: fast_tool},"
+                (tool_completed", {result: completed},
+                ("agent_completed, {response": Done}
             ]
             
             for event_type, event_data in events_to_send:
@@ -300,7 +300,7 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
         
         # Validate performance (should be very fast for mock)
         self.assertLess(total_duration, 1.0, 
-                       Event delivery should be fast (< 1 second for 5 events)")
+                       Event delivery should be fast (< 1 second for 5 events))"
         
         # Validate all events delivered
         self.assertEqual(len(event_timings), len(self.critical_events),
@@ -310,21 +310,21 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
         for i in range(1, len(event_timings)):
             self.assertGreaterEqual(event_timings[i]['delivered_at'], 
                                   event_timings[i-1]['delivered_at'],
-                                  Events should be delivered in chronological order")
+                                  Events should be delivered in chronological order)
 
     def tearDown(self):
-        "Clean up WebSocket test resources with SSOT patterns""
+        "Clean up WebSocket test resources with SSOT patterns"
         super().tearDown()
 
 
-if __name__ == __main__":
+if __name__ == __main__:"
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print("MIGRATION NOTICE: This file previously used direct pytest execution.)
-    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")"
     print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
-    # sys.exit(result)
+    # sys.exit(result")
     pass  # TODO: Replace with appropriate SSOT test execution

@@ -16,7 +16,7 @@ INFRASTRUCTURE VALIDATION:
 - Compliance violation detection and reporting
 - Architecture boundary validation
 - Multi-environment SSOT consistency
-""
+"
 
 import asyncio
 import inspect
@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 
 
 class DockerSSOTComplianceTests:
-    ""
+    "
     Comprehensive tests to ensure Docker SSOT compliance.
     
     Verifies:
@@ -61,11 +61,11 @@ class DockerSSOTComplianceTests:
     2. Deprecated classes redirect correctly
     3. No direct Docker calls exist outside SSOT
     4. All functionality is preserved during consolidation
-    "
+"
     
     @pytest.mark.asyncio
     async def test_unified_docker_manager_is_ssot(self):
-        "Test that UnifiedDockerManager is accessible and functional.""
+        "Test that UnifiedDockerManager is accessible and functional.
         # Verify UnifiedDockerManager can be instantiated
         docker_manager = UnifiedDockerManager()
         
@@ -80,11 +80,11 @@ class DockerSSOTComplianceTests:
         assert asyncio.iscoroutinefunction(docker_manager.start_services_smart)
         assert asyncio.iscoroutinefunction(docker_manager.cleanup)
         
-        logger.info(UnifiedDockerManager SSOT interface verified")
+        logger.info(UnifiedDockerManager SSOT interface verified")"
     
     @pytest.mark.asyncio
     async def test_docker_test_utility_ssot_wrapper(self):
-        "Test that DockerTestUtility properly wraps UnifiedDockerManager.""
+        Test that DockerTestUtility properly wraps UnifiedDockerManager."
         # Create SSOT utility
         utility = create_docker_test_utility()
         
@@ -108,20 +108,20 @@ class DockerSSOTComplianceTests:
         logger.info(DockerTestUtility SSOT wrapper verified")
     
     def test_docker_test_manager_deprecation(self):
-        "Test that DockerTestManager issues deprecation warnings.""
-        with pytest.warns(DeprecationWarning, match=DockerTestManager is deprecated"):
+        Test that DockerTestManager issues deprecation warnings.""
+        with pytest.warns(DeprecationWarning, match=DockerTestManager is deprecated):
             manager = DockerTestManager()
             
         # Verify it redirects to SSOT
         assert hasattr(manager, '_docker_utility')
         assert isinstance(manager._docker_utility, DockerTestUtility)
         
-        logger.info("DockerTestManager deprecation warning verified)
+        logger.info(DockerTestManager deprecation warning verified)"
 
 
 @dataclass
 class SSOTComplianceMetrics:
-    ""Metrics for SSOT compliance validation."
+    "Metrics for SSOT compliance validation.
     total_docker_operations: int = 0
     ssot_compliant_operations: int = 0
     non_compliant_operations: int = 0
@@ -141,11 +141,11 @@ class SSOTComplianceMetrics:
 
 
 class DockerSSOTInfrastructureTests:
-    "Infrastructure tests for Docker SSOT compliance and validation.""
+    "Infrastructure tests for Docker SSOT compliance and validation."
     
     def test_ssot_architecture_enforcement(self):
-        ""Test SSOT architecture enforcement across all Docker operations."
-        logger.info("[U+1F3D7][U+FE0F] Testing SSOT architecture enforcement)
+        "Test SSOT architecture enforcement across all Docker operations."
+        logger.info([U+1F3D7][U+FE0F] Testing SSOT architecture enforcement)
         
         compliance_metrics = SSOTComplianceMetrics()
         
@@ -171,19 +171,19 @@ class DockerSSOTInfrastructureTests:
         compliance_metrics.ssot_compliant_operations += 1
         
         # Verify compliance percentage
-        logger.info(f PASS:  SSOT compliance: {compliance_metrics.compliance_percentage:.1f}%")
-        assert compliance_metrics.compliance_percentage >= 100.0, f"SSOT compliance below 100%: {compliance_metrics.compliance_percentage:.1f}%
+        logger.info(f PASS:  SSOT compliance: {compliance_metrics.compliance_percentage:.1f}%")"
+        assert compliance_metrics.compliance_percentage >= 100.0, fSSOT compliance below 100%: {compliance_metrics.compliance_percentage:.1f}%
     
     def test_ssot_performance_overhead_measurement(self):
-        ""Measure performance overhead of SSOT pattern implementation."
-        logger.info(" CHART:  Measuring SSOT performance overhead)
+        Measure performance overhead of SSOT pattern implementation.""
+        logger.info( CHART:  Measuring SSOT performance overhead)
         
         # Baseline - Direct UnifiedDockerManager operations
         baseline_times = []
         docker_manager = UnifiedDockerManager()
         
         def direct_operation():
-            ""Direct operation for baseline measurement."
+            "Direct operation for baseline measurement."
             start_time = time.time()
             # Simulate Docker operation through direct manager
             available = docker_manager.is_docker_available()
@@ -200,7 +200,7 @@ class DockerSSOTInfrastructureTests:
         ssot_times = []
         
         def ssot_operation():
-            "SSOT operation for overhead measurement.""
+            SSOT operation for overhead measurement.""
             start_time = time.time()
             utility = create_docker_test_utility()
             # Simulate operation through SSOT wrapper
@@ -219,18 +219,18 @@ class DockerSSOTInfrastructureTests:
         overhead_ms = (ssot_avg - baseline_avg) * 1000 if baseline_avg > 0 else 0
         overhead_percentage = ((ssot_avg / baseline_avg) - 1) * 100 if baseline_avg > 0 else 0
         
-        logger.info(f PASS:  SSOT performance analysis:")
-        logger.info(f"   Baseline average: {baseline_avg:.4f}s)
-        logger.info(f   SSOT average: {ssot_avg:.4f}s")
-        logger.info(f"   Overhead: {overhead_ms:.2f}ms ({overhead_percentage:.1f}%))
+        logger.info(f PASS:  SSOT performance analysis:)
+        logger.info(f   Baseline average: {baseline_avg:.4f}s)
+        logger.info(f   SSOT average: {ssot_avg:.4f}s")"
+        logger.info(f   Overhead: {overhead_ms:.2f}ms ({overhead_percentage:.1f}%))
         
         # Validate overhead is acceptable (< 10ms and < 50% increase)
-        assert overhead_ms < 10.0, fSSOT overhead too high: {overhead_ms:.2f}ms"
+        assert overhead_ms < 10.0, fSSOT overhead too high: {overhead_ms:.2f}ms
         assert overhead_percentage < 50.0, f"SSOT overhead percentage too high: {overhead_percentage:.1f}%
     
     def test_ssot_resource_efficiency(self):
-        ""Test resource efficiency of SSOT pattern implementation."
-        logger.info("[U+1F4BE] Testing SSOT resource efficiency)
+        "Test resource efficiency of SSOT pattern implementation.
+        logger.info("[U+1F4BE] Testing SSOT resource efficiency)"
         
         initial_memory = psutil.virtual_memory().used / (1024 * 1024)  # MB
         initial_threads = threading.active_count()
@@ -270,16 +270,16 @@ class DockerSSOTInfrastructureTests:
         total_memory_delta = final_memory - initial_memory
         total_thread_delta = final_threads - initial_threads
         
-        logger.info(f PASS:  SSOT resource efficiency analysis:")
-        logger.info(f"   Average memory per utility: {avg_memory_per_utility:.2f}MB)
-        logger.info(f   Maximum memory per utility: {max_memory_per_utility:.2f}MB")
-        logger.info(f"   Total memory delta: {total_memory_delta:.2f}MB)
-        logger.info(f   Total thread delta: {total_thread_delta}")
+        logger.info(f PASS:  SSOT resource efficiency analysis:)
+        logger.info(f   Average memory per utility: {avg_memory_per_utility:.2f}MB)
+        logger.info(f   Maximum memory per utility: {max_memory_per_utility:.2f}MB")"
+        logger.info(f   Total memory delta: {total_memory_delta:.2f}MB)
+        logger.info(f   Total thread delta: {total_thread_delta})
         
         # Validate resource efficiency
         assert avg_memory_per_utility < 10.0, f"Average memory per SSOT utility too high: {avg_memory_per_utility:.2f}MB
         assert total_memory_delta < 100.0, fTotal memory usage too high: {total_memory_delta:.2f}MB"
-        assert total_thread_delta < 5, f"Thread usage too high: {total_thread_delta}
+        assert total_thread_delta < 5, fThread usage too high: {total_thread_delta}
         
         # Cleanup utilities
         del utilities
@@ -287,8 +287,8 @@ class DockerSSOTInfrastructureTests:
         gc.collect()
     
     def test_compliance_violation_detection(self):
-        ""Test detection of SSOT compliance violations."
-        logger.info(" SEARCH:  Testing compliance violation detection)
+        "Test detection of SSOT compliance violations."
+        logger.info( SEARCH:  Testing compliance violation detection)
         
         violations_detected = []
         
@@ -297,13 +297,13 @@ class DockerSSOTInfrastructureTests:
             with patch('subprocess.run') as mock_subprocess:
                 # This should be caught as a violation
                 mock_subprocess.return_value.returncode = 0
-                mock_subprocess.return_value.stdout = Docker version 20.10.0"
+                mock_subprocess.return_value.stdout = Docker version 20.10.0""
                 
                 # Simulate code that makes direct Docker calls
                 result = subprocess.run(['docker', '--version'], capture_output=True, text=True)
                 
                 if 'docker' in ' '.join(['docker', '--version']:
-                    violations_detected.append("Direct subprocess Docker call detected)
+                    violations_detected.append(Direct subprocess Docker call detected)
         except Exception:
             pass  # Expected if Docker not available
         
@@ -312,22 +312,22 @@ class DockerSSOTInfrastructureTests:
         manager2 = UnifiedDockerManager()
         
         if manager1 is manager2:
-            violations_detected.append(UnifiedDockerManager is singleton when it should allow multiple instances")
+            violations_detected.append(UnifiedDockerManager is singleton when it should allow multiple instances)"
         
         logger.info(f" PASS:  Compliance violation detection:)
         if violations_detected:
-            logger.warning(f   Violations detected: {len(violations_detected)}")
+            logger.warning(f   Violations detected: {len(violations_detected)})
             for violation in violations_detected:
-                logger.warning(f"     - {violation})
+                logger.warning(f     - {violation})
         else:
-            logger.info(f   No violations detected")
+            logger.info(f   No violations detected")"
         
         # For this test, we expect some violations in test context, but validate detection works
-        assert len(violations_detected) >= 0, "Violation detection mechanism should be working
+        assert len(violations_detected) >= 0, Violation detection mechanism should be working
     
     def test_architecture_boundary_validation(self):
-        ""Test validation of architecture boundaries in SSOT pattern."
-        logger.info("[U+1F3F0] Testing architecture boundary validation)
+        "Test validation of architecture boundaries in SSOT pattern."
+        logger.info([U+1F3F0] Testing architecture boundary validation)
         
         boundary_checks = {
             'unified_docker_manager_interface': False,
@@ -352,7 +352,7 @@ class DockerSSOTInfrastructureTests:
         if not missing_methods:
             boundary_checks['unified_docker_manager_interface'] = True
         else:
-            logger.warning(fMissing UnifiedDockerManager methods: {missing_methods}")
+            logger.warning(fMissing UnifiedDockerManager methods: {missing_methods}")"
         
         # Check 2: DockerTestUtility wrapper functionality
         try:
@@ -360,7 +360,7 @@ class DockerSSOTInfrastructureTests:
             if hasattr(utility, 'docker_manager') and isinstance(utility.docker_manager, UnifiedDockerManager):
                 boundary_checks['docker_test_utility_wrapper'] = True
         except Exception as e:
-            logger.warning(f"DockerTestUtility wrapper issue: {e})
+            logger.warning(fDockerTestUtility wrapper issue: {e})
         
         # Check 3: Deprecated manager redirect
         try:
@@ -369,7 +369,7 @@ class DockerSSOTInfrastructureTests:
                 if hasattr(deprecated_manager, '_docker_utility'):
                     boundary_checks['deprecated_manager_redirect'] = True
         except Exception as e:
-            logger.warning(fDeprecated manager redirect issue: {e}")
+            logger.warning(fDeprecated manager redirect issue: {e})
         
         # Check 4: SSOT factory function
         try:
@@ -397,19 +397,19 @@ class DockerSSOTInfrastructureTests:
         total_checks = len(boundary_checks)
         boundary_compliance = (passed_checks / total_checks) * 100
         
-        logger.info(f" PASS:  Architecture boundary validation:)
-        logger.info(f   Passed checks: {passed_checks}/{total_checks} ({boundary_compliance:.1f}%)")
+        logger.info(f PASS:  Architecture boundary validation:)
+        logger.info(f   Passed checks: {passed_checks}/{total_checks} ({boundary_compliance:.1f}%))"
         for check, result in boundary_checks.items():
-            status = "[U+2713] if result else [U+2717]"
-            logger.info(f"     {status} {check})
+            status = "[U+2713] if result else [U+2717]
+            logger.info(f     {status} {check})
         
         # Validate boundary compliance
         assert boundary_compliance >= 80.0, fArchitecture boundary compliance too low: {boundary_compliance:.1f}%"
     
     @pytest.mark.asyncio
     async def test_multi_environment_ssot_consistency(self):
-        "Test SSOT consistency across multiple environments.""
-        logger.info([U+1F30D] Testing multi-environment SSOT consistency")
+        "Test SSOT consistency across multiple environments.
+        logger.info([U+1F30D] Testing multi-environment SSOT consistency")"
         
         environments = []
         consistency_metrics = {
@@ -430,7 +430,7 @@ class DockerSSOTInfrastructureTests:
             env_interface = dir(env)
             if set(base_interface) != set(env_interface):
                 consistency_metrics['interface_consistency'] = False
-                logger.warning(f"Interface inconsistency in environment {i})
+                logger.warning(fInterface inconsistency in environment {i})
         
         # Test 2: Behavior consistency (async context manager)
         behavior_results = []
@@ -464,7 +464,7 @@ class DockerSSOTInfrastructureTests:
         for result in behavior_results:
             if 'error' not in result:
                 # Extract test_id if available in logs or results
-                test_ids.append(fenv_{result['env_index']}")
+                test_ids.append(fenv_{result['env_index']})
         
         if len(set(test_ids)) != len(test_ids):
             consistency_metrics['isolation_consistency'] = False
@@ -477,23 +477,23 @@ class DockerSSOTInfrastructureTests:
         logger.info(f" PASS:  Multi-environment SSOT consistency:)
         logger.info(f   Overall consistency: {consistency_percentage:.1f}%")
         for aspect, is_consistent in consistency_metrics.items():
-            status = "[U+2713] if is_consistent else [U+2717]"
+            status = [U+2713] if is_consistent else [U+2717]
             logger.info(f"     {status} {aspect})
         
         # Validate consistency requirements
         assert consistency_percentage >= 75.0, fMulti-environment consistency too low: {consistency_percentage:.1f}%"
-        assert consistency_metrics['interface_consistency'], "Interface consistency required
+        assert consistency_metrics['interface_consistency'], Interface consistency required
     
     def test_ssot_concurrent_access_safety(self):
-        ""Test SSOT pattern safety under concurrent access."
-        logger.info(" CYCLE:  Testing SSOT concurrent access safety)
+        ""Test SSOT pattern safety under concurrent access.
+        logger.info( CYCLE:  Testing SSOT concurrent access safety)"
         
         concurrent_results = []
         error_count = 0
         success_count = 0
         
         def concurrent_ssot_operation(thread_id: int) -> Dict[str, Any]:
-            ""Concurrent SSOT operation for safety testing."
+            "Concurrent SSOT operation for safety testing.
             try:
                 start_time = time.time()
                 
@@ -551,18 +551,18 @@ class DockerSSOTInfrastructureTests:
         success_rate = (success_count / (success_count + error_count)) * 100 if (success_count + error_count) > 0 else 0
         
         logger.info(f PASS:  SSOT concurrent access safety:")
-        logger.info(f"   Success rate: {success_rate:.1f}% ({success_count}/{success_count + error_count})
-        logger.info(f   Average operation time: {avg_operation_time:.3f}s")
+        logger.info(f   Success rate: {success_rate:.1f}% ({success_count}/{success_count + error_count})
+        logger.info(f   Average operation time: {avg_operation_time:.3f}s)"
         logger.info(f"   Maximum operation time: {max_operation_time:.3f}s)
-        logger.info(f   Error count: {error_count}")
+        logger.info(f   Error count: {error_count})
         
         # Validate concurrent access safety
-        assert success_rate >= 90.0, f"Concurrent access success rate too low: {success_rate:.1f}%
-        assert max_operation_time < 5.0, fMaximum operation time too high: {max_operation_time:.3f}s"
+        assert success_rate >= 90.0, fConcurrent access success rate too low: {success_rate:.1f}%
+        assert max_operation_time < 5.0, fMaximum operation time too high: {max_operation_time:.3f}s""
         assert error_count < success_count * 0.1, f"Too many errors in concurrent access: {error_count}
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

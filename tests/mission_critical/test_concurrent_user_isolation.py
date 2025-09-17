@@ -51,7 +51,7 @@ from test_framework.test_context import TestContext, create_isolated_test_contex
 
 @dataclass
 class ConcurrentUserContext:
-    ""Real user context for concurrent isolation testing."
+    Real user context for concurrent isolation testing."
     user_id: str
     email: str
     role: str = "user
@@ -63,15 +63,15 @@ class ConcurrentUserContext:
     end_time: Optional[float] = None
 
 
-@pytest.fixture(scope=function")
+@pytest.fixture(scope=function)
 def isolated_env():
-    "Isolated environment for concurrent testing.""
+    "Isolated environment for concurrent testing."
     return IsolatedEnvironment()
 
 
-@pytest.fixture(scope=function")
+@pytest.fixture(scope=function)"
 async def redis_client(isolated_env):
-    "Real Redis client for concurrent testing.""
+    "Real Redis client for concurrent testing.
     redis_url = isolated_env.get('REDIS_URL', 'redis://localhost:6381')
     client = redis.from_url(redis_url, decode_responses=True)
     
@@ -85,9 +85,9 @@ async def redis_client(isolated_env):
     await client.close()
 
 
-@pytest.fixture(scope=function")
+@pytest.fixture(scope=function")"
 async def database_engine(isolated_env):
-    "Real database engine for concurrent testing.""
+    Real database engine for concurrent testing."
     database_url = isolated_env.get('DATABASE_URL', 'postgresql+asyncpg://netra:netra@localhost:5434/netra_test')
     engine = create_async_engine(database_url, echo=False, pool_size=20, max_overflow=30)
     
@@ -98,7 +98,7 @@ async def database_engine(isolated_env):
 
 @pytest.fixture(scope=function")
 async def backend_client(isolated_env):
-    "Real backend client for concurrent testing.""
+    Real backend client for concurrent testing.""
     backend_url = isolated_env.get('BACKEND_URL', 'http://localhost:8000')
     client = BackendTestClient(backend_url)
     
@@ -106,9 +106,9 @@ async def backend_client(isolated_env):
     try:
         health_ok = await client.health_check()
         if not health_ok:
-            pytest.skip(Backend service not available for concurrent testing")
+            pytest.skip(Backend service not available for concurrent testing)
     except Exception:
-        pytest.skip("Backend service not available for concurrent testing)
+        pytest.skip(Backend service not available for concurrent testing)"
     
     yield client
     
@@ -116,7 +116,7 @@ async def backend_client(isolated_env):
 
 
 class ConcurrentTestMetrics:
-    ""Thread-safe metrics collection for concurrent tests."
+    "Thread-safe metrics collection for concurrent tests.
     
     def __init__(self):
         self._lock = Lock()
@@ -134,7 +134,7 @@ class ConcurrentTestMetrics:
     
     def record_operation(self, user_id: str, operation_type: str, success: bool, 
                         duration: float, violation_type: str = None):
-        "Record an operation result in thread-safe manner.""
+        "Record an operation result in thread-safe manner."
         with self._lock:
             self._metrics['total_operations'] += 1
             
@@ -170,7 +170,7 @@ class ConcurrentTestMetrics:
                 user_ctx['violations'] += 1
     
     def get_metrics(self) -> Dict[str, Any]:
-        ""Get thread-safe copy of metrics."
+        "Get thread-safe copy of metrics."
         with self._lock:
             return dict(self._metrics)
 
@@ -182,16 +182,16 @@ class RealConcurrentUserIsolationTests:
     
     Tests 15+ concurrent users across all services to ensure spacecraft-grade isolation.
     Zero tolerance for data leakage or user context contamination.
-    ""
+    "
 
     @pytest.mark.asyncio
     async def test_massive_concurrent_redis_isolation(self, redis_client):
-        ""
+        
         CRITICAL: 20+ concurrent users performing Redis operations simultaneously.
         
         Tests Redis isolation under extreme concurrent load to ensure
         no user data contamination occurs even under stress.
-        "
+""
         # Create 25 concurrent users for extreme stress testing
         users = [
             ConcurrentUserContext(
@@ -205,12 +205,12 @@ class RealConcurrentUserIsolationTests:
         metrics = ConcurrentTestMetrics()
         
         async def extreme_concurrent_redis_operation(user: ConcurrentUserContext) -> Dict[str, Any]:
-            "Perform intensive Redis operations for concurrent testing.""
+            Perform intensive Redis operations for concurrent testing.""
             user.start_time = time.time()
             
             try:
                 # Phase 1: Store highly sensitive user data
-                session_key = fconcurrent_session:{user.user_id}:{uuid.uuid4().hex}"
+                session_key = fconcurrent_session:{user.user_id}:{uuid.uuid4().hex}
                 
                 # Create large, complex data structure to increase memory pressure
                 sensitive_payload = {
@@ -219,14 +219,14 @@ class RealConcurrentUserIsolationTests:
                     'role': user.role,
                     'session_data': {
                         'conversations': [
-                            f"CONFIDENTIAL CONVERSATION {i} FOR {user.user_id}: {uuid.uuid4().hex}
+                            fCONFIDENTIAL CONVERSATION {i} FOR {user.user_id}: {uuid.uuid4().hex}
                             for i in range(100)  # Large dataset
                         ],
                         'agent_memories': {
                             f'agent_{j}': {
-                                'private_context': fPRIVATE CONTEXT {j} FOR {user.user_id}",
-                                'user_preferences': f"PREFERENCES {j} FOR {user.user_id},
-                                'secret_data': fSECRET-{uuid.uuid4().hex}"
+                                'private_context': fPRIVATE CONTEXT {j} FOR {user.user_id}","
+                                'user_preferences': fPREFERENCES {j} FOR {user.user_id},
+                                'secret_data': fSECRET-{uuid.uuid4().hex}
                             }
                             for j in range(10)
                         },
@@ -252,7 +252,7 @@ class RealConcurrentUserIsolationTests:
                     op_data = {
                         'user_id': user.user_id,
                         'operation_index': op_idx,
-                        'sensitive_operation': f"OPERATION-{user.user_id}-{op_idx}-{uuid.uuid4().hex},
+                        'sensitive_operation': fOPERATION-{user.user_id}-{op_idx}-{uuid.uuid4().hex},
                         'timestamp': time.time()
                     }
                     
@@ -284,7 +284,7 @@ class RealConcurrentUserIsolationTests:
                 for other_user in users:
                     if other_user.user_id != user.user_id:
                         # Try to access other user's session (should fail or return different user data)
-                        other_session_pattern = fconcurrent_session:{other_user.user_id}:*"
+                        other_session_pattern = fconcurrent_session:{other_user.user_id}:*
                         other_keys = await redis_client.keys(other_session_pattern)
                         
                         for other_key in other_keys:
@@ -323,7 +323,7 @@ class RealConcurrentUserIsolationTests:
                 for op_key in operation_keys:
                     await redis_client.delete(op_key)
                 for stress_round in range(5):
-                    stress_key = f"stress_test:{user.user_id}:{stress_round}
+                    stress_key = fstress_test:{user.user_id}:{stress_round}
                     await redis_client.delete(stress_key)
                 
                 return {
@@ -375,21 +375,21 @@ class RealConcurrentUserIsolationTests:
         avg_operation_time = total_duration / len(users)
         
         # Assert no violations occurred
-        assert len(violations) == 0, fCONCURRENT REDIS ISOLATION VIOLATIONS: {violations}"
-        assert success_rate >= 95.0, f"Success rate too low: {success_rate}% (expected >= 95%)
-        assert avg_operation_time < 5.0, fAverage operation time too high: {avg_operation_time}s (expected < 5s)"
+        assert len(violations) == 0, fCONCURRENT REDIS ISOLATION VIOLATIONS: {violations}""
+        assert success_rate >= 95.0, fSuccess rate too low: {success_rate}% (expected >= 95%)
+        assert avg_operation_time < 5.0, fAverage operation time too high: {avg_operation_time}s (expected < 5s)
         
         # Log performance metrics for monitoring
         logging.info(f"Concurrent Redis Test Metrics: {final_metrics})
 
     @pytest.mark.asyncio
     async def test_database_concurrent_session_isolation(self, database_engine):
-        ""
+        "
         CRITICAL: Database session isolation with 15+ concurrent database transactions.
         
         Tests PostgreSQL isolation under concurrent load with complex transactions
         to ensure ACID properties are maintained and no data leakage occurs.
-        "
+"
         # Create async session maker with connection pooling
         async_session = async_sessionmaker(database_engine, expire_on_commit=False)
         
@@ -416,7 +416,7 @@ class RealConcurrentUserIsolationTests:
                     created_at TIMESTAMP DEFAULT NOW(),
                     updated_at TIMESTAMP DEFAULT NOW()
                 )
-            ""))
+            ))
             
             await conn.execute(sa.text(""
                 CREATE TABLE IF NOT EXISTS concurrent_transactions (
@@ -427,18 +427,18 @@ class RealConcurrentUserIsolationTests:
                     transaction_data JSONB NOT NULL,
                     created_at TIMESTAMP DEFAULT NOW()
                 )
-            "))
+            ))
             
             # Clean up any existing test data
-            await conn.execute(sa.text("DELETE FROM concurrent_user_data))
+            await conn.execute(sa.text(DELETE FROM concurrent_user_data))"
             await conn.execute(sa.text(DELETE FROM concurrent_transactions"))
         
         metrics = ConcurrentTestMetrics()
         
         async def concurrent_database_operation(user: ConcurrentUserContext) -> Dict[str, Any]:
-            "Perform complex database operations with full isolation testing.""
+            Perform complex database operations with full isolation testing.""
             user.start_time = time.time()
-            session_id = fdb_session_{uuid.uuid4().hex}"
+            session_id = fdb_session_{uuid.uuid4().hex}
             
             try:
                 # Phase 1: Insert user data with complex transaction
@@ -451,10 +451,10 @@ class RealConcurrentUserIsolationTests:
                         'user_id': user.user_id,
                         'email': user.email,
                         'role': user.role,
-                        'confidential_info': f"CLASSIFIED-{user.user_id}-{uuid.uuid4().hex},
+                        'confidential_info': fCLASSIFIED-{user.user_id}-{uuid.uuid4().hex},
                         'user_secrets': {
-                            'api_keys': [fAPI-KEY-{i}-{uuid.uuid4().hex}" for i in range(5)],
-                            'private_data': f"PRIVATE-DATA-{user.user_id},
+                            'api_keys': [fAPI-KEY-{i}-{uuid.uuid4().hex}" for i in range(5)],"
+                            'private_data': fPRIVATE-DATA-{user.user_id},
                             'security_clearance': 'TOP_SECRET' if user.role == 'admin' else 'CONFIDENTIAL'
                         },
                         'session_context': {
@@ -464,11 +464,11 @@ class RealConcurrentUserIsolationTests:
                         }
                     }
                     
-                    result = await session.execute(sa.text(""
+                    result = await session.execute(sa.text(
                         INSERT INTO concurrent_user_data (user_id, session_id, sensitive_data, balance)
                         VALUES (:user_id, :session_id, :sensitive_data, :balance)
                         RETURNING id
-                    "), {
+                    "), {"
                         'user_id': user.user_id,
                         'session_id': session_id,
                         'sensitive_data': json.dumps(sensitive_data),
@@ -482,10 +482,10 @@ class RealConcurrentUserIsolationTests:
                 for transaction_idx in range(10):  # Multiple transactions per user
                     async with async_session() as session:
                         # Use SELECT FOR UPDATE to test row-level locking
-                        result = await session.execute(sa.text("
+                        result = await session.execute(sa.text(
                             SELECT id, balance, operation_count FROM concurrent_user_data 
                             WHERE user_id = :user_id FOR UPDATE
-                        ""), {'user_id': user.user_id}
+                        "), {'user_id': user.user_id}
                         
                         user_row = result.fetchone()
                         if not user_row:
@@ -506,10 +506,10 @@ class RealConcurrentUserIsolationTests:
                         new_operation_count = operation_count + 1
                         
                         # Record transaction
-                        await session.execute(sa.text(""
+                        await session.execute(sa.text("
                             INSERT INTO concurrent_transactions (user_id, transaction_type, amount, transaction_data)
                             VALUES (:user_id, :transaction_type, :amount, :transaction_data)
-                        "), {
+                        ), {
                             'user_id': user.user_id,
                             'transaction_type': f'concurrent_operation_{transaction_idx}',
                             'amount': transaction_idx * 10,
@@ -522,11 +522,11 @@ class RealConcurrentUserIsolationTests:
                         }
                         
                         # Update user record
-                        await session.execute(sa.text("
+                        await session.execute(sa.text(""
                             UPDATE concurrent_user_data 
                             SET balance = :new_balance, operation_count = :new_operation_count, updated_at = NOW()
                             WHERE user_id = :user_id
-                        ""), {
+                        ), {
                             'user_id': user.user_id,
                             'new_balance': new_balance,
                             'new_operation_count': new_operation_count
@@ -537,7 +537,7 @@ class RealConcurrentUserIsolationTests:
                 # Phase 3: Cross-user isolation verification
                 async with async_session() as session:
                     # Verify user can only access their own data
-                    user_data_result = await session.execute(sa.text(""
+                    user_data_result = await session.execute(sa.text("
                         SELECT user_id, sensitive_data, balance, operation_count FROM concurrent_user_data 
                         WHERE user_id = :user_id
                     "), {'user_id': user.user_id}
@@ -564,7 +564,7 @@ class RealConcurrentUserIsolationTests:
                         }
                     
                     # Check for data contamination from other users
-                    all_data_result = await session.execute(sa.text("
+                    all_data_result = await session.execute(sa.text(
                         SELECT user_id, sensitive_data FROM concurrent_user_data
                     ""))
                     
@@ -628,25 +628,25 @@ class RealConcurrentUserIsolationTests:
         
         # Cleanup test tables
         async with database_engine.begin() as conn:
-            await conn.execute(sa.text(DROP TABLE IF EXISTS concurrent_user_data"))
-            await conn.execute(sa.text("DROP TABLE IF EXISTS concurrent_transactions))
+            await conn.execute(sa.text(DROP TABLE IF EXISTS concurrent_user_data))
+            await conn.execute(sa.text(DROP TABLE IF EXISTS concurrent_transactions))"
         
         # Performance and isolation assertions
         success_rate = (successful_operations / len(users)) * 100
         avg_operation_time = total_duration / len(users)
         
         assert len(violations) == 0, fDATABASE CONCURRENT ISOLATION VIOLATIONS: {violations}"
-        assert success_rate >= 95.0, f"Database success rate too low: {success_rate}% (expected >= 95%)
+        assert success_rate >= 95.0, fDatabase success rate too low: {success_rate}% (expected >= 95%)
         assert avg_operation_time < 10.0, fDatabase operation time too high: {avg_operation_time}s (expected < 10s)"
 
     @pytest.mark.asyncio
     async def test_websocket_concurrent_message_isolation(self, backend_client):
-        "
+    "
         CRITICAL: WebSocket message isolation with 12+ concurrent connections.
         
         Tests that WebSocket connections maintain complete isolation
         even under high concurrent message load.
-        ""
+        "
         # Create 15 concurrent test contexts for WebSocket testing
         contexts = create_isolated_test_contexts(count=15)
         
@@ -660,18 +660,18 @@ class RealConcurrentUserIsolationTests:
                 
                 try:
                     # Try to establish WebSocket connection
-                    await context.setup_websocket_connection("/ws/chat, auth_required=False)
+                    await context.setup_websocket_connection(/ws/chat, auth_required=False)
                     connected_contexts.append(context)
                 except ConnectionError:
                     # If WebSocket connections aren't available, test isolation logic only
-                    logging.warning(fWebSocket connection failed for user {context.user_context.user_id}")
+                    logging.warning(fWebSocket connection failed for user {context.user_context.user_id}")"
                     continue
             
             if len(connected_contexts) < 3:
-                pytest.skip("Not enough WebSocket connections available for concurrent testing)
+                pytest.skip(Not enough WebSocket connections available for concurrent testing)
             
             async def concurrent_websocket_operation(context: TestContext) -> Dict[str, Any]:
-                ""Perform concurrent WebSocket operations with isolation testing."
+                "Perform concurrent WebSocket operations with isolation testing."
                 user_id = context.user_context.user_id
                 start_time = time.time()
                 
@@ -785,7 +785,7 @@ class RealConcurrentUserIsolationTests:
             success_rate = (successful_operations / len(connected_contexts)) * 100 if connected_contexts else 100
             avg_operation_time = total_duration / len(connected_contexts) if connected_contexts else 0
             
-            assert len(violations) == 0, f"WEBSOCKET CONCURRENT ISOLATION VIOLATIONS: {violations}
+            assert len(violations) == 0, fWEBSOCKET CONCURRENT ISOLATION VIOLATIONS: {violations}
             assert success_rate >= 90.0, fWebSocket success rate too low: {success_rate}% (expected >= 90%)"
             
         finally:
@@ -795,12 +795,12 @@ class RealConcurrentUserIsolationTests:
 
     @pytest.mark.asyncio
     async def test_memory_stress_concurrent_isolation(self, redis_client, backend_client):
-        "
+    "
         CRITICAL: Memory stress testing with 20+ concurrent users.
         
         Tests isolation under extreme memory pressure to ensure
         garbage collection doesn't cause cross-user data contamination.
-        ""
+        "
         # Create 22 users for extreme memory stress testing
         users = [
             ConcurrentUserContext(
@@ -813,7 +813,7 @@ class RealConcurrentUserIsolationTests:
         metrics = ConcurrentTestMetrics()
         
         async def memory_stress_operation(user: ConcurrentUserContext) -> Dict[str, Any]:
-            ""Perform memory-intensive operations to test isolation under stress."
+            "Perform memory-intensive operations to test isolation under stress.
             user.start_time = time.time()
             
             try:
@@ -835,7 +835,7 @@ class RealConcurrentUserIsolationTests:
                                     'metadata': {
                                         'created_at': time.time(),
                                         'thread_id': threading.get_ident(),
-                                        'memory_tag': f"MEM-{user.user_id}-{j}-{k}
+                                        'memory_tag': fMEM-{user.user_id}-{j}-{k}
                                     }
                                 }
                                 for k in range(50)
@@ -926,7 +926,7 @@ class RealConcurrentUserIsolationTests:
                             return {'status': 'backend_interaction_interference', 'violation': True}
                 except Exception as e:
                     # Backend errors acceptable, but shouldn't affect data integrity
-                    logging.warning(fBackend interaction failed for user {user.user_id}: {e}")
+                    logging.warning(fBackend interaction failed for user {user.user_id}: {e})
                 
                 user.end_time = time.time()
                 duration = user.end_time - user.start_time
@@ -981,18 +981,18 @@ class RealConcurrentUserIsolationTests:
         success_rate = (successful_operations / len(users)) * 100
         avg_operation_time = total_duration / len(users)
         
-        assert len(violations) == 0, f"MEMORY STRESS ISOLATION VIOLATIONS: {violations}
-        assert success_rate >= 90.0, fMemory stress success rate too low: {success_rate}% (expected >= 90%)"
-        assert avg_operation_time < 15.0, f"Memory stress operation time too high: {avg_operation_time}s (expected < 15s)
+        assert len(violations) == 0, fMEMORY STRESS ISOLATION VIOLATIONS: {violations}
+        assert success_rate >= 90.0, fMemory stress success rate too low: {success_rate}% (expected >= 90%)""
+        assert avg_operation_time < 15.0, fMemory stress operation time too high: {avg_operation_time}s (expected < 15s)
 
     @pytest.mark.asyncio
     async def test_thread_safety_concurrent_operations(self, redis_client):
-        ""
+        
         CRITICAL: Thread safety testing with mixed async/sync operations.
         
         Tests that thread safety is maintained when mixing asyncio operations
         with traditional threading patterns.
-        "
+""
         # Create 16 users for thread safety testing
         users = [
             ConcurrentUserContext(
@@ -1007,7 +1007,7 @@ class RealConcurrentUserIsolationTests:
         results_lock = Lock()
         
         def sync_thread_operation(user: ConcurrentUserContext) -> Dict[str, Any]:
-            "Synchronous thread operation for testing thread safety.""
+            Synchronous thread operation for testing thread safety.""
             import asyncio
             
             # Create new event loop for this thread
@@ -1082,13 +1082,13 @@ class RealConcurrentUserIsolationTests:
         success_rate = (successful_operations / len(users)) * 100
         avg_operation_time = total_duration / len(users)
         
-        assert len(violations) == 0, fTHREAD SAFETY VIOLATIONS: {violations}"
-        assert success_rate >= 95.0, f"Thread safety success rate too low: {success_rate}% (expected >= 95%)
-        assert avg_operation_time < 20.0, fThread operation time too high: {avg_operation_time}s (expected < 20s)"
+        assert len(violations) == 0, fTHREAD SAFETY VIOLATIONS: {violations}
+        assert success_rate >= 95.0, fThread safety success rate too low: {success_rate}% (expected >= 95%)
+        assert avg_operation_time < 20.0, fThread operation time too high: {avg_operation_time}s (expected < 20s)""
 
     async def _thread_safe_async_operations(self, redis_client, user: ConcurrentUserContext, 
                                            thread_id: int, start_time: float) -> Dict[str, Any]:
-        "Helper method for thread-safe async operations.""
+        Helper method for thread-safe async operations."
         try:
             # Connect to Redis in this thread
             thread_redis = redis.from_url('redis://localhost:6381', decode_responses=True)
@@ -1101,7 +1101,7 @@ class RealConcurrentUserIsolationTests:
                 'user_id': user.user_id,
                 'thread_id': thread_id,
                 'operation_timestamp': start_time,
-                'thread_specific_data': f"THREAD-DATA-{user.user_id}-{thread_id}-{uuid.uuid4().hex},
+                'thread_specific_data': fTHREAD-DATA-{user.user_id}-{thread_id}-{uuid.uuid4().hex},
                 'sensitive_info': fSENSITIVE-{user.user_id}-{uuid.uuid4().hex}"
             }
             
@@ -1154,12 +1154,12 @@ class RealConcurrentUserIsolationTests:
 
     @pytest.mark.asyncio
     async def test_comprehensive_concurrent_integration(self, redis_client, database_engine, backend_client):
-        "
+    "
         CRITICAL: Comprehensive integration test of ALL concurrent isolation mechanisms.
         
         Master test combining Redis, PostgreSQL, WebSocket, threading, and memory stress
         with 20+ concurrent users to ensure complete end-to-end isolation.
-        ""
+        "
         # Create 24 users for comprehensive concurrent integration testing
         users = [
             ConcurrentUserContext(
@@ -1173,7 +1173,7 @@ class RealConcurrentUserIsolationTests:
         metrics = ConcurrentTestMetrics()
         
         async def comprehensive_concurrent_operation(user: ConcurrentUserContext) -> Dict[str, Any]:
-            ""Comprehensive concurrent operation testing all isolation mechanisms."
+            "Comprehensive concurrent operation testing all isolation mechanisms.
             user.start_time = time.time()
             operation_results = {
                 'redis_operations': 0,
@@ -1207,7 +1207,7 @@ class RealConcurrentUserIsolationTests:
                 
                 async with async_session() as session:
                     # Create table if needed
-                    await session.execute(sa.text("
+                    await session.execute(sa.text(
                         CREATE TABLE IF NOT EXISTS comprehensive_integration_test (
                             id SERIAL PRIMARY KEY,
                             user_id VARCHAR(255) NOT NULL,
@@ -1222,14 +1222,14 @@ class RealConcurrentUserIsolationTests:
                             'user_id': user.user_id,
                             'operation_type': 'database',
                             'operation_index': db_op,
-                            'sensitive_db_data': fDB-SENSITIVE-{user.user_id}-{db_op}-{uuid.uuid4().hex}",
+                            'sensitive_db_data': fDB-SENSITIVE-{user.user_id}-{db_op}-{uuid.uuid4().hex},
                             'timestamp': time.time()
                         }
                         
                         await session.execute(sa.text("
                             INSERT INTO comprehensive_integration_test (user_id, operation_data)
                             VALUES (:user_id, :operation_data)
-                        ""), {
+                        "), {
                             'user_id': user.user_id,
                             'operation_data': json.dumps(db_data)
                         }
@@ -1244,7 +1244,7 @@ class RealConcurrentUserIsolationTests:
                         'user_id': user.user_id,
                         'memory_operation': mem_op,
                         'large_data': [
-                            fMEMORY-{user.user_id}-{mem_op}-{i}-{uuid.uuid4().hex}"
+                            fMEMORY-{user.user_id}-{mem_op}-{i}-{uuid.uuid4().hex}
                             for i in range(1000)
                         ],
                         'nested_memory': {
@@ -1265,11 +1265,11 @@ class RealConcurrentUserIsolationTests:
                 
                 # Check database data integrity
                 async with async_session() as session:
-                    db_result = await session.execute(sa.text(""
+                    db_result = await session.execute(sa.text("
                         SELECT COUNT(*), operation_data FROM comprehensive_integration_test 
                         WHERE user_id = :user_id
                         GROUP BY operation_data
-                    "), {'user_id': user.user_id}
+                    ), {'user_id': user.user_id}
                     
                     db_rows = db_result.fetchall()
                     if len(db_rows) != 3:  # Should have 3 records
@@ -1290,7 +1290,7 @@ class RealConcurrentUserIsolationTests:
                 
                 # Phase 5: Cross-user contamination check
                 # Verify no access to other users' Redis data
-                all_redis_keys = await redis_client.keys("comprehensive:*)
+                all_redis_keys = await redis_client.keys("comprehensive:*)"
                 for key in all_redis_keys:
                     if user.user_id not in key:  # Other user's key
                         other_data = await redis_client.hgetall(key)
@@ -1307,9 +1307,9 @@ class RealConcurrentUserIsolationTests:
                     await redis_client.delete(redis_key)
                 
                 async with async_session() as session:
-                    await session.execute(sa.text(""
+                    await session.execute(sa.text(
                         DELETE FROM comprehensive_integration_test WHERE user_id = :user_id
-                    "), {'user_id': user.user_id}
+                    ), {'user_id': user.user_id}"
                     await session.commit()
                 
                 del large_memory_data  # Free memory
@@ -1365,15 +1365,15 @@ class RealConcurrentUserIsolationTests:
         avg_operation_time = total_duration / len(users)
         final_metrics = metrics.get_metrics()
         
-        assert len(violations) == 0, fCOMPREHENSIVE INTEGRATION VIOLATIONS: {violations}"
+        assert len(violations) == 0, fCOMPREHENSIVE INTEGRATION VIOLATIONS: {violations}
         assert success_rate >= 90.0, f"Integration success rate too low: {success_rate}% (expected >= 90%)
         assert avg_operation_time < 30.0, fIntegration operation time too high: {avg_operation_time}s (expected < 30s)"
         
         # Log final metrics for monitoring
-        logging.info(f"Comprehensive Concurrent Integration Test Metrics: {final_metrics})
+        logging.info(fComprehensive Concurrent Integration Test Metrics: {final_metrics})
         
 
-if __name__ == __main__":
+if __name__ == __main__:"
     # Run mission critical concurrent user isolation tests with real services
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

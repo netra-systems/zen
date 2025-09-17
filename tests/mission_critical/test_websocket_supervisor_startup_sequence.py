@@ -27,7 +27,7 @@ SSOT COMPLIANCE:
 - Uses actual WebSocket connections for end-to-end validation
 - Integrates with existing deterministic startup sequence (smd.py)
 - Follows mission critical test patterns for revenue protection
-""
+"
 
 import asyncio
 import json
@@ -65,11 +65,11 @@ from netra_backend.app.smd import StartupOrchestrator, DeterministicStartupError
 
 
 class MissionCriticalWebSocketTester:
-    ""Mission critical WebSocket connection tester for race condition validation."
+    "Mission critical WebSocket connection tester for race condition validation.
     
-    def __init__(self, base_url: str = "ws://localhost:8000, auth_token: Optional[str] = None):
+    def __init__(self, base_url: str = "ws://localhost:8000, auth_token: Optional[str] = None):"
         self.base_url = base_url
-        self.auth_token = auth_token or test_mission_critical_token"
+        self.auth_token = auth_token or test_mission_critical_token
         self.logger = logging.getLogger(__name__)
         self.connection_attempts = []
         self.successful_connections = 0
@@ -81,11 +81,11 @@ class MissionCriticalWebSocketTester:
         timeout_seconds: float = 10.0,
         expect_success: bool = True
     ) -> Dict[str, Any]:
-        "
+""
         Test WebSocket connection with detailed error tracking.
         
         Returns connection result with timing and error details.
-        ""
+        
         connection_start = time.time()
         connection_result = {
             'timestamp': connection_start,
@@ -107,16 +107,16 @@ class MissionCriticalWebSocketTester:
             async with websockets.connect(
                 ws_url,
                 timeout=timeout_seconds,
-                additional_headers={Authorization": f"Bearer {self.auth_token}} as websocket:
+                additional_headers={Authorization: fBearer {self.auth_token}} as websocket:
                 connection_result['connection_time'] = time.time() - connection_start
                 connection_result['success'] = True
                 self.successful_connections += 1
                 
                 # Test basic WebSocket communication
                 test_message = {
-                    type": "ping,
-                    timestamp": time.time(),
-                    "test_id: mission_critical_validation"
+                    type: ping,
+                    timestamp": time.time(),"
+                    test_id: mission_critical_validation
                 }
                 
                 await websocket.send(json.dumps(test_message))
@@ -126,7 +126,7 @@ class MissionCriticalWebSocketTester:
                     response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                     connection_result['messages_received'].append(json.loads(response))
                 except asyncio.TimeoutError:
-                    connection_result['messages_received'].append({"error: timeout_waiting_for_response"}
+                    connection_result['messages_received'].append({error: timeout_waiting_for_response"}
                 
                 return connection_result
                 
@@ -155,12 +155,12 @@ class MissionCriticalWebSocketTester:
         concurrent_connections: int = 3,
         delay_between_batches: float = 1.0
     ) -> Dict[str, Any]:
-        ""
+        
         Stress test WebSocket connections to detect race conditions.
         
         This test is designed to trigger the startup race condition by
         attempting connections during various startup phases.
-        "
+""
         stress_test_results = {
             'total_attempted': 0,
             'total_successful': 0,
@@ -190,7 +190,7 @@ class MissionCriticalWebSocketTester:
             # Process batch results
             for result in batch_results:
                 if isinstance(result, Exception):
-                    self.logger.error(f"Connection task failed: {result})
+                    self.logger.error(fConnection task failed: {result})
                     continue
                 
                 if result['success']:
@@ -215,11 +215,11 @@ class MissionCriticalWebSocketTester:
         return stress_test_results
     
     def get_connection_statistics(self) -> Dict[str, Any]:
-        ""Get comprehensive connection statistics for analysis."
+        Get comprehensive connection statistics for analysis.""
         total_attempts = len(self.connection_attempts)
         
         if total_attempts == 0:
-            return {"error: no_connection_attempts"}
+            return {error: no_connection_attempts}
         
         success_rate = (self.successful_connections / total_attempts) * 100
         error_1011_rate = (self.error_1011_count / total_attempts) * 100
@@ -246,10 +246,10 @@ class MissionCriticalWebSocketTester:
 
 
 class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
-    "Mission critical tests for WebSocket supervisor startup sequence.""
+    Mission critical tests for WebSocket supervisor startup sequence.""
     
     def setUp(self):
-        ""Set up mission critical test environment with real services."
+        Set up mission critical test environment with real services.""
         super().setUp()
         self.test_metrics = SsotTestMetrics()
         self.test_metrics.start_timing()
@@ -270,7 +270,7 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
         self.websocket_tester = MissionCriticalWebSocketTester()
     
     def tearDown(self):
-        "Clean up mission critical test environment.""
+        Clean up mission critical test environment."
         for patch_obj in self.env_patches:
             patch_obj.stop()
         
@@ -279,7 +279,7 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
     
     @pytest.mark.asyncio
     async def test_race_condition_detection_before_fix(self):
-        ""
+        "
         CRITICAL: Detect the startup race condition that causes 1011 errors.
         
         This test is designed to FAIL before the fix is implemented and PASS
@@ -296,7 +296,7 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
         - agent_supervisor available before accepting connections
         - No 1011 errors related to agent_supervisor unavailability
         - High success rate after startup completion
-        "
+"
         from fastapi import FastAPI
         
         app = FastAPI()
@@ -346,7 +346,7 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
         # AFTER Phase 5: Should be ready for WebSocket connections
         self.assertTrue(
             readiness_result2.ready,
-            fWebSocket should be ready after Phase 5 completion. "
+            fWebSocket should be ready after Phase 5 completion. 
             f"Failed services: {readiness_result2.failed_services}
         )
         
@@ -354,12 +354,12 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
     
     @pytest.mark.asyncio
     async def test_complete_startup_sequence_with_supervisor_creation(self):
-        "
+    "
         CRITICAL: Validate complete startup sequence creates agent_supervisor correctly.
         
         This test validates the entire deterministic startup sequence and
         verifies that agent_supervisor is created in Phase 5 as expected.
-        ""
+        "
         from fastapi import FastAPI
         
         app = FastAPI()
@@ -395,7 +395,7 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
         except Exception as e:
             startup_success = False
             startup_error = str(e)
-            self.logger.error(fStartup sequence failed: {e}", exc_info=True)
+            self.logger.error(fStartup sequence failed: {e}, exc_info=True)
         
         startup_elapsed_time = time.time() - startup_start_time
         
@@ -424,31 +424,31 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
         
         self.assertTrue(
             len(services_phase_or_later) > 0,
-            "Agent supervisor should be available by Phase 5 (services) or later
+            Agent supervisor should be available by Phase 5 (services) or later
         )
         
         # Final validation: supervisor should be available
         self.assertTrue(
             hasattr(app.state, 'agent_supervisor'),
-            App state should have agent_supervisor after startup"
+            App state should have agent_supervisor after startup""
         )
         self.assertIsNotNone(
             app.state.agent_supervisor,
-            "Agent supervisor should be initialized after startup
+            Agent supervisor should be initialized after startup
         )
         
-        self.test_metrics.record_custom(startup_sequence_supervisor_creation", True)
+        self.test_metrics.record_custom(startup_sequence_supervisor_creation, True)"
         self.test_metrics.record_custom("startup_elapsed_time, startup_elapsed_time)
     
     @pytest.mark.asyncio
     async def test_websocket_connection_reliability_after_startup(self):
-        ""
+        
         CRITICAL: Validate WebSocket connections work reliably after startup completion.
         
         This test validates that WebSocket connections succeed consistently
 #         after the complete startup sequence, preventing revenue loss from # Incomplete import statement
         broken chat functionality.
-        "
+""
         from fastapi import FastAPI
         
         app = FastAPI()
@@ -460,11 +460,11 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
             startup_success = True
         except Exception as e:
             startup_success = False
-            self.logger.error(f"Startup failed: {e}, exc_info=True)
+            self.logger.error(fStartup failed: {e}, exc_info=True)
         
         # Skip WebSocket tests if startup failed (infrastructure issue)
         if not startup_success:
-            self.skipTest(Startup failed - cannot test WebSocket reliability")
+            self.skipTest(Startup failed - cannot test WebSocket reliability)"
         
         # Validate WebSocket readiness
         validator = create_gcp_websocket_validator(app.state)
@@ -473,7 +473,7 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
         self.assertTrue(
             readiness_result.ready,
             f"WebSocket should be ready after startup completion. 
-            fFailed services: {readiness_result.failed_services}"
+            fFailed services: {readiness_result.failed_services}
         )
         
         # Test multiple WebSocket connections for reliability
@@ -508,20 +508,20 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
         
         self.assertGreaterEqual(
             success_rate, 95.0,
-            f"WebSocket readiness should be at least 95% reliable. Got {success_rate}%
+            fWebSocket readiness should be at least 95% reliable. Got {success_rate}%
         )
         
-        self.test_metrics.record_custom(websocket_reliability_success_rate", success_rate)
-        self.test_metrics.record_custom("websocket_reliability_validated, True)
+        self.test_metrics.record_custom(websocket_reliability_success_rate", success_rate)"
+        self.test_metrics.record_custom(websocket_reliability_validated, True)
     
     @pytest.mark.asyncio
     async def test_1011_error_prevention_validation(self):
-        ""
+        "
         CRITICAL: Validate that 1011 errors are prevented by the fix.
         
         This test specifically validates that the startup race condition fix
         prevents WebSocket 1011 errors that break chat functionality.
-        "
+"
         from fastapi import FastAPI
         
         # Test scenario 1: Early startup phase (should prevent connections)
@@ -537,7 +537,7 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
         # Should prevent connections during early startup
         self.assertFalse(
             readiness_early.ready,
-            "WebSocket connections should be prevented during early startup to avoid 1011 errors
+            WebSocket connections should be prevented during early startup to avoid 1011 errors"
         )
         
         # Test scenario 2: Complete startup (should allow connections)
@@ -566,7 +566,7 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
         self.assertTrue(
             readiness_complete.ready,
             fWebSocket connections should be allowed after complete startup. "
-            f"Failed services: {readiness_complete.failed_services}
+            fFailed services: {readiness_complete.failed_services}
         )
         
         # Validate specific 1011 error prevention
@@ -584,12 +584,12 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
     
     @pytest.mark.asyncio
     async def test_business_value_protection_validation(self):
-        ""
+        
         CRITICAL: Validate that the fix protects business value (chat functionality).
         
         This test validates that the startup race condition fix protects the
         core business value by ensuring chat functionality works reliably.
-        "
+""
         from fastapi import FastAPI
         
         app = FastAPI()
@@ -622,7 +622,7 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
         # Validate chat infrastructure is ready
         self.assertTrue(
             chat_readiness.overall_ready,
-            f"Chat infrastructure should be ready to protect business value. 
+            fChat infrastructure should be ready to protect business value. 
             fCritical failures: {chat_readiness.critical_failures}"
         )
         
@@ -637,8 +637,8 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
         
         self.assertGreaterEqual(
             chat_service_availability, 95.0,
-            fChat service availability should be at least 95% to protect business value. "
-            f"Got {chat_service_availability}%
+            fChat service availability should be at least 95% to protect business value. 
+            fGot {chat_service_availability}%
         )
         
         # Validate specific business-critical components
@@ -653,18 +653,18 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
         for validation_name, validation_result in business_critical_validations.items():
             self.assertTrue(
                 validation_result,
-                fBusiness critical validation failed: {validation_name}"
+                fBusiness critical validation failed: {validation_name}""
             )
         
-        self.test_metrics.record_custom("business_value_protection_validated, True)
-        self.test_metrics.record_custom(chat_service_availability_percent", chat_service_availability)
+        self.test_metrics.record_custom(business_value_protection_validated, True)
+        self.test_metrics.record_custom(chat_service_availability_percent, chat_service_availability)"
 
 
 class WebSocketAgentInteractionFlowTests(SSotAsyncTestCase):
-    "Mission critical tests for complete WebSocket agent interaction flow.""
+    "Mission critical tests for complete WebSocket agent interaction flow.
     
     def setUp(self):
-        ""Set up end-to-end WebSocket agent flow testing."
+        ""Set up end-to-end WebSocket agent flow testing.
         super().setUp()
         self.test_metrics = SsotTestMetrics()
         self.test_metrics.start_timing()
@@ -677,14 +677,14 @@ class WebSocketAgentInteractionFlowTests(SSotAsyncTestCase):
         self.env_patch.start()
     
     def tearDown(self):
-        "Clean up end-to-end test environment.""
+        Clean up end-to-end test environment.""
         self.env_patch.stop()
         self.test_metrics.end_timing()
         super().tearDown()
     
     @pytest.mark.asyncio
     async def test_complete_websocket_agent_workflow(self):
-        ""
+        
         CRITICAL: Validate complete WebSocket agent workflow after startup.
         
         This test validates that the complete chat workflow works end-to-end
@@ -697,7 +697,7 @@ class WebSocketAgentInteractionFlowTests(SSotAsyncTestCase):
         4. Agent execution with real-time updates
         5. Agent response delivered
         6. WebSocket events sent for all steps
-        "
+""
         from fastapi import FastAPI
         
         app = FastAPI()
@@ -709,13 +709,13 @@ class WebSocketAgentInteractionFlowTests(SSotAsyncTestCase):
         
         # Mock complete agent infrastructure
         app.state.agent_supervisor = type('MockSupervisor', (), {
-            'process_user_message': lambda msg: f"Processed: {msg},
-            'execute_agent_workflow': lambda: [agent_started", "agent_thinking, agent_completed"]
+            'process_user_message': lambda msg: fProcessed: {msg},
+            'execute_agent_workflow': lambda: [agent_started, "agent_thinking, agent_completed"]
         }()
         
         app.state.thread_service = type('MockThreadService', (), {
-            'create_thread': lambda user_id: f"thread_{user_id},
-            'get_thread_context': lambda thread_id: {messages": []},
+            'create_thread': lambda user_id: fthread_{user_id},
+            'get_thread_context': lambda thread_id: {messages: []},"
             'save_message': lambda thread_id, message: True
         }()
         
@@ -755,7 +755,7 @@ class WebSocketAgentInteractionFlowTests(SSotAsyncTestCase):
         
         # Step 2: User message processing
         try:
-            user_message = Test agent interaction for mission critical validation"
+            user_message = Test agent interaction for mission critical validation
             processed_message = app.state.agent_supervisor.process_user_message(user_message)
             workflow_steps.append({
                 'step': 'message_processing',
@@ -820,8 +820,8 @@ class WebSocketAgentInteractionFlowTests(SSotAsyncTestCase):
         
         self.assertGreaterEqual(
             workflow_success_rate, 90.0,
-            f"Agent workflow should be at least 90% successful. Got {workflow_success_rate}%. 
-            fFailed steps: {[step for step in workflow_steps if not step['success']]}"
+            fAgent workflow should be at least 90% successful. Got {workflow_success_rate}%. 
+            fFailed steps: {[step for step in workflow_steps if not step['success']]}""
         )
         
         # Validate critical workflow steps
@@ -833,10 +833,10 @@ class WebSocketAgentInteractionFlowTests(SSotAsyncTestCase):
         
         self.assertTrue(
             critical_step_success,
-            f"All critical workflow steps should succeed. Steps: {workflow_steps}
+            fAll critical workflow steps should succeed. Steps: {workflow_steps}
         )
         
-        self.test_metrics.record_custom(agent_workflow_success_rate", workflow_success_rate)
+        self.test_metrics.record_custom(agent_workflow_success_rate, workflow_success_rate)
         self.test_metrics.record_custom("agent_workflow_validated", True)
 
 

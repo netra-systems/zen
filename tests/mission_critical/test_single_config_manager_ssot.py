@@ -20,7 +20,7 @@ Test Coverage:
 
 CRITICAL: This test ensures consolidated configuration management supports
 Golden Path user login and AI chat functionality worth $500K+ ARR protection.
-""
+"
 
 import pytest
 import sys
@@ -34,21 +34,21 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class SingleConfigManagerSSotTests(SSotBaseTestCase):
-    ""Test suite to validate single configuration manager SSOT compliance."
+    "Test suite to validate single configuration manager SSOT compliance.
 
     def test_only_one_config_manager_can_be_imported(self):
-        "
+    ""
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate single config manager import.
 
         After SSOT consolidation, only one configuration manager should be importable.
         Multiple managers indicate incomplete SSOT migration.
-        ""
+        
         # Expected SSOT import path after consolidation
-        ssot_config_manager_path = netra_backend.app.core.configuration.base.UnifiedConfigManager"
+        ssot_config_manager_path = netra_backend.app.core.configuration.base.UnifiedConfigManager""
 
         # Paths that should NOT exist after consolidation
         deprecated_paths = [
-            "netra_backend.app.core.configuration.base.UnifiedConfigManager,
+            netra_backend.app.core.configuration.base.UnifiedConfigManager,
             netra_backend.app.services.configuration_service.ConfigurationManager"
         ]
 
@@ -82,27 +82,27 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
 
         # TEST ASSERTION: Should pass when only SSOT manager exists
         assert len(deprecated_managers_found) == 0, (
-            fSSOT VIOLATION: Found deprecated config managers that were not properly consolidated: "
-            f"{deprecated_managers_found}. Only {ssot_config_manager_path} should exist after consolidation.
+            fSSOT VIOLATION: Found deprecated config managers that were not properly consolidated: 
+            f{deprecated_managers_found}. Only {ssot_config_manager_path} should exist after consolidation.
         )
 
         # Verify SSOT manager is functional
-        assert ssot_manager is not None, SSOT config manager must be instantiable"
-        assert hasattr(ssot_manager, 'get_config'), "SSOT config manager must have get_config method
+        assert ssot_manager is not None, SSOT config manager must be instantiable""
+        assert hasattr(ssot_manager, 'get_config'), SSOT config manager must have get_config method
 
     def test_config_manager_import_paths_redirect_to_ssot(self):
-        ""
+        "
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate import path redirection to SSOT.
 
         Legacy import paths should redirect to the SSOT manager to maintain compatibility.
-        "
+"
         # SSOT import
-        ssot_import = "netra_backend.app.core.configuration.base
+        ssot_import = netra_backend.app.core.configuration.base"
 
         # Legacy imports that should redirect to SSOT
         legacy_imports = [
             netra_backend.app.core.configuration.base",
-            "netra_backend.app.services.configuration_service
+            netra_backend.app.services.configuration_service
         ]
 
         # Get SSOT manager class
@@ -110,7 +110,7 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
             ssot_module = importlib.import_module(ssot_import)
             ssot_manager_class = getattr(ssot_module, 'UnifiedConfigManager')
         except (ImportError, AttributeError) as e:
-            pytest.fail(fCannot import SSOT manager: {str(e)}")
+            pytest.fail(fCannot import SSOT manager: {str(e)}")"
 
         # Test legacy imports
         import_redirections = []
@@ -128,12 +128,12 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
                         if inspect.isclass(attr_value):
                             if attr_value is ssot_manager_class:
                                 import_redirections.append({
-                                    'legacy_path': f"{legacy_import}.{attr_name},
+                                    'legacy_path': f{legacy_import}.{attr_name},
                                     'redirects_to_ssot': True
                                 }
                             else:
                                 import_redirections.append({
-                                    'legacy_path': f{legacy_import}.{attr_name}",
+                                    'legacy_path': f{legacy_import}.{attr_name},
                                     'redirects_to_ssot': False,
                                     'class': attr_value
                                 }
@@ -158,17 +158,17 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
         )
 
     def test_ssot_config_manager_has_complete_api(self):
-        "
+    "
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate SSOT manager API completeness.
 
         The SSOT config manager should have all methods needed for Golden Path functionality.
-        ""
+        "
         # Import SSOT manager
         try:
             from netra_backend.app.core.configuration.base import UnifiedConfigManager
             manager = UnifiedConfigManager()
         except ImportError as e:
-            pytest.fail(fCannot import SSOT config manager: {str(e)}")
+            pytest.fail(fCannot import SSOT config manager: {str(e)})
 
         # Required API methods for Golden Path functionality
         required_methods = [
@@ -205,7 +205,7 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
         assert len(missing_required_methods) == 0, (
             f"SSOT API INCOMPLETE: SSOT config manager missing required methods: {missing_required_methods}. 
             fAvailable methods: {[m for m in dir(manager) if not m.startswith('_')]}. "
-            f"Required for Golden Path functionality.
+            fRequired for Golden Path functionality.
         )
 
         # Verify methods are callable
@@ -215,11 +215,11 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
                 assert callable(method), fMethod {method_name} must be callable"
 
     def test_ssot_config_manager_uses_isolated_environment(self):
-        "
+    "
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate SSOT manager uses IsolatedEnvironment.
 
         The SSOT config manager must use IsolatedEnvironment for environment access.
-        ""
+        "
         # Import SSOT manager
         try:
             from netra_backend.app.core.configuration.base import UnifiedConfigManager
@@ -231,7 +231,7 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
         try:
             source_code = inspect.getsource(manager_class)
         except OSError as e:
-            pytest.skip(f"Cannot get source code for manager: {str(e)})
+            pytest.skip(fCannot get source code for manager: {str(e)})
 
         # Validate IsolatedEnvironment import and usage
         has_isolated_env_import = (
@@ -259,27 +259,27 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
         )
 
         assert has_isolated_env_usage, (
-            fSSOT VIOLATION: SSOT config manager does not use IsolatedEnvironment. "
-            f"Must use get_env() pattern for environment access.
+            fSSOT VIOLATION: SSOT config manager does not use IsolatedEnvironment. 
+            fMust use get_env() pattern for environment access.
         )
 
         assert not has_os_environ_violation, (
-            fSSOT VIOLATION: SSOT config manager uses direct os.environ access. "
-            f"Must use IsolatedEnvironment only.
+            fSSOT VIOLATION: SSOT config manager uses direct os.environ access. ""
+            fMust use IsolatedEnvironment only.
         )
 
     def test_ssot_config_manager_factory_pattern_compliance(self):
-        ""
+        
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate factory pattern for multi-user isolation.
 
         The SSOT config manager should support factory pattern for user isolation.
-        "
+""
         # Import SSOT manager
         try:
             from netra_backend.app.core.configuration.base import UnifiedConfigManager
             manager_class = UnifiedConfigManager
         except ImportError as e:
-            pytest.fail(f"Cannot import SSOT config manager: {str(e)})
+            pytest.fail(fCannot import SSOT config manager: {str(e)})
 
         # Test factory pattern (different instances)
         manager1 = manager_class()
@@ -299,8 +299,8 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
 
             # They should start with independent caches
             assert original_cache1 is not original_cache2, (
-                fISOLATION VIOLATION: Config manager instances share cache objects. "
-                f"Must have independent state for multi-user scenarios.
+                fISOLATION VIOLATION: Config manager instances share cache objects. 
+                fMust have independent state for multi-user scenarios.
             )
 
     def test_ssot_config_manager_golden_path_integration(self):
@@ -308,7 +308,7 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate Golden Path integration readiness.
 
         The SSOT config manager should provide configuration needed for Golden Path functionality.
-        "
+
         # Import SSOT manager
         try:
             from netra_backend.app.core.configuration.base import UnifiedConfigManager
@@ -347,7 +347,7 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
 
         # TEST ASSERTION: Should pass when manager can handle Golden Path config requests
         assert len(missing_configurations) == 0, (
-            f"GOLDEN PATH INTEGRATION FAILURE: SSOT config manager cannot handle required 
+            fGOLDEN PATH INTEGRATION FAILURE: SSOT config manager cannot handle required 
             fGolden Path configurations: {missing_configurations}. "
             f"Must support all configuration categories for $500K+ ARR protection.
         )
@@ -356,13 +356,13 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
         try:
             # Basic configuration access should work without errors
             environment = manager.get_config('ENVIRONMENT', 'test')
-            assert environment is not None, Environment configuration must be accessible"
+            assert environment is not None, Environment configuration must be accessible
 
         except Exception as e:
-            pytest.fail(f"SSOT config manager basic functionality failed: {str(e)})
+            pytest.fail(fSSOT config manager basic functionality failed: {str(e)})
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # Run the test to validate SSOT consolidation
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

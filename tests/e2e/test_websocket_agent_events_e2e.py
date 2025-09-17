@@ -5,7 +5,7 @@ Business Value:
 - Validates complete WebSocket event flow from frontend to backend
 - Ensures all agent lifecycle events reach the frontend
 - Tests real user chat interactions with WebSocket notifications
-""
+"
 
 import asyncio
 import json
@@ -36,56 +36,56 @@ from shared.isolated_environment import get_env
 
 @pytest.mark.e2e
 class WebSocketAgentEventsE2ETests:
-    ""End-to-end tests for WebSocket agent events."
+    "End-to-end tests for WebSocket agent events.
     
     @pytest.fixture
     async def backend_client(self):
-        "Create backend client for testing.""
-        client = BackendClient(base_url=http://localhost:8000")
+        "Create backend client for testing."
+        client = BackendClient(base_url=http://localhost:8000)"
         yield client
         await client.close()
     
     @pytest.fixture
     def test_context(self):
-        "Create test context.""
+        "Create test context.
         return TestContext()
     
     @pytest.fixture
     async def authenticated_user(self, backend_client):
-        ""Create and authenticate a test user - CLAUDE.md Compliant SSOT."
+        ""Create and authenticate a test user - CLAUDE.md Compliant SSOT.
         # Use SSOT Authentication Helper - CLAUDE.md Compliant
         token, user_data = await create_authenticated_user(
-            environment="test,
+            environment=test,"
             email=fagent_events_{uuid.uuid4()}@test.com",
             permissions=['read', 'write']
         
         return {
-            "user_id: user_data['id'],
-            access_token": token,
-            "email: user_data['email']
+            user_id: user_data['id'],
+            access_token": token,"
+            email: user_data['email']
         }
     
     @pytest.mark.asyncio
     async def test_chat_creates_websocket_connection(self, backend_client, authenticated_user):
-        ""Test chat request creates WebSocket connection and sends events - CLAUDE.md Compliant."
+        "Test chat request creates WebSocket connection and sends events - CLAUDE.md Compliant."
         test_start_time = time.time()
         
         # SSOT WebSocket Connection - CLAUDE.md Compliant
-        auth_helper = E2EWebSocketAuthHelper(environment="test)
+        auth_helper = E2EWebSocketAuthHelper(environment=test)
         websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
         
         try:
             # Wait for connection confirmation - HARD FAILURE IF NONE
             message = await asyncio.wait_for(websocket.recv(), timeout=10.0)
             data = json.loads(message)
-            assert data[type"] == "connection_established, fExpected connection_established, got: {data}"
+            assert data[type"] == "connection_established, fExpected connection_established, got: {data}
             
             # Send chat message for real agent event testing
             chat_request = {
-                "type: chat",
+                type: chat",
                 "data: {
-                    message": "Hello, can you help me?,
-                    conversation_id": str(uuid.uuid4())
+                    message: Hello, can you help me?,
+                    conversation_id": str(uuid.uuid4())"
                 }
             }
             
@@ -102,15 +102,15 @@ class WebSocketAgentEventsE2ETests:
                 events.append(event)
                 
                 # Stop when we get completion
-                if event.get("type) == agent_completed":
+                if event.get(type) == agent_completed:
                     break
             
             # Verify we received expected MISSION CRITICAL events (CLAUDE.md Section 6)
-            event_types = [e["type] for e in events]
+            event_types = [e[type] for e in events]"
             
             # MISSION CRITICAL: These events MUST be sent for substantive chat interactions
-            assert agent_started" in event_types, f"MISSION CRITICAL: agent_started event missing. Got: {event_types}
-            assert agent_completed" in event_types, f"MISSION CRITICAL: agent_completed event missing. Got: {event_types}
+            assert agent_started" in event_types, fMISSION CRITICAL: agent_started event missing. Got: {event_types}
+            assert agent_completed in event_types, fMISSION CRITICAL: agent_completed event missing. Got: {event_types}
             
             # Additional validation for complete agent lifecycle
             assert len(events) >= 2, fExpected multiple agent events, got {len(events)}: {event_types}"
@@ -124,7 +124,7 @@ class WebSocketAgentEventsE2ETests:
     
     @pytest.mark.asyncio
     async def test_agent_lifecycle_events_order(self, backend_client, authenticated_user):
-        ""Test agent lifecycle events are sent in correct order - CLAUDE.md Compliant."
+        Test agent lifecycle events are sent in correct order - CLAUDE.md Compliant."
         test_start_time = time.time()
         
         # SSOT WebSocket Connection - CLAUDE.md Compliant
@@ -137,10 +137,10 @@ class WebSocketAgentEventsE2ETests:
             
             # Send chat request for real agent execution
             chat_request = {
-                type": "chat,
-                data": {
-                    "message: What is 2+2?",
-                    "conversation_id: str(uuid.uuid4())
+                type: chat,
+                data": {"
+                    message: What is 2+2?,
+                    conversation_id: str(uuid.uuid4())"
                 }
             }
             
@@ -156,19 +156,19 @@ class WebSocketAgentEventsE2ETests:
                 event = json.loads(message)
                 events.append(event)
                 
-                if event.get(type") == "agent_completed:
+                if event.get(type") == agent_completed:
                     break
             
             # Verify order - HARD ASSERTIONS
-            event_types = [e[type"] for e in events]
-            assert len(events) > 0, "Should receive agent lifecycle events
+            event_types = [e[type] for e in events]
+            assert len(events) > 0, "Should receive agent lifecycle events"
             
             # MISSION CRITICAL: agent_started should come before agent_completed
-            assert agent_started" in event_types, f"MISSION CRITICAL: agent_started missing from {event_types}
-            assert agent_completed" in event_types, f"MISSION CRITICAL: agent_completed missing from {event_types}
+            assert agent_started in event_types, fMISSION CRITICAL: agent_started missing from {event_types}
+            assert agent_completed in event_types, fMISSION CRITICAL: agent_completed missing from {event_types}
             
-            start_index = event_types.index(agent_started")
-            complete_index = event_types.index("agent_completed)
+            start_index = event_types.index(agent_started")"
+            complete_index = event_types.index(agent_completed)
             assert start_index < complete_index, fagent_started must come before agent_completed. Order: {event_types}"
             
         finally:
@@ -180,7 +180,7 @@ class WebSocketAgentEventsE2ETests:
     
     @pytest.mark.asyncio
     async def test_tool_execution_events(self, backend_client, authenticated_user):
-        ""Test tool execution sends appropriate events - CLAUDE.md Compliant."
+        Test tool execution sends appropriate events - CLAUDE.md Compliant."
         test_start_time = time.time()
         
         # SSOT WebSocket Connection - CLAUDE.md Compliant
@@ -192,10 +192,10 @@ class WebSocketAgentEventsE2ETests:
             
             # Send request that triggers REAL tool use
             chat_request = {
-                type": "chat,
-                data": {
-                    "message: Search for information about Python",
-                    "conversation_id: str(uuid.uuid4())
+                type: chat,
+                data": {"
+                    message: Search for information about Python,
+                    conversation_id: str(uuid.uuid4())"
                 }
             }
             
@@ -212,7 +212,7 @@ class WebSocketAgentEventsE2ETests:
                 event = json.loads(message)
                 all_events.append(event)
                 
-                if tool" in event.get("type, "):
+                if tool" in event.get(type, ):
                     tool_events.append(event)
                 
                 if event.get("type) == agent_completed":
@@ -220,18 +220,18 @@ class WebSocketAgentEventsE2ETests:
             
             # MISSION CRITICAL: Validate tool events (CLAUDE.md Section 6)
             if tool_events:
-                tool_types = [e["type] for e in tool_events]
+                tool_types = [e[type] for e in tool_events]
                 
                 # Should have both executing and completed for real tool execution
-                has_executing = any(tool_executing" in t for t in tool_types)
+                has_executing = any(tool_executing in t for t in tool_types)"
                 has_completed = any("tool_completed in t for t in tool_types)
                 
                 if has_executing:
-                    assert has_completed, fMISSION CRITICAL: tool_executing without tool_completed. Events: {tool_types}"
+                    assert has_completed, fMISSION CRITICAL: tool_executing without tool_completed. Events: {tool_types}
             
             # At minimum, agent lifecycle should work
-            event_types = [e["type] for e in all_events]
-            assert agent_started" in event_types or "agent_completed in event_types, fNo agent events received: {event_types}"
+            event_types = [e["type] for e in all_events]"
+            assert agent_started in event_types or agent_completed in event_types, fNo agent events received: {event_types}"
             
         finally:
             await websocket.close()
@@ -242,7 +242,7 @@ class WebSocketAgentEventsE2ETests:
     
     @pytest.mark.asyncio
     async def test_multiple_users_isolated_events(self, backend_client):
-        ""Test multiple users receive only their own events - CLAUDE.md Compliant."
+        Test multiple users receive only their own events - CLAUDE.md Compliant."
         test_start_time = time.time()
         
         # Create two users using SSOT authentication - CLAUDE.md Compliant
@@ -250,17 +250,17 @@ class WebSocketAgentEventsE2ETests:
         for i in range(2):
             token, user_data = await create_authenticated_user(
                 environment="test,
-                email=fuser{i}_{uuid.uuid4()}@test.com",
+                email=fuser{i}_{uuid.uuid4()}@test.com,
                 permissions=['read', 'write']
             user_tokens.append({
-                "id: user_data['id'],
-                token": token,
-                "email: user_data['email']
+                "id: user_data['id'],"
+                token: token,
+                email: user_data['email']"
             }
         
         async def user_session(user, message_content):
-            ""Run a user session and collect events using SSOT WebSocket."
-            auth_helper = E2EWebSocketAuthHelper(environment="test)
+            "Run a user session and collect events using SSOT WebSocket.
+            auth_helper = E2EWebSocketAuthHelper(environment="test)"
             # Override token in auth helper for this user
             auth_helper._cached_token = user['token']
             
@@ -271,10 +271,10 @@ class WebSocketAgentEventsE2ETests:
                 
                 # Send chat for real agent execution
                 await websocket.send(json.dumps({
-                    type": "chat,
-                    data": {
+                    type: chat,
+                    data: {"
                         "message: message_content,
-                        conversation_id": str(uuid.uuid4())
+                        conversation_id: str(uuid.uuid4())
                     }
                 })
                 
@@ -297,8 +297,8 @@ class WebSocketAgentEventsE2ETests:
         
         # Run both users concurrently for real multi-user isolation testing
         results = await asyncio.gather(
-            user_session(user_tokens[0], "Hello from user 1),
-            user_session(user_tokens[1], Hello from user 2")
+            user_session(user_tokens[0], Hello from user 1),
+            user_session(user_tokens[1], Hello from user 2)"
         )
         
         # Each user should receive their own events
@@ -307,27 +307,27 @@ class WebSocketAgentEventsE2ETests:
         
         # Validate multi-user isolation - HARD ASSERTIONS
         assert len(user1_events) > 0, "User 1 should receive events
-        assert len(user2_events) > 0, User 2 should receive events"
+        assert len(user2_events) > 0, User 2 should receive events
         
         # Events should be user-specific (different conversation/request IDs)
         # This validates real multi-user isolation in the WebSocket system
-        user1_types = [e["type] for e in user1_events]
-        user2_types = [e[type"] for e in user2_events]
+        user1_types = [e["type] for e in user1_events]"
+        user2_types = [e[type] for e in user2_events]
         
         # Both should get agent events, but they should be isolated
-        assert "agent_started in user1_types or agent_completed" in user1_types, "User 1 should get agent events
-        assert agent_started" in user2_types or "agent_completed in user2_types, User 2 should get agent events"
+        assert agent_started in user1_types or agent_completed" in user1_types, "User 1 should get agent events
+        assert agent_started in user2_types or agent_completed in user2_types, User 2 should get agent events""
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - test_start_time
-        assert execution_time >= 0.1, f"E2E test executed too quickly: {execution_time:.3f}s - indicates mocked behavior
+        assert execution_time >= 0.1, fE2E test executed too quickly: {execution_time:.3f}s - indicates mocked behavior
     
     @pytest.mark.asyncio
     async def test_websocket_reconnection_preserves_state(self, backend_client, authenticated_user):
-        ""Test WebSocket reconnection preserves user state."
-        ws_url = "ws://localhost:8000/ws
+        Test WebSocket reconnection preserves user state.""
+        ws_url = ws://localhost:8000/ws
         headers = {
-            Authorization": f"Bearer {authenticated_user['access_token']}
+            Authorization: f"Bearer {authenticated_user['access_token']}
         }
         
         conversation_id = str(uuid.uuid4())
@@ -338,9 +338,9 @@ class WebSocketAgentEventsE2ETests:
             
             # Send first message
             await ws1.send(json.dumps({
-                type": "chat,
-                data": {
-                    "message: Remember this: apple",
+                type: "chat,
+                data: {
+                    message: Remember this: apple",
                     "conversation_id: conversation_id
                 }
             })
@@ -349,7 +349,7 @@ class WebSocketAgentEventsE2ETests:
             for _ in range(5):
                 msg = await asyncio.wait_for(ws1.recv(), timeout=2)
                 event = json.loads(msg)
-                if event.get(type") == "agent_completed:
+                if event.get(type) == agent_completed:
                     break
         
         # Reconnect
@@ -359,8 +359,8 @@ class WebSocketAgentEventsE2ETests:
             # Send follow-up message
             await ws2.send(json.dumps({
                 type": "chat,
-                data": {
-                    "message: What did I ask you to remember?",
+                data: {
+                    message: What did I ask you to remember?",
                     "conversation_id: conversation_id
                 }
             })
@@ -372,9 +372,9 @@ class WebSocketAgentEventsE2ETests:
                     msg = await asyncio.wait_for(ws2.recv(), timeout=2)
                     event = json.loads(msg)
                     
-                    if event.get(type") == "agent_completed:
+                    if event.get(type) == agent_completed:
                         # Check if response mentions apple"
-                        if "apple in str(event.get(data", ")).lower():
+                        if "apple in str(event.get(data, )).lower():
                             response_found = True
                         break
                 except asyncio.TimeoutError:
@@ -382,11 +382,11 @@ class WebSocketAgentEventsE2ETests:
             
             # CLAUDE.md Compliant: NO GRACEFUL FALLBACKS - Hard failure required
             # Context preservation depends on implementation - validate connection worked
-            assert len([e for e in range(10) if True] > 0, WebSocket reconnection should maintain functional connection"
+            assert len([e for e in range(10) if True] > 0, WebSocket reconnection should maintain functional connection""
     
     @pytest.mark.asyncio
     async def test_error_event_on_failure(self, backend_client, authenticated_user):
-        "Test error events are sent on failures - CLAUDE.md Compliant.""
+        Test error events are sent on failures - CLAUDE.md Compliant."
         test_start_time = time.time()
         
         # SSOT WebSocket Connection - CLAUDE.md Compliant
@@ -398,10 +398,10 @@ class WebSocketAgentEventsE2ETests:
             
             # Send invalid request to test real error handling
             invalid_request = {
-                "type: chat",
-                "data: {
+                type: chat,
+                "data: {"
                     # Missing required fields to trigger real validation error
-                    invalid": "data
+                    invalid: data
                 }
             }
             
@@ -416,33 +416,33 @@ class WebSocketAgentEventsE2ETests:
                 event = json.loads(message)
                 received_events.append(event)
                 
-                event_type = event.get(type", ")
-                if error" in event_type.lower() or "invalid in str(event).lower():
+                event_type = event.get(type, ")
+                if error" in event_type.lower() or invalid in str(event).lower():
                     error_received = True
                     break
                     
                 # Also check for agent completion with error info
-                if event_type == agent_completed" and "error in str(event).lower():
+                if event_type == agent_completed and error in str(event).lower():
                     error_received = True
                     break
             
             # Should receive error event or error indication - HARD ASSERTION
-            assert error_received, fShould receive error event for invalid request. Received: {received_events}"
+            assert error_received, fShould receive error event for invalid request. Received: {received_events}""
             
         finally:
             await websocket.close()
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - test_start_time
-        assert execution_time >= 0.1, f"E2E test executed too quickly: {execution_time:.3f}s - indicates mocked behavior
+        assert execution_time >= 0.1, fE2E test executed too quickly: {execution_time:.3f}s - indicates mocked behavior
     
     @pytest.mark.asyncio
     async def test_thinking_events_sent(self, backend_client, authenticated_user):
-        ""Test agent thinking events are sent to frontend - CLAUDE.md Compliant."
+        Test agent thinking events are sent to frontend - CLAUDE.md Compliant.""
         test_start_time = time.time()
         
         # SSOT WebSocket Connection - CLAUDE.md Compliant
-        auth_helper = E2EWebSocketAuthHelper(environment="test)
+        auth_helper = E2EWebSocketAuthHelper(environment=test)
         websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
         
         try:
@@ -450,10 +450,10 @@ class WebSocketAgentEventsE2ETests:
             
             # Send complex request that requires REAL thinking
             chat_request = {
-                type": "chat,
+                type: "chat,
                 data": {
-                    "message: Explain quantum computing in simple terms",
-                    "conversation_id: str(uuid.uuid4())
+                    message: Explain quantum computing in simple terms,
+                    "conversation_id: str(uuid.uuid4())"
                 }
             }
             
@@ -470,27 +470,27 @@ class WebSocketAgentEventsE2ETests:
                 event = json.loads(message)
                 all_events.append(event)
                 
-                event_type = event.get(type", ")
-                if thinking" in event_type:
+                event_type = event.get(type, )
+                if thinking in event_type:"
                     thinking_events.append(event)
                 
                 if event_type == "agent_completed:
                     break
             
             # MISSION CRITICAL: Validate agent lifecycle (CLAUDE.md Section 6)
-            event_types = [e[type"] for e in all_events]
+            event_types = [e[type] for e in all_events]
             assert "agent_started in event_types, fMISSION CRITICAL: agent_started missing from {event_types}"
-            assert "agent_completed in event_types, fMISSION CRITICAL: agent_completed missing from {event_types}"
+            assert agent_completed in event_types, fMISSION CRITICAL: agent_completed missing from {event_types}
             
             # Thinking events are optional but validate they work if present
             if thinking_events:
-                assert len(thinking_events) > 0, "If thinking events are sent, should receive at least one
+                assert len(thinking_events) > 0, If thinking events are sent, should receive at least one"
                 # Validate thinking event structure
                 for thinking_event in thinking_events:
-                    assert type" in thinking_event, "Thinking events should have type field
+                    assert type" in thinking_event, Thinking events should have type field
             
             # At minimum, validate we got meaningful agent interaction
-            assert len(all_events) >= 2, fShould receive meaningful agent interaction events, got: {len(all_events)}"
+            assert len(all_events) >= 2, fShould receive meaningful agent interaction events, got: {len(all_events)}
             
         finally:
             await websocket.close()
@@ -501,38 +501,38 @@ class WebSocketAgentEventsE2ETests:
     
     @pytest.mark.asyncio
     async def test_heartbeat_keeps_connection_alive(self, backend_client, authenticated_user):
-        ""Test heartbeat keeps WebSocket connection alive - CLAUDE.md Compliant."
+        "Test heartbeat keeps WebSocket connection alive - CLAUDE.md Compliant.
         test_start_time = time.time()
         
         # SSOT WebSocket Connection - CLAUDE.md Compliant
-        auth_helper = E2EWebSocketAuthHelper(environment="test)
+        auth_helper = E2EWebSocketAuthHelper(environment="test)"
         websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
         
         try:
             await asyncio.wait_for(websocket.recv(), timeout=10.0)  # Skip connection - NO HIDDEN EXCEPTIONS
             
             # Send ping for real heartbeat testing
-            ping_message = {type": "ping, timestamp": time.time()}
+            ping_message = {type: ping, timestamp: time.time()}"
             await websocket.send(json.dumps(ping_message))
             
             # Should receive pong - HARD ASSERTION
             message = await asyncio.wait_for(websocket.recv(), timeout=8.0)
             event = json.loads(message)
-            assert event["type] == pong", f"Expected pong response, got: {event}
+            assert event["type] == pong, fExpected pong response, got: {event}
             
             # Connection should stay alive for extended period - REAL TIMING
             await asyncio.sleep(3)  # Real connection persistence test
             
             # Send another ping to verify connection persistence - NO HIDDEN EXCEPTIONS
-            second_ping = {type": "ping, timestamp": time.time()}
+            second_ping = {type: "ping, timestamp": time.time()}
             await websocket.send(json.dumps(second_ping))
             
             message = await asyncio.wait_for(websocket.recv(), timeout=8.0)
             event = json.loads(message)
-            assert event["type] == pong", f"Second ping should receive pong, got: {event}
+            assert event[type] == pong, f"Second ping should receive pong, got: {event}
             
             # Validate connection remained stable
-            assert hasattr(websocket, 'close'), WebSocket connection should remain functional"
+            assert hasattr(websocket, 'close'), WebSocket connection should remain functional""
             
         finally:
             await websocket.close()

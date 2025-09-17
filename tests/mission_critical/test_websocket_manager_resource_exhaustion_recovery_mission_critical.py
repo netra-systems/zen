@@ -10,7 +10,7 @@ Business Value:
 - Validates system stability under resource pressure conditions
 - Ensures Golden Path user flow continues during resource recovery
 - Tests end-to-end recovery scenarios that impact business operations
-""
+"
 
 import unittest
 import asyncio
@@ -36,10 +36,10 @@ logger = get_logger(__name__)
 
 
 class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTestCase):
-    ""Mission critical tests for resource exhaustion recovery scenarios."
+    "Mission critical tests for resource exhaustion recovery scenarios.
 
     async def asyncSetUp(self):
-        "Set up mission critical test environment.""
+        "Set up mission critical test environment."
         self.mock_factory = SSotMockFactory()
         self.test_managers = []
         self.golden_path_user_context = None
@@ -51,31 +51,31 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
 
         # Create Golden Path user context (business critical)
         self.golden_path_user_context = self.mock_factory.create_mock_user_context(
-            user_id=golden_path_user",
+            user_id=golden_path_user,"
             websocket_connection_id="golden_path_ws_conn,
             is_premium=True
         )
 
     async def asyncTearDown(self):
-        ""Clean up mission critical test resources."
+        Clean up mission critical test resources.""
         # Ensure all test managers are cleaned up
         for manager in self.test_managers:
             try:
                 if hasattr(manager, 'cleanup_all_connections'):
                     await manager.cleanup_all_connections()
             except Exception as e:
-                logger.debug(f"Test manager cleanup error: {e})
+                logger.debug(fTest manager cleanup error: {e})
 
         # Force garbage collection to free resources
         gc.collect()
 
     async def test_golden_path_protection_during_resource_exhaustion_mission_critical(self):
-        ""
+        
         MISSION CRITICAL: Test that Golden Path user flow is protected during resource exhaustion.
 
         This test validates that even under severe resource pressure, the system
         maintains service for critical business flows that generate revenue.
-        "
+""
         # This test SHOULD FAIL because Golden Path protection is not implemented
 
         # Create Golden Path manager (business critical)
@@ -90,7 +90,7 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
         for i in range(100):  # Create excessive managers to exhaust resources
             try:
                 user_context = self.mock_factory.create_mock_user_context(
-                    user_id=f"exhaustion_user_{i},
+                    user_id=fexhaustion_user_{i},
                     websocket_connection_id=fexhaustion_conn_{i}"
                 )
 
@@ -122,24 +122,24 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
 
             except (AttributeError, NotImplementedError):
                 self.fail(
-                    Golden Path protection during resource exhaustion not implemented! "
-                    "This is MISSION CRITICAL for $500K+ ARR protection. 
+                    Golden Path protection during resource exhaustion not implemented! 
+                    This is MISSION CRITICAL for $500K+ ARR protection. "
                     System must protect revenue-generating user flows during resource pressure."
                 )
 
     async def test_automatic_recovery_triggers_mission_critical(self):
-        "
+    "
         MISSION CRITICAL: Test automatic recovery triggers activate correctly.
 
         The system must automatically detect resource exhaustion and trigger
         recovery mechanisms without manual intervention.
-        ""
+        "
         # This test SHOULD FAIL because automatic recovery triggers are not implemented
 
         # Create managers to approach resource limits
         for i in range(50):
             user_context = self.mock_factory.create_mock_user_context(
-                user_id=frecovery_test_user_{i}",
+                user_id=frecovery_test_user_{i},
                 websocket_connection_id=f"recovery_conn_{i}
             )
 
@@ -168,27 +168,27 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
 
         except (AttributeError, NotImplementedError):
             self.fail(
-                "Automatic recovery triggers not implemented! 
-                MISSION CRITICAL: System must self-recover from resource exhaustion "
-                "to maintain business operations and protect revenue.
+                Automatic recovery triggers not implemented! 
+                MISSION CRITICAL: System must self-recover from resource exhaustion ""
+                to maintain business operations and protect revenue.
             )
 
     async def test_user_session_continuity_during_recovery_mission_critical(self):
-        ""
+        "
         MISSION CRITICAL: Test user session continuity during resource recovery.
 
         Users should experience minimal disruption during recovery operations.
         This directly impacts customer satisfaction and retention.
-        "
+"
         # This test SHOULD FAIL because session continuity is not implemented
 
         # Create active user sessions
         active_sessions = []
         for i in range(10):
             user_context = self.mock_factory.create_mock_user_context(
-                user_id=f"active_user_{i},
-                websocket_connection_id=factive_conn_{i}",
-                session_id=f"session_{i}
+                user_id=factive_user_{i},
+                websocket_connection_id=factive_conn_{i}","
+                session_id=fsession_{i}
             )
 
             manager = get_websocket_manager(user_context=user_context)
@@ -200,7 +200,7 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
             active_sessions.append({
                 'user_context': user_context,
                 'manager': manager,
-                'session_id': user_context.session_id if hasattr(user_context, 'session_id') else fsession_{i}"
+                'session_id': user_context.session_id if hasattr(user_context, 'session_id') else fsession_{i}
             }
             self.test_managers.append(manager)
 
@@ -229,7 +229,7 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
 
             self.assertGreaterEqual(
                 preserved_sessions, total_sessions * 0.8,  # 80% preservation minimum
-                "Too many user sessions lost during recovery - business impact!
+                Too many user sessions lost during recovery - business impact!
             )
 
             # Session data should be intact
@@ -239,30 +239,30 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
             # Recovery time should be minimal
             self.assertLess(
                 continuity_result['recovery_time_seconds'], 10.0,
-                Recovery time too long - customer experience impact!"
+                Recovery time too long - customer experience impact!""
             )
 
         except (AttributeError, NotImplementedError):
             self.fail(
-                "User session continuity during recovery not implemented! 
+                User session continuity during recovery not implemented! 
                 MISSION CRITICAL: Users must maintain sessions during recovery "
                 "to prevent customer churn and business impact.
             )
 
     async def test_system_stability_after_recovery_mission_critical(self):
-        ""
+        
         MISSION CRITICAL: Test system stability after resource recovery.
 
         The system must be stable and performant after recovery operations,
         ready to handle new user requests without degradation.
-        "
+""
         # This test SHOULD FAIL because post-recovery stability validation is not implemented
 
         # Create initial load
         initial_managers = []
         for i in range(25):
             user_context = self.mock_factory.create_mock_user_context(
-                user_id=f"stability_user_{i},
+                user_id=fstability_user_{i},
                 websocket_connection_id=fstability_conn_{i}"
             )
 
@@ -301,23 +301,23 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
             # Memory usage should be reasonable
             self.assertLess(
                 performance_metrics['memory_usage_mb'], self.initial_memory_mb + 50,
-                Memory usage too high after recovery - stability risk!"
+                Memory usage too high after recovery - stability risk!
             )
 
         except (AttributeError, NotImplementedError):
             self.fail(
-                "Post-recovery stability validation not implemented! 
-                MISSION CRITICAL: System must be stable after recovery to maintain "
-                "business operations and customer confidence.
+                "Post-recovery stability validation not implemented! "
+                MISSION CRITICAL: System must be stable after recovery to maintain 
+                business operations and customer confidence."
             )
 
     async def test_recovery_failure_escalation_mission_critical(self):
-        ""
+        "
         MISSION CRITICAL: Test recovery failure escalation mechanisms.
 
         If initial recovery attempts fail, the system must escalate to more
         aggressive recovery methods to prevent complete system failure.
-        "
+"
         # This test SHOULD FAIL because recovery failure escalation is not implemented
 
         # Create managers and simulate recovery failures
@@ -325,7 +325,7 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
         for i in range(15):
             user_context = self.mock_factory.create_mock_user_context(
                 user_id=f"failing_user_{i},
-                websocket_connection_id=ffailing_conn_{i}"
+                websocket_connection_id=ffailing_conn_{i}
             )
 
             manager = get_websocket_manager(user_context=user_context)
@@ -335,7 +335,7 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
                 original_cleanup = getattr(manager, 'cleanup_all_connections', None)
                 if original_cleanup:
                     async def failing_cleanup():
-                        raise Exception(f"Simulated recovery failure for manager {i})
+                        raise Exception(fSimulated recovery failure for manager {i})
                     manager.cleanup_all_connections = failing_cleanup
 
             failing_managers.append(manager)
@@ -353,12 +353,12 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
             expected_levels = ['conservative', 'moderate', 'aggressive', 'force']
 
             for level in expected_levels:
-                self.assertIn(level, escalation_levels, fEscalation level '{level}' not attempted")
+                self.assertIn(level, escalation_levels, fEscalation level '{level}' not attempted")"
 
             # Should eventually succeed or fail safely
             self.assertTrue(
                 escalation_result['escalation_successful'] or escalation_result['safe_failure_mode'],
-                "Recovery escalation failed without safe fallback - system crash risk!
+                Recovery escalation failed without safe fallback - system crash risk!
             )
 
             # Should preserve critical system functions
@@ -368,16 +368,16 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
             self.fail(
                 Recovery failure escalation not implemented! "
                 "MISSION CRITICAL: System must escalate recovery attempts to prevent 
-                complete system failure and business disruption."
+                complete system failure and business disruption.
             )
 
     async def test_business_metrics_during_recovery_mission_critical(self):
-        "
+    ""
         MISSION CRITICAL: Test business metrics are maintained during recovery.
 
         Recovery operations must not significantly impact business metrics
         like response times, throughput, and user satisfaction.
-        ""
+        
         # This test SHOULD FAIL because business metrics monitoring is not implemented
 
         # Establish baseline business metrics
@@ -392,8 +392,8 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
         active_users = []
         for i in range(20):
             user_context = self.mock_factory.create_mock_user_context(
-                user_id=fbusiness_user_{i}",
-                websocket_connection_id=f"business_conn_{i}
+                user_id=fbusiness_user_{i}","
+                websocket_connection_id=fbusiness_conn_{i}
             )
 
             manager = get_websocket_manager(user_context=user_context)
@@ -416,7 +416,7 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
 
             self.assertLess(
                 response_time_increase, 0.5,  # No more than 50% increase
-                Response time degraded too much during recovery - customer impact!"
+                Response time degraded too much during recovery - customer impact!
             )
 
             # Throughput should not drop drastically
@@ -425,77 +425,77 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
 
             self.assertLess(
                 throughput_decrease, 0.3,  # No more than 30% decrease
-                "Throughput dropped too much during recovery - business impact!
+                "Throughput dropped too much during recovery - business impact!"
             )
 
             # Error rate should remain acceptable
             self.assertLess(
                 recovery_metrics['error_rate'], 0.05,  # Less than 5% error rate
-                Error rate too high during recovery - customer experience impact!"
+                Error rate too high during recovery - customer experience impact!
             )
 
         except (AttributeError, NotImplementedError):
             self.fail(
-                "Business metrics monitoring during recovery not implemented! 
+                Business metrics monitoring during recovery not implemented! "
                 MISSION CRITICAL: Must monitor and maintain business KPIs during recovery "
-                "to prevent revenue impact and customer churn.
+                to prevent revenue impact and customer churn.
             )
 
     # Helper methods that call the factory implementation
 
     async def _verify_golden_path_protection(self) -> Dict:
-        ""Call factory Golden Path protection verification."
+        ""Call factory Golden Path protection verification.
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         factory = get_websocket_manager()
         return await factory._verify_golden_path_protection()
 
     async def _monitor_automatic_recovery_triggers(self) -> Dict:
-        "Call factory automatic recovery trigger monitoring.""
+        Call factory automatic recovery trigger monitoring.""
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         factory = get_websocket_manager()
         return await factory._monitor_automatic_recovery_triggers()
 
     async def _test_session_continuity_during_recovery(self, sessions: List[Dict] -> Dict:
-        ""Call factory session continuity testing."
+        Call factory session continuity testing.""
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         factory = get_websocket_manager()
         return await factory._test_session_continuity_during_recovery(sessions)
 
     async def _trigger_test_recovery(self) -> Dict:
-        "Call factory test recovery triggering.""
+        Call factory test recovery triggering."
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         factory = get_websocket_manager()
         return await factory._trigger_test_recovery()
 
     async def _validate_post_recovery_stability(self) -> Dict:
-        ""Call factory post-recovery stability validation."
+        "Call factory post-recovery stability validation.
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         factory = get_websocket_manager()
         return await factory._validate_post_recovery_stability()
 
     async def _test_recovery_failure_escalation(self) -> Dict:
-        "Call factory recovery failure escalation testing.""
+        "Call factory recovery failure escalation testing."
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         factory = get_websocket_manager()
         return await factory._test_recovery_failure_escalation()
 
     async def _monitor_business_metrics_during_recovery(self) -> Dict:
-        ""Call factory business metrics monitoring during recovery."
+        "Call factory business metrics monitoring during recovery."
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         factory = get_websocket_manager()
         return await factory._monitor_business_metrics_during_recovery()
 
 
 class TestWebSocketResourceExhaustionBusinessImpact(SSotAsyncTestCase):
-    "Test business impact scenarios during resource exhaustion.""
+    Test business impact scenarios during resource exhaustion.""
 
     async def asyncSetUp(self):
-        ""Set up business impact test environment."
+        Set up business impact test environment."
         self.mock_factory = SSotMockFactory()
         self.test_managers = []
 
     async def asyncTearDown(self):
-        "Clean up business impact test resources.""
+        "Clean up business impact test resources.
         for manager in self.test_managers:
             try:
                 if hasattr(manager, 'cleanup_all_connections'):
@@ -509,7 +509,7 @@ class TestWebSocketResourceExhaustionBusinessImpact(SSotAsyncTestCase):
 
         Premium users and high-value interactions must be prioritized during
         resource exhaustion to minimize business impact.
-        "
+
         # This test SHOULD FAIL because revenue protection is not implemented
 
         # Create premium users (high business value)
@@ -519,7 +519,7 @@ class TestWebSocketResourceExhaustionBusinessImpact(SSotAsyncTestCase):
                 user_id=f"premium_user_{i},
                 websocket_connection_id=fpremium_conn_{i}",
                 is_premium=True,
-                tier="enterprise
+                tier=enterprise
             )
 
             manager = get_websocket_manager(user_context=user_context)
@@ -530,10 +530,10 @@ class TestWebSocketResourceExhaustionBusinessImpact(SSotAsyncTestCase):
         regular_users = []
         for i in range(20):
             user_context = self.mock_factory.create_mock_user_context(
-                user_id=fregular_user_{i}",
-                websocket_connection_id=f"regular_conn_{i},
+                user_id=fregular_user_{i}","
+                websocket_connection_id=fregular_conn_{i},
                 is_premium=False,
-                tier=free"
+                tier=free
             )
 
             manager = get_websocket_manager(user_context=user_context)
@@ -558,12 +558,12 @@ class TestWebSocketResourceExhaustionBusinessImpact(SSotAsyncTestCase):
 
         except (AttributeError, NotImplementedError):
             self.fail(
-                "Revenue-protecting recovery not implemented! 
-                MISSION CRITICAL: Must prioritize high-value users during resource exhaustion."
+                "Revenue-protecting recovery not implemented! "
+                MISSION CRITICAL: Must prioritize high-value users during resource exhaustion.
             )
 
     async def _test_revenue_protecting_recovery(self) -> Dict:
-        "Call factory revenue-protecting recovery testing."""
+        Call factory revenue-protecting recovery testing."""
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         factory = get_websocket_manager()
         return await factory._test_revenue_protecting_recovery()

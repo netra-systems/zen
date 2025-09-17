@@ -1,22 +1,22 @@
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.""
+    "Real WebSocket connection for testing instead of mocks.
     def __init__(self):
         pass
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.
         if self._closed:
-            raise RuntimeError("WebSocket is closed)
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):
-        "Close WebSocket connection.""
+        Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
     async def get_messages(self) -> list:
-        ""Get all sent messages."
+        Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
     #!/usr/bin/env python
@@ -60,13 +60,13 @@ class TestWebSocketConnection:
         from netra_backend.app.clients.auth_client_core import AuthServiceClient
         from shared.isolated_environment import get_env
 class MockWebSocketBridge:
-        "Mock WebSocket bridge to capture death notifications.""
+        "Mock WebSocket bridge to capture death notifications.
     def __init__(self):
         pass
         self.death_notifications = []
         self.events_sent = []
     async def notify_agent_death(self, run_id: str, agent_name: str, reason: str, details: Dict[str, Any]:
-        ""Capture death notification."
+        ""Capture death notification.
         self.death_notifications.append()
         'run_id': run_id,
         'agent_name': agent_name,
@@ -75,7 +75,7 @@ class MockWebSocketBridge:
         'timestamp': datetime.now(timezone.utc)
     
     async def send_agent_event(self, event_type: str, data: Dict[str, Any]:
-        "Capture general events.""
+        Capture general events.""
         pass
         self.events_sent.append()
         'type': event_type,
@@ -83,13 +83,13 @@ class MockWebSocketBridge:
         'timestamp': datetime.now(timezone.utc)
     
 class TestAgentDeathFixComplete:
-        ""Comprehensive test suite verifying the agent death bug is fixed."
+        Comprehensive test suite verifying the agent death bug is fixed.""
 @pytest.mark.asyncio
     async def test_complete_death_detection_flow(self):
-"Test the complete flow from agent execution to death detection.""
+    Test the complete flow from agent execution to death detection."
 print(")
-" + =*80)
-print("TEST: Complete Agent Death Detection Flow")
+ + "=*80)"
+print(TEST: Complete Agent Death Detection Flow)
 print(=*80)
         # Setup components
 tracker = AgentExecutionTracker()
@@ -106,7 +106,7 @@ user_id='user_456',
 timeout_seconds=30
         
 tracker.start_execution(exec_id)
-print("")
+print()
         # Send initial heartbeats (agent is alive)
 for i in range(3):
     await asyncio.sleep(1)
@@ -117,20 +117,20 @@ health_result = await health_integration.check_agent_execution_health()
 assert health_result['status'] == HealthStatus.HEALTHY.value
 print( PASS:  Health check shows HEALTHY while agent alive)
             # Simulate agent death (stop heartbeats)
-    print("")
+    print()
 [U+1F534] SIMULATING AGENT DEATH - stopping heartbeats...)
 await asyncio.sleep(12)  # Wait for death detection
             # Check if death was detected
-record = tracker.get_execution(exec_id)
+record = tracker.get_execution(exec_id")
 assert record is not None, Execution record should exist"
-assert record.is_dead(), "Agent should be detected as dead
-print(formatted_string")
+assert record.is_dead(), Agent should be detected as dead
+print(formatted_string"")
             # Check health after agent death
 health_result = await health_integration.check_agent_execution_health()
 assert health_result['status'] == HealthStatus.UNHEALTHY.value
 assert 'dead_agents' in health_result
 assert len(health_result['dead_agents'] == 1
-print(" PASS:  Health check shows UNHEALTHY after agent death)
+print( PASS:  Health check shows UNHEALTHY after agent death)"
             # Verify dead agent details
 dead_agent = health_result['dead_agents'][0]
 assert dead_agent['agent'] == 'triage_agent'
@@ -138,11 +138,11 @@ assert dead_agent['execution_id'] == exec_id
 print(formatted_string")
 @pytest.mark.asyncio
     async def test_timeout_detection_and_enforcement(self):
-"Test that timeouts are properly detected and enforced.""
+    Test that timeouts are properly detected and enforced.""
 pass
-print(")
+print()"
 " + =*80)
-print("TEST: Timeout Detection and Enforcement")
+print(TEST: Timeout Detection and Enforcement")
 print(=*80)
 tracker = AgentExecutionTracker()
                 # Create execution with short timeout
@@ -152,8 +152,8 @@ thread_id='thread_789',
 user_id='user_123',
 timeout_seconds=5
                 
-tracker.start_execution(exec_id)
-print("")
+tracker.start_execution(exec_id")
+print()
                 # Keep sending heartbeats but exceed timeout
 for i in range(7):
     await asyncio.sleep(1)
@@ -166,11 +166,11 @@ assert record.is_timed_out(), "Execution should be timed out"
 print(formatted_string)
 @pytest.mark.asyncio
     async def test_security_manager_integration(self):
-""Test that SecurityManager prevents agent death via protection mechanisms.""
+    Test that SecurityManager prevents agent death via protection mechanisms."
 print()
-" + "=*80)
-print(TEST: Security Manager Integration")
-print("=*80)
+ + "=*80)
+print(TEST: Security Manager Integration)
+print("=*80")
 from netra_backend.app.agents.security.resource_guard import ResourceGuard
 from netra_backend.app.agents.security.circuit_breaker import SystemCircuitBreaker
                         # Setup security components
@@ -179,29 +179,29 @@ circuit_breaker = SystemCircuitBreaker()
 security_manager = SecurityManager(resource_guard, circuit_breaker)
                         # Test request validation
 request_valid = await security_manager.validate_request('user_123', 'triage_agent')
-assert request_valid, First request should be valid"
-print(" PASS:  Security validation passed)
+assert request_valid, First request should be valid
+print(" PASS:  Security validation passed")
                         # Test resource acquisition
 resources = await security_manager.acquire_resources('user_123')
-assert resources is not None, Resources should be acquired"
-print(" PASS:  Resources acquired successfully)
+assert resources is not None, Resources should be acquired
+print(" PASS:  Resources acquired successfully")
                         # Test execution recording
 await security_manager.record_execution('user_123', 'triage_agent', success=False)
-print( PASS:  Execution failure recorded")
+print( PASS:  Execution failure recorded)"
                         # Test circuit breaker after failures
 for i in range(2):
     await security_manager.record_execution('user_123', 'triage_agent', success=False)
                             # Circuit should be open after 3 failures
 circuit_open = circuit_breaker.is_open('triage_agent')
 assert circuit_open, "Circuit breaker should be open after 3 failures
-print( PASS:  Circuit breaker triggered after repeated failures")
+print( PASS:  Circuit breaker triggered after repeated failures)"
 @pytest.mark.asyncio
     async def test_websocket_death_notification(self):
-"Test that WebSocket properly notifies on agent death.""
+    "Test that WebSocket properly notifies on agent death.
 pass
-print(")
-" + =*80)
-print("TEST: WebSocket Death Notification")
+print("")
+ + =*80)"
+print("TEST: WebSocket Death Notification)
 print(=*80)
                                 # Setup execution tracker with WebSocket integration
 tracker = ExecutionTracker()
@@ -209,7 +209,7 @@ websocket = MockWebSocketBridge()
                                 # Create task to monitor deaths
 death_detected = asyncio.Event()
 async def death_callback(execution_id: str, reason: str):
-""Callback when death is detected.""
+    "Callback when death is detected."
 await websocket.notify_agent_death( )
 run_id=execution_id,
 agent_name='triage_agent',
@@ -229,9 +229,9 @@ print(formatted_string)
 for i in range(2):
     await asyncio.sleep(1)
 await tracker.heartbeat(exec_id)
-print("")
-        # Stop heartbeats to simulate death
 print()
+        # Stop heartbeats to simulate death
+print(")
 [U+1F534] Simulating agent death...")
         # Register death callback
 tracker.registry.on_state_change = death_callback
@@ -239,18 +239,18 @@ tracker.registry.on_state_change = death_callback
 await tracker.timeout(exec_id)
         # Verify WebSocket notification was sent
 await asyncio.wait_for(death_detected.wait(), timeout=5)
-assert len(websocket.death_notifications) > 0, "WebSocket should send death notification
+assert len(websocket.death_notifications) > 0, WebSocket should send death notification
 notification = websocket.death_notifications[0]
 assert notification['agent_name'] == 'triage_agent'
 assert notification['reason'] == 'timeout'
-print(formatted_string")
+print(formatted_string"")
 @pytest.mark.asyncio
     async def test_multiple_concurrent_deaths(self):
-"Test system stability with multiple concurrent agent deaths.""
+    Test system stability with multiple concurrent agent deaths.""
 pass
-print(")
-" + =*80)
-print("TEST: Multiple Concurrent Agent Deaths")
+print()
+" + "=*80)
+print(TEST: Multiple Concurrent Agent Deaths)
 print(=*80)
 tracker = AgentExecutionTracker()
 health_integration = ExecutionHealthIntegration()
@@ -264,8 +264,8 @@ user_id='formatted_string',
 timeout_seconds=10
                 
 tracker.start_execution(exec_id)
-exec_ids.append(exec_id)
-print("")
+exec_ids.append(exec_id")
+print(")
                 # Send initial heartbeats
 for exec_id in exec_ids:
     tracker.heartbeat(exec_id)
@@ -273,7 +273,7 @@ print(formatted_string)
                     # Kill 3 agents (stop their heartbeats)
 dead_agents = exec_ids[:3]
 alive_agents = exec_ids[3:]
-print("")
+print(")
                     # Keep alive agents beating, let others die
 for _ in range(12):
     await asyncio.sleep(1)
@@ -286,23 +286,23 @@ dead_count = 0
 alive_count = 0
 for exec_id in exec_ids:
     record = tracker.get_execution(exec_id)
-if record and record.is_dead():
+if record and record.is_dead("):
     dead_count += 1
 elif record and not record.is_terminal:
     alive_count += 1
 assert dead_count == 3, formatted_string
-assert alive_count == 2, ""
+assert alive_count == 2, 
 print(formatted_string)
                                         # Verify health shows unhealthy
 assert health_result['status'] == HealthStatus.UNHEALTHY.value
-print(" PASS:  Health status correctly shows UNHEALTHY")
+print( PASS:  Health status correctly shows UNHEALTHY")
 @pytest.mark.asyncio
-    async def test_recovery_after_agent_death(self):
-"Test that system can recover after agent death."
+    async def test_recovery_after_agent_death(self"):
+    Test that system can recover after agent death.
 print("")
- + ="*80)
-print("TEST: Recovery After Agent Death)
-print(="*80)
+ + =*80)
+print(TEST: Recovery After Agent Death")"
+print(=*80)
 tracker = AgentExecutionTracker()
                                             # Create and kill an agent
 exec_id1 = tracker.create_execution( )
@@ -312,14 +312,14 @@ user_id='user_1',
 timeout_seconds=5
                                             
 tracker.start_execution(exec_id1)
-print("formatted_string)
+print("")
                                             # Let it timeout
 await asyncio.sleep(6)
 record1 = tracker.get_execution(exec_id1)
 assert record1.is_timed_out(), First agent should be timed out"
 print("[U+1F534] First agent timed out)
                                             # Mark as failed
-tracker.update_execution_state(exec_id1, ExecutionState.FAILED, error=Timeout")
+tracker.update_execution_state(exec_id1, ExecutionState.FAILED, error=Timeout)"
                                             # Start recovery agent
 exec_id2 = tracker.create_execution( )
 agent_name='triage_agent_recovery',
@@ -328,35 +328,35 @@ user_id='user_1',
 timeout_seconds=30
                                             
 tracker.start_execution(exec_id2)
-print("formatted_string)
+print(")
                                             # Keep recovery agent alive
 for i in range(3):
     await asyncio.sleep(1)
 tracker.heartbeat(exec_id2)
-print(formatted_string")
+print(formatted_string"")
                                                 # Complete recovery successfully
 tracker.update_execution_state(exec_id2, ExecutionState.SUCCESS, result={'recovered': True}
                                                 # Verify recovery
 record2 = tracker.get_execution(exec_id2)
 assert record2.state == ExecutionState.SUCCESS
 assert record2.result.get('recovered') == True
-print(" PASS:  Recovery agent completed successfully)
+print( PASS:  Recovery agent completed successfully)"
                                                 # Check system health after recovery
 health_integration = ExecutionHealthIntegration()
 health_result = await health_integration.check_agent_execution_health()
 assert health_result['status'] == HealthStatus.HEALTHY.value
 print( PASS:  System health restored after recovery")
 class TestBaseAgentInheritanceDeathScenarios:
-    "Test BaseAgent inheritance patterns in death/failure scenarios""
+    Test BaseAgent inheritance patterns in death/failure scenarios""
 @pytest.mark.asyncio
     async def test_baseagent_death_detection_inheritance(self):
-""Test BaseAgent death detection works through inheritance"
+    Test BaseAgent death detection works through inheritance""
 try:
     from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.schemas.agent_models import DeepAgentState
 except ImportError:
-    pytest.skip("BaseAgent components not available)
+    pytest.skip(BaseAgent components not available)
 class DeathTestAgent(BaseAgent):
     async def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -365,15 +365,15 @@ class DeathTestAgent(BaseAgent):
     # Simulate work that might lead to death
         await asyncio.sleep(0.1)
         self.death_detection_calls += 1
-        if context.run_id.endswith(_death"):
+        if context.run_id.endswith(_death):"
         # Simulate agent death scenario
         raise RuntimeError("Agent death simulation)
         await asyncio.sleep(0)
         return {
-        status": "alive,
-        death_detection_calls": self.death_detection_calls
+        status: alive,
+        death_detection_calls": self.death_detection_calls"
         
-        agent = DeathTestAgent(name="DeathTestAgent)
+        agent = DeathTestAgent(name=DeathTestAgent)
         tracker = AgentExecutionTracker()
         # Test successful execution
         exec_id_success = tracker.create_execution( )
@@ -385,12 +385,12 @@ class DeathTestAgent(BaseAgent):
         tracker.start_execution(exec_id_success)
         # Execute successfully
         context = ExecutionContext( )
-        run_id=death_test_success",
+        run_id=death_test_success,"
         agent_name=agent.name,
         state=DeepAgentState()
         
         result = await agent.execute_core_logic(context)
-        assert result["status] == alive"
+        assert result["status] == alive
         # Test death scenario
         exec_id_death = tracker.create_execution( )
         agent_name=agent.name,
@@ -400,26 +400,26 @@ class DeathTestAgent(BaseAgent):
         
         tracker.start_execution(exec_id_death)
         death_context = ExecutionContext( )
-        run_id="death_test_death,
+        run_id=death_test_death,
         agent_name=agent.name,
         state=DeepAgentState()
         
         with pytest.raises(RuntimeError):
         await agent.execute_core_logic(death_context)
             # Mark execution as failed due to agent death
-        tracker.update_execution_state(exec_id_death, ExecutionState.FAILED, error=Agent death")
+        tracker.update_execution_state(exec_id_death, ExecutionState.FAILED, error=Agent death")"
         record = tracker.get_execution(exec_id_death)
         assert record.state == ExecutionState.FAILED
-        print(" PASS:  BaseAgent death detection working through inheritance)
+        print( PASS:  BaseAgent death detection working through inheritance)
 @pytest.mark.asyncio
     async def test_baseagent_state_consistency_during_death(self):
-""Test BaseAgent state remains consistent during death scenarios"
+    ""Test BaseAgent state remains consistent during death scenarios
 pass
 try:
     from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 except ImportError:
-    pytest.skip("BaseAgent components not available)
+    pytest.skip(BaseAgent components not available)"
 class StateConsistencyAgent(BaseAgent):
     async def execute_core_logic(self, context) -> Dict[str, Any]:
         initial_state = self.get_state()
@@ -430,16 +430,16 @@ class StateConsistencyAgent(BaseAgent):
         dying_state = self.get_state()
         assert dying_state == SubAgentLifecycle.RUNNING
         self.set_state(SubAgentLifecycle.FAILED)
-        raise RuntimeError("Simulated agent death)
+        raise RuntimeError(Simulated agent death)
         self.set_state(SubAgentLifecycle.COMPLETED)
         await asyncio.sleep(0)
         return {initial_state": str(initial_state), "final_state: str(self.get_state())}
-        agent = StateConsistencyAgent(name=StateConsistencyTest")
+        agent = StateConsistencyAgent(name=StateConsistencyTest)
         # Test successful state transition
         from netra_backend.app.agents.base.interface import ExecutionContext
         from netra_backend.app.schemas.agent_models import DeepAgentState
         success_context = ExecutionContext( )
-        run_id="state_success,
+        run_id=state_success,"
         agent_name=agent.name,
         state=DeepAgentState()
         
@@ -457,42 +457,42 @@ class StateConsistencyAgent(BaseAgent):
             # State should be FAILED after death
         death_state = agent.get_state()
         assert death_state == SubAgentLifecycle.FAILED
-        print(" PASS:  BaseAgent state consistency maintained during death)
+        print( PASS:  BaseAgent state consistency maintained during death)"
 @pytest.mark.asyncio
     async def test_baseagent_websocket_notifications_on_death(self):
-""Test BaseAgent WebSocket notifications work during death"
+    "Test BaseAgent WebSocket notifications work during death
 try:
     from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.schemas.agent_models import DeepAgentState
 except ImportError:
-    pytest.skip("BaseAgent components not available)
+    pytest.skip("BaseAgent components not available)"
 websocket_notifications = []
 class WebSocketDeathAgent(BaseAgent):
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
     # Send started notification
         await self.emit_agent_started()
-        websocket_notifications.append(agent_started")
-        if context.run_id.endswith("_death):
+        websocket_notifications.append(agent_started)
+        if context.run_id.endswith(_death):"
         # Try to send thinking notification before death
         await self.emit_thinking(About to die...")
-        websocket_notifications.append("thinking)
+        websocket_notifications.append(thinking)
         # Simulate sudden death
-        raise RuntimeError(Agent died unexpectedly")
-        await self.emit_agent_completed({"status: success"}
-        websocket_notifications.append("agent_completed)
+        raise RuntimeError(Agent died unexpectedly")"
+        await self.emit_agent_completed({status: success}
+        websocket_notifications.append(agent_completed)"
         await asyncio.sleep(0)
-        return {status": "completed}
-        agent = WebSocketDeathAgent(name=WebSocketDeathTest")
+        return {status": completed}
+        agent = WebSocketDeathAgent(name=WebSocketDeathTest)
         # Test successful execution notifications
         success_context = ExecutionContext( )
-        run_id="websocket_success,
+        run_id="websocket_success,"
         agent_name=agent.name,
         state=DeepAgentState()
         
         result = await agent.execute_core_logic(success_context)
-        assert agent_started" in websocket_notifications
-        assert "agent_completed in websocket_notifications
+        assert agent_started in websocket_notifications
+        assert agent_completed in websocket_notifications"
         # Clear notifications
         websocket_notifications.clear()
         # Test death scenario notifications
@@ -504,21 +504,21 @@ class WebSocketDeathAgent(BaseAgent):
         with pytest.raises(RuntimeError):
         await agent.execute_core_logic(death_context)
             # Should have started and thinking notifications, but not completed
-        assert "agent_started in websocket_notifications
-        assert thinking" in websocket_notifications
-        assert "agent_completed not in websocket_notifications
-        print( PASS:  BaseAgent WebSocket notifications work during death scenarios")
+        assert agent_started in websocket_notifications
+        assert thinking" in websocket_notifications"
+        assert agent_completed not in websocket_notifications
+        print( PASS:  BaseAgent WebSocket notifications work during death scenarios")"
 class TestExecuteCorePatternDeathScenarios:
-        "Test _execute_core pattern in death/failure scenarios""
+        Test _execute_core pattern in death/failure scenarios"
 @pytest.mark.asyncio
     async def test_execute_core_death_detection_patterns(self):
-""Test _execute_core pattern handles death detection properly"
+    "Test _execute_core pattern handles death detection properly
 try:
     from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.schemas.agent_models import DeepAgentState
 except ImportError:
-    pytest.skip("Required components not available)
+    pytest.skip("Required components not available)"
 class ExecuteCoreDeathAgent(BaseAgent):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -532,25 +532,25 @@ class ExecuteCoreDeathAgent(BaseAgent):
         self.last_heartbeat = datetime.now(timezone.utc)
         # Simulate work
         await asyncio.sleep(0.1)
-        if context.run_id.endswith(_death"):
+        if context.run_id.endswith(_death):
             # Simulate sudden death during execution
         self.last_heartbeat = None  # Heartbeat stops
-        raise RuntimeError("Execute core death)
+        raise RuntimeError(Execute core death)"
         if context.run_id.endswith(_timeout"):
                 # Simulate timeout scenario
         await asyncio.sleep(10)  # Longer than typical timeout
         end_time = datetime.now(timezone.utc)
         await asyncio.sleep(0)
         return {
-        "execution_attempts: self.execution_attempts,
-        execution_time": (end_time - start_time).total_seconds(),
-        "heartbeat_active: self.last_heartbeat is not None
+        execution_attempts: self.execution_attempts,
+        execution_time": (end_time - start_time).total_seconds(),"
+        heartbeat_active: self.last_heartbeat is not None
                 
         except Exception as e:
                     # Death detected in execute_core
         self.last_heartbeat = None
         raise
-        agent = ExecuteCoreDeathAgent(name=ExecuteCoreDeathTest")
+        agent = ExecuteCoreDeathAgent(name=ExecuteCoreDeathTest)"
                     # Test successful execution
         success_context = ExecutionContext( )
         run_id="execute_success,
@@ -558,21 +558,21 @@ class ExecuteCoreDeathAgent(BaseAgent):
         state=DeepAgentState()
                     
         result = await agent.execute_core_logic(success_context)
-        assert result[heartbeat_active"] is True
-        assert result["execution_attempts] == 1
+        assert result[heartbeat_active] is True
+        assert result["execution_attempts] == 1"
                     # Test death during execution
         death_context = ExecutionContext( )
-        run_id=execute_death",
+        run_id=execute_death,
         agent_name=agent.name,
         state=DeepAgentState()
                     
         with pytest.raises(RuntimeError):
         await agent.execute_core_logic(death_context)
         assert agent.last_heartbeat is None  # Heartbeat stopped on death
-        print(" PASS:  Execute core pattern handles death detection properly)
+        print( PASS:  Execute core pattern handles death detection properly")"
 @pytest.mark.asyncio
     async def test_execute_core_timeout_death_scenarios(self):
-""Test _execute_core pattern handles timeout death scenarios"
+    Test _execute_core pattern handles timeout death scenarios"
 pass
 try:
     from netra_backend.app.agents.base_agent import BaseAgent
@@ -599,46 +599,46 @@ class TimeoutDeathAgent(BaseAgent):
         except asyncio.TimeoutError:
         self.timeout_detected = True
         end_time = datetime.now(timezone.utc)
-        raise RuntimeError(formatted_string")
+        raise RuntimeError(formatted_string)
     async def _simulate_work(self, context: ExecutionContext) -> Dict[str, Any]:
         await asyncio.sleep(self.execution_time)
-        if context.run_id.endswith("_long):
+        if context.run_id.endswith("_long):"
         # Simulate work that takes too long
         await asyncio.sleep(5.0)  # Longer than timeout
         return {
-        work_completed": True,
-        "execution_time: self.execution_time
+        work_completed: True,
+        execution_time: self.execution_time"
         
         # Test normal execution (within timeout)
         normal_agent = TimeoutDeathAgent(execution_time=0.1, name=TimeoutTestNormal")
         normal_context = ExecutionContext( )
-        run_id="timeout_normal,
+        run_id=timeout_normal,
         agent_name=normal_agent.name,
         state=DeepAgentState()
         
         result = await normal_agent.execute_core_logic(normal_context)
-        assert result[work_completed"] is True
+        assert result[work_completed"] is True"
         assert normal_agent.timeout_detected is False
         # Test timeout death scenario
-        timeout_agent = TimeoutDeathAgent(execution_time=0.1, name="TimeoutTestDeath)
+        timeout_agent = TimeoutDeathAgent(execution_time=0.1, name=TimeoutTestDeath)
         timeout_context = ExecutionContext( )
-        run_id=timeout_long",
+        run_id=timeout_long,"
         agent_name=timeout_agent.name,
         state=DeepAgentState()
         
         with pytest.raises(RuntimeError, match="died due to timeout):
         await timeout_agent.execute_core_logic(timeout_context)
         assert timeout_agent.timeout_detected is True
-        print( PASS:  Execute core pattern handles timeout death scenarios")
+        print( PASS:  Execute core pattern handles timeout death scenarios)"
 @pytest.mark.asyncio
     async def test_execute_core_resource_cleanup_on_death(self):
-"Test _execute_core pattern cleans up resources on death""
+    "Test _execute_core pattern cleans up resources on death
 try:
     from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.schemas.agent_models import DeepAgentState
 except ImportError:
-    pytest.skip(Required components not available")
+    pytest.skip(Required components not available")"
 class ResourceCleanupAgent(BaseAgent):
     async def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -651,20 +651,20 @@ class ResourceCleanupAgent(BaseAgent):
         await self._acquire_resources(3)
         # Simulate work
         await asyncio.sleep(0.1)
-        if context.run_id.endswith("_death):
-        raise RuntimeError(Death during execution")
+        if context.run_id.endswith(_death):
+        raise RuntimeError(Death during execution)"
         await asyncio.sleep(0)
         return {
         "resources_acquired: self.resources_acquired,
-        resources_released": self.resources_released,
-        "active_resources: len(self.active_resources)
+        resources_released: self.resources_released,
+        "active_resources: len(self.active_resources)"
             
         finally:
                 # Always cleanup resources (even on death)
         await self._release_all_resources()
     async def _acquire_resources(self, count: int):
         for i in range(count):
-        resource = formatted_string"
+        resource = formatted_string
         self.active_resources.append(resource)
         self.resources_acquired += 1
     async def _release_all_resources(self):
@@ -672,18 +672,18 @@ class ResourceCleanupAgent(BaseAgent):
         self.resources_released += 1
         self.active_resources.clear()
         # Test successful execution with cleanup
-        success_agent = ResourceCleanupAgent(name="ResourceCleanupSuccess)
+        success_agent = ResourceCleanupAgent(name=ResourceCleanupSuccess)"
         success_context = ExecutionContext( )
         run_id=cleanup_success",
         agent_name=success_agent.name,
         state=DeepAgentState()
         
         result = await success_agent.execute_core_logic(success_context)
-        assert result["resources_acquired] == 3
-        assert result[resources_released"] == 3
-        assert result["active_resources] == 0
+        assert result[resources_acquired] == 3
+        assert result[resources_released"] == 3"
+        assert result[active_resources] == 0
         # Test death scenario with cleanup
-        death_agent = ResourceCleanupAgent(name=ResourceCleanupDeath")
+        death_agent = ResourceCleanupAgent(name=ResourceCleanupDeath)"
         death_context = ExecutionContext( )
         run_id="cleanup_death,
         agent_name=death_agent.name,
@@ -695,17 +695,17 @@ class ResourceCleanupAgent(BaseAgent):
         assert death_agent.resources_acquired == 3
         assert death_agent.resources_released == 3
         assert len(death_agent.active_resources) == 0
-        print( PASS:  Execute core pattern cleans up resources on death")
+        print( PASS:  Execute core pattern cleans up resources on death)"
 @pytest.mark.asyncio
     async def test_execute_core_death_propagation_patterns(self):
-"Test _execute_core pattern properly propagates death signals""
+    "Test _execute_core pattern properly propagates death signals
 pass
 try:
     from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.schemas.agent_models import DeepAgentState
 except ImportError:
-    pytest.skip(Required components not available")
+    pytest.skip(Required components not available")"
 death_signals_received = []
 class DeathPropagationAgent(BaseAgent):
     def __init__(self, **kwargs):
@@ -726,36 +726,36 @@ class DeathPropagationAgent(BaseAgent):
         try:
         await handler(e, context)
         except Exception:
-        pass  # Handler errors don"t prevent propagation
+        pass  # Handler errors dont prevent propagation
         raise
     async def _nested_execution(self, context: ExecutionContext) -> Dict[str, Any]:
         await asyncio.sleep(0.05)
         if context.run_id.endswith(_death):
         # Death occurs in nested execution
-        raise RuntimeError("Nested execution death")
-        return {nested_result: "success"}
+        raise RuntimeError(Nested execution death")
+        return {nested_result: "success}
     async def _handle_death_signal(self, error: Exception, context: ExecutionContext):
         pass
         death_signals_received.append()
         agent_name: self.name,
-        "error_type": type(error).__name__,
+        error_type: type(error).__name__,
         error_message: str(error),
         "context_id": context.run_id
     
     # Test successful execution (no death signals)
         success_agent = DeathPropagationAgent(name=PropagationSuccess)
         success_context = ExecutionContext( )
-        run_id="propagation_success",
+        run_id=propagation_success,
         agent_name=success_agent.name,
         state=DeepAgentState()
     
         result = await success_agent.execute_core_logic(success_context)
-        assert result[nested_result] == "success"
+        assert result[nested_result] == success"
         assert len(death_signals_received) == 0  # No death signals
     # Test death propagation
         death_agent = DeathPropagationAgent(name=PropagationDeath)
         death_context = ExecutionContext( )
-        run_id="propagation_death",
+        run_id="propagation_death,
         agent_name=death_agent.name,
         state=DeepAgentState()
     
@@ -764,15 +764,15 @@ class DeathPropagationAgent(BaseAgent):
         # Should have received death signal
         assert len(death_signals_received) == 1
         signal = death_signals_received[0]
-        assert signal[agent_name] == "PropagationDeath"
+        assert signal[agent_name] == PropagationDeath
         assert signal[error_type] == "RuntimeError"
-        assert Nested execution death in signal["error_message"]
+        assert Nested execution death in signal[error_message]
         print( PASS:  Execute core pattern properly propagates death signals)
 class TestErrorRecoveryDeathScenarios:
-        ""Test error recovery patterns in death/failure scenarios""
+        "Test error recovery patterns in death/failure scenarios"
 @pytest.mark.asyncio
     async def test_error_recovery_after_agent_death(self):
-"Test error recovery mechanisms after agent death"
+    Test error recovery mechanisms after agent death
 try:
     from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
@@ -795,9 +795,9 @@ class ErrorRecoveryAgent(BaseAgent):
             # Record recovery attempt
         recovery_attempts.append()
         agent: self.name,
-        "attempt": self.attempt_count,
+        attempt: self.attempt_count,
         error: str(e),
-        "context_id": context.run_id
+        context_id": context.run_id
             
             # Try recovery if not max retries
         if self.attempt_count < self.max_retries:
@@ -811,33 +811,33 @@ class ErrorRecoveryAgent(BaseAgent):
     async def _execute_with_recovery(self, context: ExecutionContext) -> Dict[str, Any]:
         await asyncio.sleep(0.05)
     # Simulate different failure scenarios
-        if context.run_id.endswith("_transient") and self.attempt_count <= 2:
+        if context.run_id.endswith("_transient) and self.attempt_count <= 2:
         # Transient error that can be recovered
         raise ValueError(formatted_string)
-        elif context.run_id.endswith("_fatal"):
+        elif context.run_id.endswith(_fatal):
             # Fatal error that causes death
         raise RuntimeError(Fatal error - agent death)
         return {
         "success": True,
         attempts: self.attempt_count,
-        "recovered": self.attempt_count > 1
+        recovered: self.attempt_count > 1
             
     async def _attempt_recovery(self, error: Exception, context: ExecutionContext):
-        "Attempt to recover from error"
+        Attempt to recover from error"
         pass
         await asyncio.sleep(0.1)  # Recovery delay
     # Reset state for recovery attempt
         if self.get_state() == SubAgentLifecycle.FAILED:
         self.set_state(SubAgentLifecycle.RUNNING)
         # Test successful execution (no recovery needed)
-        success_agent = ErrorRecoveryAgent(name="RecoverySuccess")
+        success_agent = ErrorRecoveryAgent(name="RecoverySuccess)
         success_context = ExecutionContext( )
         run_id=recovery_success,
         agent_name=success_agent.name,
         state=DeepAgentState()
         
         result = await success_agent.execute_core_logic(success_context)
-        assert result["success"] is True
+        assert result[success] is True
         assert result[recovered] is False
         assert len(recovery_attempts) == 0
         # Test transient error recovery
@@ -848,13 +848,13 @@ class ErrorRecoveryAgent(BaseAgent):
         state=DeepAgentState()
         
         result = await transient_agent.execute_core_logic(transient_context)
-        assert result["success"] is True
+        assert result[success] is True
         assert result[recovered] is True
-        assert result["attempts"] == 3  # Should succeed on 3rd attempt
+        assert result[attempts"] == 3  # Should succeed on 3rd attempt
         # Test fatal error leading to death
         fatal_agent = ErrorRecoveryAgent(max_retries=2, name=RecoveryFatal)
         fatal_context = ExecutionContext( )
-        run_id="recovery_fatal",
+        run_id="recovery_fatal,
         agent_name=fatal_agent.name,
         state=DeepAgentState()
         
@@ -862,16 +862,16 @@ class ErrorRecoveryAgent(BaseAgent):
         await fatal_agent.execute_core_logic(fatal_context)
             # Agent should be in FAILED state
         assert fatal_agent.get_state() == SubAgentLifecycle.FAILED
-        print(" PASS:  Error recovery mechanisms work after agent death")
+        print( PASS:  Error recovery mechanisms work after agent death)
 @pytest.mark.asyncio
-    async def test_error_recovery_timeout_scenarios(self):
-"Test error recovery in timeout scenarios"
+    async def test_error_recovery_timeout_scenarios(self"):
+    "Test error recovery in timeout scenarios
 try:
     from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.schemas.agent_models import DeepAgentState
 except ImportError:
-    pytest.skip("Required components not available")
+    pytest.skip(Required components not available)
 class TimeoutRecoveryAgent(BaseAgent):
     async def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -909,17 +909,17 @@ class TimeoutRecoveryAgent(BaseAgent):
                 # Normal execution
         await asyncio.sleep(0.1)
         return {
-        "execution_time": 0.1,
+        execution_time: 0.1,
         timeout_count: self.timeout_count,
-        "recovery_count": self.recovery_count
+        recovery_count": self.recovery_count
                 
     async def _recover_from_timeout(self, context: ExecutionContext):
-        "Recover from timeout by adjusting execution parameters"
+        "Recover from timeout by adjusting execution parameters
         pass
         self.recovery_count += 1
         await asyncio.sleep(0.05)  # Brief recovery delay
     # Test normal execution (no timeouts)
-        normal_agent = TimeoutRecoveryAgent(name="TimeoutRecoveryNormal")
+        normal_agent = TimeoutRecoveryAgent(name=TimeoutRecoveryNormal)
         normal_context = ExecutionContext( )
         run_id=timeout_normal,
         agent_name=normal_agent.name,
@@ -929,29 +929,29 @@ class TimeoutRecoveryAgent(BaseAgent):
         assert result["timeout_count"] == 0
         assert result[recovery_count] == 0
     # Test timeout with recovery
-        slow_agent = TimeoutRecoveryAgent(name="TimeoutRecoverySlow")
+        slow_agent = TimeoutRecoveryAgent(name=TimeoutRecoverySlow)
         slow_context = ExecutionContext( )
         run_id=timeout_slow,
         agent_name=slow_agent.name,
         state=DeepAgentState()
     
         result = await slow_agent.execute_core_logic(slow_context)
-        assert result["timeout_count"] == 1  # One timeout occurred
+        assert result[timeout_count"] == 1  # One timeout occurred
         assert result[recovery_count] == 1  # One recovery attempt
     # Test repeated timeouts leading to death
-        very_slow_agent = TimeoutRecoveryAgent(name="TimeoutRecoveryDeath")
+        very_slow_agent = TimeoutRecoveryAgent(name="TimeoutRecoveryDeath)
         very_slow_context = ExecutionContext( )
         run_id=timeout_very_slow,
         agent_name=very_slow_agent.name,
         state=DeepAgentState()
     
-        with pytest.raises(RuntimeError, match="Agent died after .* timeouts"):
+        with pytest.raises(RuntimeError, match=Agent died after .* timeouts):
         await very_slow_agent.execute_core_logic(very_slow_context)
         assert very_slow_agent.timeout_count > 1
         print( PASS:  Error recovery works in timeout scenarios)
 @pytest.mark.asyncio
     async def test_error_recovery_cascading_failures(self):
-""Test error recovery in cascading failure scenarios""
+    ""Test error recovery in cascading failure scenarios
 try:
     from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
@@ -970,9 +970,9 @@ class CascadingFailureAgent(BaseAgent):
         except Exception as e:
         self.cascade_level += 1
         failure_cascade.append()
-        "agent": self.name,
+        agent": self.name,
         level: self.cascade_level,
-        "error": str(e)
+        "error: str(e)
             
             Try to recover from cascading failure
         if self.cascade_level <= 3:
@@ -983,7 +983,7 @@ class CascadingFailureAgent(BaseAgent):
         raise RuntimeError(formatted_string)
     async def _execute_with_cascade_handling(self, context: ExecutionContext) -> Dict[str, Any]:
         await asyncio.sleep(0.05)
-        if context.run_id.endswith("_cascade"):
+        if context.run_id.endswith(_cascade):
         if self.cascade_level == 0:
         raise ValueError(Level 1 cascade failure)
         elif self.cascade_level == 1:
@@ -994,17 +994,17 @@ class CascadingFailureAgent(BaseAgent):
                         # Recovery successful
         pass
         return {
-        "cascade_level": self.cascade_level,
+        cascade_level: self.cascade_level,
         recovered: self.cascade_level > 0
                         
     async def _handle_cascade_failure(self, error: Exception, context: ExecutionContext):
-        ""Handle cascading failure recovery""
+        "Handle cascading failure recovery"
         pass
         await asyncio.sleep(0.1 * self.cascade_level)  # Increasing recovery time
     # Test cascading failure recovery
         cascade_agent = CascadingFailureAgent(name=CascadingFailureTest)
         cascade_context = ExecutionContext( )
-        run_id="cascade_cascade",
+        run_id=cascade_cascade,
         agent_name=cascade_agent.name,
         state=DeepAgentState()
     
@@ -1014,18 +1014,18 @@ class CascadingFailureAgent(BaseAgent):
     # Verify cascade was recorded
         assert len(failure_cascade) == 3
         assert failure_cascade[0][level] == 1
-        assert failure_cascade[1]["level"] == 2
+        assert failure_cascade[1][level] == 2
         assert failure_cascade[2][level] == 3
-        print(" PASS:  Error recovery handles cascading failures")
+        print( PASS:  Error recovery handles cascading failures")
 @pytest.mark.asyncio
-    async def test_error_recovery_resource_exhaustion_death(self):
-"Test error recovery in resource exhaustion scenarios"
+    async def test_error_recovery_resource_exhaustion_death(self"):
+    Test error recovery in resource exhaustion scenarios
 try:
     from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.schemas.agent_models import DeepAgentState
 except ImportError:
-    pytest.skip("Required components not available")
+    pytest.skip(Required components not available")
 class ResourceExhaustionAgent(BaseAgent):
     async def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -1046,7 +1046,7 @@ class ResourceExhaustionAgent(BaseAgent):
         raise RuntimeError(formatted_string)
     async def _execute_with_resource_management(self, context: ExecutionContext) -> Dict[str, Any]:
     # Simulate resource usage
-        if context.run_id.endswith("_exhaust"):
+        if context.run_id.endswith("_exhaust):
         self.resource_usage += 50  # High resource usage
         else:
         self.resource_usage += 10  # Normal usage
@@ -1055,27 +1055,27 @@ class ResourceExhaustionAgent(BaseAgent):
         raise MemoryError(formatted_string)
         await asyncio.sleep(0.05)
         return {
-        "resource_usage": self.resource_usage,
+        resource_usage: self.resource_usage,
         max_resources: self.max_resources,
         "recovery_attempts": self.recovery_attempts
                 
     async def _recover_from_exhaustion(self):
-        "Attempt to recover from resource exhaustion"
+        Attempt to recover from resource exhaustion
         pass
         self.recovery_attempts += 1
     # Simulate resource cleanup
         self.resource_usage = max(0, self.resource_usage - 30)
         await asyncio.sleep(0.1)  # Recovery delay
     # Test normal execution (no exhaustion)
-        normal_agent = ResourceExhaustionAgent(name="ResourceNormal")
+        normal_agent = ResourceExhaustionAgent(name=ResourceNormal")
         normal_context = ExecutionContext( )
         run_id=resource_normal,
         agent_name=normal_agent.name,
         state=DeepAgentState()
     
         result = await normal_agent.execute_core_logic(normal_context)
-        assert result["resource_usage"] <= result[max_resources]
-        assert result["recovery_attempts"] == 0
+        assert result["resource_usage] <= result[max_resources]
+        assert result[recovery_attempts] == 0
     # Test resource exhaustion with recovery
         exhaust_agent = ResourceExhaustionAgent(name=ResourceExhaust)
         exhaust_context = ExecutionContext( )
@@ -1092,17 +1092,17 @@ class ResourceExhaustionAgent(BaseAgent):
         await exhaust_agent.execute_core_logic(exhaust_context)
         except RuntimeError as e:
             # Should eventually lead to death
-        assert "died from resource exhaustion" in str(e)
+        assert died from resource exhaustion in str(e)
         break
         else:
         pytest.fail(Should have died from repeated resource exhaustion)
-        print(" PASS:  Error recovery handles resource exhaustion scenarios")
-    async def test_agent_death_memory_cleanup(self):
-        "Test 18: Verify memory is properly cleaned up after agent death."
+        print( PASS:  Error recovery handles resource exhaustion scenarios")
+    async def test_agent_death_memory_cleanup(self"):
+        Test 18: Verify memory is properly cleaned up after agent death.
         agent = create_death_prone_agent()
         initial_memory = len(gc.get_objects())
                     # Cause agent death
-        with patch.object(agent, 'execute', side_effect=Exception("Fatal error")):
+        with patch.object(agent, 'execute', side_effect=Exception(Fatal error")):
         try:
         await agent.execute(DeepAgentState(), test_run_memory)
         except:
@@ -1113,17 +1113,17 @@ class ResourceExhaustionAgent(BaseAgent):
                                 # Check memory didn't grow excessively
         final_memory = len(gc.get_objects())
         memory_growth = final_memory - initial_memory
-        assert memory_growth < 1000, ""
+        assert memory_growth < 1000, "
         print( PASS:  Memory properly cleaned up after agent death)
     async def test_agent_death_websocket_cleanup(self):
-        ""Test 19: Verify WebSocket connections are cleaned up after death.""
+        Test 19: Verify WebSocket connections are cleaned up after death.""
         pass
         agent = create_death_prone_agent()
         mock_websocket = Magic        agent._websocket_adapter = mock_websocket
                                     # Cause agent death
         with patch.object(agent, 'execute', side_effect=Exception(Fatal WebSocket error)):
         try:
-        await agent.execute(DeepAgentState(), "test_run_ws_cleanup")
+        await agent.execute(DeepAgentState(), test_run_ws_cleanup)
         except:
         pass
                                                 # Verify WebSocket was cleaned up
@@ -1131,7 +1131,7 @@ class ResourceExhaustionAgent(BaseAgent):
         mock_websocket.close.assert_called()
         print( PASS:  WebSocket connections cleaned up after agent death)
     async def test_agent_death_thread_cleanup(self):
-        ""Test 20: Verify threads are properly terminated after agent death.""
+        "Test 20: Verify threads are properly terminated after agent death."
         import threading
         initial_threads = threading.active_count()
         agent = create_death_prone_agent()
@@ -1144,7 +1144,7 @@ class ResourceExhaustionAgent(BaseAgent):
     # Cause agent death
         with patch.object(agent, 'execute', side_effect=Exception(Thread death)):
         try:
-        await agent.execute(DeepAgentState(), "test_run_thread")
+        await agent.execute(DeepAgentState(), test_run_thread)
         except:
         pass
                 # Wait briefly for cleanup
@@ -1154,7 +1154,7 @@ class ResourceExhaustionAgent(BaseAgent):
         assert final_threads <= initial_threads + 1, Threads not cleaned up
         print(" PASS:  Threads properly terminated after agent death")
     async def test_agent_death_circuit_breaker_activation(self):
-        "Test 21: Verify circuit breaker activates on repeated deaths."
+        Test 21: Verify circuit breaker activates on repeated deaths.
         pass
         agent = create_death_prone_agent()
         death_count = 0
@@ -1173,10 +1173,10 @@ class ResourceExhaustionAgent(BaseAgent):
         except:
         pass
                 # Circuit breaker should limit attempts
-        assert death_count <= 3, f"Circuit breaker didn"t activate: {death_count} deaths
-        print( PASS:  Circuit breaker activated on repeated deaths")
+        assert death_count <= 3, fCircuit breaker didnt activate: {death_count} deaths
+        print( PASS:  Circuit breaker activated on repeated deaths)"
     async def test_agent_death_graceful_degradation(self):
-        "Test 22: Verify system degrades gracefully on agent death.""
+        "Test 22: Verify system degrades gracefully on agent death.
         agent = create_death_prone_agent()
                     # Set up fallback
         fallback_called = False
@@ -1184,57 +1184,57 @@ class ResourceExhaustionAgent(BaseAgent):
         nonlocal fallback_called
         fallback_called = True
         await asyncio.sleep(0)
-        return {fallback": True}
+        return {fallback": True}"
     # Execute with fallback
         result = await agent.execute_with_reliability( )
-        lambda x: None Exception("Primary death),
-        test_degradation",
+        lambda x: None Exception(Primary death),
+        test_degradation,"
         fallback=fallback
     
         assert fallback_called, "Fallback not called on death
-        print( PASS:  System degrades gracefully on agent death")
+        print( PASS:  System degrades gracefully on agent death)"
     async def test_agent_death_logging_completeness(self):
-        "Test 23: Verify comprehensive logging on agent death.""
+        "Test 23: Verify comprehensive logging on agent death.
         pass
         agent = create_death_prone_agent()
         with patch('netra_backend.app.logging_config.central_logger.get_logger') as mock_logger:
         logger_instance = Magic            mock_logger.return_value = logger_instance
             # Cause death
-        with patch.object(agent, 'execute', side_effect=Exception(Logged death")):
+        with patch.object(agent, 'execute', side_effect=Exception(Logged death")):"
         try:
-        await agent.execute(DeepAgentState(), "test_run_logging)
+        await agent.execute(DeepAgentState(), test_run_logging)
         except:
         pass
                         # Verify logging occurred
         assert logger_instance.error.called, Death not logged"
         print(" PASS:  Agent death properly logged)
     async def test_agent_death_metric_collection(self):
-        ""Test 24: Verify metrics are collected on agent death."
+        "Test 24: Verify metrics are collected on agent death."
         agent = create_death_prone_agent()
                             # Mock metrics collector
-        metrics = {"deaths: 0, recovery_time": []}
+        metrics = {deaths: 0, recovery_time: []}
     async def track_death():
-        metrics["deaths] += 1
+        metrics["deaths] += 1"
         start = time.time()
-        raise Exception(Metric death")
+        raise Exception(Metric death)
         try:
-        await agent.execute_with_reliability(track_death, "test_metrics)
+        await agent.execute_with_reliability(track_death, test_metrics)"
         except:
         pass
-        assert metrics[deaths"] > 0, "Death metrics not collected
-        print( PASS:  Metrics collected on agent death")
+        assert metrics[deaths"] > 0, Death metrics not collected
+        print( PASS:  Metrics collected on agent death)"
     async def test_agent_death_final_comprehensive_validation(self):
-        "Test 25: Final comprehensive validation of all death handling.""
+        "Test 25: Final comprehensive validation of all death handling.
         pass
-        print(")
-        TARGET:  Running final comprehensive death handling validation...")
+        print("")
+        TARGET:  Running final comprehensive death handling validation...)
                 # Test all critical death scenarios
         scenarios = [
         (timeout, lambda x: None asyncio.sleep(10)),
         ("exception", lambda x: None Exception(Fatal)),
-        ("memory", lambda x: None [0] * 10**9),
+        (memory, lambda x: None [0] * 10**9),
         (infinite_loop, lambda x: None while_true_loop()),
-        ("resource_exhaustion", lambda x: None open_many_files())
+        (resource_exhaustion", lambda x: None open_many_files())
                 
         results = {}
         for scenario_name, death_func in scenarios:
@@ -1242,20 +1242,20 @@ class ResourceExhaustionAgent(BaseAgent):
         try:
         with timeout(1):
         await agent.execute_with_reliability(death_func, formatted_string)
-        results[scenario_name] = "recovered"
+        results[scenario_name] = "recovered
         except:
         results[scenario_name] = handled
                                 # All scenarios should be handled
-        assert all(r == "handled" or r == recovered for r in results.values()), \
+        assert all(r == handled or r == recovered for r in results.values()), \
         ""
         print( PASS:  FINAL VALIDATION: All death scenarios properly handled)
-        print(" CELEBRATION:  AGENT DEATH FIX COMPLETE AND VERIFIED!")
+        print( CELEBRATION:  AGENT DEATH FIX COMPLETE AND VERIFIED!)
         if __name__ == __main__:
         print("")
-         + ="*80)
-        print("MISSION CRITICAL: AGENT DEATH BUG FIX VERIFICATION)
-        print(="*80)
+         + =*80)
+        print("MISSION CRITICAL: AGENT DEATH BUG FIX VERIFICATION")
+        print(=*80)"
         print("This test suite verifies the complete fix for the agent death bug.)
-        print(ALL tests must PASS for the bug to be considered FIXED.")
-        print("=*80 +  )
-        ")
+        print(ALL tests must PASS for the bug to be considered FIXED.")"
+        print(=*80 +  )
+        ")"

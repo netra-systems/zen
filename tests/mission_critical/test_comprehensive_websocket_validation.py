@@ -59,7 +59,7 @@ except ImportError as e:
 
 
 class TestWebSocketConnection:
-    ""Real WebSocket connection for testing instead of mocks."
+    Real WebSocket connection for testing instead of mocks."
 
     def __init__(self):
         self.messages_sent = []
@@ -67,24 +67,24 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        "Send JSON message.""
+        "Send JSON message.
         if self._closed:
-            raise RuntimeError(WebSocket is closed")
+            raise RuntimeError(WebSocket is closed")"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure):
-        ""Close WebSocket connection."
+    async def close(self, code: int = 1000, reason: str = Normal closure):
+        "Close WebSocket connection."
         self._closed = True
         self.is_connected = False
 
     async def get_messages(self) -> list:
-        "Get all sent messages.""
+        Get all sent messages.""
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
 
 class ComprehensiveWebSocketValidator:
-    ""Master WebSocket validation ensuring all 5 critical events work across all test scenarios."
+    Master WebSocket validation ensuring all 5 critical events work across all test scenarios."
 
     # The 5 critical events that MUST work for chat functionality
     REQUIRED_EVENTS = {
@@ -115,7 +115,7 @@ class ComprehensiveWebSocketValidator:
         self.lock = threading.Lock()
 
     def setup_test_environment(self):
-        "Setup comprehensive test environment with enhanced mocking.""
+        "Setup comprehensive test environment with enhanced mocking.
         self.mock_connection_pool = self._create_enhanced_mock_connection_pool()
         # Setup factory configuration when available
         try:
@@ -127,10 +127,10 @@ class ComprehensiveWebSocketValidator:
                     health_monitor=None
                 )
         except Exception as e:
-            logger.warning(fFailed to setup WebSocket factory: {e}")
+            logger.warning(fFailed to setup WebSocket factory: {e}")"
 
     def _create_enhanced_mock_connection_pool(self):
-        "Create enhanced mock connection pool with comprehensive event capturing.""
+        Create enhanced mock connection pool with comprehensive event capturing."
 
         class EnhancedMockWebSocketConnection:
             def __init__(self, user_id: str, connection_id: str):
@@ -166,12 +166,12 @@ class ComprehensiveWebSocketValidator:
 
             async def send_text(self, text: str) -> None:
                 if not self.is_connected:
-                    raise ConnectionError("WebSocket disconnected)
+                    raise ConnectionError(WebSocket disconnected)
                 self.connection_metadata['bytes_sent'] += len(text)
 
             async def ping(self) -> None:
                 if not self.is_connected:
-                    raise ConnectionError(WebSocket disconnected")
+                    raise ConnectionError(WebSocket disconnected")"
                 self.last_ping = time.time()
 
             async def close(self) -> None:
@@ -197,7 +197,7 @@ class ComprehensiveWebSocketValidator:
                 }
 
             async def get_connection(self, connection_id: str, user_id: str):
-                key = f"{user_id}:{connection_id}
+                key = f{user_id}:{connection_id}
 
                 if key not in self.connections:
                     self.connections[key] = EnhancedMockWebSocketConnection(user_id, connection_id)
@@ -221,18 +221,18 @@ class ComprehensiveWebSocketValidator:
                 return connection_info
 
             def get_mock_connection(self, user_id: str, connection_id: str):
-                key = f{user_id}:{connection_id}"
+                key = f{user_id}:{connection_id}
                 return self.connections.get(key)
 
             def simulate_disconnect(self, user_id: str, connection_id: str):
-                "Simulate connection disconnect.""
+                "Simulate connection disconnect."
                 key = f{user_id}:{connection_id}"
                 if key in self.connections:
                     self.connections[key].is_connected = False
 
             def simulate_reconnect(self, user_id: str, connection_id: str):
-                "Simulate connection reconnect.""
-                key = f{user_id}:{connection_id}"
+                "Simulate connection reconnect.
+                key = f{user_id}:{connection_id}""
                 if key in self.connections:
                     self.connections[key].is_connected = True
                     self.connections[key].sent_events.clear()  # Clear events on reconnect
@@ -247,9 +247,9 @@ class ComprehensiveWebSocketValidator:
         return EnhancedMockConnectionPool()
 
     async def validate_all_five_required_events(self, user_context: Dict[str, str] -> Dict[str, Any]:
-        "Validate that all 5 required WebSocket events can be sent and serialized correctly.""
+        Validate that all 5 required WebSocket events can be sent and serialized correctly."
         test_name = all_five_required_events"
-        logger.info(f"Testing {test_name}...)
+        logger.info(fTesting {test_name}...)
 
         result = {
             'test_name': test_name,
@@ -267,11 +267,11 @@ class ComprehensiveWebSocketValidator:
 
             # Define all required events with their test data
             event_tests = [
-                ('agent_started', {event_type": "agent_started, data": {"agent: TestAgent", "run_id: user_context['run_id']}},
-                ('agent_thinking', {event_type": "agent_thinking, data": {"agent: TestAgent", "run_id: user_context['run_id'], thinking": "Processing request...}},
-                ('tool_executing', {event_type": "tool_executing, data": {"agent: TestAgent", "run_id: user_context['run_id'], tool": "analysis_tool, params": {"query: test"}}},
-                ('tool_completed', {"event_type: tool_completed", "data: {agent": "TestAgent, run_id": user_context['run_id'], "tool: analysis_tool", "result: {status": "success}}},
-                ('agent_completed', {event_type": "agent_completed, data": {"agent: TestAgent", "run_id: user_context['run_id'], result": {"status: completed"}}}
+                ('agent_started', {event_type: "agent_started, data": {agent: TestAgent, run_id: user_context['run_id']}},
+                ('agent_thinking', {event_type": "agent_thinking, data: {agent: TestAgent, "run_id: user_context['run_id'], thinking": Processing request...}},
+                ('tool_executing', {event_type: tool_executing, data": {"agent: TestAgent, run_id: user_context['run_id'], tool: "analysis_tool, params": {query: test}}},
+                ('tool_completed', {"event_type: tool_completed", data: {agent: TestAgent, run_id": user_context['run_id'], "tool: analysis_tool, result: {status: "success}}},"
+                ('agent_completed', {event_type: agent_completed, data: {"agent: TestAgent", run_id: user_context['run_id'], result: {status: completed"}}}"
             ]
 
             # Test each event individually
@@ -289,7 +289,7 @@ class ComprehensiveWebSocketValidator:
 
                     # Verify event was sent
                     if not test_connection.messages_sent:
-                        raise AssertionError(f"No events sent for {event_name})
+                        raise AssertionError(fNo events sent for {event_name})
 
                     event = test_connection.messages_sent[0]
 
@@ -298,9 +298,9 @@ class ComprehensiveWebSocketValidator:
                     deserialized = json.loads(json_str)
 
                     # Verify event structure
-                    assert deserialized.get(event_type") == event_name, f"Wrong event type for {event_name}
-                    assert data" in deserialized, "Missing data field
-                    assert deserialized[data"]["run_id] == user_context['run_id'], Wrong run_id"
+                    assert deserialized.get(event_type) == event_name, fWrong event type for {event_name}
+                    assert data in deserialized, "Missing data field
+                    assert deserialized[data"][run_id] == user_context['run_id'], Wrong run_id
 
                     # Record success
                     timing = time.time() - start_time
@@ -328,7 +328,7 @@ class ComprehensiveWebSocketValidator:
 
         except Exception as e:
             result['global_error'] = str(e)
-            logger.error(f"Global error in {test_name}: {e})
+            logger.error(fGlobal error in {test_name}: {e})
 
         self.validation_results['total_tests'] += 1
         if result['success']:
@@ -339,41 +339,41 @@ class ComprehensiveWebSocketValidator:
         return result
 
     async def run_comprehensive_validation(self) -> Dict[str, Any]:
-        ""Run all validation tests and return comprehensive results."
-        logger.info("\n + =" * 80)
-        logger.info("🚀 COMPREHENSIVE WEBSOCKET VALIDATION SUITE)
-        logger.info(=" * 80)
+        "Run all validation tests and return comprehensive results."
+        logger.info(\n + = * 80)
+        logger.info("🚀 COMPREHENSIVE WEBSOCKET VALIDATION SUITE)"
+        logger.info(= * 80)
 
         self.setup_test_environment()
 
         # Create test user context
         user_context = {
-            'user_id': f"test_user_{uuid.uuid4().hex[:8]},
-            'thread_id': fthread_{uuid.uuid4().hex[:8]}",
-            'connection_id': f"conn_{uuid.uuid4().hex[:8]},
-            'run_id': frun_{uuid.uuid4().hex[:8]}"
+            'user_id': ftest_user_{uuid.uuid4().hex[:8]},
+            'thread_id': fthread_{uuid.uuid4().hex[:8]}","
+            'connection_id': fconn_{uuid.uuid4().hex[:8]},
+            'run_id': frun_{uuid.uuid4().hex[:8]}
         }
 
         # Run validation tests
         validation_tests = [
-            ("Five Required Events, self.validate_all_five_required_events(user_context)),
+            ("Five Required Events, self.validate_all_five_required_events(user_context)),"
         ]
 
         results = {}
 
         for test_name, test_coro in validation_tests:
-            logger.info(f\n🔍 Running: {test_name}")
+            logger.info(f\n🔍 Running: {test_name})
             try:
                 result = await test_coro
                 results[test_name] = result
 
                 if result.get('success', False):
-                    logger.info(f"✅ {test_name}: PASSED)
+                    logger.info(f✅ {test_name}: PASSED)
                 else:
-                    logger.error(f❌ {test_name}: FAILED")
+                    logger.error(f❌ {test_name}: FAILED")"
 
             except Exception as e:
-                logger.error(f"❌ {test_name}: EXCEPTION - {e})
+                logger.error(f❌ {test_name}: EXCEPTION - {e})
                 results[test_name] = {
                     'test_name': test_name,
                     'success': False,
@@ -405,60 +405,60 @@ class ComprehensiveWebSocketValidator:
         return self.validation_results
 
     def _print_validation_summary(self, missing_required_events: Set[str], all_events_found: Set[str]:
-        ""Print comprehensive validation summary."
-        logger.info("\n + =" * 80)
-        logger.info("📊 COMPREHENSIVE VALIDATION RESULTS)
+        Print comprehensive validation summary.""
+        logger.info(\n + = * 80)
+        logger.info(📊 COMPREHENSIVE VALIDATION RESULTS)"
         logger.info(=" * 80)
 
-        logger.info(f"Total Tests: {self.validation_results['total_tests']})
-        logger.info(fPassed Tests: {self.validation_results['passed_tests']}")
+        logger.info(fTotal Tests: {self.validation_results['total_tests']})
+        logger.info(fPassed Tests: {self.validation_results['passed_tests']})"
         logger.info(f"Failed Tests: {self.validation_results['failed_tests']})
 
         if self.validation_results['total_tests'] > 0:
             pass_rate = (self.validation_results['passed_tests'] / self.validation_results['total_tests'] * 100
-            logger.info(fPass Rate: {pass_rate:.1f}%")
+            logger.info(fPass Rate: {pass_rate:.1f}%)
 
-        logger.info(f"\n📋 REQUIRED EVENT COVERAGE:)
+        logger.info(f\n📋 REQUIRED EVENT COVERAGE:)
         for event in self.REQUIRED_EVENTS:
             status = ✅ PASS" if event in all_events_found else "❌ FAIL
-            logger.info(f  {status}: {event}")
+            logger.info(f  {status}: {event})
 
         if missing_required_events:
-            logger.error(f"\n❌ MISSING REQUIRED EVENTS: {list(missing_required_events)})
+            logger.error(f\n❌ MISSING REQUIRED EVENTS: {list(missing_required_events)})
         else:
-            logger.info(f\n✅ ALL REQUIRED EVENTS VALIDATED!")
+            logger.info(f\n✅ ALL REQUIRED EVENTS VALIDATED!")"
 
         coverage = self.validation_results['event_coverage']['coverage_percentage']
-        logger.info(f"\n📈 EVENT COVERAGE: {coverage:.1f}%)
+        logger.info(f\n📈 EVENT COVERAGE: {coverage:.1f}%)
 
         # Overall status
         if (self.validation_results['failed_tests'] == 0 and
             len(missing_required_events) == 0 and
             coverage >= 100.0):
-            logger.info(f\n🎉 COMPREHENSIVE VALIDATION: ✅ PASSED")
+            logger.info(f\n🎉 COMPREHENSIVE VALIDATION: ✅ PASSED)
             logger.info(f"    ✅ All tests passed)
             logger.info(f    ✅ All required events validated")
-            logger.info(f"    ✅ 100% event coverage achieved)
+            logger.info(f    ✅ 100% event coverage achieved)
         else:
-            logger.error(f\n🚨 COMPREHENSIVE VALIDATION: ❌ FAILED")
+            logger.error(f\n🚨 COMPREHENSIVE VALIDATION: ❌ FAILED)"
             if missing_required_events:
                 logger.error(f"    Missing events: {list(missing_required_events)})
             if self.validation_results['failed_tests'] > 0:
-                logger.error(f    Failed tests: {self.validation_results['failed_tests']}")
+                logger.error(f    Failed tests: {self.validation_results['failed_tests']})
             if coverage < 100.0:
-                logger.error(f"    Incomplete coverage: {coverage:.1f}%)
+                logger.error(f    Incomplete coverage: {coverage:.1f}%)
 
 
 # Pytest integration
 @pytest.mark.asyncio
 @pytest.mark.critical
 async def test_comprehensive_websocket_validation():
-    ""Pytest wrapper for comprehensive WebSocket validation."
+    ""Pytest wrapper for comprehensive WebSocket validation.
     validator = ComprehensiveWebSocketValidator()
     results = await validator.run_comprehensive_validation()
 
     # Assert critical success criteria
-    assert results['total_tests'] > 0, "No tests were run
+    assert results['total_tests'] > 0, No tests were run"
 
     # Assert all required events are covered
     missing_events = results['event_coverage']['missing_required']
@@ -466,7 +466,7 @@ async def test_comprehensive_websocket_validation():
 
     # Assert reasonable pass rate
     pass_rate = results['passed_tests'] / results['total_tests'] if results['total_tests'] > 0 else 0
-    assert pass_rate >= 0.75, f"Pass rate too low: {pass_rate:.1%}
+    assert pass_rate >= 0.75, fPass rate too low: {pass_rate:.1%}
 
     # Assert event coverage is complete
     coverage = results['event_coverage']['coverage_percentage']
@@ -478,7 +478,7 @@ async def test_comprehensive_websocket_validation():
             logger.warning(f"Test {test_name} failed: {test_result})
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # Allow running directly for debugging
     async def main():
         validator = ComprehensiveWebSocketValidator()

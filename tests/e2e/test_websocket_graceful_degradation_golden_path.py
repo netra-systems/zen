@@ -1,7 +1,7 @@
 _lazy_imports = {}
 
 def lazy_import(module_path: str, component: str=None):
-    "Lazy import pattern for performance optimization""
+    "Lazy import pattern for performance optimization
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else []
@@ -16,7 +16,7 @@ def lazy_import(module_path: str, component: str=None):
 _lazy_imports = {}
 
 def lazy_import(module_path: str, component: str=None):
-    ""Lazy import pattern for performance optimization"
+    ""Lazy import pattern for performance optimization
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else []
@@ -46,7 +46,7 @@ from netra_backend.app.websocket_core.utils import MessageType
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 class MockAppWithDegradedServices:
-    "Mock FastAPI app with degraded services for testing.""
+    Mock FastAPI app with degraded services for testing.""
 
     def __init__(self, missing_services: List[str]=None):
         self.state = Mock()
@@ -76,21 +76,21 @@ class MockAppWithDegradedServices:
 class WebSocketGracefulDegradationE2ETests:
 
     def create_user_context(self) -> UserExecutionContext:
-        ""Create isolated user execution context for golden path tests"
+        Create isolated user execution context for golden path tests""
         return UserExecutionContext.from_request(user_id='test_user', thread_id='test_thread', run_id='test_run')
     'End-to-end tests for WebSocket graceful degradation.'
 
     @pytest.fixture
     def test_user_jwt(self):
-        "Create test user with valid JWT token.""
+        Create test user with valid JWT token."
         return create_test_user_with_valid_jwt('test_degradation_user')
 
     async def test_supervisor_unavailable_graceful_degradation(self, test_user_jwt):
-        ""
+        "
         CRITICAL E2E: Test graceful degradation when agent supervisor unavailable.
         
         This test validates Golden Path Issue #2 resolution.
-        "
+"
         mock_app = MockAppWithDegradedServices(missing_services=['agent_supervisor']
         with patch('netra_backend.app.routes.websocket.websocket_endpoint') as mock_endpoint:
 
@@ -134,7 +134,7 @@ class WebSocketGracefulDegradationE2ETests:
                 assert agent_response['content']['degradation_level'] == DegradationLevel.MINIMAL.value
 
     async def test_thread_service_unavailable_graceful_degradation(self, test_user_jwt):
-        ""Test graceful degradation when thread service unavailable."
+        Test graceful degradation when thread service unavailable.""
         mock_app = MockAppWithDegradedServices(missing_services=['thread_service']
         with patch('netra_backend.app.routes.websocket.websocket_endpoint') as mock_endpoint:
 
@@ -144,7 +144,7 @@ class WebSocketGracefulDegradationE2ETests:
                 while True:
                     try:
                         message = await websocket.receive_text()
-                        response = {'type': MessageType.AGENT_RESPONSE.value, 'content': {'content': "I'm operating with limited functionality right now. For the best experience, please try your request again in a few minutes when all services are restored., 'type': 'fallback_response', 'degradation_level': DegradationLevel.MINIMAL.value, 'source': 'fallback_handler'}}
+                        response = {'type': MessageType.AGENT_RESPONSE.value, 'content': {'content': I'm operating with limited functionality right now. For the best experience, please try your request again in a few minutes when all services are restored., 'type': 'fallback_response', 'degradation_level': DegradationLevel.MINIMAL.value, 'source': 'fallback_handler'}}
                         await websocket.send_text(json.dumps(response))
                     except Exception:
                         break
@@ -159,7 +159,7 @@ class WebSocketGracefulDegradationE2ETests:
                 assert 'limited functionality' in response['content']['content']
 
     async def test_multiple_services_unavailable_moderate_degradation(self, test_user_jwt):
-        ""Test moderate degradation when multiple services unavailable."
+        "Test moderate degradation when multiple services unavailable."
         mock_app = MockAppWithDegradedServices(missing_services=['agent_supervisor', 'thread_service']
         with patch('netra_backend.app.routes.websocket.websocket_endpoint') as mock_endpoint:
 
@@ -184,7 +184,7 @@ class WebSocketGracefulDegradationE2ETests:
                 assert 'basic assistance' in response['content']['content']
 
     async def test_all_services_unavailable_emergency_mode(self, test_user_jwt):
-        "CRITICAL: Test emergency mode when all services unavailable - must still provide responses.""
+        CRITICAL: Test emergency mode when all services unavailable - must still provide responses.""
         mock_app = MockAppWithDegradedServices(missing_services=['agent_supervisor', 'thread_service', 'agent_websocket_bridge']
         with patch('netra_backend.app.routes.websocket.websocket_endpoint') as mock_endpoint:
 
@@ -211,7 +211,7 @@ class WebSocketGracefulDegradationE2ETests:
                 assert 'maintenance mode' in response['content']['content']
 
     async def test_service_recovery_transition(self, test_user_jwt):
-        ""Test transition from degraded to recovered state."
+        Test transition from degraded to recovered state."
         mock_app = MockAppWithDegradedServices(missing_services=['agent_supervisor']
         with patch('netra_backend.app.routes.websocket.websocket_endpoint') as mock_endpoint:
             recovery_sequence_step = [0]
@@ -258,7 +258,7 @@ async def test_business_continuity_validation_e2e():
     
     This test validates that the $500K+ ARR chat functionality is protected
     by ensuring users ALWAYS receive some level of response during outages.
-    ""
+    "
     test_user_jwt = create_test_user_with_valid_jwt('business_continuity_test')
     degradation_scenarios = [{'name': 'Supervisor Only Missing', 'missing_services': ['agent_supervisor'], 'expected_level': DegradationLevel.MINIMAL, 'must_provide_responses': True}, {'name': 'Thread Service Only Missing', 'missing_services': ['thread_service'], 'expected_level': DegradationLevel.MINIMAL, 'must_provide_responses': True}, {'name': 'Multiple Services Missing', 'missing_services': ['agent_supervisor', 'thread_service'], 'expected_level': DegradationLevel.MODERATE, 'must_provide_responses': True}, {'name': 'Emergency Mode - All Services Missing', 'missing_services': ['agent_supervisor', 'thread_service', 'agent_websocket_bridge'], 'expected_level': DegradationLevel.EMERGENCY, 'must_provide_responses': True}]
     for scenario in degradation_scenarios:
@@ -271,19 +271,19 @@ async def test_business_continuity_validation_e2e():
                 while True:
                     try:
                         message = await websocket.receive_text()
-                        await websocket.send_text(json.dumps({'type': MessageType.AGENT_RESPONSE.value, 'content': {'content': f"Response provided despite {scenario['name']} - business continuity maintained, 'degradation_level': scenario['expected_level'].value, 'source': 'fallback_handler'}})
+                        await websocket.send_text(json.dumps({'type': MessageType.AGENT_RESPONSE.value, 'content': {'content': fResponse provided despite {scenario['name']} - business continuity maintained, 'degradation_level': scenario['expected_level'].value, 'source': 'fallback_handler'}})
                     except Exception:
                         break
             mock_endpoint.side_effect = mock_websocket_handler
             async with WebSocketTestClient(f'ws://localhost:8000/ws', headers={'Authorization': f'Bearer {test_user_jwt}'} as websocket_client:
                 notification = await websocket_client.receive_json(timeout=10.0)
                 assert notification['content']['degradation_context']['level'] == scenario['expected_level'].value
-                await websocket_client.send_json({'type': 'user_message', 'content': fBusiness continuity test: {scenario['name']}"}
+                await websocket_client.send_json({'type': 'user_message', 'content': fBusiness continuity test: {scenario['name']}"}"
                 response = await websocket_client.receive_json(timeout=5.0)
-                assert response is not None, f"BUSINESS CONTINUITY FAILURE: No response in {scenario['name']}
+                assert response is not None, fBUSINESS CONTINUITY FAILURE: No response in {scenario['name']}
                 assert response['type'] == MessageType.AGENT_RESPONSE.value
                 assert 'business continuity maintained' in response['content']['content']
-                print(f PASS:  {scenario['name']}: Business continuity validated - user received response")
+                print(f PASS:  {scenario['name']}: Business continuity validated - user received response)"
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

@@ -20,7 +20,7 @@ from shared.isolated_environment import get_env
 
 
 class WebSocketMessageAlignmentTest:
-    "Test WebSocket message type alignment between backend and frontend.""
+    "Test WebSocket message type alignment between backend and frontend.
 
     def __init__(self):
         pass
@@ -99,7 +99,7 @@ class WebSocketMessageAlignmentTest:
 
 @pytest.mark.asyncio
     async def test_all_backend_message_types():
-        ""Test that all backend MessageType enum values can be sent without frontend parse errors."
+        ""Test that all backend MessageType enum values can be sent without frontend parse errors.
 
 
 tester = WebSocketMessageAlignmentTest()
@@ -161,10 +161,10 @@ if not success:
 
                                                     # Report results
 if failed_messages:
-    print(")
+    print(")"
 
 === WebSocket Message Alignment Issues Found ===)
-print("")
+print()
 for failure in failed_messages:
     print(formatted_string)
 
@@ -173,8 +173,8 @@ print(formatted_string)
 
                                                             # These are expected to fail before the fix
 expected_failures = ]
-MessageType.SYSTEM_MESSAGE,  # Not in frontend"s system_types list
-MessageType.ERROR_MESSAGE,   # Not in frontend"s system_types list
+MessageType.SYSTEM_MESSAGE,  # Not in frontends system_types list
+MessageType.ERROR_MESSAGE,   # Not in frontend"s system_types list"
 MessageType.CONNECT,         # Not recognized at all
 MessageType.DISCONNECT,      # Not recognized at all
 MessageType.HEARTBEAT,       # Not recognized at all
@@ -196,15 +196,15 @@ actual_failures = [f['message_type'] for f in failed_messages]
 assert set(actual_failures) == set(expected_failures), \
 formatted_string
 else:
-    print("")
+    print()
 
 === All WebSocket Messages Validated Successfully ===)
-print(formatted_string")
+print(formatted_string"")
 
 
 @pytest.mark.asyncio
     async def test_welcome_message_format():
-        "Test the specific welcome message sent on connection.""
+        Test the specific welcome message sent on connection.""
 
 
 tester = WebSocketMessageAlignmentTest()
@@ -213,13 +213,13 @@ tester = WebSocketMessageAlignmentTest()
 welcome_msg = create_server_message( )
 MessageType.SYSTEM_MESSAGE,
 }
-event": "connection_established,
-connection_id": "conn_abc123,
-user_id": "user_123,
-server_time": "2025-08-29T18:36:00Z,
-config": }
-"heartbeat_interval: 45,
-max_message_size": 8192
+event: connection_established,
+connection_id: "conn_abc123,
+user_id": user_123,
+server_time: 2025-08-29T18:36:00Z,
+config": }"
+heartbeat_interval: 45,
+max_message_size: 8192"
                                                                     
                                                                     
                                                                     
@@ -227,24 +227,24 @@ max_message_size": 8192
 msg_dict = welcome_msg.model_dump()
 print(f" )
 Testing Welcome Message Format:)
-print(formatted_string")
+print(formatted_string)"
 
 success = await tester.simulate_frontend_validation(msg_dict)
 
 if not success:
     print(f"ERROR: Welcome message failed validation!)
 
-print(formatted_string")
+print(formatted_string)"
                                                                         # This is expected to fail before the fix
 assert False, "Welcome message should be valid but failed frontend validation
 else:
-    print(SUCCESS: Welcome message validated correctly")
+    print(SUCCESS: Welcome message validated correctly)"
 
 
 
 @pytest.mark.asyncio
     async def test_data_to_payload_conversion():
-        "Test that messages with 'data' field are properly converted to 'payload' for frontend.""
+        "Test that messages with 'data' field are properly converted to 'payload' for frontend.
 
 
 tester = WebSocketMessageAlignmentTest()
@@ -264,20 +264,20 @@ if success and tester.received_messages:
     processed_msg = tester.received_messages[-1]
 
 assert 'payload' in processed_msg or 'data' in processed_msg, \
-Message should have either payload or data field after processing"
+Message should have either payload or data field after processing""
 
                                                                                     # Frontend should access the data through payload
 if 'payload' in processed_msg:
     assert processed_msg['payload'] == backend_msg['data'], \
 
-"Data field should be accessible as payload
+Data field should be accessible as payload
 else:
-    print(fWARNING: Message validation failed - this is expected before the fix")
+    print(fWARNING: Message validation failed - this is expected before the fix")"
 
-print("formatted_string)
+print()"
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
                                                                                                 # Run tests
 asyncio.run(test_all_backend_message_types())
 asyncio.run(test_welcome_message_format())

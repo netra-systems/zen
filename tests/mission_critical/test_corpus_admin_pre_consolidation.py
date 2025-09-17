@@ -4,7 +4,7 @@ Pre-consolidation tests for Corpus Admin module.
 These tests capture current functionality to ensure nothing is lost during SSOT consolidation.
 
 CRITICAL: These tests must pass BEFORE and AFTER the consolidation.
-""
+"
 import asyncio
 import json
 import os
@@ -26,21 +26,21 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
-    ""
+    "
     CRITICAL: Pre-consolidation tests to ensure all corpus functionality is preserved.
     Tests multi-user isolation, thread safety, and all corpus operations.
-    "
+"
     
     async def asyncSetUp(self):
-        "Async setup for test environment""
+        "Async setup for test environment
         self.user_contexts = {}
         # Create multiple user contexts for multi-user testing
         for i in range(3):
-            user_id = ftest_user_{i}"
+            user_id = ftest_user_{i}""
             self.user_contexts[user_id] = self._create_user_context(user_id)
     
     def _create_user_context(self, user_id: str) -> Dict[str, Any]:
-        "Create a user execution context for testing""
+        Create a user execution context for testing"
         return {
             'user_id': user_id,
             'request_id': f'req_{user_id}_{id(self)}',
@@ -52,7 +52,7 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
         }
     
     async def test_corpus_creation_multi_user_isolation(self):
-        ""Test that corpus creation is isolated per user"
+        "Test that corpus creation is isolated per user
         from netra_backend.app.admin.corpus import CorpusAdminSubAgent
         
         # Create corpus admin instances for different users
@@ -86,7 +86,7 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(unique_corpus_ids), len(self.user_contexts))
         
     async def test_corpus_crud_operations(self):
-        "Test all CRUD operations for corpus management""
+        "Test all CRUD operations for corpus management"
         from netra_backend.app.admin.corpus import CorpusCRUDOperations
         
         crud_ops = CorpusCRUDOperations()
@@ -117,7 +117,7 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(delete_result.get('success'))
     
     async def _test_crud_operation(self, crud_ops, operation: str, context: Dict, params: Dict) -> Dict:
-        ""Helper to test a CRUD operation"
+        "Helper to test a CRUD operation"
         with patch.object(crud_ops, f'_{operation}_corpus', new_callable=AsyncMock) as mock_op:
             mock_op.return_value = {
                 'success': True,
@@ -133,7 +133,7 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
             return mock_op.return_value
     
     async def test_corpus_indexing_operations(self):
-        "Test corpus indexing functionality""
+        Test corpus indexing functionality""
         from netra_backend.app.admin.corpus import CorpusIndexingHandlers
         
         indexing_handlers = CorpusIndexingHandlers()
@@ -155,7 +155,7 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn('document_id', result)
     
     async def test_corpus_validation_operations(self):
-        ""Test corpus validation functionality"
+        Test corpus validation functionality"
         from netra_backend.app.admin.corpus import CorpusValidationHandlers
         
         validation_handlers = CorpusValidationHandlers()
@@ -177,7 +177,7 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(len(result['errors'], 0)
     
     async def test_corpus_upload_operations(self):
-        "Test corpus upload functionality""
+        "Test corpus upload functionality
         from netra_backend.app.admin.corpus import CorpusUploadHandlers
         
         upload_handlers = CorpusUploadHandlers()
@@ -201,7 +201,7 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn('file_id', result)
     
     async def test_corpus_analysis_operations(self):
-        ""Test corpus analysis functionality"
+        ""Test corpus analysis functionality
         from netra_backend.app.admin.corpus import CorpusAnalysisOperations
         
         analysis_ops = CorpusAnalysisOperations()
@@ -225,7 +225,7 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
             self.assertIsInstance(result['total_documents'], int)
     
     async def test_corpus_error_handling(self):
-        "Test error handling and compensation""
+        Test error handling and compensation""
         from netra_backend.app.admin.corpus import (
             CorpusAdminError,
             DocumentUploadError,
@@ -235,17 +235,17 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
         
         # Test error creation
         upload_error = DocumentUploadError(
-            message=Upload failed",
+            message=Upload failed,
             details={'file': 'test.txt', 'reason': 'Too large'}
         self.assertIsInstance(upload_error, CorpusAdminError)
         
         validation_error = DocumentValidationError(
-            message="Validation failed,
+            message="Validation failed,"
             details={'document': 'doc_123', 'errors': ['Missing metadata']}
         self.assertIsInstance(validation_error, CorpusAdminError)
         
         indexing_error = IndexingError(
-            message=Indexing failed",
+            message=Indexing failed,
             details={'document': 'doc_456', 'reason': 'Index full'}
         self.assertIsInstance(indexing_error, CorpusAdminError)
         
@@ -255,7 +255,7 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(indexing_error.details, dict)
     
     async def test_thread_safety_concurrent_operations(self):
-        "Test thread safety with concurrent corpus operations""
+        Test thread safety with concurrent corpus operations""
         from netra_backend.app.admin.corpus import CorpusAdminSubAgent
         
         agent = CorpusAdminSubAgent()
@@ -304,7 +304,7 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
                 self.assertIn(user_id, corpus_id)
     
     async def test_metadata_operations(self):
-        ""Test metadata storage and retrieval patterns"
+        Test metadata storage and retrieval patterns""
         context = self.user_contexts['test_user_0']
         
         # Test current metadata patterns (to be migrated to SSOT)
@@ -324,7 +324,7 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(context['metadata']['indexed_docs'], 3)
     
     async def test_unified_corpus_admin_operations(self):
-        "Test unified corpus admin functionality""
+        Test unified corpus admin functionality"
         from netra_backend.app.admin.corpus import (
             UnifiedCorpusAdmin,
             UnifiedCorpusAdminFactory,
@@ -366,10 +366,10 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
 
 
 class CorpusAdminFactoryPatternTests(unittest.IsolatedAsyncioTestCase):
-    ""Test that corpus admin will support factory pattern for user isolation"
+    "Test that corpus admin will support factory pattern for user isolation
     
     async def test_factory_pattern_readiness(self):
-        "Test readiness for factory pattern implementation""
+        "Test readiness for factory pattern implementation"
         
         # Test new factory pattern with UnifiedCorpusAdmin
         from netra_backend.app.admin.corpus import (
@@ -390,11 +390,11 @@ class CorpusAdminFactoryPatternTests(unittest.IsolatedAsyncioTestCase):
         agent1._test_state = user1"
         agent2._test_state = "user2
         
-        self.assertEqual(agent1._test_state, user1")
-        self.assertEqual(agent2._test_state, "user2)
+        self.assertEqual(agent1._test_state, user1)
+        self.assertEqual(agent2._test_state, "user2)"
     
     async def test_user_corpus_path_isolation(self):
-        ""Test that corpus paths can be isolated per user"
+        Test that corpus paths can be isolated per user"
         
         user_contexts = {
             'user_1': {'user_id': 'user_1', 'corpus_path': '/data/corpus/user_1'},
@@ -414,9 +414,9 @@ class CorpusAdminFactoryPatternTests(unittest.IsolatedAsyncioTestCase):
 if __name__ == "__main__:
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-    print(MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print(MIGRATION NOTICE: This file previously used direct pytest execution.)"
     print("Please use: python tests/unified_test_runner.py --category <appropriate_category>)
-    print(For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md")"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

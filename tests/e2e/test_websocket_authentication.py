@@ -33,50 +33,50 @@ from shared.isolated_environment import get_env
 
 
 class WebSocketAuthTestRunner:
-    ""SSOT WebSocket Authentication Test Runner - CLAUDE.md Compliant.
+    SSOT WebSocket Authentication Test Runner - CLAUDE.md Compliant.
     
     CRITICAL: Uses REAL authentication and REAL WebSocket connections.
     NO mocks, NO try/except hiding failures, MUST use E2EAuthHelper SSOT.
-    "
+""
     
-    def __init__(self, environment: str = "test):
-        ""Initialize with SSOT authentication helper."
+    def __init__(self, environment: str = test):
+        "Initialize with SSOT authentication helper."
         self.environment = environment
         self.auth_helper = E2EWebSocketAuthHelper(environment=environment)
         self.active_connections: Dict[str, websockets.ClientConnection] = {}
         self.test_start_time = time.time()
     
     async def setup_real_services(self):
-        "Setup with REAL services - NO mocks per CLAUDE.md.""
+        Setup with REAL services - NO mocks per CLAUDE.md.""
         env = get_env()
         # Ensure real services are used
-        env.set(USE_REAL_SERVICES", "true, e2e_websocket_auth")
-        env.set("TEST_DISABLE_MOCKS, true", "e2e_websocket_auth)
-        env.set(REAL_WEBSOCKET_TESTING", "true, e2e_websocket_auth")
+        env.set(USE_REAL_SERVICES, true, e2e_websocket_auth)"
+        env.set("TEST_DISABLE_MOCKS, true, e2e_websocket_auth)
+        env.set(REAL_WEBSOCKET_TESTING", "true, e2e_websocket_auth)
         return self
     
     async def cleanup_real_services(self):
-        "Clean up real services and connections.""
+        Clean up real services and connections.""
         await self._close_all_connections()
         
         # Clean up environment
         env = get_env()
-        env.delete(USE_REAL_SERVICES", "e2e_websocket_auth)
+        env.delete(USE_REAL_SERVICES, e2e_websocket_auth)
         env.delete(TEST_DISABLE_MOCKS", "e2e_websocket_auth)
-        env.delete(REAL_WEBSOCKET_TESTING", "e2e_websocket_auth)
+        env.delete(REAL_WEBSOCKET_TESTING, e2e_websocket_auth)
     
     async def _close_all_connections(self):
-        ""Close all WebSocket connections."
+        "Close all WebSocket connections."
         for ws in self.active_connections.values():
             if not ws.closed:
                 await ws.close()
         self.active_connections.clear()
     
-    async def create_authenticated_websocket_connection(self, user_id: str = "test-ws-user) -> tuple:
+    async def create_authenticated_websocket_connection(self, user_id: str = test-ws-user) -> tuple:
         ""Create authenticated WebSocket connection using SSOT patterns.
         
         CRITICAL: Uses real authentication - NO bypassing, NO mocking.
-        "
+
         # Create real JWT token using SSOT helper
         token = self.auth_helper.create_test_jwt_token(
             user_id=user_id,
@@ -99,13 +99,13 @@ class WebSocketAuthTestRunner:
         return ws, token, headers
     
     async def verify_websocket_authentication(self, ws, expected_authenticated: bool = True):
-        "Verify WebSocket authentication status - MUST raise errors on failure.
+        Verify WebSocket authentication status - MUST raise errors on failure.""
         
         CRITICAL: NO try/except blocks hiding failures per CLAUDE.md.
-        ""
+        
         # Send authentication verification message
         auth_check = {
-            type": "auth_verify,
+            type: "auth_verify,
             timestamp": datetime.now().isoformat()
         }
         await ws.send(json.dumps(auth_check))
@@ -116,23 +116,23 @@ class WebSocketAuthTestRunner:
         
         # MUST raise errors - NO silent failures
         if expected_authenticated:
-            if response_data.get("type) == auth_error":
+            if response_data.get(type) == auth_error:
                 raise AssertionError(f"Expected authenticated WebSocket but got auth_error: {response_data})
-            if user_id" not in response_data.get("payload, {}:
-                raise AssertionError(fAuthenticated WebSocket missing user_id in response: {response_data}")
+            if user_id" not in response_data.get(payload, {}:
+                raise AssertionError(fAuthenticated WebSocket missing user_id in response: {response_data})
         else:
             if response_data.get("type) != auth_error":
-                raise AssertionError(f"Expected auth_error but got: {response_data})
+                raise AssertionError(fExpected auth_error but got: {response_data})
         
         return response_data
 
 
 @pytest_asyncio.fixture
 async def websocket_auth_runner():
-    ""SSOT WebSocket authentication test runner fixture - CLAUDE.md compliant.
+    SSOT WebSocket authentication test runner fixture - CLAUDE.md compliant.
     
     CRITICAL: Uses REAL authentication and services per CLAUDE.md requirements.
-    "
+""
     runner = WebSocketAuthTestRunner()
     await runner.setup_real_services()
     yield runner
@@ -142,10 +142,10 @@ async def websocket_auth_runner():
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_websocket_jwt_authentication_success(websocket_auth_runner):
-    "Test successful JWT authentication through WebSocket - REAL services only.
+    Test successful JWT authentication through WebSocket - REAL services only.""
     
     CRITICAL: Uses SSOT authentication patterns, NO mocks, MUST raise errors.
-    ""
+    
     start_time = time.time()
     
     # Create authenticated WebSocket connection using SSOT patterns
@@ -160,7 +160,7 @@ async def test_websocket_jwt_authentication_success(websocket_auth_runner):
     
     # Validate response structure - MUST have required fields
     payload = auth_response.get("payload, {}
-    if not payload.get(user_id"):
+    if not payload.get(user_id):
         raise AssertionError(f"Missing user_id in auth response: {auth_response})
     
     execution_time = time.time() - start_time
@@ -172,14 +172,14 @@ async def test_websocket_jwt_authentication_success(websocket_auth_runner):
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_websocket_invalid_jwt_token(websocket_auth_runner):
-    "Test WebSocket rejects invalid JWT tokens - REAL connection failure required.
+    Test WebSocket rejects invalid JWT tokens - REAL connection failure required.""
     
     CRITICAL: Must fail with REAL WebSocket connection, not mocked response.
-    ""
+    
     start_time = time.time()
     
     # Attempt connection with invalid token - MUST fail at connection level
-    invalid_headers = {Authorization": "Bearer completely_invalid_token_12345}
+    invalid_headers = {Authorization: "Bearer completely_invalid_token_12345}
     
     # This MUST raise a real WebSocket exception, not return a mock response
     connection_failed = False
@@ -200,31 +200,31 @@ async def test_websocket_invalid_jwt_token(websocket_auth_runner):
     
     # MUST have real connection failure
     if not connection_failed:
-        raise AssertionError("Invalid JWT token did not cause connection failure)
+        raise AssertionError(Invalid JWT token did not cause connection failure)
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
     if execution_time < 0.01:
-        raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing")
+        raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing")"
 
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_websocket_expired_jwt_token(websocket_auth_runner):
-    "Test WebSocket rejects expired JWT tokens - REAL authentication required.
+    Test WebSocket rejects expired JWT tokens - REAL authentication required."
     
     CRITICAL: Must use REAL expired token and REAL WebSocket rejection.
-    ""
+    "
     start_time = time.time()
     
     # Create REAL expired token using SSOT helper
     expired_token = websocket_auth_runner.auth_helper.create_test_jwt_token(
-        user_id=expired-token-test",
-        email="expired-test@websocket-auth.com,
+        user_id=expired-token-test,
+        email="expired-test@websocket-auth.com,"
         exp_minutes=-1  # Token expired 1 minute ago
     )
     
-    expired_headers = {Authorization": f"Bearer {expired_token}}
+    expired_headers = {Authorization: fBearer {expired_token}}
     
     # Attempt connection with expired token - MUST fail at connection level
     connection_failed = False
@@ -236,7 +236,7 @@ async def test_websocket_expired_jwt_token(websocket_auth_runner):
         )
         await ws.close()
         # If we get here, the test FAILED - expired token should not connect
-        raise AssertionError(Expired JWT token was accepted - authentication security failure")
+        raise AssertionError(Expired JWT token was accepted - authentication security failure)
     except (websockets.exceptions.ConnectionClosedError,
             websockets.exceptions.InvalidStatus,
             OSError) as e:
@@ -245,32 +245,32 @@ async def test_websocket_expired_jwt_token(websocket_auth_runner):
     
     # MUST have real connection failure
     if not connection_failed:
-        raise AssertionError("Expired JWT token did not cause connection failure)
+        raise AssertionError("Expired JWT token did not cause connection failure)"
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
     if execution_time < 0.01:
-        raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing")
+        raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing)
 
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_websocket_token_refresh_flow(websocket_auth_runner):
-    "Test WebSocket token refresh during active connection - REAL authentication flow.
+    Test WebSocket token refresh during active connection - REAL authentication flow.""
     
     CRITICAL: Must use REAL WebSocket connection and REAL token refresh.
-    ""
+    
     start_time = time.time()
     
     # Create authenticated connection with SSOT patterns
     ws, original_token, _ = await websocket_auth_runner.create_authenticated_websocket_connection(
-        user_id=token-refresh-test"
+        user_id=token-refresh-test""
     )
     
     # Send token refresh request to REAL WebSocket
     refresh_msg = {
-        "type: token_refresh",
-        "payload: {current_token": original_token},
+        type: token_refresh,
+        payload: {current_token": original_token},
         "timestamp: datetime.now().isoformat()
     }
     await ws.send(json.dumps(refresh_msg))
@@ -280,22 +280,22 @@ async def test_websocket_token_refresh_flow(websocket_auth_runner):
     response_data = json.loads(response)
     
     # Validate REAL token refresh response - MUST raise errors on failure
-    if response_data.get(type") == "error:
-        raise AssertionError(fToken refresh failed: {response_data}")
+    if response_data.get(type) == error:
+        raise AssertionError(fToken refresh failed: {response_data}")"
     
-    payload = response_data.get("payload, {}
-    new_token = payload.get(new_token")
+    payload = response_data.get(payload, {}
+    new_token = payload.get(new_token)"
     
     # MUST have new token and it MUST be different from original
     if not new_token:
         raise AssertionError(f"No new token in refresh response: {response_data})
     if new_token == original_token:
-        raise AssertionError(New token is identical to original - refresh did not work")
+        raise AssertionError(New token is identical to original - refresh did not work)
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
     if execution_time < 0.01:
-        raise AssertionError(f"E2E test completed in {execution_time:.3f}s - indicates mocking/bypassing)
+        raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing)
 
 
 @pytest.mark.asyncio
@@ -304,12 +304,12 @@ async def test_websocket_multi_user_authentication(websocket_auth_runner):
     ""Test multiple users authenticate simultaneously - REAL multi-user isolation.
     
     CRITICAL: Tests REAL multi-user WebSocket authentication with proper isolation.
-    "
+
     start_time = time.time()
     
     # Create multiple REAL authenticated WebSocket connections
     connections = {}
-    user_roles = ["admin-user, regular-user", "guest-user]
+    user_roles = ["admin-user, regular-user", guest-user]
     
     for user_role in user_roles:
         ws, token, headers = await websocket_auth_runner.create_authenticated_websocket_connection(
@@ -326,16 +326,16 @@ async def test_websocket_multi_user_authentication(websocket_auth_runner):
         
         # Validate each user has isolated authentication context
         payload = auth_response.get("payload, {}
-        user_id = payload.get(user_id")
+        user_id = payload.get(user_id)
         if not user_id:
             raise AssertionError(f"Missing user_id for {user_role}: {auth_response})
         if fmulti-user-{user_role}" not in user_id:
-            raise AssertionError(f"User isolation failed for {user_role} - got user_id: {user_id})
+            raise AssertionError(fUser isolation failed for {user_role} - got user_id: {user_id})
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
     if execution_time < 0.01:
-        raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing")
+        raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing)"
 
 
 @pytest.mark.asyncio
@@ -349,17 +349,17 @@ async def test_websocket_role_based_permissions(websocket_auth_runner):
     
     # Create REAL authenticated connections with different permission levels
     user_ws, user_token, _ = await websocket_auth_runner.create_authenticated_websocket_connection(
-        user_id=permission-regular-user"
+        user_id=permission-regular-user
     )
     admin_ws, admin_token, _ = await websocket_auth_runner.create_authenticated_websocket_connection(
-        user_id="permission-admin-user
+        user_id=permission-admin-user"
     )
     
     # Test regular user attempting admin operation - MUST be denied
     admin_command = {
-        type": "admin_command,
-        payload": {"command: system_status"},
-        "timestamp: datetime.now().isoformat()
+        type": admin_command,
+        payload: {command: system_status"},"
+        timestamp: datetime.now().isoformat()
     }
     await user_ws.send(json.dumps(admin_command))
     
@@ -368,7 +368,7 @@ async def test_websocket_role_based_permissions(websocket_auth_runner):
     user_response_data = json.loads(user_response)
     
     # MUST receive permission denied - raise error if not
-    if user_response_data.get(type") != "permission_denied:
+    if user_response_data.get(type) != "permission_denied:
         raise AssertionError(fRegular user should be denied admin command but got: {user_response_data}")
     
     # Test admin user with same operation - should be allowed or return valid response
@@ -377,7 +377,7 @@ async def test_websocket_role_based_permissions(websocket_auth_runner):
     admin_response_data = json.loads(admin_response)
     
     # Admin should NOT get permission denied
-    if admin_response_data.get("type) == permission_denied":
+    if admin_response_data.get(type) == permission_denied:
         raise AssertionError(f"Admin user should not be denied admin command but got: {admin_response_data})
     
     execution_time = time.time() - start_time
@@ -389,10 +389,10 @@ async def test_websocket_role_based_permissions(websocket_auth_runner):
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_websocket_session_validation(websocket_auth_runner):
-    "Test WebSocket validates session consistency - REAL session management.
+    Test WebSocket validates session consistency - REAL session management.""
     
     CRITICAL: Must use REAL WebSocket session validation with REAL authentication.
-    ""
+    
     start_time = time.time()
     
     # Create REAL authenticated WebSocket connection
@@ -402,12 +402,12 @@ async def test_websocket_session_validation(websocket_auth_runner):
     
     # Send REAL session validation message
     session_msg = {
-        "type: session_validate",
-        "payload: {
-            token": token,
-            "session_id: test_session_validation_12345"
+        "type: session_validate,
+        payload: {
+            token": token,"
+            session_id: test_session_validation_12345
         },
-        "timestamp: datetime.now().isoformat()
+        timestamp: datetime.now().isoformat()"
     }
     await ws.send(json.dumps(session_msg))
     
@@ -416,31 +416,31 @@ async def test_websocket_session_validation(websocket_auth_runner):
     response_data = json.loads(response)
     
     # Validate REAL session response - MUST raise errors on failure
-    if response_data.get(type") == "error:
-        raise AssertionError(fSession validation failed: {response_data}")
+    if response_data.get(type") == error:
+        raise AssertionError(fSession validation failed: {response_data})
     
-    payload = response_data.get("payload, {}
-    if session_id" not in payload:
-        raise AssertionError(f"Missing session_id in validation response: {response_data})
+    payload = response_data.get("payload, {}"
+    if session_id not in payload:
+        raise AssertionError(fMissing session_id in validation response: {response_data})
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
     if execution_time < 0.01:
-        raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing")
+        raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing")"
 
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_websocket_concurrent_auth_requests(websocket_auth_runner):
-    "Test WebSocket handles concurrent authentication requests - REAL concurrency.
+    Test WebSocket handles concurrent authentication requests - REAL concurrency."
     
     CRITICAL: Must use REAL WebSocket with REAL concurrent authentication processing.
-    ""
+    "
     start_time = time.time()
     
     # Create REAL authenticated WebSocket connection
     ws, token, _ = await websocket_auth_runner.create_authenticated_websocket_connection(
-        user_id=concurrent-auth-test"
+        user_id=concurrent-auth-test
     )
     
     # Send multiple REAL auth requests concurrently
@@ -448,7 +448,7 @@ async def test_websocket_concurrent_auth_requests(websocket_auth_runner):
     for i in range(5):
         auth_msg = {
             "type: auth_verify",
-            "payload: {token": token, "request_id: fconcurrent_{i}"},
+            payload: {token: token, request_id: fconcurrent_{i}"},
             "timestamp: datetime.now().isoformat()
         }
         auth_tasks.append(ws.send(json.dumps(auth_msg)))
@@ -465,38 +465,38 @@ async def test_websocket_concurrent_auth_requests(websocket_auth_runner):
     
     # Validate ALL concurrent requests processed correctly - MUST raise errors
     if len(responses) != 5:
-        raise AssertionError(fExpected 5 responses but got {len(responses)}")
+        raise AssertionError(fExpected 5 responses but got {len(responses)})
     
     for i, response in enumerate(responses):
         if response.get("type) == auth_error":
-            raise AssertionError(f"Concurrent request {i} failed with auth_error: {response})
-        if not response.get(payload", {}.get("user_id):
-            raise AssertionError(fConcurrent request {i} missing user_id: {response}")
+            raise AssertionError(fConcurrent request {i} failed with auth_error: {response})
+        if not response.get(payload, {}.get(user_id):
+            raise AssertionError(fConcurrent request {i} missing user_id: {response}")"
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
     if execution_time < 0.01:
-        raise AssertionError(f"E2E test completed in {execution_time:.3f}s - indicates mocking/bypassing)
+        raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing)
 
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_websocket_auth_state_recovery(websocket_auth_runner):
-    ""Test WebSocket recovers authentication state after reconnection - REAL state persistence.
+    Test WebSocket recovers authentication state after reconnection - REAL state persistence.
     
     CRITICAL: Must use REAL WebSocket connections and REAL state recovery mechanisms.
-    "
+""
     start_time = time.time()
     
     # Create first REAL authenticated WebSocket connection
     ws1, token, _ = await websocket_auth_runner.create_authenticated_websocket_connection(
-        user_id="state-recovery-test
+        user_id=state-recovery-test
     )
     
     # Store session state via REAL WebSocket
     state_msg = {
         type": "store_state,
-        payload": {"test_data: recovery_validation_data_12345"},
+        payload: {test_data: recovery_validation_data_12345},"
         "timestamp: datetime.now().isoformat()
     }
     await ws1.send(json.dumps(state_msg))
@@ -515,12 +515,12 @@ async def test_websocket_auth_state_recovery(websocket_auth_runner):
         additional_headers=headers,
         timeout=10.0
     )
-    websocket_auth_runner.active_connections[recovery_conn"] = ws2
+    websocket_auth_runner.active_connections[recovery_conn] = ws2
     
     # Request REAL state recovery
     recovery_msg = {
         "type: recover_state",
-        "payload: {token": token, "session_recovery: True},
+        payload: {token: token, session_recovery: True},"
         timestamp": datetime.now().isoformat()
     }
     await ws2.send(json.dumps(recovery_msg))
@@ -530,11 +530,11 @@ async def test_websocket_auth_state_recovery(websocket_auth_runner):
     recovery_response_data = json.loads(recovery_response)
     
     # Validate REAL state recovery - MUST raise errors on failure
-    if recovery_response_data.get("type) == error":
+    if recovery_response_data.get(type) == error:
         raise AssertionError(f"State recovery failed: {recovery_response_data})
     
-    recovered_data = recovery_response_data.get(payload", {}.get("test_data)
-    if recovered_data != recovery_validation_data_12345":
+    recovered_data = recovery_response_data.get(payload", {}.get(test_data)
+    if recovered_data != recovery_validation_data_12345:
         raise AssertionError(f"State recovery data mismatch: expected 'recovery_validation_data_12345', got '{recovered_data}')
     
     execution_time = time.time() - start_time
@@ -546,10 +546,10 @@ async def test_websocket_auth_state_recovery(websocket_auth_runner):
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_websocket_auth_timeout_handling(websocket_auth_runner):
-    "Test WebSocket handles authentication timeouts gracefully - REAL timeout behavior.
+    Test WebSocket handles authentication timeouts gracefully - REAL timeout behavior.""
     
     CRITICAL: Must use REAL WebSocket timeout handling with REAL authentication.
-    ""
+    
     start_time = time.time()
     
     # Create REAL authenticated WebSocket connection
@@ -559,11 +559,11 @@ async def test_websocket_auth_timeout_handling(websocket_auth_runner):
     
     # Send slow authentication request to test REAL timeout handling
     slow_auth_msg = {
-        "type: slow_auth_verify",
-        "payload: {
-            token": token,
-            "simulate_delay: True,
-            timeout_test": True
+        "type: slow_auth_verify,
+        payload: {
+            token": token,"
+            simulate_delay: True,
+            timeout_test: True"
         },
         "timestamp: datetime.now().isoformat()
     }
@@ -580,9 +580,9 @@ async def test_websocket_auth_timeout_handling(websocket_auth_runner):
         response_received = True
         
         # Validate response indicates proper timeout handling
-        response_type = response_data.get(type")
-        if response_type not in ["auth_timeout, auth_success", "timeout_handled]:
-            raise AssertionError(fUnexpected response type for timeout test: {response_type}")
+        response_type = response_data.get(type)
+        if response_type not in ["auth_timeout, auth_success", timeout_handled]:
+            raise AssertionError(fUnexpected response type for timeout test: {response_type})"
         
         timeout_handled = True
         
@@ -592,9 +592,9 @@ async def test_websocket_auth_timeout_handling(websocket_auth_runner):
     
     # MUST demonstrate real timeout handling behavior
     if not timeout_handled:
-        raise AssertionError("WebSocket timeout handling test failed - no timeout behavior observed)
+        raise AssertionError("WebSocket timeout handling test failed - no timeout behavior observed)"
     
     execution_time = time.time() - start_time
     # E2E tests with 0.00s execution = AUTOMATIC HARD FAILURE per CLAUDE.md
     if execution_time < 0.01:
-        raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing")
+        raise AssertionError(fE2E test completed in {execution_time:.3f}s - indicates mocking/bypassing")"

@@ -1,22 +1,22 @@
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.""
+    "Real WebSocket connection for testing instead of mocks.
     def __init__(self):
         pass
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.
         if self._closed:
-            raise RuntimeError("WebSocket is closed)
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):
-        "Close WebSocket connection.""
+        Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
     async def get_messages(self) -> list:
-        ""Get all sent messages."
+        Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
         '''Test that reproduces the WebSocket bridge initialization bug in service factory.
@@ -33,7 +33,7 @@ class TestWebSocketConnection:
         from shared.isolated_environment import get_env
         from shared.isolated_environment import IsolatedEnvironment
 class TestServiceFactoryWebSocketBug:
-        "Test suite reproducing the WebSocket bridge initialization bug.""
+        "Test suite reproducing the WebSocket bridge initialization bug.
     def test_agent_service_creation_properly_fails(self):
         '''Test that creating agent service via factory properly fails.
         After the fix, the factory should raise NotImplementedError
@@ -44,8 +44,8 @@ class TestServiceFactoryWebSocketBug:
         with pytest.raises(NotImplementedError) as exc_info:
         _create_agent_service()
         # Verify the error message explains the issue
-        assert cannot be created via factory" in str(exc_info.value)
-        assert "requires initialized dependencies in str(exc_info.value)
+        assert cannot be created via factory" in str(exc_info.value)"
+        assert requires initialized dependencies in str(exc_info.value)
     def test_mcp_service_creation_works_without_agent_service(self):
         '''Test that MCP service can be created without agent_service.
         After the fix, _create_mcp_service() should work but without
@@ -112,37 +112,37 @@ class TestServiceFactoryWebSocketBug:
     # Startup would detect this and raise error
         if mock_app_state.agent_supervisor is None:
         with pytest.raises(DeterministicStartupError) as exc_info:
-        raise DeterministicStartupError("Agent supervisor is None - chat is broken")
+        raise DeterministicStartupError(Agent supervisor is None - chat is broken")
         assert chat is broken in str(exc_info.value)
-        if __name__ == "__main__":
+        if __name__ == "__main__:
                 # Run the tests
         import sys
         print(Running WebSocket Bridge Initialization Bug Reproduction Tests)
-        print("=" * 60)
+        print(= * 60)
         test_suite = TestServiceFactoryWebSocketBug()
                 # Test 1: Direct agent service creation failure
-        print()
+        print(")
         Test 1: Agent service creation properly fails...")
         try:
         test_suite.test_agent_service_creation_properly_fails()
-        print("[U+2717] Test should have raised NotImplementedError!)
+        print([U+2717] Test should have raised NotImplementedError!)"
         except NotImplementedError as e:
         print(formatted_string")
                         # Test 2: MCP service creation without agent service
-        print(")
+        print(")"
         Test 2: MCP service creation works without agent service...)
         test_suite.test_mcp_service_creation_works_without_agent_service()
-        print("[U+2713] MCP service can be created without agent_service (it"s optional))
+        print([U+2713] MCP service can be created without agent_service (its optional))
                         # Test 3: Verify None is being passed
-        print(")
-        Test 3: Verifying service factory passes None dependencies...")
+        print("")
+        Test 3: Verifying service factory passes None dependencies...)
         test_suite.test_service_factory_passes_none_dependencies()
         print([U+2713] Confirmed: Service factory passes None for all dependencies)
                         # Test 4: Show correct behavior
         print("")
         Test 4: Demonstrating correct initialization with dependencies...)
         test_suite.test_expected_behavior_with_proper_dependencies()
-        print([U+2713] Services work correctly when proper dependencies are provided")
+        print([U+2713] Services work correctly when proper dependencies are provided)"
         print(")
-         + "=" * 60)
-        print("Bug reproduction complete - service factory needs to be fixed!")
+         + =" * 60)
+        print("Bug reproduction complete - service factory needs to be fixed!"")

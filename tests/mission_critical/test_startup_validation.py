@@ -24,7 +24,7 @@ Key Requirements:
  PASS:  Proper resource cleanup
  PASS:  No memory leaks
  PASS:  Connection pool validation
-""
+"
 
 import pytest
 import asyncio
@@ -51,14 +51,14 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Set test environment for infrastructure validation
 env = get_env()
-env.set(ENVIRONMENT", "testing, test")
-env.set("TESTING, true", "test)
-env.set(STARTUP_TIMEOUT", "30, test")
-env.set("VALIDATE_RESOURCE_USAGE, true", "test)
+env.set(ENVIRONMENT", testing, test)
+env.set("TESTING, true", test)
+env.set(STARTUP_TIMEOUT, "30, test")
+env.set(VALIDATE_RESOURCE_USAGE, true, "test)"
 
 
 class ResourceTracker:
-    ""Track resource usage during validation tests."
+    Track resource usage during validation tests."
     
     def __init__(self):
         self.initial_memory = None
@@ -67,7 +67,7 @@ class ResourceTracker:
         self.process = psutil.Process()
     
     def start_tracking(self):
-        "Start resource tracking.""
+        "Start resource tracking.
         self.initial_memory = self.process.memory_info().rss
         self.initial_threads = self.process.num_threads()
         try:
@@ -77,7 +77,7 @@ class ResourceTracker:
         gc.collect()
     
     def get_resource_usage(self) -> Dict[str, float]:
-        ""Get current resource usage delta."
+        ""Get current resource usage delta.
         current_memory = self.process.memory_info().rss
         current_threads = self.process.num_threads()
         try:
@@ -93,7 +93,7 @@ class ResourceTracker:
 
 
 class WebSocketTestHelper:
-    "Real WebSocket connection for testing instead of mocks.""
+    Real WebSocket connection for testing instead of mocks.""
     
     def __init__(self):
         self.messages_sent = []
@@ -101,25 +101,25 @@ class WebSocketTestHelper:
         self._closed = False
     
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        Send JSON message.""
         if self._closed:
-            raise RuntimeError("WebSocket is closed)
+            raise RuntimeError(WebSocket is closed)
         self.messages_sent.append(message)
     
-    async def close(self, code: int = 1000, reason: str = Normal closure"):
-        "Close WebSocket connection.""
+    async def close(self, code: int = 1000, reason: str = Normal closure):"
+        "Close WebSocket connection.
         self._closed = True
         self.is_connected = False
     
     async def get_messages(self) -> list:
-        ""Get all sent messages."
+        ""Get all sent messages.
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
 
 @pytest.fixture
 def mock_app():
-    "Create a mock FastAPI app with various startup states.""
+    Create a mock FastAPI app with various startup states.""
     app = FastAPI()
     app.state = MagicMock()
     
@@ -143,16 +143,16 @@ def mock_app():
 
 @pytest.fixture
 def validator():
-    ""Create a startup validator instance."
+    Create a startup validator instance.""
     return StartupValidator()
 
 
 class StartupValidationTests:
-    "Test the startup validation system.""
+    Test the startup validation system."
     
     @pytest.mark.asyncio
     async def test_zero_agents_detected(self, mock_app, validator):
-        ""Test that zero agents are properly detected and warned about."
+        "Test that zero agents are properly detected and warned about.
         # Setup mock with zero agents
         mock_app.state.agent_supervisor = MagicMock()
         mock_app.state.agent_supervisor.registry = MagicMock()
@@ -178,7 +178,7 @@ class StartupValidationTests:
     
     @pytest.mark.asyncio
     async def test_zero_tools_detected(self, mock_app, validator):
-        "Test that zero tools are properly detected.""
+        "Test that zero tools are properly detected."
         # Setup mock with zero tool classes (UserContext mode)
         mock_app.state.tool_classes = []  # Zero tools
         mock_app.state.websocket_bridge_factory = None
@@ -203,13 +203,13 @@ class StartupValidationTests:
     
     @pytest.mark.asyncio
     async def test_missing_websocket_handlers_detected(self, mock_app, validator):
-        ""Test that missing WebSocket handlers are detected."
+        "Test that missing WebSocket handlers are detected."
         # Setup WebSocket manager factory mode
         mock_app.state.websocket_manager = None  # Factory mode
         
         # Mock factory availability check
         with patch('netra_backend.app.websocket_core.websocket_manager_factory.create_websocket_manager') as mock_factory:
-            mock_factory.return_value = "factory_available
+            mock_factory.return_value = factory_available
             
             success, report = await validator.validate_startup(mock_app)
             
@@ -230,7 +230,7 @@ class StartupValidationTests:
     
     @pytest.mark.asyncio
     async def test_null_services_detected(self, mock_app, validator):
-        ""Test that None services are properly detected."
+        ""Test that None services are properly detected.
         # Set critical services to None
         mock_app.state.llm_manager = None
         mock_app.state.key_manager = None
@@ -254,7 +254,7 @@ class StartupValidationTests:
     
     @pytest.mark.asyncio
     async def test_healthy_startup(self, mock_app, validator):
-        "Test validation with all components properly initialized.""
+        Test validation with all components properly initialized.""
         # Setup healthy mock state
         mock_app.state.agent_supervisor = MagicMock()
         mock_app.state.agent_supervisor.registry = MagicMock()
@@ -320,11 +320,11 @@ class StartupValidationTests:
         for category, components in report['categories'].items():
             for component in components:
                 if component['critical'] and component['expected'] > 0:
-                    assert component['actual'] > 0, fCritical component {component['name']} has zero count"
+                    assert component['actual'] > 0, fCritical component {component['name']} has zero count
     
     @pytest.mark.asyncio
     async def test_report_generation(self, mock_app, validator):
-        "Test that validation report is properly generated.""
+        "Test that validation report is properly generated."
         # Setup minimal app state
         mock_app.state.agent_supervisor = MagicMock()
         
@@ -353,7 +353,7 @@ class StartupValidationTests:
         assert total_from_counts == report['total_validations']
     
     def test_component_status_determination(self, validator):
-        ""Test that component status is correctly determined."
+        "Test that component status is correctly determined."
         # Test zero count critical
         status = validator._get_status(0, 5, is_critical=True)
         assert status == ComponentStatus.CRITICAL
@@ -376,7 +376,7 @@ class StartupValidationTests:
     
     @pytest.mark.asyncio
     async def test_integration_with_deterministic_startup(self):
-        "Test that validation integrates with deterministic startup.""
+        Test that validation integrates with deterministic startup.""
         from netra_backend.app.smd import StartupOrchestrator, DeterministicStartupError
         
         # Create mock app
@@ -420,23 +420,23 @@ class StartupValidationTests:
                             )
                         
                         elapsed = time.time() - start_time
-                        assert elapsed < 30, fValidation took {elapsed:.2f}s, expected < 30s"
+                        assert elapsed < 30, fValidation took {elapsed:.2f}s, expected < 30s
                         
                         # Should fail due to validation (any DeterministicStartupError is success)
                         error_message = str(exc_info.value).lower()
-                        assert ("validation failed in error_message or 
+                        assert (validation failed in error_message or "
                                critical failures" in error_message or
-                               "bridge health verification failed in error_message), \
-                               fExpected validation-related error, got: {exc_info.value}"
+                               bridge health verification failed in error_message), \
+                               fExpected validation-related error, got: {exc_info.value}""
 
 
 @pytest.mark.mission_critical
 class ServiceDependencyResolutionTests:
-    "Tests for service dependency resolution during startup validation.""
+    Tests for service dependency resolution during startup validation."
     
     @pytest.fixture
     def setup_resource_tracking(self):
-        ""Setup resource tracking for dependency tests."
+        "Setup resource tracking for dependency tests.
         self.resource_tracker = ResourceTracker()
         self.resource_tracker.start_tracking()
         
@@ -446,11 +446,11 @@ class ServiceDependencyResolutionTests:
         resource_usage = self.resource_tracker.get_resource_usage()
         assert resource_usage['memory_mb'] < 20, f"Memory leak: {resource_usage['memory_mb']:.2f}MB
         assert resource_usage['threads'] <= 1, fThread leak: {resource_usage['threads']} threads"
-        assert resource_usage['file_descriptors'] <= 2, f"FD leak: {resource_usage['file_descriptors']} descriptors
+        assert resource_usage['file_descriptors'] <= 2, fFD leak: {resource_usage['file_descriptors']} descriptors
     
     @pytest.mark.asyncio
     async def test_dependency_chain_validation(self, validator):
-        ""Test validation of service dependency chains."
+        "Test validation of service dependency chains."
         # Create mock app with dependency chain
         app = FastAPI()
         app.state = MagicMock()
@@ -508,7 +508,7 @@ class ServiceDependencyResolutionTests:
     
     @pytest.mark.asyncio
     async def test_broken_dependency_chain_detection(self, validator):
-        "Test detection of broken service dependency chains.""
+        Test detection of broken service dependency chains.""
         app = FastAPI()
         app.state = MagicMock()
         
@@ -549,11 +549,11 @@ class ServiceDependencyResolutionTests:
 
 @pytest.mark.mission_critical
 class RaceConditionPreventionTests:
-    ""Tests for preventing race conditions during startup validation."
+    Tests for preventing race conditions during startup validation."
     
     @pytest.mark.asyncio
     async def test_concurrent_validation_requests(self, validator):
-        "Test that concurrent validation requests don't interfere.""
+        "Test that concurrent validation requests don't interfere.
         app = FastAPI()
         app.state = MagicMock()
         
@@ -615,15 +615,15 @@ class RaceConditionPreventionTests:
                 assert 'total_validations' in report
             
             # Should complete within reasonable time
-            assert elapsed < 15, fConcurrent validation took {elapsed:.2f}s, expected < 15s"
+            assert elapsed < 15, fConcurrent validation took {elapsed:.2f}s, expected < 15s""
 
 
 @pytest.mark.mission_critical  
 class ConnectionPoolValidationTests:
-    "Tests for connection pool validation during startup.""
+    Tests for connection pool validation during startup."
     
     def test_database_connection_pool_health(self, validator):
-        ""Test database connection pool health validation."
+        "Test database connection pool health validation.
         app = FastAPI()
         app.state = MagicMock()
         
@@ -655,7 +655,7 @@ class ConnectionPoolValidationTests:
         assert pool_health['invalidated'] == 0
     
     def test_redis_connection_pool_health(self, validator):
-        "Test Redis connection pool health validation.""
+        "Test Redis connection pool health validation."
         app = FastAPI()
         app.state = MagicMock()
         
@@ -683,7 +683,7 @@ class ConnectionPoolValidationTests:
         assert pool_health['available'] + pool_health['in_use'] <= pool_health['created']
 
 
-if __name__ == __main__":
+if __name__ == __main__:"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

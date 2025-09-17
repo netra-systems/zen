@@ -1,7 +1,7 @@
 _lazy_imports = {}
 
 def lazy_import(module_path: str, component: str=None):
-    "Lazy import pattern for performance optimization""
+    "Lazy import pattern for performance optimization
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else []
@@ -16,7 +16,7 @@ def lazy_import(module_path: str, component: str=None):
 _lazy_imports = {}
 
 def lazy_import(module_path: str, component: str=None):
-    ""Lazy import pattern for performance optimization"
+    ""Lazy import pattern for performance optimization
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else []
@@ -49,12 +49,12 @@ logger = central_logger.get_logger(__name__)
 class WebSocketSSOTGoldenPathTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
-        "Create isolated user execution context for golden path tests""
+        Create isolated user execution context for golden path tests""
         return UserExecutionContext.from_request(user_id='test_user', thread_id='test_thread', run_id='test_run')
     '\n    Integration test for Golden Path user journey via SSOT WebSocket.\n    \n    CRITICAL: Tests complete user journey from login to AI response\n    through consolidated SSOT WebSocket implementation.\n    '
 
     def setup_method(self, method=None):
-        ""Set up Golden Path test fixtures."
+        Set up Golden Path test fixtures.""
         super().setup_method(method)
         self.test_user_id = f'golden_path_user_{uuid.uuid4().hex[:8]}'
         self.test_email = f'{self.test_user_id}@test.com'
@@ -65,16 +65,16 @@ class WebSocketSSOTGoldenPathTests(SSotAsyncTestCase):
         self.received_events = []
 
     async def capture_websocket_event(self, event_data: Dict[str, Any]:
-        "Capture WebSocket events for validation.""
+        Capture WebSocket events for validation."
         self.received_events.append({'timestamp': datetime.now(timezone.utc).isoformat(), 'event': event_data}
         logger.info(f'Golden Path event captured: {event_data}')
 
     async def test_golden_path_complete_user_journey_ssot(self):
-        ""
+        "
         Test complete Golden Path user journey through SSOT WebSocket.
         
         CRITICAL: This validates the $500K+ ARR chat functionality works end-to-end.
-        "
+"
         mock_auth_result = {'success': True, 'user_id': self.test_user_id, 'jwt_token': self.test_jwt_token, 'user_context': {'email': self.test_email, 'authenticated': True}}
         decoded_payload = jwt.decode(self.test_jwt_token, self.jwt_secret, algorithms=['HS256']
         assert decoded_payload['sub'] == self.test_user_id
@@ -112,11 +112,11 @@ class WebSocketSSOTGoldenPathTests(SSotAsyncTestCase):
         logger.info(' PASS:  Golden Path user journey validated successfully through SSOT WebSocket')
 
     async def test_ssot_websocket_handles_authentication_flow(self):
-        ""
+        
         Test SSOT WebSocket properly handles authentication flow.
         
         CRITICAL: Authentication is the gateway to chat functionality.
-        "
+""
         mock_websocket = AsyncMock()
         auth_request = {'type': 'authenticate', 'token': self.test_jwt_token, 'user_id': self.test_user_id}
         auth_result = {'success': True, 'user_id': self.test_user_id, 'authenticated': True, 'permissions': ['chat', 'agent_access'], 'session_id': f'session_{uuid.uuid4().hex[:8]}'}
@@ -131,11 +131,11 @@ class WebSocketSSOTGoldenPathTests(SSotAsyncTestCase):
         assert auth_failure_result['retry_allowed']
 
     async def test_ssot_websocket_event_ordering_preservation(self):
-        "
+    "
         Test SSOT WebSocket preserves critical event ordering.
         
         CRITICAL: Event order affects user experience quality.
-        ""
+        "
         ordered_events = [{'type': 'agent_started', 'sequence': 1, 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'agent_thinking', 'sequence': 2, 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'tool_executing', 'sequence': 3, 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'tool_completed', 'sequence': 4, 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'agent_completed', 'sequence': 5, 'timestamp': datetime.now(timezone.utc).isoformat()}]
         received_sequences = []
         for event in ordered_events:
@@ -145,11 +145,11 @@ class WebSocketSSOTGoldenPathTests(SSotAsyncTestCase):
         assert len(self.received_events) == 5, 'All events must be delivered without loss'
 
     async def test_ssot_websocket_user_isolation_validation(self):
-        ""
+        
         Test SSOT WebSocket maintains proper user isolation.
         
         CRITICAL: User isolation prevents cross-user event leakage.
-        "
+""
         user_1 = f'user_1_{uuid.uuid4().hex[:8]}'
         user_2 = f'user_2_{uuid.uuid4().hex[:8]}'
         user_1_context = {'user_id': user_1, 'context_id': f'ctx_{uuid.uuid4().hex[:8]}', 'isolated': True}
@@ -175,7 +175,7 @@ class WebSocketSSOTGoldenPathTests(SSotAsyncTestCase):
         assert 'User 1' not in str(user_2_events)
 
     async def test_ssot_websocket_error_recovery_patterns(self):
-        "
+    "
         Test SSOT WebSocket implements proper error recovery.
         
         CRITICAL: Errors should not break the Golden Path user journey.

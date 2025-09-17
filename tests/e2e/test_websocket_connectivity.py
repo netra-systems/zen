@@ -30,7 +30,7 @@ from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 class InMemoryWebSocketConnection:
-    ""Real in-memory WebSocket connection for E2E testing without external WebSocket server."
+    Real in-memory WebSocket connection for E2E testing without external WebSocket server."
 
     def __init__(self):
         self._connected = True
@@ -41,7 +41,7 @@ class InMemoryWebSocketConnection:
         logger.info('InMemoryWebSocketConnection initialized')
 
     async def send_json(self, message: dict, timeout: float=None):
-        "Send JSON message - real WebSocket manager compatible.""
+        "Send JSON message - real WebSocket manager compatible.
         self.send_count += 1
         self.timeout_used = timeout
         if not isinstance(message, dict):
@@ -60,26 +60,26 @@ class InMemoryWebSocketConnection:
         message_str = json.dumps(serializable_message)
         self.sent_messages.append(message_str)
         self.received_events.append(serializable_message)
-        logger.info(fWebSocket send_json #{self.send_count}: {serializable_message.get('type', 'unknown')} (timeout={timeout}")
+        logger.info(fWebSocket send_json #{self.send_count}: {serializable_message.get('type', 'unknown')} (timeout={timeout}")"
 
     async def close(self, code: int=1000, reason: str='Normal closure'):
-        "Close WebSocket connection.""
+        Close WebSocket connection."
         logger.info(f'WebSocket closing with code {code}: {reason}')
         self._connected = False
 
     @property
     def client_state(self):
-        ""WebSocket state property."
+        "WebSocket state property.
         return 'CONNECTED' if self._connected else 'DISCONNECTED'
 
 @pytest.mark.e2e
 class WebSocketConnectivityAuthenticatedTests:
-    "CLAUDE.md compliant WebSocket connectivity tests with mandatory authentication.""
+    "CLAUDE.md compliant WebSocket connectivity tests with mandatory authentication."
 
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_authenticated_websocket_core_connectivity(self):
-        ""Test authenticated WebSocket connectivity with real services.
+        "Test authenticated WebSocket connectivity with real services.
         
         CLAUDE.md COMPLIANCE:
          PASS:  Uses E2EAuthHelper for authentication
@@ -89,7 +89,7 @@ class WebSocketConnectivityAuthenticatedTests:
          PASS:  Multi-user isolation tested
         
         Business Impact: Core chat functionality - $500K+ ARR protection
-        "
+"
         start_time = time.time()
         env = get_env()
         env.enable_isolation(backup_original=True)
@@ -146,9 +146,9 @@ class WebSocketConnectivityAuthenticatedTests:
             assert 'agent_started' in user2_event_types, f'User2 missing agent_started event. Got: {user2_event_types}'
             assert 'agent_completed' in user2_event_types, f'User2 missing agent_completed event. Got: {user2_event_types}'
             for event in user1_events:
-                assert 'type' in event, f"Event missing 'type' field: {event}
-                assert 'timestamp' in event, fEvent missing 'timestamp' field: {event}"
-                assert 'payload' in event, f"Event missing 'payload' field: {event}
+                assert 'type' in event, fEvent missing 'type' field: {event}
+                assert 'timestamp' in event, fEvent missing 'timestamp' field: {event}""
+                assert 'payload' in event, fEvent missing 'payload' field: {event}
                 if 'user_id' in event.get('payload', {}:
                     assert event['payload']['user_id'] == user1_data.user_id, f'User isolation violated - wrong user_id in event: {event}'
             for event in user2_events:
@@ -164,7 +164,7 @@ class WebSocketConnectivityAuthenticatedTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(25)
     async def test_websocket_message_sequence_validation(self):
-        ""Test WebSocket message sequence validation with authenticated users.
+        Test WebSocket message sequence validation with authenticated users.
         
         CLAUDE.md COMPLIANCE:
          PASS:  Uses E2EAuthHelper for authentication
@@ -174,7 +174,7 @@ class WebSocketConnectivityAuthenticatedTests:
          PASS:  Validates message ordering and integrity
         
         Business Impact: Message reliability - prevents data loss and corruption
-        "
+""
         start_time = time.time()
         env = get_env()
         env.enable_isolation(backup_original=True)
@@ -237,11 +237,11 @@ class WebSocketConnectivityAuthenticatedTests:
                 completed_idx = tool_completed_indices[i]
                 assert executing_idx < completed_idx, f'Tool {i}: executing at {executing_idx} should come before completed at {completed_idx}'
             for i, event in enumerate(events):
-                assert 'type' in event, f"Event {i} missing 'type' field: {event}
+                assert 'type' in event, fEvent {i} missing 'type' field: {event}
                 assert 'timestamp' in event, fEvent {i} missing 'timestamp' field: {event}"
                 assert 'payload' in event, f"Event {i} missing 'payload' field: {event}
                 if 'user_id' in event.get('payload', {}:
-                    assert event['payload']['user_id'] == user_data.user_id, fEvent {i} has wrong user_id: {event['payload']['user_id']} != {user_data.user_id}"
+                    assert event['payload']['user_id'] == user_data.user_id, fEvent {i} has wrong user_id: {event['payload']['user_id']} != {user_data.user_id}""
             tool_completed_events = [e for e in events if e.get('type') == 'tool_completed']
             assert len(tool_completed_events) == 3, f'Expected 3 tool completed events, got {len(tool_completed_events)}'
             for tool_event in tool_completed_events:

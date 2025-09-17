@@ -1,22 +1,22 @@
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.""
+    "Real WebSocket connection for testing instead of mocks.
     def __init__(self):
         pass
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.
         if self._closed:
-            raise RuntimeError("WebSocket is closed)
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):
-        "Close WebSocket connection.""
+        Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
     async def get_messages(self) -> list:
-        ""Get all sent messages."
+        Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
         '''
@@ -63,9 +63,9 @@ class TestWebSocketConnection:
         from shared.isolated_environment import get_env
         import asyncio
 class TestDockerUnifiedFixes:
-        "Comprehensive validation of all implemented fixes.""
+        "Comprehensive validation of all implemented fixes.
     def test_p0_database_credentials_fixed(self):
-        ""Validate P0: Database credentials are environment-aware."
+        ""Validate P0: Database credentials are environment-aware.
     # Test development environment
         dev_manager = UnifiedDockerManager(environment_type=EnvironmentType.DEVELOPMENT)
         dev_creds = dev_manager.get_database_credentials()
@@ -88,36 +88,36 @@ class TestDockerUnifiedFixes:
         assert alpine_creds['password'] == 'test'
         assert alpine_creds['database'] == 'netra_test'
     def test_p0_service_urls_use_correct_credentials(self):
-        "Validate P0: Service URLs include correct credentials.""
+        Validate P0: Service URLs include correct credentials.""
         pass
     # Development environment
         dev_manager = UnifiedDockerManager(environment_type=EnvironmentType.DEVELOPMENT)
-        dev_url = dev_manager._build_service_url_from_port(postgres", 5433)
-        assert "netra:netra123 in dev_url
-        assert netra_dev" in dev_url
+        dev_url = dev_manager._build_service_url_from_port(postgres, 5433)
+        assert "netra:netra123 in dev_url"
+        assert netra_dev in dev_url
     # Test environment
         test_manager = UnifiedDockerManager(environment_type=EnvironmentType.SHARED)
-        test_url = test_manager._build_service_url_from_port("postgres, 5434)
+        test_url = test_manager._build_service_url_from_port(postgres, 5434)"
         assert test_user:test_pass" in test_url
-        assert "netra_test in test_url
+        assert netra_test in test_url
     def test_p0_port_discovery_container_parsing(self):
-        ""Validate P0: Port discovery correctly parses container names."
+        ""Validate P0: Port discovery correctly parses container names.
         manager = UnifiedDockerManager()
     # Test container name parsing
         test_cases = [
-        ("netra-core-generation-1-dev-backend-1, backend"),
-        ("netra-core-generation-1-test-postgres-1, postgres"),
-        ("netra-core-generation-1-alpine-test-redis-1, redis"),
+        (netra-core-generation-1-dev-backend-1, backend"),
+        ("netra-core-generation-1-test-postgres-1, postgres),
+        (netra-core-generation-1-alpine-test-redis-1, redis),
         ("netra-backend, backend"),
-        ("netra-postgres, postgres"),
+        (netra-postgres, postgres),
     
         for container_name, expected_service in test_cases:
         service = manager._parse_container_name_to_service(container_name)
         assert service == expected_service, ( )
-        "formatted_string
+        formatted_string"
         
     def test_p0_port_discovery_from_docker_ps(self):
-        ""Validate P0: Port discovery extracts ports from docker ps output."
+        "Validate P0: Port discovery extracts ports from docker ps output.
         pass
         manager = UnifiedDockerManager()
         mock_output = '''
@@ -131,9 +131,9 @@ class TestDockerUnifiedFixes:
         assert ports['postgres'] == 5433
         assert ports['auth'] == 8081
     def test_p1_docker_config_loader_exists(self):
-        "Validate P1: Docker configuration loader is implemented.""
+        "Validate P1: Docker configuration loader is implemented."
     # Check config file exists
-        config_path = project_root / config" / "docker_environments.yaml
+        config_path = project_root / config / "docker_environments.yaml
         assert config_path.exists(), Docker environment configuration YAML should exist"
     # Test loader functionality
         loader = DockerConfigLoader()
@@ -147,7 +147,7 @@ class TestDockerUnifiedFixes:
         assert test_config.credentials['postgres_user'] == 'test_user'
         assert test_config.credentials['postgres_password'] == 'test_pass'
     def test_p1_environment_detection_implemented(self):
-        "Validate P1: Environment detection is implemented.""
+        Validate P1: Environment detection is implemented.""
         pass
         manager = UnifiedDockerManager()
     # Should have detect_environment method
@@ -157,23 +157,23 @@ class TestDockerUnifiedFixes:
         # Mock development containers running
         mock_run.return_value = MagicMock( )
         stdout=netra-core-generation-1-dev-backend-1
-        ",
-        stderr=",
+        ,
+        stderr=,"
         returncode=0
         
         env_type = manager.detect_environment()
         assert env_type == EnvironmentType.DEVELOPMENT
     def test_p1_configuration_validation_exists(self):
-        ""Validate P1: Configuration validation is implemented."
+        "Validate P1: Configuration validation is implemented.
         loader = DockerConfigLoader()
     # Should have validation method
         assert hasattr(loader, 'validate_configuration')
     # Validate all environments
         for env in DockerEnvironment:
         is_valid = loader.validate_environment(env)
-        assert is_valid, "formatted_string
+        assert is_valid, "formatted_string"
     def test_integration_docker_manager_uses_config_loader(self):
-        ""Validate integration: UnifiedDockerManager can use DockerConfigLoader."
+        Validate integration: UnifiedDockerManager can use DockerConfigLoader."
         pass
         manager = UnifiedDockerManager(environment_type=EnvironmentType.DEVELOPMENT)
     Manager should be able to get configuration from loader
@@ -182,12 +182,12 @@ class TestDockerUnifiedFixes:
         assert config is not None
         assert config.ports['backend'] == 8000
     def test_all_fixes_integrated(self):
-        "Comprehensive test that all fixes work together.""
+        "Comprehensive test that all fixes work together.
     # Create managers for each environment
         environments = [
-        (EnvironmentType.DEVELOPMENT, False, netra", "netra123, netra_dev"),
-        (EnvironmentType.SHARED, False, "test_user, test_pass", "netra_test),
-        (EnvironmentType.SHARED, True, test", "test, netra_test"),  # Alpine
+        (EnvironmentType.DEVELOPMENT, False, netra", "netra123, netra_dev),
+        (EnvironmentType.SHARED, False, test_user, test_pass", "netra_test),
+        (EnvironmentType.SHARED, True, test, test, netra_test"),  # Alpine"
     
         for env_type, use_alpine, expected_user, expected_pass, expected_db in environments:
         manager = UnifiedDockerManager( )
@@ -200,8 +200,8 @@ class TestDockerUnifiedFixes:
         assert creds['password'] == expected_pass
         assert creds['database'] == expected_db
         # Test URL building
-        url = manager._build_service_url_from_port("postgres, 5432)
-        assert formatted_string" in url
+        url = manager._build_service_url_from_port(postgres, 5432)
+        assert formatted_string in url"
         assert expected_db in url
         # Test environment detection exists
         assert hasattr(manager, 'detect_environment')
@@ -210,30 +210,30 @@ class TestDockerUnifiedFixes:
         pattern = manager._get_container_name_pattern()
         assert pattern is not None
     def test_summary_report(self):
-        "Generate summary of all fixes.""
+        "Generate summary of all fixes.
         pass
         fixes_validated = {
         P0 - Database Credentials": " PASS:  FIXED - Environment-aware credentials,
-        P0 - Port Discovery": " PASS:  FIXED - Enhanced container parsing,
-        P0 - Service URLs": " PASS:  FIXED - Dynamic credential injection,
-        P1 - Configuration YAML": " PASS:  IMPLEMENTED - Centralized config,
-        P1 - Environment Detection": " PASS:  IMPLEMENTED - Auto-detection logic,
+        P0 - Port Discovery:  PASS:  FIXED - Enhanced container parsing,
+        P0 - Service URLs: " PASS:  FIXED - Dynamic credential injection,
+        P1 - Configuration YAML":  PASS:  IMPLEMENTED - Centralized config,
+        P1 - Environment Detection:  PASS:  IMPLEMENTED - Auto-detection logic,
         P1 - Configuration Validation": " PASS:  IMPLEMENTED - Validation system
     
+        print()
+        " + "=*60)
+        print(DOCKER UNIFIED FIXES VALIDATION SUMMARY)
+        print(=*60)
+        for fix, status in fixes_validated.items("):
         print(")
-        " + =*60)
-        print("DOCKER UNIFIED FIXES VALIDATION SUMMARY")
         print(=*60)
-        for fix, status in fixes_validated.items():
-        print("")
-        print(=*60)
-        print("ALL P0 AND P1 ISSUES RESOLVED  PASS: ")
-        print(=*60)
+        print(ALL P0 AND P1 ISSUES RESOLVED  PASS: ")
+        print(=*60")
         # All fixes should be implemented
-        assert all(" PASS: " in status for status in fixes_validated.values())
+        assert all( PASS:  in status for status in fixes_validated.values())
         @dataclass
 class UnifiedFixMetrics:
-        "Metrics for unified fixes performance and reliability."
+        Metrics for unified fixes performance and reliability."
         fix_name: str
         validation_time_ms: float
         memory_usage_mb: float
@@ -245,10 +245,10 @@ class UnifiedFixMetrics:
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         logger = logging.getLogger(__name__)
 class TestDockerUnifiedFixesInfrastructure:
-        ""Infrastructure tests for Docker unified fixes verification.""
+        "Infrastructure tests for Docker unified fixes verification.
     def test_unified_fixes_performance_impact(self):
         "Test performance impact of all unified fixes."
-        logger.info(" CHART:  Testing unified fixes performance impact")
+        logger.info( CHART:  Testing unified fixes performance impact)
         fix_metrics = []
     # Test 1: Database credential fix performance
         start_time = time.time()
@@ -268,7 +268,7 @@ class TestDockerUnifiedFixesInfrastructure:
         memory_after = psutil.virtual_memory().used / (1024 * 1024)
         cpu_after = psutil.cpu_percent(interval=0.1)
         fix_metrics.append(UnifiedFixMetrics( ))
-        fix_name="Database Credentials Fix",
+        fix_name=Database Credentials Fix",
         validation_time_ms=validation_time,
         memory_usage_mb=memory_after - memory_before,
         cpu_usage_percent=cpu_after - cpu_before,
@@ -299,7 +299,7 @@ class TestDockerUnifiedFixesInfrastructure:
         validation_time = (time.time() - start_time) * 1000
         memory_after = psutil.virtual_memory().used / (1024 * 1024)
         fix_metrics.append(UnifiedFixMetrics( ))
-        fix_name="Port Discovery Fix",
+        fix_name="Port Discovery Fix,
         validation_time_ms=validation_time,
         memory_usage_mb=memory_after - memory_before,
         cpu_usage_percent=0,  # CPU not heavily impacted by this test
@@ -309,18 +309,18 @@ class TestDockerUnifiedFixesInfrastructure:
                             # Analyze performance impact
         logger.info( PASS:  Unified fixes performance impact analysis:)
         for metric in fix_metrics:
-        logger.info("")
+        logger.info()
         logger.info(formatted_string)
         logger.info("")
         logger.info(formatted_string)
-        logger.info("")
+        logger.info()
                                 # Validate performance requirements
         for metric in fix_metrics:
         assert metric.validation_time_ms < 5000, formatted_string
-        assert metric.memory_usage_mb < 50, ""
+        assert metric.memory_usage_mb < 50, "
         assert metric.success_rate >= 95, formatted_string
     def test_unified_fixes_regression_testing(self):
-        ""Test for regressions in all unified fixes.""
+        "Test for regressions in all unified fixes.
         logger.info( CYCLE:  Testing unified fixes regression testing)
         regression_test_results = []
     # Regression Test 1: Credential consistency across environments
@@ -361,13 +361,13 @@ class TestDockerUnifiedFixesInfrastructure:
                     
                     # Regression Test 2: Container name parsing consistency
         test_cases = [
-        (netra-core-generation-1-dev-backend-1", "backend),
-        (netra-core-generation-1-test-postgres-1", "postgres),
-        (netra-core-generation-1-alpine-test-redis-1", "redis),
-        (netra-backend", "backend),
+        (netra-core-generation-1-dev-backend-1, backend),
+        (netra-core-generation-1-test-postgres-1, "postgres),
+        (netra-core-generation-1-alpine-test-redis-1", redis),
+        (netra-backend, backend),
         (netra-postgres", "postgres),
-        (custom-container-auth-service", "auth),  # Edge case
-        (very-long-container-name-backend-service", "backend),  # Edge case
+        (custom-container-auth-service, auth),  # Edge case
+        (very-long-container-name-backend-service, "backend),  # Edge case
                     
         parsing_results = []
         for container_name, expected_service in test_cases:
@@ -399,21 +399,21 @@ class TestDockerUnifiedFixesInfrastructure:
                                 # Analyze regression results
         logger.info( PASS:  Unified fixes regression test results:")
         for result in regression_test_results:
-        logger.info("formatted_string)
+        logger.info("
                                     # Validate no regressions
         for result in regression_test_results:
         assert result['success_rate'] >= 90, formatted_string"
     def test_unified_fixes_compatibility_validation(self):
-        "Test compatibility of fixes across different environments.""
+        Test compatibility of fixes across different environments.""
         pass
-        logger.info([U+1F310] Testing unified fixes compatibility validation")
+        logger.info([U+1F310] Testing unified fixes compatibility validation)
         compatibility_matrix = {}
     # Test compatibility across environment types
         environment_combinations = [
-        (EnvironmentType.DEVELOPMENT, False, "Development Standard),
+        (EnvironmentType.DEVELOPMENT, False, Development Standard),"
         (EnvironmentType.DEVELOPMENT, True, Development Alpine"),
-        (EnvironmentType.SHARED, False, "Test Standard),
-        (EnvironmentType.SHARED, True, Test Alpine"),
+        (EnvironmentType.SHARED, False, Test Standard),
+        (EnvironmentType.SHARED, True, Test Alpine"),"
     
         for env_type, use_alpine, env_description in environment_combinations:
         compatibility_results = []
@@ -438,7 +438,7 @@ class TestDockerUnifiedFixesInfrastructure:
                     
                     # Test 2: URL building
         try:
-        url = manager._build_service_url_from_port("postgres, 5432)
+        url = manager._build_service_url_from_port(postgres, 5432)
         compatibility_results.append()
         'feature': 'url_building',
         'success': True,
@@ -486,27 +486,27 @@ class TestDockerUnifiedFixesInfrastructure:
         {'feature': 'manager_instantiation', 'success': False, 'error': str(e)}
                                                 
                                                 # Analyze compatibility results
-        logger.info( PASS:  Unified fixes compatibility analysis:")
+        logger.info( PASS:  Unified fixes compatibility analysis:)"
         for env_desc, results in compatibility_matrix.items():
         successful_features = sum(1 for r in results if r['success']
         total_features = len(results)
         compatibility_rate = (successful_features / total_features) * 100
-        logger.info("formatted_string)
+        logger.info("
         for result in results:
-        status = [U+2713]" if result['success'] else "[U+2717]
+        status = [U+2713] if result['success'] else "[U+2717]
         logger.info(formatted_string")
                                                         # Validate compatibility requirements
         for env_desc, results in compatibility_matrix.items():
         successful_features = sum(1 for r in results if r['success']
         total_features = len(results)
         compatibility_rate = (successful_features / total_features) * 100
-        assert compatibility_rate >= 75, "formatted_string
+        assert compatibility_rate >= 75, formatted_string
     def test_unified_fixes_stability_under_load(self):
-        ""Test stability of fixes under concurrent load."
-        logger.info("[U+1F680] Testing unified fixes stability under load)
+        ""Test stability of fixes under concurrent load.
+        logger.info([U+1F680] Testing unified fixes stability under load)"
         stability_results = []
     def concurrent_credential_operation(thread_id: int) -> Dict[str, Any]:
-        ""Concurrent credential operation for stability testing."
+        "Concurrent credential operation for stability testing.
         pass
         try:
         start_time = time.time()
@@ -518,7 +518,7 @@ class TestDockerUnifiedFixesInfrastructure:
         use_alpine=use_alpine
         
         creds = manager.get_database_credentials()
-        url = manager._build_service_url_from_port("postgres, 5432)
+        url = manager._build_service_url_from_port("postgres, 5432)"
         operation_time = time.time() - start_time
         return {
         'thread_id': thread_id,
@@ -547,7 +547,7 @@ class TestDockerUnifiedFixesInfrastructure:
         except Exception as e:
         stability_results.append()
         'success': False,
-        'error': formatted_string",
+        'error': formatted_string,
         'operation_time': 15.0  # Timeout time
                             
                             # Analyze stability results
@@ -566,19 +566,19 @@ class TestDockerUnifiedFixesInfrastructure:
         valid_credentials = 0
         valid_urls = 0
         success_rate = (successful_operations / len(stability_results)) * 100 if stability_results else 0
-        logger.info(" PASS:  Unified fixes stability under load:)
+        logger.info( PASS:  Unified fixes stability under load:)"
         logger.info(formatted_string")
-        logger.info("formatted_string)
+        logger.info("
         logger.info(formatted_string")
-        logger.info("formatted_string)
+        logger.info("
         logger.info(formatted_string")
-        logger.info("formatted_string)
+        logger.info("
                                     # Validate stability requirements
         assert success_rate >= 90, formatted_string"
-        assert max_operation_time < 10.0, "formatted_string
-        assert failed_operations < successful_operations * 0.1, formatted_string"
+        assert max_operation_time < 10.0, formatted_string
+        assert failed_operations < successful_operations * 0.1, formatted_string""
     def test_unified_fixes_monitoring_readiness(self):
-        "Test monitoring and alerting readiness for fixes.""
+        Test monitoring and alerting readiness for fixes."
         logger.info( CHART:  Testing unified fixes monitoring readiness")
         monitoring_metrics = {}
     # Monitor 1: Credential retrieval metrics
@@ -645,7 +645,7 @@ class TestDockerUnifiedFixesInfrastructure:
         port_discovery_metrics['ports_discovered'].extend(list(ports.keys()))
         except Exception as e:
         port_discovery_metrics['failed_discoveries'] += 1
-        logger.warning("formatted_string)
+        logger.warning("
         port_discovery_metrics['average_discovery_time_ms'] = statistics.mean(discovery_times) if discovery_times else 0
         monitoring_metrics['port_discovery'] = port_discovery_metrics
                                 # Monitor 3: Configuration loading metrics
@@ -655,7 +655,7 @@ class TestDockerUnifiedFixesInfrastructure:
         'validation_success_rate': 0
                                 
         try:
-        config_path = project_root / config" / "docker_environments.yaml
+        config_path = project_root / config" / docker_environments.yaml
         if config_path.exists():
         config_metrics['config_files_accessible'] += 1
                                         # Test config loader
@@ -672,30 +672,30 @@ class TestDockerUnifiedFixesInfrastructure:
         pass
         config_metrics['validation_success_rate'] = (environments_validated / total_environments) * 100
         except Exception as e:
-        logger.warning(formatted_string")
+        logger.warning(formatted_string)
         config_metrics['validation_success_rate'] = 0
         else:
         config_metrics['config_files_inaccessible'] += 1
         except Exception as e:
         config_metrics['config_files_inaccessible'] += 1
-        logger.warning("formatted_string)
+        logger.warning(""
         monitoring_metrics['configuration'] = config_metrics
                                                                         # Analyze monitoring readiness
-        logger.info( PASS:  Unified fixes monitoring readiness:")
+        logger.info( PASS:  Unified fixes monitoring readiness:)
                                                                         # Credential monitoring
         cred_success_rate = (credential_metrics['successful_retrievals'] / )
         (credential_metrics['successful_retrievals'] + credential_metrics['failed_retrievals']) * 100 if (credential_metrics['successful_retrievals'] + credential_metrics['failed_retrievals'] > 0 else 0
-        logger.info("formatted_string)
+        logger.info(""
                                                                         # Port discovery monitoring
         port_success_rate = (port_discovery_metrics['successful_discoveries'] / )
         (port_discovery_metrics['successful_discoveries'] + port_discovery_metrics['failed_discoveries']) * 100 if (port_discovery_metrics['successful_discoveries'] + port_discovery_metrics['failed_discoveries'] > 0 else 0
-        logger.info(formatted_string")
+        logger.info(formatted_string)
                                                                         # Configuration monitoring
-        logger.info("formatted_string)
+        logger.info(""
                                                                         # Validate monitoring readiness
-        assert cred_success_rate >= 75, formatted_string"
-        assert port_success_rate >= 75, "formatted_string
-        assert config_metrics['validation_success_rate'] >= 50, formatted_string"
+        assert cred_success_rate >= 75, formatted_string
+        assert port_success_rate >= 75, "formatted_string"
+        assert config_metrics['validation_success_rate'] >= 50, formatted_string
                                                                         # Return metrics for potential external monitoring integration
         return monitoring_metrics
-        if __name__ == "__main__":
+        if __name__ == __main__":

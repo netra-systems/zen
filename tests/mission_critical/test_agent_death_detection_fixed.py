@@ -1,5 +1,5 @@
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.""
+    "Real WebSocket connection for testing instead of mocks.
 
     def __init__(self):
         pass
@@ -8,19 +8,19 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.
         if self._closed:
-        raise RuntimeError("WebSocket is closed)
+        raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = Normal closure"):
-        "Close WebSocket connection.""
+        Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
 
     async def get_messages(self) -> list:
-        ""Get all sent messages."
+        Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
@@ -69,25 +69,25 @@ class TestWebSocketConnection:
         @pytest.mark.critical
 @pytest.mark.asyncio
 class TestAgentDeathDetectionFixed:
-    "Test suite for agent death detection fixes""
+    "Test suite for agent death detection fixes
 
     async def test_execution_tracker_creates_unique_ids(self):
-    ""Test that execution tracker creates unique IDs for each execution"
+    ""Test that execution tracker creates unique IDs for each execution
     tracker = AgentExecutionTracker()
 
         # Create multiple executions
     exec_ids = []
     for i in range(10):
     exec_id = tracker.create_execution( )
-    agent_name="formatted_string,
+    agent_name=formatted_string,"
     thread_id=formatted_string",
-    user_id="test_user,
+    user_id=test_user,
     timeout_seconds=30
             
     exec_ids.append(exec_id)
 
             # Verify all IDs are unique
-    assert len(exec_ids) == len(set(exec_ids)), Execution IDs must be unique"
+    assert len(exec_ids) == len(set(exec_ids)), Execution IDs must be unique""
 
             # Verify execution records exist
     for exec_id in exec_ids:
@@ -97,15 +97,15 @@ class TestAgentDeathDetectionFixed:
     assert record.state == ExecutionState.PENDING
 
     async def test_heartbeat_monitoring_detects_death(self):
-    "Test that heartbeat monitoring correctly detects agent death""
+    Test that heartbeat monitoring correctly detects agent death"
     pass
     tracker = AgentExecutionTracker(heartbeat_timeout=2)  # 2 second timeout
 
                     # Create and start execution
     exec_id = tracker.create_execution( )
     agent_name=test_agent",
-    thread_id="test_thread,
-    user_id=test_user"
+    thread_id=test_thread,
+    user_id=test_user""
                     
     tracker.start_execution(exec_id)
 
@@ -127,7 +127,7 @@ class TestAgentDeathDetectionFixed:
     assert record.is_dead(tracker.heartbeat_timeout)
 
     async def test_death_notification_sent_via_websocket(self):
-    "Test that death notifications are sent via WebSocket""
+    Test that death notifications are sent via WebSocket"
                         # Mock WebSocket manager
     websocket = TestWebSocketConnection()
     mock_ws_manager.send_to_thread = AsyncMock(return_value=True)
@@ -135,14 +135,14 @@ class TestAgentDeathDetectionFixed:
                         # Create bridge
     bridge = AgentWebSocketBridge()
     bridge._websocket_manager = mock_ws_manager
-    bridge._thread_id_cache = {exec_123": "thread_123}
+    bridge._thread_id_cache = {exec_123": thread_123}
 
                         # Send death notification
     success = await bridge.notify_agent_death( )
-    run_id=exec_123",
-    agent_name="test_agent,
-    death_cause=timeout",
-    death_context={"timeout: 30}
+    run_id=exec_123,
+    agent_name="test_agent,"
+    death_cause=timeout,
+    death_context={timeout: 30}"
                         
 
     assert success == True
@@ -160,22 +160,22 @@ class TestAgentDeathDetectionFixed:
     message = call_args.kwargs['message']
 
     assert thread_id == thread_123"
-    assert message['type'] == "agent_death
-    assert message['agent_name'] == test_agent"
-    assert message['payload']['death_cause'] == "timeout
+    assert message['type'] == agent_death
+    assert message['agent_name'] == test_agent""
+    assert message['payload']['death_cause'] == timeout
     assert message['payload']['status'] == dead"
     assert 'message' in message['payload']  # User-friendly message
     assert message['payload']['recovery_action'] == "refresh_required
 
     async def test_timeout_detection_and_notification(self):
-    ""Test that execution timeouts are detected and notified"
+    Test that execution timeouts are detected and notified""
     pass
     tracker = AgentExecutionTracker(execution_timeout=2)  # 2 second timeout
 
                                     # Create execution with short timeout
     exec_id = tracker.create_execution( )
-    agent_name="slow_agent,
-    thread_id=test_thread",
+    agent_name=slow_agent,
+    thread_id=test_thread,"
     user_id="test_user,
     timeout_seconds=2
                                     
@@ -194,7 +194,7 @@ class TestAgentDeathDetectionFixed:
     assert any(ex.execution_id == exec_id and ex.is_timed_out() for ex in dead_executions)
 
     async def test_health_monitor_integration(self):
-    ""Test that health monitor correctly reports dead agents"
+    Test that health monitor correctly reports dead agents""
     from netra_backend.app.core.agent_health_monitor import AgentHealthMonitor
 
                                         # Create health monitor with execution tracker
@@ -203,17 +203,17 @@ class TestAgentDeathDetectionFixed:
 
                                         # Create a dead execution
     exec_id = tracker.create_execution( )
-    agent_name="dead_agent,
-    thread_id=test_thread",
+    agent_name=dead_agent,
+    thread_id=test_thread,"
     user_id="test_user
                                         
     tracker.start_execution(exec_id)
-    tracker.update_execution_state(exec_id, ExecutionState.DEAD, error=No heartbeat")
+    tracker.update_execution_state(exec_id, ExecutionState.DEAD, error=No heartbeat)
 
                                         # Test death detection
     last_heartbeat = datetime.now(timezone.utc) - timedelta(seconds=15)
     is_dead = await health_monitor.detect_agent_death( )
-    agent_name="dead_agent,
+    agent_name="dead_agent,"
     last_heartbeat=last_heartbeat,
     execution_context={}
                                         
@@ -221,7 +221,7 @@ class TestAgentDeathDetectionFixed:
     assert is_dead == True
 
     async def test_execution_engine_death_monitoring(self):
-    ""Test that ExecutionEngine properly monitors for agent death"
+    Test that ExecutionEngine properly monitors for agent death"
     pass
     with patch('netra_backend.app.agents.supervisor.execution_engine.get_execution_tracker') as mock_get_tracker:
                                                 # Create mock tracker
@@ -253,13 +253,13 @@ class TestAgentDeathDetectionFixed:
     assert hasattr(engine, '_handle_agent_timeout')
 
     async def test_execution_state_transitions(self):
-    ""Test proper execution state transitions"
+    Test proper execution state transitions""
     tracker = AgentExecutionTracker()
 
                                                     # Create execution
     exec_id = tracker.create_execution( )
-    agent_name="state_test_agent,
-    thread_id=test_thread",
+    agent_name=state_test_agent,
+    thread_id=test_thread,"
     user_id="test_user
                                                     
 
@@ -286,15 +286,15 @@ class TestAgentDeathDetectionFixed:
     tracker.update_execution_state( )
     exec_id,
     ExecutionState.COMPLETED,
-    result={success": True}
+    result={success: True}
                                                     
     record = tracker.get_execution(exec_id)
     assert record.state == ExecutionState.COMPLETED
     assert record.is_terminal
-    assert record.result == {"success: True}
+    assert record.result == {"success: True}"
 
     async def test_concurrent_execution_tracking(self):
-    ""Test tracking multiple concurrent executions"
+    Test tracking multiple concurrent executions"
     pass
     tracker = AgentExecutionTracker()
 
@@ -303,8 +303,8 @@ class TestAgentDeathDetectionFixed:
     for i in range(5):
     exec_id = tracker.create_execution( )
     agent_name="formatted_string,
-    thread_id=shared_thread",
-    user_id="test_user
+    thread_id=shared_thread,
+    user_id="test_user"
                                                             
     tracker.start_execution(exec_id)
     exec_ids.append(exec_id)
@@ -314,7 +314,7 @@ class TestAgentDeathDetectionFixed:
     assert len(active_executions) >= 5
 
                                                             # Verify thread-based retrieval
-    thread_executions = tracker.get_executions_by_thread(shared_thread")
+    thread_executions = tracker.get_executions_by_thread(shared_thread)
     assert len(thread_executions) >= 5
 
                                                             # Complete some executions
@@ -329,21 +329,21 @@ class TestAgentDeathDetectionFixed:
     assert len([item for item in []] == 2
 
     async def test_metrics_collection(self):
-    "Test that execution metrics are properly collected""
+    Test that execution metrics are properly collected""
     tracker = AgentExecutionTracker()
 
                                                                     # Create and complete successful execution
-    exec_id1 = tracker.create_execution(agent1", "thread1, user1")
+    exec_id1 = tracker.create_execution(agent1, thread1, user1")"
     tracker.start_execution(exec_id1)
     tracker.update_execution_state(exec_id1, ExecutionState.COMPLETED)
 
                                                                     # Create and fail execution
-    exec_id2 = tracker.create_execution("agent2, thread2", "user2)
+    exec_id2 = tracker.create_execution(agent2, thread2, user2)"
     tracker.start_execution(exec_id2)
     tracker.update_execution_state(exec_id2, ExecutionState.FAILED, error=Test error")
 
                                                                     # Create and timeout execution
-    exec_id3 = tracker.create_execution("agent3, thread3", "user3, timeout_seconds=1)
+    exec_id3 = tracker.create_execution(agent3, thread3, "user3, timeout_seconds=1)"
     tracker.start_execution(exec_id3)
     tracker.update_execution_state(exec_id3, ExecutionState.TIMEOUT)
 
@@ -358,7 +358,7 @@ class TestAgentDeathDetectionFixed:
     assert 'failure_rate' in metrics
 
     async def test_registry_health_includes_death_detection(self):
-    ""Test that AgentRegistry health includes death detection info"
+    Test that AgentRegistry health includes death detection info"
     pass
     from netra_backend.app.core.registry.universal_registry import AgentRegistry
 
@@ -376,7 +376,7 @@ class TestAgentDeathDetectionFixed:
     assert health['death_detection_enabled'] == True
 
     async def test_monitoring_task_lifecycle(self):
-    "Test that monitoring task starts and stops properly""
+    "Test that monitoring task starts and stops properly
     tracker = AgentExecutionTracker()
 
                                                                             # Start monitoring
@@ -389,21 +389,21 @@ class TestAgentDeathDetectionFixed:
     assert tracker._monitor_task is None
 
     async def test_death_recovery_message_generation(self):
-    ""Test user-friendly death messages are generated correctly"
+    ""Test user-friendly death messages are generated correctly
     pass
     bridge = AgentWebSocketBridge()
 
                                                                                 # Test different death causes
     messages = {
-    "timeout: took too long",
-    "no_heartbeat: Lost connection",
-    "silent_failure: stopped unexpectedly",
+    timeout: took too long",
+    "no_heartbeat: Lost connection,
+    silent_failure: stopped unexpectedly,
     "memory_limit: ran out of resources",
-    "cancelled: was cancelled"
+    cancelled: was cancelled
                                                                                 
 
     for cause, expected_substring in messages.items():
-    message = bridge._get_user_friendly_death_message(cause, "test_agent)
+    message = bridge._get_user_friendly_death_message(cause, test_agent)"
     assert expected_substring in message
     assert test_agent" in message
 
@@ -441,9 +441,9 @@ class TestAgentDeathDetectionFixed:
 
     # 4. Simulate agent execution that dies
         exec_id = tracker.create_execution( )
-        agent_name="dying_agent,
-        thread_id=test_thread",
-        user_id="test_user,
+        agent_name=dying_agent,
+        thread_id=test_thread","
+        user_id=test_user,
         timeout_seconds=3,
         metadata={'run_id': 'run_123'}
     
@@ -475,13 +475,13 @@ class TestAgentDeathDetectionFixed:
         await tracker.stop_monitoring()
 
         print(")
-         + "="*80)
+         + ="*80)
         print( PASS:  AGENT DEATH DETECTION SYSTEM WORKING CORRECTLY)
-        print("="*80)
+        print("=*80)
         print(formatted_string)
-        print("")
-        print(formatted_string)
-        print("="*80)
+        print(")
+        print(formatted_string")
+        print(=*80)
 
 
         if __name__ == "__main__":

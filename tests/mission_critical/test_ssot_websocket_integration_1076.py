@@ -12,7 +12,7 @@ Key violations to detect:
 
 Related Issues: #1076 - SSOT compliance verification
 Priority: CRITICAL - WebSocket is 90% of business value through chat functionality
-""
+"
 
 import pytest
 from pathlib import Path
@@ -29,50 +29,50 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class SSotWebSocketIntegrationTests(SSotBaseTestCase):
-    ""Tests to detect WebSocket SSOT integration violations."
+    "Tests to detect WebSocket SSOT integration violations.
 
     @property
     def project_root(self):
-        "Get project root path.""
+        "Get project root path."
         return Path(__file__).parent.parent.parent
 
     def test_websocket_manager_ssot_import_compliance(self):
-        ""
+        "
         CRITICAL: Ensure WebSocket manager imports follow SSOT patterns.
 
         EXPECTED: Should FAIL initially - detects non-SSOT WebSocket imports
         REMEDIATION: Update all imports to use SSOT WebSocket manager
-        "
+"
         websocket_import_violations = []
 
         # Check all files that import WebSocket functionality
         search_paths = [
-            self.project_root / "netra_backend / app" / "routes,
-            self.project_root / netra_backend" / "app / agents",
-            self.project_root / "netra_backend / app" / "middleware,
-            self.project_root / netra_backend" / "app / tools"
+            self.project_root / netra_backend / app" / "routes,
+            self.project_root / netra_backend / app / agents","
+            self.project_root / netra_backend / app / middleware,"
+            self.project_root / netra_backend" / app / tools
         ]
 
         # Expected SSOT WebSocket import patterns
         expected_ssot_imports = [
-            "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager,
-            from netra_backend.app.websocket_core.websocket_manager import",
+            "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager,"
+            from netra_backend.app.websocket_core.websocket_manager import,
         ]
 
         # Deprecated WebSocket import patterns
         deprecated_imports = [
-            "from netra_backend.app.websocket_core.manager import,
+            from netra_backend.app.websocket_core.manager import,"
             from netra_backend.app.websocket import",
-            "from websocket_manager import,
-            import websocket_manager"
+            from websocket_manager import,
+            import websocket_manager""
         ]
 
         for search_path in search_paths:
             if not search_path.exists():
                 continue
 
-            for py_file in search_path.rglob("*.py):
-                if py_file.name.startswith(__") or "test in py_file.name.lower():
+            for py_file in search_path.rglob(*.py):
+                if py_file.name.startswith(__) or "test in py_file.name.lower():
                     continue
 
                 try:
@@ -113,50 +113,50 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
         # This test should FAIL initially if deprecated WebSocket imports exist
         if websocket_import_violations:
             violation_details = \n".join([
-                f"  - {viol['file']}:{viol['line']} - {viol['content']}
+                f  - {viol['file']}:{viol['line']} - {viol['content']}
                 for viol in websocket_import_violations[:15]  # Limit output
             ]
 
             self.fail(
                 fSSOT VIOLATION: Found {len(websocket_import_violations)} WebSocket import violations:\n"
                 f"{violation_details}\n
-                f{'... and more' if len(websocket_import_violations) > 15 else ''}\n\n"
-                f"REMEDIATION REQUIRED:\n
-                f1. Replace deprecated WebSocket imports with SSOT patterns\n"
-                f"2. Use 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'\n
-                f3. Remove all references to deprecated websocket_core.manager"
+                f{'... and more' if len(websocket_import_violations) > 15 else ''}\n\n
+                fREMEDIATION REQUIRED:\n
+                f1. Replace deprecated WebSocket imports with SSOT patterns\n""
+                f2. Use 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'\n
+                f3. Remove all references to deprecated websocket_core.manager
             )
 
     def test_websocket_auth_integration_ssot_compliance(self):
-        "
+    ""
         CRITICAL: Ensure WebSocket auth integration uses SSOT auth service.
 
         EXPECTED: Should FAIL initially - detects non-SSOT auth in WebSocket
         REMEDIATION: Update WebSocket auth to use SSOT auth service directly
-        ""
+        
         websocket_auth_violations = []
 
         # Check WebSocket files for auth integration patterns
         websocket_files = [
-            self.project_root / netra_backend" / "app / routes" / "websocket.py,
-            self.project_root / netra_backend" / "app / routes" / "websocket_ssot.py,
-            self.project_root / netra_backend" / "app / websocket_core" / "websocket_manager.py,
-            self.project_root / netra_backend" / "app / websocket_core" / "auth.py
+            self.project_root / netra_backend" / "app / routes / websocket.py,
+            self.project_root / netra_backend / "app / routes" / websocket_ssot.py,
+            self.project_root / netra_backend / app / websocket_core" / "websocket_manager.py,
+            self.project_root / netra_backend / app / websocket_core / "auth.py
         ]
 
         # Expected SSOT auth patterns
         expected_auth_imports = [
             from auth_service.auth_core.core.jwt_handler import",
-            "from auth_service.auth_core.core.token_validator import,
-            from auth_service.auth_core.core.session_manager import"
+            from auth_service.auth_core.core.token_validator import,
+            from auth_service.auth_core.core.session_manager import""
         ]
 
         # Deprecated auth patterns in WebSocket
         deprecated_auth_patterns = [
-            "from netra_backend.app.auth_integration.auth import,
-            from netra_backend.app.auth_integration import",
+            from netra_backend.app.auth_integration.auth import,
+            from netra_backend.app.auth_integration import,"
             "_validate_token_with_auth_service,  # Wrapper function
-            validate_jwt_token"  # Legacy function
+            validate_jwt_token  # Legacy function
         ]
 
         for ws_file in websocket_files:
@@ -200,51 +200,51 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
 
         # This test should FAIL initially if WebSocket auth violations exist
         if websocket_auth_violations:
-            violation_details = "\n.join([
-                f  - {viol['file']}:{viol['line']} - {viol['content']}"
+            violation_details = "\n.join(["
+                f  - {viol['file']}:{viol['line']} - {viol['content']}
                 for viol in websocket_auth_violations[:10]  # Limit output
             ]
 
             self.fail(
-                f"SSOT VIOLATION: Found {len(websocket_auth_violations)} WebSocket auth integration violations:\n
-                f{violation_details}\n"
-                f"{'... and more' if len(websocket_auth_violations) > 10 else ''}\n\n
-                fREMEDIATION REQUIRED:\n"
+                fSSOT VIOLATION: Found {len(websocket_auth_violations)} WebSocket auth integration violations:\n
+                f{violation_details}\n""
+                f{'... and more' if len(websocket_auth_violations) > 10 else ''}\n\n
+                fREMEDIATION REQUIRED:\n
                 f"1. Replace WebSocket auth integration with SSOT auth service\n
                 f2. Use direct auth_service imports in WebSocket code\n"
-                f"3. Remove auth_integration wrapper functions from WebSocket
+                f3. Remove auth_integration wrapper functions from WebSocket
             )
 
     def test_websocket_configuration_ssot_compliance(self):
-        ""
+        "
         CRITICAL: Ensure WebSocket configuration uses SSOT patterns.
 
         EXPECTED: Should FAIL initially - detects non-SSOT config in WebSocket
         REMEDIATION: Update WebSocket config to use SSOT configuration
-        "
+"
         websocket_config_violations = []
 
         # Check WebSocket files for configuration patterns
         websocket_files = [
-            self.project_root / "netra_backend / app" / "routes / websocket.py",
-            self.project_root / "netra_backend / app" / "routes / websocket_ssot.py",
-            self.project_root / "netra_backend / app" / "websocket_core / websocket_manager.py",
-            self.project_root / "netra_backend / app" / "websocket_core / auth.py"
+            self.project_root / netra_backend / app" / "routes / websocket.py,
+            self.project_root / netra_backend / app / "routes / websocket_ssot.py",
+            self.project_root / netra_backend / app / websocket_core / websocket_manager.py",
+            self.project_root / "netra_backend / app / websocket_core / auth.py
         ]
 
         # Expected SSOT configuration patterns
         expected_config_imports = [
-            "from netra_backend.app.core.configuration,
-            from dev_launcher.isolated_environment import IsolatedEnvironment",
-            "from shared.logging.unified_logging_ssot import get_logger
+            "from netra_backend.app.core.configuration,"
+            from dev_launcher.isolated_environment import IsolatedEnvironment,
+            from shared.logging.unified_logging_ssot import get_logger"
         ]
 
         # Deprecated configuration patterns in WebSocket
         deprecated_config_patterns = [
             os.environ[",
-            "os.getenv(,
-            from netra_backend.app.config import",
-            "from netra_backend.app.logging_config import
+            os.getenv(,
+            from netra_backend.app.config import","
+            from netra_backend.app.logging_config import
         ]
 
         for ws_file in websocket_files:
@@ -274,50 +274,50 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
 
         # This test should FAIL initially if WebSocket config violations exist
         if websocket_config_violations:
-            violation_details = \n".join([
+            violation_details = \n.join(["
                 f"  - {viol['file']}:{viol['line']} - {viol['content']}
                 for viol in websocket_config_violations[:10]  # Limit output
             ]
 
             self.fail(
-                fSSOT VIOLATION: Found {len(websocket_config_violations)} WebSocket configuration violations:\n"
-                f"{violation_details}\n
-                f{'... and more' if len(websocket_config_violations) > 10 else ''}\n\n"
-                f"REMEDIATION REQUIRED:\n
-                f1. Replace direct environment access with IsolatedEnvironment\n"
+                fSSOT VIOLATION: Found {len(websocket_config_violations)} WebSocket configuration violations:\n
+                f{violation_details}\n
+                f{'... and more' if len(websocket_config_violations) > 10 else ''}\n\n""
+                fREMEDIATION REQUIRED:\n
+                f1. Replace direct environment access with IsolatedEnvironment\n
                 f"2. Use SSOT configuration modules in WebSocket code\n
                 f3. Replace legacy logging with SSOT logging in WebSocket"
             )
 
     def test_websocket_agent_event_integration_ssot_compliance(self):
-        "
+    "
         CRITICAL: Ensure agent-WebSocket event integration follows SSOT patterns.
 
         EXPECTED: Should FAIL initially - detects non-SSOT agent-WebSocket integration
         REMEDIATION: Ensure agents use SSOT WebSocket manager for events
-        ""
+        "
         agent_websocket_violations = []
 
         # Check agent files for WebSocket event integration
         agent_files = [
-            self.project_root / netra_backend" / "app / agents" / "supervisor,
-            self.project_backend / app" / "agents / registry.py",
-            self.project_root / "netra_backend / app" / "tools
+            self.project_root / netra_backend / app / agents" / "supervisor,
+            self.project_backend / app / agents / registry.py,"
+            self.project_root / "netra_backend / app / tools
         ]
 
         # Expected SSOT WebSocket event patterns
         expected_event_patterns = [
-            websocket_manager.emit(",
-            "WebSocketManager,
+            websocket_manager.emit(","
+            WebSocketManager,
             websocket_notifier.notify("
         ]
 
         # Deprecated agent-WebSocket integration patterns
         deprecated_event_patterns = [
             "websocket.emit(,  # Direct websocket usage
-            emit_websocket_event(",  # Custom wrapper
-            "send_websocket_message(,  # Legacy function
-            websocket_emit("  # Non-SSOT function
+            emit_websocket_event(,  # Custom wrapper
+            "send_websocket_message(,  # Legacy function"
+            websocket_emit(  # Non-SSOT function
         ]
 
         for agent_path in agent_files:
@@ -327,10 +327,10 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
             if agent_path.is_file():
                 files_to_check = [agent_path]
             else:
-                files_to_check = list(agent_path.rglob("*.py))
+                files_to_check = list(agent_path.rglob(*.py))"
 
             for agent_file in files_to_check:
-                if agent_file.name.startswith(__") or "test in agent_file.name.lower():
+                if agent_file.name.startswith(__") or test in agent_file.name.lower():
                     continue
 
                 try:
@@ -370,23 +370,23 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
 
         # This test should FAIL initially if agent-WebSocket violations exist
         if agent_websocket_violations:
-            violation_details = \n".join([
+            violation_details = \n.join([
                 f"  - {viol['file']}:{viol['line']} - {viol['content']}
                 for viol in agent_websocket_violations[:10]  # Limit output
             ]
 
             self.fail(
                 fSSOT VIOLATION: Found {len(agent_websocket_violations)} agent-WebSocket integration violations:\n"
-                f"{violation_details}\n
+                f{violation_details}\n
                 f{'... and more' if len(agent_websocket_violations) > 10 else ''}\n\n"
                 f"REMEDIATION REQUIRED:\n
-                f1. Ensure agents use SSOT WebSocket manager for event emission\n"
-                f"2. Remove custom WebSocket wrapper functions from agents\n
-                f3. Use WebSocketManager.emit() consistently across all agents"
+                f1. Ensure agents use SSOT WebSocket manager for event emission\n
+                f2. Remove custom WebSocket wrapper functions from agents\n
+                f3. Use WebSocketManager.emit() consistently across all agents""
             )
 
     def test_websocket_golden_path_ssot_integration(self):
-        "
+
         CRITICAL: Ensure WebSocket golden path integration follows SSOT patterns.
 
         EXPECTED: Should FAIL initially - detects golden path SSOT violations
@@ -396,10 +396,10 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
 
         # Key files in the WebSocket golden path
         golden_path_files = [
-            self.project_root / netra_backend" / "app / routes" / "websocket.py,
-            self.project_root / netra_backend" / "app / websocket_core" / "websocket_manager.py,
-            self.project_root / netra_backend" / "app / agents" / "supervisor / execution_engine.py",
-            self.project_root / "netra_backend / app" / "tools / enhanced_dispatcher.py"
+            self.project_root / netra_backend / app / routes / "websocket.py,
+            self.project_root / netra_backend" / app / websocket_core / websocket_manager.py,
+            self.project_root / netra_backend" / "app / agents / supervisor / execution_engine.py,"
+            self.project_root / "netra_backend / app / tools / enhanced_dispatcher.py
         ]
 
         # SSOT compliance requirements for golden path
@@ -472,19 +472,19 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
 
         # This test should FAIL initially if golden path SSOT violations exist
         if golden_path_violations:
-            violation_details = "\n.join([
-                f  - {viol['file']} - {viol['requirement']}: {viol['content']}"
+            violation_details = "\n.join(["
+                f  - {viol['file']} - {viol['requirement']}: {viol['content']}
                 for viol in golden_path_violations[:10]  # Limit output
             ]
 
             self.fail(
-                f"SSOT VIOLATION: Found {len(golden_path_violations)} golden path SSOT violations:\n
-                f{violation_details}\n"
-                f"{'... and more' if len(golden_path_violations) > 10 else ''}\n\n
-                fREMEDIATION REQUIRED:\n"
+                fSSOT VIOLATION: Found {len(golden_path_violations)} golden path SSOT violations:\n
+                f{violation_details}\n""
+                f{'... and more' if len(golden_path_violations) > 10 else ''}\n\n
+                fREMEDIATION REQUIRED:\n
                 f"1. Ensure all golden path files use SSOT patterns consistently\n
                 f2. Update WebSocket manager to use SSOT imports\n"
-                f"3. Ensure agents and tools use SSOT WebSocket, auth, config, and logging\n
+                f3. Ensure agents and tools use SSOT WebSocket, auth, config, and logging\n
                 f4. Verify complete golden path workflow uses SSOT architecture"
             )
 

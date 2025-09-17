@@ -31,7 +31,7 @@ ARCHITECTURE ALIGNMENT:
 - Validates WebSocket event delivery tracking and confirmation
 - Tests thread/run ID mapping for reliable message routing
 - Follows Golden Path WebSocket event requirements from GOLDEN_PATH_USER_FLOW_COMPLETE.md
-""
+"
 
 import asyncio
 import json
@@ -83,7 +83,7 @@ except ImportError as e:
     E2EWebSocketAuthHelper = MagicMock
 
 class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
-    "
+    ""
     P0 Critical Integration Tests for WebSocket-Agent Communication.
     
     This test class validates that WebSocket communication works end-to-end with
@@ -97,10 +97,10 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
     - Agent-WebSocket bridge integration and message routing
     - Performance requirements for responsive user experience
     - Error handling and graceful degradation in communication failures
-    ""
+    
     
     def setup_method(self, method):
-        ""Set up test environment with real WebSocket and agent infrastructure - pytest entry point."
+        "Set up test environment with real WebSocket and agent infrastructure - pytest entry point."
         # Call the parent's sync setup method
         super().setup_method(method)
 
@@ -108,16 +108,16 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
         self._setup_sync_components(method)
 
     def _setup_sync_components(self, method=None):
-        "Set up sync components for test environment.""
+        Set up sync components for test environment.""
 
         # Initialize environment for WebSocket integration testing
         self.env = get_env()
-        self.set_env_var(TESTING", "true)
-        self.set_env_var(TEST_ENV", "integration)
+        self.set_env_var(TESTING, true)
+        self.set_env_var(TEST_ENV, "integration)
 
         # Create unique test identifiers for isolation
         self.test_user_id = fws_user_{uuid.uuid4().hex[:8]}"
-        self.test_thread_id = f"ws_thread_{uuid.uuid4().hex[:8]}
+        self.test_thread_id = fws_thread_{uuid.uuid4().hex[:8]}
         self.test_run_id = fws_run_{uuid.uuid4().hex[:8]}"
 
         # Track WebSocket communication metrics
@@ -133,15 +133,15 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
         self._async_init_pending = True
 
         # Initialize mock infrastructure immediately for tests that need itdef teardown_method(self, method):
-        "Clean up WebSocket resources - pytest entry point.""
+        "Clean up WebSocket resources - pytest entry point.
         # Call the parent's sync teardown method
         super().teardown_method(method)
     
     async def async_teardown_method(self, method=None):
-        ""Clean up WebSocket resources and record metrics."
+        ""Clean up WebSocket resources and record metrics.
         try:
             # Record communication metrics for analysis
-            self.record_metric("websocket_communication_metrics, self.communication_metrics)
+            self.record_metric(websocket_communication_metrics, self.communication_metrics)"
             
             # Clean up WebSocket infrastructure
             if hasattr(self, 'websocket_manager') and self.websocket_manager:
@@ -159,7 +159,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
         await super().async_teardown_method(method)
     
     async def _initialize_websocket_infrastructure(self):
-        "Initialize real WebSocket infrastructure components.""
+        Initialize real WebSocket infrastructure components.""
         if not REAL_COMPONENTS_AVAILABLE:return
             
         try:
@@ -171,7 +171,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
             
             # Create user execution context for SSOT factory pattern
             user_context = UserExecutionContext(
-                user_id=fwebsocket_comm_test_user_{UnifiedIdGenerator.generate_base_id('user')}",
+                user_id=fwebsocket_comm_test_user_{UnifiedIdGenerator.generate_base_id('user')},
                 thread_id=f"websocket_comm_test_thread_{UnifiedIdGenerator.generate_base_id('thread')},
                 run_id=UnifiedIdGenerator.generate_base_id('run')
             )
@@ -193,10 +193,10 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
             self.auth_helper = E2EWebSocketAuthHelper(environment=integration")
             
         except Exception as e:
-            print(f"Failed to initialize real WebSocket infrastructure: {e})
+            print(fFailed to initialize real WebSocket infrastructure: {e})
     
     def _create_mock_llm_manager(self):
-        ""Create mock LLM manager for integration tests."
+        ""Create mock LLM manager for integration tests.
         mock_llm = MagicMock()
         mock_llm.chat_completion = AsyncMock()
         mock_llm.chat_completion.return_value = {
@@ -212,7 +212,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
         return mock_llm
 
     def _create_mock_tool_dispatcher(self):
-        "Create mock tool dispatcher for integration tests.""
+        Create mock tool dispatcher for integration tests.""
         mock_dispatcher = MagicMock()
         mock_dispatcher.execute_tool = AsyncMock()
         mock_dispatcher.execute_tool.return_value = {
@@ -225,21 +225,21 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
     @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_websocket_connection_enables_agent_communication(self):
-        ""
+        
         Test WebSocket connection establishment enables real-time agent communication.
         
         Business Value: Foundation for $500K+ ARR chat functionality - WebSocket
         connection must enable real-time agent-user communication.
-        "
+""
         if not REAL_COMPONENTS_AVAILABLE:
-            pytest.skip("Real WebSocket components not available)
+            pytest.skip(Real WebSocket components not available)
             
         try:
             # Create authenticated WebSocket token
             token = self.auth_helper.create_test_jwt_token(
                 user_id=self.test_user_id,
-                email=f{self.test_user_id}@test.com",
-                permissions=["read, write"],
+                email=f{self.test_user_id}@test.com","
+                permissions=[read, write],
                 exp_minutes=10
             )
             headers = self.auth_helper.get_websocket_headers(token)
@@ -247,16 +247,16 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
             # Test WebSocket connection with FastAPI TestClient
             client = TestClient(app)
             
-            with client.websocket_connect("/ws, headers=headers) as websocket:
+            with client.websocket_connect(/ws, headers=headers) as websocket:"
                 # Should receive connection_established message
                 connection_data = websocket.receive_json()
                 
                 # Validate connection establishment
-                self.assertEqual(connection_data[type"], "connection_established)
-                self.assertIn(connection_id", connection_data)
-                self.assertIn("user_id, connection_data)
-                self.assertTrue(connection_data[connection_ready"]
-                self.assertIn("server_time, connection_data)
+                self.assertEqual(connection_data[type"], connection_established)
+                self.assertIn(connection_id, connection_data)
+                self.assertIn("user_id, connection_data)"
+                self.assertTrue(connection_data[connection_ready]
+                self.assertIn(server_time, connection_data)"
                 
                 # Record successful connection
                 self.communication_metrics['websocket_connections_established'] += 1
@@ -270,12 +270,12 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
     @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_agent_websocket_bridge_delivers_all_business_critical_events(self):
-        "
+    "
         Test agent-websocket bridge delivers all 5 business-critical events.
         
         Business Value: Core real-time UX - all 5 events (agent_started, agent_thinking,
         tool_executing, tool_completed, agent_completed) must reach users for optimal experience.
-        ""
+        "
         # Define the 5 business-critical WebSocket events for Golden Path
         critical_events = [
             'agent_started',     # User sees agent began processing
@@ -307,7 +307,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
             
             # Execute agent with event tracking
             agent_state = self._create_agent_state(
-                user_request=Test all critical WebSocket events delivery",
+                user_request=Test all critical WebSocket events delivery,
                 user_id=user_context.user_id
             )
             
@@ -352,16 +352,16 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
     @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_multi_user_websocket_isolation_prevents_cross_user_events(self):
-        "
+    "
         Test multi-user WebSocket isolation prevents cross-user event leakage.
         
         Business Value: Security critical - prevents $5M+ compliance violations
         and maintains customer trust through proper event isolation.
-        ""
+        "
         # Create multiple concurrent user scenarios for isolation testing
         user_scenarios = [
             {
-                'user_id': fuser_1_{uuid.uuid4().hex[:8]}",
+                'user_id': fuser_1_{uuid.uuid4().hex[:8]},
                 'sensitive_data': 'Confidential Project Alpha details',
                 'expected_isolation': 'Must not see Project Beta or Charlie events'
             },
@@ -387,14 +387,14 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
             try:
                 context_manager = self.agent_factory.user_execution_scope(
                     user_id=scenario['user_id'],
-                    thread_id=f"thread_{scenario['user_id']},
+                    thread_id=fthread_{scenario['user_id']},
                     run_id=frun_{scenario['user_id']}"
                 ) if hasattr(self.agent_factory, 'user_execution_scope') else self._mock_user_execution_scope(
-                    scenario['user_id'], f"thread_{scenario['user_id']}, frun_{scenario['user_id']}"
+                    scenario['user_id'], f"thread_{scenario['user_id']}, frun_{scenario['user_id']}
                 )
             except Exception:
                 context_manager = self._mock_user_execution_scope(
-                    scenario['user_id'], f"thread_{scenario['user_id']}, frun_{scenario['user_id']}"
+                    scenario['user_id'], fthread_{scenario['user_id']}, frun_{scenario['user_id']}
                 )
             
             async with context_manager as user_context:
@@ -412,7 +412,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
                 
                 # Execute agent with user-specific data
                 agent_state = self._create_agent_state(
-                    user_request=f"Process: {scenario['sensitive_data']},
+                    user_request=fProcess: {scenario['sensitive_data']},
                     user_id=user_context.user_id
                 )
                 
@@ -443,7 +443,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
                     # Validate different users have different events
                     for event_a in events_a:
                         self.assertNotEqual(event_a['user_id'], user_id_b,
-                                          fEvent user_id leakage detected")
+                                          fEvent user_id leakage detected")"
                         
                         # Validate sensitive content doesn't leak between users
                         for event_b in events_b:
@@ -452,19 +452,19 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
                             
                             if event_a_content and event_b_content:
                                 self.assertNotEqual(event_a_content, event_b_content,
-                                                  f"Sensitive content leakage between users)
+                                                  fSensitive content leakage between users)
         
         self.communication_metrics['user_isolations_validated'] += len(user_scenarios)
 
     @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_websocket_event_sequence_integrity_during_agent_execution(self):
-        ""
+        
         Test WebSocket event sequence maintains integrity during agent execution.
         
         Business Value: User experience reliability - events must arrive in correct
         order with complete information for coherent real-time progress display.
-        "
+""
         async with self._get_user_execution_context() as user_context:
             
             # Create agent with full event sequence capability
@@ -485,7 +485,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
             
             # Execute agent with detailed event sequence tracking
             agent_state = self._create_agent_state(
-                user_request="Execute complete workflow with full event sequence,
+                user_request=Execute complete workflow with full event sequence,
                 user_id=user_context.user_id
             )
             
@@ -524,18 +524,18 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
             
             # Validate event sequence integrity
             self.assertEqual(len(event_sequence), len(expected_sequence),
-                           fEvent sequence incomplete: {len(event_sequence)}/{len(expected_sequence)}")
+                           fEvent sequence incomplete: {len(event_sequence)}/{len(expected_sequence)}")"
             
             # Validate event order and timing
             for i, (actual, expected) in enumerate(zip(event_sequence, expected_sequence)):
                 self.assertEqual(actual['event_type'], expected['event'],
-                               f"Event order incorrect at position {i})
+                               fEvent order incorrect at position {i})
                 
                 # Validate event timing is reasonable for UX
                 if i > 0:
                     time_since_previous = actual['timestamp'] - event_sequence[i-1]['timestamp']
                     self.assertLess(time_since_previous, 3.0,
-                                  fToo long between events {i-1} and {i}: {time_since_previous:.2f}s")
+                                  fToo long between events {i-1} and {i}: {time_since_previous:.2f}s)
             
             # Validate total sequence timing for user experience
             total_sequence_time = event_sequence[-1]['timestamp']
@@ -544,7 +544,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
             
             # Record event sequence metrics
             self.record_metric(event_sequence_integrity_validated", True)
-            self.record_metric("total_sequence_time_ms, total_sequence_time * 1000)
+            self.record_metric(total_sequence_time_ms, total_sequence_time * 1000)
 
     @pytest.mark.integration
     @pytest.mark.asyncio
@@ -554,7 +554,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
         
         Business Value: Platform resilience - communication failures must be handled
         gracefully without breaking user experience or losing critical events.
-        "
+
         async with self._get_user_execution_context() as user_context:
             
             # Create agent with error simulation capabilities
@@ -627,12 +627,12 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
     @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_websocket_performance_meets_real_time_requirements(self):
-        "
+    "
         Test WebSocket communication performance meets real-time UX requirements.
         
         Business Value: User retention - responsive WebSocket communication essential
         for user satisfaction and platform competitiveness.
-        ""
+        "
         # Define performance requirements for real-time UX
         performance_requirements = {
             'event_delivery_latency_max_ms': 100,  # Events delivered within 100ms
@@ -693,7 +693,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
             
             # Validate performance requirements
             self.assertLess(avg_latency, performance_requirements['event_delivery_latency_max_ms'],
-                           fEvent latency too high: {avg_latency:.1f}ms")
+                           fEvent latency too high: {avg_latency:.1f}ms)
             
             self.assertGreaterEqual(
                 performance_results['concurrent_users_successful'],
@@ -709,7 +709,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
     
     @asynccontextmanager
     async def _get_user_execution_context(self):
-        ""Get user execution context from factory or mock."
+        "Get user execution context from factory or mock.
         # Initialize async components if needed
         if getattr(self, '_async_init_pending', False):
             await self._initialize_websocket_infrastructure()
@@ -733,7 +733,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
             yield context
     
     def _create_agent_state(self, user_request: str, user_id: str):
-        "Create agent state with fallback for mock scenarios.""
+        "Create agent state with fallback for mock scenarios."
         try:
             if REAL_COMPONENTS_AVAILABLE:
                 state = DeepAgentState()
@@ -750,7 +750,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
         return state
     
     def _create_websocket_integrated_agent(self):
-        ""Create agent with full WebSocket integration."
+        "Create agent with full WebSocket integration."
         mock_agent = MagicMock()
         
         async def execute_with_websocket_events(state, run_id, stream_updates=False):
@@ -758,7 +758,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
                 # Simulate WebSocket events during execution
                 await asyncio.sleep(0.1)
             return MagicMock(
-                result="WebSocket integrated execution complete,
+                result=WebSocket integrated execution complete,
                 events_sent=True
             )
         
@@ -766,13 +766,13 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
         return mock_agent
     
     def _create_isolated_websocket_agent(self, user_id: str):
-        ""Create agent with user isolation for WebSocket testing."
+        ""Create agent with user isolation for WebSocket testing.
         mock_agent = MagicMock()
         
         async def execute_with_isolation(state, run_id, stream_updates=False):
             # Return results that include only user-specific data
             return MagicMock(
-                result=f"Isolated execution for user {user_id},
+                result=fIsolated execution for user {user_id},
                 processed_user_id=user_id,
                 isolation_validated=True
             )
@@ -781,7 +781,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
         return mock_agent
     
     def _create_sequence_tracking_agent(self):
-        ""Create agent that tracks WebSocket event sequences."
+        ""Create agent that tracks WebSocket event sequences.
         mock_agent = MagicMock()
         
         async def execute_with_sequence_tracking(state, run_id, stream_updates=False):
@@ -789,7 +789,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
                 # Simulate progressive event delivery
                 await asyncio.sleep(0.5)
             return MagicMock(
-                result="Sequence tracking execution complete,
+                result=Sequence tracking execution complete,"
                 sequence_tracked=True
             )
         
@@ -797,32 +797,32 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
         return mock_agent
     
     def _create_error_prone_websocket_agent(self):
-        ""Create agent with error simulation for testing error handling."
+        "Create agent with error simulation for testing error handling.
         mock_agent = MagicMock()
         
         async def execute_with_error_simulation(state, run_id, stream_updates=False):
-            if "error handling in state.user_request:
+            if "error handling in state.user_request:"
                 # Simulate partial success with error recovery
                 return MagicMock(
-                    result=Error handling test completed",
+                    result=Error handling test completed,
                     errors_encountered=True,
                     recovery_successful=True,
                     partial_events_delivered=True
                 )
-            return MagicMock(result="Normal execution)
+            return MagicMock(result=Normal execution)"
         
         mock_agent.execute = AsyncMock(side_effect=execute_with_error_simulation)
         return mock_agent
     
     def _create_performance_test_agent(self):
-        ""Create agent for performance testing."
+        "Create agent for performance testing.
         mock_agent = MagicMock()
         
         async def execute_with_performance_tracking(state, run_id, stream_updates=False):
             # Simulate fast execution for performance testing
             await asyncio.sleep(0.05)  # 50ms processing time
             return MagicMock(
-                result="Performance test execution complete,
+                result="Performance test execution complete,"
                 execution_time_ms=50
             )
         
@@ -830,7 +830,7 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
         return mock_agent
     
     def _configure_error_simulation(self, error_type: str):
-        ""Configure error simulation for testing."
+        Configure error simulation for testing."
         if error_type == 'temporary_connection_loss':
             # Mock temporary connection issues
             if hasattr(self.websocket_bridge, 'send_agent_event'):
@@ -852,13 +852,13 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
             # Mock serialization issues
             if hasattr(self.websocket_bridge, 'send_agent_event'):
                 async def simulate_serialization_error(*args, **kwargs):
-                    raise json.JSONEncodeError("Test serialization error, ", 0)
+                    raise json.JSONEncodeError("Test serialization error, , 0)
                 
                 self.websocket_bridge.send_agent_event = AsyncMock(side_effect=simulate_serialization_error)
     
     async def _test_concurrent_user_websocket_performance(self, user_index: int):
-        "Test WebSocket performance for concurrent users.""
-        user_id = fconcurrent_user_{user_index}_{uuid.uuid4().hex[:6]}"
+        Test WebSocket performance for concurrent users.""
+        user_id = fconcurrent_user_{user_index}_{uuid.uuid4().hex[:6]}
         
         try:
             # Simulate concurrent WebSocket activity
@@ -867,8 +867,8 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
             # Create mock context for concurrent user
             context = MagicMock()
             context.user_id = user_id
-            context.thread_id = f"thread_{user_id}
-            context.run_id = frun_{user_id}"
+            context.thread_id = fthread_{user_id}
+            context.run_id = frun_{user_id}""
             
             # Simulate agent execution with WebSocket events
             agent = self._create_performance_test_agent()

@@ -29,7 +29,7 @@ BUSINESS-CRITICAL WEBSOCKET EVENTS (ALL MUST BE TESTED):
 3. tool_executing - Tool usage transparency
 4. tool_completed - Tool results display
 5. agent_completed - User knows response ready
-""
+"
 
 import pytest
 import asyncio
@@ -79,15 +79,15 @@ except ImportError:
 @pytest.mark.websocket_flow
 @pytest.mark.business_critical
 class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
-    ""
+    "
     Phase 1: WebSocket Message Flow Integration Test Suite
 
     BUSINESS IMPACT: Protects $500K+ ARR through reliable WebSocket message delivery
     COVERAGE TARGET: Agent Registry, WebSocket Bridge, Message Flow components
-    "
+"
 
     def setup_method(self, method):
-        "Setup for each test method with isolated WebSocket infrastructure""
+        "Setup for each test method with isolated WebSocket infrastructure
         super().setup_method(method)
         self.test_user_ids = []
         self.websocket_connections = []
@@ -102,7 +102,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
         ]
 
     async def teardown_method(self, method):
-        ""Cleanup WebSocket connections and test data"
+        ""Cleanup WebSocket connections and test data
         # Close all WebSocket connections
         for connection in self.websocket_connections:
             try:
@@ -121,12 +121,12 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(25)
     async def test_websocket_agent_registry_integration(self):
-        "
+    ""
         Test WebSocket integration with Agent Registry
         COVERS: Agent Registry (11.48% coverage gap - 740/836 lines missing)
-        ""
+        
         if not WEBSOCKET_AVAILABLE or not AGENT_SYSTEM_AVAILABLE:
-            pytest.skip(WebSocket or Agent system not available")
+            pytest.skip(WebSocket or Agent system not available)"
 
         # Create authenticated test user
         user_id = str(uuid.uuid4())
@@ -174,10 +174,10 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(25)
     async def test_websocket_bridge_message_routing(self):
-        "
+    "
         Test WebSocket Bridge message routing functionality
         COVERS: Agent WebSocket Bridge (15.19% coverage gap - 1,267/1,494 lines missing)
-        ""
+        "
         if not WEBSOCKET_AVAILABLE or not USER_CONTEXT_AVAILABLE:
             pytest.skip(WebSocket or User Context system not available")
 
@@ -233,12 +233,12 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(30)
     async def test_complete_websocket_event_flow_sequence(self):
-        "
+    "
         Test complete WebSocket event flow for all 5 business-critical events
         COVERS: Complete WebSocket message flow end-to-end
-        ""
+        "
         if not all([WEBSOCKET_AVAILABLE, AGENT_SYSTEM_AVAILABLE, USER_CONTEXT_AVAILABLE]:
-            pytest.skip(Required systems not available")
+            pytest.skip(Required systems not available)
 
         # Create authenticated test user
         user_id = str(uuid.uuid4())
@@ -318,12 +318,12 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(25)
     async def test_websocket_agent_execution_engine_integration(self):
-        "
+    ""
         Test WebSocket integration with Agent Execution Engine
         COVERS: User Execution Engine (13.69% coverage - 555/643 lines missing)
-        ""
+        
         if not all([WEBSOCKET_AVAILABLE, AGENT_SYSTEM_AVAILABLE, USER_CONTEXT_AVAILABLE]:
-            pytest.skip(Required systems not available")
+            pytest.skip(Required systems not available")"
 
         # Create authenticated test user
         user_id = str(uuid.uuid4())
@@ -372,12 +372,12 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(25)
     async def test_websocket_concurrent_user_message_isolation(self):
-        "
+
         Test WebSocket message isolation with concurrent users
         COVERS: Multi-user WebSocket message isolation and concurrency
         ""
         if not all([WEBSOCKET_AVAILABLE, USER_CONTEXT_AVAILABLE]:
-            pytest.skip(Required systems not available")
+            pytest.skip(Required systems not available)
 
         # Create 3 concurrent authenticated test users
         user_ids = [str(uuid.uuid4()) for _ in range(3)]
@@ -433,12 +433,12 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(20)
     async def test_websocket_error_handling_and_recovery(self):
-        "
+    ""
         Test WebSocket error handling and recovery mechanisms
         COVERS: WebSocket error scenarios and system resilience
-        ""
+        
         if not WEBSOCKET_AVAILABLE:
-            pytest.skip(WebSocket system not available")
+            pytest.skip(WebSocket system not available)"
 
         # Create authenticated test user
         user_id = str(uuid.uuid4())
@@ -465,7 +465,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
             await bridge.send_agent_event(invalid_message)
         except Exception as e:
             # Error handling should be graceful
-            assert "invalid_event_type in str(e).lower() or malformed" in str(e).lower()
+            assert "invalid_event_type in str(e).lower() or malformed in str(e).lower()
 
         # Test recovery with valid message after error
         valid_message = {
@@ -486,12 +486,12 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(30)
     async def test_websocket_agent_instance_factory_integration(self):
-        "
+    "
         Test WebSocket integration with Agent Instance Factory
         COVERS: Agent Instance Factory (9.60% coverage - 452/500 lines missing)
-        ""
+        "
         if not all([WEBSOCKET_AVAILABLE, AGENT_SYSTEM_AVAILABLE, USER_CONTEXT_AVAILABLE]:
-            pytest.skip(Required systems not available")
+            pytest.skip(Required systems not available)
 
         # Create authenticated test user
         user_id = str(uuid.uuid4())
@@ -532,12 +532,12 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(20)
     async def test_websocket_message_serialization_and_deserialization(self):
-        "
+    ""
         Test WebSocket message serialization/deserialization with complex data
         COVERS: WebSocket message format consistency and data integrity
-        ""
+        
         if not WEBSOCKET_AVAILABLE:
-            pytest.skip(WebSocket system not available")
+            pytest.skip(WebSocket system not available")"
 
         # Create authenticated test user
         user_id = str(uuid.uuid4())
@@ -590,12 +590,12 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(25)
     async def test_websocket_performance_under_message_load(self):
-        "
+
         Test WebSocket performance under sustained message load
         COVERS: WebSocket system performance and scalability
         ""
         if not WEBSOCKET_AVAILABLE:
-            pytest.skip(WebSocket system not available")
+            pytest.skip(WebSocket system not available)
 
         # Create authenticated test user
         user_id = str(uuid.uuid4())
@@ -651,10 +651,10 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
         # Should handle at least 80% of messages successfully
         success_rate = received_count / message_count
-        assert success_rate >= 0.8, f"Success rate {success_rate} below 80%
+        assert success_rate >= 0.8, fSuccess rate {success_rate} below 80%
 
         # Performance should be reasonable (less than 20 seconds for 50 messages)
-        assert total_duration < 20.0, fTotal duration {total_duration}s too slow"
+        assert total_duration < 20.0, fTotal duration {total_duration}s too slow""
 
         # Messages should be received in reasonable order (allowing some reordering)
         ordered_sequences = [seq for seq in received_sequences if seq != -1]

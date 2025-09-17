@@ -1,23 +1,23 @@
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.""
+    "Real WebSocket connection for testing instead of mocks.
     def __init__(self):
         pass
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.
         if self._closed:
-            raise RuntimeError("WebSocket is closed)
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):
-        "Close WebSocket connection.""
+        Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
     async def get_messages(self) -> list:
-        ""Get all sent messages."
+        Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
         '''
@@ -66,14 +66,14 @@ class TestWebSocketConnection:
         IsolatedExecutionEngine
             
 class TestWebSocketE2EProof(SSotAsyncTestCase):
-        "Prove the WebSocket factory pattern flow works end-to-end."
+        Prove the WebSocket factory pattern flow works end-to-end.
     def setUp(self):
-        ""Set up test environment with factory components.""
+        ""Set up test environment with factory components.
         self.captured_events = []
         self.run_id = formatted_string
-        self.thread_id = ""
+        self.thread_id = "
         self.user_id = formatted_string
-        self.connection_id = ""
+        self.connection_id = "
     # Create factory components
         self.mock_connection_pool = self._create_mock_connection_pool()
         self.websocket_factory = WebSocketBridgeFactory()
@@ -83,7 +83,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         health_monitor=None
     
     def test_factory_based_websocket_flow(self):
-        "CRITICAL: Prove the factory-based WebSocket flow with user isolation."
+        CRITICAL: Prove the factory-based WebSocket flow with user isolation.
     async def run_factory_test():
         pass
     # ===== STEP 1: User Request with Factory Context =====
@@ -93,7 +93,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         thread_id=self.thread_id,
         session_id=formatted_string
     
-        print("")
+        print()
     # ===== STEP 2: Factory Creates User Emitter =====
         emitter = await self.websocket_factory.create_user_emitter( )
         user_id=self.user_id,
@@ -106,9 +106,9 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         run_id = self.run_id
         print(f TARGET:  STEP 3: Emitting all 5 required WebSocket events...)
         await emitter.notify_agent_started(agent_name, run_id)
-        await emitter.notify_agent_thinking(agent_name, run_id, "Analyzing request...")
-        await emitter.notify_tool_executing(agent_name, run_id, search_tool, {"query": test}
-        await emitter.notify_tool_completed(agent_name, run_id, "search_tool", {results: ["found"]}
+        await emitter.notify_agent_thinking(agent_name, run_id, Analyzing request...)
+        await emitter.notify_tool_executing(agent_name, run_id, search_tool, {query": test}
+        await emitter.notify_tool_completed(agent_name, run_id, "search_tool, {results: [found]}
         await emitter.notify_agent_completed(agent_name, run_id, {status: "success"}
     # Allow event processing
         await asyncio.sleep(0.2)
@@ -117,7 +117,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         sent_events = mock_connection.sent_events
         print(formatted_string)
     # Verify all 5 required events
-        required_events = ["agent_started", agent_thinking, "tool_executing", tool_completed, "agent_completed"]
+        required_events = [agent_started, agent_thinking, tool_executing", tool_completed, "agent_completed]
         found_events = [event.get('event_type') for event in sent_events]
         missing_events = []
         for required_event in required_events:
@@ -125,7 +125,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         missing_events.append(required_event)
         self.assertEqual(len(missing_events), 0, formatted_string)
             # ===== STEP 5: Verify Event Structure and JSON =====
-        print(f" SEARCH:  STEP 5: Validating event structure and JSON serialization...")
+        print(f SEARCH:  STEP 5: Validating event structure and JSON serialization...)
         for event in sent_events:
                 # Verify structure
         self.assertIn('event_type', event)
@@ -158,48 +158,48 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         loop.close()
                             # ===== FINAL VERIFICATION: Trace Complete Factory Flow =====
         print("")
-         + ="*70)
-        print("END-TO-END FACTORY-BASED WEBSOCKET FLOW PROOF)
-        print(="*70)
-        print("formatted_string)
-        print(formatted_string")
-        print("formatted_string)
-        print(formatted_string")
+         + =*70)
+        print("END-TO-END FACTORY-BASED WEBSOCKET FLOW PROOF")
+        print(=*70)"
         print(")
-        [U+1F3ED] FACTORY FLOW:)
-        print("1. Request  ->  ExecutionEngineFactory (user context created"))
-        print(2. Factory  ->  WebSocketBridgeFactory (per-user emitter")")
-        print(3. Factory  ->  UserWebSocketEmitter (complete isolation)")
-        print("4. Emitter  ->  UserWebSocketConnection (user-specific))
-        print("5. Connection  ->  User WebSocket (isolated delivery"))
-        print(")
-        [U+1F4E1] CRITICAL EVENTS VALIDATED:")
-        required_events = [agent_started, "agent_thinking", tool_executing, "tool_completed", agent_completed]
-        for i, event_type in enumerate(required_events, 1):
+        print(formatted_string"")
+        print(")"
+        print(formatted_string)
         print("")
+        [U+1F3ED] FACTORY FLOW:)
+        print(1. Request  ->  ExecutionEngineFactory (user context created)")
+        print(2. Factory  ->  WebSocketBridgeFactory (per-user emitter"))
+        print(3. Factory  ->  UserWebSocketEmitter (complete isolation))"
+        print("4. Emitter  ->  UserWebSocketConnection (user-specific))
+        print(5. Connection  ->  User WebSocket (isolated delivery")")
         print()
-        [U+1F510] USER ISOLATION VERIFIED:")
-        print("   PASS:  Per-user execution context)
-        print(   PASS:  Per-user WebSocket emitter")
-        print("   PASS:  Per-user event queue)
-        print(   PASS:  No shared state")
+        [U+1F4E1] CRITICAL EVENTS VALIDATED:")"
+        required_events = [agent_started, agent_thinking, tool_executing, tool_completed", agent_completed]
+        for i, event_type in enumerate(required_events, 1):
         print(")
-        TARGET:  JSON SERIALIZATION VALIDATED:)
-        print("   PASS:  All events serialize to JSON")
-        print(   PASS:  All events deserialize correctly)
-        print("   PASS:  No data loss in serialization")
         print()
-        PASS:  FACTORY-BASED FLOW COMPLETELY PROVEN!")
-        print("=*70)
+        [U+1F510] USER ISOLATION VERIFIED:)"
+        print("   PASS:  Per-user execution context)
+        print(   PASS:  Per-user WebSocket emitter")"
+        print(   PASS:  Per-user event queue)
+        print(   PASS:  No shared state"")
+        print()"
+        TARGET:  JSON SERIALIZATION VALIDATED:)
+        print("   PASS:  All events serialize to JSON)
+        print(   PASS:  All events deserialize correctly)
+        print(   PASS:  No data loss in serialization")
+        print(")
+        PASS:  FACTORY-BASED FLOW COMPLETELY PROVEN!)
+        print(=*70")"
     def test_factory_user_isolation(self):
-        ""CRITICAL: Verify factory ensures complete user isolation."
+        CRITICAL: Verify factory ensures complete user isolation."
     async def test_isolation():
         # Create emitters for two different users
         user1_id = "formatted_string
-        user2_id = formatted_string"
-        thread1_id = "formatted_string
-        thread2_id = formatted_string"
-        conn1_id = "formatted_string
+        user2_id = formatted_string
+        thread1_id = "formatted_string"
+        thread2_id = formatted_string
+        conn1_id = formatted_string"
         conn2_id = formatted_string"
         emitter1 = await self.websocket_factory.create_user_emitter( )
         user_id=user1_id,
@@ -212,7 +212,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         connection_id=conn2_id
         
         Send events from both users
-        await emitter1.notify_agent_started("Agent1, run1")
+        await emitter1.notify_agent_started(Agent1, run1)
         await emitter2.notify_agent_started("Agent2, run2")
         await asyncio.sleep(0.1)  # Allow processing
         # Verify complete isolation
@@ -221,8 +221,8 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         # User 1 should only have their events
         user1_events = [item for item in []] == thread1_id]
         user2_events = [item for item in []] == thread2_id]
-        self.assertEqual(len(user1_events), 1, "User 1 should have exactly 1 event)
-        self.assertEqual(len(user2_events), 1, User 2 should have exactly 1 event")
+        self.assertEqual(len(user1_events), 1, User 1 should have exactly 1 event)
+        self.assertEqual(len(user2_events), 1, User 2 should have exactly 1 event)"
         # Verify no cross-contamination
         for event in user1_events:
         self.assertEqual(event['thread_id'], thread1_id)
@@ -231,8 +231,8 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         self.assertEqual(event['thread_id'], thread2_id)
         self.assertIn('Agent2', str(event['data'])
         print(" PASS:  Complete user isolation verified)
-        print(formatted_string")
-        print("formatted_string)
+        print(formatted_string")"
+        print()"
                 # Clean up
         await emitter1.cleanup()
         await emitter2.cleanup()
@@ -244,7 +244,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         finally:
         loop.close()
     def test_factory_components_availability(self):
-        ""Verify all factory-based components are available."
+        "Verify all factory-based components are available.
         missing_components = []
     # Check 1: WebSocketBridgeFactory exists and has required methods
         try:
@@ -252,9 +252,9 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         required_factory_methods = ['create_user_emitter', 'configure', 'get_factory_metrics']
         for method in required_factory_methods:
         if not hasattr(factory, method):
-        missing_components.append("formatted_string)
+        missing_components.append(""
         except Exception as e:
-        missing_components.append(formatted_string")
+        missing_components.append(formatted_string)
                     # Check 2: UserWebSocketEmitter has all required notification methods
         required_emitter_methods = [
         'notify_agent_started', 'notify_agent_thinking',
@@ -263,45 +263,45 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
                     
         for method in required_emitter_methods:
         if not hasattr(UserWebSocketEmitter, method):
-        missing_components.append("formatted_string)
+        missing_components.append(""
                             # Check 3: UserExecutionContext has required fields
         required_context_fields = ['user_id', 'request_id', 'thread_id', 'active_runs', 'cleanup_callbacks']
         for field in required_context_fields:
         if not hasattr(UserExecutionContext, '__annotations__') or field not in UserExecutionContext.__annotations__:
-        missing_components.append(formatted_string")
+        missing_components.append(formatted_string)
                                     # Check 4: WebSocketEvent has proper structure
         try:
         event = WebSocketEvent( )
-        event_type="test,
-        user_id=test_user",
-        thread_id="test_thread,
-        data={test": "data}
+        event_type="test,"
+        user_id=test_user,
+        thread_id=test_thread,"
+        data={test": data}
                                         
         required_event_fields = ['event_type', 'user_id', 'thread_id', 'data', 'event_id', 'timestamp']
         for field in required_event_fields:
         if not hasattr(event, field):
-        missing_components.append(formatted_string")
+        missing_components.append(formatted_string)
         except Exception as e:
-        missing_components.append("formatted_string)
+        missing_components.append(""
                                                     # Check 5: ExecutionEngineFactory exists
         try:
         from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory
         if not hasattr(ExecutionEngineFactory, 'create_execution_engine'):
-        missing_components.append(ExecutionEngineFactory missing create_execution_engine")
+        missing_components.append(ExecutionEngineFactory missing create_execution_engine)
         except ImportError:
-        missing_components.append("ExecutionEngineFactory not found)
+        missing_components.append("ExecutionEngineFactory not found)"
                                                                 # Report results
         if missing_components:
-        print(")
-        WARNING: [U+FE0F] MISSING FACTORY COMPONENTS DETECTED:")
+        print()
+        WARNING: [U+FE0F] MISSING FACTORY COMPONENTS DETECTED:")"
         for issue in missing_components:
         print(formatted_string)
-        self.fail("")
+        self.fail()
         else:
         print()
-        PASS:  ALL FACTORY COMPONENTS VERIFIED - Complete factory pattern available!")
+        PASS:  ALL FACTORY COMPONENTS VERIFIED - Complete factory pattern available!)"
     def test_websocket_event_json_serialization_comprehensive(self):
-        "CRITICAL: Comprehensive JSON serialization test for all event types.""
+        "CRITICAL: Comprehensive JSON serialization test for all event types.
     # Test all 5 required event types with various data
         test_events = [
         {
@@ -374,13 +374,13 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         self.assertEqual(event_dict['event_type'], deserialized['event_type']
         self.assertEqual(event_dict['event_id'], deserialized['event_id']
         self.assertEqual(event_dict['thread_id'], deserialized['thread_id']
-        print(formatted_string")
+        print(formatted_string"")
         except (TypeError, ValueError) as e:
-        self.fail("formatted_string)
+        self.fail("
         print(")
-        PASS:  ALL EVENT TYPES JSON SERIALIZATION VERIFIED")
+        PASS:  ALL EVENT TYPES JSON SERIALIZATION VERIFIED)"
     def _create_mock_connection_pool(self):
-        "Create mock connection pool for testing."
+        "Create mock connection pool for testing.
 class MockWebSocketConnection:
     def __init__(self, user_id: str, connection_id: str):
         pass
@@ -389,39 +389,39 @@ class MockWebSocketConnection:
         self.sent_events = []
         self.is_connected = True
     async def send_json(self, data: Dict[str, Any] -> None:
-        ""Mock send_json method.""
+        Mock send_json method.""
         if not self.is_connected:
         raise ConnectionError(WebSocket disconnected)
         self.sent_events.append(data)
         self.captured_events.append()
-        "method": send_json,
-        "data": data,
+        method: send_json,
+        data": data,
         timestamp: time.time(),
-        "user_id": self.user_id
+        "user_id: self.user_id
         
     async def send_text(self, data: str) -> None:
-        "Mock send_text method for ping."
+        Mock send_text method for ping.
         if not self.is_connected:
         raise ConnectionError("WebSocket disconnected")
     async def ping(self) -> None:
-        "Mock ping method."
+        Mock ping method.
         if not self.is_connected:
-        raise ConnectionError("WebSocket disconnected")
+        raise ConnectionError(WebSocket disconnected")
     async def close(self) -> None:
-        "Mock close method."
+        "Mock close method.
         self.is_connected = False
         @property
     async def application_state(self):
-        ""Mock application state for FastAPI compatibility.""
+        Mock application state for FastAPI compatibility.""
         await asyncio.sleep(0)
         return Magic
 class MockConnectionPool:
     def __init__(self):
         self.connections = {}
     async def get_connection(self, connection_id: str, user_id: str):
-        "Get or create mock connection."
+        Get or create mock connection.
         pass
-        key = ""
+        key = "
         if key not in self.connections:
         self.connections[key] = MockWebSocketConnection(user_id, connection_id)
         # Return connection info structure
@@ -429,8 +429,8 @@ class MockConnectionPool:
         await asyncio.sleep(0)
         return connection_info
     def get_mock_connection(self, user_id: str, connection_id: str):
-        "Get mock connection for testing."
-        key = ""
+        "Get mock connection for testing.
+        key = 
         return self.connections.get(key)
         return MockConnectionPool()
         if __name__ == "__main__":

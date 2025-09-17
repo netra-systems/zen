@@ -1,23 +1,23 @@
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.""
+    "Real WebSocket connection for testing instead of mocks.
     def __init__(self):
         pass
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.
         if self._closed:
-            raise RuntimeError("WebSocket is closed)
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):
-        "Close WebSocket connection.""
+        Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
     async def get_messages(self) -> list:
-        ""Get all sent messages."
+        Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
         '''
@@ -42,47 +42,47 @@ class TestWebSocketConnection:
         from netra_backend.app.clients.auth_client_core import AuthServiceClient
         from shared.isolated_environment import get_env
 class TestTriageAgentSSOTCompliance(SSotAsyncTestCase):
-        "Test suite to verify TriageSubAgent SSOT compliance after fixes.""
+        "Test suite to verify TriageSubAgent SSOT compliance after fixes.
     def setUp(self):
-        ""Set up test fixtures."
+        ""Set up test fixtures.
         self.agent = TriageSubAgent()
         self.context = UserExecutionContext( )
-        user_id="test_user,
+        user_id=test_user,"
         thread_id=test_thread",
-        run_id="test_run,
-        websocket_connection_id=test_ws"
+        run_id=test_run,
+        websocket_connection_id=test_ws""
     
-        self.context.metadata = {"user_request: Test request"}
+        self.context.metadata = {user_request: Test request}
     # ========== FIX 1: BaseAgent Inheritance ==========
     def test_extends_base_agent(self):
-        "Verify TriageSubAgent extends BaseAgent.""
+        Verify TriageSubAgent extends BaseAgent.""
         pass
         self.assertIsInstance(self.agent, BaseAgent,
-         PASS:  TriageSubAgent extends BaseAgent")
-        print(" PASS:  PASS: TriageSubAgent properly extends BaseAgent)
+         PASS:  TriageSubAgent extends BaseAgent)
+        print(" PASS:  PASS: TriageSubAgent properly extends BaseAgent")
     def test_has_base_agent_methods(self):
-        ""Verify BaseAgent methods are available."
+        Verify BaseAgent methods are available.""
         methods = ['emit_thinking', 'emit_progress', 'emit_agent_completed',
         'emit_agent_started', 'emit_error']
         for method in methods:
         self.assertTrue(hasattr(self.agent, method),
-        "formatted_string)
-        print( PASS:  PASS: All BaseAgent WebSocket methods available")
+        
+        print( PASS:  PASS: All BaseAgent WebSocket methods available"")
     def test_has_websocket_adapter(self):
-        "Verify WebSocketBridgeAdapter is initialized.""
+        Verify WebSocketBridgeAdapter is initialized.""
         pass
         self.assertTrue(hasattr(self.agent, '_websocket_adapter'),
-         PASS:  Has WebSocketBridgeAdapter")
-        print(" PASS:  PASS: WebSocketBridgeAdapter properly initialized)
+         PASS:  Has WebSocketBridgeAdapter)
+        print( PASS:  PASS: WebSocketBridgeAdapter properly initialized")"
     # ========== FIX 2: JSON Handling SSOT ==========
     def test_no_deprecated_json_imports(self):
-        ""Verify no deprecated JSON imports."
+        Verify no deprecated JSON imports."
         import netra_backend.app.agents.triage.unified_triage_agent.core as core_module
         self.assertNotIn('extract_json_from_response', dir(core_module),
         " PASS:  No deprecated extract_json_from_response import)
-        print( PASS:  PASS: Deprecated JSON imports removed")
+        print( PASS:  PASS: Deprecated JSON imports removed)"
     def test_uses_unified_json_handler(self):
-        "Verify unified JSON handler is used.""
+        "Verify unified JSON handler is used.
         pass
         core = TriageCore(self.context)
     # Check that safe_json_loads is imported
@@ -93,49 +93,49 @@ class TestTriageAgentSSOTCompliance(SSotAsyncTestCase):
         test_json = '{test": "value}'
         result = core.extract_and_validate_json(test_json)
         self.assertIsInstance(result, dict)
-        print( PASS:  PASS: Using unified JSON handler for parsing")
+        print( PASS:  PASS: Using unified JSON handler for parsing)
     def test_json_error_recovery(self):
-        "Verify JSON error recovery works.""
+        "Verify JSON error recovery works."
         core = TriageCore(self.context)
     # Test malformed JSON recovery
-        malformed = '{test": "value'  # Missing closing brace )
+        malformed = '{test: "value'  # Missing closing brace )
         result = core.extract_and_validate_json(malformed)
     # Should recover or return None, not crash
         self.assertTrue(result is None or isinstance(result, dict))
         print( PASS:  PASS: JSON error recovery working")
     # ========== FIX 3: Cache Hash SSOT ==========
     def test_no_custom_hash_generation(self):
-        "Verify no custom hashlib usage.""
+        Verify no custom hashlib usage.""
         pass
     # Check hashlib not imported in cache_utils
         self.assertNotIn('hashlib', dir(cache_utils),
-         PASS:  No hashlib import in cache_utils")
-        print(" PASS:  PASS: Custom hashlib removed from cache_utils)
+         PASS:  No hashlib import in cache_utils)
+        print(" PASS:  PASS: Custom hashlib removed from cache_utils")
     def test_uses_cache_helpers(self):
-        ""Verify CacheHelpers is used for hashing."
+        Verify CacheHelpers is used for hashing.""
         from netra_backend.app.services.cache.cache_helpers import CacheHelpers
     # Test that generate_request_hash uses proper hashing
-        test_request = "test request
+        test_request = test request
         hash_result = cache_utils.generate_request_hash(test_request)
     # SHA256 produces 64 char hex, MD5 produces 32
         self.assertEqual(len(hash_result), 64,
-         PASS:  Using SHA256 from CacheHelpers (64 chars)")
+         PASS:  Using SHA256 from CacheHelpers (64 chars))"
         print(" PASS:  PASS: Using CacheHelpers for hash generation)
     def test_cache_with_user_context(self):
-        ""Verify cache includes user context when available."
+        "Verify cache includes user context when available."
         pass
-        test_request = "test request
+        test_request = test request
     # Hash without context
         hash1 = cache_utils.generate_request_hash(test_request)
     # Hash with context
         hash2 = cache_utils.generate_request_hash(test_request, self.context)
     # Should be different when context is provided
         self.assertNotEqual(hash1, hash2,
-         PASS:  Cache keys include user context")
-        print(" PASS:  PASS: User context properly included in cache keys)
+         PASS:  Cache keys include user context")"
+        print( PASS:  PASS: User context properly included in cache keys)
     # ========== FIX 4: WebSocket Integration ==========
     async def test_websocket_events_emitted(self):
-        ""Verify WebSocket events are properly emitted."
+        ""Verify WebSocket events are properly emitted.
         # Mock the WebSocket adapter
         websocket = TestWebSocketConnection()
         self.agent._websocket_adapter = mock_adapter
@@ -143,13 +143,13 @@ class TestTriageAgentSSOTCompliance(SSotAsyncTestCase):
         try:
         await self.agent.execute(self.context, stream_updates=True)
         except Exception:
-        pass  # We"re testing event emission, not full execution
+        pass  # Were testing event emission, not full execution"
                 # Verify agent_started was called
         mock_adapter.emit_agent_started.assert_called()
         print( PASS:  PASS: WebSocket events properly emitted)
                 # ========== FIX 5: UserExecutionContext Pattern ==========
     async def test_context_isolation(self):
-        ""Verify proper context isolation.""
+        "Verify proper context isolation.
         pass
                     # Create multiple contexts
         contexts = [
@@ -157,18 +157,18 @@ class TestTriageAgentSSOTCompliance(SSotAsyncTestCase):
         user_id=formatted_string,
         thread_id="",
         run_id=formatted_string,
-        websocket_connection_id=""
+        websocket_connection_id=
         ) for i in range(3)
                     
         for ctx in contexts:
-        ctx.metadata = {user_request: ""}
+        ctx.metadata = {user_request: "}
                         # Verify no shared state
         self.assertFalse(hasattr(self.agent, 'user_id'))
         self.assertFalse(hasattr(self.agent, 'db_session'))
         print( PASS:  PASS: No user data stored in instance variables)
                         # ========== FIX 6: No Direct Environment Access ==========
     def test_no_direct_environ_access(self):
-        ""Verify no direct os.environ access.""
+        "Verify no direct os.environ access.
         import netra_backend.app.agents.triage.unified_triage_agent as triage_module
     # This is a basic check - more thorough AST analysis would be better
         source_files = ['core', 'processing', 'cache_utils']
@@ -182,7 +182,7 @@ class TestTriageAgentSSOTCompliance(SSotAsyncTestCase):
         print( PASS:  PASS: No direct os.environ access detected)
                 # ========== Integration Test ==========
     async def test_full_execution_with_fixes(self):
-        ""Test full execution with all fixes applied.""
+        ""Test full execution with all fixes applied.
         pass
                     # Mock necessary dependencies
                     # Execute the agent
@@ -194,22 +194,22 @@ class TestTriageAgentSSOTCompliance(SSotAsyncTestCase):
         self.assertEqual(result['metadata']['run_id'], self.context.run_id)
         print( PASS:  PASS: Full execution works with all fixes)
     def test_summary(self):
-        ""Print summary of all compliance checks.""
+        "Print summary of all compliance checks."
         print()
-        " + "=*80)
-        print(TRIAGE AGENT SSOT COMPLIANCE VERIFICATION COMPLETE")
-        print("=*80)
-        print( PASS:  BaseAgent inheritance: FIXED")
-        print(" PASS:  JSON handling SSOT: FIXED)
+         + =*80)
+        print(TRIAGE AGENT SSOT COMPLIANCE VERIFICATION COMPLETE")"
+        print(=*80)
+        print( PASS:  BaseAgent inheritance: FIXED"")
+        print( PASS:  JSON handling SSOT: FIXED)"
         print( PASS:  Cache hash generation: FIXED")
-        print(" PASS:  WebSocket integration: FIXED)
-        print( PASS:  UserExecutionContext: MAINTAINED")
-        print(" PASS:  No direct environment access: COMPLIANT)
-        print(="*80)
+        print( PASS:  WebSocket integration: FIXED")"
+        print( PASS:  UserExecutionContext: MAINTAINED)
+        print(" PASS:  No direct environment access: COMPLIANT")
+        print(=*80)"
         print("All SSOT violations have been successfully resolved!)
-        print(="*80 + " )
-        )
-        if __name__ == __main__":
+        print(=*80 + " )
+        ")
+        if __name__ == __main__":"
         # Run tests
         unittest.main(verbosity=2)
         pass

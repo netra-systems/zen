@@ -22,30 +22,30 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 
 class InheritanceArchitectureViolationsTests:
-    ""Test suite exposing critical inheritance architecture violations."
+    Test suite exposing critical inheritance architecture violations."
     
     @pytest.fixture
     def mock_llm_manager(self):
-        "Create mock LLM manager.""
+        "Create mock LLM manager.
         return LLMManager()
     
     @pytest.fixture
     def mock_tool_dispatcher(self):
-        ""Create mock tool dispatcher."
+        ""Create mock tool dispatcher.
         return ToolDispatcher()
     
     @pytest.fixture
     def data_agent(self, mock_llm_manager, mock_tool_dispatcher):
-        "Create DataSubAgent instance.""
+        Create DataSubAgent instance.""
         return DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
     
     @pytest.fixture
     def validation_agent(self, mock_llm_manager, mock_tool_dispatcher):
-        ""Create ValidationSubAgent instance."
+        Create ValidationSubAgent instance.""
         return ValidationSubAgent(mock_llm_manager, mock_tool_dispatcher)
     
     def test_multiple_inheritance_creates_mro_complexity(self, data_agent):
-        "Test that multiple inheritance creates complex Method Resolution Order.""
+        Test that multiple inheritance creates complex Method Resolution Order."
         mro = data_agent.__class__.__mro__
         
         # Check that BaseAgent is in MRO (single inheritance pattern)
@@ -55,20 +55,20 @@ class InheritanceArchitectureViolationsTests:
         # VIOLATION: Complex MRO with multiple base classes
         # The MRO should be simple and linear, not complex with multiple inheritance paths
         base_classes = [cls for cls in mro if cls.__module__.startswith('netra_backend')]
-        assert len(base_classes) <= 3, f"Too many base classes in MRO: {len(base_classes)}
+        assert len(base_classes) <= 3, fToo many base classes in MRO: {len(base_classes)}
     
     def test_duplicate_execution_methods_exist(self, data_agent):
-        ""Test that duplicate execution methods exist due to multiple inheritance."
+        "Test that duplicate execution methods exist due to multiple inheritance."
         # Both classes define execution-related methods
         has_execute = hasattr(data_agent, 'execute')
         has_execute_core_logic = hasattr(data_agent, 'execute_core_logic')
         
         # VIOLATION: Both execution methods exist, creating confusion
         assert not (has_execute and has_execute_core_logic), \
-            "Both execute() and execute_core_logic() exist - SSOT violation
+            Both execute() and execute_core_logic() exist - SSOT violation
     
     def test_websocket_methods_duplicated_across_inheritance(self, data_agent):
-        ""Test that WebSocket methods are duplicated across inheritance hierarchy."
+        ""Test that WebSocket methods are duplicated across inheritance hierarchy.
         # Collect all WebSocket-related methods from the inheritance chain
         websocket_methods = set()
         for cls in data_agent.__class__.__mro__:
@@ -86,10 +86,10 @@ class InheritanceArchitectureViolationsTests:
         
         # VIOLATION: Same methods defined in multiple classes
         duplicates = {name: classes for name, classes in method_names.items() if len(classes) > 1}
-        assert not duplicates, f"Duplicate WebSocket methods across classes: {duplicates}
+        assert not duplicates, fDuplicate WebSocket methods across classes: {duplicates}
     
     def test_initialization_order_confusion(self, mock_llm_manager, mock_tool_dispatcher):
-        ""Test that multiple __init__ calls create initialization confusion."
+        ""Test that multiple __init__ calls create initialization confusion.
         class AgentTests(BaseAgent):
             init_calls = []
             
@@ -98,7 +98,7 @@ class InheritanceArchitectureViolationsTests:
                 AgentTests.init_calls = []
                 
                 # Single parent __init__ method
-                BaseAgent.__init__(self, llm_manager, name="AgentTests)
+                BaseAgent.__init__(self, llm_manager, name=AgentTests)"
                 AgentTests.init_calls.append(BaseAgent")
                 
                 # Using composition pattern for execution logic
@@ -113,10 +113,10 @@ class InheritanceArchitectureViolationsTests:
         
         # VIOLATION: Multiple initialization creates complexity
         assert len(AgentTests.init_calls) == 1, \
-            f"Multiple __init__ calls required: {AgentTests.init_calls}
+            fMultiple __init__ calls required: {AgentTests.init_calls}
     
     def test_conflicting_attribute_ownership(self, data_agent, validation_agent):
-        ""Test that attributes are owned by multiple parent classes."
+        "Test that attributes are owned by multiple parent classes."
         # Check which class owns common attributes
         for agent in [data_agent, validation_agent]:
             # These attributes might be defined in multiple places
@@ -133,11 +133,11 @@ class InheritanceArchitectureViolationsTests:
                     
                     # VIOLATION: Attribute defined in multiple classes
                     assert len(defining_classes) <= 1, \
-                        f"Attribute '{attr}' defined in multiple classes: {defining_classes}
+                        fAttribute '{attr}' defined in multiple classes: {defining_classes}
     
     @pytest.mark.asyncio
     async def test_execution_path_ambiguity(self, data_agent):
-        ""Test that execution path is ambiguous due to multiple inheritance."
+        "Test that execution path is ambiguous due to multiple inheritance."
         state = DeepAgentState()
         
         # Check which execution method is actually called
@@ -169,10 +169,10 @@ class InheritanceArchitectureViolationsTests:
         
         # VIOLATION: Multiple execution paths possible
         assert len(execution_methods) == 1, \
-            f"Multiple execution methods called: {execution_methods}
+            fMultiple execution methods called: {execution_methods}
     
     def test_interface_contract_violations(self, data_agent):
-        ""Test that interface contracts are violated by inheritance structure."
+        "Test that interface contracts are violated by inheritance structure."
         # Agent interface requires these abstract methods
         required_methods = ['execute_core_logic', 'validate_preconditions']
         
@@ -184,10 +184,10 @@ class InheritanceArchitectureViolationsTests:
                 
                 # VIOLATION: Abstract methods might not be properly implemented
                 assert not is_abstract, \
-                    f"Abstract method '{method_name}' not properly implemented
+                    fAbstract method '{method_name}' not properly implemented
     
     def test_single_responsibility_principle_violation(self, data_agent):
-        ""Test that agents violate Single Responsibility Principle."
+        "Test that agents violate Single Responsibility Principle."
         # Count responsibilities by analyzing method purposes
         responsibilities = {
             'execution': [],
@@ -218,10 +218,10 @@ class InheritanceArchitectureViolationsTests:
         # VIOLATION: Too many responsibilities in a single class
         active_responsibilities = sum(1 for r in responsibilities.values() if r)
         assert active_responsibilities <= 2, \
-            f"Agent has {active_responsibilities} responsibilities - violates SRP
+            fAgent has {active_responsibilities} responsibilities - violates SRP
     
     def test_inheritance_depth_exceeds_recommended(self, data_agent):
-        ""Test that inheritance depth exceeds recommended levels."
+        "Test that inheritance depth exceeds recommended levels."
         # Calculate inheritance depth
         depth = 0
         current_class = data_agent.__class__
@@ -234,10 +234,10 @@ class InheritanceArchitectureViolationsTests:
                 break
         
         # VIOLATION: Deep inheritance hierarchy
-        assert depth <= 3, f"Inheritance depth {depth} exceeds recommended maximum of 3
+        assert depth <= 3, fInheritance depth {depth} exceeds recommended maximum of 3
     
     def test_method_resolution_order_conflicts(self):
-        ""Test for potential MRO conflicts with diamond inheritance."
+        "Test for potential MRO conflicts with diamond inheritance."
         # Create a test case that exposes MRO issues
         class ConflictTestAgent(BaseAgent):
             def __init__(self):
@@ -261,7 +261,7 @@ class InheritanceArchitectureViolationsTests:
             for cls in mro:
                 for base in cls.__bases__:
                     if base in base_classes and base != object:
-                        assert False, f"Diamond inheritance detected with {base.__name__}
+                        assert False, fDiamond inheritance detected with {base.__name__}
                     base_classes.add(base)
         except TypeError as e:
             # This is expected with improper multiple inheritance
@@ -269,11 +269,11 @@ class InheritanceArchitectureViolationsTests:
 
 
 class MissionCriticalInheritanceFixesTests:
-    "Tests that must pass after fixing inheritance issues.""
+    "Tests that must pass after fixing inheritance issues.
     
-    @pytest.mark.skip(reason=Will pass after inheritance is fixed")
+    @pytest.mark.skip(reason=Will pass after inheritance is fixed")"
     def test_single_inheritance_pattern(self):
-        "Test that agents use single inheritance pattern.""
+        Test that agents use single inheritance pattern."
         from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
         from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
         
@@ -281,11 +281,11 @@ class MissionCriticalInheritanceFixesTests:
             # Should only inherit from BaseAgent
             bases = AgentClass.__bases__
             assert len(bases) == 1, f{AgentClass.__name__} should have single inheritance"
-            assert bases[0] == BaseAgent, f"{AgentClass.__name__} should only inherit from BaseAgent
+            assert bases[0] == BaseAgent, f{AgentClass.__name__} should only inherit from BaseAgent
     
-    @pytest.mark.skip(reason=Will pass after inheritance is fixed")  
+    @pytest.mark.skip(reason=Will pass after inheritance is fixed)  "
     def test_no_duplicate_methods(self):
-        "Test that no duplicate methods exist after fix.""
+        "Test that no duplicate methods exist after fix.
         from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
         
         agent = DataSubAgent(LLMManager(), ToolDispatcher())
@@ -295,11 +295,11 @@ class MissionCriticalInheritanceFixesTests:
         has_execute_core_logic = hasattr(agent, 'execute_core_logic')
         
         assert has_execute and not has_execute_core_logic, \
-            Should only have execute() method, not execute_core_logic()"
+            Should only have execute() method, not execute_core_logic()""
     
-    @pytest.mark.skip(reason="Will pass after inheritance is fixed)
+    @pytest.mark.skip(reason=Will pass after inheritance is fixed)
     def test_clear_responsibility_boundaries(self):
-        ""Test that responsibilities are clearly separated."
+        "Test that responsibilities are clearly separated."
         from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
         
         agent = DataSubAgent(LLMManager(), ToolDispatcher())
@@ -311,32 +311,32 @@ class MissionCriticalInheritanceFixesTests:
         core_methods = [m for m in dir(agent) if not m.startswith('_')]
         
         # Should have focused set of public methods
-        assert len(core_methods) < 20, "Too many public methods - responsibilities not focused
+        assert len(core_methods) < 20, Too many public methods - responsibilities not focused
 
 
 class InheritanceErrorRecoveryTests:
-    ""Test error recovery patterns under 5 seconds in inheritance context."
+    ""Test error recovery patterns under 5 seconds in inheritance context.
     
     @pytest.fixture
     def recovery_agent(self):
-        "Create agent for error recovery testing."" 
+        Create agent for error recovery testing."" 
         return DataSubAgent(LLMManager(), ToolDispatcher())
         
     @pytest.fixture 
     def recovery_context(self):
-        ""Create context for error recovery testing."
+        Create context for error recovery testing.""
         state = DeepAgentState()
-        state.user_request = "Test inheritance error recovery
+        state.user_request = Test inheritance error recovery
         
         return ExecutionContext(
-            run_id=recovery_test",
+            run_id=recovery_test,"
             agent_name="DataSubAgent,
             state=state,
             stream_updates=True
         )
 
     async def test_inheritance_method_resolution_recovery(self, recovery_agent, recovery_context):
-        ""Test recovery from inheritance method resolution issues within 5 seconds."
+        Test recovery from inheritance method resolution issues within 5 seconds.""
         start_time = asyncio.get_event_loop().time()
         
         # Test that agent can recover from inheritance confusion
@@ -351,7 +351,7 @@ class InheritanceErrorRecoveryTests:
                 result = None
                 
             recovery_time = asyncio.get_event_loop().time() - start_time
-            assert recovery_time < 5.0, f"Recovery took {recovery_time:.2f}s, exceeds 5s limit
+            assert recovery_time < 5.0, fRecovery took {recovery_time:.2f}s, exceeds 5s limit
             
             # Should get some result even if inheritance is messy
             assert result is not None or True  # Accept None if inheritance is broken
@@ -360,7 +360,7 @@ class InheritanceErrorRecoveryTests:
             assert recovery_time < 5.0
         
     async def test_mro_confusion_recovery(self, recovery_agent, recovery_context):
-        ""Test recovery from MRO confusion."
+        Test recovery from MRO confusion.""
         start_time = asyncio.get_event_loop().time()
         
         # Test method resolution order issues
@@ -382,7 +382,7 @@ class InheritanceErrorRecoveryTests:
             assert recovery_time < 5.0
         
     async def test_duplicate_method_recovery(self, recovery_agent):
-        "Test recovery from duplicate method definitions.""
+        Test recovery from duplicate method definitions."
         start_time = asyncio.get_event_loop().time()
         
         try:
@@ -407,29 +407,29 @@ class InheritanceErrorRecoveryTests:
 
 
 class InheritanceExecuteCoreTests:
-    ""Test _execute_core implementation patterns in inheritance context."
+    "Test _execute_core implementation patterns in inheritance context.
     
     @pytest.fixture
     def inheritance_agent(self):
-        "Create agent for _execute_core testing.""
+        "Create agent for _execute_core testing."
         return DataSubAgent(LLLManager(), ToolDispatcher()) if 'LLLManager' in globals() else DataSubAgent(LLMManager(), ToolDispatcher())
         
     @pytest.fixture
     def core_execution_context(self):
-        ""Create execution context for _execute_core testing."
+        "Create execution context for _execute_core testing."
         state = DeepAgentState()
-        state.user_request = "Test _execute_core inheritance
+        state.user_request = Test _execute_core inheritance
         
         return ExecutionContext(
-            run_id=core_exec_test",
-            agent_name="DataSubAgent,
+            run_id=core_exec_test","
+            agent_name=DataSubAgent,
             state=state,
             stream_updates=True,
             correlation_id=core_correlation"
         )
 
     async def test_execute_core_inheritance_chain(self, inheritance_agent, core_execution_context):
-        "Test _execute_core follows proper inheritance chain.""
+        "Test _execute_core follows proper inheritance chain.
         # Test that execution methods are properly resolved
         execution_methods = []
         
@@ -441,7 +441,7 @@ class InheritanceExecuteCoreTests:
             execution_methods.append('execute')
             
         # Should have at least one execution method
-        assert len(execution_methods) >= 1, fNo execution methods found, inheritance broken"
+        assert len(execution_methods) >= 1, fNo execution methods found, inheritance broken""
         
         # Try to execute using the available method
         try:
@@ -461,7 +461,7 @@ class InheritanceExecuteCoreTests:
             pass
             
     async def test_execute_core_method_resolution(self, inheritance_agent, core_execution_context):
-        "Test method resolution in complex inheritance.""
+        Test method resolution in complex inheritance."
         # Get MRO and check for execution methods at each level
         mro = type(inheritance_agent).__mro__
         method_sources = {}
@@ -481,15 +481,15 @@ class InheritanceExecuteCoreTests:
 
 
 class InheritanceResourceCleanupTests:
-    "Test resource cleanup patterns in inheritance context.""
+    Test resource cleanup patterns in inheritance context.""
     
     @pytest.fixture
     def cleanup_agent(self):
-        ""Create agent for cleanup testing."
+        Create agent for cleanup testing."
         return DataSubAgent(LLMManager(), ToolDispatcher())
 
     async def test_inheritance_cleanup_chain(self, cleanup_agent):
-        "Test cleanup follows proper inheritance chain.""
+        "Test cleanup follows proper inheritance chain.
         # Check if cleanup methods exist in inheritance hierarchy
         cleanup_methods = []
         
@@ -508,7 +508,7 @@ class InheritanceResourceCleanupTests:
                 pass  # May fail due to inheritance issues
                 
     async def test_inheritance_resource_tracking(self, cleanup_agent):
-        ""Test resource tracking across inheritance chain."
+        ""Test resource tracking across inheritance chain.
         # Check for resource tracking attributes
         resource_attrs = []
         
@@ -521,15 +521,15 @@ class InheritanceResourceCleanupTests:
 
 
 class InheritanceBaseComplianceTests:
-    "Test BaseAgent inheritance compliance in complex hierarchies.""
+    Test BaseAgent inheritance compliance in complex hierarchies.""
     
     @pytest.fixture
     def compliance_agent(self):
-        ""Create agent for compliance testing."
+        Create agent for compliance testing.""
         return DataSubAgent(LLMManager(), ToolDispatcher())
 
     def test_complex_inheritance_chain(self, compliance_agent):
-        "Test proper BaseAgent inheritance in complex hierarchies.""
+        Test proper BaseAgent inheritance in complex hierarchies."
         # Verify inheritance
         assert isinstance(compliance_agent, BaseAgent)
         
@@ -542,10 +542,10 @@ class InheritanceBaseComplianceTests:
         
         # Check for inheritance depth
         base_index = mro_names.index('BaseAgent')
-        assert base_index >= 1, "BaseAgent should not be the direct class
+        assert base_index >= 1, BaseAgent should not be the direct class
         
     def test_method_override_consistency(self, compliance_agent):
-        ""Test method override consistency across inheritance."
+        ""Test method override consistency across inheritance.
         # Check for common override patterns
         override_methods = ['execute', 'execute_core_logic', 'validate_preconditions']
         
@@ -561,7 +561,7 @@ class InheritanceBaseComplianceTests:
         assert len(overridden) >= 0  # May be zero if inheritance is broken
         
     def test_inheritance_attribute_conflicts(self, compliance_agent):
-        "Test for attribute conflicts in inheritance."""
+        Test for attribute conflicts in inheritance."""
         # Check for duplicate attributes across MRO
         all_attrs = set()
         conflicts = []

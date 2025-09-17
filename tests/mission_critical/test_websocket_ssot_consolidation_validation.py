@@ -18,7 +18,7 @@ SSOT CONSOLIDATION EXPECTATIONS:
 5. User isolation maintained through context, not instance separation
 
 This test defines the TARGET STATE after SSOT consolidation.
-""
+"
 
 import asyncio
 import pytest
@@ -38,17 +38,17 @@ from shared.types.core_types import UserID, ensure_user_id
 
 
 class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
-    ""Validate expected behavior after WebSocket SSOT consolidation."
+    "Validate expected behavior after WebSocket SSOT consolidation.
     
     async def asyncSetUp(self):
-        "Set up test environment for SSOT consolidation validation.""
+        "Set up test environment for SSOT consolidation validation."
         await super().asyncSetUp()
-        self.test_user_1 = ensure_user_id(test_user_1")
+        self.test_user_1 = ensure_user_id(test_user_1)"
         self.test_user_2 = ensure_user_id("test_user_2)
         self.ssot_mock_factory = SSotMockFactory()
     
     async def test_factory_delegates_to_ssot_singleton_target_state(self):
-        ""
+        
         TARGET STATE: Factory delegates to UnifiedWebSocketManager SSOT singleton.
         
         After SSOT consolidation, the factory should create user-context-isolated
@@ -56,7 +56,7 @@ class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
         
         CURRENTLY FAILS: Factory creates separate instances
         WILL PASS: After SSOT consolidation implementation
-        "
+""
         factory = WebSocketManagerFactory()
         
         # Create managers for different users
@@ -73,11 +73,11 @@ class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
             ssot_instance_2 = getattr(manager_2, '_ssot_instance', None)
             
             # FUTURE EXPECTATION: Same SSOT instance for both managers
-            self.assertIsNotNone(ssot_instance_1, "Manager should have SSOT instance reference)
-            self.assertIsNotNone(ssot_instance_2, Manager should have SSOT instance reference")
+            self.assertIsNotNone(ssot_instance_1, Manager should have SSOT instance reference)
+            self.assertIsNotNone(ssot_instance_2, Manager should have SSOT instance reference")"
             self.assertIs(
                 ssot_instance_1, ssot_instance_2,
-                "TARGET STATE: Both managers delegate to same SSOT instance
+                TARGET STATE: Both managers delegate to same SSOT instance
             )
             
             # TARGET STATE: User context properly isolated
@@ -85,37 +85,37 @@ class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
             self.assertEqual(manager_2._user_context.user_id, self.test_user_2)
             
             self.record_consolidation_success(
-                test_name=factory_ssot_delegation",
+                test_name=factory_ssot_delegation,"
                 behavior="Factory delegates to SSOT UnifiedWebSocketManager singleton,
-                validation=User isolation through context, shared SSOT instance"
+                validation=User isolation through context, shared SSOT instance
             )
             
         except (AttributeError, AssertionError) as e:
             # EXPECTED FAILURE: SSOT consolidation not yet implemented
             self.record_consolidation_target(
-                test_name="factory_ssot_delegation,
+                test_name="factory_ssot_delegation,"
                 current_failure=str(e),
-                target_behavior=Factory creates context-wrapped SSOT delegates",
-                implementation_required="Add _ssot_instance delegation pattern to factory
+                target_behavior=Factory creates context-wrapped SSOT delegates,
+                implementation_required=Add _ssot_instance delegation pattern to factory"
             )
             
             # For now, expect this test to fail
             pytest.skip(SSOT consolidation not yet implemented - target state test")
 
     async def test_unified_websocket_manager_ssot_coordination(self):
-        "
+    "
         TARGET STATE: UnifiedWebSocketManager coordinates all WebSocket operations.
         
         After consolidation, all WebSocket operations should go through the SSOT
         UnifiedWebSocketManager, regardless of how they're initiated.
-        ""
+        "
         # TARGET STATE: Get SSOT singleton instance
         try:
             # Future SSOT pattern: Singleton access method
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager_singleton
             
             ssot_manager = get_websocket_manager_singleton()
-            self.assertIsNotNone(ssot_manager, SSOT singleton should be available")
+            self.assertIsNotNone(ssot_manager, SSOT singleton should be available)
             
             # TARGET STATE: Factory uses SSOT singleton
             factory = WebSocketManagerFactory()
@@ -126,38 +126,38 @@ class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
             factory_ssot_ref = getattr(factory_manager, '_ssot_instance', None)
             self.assertIs(
                 factory_ssot_ref, ssot_manager,
-                "TARGET STATE: Factory manager delegates to SSOT singleton
+                "TARGET STATE: Factory manager delegates to SSOT singleton"
             )
             
             # TARGET STATE: Direct and factory access use same instance
             self.assertIs(
                 ssot_manager, factory_ssot_ref,
-                TARGET STATE: All access patterns use same SSOT instance"
+                TARGET STATE: All access patterns use same SSOT instance
             )
             
             self.record_consolidation_success(
-                test_name="ssot_coordination, 
+                test_name=ssot_coordination, "
                 behavior=All WebSocket operations coordinate through SSOT singleton",
-                validation="Factory and direct access use same SSOT instance
+                validation=Factory and direct access use same SSOT instance
             )
             
         except ImportError:
             # EXPECTED FAILURE: SSOT singleton pattern not yet implemented
             self.record_consolidation_target(
-                test_name=ssot_coordination",
-                current_failure="SSOT singleton access method not implemented,
-                target_behavior=get_websocket_manager_singleton() provides SSOT access",
+                test_name=ssot_coordination","
+                current_failure=SSOT singleton access method not implemented,
+                target_behavior=get_websocket_manager_singleton() provides SSOT access,"
                 implementation_required="Implement SSOT singleton access pattern
             )
-            pytest.skip(SSOT singleton pattern not yet implemented - target state test")
+            pytest.skip(SSOT singleton pattern not yet implemented - target state test)
 
     async def test_user_isolation_through_context_not_instances(self):
-        "
+    ""
         TARGET STATE: User isolation achieved through context, not separate instances.
         
         Business requirement: Complete user isolation for WebSocket operations
         Architecture target: Single SSOT instance with context-based isolation
-        ""
+        
         try:
             factory = WebSocketManagerFactory()
             
@@ -172,15 +172,15 @@ class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
             ssot_instance_1 = getattr(manager_1, '_ssot_instance', None)
             ssot_instance_2 = getattr(manager_2, '_ssot_instance', None)
             
-            self.assertIs(ssot_instance_1, ssot_instance_2, Same SSOT instance")
+            self.assertIs(ssot_instance_1, ssot_instance_2, Same SSOT instance")"
             
             # TARGET STATE: Context isolation in operations
             mock_connection_1 = MagicMock()
             mock_connection_2 = MagicMock()
             
             # Add connections through context-isolated managers
-            await manager_1.add_connection("conn_1, mock_connection_1)
-            await manager_2.add_connection(conn_2", mock_connection_2)
+            await manager_1.add_connection(conn_1, mock_connection_1)
+            await manager_2.add_connection(conn_2, mock_connection_2)"
             
             # TARGET STATE: Operations isolated by context
             manager_1_connections = await manager_1.get_user_connections()
@@ -200,19 +200,19 @@ class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
             
             self.record_consolidation_success(
                 test_name="context_isolation,
-                behavior=User isolation through SSOT instance with context filtering", 
-                validation="Business requirement met with proper SSOT architecture
+                behavior=User isolation through SSOT instance with context filtering, 
+                validation="Business requirement met with proper SSOT architecture"
             )
             
         except (AttributeError, TypeError) as e:
             # EXPECTED FAILURE: Context-based isolation not yet implemented
             self.record_consolidation_target(
-                test_name=context_isolation",
+                test_name=context_isolation,
                 current_failure=str(e),
-                target_behavior="SSOT instance with user context filtering methods,
+                target_behavior=SSOT instance with user context filtering methods,"
                 implementation_required=Implement get_connections_for_user() and context isolation"
             )
-            pytest.skip("Context-based isolation not yet implemented - target state test)
+            pytest.skip(Context-based isolation not yet implemented - target state test)
 
     def test_mock_infrastructure_wraps_ssot_target_state(self):
         ""
@@ -220,7 +220,7 @@ class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
         
         Test mocks should use the same SSOT patterns as production, ensuring
         test fidelity and preventing mock/production divergence.
-        "
+
         try:
             # TARGET STATE: SSOT mock factory creates SSOT-compliant mocks
             ssot_mock = self.ssot_mock_factory.create_websocket_manager_mock()
@@ -229,7 +229,7 @@ class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
             wrapped_ssot_instance = getattr(ssot_mock, '_wrapped_ssot_instance', None)
             self.assertIsNotNone(
                 wrapped_ssot_instance,
-                "TARGET STATE: Mock wraps real SSOT manager instance
+                "TARGET STATE: Mock wraps real SSOT manager instance"
             )
             
             # TARGET STATE: Mock preserves SSOT interface
@@ -239,7 +239,7 @@ class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
             missing_methods = ssot_methods - mock_methods
             self.assertEqual(
                 len(missing_methods), 0,
-                fTARGET STATE: Mock preserves all SSOT methods, missing: {missing_methods}"
+                fTARGET STATE: Mock preserves all SSOT methods, missing: {missing_methods}
             )
             
             # TARGET STATE: Mock events match production agent event patterns
@@ -252,32 +252,32 @@ class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
             can_send_agent_events = hasattr(ssot_mock, 'send_agent_event')
             self.assertTrue(
                 can_send_agent_events,
-                "TARGET STATE: Mock supports production agent event patterns
+                TARGET STATE: Mock supports production agent event patterns"
             )
             
             self.record_consolidation_success(
                 test_name=mock_ssot_wrapping",
-                behavior="Mocks wrap SSOT managers preserving full interface compatibility,
-                validation=Test/production interface consistency maintained"
+                behavior=Mocks wrap SSOT managers preserving full interface compatibility,
+                validation=Test/production interface consistency maintained""
             )
             
         except (AttributeError, AssertionError) as e:
             # EXPECTED FAILURE: SSOT mock wrapping not yet implemented  
             self.record_consolidation_target(
-                test_name="mock_ssot_wrapping,
+                test_name=mock_ssot_wrapping,
                 current_failure=str(e),
-                target_behavior=Mock infrastructure wraps SSOT managers with spy/stub capabilities",
+                target_behavior=Mock infrastructure wraps SSOT managers with spy/stub capabilities,"
                 implementation_required="Implement SSOT manager wrapping in mock factory
             )
-            pytest.skip(SSOT mock wrapping not yet implemented - target state test")
+            pytest.skip(SSOT mock wrapping not yet implemented - target state test)
 
     async def test_golden_path_functionality_preserved_during_ssot_consolidation(self):
-        "
+    ""
         CRITICAL: Validate Golden Path functionality preserved during SSOT consolidation.
         
         BUSINESS REQUIREMENT: Users login  ->  get AI responses (90% of platform value)
         ARCHITECTURE REQUIREMENT: SSOT consolidation must not break core functionality
-        ""
+        
         # TARGET STATE: WebSocket manager supports Golden Path agent events
         try:
             factory = WebSocketManagerFactory()
@@ -291,16 +291,16 @@ class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
             ]
             
             mock_connection = MagicMock()
-            await manager.add_connection(test_conn", mock_connection)
+            await manager.add_connection(test_conn", mock_connection)"
             
             # Validate each Golden Path event can be sent
             events_sent = []
             for event_type in golden_path_events:
                 try:
                     await manager.send_agent_event(
-                        connection_id="test_conn,
+                        connection_id=test_conn,
                         event_type=event_type,
-                        event_data={message": f"Test {event_type}}
+                        event_data={message: f"Test {event_type}}
                     events_sent.append(event_type)
                 except Exception as e:
                     self.record_golden_path_failure(event_type, str(e))
@@ -313,26 +313,26 @@ class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
             
             # TARGET STATE: SSOT coordination doesn't break user experience
             connection_count = await manager.get_connection_count()
-            self.assertEqual(connection_count, 1, "SSOT patterns preserve connection management)
+            self.assertEqual(connection_count, 1, SSOT patterns preserve connection management)
             
             self.record_consolidation_success(
-                test_name=golden_path_preservation",
+                test_name=golden_path_preservation,"
                 behavior="SSOT consolidation preserves all Golden Path functionality,
-                validation=$550K+ MRR chat functionality protected during migration"
+                validation=$550K+ MRR chat functionality protected during migration
             )
             
         except Exception as e:
             # EXPECTED FAILURE: Golden Path agent event support not fully implemented
             self.record_consolidation_target(
-                test_name="golden_path_preservation, 
+                test_name="golden_path_preservation, "
                 current_failure=str(e),
-                target_behavior=SSOT manager fully supports Golden Path agent events",
-                implementation_required="Ensure send_agent_event() method in SSOT manager
+                target_behavior=SSOT manager fully supports Golden Path agent events,
+                implementation_required=Ensure send_agent_event() method in SSOT manager"
             )
             pytest.skip(Golden Path agent event support not yet complete - target state test")
     
     def record_consolidation_success(self, test_name: str, behavior: str, validation: str):
-        "Record successful SSOT consolidation validation.""
+        Record successful SSOT consolidation validation.""
         if not hasattr(self, '_consolidation_successes'):
             self._consolidation_successes = []
             
@@ -343,11 +343,11 @@ class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
             'timestamp': self.get_current_timestamp()
         }
         
-        self.logger.info(fSSOT Consolidation SUCCESS - {test_name}: {behavior}")
+        self.logger.info(fSSOT Consolidation SUCCESS - {test_name}: {behavior})
     
     def record_consolidation_target(self, test_name: str, current_failure: str,
                                    target_behavior: str, implementation_required: str):
-        "Record SSOT consolidation target state for future implementation.""
+        Record SSOT consolidation target state for future implementation.""
         if not hasattr(self, '_consolidation_targets'):
             self._consolidation_targets = []
             
@@ -359,10 +359,10 @@ class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
             'timestamp': self.get_current_timestamp()
         }
         
-        self.logger.info(fSSOT Consolidation TARGET - {test_name}: {target_behavior}")
+        self.logger.info(fSSOT Consolidation TARGET - {test_name}: {target_behavior})
     
     def record_golden_path_failure(self, event_type: str, failure_reason: str):
-        "Record Golden Path functionality failures during SSOT testing.""
+        "Record Golden Path functionality failures during SSOT testing."
         if not hasattr(self, '_golden_path_failures'):
             self._golden_path_failures = []
             
@@ -373,11 +373,11 @@ class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
             'timestamp': self.get_current_timestamp()
         }
         
-        self.logger.warning(fGolden Path FAILURE - {event_type}: {failure_reason}")
+        self.logger.warning(fGolden Path FAILURE - {event_type}: {failure_reason})"
 
 
 class SsotConsolidationIntegrationTests(SSotBaseTestCase):
-    "Integration tests for SSOT consolidation patterns.""
+    "Integration tests for SSOT consolidation patterns.
     
     def test_ssot_consolidation_maintains_service_boundaries(self):
         ""
@@ -385,7 +385,7 @@ class SsotConsolidationIntegrationTests(SSotBaseTestCase):
         
         WebSocket SSOT consolidation should not create dependencies between
         the main backend, auth service, and frontend services.
-        "
+
         # TARGET STATE: WebSocket SSOT isolated to backend service
         try:
             from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
@@ -394,7 +394,7 @@ class SsotConsolidationIntegrationTests(SSotBaseTestCase):
             websocket_module_path = WebSocketManager.__module__
             self.assertTrue(
                 websocket_module_path.startswith('netra_backend'),
-                "TARGET STATE: WebSocket SSOT contained within backend service
+                "TARGET STATE: WebSocket SSOT contained within backend service"
             )
             
             # TARGET STATE: No auth service imports in WebSocket SSOT
@@ -406,31 +406,31 @@ class SsotConsolidationIntegrationTests(SSotBaseTestCase):
             
             self.assertFalse(
                 has_forbidden_imports,
-                TARGET STATE: WebSocket SSOT doesn't import auth service directly"
+                TARGET STATE: WebSocket SSOT doesn't import auth service directly
             )
             
             self.record_test_finding(
-                finding_type="service_boundary_compliance,
+                finding_type=service_boundary_compliance,"
                 description=SSOT consolidation maintains service independence",
-                impact="Architecture remains modular and deployable independently,
-                recommendation=Continue this pattern for other SSOT consolidations"
+                impact=Architecture remains modular and deployable independently,
+                recommendation=Continue this pattern for other SSOT consolidations""
             )
             
         except Exception as e:
             self.record_test_finding(
-                finding_type="service_boundary_validation_failure,
-                description=fCould not validate service boundaries: {e}",
+                finding_type=service_boundary_validation_failure,
+                description=fCould not validate service boundaries: {e},"
                 impact="Unable to confirm SSOT consolidation follows service patterns,
-                recommendation=Implement service boundary validation in SSOT tests"
+                recommendation=Implement service boundary validation in SSOT tests
             )
 
 
-if __name__ == "__main__:
+if __name__ == "__main__:"
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-    print(MIGRATION NOTICE: This file previously used direct pytest execution.")
-    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>)
-    print(For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print(MIGRATION NOTICE: This file previously used direct pytest execution.)
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md)"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

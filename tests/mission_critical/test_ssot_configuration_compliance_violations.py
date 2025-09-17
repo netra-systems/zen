@@ -25,7 +25,7 @@ Test Strategy:
 
 Author: SSOT Gardener Agent - Step 2 Test Plan Execution
 Date: 2025-09-13
-""
+"
 
 import ast
 import os
@@ -44,7 +44,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @dataclass
 class SsotViolation:
-    ""Structure for SSOT configuration compliance violations."
+    "Structure for SSOT configuration compliance violations.
     violation_type: str
     file_path: str
     line_number: int
@@ -57,7 +57,7 @@ class SsotViolation:
 
 @dataclass
 class SsotComplianceResults:
-    "SSOT configuration compliance validation results.""
+    "SSOT configuration compliance validation results."
     total_files_scanned: int
     total_violations_found: int
     critical_violations: List[SsotViolation]
@@ -69,10 +69,10 @@ class SsotComplianceResults:
 
 
 class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
-    ""CRITICAL: Test suite to detect Configuration Manager SSOT compliance violations."
+    "CRITICAL: Test suite to detect Configuration Manager SSOT compliance violations."
 
     def setup_method(self, method=None):
-        "Setup test environment for SSOT compliance validation.""
+        Setup test environment for SSOT compliance validation.""
         super().setup_method(method)
 
         # Project root path
@@ -83,7 +83,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
             {
                 'file': 'netra_backend/app/logging/auth_trace_logger.py',
                 'line': 284,
-                'pattern': os.getenv('ENVIRONMENT')",
+                'pattern': os.getenv('ENVIRONMENT'),
                 'variable': 'ENVIRONMENT',
                 'severity': 'CRITICAL',
                 'impact': 'Authentication logging inconsistency - affects Golden Path user auth debugging'
@@ -91,7 +91,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
             {
                 'file': 'netra_backend/app/middleware/error_recovery_middleware.py',
                 'line': 33,
-                'pattern': "os.environ.get('ENVIRONMENT'),
+                'pattern': os.environ.get('ENVIRONMENT'),"
                 'variable': 'ENVIRONMENT',
                 'severity': 'CRITICAL',
                 'impact': 'Error handling inconsistency - affects system stability and user experience'
@@ -124,7 +124,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         ]
 
     def scan_file_for_violations(self, file_path: Path) -> List[SsotViolation]:
-        "Scan a Python file for SSOT configuration violations.""
+        Scan a Python file for SSOT configuration violations.""
         violations = []
 
         try:
@@ -150,12 +150,12 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
 
                         # Create violation record
                         violation = SsotViolation(
-                            violation_type=DIRECT_ENVIRONMENT_ACCESS",
+                            violation_type=DIRECT_ENVIRONMENT_ACCESS,
                             file_path=str(file_path.relative_to(self.project_root)),
                             line_number=line_num,
                             code_line=line.strip(),
                             environment_variable=env_var,
-                            description=f"Direct environment access using {pattern} instead of IsolatedEnvironment,
+                            description=fDirect environment access using {pattern} instead of IsolatedEnvironment,
                             severity=severity,
                             business_impact=self.determine_business_impact(env_var, str(file_path))
                         )
@@ -164,30 +164,30 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
 
         except Exception as e:
             # Log file read errors but don't fail the test
-            self.record_metric('file_read_errors', f{file_path}: {str(e)}")
+            self.record_metric('file_read_errors', f{file_path}: {str(e)}")"
 
         return violations
 
     def extract_env_var_name(self, code_line: str) -> str:
-        "Extract environment variable name from code line.""
+        Extract environment variable name from code line."
         # Common patterns: os.getenv('VAR'), os.environ.get('VAR'), os.environ['VAR']
-        for quote in ['", '"']:
-            if f({quote} in code_line and f"{quote}" in code_line:
+        for quote in ['", '']:
+            if f({quote} in code_line and f{quote} in code_line:
                 start = code_line.find(f({quote}) + 2
-                end = code_line.find(f"{quote}", start)
+                end = code_line.find(f{quote}", start)
                 if start < end:
                     return code_line[start:end]
 
-            if f[{quote} in code_line and f"{quote}]" in code_line:
+            if f[{quote} in code_line and f"{quote}] in code_line:
                 start = code_line.find(f[{quote}) + 2
-                end = code_line.find(f"{quote}]", start)
+                end = code_line.find(f{quote}], start)
                 if start < end:
                     return code_line[start:end]
 
         return UNKNOWN
 
     def determine_violation_severity(self, env_var: str, pattern: str) -> str:
-        ""Determine severity of SSOT violation.""
+        "Determine severity of SSOT violation."
         # Critical environment variables that affect Golden Path
         critical_vars = {'ENVIRONMENT', 'JWT_SECRET_KEY', 'DATABASE_URL', 'REDIS_URL'}
         high_vars = {'CORPUS_BASE_PATH', 'AUTH_SERVICE_URL', 'API_KEY'}
@@ -202,7 +202,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
             return 'LOW'
 
     def determine_business_impact(self, env_var: str, file_path: str) -> str:
-        "Determine business impact of SSOT violation."
+        Determine business impact of SSOT violation.
         if 'auth' in file_path.lower() and env_var == 'ENVIRONMENT':
             return 'Authentication system inconsistency - affects $500K+ ARR Golden Path user auth'
         elif 'middleware' in file_path.lower() and env_var == 'ENVIRONMENT':
@@ -215,7 +215,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
             return 'Configuration consistency - affects development and deployment reliability'
 
     def scan_project_for_violations(self) -> SsotComplianceResults:
-        ""Scan entire project for SSOT configuration violations.""
+        ""Scan entire project for SSOT configuration violations.
         all_violations = []
         files_scanned = 0
         compliant_files = 0
@@ -276,16 +276,16 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         )
 
     def test_detect_auth_trace_logger_ssot_violation(self):
-        "
+    ""
         MUST FAIL CURRENTLY - Detect SSOT violation in auth trace logger.
 
         This test specifically targets the known violation:
         netra_backend/app/logging/auth_trace_logger.py:284 - os.getenv('ENVIRONMENT')
-        "
+
         target_file = self.project_root / 'netra_backend/app/logging/auth_trace_logger.py'
 
         # Verify file exists
-        assert target_file.exists(), f"Target file not found: {target_file}"
+        assert target_file.exists(), f"Target file not found: {target_file}
 
         # Scan for violations
         violations = self.scan_file_for_violations(target_file)
@@ -303,12 +303,12 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         # TEST ASSERTION: This MUST FAIL in current state (violation exists)
         assert expected_violation_found, (
             fEXPECTED SSOT VIOLATION NOT FOUND: Expected to find os.getenv('ENVIRONMENT') violation 
-            f"around line 284 in auth_trace_logger.py. Found violations: {env_violations}. "
+            f"around line 284 in auth_trace_logger.py. Found violations: {env_violations}. 
             fThis test should FAIL until violation is fixed with IsolatedEnvironment.
         )
 
     def test_detect_error_recovery_middleware_ssot_violation(self):
-        ""
+        
         MUST FAIL CURRENTLY - Detect SSOT violation in error recovery middleware.
 
         This test specifically targets the known violation:
@@ -334,22 +334,22 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
 
         # TEST ASSERTION: This MUST FAIL in current state (violation exists)
         assert expected_violation_found, (
-            f"EXPECTED SSOT VIOLATION NOT FOUND: Expected to find os.environ.get('ENVIRONMENT') violation "
+            fEXPECTED SSOT VIOLATION NOT FOUND: Expected to find os.environ.get('ENVIRONMENT') violation 
             faround line 33 in error_recovery_middleware.py. Found violations: {env_violations}. 
-            f"This test should FAIL until violation is fixed with IsolatedEnvironment."
+            fThis test should FAIL until violation is fixed with IsolatedEnvironment.
         )
 
     def test_detect_corpus_admin_ssot_violation(self):
-        "
+    ""
         MUST FAIL CURRENTLY - Detect SSOT violation in unified corpus admin.
 
         This test specifically targets the known violation:
         netra_backend/app/admin/corpus/unified_corpus_admin.py:155 - os.getenv('CORPUS_BASE_PATH')
-        "
+"
         target_file = self.project_root / 'netra_backend/app/admin/corpus/unified_corpus_admin.py'
 
         # Verify file exists
-        assert target_file.exists(), f"Target file not found: {target_file}"
+        assert target_file.exists(), f"Target file not found: {target_file}
 
         # Scan for violations
         violations = self.scan_file_for_violations(target_file)
@@ -367,17 +367,17 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         # TEST ASSERTION: This MUST FAIL in current state (violation exists)
         assert expected_violation_found, (
             fEXPECTED SSOT VIOLATION NOT FOUND: Expected to find os.getenv('CORPUS_BASE_PATH') violation 
-            f"around line 155 in unified_corpus_admin.py. Found violations: {corpus_violations}. "
+            faround line 155 in unified_corpus_admin.py. Found violations: {corpus_violations}. 
             fThis test should FAIL until violation is fixed with IsolatedEnvironment.
         )
 
     def test_comprehensive_ssot_configuration_compliance(self):
-        ""
+        "
         MUST FAIL CURRENTLY - Comprehensive scan for all SSOT configuration violations.
 
         This test scans the entire project and validates that all expected violations are found.
         After SSOT remediation, this test should pass with zero violations.
-        ""
+        "
         # Perform comprehensive scan
         compliance_results = self.scan_project_for_violations()
 
@@ -417,21 +417,21 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         # TEST ASSERTION: This MUST FAIL in current state (violations exist)
         assert actual_total >= expected_minimum_total, (
             fINSUFFICIENT SSOT VIOLATIONS DETECTED: Expected to find at least {expected_minimum_total} 
-            f"SSOT violations but found {actual_total}. This indicates the test may not be working properly. "
+            fSSOT violations but found {actual_total}. This indicates the test may not be working properly. 
             fExpected violations: {self.expected_violations}. 
-            f"Found violations: {violation_details}"
+            fFound violations: {violation_details}"
         )
 
         assert actual_critical >= expected_critical_violations, (
             fINSUFFICIENT CRITICAL VIOLATIONS: Expected at least {expected_critical_violations} critical 
-            f"SSOT violations but found {actual_critical}. Critical violations affect Golden Path functionality. "
+            f"SSOT violations but found {actual_critical}. Critical violations affect Golden Path functionality. 
             fFound critical: {[v.file_path + ':' + str(v.line_number) for v in compliance_results.critical_violations]}
         )
 
         assert actual_high >= expected_high_violations, (
-            f"INSUFFICIENT HIGH VIOLATIONS: Expected at least {expected_high_violations} high priority "
+            fINSUFFICIENT HIGH VIOLATIONS: Expected at least {expected_high_violations} high priority 
             fSSOT violations but found {actual_high}. 
-            f"Found high: {[v.file_path + ':' + str(v.line_number) for v in compliance_results.high_violations]}"
+            fFound high: {[v.file_path + ':' + str(v.line_number) for v in compliance_results.high_violations]}
         )
 
         # Detailed assertion message for when this test should eventually pass
@@ -440,16 +440,16 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
                 fSSOT REMEDIATION COMPLETE: All configuration violations have been fixed! 
                 f"This test should now PASS consistently. Consider updating test expectations. "
                 fFiles scanned: {compliance_results.total_files_scanned}, 
-                f"Compliant files: {compliance_results.compliant_files}"
+                fCompliant files: {compliance_results.compliant_files}
             )
 
     def test_validate_isolated_environment_usage_patterns(self):
-        "
+    "
         Test for proper IsolatedEnvironment usage patterns in SSOT-compliant files.
 
         This test identifies files that correctly use IsolatedEnvironment patterns
         and ensures they serve as examples for SSOT remediation.
-        "
+"
         compliant_files = []
         files_with_good_patterns = []
 
@@ -489,7 +489,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
 
         # This test is informational - shows what good patterns look like
         assert len(compliant_files) >= 0, (
-            f"Found {len(compliant_files)} fully compliant files using IsolatedEnvironment patterns. "
+            fFound {len(compliant_files)} fully compliant files using IsolatedEnvironment patterns. 
             fCompliant files: {compliant_files}. 
             f"Files with mixed patterns: {files_with_good_patterns}"
         )

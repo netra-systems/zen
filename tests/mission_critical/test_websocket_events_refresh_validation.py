@@ -60,7 +60,7 @@ ExecutionStatus
 
 
 class WebSocketEventValidation:
-    "Validates WebSocket events during refresh scenarios.""
+    "Validates WebSocket events during refresh scenarios.
 
     # Required events per spec
     REQUIRED_EVENTS = {
@@ -106,7 +106,7 @@ class WebSocketEventValidation:
         self.mock_connection_pool = self._create_mock_connection_pool()
 
     def generate_test_token(self) -> str:
-        ""Generate a valid JWT token for testing."
+        ""Generate a valid JWT token for testing.
         payload = {
         'sub': 'event_test_user',
         'email': 'events@test.com',
@@ -116,7 +116,7 @@ class WebSocketEventValidation:
         return jwt.encode(payload, self.jwt_secret, algorithm='HS256')
 
     def _create_mock_connection_pool(self):
-        "Create mock connection pool for factory testing.""
+        Create mock connection pool for factory testing.""
 
 class MockWebSocketConnection:
     def __init__(self, user_id: str, connection_id: str):
@@ -127,12 +127,12 @@ class MockWebSocketConnection:
 
     async def send_json(self, data: Dict[str, Any] -> None:
         if not self.is_connected:
-        raise ConnectionError(WebSocket disconnected")
+        raise ConnectionError(WebSocket disconnected)
         self.sent_events.append(data)
 
     async def ping(self) -> None:
         if not self.is_connected:
-        raise ConnectionError("WebSocket disconnected)
+        raise ConnectionError("WebSocket disconnected)"
 
     async def close(self) -> None:
         self.is_connected = False
@@ -145,7 +145,7 @@ class MockConnectionPool:
         self.connections = {}
 
     async def get_connection(self, connection_id: str, user_id: str):
-        key = formatted_string"
+        key = formatted_string
         if key not in self.connections:
         self.connections[key] = MockWebSocketConnection(user_id, connection_id)
 
@@ -154,18 +154,18 @@ class MockConnectionPool:
         return connection_info
 
     def get_mock_connection(self, user_id: str, connection_id: str):
-        key = "formatted_string
+        key = formatted_string"
         return self.connections.get(key)
 
     def simulate_disconnect(self, user_id: str, connection_id: str):
-        ""Simulate connection disconnect for refresh testing."
+        "Simulate connection disconnect for refresh testing.
         pass
-        key = "formatted_string
+        key = "formatted_string"
         if key in self.connections:
         self.connections[key].is_connected = False
 
     def simulate_reconnect(self, user_id: str, connection_id: str):
-        ""Simulate connection reconnect after refresh."
+        Simulate connection reconnect after refresh."
         key = "formatted_string
         if key in self.connections:
         self.connections[key].is_connected = True
@@ -178,11 +178,11 @@ class MockConnectionPool:
         pass
         Test that WebSocket events continue to be sent after page refresh.
         '''
-        test_name = events_preserved_after_refresh"
-        print(f" )
+        test_name = events_preserved_after_refresh
+        print(f" ")
 
 class TestWebSocketConnection:
-        "Real WebSocket connection for testing instead of mocks."
+        Real WebSocket connection for testing instead of mocks.
 
     def __init__(self):
         pass
@@ -191,19 +191,19 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        ""Send JSON message.""
+        "Send JSON message."
         if self._closed:
         raise RuntimeError(WebSocket is closed)
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = Normal closure):
         "Close WebSocket connection."
         pass
         self._closed = True
         self.is_connected = False
 
     async def get_messages(self) -> list:
-        ""Get all sent messages.""
+        Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
@@ -244,10 +244,10 @@ class TestWebSocketConnection:
         await page.wait_for_timeout(2000)
 
                 # Send a message to trigger agent events
-        message_input = await page.query_selector('[data-testid="message-input], textarea')
+        message_input = await page.query_selector('[data-testid=message-input], textarea')
         if message_input:
-        await message_input.fill(Test message before refresh")
-        await message_input.press("Enter)
+        await message_input.fill(Test message before refresh")"
+        await message_input.press(Enter)
         await page.wait_for_timeout(3000)  # Wait for events
 
                     # Mark transition point
@@ -258,10 +258,10 @@ class TestWebSocketConnection:
         await page.wait_for_timeout(2000)
 
                     # Send another message after refresh
-        message_input_after = await page.query_selector('[data-testid=message-input"], textarea')
+        message_input_after = await page.query_selector('[data-testid=message-input], textarea')"
         if message_input_after:
         await message_input_after.fill("Test message after refresh)
-        await message_input_after.press(Enter")
+        await message_input_after.press(Enter)
         await page.wait_for_timeout(3000)  # Wait for events
 
                         # Analyze events
@@ -278,15 +278,15 @@ class TestWebSocketConnection:
         'missing': list(missing_after),
         'phase': 'after_refresh'
                             
-        print("formatted_string)
+        print("")
 
                             # Verify session restoration
         has_session_restore = 'session_restore' in events_after_refresh
 
+        print(formatted_string")"
+        print()"
         print(formatted_string")
-        print("formatted_string)
-        print(formatted_string")
-        print("formatted_string)
+        print("")
 
         self.test_results['events_captured'][test_name] = {
         'before': list(required_before),
@@ -298,10 +298,10 @@ class TestWebSocketConnection:
         self.test_results['passed'] += 1
         return True
         else:
-        raise AssertionError(formatted_string")
+        raise AssertionError(formatted_string)
 
         except Exception as e:
-        print("formatted_string)
+        print("")
         self.test_results['failed'] += 1
         return False
         finally:
@@ -313,7 +313,7 @@ class TestWebSocketConnection:
         Test that WebSocket reconnection follows proper event sequence.
         '''
         test_name = reconnection_event_sequence"
-        print("formatted_string)
+        print(")
 
         try:
         event_sequence: List[tuple] = []
@@ -357,7 +357,7 @@ class TestWebSocketConnection:
         localStorage.setItem('jwt_token', '{token}');
         ''')
 
-        await page.goto(formatted_string", wait_until='networkidle')
+        await page.goto(formatted_string", wait_until='networkidle')"
         await page.wait_for_timeout(2000)
 
     # Trigger refresh
@@ -378,11 +378,11 @@ class TestWebSocketConnection:
     # Check for session restoration
         has_session_event = any(e == 'session_restore' for e, _, _ in event_sequence)
 
-        print("formatted_string)
+        print()"
         print(formatted_string")
-        print("formatted_string)
-        print(formatted_string")
-        print("formatted_string)
+        print("")
+        print(formatted_string)"
+        print(")
 
         self.test_results['events_captured'][test_name] = {
         'sequence': actual_pattern[:5],
@@ -393,10 +393,10 @@ class TestWebSocketConnection:
         self.test_results['passed'] += 1
         return True
         else:
-        raise AssertionError(No reconnection detected after refresh")
+        raise AssertionError(No reconnection detected after refresh")"
 
         except Exception as e:
-        print("formatted_string)
+        print()"
         self.test_results['failed'] += 1
         return False
         finally:
@@ -408,7 +408,7 @@ class TestWebSocketConnection:
         Test that events are not duplicated after page refresh.
         '''
         test_name = no_duplicate_events_after_refresh"
-        print("formatted_string)
+        print(")"
 
         try:
         message_ids: Set[str] = set()
@@ -442,14 +442,14 @@ class TestWebSocketConnection:
         localStorage.setItem('jwt_token', '{token}');
         ''')
 
-        await page.goto(formatted_string", wait_until='networkidle')
+        await page.goto(formatted_string, wait_until='networkidle')
 
                         # Send messages before and after refresh
         for i in range(2):
-        message_input = await page.query_selector('[data-testid="message-input], textarea')
+        message_input = await page.query_selector('[data-testid=message-input], textarea')"
         if message_input:
         await message_input.fill(formatted_string")
-        await message_input.press("Enter)
+        await message_input.press(Enter)
         await page.wait_for_timeout(2000)
 
         if i == 0:
@@ -459,24 +459,24 @@ class TestWebSocketConnection:
 
                                     # Check for duplicates
         if duplicate_events:
-        print(formatted_string")
+        print(formatted_string"")
         self.test_results['events_captured'][test_name] = {
         'duplicates': duplicate_events[:5]  # First 5 duplicates
                                         
 
-        print("formatted_string)
-        print(formatted_string")
-        print("formatted_string)
+        print(")"
+        print(formatted_string)
+        print("")
 
                                         # Test passes if duplicates are minimal
         if len(duplicate_events) <= 2:  # Allow up to 2 duplicates (edge cases)
         self.test_results['passed'] += 1
         return True
         else:
-        raise AssertionError(formatted_string")
+        raise AssertionError(formatted_string)"
 
         except Exception as e:
-        print("formatted_string)
+        print(")
         self.test_results['failed'] += 1
         return False
         finally:
@@ -487,8 +487,8 @@ class TestWebSocketConnection:
         '''
         Test that events are sent with appropriate timing after refresh.
         '''
-        test_name = event_timing_after_refresh"
-        print("formatted_string)
+        test_name = event_timing_after_refresh""
+        print()"
 
         try:
         event_timings: Dict[str, List[float]] = {}
@@ -528,10 +528,10 @@ class TestWebSocketConnection:
         initial_timing = time.time()
 
                 # Send a test message
-        message_input = await page.query_selector('[data-testid="message-input], textarea')
+        message_input = await page.query_selector('[data-testid=message-input], textarea')
         if message_input:
-        await message_input.fill(Timing test message")
-        await message_input.press("Enter)
+        await message_input.fill(Timing test message")"
+        await message_input.press(Enter)
         await page.wait_for_timeout(2000)
 
                     # Refresh and measure reconnection timing
@@ -549,8 +549,8 @@ class TestWebSocketConnection:
         if event in event_timings and event_timings[event]:
         critical_timings[event] = min(event_timings[event]
 
-        print(formatted_string")
-        print("formatted_string)
+        print(formatted_string")"
+        print()"
 
         for event, timing in critical_timings.items():
         print(formatted_string")
@@ -565,12 +565,12 @@ class TestWebSocketConnection:
         self.test_results['passed'] += 1
         return True
         else:
-        print("formatted_string)
+        print("")
         self.test_results['passed'] += 1  # Still pass but warn
         return True
 
         except Exception as e:
-        print(formatted_string")
+        print(formatted_string)"
         self.test_results['failed'] += 1
         return False
         finally:
@@ -578,9 +578,9 @@ class TestWebSocketConnection:
         page.remove_listener('websocket', handle_websocket)
 
     async def test_factory_websocket_event_persistence(self) -> bool:
-        "Test factory-based WebSocket event persistence during simulated refresh.""
-        test_name = factory_websocket_event_persistence"
-        print("formatted_string)
+        "Test factory-based WebSocket event persistence during simulated refresh.
+        test_name = factory_websocket_event_persistence""
+        print()"
 
         try:
                                                     # Configure factory
@@ -591,8 +591,8 @@ class TestWebSocketConnection:
                                                     
 
         user_id = formatted_string"
-        thread_id = "formatted_string
-        connection_id = formatted_string"
+        thread_id = formatted_string
+        connection_id = formatted_string""
 
                                                     # Create initial emitter
         emitter1 = await self.websocket_factory.create_user_emitter( )
@@ -601,10 +601,10 @@ class TestWebSocketConnection:
         connection_id=connection_id
                                                     
 
-                                                    # Send events before "refresh
-        await emitter1.notify_agent_started(TestAgent", "run_1)
-        await emitter1.notify_agent_thinking(TestAgent", "run_1, Processing...")
-        await emitter1.notify_tool_executing("TestAgent, run_1", "search_tool, {query": "test}
+                                                    # Send events before refresh
+        await emitter1.notify_agent_started(TestAgent, run_1)
+        await emitter1.notify_agent_thinking(TestAgent", "run_1, Processing...)
+        await emitter1.notify_tool_executing(TestAgent, run_1", "search_tool, {query: test}
 
         await asyncio.sleep(0.1)  # Allow processing
 
@@ -628,8 +628,8 @@ class TestWebSocketConnection:
                                                     
 
                                                     # Send events after refresh"
-        await emitter2.notify_tool_completed("TestAgent, run_1", "search_tool, {results": ["found]}
-        await emitter2.notify_agent_completed(TestAgent", "run_1, {status": "success}
+        await emitter2.notify_tool_completed("TestAgent, run_1, search_tool, {results: ["found]}"
+        await emitter2.notify_agent_completed(TestAgent, run_1, {status: "success}
 
         await asyncio.sleep(0.1)  # Allow processing
 
@@ -654,9 +654,9 @@ class TestWebSocketConnection:
                                                         
 
         print(formatted_string")
-        print("formatted_string)
-        print(formatted_string")
-        print("formatted_string)
+        print("")
+        print(formatted_string)"
+        print(")
 
                                                         # Clean up
         await emitter2.cleanup()
@@ -666,19 +666,19 @@ class TestWebSocketConnection:
         self.test_results['passed'] += 1
         return True
         else:
-        raise AssertionError(formatted_string")
+        raise AssertionError(formatted_string")"
 
         except Exception as e:
-        print("formatted_string)
+        print()"
         self.test_results['failed'] += 1
         return False
         finally:
         self.test_results['total'] += 1
 
     async def test_factory_json_serialization_during_refresh(self) -> bool:
-        ""Test JSON serialization remains intact during refresh scenarios."
-        test_name = "factory_json_serialization_during_refresh
-        print(formatted_string")
+        "Test JSON serialization remains intact during refresh scenarios.
+        test_name = "factory_json_serialization_during_refresh"
+        print(formatted_string)
 
         try:
                                                                                 # Configure factory
@@ -688,9 +688,9 @@ class TestWebSocketConnection:
         health_monitor=None
                                                                                 
 
-        user_id = "formatted_string
-        thread_id = formatted_string"
-        connection_id = "formatted_string
+        user_id = "formatted_string"
+        thread_id = formatted_string
+        connection_id = formatted_string"
 
                                                                                 # Test events with complex data for JSON serialization
         test_events_data = [
@@ -706,7 +706,7 @@ class TestWebSocketConnection:
         emitter = await self.websocket_factory.create_user_emitter( )
         user_id=user_id,
         thread_id=formatted_string",
-        connection_id="formatted_string
+        connection_id=formatted_string
                                                                                     
 
                                                                                     # Send event based on type
@@ -720,7 +720,7 @@ class TestWebSocketConnection:
         await asyncio.sleep(0.1)
 
                                                                                                 # Get sent events and test JSON serialization
-        mock_conn = self.mock_connection_pool.get_mock_connection(user_id, formatted_string")
+        mock_conn = self.mock_connection_pool.get_mock_connection(user_id, formatted_string")"
         sent_events = mock_conn.sent_events
 
         for event in sent_events:
@@ -760,34 +760,34 @@ class TestWebSocketConnection:
         'failed_details': failed_serializations[:3]  # First 3 failures
                                                                                                             
 
-        print("formatted_string)
+        print()"
         print(formatted_string")
-        print("formatted_string)
+        print("")
 
                                                                                                             # Test passes if most events serialize correctly
         if len(failed_serializations) == 0:
         self.test_results['passed'] += 1
         return True
         elif len(successful_serializations) > len(failed_serializations):
-        print(f WARNING: [U+FE0F] Some serialization failures but mostly working")
+        print(f WARNING: [U+FE0F] Some serialization failures but mostly working)"
         self.test_results['passed'] += 1
         return True
         else:
-        raise AssertionError("formatted_string)
+        raise AssertionError("
 
         except Exception as e:
-        print(formatted_string")
+        print(formatted_string")"
         self.test_results['failed'] += 1
         return False
         finally:
         self.test_results['total'] += 1
 
     async def run_all_validations(self, browser: Browser) -> Dict[str, Any]:
-        "Run all WebSocket event validations including factory-based tests.""
+        Run all WebSocket event validations including factory-based tests."
         print(")
-        " + = * 70)
-        print(" SEARCH:  WebSocket Event Validation During Refresh (Browser + Factory"))
-        print(=" * 70)
+         + "= * 70)"
+        print( SEARCH:  WebSocket Event Validation During Refresh (Browser + Factory))
+        print(=" * 70")
 
     # Factory-based tests (run first, don't require browser)
         factory_tests = [
@@ -795,13 +795,13 @@ class TestWebSocketConnection:
         self.test_factory_json_serialization_during_refresh
     
 
-        print(")
+        print()"
         [U+1F3ED] Running Factory-Based Tests...)
         for test_func in factory_tests:
         try:
         await test_func()
         except Exception as e:
-        print("")
+        print(")
         self.test_results['failed'] += 1
         self.test_results['total'] += 1
 
@@ -814,7 +814,7 @@ class TestWebSocketConnection:
                 
 
         print()
-        [U+1F310] Running Browser-Based Tests...")
+        [U+1F310] Running Browser-Based Tests...)"
         for test_func in browser_tests:
         context = await browser.new_context()
         page = await context.new_page()
@@ -822,35 +822,35 @@ class TestWebSocketConnection:
         try:
         await test_func(page)
         except Exception as e:
-        print("formatted_string)
+        print(")
         self.test_results['failed'] += 1
         self.test_results['total'] += 1
         finally:
         await context.close()
 
                                 # Print summary
-        print(")
-        " + = * 70)
-        print(" CHART:  VALIDATION RESULTS SUMMARY")
+        print("")
+         + = * 70)"
+        print(" CHART:  VALIDATION RESULTS SUMMARY)
         print(= * 70)
-        print("")
-        print(formatted_string)
-        print("")
+        print(")
+        print(formatted_string")
+        print()
 
                                 # Factory test results
         if self.test_results['factory_tests']:
         print()
-        [U+1F3ED] FACTORY TEST DETAILS:")
+        [U+1F3ED] FACTORY TEST DETAILS:")"
         for test_name, test_data in self.test_results['factory_tests'].items():
-        print("formatted_string)
+        print()"
         for key, value in test_data.items():
         print(formatted_string")
 
         if self.test_results['missing_events']:
-        print(")
+        print(")"
         WARNING: [U+FE0F] MISSING REQUIRED EVENTS:)
         for missing in self.test_results['missing_events']:
-        print("")
+        print()
 
                                                     # Check overall compliance
         all_captured_events = set()
@@ -869,7 +869,7 @@ class TestWebSocketConnection:
         if missing_required:
         print(formatted_string)
         else:
-        print("   PASS:  All required events captured!")
+        print(   PASS:  All required events captured!)
 
                                                                         # Factory pattern compliance
         factory_events = set()
@@ -881,12 +881,12 @@ class TestWebSocketConnection:
         factory_captured = factory_events & self.REQUIRED_EVENTS
         factory_missing = self.REQUIRED_EVENTS - factory_captured
         print(f )
-        [U+1F3ED] FACTORY PATTERN COMPLIANCE:)
-        print("")
+        [U+1F3ED] FACTORY PATTERN COMPLIANCE:")
+        print(")
         if factory_missing:
         print(formatted_string)
         else:
-        print("   PASS:  All factory events working correctly!")
+        print(   PASS:  All factory events working correctly!")
 
                                                                                             # Determine overall status
         factory_events = set()
@@ -897,20 +897,20 @@ class TestWebSocketConnection:
         factory_missing = self.REQUIRED_EVENTS - factory_events if factory_events else set()
 
         if self.test_results['failed'] == 0 and not missing_required and not factory_missing:
-        print()
-        PASS:  ALL VALIDATIONS PASSED - WebSocket events working correctly!")
-        print("   PASS:  Browser tests passed)
-        print(   PASS:  Factory tests passed")
-        print("   PASS:  All required events validated)
+        print(")
+        PASS:  ALL VALIDATIONS PASSED - WebSocket events working correctly!)
+        print(   PASS:  Browser tests passed")"
+        print(   PASS:  Factory tests passed)
+        print("   PASS:  All required events validated")
         elif missing_required or factory_missing:
         all_missing = missing_required | factory_missing
-        print(formatted_string")
+        print(formatted_string)"
         if missing_required:
-        print("formatted_string)
+        print(")
         if factory_missing:
-        print(formatted_string")
+        print(formatted_string"")
         else:
-        print("formatted_string)
+        print(")"
 
         return self.test_results
 
@@ -919,7 +919,7 @@ class TestWebSocketConnection:
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_websocket_events_refresh_validation():
-""Pytest wrapper for WebSocket event validation."
+    Pytest wrapper for WebSocket event validation."
 from playwright.async_api import async_playwright
 
 async with async_playwright() as p:
@@ -933,14 +933,14 @@ results = await validator.run_all_validations(browser)
 browser_events = set()
 for test_data in results['events_captured'].values():
     if isinstance(test_data, dict):
-browser_events.update(test_data.get('before', [])
+    browser_events.update(test_data.get('before', [])
 browser_events.update(test_data.get('after', [])
 
                                                                                                                                             # Assert critical events are captured (factory tests)
 factory_events = set()
 for test_data in results['factory_tests'].values():
     if 'all_event_types' in test_data:
-factory_events.update(test_data['all_event_types']
+    factory_events.update(test_data['all_event_types']
 
                                                                                                                                                     # Combined validation
 all_events = browser_events | factory_events
@@ -950,23 +950,23 @@ assert len(missing) <= 2, "formatted_string
                                                                                                                                                     # Assert factory tests passed
 factory_success = sum(1 for test_data in results['factory_tests'].values() )
 if test_data.get('successful', 0) > 0 or test_data.get('found_after_refresh'))
-assert factory_success > 0, No factory tests passed"
+assert factory_success > 0, No factory tests passed
 
                                                                                                                                                     # Assert reasonable pass rate
 pass_rate = results['passed'] / results['total'] if results['total'] > 0 else 0
-assert pass_rate >= 0.75, "formatted_string
+assert pass_rate >= 0.75, "formatted_string"
 
 finally:
 await browser.close()
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
                                                                                                                                                             # Allow running directly for debugging
 import asyncio
 from playwright.async_api import async_playwright
 
 async def main():
-async with async_playwright() as p:
+    async with async_playwright() as p:
 browser = await p.chromium.launch(headless=False)  # Visible for debugging
 
 try:

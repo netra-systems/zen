@@ -19,7 +19,7 @@ Test Strategy:
 - Create realistic multi-user scenarios
 - Test actual WebSocket event flows
 - Validate production-like conditions
-""
+"
 
 import asyncio
 import unittest
@@ -33,10 +33,10 @@ logger = get_logger(__name__)
 
 
 class WebSocketManagerCrossServiceIntegrationTests(SSotAsyncTestCase, unittest.TestCase):
-    ""Test WebSocket Manager SSOT compliance across service boundaries."
+    "Test WebSocket Manager SSOT compliance across service boundaries.
 
     def setup_method(self, method):
-        "Set up test environment for cross-service integration.""
+        "Set up test environment for cross-service integration."
         super().setup_method(method)
         
         # Clear WebSocket manager registry for clean state
@@ -59,13 +59,13 @@ class WebSocketManagerCrossServiceIntegrationTests(SSotAsyncTestCase, unittest.T
         logger.info(f"Starting cross-service integration test: {method_name})
 
     def teardown_method(self, method):
-        ""Clean up test environment."
+        Clean up test environment."
         from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
         reset_manager_registry()
         super().teardown_method(method)
 
     def test_websocket_manager_service_integration_consistency(self):
-        "Test WebSocket manager consistency across service integrations.""
+        "Test WebSocket manager consistency across service integrations.
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         
         # Get managers for each user through different service integration paths
@@ -90,19 +90,19 @@ class WebSocketManagerCrossServiceIntegrationTests(SSotAsyncTestCase, unittest.T
         # CRITICAL ASSERTION: Same user should get identical manager through different paths
         for i, user_context in enumerate(self.test_users):
             self.assertIs(managers_direct[i], managers_factory[i],
-                         fINTEGRATION VIOLATION: Different managers for user {user_context.user_id} "
-                         f"through different service integration paths)
+                         fINTEGRATION VIOLATION: Different managers for user {user_context.user_id} ""
+                         fthrough different service integration paths)
 
         # CRITICAL ASSERTION: Different users should have different managers
         for i in range(len(managers_direct)):
             for j in range(i + 1, len(managers_direct)):
                 self.assertIsNot(managers_direct[i], managers_direct[j],
-                                fUSER ISOLATION VIOLATION: Same manager for users {i} and {j}")
+                                fUSER ISOLATION VIOLATION: Same manager for users {i} and {j})
 
-        logger.info("WebSocket manager service integration consistency test PASSED)
+        logger.info("WebSocket manager service integration consistency test PASSED)"
 
     async def test_websocket_event_delivery_consistency_integration(self):
-        ""Test WebSocket event delivery consistency across manager instances."
+        Test WebSocket event delivery consistency across manager instances."
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         
         # Create mock WebSocket connections for testing
@@ -110,13 +110,13 @@ class WebSocketManagerCrossServiceIntegrationTests(SSotAsyncTestCase, unittest.T
         event_logs = {}
         
         def create_mock_websocket(user_id):
-            "Create mock WebSocket that logs events.""
+            "Create mock WebSocket that logs events.
             mock_ws = AsyncMock()
             event_log = []
             
             async def mock_send_text(data):
                 event_log.append(json.loads(data) if isinstance(data, str) else data)
-                logger.info(fMock WebSocket for {user_id} received: {data}")
+                logger.info(fMock WebSocket for {user_id} received: {data}")"
             
             mock_ws.send_text = mock_send_text
             mock_ws.client_state = MagicMock()
@@ -137,7 +137,7 @@ class WebSocketManagerCrossServiceIntegrationTests(SSotAsyncTestCase, unittest.T
             
             # Simulate connection registration if manager supports it
             if hasattr(manager, 'register_connection'):
-                connection_id = f"test_conn_{i:03d}
+                connection_id = ftest_conn_{i:03d}
                 await manager.register_connection(connection_id, mock_ws)
 
         # Send test events through each manager
@@ -167,7 +167,7 @@ class WebSocketManagerCrossServiceIntegrationTests(SSotAsyncTestCase, unittest.T
                         await manager.notify(event['type'], event['data']
                         user_events.append(event)
                     else:
-                        logger.warning(fManager for user {user_context.user_id} has no event emission method")
+                        logger.warning(fManager for user {user_context.user_id} has no event emission method)
                         
                 except Exception as e:
                     logger.error(f"Event emission failed for user {user_context.user_id}: {e})
@@ -180,10 +180,10 @@ class WebSocketManagerCrossServiceIntegrationTests(SSotAsyncTestCase, unittest.T
             for user_id, events in event_results.items():
                 logger.info(fUser {user_id} processed {len(events)} events")
 
-        logger.info("WebSocket event delivery consistency integration test COMPLETED)
+        logger.info(WebSocket event delivery consistency integration test COMPLETED)
 
     def test_multi_user_concurrent_session_isolation_integration(self):
-        ""Test multi-user session isolation under concurrent load."
+        ""Test multi-user session isolation under concurrent load.
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         
         # Concurrent execution tracking
@@ -192,7 +192,7 @@ class WebSocketManagerCrossServiceIntegrationTests(SSotAsyncTestCase, unittest.T
         access_lock = threading.Lock()
         
         def concurrent_user_session(user_index):
-            "Simulate concurrent user session operations.""
+            Simulate concurrent user session operations.""
             try:
                 user_context = type('MockUserContext', (), {
                     'user_id': f'concurrent_user_{user_index:03d}',
@@ -228,7 +228,7 @@ class WebSocketManagerCrossServiceIntegrationTests(SSotAsyncTestCase, unittest.T
                         'success': True
                     }
                     
-                logger.info(fConcurrent session for user {user_index} completed successfully")
+                logger.info(fConcurrent session for user {user_index} completed successfully)
                 
             except Exception as e:
                 with access_lock:
@@ -258,7 +258,7 @@ class WebSocketManagerCrossServiceIntegrationTests(SSotAsyncTestCase, unittest.T
         self.assertEqual(len(failed_sessions), 0, 
                         fConcurrent session failures: {failed_sessions}")
         self.assertEqual(len(successful_sessions), num_concurrent_users,
-                        f"Expected {num_concurrent_users} successful sessions, got {len(successful_sessions)})
+                        fExpected {num_concurrent_users} successful sessions, got {len(successful_sessions)})
 
         # Validate unique manager instances across all users
         manager_ids = [result['manager_id'] for result in successful_sessions]
@@ -268,32 +268,32 @@ class WebSocketManagerCrossServiceIntegrationTests(SSotAsyncTestCase, unittest.T
                         fCONCURRENT ISOLATION VIOLATION: Shared managers detected. "
                         f"Manager IDs: {manager_ids})
 
-        logger.info(fMulti-user concurrent session isolation test PASSED: "
-                   f"{len(successful_sessions)} concurrent sessions isolated successfully)
+        logger.info(fMulti-user concurrent session isolation test PASSED: 
+                   f{len(successful_sessions)} concurrent sessions isolated successfully)
 
 
 class WebSocketManagerRealServiceIntegrationTests(SSotAsyncTestCase, unittest.TestCase):
-    ""Test WebSocket Manager integration with real services (no Docker)."
+    ""Test WebSocket Manager integration with real services (no Docker).
 
     def setup_method(self, method):
-        "Set up test environment for real service integration.""
+        Set up test environment for real service integration.""
         super().setup_method(method)
         
         # Clear manager registry
         from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
         reset_manager_registry()
         
-        method_name = method.__name__ if method else unknown_method"
+        method_name = method.__name__ if method else unknown_method
         logger.info(f"Starting real service integration test: {method_name})
 
     def teardown_method(self, method):
-        ""Clean up test environment."
+        "Clean up test environment.
         from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
         reset_manager_registry()
         super().teardown_method(method)
 
     async def test_websocket_manager_auth_service_integration(self):
-        "Test WebSocket Manager integration with authentication service.""
+        "Test WebSocket Manager integration with authentication service."
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         
         # Create authenticated user context
@@ -310,7 +310,7 @@ class WebSocketManagerRealServiceIntegrationTests(SSotAsyncTestCase, unittest.Te
         manager = get_websocket_manager(auth_user_context)
         
         # Validate manager creation with authentication context
-        self.assertIsNotNone(manager, WebSocket manager should be created with auth context")
+        self.assertIsNotNone(manager, WebSocket manager should be created with auth context)"
         
         if hasattr(manager, 'user_context'):
             self.assertEqual(manager.user_context.user_id, 'auth_test_user_001',
@@ -321,18 +321,18 @@ class WebSocketManagerRealServiceIntegrationTests(SSotAsyncTestCase, unittest.Te
             # Try to validate auth integration
             if hasattr(manager, 'validate_auth'):
                 auth_valid = await manager.validate_auth()
-                logger.info(fAuth validation result: {auth_valid}")
+                logger.info(fAuth validation result: {auth_valid})
             elif hasattr(manager, '_auth_token'):
                 self.assertIsNotNone(manager._auth_token, 
-                                   "Manager should have authentication token)
+                                   "Manager should have authentication token)"
                 
         except Exception as e:
-            logger.info(fAuth integration test skipped - method not available: {e}")
+            logger.info(fAuth integration test skipped - method not available: {e})
 
-        logger.info("WebSocket manager auth service integration test PASSED)
+        logger.info(WebSocket manager auth service integration test PASSED)"
 
     def test_websocket_manager_database_service_integration(self):
-        ""Test WebSocket Manager integration with database services."
+        "Test WebSocket Manager integration with database services.
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         
         # Create user context with database requirements
@@ -348,25 +348,25 @@ class WebSocketManagerRealServiceIntegrationTests(SSotAsyncTestCase, unittest.Te
         manager = get_websocket_manager(db_user_context)
         
         # Validate manager creation with database context
-        self.assertIsNotNone(manager, "WebSocket manager should be created with DB context)
+        self.assertIsNotNone(manager, "WebSocket manager should be created with DB context)"
         
         # Test database integration if available
         try:
             # Check if manager has database-related functionality
             if hasattr(manager, 'get_connection_status'):
                 status = manager.get_connection_status()
-                logger.info(fConnection status: {status}")
+                logger.info(fConnection status: {status})
             elif hasattr(manager, '_connection_registry'):
                 registry = getattr(manager, '_connection_registry', {}
-                logger.info(f"Connection registry: {type(registry)})
+                logger.info(fConnection registry: {type(registry)})
                 
         except Exception as e:
-            logger.info(fDatabase integration test informational - method not available: {e}")
+            logger.info(fDatabase integration test informational - method not available: {e}")"
 
-        logger.info("WebSocket manager database service integration test PASSED)
+        logger.info(WebSocket manager database service integration test PASSED)
 
     async def test_websocket_manager_agent_service_integration(self):
-        ""Test WebSocket Manager integration with agent services."
+        "Test WebSocket Manager integration with agent services."
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         
         # Create agent execution user context
@@ -385,7 +385,7 @@ class WebSocketManagerRealServiceIntegrationTests(SSotAsyncTestCase, unittest.Te
         manager = get_websocket_manager(agent_user_context)
         
         # Validate manager creation with agent context
-        self.assertIsNotNone(manager, "WebSocket manager should be created with agent context)
+        self.assertIsNotNone(manager, WebSocket manager should be created with agent context)
         
         # Test agent integration patterns
         agent_integration_methods = [
@@ -405,19 +405,19 @@ class WebSocketManagerRealServiceIntegrationTests(SSotAsyncTestCase, unittest.Te
 
         # Log available agent integration methods
         if available_methods:
-            logger.info(fAvailable agent integration methods: {available_methods}")
+            logger.info(fAvailable agent integration methods: {available_methods}")"
         else:
-            logger.info("No specific agent integration methods detected - using generic event system)
+            logger.info(No specific agent integration methods detected - using generic event system)
 
         # Test generic event emission if specific methods not available
         try:
             if hasattr(manager, 'emit_event') or hasattr(manager, 'send_event'):
-                logger.info(Generic event emission capabilities detected")
+                logger.info(Generic event emission capabilities detected)"
             else:
                 logger.info("Manager created successfully without specific event methods)
                 
         except Exception as e:
-            logger.info(fAgent integration test informational: {e}")
+            logger.info(fAgent integration test informational: {e})
 
         logger.info("WebSocket manager agent service integration test PASSED")
 

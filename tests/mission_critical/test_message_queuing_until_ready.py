@@ -1,5 +1,5 @@
 class WebSocketTestHelper:
-    "Real WebSocket connection for testing instead of mocks.""
+    "Real WebSocket connection for testing instead of mocks.
     
     def __init__(self):
         self.messages_sent = []
@@ -7,18 +7,18 @@ class WebSocketTestHelper:
         self._closed = False
         
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.
         if self._closed:
-            raise RuntimeError("WebSocket is closed)
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
         
     async def close(self, code: int = 1000, reason: str = Normal closure"):
-        "Close WebSocket connection.""
+        Close WebSocket connection.""
         self._closed = True
         self.is_connected = False
         
     def get_messages(self) -> list:
-        ""Get all sent messages."
+        Get all sent messages."
         return self.messages_sent.copy()
 
 "
@@ -32,7 +32,7 @@ Critical scenarios covered:
 4. Automatic queue processing when ready
 5. Queue persistence across reconnections
 6. Priority message handling in queue
-""
+"
 
 import asyncio
 import time
@@ -58,11 +58,11 @@ from shared.isolated_environment import get_env
 
 
 class MessageQueueingUntilReadyTests:
-    ""Test message queuing behavior when WebSocket not ready."
+    "Test message queuing behavior when WebSocket not ready.
 
     @pytest.fixture
     async def setup(self):
-        "Setup test environment with WebSocket infrastructure.""
+        "Setup test environment with WebSocket infrastructure."
         manager = WebSocketManager()
         
         # Generate test IDs
@@ -82,7 +82,7 @@ class MessageQueueingUntilReadyTests:
 
     @pytest.mark.asyncio
     async def test_message_queuing_before_connection(self, setup):
-        ""Test message queuing behavior when no connection exists."
+        "Test message queuing behavior when no connection exists."
         manager = setup['manager']
         user_id = setup['user_id']
         
@@ -123,7 +123,7 @@ class MessageQueueingUntilReadyTests:
 
     @pytest.mark.asyncio
     async def test_message_ordering_preservation(self, setup):
-        "Test that message order is preserved when sent in sequence.""
+        Test that message order is preserved when sent in sequence.""
         manager = setup['manager']
         user_id = setup['user_id']
         
@@ -163,7 +163,7 @@ class MessageQueueingUntilReadyTests:
 
     @pytest.mark.asyncio
     async def test_connection_without_thread_immediate_send(self, setup):
-        ""Test sending messages when connected but no thread_id."
+        Test sending messages when connected but no thread_id."
         manager = setup['manager']
         user_id = setup['user_id']
         
@@ -205,7 +205,7 @@ class MessageQueueingUntilReadyTests:
 
     @pytest.mark.asyncio
     async def test_high_message_volume_handling(self, setup):
-        "Test handling of high message volume scenarios.""
+        "Test handling of high message volume scenarios.
         manager = setup['manager']
         user_id = setup['user_id']
         
@@ -236,7 +236,7 @@ class MessageQueueingUntilReadyTests:
 
     @pytest.mark.asyncio
     async def test_reconnection_behavior(self, setup):
-        ""Test behavior when connection drops and reconnects."
+        ""Test behavior when connection drops and reconnects.
         manager = setup['manager']
         user_id = setup['user_id']
         thread_id = setup['thread_id']
@@ -253,7 +253,7 @@ class MessageQueueingUntilReadyTests:
         await manager.send_to_user(user_id, {'type': 'msg2', 'data': {}}
         
         # Disconnect
-        await manager.disconnect_user(user_id, mock_ws1, 1000, "Test disconnect)
+        await manager.disconnect_user(user_id, mock_ws1, 1000, Test disconnect)"
         
         # Verify messages were sent to first connection
         assert mock_ws1.send_json.call_count == 2
@@ -279,7 +279,7 @@ class MessageQueueingUntilReadyTests:
 
     @pytest.mark.asyncio
     async def test_different_message_types(self, setup):
-        ""Test handling different message types."
+        "Test handling different message types.
         manager = setup['manager']
         user_id = setup['user_id']
         
@@ -322,7 +322,7 @@ class MessageQueueingUntilReadyTests:
 
     @pytest.mark.asyncio
     async def test_concurrent_message_operations(self, setup):
-        "Test concurrent message sending operations.""
+        "Test concurrent message sending operations."
         manager = setup['manager']
         user_id = setup['user_id']
         
@@ -362,7 +362,7 @@ class MessageQueueingUntilReadyTests:
 
     @pytest.mark.asyncio
     async def test_error_handling_during_send(self, setup):
-        ""Test error handling when message sending fails."
+        "Test error handling when message sending fails."
         manager = setup['manager']
         user_id = setup['user_id']
         
@@ -376,7 +376,7 @@ class MessageQueueingUntilReadyTests:
             nonlocal call_count
             call_count += 1
             if call_count == 3:
-                raise Exception("WebSocket send failed)
+                raise Exception(WebSocket send failed)
             return None
         
         mock_ws.send_json = AsyncMock(side_effect=failing_send)
@@ -406,7 +406,7 @@ class MessageQueueingUntilReadyTests:
 
     @pytest.mark.asyncio 
     async def test_queue_with_websocket_manager_integration(self, setup):
-        ""Test queue behavior with WebSocketManager integration."
+        ""Test queue behavior with WebSocketManager integration.
         # Use the existing manager from setup
         manager = setup['manager']
         user_id = setup['user_id']
@@ -443,7 +443,7 @@ class MessageQueueingUntilReadyTests:
 
     @pytest.mark.asyncio
     async def test_message_rapid_sending(self, setup):
-        "Test rapid message sending behavior.""
+        Test rapid message sending behavior."""
         manager = setup['manager']
         user_id = setup['user_id']
         
@@ -483,7 +483,7 @@ class MessageQueueingUntilReadyTests:
         assert mock_ws.send_json.call_count == 50
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

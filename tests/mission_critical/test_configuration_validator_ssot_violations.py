@@ -11,7 +11,7 @@ These tests demonstrate the problem by showing inconsistent behavior across
 
 CRITICAL: These tests PASS initially (showing violations exist) and will FAIL after SSOT consolidation.
 Business Impact: OAuth authentication failures threaten $500K+ ARR
-""
+"
 
 import asyncio
 import logging
@@ -31,15 +31,15 @@ logger = logging.getLogger(__name__)
 
 
 class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
-    ""
+    "
     SSOT Violation Reproduction Tests
     
     These tests expose inconsistencies between duplicate ConfigurationValidator classes.
     They should PASS initially (proving violations exist) and FAIL after consolidation.
-    "
+"
 
     def setUp(self):
-        "Set up test environment with isolated configuration.""
+        "Set up test environment with isolated configuration.
         super().setUp()
         
         # Standard test configuration
@@ -59,19 +59,19 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
         self.env_patcher.start()
 
     def tearDown(self):
-        ""Clean up test environment."
+        ""Clean up test environment.
         super().tearDown()
         if hasattr(self, 'env_patcher'):
             self.env_patcher.stop()
 
     def test_oauth_validation_inconsistency_reproduction(self):
-        "
+    ""
         Test OAuth validation consistency across different ConfigurationValidator implementations.
         
         POST-CONSOLIDATION: This test now verifies that all validators provide CONSISTENT results
         after Phase 1 SSOT consolidation. All validators should delegate OAuth validation to the
         central SSOT validator, eliminating inconsistencies.
-        ""
+        
         # Test OAuth configuration with minimal valid setup
         oauth_config = {
             'OAUTH_CLIENT_ID': 'test_client_id',
@@ -144,22 +144,22 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
         # Log the consistency status for debugging
         logger.info(fOAuth Validation Results (POST-CONSOLIDATION) - Central: {central_oauth_valid}, "
                    f"Backend: {backend_oauth_valid}, Test: {test_oauth_valid}, 
-                   fConfig: {config_oauth_valid}")
+                   fConfig: {config_oauth_valid})
         
         # This test PASSES when validators are consistent (showing SSOT consolidation success)
         self.assertTrue(
             validators_consistent,
-            "SSOT Consolidation SUCCESS: OAuth validation should be consistent across all validators 
+            SSOT Consolidation SUCCESS: OAuth validation should be consistent across all validators "
             after Phase 1 consolidation (all validators delegate to central SSOT)"
         )
 
     def test_environment_detection_duplication_reproduction(self):
-        "
+    "
         Test environment detection duplication across ConfigurationValidator implementations.
         
         Shows that multiple validators implement their own environment detection logic,
         creating SSOT violations and potential inconsistencies.
-        ""
+        "
         test_environments = ['development', 'staging', 'production', 'test']
         
         environment_results = {}
@@ -171,7 +171,7 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
                 try:
                     central_env = central_validator.get_current_environment()
                 except Exception:
-                    central_env = unknown"
+                    central_env = unknown
                 
                 # Backend validator environment detection
                 backend_validator = BackendValidator()
@@ -183,7 +183,7 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
                     else:
                         backend_env = get_env('ENVIRONMENT', 'unknown')
                 except Exception:
-                    backend_env = "unknown
+                    backend_env = "unknown"
                 
                 # Test framework validator environment detection
                 test_validator = TestFrameworkValidator()
@@ -193,7 +193,7 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
                     else:
                         test_env = env  # Direct fallback
                 except Exception:
-                    test_env = unknown"
+                    test_env = unknown
                 
                 # Config validator environment detection
                 config_validator = ConfigValidator()
@@ -203,7 +203,7 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
                     else:
                         config_env = env  # Direct fallback
                 except Exception:
-                    config_env = "unknown
+                    config_env = unknown"
                 
                 environment_results[env] = {
                     'central': central_env,
@@ -223,12 +223,12 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
         # POST-CONSOLIDATION: This test PASSES when environment detection is consistent
         self.assertFalse(
             has_inconsistencies,
-            "SSOT Consolidation SUCCESS: Environment detection should be consistent 
-            across validators after Phase 1 consolidation"
+            SSOT Consolidation SUCCESS: Environment detection should be consistent 
+            across validators after Phase 1 consolidation""
         )
 
     def test_jwt_secret_validation_divergence_reproduction(self):
-        "
+
         Test JWT secret validation divergence across ConfigurationValidator implementations.
         
         Shows that different validators have different JWT validation requirements,
@@ -305,22 +305,22 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
             
             if len(set(valid_results)) > 1:  # Different validation results
                 has_divergence = True
-                logger.warning(fJWT validation divergence in {scenario}: {results}")
+                logger.warning(fJWT validation divergence in {scenario}: {results})
         
         # POST-CONSOLIDATION: This test PASSES when JWT validation is consistent
         self.assertFalse(
             has_divergence,
-            "SSOT Consolidation SUCCESS: JWT validation should be consistent across validators 
+            SSOT Consolidation SUCCESS: JWT validation should be consistent across validators "
             after Phase 1 consolidation"
         )
 
     def test_database_config_pattern_conflicts_reproduction(self):
-        "
+    "
         Test database configuration pattern conflicts across ConfigurationValidator implementations.
         
         Shows that different validators have conflicting database validation patterns,
         creating deployment inconsistencies and SSOT violations.
-        ""
+        "
         # Test different database configuration patterns
         db_scenarios = [
             {
@@ -399,22 +399,22 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
             # Check if validators handle the same config differently
             if len(set(validator_patterns)) > 1:
                 has_conflicts = True
-                logger.warning(fDatabase pattern conflicts in {scenario}: {conflicts}")
+                logger.warning(fDatabase pattern conflicts in {scenario}: {conflicts})
         
         # POST-CONSOLIDATION: This test PASSES when database patterns are consistent
         self.assertFalse(
             has_conflicts,
-            "SSOT Consolidation SUCCESS: Database configuration patterns should be consistent 
-            across validators after Phase 1 consolidation"
+            "SSOT Consolidation SUCCESS: Database configuration patterns should be consistent "
+            across validators after Phase 1 consolidation
         )
 
     def test_golden_path_configuration_failures_reproduction(self):
-        "
+    ""
         Test Golden Path configuration failures due to SSOT violations.
         
         Reproduces end-to-end configuration failures that impact the Golden Path
         user flow (login  ->  WebSocket  ->  AI response) due to validator inconsistencies.
-        ""
+        
         # Golden Path configuration requirements
         golden_path_config = {
             'ENVIRONMENT': 'staging',
@@ -482,7 +482,7 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
         if len(set(validation_states)) > 1:
             has_failures = True
             for name, result in golden_path_results.items():
-                logger.warning(fGolden Path validation {name}: {result}")
+                logger.warning(fGolden Path validation {name}: {result})"
         
         # Also check if any validator completely fails Golden Path validation
         if not all(validation_states):
@@ -492,17 +492,17 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
         # POST-CONSOLIDATION: This test PASSES when Golden Path validation is consistent
         self.assertFalse(
             has_failures,
-            SSOT Consolidation SUCCESS: Golden Path configuration should be consistent and valid "
-            "across all validators after Phase 1 consolidation
+            SSOT Consolidation SUCCESS: Golden Path configuration should be consistent and valid 
+            "across all validators after Phase 1 consolidation"
         )
 
-if __name__ == __main__":
+if __name__ == __main__:
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-    print("MIGRATION NOTICE: This file previously used direct pytest execution.)
-    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print(MIGRATION NOTICE: This file previously used direct pytest execution.")"
+    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)
     print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
-    # sys.exit(result)
+    # sys.exit(result")

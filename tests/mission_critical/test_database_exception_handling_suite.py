@@ -15,7 +15,7 @@ This suite demonstrates:
 4. Production deployments at risk from unclear error messages
 
 Tests will pass once comprehensive exception handling remediation is complete.
-""
+"
 
 import pytest
 import asyncio
@@ -40,11 +40,11 @@ from netra_backend.app.db.transaction_errors import (
 
 
 class DatabaseExceptionHandlingSystemicIssuesTests:
-    ""Mission critical tests proving systemic database exception handling issues."
+    "Mission critical tests proving systemic database exception handling issues.
     
     @pytest.mark.mission_critical
     def test_database_modules_missing_transaction_error_integration(self):
-        "FAILING TEST: Core database modules don't integrate with transaction_errors.py infrastructure.""
+        "FAILING TEST: Core database modules don't integrate with transaction_errors.py infrastructure."
         
         # Test all 4 priority modules identified in Issue #374
         modules_to_test = [
@@ -69,7 +69,7 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
             
             for import_name in required_imports:
                 if not hasattr(module, import_name):
-                    missing_integrations.append(f{module_name} missing {import_name}")
+                    missing_integrations.append(f{module_name} missing {import_name})"
         
         # This test FAILS because modules don't integrate with transaction_errors.py
         assert len(missing_integrations) == 0, \
@@ -78,7 +78,7 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
     @pytest.mark.mission_critical
     @pytest.mark.asyncio
     async def test_support_team_cannot_distinguish_database_error_types(self):
-        ""FAILING TEST: Support teams cannot distinguish between database error types in production."
+        FAILING TEST: Support teams cannot distinguish between database error types in production."
         
         # Simulate the exact scenarios support teams face in production
         production_database_scenarios = [
@@ -90,25 +90,25 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
             },
             {
                 'scenario': 'ClickHouse query timeout on analytics',
-                'error': clickhouse_errors.NetworkError(Read timeout"),
+                'error': clickhouse_errors.NetworkError(Read timeout),
                 'expected_type': DatabaseTimeoutError,
                 'support_action': 'Optimize analytics query or increase timeout'
             },
             {
                 'scenario': 'Database deadlock in transaction',
-                'error': OperationalError("Deadlock found when trying to get lock, None, None),
+                'error': OperationalError("Deadlock found when trying to get lock, None, None),"
                 'expected_type': DeadlockError,
                 'support_action': 'Retry transaction with exponential backoff'
             },
             {
                 'scenario': 'Authentication failure to database',
-                'error': OperationalError(FATAL: password authentication failed", None, None),
+                'error': OperationalError(FATAL: password authentication failed, None, None),
                 'expected_type': DatabasePermissionError,
                 'support_action': 'Check database credentials and user permissions'
             },
             {
                 'scenario': 'Missing table in schema',
-                'error': OperationalError("relation 'missing_table' does not exist, None, None),
+                'error': OperationalError(relation 'missing_table' does not exist, None, None),"
                 'expected_type': SchemaError,
                 'support_action': 'Run database migration or create missing table'
             }
@@ -134,20 +134,20 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
     
     @pytest.mark.mission_critical  
     def test_incident_resolution_time_impact_measurement(self):
-        "FAILING TEST: Measures the business impact of unclear database error messages.""
+        FAILING TEST: Measures the business impact of unclear database error messages.""
         
         # Simulate current vs expected incident resolution times
         current_generic_errors = [
-            Database error occurred",
-            "ClickHouse operation failed, 
+            Database error occurred,
+            ClickHouse operation failed, "
             Database initialization failed",
-            "Schema operation error
+            Schema operation error
         ]
         
         expected_specific_errors = [
-            DatabaseConnectionError: Connection pool exhausted (pool_size=5, overflow=10)",
-            "DatabaseTimeoutError: ClickHouse query timeout (query=SELECT COUNT(*), timeout=30s),
-            DatabasePermissionError: Authentication failed for user 'app_user' (check credentials)",
+            DatabaseConnectionError: Connection pool exhausted (pool_size=5, overflow=10)","
+            DatabaseTimeoutError: ClickHouse query timeout (query=SELECT COUNT(*), timeout=30s),
+            DatabasePermissionError: Authentication failed for user 'app_user' (check credentials),"
             "SchemaError: Table 'user_metrics' missing required column 'created_at' (run migration 'add_timestamps')
         ]
         
@@ -165,13 +165,13 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
         
         # This test FAILS to demonstrate the business cost of current approach
         assert monthly_cost_impact < 100, \
-            fCurrent broad exception handling costs ${monthly_cost_impact:.2f}/month in support engineer time " \
+            fCurrent broad exception handling costs ${monthly_cost_impact:.2f}/month in support engineer time  \
             f"(Current: {current_avg_resolution_time_hours}h avg resolution, Expected: {expected_avg_resolution_time_minutes}min)
     
     @pytest.mark.mission_critical
     @pytest.mark.asyncio
     async def test_production_deployment_risk_from_unclear_database_errors(self):
-        ""FAILING TEST: Production deployments at risk due to unclear database initialization errors."
+        "FAILING TEST: Production deployments at risk due to unclear database initialization errors.
         
         # Simulate production deployment scenarios where unclear errors cause failures
         production_deployment_scenarios = [
@@ -214,7 +214,7 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
     
     @pytest.mark.mission_critical
     def test_database_error_business_value_impact(self):
-        "FAILING TEST: Database errors directly impact $500K+ ARR business value delivery.""
+        FAILING TEST: Database errors directly impact $500K+ ARR business value delivery.""
         
         # Map database errors to business value impact
         business_value_scenarios = [
@@ -248,21 +248,21 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
         
         # This test FAILS to demonstrate the massive business risk
         assert total_revenue_at_risk < 100000, \
-            fDatabase error resolution delays put ${total_revenue_at_risk:,} ARR at risk. " \
-            f"Current error resolution {customer_satisfaction_impact:.1f}x slower than target.
+            fDatabase error resolution delays put ${total_revenue_at_risk:,} ARR at risk.  \
+            fCurrent error resolution {customer_satisfaction_impact:.1f}x slower than target.
     
     @pytest.mark.mission_critical
     @pytest.mark.asyncio
     async def test_end_to_end_database_error_handling_workflow(self):
-        ""FAILING TEST: End-to-end test of database error handling from detection to resolution."
+        ""FAILING TEST: End-to-end test of database error handling from detection to resolution.
         
         # Simulate complete workflow: Error occurs -> Classification -> Recovery -> Resolution
         
         # Step 1: Database error occurs (simulate various types)
         database_errors_to_test = [
-            OperationalError("connection to server at localhost, port 5432 failed, None, None),
+            OperationalError(connection to server at localhost, port 5432 failed, None, None),"
             clickhouse_errors.NetworkError(Connection timed out"),
-            OperationalError("deadlock detected, None, None)
+            OperationalError(deadlock detected, None, None)
         ]
         
         workflow_failures = []
@@ -278,14 +278,14 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
                 # Step 4: Verify specific error type provides actionable information
                 error_type = type(classified).__name__
                 if error_type == 'OperationalError':  # Not properly classified
-                    workflow_failures.append(fError not classified: {str(error)[:100]}")
+                    workflow_failures.append(fError not classified: {str(error)[:100]}")"
                 
                 # Step 5: Verify recovery strategy exists
                 if not retryable and 'connection' in str(error).lower():
-                    workflow_failures.append(f"Connection error not marked as retryable: {str(error)[:100]})
+                    workflow_failures.append(fConnection error not marked as retryable: {str(error)[:100]})
                     
             except Exception as e:
-                workflow_failures.append(fWorkflow failed for error {str(error)[:50]}: {e}")
+                workflow_failures.append(fWorkflow failed for error {str(error)[:50]}: {e})
         
         # This test FAILS because the end-to-end workflow is broken
         assert len(workflow_failures) == 0, \
@@ -293,11 +293,11 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
 
 
 class DatabaseExceptionRemediationReadinessTests:
-    ""Tests validating system readiness for exception handling remediation."
+    "Tests validating system readiness for exception handling remediation.
     
     @pytest.mark.mission_critical
     def test_transaction_errors_infrastructure_completeness(self):
-        "FAILING TEST: Validates transaction_errors.py infrastructure is complete for remediation.""
+        "FAILING TEST: Validates transaction_errors.py infrastructure is complete for remediation."
         
         # Check that all required specific exception classes exist
         required_exception_classes = [
@@ -329,7 +329,7 @@ class DatabaseExceptionRemediationReadinessTests:
     
     @pytest.mark.mission_critical 
     def test_remediation_scope_coverage(self):
-        ""FAILING TEST: Validates remediation scope covers all identified broad exception patterns."
+        FAILING TEST: Validates remediation scope covers all identified broad exception patterns."
         
         # From Issue #374 analysis - these modules contain the most broad exception patterns
         priority_modules_with_pattern_counts = {
@@ -353,13 +353,13 @@ class DatabaseExceptionRemediationReadinessTests:
 
 
 if __name__ == '__main__':
-    ""
+    
     Run this mission critical test suite to validate database exception handling issues.
     
     EXPECTED RESULT: All tests should FAIL initially, proving the systemic issues exist.
     
     Command: python tests/mission_critical/test_database_exception_handling_suite.py
-    "
+""
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

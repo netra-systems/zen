@@ -12,7 +12,7 @@ Key violations to detect:
 
 Related Issues: #1076 - SSOT compliance verification
 Priority: CRITICAL - These tests ensure behavioral consistency in SSOT architecture
-""
+"
 
 import pytest
 from pathlib import Path
@@ -30,20 +30,20 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class SSotBehavioralConsistencyTests(SSotBaseTestCase):
-    ""Tests to detect SSOT behavioral consistency violations."
+    "Tests to detect SSOT behavioral consistency violations.
 
     @property
     def project_root(self):
-        "Get project root path.""
+        "Get project root path."
         return Path(__file__).parent.parent.parent
 
     def test_logging_function_behavioral_consistency(self):
-        ""
+        "
         CRITICAL: Ensure SSOT logging functions behave consistently.
 
         EXPECTED: Should FAIL initially - detects behavioral inconsistencies in logging
         REMEDIATION: Ensure all logging goes through unified SSOT logger
-        "
+"
         behavioral_violations = []
 
         try:
@@ -82,17 +82,17 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
             # Check for direct imports in production files
             production_files_with_legacy_logging = []
             search_paths = [
-                self.project_root / "netra_backend / app",
+                self.project_root / netra_backend / app",
                 self.project_root / "auth_service,
-                self.project_root / shared"
+                self.project_root / shared
             ]
 
             for search_path in search_paths:
                 if not search_path.exists():
                     continue
 
-                for py_file in search_path.rglob("*.py):
-                    if py_file.name.startswith(__") or "test in py_file.name.lower():
+                for py_file in search_path.rglob("*.py):"
+                    if py_file.name.startswith(__) or test in py_file.name.lower():
                         continue
 
                     try:
@@ -124,27 +124,27 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
 
         # This test should FAIL initially if behavioral violations exist
         if behavioral_violations:
-            violation_details = \n".join([
+            violation_details = \n.join(["
                 f"  - {viol['violation_type']}: {viol['reason']}
                 for viol in behavioral_violations
             ]
 
             self.fail(
-                fSSOT VIOLATION: Found {len(behavioral_violations)} logging behavioral inconsistencies:\n"
-                f"{violation_details}\n\n
-                fREMEDIATION REQUIRED:\n"
-                f"1. Remove legacy logging module completely\n
-                f2. Ensure all production code uses SSOT logging\n"
+                fSSOT VIOLATION: Found {len(behavioral_violations)} logging behavioral inconsistencies:\n
+                f{violation_details}\n\n
+                fREMEDIATION REQUIRED:\n""
+                f1. Remove legacy logging module completely\n
+                f2. Ensure all production code uses SSOT logging\n
                 f"3. Verify consistent logger behavior across codebase
             )
 
     def test_auth_function_behavioral_consistency(self):
-        ""
+        "
         CRITICAL: Ensure auth functions behave consistently across SSOT and legacy systems.
 
         EXPECTED: Should FAIL initially - detects auth behavioral inconsistencies
         REMEDIATION: Remove legacy auth, ensure SSOT auth service is single source
-        "
+"
         auth_behavioral_violations = []
 
         try:
@@ -175,15 +175,15 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
             # Check for files that import from auth_integration instead of auth_service
             files_using_legacy_auth = []
             search_paths = [
-                self.project_root / "netra_backend / app" / "routes,
-                self.project_root / netra_backend" / "app / middleware"
+                self.project_root / "netra_backend / app / routes,
+                self.project_root / netra_backend" / "app / middleware
             ]
 
             for search_path in search_paths:
                 if not search_path.exists():
                     continue
 
-                for py_file in search_path.rglob("*.py):
+                for py_file in search_path.rglob(*.py):"
                     if py_file.name.startswith(__"):
                         continue
 
@@ -216,27 +216,27 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
 
         # This test should FAIL initially if auth behavioral violations exist
         if auth_behavioral_violations:
-            violation_details = "\n.join([
-                f  - {viol['violation_type']}: {viol['reason']}"
+            violation_details = \n.join([
+                f  - {viol['violation_type']}: {viol['reason']}""
                 for viol in auth_behavioral_violations
             ]
 
             self.fail(
-                f"SSOT VIOLATION: Found {len(auth_behavioral_violations)} auth behavioral inconsistencies:\n
-                f{violation_details}\n\n"
+                fSSOT VIOLATION: Found {len(auth_behavioral_violations)} auth behavioral inconsistencies:\n
+                f{violation_details}\n\n
                 f"REMEDIATION REQUIRED:\n
                 f1. Remove legacy auth integration module\n"
-                f"2. Update all routes/middleware to use SSOT auth service\n
+                f2. Update all routes/middleware to use SSOT auth service\n
                 f3. Ensure auth_service is the single source of truth for authentication"
             )
 
     def test_configuration_function_behavioral_consistency(self):
-        "
+    "
         CRITICAL: Ensure configuration functions return consistent values.
 
         EXPECTED: Should FAIL initially - detects config behavioral inconsistencies
         REMEDIATION: Consolidate to SSOT configuration architecture
-        ""
+        "
         config_behavioral_violations = []
 
         try:
@@ -275,19 +275,19 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
             # Check for direct os.environ usage in production files
             files_with_direct_env_access = []
             search_paths = [
-                self.project_root / netra_backend" / "app,
-                self.project_root / auth_service",
-                self.project_root / "shared
+                self.project_root / netra_backend" / app,
+                self.project_root / auth_service,
+                self.project_root / "shared"
             ]
 
             for search_path in search_paths:
                 if not search_path.exists():
                     continue
 
-                for py_file in search_path.rglob(*.py"):
-                    if (py_file.name.startswith("__) or
+                for py_file in search_path.rglob(*.py):
+                    if (py_file.name.startswith(__) or"
                         test" in py_file.name.lower() or
-                        "isolated_environment in py_file.name):
+                        isolated_environment in py_file.name):
                         continue
 
                     try:
@@ -322,27 +322,27 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
 
         # This test should FAIL initially if config behavioral violations exist
         if config_behavioral_violations:
-            violation_details = \n".join([
-                f"  - {viol['violation_type']}: {viol['reason']}
+            violation_details = \n".join(["
+                f  - {viol['violation_type']}: {viol['reason']}
                 for viol in config_behavioral_violations
             ]
 
             self.fail(
-                fSSOT VIOLATION: Found {len(config_behavioral_violations)} configuration behavioral inconsistencies:\n"
+                fSSOT VIOLATION: Found {len(config_behavioral_violations)} configuration behavioral inconsistencies:\n
                 f"{violation_details}\n\n
                 fREMEDIATION REQUIRED:\n"
-                f"1. Consolidate to single SSOT configuration source\n
+                f1. Consolidate to single SSOT configuration source\n
                 f2. Replace direct environment access with IsolatedEnvironment\n"
                 f"3. Ensure consistent configuration behavior across services
             )
 
     def test_websocket_function_behavioral_consistency(self):
-        ""
+        
         CRITICAL: Ensure WebSocket functions behave consistently.
 
         EXPECTED: Should FAIL initially - detects WebSocket behavioral inconsistencies
         REMEDIATION: Ensure SSOT WebSocket manager is single source
-        "
+""
         websocket_behavioral_violations = []
 
         try:
@@ -366,7 +366,7 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
             # Check for files that might have duplicate WebSocket functionality
             files_with_websocket_implementations = []
             search_paths = [
-                self.project_root / "netra_backend / app"
+                self.project_root / netra_backend / app
             ]
 
             websocket_implementation_patterns = [
@@ -381,8 +381,8 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
                 if not search_path.exists():
                     continue
 
-                for py_file in search_path.rglob("*.py):
-                    if py_file.name.startswith(__") or "test in py_file.name.lower():
+                for py_file in search_path.rglob(*.py):"
+                    if py_file.name.startswith(__") or test in py_file.name.lower():
                         continue
 
                     try:
@@ -417,7 +417,7 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
                 if not search_path.exists():
                     continue
 
-                for py_file in search_path.rglob(*.py"):
+                for py_file in search_path.rglob(*.py):
                     if py_file.name.startswith("__) or test" in py_file.name.lower():
                         continue
 
@@ -451,27 +451,27 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
 
         # This test should FAIL initially if WebSocket behavioral violations exist
         if websocket_behavioral_violations:
-            violation_details = "\n.join([
+            violation_details = \n.join([
                 f  - {viol['violation_type']}: {viol['reason']}"
                 for viol in websocket_behavioral_violations
             ]
 
             self.fail(
                 f"SSOT VIOLATION: Found {len(websocket_behavioral_violations)} WebSocket behavioral inconsistencies:\n
-                f{violation_details}\n\n"
-                f"REMEDIATION REQUIRED:\n
-                f1. Consolidate WebSocket functionality to SSOT WebSocket manager\n"
-                f"2. Remove duplicate WebSocket implementations\n
-                f3. Ensure consistent event emission patterns through SSOT manager"
+                f{violation_details}\n\n
+                fREMEDIATION REQUIRED:\n
+                f1. Consolidate WebSocket functionality to SSOT WebSocket manager\n""
+                f2. Remove duplicate WebSocket implementations\n
+                f3. Ensure consistent event emission patterns through SSOT manager
             )
 
     def test_database_function_behavioral_consistency(self):
-        "
+    ""
         CRITICAL: Ensure database functions behave consistently.
 
         EXPECTED: Should FAIL initially - detects database behavioral inconsistencies
         REMEDIATION: Ensure SSOT database patterns are consistently used
-        ""
+        
         db_behavioral_violations = []
 
         try:
@@ -479,7 +479,7 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
             db_connection_files = []
             search_paths = [
                 self.project_root / netra_backend" / "app,
-                self.project_root / auth_service"
+                self.project_root / auth_service
             ]
 
             db_connection_patterns = [
@@ -494,8 +494,8 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
                 if not search_path.exists():
                     continue
 
-                for py_file in search_path.rglob("*.py):
-                    if py_file.name.startswith(__") or "test in py_file.name.lower():
+                for py_file in search_path.rglob(*.py):"
+                    if py_file.name.startswith(__") or test in py_file.name.lower():
                         continue
 
                     try:
@@ -541,18 +541,18 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
 
         # This test should FAIL initially if database behavioral violations exist
         if db_behavioral_violations:
-            violation_details = \n".join([
+            violation_details = \n.join([
                 f"  - {viol['violation_type']}: {viol['reason']}
                 for viol in db_behavioral_violations
             ]
 
             self.fail(
                 fSSOT VIOLATION: Found {len(db_behavioral_violations)} database behavioral inconsistencies:\n"
-                f"{violation_details}\n\n
+                f{violation_details}\n\n
                 fREMEDIATION REQUIRED:\n"
                 f"1. Consolidate database logic to SSOT database manager\n
-                f2. Remove duplicate database connection implementations\n"
-                f"3. Ensure consistent database access patterns"
+                f2. Remove duplicate database connection implementations\n
+                f3. Ensure consistent database access patterns"
             )
 
 

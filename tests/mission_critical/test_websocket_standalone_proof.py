@@ -27,7 +27,7 @@ from shared.isolated_environment import get_env
 
 
 class MockWebSocket:
-    "Minimal mock WebSocket for testing""
+    "Minimal mock WebSocket for testing
     def __init__(self, fail_after: int = None):
         pass
         self.client_state = WebSocketState.CONNECTED
@@ -39,7 +39,7 @@ class MockWebSocket:
     async def send_json(self, data: Dict, timeout: float = None) -> None:
         self.send_count += 1
         if self.fail_after and self.send_count > self.fail_after:
-        raise ConnectionError(Simulated network error")
+        raise ConnectionError(Simulated network error")"
         self.messages_sent.append(data)
 
     async def close(self) -> None:
@@ -47,48 +47,48 @@ class MockWebSocket:
 
 
     def test_error_handling_improvements():
-        "Test that WebSocket manager handles errors gracefully""
+        Test that WebSocket manager handles errors gracefully"
         print(")
-        [PASS] TEST 1: Error Handling Improvements")
+        [PASS] TEST 1: Error Handling Improvements)"
 
         ws_manager = WebSocketManager()
         mock_ws = MockWebSocket(fail_after=2)  # Fail after 2 messages
 
     # Add connection
         ws_manager.connections[test_conn] = {
-        "connection_id": test_conn,
-        "user_id": user1,
+        "connection_id: test_conn,
+        user_id: user1,
         "websocket": mock_ws,
-        thread_id: "thread1",
+        thread_id: thread1,
         is_healthy: True,
-        "message_count": 0
+        message_count": 0
     
 
     # Test serialization robustness
         test_messages = [
-        {type: "test", data: "normal"},
-        {type: "test", data: {"nested": object}},
+        {type: "test, data: normal},
+        {type: "test", data: {nested: object}},
         None,  # Should handle None
-        {"type": test, "data": float('inf')},  # Should handle infinity
+        {type": test, "data: float('inf')},  # Should handle infinity
     
 
         for msg in test_messages:
         try:
         serialized = ws_manager._serialize_message_safely(msg)
         assert isinstance(serialized, dict), formatted_string
-        print("")
+        print()
         except Exception as e:
-        print(formatted_string)
+        print(formatted_string")
         return False
 
-        print("  [OK] Error handling works correctly")
+        print("  [OK] Error handling works correctly)
         return True
 
 
     def test_concurrent_connections():
-        "Test that multiple connections are isolated"
+        Test that multiple connections are isolated"
         pass
-        print("")
+        print(")
         [PASS] TEST 2: Concurrent Connection Isolation)
 
         ws_manager = WebSocketManager()
@@ -99,10 +99,10 @@ class MockWebSocket:
         conn_id = formatted_string"
         ws_manager.connections[conn_id] = {
         "connection_id: conn_id,
-        user_id": "formatted_string,
-        websocket": mock_ws,
-        "thread_id: formatted_string",
-        "is_healthy: True
+        user_id: formatted_string,
+        websocket": mock_ws,"
+        thread_id: formatted_string,
+        is_healthy: True"
         
 
         # Verify isolation
@@ -113,15 +113,15 @@ class MockWebSocket:
         for conn_id in ws_manager.connections:
         conn_ids.add(conn_id)
 
-        assert len(conn_ids) == 5, "Each connection should be unique
-        print(formatted_string")
+        assert len(conn_ids) == 5, Each connection should be unique
+        print(formatted_string"")
         return True
 
 
     async def test_heartbeat_manager_async():
-        "Test heartbeat manager improvements""
-        print(")
-        [PASS] TEST 3: Heartbeat Manager Thread Safety")
+        Test heartbeat manager improvements""
+        print()
+        [PASS] TEST 3: Heartbeat Manager Thread Safety")"
 
         config = HeartbeatConfig( )
         heartbeat_interval_seconds=1,
@@ -139,12 +139,12 @@ class MockWebSocket:
         await asyncio.gather(*tasks)
 
                     # Verify all registered
-        assert len(heartbeat_mgr.connection_heartbeats) == 10, "Should have 10 registered connections"
+        assert len(heartbeat_mgr.connection_heartbeats) == 10, Should have 10 registered connections
         print(formatted_string)
 
                     # Test activity recording
         for i in range(10):
-        await heartbeat_mgr.record_activity("")
+        await heartbeat_mgr.record_activity(")
 
                         # Check health
         healthy_count = 0
@@ -152,7 +152,7 @@ class MockWebSocket:
                             # Removed problematic line: if await heartbeat_mgr.check_connection_health(fError executing agent: {e}):
         healthy_count += 1
 
-        assert healthy_count == 10, "All connections should be healthy"
+        assert healthy_count == 10, "All connections should be healthy
         print(formatted_string)
 
         await asyncio.sleep(0)
@@ -160,21 +160,21 @@ class MockWebSocket:
 
 
     async def test_message_buffering():
-        ""Test message handling during failures""
+        Test message handling during failures""
         pass
         print()
-        [PASS] TEST 4: Message Resilience During Failures")
+        [PASS] TEST 4: Message Resilience During Failures)
 
         ws_manager = WebSocketManager()
 
                                     # Create connection that will fail
         mock_ws = MockWebSocket(fail_after=3)
-        ws_manager.connections["buffer_test] = {
-        connection_id": "buffer_test,
-        user_id": "buffer_user,
-        websocket": mock_ws,
-        "thread_id: buffer_thread",
-        "is_healthy: True,
+        ws_manager.connections[buffer_test] = {"
+        connection_id": buffer_test,
+        user_id: buffer_user,
+        websocket": mock_ws,"
+        thread_id: buffer_thread,
+        is_healthy: True,"
         message_count": 0
                                     
 
@@ -184,14 +184,14 @@ class MockWebSocket:
 
         for i in range(messages_to_send):
         result = await ws_manager.send_to_thread( )
-        "buffer_thread,
-        {type": "test, id": i}
+        buffer_thread,
+        {type": "test, id: i}
                                         
         if result:
         success_count += 1
 
-        print("formatted_string)
-        print(formatted_string")
+        print("")
+        print(formatted_string)"
 
                                             # Verify partial success handling
         assert len(mock_ws.messages_sent) <= 3, "Should stop after failure
@@ -200,8 +200,8 @@ class MockWebSocket:
 
 
     async def test_memory_management():
-        ""Test memory leak prevention"
-        print(")
+        Test memory leak prevention""
+        print()
         [PASS] TEST 5: Memory Leak Prevention)
 
         ws_manager = WebSocketManager()
@@ -214,31 +214,31 @@ class MockWebSocket:
         mock_ws = MockWebSocket()
         ws_manager.connections[conn_id] = {
         connection_id: conn_id,
-        "user_id": formatted_string,
-        "websocket": mock_ws,
-        thread_id: "",
+        user_id: formatted_string,
+        websocket": mock_ws,
+        thread_id: ",
         is_healthy: True
                                                         
 
                                                         # Remove connections
         for i in range(10):
-        conn_id = ""
+        conn_id = 
         if conn_id in ws_manager.connections:
         del ws_manager.connections[conn_id]
 
                                                                 # Check no leaks
         assert len(ws_manager.connections) == 0, formatted_string
-        print(f"  [OK] No memory leaks after 30 connection cycles")
+        print(f"  [OK] No memory leaks after 30 connection cycles)
         await asyncio.sleep(0)
         return True
 
 
-    def main():
-        "Run all standalone tests"
+    def main("):
+        Run all standalone tests
         pass
-        print("=" * 60)
-        print(WEBSOCKET IMPROVEMENTS STANDALONE PROOF)
-        print("No external dependencies required!")
+        print(=" * 60)
+        print(WEBSOCKET IMPROVEMENTS STANDALONE PROOF")
+        print(No external dependencies required!)
         print(= * 60)
 
     # Run synchronous tests
@@ -256,27 +256,27 @@ class MockWebSocket:
 
     # Summary
         print("")
-         + =" * 60)
-        print("RESULTS SUMMARY)
-        print(=" * 60)
+         + = * 60)
+        print("RESULTS SUMMARY")
+        print(= * 60)"
 
         passed = sum(results)
         total = len(results)
 
         if passed == total:
-        print("formatted_string)
         print(")
-        BUSINESS VALUE CONFIRMED:")
+        print("")
+        BUSINESS VALUE CONFIRMED:)
         print(- Chat reliability enhanced with error recovery)
         print("- Concurrent users properly isolated")
         print(- Memory leaks prevented)
-        print("- Connection health monitoring works")
-        print(- Message resilience during failures)
-        print("")
+        print(- Connection health monitoring works)
+        print(- Message resilience during failures")
+        print(")
         >>> WebSocket improvements are PRODUCTION READY!)
         return 0
         else:
-        print(formatted_string")
+        print(formatted_string")"
         return 1
 
 

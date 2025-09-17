@@ -25,7 +25,7 @@ Usage:
     python -m pytest tests/mission_critical/test_ssot_regression_prevention_monitor.py -v
     python tests/mission_critical/test_ssot_regression_prevention_monitor.py --monitor-mode
     python tests/mission_critical/test_ssot_regression_prevention_monitor.py --generate-baseline
-""
+"
 
 import asyncio
 import json
@@ -70,25 +70,25 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
     
     These tests validate that resolved SSOT violations stay resolved and
     can be integrated into continuous monitoring systems.
-    ""
+    "
     
     @pytest.fixture(autouse=True)
     def setup_regression_monitor(self):
-        ""Setup regression monitoring capabilities."
+        Setup regression monitoring capabilities.""
         self.project_root = Path(__file__).parent.parent.parent
         self.monitoring_reports = []
         self.baseline_violations = {}
         
-        logger.info("[U+1F680] Starting SSOT Regression Prevention Monitor)
-        logger.info(=" * 60)
+        logger.info([U+1F680] Starting SSOT Regression Prevention Monitor)
+        logger.info(= * 60)"
         logger.info("MISSION: Prevent reintroduction of resolved SSOT violations)
-        logger.info(FOCUS: WebSocket auth patterns from GitHub Issue #300")
-        logger.info("= * 60)
+        logger.info(FOCUS: WebSocket auth patterns from GitHub Issue #300)
+        logger.info("= * 60)"
         
     @pytest.mark.critical
     @pytest.mark.security
     def test_no_jwt_signature_bypass_patterns(self):
-        ""
+        
         CRITICAL SECURITY: Ensure JWT signature bypass patterns remain resolved.
         
         GitHub Issue #300: WebSocket JWT bypass vulnerability was RESOLVED
@@ -96,20 +96,20 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
         
         PATTERN: verify_signature=False (CRITICAL security bypass)
         BUSINESS IMPACT: $500K+ ARR at risk if reintroduced
-        "
-        logger.info(" SEARCH:  Testing for JWT signature bypass pattern regression)
+""
+        logger.info( SEARCH:  Testing for JWT signature bypass pattern regression)
         
         # Specific patterns from resolved GitHub Issue #300
         critical_patterns = [
-            rverify_signature\s*=\s*False",
+            rverify_signature\s*=\s*False,"
             r"jwt\.decode\([^)]*verify\s*=\s*False, 
-            roptions\s*=\s*\{[^}]*[\"']verify_signature[\"']\s*:\s*False
+            roptions\s*=\s*\{[^}]*[\']verify_signature[\']\s*:\s*False
         ]
         
         violations_found = []
         files_to_check = [
-            netra_backend/app/websocket_core/user_context_extractor.py",
-            "netra_backend/app/routes/websocket.py,
+            netra_backend/app/websocket_core/user_context_extractor.py","
+            netra_backend/app/routes/websocket.py,
             netra_backend/app/auth_integration/auth.py"
         ]
         
@@ -140,17 +140,17 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
         
         # Assert no critical violations found
         if violations_found:
-            logger.critical( ALERT:  CRITICAL REGRESSION: JWT signature bypass patterns detected!")
+            logger.critical( ALERT:  CRITICAL REGRESSION: JWT signature bypass patterns detected!)
             for violation in violations_found:
-                logger.critical(f"  File: {violation['file']}:{violation['line']})
-                logger.critical(f  Code: {violation['content']}")
-                logger.critical(f"  Pattern: {violation['pattern']})
+                logger.critical(f  File: {violation['file']}:{violation['line']})
+                logger.critical(f  Code: {violation['content']}")"
+                logger.critical(f  Pattern: {violation['pattern']})
             
-            pytest.fail(fCRITICAL SECURITY REGRESSION: {len(violations_found)} JWT signature bypass "
+            pytest.fail(fCRITICAL SECURITY REGRESSION: {len(violations_found)} JWT signature bypass 
                        f"patterns found. These were resolved in GitHub Issue #300 and must not be reintroduced. 
                        fBusiness Impact: $500K+ ARR at risk from auth bypass vulnerability.")
         
-        logger.info(" PASS:  No JWT signature bypass patterns detected - Issue #300 remains resolved)
+        logger.info( PASS:  No JWT signature bypass patterns detected - Issue #300 remains resolved)
     
     @pytest.mark.critical
     @pytest.mark.ssot_compliance
@@ -160,24 +160,24 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
         
         SSOT REQUIREMENT: All auth operations must use UnifiedAuthInterface
         This test prevents regression to direct JWT operations bypassing SSOT.
-        "
-        logger.info(" SEARCH:  Testing UnifiedAuthInterface SSOT compliance)
+
+        logger.info(" SEARCH:  Testing UnifiedAuthInterface SSOT compliance)"
         
         # Check for direct JWT imports/operations bypassing UnifiedAuthInterface
         ssot_violation_patterns = [
-            (r^import\s+jwt(?:\s|$)", "Direct JWT import bypassing UnifiedAuthInterface),
-            (rjwt\.(encode|decode)\s*\(", "Direct JWT operations bypassing auth service),
-            (rfrom\s+jwt\s+import", "JWT component import bypassing SSOT)
+            (r^import\s+jwt(?:\s|$), Direct JWT import bypassing UnifiedAuthInterface),
+            (rjwt\.(encode|decode)\s*\(, "Direct JWT operations bypassing auth service),
+            (rfrom\s+jwt\s+import", JWT component import bypassing SSOT)
         ]
         
         violations_found = []
-        backend_root = self.project_root / netra_backend"
+        backend_root = self.project_root / netra_backend
         
         # Focus on key auth-related files
         key_files = [
-            "app/websocket_core/user_context_extractor.py,
-            app/routes/websocket.py", 
-            "app/auth_integration/auth.py,
+            "app/websocket_core/user_context_extractor.py,"
+            app/routes/websocket.py, 
+            app/auth_integration/auth.py,"
             app/core/configuration/unified_secrets.py"
         ]
         
@@ -192,7 +192,7 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
                     lines = content.splitlines()
                 
                 # Check for SSOT compliance patterns
-                has_unified_auth_import = "UnifiedAuthInterface in content or get_unified_auth" in content
+                has_unified_auth_import = UnifiedAuthInterface in content or get_unified_auth in content
                 
                 for line_idx, line in enumerate(lines):
                     # Skip lines that are properly using UnifiedAuthInterface
@@ -200,7 +200,7 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
                         continue
                         
                     # Skip exception markers
-                    if any(marker in line for marker in ["@auth_ssot_exception, # SSOT_EXCEPTION", "# JWT_ALLOWED]:
+                    if any(marker in line for marker in [@auth_ssot_exception, # SSOT_EXCEPTION, # JWT_ALLOWED]:"
                         continue
                     
                     for pattern, description in ssot_violation_patterns:
@@ -226,16 +226,16 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
                 filtered_violations.append(violation)
         
         if filtered_violations:
-            logger.error(" ALERT:  SSOT REGRESSION: Direct JWT operations bypassing UnifiedAuthInterface!)
+            logger.error( ALERT:  SSOT REGRESSION: Direct JWT operations bypassing UnifiedAuthInterface!)
             for violation in filtered_violations:
-                logger.error(f  File: {violation['file']}:{violation['line']}")
-                logger.error(f"  Issue: {violation['description']})
-                logger.error(f  Code: {violation['content']}")
+                logger.error(f  File: {violation['file']}:{violation['line']}")"
+                logger.error(f  Issue: {violation['description']})
+                logger.error(f  Code: {violation['content']})
             
             pytest.fail(f"SSOT COMPLIANCE REGRESSION: {len(filtered_violations)} violations found. 
                        fAll JWT operations must use UnifiedAuthInterface to maintain SSOT compliance.")
         
-        logger.info(" PASS:  UnifiedAuthInterface SSOT compliance maintained)
+        logger.info( PASS:  UnifiedAuthInterface SSOT compliance maintained)
     
     @pytest.mark.error
     @pytest.mark.websocket_security
@@ -245,20 +245,20 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
         
         ARCHITECTURAL REQUIREMENT: WebSocket auth must be consistent with main auth
         This test prevents fallback mechanisms that compromise security.
-        "
-        logger.info(" SEARCH:  Testing for WebSocket auth fallback pattern regression)
+
+        logger.info(" SEARCH:  Testing for WebSocket auth fallback pattern regression)"
         
         fallback_patterns = [
-            (rfallback.*auth|auth.*fallback", "Authentication fallback mechanism),
-            (rlegacy.*auth|auth.*legacy", "Legacy authentication logic),
-            (rbypass.*auth|auth.*bypass", "Authentication bypass mechanism)
+            (rfallback.*auth|auth.*fallback, Authentication fallback mechanism),
+            (rlegacy.*auth|auth.*legacy, "Legacy authentication logic),
+            (rbypass.*auth|auth.*bypass", Authentication bypass mechanism)
         ]
         
         violations_found = []
         websocket_files = [
-            netra_backend/app/websocket_core/user_context_extractor.py",
-            "netra_backend/app/routes/websocket.py,
-            netra_backend/app/websocket_core/auth.py"
+            netra_backend/app/websocket_core/user_context_extractor.py,
+            "netra_backend/app/routes/websocket.py,"
+            netra_backend/app/websocket_core/auth.py
         ]
         
         for file_path in websocket_files:
@@ -273,7 +273,7 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
                 
                 for line_idx, line in enumerate(lines):
                     # Skip comments explaining what NOT to do
-                    if line.strip().startswith("#) and any(word in line.lower() for word in [violation", "do not, don't", "avoid]:
+                    if line.strip().startswith(#) and any(word in line.lower() for word in [violation", "do not, don't, avoid]:
                         continue
                         
                     for pattern, description in fallback_patterns:
@@ -287,32 +287,32 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
                             }
                             
             except Exception as e:
-                logger.error(fError checking {file_path}: {e}")
+                logger.error(fError checking {file_path}: {e}")"
         
         if violations_found:
-            logger.warning(" WARNING: [U+FE0F]  ARCHITECTURAL REGRESSION: WebSocket auth fallback patterns detected!)
+            logger.warning( WARNING: [U+FE0F]  ARCHITECTURAL REGRESSION: WebSocket auth fallback patterns detected!)
             for violation in violations_found:
-                logger.warning(f  File: {violation['file']}:{violation['line']}")
+                logger.warning(f  File: {violation['file']}:{violation['line']})"
                 logger.warning(f"  Issue: {violation['description']})
-                logger.warning(f  Code: {violation['content']}")
+                logger.warning(f  Code: {violation['content']})
             
             # This is a warning-level issue, not a hard failure
-            logger.warning(f"Found {len(violations_found)} WebSocket auth fallback patterns. 
-                          fThese should be reviewed for SSOT compliance.")
+            logger.warning(fFound {len(violations_found)} WebSocket auth fallback patterns. 
+                          fThese should be reviewed for SSOT compliance.")"
         else:
-            logger.info(" PASS:  No WebSocket auth fallback patterns detected)
+            logger.info( PASS:  No WebSocket auth fallback patterns detected)
     
     @pytest.mark.integration  
     @pytest.mark.monitoring_integration
     def test_monitoring_system_integration(self):
-        ""
+        "
         INTEGRATION: Test integration with automated monitoring system.
         
         This test validates that the monitoring system can detect violations
         and integrate with the testing framework.
-        "
+"
         if not MONITORING_AVAILABLE:
-            pytest.skip("Monitoring system components not available)
+            pytest.skip(Monitoring system components not available)"
             
         logger.info( SEARCH:  Testing monitoring system integration")
         
@@ -324,47 +324,47 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
             report = monitor.run_monitoring_scan(websocket_only=True)
             
             # Validate monitoring report structure
-            assert isinstance(report, MonitoringReport), "Monitoring must return valid report
-            assert report.total_files_scanned > 0, Monitoring must scan files"
-            assert report.scan_timestamp is not None, "Report must have timestamp
+            assert isinstance(report, MonitoringReport), Monitoring must return valid report
+            assert report.total_files_scanned > 0, Monitoring must scan files""
+            assert report.scan_timestamp is not None, Report must have timestamp
             assert isinstance(report.violations, list), Violations must be a list"
             
             # Log monitoring results
             logger.info(f" PASS:  Monitoring system integration successful)
-            logger.info(f   Files scanned: {report.total_files_scanned}")
-            logger.info(f"   Violations found: {len(report.violations)})
-            logger.info(f   Regressions: {report.regression_violations}")
-            logger.info(f"   Critical issues: {report.security_critical_count})
+            logger.info(f   Files scanned: {report.total_files_scanned})
+            logger.info(f   Violations found: {len(report.violations)})
+            logger.info(f   Regressions: {report.regression_violations}")"
+            logger.info(f   Critical issues: {report.security_critical_count})
             
             # Store report for analysis
             self.monitoring_reports.append(report)
             
             # Alert on critical security issues
             if report.security_critical_count > 0:
-                pytest.fail(fCRITICAL MONITORING ALERT: {report.security_critical_count} "
+                pytest.fail(fCRITICAL MONITORING ALERT: {report.security_critical_count} 
                            f"security violations detected by monitoring system. 
                            fImmediate action required.")
             
         except Exception as e:
-            pytest.fail(f"Monitoring system integration failed: {e})
+            pytest.fail(fMonitoring system integration failed: {e})
     
     @pytest.mark.baseline
     def test_generate_violation_baseline(self):
-        ""
+        "
         BASELINE: Generate baseline violations for regression detection.
         
         This test can be run with --generate-baseline flag to establish
         the current state as a baseline for future regression detection.
-        "
+"
         if not MONITORING_AVAILABLE:
-            pytest.skip("Monitoring system components not available)
+            pytest.skip(Monitoring system components not available)"
             
         # Check if we're in baseline generation mode
         generate_baseline = --generate-baseline" in sys.argv
         if not generate_baseline:
-            pytest.skip("Baseline generation not requested (use --generate-baseline))
+            pytest.skip(Baseline generation not requested (use --generate-baseline))
             
-        logger.info( CHART:  Generating SSOT violation baseline")
+        logger.info( CHART:  Generating SSOT violation baseline")"
         
         try:
             monitor = SSOTComplianceMonitor(self.project_root)
@@ -376,8 +376,8 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
             # Save as baseline
             websocket_monitor._save_baseline_violations(violations)
             
-            logger.info(f" PASS:  Baseline generated with {len(violations)} violations)
-            logger.info(   Future scans will use this baseline to detect regressions")
+            logger.info(f PASS:  Baseline generated with {len(violations)} violations)
+            logger.info(   Future scans will use this baseline to detect regressions)
             
             # Log violation summary
             violation_types = {}
@@ -387,12 +387,12 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
                     violation_types[violation_type] = 0
                 violation_types[violation_type] += 1
             
-            logger.info("   Baseline violation summary:)
+            logger.info("   Baseline violation summary:)"
             for vtype, count in violation_types.items():
-                logger.info(f     {vtype}: {count}")
+                logger.info(f     {vtype}: {count})
                 
         except Exception as e:
-            pytest.fail(f"Baseline generation failed: {e})
+            pytest.fail(fBaseline generation failed: {e})
     
     @pytest.mark.continuous_monitoring
     def test_continuous_monitoring_readiness(self):
@@ -401,14 +401,14 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
         
         This test validates that the system is ready for continuous monitoring
         in production environments.
-        "
-        logger.info(" SEARCH:  Testing continuous monitoring readiness)
+
+        logger.info(" SEARCH:  Testing continuous monitoring readiness)"
         
         readiness_checks = [
-            (Monitoring script executable", self._check_monitoring_script_executable),
-            ("Report directory writable, self._check_report_directory_writable), 
+            (Monitoring script executable, self._check_monitoring_script_executable),
+            (Report directory writable, self._check_report_directory_writable), "
             (Baseline file accessible", self._check_baseline_file_accessible),
-            ("Log file writable, self._check_log_file_writable)
+            (Log file writable, self._check_log_file_writable)
         ]
         
         failed_checks = []
@@ -417,12 +417,12 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
             try:
                 result = check_func()
                 if result:
-                    logger.info(f PASS:  {check_name}: PASS")
+                    logger.info(f PASS:  {check_name}: PASS")"
                 else:
-                    logger.error(f" FAIL:  {check_name}: FAIL)
+                    logger.error(f FAIL:  {check_name}: FAIL)
                     failed_checks.append(check_name)
             except Exception as e:
-                logger.error(f FAIL:  {check_name}: ERROR - {e}")
+                logger.error(f FAIL:  {check_name}: ERROR - {e})
                 failed_checks.append(check_name)
         
         if failed_checks:
@@ -431,29 +431,29 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
         logger.info( PASS:  System ready for continuous monitoring deployment")
     
     def _check_monitoring_script_executable(self) -> bool:
-        "Check if monitoring script is executable.""
-        script_path = self.project_root / scripts" / "monitor_ssot_compliance.py
+        Check if monitoring script is executable.""
+        script_path = self.project_root / scripts / monitor_ssot_compliance.py
         return script_path.exists() and os.access(script_path, os.R_OK)
     
     def _check_report_directory_writable(self) -> bool:
-        ""Check if report directory is writable."
-        report_dir = self.project_root / "reports / ssot_compliance"
+        "Check if report directory is writable."
+        report_dir = self.project_root / reports / ssot_compliance
         report_dir.mkdir(parents=True, exist_ok=True)
-        test_file = report_dir / "test_write_permissions.tmp
+        test_file = report_dir / "test_write_permissions.tmp"
         try:
-            test_file.write_text(test")
+            test_file.write_text(test)
             test_file.unlink()
             return True
         except Exception:
             return False
     
     def _check_baseline_file_accessible(self) -> bool:
-        "Check if baseline file is accessible.""
-        baseline_file = self.project_root / ssot_monitoring_baseline.json"
+        Check if baseline file is accessible.""
+        baseline_file = self.project_root / ssot_monitoring_baseline.json
         return not baseline_file.exists() or os.access(baseline_file, os.R_OK | os.W_OK)
     
     def _check_log_file_writable(self) -> bool:
-        "Check if log file is writable.""
+        "Check if log file is writable."
         log_file = self.project_root / ssot_compliance_monitor.log"
         try:
             with open(log_file, 'a') as f:
@@ -463,19 +463,19 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
             return False
     
     def tearDown(self):
-        ""Clean up test artifacts."
+        Clean up test artifacts."
         logger.info("[U+1F9F9] SSOT regression prevention test cleanup complete)
         if self.monitoring_reports:
-            logger.info(f CHART:  Generated {len(self.monitoring_reports)} monitoring reports during testing")
+            logger.info(f CHART:  Generated {len(self.monitoring_reports)} monitoring reports during testing)
 
 
 # Standalone execution for monitoring mode
-if __name__ == "__main__:
+if __name__ == "__main__:"
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-    print(MIGRATION NOTICE: This file previously used direct pytest execution.")
-    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>)
-    print(For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print(MIGRATION NOTICE: This file previously used direct pytest execution.)
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md)"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

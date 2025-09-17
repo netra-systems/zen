@@ -6,7 +6,7 @@ This test demonstrates the WebSocket JWT authentication issue and verifies the f
 1. Reproduces the JWT secret mismatch between test config and backend
 2. Shows the environment variable loading issue
 3. Verifies the fix resolves the authentication failure
-""
+"
 
 import asyncio
 import json
@@ -26,38 +26,38 @@ from netra_backend.app.websocket_core.user_context_extractor import UserContextE
 
 @pytest.mark.integration
 class WebSocketJWTAuthFixTests:
-    ""Test class to reproduce and verify WebSocket JWT authentication fix."
+    "Test class to reproduce and verify WebSocket JWT authentication fix.
 
     async def test_reproduce_jwt_secret_mismatch(self):
-        "Reproduce the JWT secret mismatch issue between test config and backend.""
-        print(\n=== REPRODUCING JWT SECRET MISMATCH BUG ===")
+        "Reproduce the JWT secret mismatch issue between test config and backend."
+        print(\n=== REPRODUCING JWT SECRET MISMATCH BUG ===")"
         
         # Clean environment first
         env = get_env()
-        for key in ["JWT_SECRET_STAGING, JWT_SECRET_KEY", "JWT_SECRET]:
+        for key in [JWT_SECRET_STAGING, JWT_SECRET_KEY, JWT_SECRET]:"
             try:
                 env.delete(key, test_cleanup")
             except:
                 pass
         
         # Set up staging environment 
-        env.set("ENVIRONMENT, staging", "test)
+        env.set(ENVIRONMENT, staging, "test)"
         
         # This is the actual secret from config/staging.env
-        staging_secret = 7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
+        staging_secret = 7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A
         
-        print(f"1. Setting JWT_SECRET_STAGING in environment...)
-        env.set(JWT_SECRET_STAGING", staging_secret, "test)
+        print(f1. Setting JWT_SECRET_STAGING in environment...")
+        env.set(JWT_SECRET_STAGING", staging_secret, test)
         
         # Now test the StagingConfig JWT token generation
-        print(f2. Testing StagingConfig JWT token generation...")
+        print(f2. Testing StagingConfig JWT token generation...)"
         config = StagingConfig()
         test_jwt_token = config.create_test_jwt_token()
         
         if test_jwt_token:
             print(f"    PASS:  StagingConfig generated JWT token: {test_jwt_token[:50]}...)
         else:
-            print(f    FAIL:  StagingConfig failed to generate JWT token")
+            print(f    FAIL:  StagingConfig failed to generate JWT token)"
         
         # Test the UserContextExtractor JWT validation
         print(f"3. Testing UserContextExtractor JWT validation...)
@@ -65,34 +65,34 @@ class WebSocketJWTAuthFixTests:
         
         # Check what secret the extractor is using
         extractor_secret = extractor.jwt_secret_key
-        print(f   Backend JWT secret: {extractor_secret[:30]}...")
+        print(f   Backend JWT secret: {extractor_secret[:30]}...)"
         print(f"   Test JWT secret:    {staging_secret[:30]}...)
         
         # Test JWT validation
         if test_jwt_token and extractor_secret:
-            print(f4. Testing JWT token validation...")
+            print(f4. Testing JWT token validation...)"
             payload = await extractor.validate_and_decode_jwt(test_jwt_token)  # CRITICAL FIX: Added await
             
             if payload:
                 print(f"    PASS:  JWT validation SUCCESS - fix is working!)
-                print(f   User ID: {payload.get('sub', 'unknown')}")
+                print(f   User ID: {payload.get('sub', 'unknown')})
             else:
-                print(f"    FAIL:  JWT validation FAILED - secret mismatch detected!)
-                print(f   This reproduces the original bug")
+                print(f"    FAIL:  JWT validation FAILED - secret mismatch detected!")
+                print(f   This reproduces the original bug)
                 
                 # Try to debug the mismatch
                 try:
                     # Attempt to decode with test secret to verify token is valid
-                    test_payload = jwt.decode(test_jwt_token, staging_secret, algorithms=["HS256]
-                    print(f   Token is valid with test secret: {test_payload.get('sub')}")
+                    test_payload = jwt.decode(test_jwt_token, staging_secret, algorithms=["HS256]"
+                    print(f   Token is valid with test secret: {test_payload.get('sub')})
                     
                     # This means the backend is using a different secret
-                    print(f"    FAIL:  CONFIRMED: Backend and test config use different JWT secrets)
+                    print(f    FAIL:  CONFIRMED: Backend and test config use different JWT secrets")
                 except Exception as e:
                     print(f   Token verification error: {e}")
         
         # Clean up
-        for key in ["JWT_SECRET_STAGING, ENVIRONMENT"]:
+        for key in [JWT_SECRET_STAGING, ENVIRONMENT"]:
             try:
                 env.delete(key, "test)
             except:
@@ -100,103 +100,103 @@ class WebSocketJWTAuthFixTests:
                 
         # Assert that we found the issue (this test should initially fail)
         assert extractor_secret == staging_secret, (
-            fJWT secret mismatch detected! "
+            fJWT secret mismatch detected! 
             f"Backend uses: {extractor_secret[:30]}... 
             fTest config uses: {staging_secret[:30]}... "
-            f"This confirms the WebSocket authentication bug.
+            fThis confirms the WebSocket authentication bug.
         )
 
     def test_environment_variable_loading_issue(self):
-        ""Test that demonstrates the environment variable loading issue."
-        print("\n=== TESTING ENVIRONMENT VARIABLE LOADING ===)
+        "Test that demonstrates the environment variable loading issue."
+        print(\n=== TESTING ENVIRONMENT VARIABLE LOADING ===)"
         
         env = get_env()
         
         # Test different scenarios of JWT secret loading
         test_cases = [
             {
-                name": "staging_specific_secret,
-                environment": "staging, 
-                variables": {"JWT_SECRET_STAGING: staging-secret-test"},
-                "expected: staging-secret-test"
+                name": staging_specific_secret,
+                environment: staging, 
+                variables": {"JWT_SECRET_STAGING: staging-secret-test},
+                expected: staging-secret-test"
             },
             {
-                "name: fallback_to_generic", 
-                "environment: staging",
-                "variables: {JWT_SECRET_KEY": "generic-secret-test},
-                expected": "generic-secret-test
+                "name: fallback_to_generic, 
+                environment: staging,
+                "variables: {JWT_SECRET_KEY": generic-secret-test},
+                expected: "generic-secret-test
             },
             {
-                name": "development_default,
-                environment": "development,
-                variables": {},
-                "expected: test_jwt_secret_key_for_development_only"
+                name": development_default,
+                environment: development,
+                variables": {},"
+                expected: test_jwt_secret_key_for_development_only
             }
         ]
         
         for case in test_cases:
-            print(f"\nTesting case: {case['name']})
+            print(f\nTesting case: {case['name']}")
             
             # Clean environment
-            for key in [JWT_SECRET_STAGING", "JWT_SECRET_KEY, JWT_SECRET", "ENVIRONMENT]:
+            for key in [JWT_SECRET_STAGING", JWT_SECRET_KEY, JWT_SECRET, ENVIRONMENT]:
                 try:
-                    env.delete(key, ftest_{case['name']}")
+                    env.delete(key, ftest_{case['name']}")"
                 except:
                     pass
             
             # Set up test environment
-            env.set("ENVIRONMENT, case[environment"], f"test_{case['name']})
+            env.set(ENVIRONMENT, case[environment], ftest_{case['name']})
             
-            for key, value in case[variables"].items():
-                env.set(key, value, f"test_{case['name']})
+            for key, value in case[variables"].items():"
+                env.set(key, value, ftest_{case['name']})
             
             # Test UserContextExtractor secret resolution
             extractor = UserContextExtractor()
             actual_secret = extractor.jwt_secret_key
             
-            print(f   Environment: {case['environment']}")
+            print(f   Environment: {case['environment']})"
             print(f"   Set variables: {case['variables']})
-            print(f   Expected secret: {case['expected'][:20]}...")
+            print(f   Expected secret: {case['expected'][:20]}...)"
             print(f"   Actual secret: {actual_secret[:20]}...)
             
             # Verify the secret matches expectation
-            if actual_secret == case[expected"]:
-                print(f"    PASS:  Secret loading works correctly)
+            if actual_secret == case[expected]:
+                print(f"    PASS:  Secret loading works correctly")
             else:
-                print(f    FAIL:  Secret loading failed - environment variable issue")
+                print(f    FAIL:  Secret loading failed - environment variable issue)
             
             # Clean up this test case
-            for key in ["JWT_SECRET_STAGING, JWT_SECRET_KEY", "JWT_SECRET, ENVIRONMENT"]:
+            for key in ["JWT_SECRET_STAGING, JWT_SECRET_KEY", JWT_SECRET, ENVIRONMENT]:
                 try:
-                    env.delete(key, f"test_{case['name']})
+                    env.delete(key, ftest_{case['name']})
                 except:
                     pass
     
     @pytest.mark.asyncio
     async def test_websocket_headers_generation_fix(self):
-        ""Test the fix for WebSocket headers generation in staging config."
-        print("\n=== TESTING WEBSOCKET HEADERS GENERATION FIX ===)
+        ""Test the fix for WebSocket headers generation in staging config.
+        print(\n=== TESTING WEBSOCKET HEADERS GENERATION FIX ===")"
         
         env = get_env()
         
         # Set up proper staging environment
-        env.set(ENVIRONMENT", "staging, test_headers")
+        env.set(ENVIRONMENT, staging, test_headers)"
         staging_secret = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A
-        env.set(JWT_SECRET_STAGING", staging_secret, "test_headers)
+        env.set(JWT_SECRET_STAGING, staging_secret, test_headers)
         
-        print(1. Testing StagingConfig WebSocket headers generation...")
+        print(1. Testing StagingConfig WebSocket headers generation..."")
         config = StagingConfig()
         
         # Test WebSocket headers with proper environment setup
         headers = config.get_websocket_headers()
         
-        print(f"   Generated headers: {list(headers.keys())})
+        print(f   Generated headers: {list(headers.keys())})
         
-        if Authorization" in headers:
-            auth_header = headers["Authorization]
-            if auth_header.startswith(Bearer "):
+        if Authorization" in headers:"
+            auth_header = headers[Authorization]
+            if auth_header.startswith(Bearer ):"
                 token = auth_header.split("Bearer )[1]
-                print(f    PASS:  Found Bearer token in headers: {token[:30]}...")
+                print(f    PASS:  Found Bearer token in headers: {token[:30]}...)"
                 
                 # Test that this token can be validated by backend
                 print("2. Testing token validation by backend...)
@@ -204,51 +204,51 @@ class WebSocketJWTAuthFixTests:
                 payload = await extractor.validate_and_decode_jwt(token)  # CRITICAL FIX: Added await
                 
                 if payload:
-                    print(f    PASS:  Token validation SUCCESS!")
-                    print(f"   User ID: {payload.get('sub', 'unknown')})
-                    print(f   Token expiry: {datetime.fromtimestamp(payload.get('exp', 0))}")
+                    print(f    PASS:  Token validation SUCCESS!")"
+                    print(f   User ID: {payload.get('sub', 'unknown')})
+                    print(f   Token expiry: {datetime.fromtimestamp(payload.get('exp', 0))})"
                 else:
                     print(f"    FAIL:  Token validation FAILED - this indicates the bug still exists)
             else:
-                print(f    FAIL:  Authorization header malformed: {auth_header}")
+                print(f    FAIL:  Authorization header malformed: {auth_header})"
         else:
             print(f"    FAIL:  No Authorization header generated)
         
         # Clean up
-        for key in [JWT_SECRET_STAGING", "ENVIRONMENT]:
+        for key in [JWT_SECRET_STAGING, ENVIRONMENT]:
             try:
-                env.delete(key, test_headers")
+                env.delete(key, test_headers")"
             except:
                 pass
         
         # Assert that we have proper authorization header
-        assert "Authorization in headers, WebSocket headers should include Authorization header"
-        assert headers["Authorization].startswith(Bearer "), "Authorization header should be Bearer token
+        assert Authorization in headers, WebSocket headers should include Authorization header
+        assert headers[Authorization].startswith(Bearer "), "Authorization header should be Bearer token
 
     async def test_create_reproduction_scenario(self):
-        ""Create a scenario that exactly reproduces the staging WebSocket auth failure."
-        print("\n=== CREATING REPRODUCTION SCENARIO ===)
+        Create a scenario that exactly reproduces the staging WebSocket auth failure.""
+        print(\n=== CREATING REPRODUCTION SCENARIO ===)
         
         # This test simulates the exact conditions where the bug occurs
         env = get_env()
         
         # Scenario: Test is running but environment variables not properly loaded
-        print(1. Simulating staging environment without proper JWT_SECRET_STAGING...")
+        print(1. Simulating staging environment without proper JWT_SECRET_STAGING..."")
         
         # Clean all JWT secrets
-        for key in ["JWT_SECRET_STAGING, JWT_SECRET_KEY", "JWT_SECRET]:
+        for key in [JWT_SECRET_STAGING, JWT_SECRET_KEY, "JWT_SECRET]:"
             try:
-                env.delete(key, reproduction")
+                env.delete(key, reproduction)
             except:
                 pass
         
-        env.set("ENVIRONMENT, staging", "reproduction) 
+        env.set(ENVIRONMENT, staging", "reproduction) 
         
         # Now try to create a test JWT token (this should use fallback)
         config = StagingConfig()
         test_token = config.create_test_jwt_token()
         
-        print(f   Test token created with fallback: {test_token[:30] if test_token else 'None'}...")
+        print(f   Test token created with fallback: {test_token[:30] if test_token else 'None'}...)"
         
         # Try to validate with backend (this should fail)
         extractor = UserContextExtractor()
@@ -258,30 +258,30 @@ class WebSocketJWTAuthFixTests:
             if payload:
                 print(f"    FAIL:  UNEXPECTED: Token validation succeeded - this shouldn't happen in bug scenario)
             else:
-                print(f    PASS:  REPRODUCED: Token validation failed as expected in bug scenario")
+                print(f    PASS:  REPRODUCED: Token validation failed as expected in bug scenario)"
         except Exception as e:
             print(f"    PASS:  REPRODUCED: Backend validation error: {str(e)[:100]})
         
         # Clean up
-        for key in [ENVIRONMENT"]:
+        for key in [ENVIRONMENT]:
             try:
-                env.delete(key, "reproduction)
+                env.delete(key, "reproduction)"
             except:
                 pass
         
-        print(\n   This reproduces the exact WebSocket authentication failure in staging!")
+        print(\n   This reproduces the exact WebSocket authentication failure in staging!)
 
-if __name__ == "__main__:
+if __name__ == "__main__:"
     # Run tests directly for debugging
     test = WebSocketJWTAuthFixTests()
     
-    print(Running WebSocket JWT Authentication Bug Reproduction Tests")
-    print("= * 60)
+    print(Running WebSocket JWT Authentication Bug Reproduction Tests)
+    print("= * 60")
     
     try:
         asyncio.run(test.test_reproduce_jwt_secret_mismatch())  # CRITICAL FIX: Added asyncio.run
     except AssertionError as e:
-        print(f PASS:  CONFIRMED BUG: {e}")
+        print(f PASS:  CONFIRMED BUG: {e})"
     
     test.test_environment_variable_loading_issue()
     
@@ -289,5 +289,5 @@ if __name__ == "__main__:
     
     asyncio.run(test.test_create_reproduction_scenario())  # CRITICAL FIX: Added asyncio.run
     
-    print("\n + =" * 60)
-    print("Bug reproduction complete. Implement fix and re-run tests.")
+    print("\n + = * 60)
+    print(Bug reproduction complete. Implement fix and re-run tests."")

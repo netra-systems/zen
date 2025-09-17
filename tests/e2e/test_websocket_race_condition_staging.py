@@ -21,7 +21,7 @@ STAGING ENVIRONMENT TARGETS:
 - Auth endpoint: https://auth.staging.netrasystems.ai
 - Real network latency and Cloud Run startup patterns
 - Production-like service dependencies and timing
-""
+"
 
 import asyncio
 import pytest
@@ -46,7 +46,7 @@ logger = get_logger(__name__)
 
 
 class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
-    ""
+    "
     E2E tests for WebSocket race conditions in GCP staging environment.
     
     CRITICAL: These tests expose real Cloud Run race conditions that affect production:
@@ -56,20 +56,20 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
     - Multi-region connection conflicts
     
     EXPECTED BEHAVIOR: Tests should FAIL initially to prove staging race conditions exist.
-    "
+"
     
     def setUp(self):
-        "Set up staging E2E test environment.""
+        "Set up staging E2E test environment.
         super().setUp()
         self.id_manager = UnifiedIDManager()
-        self.staging_base_url = https://api.staging.netrasystems.ai"
-        self.staging_ws_url = "wss://api.staging.netrasystems.ai/ws
+        self.staging_base_url = https://api.staging.netrasystems.ai""
+        self.staging_ws_url = wss://api.staging.netrasystems.ai/ws
         self.staging_auth_url = https://auth.staging.netrasystems.ai"
         self.race_conditions_detected = []
         self.staging_failures = []
         
     async def asyncSetUp(self):
-        "Async setup for staging E2E testing.""
+        "Async setup for staging E2E testing.
         await super().asyncSetUp()
         
         # Create staging WebSocket client
@@ -91,15 +91,15 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
         4. Authentication pipeline not ready during handshake
         
         BUSINESS IMPACT: Users experience connection failures during staging cold starts.
-        "
-        logger.info("Testing staging Cloud Run cold start race conditions...)
+
+        logger.info("Testing staging Cloud Run cold start race conditions...)"
         
         cold_start_failures = []
         
         # Test multiple cold start scenarios
         for attempt in range(3):
             try:
-                logger.info(fCold start test attempt {attempt + 1}/3...")
+                logger.info(fCold start test attempt {attempt + 1}/3...)
                 
                 # Measure staging service response time
                 service_check_start = time.time()
@@ -112,15 +112,15 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                     async with websockets.connect(
                         self.staging_ws_url,
                         timeout=5.0,  # Shorter timeout to catch race conditions
-                        extra_headers={"Origin: https://staging.netrasystems.ai"} as websocket:
+                        extra_headers={Origin: https://staging.netrasystems.ai"} as websocket:
                         connection_time = time.time() - connection_start
                         
                         # Test immediate message send (race condition trigger)
                         test_message = {
-                            "type: test_message",
-                            "content: race_condition_test",
-                            "timestamp: datetime.now(timezone.utc).isoformat(),
-                            attempt": attempt
+                            "type: test_message,
+                            content: race_condition_test,
+                            "timestamp: datetime.now(timezone.utc).isoformat(),"
+                            attempt: attempt
                         }
                         
                         send_start = time.time()
@@ -131,8 +131,8 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                             response = await asyncio.wait_for(websocket.recv(), timeout=2.0)
                             response_time = time.time() - send_start
                             
-                            logger.info(f"Attempt {attempt}: Connection {connection_time:.3f}s, 
-                                       fResponse {response_time:.3f}s")
+                            logger.info(fAttempt {attempt}: Connection {connection_time:.3f}s, 
+                                       fResponse {response_time:.3f}s")"
                             
                             # Check for race condition indicators
                             if connection_time > 3.0:  # Excessive connection time
@@ -156,7 +156,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                                 'issue': 'response_timeout',
                                 'connection_time': connection_time
                             }
-                            logger.error(f"COLD START RACE CONDITION: Response timeout after {connection_time:.3f}s connection)
+                            logger.error(fCOLD START RACE CONDITION: Response timeout after {connection_time:.3f}s connection)
                 
                 except (websockets.exceptions.ConnectionClosed, 
                         websockets.exceptions.InvalidStatusCode,
@@ -170,7 +170,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                         'error': str(e),
                         'error_type': type(e).__name__
                     }
-                    logger.error(fCOLD START RACE CONDITION: Connection failed in {connection_time:.3f}s - {e}")
+                    logger.error(fCOLD START RACE CONDITION: Connection failed in {connection_time:.3f}s - {e})
                 
                 # Delay between attempts to vary cold start timing
                 await asyncio.sleep(1.0 + (attempt * 0.5))
@@ -197,12 +197,12 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
             
             pytest.fail(
                 fSTAGING COLD START RACE CONDITION DETECTED: Cloud Run cold start timing issues found. "
-                f"This proves Issue #1176 affects staging environment. 
+                fThis proves Issue #1176 affects staging environment. 
                 fFailure summary: {failure_summary}"
             )
     
     async def test_staging_concurrent_connection_race_condition(self):
-        "
+    "
         Test concurrent connection race conditions in staging environment.
         
         EXPECTED BEHAVIOR: This test should FAIL initially, proving staging concurrent connection issues.
@@ -214,35 +214,35 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
         4. Authentication pipeline concurrent access conflicts
         
         BUSINESS IMPACT: Multiple users connecting simultaneously experience failures.
-        ""
+        "
         logger.info(Testing staging concurrent connection race conditions...")
         
         concurrent_failures = []
         
         async def attempt_staging_connection(connection_id: int):
-            "Attempt concurrent staging WebSocket connection.""
+            Attempt concurrent staging WebSocket connection.""
             try:
                 start_time = time.time()
                 
                 # Unique connection identifier
-                user_id = self.id_manager.generate_id(IDType.USER, prefix=fstaging_concurrent_{connection_id}")
+                user_id = self.id_manager.generate_id(IDType.USER, prefix=fstaging_concurrent_{connection_id})
                 
                 # Real staging WebSocket connection
                 async with websockets.connect(
                     self.staging_ws_url,
                     timeout=10.0,
                     extra_headers={
-                        "Origin: https://staging.netrasystems.ai",
-                        "User-Agent: fNetraTest/1.0 Connection-{connection_id}"
+                        Origin: https://staging.netrasystems.ai",
+                        "User-Agent: fNetraTest/1.0 Connection-{connection_id}
                     } as websocket:
                     connection_time = time.time() - start_time
                     
                     # Send test message to validate connection
                     test_message = {
-                        "type: concurrent_test",
-                        "user_id: user_id,
-                        connection_id": connection_id,
-                        "timestamp: datetime.now(timezone.utc).isoformat()
+                        type: concurrent_test,
+                        "user_id: user_id,"
+                        connection_id: connection_id,
+                        timestamp: datetime.now(timezone.utc).isoformat()"
                     }
                     
                     send_start = time.time()
@@ -302,11 +302,11 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                 time_variance = max_time - min_time
                 
                 if time_variance > 2.0:  # High variance indicates contention
-                    race_indicators.append(f"High connection time variance: {time_variance:.3f}s)
+                    race_indicators.append(fHigh connection time variance: {time_variance:.3f}s)
         
         # 3. Connection exceptions during concurrent access
         if connection_exceptions:
-            race_indicators.append(fConnection exceptions: {len(connection_exceptions)}")
+            race_indicators.append(fConnection exceptions: {len(connection_exceptions)})"
         
         # 4. Specific error patterns indicating race conditions
         error_patterns = {}
@@ -319,9 +319,9 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
         if error_patterns:
             race_indicators.append(f"Error patterns: {error_patterns})
         
-        logger.info(fStaging concurrent connections: {len(successful_connections)} successful, "
-                   f"{len(failed_connections)} failed, {len(connection_exceptions)} exceptions, 
-                   ftotal time: {total_concurrent_time:.3f}s")
+        logger.info(fStaging concurrent connections: {len(successful_connections)} successful, 
+                   f{len(failed_connections)} failed, {len(connection_exceptions)} exceptions, 
+                   ftotal time: {total_concurrent_time:.3f}s")"
         
         # CRITICAL: Test should fail if staging race conditions detected
         if race_indicators:
@@ -329,13 +329,13 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
             concurrent_failures.extend(race_indicators)
             
             pytest.fail(
-                f"STAGING CONCURRENT RACE CONDITION DETECTED: Concurrent connection issues found in staging. 
-                fThis proves Issue #1176 affects production-like environment. "
+                fSTAGING CONCURRENT RACE CONDITION DETECTED: Concurrent connection issues found in staging. 
+                fThis proves Issue #1176 affects production-like environment. 
                 f"Race indicators: {'; '.join(race_indicators)}
             )
     
     async def test_staging_handshake_authentication_race_condition(self):
-        ""
+        "
         Test WebSocket handshake authentication race conditions in staging.
         
         EXPECTED BEHAVIOR: This test should FAIL initially, proving staging auth race conditions.
@@ -347,14 +347,14 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
         4. Authentication pipeline initialization race conditions
         
         BUSINESS IMPACT: Authenticated users experience connection failures.
-        "
+"
         logger.info("Testing staging handshake authentication race conditions...)
         
         auth_race_failures = []
         
         for attempt in range(3):
             try:
-                logger.info(fAuth handshake test attempt {attempt + 1}/3...")
+                logger.info(fAuth handshake test attempt {attempt + 1}/3...)
                 
                 # Test authenticated WebSocket connection to staging
                 auth_start_time = time.time()
@@ -362,8 +362,8 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                 # Attempt connection with authentication headers
                 auth_headers = {
                     "Origin: https://staging.netrasystems.ai",
-                    "Authorization: Bearer test-token-for-race-condition-testing",
-                    "X-Test-Scenario: fauth-race-{attempt}"
+                    Authorization: Bearer test-token-for-race-condition-testing,
+                    X-Test-Scenario: fauth-race-{attempt}"
                 }
                 
                 try:
@@ -376,10 +376,10 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                         
                         # Test immediate authenticated message
                         auth_message = {
-                            "type: authenticated_test",
-                            "content: auth_race_condition_test",
-                            "timestamp: datetime.now(timezone.utc).isoformat(),
-                            attempt": attempt
+                            "type: authenticated_test,
+                            content: auth_race_condition_test,
+                            "timestamp: datetime.now(timezone.utc).isoformat(),"
+                            attempt: attempt
                         }
                         
                         send_start = time.time()
@@ -411,7 +411,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                                 'issue': 'auth_response_timeout',
                                 'handshake_time': handshake_time
                             }
-                            logger.error(f"AUTH RACE CONDITION: Response timeout after {handshake_time:.3f}s auth handshake)
+                            logger.error(fAUTH RACE CONDITION: Response timeout after {handshake_time:.3f}s auth handshake)
                 
                 except websockets.exceptions.InvalidStatusCode as e:
                     handshake_time = time.time() - auth_start_time
@@ -425,7 +425,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                                 'status_code': e.status_code,
                                 'error': str(e)
                             }
-                            logger.error(fAUTH RACE CONDITION: Auth failure {e.status_code} after {handshake_time:.3f}s")
+                            logger.error(fAUTH RACE CONDITION: Auth failure {e.status_code} after {handshake_time:.3f}s")"
                 
                 except (websockets.exceptions.ConnectionClosed, ConnectionRefusedError, OSError) as e:
                     handshake_time = time.time() - auth_start_time
@@ -436,7 +436,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                         'error': str(e),
                         'error_type': type(e).__name__
                     }
-                    logger.error(f"AUTH RACE CONDITION: Connection failed during auth in {handshake_time:.3f}s - {e})
+                    logger.error(fAUTH RACE CONDITION: Connection failed during auth in {handshake_time:.3f}s - {e})
                 
                 # Delay between auth attempts
                 await asyncio.sleep(0.5 + (attempt * 0.3))
@@ -448,7 +448,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                     'error': str(e),
                     'error_type': type(e).__name__
                 }
-                logger.error(fException during auth race test attempt {attempt}: {e}")
+                logger.error(fException during auth race test attempt {attempt}: {e})
         
         # CRITICAL: Test should fail if auth race conditions detected
         if auth_race_failures:
@@ -461,16 +461,16 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                 elif 'error' in failure:
                     failure_details.append(fAttempt {failure['attempt']}: {failure['issue']} - {failure.get('error_type', 'Unknown')}")
                 else:
-                    failure_details.append(f"Attempt {failure['attempt']}: {failure['issue']})
+                    failure_details.append(fAttempt {failure['attempt']}: {failure['issue']})
             
             pytest.fail(
                 fSTAGING AUTH RACE CONDITION DETECTED: Authentication handshake timing issues found. "
                 f"This proves Issue #1176 affects authenticated staging connections. 
-                fDetails: {'; '.join(failure_details)}"
+                fDetails: {'; '.join(failure_details)}
             )
     
     async def test_staging_service_dependency_race_condition(self):
-        "
+    ""
         Test service dependency initialization race conditions in staging.
         
         EXPECTED BEHAVIOR: This test should FAIL initially, proving staging dependency race conditions.
@@ -482,8 +482,8 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
         4. Message routing pipeline not available
         
         BUSINESS IMPACT: Chat functionality fails due to missing service dependencies.
-        ""
-        logger.info(Testing staging service dependency race conditions...")
+        
+        logger.info(Testing staging service dependency race conditions...)"
         
         dependency_failures = []
         
@@ -498,17 +498,17 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                 async with websockets.connect(
                     self.staging_ws_url,
                     timeout=6.0,
-                    extra_headers={Origin": "https://staging.netrasystems.ai} as websocket:
+                    extra_headers={Origin: https://staging.netrasystems.ai} as websocket:
                     connection_time = time.time() - dependency_start
                     
                     # Test message that requires service dependencies
                     dependency_message = {
-                        type": "chat_message,
-                        content": "Test dependency race condition,
-                        requires_agent": True,
-                        "requires_database: True,
-                        timestamp": datetime.now(timezone.utc).isoformat(),
-                        "attempt: attempt
+                        type: "chat_message,
+                        content": Test dependency race condition,
+                        requires_agent: True,
+                        "requires_database: True,"
+                        timestamp: datetime.now(timezone.utc).isoformat(),
+                        attempt: attempt"
                     }
                     
                     send_start = time.time()
@@ -572,7 +572,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                     'error': str(e),
                     'error_type': type(e).__name__
                 }
-                logger.error(f"Exception during dependency race test attempt {attempt}: {e})
+                logger.error(fException during dependency race test attempt {attempt}: {e})
         
         # CRITICAL: Test should fail if dependency race conditions detected
         if dependency_failures:
@@ -588,15 +588,15 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
             pytest.fail(
                 fSTAGING DEPENDENCY RACE CONDITION DETECTED: Service dependency timing issues found. "
                 f"This proves Issue #1176 affects staging service coordination. 
-                fDependency issues: {dependency_summary}"
+                fDependency issues: {dependency_summary}
             )
 
     def tearDown(self):
-        "Clean up staging E2E test environment and report findings.""
+        Clean up staging E2E test environment and report findings.""
         super().tearDown()
         
         if self.race_conditions_detected:
-            logger.error(fISSUE #1176 STAGING VALIDATION: Race conditions detected in GCP staging environment. "
+            logger.error(fISSUE #1176 STAGING VALIDATION: Race conditions detected in GCP staging environment. 
                         f"Total race conditions: {len(self.race_conditions_detected)})
             
             # Categorize race condition types for analysis
@@ -619,7 +619,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
 # Helper functions for staging race condition analysis
 
 def analyze_staging_response_time(response_time: float) -> Dict[str, Any]:
-    "Analyze staging response time for race condition indicators.""
+    Analyze staging response time for race condition indicators.""
     return {
         'is_excessive': response_time > 5.0,
         'severity': 'high' if response_time > 10.0 else 'medium' if response_time > 5.0 else 'low',
@@ -628,7 +628,7 @@ def analyze_staging_response_time(response_time: float) -> Dict[str, Any]:
     }
 
 def classify_response_time(response_time: float) -> str:
-    ""Classify response time into race condition categories."
+    Classify response time into race condition categories."
     if response_time > 15.0:
         return 'severe_race_condition'
     elif response_time > 8.0:
@@ -639,14 +639,14 @@ def classify_response_time(response_time: float) -> str:
         return 'normal_timing'
 
 class StagingRaceConditionReporter:
-    "Report staging race condition findings for Issue #1176.""
+    "Report staging race condition findings for Issue #1176.
     
     def __init__(self):
         self.findings = []
-        self.staging_environment = GCP Cloud Run Staging"
+        self.staging_environment = GCP Cloud Run Staging""
     
     def record_finding(self, test_name: str, race_type: str, details: Dict[str, Any]:
-        "Record a race condition finding.""
+        Record a race condition finding."
         self.findings.append({
             'test_name': test_name,
             'race_type': race_type,
@@ -656,22 +656,22 @@ class StagingRaceConditionReporter:
         }
     
     def generate_report(self) -> str:
-        ""Generate comprehensive race condition report for Issue #1176."
+        "Generate comprehensive race condition report for Issue #1176.
         if not self.findings:
-            return "No race conditions detected in staging environment.
+            return "No race conditions detected in staging environment."
         
         report_lines = [
-            fIssue #1176 Staging Race Condition Report",
-            f"Environment: {self.staging_environment},
-            fTotal Findings: {len(self.findings)}",
-            f"Generated: {datetime.now(timezone.utc).isoformat()},
-            ",
-            "Race Condition Findings:
+            fIssue #1176 Staging Race Condition Report,
+            fEnvironment: {self.staging_environment},
+            fTotal Findings: {len(self.findings)}","
+            fGenerated: {datetime.now(timezone.utc).isoformat()},
+            ,
+            "Race Condition Findings:"
         ]
         
         for i, finding in enumerate(self.findings, 1):
-            report_lines.append(f{i}. {finding['test_name']} - {finding['race_type']}")
-            report_lines.append(f"   Details: {finding['details']})
-            report_lines.append(")
+            report_lines.append(f{i}. {finding['test_name']} - {finding['race_type']})
+            report_lines.append(f   Details: {finding['details']})
+            report_lines.append(")"
         
         return "\n".join(report_lines)

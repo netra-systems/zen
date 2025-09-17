@@ -19,7 +19,7 @@ Business Value Justification:
 - Strategic Impact: Essential for multi-tenant security and scalability
 
 These tests are intentionally DIFFICULT and COMPREHENSIVE to expose all isolation bugs.
-""
+"
 
 import asyncio
 import logging
@@ -65,7 +65,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestWebSocketConnection:
-    ""Real WebSocket connection for testing instead of mocks."
+    "Real WebSocket connection for testing instead of mocks.
 
     def __init__(self):
         self.messages_sent = []
@@ -73,24 +73,24 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        "Send JSON message.""
+        "Send JSON message."
         if self._closed:
-            raise RuntimeError(WebSocket is closed")
+            raise RuntimeError(WebSocket is closed)"
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = "Normal closure):
-        ""Close WebSocket connection."
+        Close WebSocket connection.""
         self._closed = True
         self.is_connected = False
 
     def get_messages(self) -> list:
-        "Get all sent messages.""
+        Get all sent messages."
         return self.messages_sent.copy()
 
 
 @dataclass
 class MockUser:
-    ""Simulates a concurrent user with unique identifiers."
+    "Simulates a concurrent user with unique identifiers.
     user_id: str
     thread_id: str
     run_id: str
@@ -107,7 +107,7 @@ class MockUser:
 
 @dataclass
 class IsolationTestResult:
-    "Results of isolation testing.""
+    "Results of isolation testing."
     user_id: str
     success: bool
     isolation_violations: List[str]
@@ -117,7 +117,7 @@ class IsolationTestResult:
 
 
 class IsolationViolationDetector:
-    ""Detects violations of user isolation in agent execution."
+    "Detects violations of user isolation in agent execution."
 
     def __init__(self):
         self.global_state_mutations = []
@@ -126,7 +126,7 @@ class IsolationViolationDetector:
         self.concurrent_execution_conflicts = []
 
     def record_websocket_event(self, run_id: str, event_type: str, target_user: str, actual_user: str):
-        "Record WebSocket event routing for isolation analysis.""
+        Record WebSocket event routing for isolation analysis.""
         if run_id not in self.websocket_event_routing:
             self.websocket_event_routing[run_id] = []
 
@@ -139,7 +139,7 @@ class IsolationViolationDetector:
         }
 
     def detect_global_state_mutation(self, component: str, before_state: Any, after_state: Any):
-        ""Detect mutations to global state that affect all users."
+        Detect mutations to global state that affect all users."
         if before_state != after_state:
             self.global_state_mutations.append({
                 'component': component,
@@ -149,22 +149,22 @@ class IsolationViolationDetector:
             }
 
     def get_isolation_violations(self) -> List[str]:
-        "Get all detected isolation violations.""
+        "Get all detected isolation violations.
         violations = []
 
         # Check WebSocket event routing violations
         for run_id, events in self.websocket_event_routing.items():
             wrong_events = [event for event in events if event['is_violation']]
             if wrong_events:
-                violations.append(fWebSocket event routing violations in run {run_id}: {len(wrong_events)} events")
+                violations.append(fWebSocket event routing violations in run {run_id}: {len(wrong_events)} events")"
 
         # Check global state mutations
         if self.global_state_mutations:
-            violations.append(f"Global state mutations detected: {len(self.global_state_mutations)} mutations)
+            violations.append(fGlobal state mutations detected: {len(self.global_state_mutations)} mutations)
 
         # Check concurrent execution conflicts
         if self.concurrent_execution_conflicts:
-            violations.append(fConcurrent execution conflicts: {len(self.concurrent_execution_conflicts)} conflicts")
+            violations.append(fConcurrent execution conflicts: {len(self.concurrent_execution_conflicts)} conflicts)
 
         return violations
 
@@ -175,7 +175,7 @@ class IsolationViolationDetector:
 
 @pytest.mark.asyncio
 async def test_websocket_bridge_shared_across_users_FAILING():
-    "
+    ""
     CRITICAL FAILING TEST: Demonstrates WebSocket bridge being shared across all users.
 
     This test SHOULD FAIL because:
@@ -184,13 +184,13 @@ async def test_websocket_bridge_shared_across_users_FAILING():
     - Events intended for User A can be received by User B
 
     Expected Failure: WebSocket events leak between users
-    ""
+    
     # Create multiple mock users
     users = [
         MockUser(
-            user_id=fuser_{i}",
-            thread_id=f"thread_{i},
-            run_id=frun_{i}",
+            user_id=fuser_{i}","
+            thread_id=fthread_{i},
+            run_id=frun_{i},
             websocket_connection=TestWebSocketConnection()
         ) for i in range(5)
     ]
@@ -211,14 +211,14 @@ async def test_websocket_bridge_shared_across_users_FAILING():
 
     # CRITICAL ASSERTION: All registries are the same object (singleton violation)
     # This test FAILS because all registries are identical
-    assert len(set(id(registry) for registry in registries)) == len(users), \
-        fCRITICAL ISOLATION FAILURE: All {len(users)} users share the same AgentRegistry singleton instance!"
+    assert len(set(id(registry) for registry in registries)) == len(users), "\
+        fCRITICAL ISOLATION FAILURE: All {len(users)} users share the same AgentRegistry singleton instance!
 
     # CRITICAL ASSERTION: Each user should have their own WebSocket bridge
     # This test FAILS because all users share the same bridge
     bridges = [registry.get_websocket_bridge() for registry in registries]
     assert len(set(id(bridge) for bridge in bridges)) == len(users), \
-        f"CRITICAL ISOLATION FAILURE: All {len(users)} users share the same WebSocket bridge instance!
+        fCRITICAL ISOLATION FAILURE: All {len(users)} users share the same WebSocket bridge instance!
 
     # Simulate concurrent agent executions
     tasks = []
@@ -236,7 +236,7 @@ async def test_websocket_bridge_shared_across_users_FAILING():
 
     # This assertion SHOULD FAIL due to isolation violations
     assert len(violations) == 0, \
-        fCRITICAL ISOLATION VIOLATIONS DETECTED:\n" + "\n.join(violations)
+        fCRITICAL ISOLATION VIOLATIONS DETECTED:\n + "\n.join(violations)
 
 
 # ============================================================================
@@ -245,7 +245,7 @@ async def test_websocket_bridge_shared_across_users_FAILING():
 
 @pytest.mark.asyncio
 async def test_global_singleton_blocks_concurrent_users_FAILING():
-    ""
+    "
     CRITICAL FAILING TEST: Demonstrates global singleton blocking concurrent execution.
 
     This test SHOULD FAIL because:
@@ -254,7 +254,7 @@ async def test_global_singleton_blocks_concurrent_users_FAILING():
     - User A's execution blocks User B's execution inappropriately
 
     Expected Failure: Severe performance degradation with concurrent users
-    "
+"
 
     # Test with increasing numbers of concurrent users to show scaling issues
     user_counts = [1, 3, 5, 8, 10]
@@ -264,8 +264,8 @@ async def test_global_singleton_blocks_concurrent_users_FAILING():
         users = [
             MockUser(
                 user_id=f"user_{i},
-                thread_id=fthread_{i}",
-                run_id=f"run_{i},
+                thread_id=fthread_{i},
+                run_id=frun_{i},
                 websocket_connection=TestWebSocketConnection()
             ) for i in range(user_count)
         ]
@@ -304,9 +304,9 @@ async def test_global_singleton_blocks_concurrent_users_FAILING():
         max_acceptable_time = expected_time * 1.5
 
         assert actual_time <= max_acceptable_time, \
-            fCRITICAL PERFORMANCE FAILURE with {user_count} users: " \
-            f"Expected {expected_time}s, got {actual_time}s.  \
-            fSingleton blocking detected!"
+            fCRITICAL PERFORMANCE FAILURE with {user_count} users: " \"
+            fExpected {expected_time}s, got {actual_time}s.  \
+            fSingleton blocking detected!
 
     # CRITICAL ASSERTION: Time per user should be constant (parallel execution)
     # This test FAILS because time per user increases with global locking
@@ -335,12 +335,12 @@ async def test_websocket_events_wrong_users_FAILING():
     - User A's agent events are delivered to User B's WebSocket
 
     Expected Failure: Event routing violations between users
-    ""
+    "
 
     # Create users with mock WebSocket connections
     users = [
         MockUser(
-            user_id=fuser_{i}",
+            user_id=fuser_{i},
             thread_id=f"thread_{i},
             run_id=frun_{i}",
             websocket_connection=TestWebSocketConnection()
@@ -351,7 +351,7 @@ async def test_websocket_events_wrong_users_FAILING():
     event_deliveries = {}
 
     def mock_websocket_send(connection, event_data):
-        "Mock WebSocket send with delivery tracking.""
+        Mock WebSocket send with delivery tracking.""
         user_id = None
         # Find which user this connection belongs to
         for user in users:
@@ -406,7 +406,7 @@ async def test_websocket_events_wrong_users_FAILING():
     # Simulate concurrent agent executions with WebSocket events
     async def simulate_agent_with_events(user: MockUser):
         # Trigger agent started event
-        await bridge.notify_agent_started(user.run_id, test_agent", {}
+        await bridge.notify_agent_started(user.run_id, test_agent, {}
         await asyncio.sleep(0.1)
 
     # Execute all users concurrently
@@ -427,7 +427,7 @@ async def test_websocket_events_wrong_users_FAILING():
                 }
 
     assert len(routing_violations) == 0, \
-        f"CRITICAL EVENT ROUTING VIOLATIONS: {len(routing_violations)} events delivered to wrong users:\n + \
+        fCRITICAL EVENT ROUTING VIOLATIONS: {len(routing_violations)} events delivered to wrong users:\n + \
         \n".join([f"Event for {v['intended_for']} delivered to {v['delivered_to']} for v in routing_violations]
 
     # CRITICAL ASSERTION: Every user should receive exactly their events
@@ -437,7 +437,7 @@ async def test_websocket_events_wrong_users_FAILING():
         expected_events = 1  # One agent_started event per user
 
         assert len(user_events) == expected_events, \
-            fCRITICAL EVENT COUNT FAILURE: User {user.user_id} expected {expected_events} events, got {len(user_events)}"
+            fCRITICAL EVENT COUNT FAILURE: User {user.user_id} expected {expected_events} events, got {len(user_events)}
 
 
 # ============================================================================
@@ -446,7 +446,7 @@ async def test_websocket_events_wrong_users_FAILING():
 
 async def simulate_user_agent_execution(user: MockUser, registry: AgentRegistry,
                                        violation_detector: IsolationViolationDetector):
-    "Simulate a realistic user agent execution to detect isolation violations.""
+    Simulate a realistic user agent execution to detect isolation violations.""
 
     # Record initial registry state
     initial_bridge = registry.get_websocket_bridge()
@@ -462,9 +462,9 @@ async def simulate_user_agent_execution(user: MockUser, registry: AgentRegistry,
         if bridge:
             try:
                 # This call might affect other users due to shared bridge
-                await bridge.notify_agent_started(user.run_id, test_agent", {}
+                await bridge.notify_agent_started(user.run_id, test_agent, {}
                 violation_detector.record_websocket_event(
-                    user.run_id, "agent_started, user.user_id, user.user_id
+                    user.run_id, agent_started, user.user_id, user.user_id"
                 )
             except Exception as e:
                 pass  # Handle missing methods gracefully
@@ -479,18 +479,18 @@ async def simulate_user_agent_execution(user: MockUser, registry: AgentRegistry,
         websocket_bridge", id(initial_bridge), id(final_bridge)
     )
     violation_detector.detect_global_state_mutation(
-        "agent_count, initial_agents, final_agents
+        agent_count, initial_agents, final_agents
     )
 
 
 async def simulate_blocking_agent_execution(user: MockUser, registry: AgentRegistry):
-    ""Simulate agent execution that reveals blocking behavior."
+    ""Simulate agent execution that reveals blocking behavior.
 
     # Simulate multiple registry operations that could block other users
     for operation in range(5):
         # Registry operations that go through singleton
         agents = registry.list_agents()
-        agent = registry.get("triage)
+        agent = registry.get(triage)"
         health = registry.get_registry_health()
 
         # Add delay to make blocking effects visible
@@ -503,14 +503,14 @@ async def simulate_blocking_agent_execution(user: MockUser, registry: AgentRegis
 
 @pytest.mark.asyncio
 async def test_comprehensive_isolation_audit_FAILING():
-    ""
+    "
     MASTER FAILING TEST: Comprehensive audit of all isolation violations.
 
     This is the ultimate failing test that demonstrates ALL isolation problems
     in a single comprehensive test case.
 
     Expected Result: MASSIVE FAILURE showing all isolation bugs simultaneously
-    "
+"
 
     logger.critical("🚨 STARTING COMPREHENSIVE ISOLATION AUDIT - EXPECT MASSIVE FAILURES 🚨)
 
@@ -518,7 +518,7 @@ async def test_comprehensive_isolation_audit_FAILING():
     user_count = 8
     users = [
         MockUser(
-            user_id=fuser_{i}",
+            user_id=fuser_{i},
             thread_id=f"thread_{i},
             run_id=frun_{i}",
             websocket_connection=TestWebSocketConnection()
@@ -530,7 +530,7 @@ async def test_comprehensive_isolation_audit_FAILING():
 
     # Test all isolation aspects simultaneously
     async def comprehensive_user_simulation(user: MockUser):
-        "Simulate comprehensive user interaction that exposes all isolation bugs.""
+        Simulate comprehensive user interaction that exposes all isolation bugs.""
 
         # ISOLATION TEST 1: Registry singleton sharing
         registry = AgentRegistry()
@@ -553,7 +553,7 @@ async def test_comprehensive_isolation_audit_FAILING():
             run_id=user.run_id,
             thread_id=user.thread_id,
             user_id=user.user_id,
-            agent_name=test_agent"
+            agent_name=test_agent
         )
 
         # Simulate intensive registry usage
@@ -573,7 +573,7 @@ async def test_comprehensive_isolation_audit_FAILING():
 
             # Simulate WebSocket events (potential cross-user leakage)
             try:
-                await bridge.notify_agent_started(user.run_id, f"agent_{step}, {}
+                await bridge.notify_agent_started(user.run_id, fagent_{step}, {}
             except:
                 pass
 
@@ -594,7 +594,7 @@ async def test_comprehensive_isolation_audit_FAILING():
         )
 
     # Execute all users concurrently
-    logger.warning(⚡ Executing 8 concurrent users - isolation violations expected...")
+    logger.warning(⚡ Executing 8 concurrent users - isolation violations expected...")"
     results = await asyncio.gather(
         *[comprehensive_user_simulation(user) for user in users],
         return_exceptions=True
@@ -607,8 +607,8 @@ async def test_comprehensive_isolation_audit_FAILING():
     unique_registry_ids = set(registry_ids)
 
     assert len(unique_registry_ids) == user_count, \
-        f"CRITICAL REGISTRY SHARING VIOLATION: {user_count} users share {len(unique_registry_ids)} registry instances.  \
-        fAll users using same singleton!"
+        fCRITICAL REGISTRY SHARING VIOLATION: {user_count} users share {len(unique_registry_ids)} registry instances.  \
+        fAll users using same singleton!
 
     # Check 2: Performance scaling (SHOULD FAIL)
     execution_times = [result.performance_metrics['execution_time'] for result in results if isinstance(result, IsolationTestResult)]
@@ -623,24 +623,24 @@ async def test_comprehensive_isolation_audit_FAILING():
     # Check 3: Global state mutations (SHOULD FAIL)
     total_violations = len(violation_detector.get_isolation_violations())
     assert total_violations == 0, \
-        f"CRITICAL GLOBAL STATE VIOLATIONS: {total_violations} violations detected:\n + \
-        \n".join(violation_detector.get_isolation_violations())
+        fCRITICAL GLOBAL STATE VIOLATIONS: {total_violations} violations detected:\n + \
+        \n.join(violation_detector.get_isolation_violations())"
 
     # Check 4: Exception handling (SHOULD FAIL if exceptions occurred)
     exceptions = [result for result in results if isinstance(result, Exception)]
     assert len(exceptions) == 0, \
         f"CRITICAL EXECUTION FAILURES: {len(exceptions)} exceptions during isolation testing
 
-    logger.critical(🎯 IF YOU SEE THIS MESSAGE, THE ISOLATION BUGS HAVE BEEN FIXED!")
-    logger.critical("🎯 THESE TESTS SHOULD FAIL WITH CURRENT SINGLETON ARCHITECTURE!)
+    logger.critical(🎯 IF YOU SEE THIS MESSAGE, THE ISOLATION BUGS HAVE BEEN FIXED!)
+    logger.critical(🎯 THESE TESTS SHOULD FAIL WITH CURRENT SINGLETON ARCHITECTURE!)"
 
 
 if __name__ == __main__":
     import asyncio
 
-    print("🚨 CRITICAL ISOLATION TEST SUITE)
+    print(🚨 CRITICAL ISOLATION TEST SUITE)"
     print(🚨 These tests are DESIGNED TO FAIL with current architecture")
-    print("🚨 Demonstrates user isolation violations in AgentRegistry singleton")
+    print(🚨 Demonstrates user isolation violations in AgentRegistry singleton")
 
     # Run a quick demonstration
-    asyncio.run(test_comprehensive_isolation_audit_FAILING())
+    asyncio.run(test_comprehensive_isolation_audit_FAILING()")

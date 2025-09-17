@@ -22,7 +22,7 @@ logger = central_logger.get_logger(__name__)
 
 @dataclass
 class ColdStartSimulation:
-    ""Configuration for cold start simulation."
+    Configuration for cold start simulation."
     trigger_delay: float
     connection_attempts: int
     timeout_seconds: float
@@ -30,7 +30,7 @@ class ColdStartSimulation:
 
 @dataclass
 class WebSocketConnectionAttempt:
-    "Result of a WebSocket connection attempt.""
+    "Result of a WebSocket connection attempt.
     attempt_number: int
     start_time: float
     end_time: float
@@ -41,7 +41,7 @@ class WebSocketConnectionAttempt:
     service_ready: bool
 
 class StagingEnvironmentManager:
-    ""Manager for staging environment interactions."
+    ""Manager for staging environment interactions.
 
     def __init__(self):
         self.staging_base_url = self._get_staging_url()
@@ -49,14 +49,14 @@ class StagingEnvironmentManager:
         self.health_check_url = f'{self.staging_base_url}/health'
 
     def _get_staging_url(self) -> str:
-        "Get staging environment URL.""
+        Get staging environment URL.""
         staging_url = os.getenv('STAGING_BASE_URL')
         if staging_url:
             return staging_url
         return 'https://netra-backend-staging-abc123-uc.a.run.app'
 
     def _get_websocket_url(self) -> str:
-        ""Get WebSocket URL for staging."
+        Get WebSocket URL for staging.""
         base_url = self.staging_base_url
         if base_url.startswith('https://'):
             websocket_url = base_url.replace('https://', 'wss://')
@@ -65,7 +65,7 @@ class StagingEnvironmentManager:
         return f'{websocket_url}/ws'
 
     async def trigger_cold_start(self) -> bool:
-        "Trigger a cold start in staging environment.""
+        Trigger a cold start in staging environment."
         try:
             logger.info(f'Triggering cold start conditions for {self.staging_base_url}')
             await asyncio.sleep(2.0)
@@ -75,7 +75,7 @@ class StagingEnvironmentManager:
             return False
 
     async def check_service_health(self) -> Dict[str, Any]:
-        ""Check service health status."
+        "Check service health status.
         try:
             loop = asyncio.get_event_loop()
 
@@ -93,21 +93,21 @@ class StagingEnvironmentManager:
 
 @pytest.mark.e2e
 class WebSocketStagingColdStartTests(SSotAsyncTestCase):
-    "E2E tests for WebSocket connections during staging cold starts.""
+    "E2E tests for WebSocket connections during staging cold starts."
 
     def setUp(self):
-        ""Set up E2E test environment."
+        "Set up E2E test environment."
         super().setUp()
         self.staging_manager = StagingEnvironmentManager()
         self.connection_attempts = []
 
     @pytest.mark.staging
     async def test_websocket_connection_during_cold_start(self):
-        "TEST FAILURE EXPECTED: WebSocket 1011 errors during staging cold start.
+        TEST FAILURE EXPECTED: WebSocket 1011 errors during staging cold start.""
         
         This test should FAIL to expose the 1011 error condition that occurs when
         clients attempt WebSocket connections during GCP Cloud Run cold starts.
-        ""
+        
         logger.info('🧪 Testing WebSocket connection during staging cold start')
         cold_start_config = ColdStartSimulation(trigger_delay=1.0, connection_attempts=5, timeout_seconds=10.0, retry_delay=2.0)
         logger.info('Step 1: Triggering cold start conditions')
@@ -130,18 +130,18 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
 
     @pytest.mark.staging
     async def test_websocket_handshake_timeout_during_startup(self):
-        ""TEST FAILURE EXPECTED: WebSocket handshake timeouts during service startup.
+        "TEST FAILURE EXPECTED: WebSocket handshake timeouts during service startup.
         
         This test should FAIL to expose handshake timeout issues that contribute
         to 1011 errors when the service is not ready to handle WebSocket connections.
-        "
+"
         logger.info('🧪 Testing WebSocket handshake timeouts during startup')
         initial_health = await self.staging_manager.check_service_health()
         logger.info(f'Initial service health: {initial_health}')
         timeout_tests = [{'timeout': 5.0, 'description': 'short_timeout'}, {'timeout': 10.0, 'description': 'default_timeout'}, {'timeout': 20.0, 'description': 'long_timeout'}]
         timeout_results = []
         for timeout_test in timeout_tests:
-            logger.info(f"Testing {timeout_test['description']} ({timeout_test['timeout']}s))
+            logger.info(fTesting {timeout_test['description']} ({timeout_test['timeout']}s))
             await self.staging_manager.trigger_cold_start()
             await asyncio.sleep(1.0)
             start_time = time.time()
@@ -156,16 +156,16 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
         logger.info(f'Failed connections: {len(failed_connections)}')
         logger.info(f'Timeout-related failures: {len(timeout_failures)}')
         if timeout_failures:
-            failure_descriptions = [f{r['description']}: {r['actual_duration']:.1f}s" for r in timeout_failures]
+            failure_descriptions = [f{r['description']}: {r['actual_duration']:.1f}s" for r in timeout_failures]"
             self.assertEqual(len(timeout_failures), 0, f'EXPECTED FAILURE: WebSocket handshake timeouts during startup. Timeout failures: {failure_descriptions}. This contributes to 1011 errors when clients cannot complete handshake before service is ready.')
 
     @pytest.mark.staging
     async def test_websocket_health_check_coordination(self):
-        "TEST FAILURE EXPECTED: Health check passes but WebSocket not ready.
+        TEST FAILURE EXPECTED: Health check passes but WebSocket not ready."
         
         This test should FAIL to expose the issue where health checks pass but
         WebSocket connections still fail with 1011 errors.
-        ""
+        "
         logger.info('🧪 Testing WebSocket health check coordination')
         monitoring_duration = 30.0
         check_interval = 2.0
@@ -176,7 +176,7 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
             websocket_result = await self._attempt_single_websocket_connection(timeout=5.0)
             correlation_point = {'timestamp': time.time() - start_time, 'health_healthy': health_result.get('healthy', False), 'health_status_code': health_result.get('status_code'), 'websocket_success': websocket_result.success, 'websocket_error_code': websocket_result.error_code, 'health_response_time': health_result.get('response_time'), 'websocket_handshake_time': websocket_result.handshake_duration}
             health_websocket_correlation.append(correlation_point)
-            logger.debug(fHealth/WebSocket correlation at {correlation_point['timestamp']:.1f}s: Health={correlation_point['health_healthy']}, WebSocket={correlation_point['websocket_success']}")
+            logger.debug(fHealth/WebSocket correlation at {correlation_point['timestamp']:.1f}s: Health={correlation_point['health_healthy']}, WebSocket={correlation_point['websocket_success']})
             await asyncio.sleep(check_interval)
         problematic_points = []
         for point in health_websocket_correlation:
@@ -191,11 +191,11 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
 
     @pytest.mark.staging
     async def test_concurrent_websocket_connections_cold_start(self):
-        "TEST: Concurrent WebSocket connections during cold start conditions.
+        TEST: Concurrent WebSocket connections during cold start conditions.""
         
         This test validates how the system handles multiple concurrent WebSocket
         connection attempts during cold start scenarios.
-        ""
+        
         logger.info('🧪 Testing concurrent WebSocket connections during cold start')
         await self.staging_manager.trigger_cold_start()
         await asyncio.sleep(1.0)
@@ -232,7 +232,7 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
         self.assertGreater(success_rate, minimum_success_rate, f'Concurrent connection success rate too low: {success_rate:.1%} < {minimum_success_rate:.1%}. Cold start handling may not be robust enough for production load.')
 
     async def _attempt_websocket_connections_during_startup(self, config: ColdStartSimulation) -> List[WebSocketConnectionAttempt]:
-        ""Attempt multiple WebSocket connections during startup."
+        "Attempt multiple WebSocket connections during startup."
         results = []
         for attempt in range(config.connection_attempts):
             logger.info(f'Connection attempt {attempt + 1}/{config.connection_attempts}')
@@ -252,7 +252,7 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
         return results
 
     async def _attempt_single_websocket_connection(self, timeout: float, attempt_id: str='single') -> WebSocketConnectionAttempt:
-        "Attempt a single WebSocket connection."""
+        Attempt a single WebSocket connection.""
         start_time = time.time()
         try:
             async with asyncio.timeout(timeout):

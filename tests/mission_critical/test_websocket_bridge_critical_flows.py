@@ -6,7 +6,7 @@
 _lazy_imports = {}
 
 def lazy_import(module_path: str, component: str = None):
-    "Lazy import pattern for performance optimization""
+    "Lazy import pattern for performance optimization
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else []
@@ -15,7 +15,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(fWarning: Failed to lazy load {module_path}: {e}")
+            print(fWarning: Failed to lazy load {module_path}: {e}"")
             _lazy_imports[module_path] = None
     
     return _lazy_imports[module_path]
@@ -23,7 +23,7 @@ def lazy_import(module_path: str, component: str = None):
 _lazy_imports = {}
 
 def lazy_import(module_path: str, component: str = None):
-    "Lazy import pattern for performance optimization""
+    Lazy import pattern for performance optimization""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else []
@@ -32,12 +32,12 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(fWarning: Failed to lazy load {module_path}: {e}")
+            print(fWarning: Failed to lazy load {module_path}: {e})
             _lazy_imports[module_path] = None
     
     return _lazy_imports[module_path]
 
-"
+""
 MISSION CRITICAL: Comprehensive WebSocket Bridge Critical Flows Test Suite
 
 CRITICAL BUSINESS CONTEXT:
@@ -62,7 +62,7 @@ COVERAGE FOCUS:
 - Business metrics validation and performance tracking
 
 These tests are designed to catch critical regressions before they impact users.
-""
+
 
 import asyncio
 import json
@@ -124,7 +124,7 @@ try:
         create_isolated_test_contexts
     )
 except ImportError as e:
-    pytest.skip(fCould not import required WebSocket bridge modules: {e}", allow_module_level=True)
+    pytest.skip(fCould not import required WebSocket bridge modules: {e}", allow_module_level=True)"
 
 
 # CRITICAL: Using actual WebSocketManager from websocket_core - NO MOCKS per CLAUDE.md
@@ -132,7 +132,7 @@ except ImportError as e:
 
 
 class MockOrchestrator:
-    "Enhanced orchestrator mock with comprehensive scenarios.""
+    Enhanced orchestrator mock with comprehensive scenarios."
     
     def __init__(self):
         self.thread_mappings: Dict[str, str] = {}
@@ -149,7 +149,7 @@ class MockOrchestrator:
         self.health_status = 'healthy'
     
     async def get_thread_id_for_run(self, run_id: str) -> Optional[str]:
-        ""Mock thread resolution with comprehensive failure modes."
+        "Mock thread resolution with comprehensive failure modes.
         start_time = time.time()
         self.call_metrics['resolution_calls'] += 1
         
@@ -157,7 +157,7 @@ class MockOrchestrator:
             # Check if orchestrator is available
             if not self.is_available:
                 self.call_metrics['failed_resolutions'] += 1
-                raise Exception("Orchestrator unavailable)
+                raise Exception("Orchestrator unavailable)"
             
             # Check initialization
             if not self.initialization_complete:
@@ -193,7 +193,7 @@ class MockOrchestrator:
             return None
     
     def _update_avg_resolution_time(self, resolution_time: float):
-        ""Update rolling average resolution time."
+        Update rolling average resolution time."
         current_avg = self.call_metrics['avg_resolution_time']
         total_calls = self.call_metrics['resolution_calls']
         
@@ -205,27 +205,27 @@ class MockOrchestrator:
             )
     
     def set_thread_mapping(self, run_id: str, thread_id: str):
-        "Set thread mapping.""
+        "Set thread mapping.
         self.thread_mappings[run_id] = thread_id
     
     def set_resolution_delay(self, run_id: str, delay: float):
-        ""Set resolution delay."
+        ""Set resolution delay.
         self.resolution_delays[run_id] = delay
     
     def set_resolution_failure(self, run_id: str):
-        "Mark run_id as resolution failure.""
+        Mark run_id as resolution failure.""
         self.resolution_failures.add(run_id)
     
     def set_availability(self, available: bool):
-        ""Set orchestrator availability."
+        Set orchestrator availability.""
         self.is_available = available
     
     def set_initialization_status(self, complete: bool):
-        "Set initialization status.""
+        Set initialization status."
         self.initialization_complete = complete
     
     async def get_metrics(self) -> Dict[str, Any]:
-        ""Get orchestrator metrics."
+        "Get orchestrator metrics.
         total_calls = self.call_metrics['resolution_calls']
         success_rate = (
             self.call_metrics['successful_resolutions'] / max(1, total_calls)
@@ -243,13 +243,13 @@ class MockOrchestrator:
         }
     
     async def set_websocket_manager(self, manager):
-        "Mock method for integration.""
+        "Mock method for integration."
         pass
 
 
 @pytest.fixture
 async def real_websocket_manager():
-    ""Real WebSocket manager fixture - NO MOCKS."
+    "Real WebSocket manager fixture - NO MOCKS."
     from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
     manager = get_websocket_manager()
     yield manager
@@ -257,13 +257,13 @@ async def real_websocket_manager():
 
 @pytest.fixture
 def mock_orchestrator():
-    "Orchestrator fixture.""
+    Orchestrator fixture.""
     return MockOrchestrator()
 
 
 @pytest.fixture
 def test_registry():
-    ""Test registry with short TTL for testing."
+    Test registry with short TTL for testing."
     config = RegistryConfig(
         mapping_ttl_hours=0.1,  # 6 minutes for testing
         cleanup_interval_minutes=1,  # Fast cleanup for testing
@@ -275,7 +275,7 @@ def test_registry():
 
 @pytest.fixture
 async def websocket_bridge(real_websocket_manager, mock_orchestrator, test_registry):
-    "WebSocket bridge with real WebSocket manager and mocked orchestrator.""
+    "WebSocket bridge with real WebSocket manager and mocked orchestrator.
     bridge = AgentWebSocketBridge()
     
     # Set real WebSocket manager and mocked orchestrator
@@ -288,20 +288,20 @@ async def websocket_bridge(real_websocket_manager, mock_orchestrator, test_regis
 
 
 class RunIdSSotComplianceTests:
-    ""Test SSOT compliance for run ID generation and thread extraction."
+    ""Test SSOT compliance for run ID generation and thread extraction.
     
     @pytest.mark.asyncio
     async def test_run_id_always_includes_thread(self):
-        "CRITICAL: Verify all generated run IDs include thread information.""
+        CRITICAL: Verify all generated run IDs include thread information.""
         
         test_thread_ids = [
-            user_session_123",
-            "chat_conversation_456, 
-            admin_tool_789",
-            "background_task_abc,
+            user_session_123,
+            "chat_conversation_456, "
+            admin_tool_789,
+            background_task_abc,"
             websocket_connection_def",
-            "thread_complex_nested_ghi,
-            a",  # Minimal thread ID
+            thread_complex_nested_ghi,
+            a,  # Minimal thread ID"
             "x * 200,  # Maximum length thread ID
         ]
         
@@ -310,7 +310,7 @@ class RunIdSSotComplianceTests:
             run_id = UnifiedIDManager.generate_run_id(thread_id)
             
             # Verify format compliance
-            assert run_id.startswith(RUN_ID_PREFIX), fRun ID missing prefix: {run_id}"
+            assert run_id.startswith(RUN_ID_PREFIX), fRun ID missing prefix: {run_id}
             assert RUN_ID_SEPARATOR in run_id, f"Run ID missing separator: {run_id}
             
             # Verify thread extraction works
@@ -318,7 +318,7 @@ class RunIdSSotComplianceTests:
             assert extracted_thread == thread_id, fThread extraction failed: expected '{thread_id}', got '{extracted_thread}'"
             
             # Verify validation passes
-            assert UnifiedIDManager.validate_id_pair(run_id, thread_id), f"Validation failed for run_id: {run_id}
+            assert UnifiedIDManager.validate_id_pair(run_id, thread_id), fValidation failed for run_id: {run_id}
             
             # Verify not legacy format
             assert not is_legacy_run_id(run_id), fGenerated run_id marked as legacy: {run_id}"
@@ -327,23 +327,23 @@ class RunIdSSotComplianceTests:
     
     @pytest.mark.asyncio
     async def test_thread_resolution_priority_chain(self, websocket_bridge, test_registry, mock_orchestrator):
-        ""CRITICAL: Test 3-priority chain Resolution: Registry -> WebSocketManager -> Pattern -> None."
+        "CRITICAL: Test 3-priority chain Resolution: Registry -> WebSocketManager -> Pattern -> None."
         
         # Test case setup
-        run_id = "priority_test_run_123 
-        registry_thread = thread_from_registry"
+        run_id = priority_test_run_123 
+        registry_thread = thread_from_registry""
         
         # Case 1: Registry has mapping (PRIORITY 1 - highest priority)
         await test_registry.register(run_id, registry_thread)
         
         result = await websocket_bridge._resolve_thread_id_from_run_id(run_id)
-        assert result == registry_thread, f"Registry priority failed: expected '{registry_thread}', got '{result}'
+        assert result == registry_thread, fRegistry priority failed: expected '{registry_thread}', got '{result}'
         
         # Case 2: Clear registry, WebSocketManager check should be used (PRIORITY 3)
         await test_registry.unregister_run(run_id)
         
         # Test with run_id that has valid thread format for WebSocketManager check
-        thread_format_run_id = thread_websocket_test_456"
+        thread_format_run_id = thread_websocket_test_456
         
         result = await websocket_bridge._resolve_thread_id_from_run_id(thread_format_run_id)
         # Should return the run_id itself if it's a valid thread format
@@ -354,29 +354,29 @@ class RunIdSSotComplianceTests:
         run_id_with_pattern = agent_run_thread_pattern_extraction_789"
         
         result = await websocket_bridge._resolve_thread_id_from_run_id(run_id_with_pattern)
-        # Pattern extraction should extract the full ID and prefix with "thread_
+        # Pattern extraction should extract the full ID and prefix with thread_
         expected_pattern = thread_agent_run_thread_pattern_extraction_789"
         assert result == expected_pattern, f"Pattern fallback failed: expected '{expected_pattern}', got '{result}'
         
         # Case 4: No resolution possible (empty string should fail)
-        impossible_run_id = "
+        impossible_run_id = 
         
         # Empty run_id should raise ValueError per validation
         try:
             result = await websocket_bridge._resolve_thread_id_from_run_id(impossible_run_id)
-            assert False, f"Empty run_id should raise ValueError, but got '{result}'
+            assert False, fEmpty run_id should raise ValueError, but got '{result}'
         except ValueError as e:
             # Expected - empty run_id should be rejected
             assert Invalid run_id" in str(e), f"Expected invalid run_id error, got: {e}
         
-        print( PASS:  Thread resolution 3-priority chain: PASSED")
+        print( PASS:  Thread resolution 3-priority chain: PASSED)
     
     @pytest.mark.asyncio  
     async def test_registry_primary_resolution(self, websocket_bridge, test_registry, mock_orchestrator):
-        "CRITICAL: Test registry as primary resolution source in 3-priority system.""
+        CRITICAL: Test registry as primary resolution source in 3-priority system.""
         
-        run_id = registry_primary_test"
-        registry_thread = "thread_primary_registry
+        run_id = registry_primary_test
+        registry_thread = thread_primary_registry"
         
         # Register in registry (PRIORITY 1)
         await test_registry.register(run_id, registry_thread)
@@ -386,32 +386,32 @@ class RunIdSSotComplianceTests:
         assert result == registry_thread, fRegistry primary failed: expected '{registry_thread}', got '{result}'"
         
         # Test fallback when registry has no mapping - use empty string to trigger error
-        fallback_run_id = "
+        fallback_run_id = 
         
         # Empty string should raise ValueError as no sources can handle it
         try:
             result = await websocket_bridge._resolve_thread_id_from_run_id(fallback_run_id)
-            assert False, fEmpty run_id should raise ValueError, but got '{result}'"
+            assert False, fEmpty run_id should raise ValueError, but got '{result}'""
         except ValueError as e:
             # Expected - demonstrates registry alone can't handle invalid inputs
-            assert "Invalid run_id in str(e), fExpected invalid run_id error, got: {e}"
+            assert Invalid run_id in str(e), fExpected invalid run_id error, got: {e}
         
-        print(" PASS:  Registry backup when orchestrator fails: PASSED)
+        print( PASS:  Registry backup when orchestrator fails: PASSED")"
     
     @pytest.mark.asyncio
     async def test_simple_run_id_failure_detection(self, websocket_bridge):
-        ""CRITICAL: Detect and handle legacy/invalid run IDs that break thread resolution."
+        CRITICAL: Detect and handle legacy/invalid run IDs that break thread resolution."
         
         # Legacy run ID formats that should fail gracefully
         legacy_run_ids = [
             "run_12345,  # Old format without thread
-            admin_tool_timestamp_67890",  # Admin format without thread
-            "batch_process_abc123,  # Batch format without thread
-            user_session_456",  # User format without thread marker
-            ",  # Empty string
+            admin_tool_timestamp_67890,  # Admin format without thread
+            "batch_process_abc123,  # Batch format without thread"
+            user_session_456,  # User format without thread marker
+            ,  # Empty string"
             thread_",  # Incomplete thread format
-            "_run_,  # Separator only
-            malformed_format",  # No recognizable pattern
+            _run_,  # Separator only
+            malformed_format",  # No recognizable pattern"
         ]
         
         for legacy_run_id in legacy_run_ids:
@@ -419,31 +419,31 @@ class RunIdSSotComplianceTests:
                 continue
                 
             # Verify it's detected as legacy/invalid
-            if legacy_run_id not in [", thread_", "_run_]:
+            if legacy_run_id not in [, thread_, _run_]:"
                 assert is_legacy_run_id(legacy_run_id), fShould detect '{legacy_run_id}' as legacy"
             
             # Thread resolution should handle gracefully (return None, not crash)
             result = await websocket_bridge._resolve_thread_id_from_run_id(legacy_run_id)
-            assert result is None or isinstance(result, str), f"Should handle '{legacy_run_id}' gracefully
+            assert result is None or isinstance(result, str), fShould handle '{legacy_run_id}' gracefully
             
             # Extraction should return None for invalid formats
             extracted = UnifiedIDManager.extract_thread_id(legacy_run_id) 
-            if legacy_run_id.startswith(thread_") and "_run_ in legacy_run_id:
+            if legacy_run_id.startswith(thread_) and "_run_ in legacy_run_id:
                 # Valid format should extract
                 assert isinstance(extracted, str) or extracted is None
             else:
                 # Invalid format should return None
                 assert extracted is None, fShould return None for invalid format '{legacy_run_id}'"
         
-        print(" PASS:  Simple run ID failure detection: PASSED)
+        print( PASS:  Simple run ID failure detection: PASSED)"
 
 
 class ThreadRegistryOperationsTests:
-    ""Test thread registry operations including TTL and cleanup."
+    "Test thread registry operations including TTL and cleanup.
     
     @pytest.mark.asyncio
     async def test_registry_performance_under_load(self, test_registry):
-        "CRITICAL: Test registry performance with 1000+ mappings.""
+        "CRITICAL: Test registry performance with 1000+ mappings."
         
         # Create large number of mappings
         mapping_count = 1500
@@ -455,7 +455,7 @@ class ThreadRegistryOperationsTests:
         for i in range(mapping_count):
             run_id = fload_test_{i}"
             thread_id = f"thread_load_{i}
-            metadata = {index": i, "batch: performance_test"}
+            metadata = {index: i, batch: performance_test}"
             
             success = await test_registry.register(run_id, thread_id, metadata)
             assert success, f"Registration {i} should succeed
@@ -480,20 +480,20 @@ class ThreadRegistryOperationsTests:
         lookup_success_rate = successful_lookups / len(lookup_results)
         
         # Performance assertions
-        assert registration_time < 5.0, fRegistration took too long: {registration_time:.2f}s"
-        assert lookup_time < 2.0, f"Lookup took too long: {lookup_time:.2f}s
-        assert lookup_success_rate > 0.95, fLookup success rate too low: {lookup_success_rate:.2%}"
+        assert registration_time < 5.0, fRegistration took too long: {registration_time:.2f}s
+        assert lookup_time < 2.0, fLookup took too long: {lookup_time:.2f}s
+        assert lookup_success_rate > 0.95, fLookup success rate too low: {lookup_success_rate:.2%}""
         
         # Verify registry health under load
         metrics = await test_registry.get_metrics()
-        assert metrics['registry_healthy'], "Registry should remain healthy under load
+        assert metrics['registry_healthy'], Registry should remain healthy under load
         assert metrics['active_mappings'] >= mapping_count * 0.9, Most mappings should still be active"
         
         print(f" PASS:  Registry performance under load: {mapping_count} mappings registered in {registration_time:.2f}s, {len(lookup_results)} lookups in {lookup_time:.2f}s)
     
     @pytest.mark.asyncio
     async def test_registry_ttl_and_cleanup(self, test_registry):
-        ""CRITICAL: Test TTL expiration and automatic cleanup."
+        CRITICAL: Test TTL expiration and automatic cleanup.""
         
         # Override TTL for fast testing
         original_ttl = test_registry.config.mapping_ttl_hours
@@ -502,9 +502,9 @@ class ThreadRegistryOperationsTests:
         try:
             # Register test mappings
             test_mappings = [
-                ("ttl_test_1, thread_ttl_1"),
-                ("ttl_test_2, thread_ttl_2"), 
-                ("ttl_test_3, thread_ttl_3"),
+                (ttl_test_1, thread_ttl_1),
+                (ttl_test_2, thread_ttl_2"), 
+                ("ttl_test_3, thread_ttl_3),
             ]
             
             for run_id, thread_id in test_mappings:
@@ -513,7 +513,7 @@ class ThreadRegistryOperationsTests:
             # Verify immediate lookup works
             for run_id, thread_id in test_mappings:
                 result = await test_registry.get_thread(run_id)
-                assert result == thread_id, f"Immediate lookup should work for {run_id}
+                assert result == thread_id, fImmediate lookup should work for {run_id}
             
             # Wait for TTL expiration
             await asyncio.sleep(5.0)
@@ -528,24 +528,24 @@ class ThreadRegistryOperationsTests:
             assert cleaned >= len(test_mappings), f"Should clean at least {len(test_mappings)} mappings
             
             metrics = await test_registry.get_metrics()
-            assert metrics['expired_mappings_cleaned'] >= len(test_mappings), Cleanup metrics should reflect removed mappings"
+            assert metrics['expired_mappings_cleaned'] >= len(test_mappings), Cleanup metrics should reflect removed mappings
             
         finally:
             # Restore original TTL
             test_registry.config.mapping_ttl_hours = original_ttl
         
-        print(" PASS:  Registry TTL and cleanup: PASSED)
+        print( PASS:  Registry TTL and cleanup: PASSED")"
     
     @pytest.mark.asyncio
     async def test_registry_concurrent_access(self, test_registry):
-        ""CRITICAL: Test thread-safe concurrent registry operations."
+        CRITICAL: Test thread-safe concurrent registry operations."
         
         async def concurrent_worker(worker_id: int, operations: int) -> Dict[str, int]:
             stats = {'registered': 0, 'lookups': 0, 'unregistered': 0}
             
             for i in range(operations):
                 run_id = f"worker_{worker_id}_op_{i}
-                thread_id = fthread_worker_{worker_id}_{i}"
+                thread_id = fthread_worker_{worker_id}_{i}
                 
                 # Register
                 success = await test_registry.register(run_id, thread_id)
@@ -584,66 +584,66 @@ class ThreadRegistryOperationsTests:
         
         # Verify concurrent operations succeeded
         expected_operations = worker_count * operations_per_worker
-        assert total_stats['registered'] >= expected_operations * 0.95, "Most registrations should succeed
+        assert total_stats['registered'] >= expected_operations * 0.95, Most registrations should succeed"
         assert total_stats['lookups'] >= expected_operations * 0.95, Most lookups should succeed"
         
         # Verify registry integrity
         metrics = await test_registry.get_metrics()
-        assert metrics['registry_healthy'], "Registry should remain healthy after concurrent access
+        assert metrics['registry_healthy'], Registry should remain healthy after concurrent access
         
-        print(f PASS:  Registry concurrent access: {total_stats['registered']} registrations, {total_stats['lookups']} lookups across {worker_count} workers")
+        print(f PASS:  Registry concurrent access: {total_stats['registered']} registrations, {total_stats['lookups']} lookups across {worker_count} workers"")
 
 
 class WebSocketEventDeliveryTests:
-    "Test end-to-end WebSocket event delivery.""
+    Test end-to-end WebSocket event delivery.""
     
     @pytest.mark.asyncio
     async def test_websocket_events_reach_users(self, websocket_bridge, real_websocket_manager, test_registry):
-        ""CRITICAL: Verify WebSocket events actually reach users end-to-end."
+        CRITICAL: Verify WebSocket events actually reach users end-to-end."
         
         # Setup user scenarios
         user_scenarios = [
             {
-                "user_id: user_123",
-                "session_id: session_abc",
+                "user_id: user_123,
+                session_id: session_abc,
                 "thread_id: thread_user_123_session_abc",
-                "run_id: UnifiedIDManager.generate_run_id(user_123_session_abc"),
-                "agent_name: ChatAgent"
+                run_id: UnifiedIDManager.generate_run_id(user_123_session_abc),
+                agent_name: ChatAgent"
             },
             {
-                "user_id: user_456", 
-                "session_id: session_def",
-                "thread_id: thread_user_456_session_def",
-                "run_id: UnifiedIDManager.generate_run_id(user_456_session_def"),
-                "agent_name: AnalysisAgent"
+                "user_id: user_456, 
+                session_id: session_def,
+                thread_id: thread_user_456_session_def",
+                "run_id: UnifiedIDManager.generate_run_id(user_456_session_def),
+                agent_name: AnalysisAgent
             },
             {
-                "user_id: user_789",
-                "session_id: session_ghi", 
-                "thread_id: thread_user_789_session_ghi",
+                user_id: user_789",
+                "session_id: session_ghi, 
+                thread_id: thread_user_789_session_ghi,
                 "run_id: UnifiedIDManager.generate_run_id(user_789_session_ghi"),
-                "agent_name: SupportAgent"
+                agent_name: SupportAgent
             }
         ]
         
         # Register all thread mappings
         for scenario in user_scenarios:
             await test_registry.register(
-                scenario["run_id],
+                scenario[run_id],"
                 scenario[thread_id"],
-                {"user_id: scenario[user_id"], "session_id: scenario[session_id"]}
+                {user_id: scenario[user_id], "session_id: scenario[session_id"]}
             
             # Real WebSocket manager handles connections via standard WebSocket protocol
             # Connection established when user actually connects via WebSocket
         
         # Test full event sequence for each user
         event_types = [
-            ("notify_agent_started, {context": {"user_query: Test query"}},
-            ("notify_agent_thinking, {reasoning": "Processing request, step_number": 1},
-            ("notify_tool_executing, {tool_name": "test_tool, parameters": {"param: value"}},
-            ("notify_tool_completed, {tool_name": "test_tool, result": {"success: True}},
-            (notify_progress_update", {"progress: {percentage": 75, "message: Nearly done"}},
-            ("notify_agent_completed, {result": {"status: success", "data: response"}}
+            (notify_agent_started, {context: {user_query: Test query"}},
+            ("notify_agent_thinking, {reasoning: Processing request, step_number: 1},
+            ("notify_tool_executing, {tool_name": test_tool, parameters: {param: value"}},
+            ("notify_tool_completed, {tool_name: test_tool, result: {"success: True}},"
+            (notify_progress_update, {progress: {percentage: 75, "message: Nearly done"}},
+            (notify_agent_completed, {result: {"status: success", data: response}}
         ]
         
         # Send events for all users
@@ -651,11 +651,11 @@ class WebSocketEventDeliveryTests:
             for event_method, event_kwargs in event_types:
                 method = getattr(websocket_bridge, event_method)
                 success = await method(
-                    scenario["run_id],
+                    scenario[run_id],"
                     scenario[agent_name"],
                     **event_kwargs
                 )
-                assert success, f"Event {event_method} should succeed for {scenario['user_id']}
+                assert success, fEvent {event_method} should succeed for {scenario['user_id']}
         
         # Verify event delivery per user with real WebSocket manager
         for scenario in user_scenarios:
@@ -668,15 +668,15 @@ class WebSocketEventDeliveryTests:
         # Real WebSocket manager ensures proper isolation through connection management
         # Cross-user contamination prevention verified by successful individual event sends
         
-        print(f PASS:  WebSocket events reach users: {len(user_scenarios)} users  x  {len(event_types)} events delivered successfully")
+        print(f PASS:  WebSocket events reach users: {len(user_scenarios)} users  x  {len(event_types)} events delivered successfully)"
     
     @pytest.mark.asyncio
     async def test_event_delivery_failure_recovery(self, websocket_bridge, real_websocket_manager, test_registry):
-        "CRITICAL: Test event delivery failure handling and recovery.""
+        "CRITICAL: Test event delivery failure handling and recovery.
         
         # Setup test scenario  
-        run_id = UnifiedIDManager.generate_run_id(recovery_test_user")
-        thread_id = "thread_recovery_test_user
+        run_id = UnifiedIDManager.generate_run_id(recovery_test_user")"
+        thread_id = thread_recovery_test_user
         agent_name = RecoveryTestAgent"
         
         await test_registry.register(run_id, thread_id)
@@ -684,27 +684,27 @@ class WebSocketEventDeliveryTests:
         # Test different failure scenarios
         failure_scenarios = [
             {
-                "name: connection_timeout",
-                "failure_mode: timeout",
-                "expected_success: False,
-                recovery_action": lambda: None  # Real connections handle recovery automatically
+                "name: connection_timeout,
+                failure_mode: timeout,
+                "expected_success: False,"
+                recovery_action: lambda: None  # Real connections handle recovery automatically
             },
             {
-                "name: connection_closed", 
-                "failure_mode: connection_closed",
-                "expected_success: False,
-                recovery_action": lambda: None  # Real connections handle recovery automatically
+                name: connection_closed", 
+                "failure_mode: connection_closed,
+                expected_success: False,
+                recovery_action": lambda: None  # Real connections handle recovery automatically"
             },
             {
-                "name: rate_limited",
-                "failure_mode: rate_limited", 
+                name: rate_limited,
+                failure_mode: rate_limited", 
                 "expected_success: False,
-                recovery_action": lambda: None  # Real connections handle recovery automatically
+                recovery_action: lambda: None  # Real connections handle recovery automatically
             },
             {
                 "name: network_partition",
-                "failure_mode: network_partition",
-                "expected_success: False, 
+                failure_mode: network_partition,
+                expected_success: False, "
                 recovery_action": lambda: None  # Real connections handle recovery automatically
             }
         ]
@@ -713,7 +713,7 @@ class WebSocketEventDeliveryTests:
             real_websocket_manager.clear_messages()
             
             # Set failure condition
-            if scenario["failure_mode] == network_partition":
+            if scenario[failure_mode] == network_partition:
                 # Real connections don't support artificial network partitioning
                 pass
             else:
@@ -729,24 +729,24 @@ class WebSocketEventDeliveryTests:
             # Event delivery failure is indicated by the bridge method return value
             
             # Perform recovery action
-            scenario["recovery_action]()
+            scenario[recovery_action]()
             
             # Verify recovery works
-            success = await websocket_bridge.notify_agent_thinking(run_id, agent_name, Recovery test")
+            success = await websocket_bridge.notify_agent_thinking(run_id, agent_name, Recovery test)"
             assert success, f"Recovery should work after {scenario['name']}
             
             # With real WebSocket manager, recovery is automatic
             # Successful recovery is indicated by the bridge method success response
         
-        print( PASS:  Event delivery failure recovery: PASSED")
+        print( PASS:  Event delivery failure recovery: PASSED)
     
     @pytest.mark.asyncio
     async def test_high_frequency_event_delivery(self, websocket_bridge, real_websocket_manager, test_registry):
-        "CRITICAL: Test high-frequency event delivery without loss.""
+        "CRITICAL: Test high-frequency event delivery without loss."
         
-        run_id = UnifiedIDManager.generate_run_id(high_frequency_user")
+        run_id = UnifiedIDManager.generate_run_id(high_frequency_user)"
         thread_id = "thread_high_frequency_user
-        agent_name = HighFrequencyAgent"
+        agent_name = HighFrequencyAgent
         
         await test_registry.register(run_id, thread_id)
         # Real connections handle connection lifecycle automatically
@@ -773,9 +773,9 @@ class WebSocketEventDeliveryTests:
                 elif event_type == 1:
                     task = websocket_bridge.notify_tool_executing(run_id, agent_name, ftool_{event_index}")
                 elif event_type == 2:
-                    task = websocket_bridge.notify_progress_update(run_id, agent_name, {"percentage: event_index % 100}
+                    task = websocket_bridge.notify_progress_update(run_id, agent_name, {percentage: event_index % 100}
                 else:
-                    task = websocket_bridge.notify_tool_completed(run_id, agent_name, ftool_{event_index}", {"result: foutput_{event_index}"}
+                    task = websocket_bridge.notify_tool_completed(run_id, agent_name, ftool_{event_index}", {"result: foutput_{event_index}}
                 
                 batch_tasks.append(task)
             
@@ -783,7 +783,7 @@ class WebSocketEventDeliveryTests:
             batch_results = await asyncio.gather(*batch_tasks)
             
             # Verify all succeeded
-            assert all(batch_results), f"All events in batch {batch // event_batch_size} should succeed
+            assert all(batch_results), fAll events in batch {batch // event_batch_size} should succeed
             
             # Small delay between batches
             await asyncio.sleep(0.01)
@@ -796,23 +796,23 @@ class WebSocketEventDeliveryTests:
         
         # Performance assertion
         events_per_second = event_count / total_time
-        assert events_per_second > 50, fEvent throughput too low: {events_per_second:.1f} events/sec"
+        assert events_per_second > 50, fEvent throughput too low: {events_per_second:.1f} events/sec""
         
-        print(f" PASS:  High-frequency event delivery: {event_count} events delivered in {total_time:.2f}s ({events_per_second:.1f} events/sec))
+        print(f PASS:  High-frequency event delivery: {event_count} events delivered in {total_time:.2f}s ({events_per_second:.1f} events/sec))
 
 
 class OrchestratorIntegrationTests:
-    ""Test orchestrator initialization and fallback mechanisms."
+    "Test orchestrator initialization and fallback mechanisms."
     
     @pytest.mark.asyncio
     async def test_orchestrator_initialization_required(self, websocket_bridge, mock_orchestrator):
-        "CRITICAL: Test that orchestrator initialization is properly validated.""
+        CRITICAL: Test that orchestrator initialization is properly validated.""
         
         # Test uninitialized orchestrator
         mock_orchestrator.set_initialization_status(False)
         
-        run_id = init_test_123"
-        thread_id = "thread_init_test
+        run_id = init_test_123
+        thread_id = thread_init_test"
         
         # Set mapping in orchestrator (but it's not initialized)
         mock_orchestrator.set_thread_mapping(run_id, thread_id)
@@ -827,40 +827,40 @@ class OrchestratorIntegrationTests:
         
         # Resolution should now work
         result = await websocket_bridge._resolve_thread_id_from_run_id(run_id)
-        assert result == thread_id, f"Should resolve after initialization: expected '{thread_id}', got '{result}'
+        assert result == thread_id, fShould resolve after initialization: expected '{thread_id}', got '{result}'
         
         # Verify metrics show the failure and recovery
         metrics = await mock_orchestrator.get_metrics()
         assert metrics['failed_resolutions'] > 0, Should show failures during uninitialized period"
         assert metrics['successful_resolutions'] > 0, "Should show success after initialization
         
-        print( PASS:  Orchestrator initialization required: PASSED")
+        print( PASS:  Orchestrator initialization required: PASSED)"
     
     @pytest.mark.asyncio  
     async def test_orchestrator_unavailable_fallback(self, websocket_bridge, mock_orchestrator, test_registry):
-        "CRITICAL: Test graceful fallback when orchestrator becomes unavailable.""
+        "CRITICAL: Test graceful fallback when orchestrator becomes unavailable.
         
-        run_id_1 = orchestrator_unavailable_1"
-        thread_id_1 = "thread_unavailable_1 
+        run_id_1 = orchestrator_unavailable_1""
+        thread_id_1 = thread_unavailable_1 
         
-        run_id_2 = orchestrator_unavailable_thread_pattern_456" 
+        run_id_2 = orchestrator_unavailable_thread_pattern_456 "
         expected_pattern_thread = "thread_pattern
         
         # Setup: Registry has run_id_1, orchestrator has both
         await test_registry.register(run_id_1, thread_id_1)
-        mock_orchestrator.set_thread_mapping(run_id_1, thread_orchestrator_1")
-        mock_orchestrator.set_thread_mapping(run_id_2, "thread_orchestrator_2)
+        mock_orchestrator.set_thread_mapping(run_id_1, thread_orchestrator_1)
+        mock_orchestrator.set_thread_mapping(run_id_2, "thread_orchestrator_2)"
         
         # Test 1: Normal operation (registry takes priority)
         result = await websocket_bridge._resolve_thread_id_from_run_id(run_id_1)
-        assert result == thread_id_1, Registry should take priority"
+        assert result == thread_id_1, Registry should take priority
         
         # Test 2: Make orchestrator unavailable
         mock_orchestrator.set_availability(False)
         
         # run_id_1 should still resolve via registry
         result = await websocket_bridge._resolve_thread_id_from_run_id(run_id_1)
-        assert result == thread_id_1, "Should fall back to registry when orchestrator unavailable
+        assert result == thread_id_1, Should fall back to registry when orchestrator unavailable"
         
         # run_id_2 should fall back to pattern extraction
         result = await websocket_bridge._resolve_thread_id_from_run_id(run_id_2)
@@ -871,17 +871,17 @@ class OrchestratorIntegrationTests:
         
         # Verify orchestrator works again
         result = await websocket_bridge._resolve_thread_id_from_run_id(run_id_2)
-        assert result == "thread_orchestrator_2, Should use orchestrator again when available"
+        assert result == thread_orchestrator_2, Should use orchestrator again when available
         
-        print(" PASS:  Orchestrator unavailable fallback: PASSED)
+        print(" PASS:  Orchestrator unavailable fallback: PASSED")
     
     @pytest.mark.asyncio
     async def test_orchestrator_performance_degradation(self, websocket_bridge, mock_orchestrator):
-        ""CRITICAL: Test behavior when orchestrator performance degrades."
+        CRITICAL: Test behavior when orchestrator performance degrades.""
         
         # Setup slow orchestrator responses
-        slow_run_ids = [f"slow_test_{i} for i in range(5)]
-        fast_run_ids = [ffast_test_{i}" for i in range(5)]
+        slow_run_ids = [fslow_test_{i} for i in range(5)]
+        fast_run_ids = [ffast_test_{i} for i in range(5)]
         
         # Make some run_ids slow
         for run_id in slow_run_ids:
@@ -911,42 +911,42 @@ class OrchestratorIntegrationTests:
         total_time = time.time() - start_time
         
         # Verify all resolutions succeeded despite delays
-        assert all(result is not None for result in results), "All resolutions should succeed
+        assert all(result is not None for result in results), All resolutions should succeed
         
         # Verify correct mappings returned
         for i, run_id in enumerate(all_run_ids):
-            expected = fthread_{run_id}"
+            expected = fthread_{run_id}""
             actual = results[i]
-            assert actual == expected, f"Resolution failed for {run_id}: expected '{expected}', got '{actual}'
+            assert actual == expected, fResolution failed for {run_id}: expected '{expected}', got '{actual}'
         
         # Total time should be around 2 seconds (concurrent execution)
-        assert total_time < 3.0, fConcurrent resolution should be faster: {total_time:.2f}s"
+        assert total_time < 3.0, fConcurrent resolution should be faster: {total_time:.2f}s
         assert total_time > 1.8, f"Should respect delays: {total_time:.2f}s
         
         # Check orchestrator metrics
         metrics = await mock_orchestrator.get_metrics()
         assert metrics['resolution_calls'] == len(all_run_ids), Should have called orchestrator for each run_id"
-        assert metrics['avg_resolution_time_ms'] > 1000, "Average time should reflect delays
+        assert metrics['avg_resolution_time_ms'] > 1000, Average time should reflect delays
         
-        print(f PASS:  Orchestrator performance degradation: {len(all_run_ids)} resolutions in {total_time:.2f}s")
+        print(f PASS:  Orchestrator performance degradation: {len(all_run_ids)} resolutions in {total_time:.2f}s")"
 
 
 class ConcurrentOperationsTests:
-    "Test concurrent agent executions and multi-user scenarios.""
+    Test concurrent agent executions and multi-user scenarios."
     
     @pytest.mark.asyncio
     async def test_concurrent_agents_different_threads(self, websocket_bridge, real_websocket_manager, test_registry):
-        ""CRITICAL: Test multiple agents running concurrently in different threads."
+        "CRITICAL: Test multiple agents running concurrently in different threads.
         
         # Setup multiple concurrent agent scenarios
         agent_scenarios = []
         for i in range(20):  # 20 concurrent agents
             scenario = {
                 "agent_id: fagent_{i}",
-                "user_id: fuser_{i}",
-                "thread_id: fthread_user_{i}_session",
-                "run_id: UnifiedIDManager.generate_run_id(fuser_{i}_session"),
-                "agent_name: fConcurrentAgent_{i}"
+                user_id: fuser_{i},
+                thread_id: fthread_user_{i}_session",
+                "run_id: UnifiedIDManager.generate_run_id(fuser_{i}_session),
+                agent_name: fConcurrentAgent_{i}
             }
             agent_scenarios.append(scenario)
         
@@ -958,26 +958,26 @@ class ConcurrentOperationsTests:
         # Define agent execution flow
         async def execute_agent(scenario: Dict) -> Dict[str, Any]:
             results = {
-                "scenario: scenario,
-                events_sent": 0,
+                scenario: scenario,
+                events_sent: 0,"
                 "events_succeeded: 0,
-                start_time": time.time(),
-                "end_time: None
+                start_time: time.time(),
+                "end_time: None"
             }
             
             # Agent execution sequence
             events = [
-                (notify_agent_started", {"context: {task": f"Task for {scenario['agent_name']}}},
-                (notify_agent_thinking", {"reasoning: Analyzing request", "step_number: 1},
-                (notify_tool_executing", {"tool_name: data_processor", "parameters: {source": "database}},
-                (notify_progress_update", {"progress: {percentage": 33, "message: Processing data"}},
-                ("notify_tool_completed, {tool_name": "data_processor, result": {"rows: 100}},
-                (notify_agent_thinking", {"reasoning: Generating response", "step_number: 2},
-                (notify_tool_executing", {"tool_name: response_generator", "parameters: {format": "json}},
-                (notify_progress_update", {"progress: {percentage": 66, "message: Generating response"}},
-                ("notify_tool_completed, {tool_name": "response_generator, result": {"response: Generated"}},
-                ("notify_progress_update, {progress": {"percentage: 100, message": "Complete}},
-                (notify_agent_completed", {"result: {status": "success, output": "Final result}}
+                (notify_agent_started, {context: {task: f"Task for {scenario['agent_name']}}},
+                (notify_agent_thinking, {"reasoning: Analyzing request, step_number: 1},
+                (notify_tool_executing, {"tool_name: data_processor", parameters: {source: database}},
+                (notify_progress_update", {"progress: {percentage: 33, message: Processing data}},"
+                ("notify_tool_completed, {tool_name: data_processor, result: {"rows: 100}},"
+                (notify_agent_thinking, {reasoning: Generating response, "step_number: 2},
+                (notify_tool_executing", {tool_name: response_generator, parameters: {format": "json}},
+                (notify_progress_update, {progress: {percentage: 66, "message: Generating response"}},
+                (notify_tool_completed, {tool_name: "response_generator, result": {response: Generated}},
+                (notify_progress_update, {progress": {"percentage: 100, message: Complete}},
+                (notify_agent_completed", {"result: {status: success, output: "Final result}}
             ]
             
             # Execute events with small delays to simulate realistic execution
@@ -986,18 +986,18 @@ class ConcurrentOperationsTests:
                 
                 method = getattr(websocket_bridge, event_method)
                 success = await method(
-                    scenario["run_id],
-                    scenario[agent_name"],
+                    scenario[run_id],
+                    scenario[agent_name"],"
                     **event_kwargs
                 )
                 
                 if success:
-                    results["events_succeeded] += 1
+                    results[events_succeeded] += 1
                 
                 # Small delay between events
                 await asyncio.sleep(random.uniform(0.01, 0.05))
             
-            results[end_time"] = time.time()
+            results[end_time] = time.time()"
             return results
         
         # Execute all agents concurrently
@@ -1008,7 +1008,7 @@ class ConcurrentOperationsTests:
         
         # Analyze results
         total_events_sent = sum(result["events_sent] for result in execution_results)
-        total_events_succeeded = sum(result[events_succeeded"] for result in execution_results)
+        total_events_succeeded = sum(result[events_succeeded] for result in execution_results)
         success_rate = total_events_succeeded / max(1, total_events_sent)
         
         # Verify high success rate
@@ -1016,48 +1016,48 @@ class ConcurrentOperationsTests:
         
         # Verify all agents completed
         for result in execution_results:
-            agent_success_rate = result[events_succeeded"] / result["events_sent]
-            assert agent_success_rate > 0.9, fAgent {result['scenario']['agent_name']} success rate too low: {agent_success_rate:.2%}"
+            agent_success_rate = result[events_succeeded"] / result[events_sent]
+            assert agent_success_rate > 0.9, fAgent {result['scenario']['agent_name']} success rate too low: {agent_success_rate:.2%}
         
         # Verify message isolation (no cross-contamination)
         for scenario in agent_scenarios:
-            thread_messages = real_websocket_manager.get_events_for_thread(scenario["thread_id]
+            thread_messages = real_websocket_manager.get_events_for_thread(scenario["thread_id]"
             
             # Should have all expected events
             expected_event_count = 11  # Number of events in sequence
-            assert len(thread_messages) == expected_event_count, fThread {scenario['thread_id']} should have {expected_event_count} messages"
+            assert len(thread_messages) == expected_event_count, fThread {scenario['thread_id']} should have {expected_event_count} messages
             
             # All messages should be for this agent
             for message in thread_messages:
-                assert message["run_id] == scenario[run_id"], "Message should have correct run_id
-                assert message[agent_name"] == scenario["agent_name], Message should have correct agent_name"
+                assert message[run_id] == scenario[run_id"], "Message should have correct run_id
+                assert message[agent_name] == scenario[agent_name], Message should have correct agent_name""
         
         # Performance verification
         events_per_second = total_events_sent / total_execution_time
-        assert events_per_second > 100, f"Event throughput too low: {events_per_second:.1f} events/sec
+        assert events_per_second > 100, fEvent throughput too low: {events_per_second:.1f} events/sec
         
-        print(f PASS:  Concurrent agents different threads: {len(agent_scenarios)} agents  x  11 events = {total_events_sent} events in {total_execution_time:.2f}s ({events_per_second:.1f} events/sec)")
+        print(f PASS:  Concurrent agents different threads: {len(agent_scenarios)} agents  x  11 events = {total_events_sent} events in {total_execution_time:.2f}s ({events_per_second:.1f} events/sec))
     
     @pytest.mark.asyncio
     async def test_reconnection_preserves_mappings(self, websocket_bridge, real_websocket_manager, test_registry):
-        "CRITICAL: Test that reconnection preserves thread mappings.""
+        "CRITICAL: Test that reconnection preserves thread mappings."
         
         # Setup initial mappings
         scenarios = [
-            {run_id": UnifiedIDManager.generate_run_id("user_1_session), thread_id": "thread_user_1_session},
-            {run_id": UnifiedIDManager.generate_run_id("user_2_chat), thread_id": "thread_user_2_chat},
-            {run_id": UnifiedIDManager.generate_run_id("user_3_support), thread_id": "thread_user_3_support}
+            {run_id: UnifiedIDManager.generate_run_id("user_1_session), thread_id": thread_user_1_session},
+            {run_id: UnifiedIDManager.generate_run_id(user_2_chat), thread_id": "thread_user_2_chat},
+            {run_id: UnifiedIDManager.generate_run_id(user_3_support), thread_id: "thread_user_3_support}
         ]
         
         # Register mappings
         for scenario in scenarios:
-            await test_registry.register(scenario[run_id"], scenario["thread_id]
+            await test_registry.register(scenario[run_id"], scenario[thread_id]
             # Real WebSocket manager handles connection status automatically
         
         # Send initial events to verify connectivity
         for scenario in scenarios:
-            success = await websocket_bridge.notify_agent_started(scenario[run_id"], "InitialAgent)
-            assert success, fInitial event should succeed for {scenario['thread_id']}"
+            success = await websocket_bridge.notify_agent_started(scenario[run_id], InitialAgent)
+            assert success, fInitial event should succeed for {scenario['thread_id']}""
         
         # Track initial state (real WebSocket manager tracks internally)
         initial_event_success = True  # All initial events succeeded
@@ -1067,7 +1067,7 @@ class ConcurrentOperationsTests:
         
         # Events should fail during disconnection
         for scenario in scenarios:
-            success = await websocket_bridge.notify_agent_thinking(scenario["run_id], DisconnectedAgent", "Should fail)
+            success = await websocket_bridge.notify_agent_thinking(scenario[run_id], DisconnectedAgent, Should fail)"
             assert not success, fEvent should fail during disconnection for {scenario['thread_id']}"
         
         # Verify no new messages during disconnection (handled by WebSocket manager)
@@ -1087,12 +1087,12 @@ class ConcurrentOperationsTests:
         # Verify mappings preserved after reconnection
         for scenario in scenarios:
             # Resolution should still work
-            resolved_thread = await websocket_bridge._resolve_thread_id_from_run_id(scenario["run_id]
+            resolved_thread = await websocket_bridge._resolve_thread_id_from_run_id(scenario[run_id]
             assert resolved_thread == scenario[thread_id"], f"Mapping should be preserved after reconnection
             
             # Events should work again
-            success = await websocket_bridge.notify_agent_completed(scenario[run_id"], "ReconnectedAgent)
-            assert success, fEvent should succeed after reconnection for {scenario['thread_id']}"
+            success = await websocket_bridge.notify_agent_completed(scenario[run_id], ReconnectedAgent)
+            assert success, fEvent should succeed after reconnection for {scenario['thread_id']}
         
         # Verify new messages delivered after reconnection
         for scenario in scenarios:
@@ -1100,11 +1100,11 @@ class ConcurrentOperationsTests:
             # Real WebSocket manager handles message delivery confirmation internally
             pass
         
-        print(" PASS:  Reconnection preserves mappings: PASSED)
+        print(" PASS:  Reconnection preserves mappings: PASSED")
     
     @pytest.mark.asyncio
     async def test_system_under_extreme_load(self, websocket_bridge, real_websocket_manager, test_registry):
-        ""CRITICAL: Test system behavior under extreme concurrent load."
+        CRITICAL: Test system behavior under extreme concurrent load.""
         
         # Setup extreme load scenario
         thread_count = 100
@@ -1115,22 +1115,22 @@ class ConcurrentOperationsTests:
         scenarios = []
         for i in range(thread_count):
             scenario = {
-                "thread_id: fthread_load_test_{i}",
-                "run_id: UnifiedIDManager.generate_run_id(fload_test_user_{i}"),
-                "agent_name: fLoadTestAgent_{i}"
+                thread_id: fthread_load_test_{i},
+                run_id: UnifiedIDManager.generate_run_id(fload_test_user_{i}"),
+                "agent_name: fLoadTestAgent_{i}
             }
             scenarios.append(scenario)
         
         # Register all mappings
         registration_start = time.time()
         for scenario in scenarios:
-            await test_registry.register(scenario["run_id], scenario[thread_id"]
+            await test_registry.register(scenario[run_id], scenario[thread_id]
             # Real WebSocket manager handles connection status automatically
         registration_time = time.time() - registration_start
         
         # Define load generator
         async def generate_load(scenario: Dict, event_count: int) -> Dict[str, Any]:
-            results = {"sent: 0, succeeded": 0, "errors: 0}
+            results = {"sent: 0, succeeded": 0, errors: 0}
             
             for event_idx in range(event_count):
                 try:
@@ -1139,38 +1139,38 @@ class ConcurrentOperationsTests:
                     
                     if event_type == 0:
                         success = await websocket_bridge.notify_agent_started(
-                            scenario[run_id"], 
+                            scenario[run_id], "
                             scenario["agent_name]
                     elif event_type == 1:
                         success = await websocket_bridge.notify_agent_thinking(
-                            scenario[run_id"],
-                            scenario["agent_name], 
-                            fProcessing step {event_idx}"
+                            scenario[run_id],
+                            scenario["agent_name], "
+                            fProcessing step {event_idx}
                         )
                     elif event_type == 2:
                         success = await websocket_bridge.notify_tool_executing(
-                            scenario["run_id],
+                            scenario[run_id],"
                             scenario[agent_name"],
-                            f"tool_{event_idx}
+                            ftool_{event_idx}
                         )
                     elif event_type == 3:
                         success = await websocket_bridge.notify_progress_update(
-                            scenario[run_id"],
+                            scenario[run_id],"
                             scenario["agent_name],
-                            {percentage": (event_idx * 100) // event_count}
+                            {percentage: (event_idx * 100) // event_count}
                     else:
                         success = await websocket_bridge.notify_tool_completed(
-                            scenario["run_id],
-                            scenario[agent_name"],
-                            f"tool_{event_idx},
+                            scenario["run_id],"
+                            scenario[agent_name],
+                            ftool_{event_idx},
                             {result": f"output_{event_idx}}
                     
-                    results[sent"] += 1
+                    results[sent] += 1
                     if success:
-                        results["succeeded] += 1
+                        results[succeeded] += 1
                 
                 except Exception as e:
-                    results[errors"] += 1
+                    results[errors"] += 1"
             
             return results
         
@@ -1181,43 +1181,43 @@ class ConcurrentOperationsTests:
         load_time = time.time() - load_start
         
         # Aggregate results
-        total_sent = sum(result["sent] for result in load_results)
-        total_succeeded = sum(result[succeeded"] for result in load_results)
+        total_sent = sum(result[sent] for result in load_results)
+        total_succeeded = sum(result[succeeded] for result in load_results)"
         total_errors = sum(result["errors] for result in load_results)
         
         success_rate = total_succeeded / max(1, total_sent)
         events_per_second = total_sent / load_time
         
         # Verify system handled extreme load
-        assert success_rate > 0.90, fSuccess rate under extreme load too low: {success_rate:.2%}"
+        assert success_rate > 0.90, fSuccess rate under extreme load too low: {success_rate:.2%}
         assert total_errors < total_sent * 0.05, f"Too many errors: {total_errors}
         assert events_per_second > 200, fThroughput too low under load: {events_per_second:.1f} events/sec"
         
         # Verify registry health under load
         registry_metrics = await test_registry.get_metrics()
-        assert registry_metrics['registry_healthy'], "Registry should remain healthy under extreme load
-        assert registry_metrics['lookup_success_rate'] > 0.95, fRegistry lookup success rate too low: {registry_metrics['lookup_success_rate']:.2%}"
+        assert registry_metrics['registry_healthy'], Registry should remain healthy under extreme load
+        assert registry_metrics['lookup_success_rate'] > 0.95, fRegistry lookup success rate too low: {registry_metrics['lookup_success_rate']:.2%}""
         
         # Verify WebSocket manager health through event success rates
         # Real WebSocket manager health confirmed by high event success rate
         # Individual event failures would have caused assertion failures above
         
-        print(f" PASS:  System under extreme load: {thread_count} threads  x  {events_per_thread} events = {total_sent} events in {load_time:.2f}s ({events_per_second:.1f} events/sec, {success_rate:.1%} success rate))
+        print(f PASS:  System under extreme load: {thread_count} threads  x  {events_per_thread} events = {total_sent} events in {load_time:.2f}s ({events_per_second:.1f} events/sec, {success_rate:.1%} success rate))
 
 
 class BusinessMetricsTests:
-    ""Test business value validation and metrics tracking."
+    "Test business value validation and metrics tracking."
     
     @pytest.mark.asyncio
     async def test_event_delivery_success_rate_metrics(self, websocket_bridge, real_websocket_manager, test_registry):
-        "CRITICAL: Validate business metrics for event delivery success rate.""
+        CRITICAL: Validate business metrics for event delivery success rate.""
         
         # Setup business scenarios representing different user types
         business_scenarios = [
-            {type": "free_user, thread_count": 10, "events_per_thread: 5},
-            {type": "early_user, thread_count": 20, "events_per_thread: 10},
-            {type": "mid_user, thread_count": 30, "events_per_thread: 15},
-            {type": "enterprise_user, thread_count": 40, "events_per_thread: 20}
+            {type: free_user, thread_count: 10, "events_per_thread: 5},
+            {type": early_user, thread_count: 20, events_per_thread: 10},
+            {type": "mid_user, thread_count: 30, events_per_thread: 15},
+            {type: "enterprise_user, thread_count": 40, events_per_thread: 20}
         ]
         
         business_metrics = {}
@@ -1227,16 +1227,16 @@ class BusinessMetricsTests:
             
             # Setup threads for this user type
             threads = []
-            for i in range(scenario[thread_count"]:
+            for i in range(scenario[thread_count]:
                 thread_info = {
                     "thread_id: fthread_{scenario['type']}_{i}",
-                    "run_id: UnifiedIDManager.generate_run_id(f{scenario['type']}_{i}"),
-                    "agent_name: fAgent_{scenario['type']}_{i}"
+                    run_id: UnifiedIDManager.generate_run_id(f{scenario['type']}_{i}),
+                    agent_name: fAgent_{scenario['type']}_{i}"
                 }
                 threads.append(thread_info)
                 
                 # Register mapping
-                await test_registry.register(thread_info["run_id], thread_info[thread_id"]
+                await test_registry.register(thread_info["run_id], thread_info[thread_id]
                 # Real WebSocket manager handles connection status automatically
             
             # Send events for all threads in this scenario
@@ -1244,24 +1244,24 @@ class BusinessMetricsTests:
             events_succeeded = 0
             
             for thread_info in threads:
-                for event_idx in range(scenario["events_per_thread]:
+                for event_idx in range(scenario[events_per_thread]:
                     # Vary event types to match real usage
                     event_type = event_idx % 3
                     
                     if event_type == 0:
                         success = await websocket_bridge.notify_agent_started(
-                            thread_info[run_id"],
-                            thread_info["agent_name]
+                            thread_info[run_id"],"
+                            thread_info[agent_name]
                     elif event_type == 1:
                         success = await websocket_bridge.notify_agent_thinking(
-                            thread_info[run_id"],
+                            thread_info[run_id],"
                             thread_info["agent_name],
-                            fBusiness logic step {event_idx}"
+                            fBusiness logic step {event_idx}
                         )
                     else:
                         success = await websocket_bridge.notify_agent_completed(
-                            thread_info["run_id],
-                            thread_info[agent_name"]
+                            thread_info["run_id],"
+                            thread_info[agent_name]
                     
                     events_sent += 1
                     if success:
@@ -1272,68 +1272,68 @@ class BusinessMetricsTests:
             events_per_second = events_sent / scenario_time
             
             # Store business metrics
-            business_metrics[scenario["type]] = {
+            business_metrics[scenario[type]] = {"
                 events_sent": events_sent,
-                "events_succeeded: events_succeeded,
-                success_rate": success_rate,
-                "events_per_second: events_per_second,
-                execution_time": scenario_time,
-                "thread_count: scenario[thread_count"],
-                "avg_events_per_thread: scenario[events_per_thread"]
+                events_succeeded: events_succeeded,
+                success_rate": success_rate,"
+                events_per_second: events_per_second,
+                execution_time: scenario_time,"
+                "thread_count: scenario[thread_count],
+                avg_events_per_thread: scenario[events_per_thread]
             }
             
             # Business value assertions per user type
             if scenario["type] == enterprise_user":
                 # Enterprise users require highest reliability
-                assert success_rate >= 0.99, f"Enterprise success rate too low: {success_rate:.2%}
-                assert events_per_second >= 100, fEnterprise throughput too low: {events_per_second:.1f}"
-            elif scenario["type] in [early_user", "mid_user]:
+                assert success_rate >= 0.99, fEnterprise success rate too low: {success_rate:.2%}
+                assert events_per_second >= 100, fEnterprise throughput too low: {events_per_second:.1f}
+            elif scenario["type] in [early_user", mid_user]:
                 # Paid users require high reliability
                 assert success_rate >= 0.95, fPaid user success rate too low for {scenario['type']}: {success_rate:.2%}"
                 assert events_per_second >= 50, f"Paid user throughput too low: {events_per_second:.1f}
             else:  # free_user
                 # Free users still need good experience for conversion
-                assert success_rate >= 0.90, fFree user success rate too low: {success_rate:.2%}"
+                assert success_rate >= 0.90, fFree user success rate too low: {success_rate:.2%}
         
         # Cross-scenario business metrics validation
-        total_events = sum(metrics["events_sent] for metrics in business_metrics.values())
+        total_events = sum(metrics[events_sent] for metrics in business_metrics.values())"
         total_succeeded = sum(metrics[events_succeeded"] for metrics in business_metrics.values())
         overall_success_rate = total_succeeded / total_events
         
         # Overall platform reliability
-        assert overall_success_rate >= 0.95, f"Overall platform success rate too low: {overall_success_rate:.2%}
+        assert overall_success_rate >= 0.95, fOverall platform success rate too low: {overall_success_rate:.2%}
         
         # Enterprise performance should be best
-        enterprise_rate = business_metrics[enterprise_user"]["success_rate]
-        free_rate = business_metrics[free_user"]["success_rate]
-        assert enterprise_rate >= free_rate, Enterprise users should have equal or better performance than free users"
+        enterprise_rate = business_metrics[enterprise_user]["success_rate]
+        free_rate = business_metrics[free_user"][success_rate]
+        assert enterprise_rate >= free_rate, Enterprise users should have equal or better performance than free users
         
         # Log business metrics
-        print(" PASS:  Business Metrics Summary:)
+        print(" PASS:  Business Metrics Summary:")
         for user_type, metrics in business_metrics.items():
-            print(f  {user_type}: {metrics['success_rate']:.1%} success, {metrics['events_per_second']:.1f} events/sec, {metrics['thread_count']} threads")
+            print(f  {user_type}: {metrics['success_rate']:.1%} success, {metrics['events_per_second']:.1f} events/sec, {metrics['thread_count']} threads)"
         print(f"  Overall: {overall_success_rate:.1%} success rate, {total_events} total events)
     
     @pytest.mark.asyncio
     async def test_thread_resolution_accuracy_metrics(self, websocket_bridge, test_registry, mock_orchestrator):
-        ""CRITICAL: Measure and validate thread resolution accuracy for business impact."
+        CRITICAL: Measure and validate thread resolution accuracy for business impact.""
         
         # Setup comprehensive resolution test cases
         test_cases = [
             {
-                "category: registry_resolution",
-                "setup: lambda run_id, thread_id: test_registry.register(run_id, thread_id),
-                expected_source": "registry
+                category: registry_resolution,
+                setup: lambda run_id, thread_id: test_registry.register(run_id, thread_id),"
+                expected_source": registry
             },
             {
-                category": "orchestrator_resolution, 
-                setup": lambda run_id, thread_id: mock_orchestrator.set_thread_mapping(run_id, thread_id),
-                "expected_source: orchestrator"
+                category: orchestrator_resolution, 
+                setup": lambda run_id, thread_id: mock_orchestrator.set_thread_mapping(run_id, thread_id),"
+                expected_source: orchestrator
             },
             {
-                "category: pattern_resolution",
+                category: pattern_resolution",
                 "setup: lambda run_id, thread_id: None,  # No setup needed for pattern
-                expected_source": "pattern,
+                expected_source: pattern,
                 run_id_pattern": "pattern_test_thread_{}_extraction
             }
         ]
@@ -1341,7 +1341,7 @@ class BusinessMetricsTests:
         resolution_metrics = {}
         
         for test_case in test_cases:
-            category = test_case[category"]
+            category = test_case[category]
             resolution_start = time.time()
             
             # Generate test data
@@ -1351,17 +1351,17 @@ class BusinessMetricsTests:
             incorrect_resolutions = 0
             
             for i in range(test_count):
-                if test_case.get("run_id_pattern):
+                if test_case.get(run_id_pattern):"
                     # Use pattern-based run_id for pattern resolution tests
                     thread_id = fthread_{i}"
-                    run_id = test_case["run_id_pattern].format(i)
+                    run_id = test_case[run_id_pattern].format(i)
                 else:
                     # Use generated run_id for registry/orchestrator tests
-                    thread_id = fthread_{category}_{i}"
-                    run_id = UnifiedIDManager.generate_run_id(f"{category}_{i})
+                    thread_id = fthread_{category}_{i}""
+                    run_id = UnifiedIDManager.generate_run_id(f{category}_{i})
                 
                 # Setup according to test case
-                setup_result = test_case[setup"](run_id, thread_id)
+                setup_result = test_case[setup](run_id, thread_id)
                 if asyncio.iscoroutine(setup_result):
                     await setup_result
                 
@@ -1385,51 +1385,51 @@ class BusinessMetricsTests:
             avg_resolution_time = (resolution_time / total_attempts) * 1000  # Convert to ms
             
             resolution_metrics[category] = {
-                "total_attempts: total_attempts,
-                successful_resolutions": successful_resolutions,
-                "failed_resolutions: failed_resolutions,
+                "total_attempts: total_attempts,"
+                successful_resolutions: successful_resolutions,
+                failed_resolutions: failed_resolutions,"
                 incorrect_resolutions": incorrect_resolutions,
-                "success_rate: success_rate,
-                accuracy_rate": accuracy_rate,
-                "avg_resolution_time_ms: avg_resolution_time,
-                total_time": resolution_time
+                success_rate: success_rate,
+                accuracy_rate": accuracy_rate,"
+                avg_resolution_time_ms: avg_resolution_time,
+                total_time: resolution_time"
             }
             
             # Business-critical assertions per resolution source
             if category == "registry_resolution:
                 # Registry should be most reliable (primary source)
-                assert success_rate >= 0.99, fRegistry resolution rate too low: {success_rate:.2%}"
+                assert success_rate >= 0.99, fRegistry resolution rate too low: {success_rate:.2%}
                 assert accuracy_rate >= 0.999, f"Registry accuracy too low: {accuracy_rate:.3%}
                 assert avg_resolution_time < 5.0, fRegistry resolution too slow: {avg_resolution_time:.1f}ms"
-            elif category == "orchestrator_resolution:
+            elif category == orchestrator_resolution:
                 # Orchestrator should be highly reliable (backup source)
-                assert success_rate >= 0.95, fOrchestrator resolution rate too low: {success_rate:.2%}"
-                assert accuracy_rate >= 0.99, f"Orchestrator accuracy too low: {accuracy_rate:.2%}
-                assert avg_resolution_time < 50.0, fOrchestrator resolution too slow: {avg_resolution_time:.1f}ms"
+                assert success_rate >= 0.95, fOrchestrator resolution rate too low: {success_rate:.2%}""
+                assert accuracy_rate >= 0.99, fOrchestrator accuracy too low: {accuracy_rate:.2%}
+                assert avg_resolution_time < 50.0, fOrchestrator resolution too slow: {avg_resolution_time:.1f}ms
             else:  # pattern_resolution
                 # Pattern should be reliable fallback
                 assert success_rate >= 0.90, f"Pattern resolution rate too low: {success_rate:.2%}
                 assert accuracy_rate >= 0.95, fPattern accuracy too low: {accuracy_rate:.2%}"
-                assert avg_resolution_time < 10.0, f"Pattern resolution too slow: {avg_resolution_time:.1f}ms
+                assert avg_resolution_time < 10.0, fPattern resolution too slow: {avg_resolution_time:.1f}ms
         
         # Cross-source validation
-        registry_success = resolution_metrics[registry_resolution"]["success_rate]
-        orchestrator_success = resolution_metrics[orchestrator_resolution"]["success_rate]
-        pattern_success = resolution_metrics[pattern_resolution"]["success_rate]
+        registry_success = resolution_metrics[registry_resolution]["success_rate]
+        orchestrator_success = resolution_metrics[orchestrator_resolution"][success_rate]
+        pattern_success = resolution_metrics[pattern_resolution][success_rate]
         
         # Priority order should reflect reliability
-        assert registry_success >= orchestrator_success, Registry should be most reliable"
-        assert orchestrator_success >= pattern_success * 0.95, "Orchestrator should be more reliable than pattern
+        assert registry_success >= orchestrator_success, Registry should be most reliable""
+        assert orchestrator_success >= pattern_success * 0.95, Orchestrator should be more reliable than pattern
         
         # Log resolution accuracy metrics
-        print( PASS:  Thread Resolution Accuracy Metrics:")
+        print( PASS:  Thread Resolution Accuracy Metrics:")"
         for source, metrics in resolution_metrics.items():
-            print(f"  {source}: {metrics['success_rate']:.1%} success, {metrics['accuracy_rate']:.2%} accuracy, {metrics['avg_resolution_time_ms']:.1f}ms avg)
+            print(f  {source}: {metrics['success_rate']:.1%} success, {metrics['accuracy_rate']:.2%} accuracy, {metrics['avg_resolution_time_ms']:.1f}ms avg)
         
         return resolution_metrics
 
 
-if __name__ == __main__":
+if __name__ == __main__:"
     # Run comprehensive critical flows test suite
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

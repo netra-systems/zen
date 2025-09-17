@@ -41,10 +41,10 @@ from netra_backend.app.core.auth_startup_validator import AuthStartupValidator
 
 
 class Issue722SsotFixValidationTests(SSotAsyncTestCase):
-    ""Mission critical validation for Issue #722 SSOT fix implementation."
+    Mission critical validation for Issue #722 SSOT fix implementation."
 
     def setup_method(self, method):
-        "Set up mission critical test environment.""
+        "Set up mission critical test environment.
         super().setup_method(method)
 
         # Configure Golden Path environment
@@ -75,7 +75,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
         4. Startup validation
 
         This test MUST PASS to ensure $500K+ ARR business continuity.
-        "
+
         golden_path_components = {
             'auth_tracing': {'status': 'unknown', 'critical': True},
             'websocket_config': {'status': 'unknown', 'critical': True},
@@ -177,18 +177,18 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
             fFailed components: {critical_failures}. All results: {golden_path_components}"
 
         assert critical_working == total_critical, \
-            f"MISSION CRITICAL: All critical components must work.  \
+            fMISSION CRITICAL: All critical components must work.  \
             fWorking: {critical_working}/{total_critical}. Results: {golden_path_components}"
 
         print(f"GOLDEN PATH VALIDATION SUCCESSFUL: {golden_path_components})
 
     def test_ssot_fixes_use_isolated_environment_correctly(self):
-        ""
+        
         Validate that SSOT fixes properly use IsolatedEnvironment.
 
         This test ensures that after the fixes, modules use IsolatedEnvironment
         instead of direct os.environ access, proving SSOT compliance.
-        "
+""
         ssot_compliance_tests = {}
 
         # Set up test values in IsolatedEnvironment only
@@ -258,23 +258,23 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
 
         # After SSOT fixes, we expect compliance
         assert len(violation_modules) == 0, \
-            f"SSOT COMPLIANCE FAILURE: Modules still violating after fixes: {violation_modules}.  \
+            fSSOT COMPLIANCE FAILURE: Modules still violating after fixes: {violation_modules}.  \
             fAll results: {ssot_compliance_tests}"
 
         # Validate that at least some modules are testable and compliant
         assert len(compliant_modules) >= 1, \
             f"SSOT COMPLIANCE: At least some modules should be compliant after fixes.  \
-            fResults: {ssot_compliance_tests}"
+            fResults: {ssot_compliance_tests}
 
-        print(f"SSOT COMPLIANCE VALIDATION: {ssot_compliance_tests})
+        print(fSSOT COMPLIANCE VALIDATION: {ssot_compliance_tests})
 
-    def test_multi_user_isolation_integrity_after_fixes(self):
-        ""
+    def test_multi_user_isolation_integrity_after_fixes(self"):
+        "
         Validate multi-user isolation integrity after SSOT fixes.
 
         Ensures that environment isolation doesn't break user-specific contexts
         and that multiple users can operate simultaneously without interference.
-        "
+"
         test_users = [
             {'user_id': 'user-alpha', 'environment': 'staging'},
             {'user_id': 'user-beta', 'environment': 'development'},
@@ -350,26 +350,26 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
 
         assert len(successful_users) >= 2, \
             f"ISOLATION INTEGRITY: Multiple users should have successful tests.  \
-            fSuccessful: {len(successful_users)}/3. Results: {user_isolation_results}"
+            fSuccessful: {len(successful_users)}/3. Results: {user_isolation_results}
 
         assert len(correctly_detected_env) >= len(successful_users) // 2, \
-            f"ENVIRONMENT DETECTION: Users should detect their environment correctly.  \
-            fCorrect: {len(correctly_detected_env)}, Successful: {len(successful_users)}"
+            fENVIRONMENT DETECTION: Users should detect their environment correctly.  \
+            fCorrect: {len(correctly_detected_env)}, Successful: {len(successful_users)}""
 
         if len(isolated_corpus) > 0:
             assert len(isolated_corpus) >= len(successful_users) // 2, \
-                f"CORPUS ISOLATION: Users should have isolated corpus paths.  \
-                fIsolated: {len(isolated_corpus)}, Successful: {len(successful_users)}"
+                fCORPUS ISOLATION: Users should have isolated corpus paths.  \
+                fIsolated: {len(isolated_corpus)}, Successful: {len(successful_users)}
 
         print(f"MULTI-USER ISOLATION INTEGRITY VALIDATED: {len(successful_users)} users successful)
 
-    def test_system_stability_after_ssot_changes(self):
-        ""
+    def test_system_stability_after_ssot_changes(self"):
+        
         Validate overall system stability after Issue #722 SSOT changes.
 
         This test ensures that environmental changes don't cause system
         instability, memory leaks, or performance degradation.
-        "
+""
         stability_metrics = {
             'module_import_stability': False,
             'repeated_operations_stable': False,
@@ -391,7 +391,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
             stability_metrics['module_import_stability'] = True
 
         except Exception as e:
-            print(f"Module import stability issue: {e})
+            print(fModule import stability issue: {e})
 
         # Test 2: Repeated operations stability
         try:
@@ -418,7 +418,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
             stability_metrics['repeated_operations_stable'] = True
 
         except Exception as e:
-            print(fRepeated operations stability issue: {e}")
+            print(fRepeated operations stability issue: {e}")"
 
         # Test 3: No obvious memory accumulation (simple check)
         try:
@@ -429,7 +429,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
             stability_metrics['no_memory_accumulation'] = True
 
         except Exception as e:
-            print(f"Memory accumulation check issue: {e})
+            print(fMemory accumulation check issue: {e})
 
         # Test 4: Performance acceptability (simple timing check)
         try:
@@ -450,25 +450,25 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
             stability_metrics['performance_acceptable'] = operation_time < 5.0
 
         except Exception as e:
-            print(fPerformance check issue: {e}")
+            print(fPerformance check issue: {e}")"
 
         # STABILITY ASSERTION: System should remain stable after changes
         stable_metrics = sum(stability_metrics.values())
         total_metrics = len(stability_metrics)
 
         assert stable_metrics >= (total_metrics - 1), \
-            f"SYSTEM STABILITY: Most stability metrics should pass.  \
-            fStable: {stable_metrics}/{total_metrics}. Results: {stability_metrics}"
+            fSYSTEM STABILITY: Most stability metrics should pass.  \
+            fStable: {stable_metrics}/{total_metrics}. Results: {stability_metrics}
 
         print(f"SYSTEM STABILITY VALIDATED: {stable_metrics}/{total_metrics} metrics stable)
 
-    def test_business_continuity_validation(self):
-        ""
+    def test_business_continuity_validation(self"):
+        
         ULTIMATE TEST: Validate complete business continuity after SSOT fixes.
 
         This test simulates a complete user journey to ensure that all
         Issue #722 changes work together to maintain business functionality.
-        "
+""
         business_journey = {
             'user_registration_flow': False,
             'authentication_system': False,
@@ -491,7 +491,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
                 business_journey['authentication_system'] = True
 
         except Exception as e:
-            print(f"Authentication flow issue: {e})
+            print(fAuthentication flow issue: {e})
 
         # Simulate WebSocket connection setup
         try:
@@ -501,7 +501,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
                 business_journey['websocket_connectivity'] = True
 
         except Exception as e:
-            print(fWebSocket setup issue: {e}")
+            print(fWebSocket setup issue: {e}")"
 
         # Simulate corpus data access
         try:
@@ -521,7 +521,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
                 business_journey['corpus_data_access'] = True
 
         except Exception as e:
-            print(f"Corpus access issue: {e})
+            print(fCorpus access issue: {e})
 
         # Simulate multi-user support
         try:
@@ -546,15 +546,15 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
             business_journey['multi_user_support'] = users_successful >= 2
 
         except Exception as e:
-            print(fMulti-user support issue: {e}")
+            print(fMulti-user support issue: {e}")"
 
         # BUSINESS CONTINUITY ASSERTION: Core business functions must work
         working_functions = sum(business_journey.values())
         total_functions = len(business_journey)
 
         assert working_functions >= (total_functions - 1), \
-            f"BUSINESS CONTINUITY FAILURE: Core business functions must work after SSOT fixes.  \
-            fWorking: {working_functions}/{total_functions}. Results: {business_journey}"
+            fBUSINESS CONTINUITY FAILURE: Core business functions must work after SSOT fixes.  \
+            fWorking: {working_functions}/{total_functions}. Results: {business_journey}
 
         # Ensure critical business functions specifically work
         critical_functions = ['authentication_system', 'websocket_connectivity', 'corpus_data_access']
@@ -564,5 +564,5 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
             f"CRITICAL BUSINESS FUNCTIONS: At least 2/3 critical functions must work.  \
             fCritical working: {critical_working}/3. All results: {business_journey}"
 
-        print(f"BUSINESS CONTINUITY VALIDATED: {working_functions}/{total_functions} functions operational)
-        print(f$500K+ ARR PROTECTION: All critical business functions validated successful")
+        print(fBUSINESS CONTINUITY VALIDATED: {working_functions}/{total_functions} functions operational)
+        print(f$500K+ ARR PROTECTION: All critical business functions validated successful"")"

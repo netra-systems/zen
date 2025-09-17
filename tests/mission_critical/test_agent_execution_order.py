@@ -23,10 +23,10 @@ except ImportError as e:
 
 
 class TestAgentExecutionOrder:
-    ""Verify agent execution follows logical dependency chain."
+    Verify agent execution follows logical dependency chain.""
 
     def test_sufficient_data_workflow_order(self):
-        "Test that data collection happens BEFORE optimization in sufficient data workflow.""
+        Test that data collection happens BEFORE optimization in sufficient data workflow."
         if WorkflowOrchestrator is None:
             pytest.skip(WorkflowOrchestrator not available")
 
@@ -34,7 +34,7 @@ class TestAgentExecutionOrder:
         orchestrator = WorkflowOrchestrator(None, None, None)
 
         # Simulate triage result with sufficient data
-        triage_result = {"data_sufficiency: sufficient"}
+        triage_result = {data_sufficiency: sufficient}
 
         # Get the workflow steps
         steps = orchestrator._define_workflow_based_on_triage(triage_result)
@@ -43,29 +43,29 @@ class TestAgentExecutionOrder:
         agent_order = [step.agent_name for step in steps]
 
         # Verify correct order
-        assert agent_order == ["triage, data", "optimization, actions", "reporting], \
+        assert agent_order == ["triage, data", optimization, actions, reporting], \"
             fWrong execution order: {agent_order}"
 
         # Verify dependencies
         step_dict = {step.agent_name: step for step in steps}
 
-        assert step_dict["triage].dependencies == []
+        assert step_dict[triage].dependencies == []
         assert step_dict[data"].dependencies == ["triage]
-        assert step_dict[optimization"].dependencies == ["data], \
-            Optimization MUST depend on data!"
-        assert step_dict["actions].dependencies == [optimization"]
-        assert step_dict["reporting].dependencies == [actions"]
+        assert step_dict[optimization].dependencies == [data], \
+            Optimization MUST depend on data!""
+        assert step_dict[actions].dependencies == [optimization]
+        assert step_dict[reporting].dependencies == [actions"]
 
     def test_insufficient_data_workflow_order(self):
-        "Test that data collection is prioritized when data is insufficient.""
+        "Test that data collection is prioritized when data is insufficient.
         if WorkflowOrchestrator is None:
-            pytest.skip(WorkflowOrchestrator not available")
+            pytest.skip(WorkflowOrchestrator not available")"
 
         # Create mock objects
         orchestrator = WorkflowOrchestrator(None, None, None)
 
         # Simulate triage result with insufficient data
-        triage_result = {"data_sufficiency: insufficient"}
+        triage_result = {data_sufficiency: insufficient}
 
         # Get the workflow steps
         steps = orchestrator._define_workflow_based_on_triage(triage_result)
@@ -74,33 +74,33 @@ class TestAgentExecutionOrder:
         agent_order = [step.agent_name for step in steps]
 
         # For insufficient data, data collection should come first after triage
-        assert agent_order[0] == "triage, Triage should always be first"
-        assert agent_order[1] == "data, Data collection should be second when data is insufficient"
+        assert agent_order[0] == triage, Triage should always be first"
+        assert agent_order[1] == "data, Data collection should be second when data is insufficient
 
         # Verify dependencies still maintain logical order
         step_dict = {step.agent_name: step for step in steps}
 
         # Data should still depend on triage
-        assert step_dict["data].dependencies == [triage"]
+        assert step_dict[data].dependencies == [triage]
 
         # If optimization exists, it should depend on data
-        if "optimization in step_dict:
-            assert data" in step_dict["optimization].dependencies, \
+        if "optimization in step_dict:"
+            assert data in step_dict[optimization].dependencies, \
                 Optimization must depend on data collection"
 
     def test_no_optimization_without_data(self):
-        "Test that optimization never runs without data dependency.""
+        "Test that optimization never runs without data dependency.
         if WorkflowOrchestrator is None:
-            pytest.skip(WorkflowOrchestrator not available")
+            pytest.skip(WorkflowOrchestrator not available")"
 
         # Create mock objects
         orchestrator = WorkflowOrchestrator(None, None, None)
 
         # Test various triage scenarios
         test_scenarios = [
-            {"data_sufficiency: sufficient"},
-            {"data_sufficiency: insufficient"},
-            {"data_sufficiency: partial"}
+            {data_sufficiency: sufficient},
+            {data_sufficiency: insufficient"},
+            {"data_sufficiency: partial}
         ]
 
         for scenario in test_scenarios:
@@ -108,45 +108,45 @@ class TestAgentExecutionOrder:
             step_dict = {step.agent_name: step for step in steps}
 
             # If optimization step exists, it must depend on data
-            if "optimization in step_dict:
-                optimization_deps = step_dict[optimization"].dependencies
-                assert "data in optimization_deps, \
+            if optimization in step_dict:
+                optimization_deps = step_dict[optimization"].dependencies"
+                assert data in optimization_deps, \
                     fOptimization lacks data dependency in scenario {scenario}"
 
     def test_workflow_step_creation(self):
-        "Test that workflow steps are created correctly.""
+        "Test that workflow steps are created correctly.
         if WorkflowOrchestrator is None or PipelineStepConfig is None:
-            pytest.skip(Workflow components not available")
+            pytest.skip(Workflow components not available")"
 
         # Create mock objects
         orchestrator = WorkflowOrchestrator(None, None, None)
 
         # Test step creation
-        triage_result = {"data_sufficiency: sufficient"}
+        triage_result = {data_sufficiency: sufficient}
         steps = orchestrator._define_workflow_based_on_triage(triage_result)
 
         # Verify all steps are PipelineStepConfig instances
         for step in steps:
             assert isinstance(step, PipelineStepConfig), \
-                f"Step {step} is not a PipelineStepConfig instance
+                fStep {step} is not a PipelineStepConfig instance
 
         # Verify required attributes
         for step in steps:
-            assert hasattr(step, 'agent_name'), fStep missing agent_name: {step}"
-            assert hasattr(step, 'dependencies'), f"Step missing dependencies: {step}
+            assert hasattr(step, 'agent_name'), fStep missing agent_name: {step}""
+            assert hasattr(step, 'dependencies'), fStep missing dependencies: {step}
             assert isinstance(step.dependencies, list), \
-                fDependencies should be a list: {step.dependencies}"
+                fDependencies should be a list: {step.dependencies}
 
     def test_dependency_graph_validation(self):
-        "Test that the dependency graph is acyclic and valid.""
+        "Test that the dependency graph is acyclic and valid."
         if WorkflowOrchestrator is None:
-            pytest.skip(WorkflowOrchestrator not available")
+            pytest.skip(WorkflowOrchestrator not available)"
 
         # Create mock objects
         orchestrator = WorkflowOrchestrator(None, None, None)
 
         # Test with sufficient data
-        triage_result = {"data_sufficiency: sufficient"}
+        triage_result = {"data_sufficiency: sufficient}
         steps = orchestrator._define_workflow_based_on_triage(triage_result)
 
         # Build dependency graph
@@ -176,12 +176,12 @@ class TestAgentExecutionOrder:
         # Check for cycles
         for agent_name in agent_names:
             assert not has_cycle(agent_name), \
-                f"Circular dependency detected involving {agent_name}
+                fCircular dependency detected involving {agent_name}
 
     def test_execution_order_consistency(self):
-        ""Test that execution order is consistent across multiple calls."
+        "Test that execution order is consistent across multiple calls."
         if WorkflowOrchestrator is None:
-            pytest.skip("WorkflowOrchestrator not available)
+            pytest.skip(WorkflowOrchestrator not available)
 
         # Create mock objects
         orchestrator = WorkflowOrchestrator(None, None, None)
@@ -200,12 +200,12 @@ class TestAgentExecutionOrder:
         first_order = execution_orders[0]
         for i, order in enumerate(execution_orders[1:], 1):
             assert order == first_order, \
-                fExecution order inconsistent on call {i+1}: {order} vs {first_order}"
+                fExecution order inconsistent on call {i+1}: {order} vs {first_order}
 
     def test_critical_business_logic_order(self):
-        "Test that business-critical ordering constraints are maintained.""
+        Test that business-critical ordering constraints are maintained.""
         if WorkflowOrchestrator is None:
-            pytest.skip(WorkflowOrchestrator not available")
+            pytest.skip(WorkflowOrchestrator not available)
 
         # Create mock objects
         orchestrator = WorkflowOrchestrator(None, None, None)
@@ -218,59 +218,59 @@ class TestAgentExecutionOrder:
         agent_order = [step.agent_name for step in steps]
 
         # Business Rule 1: Triage must be first
-        assert agent_order[0] == "triage, \
+        assert agent_order[0] == triage, \
             Triage must be the first step in any workflow"
 
         # Business Rule 2: Data collection before optimization
-        if "data in agent_order and optimization" in agent_order:
-            data_pos = agent_order.index("data)
-            opt_pos = agent_order.index(optimization")
+        if "data in agent_order and optimization in agent_order:
+            data_pos = agent_order.index(data)
+            opt_pos = agent_order.index(optimization")"
             assert data_pos < opt_pos, \
-                "Data collection must come before optimization
+                Data collection must come before optimization
 
         # Business Rule 3: Actions before reporting
-        if actions" in agent_order and "reporting in agent_order:
+        if actions in agent_order and "reporting in agent_order:
             actions_pos = agent_order.index(actions")
-            reporting_pos = agent_order.index("reporting)
+            reporting_pos = agent_order.index(reporting)
             assert actions_pos < reporting_pos, \
-                Actions must come before reporting"
+                Actions must come before reporting""
 
         # Business Rule 4: Optimization before actions (if both exist)
-        if "optimization in agent_order and actions" in agent_order:
-            opt_pos = agent_order.index("optimization)
+        if optimization in agent_order and actions in agent_order:
+            opt_pos = agent_order.index(optimization)"
             actions_pos = agent_order.index(actions")
             assert opt_pos < actions_pos, \
-                "Optimization must come before actions
+                Optimization must come before actions
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # Allow running directly for debugging
     test_instance = TestAgentExecutionOrder()
 
     try:
         test_instance.test_sufficient_data_workflow_order()
-        print("✅ Sufficient data workflow order test passed)
+        print(✅ Sufficient data workflow order test passed)
 
         test_instance.test_insufficient_data_workflow_order()
-        print(✅ Insufficient data workflow order test passed")
+        print(✅ Insufficient data workflow order test passed"")
 
         test_instance.test_no_optimization_without_data()
-        print("✅ No optimization without data test passed)
+        print(✅ No optimization without data test passed)"
 
         test_instance.test_workflow_step_creation()
         print(✅ Workflow step creation test passed")
 
         test_instance.test_dependency_graph_validation()
-        print("✅ Dependency graph validation test passed)
+        print(✅ Dependency graph validation test passed")"
 
         test_instance.test_execution_order_consistency()
-        print(✅ Execution order consistency test passed")
+        print(✅ Execution order consistency test passed)
 
         test_instance.test_critical_business_logic_order()
-        print("✅ Critical business logic order test passed)
+        print("✅ Critical business logic order test passed")
 
-        print(\n🎉 All agent execution order tests passed!")
+        print(\n🎉 All agent execution order tests passed!)"
 
     except Exception as e:
         print(f"❌ Test failed: {e}")
-        sys.exit(1)
+        sys.exit(1")

@@ -30,7 +30,7 @@ SSOT Violations Being Detected:
 - Cross-user event bleeding
 - Factory vs SSOT behavioral inconsistencies
 - Golden Path WebSocket connection race conditions
-""
+"
 
 import asyncio
 import time
@@ -48,15 +48,15 @@ logger = central_logger.get_logger(__name__)
 
 
 class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
-    ""
+    "
     Unit tests detecting WebSocket Manager SSOT violations.
     
     These tests have NO external dependencies and should detect
     architectural violations in the codebase.
-    "
+"
     
     def test_websocket_manager_factory_ssot_violation_detected(self):
-        "
+    "
         Test that WebSocketManagerFactory creates isolated instances instead of using SSOT.
         
         EXPECTED: Should FAIL initially - detecting factory bypassing UnifiedWebSocketManager.
@@ -64,9 +64,9 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
         This test detects the violation where WebSocketManagerFactory creates separate
         manager instances instead of using the SSOT UnifiedWebSocketManager with proper
         user context isolation.
-        ""
-        self.record_metric(test_type", "unit_ssot_violation_detection)
-        self.record_metric(violation_category", "factory_ssot_bypass)
+        "
+        self.record_metric(test_type", unit_ssot_violation_detection)
+        self.record_metric(violation_category, factory_ssot_bypass)
         
         violation_detected = False
         violation_details = []
@@ -86,7 +86,7 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
                     if hasattr(WebSocketManagerFactory, 'create'):
                         # Try to create a test instance
                         import asyncio
-                        test_manager = asyncio.run(WebSocketManagerFactory.create(user_id=test_validation"))
+                        test_manager = asyncio.run(WebSocketManagerFactory.create(user_id=test_validation"))"
                         if not isinstance(test_manager, UnifiedWebSocketManager):
                             factory_creates_separate_instances = True
                 except:
@@ -95,9 +95,9 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
 
                 if factory_creates_separate_instances:
                     violation_detected = True
-                    violation_details.append("WebSocketManagerFactory exists and creates non-SSOT instances)
+                    violation_details.append(WebSocketManagerFactory exists and creates non-SSOT instances)
                 else:
-                    logger.info(SSOT COMPLIANT: WebSocketManagerFactory creates proper SSOT instances")
+                    logger.info(SSOT COMPLIANT: WebSocketManagerFactory creates proper SSOT instances)"
                 
             # Check if WebSocketManager is NOT the same as UnifiedWebSocketManager (SSOT violation)
             # Issue #712 Fix: This should actually verify that they ARE the same (proper SSOT aliasing)
@@ -105,7 +105,7 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
                 violation_detected = True
                 violation_details.append(f"WebSocketManager ({WebSocketManager} is not the SSOT UnifiedWebSocketManager ({UnifiedWebSocketManager})
             else:
-                logger.info(SSOT COMPLIANT: WebSocketManager is properly aliased to UnifiedWebSocketManager")
+                logger.info(SSOT COMPLIANT: WebSocketManager is properly aliased to UnifiedWebSocketManager)
                 
             # Check for multiple manager classes (SSOT violation)
             # Issue #712 Fix: Enhanced validation that understands SSOT compatibility patterns
@@ -117,7 +117,7 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
                 from netra_backend.app.websocket_core import unified_manager
 
                 if hasattr(websocket_manager, 'WebSocketManager'):
-                    manager_classes.append("websocket_manager.WebSocketManager)
+                    manager_classes.append(websocket_manager.WebSocketManager)"
                 if hasattr(unified_manager, 'UnifiedWebSocketManager'):
                     manager_classes.append(unified_manager.UnifiedWebSocketManager")
 
@@ -130,7 +130,7 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
                     # This is the CORRECT pattern for SSOT with compatibility
                     if ws_manager is unified_manager_cls:
                         is_proper_ssot_alias = True
-                        logger.info("SSOT VALIDATION: WebSocketManager properly aliased to UnifiedWebSocketManager)
+                        logger.info(SSOT VALIDATION: WebSocketManager properly aliased to UnifiedWebSocketManager)
                     else:
                         is_proper_ssot_alias = False
 
@@ -140,30 +140,30 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
             # Only consider it a violation if there are multiple classes AND they're not proper SSOT aliases
             if len(manager_classes) > 1 and not is_proper_ssot_alias:
                 violation_detected = True
-                violation_details.append(fMultiple WebSocket manager classes without proper SSOT aliasing: {manager_classes}")
+                violation_details.append(fMultiple WebSocket manager classes without proper SSOT aliasing: {manager_classes}")"
             elif len(manager_classes) > 1 and is_proper_ssot_alias:
                 # This is actually the correct SSOT pattern - compatibility alias working properly
-                logger.info(f"SSOT COMPLIANT: Multiple classes detected but properly aliased: {manager_classes})
+                logger.info(fSSOT COMPLIANT: Multiple classes detected but properly aliased: {manager_classes})
                 
         except ImportError as e:
             # If imports fail, that might indicate incomplete SSOT implementation
             violation_detected = True
-            violation_details.append(fImport failure indicating incomplete SSOT: {e}")
+            violation_details.append(fImport failure indicating incomplete SSOT: {e})
             
         # Record violation details
-        self.record_metric("violation_detected, violation_detected)
-        self.record_metric(violation_details", violation_details)
+        self.record_metric("violation_detected, violation_detected)"
+        self.record_metric(violation_details, violation_details)
         
         # Test should FAIL if violations are detected (proving violations exist)
         if violation_detected:
-            failure_message = f"SSOT VIOLATION DETECTED: WebSocketManagerFactory bypasses SSOT.\nDetails: {violation_details}
+            failure_message = fSSOT VIOLATION DETECTED: WebSocketManagerFactory bypasses SSOT.\nDetails: {violation_details}
             logger.critical(failure_message)
             pytest.fail(failure_message)
         else:
-            logger.info(No factory SSOT violations detected - remediation may be complete")
+            logger.info(No factory SSOT violations detected - remediation may be complete")"
     
     def test_unified_manager_bypass_violation_detected(self):
-        "
+
         Test that code bypasses UnifiedWebSocketManager SSOT.
         
         EXPECTED: Should FAIL initially - detecting direct manager instantiation.
@@ -171,8 +171,8 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
         This test detects code that creates WebSocket managers directly
         instead of using the SSOT UnifiedWebSocketManager.
         ""
-        self.record_metric(test_type", "unit_ssot_violation_detection)
-        self.record_metric(violation_category", "unified_manager_bypass)
+        self.record_metric(test_type, unit_ssot_violation_detection)
+        self.record_metric(violation_category, "unified_manager_bypass)
         
         violation_detected = False
         violation_details = []
@@ -189,19 +189,19 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
                 violation_details.append(Direct WebSocketManager instantiation succeeded (should be prevented)")
             except (TypeError, AttributeError, RuntimeError) as e:
                 # Good - direct instantiation is prevented
-                logger.debug(f"Direct instantiation properly prevented: {e})
+                logger.debug(fDirect instantiation properly prevented: {e})
             
             # Check for non-SSOT manager creation methods
             manager_creation_methods = []
             if hasattr(WebSocketManager, '__new__'):
-                manager_creation_methods.append(__new__")
+                manager_creation_methods.append(__new__)"
             if hasattr(WebSocketManager, '__init__') and callable(getattr(WebSocketManager, '__init__')):
                 manager_creation_methods.append("__init__)
                 
             # In SSOT pattern, these should be controlled or redirected
             if len(manager_creation_methods) > 0:
                 violation_detected = True
-                violation_details.append(fDirect instantiation methods available: {manager_creation_methods}")
+                violation_details.append(fDirect instantiation methods available: {manager_creation_methods})
                 
         except ImportError as e:
             violation_detected = True
@@ -209,27 +209,27 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
             
         # Record violation details
         self.record_metric(violation_detected", violation_detected)
-        self.record_metric("violation_details, violation_details)
+        self.record_metric(violation_details, violation_details)
         
         # Test should FAIL if violations are detected
         if violation_detected:
-            failure_message = fSSOT VIOLATION DETECTED: Code bypasses UnifiedWebSocketManager SSOT.\nDetails: {violation_details}"
+            failure_message = fSSOT VIOLATION DETECTED: Code bypasses UnifiedWebSocketManager SSOT.\nDetails: {violation_details}""
             logger.critical(failure_message)
             pytest.fail(failure_message)
         else:
-            logger.info("No unified manager bypass violations detected)
+            logger.info(No unified manager bypass violations detected)
     
     def test_mock_framework_ssot_divergence_detected(self):
-        ""
+        "
         Test that mock framework diverges from SSOT patterns.
         
         EXPECTED: Should FAIL initially - detecting test/production inconsistencies.
         
         This test detects cases where test mocks don't match the SSOT
         production implementation, leading to test/prod inconsistencies.
-        "
-        self.record_metric("test_type, unit_ssot_violation_detection")
-        self.record_metric("violation_category, mock_framework_divergence")
+"
+        self.record_metric(test_type, unit_ssot_violation_detection")
+        self.record_metric("violation_category, mock_framework_divergence)
         
         violation_detected = False
         violation_details = []
@@ -249,14 +249,14 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
             
             if missing_in_mock:
                 violation_detected = True
-                violation_details.append(f"Mock missing real methods: {missing_in_mock})
+                violation_details.append(fMock missing real methods: {missing_in_mock})
                 
             if extra_in_mock:
                 # Filter out internal/private methods
                 significant_extra = {m for m in extra_in_mock if not m.startswith('_')}
                 if significant_extra:
                     violation_detected = True
-                    violation_details.append(fMock has extra methods not in real: {significant_extra}")
+                    violation_details.append(fMock has extra methods not in real: {significant_extra})"
             
             # Check for behavioral divergence indicators
             if hasattr(MockWebSocketManager, 'send_message') and hasattr(WebSocketManager, 'send_message'):
@@ -270,22 +270,22 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
         except ImportError as e:
             # Mock import failure might indicate missing mock framework
             violation_detected = True
-            violation_details.append(fMock framework import failure: {e}")
+            violation_details.append(fMock framework import failure: {e})
             
         # Record violation details
-        self.record_metric("violation_detected, violation_detected)
-        self.record_metric(violation_details", violation_details)
+        self.record_metric("violation_detected, violation_detected)"
+        self.record_metric(violation_details, violation_details)
         
         # Test should FAIL if violations are detected
         if violation_detected:
-            failure_message = f"SSOT VIOLATION DETECTED: Mock framework diverges from SSOT patterns.\nDetails: {violation_details}
+            failure_message = fSSOT VIOLATION DETECTED: Mock framework diverges from SSOT patterns.\nDetails: {violation_details}
             logger.critical(failure_message)
             pytest.fail(failure_message)
         else:
-            logger.info(No mock framework divergence detected")
+            logger.info(No mock framework divergence detected")"
     
     def test_user_isolation_architecture_violation_detected(self):
-        "
+
         Test user isolation using separate managers vs SSOT with context.
         
         EXPECTED: Should FAIL initially - detecting incorrect isolation pattern.
@@ -293,8 +293,8 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
         This test detects the violation where user isolation is achieved
         through separate manager instances instead of SSOT with execution context.
         ""
-        self.record_metric(test_type", "unit_ssot_violation_detection)
-        self.record_metric(violation_category", "user_isolation_architecture)
+        self.record_metric(test_type, unit_ssot_violation_detection)
+        self.record_metric(violation_category, "user_isolation_architecture)
         
         violation_detected = False
         violation_details = []
@@ -304,7 +304,7 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
             
             # Check if factory creates separate instances for different users
             user1_id = UserID(test_user_1")
-            user2_id = UserID("test_user_2)
+            user2_id = UserID(test_user_2)
             
             # Try to get managers for different users
             try:
@@ -314,17 +314,17 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
                 # If we get different instances, that's a SSOT violation
                 if manager1 is not manager2:
                     violation_detected = True
-                    violation_details.append(Factory creates separate manager instances per user (SSOT violation)")
+                    violation_details.append(Factory creates separate manager instances per user (SSOT violation)")"
                     
                 # Check if instances have different IDs/state
                 if hasattr(manager1, 'manager_id') and hasattr(manager2, 'manager_id'):
                     if manager1.manager_id != manager2.manager_id:
                         violation_detected = True
-                        violation_details.append("Managers have different IDs indicating separate instances)
+                        violation_details.append(Managers have different IDs indicating separate instances)
                         
             except (AttributeError, TypeError) as e:
                 # Method might not exist if SSOT is implemented
-                logger.debug(fFactory method not available: {e}")
+                logger.debug(fFactory method not available: {e})"
                 
             # Check for user-specific manager creation methods
             factory_methods = [method for method in dir(WebSocketManagerFactory) 
@@ -336,7 +336,7 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
                 
         except ImportError:
             # Factory not existing might indicate SSOT implementation
-            logger.debug(WebSocketManagerFactory not found - might indicate SSOT implementation")
+            logger.debug(WebSocketManagerFactory not found - might indicate SSOT implementation)
             
         # Check for context-based SSOT implementation
         try:
@@ -346,31 +346,31 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
             # SSOT should use single manager with context
             if not hasattr(UnifiedWebSocketManager, 'with_context') and not hasattr(UnifiedWebSocketManager, 'set_context'):
                 violation_detected = True
-                violation_details.append("UnifiedWebSocketManager lacks context-based user isolation)
+                violation_details.append(UnifiedWebSocketManager lacks context-based user isolation)"
                 
         except ImportError as e:
             violation_detected = True
             violation_details.append(fSSOT context components missing: {e}")
             
         # Record violation details
-        self.record_metric("violation_detected, violation_detected)
-        self.record_metric(violation_details", violation_details)
+        self.record_metric(violation_detected, violation_detected)
+        self.record_metric(violation_details", violation_details)"
         
         # Test should FAIL if violations are detected
         if violation_detected:
-            failure_message = f"SSOT VIOLATION DETECTED: User isolation uses separate managers instead of SSOT with context.\nDetails: {violation_details}
+            failure_message = fSSOT VIOLATION DETECTED: User isolation uses separate managers instead of SSOT with context.\nDetails: {violation_details}
             logger.critical(failure_message)
             pytest.fail(failure_message)
         else:
-            logger.info(No user isolation architecture violations detected")
+            logger.info(No user isolation architecture violations detected)
 
 
 class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
-    "
+    ""
     Integration tests detecting WebSocket Manager SSOT violations with real services.
     
     These tests use real services but NO Docker dependencies.
-    ""
+    
     
     def test_websocket_manager_instance_duplication_detected(self):
         ""
@@ -380,9 +380,9 @@ class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
         
         This test detects runtime violations where multiple WebSocket manager
         instances exist simultaneously in the application.
-        "
+
         self.record_metric("test_type, integration_ssot_violation_detection")
-        self.record_metric("violation_category, instance_duplication")
+        self.record_metric(violation_category, instance_duplication)
         
         violation_detected = False
         violation_details = []
@@ -408,12 +408,12 @@ class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
                         instance_ids.add(id(instance))  # Use object ID if no manager_id
                         
                 except Exception as e:
-                    logger.debug(f"Instance creation {i} failed: {e})
+                    logger.debug(fInstance creation {i} failed: {e})
                     
             # If we created multiple instances with different IDs, that's a violation
             if len(instances) > 1 and len(instance_ids) > 1:
                 violation_detected = True
-                violation_details.append(fCreated {len(instances)} different manager instances with IDs: {instance_ids}")
+                violation_details.append(fCreated {len(instances)} different manager instances with IDs: {instance_ids}")"
                 
             # Check if instances are actually different objects
             if len(instances) > 1:
@@ -421,16 +421,16 @@ class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
                 for i, instance in enumerate(instances[1:], 1):
                     if instance is not first_instance:
                         violation_detected = True
-                        violation_details.append(f"Instance {i} is different object from instance 0)
+                        violation_details.append(fInstance {i} is different object from instance 0)
                         
         except ImportError as e:
             violation_detected = True
-            violation_details.append(fWebSocket manager import failure: {e}")
+            violation_details.append(fWebSocket manager import failure: {e})
             
         # Record violation details
-        self.record_metric("violation_detected, violation_detected)
-        self.record_metric(violation_details", violation_details)
-        self.record_metric("instances_created, len(instances) if 'instances' in locals() else 0)
+        self.record_metric("violation_detected, violation_detected)"
+        self.record_metric(violation_details, violation_details)
+        self.record_metric(instances_created, len(instances) if 'instances' in locals() else 0)"
         
         # Test should FAIL if violations are detected
         if violation_detected:
@@ -438,7 +438,7 @@ class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
             logger.critical(failure_message)
             pytest.fail(failure_message)
         else:
-            logger.info("No instance duplication violations detected)
+            logger.info(No instance duplication violations detected)
     
     def test_cross_user_event_bleeding_detected(self):
         ""
@@ -448,9 +448,9 @@ class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
         
         This test detects violations where WebSocket events intended for
         one user are delivered to another user.
-        "
+
         self.record_metric("test_type, integration_ssot_violation_detection")
-        self.record_metric("violation_category, cross_user_event_bleeding")
+        self.record_metric(violation_category, cross_user_event_bleeding)
         
         violation_detected = False
         violation_details = []
@@ -459,7 +459,7 @@ class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
             from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             # Simulate two different users
-            user1_id = UserID("test_user_1)
+            user1_id = UserID(test_user_1)"
             user2_id = UserID(test_user_2")
             
             # Track events for each user
@@ -495,7 +495,7 @@ class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
                     manager.register_connection(user2_id, user2_conn)
                     
                 # Send a message intended only for user1
-                test_message = {"type: agent_started", "user_id: str(user1_id), data": "test}
+                test_message = {type: agent_started, "user_id: str(user1_id), data": test}
                 
                 if hasattr(manager, 'send_to_user'):
                     manager.send_to_user(user1_id, test_message)
@@ -506,7 +506,7 @@ class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
                 # Check if user2 received the message (violation)
                 if len(user2_events) > 0:
                     violation_detected = True
-                    violation_details.append(fUser2 received {len(user2_events)} events intended for User1: {user2_events}")
+                    violation_details.append(fUser2 received {len(user2_events)} events intended for User1: {user2_events})"
                     
                 # Check if user1 received the message (expected)
                 if len(user1_events) == 0:
@@ -515,7 +515,7 @@ class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
                     
             except AttributeError as e:
                 # Manager might not have expected methods
-                violation_details.append(fManager missing expected methods: {e}")
+                violation_details.append(fManager missing expected methods: {e})
                 
         except ImportError as e:
             violation_detected = True
@@ -523,9 +523,9 @@ class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
             
         # Record violation details
         self.record_metric(violation_detected", violation_detected)
-        self.record_metric("violation_details, violation_details)
-        self.record_metric(user1_events_count", len(user1_events) if 'user1_events' in locals() else 0)
-        self.record_metric("user2_events_count, len(user2_events) if 'user2_events' in locals() else 0)
+        self.record_metric(violation_details, violation_details)
+        self.record_metric(user1_events_count", len(user1_events) if 'user1_events' in locals() else 0)"
+        self.record_metric(user2_events_count, len(user2_events) if 'user2_events' in locals() else 0)
         
         # Test should FAIL if violations are detected
         if violation_detected:
@@ -536,15 +536,15 @@ class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
             logger.info("No cross-user event bleeding violations detected)
     
     def test_factory_vs_ssot_behavior_inconsistency_detected(self):
-        ""
+        
         Test behavioral differences between factory and SSOT instances.
         
         EXPECTED: Should FAIL initially - detecting inconsistent behavior patterns.
         
         This test detects violations where factory-created instances behave
         differently from SSOT instances.
-        "
-        self.record_metric("test_type, integration_ssot_violation_detection")
+""
+        self.record_metric(test_type, integration_ssot_violation_detection)
         self.record_metric("violation_category, factory_ssot_behavior_inconsistency")
         
         violation_detected = False
@@ -564,12 +564,12 @@ class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
                 elif hasattr(WebSocketManagerFactory, 'get_manager'):
                     factory_instance = WebSocketManagerFactory.get_manager()
             except Exception as e:
-                logger.debug(f"Factory instance creation failed: {e})
+                logger.debug(fFactory instance creation failed: {e})
                 
             try:
                 direct_instance = WebSocketManager()
             except Exception as e:
-                logger.debug(fDirect instance creation failed: {e}")
+                logger.debug(fDirect instance creation failed: {e})
                 
             # Compare behavior if both instances exist
             if factory_instance and direct_instance:
@@ -590,27 +590,27 @@ class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
                 # Check if they're the same instance (should be for SSOT)
                 if factory_instance is not direct_instance:
                     violation_detected = True
-                    violation_details.append("Factory and direct instances are different objects (SSOT violation))
+                    violation_details.append(Factory and direct instances are different objects (SSOT violation))
                     
             elif factory_instance and not direct_instance:
                 # Factory works but direct doesn't - might be SSOT implementation
-                logger.info(Factory works but direct instantiation prevented - possible SSOT implementation")
+                logger.info(Factory works but direct instantiation prevented - possible SSOT implementation")"
             elif not factory_instance and direct_instance:
                 # Direct works but factory doesn't - might indicate incomplete migration
                 violation_detected = True
-                violation_details.append("Direct instantiation works but factory doesn't - incomplete SSOT migration)
+                violation_details.append(Direct instantiation works but factory doesn't - incomplete SSOT migration)
             else:
                 # Neither works - might indicate broken implementation
                 violation_detected = True
-                violation_details.append(Neither factory nor direct instantiation works")
+                violation_details.append(Neither factory nor direct instantiation works)"
                 
         except ImportError as e:
             # Factory not existing might indicate SSOT implementation
             logger.debug(f"Factory import failed - might indicate SSOT implementation: {e})
             
         # Record violation details
-        self.record_metric(violation_detected", violation_detected)
-        self.record_metric("violation_details, violation_details)
+        self.record_metric(violation_detected, violation_detected)
+        self.record_metric(violation_details, violation_details)"
         
         # Test should FAIL if violations are detected
         if violation_detected:
@@ -618,7 +618,7 @@ class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
             logger.critical(failure_message)
             pytest.fail(failure_message)
         else:
-            logger.info("No factory vs SSOT behavior inconsistencies detected)
+            logger.info(No factory vs SSOT behavior inconsistencies detected)
 
 
 class WebSocketManagerSSotViolationsE2EStagingTests(SSotAsyncTestCase):
@@ -626,27 +626,27 @@ class WebSocketManagerSSotViolationsE2EStagingTests(SSotAsyncTestCase):
     E2E tests detecting WebSocket Manager SSOT violations on staging environment.
     
     These tests use remote staging environment only - NO local dependencies.
-    "
+
     
     @pytest.mark.asyncio
     async def test_golden_path_websocket_connection_failures_detected(self):
-        "
+    ""
         Test Golden Path WebSocket connection stability on staging.
         
         EXPECTED: Should FAIL initially - detecting 1011 errors and race conditions.
         
         This test detects violations in the Golden Path where WebSocket connections
         fail due to race conditions or SSOT implementation issues.
-        ""
+        
         self.record_metric(test_type", "e2e_ssot_violation_detection)
-        self.record_metric(violation_category", "golden_path_connection_failures)
+        self.record_metric(violation_category, golden_path_connection_failures)
         
         violation_detected = False
         violation_details = []
         
         try:
             # Test WebSocket connection to staging environment
-            staging_url = self.get_env_var(STAGING_WEBSOCKET_URL", "wss://staging.netrasystems.ai/ws)
+            staging_url = self.get_env_var(STAGING_WEBSOCKET_URL, "wss://staging.netrasystems.ai/ws)
             
             # Simulate Golden Path connection attempts
             connection_attempts = 5
@@ -670,7 +670,7 @@ class WebSocketManagerSSotViolationsE2EStagingTests(SSotAsyncTestCase):
                         successful_connections += 1
                         
                 except Exception as e:
-                    connection_errors.append(f"Attempt {attempt}: {e})
+                    connection_errors.append(fAttempt {attempt}: {e})
                     
                 # Small delay between attempts
                 await asyncio.sleep(0.1)
@@ -679,7 +679,7 @@ class WebSocketManagerSSotViolationsE2EStagingTests(SSotAsyncTestCase):
             success_rate = successful_connections / connection_attempts
             if success_rate < 0.8:  # Less than 80% success indicates issues
                 violation_detected = True
-                violation_details.append(fLow connection success rate: {success_rate:.2%} ({successful_connections}/{connection_attempts}")
+                violation_details.append(fLow connection success rate: {success_rate:.2%} ({successful_connections}/{connection_attempts})"
                 
             if connection_errors:
                 violation_detected = True
@@ -687,27 +687,27 @@ class WebSocketManagerSSotViolationsE2EStagingTests(SSotAsyncTestCase):
                 
             # Test for specific race condition patterns
             race_condition_indicators = [
-                1011",  # Unexpected condition
-                "race,  # Race condition in logs
+                1011,  # Unexpected condition
+                race,  # Race condition in logs"
                 timeout",  # Connection timeouts
-                "duplicate,  # Duplicate connections
+                duplicate,  # Duplicate connections
             ]
             
             for error in connection_errors:
                 for indicator in race_condition_indicators:
                     if indicator.lower() in str(error).lower():
                         violation_detected = True
-                        violation_details.append(fRace condition indicator '{indicator}' in error: {error}")
+                        violation_details.append(fRace condition indicator '{indicator}' in error: {error}")"
                         
         except Exception as e:
             violation_detected = True
-            violation_details.append(f"Golden Path connection testing failed: {e})
+            violation_details.append(fGolden Path connection testing failed: {e})
             
         # Record violation details
-        self.record_metric(violation_detected", violation_detected)
-        self.record_metric("violation_details, violation_details)
-        self.record_metric(connection_success_rate", success_rate if 'success_rate' in locals() else 0.0)
-        self.record_metric("connection_errors_count, len(connection_errors) if 'connection_errors' in locals() else 0)
+        self.record_metric(violation_detected, violation_detected)
+        self.record_metric("violation_details, violation_details)"
+        self.record_metric(connection_success_rate, success_rate if 'success_rate' in locals() else 0.0)
+        self.record_metric(connection_errors_count, len(connection_errors) if 'connection_errors' in locals() else 0)"
         
         # Test should FAIL if violations are detected
         if violation_detected:
@@ -715,7 +715,7 @@ class WebSocketManagerSSotViolationsE2EStagingTests(SSotAsyncTestCase):
             logger.critical(failure_message)
             pytest.fail(failure_message)
         else:
-            logger.info("No Golden Path connection failures detected)
+            logger.info(No Golden Path connection failures detected)
     
     @pytest.mark.asyncio
     async def test_concurrent_user_websocket_race_conditions_detected(self):
@@ -726,9 +726,9 @@ class WebSocketManagerSSotViolationsE2EStagingTests(SSotAsyncTestCase):
         
         This test detects violations where concurrent user connections cause
         race conditions due to improper SSOT implementation.
-        "
+
         self.record_metric("test_type, e2e_ssot_violation_detection")
-        self.record_metric("violation_category, concurrent_user_race_conditions")
+        self.record_metric(violation_category, concurrent_user_race_conditions)
         
         violation_detected = False
         violation_details = []
@@ -740,7 +740,7 @@ class WebSocketManagerSSotViolationsE2EStagingTests(SSotAsyncTestCase):
             user_results = {}
             
             async def simulate_user_connection(user_id: str):
-                "Simulate a single user's WebSocket connection.""
+                Simulate a single user's WebSocket connection.""
                 try:
                     start_time = time.time()
                     
@@ -771,7 +771,7 @@ class WebSocketManagerSSotViolationsE2EStagingTests(SSotAsyncTestCase):
             
             # Start concurrent connections
             for i in range(concurrent_users):
-                user_id = ftest_user_{i}"
+                user_id = ftest_user_{i}
                 task = asyncio.create_task(simulate_user_connection(user_id))
                 connection_tasks.append(task)
             
@@ -800,7 +800,7 @@ class WebSocketManagerSSotViolationsE2EStagingTests(SSotAsyncTestCase):
             success_rate = successful_users / concurrent_users
             if success_rate < 1.0:  # All should succeed without race conditions
                 violation_detected = True
-                violation_details.append(f"Concurrent connection success rate: {success_rate:.2%} ({successful_users}/{concurrent_users})
+                violation_details.append(fConcurrent connection success rate: {success_rate:.2%} ({successful_users}/{concurrent_users})
             
             # Check for timing anomalies (indicating race conditions)
             if connection_times:
@@ -811,7 +811,7 @@ class WebSocketManagerSSotViolationsE2EStagingTests(SSotAsyncTestCase):
                 # Large variance might indicate race conditions
                 if max_time > min_time * 3:  # More than 3x difference
                     violation_detected = True
-                    violation_details.append(fLarge timing variance: min={min_time:.3f}s, max={max_time:.3f}s, avg={avg_time:.3f}s")
+                    violation_details.append(fLarge timing variance: min={min_time:.3f}s, max={max_time:.3f}s, avg={avg_time:.3f}s)"
             
             # Check for event delivery issues
             expected_total_events = successful_users  # Each user should get 1 event
@@ -821,91 +821,91 @@ class WebSocketManagerSSotViolationsE2EStagingTests(SSotAsyncTestCase):
                 
         except Exception as e:
             violation_detected = True
-            violation_details.append(fConcurrent user testing failed: {e}")
+            violation_details.append(fConcurrent user testing failed: {e})
             
         # Record violation details
-        self.record_metric("violation_detected, violation_detected)
+        self.record_metric(violation_detected, violation_detected)"
         self.record_metric(violation_details", violation_details)
-        self.record_metric("concurrent_users, concurrent_users)
-        self.record_metric(successful_users", successful_users if 'successful_users' in locals() else 0)
+        self.record_metric(concurrent_users, concurrent_users)
+        self.record_metric(successful_users", successful_users if 'successful_users' in locals() else 0)"
         
         # Test should FAIL if violations are detected
         if violation_detected:
-            failure_message = f"SSOT VIOLATION DETECTED: Concurrent user WebSocket race conditions.\nDetails: {violation_details}
+            failure_message = fSSOT VIOLATION DETECTED: Concurrent user WebSocket race conditions.\nDetails: {violation_details}
             logger.critical(failure_message)
             pytest.fail(failure_message)
         else:
-            logger.info(No concurrent user race conditions detected")
+            logger.info(No concurrent user race conditions detected)
 
 
 # Test execution summary
 def test_suite_summary():
-    "
+    ""
     Summary of WebSocket Manager SSOT violation tests.
     
     This function provides a summary of what violations each test detects
     and the expected remediation approach.
-    ""
+    
     test_summary = {
-        unit_tests": {
-            "test_websocket_manager_factory_ssot_violation_detected: {
-                violation": "Factory pattern bypassing UnifiedWebSocketManager SSOT,
-                remediation": "Remove factory, use SSOT UnifiedWebSocketManager with context
+        unit_tests": {"
+            test_websocket_manager_factory_ssot_violation_detected: {
+                violation: "Factory pattern bypassing UnifiedWebSocketManager SSOT,
+                remediation": Remove factory, use SSOT UnifiedWebSocketManager with context
             },
-            test_unified_manager_bypass_violation_detected": {
+            test_unified_manager_bypass_violation_detected: {
                 "violation: Direct manager instantiation instead of SSOT",
-                "remediation: Prevent direct instantiation, enforce SSOT pattern"
+                remediation: Prevent direct instantiation, enforce SSOT pattern
             },
-            "test_mock_framework_ssot_divergence_detected: {
-                violation": "Mock framework diverges from SSOT patterns,
-                remediation": "Update mocks to match SSOT implementation exactly
+            test_mock_framework_ssot_divergence_detected: {"
+                violation": Mock framework diverges from SSOT patterns,
+                remediation: Update mocks to match SSOT implementation exactly
             },
-            test_user_isolation_architecture_violation_detected": {
-                "violation: User isolation using separate managers vs SSOT with context",
-                "remediation: Use single SSOT manager with UserExecutionContext"
+            test_user_isolation_architecture_violation_detected": {"
+                violation: User isolation using separate managers vs SSOT with context,
+                remediation: Use single SSOT manager with UserExecutionContext"
             }
         },
         "integration_tests: {
-            test_websocket_manager_instance_duplication_detected": {
+            test_websocket_manager_instance_duplication_detected: {
                 "violation: Multiple WebSocket manager instances in production",
-                "remediation: Enforce singleton/SSOT pattern at runtime"
+                remediation: Enforce singleton/SSOT pattern at runtime
             },
-            "test_cross_user_event_bleeding_detected: {
-                violation": "WebSocket events bleeding between users,
-                remediation": "Implement proper user context isolation
+            test_cross_user_event_bleeding_detected: {"
+                violation": WebSocket events bleeding between users,
+                remediation: Implement proper user context isolation
             },
-            test_factory_vs_ssot_behavior_inconsistency_detected": {
-                "violation: Behavioral differences between factory and SSOT instances",
-                "remediation: Eliminate factory, use consistent SSOT behavior"
+            test_factory_vs_ssot_behavior_inconsistency_detected": {"
+                violation: Behavioral differences between factory and SSOT instances,
+                remediation: Eliminate factory, use consistent SSOT behavior"
             }
         },
         "e2e_tests: {
-            test_golden_path_websocket_connection_failures_detected": {
+            test_golden_path_websocket_connection_failures_detected: {
                 "violation: Golden Path WebSocket connection race conditions",
-                "remediation: Fix race conditions in SSOT connection handling"
+                remediation: Fix race conditions in SSOT connection handling
             },
-            "test_concurrent_user_websocket_race_conditions_detected: {
-                violation": "Concurrent user connection race conditions,
-                remediation": "Implement proper concurrency control in SSOT
+            test_concurrent_user_websocket_race_conditions_detected: {"
+                violation": Concurrent user connection race conditions,
+                remediation: Implement proper concurrency control in SSOT
             }
         }
     }
     return test_summary
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # Run tests to detect violations
-    print("WebSocket Manager SSOT Violation Detection Tests)
-    print(=" * 50)
-    print("These tests are designed to FAIL initially to prove violations exist.)
+    print(WebSocket Manager SSOT Violation Detection Tests)
+    print(=" * 50")
+    print(These tests are designed to FAIL initially to prove violations exist.)"
     print(After remediation, they should PASS.")
     print()
     
     summary = test_suite_summary()
     for category, tests in summary.items():
-        print(f"{category.upper()}:)
-        for test_name, details in tests.items():
+        print(f{category.upper()}:)
+        for test_name, details in tests.items("):
             print(f  - {test_name}")
-            print(f"    Violation: {details['violation']})
-            print(f    Remediation: {details['remediation']}")
+            print(f    Violation: {details['violation']}")
+            print(f    Remediation: {details['remediation']}"")"
         print()
