@@ -33,7 +33,7 @@ from typing import Dict, Any, Optional, List
 import pytest_asyncio
 import uuid
 from shared.isolated_environment import get_env
-from test_framework.environment_isolation import isolated_test_env, get_test_env_manager
+from test_framework.environment_isolation import isolated_test_env_fixture, get_test_env_manager
 from tests.clients.websocket_client import WebSocketTestClient
 from tests.clients.backend_client import BackendTestClient
 from tests.clients.auth_client import AuthTestClient
@@ -149,10 +149,10 @@ class RealAgentBillingFlowTests:
     """Test complete agent billing flow with REAL services only."""
 
     @pytest_asyncio.fixture
-    async def billing_test_core(self, isolated_test_env):
+    async def billing_test_core(self, isolated_test_env_fixture):
         """Initialize billing test core with real service infrastructure."""
         core = RealAgentBillingTestCore()
-        infrastructure = await core.setup_real_billing_infrastructure(isolated_test_env)
+        infrastructure = await core.setup_real_billing_infrastructure(isolated_test_env_fixture)
         yield core
         await core.teardown_real_services()
 
@@ -269,10 +269,10 @@ class RealAgentBillingStressTests:
     """Stress tests for agent billing with real services."""
 
     @pytest_asyncio.fixture
-    async def billing_test_core(self, isolated_test_env):
+    async def billing_test_core(self, isolated_test_env_fixture):
         """Initialize billing test core with real service infrastructure."""
         core = RealAgentBillingTestCore()
-        infrastructure = await core.setup_real_billing_infrastructure(isolated_test_env)
+        infrastructure = await core.setup_real_billing_infrastructure(isolated_test_env_fixture)
         yield core
         await core.teardown_real_services()
 

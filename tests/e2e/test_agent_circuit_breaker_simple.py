@@ -34,7 +34,7 @@ setup_test_path()
 # Use centralized environment management per CLAUDE.md - ABSOLUTE IMPORTS ONLY
 from shared.isolated_environment import get_env
 from netra_backend.app.config import get_config
-from test_framework.environment_isolation import isolated_test_env
+from test_framework.environment_isolation import isolated_test_env_fixture
 from test_framework.fixtures.auth import create_real_jwt_token
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 

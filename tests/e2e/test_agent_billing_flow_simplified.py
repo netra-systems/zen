@@ -250,7 +250,7 @@ class AgentBillingFlowCompliantTests:
     """Agent billing flow tests compliant with CLAUDE.md - REAL services only."""
     
     @pytest_asyncio.fixture
-    async def real_billing_env(self, isolated_test_env):
+    async def real_billing_env(self, isolated_test_env_fixture):
         """Setup real services environment for billing tests."""
         # Setup real services environment per CLAUDE.md requirements
         env_manager = get_test_env_manager()
@@ -487,7 +487,7 @@ class RealBillingIntegrationTests:
     """Test real billing integration with complete agent execution per CLAUDE.md."""
     
     @pytest_asyncio.fixture
-    async def real_billing_env(self, isolated_test_env):
+    async def real_billing_env(self, isolated_test_env_fixture):
         """Setup real services environment for billing integration tests."""
         env_manager = get_test_env_manager()
         isolated_env = env_manager.setup_test_environment(

@@ -32,7 +32,7 @@ import uuid
 from typing import Dict, Any, Optional, List
 import pytest
 import pytest_asyncio
-from test_framework.environment_isolation import isolated_test_env, get_test_env_manager
+from test_framework.environment_isolation import isolated_test_env_fixture, get_test_env_manager
 from tests.clients.websocket_client import WebSocketTestClient
 from tests.clients.backend_client import BackendTestClient
 from tests.clients.auth_client import AuthTestClient
@@ -151,10 +151,10 @@ class RealWebSocketAuthIntegrationTests:
     """Real WebSocket authentication integration tests."""
 
     @pytest_asyncio.fixture
-    async def auth_test_core(self, isolated_test_env):
+    async def auth_test_core(self, isolated_test_env_fixture):
         """Setup real authentication test infrastructure."""
         core = RealWebSocketAuthTestCore()
-        infrastructure = await core.setup_real_auth_infrastructure(isolated_test_env)
+        infrastructure = await core.setup_real_auth_infrastructure(isolated_test_env_fixture)
         yield core
         await core.teardown_real_connections()
 
@@ -299,10 +299,10 @@ class RealWebSocketAuthStressTests:
     """Stress tests for WebSocket authentication with real services."""
 
     @pytest_asyncio.fixture
-    async def auth_test_core(self, isolated_test_env):
+    async def auth_test_core(self, isolated_test_env_fixture):
         """Setup real authentication test infrastructure."""
         core = RealWebSocketAuthTestCore()
-        infrastructure = await core.setup_real_auth_infrastructure(isolated_test_env)
+        infrastructure = await core.setup_real_auth_infrastructure(isolated_test_env_fixture)
         yield core
         await core.teardown_real_connections()
 
