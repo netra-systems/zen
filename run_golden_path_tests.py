@@ -16,35 +16,35 @@ def main():
     project_root = Path(__file__).parent
     os.chdir(project_root)
     
-    # Key golden path tests to run in order of importance
-    critical_tests = [
-        "tests/e2e/test_golden_path_complete_flow.py",
-        "tests/e2e/test_authentication_golden_path_complete.py", 
-        "tests/e2e/test_golden_path_auth_e2e.py",
-        "tests/e2e/test_golden_path_websocket_auth_staging.py",
-        "tests/e2e/test_golden_path_execution_engine_staging.py"
+    # Integration golden path tests in netra_backend (key ones to focus on)
+    critical_integration_tests = [
+        "netra_backend/tests/integration/golden_path/test_service_dependency_integration.py",
+        "netra_backend/tests/integration/golden_path/test_complete_golden_path_integration.py",
+        "netra_backend/tests/integration/golden_path/test_user_authentication_flows.py",
+        "netra_backend/tests/integration/golden_path/test_agent_execution_database_integration.py",
+        "netra_backend/tests/integration/golden_path/test_websocket_real_connection_integration.py"
     ]
     
-    # Mission critical tests
-    mission_critical_tests = [
-        "tests/mission_critical/test_golden_path_websocket_authentication.py",
-        "tests/mission_critical/test_websocket_ssot_golden_path_validation.py",
-        "tests/mission_critical/test_golden_path_integration_coverage.py"
+    # Key business value tests
+    business_critical_tests = [
+        "netra_backend/tests/integration/golden_path/test_business_value_delivery_validation_enhanced.py",
+        "netra_backend/tests/integration/golden_path/test_golden_path_service_boundaries.py",
+        "netra_backend/tests/integration/golden_path/test_authentication_real_services_integration.py"
     ]
     
     print("=" * 80)
-    print("RUNNING E2E GOLDEN PATH TESTS AGAINST GCP STAGING")
-    print("Mode: Fast failure, no Docker dependencies")
+    print("RUNNING INTEGRATION GOLDEN PATH TESTS WITHOUT DOCKER")
+    print("Mode: Fast failure, integration tests focus")
     print("=" * 80)
     
     failed_tests = []
     passed_tests = []
     
-    # Run critical e2e tests first
-    print("\n[PHASE 1] Running Critical E2E Golden Path Tests")
+    # Run critical integration tests first
+    print("\n[PHASE 1] Running Critical Integration Golden Path Tests")
     print("-" * 50)
     
-    for test_file in critical_tests:
+    for test_file in critical_integration_tests:
         if not Path(test_file).exists():
             print(f"⚠️  SKIP: {test_file} (file not found)")
             continue
@@ -55,7 +55,7 @@ def main():
             sys.executable, "-m", "pytest",
             test_file,
             "-v", "--tb=short", "--maxfail=1",
-            "--no-header", "--no-summary"
+            "--no-header", "--no-summary", "--no-docker"
         ]
         
         try:
@@ -79,11 +79,11 @@ def main():
             print(f"💥 ERROR: {test_file} - {str(e)}")
             failed_tests.append((test_file, "EXCEPTION", str(e)))
     
-    # Run mission critical tests
-    print("\n[PHASE 2] Running Mission Critical Golden Path Tests")
+    # Run business critical tests
+    print("\n[PHASE 2] Running Business Critical Golden Path Tests")
     print("-" * 50)
     
-    for test_file in mission_critical_tests:
+    for test_file in business_critical_tests:
         if not Path(test_file).exists():
             print(f"⚠️  SKIP: {test_file} (file not found)")
             continue
@@ -94,7 +94,7 @@ def main():
             sys.executable, "-m", "pytest",
             test_file,
             "-v", "--tb=short", "--maxfail=1",
-            "--no-header", "--no-summary"
+            "--no-header", "--no-summary", "--no-docker"
         ]
         
         try:
