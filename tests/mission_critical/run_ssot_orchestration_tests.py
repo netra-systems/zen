@@ -43,28 +43,28 @@ class SSOTTestRunner:
         self.project_root = PROJECT_ROOT
         self.test_dir = self.project_root / "tests" / "mission_critical"
 
-        self.test_suites = { )
-        "consolidation": { )
+        self.test_suites = {
+        "consolidation": {
         "file": "test_ssot_orchestration_consolidation.py",
         "description": "Main SSOT orchestration validation tests",
         "fast": True
         },
-        "edge_cases": { )
+        "edge_cases": {
         "file": "test_orchestration_edge_cases.py",
         "description": "Edge cases, concurrency, and stress tests",
         "fast": False
         },
-        "integration": { )
+        "integration": {
         "file": "test_orchestration_integration.py",
         "description": "Integration with real orchestration components",
         "fast": True
         },
-        "violations": { )
+        "violations": {
         "file": "test_no_ssot_violations.py",
         "description": "SSOT violation detection and prevention",
         "fast": True
         },
-        "performance": { )
+        "performance": {
         "file": "test_orchestration_performance.py",
         "description": "Performance benchmarks and optimization validation",
         "fast": False
@@ -89,7 +89,7 @@ class SSOTTestRunner:
         print("=" * 80)
 
             # Build pytest command
-        cmd = [ )
+        cmd = [
         sys.executable, str(test_file),
         "-v" if verbose else "",
         "-x" if stop_on_fail else "",
@@ -138,8 +138,7 @@ class SSOTTestRunner:
 
     def print_summary(self, results: Dict[str, int]):
         """Print test results summary."""
-        print(" )
-        " + "=" * 80)
+        print("\n" + "=" * 80)
         print("SSOT ORCHESTRATION TEST RESULTS SUMMARY")
         print("=" * 80)
 

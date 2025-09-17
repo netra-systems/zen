@@ -24,37 +24,35 @@ print("=" * 50)
 suite = SSotComplianceSuite()
 
     # Run core validations (skip WebSocket events test)
-print(" )
-1. WebSocket Manager Consolidation")
+print("1. WebSocket Manager Consolidation")
 websocket_violations = suite.validate_websocket_manager_consolidation()
 print("formatted_string")
 
-print(" )
-2. JWT Validation Security")
+print("2. JWT Validation Security")
 jwt_violations = suite.validate_jwt_validation_security()
 print("formatted_string")
 
-print(" )
+print("
 3. Agent Registry Consolidation")
 agent_violations = suite.validate_agent_registry_consolidation()
 print("formatted_string")
 
-print(" )
+print("
 4. IsolatedEnvironment Consolidation")
 env_violations = suite.validate_isolated_environment_consolidation()
 print("formatted_string")
 
-print(" )
+print("
 5. Session Management Consolidation")
 session_violations = suite.validate_session_management_consolidation()
 print("formatted_string")
 
-print(" )
+print("
 6. Tool Execution Consolidation")
 tool_violations = suite.validate_tool_execution_consolidation()
 print("formatted_string")
 
-print(" )
+print("
 7. Direct os.environ Access")
 os_violations = suite.validate_direct_os_environ_access()
 print("formatted_string")
