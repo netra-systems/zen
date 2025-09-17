@@ -9,9 +9,6 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Protocol, TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from netra_backend.app.database.session_manager import SessionManager
-
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult

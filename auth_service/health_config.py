@@ -6,6 +6,7 @@ Uses SSOT AuthEnvironment for all configuration access.
 import os
 from typing import Dict, Any
 from enum import Enum
+from sqlalchemy import text
 from auth_service.auth_core.auth_environment import get_auth_env
 
 
@@ -23,7 +24,7 @@ async def check_auth_postgres_health() -> Dict[str, Any]:
         
         # Test database connection
         async with auth_db.get_session() as session:
-            result = await session.execute("SELECT 1")
+            result = await session.execute(text("SELECT 1"))
             _ = result.scalar()
             
         return {
