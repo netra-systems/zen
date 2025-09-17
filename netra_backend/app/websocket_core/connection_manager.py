@@ -122,10 +122,10 @@ class ConnectionInfo:
 
 
 # SSOT COMPLIANCE: Use direct alias instead of class inheritance
-# DEPRECATED: WebSocketConnectionManager is now an alias to UnifiedWebSocketManager
-# Use UnifiedWebSocketManager directly for new code
+# DEPRECATED: WebSocketConnectionManager is now an alias to WebSocketManager
+# Use WebSocketManager directly for new code
 # This eliminates the duplicate class definition while maintaining backward compatibility
-WebSocketConnectionManager = UnifiedWebSocketManager
+WebSocketConnectionManager = WebSocketManager
 
 
 # SSOT alias for backward compatibility

@@ -55,7 +55,7 @@ logger = central_logger.get_logger(__name__)
 
 
 # DEPRECATED WebSocketManagerAdapter removed for SSOT compliance - use get_websocket_manager() directly
-# DEPRECATED: Use UnifiedWebSocketManager with appropriate mode instead
+# DEPRECATED: Use WebSocketManager with appropriate mode instead
 
 # Keep the migration functions for backward compatibility
 class _LegacyWSAdapter:
@@ -87,7 +87,7 @@ class _LegacyWSAdapter:
         }
         
         # Initialize legacy tracking variables
-        self._legacy_managers: Dict[str, UnifiedWebSocketManager] = {}
+        self._legacy_managers: Dict[str, WebSocketManager] = {}
         self._legacy_contexts: Dict[str, UserExecutionContext] = {}
         self._legacy_lock = threading.RLock()
         self._usage_warnings_shown: Set[str] = set()
@@ -98,7 +98,7 @@ class _LegacyWSAdapter:
     # DELEGATION METHODS (SSOT COMPLIANCE - Delegate to get_websocket_manager())
     # ============================================================================
     
-    def create_isolated_manager(self, user_id: str, connection_id: str) -> UnifiedWebSocketManager:
+    def create_isolated_manager(self, user_id: str, connection_id: str) -> WebSocketManager:
         """Create isolated manager using direct instantiation (DEPRECATED)."""
         warnings.warn("Use get_websocket_manager() instead", DeprecationWarning)
         # SSOT: Direct instantiation without factory dependency
@@ -108,7 +108,7 @@ class _LegacyWSAdapter:
         })
         return WebSocketManager(user_context=user_context)
     
-    def get_manager_by_user(self, user_id: str) -> Optional[UnifiedWebSocketManager]:
+    def get_manager_by_user(self, user_id: str) -> Optional[WebSocketManager]:
         """Get manager by user from legacy managers (DEPRECATED)."""
         warnings.warn("Use get_websocket_manager() instead", DeprecationWarning)
         # SSOT: Look through our legacy managers instead of factory
@@ -128,7 +128,7 @@ class _LegacyWSAdapter:
                 total += len(manager.get_user_connections())
         return total
     
-    def get_manager(self) -> UnifiedWebSocketManager:
+    def get_manager(self) -> WebSocketManager:
         """Create a default manager for legacy usage (DEPRECATED)."""
         warnings.warn("get_manager() is deprecated. Use create_isolated_manager() instead", DeprecationWarning)
         # Create a default manager for legacy usage with direct instantiation
@@ -191,7 +191,7 @@ class _LegacyWSAdapter:
         self._legacy_stats["contexts_created"] += 1
         return context
     
-    def _get_or_create_manager(self, context_key: str, user_context: UserExecutionContext) -> UnifiedWebSocketManager:
+    def _get_or_create_manager(self, context_key: str, user_context: UserExecutionContext) -> WebSocketManager:
         """
         Get or create an isolated manager for a context key.
         
@@ -469,7 +469,7 @@ def get_legacy_websocket_manager() -> _LegacyWSAdapter:
         return _adapter_instance
 
 
-def migrate_singleton_usage(user_context: UserExecutionContext) -> UnifiedWebSocketManager:
+def migrate_singleton_usage(user_context: UserExecutionContext) -> WebSocketManager:
     """
     Helper function to migrate from singleton to factory pattern.
     
