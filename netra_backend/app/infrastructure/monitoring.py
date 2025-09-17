@@ -271,15 +271,14 @@ class WebSocketAuthenticationHealthCheck:
             # Check authentication configuration
             auth_service_url = self.env.get("AUTH_SERVICE_URL")
             internal_auth_url = self.env.get("AUTH_SERVICE_INTERNAL_URL")
-            jwt_secret = self.env.get("JWT_SECRET_KEY")
+            # jwt_secret removed - JWT operations delegated to auth service (SSOT compliance)
             
             issues = []
             
             if not auth_service_url:
                 issues.append("Auth service URL not configured")
-                
-            if not jwt_secret:
-                issues.append("JWT secret not configured")
+
+            # JWT secret validation removed - JWT operations delegated to auth service (SSOT compliance)
             
             response_time_ms = (time.time() - start_time) * 1000
             

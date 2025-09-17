@@ -43,7 +43,7 @@ class ServiceAuthConfig:
     service_secret: str
     environment: ServiceEnvironment
     auth_service_url: str
-    jwt_secret_key: str
+    # jwt_secret_key removed - JWT operations delegated to auth service (SSOT compliance)
     status: ServiceAuthStatus = ServiceAuthStatus.VALID
     validation_errors: list = None
 
@@ -61,7 +61,7 @@ class ServiceAuthManager:
         base_vars = {
             "SERVICE_ID": "Service identifier for inter-service auth",
             "SERVICE_SECRET": "Service secret for authentication",
-            "JWT_SECRET_KEY": "JWT signing key",
+            # JWT_SECRET_KEY removed - JWT operations delegated to auth service (SSOT compliance)
         }
         
         if self.environment in [ServiceEnvironment.STAGING, ServiceEnvironment.PRODUCTION]:
@@ -95,7 +95,7 @@ class ServiceAuthManager:
             # Get environment variables
             service_id = os.getenv("SERVICE_ID")
             service_secret = os.getenv("SERVICE_SECRET")
-            jwt_secret_key = os.getenv("JWT_SECRET_KEY")
+            # jwt_secret_key removed - JWT operations delegated to auth service (SSOT compliance)
             auth_service_url = os.getenv("AUTH_SERVICE_URL", "")
             
             # Validate required fields
@@ -111,10 +111,7 @@ class ServiceAuthManager:
             elif len(service_secret) < 32:
                 validation_errors.append("SERVICE_SECRET must be at least 32 characters")
             
-            if not jwt_secret_key:
-                validation_errors.append("JWT_SECRET_KEY environment variable not set")
-            elif len(jwt_secret_key) < 32:
-                validation_errors.append("JWT_SECRET_KEY must be at least 32 characters")
+            # JWT validation removed - JWT operations delegated to auth service (SSOT compliance)
             
             if self.environment in [ServiceEnvironment.STAGING, ServiceEnvironment.PRODUCTION]:
                 if not auth_service_url:
@@ -131,7 +128,7 @@ class ServiceAuthManager:
                 service_secret=service_secret or "",
                 environment=self.environment,
                 auth_service_url=auth_service_url,
-                jwt_secret_key=jwt_secret_key or "",
+                # jwt_secret_key removed - JWT operations delegated to auth service (SSOT compliance)
                 status=status,
                 validation_errors=validation_errors
             )
