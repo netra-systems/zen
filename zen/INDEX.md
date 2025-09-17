@@ -27,7 +27,7 @@
 ### Core Service Files
 | File | Purpose | Documentation |
 |------|---------|---------------|
-| [`claude_instance_orchestrator.py`](claude_instance_orchestrator.py) | Main orchestrator service | [Enhancement Plan](docs/claude-instance-orchestrator-enhancement-plan.md) |
+| [`claude_instance_orchestrator.py`](claude_instance_orchestrator.py) | Main orchestrator service | [Enhancement Plan](docs/claude_instance_orchestrator_enhancement_plan.md) |
 | [`config_example.json`](config_example.json) | Configuration template | [README](README.md#configuration) |
 | [`__init__.py`](__init__.py) | Python package definition | [Setup Guide](setup.py) |
 | [`setup.py`](setup.py) | Package installation script | [Requirements](requirements.txt) |
@@ -37,19 +37,19 @@
 | Document | Focus Area | Related Docs |
 |----------|------------|--------------|
 | **[TESTING.md](docs/TESTING.md)** | Test execution guide | [Test Runner](tests/test_runner.py) |
-| **[Enhancement Plan](docs/claude-instance-orchestrator-enhancement-plan.md)** | Service roadmap | [Token Budget Plan](docs/claude-instance-orchestrator-token-budget-codex-plan.md) |
-| **[Deployment Strategy](docs/claude-orchestrator-deployment-strategy-plan.md)** | Production deployment | [CloudSQL Integration](../scripts/ORCHESTRATOR_CLOUDSQL_INTEGRATION.md) |
-| **[README-orchestrator.md](docs/README-orchestrator.md)** | Detailed service guide | [Modernization Summary](docs/claude-orchestrator-modernization-summary.md) |
-| **[Universal CLI Plan](docs/universal-cli-orchestrator-enhancement-plan.md)** | CLI enhancement strategy | [Main README](README.md) |
+| **[Enhancement Plan](docs/claude_instance_orchestrator_enhancement_plan.md)** | Service roadmap | [Token Budget Plan](docs/claude_instance_orchestrator_token_budget_codex_plan.md) |
+| **[Deployment Strategy](docs/claude_orchestrator_deployment_strategy_plan.md)** | Production deployment | [CloudSQL Integration](../scripts/ORCHESTRATOR_CLOUDSQL_INTEGRATION.md) |
+| **[README_orchestrator.md](docs/README_orchestrator.md)** | Detailed service guide | [Modernization Summary](docs/claude_orchestrator_modernization_summary.md) |
+| **[Universal CLI Plan](docs/universal_cli_orchestrator_enhancement_plan.md)** | CLI enhancement strategy | [Main README](README.md) |
 
 ### Test Infrastructure
 | Test File | Coverage Area | Documentation |
 |-----------|---------------|---------------|
 | **[test_runner.py](tests/test_runner.py)** | Test execution coordination | [TESTING.md](docs/TESTING.md) |
 | **[Unit Tests](tests/test_claude_instance_orchestrator_unit.py)** | Core functionality | [Service README](README.md#testing) |
-| **[Command Tests](tests/test_claude_instance_orchestrator_commands.py)** | Command discovery/validation | [Enhancement Plan](docs/claude-instance-orchestrator-enhancement-plan.md) |
-| **[Metrics Tests](tests/test_claude_instance_orchestrator_metrics.py)** | Token parsing/metrics | [Token Budget Plan](docs/claude-instance-orchestrator-token-budget-codex-plan.md) |
-| **[Integration Tests](tests/test_claude_instance_orchestrator_integration.py)** | End-to-end workflows | [Deployment Strategy](docs/claude-orchestrator-deployment-strategy-plan.md) |
+| **[Command Tests](tests/test_claude_instance_orchestrator_commands.py)** | Command discovery/validation | [Enhancement Plan](docs/claude_instance_orchestrator_enhancement_plan.md) |
+| **[Metrics Tests](tests/test_claude_instance_orchestrator_metrics.py)** | Token parsing/metrics | [Token Budget Plan](docs/claude_instance_orchestrator_token_budget_codex_plan.md) |
+| **[Integration Tests](tests/test_claude_instance_orchestrator_integration.py)** | End-to-end workflows | [Deployment Strategy](docs/claude_orchestrator_deployment_strategy_plan.md) |
 
 ---
 

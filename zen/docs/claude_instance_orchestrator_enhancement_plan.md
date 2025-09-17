@@ -8,14 +8,14 @@
 ## Phase 0 – Discovery & Alignment
 1. Trace how InstanceConfig is created (CLI flags vs config file) and how commands are launched via ClaudeInstanceOrchestrator.
 2. Review scripts/claude behavior (arguments, env requirements, logging) to understand how to embed it.
-3. Inventory current persistence hooks (CloudSQL, NetraOptimizer) to understand how new execution metadata should fit.
+3. Inventory local metrics display capabilities to understand how new execution metadata should be presented.
 4. Capture stakeholders' requirements for chaining semantics (blocking vs async, failure policy) before implementation.
 
 ## Phase 1 – Single Instance Mode
 - CLI/Config UX: add a --mode {single,batch} flag and mode field in config files; default to existing batch behavior.
 - Command Source: allow --single-command to accept a named preset (claude) or raw command string; map preset claude to scripts/claude.
 - Execution Path: short-circuit orchestration to launch exactly one instance with existing logging, token parsing, and result saving.
-- Telemetry: ensure single-instance runs still emit summaries/results and optional NetraOptimizer records.
+- Telemetry: ensure single-instance runs still emit summaries/results with local metrics display.
 - Back-compat: document how existing multi-instance configs behave identically without new flags.
 
 ## Phase 2 – Generic CLI Runtime Support
@@ -43,10 +43,10 @@
 ## Risks & Open Questions
 - Need confirmation on how scripts/claude is configured (API keys, workspace discovery) to ensure compatibility in orchestrator environment.
 - Clarify expectations for mixed runtimes in one workflow (e.g., Claude output feeding Codex); may need standardized artifact passing.
-- Evaluate whether NetraOptimizer schema can store runtime type and dependency graph metadata without migrations.
+- Evaluate whether local metrics storage can capture runtime type and dependency graph metadata for display.
 - Consider security posture when allowing arbitrary CLI commands (sandboxing, allowlists).
 
 ## Success Criteria
-- Running python claude-instance-orchestrator.py --mode single --single-command claude proxies through scripts/claude without regressions.
+- Running python claude_instance_orchestrator.py --mode single --single-command claude proxies through scripts/claude without regressions.
 - Config-defined Codex job executes and its output/exit status is visible in orchestration summaries.
 - A sample DAG with conditional branches executes in the intended order, halts on failure when configured, and persists dependency-aware metadata.

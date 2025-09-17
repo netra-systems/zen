@@ -2,7 +2,7 @@
 
 ## Overview
 
-This plan enhances the existing `claude-instance-orchestrator.py` to support:
+This plan enhances the existing `claude_instance_orchestrator.py` to support:
 1. **Single Instance Mode**: Run individual CLI commands (including `scripts/claude`)
 2. **Universal CLI Support**: Execute ANY command-line tool (Claude, OpenAI, Docker, etc.)
 3. **Dependent Command Chaining**: Conditional execution with graph-based logic
@@ -12,7 +12,7 @@ This plan enhances the existing `claude-instance-orchestrator.py` to support:
 ### Existing Architecture Strengths
 - ✅ **JSON Token Parsing**: Modern stream-json support with fallback regex
 - ✅ **Async Processing**: Efficient parallel execution with staggered startup
-- ✅ **Database Integration**: CloudSQL metrics storage via NetraOptimizer
+- ✅ **Local Metrics**: Local token usage display and monitoring
 - ✅ **Real-time Monitoring**: Rolling status reports and WebSocket-style formatting
 - ✅ **Mac Compatibility**: Auto-detection of Claude executable paths
 - ✅ **Comprehensive Metrics**: Token usage, cost calculation, cache hit rates
@@ -87,13 +87,13 @@ class CLIToolRegistry:
 Add command-line flag for single execution:
 ```bash
 # Single Claude command
-python claude-instance-orchestrator.py --single --command "/gitcommitgardener"
+python claude_instance_orchestrator.py --single --command "/gitcommitgardener"
 
 # Single OpenAI command
-python claude-instance-orchestrator.py --single --tool openai --command "api chat.completions.create -m gpt-4"
+python claude_instance_orchestrator.py --single --tool openai --command "api chat.completions.create -m gpt-4"
 
 # Generic command
-python claude-instance-orchestrator.py --single --command "docker ps -a"
+python claude_instance_orchestrator.py --single --command "docker ps -a"
 ```
 
 ### Phase 2: Dependency Chain Engine (Week 3-4)
@@ -139,7 +139,7 @@ class DependencyGraphExecutor:
   "commands": [
     {
       "name": "setup-env",
-      "command": "docker-compose up -d postgres redis",
+      "command": "docker-compose up -d app-services",
       "tool_type": "docker",
       "priority": 100
     },

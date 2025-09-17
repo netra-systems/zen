@@ -63,12 +63,12 @@ netra_orchestrator_client/
 ├── README.md                         # This file
 ├── docs/                             # Documentation
 │   ├── TESTING.md                   # Test execution guide
-│   ├── claude-instance-orchestrator-enhancement-plan.md
-│   ├── claude-instance-orchestrator-token-budget-codex-plan.md
-│   ├── claude-orchestrator-deployment-strategy-plan.md
-│   ├── README-orchestrator.md
-│   ├── claude-orchestrator-modernization-summary.md
-│   └── universal-cli-orchestrator-enhancement-plan.md
+│   ├── claude_instance_orchestrator_enhancement_plan.md
+│   ├── claude_instance_orchestrator_token_budget_codex_plan.md
+│   ├── claude_orchestrator_deployment_strategy_plan.md
+│   ├── README_orchestrator.md
+│   ├── claude_orchestrator_modernization_summary.md
+│   └── universal_cli_orchestrator_enhancement_plan.md
 └── tests/                           # Test suite
     ├── test_runner.py              # Test runner script
     ├── test_claude_instance_orchestrator_commands.py

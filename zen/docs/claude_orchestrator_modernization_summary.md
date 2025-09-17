@@ -1,7 +1,7 @@
 # Claude Instance Orchestrator Modernization Summary
 
 ## Overview
-Successfully modernized the `claude-instance-orchestrator.py` script to use proper JSON parsing instead of regex-based token extraction, while maintaining full backward compatibility.
+Successfully modernized the `claude_instance_orchestrator.py` script to use proper JSON parsing instead of regex-based token extraction, while maintaining full backward compatibility.
 
 ## Key Changes Implemented
 
@@ -138,17 +138,17 @@ Successfully modernized the `claude-instance-orchestrator.py` script to use prop
 
 ### Enable JSON Parsing Debug Mode
 ```bash
-python3 claude-instance-orchestrator.py --debug-json --workspace ~/my-project
+python3 claude_instance_orchestrator.py --debug-json --workspace ~/my-project
 ```
 
 ### Use JSON Output Format
 ```bash
-python3 claude-instance-orchestrator.py --output-format json --workspace ~/my-project
+python3 claude_instance_orchestrator.py --output-format json --workspace ~/my-project
 ```
 
 ### Stream JSON with Debug Info
 ```bash
-python3 claude-instance-orchestrator.py --output-format stream-json --debug-json --workspace ~/my-project
+python3 claude_instance_orchestrator.py --output-format stream-json --debug-json --workspace ~/my-project
 ```
 
 ## Migration Impact
@@ -172,4 +172,4 @@ python3 claude-instance-orchestrator.py --output-format stream-json --debug-json
 
 ## Conclusion
 
-The modernization successfully transforms the claude-instance-orchestrator from regex-based parsing to a robust JSON-first approach while maintaining 100% backward compatibility. This provides immediate benefits in accuracy and reliability while establishing a foundation for future enhancements.
+The modernization successfully transforms the claude_instance_orchestrator from regex-based parsing to a robust JSON-first approach while maintaining 100% backward compatibility. This provides immediate benefits in accuracy and reliability while establishing a foundation for future enhancements.

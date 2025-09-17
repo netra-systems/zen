@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Integration tests for claude-instance-orchestrator.py
+Integration tests for claude_instance_orchestrator.py
 
 Tests the orchestrator workflow, async execution, and process management
 with real subprocess execution (using safe commands).

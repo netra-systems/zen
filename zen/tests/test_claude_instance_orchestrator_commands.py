@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Unit tests for claude-instance-orchestrator.py command functionality
+Unit tests for claude_instance_orchestrator.py command functionality
 
 Tests command discovery, validation, Claude command building, and file inspection.
 """

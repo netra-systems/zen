@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Unit tests for claude-instance-orchestrator.py metrics and token parsing
+Unit tests for claude_instance_orchestrator.py metrics and token parsing
 
 Tests token usage parsing, metrics calculation, status reporting, and result generation.
 """

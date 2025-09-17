@@ -1,7 +1,7 @@
 # Codex Plan: Claude Orchestrator Token Budgets
 
 ## Context Snapshot
-- scripts/claude-instance-orchestrator.py already tracks per-instance token totals via _parse_token_usage (stream JSON) and _parse_final_output_token_usage (batch) while InstanceStatus persists aggregated counts.
+- scripts/claude_instance_orchestrator.py already tracks per-instance token totals via _parse_token_usage (stream JSON) and _parse_final_output_token_usage (batch) while InstanceStatus persists aggregated counts.
 - Rolling console updates originate from _print_status_report, and per-line streaming visuals flow through _stream_output_parallel -> format_instance_line.
 - CLI loading (main) supports JSON configs for InstanceConfig definitions but has no notion of token limits or throttling hooks yet.
 

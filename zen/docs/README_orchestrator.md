@@ -32,10 +32,10 @@ Multi-platform orchestrator for running multiple Claude Code instances in parall
 ### Quick Start (Default Configuration)
 ```bash
 # Run with default instances
-python3 scripts/claude-instance-orchestrator.py
+python3 scripts/claude_instance_orchestrator.py
 
 # Dry run to see commands without executing
-python3 scripts/claude-instance-orchestrator.py --dry-run
+python3 scripts/claude_instance_orchestrator.py --dry-run
 
 # Use the convenient wrapper script
 ./claude-orchestrator --dry-run
@@ -43,17 +43,17 @@ python3 scripts/claude-instance-orchestrator.py --dry-run
 
 ### List Available Commands
 ```bash
-python3 scripts/claude-instance-orchestrator.py --list-commands
+python3 scripts/claude_instance_orchestrator.py --list-commands
 ./claude-orchestrator --list-commands
 ```
 
 ### Custom Configuration
 ```bash
 # Use custom config file
-python3 scripts/claude-instance-orchestrator.py --config my-config.json
+python3 scripts/claude_instance_orchestrator.py --config my-config.json
 
 # Specify different workspace
-python3 scripts/claude-instance-orchestrator.py --workspace ~/my-project
+python3 scripts/claude_instance_orchestrator.py --workspace ~/my-project
 ```
 
 ## Configuration
@@ -159,7 +159,7 @@ npm install -g @anthropic/claude-code
 ### Permission Issues
 ```bash
 # Make scripts executable
-chmod +x scripts/claude-instance-orchestrator.py
+chmod +x scripts/claude_instance_orchestrator.py
 chmod +x claude-orchestrator
 ```
 
@@ -180,7 +180,7 @@ python3 --version
 ./claude-orchestrator --config scripts/claude-orchestrator-config-example.json
 
 # Quick test creation only
-python3 scripts/claude-instance-orchestrator.py --config - <<EOF
+python3 scripts/claude_instance_orchestrator.py --config - <<EOF
 {
   "instances": [
     {

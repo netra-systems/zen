@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """
 Usage Examples:
-  python3 claude-instance-orchestrator.py --workspace ~/my-project --dry-run
-  python3 claude-instance-orchestrator.py --list-commands
-  python3 claude-instance-orchestrator.py --config config.json
-  python3 claude-instance-orchestrator.py --startup-delay 2.0  # 2 second delay between launches
-  python3 claude-instance-orchestrator.py --startup-delay 0.5  # 0.5 second delay between launches
-  python3 claude-instance-orchestrator.py --max-line-length 1000  # Longer output lines
-  python3 claude-instance-orchestrator.py --status-report-interval 60  # Status reports every 60s
-  python3 claude-instance-orchestrator.py --quiet  # Minimal output, errors only
-  python3 claude-instance-orchestrator.py --start-at "2h"  # Start 2 hours from now
-  python3 claude-instance-orchestrator.py --start-at "30m"  # Start in 30 minutes
-  python3 claude-instance-orchestrator.py --start-at "1am"  # Start at 1 AM (today or tomorrow)
-  python3 claude-instance-orchestrator.py --start-at "14:30"  # Start at 2:30 PM (today or tomorrow)
-  python3 claude-instance-orchestrator.py --start-at "10:30pm"  # Start at 10:30 PM (today or tomorrow)
+  python3 claude_instance_orchestrator.py --workspace ~/my-project --dry-run
+  python3 claude_instance_orchestrator.py --list-commands
+  python3 claude_instance_orchestrator.py --config config.json
+  python3 claude_instance_orchestrator.py --startup-delay 2.0  # 2 second delay between launches
+  python3 claude_instance_orchestrator.py --startup-delay 0.5  # 0.5 second delay between launches
+  python3 claude_instance_orchestrator.py --max-line-length 1000  # Longer output lines
+  python3 claude_instance_orchestrator.py --status-report-interval 60  # Status reports every 60s
+  python3 claude_instance_orchestrator.py --quiet  # Minimal output, errors only
+  python3 claude_instance_orchestrator.py --start-at "2h"  # Start 2 hours from now
+  python3 claude_instance_orchestrator.py --start-at "30m"  # Start in 30 minutes
+  python3 claude_instance_orchestrator.py --start-at "1am"  # Start at 1 AM (today or tomorrow)
+  python3 claude_instance_orchestrator.py --start-at "14:30"  # Start at 2:30 PM (today or tomorrow)
+  python3 claude_instance_orchestrator.py --start-at "10:30pm"  # Start at 10:30 PM (today or tomorrow)
 """
 
 import asyncio
@@ -45,14 +45,16 @@ except ImportError as e:
     render_progress_bar = None
     # Note: logger is not yet defined here, will log warning after logger setup
 
-# Optional NetraOptimizer imports
-DatabaseClient = None
-ExecutionRecord = None
+# Add token transparency imports
 try:
-    from netraoptimizer import NetraOptimizerClient, DatabaseClient
-    from netraoptimizer.database import ExecutionRecord
-except ImportError:
-    pass  # NetraOptimizer is optional
+    from token_transparency import ClaudePricingEngine, TokenUsageData
+except ImportError as e:
+    # Graceful fallback if token transparency package is not available
+    ClaudePricingEngine = None
+    TokenUsageData = None
+
+# NetraOptimizer database functionality has been removed for security
+# Local token metrics are preserved without database persistence
 
 # Setup logging
 logging.basicConfig(
@@ -136,7 +138,7 @@ class ClaudeInstanceOrchestrator:
         self.use_cloud_sql = use_cloud_sql
         self.quiet = quiet
         self.batch_id = str(uuid4())  # Generate batch ID for this orchestration run
-        self.db_client = None
+        # Database client removed for security - local metrics only
         self.optimizer = None
 
         # Initialize budget manager if any budget settings are provided
@@ -149,6 +151,14 @@ class ClaudeInstanceOrchestrator:
             self.budget_manager = None
         self.enable_budget_visuals = enable_budget_visuals
 
+        # Initialize token transparency pricing engine
+        if ClaudePricingEngine:
+            self.pricing_engine = ClaudePricingEngine()
+            logger.info("🎯 Token transparency pricing engine enabled - Claude pricing compliance active")
+        else:
+            self.pricing_engine = None
+            logger.debug("Token transparency pricing engine disabled (module not available)")
+
         # Log budget configuration status
         if self.budget_manager:
             budget_msg = f"Overall: {overall_token_budget:,} tokens" if overall_token_budget else "No overall limit"
@@ -157,22 +167,11 @@ class ClaudeInstanceOrchestrator:
             logger.debug("Token budget tracking disabled (no budget specified)")
 
         # Configure CloudSQL if requested
+        # CloudSQL functionality has been removed for security and simplicity
+        # Token metrics are now handled locally without database persistence
         if use_cloud_sql:
-            os.environ['POSTGRES_PORT'] = '5434'
-            os.environ['POSTGRES_HOST'] = 'localhost'
-            os.environ['POSTGRES_DB'] = 'netra_optimizer'
-            os.environ['POSTGRES_USER'] = 'postgres'
-            os.environ['POSTGRES_PASSWORD'] = 'DTprdt5KoQXlEG4Gh9lF'
-            os.environ['ENVIRONMENT'] = 'staging'
-            logger.info("Configured for CloudSQL on port 5434")
-
-            # Initialize database client if available
-            if DatabaseClient:
-                try:
-                    self.db_client = DatabaseClient(use_cloud_sql=True)
-                    logger.info("NetraOptimizer database client configured")
-                except Exception as e:
-                    logger.warning(f"Failed to initialize database client: {e}")
+            logger.warning("CloudSQL functionality has been disabled. Token metrics will be displayed locally only.")
+            logger.info("For data persistence, consider implementing local file-based storage.")
 
     def add_instance(self, config: InstanceConfig):
         """Add a new instance configuration"""
@@ -420,7 +419,8 @@ class ClaudeInstanceOrchestrator:
             status.end_time = time.time()
 
             # Save metrics to database if CloudSQL is enabled
-            if self.use_cloud_sql and self.db_client:
+            # Database persistence disabled - metrics preserved in local display only
+            if False:  # CloudSQL functionality removed
                 await self._save_metrics_to_database(name, config, status)
 
             if returncode == 0:
@@ -441,77 +441,42 @@ class ClaudeInstanceOrchestrator:
             return False
 
     async def _save_metrics_to_database(self, name: str, config: InstanceConfig, status: InstanceStatus):
-        """Save execution metrics to CloudSQL database"""
-        if not self.db_client or not ExecutionRecord:
-            return
-
-        try:
-            # Initialize database if not already done
-            if not hasattr(self.db_client, '_initialized'):
-                await self.db_client.initialize()
-                self.db_client._initialized = True
-
-            # Create execution record
-            execution_id = uuid4()
-            command_string = config.command
-            start_time = datetime.fromtimestamp(status.start_time) if status.start_time else datetime.now()
-
-            # Calculate cache metrics
-            cache_read = 0
-            cache_creation = 0
-
-            # Try to extract cache metrics from cached_tokens
-            # In claude-instance-orchestrator.py, cached_tokens combines both read and creation
-            # We'll need to parse from the output to get accurate breakdown
-
-            record = ExecutionRecord(
-                id=execution_id,
-                timestamp=start_time,
-                command_base='claude',  # Always 'claude' for consistency
-                command_raw=command_string,
-                batch_id=UUID(self.batch_id) if self.batch_id else None,
-                execution_sequence=list(self.instances.keys()).index(name),
-                workspace_context={
-                    'instance_name': name,
-                    'workspace_dir': str(self.workspace_dir),
-                    'description': config.description,
-                    'orchestration_run': self.start_datetime.isoformat()
-                },
-                input_tokens=status.input_tokens,
-                output_tokens=status.output_tokens,
-                cached_tokens=status.cached_tokens,  # Combined cache_read + cache_creation
-                fresh_tokens=0,  # Will be set if we can parse cache_creation separately
-                total_tokens=status.total_tokens,
-                cache_hit_rate=(status.cached_tokens / status.total_tokens * 100) if status.total_tokens > 0 else 0,
-                cost_usd=self._calculate_cost(status),
-                cache_savings_usd=0,  # Will calculate if we have cache_read data
-                execution_time_ms=int((status.end_time - status.start_time) * 1000) if status.start_time else 0,
-                status=status.status,
-                error_message=status.error if status.error else None
-            )
-
-            # Save to database
-            await self.db_client.insert_execution(record)
-            logger.info(f"Saved metrics to CloudSQL for {name}")
-
-        except Exception as e:
-            logger.warning(f"Failed to save metrics to database for {name}: {e}")
+        """Database persistence has been removed for security. Metrics are displayed locally only."""
+        # CloudSQL functionality removed for security and simplicity
+        # Token metrics are preserved in the local display
+        logger.debug(f"Metrics for {name} available in local display only (database persistence disabled)")
 
     def _calculate_cost(self, status: InstanceStatus) -> float:
-        """Calculate cost with current Claude 3.5 Sonnet pricing and proper cache handling"""
+        """Calculate cost with Claude pricing compliance engine and proper cache handling"""
 
         # Use authoritative cost if available (preferred)
         if status.total_cost_usd is not None:
             return status.total_cost_usd
 
-        # Fallback calculation with current pricing
+        # Use pricing engine if available
+        if self.pricing_engine and TokenUsageData:
+            # Create usage data from status
+            usage_data = TokenUsageData(
+                input_tokens=status.input_tokens,
+                output_tokens=status.output_tokens,
+                cache_read_tokens=status.cache_read_tokens,
+                cache_creation_tokens=status.cache_creation_tokens,
+                total_tokens=status.total_tokens,
+                cache_type="5min",  # Default to 5min cache
+                model="claude-3-5-sonnet"  # Default model
+            )
+
+            cost_breakdown = self.pricing_engine.calculate_cost(usage_data, status.total_cost_usd)
+            return cost_breakdown.total_cost
+
+        # Fallback calculation with current pricing (legacy support)
         # Claude 3.5 Sonnet current rates (as of 2024-2025)
         input_cost = (status.input_tokens / 1_000_000) * 3.00    # $3 per M input tokens
         output_cost = (status.output_tokens / 1_000_000) * 15.00  # $15 per M output tokens
 
-        # Cache costs (differentiated by type)
-        cache_read_cost = (status.cache_read_tokens / 1_000_000) * 0.30      # $0.30 per M cache read
-        cache_creation_cost = (status.cache_creation_tokens / 1_000_000) * 0.75  # 25% of input rate for cache creation
+        # Cache costs with CORRECTED pricing based on Claude documentation
+        cache_read_cost = (status.cache_read_tokens / 1_000_000) * (3.00 * 0.1)  # 10% of input rate
+        cache_creation_cost = (status.cache_creation_tokens / 1_000_000) * (3.00 * 1.25)  # 5min cache: 25% premium
 
         return input_cost + output_cost + cache_read_cost + cache_creation_cost
 
@@ -792,6 +757,12 @@ class ClaudeInstanceOrchestrator:
         median_str = self._format_tokens(int(token_median)) if token_median > 0 else "0"
         print(f"║ Tokens: {self._format_tokens(total_tokens_all)} total, {self._format_tokens(total_cached_all)} cached | Median: {median_str} | Tools: {total_tools_all}")
 
+        # --- ADD COST TRANSPARENCY SECTION ---
+        if self.pricing_engine:
+            total_cost = sum(self._calculate_cost(s) for s in self.statuses.values())
+            avg_cost_per_instance = total_cost / len(self.statuses) if self.statuses else 0
+            print(f"║ 💰 Cost: ${total_cost:.4f} total, ${avg_cost_per_instance:.4f} avg/instance | Pricing: Claude compliant")
+
         # --- ADD BUDGET STATUS SECTION ---
         if self.budget_manager and self.enable_budget_visuals and render_progress_bar:
             bm = self.budget_manager
@@ -873,15 +844,17 @@ class ClaudeInstanceOrchestrator:
 
     def _update_budget_tracking(self, status: InstanceStatus, instance_name: str):
         """Update budget tracking with token deltas and check for runtime budget violations"""
-        if self.budget_manager and status.total_tokens > status._last_known_total_tokens:
-            new_tokens = status.total_tokens - status._last_known_total_tokens
+        # Calculate total billable tokens (fresh + cached for budget purposes)
+        current_billable_tokens = status.total_tokens + status.cached_tokens
+        if self.budget_manager and current_billable_tokens > status._last_known_total_tokens:
+            new_tokens = current_billable_tokens - status._last_known_total_tokens
             # Extract base command without arguments
             command = self.instances[instance_name].command
             base_command = command.split()[0] if command else command
 
             # Record the usage
             self.budget_manager.record_usage(base_command, new_tokens)
-            status._last_known_total_tokens = status.total_tokens
+            status._last_known_total_tokens = current_billable_tokens
 
             # RUNTIME BUDGET ENFORCEMENT - Check if we've exceeded budgets during execution
             self._check_runtime_budget_violation(status, instance_name, base_command)
@@ -1789,6 +1762,11 @@ async def main():
     logger.info(f"Results: {summary['completed']} completed, {summary['failed']} failed")
     logger.info(f"Token Usage: {total_tokens:,} total ({total_cached:,} cached, {cache_rate}% hit rate), {total_tool_calls} tool calls")
 
+    # Add cost transparency to final summary
+    if orchestrator.pricing_engine:
+        total_cost = sum(orchestrator._calculate_cost(status) for status in orchestrator.statuses.values())
+        logger.info(f"💰 Total Cost: ${total_cost:.4f} (Claude pricing compliant)")
+
     # Save results (will auto-generate filename if args.output is None)
     orchestrator.save_results(args.output)
 
@@ -1827,10 +1805,9 @@ async def main():
 
     # Show CloudSQL info if enabled
     if args.use_cloud_sql:
-        print(f"\n📊 Metrics saved to CloudSQL")
+        print(f"\n📊 Local metrics displayed above")
         print(f"   Batch ID: {orchestrator.batch_id}")
-        print(f"   View metrics with:")
-        print(f"   psql -h localhost -p 5434 -U postgres -d netra_optimizer -c \"SELECT * FROM command_executions WHERE batch_id = '{orchestrator.batch_id}';\"")
+        print(f"   Database persistence disabled for security")
 
     # Exit with appropriate code
     sys.exit(0 if summary['failed'] == 0 else 1)
