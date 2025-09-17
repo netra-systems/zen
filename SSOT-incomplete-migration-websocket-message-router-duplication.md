@@ -39,11 +39,19 @@ Multiple competing WebSocket message router implementations exist:
 - ✅ `/tests/validation/test_canonical_message_router_non_docker.py` - Import validation
 - ✅ `/tests/unit/websocket_core/test_issue_1099_ssot_handler_validation.py` - Handler validation
 
-#### New Tests Needed
-- [ ] Test single CanonicalMessageRouter implementation exists (must pass after fix)
-- [ ] Test no circular router inheritance
-- [ ] Test consistent WebSocket manager imports
-- [ ] Test backwards compatibility preserved
+#### New Tests Needed (PLANNED)
+- [ ] `/tests/unit/ssot/test_canonical_message_router_single_implementation_validation.py`
+  - Validates only ONE CanonicalMessageRouter class exists
+  - Currently will FAIL (multiple exist), must PASS after consolidation
+- [ ] `/tests/unit/ssot/test_message_router_inheritance_validation.py`
+  - Prevents circular inheritance patterns
+  - Validates clean MRO and base class structure
+- [ ] `/tests/unit/ssot/test_websocket_manager_import_consistency.py`
+  - Ensures consistent import path for get_websocket_manager
+  - Prevents fallback/backup import anti-patterns
+- [ ] `/tests/unit/ssot/test_message_router_backwards_compatibility.py`
+  - Validates legacy imports continue working via aliases
+  - Ensures method signatures preserved for smooth transition
 
 ### Remediation Plan
 - [ ] Consolidate to single CanonicalMessageRouter in canonical_message_router.py
