@@ -165,6 +165,31 @@ def fix_invalid_syntax(content: str) -> str:
         line = lines[i]
         original_line = line
 
+        # CRITICAL FIX: Pattern found in 808 errors - unterminated docstrings
+        # Pattern: "Real WebSocket connection for testing instead of mocks.""
+        if '"Real WebSocket connection for testing instead of mocks.""' in line:
+            line = line.replace(
+                '"Real WebSocket connection for testing instead of mocks.""',
+                '"""Real WebSocket connection for testing instead of mocks."""'
+            )
+
+        # Fix other common unterminated string patterns
+        if '"Test suite for ' in line and line.count('"') == 3 and line.endswith('""'):
+            # Pattern: "Test suite for backend login endpoint 500 error fixes.""
+            line = re.sub(r'^(\s*)"(.+)""$', r'\1"""\2"""', line)
+
+        # Fix unterminated string literals at line start
+        if line.strip().startswith('"') and not line.strip().startswith('"""'):
+            # Check if it's a single quote at start and ends with ""
+            if line.strip().endswith('""') and line.count('"') == 3:
+                line = re.sub(r'^(\s*)"(.+)""$', r'\1"""\2"""', line)
+
+        # Fix f-string unterminated literals
+        if 'logger.warning(f"' in line and line.count('"') == 1:
+            line = line.rstrip() + '")'
+        if 'print(f"' in line and line.count('"') == 1:
+            line = line.rstrip() + '")'
+
         # Fix incomplete import statements that end abruptly
         if ('from ' in line and
             ('import (' in line or line.strip().endswith('(')) and
