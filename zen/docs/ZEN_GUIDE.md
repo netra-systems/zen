@@ -1,4 +1,4 @@
-# Netra-Zen User Guide
+# Zen User Guide
 
 Zen orchestrates multiple Claude Code CLI instances for parallel task execution.
 
