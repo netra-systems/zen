@@ -5,7 +5,7 @@ Provides comprehensive monitoring of database connection pools.
 
 from typing import Any, Dict
 
-from netra_backend.app.core.configuration.base import config_manager
+from netra_backend.app.config import config_manager
 from netra_backend.app.core.exceptions_database import DatabaseError
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.database.health_checker import ConnectionHealthChecker

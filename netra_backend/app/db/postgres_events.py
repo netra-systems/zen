@@ -22,7 +22,7 @@ def get_settings():
 # Initialize settings at module level
 settings = get_settings()
 # Get unified config for database settings
-config = get_unified_config()
+config = get_settings()
 
 logger = central_logger.get_logger(__name__)
 

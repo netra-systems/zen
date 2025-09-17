@@ -11,8 +11,7 @@ from typing import List, Tuple
 
 import psutil
 
-from netra_backend.app.core.configuration import unified_config_manager
-from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.config import get_config as get_unified_config
 from netra_backend.app.core.network_constants import ServicePorts, HostConstants
 from netra_backend.app.startup_checks.models import StartupCheckResult
 
