@@ -138,18 +138,21 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       webSocketService.onStatusChange = handleStatusChange;
       webSocketService.onMessage = handleMessage;
       
+      // Get authentication configuration with ticket support
+      const authConfig = unifiedAuthService.getWebSocketAuthConfig();
+      
       // Connect to WebSocket using secure endpoint
       const baseWsUrl = appConfig.wsUrl || `${appConfig.apiUrl.replace(/^http/, 'ws')}/ws`;
       const wsUrl = webSocketService.getSecureUrl(baseWsUrl);
       
       logger.debug('[WebSocketProvider] Establishing secure WebSocket connection', {
         baseWsUrl: baseWsUrl,
-        finalWsUrl: wsUrl.replace(/jwt\.[^&]+/, 'jwt.***'), // Hide token in logs
+        finalWsUrl: wsUrl.replace(/jwt\.[^&]+/, 'jwt.***').replace(/ticket\.[^&]+/, 'ticket.***'), // Hide auth in logs
         hasToken: !!currentToken,
         tokenLength: currentToken ? currentToken.length : 0,
         isSecure: !isDevelopment || !!currentToken,
         isDevelopment,
-        authMethod: currentToken ? 'subprotocol' : 'none',
+        authMethod: authConfig.useTicketAuth ? 'ticket' : (currentToken ? 'jwt' : 'none'),
         configWsUrl: appConfig.wsUrl,
         configApiUrl: appConfig.apiUrl
       });

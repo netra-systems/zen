@@ -205,7 +205,7 @@ resource "google_compute_url_map" "https_lb" {
   project         = var.project_id
 
   host_rule {
-    hosts        = ["api.staging.netrasystems.ai"]
+    hosts        = ["api-staging.netrasystems.ai"]
     path_matcher = "api-paths"
   }
 
