@@ -1061,6 +1061,7 @@ AuthUser = User  # Alias for expected AuthUser import
 __all__ = [
     "auth_client",
     "get_current_user",
+    "get_current_user_secure",  # Issue #1296 Phase 2: Secure auth for ticket operations
     "get_optional_user",
     "get_auth_client",
     "get_auth_handler",  # Deployment compatibility alias
