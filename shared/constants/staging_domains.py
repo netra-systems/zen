@@ -78,7 +78,7 @@ DEPRECATED_STAGING_DOMAINS = {
     "OLD_FORMAT": [
         "*.staging.netrasystems.ai",  # Wrong subdomain format
         "https://app.staging.netrasystems.ai",
-        "https://api.staging.netrasystems.ai",
+        "https://api-staging.netrasystems.ai",
         "https://auth-staging.netrasystems.ai",
     ],
     "CLOUD_RUN_DIRECT": [
