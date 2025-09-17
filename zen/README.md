@@ -21,6 +21,7 @@ python zen_orchestrator.py --config my_config.json --overall-token-budget 50000
 - **Budget Management**: Token limits with cost tracking
 - **Real-time Monitoring**: Live status updates with progress visualization
 - **Execution Summary**: High-level results and token usage overview
+- **Tool Usage Tracking**: Detailed metrics for Claude Code tool usage with token costs
 
 ## Configuration
 
@@ -43,6 +44,8 @@ Create a JSON file with your tasks:
 - [Quick Setup](docs/QUICK_SETUP.md) - Get started in minutes
 - [User Guide](docs/ZEN_GUIDE.md) - Comprehensive usage guide
 - [Examples](docs/EXAMPLES.md) - Common workflows and patterns
+- [Pricing Strategy](docs/pricing_strategy.md) - Token calculation and cost transparency
+- [Changelog](docs/changelog.md) - Version history and changes
 
 ## Project Structure
 
@@ -62,6 +65,15 @@ zen/
 - Python 3.8+
 - Claude Code CLI
 - Dependencies in requirements.txt
+
+## Logging and Output
+
+- **Console Output**: All logs and execution results are displayed in the console
+- **No File Logging**: ZEN does not write logs to files by default
+- **Capturing Output**: To save execution logs, use output redirection:
+  ```bash
+  python zen_orchestrator.py --config tasks.json > execution.log 2>&1
+  ```
 
 ## Testing
 

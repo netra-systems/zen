@@ -10,6 +10,13 @@ The pricing calculations are handled by the `ClaudePricingEngine` located in `/z
 
 ## Token Calculation Formulas
 
+### ⚠️ Important: Token Accounting Principles
+
+**CRITICAL**: The `total_tokens` field is comprehensive and includes ALL token types. Cache tokens are NOT added separately to the total - they are already included within it.
+
+- ✅ **Correct**: Display `total_tokens` as the complete count
+- ❌ **Incorrect**: Add `total_tokens + cached_tokens` (this double-counts cache tokens)
+
 ### Basic Token Types
 
 1. **Input Tokens**: Raw text input sent to Claude models
@@ -28,8 +35,9 @@ The pricing calculations are handled by the `ClaudePricingEngine` located in `/z
    - Formula: `usage_data.cache_creation_tokens`
    - Charged at premium rates based on cache duration
 
-5. **Total Tokens**: Sum of all token types
+5. **Total Tokens**: Sum of all token types (IMPORTANT: This is comprehensive)
    - Formula: `input_tokens + output_tokens + cache_read_tokens + cache_creation_tokens`
+   - **Note**: Cache tokens are already included in total_tokens, not added separately
 
 ## Cache Pricing Strategy
 
@@ -185,6 +193,37 @@ The orchestrator provides real-time cost tracking in status reports:
 2. **Average cost per instance**
 3. **Tool usage details with costs**
 4. **Cache efficiency metrics**
+
+### Simplified Metrics Display
+For user clarity, the status table shows simplified token metrics:
+
+- **Overall**: Total tokens including all types (input + output + cache_read + cache_creation)
+- **Tokens**: Core processing tokens only (input + output)
+- **Cache**: Cache tokens only (cache_read + cache_creation)
+
+This provides an intuitive breakdown: `Overall = Tokens + Cache`
+
+#### Status Table Format
+```
+║  Status   Name                           Model      Duration   Overall  Tokens   Cache    Tools
+║  ──────── ────────────────────────────── ────────── ────────── ──────── ──────── ──────── ──────
+║  ✅        analyze-repository             35sonnet   5m3s       100.5K   1.1K     99.4K    1
+```
+
+#### Tool Usage Details Table
+The system also provides a detailed breakdown of tool usage:
+
+```
+╔═══ TOOL USAGE DETAILS ═══╗
+║ Tool Name            Uses     Tokens     Cost ($)   Used By
+║ ──────────────────── ──────── ────────── ────────── ───────────────────────────────────
+║ Task                 1        50         0.0002     analyze-repository(1 uses, 50 tok)
+║ ──────────────────── ──────── ────────── ────────── ───────────────────────────────────
+║ TOTAL                1        50         0.0002
+╚═══════════════════════════════════════════════════════════════════════════════════════╝
+```
+
+**Tool Cost Calculation**: Tool tokens are charged at the input token rate for the respective model (e.g., $3.00 per million tokens for Claude 3.5 Sonnet).
 
 ## Budget Management Integration
 

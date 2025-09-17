@@ -70,6 +70,20 @@ ZEN provides real-time status reports and execution summaries including:
 - Execution duration
 - Success/failure status
 - Output previews
+- Tool usage details table (when tools are detected)
+
+### Logging and Output
+
+- **Console Output**: All logs and results are displayed in the console
+- **No File Logging**: ZEN does not write logs to files by default
+- **Capturing Logs**: To save logs, use output redirection:
+  ```bash
+  python zen_orchestrator.py --config tasks.json > zen_run.log 2>&1
+  ```
+- **Tool Metrics**: When Claude Code instances use tools, a detailed TOOL USAGE DETAILS table shows:
+  - Tool names and usage counts
+  - Token costs per tool
+  - Total tool-related token consumption
 
 ## Need Detailed Analytics?
 
