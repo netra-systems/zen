@@ -54,7 +54,7 @@ class GoldenPathTestMetrics:
             self.events_received = []
 
 
-class TestGoldenPathValidation(SSotAsyncTestCase):
+class TestGoldenPathValidation(SSotAsyncTestCase, unittest.TestCase):
     """
     Golden Path Validation Test Suite
 

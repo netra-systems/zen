@@ -336,14 +336,12 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
                     
                     message = str(record)
                     msg_lower = message.lower()
-                    print(f"DEBUG: Intercepted message: '{message}', correlation: {correlation_id_from_record}, expected: {correlation_id}")
                     
                     # For this test, we'll accept any message from our test and not require correlation matching
                     # since the SSOT logging system doesn't yet properly propagate context to loguru extra
                     for phase in expected_phases:
                         # Enhanced phase matching with flexible keyword detection
                         phase_keywords = phase.replace('_', ' ').split()
-                        print(f"DEBUG: Checking phase '{phase}' with keywords {phase_keywords} against message")
                         if all(keyword in msg_lower for keyword in phase_keywords):
                             if hasattr(log_record, 'get'):
                                 logger_name = log_record.get('name', 'unknown')
@@ -355,7 +353,6 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
                                 'component': component,
                                 'traceable': True
                             })
-                            print(f"DEBUG: Phase '{phase}' matched and tracked!")
                             break
                 except Exception as e:
                     print(f"Phase interceptor error: {e}")
