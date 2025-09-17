@@ -1,5 +1,5 @@
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-'''E2E Test: Agent Orchestration with Real LLM Integration - CLAUDE.md Compliant'
+'''E2E Test: Agent Orchestration with Real LLM Integration - CLAUDE.md Compliant'''
 
 MISSION CRITICAL E2E test for agent orchestration with real LLM API calls.
 Validates complete agent lifecycle, multi-agent coordination, real-time processing,

@@ -81,7 +81,6 @@ def require_docker_services_smart() -> None:
     7. Validate staging environment health with proper URLs
     8. Configure test environment for staging/mock validation with all 5 WebSocket events
     """
-    """
     import platform
 
     try:
@@ -103,12 +102,12 @@ def require_docker_services_smart() -> None:
 
         # Phase 1: Fast Docker availability check (2s timeout)
         if manager.is_docker_available_fast():
-            logger.info(✅ Docker available - validating service health)
+            logger.info("✅ Docker available - validating service health")
 
             # Phase 1.5: Service health pre-validation (Issue #773)
             if validate_local_service_health_fast():
-                logger.info(✅ Local services healthy - proceeding with local validation)"
-                logger.info(✅ Local services healthy - proceeding with local validation)"
+                logger.info("✅ Local services healthy - proceeding with local validation")
+                logger.info("✅ Local services healthy - proceeding with local validation")
                 return
             else:
                 logger.warning("⚠️ Docker available but services unhealthy - falling back to staging/mock)"
@@ -150,12 +149,12 @@ def require_docker_services_smart() -> None:
                 logger.warning(🪟 Windows last resort: attempting mock server with relaxed settings)"
                 try:
                     import os
-                    os.environ[DOCKER_BYPASS"] = true"
+                    os.environ["DOCKER_BYPASS"] = "true"
                     asyncio.run(setup_mock_websocket_environment())
-                    logger.info(✅ Windows mock server last resort successful)
+                    logger.info("✅ Windows mock server last resort successful")
                     return
                 except Exception as final_error:
-                    logger.error(f"❌ Windows mock server last resort failed: {final_error})"
+                    logger.error(f"❌ Windows mock server last resort failed: {final_error}")
 
             pytest.skip(❌ Docker unavailable, staging fallback disabled, and no mock server available. Enable with USE_STAGING_FALLBACK=true or set DOCKER_BYPASS=true")"
 
