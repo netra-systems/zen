@@ -7,7 +7,21 @@ Zen runs multiple Code CLI instances for peaceful parallel task execution.
 Zen allows you to:
 - Run multiple Claude Code CLI instances simultaneously (Codex support coming soon)
 - Calm results (status, time, token usage)
-- Relax token fears with easy token budget limits
+- Relax "5-hour limit reached" lockout fears with easy token budget limits
+- Get more value out of your Claude MAX subscription 
+
+## Inspiration and background
+While developing Netra Apex (commerical product)
+our small team has used billions of tokens and run 100s of parrallel claude code instances.
+During that process we got annoyed at the "cognitive overhead"
+of having 10s of terminals open and scrolling mountains of text.
+Did the /command work or not? 
+
+What started as a simple way to make that process more peaceful turned into something we hope will be useful to the community.
+Surprisingly , the time that a command ran and it's presumed difficulty, often had little correlation with actual token usage.
+"Simple" git operations would sometimes eat 10x as many as complex issue resolution commands.
+
+Further, as usage limits become more restrictive, getting up at odd hours just to feed the beast got old fast. So we added scheduling to run it at pre-defined times.
 
 ## Quick Start (TBD replaced with path command)
 
