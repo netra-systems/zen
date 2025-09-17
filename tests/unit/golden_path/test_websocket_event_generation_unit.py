@@ -183,9 +183,14 @@ class GoldenPathWebSocketEventGenerationTests(SSotAsyncTestCase):
         """Setup sophisticated test environment."""
         super().setup_method(method)
         
-        # Create sophisticated mock infrastructure
-        self.mock_factory = SSotMockFactory()
-        self.sophisticated_factory = SophisticatedWebSocketMockFactory()
+        # Create sophisticated real service infrastructure
+        self.real_service_environment = create_real_test_environment(
+            test_name=method.__name__,
+            include_websocket=True,
+            include_auth=True,
+            include_agent=True
+        )
+        self.sophisticated_factory = SophisticatedWebSocketRealServiceFactory()
         
         # Create test user context using SSOT patterns
         self.test_user_context = self.create_test_user_execution_context(
