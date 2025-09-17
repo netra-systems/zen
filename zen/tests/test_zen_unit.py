@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Unit tests for claude-instance-orchestrator.py
+Unit tests for zen_orchestrator.py
 
 Tests the core functionality of the Claude instance orchestrator script
 focusing on dataclasses, initialization, and core business logic.
@@ -22,7 +22,7 @@ from datetime import datetime, timedelta
 service_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(service_dir))
 
-from claude_instance_orchestrator import (
+from zen_orchestrator import (
     InstanceConfig,
     InstanceStatus,
     ClaudeInstanceOrchestrator,
@@ -207,21 +207,21 @@ class TestClaudeInstanceOrchestratorInit:
         assert orchestrator.use_cloud_sql is True
         assert orchestrator.quiet is True
 
-    def test_orchestrator_cloud_sql_init(self):
-        """Test orchestrator initialization with CloudSQL configuration"""
+    def test_orchestrator_cloud_sql_disabled(self):
+        """Test that CloudSQL configuration is disabled for security"""
         with patch.dict(os.environ, {}, clear=True):
             orchestrator = ClaudeInstanceOrchestrator(
                 workspace_dir=self.workspace,
                 use_cloud_sql=True
             )
 
-            assert orchestrator.use_cloud_sql is True
-            # Check that environment variables were set
-            assert os.environ.get('POSTGRES_PORT') == '5434'
-            assert os.environ.get('POSTGRES_HOST') == 'localhost'
-            assert os.environ.get('POSTGRES_DB') == 'netra_optimizer'
-            assert os.environ.get('POSTGRES_USER') == 'postgres'
-            assert os.environ.get('ENVIRONMENT') == 'staging'
+            # CloudSQL functionality disabled for security
+            assert orchestrator.use_cloud_sql is True  # Flag preserved for backward compatibility
+            # But no environment variables should be set for security
+            assert os.environ.get('POSTGRES_PORT') is None
+            assert os.environ.get('POSTGRES_HOST') is None
+            assert os.environ.get('POSTGRES_DB') is None
+            assert os.environ.get('POSTGRES_USER') is None
 
     def test_add_instance(self):
         """Test adding instances to orchestrator"""

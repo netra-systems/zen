@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Test runner for Netra Orchestrator Client tests
+Test runner for ZEN tests
 
-Runs all unit and integration tests for the Claude instance orchestrator.
+Runs all unit and integration tests for the ZEN orchestrator.
 """
 
 import sys
@@ -11,23 +11,23 @@ from pathlib import Path
 
 
 def run_tests():
-    """Run all tests for Netra Orchestrator Client"""
+    """Run all tests for ZEN Orchestrator"""
     tests_dir = Path(__file__).parent
     service_root = tests_dir.parent
 
     # List of test files to run
     test_files = [
-        "test_claude_instance_orchestrator_unit.py",
-        "test_claude_instance_orchestrator_commands.py",
-        "test_claude_instance_orchestrator_metrics.py",
-        "test_claude_instance_orchestrator_integration.py"
+        "test_zen_unit.py",
+        "test_zen_commands.py",
+        "test_zen_metrics.py",
+        "test_zen_integration.py"
     ]
 
     total_passed = 0
     total_failed = 0
 
     print("=" * 80)
-    print("Running Claude Instance Orchestrator Tests")
+    print("Running ZEN Orchestrator Tests")
     print("=" * 80)
 
     for test_file in test_files:
@@ -83,7 +83,7 @@ def run_tests():
 def run_specific_test(test_name):
     """Run a specific test file"""
     tests_dir = Path(__file__).parent
-    test_path = tests_dir / f"test_claude_instance_orchestrator_{test_name}.py"
+    test_path = tests_dir / f"test_zen_{test_name}.py"
 
     if not test_path.exists():
         print(f"[FAIL] Test file not found: {test_path}")

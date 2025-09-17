@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Unit tests for claude-instance-orchestrator.py metrics and token parsing
+Unit tests for zen_orchestrator.py metrics and token parsing
 
 Tests token usage parsing, metrics calculation, status reporting, and result generation.
 """
@@ -18,7 +18,7 @@ import time
 service_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(service_dir))
 
-from claude_instance_orchestrator import (
+from zen_orchestrator import (
     InstanceConfig,
     InstanceStatus,
     ClaudeInstanceOrchestrator

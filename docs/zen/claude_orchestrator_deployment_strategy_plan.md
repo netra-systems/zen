@@ -9,7 +9,7 @@
 
 ```mermaid
 flowchart TD
-    A[Current State: Python script at scripts/claude-instance-orchestrator.py] --> B{Packaging Goal}
+    A[Current State: Python script at scripts/claude_instance_orchestrator.py] --> B{Packaging Goal}
     B -->|Minimal change| C[Pip Package]
     B -->|Security-hardened binary| D[Python Executable Wrapper]
     B -->|Performance rewrite| E[Rust Service]
@@ -66,7 +66,7 @@ quadrantChart
 ```
 
 ## Proposed Execution Plan
-1. **Stabilize Python Codebase (Weeks 1-2):** Refactor `scripts/claude-instance-orchestrator.py` for package layout, feature flags for optional dependencies, and CLI entry point scaffolding.
+1. **Stabilize Python Codebase (Weeks 1-2):** Refactor `scripts/claude_instance_orchestrator.py` for package layout, feature flags for optional dependencies, and CLI entry point scaffolding.
 2. **Pip Packaging Pilot (Weeks 2-3):** Create `pyproject.toml`, add dependency pins, publish internal index release; document install/upgrade steps in the index.
 3. **Security Hardening Track (Weeks 3-5):** Automate SBOM, integrate code signing, and produce PyInstaller/PEX artifact for limited rollout; validate checksum workflow with Netra Ops.
 4. **Rewrite Spike (Weeks 5-7):** Run comparative spikes for Rust and Node prototypes focused on command orchestration loop and telemetry (aligned with Phase 2 discovery tasks).

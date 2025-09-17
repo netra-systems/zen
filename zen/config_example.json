@@ -1,25 +1,12 @@
 {
-  "instances": [
-    {
-      "name": "test-creator",
-      "command": "/createtestsv2 unit",
-      "description": "Create unit tests for the project",
-      "permission_mode": "acceptEdits",
-      "output_format": "stream-json"
-    },
-    {
-      "name": "ssot-gardener", 
-      "command": "/ssotgardener",
-      "description": "SSOT maintenance and cleanup",
-      "permission_mode": "acceptEdits",
-      "output_format": "stream-json"
-    },
-    {
-      "name": "test-runner",
-      "command": "/test-real integration",
-      "description": "Run integration tests with real services",
-      "permission_mode": "acceptEdits", 
-      "output_format": "stream-json"
-    }
-  ]
-}
+    "instances": [
+      {
+        "name": "analyze-repository",
+        "command": "/analyze-repository; Spawn three subagents to understand how the information at this website is used in the zen directory. https://docs.claude.com/en/docs/about-claude/pricing#tool-use-pricing.",
+        "description": "Reads and understands the required portion of the repository",
+        "permission_mode": "acceptEdits",
+        "output_format": "stream-json",
+        "max_tokens_per_command": 5000
+      }
+    ]
+  }

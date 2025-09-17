@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Integration tests for claude-instance-orchestrator.py
+Integration tests for zen_orchestrator.py
 
 Tests the orchestrator workflow, async execution, and process management
 with real subprocess execution (using safe commands).
@@ -21,7 +21,7 @@ import os
 service_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(service_dir))
 
-from claude_instance_orchestrator import (
+from zen_orchestrator import (
     InstanceConfig,
     InstanceStatus,
     ClaudeInstanceOrchestrator,

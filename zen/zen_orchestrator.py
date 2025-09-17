@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """
 Usage Examples:
-  python3 claude-instance-orchestrator.py --workspace ~/my-project --dry-run
-  python3 claude-instance-orchestrator.py --list-commands
-  python3 claude-instance-orchestrator.py --config config.json
-  python3 claude-instance-orchestrator.py --startup-delay 2.0  # 2 second delay between launches
-  python3 claude-instance-orchestrator.py --startup-delay 0.5  # 0.5 second delay between launches
-  python3 claude-instance-orchestrator.py --max-line-length 1000  # Longer output lines
-  python3 claude-instance-orchestrator.py --status-report-interval 60  # Status reports every 60s
-  python3 claude-instance-orchestrator.py --quiet  # Minimal output, errors only
-  python3 claude-instance-orchestrator.py --start-at "2h"  # Start 2 hours from now
-  python3 claude-instance-orchestrator.py --start-at "30m"  # Start in 30 minutes
-  python3 claude-instance-orchestrator.py --start-at "1am"  # Start at 1 AM (today or tomorrow)
-  python3 claude-instance-orchestrator.py --start-at "14:30"  # Start at 2:30 PM (today or tomorrow)
-  python3 claude-instance-orchestrator.py --start-at "10:30pm"  # Start at 10:30 PM (today or tomorrow)
+  python zen_orchestrator.py --workspace ~/my-project --dry-run
+  python zen_orchestrator.py --list-commands
+  python zen_orchestrator.py --config config.json
+  python zen_orchestrator.py --startup-delay 2.0  # 2 second delay between launches
+  python zen_orchestrator.py --startup-delay 0.5  # 0.5 second delay between launches
+  python zen_orchestrator.py --max-line-length 1000  # Longer output lines
+  python zen_orchestrator.py --status-report-interval 60  # Status reports every 60s
+  python zen_orchestrator.py --quiet  # Minimal output, errors only
+  python zen_orchestrator.py --start-at "2h"  # Start 2 hours from now
+  python zen_orchestrator.py --start-at "30m"  # Start in 30 minutes
+  python zen_orchestrator.py --start-at "1am"  # Start at 1 AM (today or tomorrow)
+  python zen_orchestrator.py --start-at "14:30"  # Start at 2:30 PM (today or tomorrow)
+  python zen_orchestrator.py --start-at "10:30pm"  # Start at 10:30 PM (today or tomorrow)
 """
 
 import asyncio
@@ -26,7 +26,7 @@ import yaml
 import shutil
 import os
 import platform
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 import argparse
@@ -45,14 +45,16 @@ except ImportError as e:
     render_progress_bar = None
     # Note: logger is not yet defined here, will log warning after logger setup
 
-# Optional NetraOptimizer imports
-DatabaseClient = None
-ExecutionRecord = None
+# Add token transparency imports
 try:
-    from netraoptimizer import NetraOptimizerClient, DatabaseClient
-    from netraoptimizer.database import ExecutionRecord
-except ImportError:
-    pass  # NetraOptimizer is optional
+    from token_transparency import ClaudePricingEngine, TokenUsageData
+except ImportError as e:
+    # Graceful fallback if token transparency package is not available
+    ClaudePricingEngine = None
+    TokenUsageData = None
+
+# NetraOptimizer database functionality has been removed for security
+# Local token metrics are preserved without database persistence
 
 # Setup logging
 logging.basicConfig(
@@ -108,10 +110,24 @@ class InstanceStatus:
     # NEW: Authoritative cost from SDK when available
     total_cost_usd: Optional[float] = None
 
+    # NEW: Model tracking for transparency
+    model_used: str = "claude-3-5-sonnet"  # Default model
+
+    # NEW: Tool usage details
+    tool_details: Dict[str, int] = None  # Tool name -> usage count
+    tool_tokens: Dict[str, int] = None   # Tool name -> token usage
+    tool_id_mapping: Dict[str, str] = field(default_factory=dict)  # tool_use_id -> tool name mapping
+
     def __post_init__(self):
         """Initialize fields that need special handling"""
         if self.processed_message_ids is None:
             self.processed_message_ids = set()
+        if self.tool_details is None:
+            self.tool_details = {}
+        if self.tool_tokens is None:
+            self.tool_tokens = {}
+        if self.tool_id_mapping is None:
+            self.tool_id_mapping = {}
 
 class ClaudeInstanceOrchestrator:
     """Orchestrator for managing multiple Claude Code instances"""
@@ -136,7 +152,7 @@ class ClaudeInstanceOrchestrator:
         self.use_cloud_sql = use_cloud_sql
         self.quiet = quiet
         self.batch_id = str(uuid4())  # Generate batch ID for this orchestration run
-        self.db_client = None
+        # Database client removed for security - local metrics only
         self.optimizer = None
 
         # Initialize budget manager if any budget settings are provided
@@ -149,6 +165,14 @@ class ClaudeInstanceOrchestrator:
             self.budget_manager = None
         self.enable_budget_visuals = enable_budget_visuals
 
+        # Initialize token transparency pricing engine
+        if ClaudePricingEngine:
+            self.pricing_engine = ClaudePricingEngine()
+            logger.info("🎯 Token transparency pricing engine enabled - Claude pricing compliance active")
+        else:
+            self.pricing_engine = None
+            logger.debug("Token transparency pricing engine disabled (module not available)")
+
         # Log budget configuration status
         if self.budget_manager:
             budget_msg = f"Overall: {overall_token_budget:,} tokens" if overall_token_budget else "No overall limit"
@@ -157,22 +181,11 @@ class ClaudeInstanceOrchestrator:
             logger.debug("Token budget tracking disabled (no budget specified)")
 
         # Configure CloudSQL if requested
+        # CloudSQL functionality available with Netra Apex
+        # Token metrics are now handled locally without database persistence
         if use_cloud_sql:
-            os.environ['POSTGRES_PORT'] = '5434'
-            os.environ['POSTGRES_HOST'] = 'localhost'
-            os.environ['POSTGRES_DB'] = 'netra_optimizer'
-            os.environ['POSTGRES_USER'] = 'postgres'
-            os.environ['POSTGRES_PASSWORD'] = 'DTprdt5KoQXlEG4Gh9lF'
-            os.environ['ENVIRONMENT'] = 'staging'
-            logger.info("Configured for CloudSQL on port 5434")
-
-            # Initialize database client if available
-            if DatabaseClient:
-                try:
-                    self.db_client = DatabaseClient(use_cloud_sql=True)
-                    logger.info("NetraOptimizer database client configured")
-                except Exception as e:
-                    logger.warning(f"Failed to initialize database client: {e}")
+            logger.warning("CloudSQL functionality has been disabled. Token metrics will be displayed locally only.")
+            logger.info("For data persistence, consider upgrading to Netra Apex.")
 
     def add_instance(self, config: InstanceConfig):
         """Add a new instance configuration"""
@@ -420,7 +433,8 @@ class ClaudeInstanceOrchestrator:
             status.end_time = time.time()
 
             # Save metrics to database if CloudSQL is enabled
-            if self.use_cloud_sql and self.db_client:
+            # Database persistence disabled - metrics preserved in local display only
+            if False:  # CloudSQL functionality removed
                 await self._save_metrics_to_database(name, config, status)
 
             if returncode == 0:
@@ -441,79 +455,54 @@ class ClaudeInstanceOrchestrator:
             return False
 
     async def _save_metrics_to_database(self, name: str, config: InstanceConfig, status: InstanceStatus):
-        """Save execution metrics to CloudSQL database"""
-        if not self.db_client or not ExecutionRecord:
-            return
-
-        try:
-            # Initialize database if not already done
-            if not hasattr(self.db_client, '_initialized'):
-                await self.db_client.initialize()
-                self.db_client._initialized = True
-
-            # Create execution record
-            execution_id = uuid4()
-            command_string = config.command
-            start_time = datetime.fromtimestamp(status.start_time) if status.start_time else datetime.now()
-
-            # Calculate cache metrics
-            cache_read = 0
-            cache_creation = 0
-
-            # Try to extract cache metrics from cached_tokens
-            # In claude-instance-orchestrator.py, cached_tokens combines both read and creation
-            # We'll need to parse from the output to get accurate breakdown
-
-            record = ExecutionRecord(
-                id=execution_id,
-                timestamp=start_time,
-                command_base='claude',  # Always 'claude' for consistency
-                command_raw=command_string,
-                batch_id=UUID(self.batch_id) if self.batch_id else None,
-                execution_sequence=list(self.instances.keys()).index(name),
-                workspace_context={
-                    'instance_name': name,
-                    'workspace_dir': str(self.workspace_dir),
-                    'description': config.description,
-                    'orchestration_run': self.start_datetime.isoformat()
-                },
-                input_tokens=status.input_tokens,
-                output_tokens=status.output_tokens,
-                cached_tokens=status.cached_tokens,  # Combined cache_read + cache_creation
-                fresh_tokens=0,  # Will be set if we can parse cache_creation separately
-                total_tokens=status.total_tokens,
-                cache_hit_rate=(status.cached_tokens / status.total_tokens * 100) if status.total_tokens > 0 else 0,
-                cost_usd=self._calculate_cost(status),
-                cache_savings_usd=0,  # Will calculate if we have cache_read data
-                execution_time_ms=int((status.end_time - status.start_time) * 1000) if status.start_time else 0,
-                status=status.status,
-                error_message=status.error if status.error else None
-            )
-
-            # Save to database
-            await self.db_client.insert_execution(record)
-            logger.info(f"Saved metrics to CloudSQL for {name}")
-
-        except Exception as e:
-            logger.warning(f"Failed to save metrics to database for {name}: {e}")
+        """Database persistence has been removed for security. Metrics are displayed locally only."""
+        # CloudSQL functionality removed for security and simplicity
+        # Token metrics are preserved in the local display
+        logger.debug(f"Metrics for {name} available in local display only (database persistence disabled)")
 
     def _calculate_cost(self, status: InstanceStatus) -> float:
-        """Calculate cost with current Claude 3.5 Sonnet pricing and proper cache handling"""
+        """Calculate cost with Claude pricing compliance engine and proper cache handling"""
 
         # Use authoritative cost if available (preferred)
         if status.total_cost_usd is not None:
             return status.total_cost_usd
 
-        # Fallback calculation with current pricing
+        # Use pricing engine if available
+        if self.pricing_engine and TokenUsageData:
+            # Create usage data from status
+            usage_data = TokenUsageData(
+                input_tokens=status.input_tokens,
+                output_tokens=status.output_tokens,
+                cache_read_tokens=status.cache_read_tokens,
+                cache_creation_tokens=status.cache_creation_tokens,
+                total_tokens=status.total_tokens,
+                cache_type="5min",  # Default to 5min cache
+                model=status.model_used  # Use detected model
+            )
+
+            cost_breakdown = self.pricing_engine.calculate_cost(
+                usage_data,
+                status.total_cost_usd,
+                status.tool_tokens  # Include tool token costs
+            )
+            return cost_breakdown.total_cost
+
+        # Fallback calculation with current pricing (legacy support)
         # Claude 3.5 Sonnet current rates (as of 2024-2025)
         input_cost = (status.input_tokens / 1_000_000) * 3.00    # $3 per M input tokens
         output_cost = (status.output_tokens / 1_000_000) * 15.00  # $15 per M output tokens
 
-        # Cache costs (differentiated by type)
-        cache_read_cost = (status.cache_read_tokens / 1_000_000) * 0.30      # $0.30 per M cache read
-        cache_creation_cost = (status.cache_creation_tokens / 1_000_000) * 0.75  # 25% of input rate for cache creation
+        # Cache costs with CORRECTED pricing based on Claude documentation
+        cache_read_cost = (status.cache_read_tokens / 1_000_000) * (3.00 * 0.1)  # 10% of input rate
+        cache_creation_cost = (status.cache_creation_tokens / 1_000_000) * (3.00 * 1.25)  # 5min cache: 25% premium
 
-        return input_cost + output_cost + cache_read_cost + cache_creation_cost
+        # Tool costs (fallback calculation)
+        tool_cost = 0.0
+        if status.tool_tokens:
+            for tool_name, tokens in status.tool_tokens.items():
+                tool_cost += (tokens / 1_000_000) * 3.00  # Tool tokens at input rate
+
+        return input_cost + output_cost + cache_read_cost + cache_creation_cost + tool_cost
 
     async def _stream_output(self, name: str, process):
         """Stream output in real-time for stream-json format (DEPRECATED - use _stream_output_parallel)"""
@@ -638,11 +627,8 @@ class ClaudeInstanceOrchestrator:
             print(f"{completion_msg}")
             print(f"{'='*60}\n")
 
-            # Ensure streams are properly closed
-            if process.stdout and not process.stdout.at_eof():
-                process.stdout.close()
-            if process.stderr and not process.stderr.at_eof():
-                process.stderr.close()
+            # Note: StreamReader objects in asyncio don't have .close() method
+            # They are automatically closed when the process terminates
 
     async def run_all_instances(self, timeout: int = 300) -> Dict[str, bool]:
         """Run all instances with configurable soft startup delay between launches"""
@@ -662,19 +648,32 @@ class ClaudeInstanceOrchestrator:
             tasks.append(task)
 
         # Start the rolling status report task if we have instances to monitor
+        # NOTE: Do NOT add status reporter to main tasks list - it runs indefinitely
         if len(tasks) > 0 and not self.max_console_lines == 0:  # Don't show status in quiet mode
             self.status_report_task = asyncio.create_task(self._rolling_status_reporter())
-            tasks.append(self.status_report_task)
 
+        # Wait for all instance tasks to complete (not the status reporter)
+        logger.debug(f"⏳ Waiting for {len(tasks)} instance tasks to complete...")
         results = await asyncio.gather(*tasks, return_exceptions=True)
+        logger.debug("✅ All instance tasks completed")
 
-        # Stop the status reporter
-        if self.status_report_task and not self.status_report_task.done():
+        # Stop the status reporter - CRITICAL: This prevents hanging
+        if hasattr(self, 'status_report_task') and self.status_report_task and not self.status_report_task.done():
+            logger.debug("🛑 Cancelling status reporter task...")
             self.status_report_task.cancel()
             try:
                 await self.status_report_task
+                logger.debug("✅ Status reporter task cancelled successfully")
             except asyncio.CancelledError:
+                logger.debug("✅ Status reporter task cancellation confirmed")
                 pass
+            except Exception as e:
+                logger.warning(f"⚠️ Error cancelling status reporter: {e}")
+        else:
+            logger.debug("ℹ️ No status reporter task to cancel")
+
+        # Ensure all processes are cleaned up
+        await self._cleanup_all_processes()
 
         final_results = {}
         for name, result in zip(self.instances.keys(), results):
@@ -692,6 +691,29 @@ class ClaudeInstanceOrchestrator:
                 final_results[name] = result
 
         return final_results
+
+    async def _cleanup_all_processes(self):
+        """Ensure all processes are properly cleaned up to prevent hanging"""
+        logger.debug("🧹 Cleaning up all processes...")
+
+        for name, status in self.statuses.items():
+            if status.pid and status.status == "running":
+                try:
+                    import signal
+                    import os
+                    logger.debug(f"🛑 Cleaning up hanging process for {name} (PID: {status.pid})")
+                    os.kill(status.pid, signal.SIGTERM)
+                except (OSError, ProcessLookupError):
+                    # Process already terminated
+                    pass
+                except Exception as e:
+                    logger.warning(f"⚠️ Error cleaning up process {status.pid}: {e}")
+
+        # Clear the processes dict
+        if hasattr(self, 'processes'):
+            self.processes.clear()
+
+        logger.debug("✅ Process cleanup completed")
 
     async def _run_instance_with_delay(self, name: str, delay: float, timeout: int) -> bool:
         """Run an instance after a specified delay"""
@@ -792,6 +814,12 @@ class ClaudeInstanceOrchestrator:
         median_str = self._format_tokens(int(token_median)) if token_median > 0 else "0"
         print(f"║ Tokens: {self._format_tokens(total_tokens_all)} total, {self._format_tokens(total_cached_all)} cached | Median: {median_str} | Tools: {total_tools_all}")
 
+        # --- ADD COST TRANSPARENCY SECTION ---
+        if self.pricing_engine:
+            total_cost = sum(self._calculate_cost(s) for s in self.statuses.values())
+            avg_cost_per_instance = total_cost / len(self.statuses) if self.statuses else 0
+            print(f"║ 💰 Cost: ${total_cost:.4f} total, ${avg_cost_per_instance:.4f} avg/instance | Pricing: Claude compliant")
+
         # --- ADD BUDGET STATUS SECTION ---
         if self.budget_manager and self.enable_budget_visuals and render_progress_bar:
             bm = self.budget_manager
@@ -819,9 +847,9 @@ class ClaudeInstanceOrchestrator:
 
         print(f"║")
         
-        # Print column headers with wider name column
-        print(f"║  {'Status':<8} {'Name':<35} {'Duration':<10} {'Tokens':<8} {'vs Med':<8} {'Cache':<8} {'Tools':<6}")
-        print(f"║  {'─'*8} {'─'*35} {'─'*10} {'─'*8} {'─'*8} {'─'*8} {'─'*6}")
+        # Print column headers with simplified metrics
+        print(f"║  {'Status':<8} {'Name':<30} {'Model':<10} {'Duration':<10} {'Overall':<8} {'Tokens':<8} {'Cache':<8} {'Tools':<6}")
+        print(f"║  {'─'*8} {'─'*30} {'─'*10} {'─'*10} {'─'*8} {'─'*8} {'─'*8} {'─'*6}")
 
         for name, status in self.statuses.items():
             # Status emoji
@@ -844,47 +872,154 @@ class ClaudeInstanceOrchestrator:
             else:
                 time_info = "waiting"
 
-            # Format token information
-            token_info = self._format_tokens(status.total_tokens) if status.total_tokens > 0 else "0"
-            cache_info = self._format_tokens(status.cached_tokens) if status.cached_tokens > 0 else "0"
-            tool_info = str(status.tool_calls) if status.tool_calls > 0 else "0"
-            
-            # Calculate percentage relative to median
-            token_pct = self._calculate_token_percentage(status.total_tokens, token_median)
+            # Format simplified token information for user-friendly display
+            # CHANGE LOG (v1.1.0): Simplified metrics display for better user understanding
+            # - Overall: Shows complete token count (was previously confusing as "Tokens")
+            # - Tokens: Shows only core processing tokens (input + output)
+            # - Cache: Shows only cache tokens (cache_read + cache_creation)
+            # - Formula: Overall = Tokens + Cache (intuitive breakdown)
 
-            # Create detailed line with consistent spacing and wider name column
-            detail = f"  {emoji:<8} {name:<35} {time_info:<10} {token_info:<8} {token_pct:<8} {cache_info:<8} {tool_info:<6}"
+            # Overall = total_tokens (which includes input + output + cache_read + cache_creation)
+            overall_tokens = self._format_tokens(status.total_tokens) if status.total_tokens > 0 else "0"
+
+            # Tokens = input + output only (core processing tokens)
+            core_tokens = status.input_tokens + status.output_tokens
+            tokens_info = self._format_tokens(core_tokens) if core_tokens > 0 else "0"
+
+            # Cache = cache_read + cache_creation (simplified as cached_tokens)
+            cache_info = self._format_tokens(status.cached_tokens) if status.cached_tokens > 0 else "0"
+
+            tool_info = str(status.tool_calls) if status.tool_calls > 0 else "0"
+
+            # Format model name for display
+            model_short = status.model_used.replace('claude-', '').replace('-', '') if status.model_used else "unknown"
+
+            # Create detailed line with simplified metrics
+            detail = f"  {emoji:<8} {name:<30} {model_short:<10} {time_info:<10} {overall_tokens:<8} {tokens_info:<8} {cache_info:<8} {tool_info:<6}"
 
             print(f"║{detail}")
 
         footer = "╚" + "═" * (len(header) - 2) + "╝"
-        print(f"{footer}\n")
+        print(f"{footer}")
+
+        # --- ADD DETAILED TOOL USAGE TABLE WITH TOKENS AND COSTS ---
+        all_tools = {}
+        for status in self.statuses.values():
+            for tool_name, count in status.tool_details.items():
+                if tool_name not in all_tools:
+                    all_tools[tool_name] = {"count": 0, "tokens": 0, "instances": []}
+                all_tools[tool_name]["count"] += count
+                all_tools[tool_name]["tokens"] += status.tool_tokens.get(tool_name, 0)
+
+                # Format instance info with tokens if available
+                tool_tokens = status.tool_tokens.get(tool_name, 0)
+                if tool_tokens > 0:
+                    all_tools[tool_name]["instances"].append(f"{status.name}({count} uses, {tool_tokens} tok)")
+                else:
+                    all_tools[tool_name]["instances"].append(f"{status.name}({count} uses)")
+
+
+        if all_tools:
+            print(f"\n╔═══ TOOL USAGE DETAILS ═══╗")
+            print(f"║ {'Tool Name':<20} {'Uses':<8} {'Tokens':<10} {'Cost ($)':<10} {'Used By':<35}")
+            print(f"║ {'─'*20} {'─'*8} {'─'*10} {'─'*10} {'─'*35}")
+
+            total_tool_uses = 0
+            total_tool_tokens = 0
+            total_tool_cost = 0.0
+
+            for tool_name, details in sorted(all_tools.items()):
+                tool_count = details["count"]
+                tool_tokens = details["tokens"]
+
+                # Calculate tool cost at current model rates (3.5 sonnet input rate)
+                tool_cost = (tool_tokens / 1_000_000) * 3.00 if tool_tokens > 0 else 0.0
+
+                instances_str = ", ".join(details["instances"][:2])  # Show first 2 instances
+                if len(details["instances"]) > 2:
+                    instances_str += f" +{len(details['instances'])-2} more"
+
+                token_str = f"{tool_tokens:,}" if tool_tokens > 0 else "0"
+                cost_str = f"{tool_cost:.4f}" if tool_cost > 0 else "0"
+
+                print(f"║ {tool_name:<20} {tool_count:<8} {token_str:<10} {cost_str:<10} {instances_str:<35}")
+
+                total_tool_uses += tool_count
+                total_tool_tokens += tool_tokens
+                total_tool_cost += tool_cost
+
+            print(f"║ {'─'*20} {'─'*8} {'─'*10} {'─'*10} {'─'*35}")
+            total_tokens_str = f"{total_tool_tokens:,}" if total_tool_tokens > 0 else "0"
+            total_cost_str = f"{total_tool_cost:.4f}" if total_tool_cost > 0 else "0"
+            print(f"║ {'TOTAL':<20} {total_tool_uses:<8} {total_tokens_str:<10} {total_cost_str:<10}")
+            print(f"╚{'═'*95}╝")
+
+        print()
 
     def _parse_token_usage(self, line: str, status: InstanceStatus, instance_name: str):
         """Parse token usage information from Claude Code JSON output lines"""
+        # DEBUG: Log lines with potential token information
+        if line.strip() and any(keyword in line.lower() for keyword in ['token', 'usage', 'total', 'input', 'output']):
+            logger.debug(f"🔍 TOKEN PARSE [{instance_name}]: {line[:100]}{'...' if len(line) > 100 else ''}")
+
+        # Track previous total for delta detection
+        prev_total = status.total_tokens
+
         # First try to parse as JSON - this is the modern approach for stream-json format
         if self._try_parse_json_token_usage(line, status):
+            # Check if tokens actually changed
+            if status.total_tokens != prev_total:
+                logger.info(f"✅ JSON PARSE SUCCESS [{instance_name}]: tokens {prev_total} → {status.total_tokens}")
             self._update_budget_tracking(status, instance_name)
             return
 
         # Fallback to regex parsing for backward compatibility or non-JSON output
         self._parse_token_usage_fallback(line, status)
+
+        # Check if tokens changed in fallback parsing
+        if status.total_tokens != prev_total:
+            logger.info(f"✅ REGEX PARSE SUCCESS [{instance_name}]: tokens {prev_total} → {status.total_tokens}")
+
         self._update_budget_tracking(status, instance_name)
 
     def _update_budget_tracking(self, status: InstanceStatus, instance_name: str):
         """Update budget tracking with token deltas and check for runtime budget violations"""
-        if self.budget_manager and status.total_tokens > status._last_known_total_tokens:
-            new_tokens = status.total_tokens - status._last_known_total_tokens
-            # Extract base command without arguments
-            command = self.instances[instance_name].command
-            base_command = command.split()[0] if command else command
+        # Use total_tokens which already includes all token types (input + output + cache_read + cache_creation)
+        current_billable_tokens = status.total_tokens
+
+        # Extract command information
+        command = self.instances[instance_name].command
+        # Clean the command by removing trailing semicolons and splitting on first space
+        base_command = command.rstrip(';').split()[0] if command else command
+
+        # ENHANCED DEBUG: Log budget tracking state
+        logger.debug(f"🔍 BUDGET DEBUG [{instance_name}]: command='{base_command}', current_tokens={current_billable_tokens}, last_known={status._last_known_total_tokens}")
+
+        # Check if this command has a budget configured
+        if self.budget_manager and base_command in self.budget_manager.command_budgets:
+            budget_info = self.budget_manager.command_budgets[base_command]
+            logger.debug(f"🎯 BUDGET FOUND [{instance_name}]: {base_command} has budget {budget_info.used}/{budget_info.limit} ({budget_info.percentage:.1f}%)")
+        elif self.budget_manager:
+            logger.debug(f"⚠️ NO BUDGET [{instance_name}]: command '{base_command}' not in budget keys: {list(self.budget_manager.command_budgets.keys())}")
+
+        if self.budget_manager and current_billable_tokens > status._last_known_total_tokens:
+            new_tokens = current_billable_tokens - status._last_known_total_tokens
+
+            logger.info(f"💰 BUDGET UPDATE [{instance_name}]: Recording {new_tokens} tokens for command '{base_command}'")
 
             # Record the usage
             self.budget_manager.record_usage(base_command, new_tokens)
-            status._last_known_total_tokens = status.total_tokens
+            status._last_known_total_tokens = current_billable_tokens
+
+            # Log the new budget state
+            if base_command in self.budget_manager.command_budgets:
+                budget_info = self.budget_manager.command_budgets[base_command]
+                logger.info(f"📊 BUDGET STATE [{instance_name}]: {base_command} now at {budget_info.used}/{budget_info.limit} tokens ({budget_info.percentage:.1f}%)")
 
             # RUNTIME BUDGET ENFORCEMENT - Check if we've exceeded budgets during execution
             self._check_runtime_budget_violation(status, instance_name, base_command)
+        elif self.budget_manager and current_billable_tokens == 0:
+            logger.warning(f"🚫 NO TOKENS [{instance_name}]: total_tokens is still 0 - token detection may be failing")
 
     def _check_runtime_budget_violation(self, status: InstanceStatus, instance_name: str, base_command: str):
         """Check for budget violations during runtime and terminate instances if needed"""
@@ -912,10 +1047,16 @@ class ClaudeInstanceOrchestrator:
             message = f"Runtime budget violation for {instance_name}: {violation_reason}"
 
             if self.budget_manager.enforcement_mode == "block":
-                logger.error(f"🚫 RUNTIME TERMINATION: {message}")
+                logger.error(f"🚫 🔴 RUNTIME TERMINATION: {message}")
                 self._terminate_instance(status, instance_name, f"Terminated due to budget violation - {violation_reason}")
             else:  # warn mode
-                logger.warning(f"⚠️  RUNTIME WARNING: {message}")
+                # EXPLICIT YELLOW WARNING SYMBOLS FOR VISIBILITY
+                logger.warning(f"🔶 ⚠️  🟡 BUDGET EXCEEDED WARNING: {message}")
+                print(f"\n{'='*80}")
+                print(f"🔶 ⚠️  🟡 BUDGET VIOLATION WARNING 🟡 ⚠️  🔶")
+                print(f"Instance: {instance_name}")
+                print(f"Reason: {violation_reason}")
+                print(f"{'='*80}\n")
 
     def _terminate_instance(self, status: InstanceStatus, instance_name: str, reason: str):
         """Terminate a running instance due to budget violation"""
@@ -968,6 +1109,24 @@ class ClaudeInstanceOrchestrator:
         try:
             json_data = json.loads(line)
 
+            # ADD DEBUG LOGGING FOR TOKEN PARSING
+            logger.debug(f"🔍 TOKEN PARSING: Analyzing JSON line with keys: {list(json_data.keys())}")
+
+            # Special debug for tool detection
+            if 'type' in json_data:
+                logger.debug(f"🎯 JSON TYPE: {json_data['type']}")
+                if json_data['type'] == 'assistant' and 'message' in json_data:
+                    message = json_data.get('message', {})
+                    if isinstance(message, dict) and 'content' in message:
+                        content = message.get('content', [])
+                        if isinstance(content, list):
+                            tool_types = [item.get('type') for item in content if isinstance(item, dict)]
+                            logger.debug(f"🎯 CONTENT TYPES: {tool_types}")
+
+            # Check if this looks like a tool usage line
+            if 'name' in json_data and ('type' in json_data and json_data['type'] in ['tool_use', 'tool_call']):
+                logger.debug(f"🎯 POTENTIAL TOOL: type={json_data.get('type')}, name={json_data.get('name')}")
+
             # Extract message ID for deduplication
             message_id = self._extract_message_id(json_data)
 
@@ -980,22 +1139,49 @@ class ClaudeInstanceOrchestrator:
                 # Mark as processed
                 status.processed_message_ids.add(message_id)
 
+            # DETECT AND STORE MODEL NAME
+            if self.pricing_engine:
+                detected_model = self.pricing_engine.detect_model_from_response(json_data)
+                if detected_model != status.model_used:
+                    logger.debug(f"🤖 MODEL DETECTED: {detected_model} (was {status.model_used})")
+                    status.model_used = detected_model
+
             # Process usage data (only once per message ID)
             usage_data = None
             if 'usage' in json_data:
                 usage_data = json_data['usage']
+                logger.info(f"📊 TOKEN DATA: Found usage data: {usage_data}")
             elif 'message' in json_data and isinstance(json_data['message'], dict) and 'usage' in json_data['message']:
                 usage_data = json_data['message']['usage']
+                logger.info(f"📊 TOKEN DATA: Found nested usage data: {usage_data}")
             elif 'tokens' in json_data and isinstance(json_data['tokens'], dict):
                 # Handle structured token data format
                 usage_data = json_data['tokens']
+                logger.info(f"📊 TOKEN DATA: Found tokens data: {usage_data}")
+            else:
+                # Check for direct token fields at the top level
+                direct_tokens = {}
+                for key in ['input_tokens', 'output_tokens', 'total_tokens', 'input', 'output', 'total']:
+                    if key in json_data and isinstance(json_data[key], (int, float)):
+                        direct_tokens[key] = json_data[key]
+
+                if direct_tokens:
+                    usage_data = direct_tokens
+                    logger.info(f"📊 TOKEN DATA: Found direct token fields: {usage_data}")
+                else:
+                    logger.debug(f"❌ NO TOKEN DATA: No usage fields found in JSON with keys: {list(json_data.keys())}")
 
             if usage_data and isinstance(usage_data, dict):
-                # Use max() instead of += to handle same-ID messages correctly
+                # FIXED: Use cumulative addition for progressive token counts, not max()
+                prev_input = status.input_tokens
+                prev_output = status.output_tokens
+
                 if 'input_tokens' in usage_data:
-                    status.input_tokens = max(status.input_tokens, int(usage_data['input_tokens']))
+                    new_input = int(usage_data['input_tokens'])
+                    status.input_tokens = max(status.input_tokens, new_input)  # Keep max for final totals
                 elif 'input' in usage_data:  # Alternative format
-                    status.input_tokens = max(status.input_tokens, int(usage_data['input']))
+                    new_input = int(usage_data['input'])
+                    status.input_tokens = max(status.input_tokens, new_input)
 
                 if 'output_tokens' in usage_data:
                     status.output_tokens = max(status.output_tokens, int(usage_data['output_tokens']))
@@ -1018,10 +1204,39 @@ class ClaudeInstanceOrchestrator:
                 # Use authoritative total when available
                 if 'total_tokens' in usage_data:
                     total = int(usage_data['total_tokens'])
-                    status.total_tokens = max(status.total_tokens, total)
+                    prev_total = status.total_tokens
+
+                    # BUDGET FIX: Handle both cumulative and individual message tokens
+                    # If this looks like individual message tokens (has message_id), accumulate
+                    # If this looks like cumulative session tokens (no message_id), use max
+                    if message_id:
+                        # Individual message - accumulate if it represents new work
+                        status.total_tokens += total
+                        logger.debug(f"🎯 TOTAL from 'total_tokens' (individual): {prev_total} + {total} → {status.total_tokens}")
+                    else:
+                        # Cumulative session total - use max to handle running totals
+                        status.total_tokens = max(status.total_tokens, total)
+                        logger.debug(f"🎯 TOTAL from 'total_tokens' (cumulative): {prev_total} → {status.total_tokens}")
                 elif 'total' in usage_data:  # Alternative format
                     total = int(usage_data['total'])
-                    status.total_tokens = max(status.total_tokens, total)
+                    prev_total = status.total_tokens
+
+                    # BUDGET FIX: Same logic for alternative format
+                    if message_id:
+                        # Individual message - accumulate
+                        status.total_tokens += total
+                        logger.debug(f"🎯 TOTAL from 'total' (individual): {prev_total} + {total} → {status.total_tokens}")
+                    else:
+                        # Cumulative session total - use max
+                        status.total_tokens = max(status.total_tokens, total)
+                        logger.debug(f"🎯 TOTAL from 'total' (cumulative): {prev_total} → {status.total_tokens}")
+                else:
+                    # Calculate total from components if not provided
+                    calculated_total = (status.input_tokens + status.output_tokens +
+                                      status.cache_read_tokens + status.cache_creation_tokens)
+                    prev_total = status.total_tokens
+                    status.total_tokens = max(status.total_tokens, calculated_total)
+                    logger.debug(f"🎯 TOTAL calculated: {prev_total} → {status.total_tokens} (input:{status.input_tokens} + output:{status.output_tokens} + cache_read:{status.cache_read_tokens} + cache_creation:{status.cache_creation_tokens})")
 
                 # Store authoritative cost if available
                 if 'total_cost_usd' in usage_data:
@@ -1030,42 +1245,161 @@ class ClaudeInstanceOrchestrator:
                 # Update backward compatibility field
                 self._update_cache_tokens_for_compatibility(status)
 
+                # ADD DETAILED LOGGING FOR TOKEN UPDATES
+                logger.debug(f"✅ TOKEN UPDATE: input={status.input_tokens}, output={status.output_tokens}, "
+                           f"total={status.total_tokens}, cached={status.cached_tokens}")
+
                 return True
 
-            # Handle tool calls with same ID deduplication
+            # Handle tool calls with detailed tracking
             if 'type' in json_data:
+                logger.debug(f"🔍 TOOL DETECTION: Found type='{json_data['type']}', checking for tool usage...")
+
                 if json_data['type'] in ['tool_use', 'tool_call', 'tool_execution']:
-                    if message_id:
-                        # Only count tools once per message ID
-                        status.tool_calls += 1
+                    # Extract tool name for detailed tracking (ALWAYS track, even without message_id)
+                    tool_name = json_data.get('name', json_data.get('tool_name', 'unknown_tool'))
+                    status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
+                    status.tool_calls += 1
+
+                    logger.debug(f"🔧 TOOL FOUND: {tool_name} (message_id={message_id})")
+
+                    # Track tool token usage if available
+                    tool_tokens = 0
+                    if 'usage' in json_data and isinstance(json_data['usage'], dict):
+                        tool_usage = json_data['usage']
+                        tool_tokens = tool_usage.get('total_tokens',
+                                    tool_usage.get('input_tokens', 0) + tool_usage.get('output_tokens', 0))
+                    elif 'tokens' in json_data:
+                        tool_tokens = int(json_data.get('tokens', 0))
+                    elif 'token_usage' in json_data:
+                        tool_tokens = int(json_data.get('token_usage', 0))
+
+                    if tool_tokens > 0:
+                        status.tool_tokens[tool_name] = status.tool_tokens.get(tool_name, 0) + tool_tokens
+                        logger.debug(f"🔧 TOOL TRACKED: {tool_name} (uses: {status.tool_details[tool_name]}, tokens: {status.tool_tokens[tool_name]})")
+                    else:
+                        logger.debug(f"🔧 TOOL TRACKED: {tool_name} (uses: {status.tool_details[tool_name]}, no tokens)")
                     return True
                 elif json_data['type'] == 'message' and 'tool_calls' in json_data:
-                    # Count tool calls in message
+                    # Count tool calls in message with token tracking
                     tool_calls = json_data['tool_calls']
+                    logger.debug(f"🔧 TOOL MESSAGE: Found tool_calls in message: {tool_calls}")
                     if isinstance(tool_calls, list):
+                        for tool in tool_calls:
+                            if isinstance(tool, dict):
+                                tool_name = tool.get('name', tool.get('function', {}).get('name', 'unknown_tool'))
+                                status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
+
+                                # Track tool tokens if available in tool data
+                                tool_tokens = 0
+                                if 'tokens' in tool:
+                                    tool_tokens = int(tool['tokens'])
+                                elif 'usage' in tool and isinstance(tool['usage'], dict):
+                                    tool_usage = tool['usage']
+                                    tool_tokens = tool_usage.get('total_tokens', 0)
+
+                                if tool_tokens > 0:
+                                    status.tool_tokens[tool_name] = status.tool_tokens.get(tool_name, 0) + tool_tokens
+                                    logger.debug(f"🔧 TOOL FROM MESSAGE: {tool_name} (tokens: {tool_tokens})")
+
                         status.tool_calls += len(tool_calls)
                     elif isinstance(tool_calls, (int, float)):
-                        status.tool_calls += int(tool_calls)
+                        # When tool_calls is just a number, add generic tool entries
+                        tool_count = int(tool_calls)
+                        status.tool_calls += tool_count
+                        # Add generic tool details so the table appears
+                        generic_tool_name = "Claude_Tool"  # Generic name when specific name unavailable
+                        status.tool_details[generic_tool_name] = status.tool_details.get(generic_tool_name, 0) + tool_count
                     return True
+                elif json_data['type'] == 'assistant' and 'message' in json_data:
+                    # Handle Claude Code format: {"type":"assistant","message":{"content":[{"type":"tool_use","name":"Task",...}]}}
+                    message = json_data['message']
+                    if isinstance(message, dict) and 'content' in message:
+                        content = message['content']
+                        if isinstance(content, list):
+                            for item in content:
+                                if isinstance(item, dict) and item.get('type') == 'tool_use':
+                                    tool_name = item.get('name', 'unknown_tool')
+                                    tool_use_id = item.get('id', '')
 
-            # Handle direct token fields at root level (without message ID - always accumulate)
+                                    # Store the mapping for later tool_result processing
+                                    if tool_use_id:
+                                        status.tool_id_mapping[tool_use_id] = tool_name
+
+                                    status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
+                                    status.tool_calls += 1
+                                    logger.debug(f"🔧 TOOL FROM ASSISTANT CONTENT: {tool_name} (id: {tool_use_id})")
+                            return True
+                elif json_data['type'] == 'user' and 'message' in json_data:
+                    # Handle Claude Code user messages with tool results: {"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"..."}]}}
+                    message = json_data['message']
+                    if isinstance(message, dict) and 'content' in message:
+                        content = message['content']
+                        if isinstance(content, list):
+                            for item in content:
+                                if isinstance(item, dict):
+                                    # Tool result indicates a tool was used
+                                    if item.get('type') == 'tool_result' and 'tool_use_id' in item:
+                                        # Use stored mapping if available, otherwise extract from content
+                                        tool_use_id = item['tool_use_id']
+                                        if tool_use_id in status.tool_id_mapping:
+                                            tool_name = status.tool_id_mapping[tool_use_id]
+                                        else:
+                                            tool_name = self._extract_tool_name_from_result(item, tool_use_id)
+
+                                        # Don't double-count if we already counted this in tool_use
+                                        if tool_use_id not in status.tool_id_mapping:
+                                            status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
+                                            status.tool_calls += 1
+
+                                        # Estimate tool token usage based on content size
+                                        tool_tokens = self._estimate_tool_tokens(item)
+                                        if tool_tokens > 0:
+                                            status.tool_tokens[tool_name] = status.tool_tokens.get(tool_name, 0) + tool_tokens
+                                            logger.debug(f"🔧 TOOL FROM USER CONTENT: {tool_name} (tool_use_id: {tool_use_id}, estimated_tokens: {tool_tokens})")
+                                        else:
+                                            logger.debug(f"🔧 TOOL FROM USER CONTENT: {tool_name} (tool_use_id: {tool_use_id})")
+                                    # Tool use in user message (request)
+                                    elif item.get('type') == 'tool_use' and 'name' in item:
+                                        tool_name = item.get('name', 'unknown_tool')
+                                        status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
+                                        status.tool_calls += 1
+
+                                        # Estimate tool token usage for tool use (typically smaller than results)
+                                        tool_tokens = self._estimate_tool_tokens(item, is_tool_use=True)
+                                        if tool_tokens > 0:
+                                            status.tool_tokens[tool_name] = status.tool_tokens.get(tool_name, 0) + tool_tokens
+                                            logger.debug(f"🔧 TOOL USE FROM USER CONTENT: {tool_name} (estimated_tokens: {tool_tokens})")
+                                        else:
+                                            logger.debug(f"🔧 TOOL USE FROM USER CONTENT: {tool_name}")
+                            return True
+
+            # Handle direct token fields at root level (without message ID - treat as individual message tokens)
             token_fields_found = False
             if not message_id:  # Only process these if no message ID (prevents double counting)
                 if 'input_tokens' in json_data:
-                    status.input_tokens = max(status.input_tokens, int(json_data['input_tokens']))
+                    # BUDGET FIX: For direct fields without message_id, accumulate as individual messages
+                    new_input = int(json_data['input_tokens'])
+                    status.input_tokens += new_input
                     token_fields_found = True
+                    logger.debug(f"🎯 DIRECT input_tokens: +{new_input} → {status.input_tokens}")
                 if 'output_tokens' in json_data:
-                    status.output_tokens = max(status.output_tokens, int(json_data['output_tokens']))
+                    new_output = int(json_data['output_tokens'])
+                    status.output_tokens += new_output
                     token_fields_found = True
+                    logger.debug(f"🎯 DIRECT output_tokens: +{new_output} → {status.output_tokens}")
                 if 'cached_tokens' in json_data:
                     cached_total = int(json_data['cached_tokens'])
-                    status.cache_read_tokens = max(status.cache_read_tokens, cached_total)
+                    status.cache_read_tokens += cached_total  # Accumulate cache tokens too
                     self._update_cache_tokens_for_compatibility(status)
                     token_fields_found = True
+                    logger.debug(f"🎯 DIRECT cached_tokens: +{cached_total} → {status.cache_read_tokens}")
                 if 'total_tokens' in json_data:
                     total = int(json_data['total_tokens'])
-                    status.total_tokens = max(status.total_tokens, total)
+                    prev_total = status.total_tokens
+                    status.total_tokens += total  # Accumulate total tokens
                     token_fields_found = True
+                    logger.debug(f"🎯 DIRECT total_tokens: {prev_total} + {total} → {status.total_tokens}")
                 if 'tool_calls' in json_data and isinstance(json_data['tool_calls'], (int, float)):
                     status.tool_calls += int(json_data['tool_calls'])
                     token_fields_found = True
@@ -1245,6 +1579,279 @@ class ClaudeInstanceOrchestrator:
             # Simple token count
             status.total_tokens += int(token_data)
 
+    def _extract_tool_name_from_result(self, tool_result: dict, tool_use_id: str) -> str:
+        """Extract meaningful tool name from tool result using comprehensive Claude Code tool patterns"""
+        try:
+            content = tool_result.get('content', '')
+
+            if isinstance(content, str):
+                # Handle empty content first (successful commands with no output)
+                if content == "" or content.strip() == "":
+                    return 'Bash'
+
+                content_lower = content.lower()
+
+                # =============================================================================
+                # PRIORITY PATTERNS - Check these FIRST before other tool patterns
+                # =============================================================================
+
+                # Permission/MCP Tools - Check this FIRST before other patterns that might match
+                if any(pattern in content_lower for pattern in [
+                    'claude requested permissions', 'haven\'t granted it yet',
+                    'but you haven\'t granted it yet'
+                ]):
+                    return 'permission_request'
+
+                # =============================================================================
+                # CLAUDE CODE OFFICIAL TOOLS - Comprehensive Detection Patterns
+                # =============================================================================
+
+                # Task Tool - Agent spawning and management
+                if any(pattern in content_lower for pattern in [
+                    'agent', 'subagent', 'spawned', 'task completed', 'agent completed',
+                    'general-purpose', 'statusline-setup', 'output-style-setup'
+                ]):
+                    return 'Task'
+
+                # Bash Tool - Command execution (most comprehensive patterns)
+                if (any(pattern in content_lower for pattern in [
+                    # Git operations
+                    'on branch', 'nothing to commit', 'git pull', 'working tree clean',
+                    'commit', 'staged', 'untracked files', 'changes not staged',
+                    'your branch', 'ahead of', 'behind', 'diverged',
+                    'file changed', 'insertions', 'deletions', 'files changed',
+                    'develop-', 'main-', 'feature-', 'bugfix-',
+                    # Command outputs
+                    'command', 'executed', 'permission denied', 'no such file or directory',
+                    'command not found', 'usage:', 'process completed', 'exit code',
+                    'killed', 'terminated',
+                    # File system outputs
+                    'rw-r--r--', 'drwxr-xr-x'
+                ]) or content.startswith('$') or
+                (content.startswith('total ') and '\n-rw' in content)):
+                    return 'Bash'
+
+                # Glob Tool - File pattern matching
+                if (any(pattern in content_lower for pattern in [
+                    'files found', 'pattern matching', 'glob', 'file pattern'
+                ]) or (
+                    # Single file path results (like "zen/zen_orchestrator.py")
+                    len(content.strip()) < 200 and '/' in content and content.count('\n') == 0 and
+                    not content.startswith('/') and any(content.endswith(ext) for ext in [
+                        '.py', '.js', '.ts', '.json', '.md', '.txt', '.html', '.css', '.yml', '.yaml'
+                    ])
+                ) or (
+                    # Multiple file listings
+                    content.count('\n') > 5 and '/' in content and
+                    not content.startswith('<!DOCTYPE') and not content.startswith('<html')
+                )):
+                    return 'Glob'
+
+                # Grep Tool - Search operations
+                if any(pattern in content_lower for pattern in [
+                    'matches found', 'pattern', 'searched', 'grep', 'ripgrep', 'no matches',
+                    'search', 'found', 'regex'
+                ]):
+                    return 'Grep'
+
+                # LS Tool - Directory listings
+                if (any(pattern in content_lower for pattern in [
+                    'list_dir', 'directory listing', 'listing files'
+                ]) or (content.startswith('total ') and '\n-rw' in content and 'drwx' in content)):
+                    return 'LS'
+
+                # Read Tool - File reading (comprehensive patterns)
+                if (content.startswith('#!/usr/bin/env') or
+                    any(pattern in content for pattern in [
+                        'import ', 'def ', 'class ', 'function', 'const ', 'var ', 'let ',
+                        'export ', 'module.exports', 'require(', '#include', 'package ',
+                        'use ', 'fn ', 'struct ', 'impl ', 'trait '
+                    ]) or
+                    (len(content) > 1000 and any(word in content_lower for word in [
+                        'function', 'class', 'import', 'def', 'module', 'export', 'const'
+                    ])) or
+                    (len(content) > 500 and not any(pattern in content_lower for pattern in [
+                        'html', 'http', 'www', 'commit', 'staged', 'branch'
+                    ]))):
+                    return 'Read'
+
+                # Edit Tool - File editing
+                if (any(pattern in content_lower for pattern in [
+                    'file has been updated', 'result of running', 'has been updated successfully'
+                ]) or (
+                    'edit' in content_lower and any(pattern in content_lower for pattern in [
+                        'success', 'updated', 'modified', 'changed'
+                    ])
+                )):
+                    return 'Edit'
+
+                # MultiEdit Tool - Multiple file edits
+                if any(pattern in content_lower for pattern in [
+                    'edits have been applied', 'multiple edits', 'multiedit'
+                ]) and 'edit' in content_lower:
+                    return 'MultiEdit'
+
+                # Write Tool - File creation
+                if any(pattern in content_lower for pattern in [
+                    'file created successfully', 'file written', 'written to', 'created successfully'
+                ]):
+                    return 'Write'
+
+                # NotebookEdit Tool - Jupyter operations
+                if any(pattern in content_lower for pattern in [
+                    'notebook', 'jupyter', 'ipynb'
+                ]) or (
+                    'cell' in content_lower and any(pattern in content_lower for pattern in [
+                        'executed', 'output', 'edit', 'code', 'markdown'
+                    ])
+                ):
+                    return 'NotebookEdit'
+
+                # WebFetch Tool - Web content fetching
+                if (content.startswith('<!DOCTYPE') or content.startswith('<html') or
+                    any(pattern in content_lower for pattern in [
+                        'http://', 'https://', 'web content', 'webpage', 'url', 'website'
+                    ]) or (
+                        any(pattern in content_lower for pattern in ['http', 'web', 'fetch', 'url']) and
+                        any(pattern in content_lower for pattern in ['request', 'response', 'content', 'page'])
+                    )):
+                    return 'WebFetch'
+
+                # TodoWrite Tool - Task management (already has good patterns)
+                if any(pattern in content_lower for pattern in [
+                    'todos have been modified', 'todo list', 'task list', 'progress',
+                    'todo', 'task', 'completed', 'in_progress', 'pending'
+                ]):
+                    return 'TodoWrite'
+
+                # WebSearch Tool - Web searching
+                if any(pattern in content_lower for pattern in [
+                    'search results', 'web search', 'search query', 'internet search'
+                ]) and any(pattern in content_lower for pattern in ['web', 'search', 'internet', 'query']):
+                    return 'WebSearch'
+
+                # BashOutput Tool - Background shell output
+                if any(pattern in content_lower for pattern in [
+                    'shell output', 'background', 'stdout', 'stderr', 'bash output'
+                ]):
+                    return 'BashOutput'
+
+                # KillBash Tool - Shell termination
+                if any(pattern in content_lower for pattern in [
+                    'shell killed', 'terminated', 'killed shell', 'bash killed'
+                ]):
+                    return 'KillBash'
+
+                # ExitPlanMode Tool - Plan mode exit
+                if any(pattern in content_lower for pattern in [
+                    'exit plan', 'plan mode', 'ready to code', 'plan', 'implementation'
+                ]):
+                    return 'ExitPlanMode'
+
+                # MCP Tools - Model Context Protocol tools
+                if 'mcp__' in content:
+                    import re
+                    mcp_match = re.search(r'mcp__[a-zA-Z_]+__[a-zA-Z_]+', content)
+                    if mcp_match:
+                        return mcp_match.group(0)
+
+
+                # Code execution results
+                if any(pattern in content_lower for pattern in [
+                    'traceback', 'error:', 'exception', 'stack trace'
+                ]):
+                    return 'Execute'
+
+                # Error-specific tool identification
+                if any(pattern in content_lower for pattern in [
+                    'eisdir: illegal operation on a directory', 'directory, read',
+                    'is a directory', 'illegal operation on a directory'
+                ]):
+                    return 'Read'  # Read tool trying to read directory
+
+                # Command approval/permission errors (often from Task tools)
+                if any(pattern in content_lower for pattern in [
+                    'this command requires approval', 'requires approval',
+                    'command contains multiple operations'
+                ]):
+                    return 'Bash'
+
+                # File size limit errors (Read tool)
+                if any(pattern in content_lower for pattern in [
+                    'file content', 'exceeds maximum allowed tokens',
+                    'use offset and limit parameters'
+                ]):
+                    return 'Read'
+
+                # =============================================================================
+                # DEFAULT FALLBACK - Try to infer from content characteristics
+                # =============================================================================
+
+                # Very long text content - likely Read
+                if len(content) > 3000:
+                    return 'Read'
+
+                # Medium text with code patterns - likely Read
+                elif len(content) > 200 and any(pattern in content for pattern in [
+                    '{', '}', '[', ']', '(', ')', ';', '=', '->', '=>'
+                ]):
+                    return 'Read'
+
+                # Short technical content - likely command output (Bash)
+                elif len(content) < 100 and any(char in content for char in ['$', '/', '-', '=']):
+                    return 'Bash'
+
+            # Check for error indicators
+            if tool_result.get('is_error'):
+                error_content = tool_result.get('content', '')
+                if 'permission' in error_content.lower():
+                    return 'permission_denied'
+                elif 'not found' in error_content.lower():
+                    return 'file_not_found'
+
+        except Exception as e:
+            # If pattern matching fails, fall back to tool_use_id
+            pass
+
+        # Fallback to generic name with partial tool_use_id for tracking
+        short_id = tool_use_id[-8:] if len(tool_use_id) > 8 else tool_use_id
+        return f"tool_{short_id}"
+
+    def _estimate_tool_tokens(self, tool_data: dict, is_tool_use: bool = False) -> int:
+        """Estimate token usage for a tool based on content size"""
+        try:
+            if is_tool_use:
+                # For tool_use, estimate based on input parameters
+                input_data = tool_data.get('input', {})
+                if isinstance(input_data, dict):
+                    # Rough estimation: ~4 characters per token
+                    text_content = str(input_data)
+                    return max(10, len(text_content) // 4)  # Minimum 10 tokens for tool invocation
+                return 10  # Base cost for tool invocation
+            else:
+                # For tool_result, estimate based on content size
+                content = tool_data.get('content', '')
+                if isinstance(content, str):
+                    # Rough estimation: ~4 characters per token for output
+                    base_tokens = len(content) // 4
+
+                    # Add overhead for tool processing
+                    overhead = 20  # Base overhead for tool execution
+
+                    # Adjust based on content type
+                    if len(content) > 5000:  # Large content (like file reads)
+                        overhead += 50
+                    elif len(content) > 1000:  # Medium content (like directory listings)
+                        overhead += 20
+
+                    return max(base_tokens + overhead, 25)  # Minimum 25 tokens for any tool result
+
+                return 25  # Base tokens for tool result
+
+        except Exception as e:
+            # Fallback to base estimation if any errors occur
+            return 15 if is_tool_use else 30
+
     def get_status_summary(self) -> Dict:
         """Get summary of all instance statuses"""
         summary = {
@@ -1257,7 +1864,13 @@ class ClaudeInstanceOrchestrator:
         }
 
         for name, status in self.statuses.items():
-            summary["instances"][name] = asdict(status)
+            status_dict = asdict(status)
+
+            # Convert set to list for JSON serialization
+            if isinstance(status_dict.get("processed_message_ids"), set):
+                status_dict["processed_message_ids"] = list(status_dict["processed_message_ids"])
+
+            summary["instances"][name] = status_dict
             summary[status.status] += 1
 
             # Add duration if completed
@@ -1267,60 +1880,6 @@ class ClaudeInstanceOrchestrator:
 
         return summary
 
-    def generate_output_filename(self, base_filename: str = None) -> Path:
-        """Generate output filename with datetime and agent names"""
-        if base_filename is None:
-            base_filename = "claude_instances_results"
-
-        # Format datetime as YYYYMMDD_HHMMSS
-        datetime_str = self.start_datetime.strftime("%Y%m%d_%H%M%S")
-
-        # Get agent names, clean them for filename
-        agent_names = []
-        for name in self.instances.keys():
-            # Clean name for filename (remove special characters)
-            clean_name = "".join(c for c in name if c.isalnum() or c in "_-")
-            agent_names.append(clean_name)
-
-        agents_str = "_".join(sorted(agent_names))
-
-        # Create filename: base_DATETIME_agents.json
-        filename = f"{base_filename}_{datetime_str}_{agents_str}.json"
-
-        return Path(filename)
-
-    def save_results(self, output_file: Path = None):
-        """Save results to JSON file with datetime and agent names"""
-        if output_file is None:
-            output_file = self.generate_output_filename()
-
-        results = self.get_status_summary()
-
-        # Add metadata to results including token summary
-        total_tokens = sum(status.total_tokens for status in self.statuses.values())
-        total_input_tokens = sum(status.input_tokens for status in self.statuses.values())
-        total_output_tokens = sum(status.output_tokens for status in self.statuses.values())
-        total_cached_tokens = sum(status.cached_tokens for status in self.statuses.values())
-        total_tool_calls = sum(status.tool_calls for status in self.statuses.values())
-
-        results["metadata"] = {
-            "start_datetime": self.start_datetime.isoformat(),
-            "agents": list(self.instances.keys()),
-            "generated_filename": str(output_file),
-            "token_usage": {
-                "total_tokens": total_tokens,
-                "input_tokens": total_input_tokens,
-                "output_tokens": total_output_tokens,
-                "cached_tokens": total_cached_tokens,
-                "total_tool_calls": total_tool_calls,
-                "cache_hit_rate": round(total_cached_tokens / max(total_tokens, 1) * 100, 2)
-            }
-        }
-
-        with open(output_file, 'w') as f:
-            json.dump(results, f, indent=2)
-
-        logger.info(f"Results saved to {output_file}")
 
 
 
@@ -1543,8 +2102,6 @@ async def main():
     parser = argparse.ArgumentParser(description="Claude Code Instance Orchestrator")
     parser.add_argument("--workspace", type=str, default=None,
                        help="Workspace directory (default: current directory)")
-    parser.add_argument("--output", type=Path, default=None,
-                       help="Output file for results (default: auto-generated with datetime and agents)")
     parser.add_argument("--config", type=Path, help="Custom instance configuration file")
     parser.add_argument("--dry-run", action="store_true", help="Show commands without running")
     parser.add_argument("--list-commands", action="store_true", help="List all available slash commands and exit")
@@ -1626,7 +2183,10 @@ async def main():
                 # Keep command name as is - don't let it be expanded as path
                 command_name = command_name.strip()
                 orchestrator.budget_manager.set_command_budget(command_name, int(limit))
-                logger.info(f"Set budget for {command_name} to {limit} tokens.")
+                logger.info(f"🎯 BUDGET SET: {command_name} = {limit} tokens")
+
+                # DEBUG: Log all budget keys after setting
+                logger.debug(f"📋 ALL BUDGET KEYS: {list(orchestrator.budget_manager.command_budgets.keys())}")
             except ValueError:
                 logger.error(f"Invalid format for --command-budget: '{budget_str}'. Use '/command=limit'.")
 
@@ -1789,48 +2349,98 @@ async def main():
     logger.info(f"Results: {summary['completed']} completed, {summary['failed']} failed")
     logger.info(f"Token Usage: {total_tokens:,} total ({total_cached:,} cached, {cache_rate}% hit rate), {total_tool_calls} tool calls")
 
-    # Save results (will auto-generate filename if args.output is None)
-    orchestrator.save_results(args.output)
+    # Add cost transparency to final summary
+    if orchestrator.pricing_engine:
+        total_cost = sum(orchestrator._calculate_cost(status) for status in orchestrator.statuses.values())
+        logger.info(f"💰 Total Cost: ${total_cost:.4f} (Claude pricing compliant)")
 
-    # Print detailed results
-    print("\n" + "="*60)
-    print("CLAUDE CODE INSTANCE ORCHESTRATOR RESULTS")
-    print("="*60)
+    # Note: ZEN provides summary only - upgrade to Apex for detailed data access
 
-    for name, status in orchestrator.statuses.items():
-        print(f"\n{name.upper()}:")
-        print(f"  Status: {status.status}")
-        if status.start_time and status.end_time:
-            duration = status.end_time - status.start_time
-            print(f"  Duration: {duration:.2f}s")
+    # Print detailed results in table format
+    print("\n" + "="*120)
+    print("NETRA ZEN RESULTS")
+    print("="*120)
 
-        # Show token usage
-        if status.total_tokens > 0 or status.input_tokens > 0 or status.output_tokens > 0 or status.cached_tokens > 0:
-            print(f"  Tokens: {status.total_tokens:,} total")
-            if status.input_tokens > 0 or status.output_tokens > 0:
-                print(f"          {status.input_tokens:,} input, {status.output_tokens:,} output")
-            if status.cached_tokens > 0:
-                print(f"          {status.cached_tokens:,} cached")
+    if orchestrator.statuses:
+        # Table headers
+        headers = ["Instance", "Status", "Duration", "Total Tokens", "Input", "Output", "Cached", "Tools", "Cost"]
+        col_widths = [20, 10, 10, 12, 8, 8, 8, 6, 10]
 
-        if status.tool_calls > 0:
-            print(f"  Tool Calls: {status.tool_calls}")
+        # Print header
+        header_row = "║ " + " │ ".join(h.ljust(w) for h, w in zip(headers, col_widths)) + " ║"
+        print("╔" + "═" * (len(header_row) - 2) + "╗")
+        print(header_row)
+        print("╠" + "─" * (len(header_row) - 2) + "╣")
 
-        if status.output:
-            print(f"  Output Preview: {status.output[:200]}...")
+        # Print data rows
+        for name, status in orchestrator.statuses.items():
+            # Prepare row data
+            instance_name = name[:19] if len(name) > 19 else name
+            status_str = status.status
+            duration_str = f"{status.end_time - status.start_time:.1f}s" if status.start_time and status.end_time else "N/A"
+            total_tokens_str = f"{status.total_tokens:,}" if status.total_tokens > 0 else "0"
+            input_tokens_str = f"{status.input_tokens:,}" if status.input_tokens > 0 else "0"
+            output_tokens_str = f"{status.output_tokens:,}" if status.output_tokens > 0 else "0"
+            cached_tokens_str = f"{status.cached_tokens:,}" if status.cached_tokens > 0 else "0"
+            tools_str = str(status.tool_calls) if status.tool_calls > 0 else "0"
+            # Calculate cost - use the pricing engine
+            if status.total_cost_usd is not None:
+                cost_str = f"${status.total_cost_usd:.4f}"
+            else:
+                # Calculate cost using the pricing engine
+                calculated_cost = orchestrator._calculate_cost(status)
+                cost_str = f"${calculated_cost:.4f}" if calculated_cost > 0 else "N/A"
 
-        if status.error:
-            print(f"  Errors: {status.error[:200]}...")
+            row_data = [instance_name, status_str, duration_str, total_tokens_str, input_tokens_str,
+                       output_tokens_str, cached_tokens_str, tools_str, cost_str]
 
-    # Show the actual filename used (important when auto-generated)
-    final_output_file = args.output or orchestrator.generate_output_filename()
-    print(f"\nFull results saved to: {final_output_file}")
+            row = "║ " + " │ ".join(data.ljust(w) for data, w in zip(row_data, col_widths)) + " ║"
+            print(row)
+
+        print("╚" + "═" * (len(header_row) - 2) + "╝")
+
+        # Print additional details if there are outputs or errors
+        print("\nAdditional Details:")
+        print("-" * 40)
+        for name, status in orchestrator.statuses.items():
+            has_details = False
+
+            if status.output:
+                if not has_details:
+                    print(f"\n{name.upper()}:")
+                    has_details = True
+                print(f"  Output Preview: {status.output[:150]}...")
+
+            if status.error:
+                if not has_details:
+                    print(f"\n{name.upper()}:")
+                    has_details = True
+                print(f"  Errors: {status.error[:150]}...")
+
+            if status.tool_calls > 0 and status.tool_details:
+                if not has_details:
+                    print(f"\n{name.upper()}:")
+                    has_details = True
+                print(f"  Tools Used ({status.tool_calls}): {', '.join(status.tool_details)}")
+    else:
+        print("No instances were processed.")
+
+    # For detailed data access
+    print("\n" + "="*80)
+    print("🚀 NEED DETAILED TOKEN ANALYTICS & DATA ACCESS?")
+    print("="*80)
+    print("For comprehensive token usage analytics, historical data,")
+    print("and advanced reporting features, upgrade to Netra Apex.")
+    print("")
+    print("📧 Contact us: anthony.chaudhary@netrasystems.ai")
+    print("🌐 Learn more: https://netrasystems.ai/")
+    print("="*80)
 
     # Show CloudSQL info if enabled
     if args.use_cloud_sql:
-        print(f"\n📊 Metrics saved to CloudSQL")
+        print(f"\n📊 Local metrics displayed above")
         print(f"   Batch ID: {orchestrator.batch_id}")
-        print(f"   View metrics with:")
-        print(f"   psql -h localhost -p 5434 -U postgres -d netra_optimizer -c \"SELECT * FROM command_executions WHERE batch_id = '{orchestrator.batch_id}';\"")
+        print(f"   Database persistence disabled for security")
 
     # Exit with appropriate code
     sys.exit(0 if summary['failed'] == 0 else 1)

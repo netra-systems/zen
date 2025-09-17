@@ -24,6 +24,9 @@ junit.xml
 pytest_output.txt
 *_output.txt
 
+# Git commit gardener result files
+claude_instances_results_*.json
+
 # Dev launcher cache
 .dev_cache/
 .dev_launcher_cache/
