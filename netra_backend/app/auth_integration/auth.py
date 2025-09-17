@@ -498,6 +498,44 @@ def _classify_domain_for_analytics(domain: str) -> str:
         return 'unknown'
 
 
+async def get_current_user_secure(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: AsyncSession = Depends(get_db)
+) -> Dict[str, Any]:
+    """
+    Get current authenticated user for secure ticket-based operations.
+    
+    This function is designed for the AuthTicketManager integration (Issue #1296 Phase 2)
+    and returns user information as a dictionary suitable for ticket generation.
+    
+    Returns:
+        Dict containing user_id, email, role, permissions, and other user context
+        
+    Raises:
+        HTTPException: 401 if authentication fails
+    """
+    token = credentials.credentials
+    validation_result = await _validate_token_with_auth_service(token)
+    user = await _get_user_from_database(db, validation_result)
+    
+    # Convert User object to dictionary format expected by ticket system
+    user_dict = {
+        "user_id": user.id if hasattr(user, 'id') else validation_result.get("user_id"),
+        "id": user.id if hasattr(user, 'id') else validation_result.get("user_id"),  # Alias for compatibility
+        "email": user.email if hasattr(user, 'email') else validation_result.get("email"),
+        "role": getattr(user, 'role', validation_result.get("role", "standard_user")),
+        "permissions": getattr(user, 'permissions', validation_result.get("permissions", [])),
+        "is_superuser": getattr(user, 'is_superuser', False),
+        "is_admin": getattr(user, 'is_admin', False) or getattr(user, 'is_superuser', False),
+        # Include JWT validation result for additional security context
+        "jwt_claims": validation_result
+    }
+    
+    logger.info(f"🔐 SECURE AUTH: User {user_dict['user_id'][:8]}... authenticated for ticket operations")
+    
+    return user_dict
+
+
 async def get_current_user_optional(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_security),
     db: AsyncSession = Depends(get_db)
