@@ -3630,7 +3630,7 @@ class UnifiedTestRunner:
 
         # ISSUE #1176 PHASE 1 FIX: Additional validation for edge cases
         # Ensure we have meaningful test execution beyond just collection
-        if collected_count > 0 but not execution_detected:
+        if collected_count > 0 and not execution_detected:
             print(f"[WARNING] {service}:{category_name} - Tests collected but no execution evidence")
             print(f"[WARNING] collected_count: {collected_count}, execution_detected: {execution_detected}")
             # Allow success but log warning for investigation
