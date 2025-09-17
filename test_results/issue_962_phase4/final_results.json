@@ -3,35 +3,35 @@
     "success": false,
     "violations_count": 0,
     "test_failures": [],
-    "execution_time": 2.762725830078125,
-    "timestamp": "2025-09-17T16:48:02.751881"
+    "execution_time": 3.527682065963745,
+    "timestamp": "2025-09-17T16:49:31.803952"
   },
   "single_manager": {
     "success": false,
     "violations_count": 0,
     "test_failures": [],
-    "execution_time": 4.262931823730469,
-    "timestamp": "2025-09-17T16:48:02.751881"
+    "execution_time": 3.6245548725128174,
+    "timestamp": "2025-09-17T16:49:31.803952"
   },
   "auth_flow": {
     "success": false,
     "violations_count": 0,
     "test_failures": [],
-    "execution_time": 2.3836851119995117,
-    "timestamp": "2025-09-17T16:48:02.751881"
+    "execution_time": 4.050489187240601,
+    "timestamp": "2025-09-17T16:49:31.803952"
   },
   "mission_critical": {
     "success": false,
     "violations_count": 0,
     "test_failures": [],
-    "execution_time": 4.025633096694946,
-    "timestamp": "2025-09-17T16:48:02.751881"
+    "execution_time": 3.4283270835876465,
+    "timestamp": "2025-09-17T16:49:31.803952"
   },
   "staging_validation": {
     "success": false,
     "violations_count": 0,
     "test_failures": [],
-    "execution_time": 4.325677156448364,
-    "timestamp": "2025-09-17T16:48:02.751881"
+    "execution_time": 3.587463140487671,
+    "timestamp": "2025-09-17T16:49:31.803952"
   }
 }
