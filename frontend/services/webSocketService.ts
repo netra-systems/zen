@@ -1387,15 +1387,7 @@ class WebSocketService {
       this.messageTimestamps.push(Date.now());
     }
     
-    // If refreshing token, queue message as pending with size limit
-    if (this.isRefreshingToken) {
-      if (this.pendingMessages.length < 50) {
-        this.pendingMessages.push(message);
-      } else {
-        logger.warn('Pending messages queue full, dropping message to prevent memory leak');
-      }
-      return;
-    }
+    // JWT token refresh logic removed - using ticket authentication only
     
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       try {
@@ -1730,23 +1722,8 @@ class WebSocketService {
       return;
     }
 
-    // Check if this is a token expiry issue
-    const isTokenExpired = event.reason && (
-      event.reason.includes('Token expired') ||
-      event.reason.includes('token has expired') ||
-      event.reason.includes('JWT expired')
-    );
-    
-    if (isTokenExpired && !this.isRefreshingToken) {
-      logger.debug('WebSocket closed due to token expiry, attempting refresh');
-      this.performTokenRefresh().catch(error => {
-        logger.error('Token refresh after auth error failed', error as Error);
-        this.scheduleAuthRetry(options);
-      });
-    } else {
-      // Handle other auth failures with exponential backoff
-      this.scheduleAuthRetry(options);
-    }
+    // JWT token expiry logic removed - handle all auth failures with exponential backoff
+    this.scheduleAuthRetry(options);
   }
 
   /**

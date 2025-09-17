@@ -116,6 +116,7 @@ class OrchestrationConfig:
             # Configuration
             self._force_refresh = False
             self._debug_mode = self.env.get("ORCHESTRATION_DEBUG", "false").lower() == "true"
+            self._no_services_mode = self.env.get("TEST_NO_SERVICES", "false").lower() == "true"
             
             self._initialized = True
             
@@ -293,6 +294,35 @@ class OrchestrationConfig:
                 logger.debug(error_msg)
             return False, error_msg
 
+    def _check_service_availability(self, service_name: str, host: str = "localhost", port: int = None, timeout: float = 2.0) -> Tuple[bool, Optional[str]]:
+        """
+        Check if a specific service is available and responding.
+        
+        Args:
+            service_name: Name of the service (for logging)
+            host: Service host (default: localhost)
+            port: Service port
+            timeout: Connection timeout in seconds
+            
+        Returns:
+            Tuple of (availability, error_message)
+        """
+        if port is None:
+            return False, f"No port specified for {service_name}"
+            
+        try:
+            import socket
+            with socket.create_connection((host, port), timeout=timeout):
+                if self._debug_mode:
+                    logger.debug(f"Service {service_name} available at {host}:{port}")
+                return True, None
+                
+        except (socket.timeout, socket.error, ConnectionRefusedError, OSError) as e:
+            error_msg = f"Service {service_name} unavailable at {host}:{port}: {str(e)}"
+            if self._debug_mode:
+                logger.debug(error_msg)
+            return False, error_msg
+
     def _check_availability(self, feature_name: str) -> bool:
         """
         Internal method to check and cache availability for a specific feature.
@@ -412,7 +442,23 @@ class OrchestrationConfig:
         Returns:
             True if Docker is available for test orchestration
         """
+        if self._no_services_mode:
+            return False  # In no-services mode, Docker is always unavailable
         return self._check_availability('docker')
+
+    @property
+    def no_services_mode(self) -> bool:
+        """
+        Check if running in no-services mode.
+        
+        In no-services mode, tests run without external service dependencies.
+        This is useful for lightweight test execution in environments where
+        services like Docker, databases, or other infrastructure aren't available.
+        
+        Returns:
+            True if TEST_NO_SERVICES environment variable is set to true
+        """
+        return self._no_services_mode
 
     @property
     def all_orchestration_available(self) -> bool:
