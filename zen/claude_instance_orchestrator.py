@@ -110,10 +110,21 @@ class InstanceStatus:
     # NEW: Authoritative cost from SDK when available
     total_cost_usd: Optional[float] = None
 
+    # NEW: Model tracking for transparency
+    model_used: str = "claude-3-5-sonnet"  # Default model
+
+    # NEW: Tool usage details
+    tool_details: Dict[str, int] = None  # Tool name -> usage count
+    tool_tokens: Dict[str, int] = None   # Tool name -> token usage
+
     def __post_init__(self):
         """Initialize fields that need special handling"""
         if self.processed_message_ids is None:
             self.processed_message_ids = set()
+        if self.tool_details is None:
+            self.tool_details = {}
+        if self.tool_tokens is None:
+            self.tool_tokens = {}
 
 class ClaudeInstanceOrchestrator:
     """Orchestrator for managing multiple Claude Code instances"""
@@ -463,10 +474,14 @@ class ClaudeInstanceOrchestrator:
                 cache_creation_tokens=status.cache_creation_tokens,
                 total_tokens=status.total_tokens,
                 cache_type="5min",  # Default to 5min cache
-                model="claude-3-5-sonnet"  # Default model
+                model=status.model_used  # Use detected model
             )
 
-            cost_breakdown = self.pricing_engine.calculate_cost(usage_data, status.total_cost_usd)
+            cost_breakdown = self.pricing_engine.calculate_cost(
+                usage_data,
+                status.total_cost_usd,
+                status.tool_tokens  # Include tool token costs
+            )
             return cost_breakdown.total_cost
 
         # Fallback calculation with current pricing (legacy support)
@@ -478,7 +493,13 @@ class ClaudeInstanceOrchestrator:
         cache_read_cost = (status.cache_read_tokens / 1_000_000) * (3.00 * 0.1)  # 10% of input rate
         cache_creation_cost = (status.cache_creation_tokens / 1_000_000) * (3.00 * 1.25)  # 5min cache: 25% premium
 
-        return input_cost + output_cost + cache_read_cost + cache_creation_cost
+        # Tool costs (fallback calculation)
+        tool_cost = 0.0
+        if status.tool_tokens:
+            for tool_name, tokens in status.tool_tokens.items():
+                tool_cost += (tokens / 1_000_000) * 3.00  # Tool tokens at input rate
+
+        return input_cost + output_cost + cache_read_cost + cache_creation_cost + tool_cost
 
     async def _stream_output(self, name: str, process):
         """Stream output in real-time for stream-json format (DEPRECATED - use _stream_output_parallel)"""
@@ -627,19 +648,32 @@ class ClaudeInstanceOrchestrator:
             tasks.append(task)
 
         # Start the rolling status report task if we have instances to monitor
+        # NOTE: Do NOT add status reporter to main tasks list - it runs indefinitely
         if len(tasks) > 0 and not self.max_console_lines == 0:  # Don't show status in quiet mode
             self.status_report_task = asyncio.create_task(self._rolling_status_reporter())
-            tasks.append(self.status_report_task)
 
+        # Wait for all instance tasks to complete (not the status reporter)
+        logger.debug(f"⏳ Waiting for {len(tasks)} instance tasks to complete...")
         results = await asyncio.gather(*tasks, return_exceptions=True)
+        logger.debug("✅ All instance tasks completed")
 
-        # Stop the status reporter
-        if self.status_report_task and not self.status_report_task.done():
+        # Stop the status reporter - CRITICAL: This prevents hanging
+        if hasattr(self, 'status_report_task') and self.status_report_task and not self.status_report_task.done():
+            logger.debug("🛑 Cancelling status reporter task...")
             self.status_report_task.cancel()
             try:
                 await self.status_report_task
+                logger.debug("✅ Status reporter task cancelled successfully")
             except asyncio.CancelledError:
+                logger.debug("✅ Status reporter task cancellation confirmed")
                 pass
+            except Exception as e:
+                logger.warning(f"⚠️ Error cancelling status reporter: {e}")
+        else:
+            logger.debug("ℹ️ No status reporter task to cancel")
+
+        # Ensure all processes are cleaned up
+        await self._cleanup_all_processes()
 
         final_results = {}
         for name, result in zip(self.instances.keys(), results):
@@ -657,6 +691,29 @@ class ClaudeInstanceOrchestrator:
                 final_results[name] = result
 
         return final_results
+
+    async def _cleanup_all_processes(self):
+        """Ensure all processes are properly cleaned up to prevent hanging"""
+        logger.debug("🧹 Cleaning up all processes...")
+
+        for name, status in self.statuses.items():
+            if status.pid and status.status == "running":
+                try:
+                    import signal
+                    import os
+                    logger.debug(f"🛑 Cleaning up hanging process for {name} (PID: {status.pid})")
+                    os.kill(status.pid, signal.SIGTERM)
+                except (OSError, ProcessLookupError):
+                    # Process already terminated
+                    pass
+                except Exception as e:
+                    logger.warning(f"⚠️ Error cleaning up process {status.pid}: {e}")
+
+        # Clear the processes dict
+        if hasattr(self, 'processes'):
+            self.processes.clear()
+
+        logger.debug("✅ Process cleanup completed")
 
     async def _run_instance_with_delay(self, name: str, delay: float, timeout: int) -> bool:
         """Run an instance after a specified delay"""
@@ -790,9 +847,9 @@ class ClaudeInstanceOrchestrator:
 
         print(f"║")
         
-        # Print column headers with wider name column
-        print(f"║  {'Status':<8} {'Name':<35} {'Duration':<10} {'Tokens':<8} {'vs Med':<8} {'Cache':<8} {'Tools':<6}")
-        print(f"║  {'─'*8} {'─'*35} {'─'*10} {'─'*8} {'─'*8} {'─'*8} {'─'*6}")
+        # Print column headers with model column
+        print(f"║  {'Status':<8} {'Name':<30} {'Model':<10} {'Duration':<10} {'Tokens':<8} {'vs Med':<8} {'Cache':<8} {'Tools':<6}")
+        print(f"║  {'─'*8} {'─'*30} {'─'*10} {'─'*10} {'─'*8} {'─'*8} {'─'*8} {'─'*6}")
 
         for name, status in self.statuses.items():
             # Status emoji
@@ -819,17 +876,73 @@ class ClaudeInstanceOrchestrator:
             token_info = self._format_tokens(status.total_tokens) if status.total_tokens > 0 else "0"
             cache_info = self._format_tokens(status.cached_tokens) if status.cached_tokens > 0 else "0"
             tool_info = str(status.tool_calls) if status.tool_calls > 0 else "0"
-            
+
+            # Format model name for display
+            model_short = status.model_used.replace('claude-', '').replace('-', '') if status.model_used else "unknown"
+
             # Calculate percentage relative to median
             token_pct = self._calculate_token_percentage(status.total_tokens, token_median)
 
-            # Create detailed line with consistent spacing and wider name column
-            detail = f"  {emoji:<8} {name:<35} {time_info:<10} {token_info:<8} {token_pct:<8} {cache_info:<8} {tool_info:<6}"
+            # Create detailed line with model column
+            detail = f"  {emoji:<8} {name:<30} {model_short:<10} {time_info:<10} {token_info:<8} {token_pct:<8} {cache_info:<8} {tool_info:<6}"
 
             print(f"║{detail}")
 
         footer = "╚" + "═" * (len(header) - 2) + "╝"
-        print(f"{footer}\n")
+        print(f"{footer}")
+
+        # --- ADD DETAILED TOOL USAGE TABLE WITH TOKENS AND COSTS ---
+        all_tools = {}
+        for status in self.statuses.values():
+            for tool_name, count in status.tool_details.items():
+                if tool_name not in all_tools:
+                    all_tools[tool_name] = {"count": 0, "tokens": 0, "instances": []}
+                all_tools[tool_name]["count"] += count
+                all_tools[tool_name]["tokens"] += status.tool_tokens.get(tool_name, 0)
+
+                # Format instance info with tokens if available
+                tool_tokens = status.tool_tokens.get(tool_name, 0)
+                if tool_tokens > 0:
+                    all_tools[tool_name]["instances"].append(f"{status.name}({count} uses, {tool_tokens} tok)")
+                else:
+                    all_tools[tool_name]["instances"].append(f"{status.name}({count} uses)")
+
+        if all_tools:
+            print(f"\n╔═══ TOOL USAGE DETAILS ═══╗")
+            print(f"║ {'Tool Name':<20} {'Uses':<8} {'Tokens':<10} {'Cost ($)':<10} {'Used By':<35}")
+            print(f"║ {'─'*20} {'─'*8} {'─'*10} {'─'*10} {'─'*35}")
+
+            total_tool_uses = 0
+            total_tool_tokens = 0
+            total_tool_cost = 0.0
+
+            for tool_name, details in sorted(all_tools.items()):
+                tool_count = details["count"]
+                tool_tokens = details["tokens"]
+
+                # Calculate tool cost at current model rates (3.5 sonnet input rate)
+                tool_cost = (tool_tokens / 1_000_000) * 3.00 if tool_tokens > 0 else 0.0
+
+                instances_str = ", ".join(details["instances"][:2])  # Show first 2 instances
+                if len(details["instances"]) > 2:
+                    instances_str += f" +{len(details['instances'])-2} more"
+
+                token_str = f"{tool_tokens:,}" if tool_tokens > 0 else "0"
+                cost_str = f"{tool_cost:.4f}" if tool_cost > 0 else "0"
+
+                print(f"║ {tool_name:<20} {tool_count:<8} {token_str:<10} {cost_str:<10} {instances_str:<35}")
+
+                total_tool_uses += tool_count
+                total_tool_tokens += tool_tokens
+                total_tool_cost += tool_cost
+
+            print(f"║ {'─'*20} {'─'*8} {'─'*10} {'─'*10} {'─'*35}")
+            total_tokens_str = f"{total_tool_tokens:,}" if total_tool_tokens > 0 else "0"
+            total_cost_str = f"{total_tool_cost:.4f}" if total_tool_cost > 0 else "0"
+            print(f"║ {'TOTAL':<20} {total_tool_uses:<8} {total_tokens_str:<10} {total_cost_str:<10}")
+            print(f"╚{'═'*95}╝")
+
+        print()
 
     def _parse_token_usage(self, line: str, status: InstanceStatus, instance_name: str):
         """Parse token usage information from Claude Code JSON output lines"""
@@ -885,10 +998,16 @@ class ClaudeInstanceOrchestrator:
             message = f"Runtime budget violation for {instance_name}: {violation_reason}"
 
             if self.budget_manager.enforcement_mode == "block":
-                logger.error(f"🚫 RUNTIME TERMINATION: {message}")
+                logger.error(f"🚫 🔴 RUNTIME TERMINATION: {message}")
                 self._terminate_instance(status, instance_name, f"Terminated due to budget violation - {violation_reason}")
             else:  # warn mode
-                logger.warning(f"⚠️  RUNTIME WARNING: {message}")
+                # EXPLICIT YELLOW WARNING SYMBOLS FOR VISIBILITY
+                logger.warning(f"🔶 ⚠️  🟡 BUDGET EXCEEDED WARNING: {message}")
+                print(f"\n{'='*80}")
+                print(f"🔶 ⚠️  🟡 BUDGET VIOLATION WARNING 🟡 ⚠️  🔶")
+                print(f"Instance: {instance_name}")
+                print(f"Reason: {violation_reason}")
+                print(f"{'='*80}\n")
 
     def _terminate_instance(self, status: InstanceStatus, instance_name: str, reason: str):
         """Terminate a running instance due to budget violation"""
@@ -941,6 +1060,24 @@ class ClaudeInstanceOrchestrator:
         try:
             json_data = json.loads(line)
 
+            # ADD DEBUG LOGGING FOR TOKEN PARSING
+            logger.debug(f"🔍 TOKEN PARSING: Analyzing JSON line with keys: {list(json_data.keys())}")
+
+            # Special debug for tool detection
+            if 'type' in json_data:
+                logger.debug(f"🎯 JSON TYPE: {json_data['type']}")
+                if json_data['type'] == 'assistant' and 'message' in json_data:
+                    message = json_data.get('message', {})
+                    if isinstance(message, dict) and 'content' in message:
+                        content = message.get('content', [])
+                        if isinstance(content, list):
+                            tool_types = [item.get('type') for item in content if isinstance(item, dict)]
+                            logger.debug(f"🎯 CONTENT TYPES: {tool_types}")
+
+            # Check if this looks like a tool usage line
+            if 'name' in json_data and ('type' in json_data and json_data['type'] in ['tool_use', 'tool_call']):
+                logger.debug(f"🎯 POTENTIAL TOOL: type={json_data.get('type')}, name={json_data.get('name')}")
+
             # Extract message ID for deduplication
             message_id = self._extract_message_id(json_data)
 
@@ -953,22 +1090,37 @@ class ClaudeInstanceOrchestrator:
                 # Mark as processed
                 status.processed_message_ids.add(message_id)
 
+            # DETECT AND STORE MODEL NAME
+            if self.pricing_engine:
+                detected_model = self.pricing_engine.detect_model_from_response(json_data)
+                if detected_model != status.model_used:
+                    logger.debug(f"🤖 MODEL DETECTED: {detected_model} (was {status.model_used})")
+                    status.model_used = detected_model
+
             # Process usage data (only once per message ID)
             usage_data = None
             if 'usage' in json_data:
                 usage_data = json_data['usage']
+                logger.debug(f"📊 TOKEN DATA: Found usage data: {usage_data}")
             elif 'message' in json_data and isinstance(json_data['message'], dict) and 'usage' in json_data['message']:
                 usage_data = json_data['message']['usage']
+                logger.debug(f"📊 TOKEN DATA: Found nested usage data: {usage_data}")
             elif 'tokens' in json_data and isinstance(json_data['tokens'], dict):
                 # Handle structured token data format
                 usage_data = json_data['tokens']
+                logger.debug(f"📊 TOKEN DATA: Found tokens data: {usage_data}")
 
             if usage_data and isinstance(usage_data, dict):
-                # Use max() instead of += to handle same-ID messages correctly
+                # FIXED: Use cumulative addition for progressive token counts, not max()
+                prev_input = status.input_tokens
+                prev_output = status.output_tokens
+
                 if 'input_tokens' in usage_data:
-                    status.input_tokens = max(status.input_tokens, int(usage_data['input_tokens']))
+                    new_input = int(usage_data['input_tokens'])
+                    status.input_tokens = max(status.input_tokens, new_input)  # Keep max for final totals
                 elif 'input' in usage_data:  # Alternative format
-                    status.input_tokens = max(status.input_tokens, int(usage_data['input']))
+                    new_input = int(usage_data['input'])
+                    status.input_tokens = max(status.input_tokens, new_input)
 
                 if 'output_tokens' in usage_data:
                     status.output_tokens = max(status.output_tokens, int(usage_data['output_tokens']))
@@ -995,6 +1147,11 @@ class ClaudeInstanceOrchestrator:
                 elif 'total' in usage_data:  # Alternative format
                     total = int(usage_data['total'])
                     status.total_tokens = max(status.total_tokens, total)
+                else:
+                    # Calculate total from components if not provided
+                    calculated_total = (status.input_tokens + status.output_tokens +
+                                      status.cache_read_tokens + status.cache_creation_tokens)
+                    status.total_tokens = max(status.total_tokens, calculated_total)
 
                 # Store authoritative cost if available
                 if 'total_cost_usd' in usage_data:
@@ -1003,23 +1160,80 @@ class ClaudeInstanceOrchestrator:
                 # Update backward compatibility field
                 self._update_cache_tokens_for_compatibility(status)
 
+                # ADD DETAILED LOGGING FOR TOKEN UPDATES
+                logger.debug(f"✅ TOKEN UPDATE: input={status.input_tokens}, output={status.output_tokens}, "
+                           f"total={status.total_tokens}, cached={status.cached_tokens}")
+
                 return True
 
-            # Handle tool calls with same ID deduplication
+            # Handle tool calls with detailed tracking
             if 'type' in json_data:
+                logger.debug(f"🔍 TOOL DETECTION: Found type='{json_data['type']}', checking for tool usage...")
+
                 if json_data['type'] in ['tool_use', 'tool_call', 'tool_execution']:
-                    if message_id:
-                        # Only count tools once per message ID
-                        status.tool_calls += 1
+                    # Extract tool name for detailed tracking (ALWAYS track, even without message_id)
+                    tool_name = json_data.get('name', json_data.get('tool_name', 'unknown_tool'))
+                    status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
+                    status.tool_calls += 1
+
+                    logger.debug(f"🔧 TOOL FOUND: {tool_name} (message_id={message_id})")
+
+                    # Track tool token usage if available
+                    tool_tokens = 0
+                    if 'usage' in json_data and isinstance(json_data['usage'], dict):
+                        tool_usage = json_data['usage']
+                        tool_tokens = tool_usage.get('total_tokens',
+                                    tool_usage.get('input_tokens', 0) + tool_usage.get('output_tokens', 0))
+                    elif 'tokens' in json_data:
+                        tool_tokens = int(json_data.get('tokens', 0))
+                    elif 'token_usage' in json_data:
+                        tool_tokens = int(json_data.get('token_usage', 0))
+
+                    if tool_tokens > 0:
+                        status.tool_tokens[tool_name] = status.tool_tokens.get(tool_name, 0) + tool_tokens
+                        logger.debug(f"🔧 TOOL TRACKED: {tool_name} (uses: {status.tool_details[tool_name]}, tokens: {status.tool_tokens[tool_name]})")
+                    else:
+                        logger.debug(f"🔧 TOOL TRACKED: {tool_name} (uses: {status.tool_details[tool_name]}, no tokens)")
                     return True
                 elif json_data['type'] == 'message' and 'tool_calls' in json_data:
-                    # Count tool calls in message
+                    # Count tool calls in message with token tracking
                     tool_calls = json_data['tool_calls']
+                    logger.debug(f"🔧 TOOL MESSAGE: Found tool_calls in message: {tool_calls}")
                     if isinstance(tool_calls, list):
+                        for tool in tool_calls:
+                            if isinstance(tool, dict):
+                                tool_name = tool.get('name', tool.get('function', {}).get('name', 'unknown_tool'))
+                                status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
+
+                                # Track tool tokens if available in tool data
+                                tool_tokens = 0
+                                if 'tokens' in tool:
+                                    tool_tokens = int(tool['tokens'])
+                                elif 'usage' in tool and isinstance(tool['usage'], dict):
+                                    tool_usage = tool['usage']
+                                    tool_tokens = tool_usage.get('total_tokens', 0)
+
+                                if tool_tokens > 0:
+                                    status.tool_tokens[tool_name] = status.tool_tokens.get(tool_name, 0) + tool_tokens
+                                    logger.debug(f"🔧 TOOL FROM MESSAGE: {tool_name} (tokens: {tool_tokens})")
+
                         status.tool_calls += len(tool_calls)
                     elif isinstance(tool_calls, (int, float)):
                         status.tool_calls += int(tool_calls)
                     return True
+                elif json_data['type'] == 'assistant' and 'message' in json_data:
+                    # Handle Claude Code format: {"type":"assistant","message":{"content":[{"type":"tool_use","name":"Task",...}]}}
+                    message = json_data['message']
+                    if isinstance(message, dict) and 'content' in message:
+                        content = message['content']
+                        if isinstance(content, list):
+                            for item in content:
+                                if isinstance(item, dict) and item.get('type') == 'tool_use':
+                                    tool_name = item.get('name', 'unknown_tool')
+                                    status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
+                                    status.tool_calls += 1
+                                    logger.debug(f"🔧 TOOL FROM ASSISTANT CONTENT: {tool_name}")
+                            return True
 
             # Handle direct token fields at root level (without message ID - always accumulate)
             token_fields_found = False
@@ -1230,7 +1444,13 @@ class ClaudeInstanceOrchestrator:
         }
 
         for name, status in self.statuses.items():
-            summary["instances"][name] = asdict(status)
+            status_dict = asdict(status)
+
+            # Convert set to list for JSON serialization
+            if isinstance(status_dict.get("processed_message_ids"), set):
+                status_dict["processed_message_ids"] = list(status_dict["processed_message_ids"])
+
+            summary["instances"][name] = status_dict
             summary[status.status] += 1
 
             # Add duration if completed
@@ -1770,34 +1990,62 @@ async def main():
     # Save results (will auto-generate filename if args.output is None)
     orchestrator.save_results(args.output)
 
-    # Print detailed results
-    print("\n" + "="*60)
-    print("CLAUDE CODE INSTANCE ORCHESTRATOR RESULTS")
-    print("="*60)
+    # Print detailed results in table format
+    print("\n" + "="*120)
+    print("NETRA ZEN RESULTS")
+    print("="*120)
 
-    for name, status in orchestrator.statuses.items():
-        print(f"\n{name.upper()}:")
-        print(f"  Status: {status.status}")
-        if status.start_time and status.end_time:
-            duration = status.end_time - status.start_time
-            print(f"  Duration: {duration:.2f}s")
+    if orchestrator.statuses:
+        # Table headers
+        headers = ["Instance", "Status", "Duration", "Total Tokens", "Input", "Output", "Cached", "Tools", "Cost"]
+        col_widths = [20, 10, 10, 12, 8, 8, 8, 6, 10]
 
-        # Show token usage
-        if status.total_tokens > 0 or status.input_tokens > 0 or status.output_tokens > 0 or status.cached_tokens > 0:
-            print(f"  Tokens: {status.total_tokens:,} total")
-            if status.input_tokens > 0 or status.output_tokens > 0:
-                print(f"          {status.input_tokens:,} input, {status.output_tokens:,} output")
-            if status.cached_tokens > 0:
-                print(f"          {status.cached_tokens:,} cached")
+        # Print header
+        header_row = "║ " + " │ ".join(h.ljust(w) for h, w in zip(headers, col_widths)) + " ║"
+        print("╔" + "═" * (len(header_row) - 2) + "╗")
+        print(header_row)
+        print("╠" + "─" * (len(header_row) - 2) + "╣")
 
-        if status.tool_calls > 0:
-            print(f"  Tool Calls: {status.tool_calls}")
+        # Print data rows
+        for name, status in orchestrator.statuses.items():
+            # Prepare row data
+            instance_name = name[:19] if len(name) > 19 else name
+            status_str = status.status
+            duration_str = f"{status.end_time - status.start_time:.1f}s" if status.start_time and status.end_time else "N/A"
+            total_tokens_str = f"{status.total_tokens:,}" if status.total_tokens > 0 else "0"
+            input_tokens_str = f"{status.input_tokens:,}" if status.input_tokens > 0 else "0"
+            output_tokens_str = f"{status.output_tokens:,}" if status.output_tokens > 0 else "0"
+            cached_tokens_str = f"{status.cached_tokens:,}" if status.cached_tokens > 0 else "0"
+            tools_str = str(status.tool_calls) if status.tool_calls > 0 else "0"
+            cost_str = f"${orchestrator._calculate_cost(status):.4f}" if hasattr(orchestrator, '_calculate_cost') else "N/A"
 
-        if status.output:
-            print(f"  Output Preview: {status.output[:200]}...")
+            row_data = [instance_name, status_str, duration_str, total_tokens_str, input_tokens_str,
+                       output_tokens_str, cached_tokens_str, tools_str, cost_str]
 
-        if status.error:
-            print(f"  Errors: {status.error[:200]}...")
+            row = "║ " + " │ ".join(data.ljust(w) for data, w in zip(row_data, col_widths)) + " ║"
+            print(row)
+
+        print("╚" + "═" * (len(header_row) - 2) + "╝")
+
+        # Print additional details if there are outputs or errors
+        print("\nAdditional Details:")
+        print("-" * 40)
+        for name, status in orchestrator.statuses.items():
+            has_details = False
+
+            if status.output:
+                if not has_details:
+                    print(f"\n{name.upper()}:")
+                    has_details = True
+                print(f"  Output Preview: {status.output[:150]}...")
+
+            if status.error:
+                if not has_details:
+                    print(f"\n{name.upper()}:")
+                    has_details = True
+                print(f"  Errors: {status.error[:150]}...")
+    else:
+        print("No instances were processed.")
 
     # Show the actual filename used (important when auto-generated)
     final_output_file = args.output or orchestrator.generate_output_filename()

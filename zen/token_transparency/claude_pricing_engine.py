@@ -174,13 +174,15 @@ class ClaudePricingEngine:
         return "5min"
 
     def calculate_cost(self, usage_data: TokenUsageData,
-                      authoritative_cost: Optional[float] = None) -> CostBreakdown:
+                      authoritative_cost: Optional[float] = None,
+                      tool_tokens: Optional[Dict[str, int]] = None) -> CostBreakdown:
         """
         Calculate detailed cost breakdown with Claude pricing compliance.
 
         Args:
             usage_data: Token usage information
             authoritative_cost: SDK-provided cost (preferred when available)
+            tool_tokens: Dictionary of tool names to token counts for tool cost calculation
 
         Returns:
             Detailed cost breakdown for transparency
@@ -216,8 +218,12 @@ class ClaudePricingEngine:
         cache_creation_cost = (usage_data.cache_creation_tokens / 1_000_000) * \
                              (model_pricing["input"] * cache_multiplier)
 
-        # Tool costs (placeholder for future implementation)
-        tool_cost = 0.0  # Most tools have no additional cost
+        # Calculate tool costs based on token usage
+        tool_cost = 0.0
+        if tool_tokens:
+            for tool_name, tokens in tool_tokens.items():
+                # Tool tokens are charged at the same rate as input tokens for the model
+                tool_cost += (tokens / 1_000_000) * model_pricing["input"]
 
         return CostBreakdown(
             input_cost=input_cost,
@@ -274,13 +280,15 @@ class ClaudePricingEngine:
         return None
 
     def get_transparency_report(self, usage_data: TokenUsageData,
-                               cost_breakdown: CostBreakdown) -> Dict[str, Any]:
+                               cost_breakdown: CostBreakdown,
+                               tool_tokens: Optional[Dict[str, int]] = None) -> Dict[str, Any]:
         """
         Generate transparency report for token usage and costs.
 
         Args:
             usage_data: Token usage information
             cost_breakdown: Detailed cost breakdown
+            tool_tokens: Tool-specific token usage
 
         Returns:
             Comprehensive transparency report
@@ -293,7 +301,8 @@ class ClaudePricingEngine:
                 "output_tokens": usage_data.output_tokens,
                 "cache_read_tokens": usage_data.cache_read_tokens,
                 "cache_creation_tokens": usage_data.cache_creation_tokens,
-                "total_tokens": usage_data.total_tokens
+                "total_tokens": usage_data.total_tokens,
+                "tool_tokens": tool_tokens or {}
             },
             "cost_breakdown": {
                 "input_cost_usd": round(cost_breakdown.input_cost, 6),
