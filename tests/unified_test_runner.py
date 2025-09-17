@@ -944,6 +944,7 @@ class UnifiedTestRunner:
         self.docker_manager = None
         self.docker_environment = None
         self.docker_ports = None
+        self.docker_enabled = True  # Track whether Docker should be used for this test run
         
         # Test execution timeout fix for iterations 41-60
         from shared.isolated_environment import get_env
@@ -1413,16 +1414,20 @@ class UnifiedTestRunner:
         """Initialize Docker environment - automatically starts services if needed."""
         # Skip Docker for staging (uses remote services)
         if self._detect_staging_environment(args):
+            self.docker_enabled = False
+            print("[INFO] Docker disabled for staging environment - using remote services")
             return
         
         # Skip Docker if explicitly disabled
         env = get_env()
         if env.get('TEST_NO_DOCKER', 'false').lower() == 'true':
+            self.docker_enabled = False
             print("[INFO] Docker disabled via TEST_NO_DOCKER environment variable")
             return
         
         # Determine if Docker is actually needed based on test categories
         if not self._docker_required_for_tests(args, running_e2e):
+            self.docker_enabled = False
             print("[INFO] Docker not required for selected test categories")
             print("[INFO] Skipping all Docker operations (initialization, health checks, service management)")
             return
@@ -2078,7 +2083,7 @@ class UnifiedTestRunner:
             self.port_discovery = DockerPortDiscovery(use_test_services=True)
         
         # Update service URLs with centralized Docker manager ports (if available)
-        if CENTRALIZED_DOCKER_AVAILABLE and self.docker_manager and self.docker_ports and args.env != 'staging':
+        if CENTRALIZED_DOCKER_AVAILABLE and self.docker_enabled and self.docker_manager and self.docker_ports and args.env != 'staging':
             env = get_env()
             
             # Update PostgreSQL DATABASE_URL

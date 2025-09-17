@@ -12,7 +12,7 @@ import argparse
 from tests.unified_test_runner import UnifiedTestRunner
 
 def test_docker_bypass():
-    """Test the _docker_required_for_tests logic"""
+    """Test the _docker_required_for_tests logic and Docker bypass"""
     
     runner = UnifiedTestRunner()
     
@@ -31,12 +31,28 @@ def test_docker_bypass():
     needs_docker = runner._docker_required_for_tests(args, running_e2e=False)
     print(f"Result: Docker required = {needs_docker}")
     
-    if needs_docker:
-        print("❌ FAILURE: Docker is reported as required despite --no-docker flag")
+    # Test the Docker initialization bypass
+    print("\nTesting Docker initialization bypass...")
+    print(f"Initial docker_enabled state: {runner.docker_enabled}")
+    
+    try:
+        runner._initialize_docker_environment(args, running_e2e=False)
+        print(f"After initialization docker_enabled state: {runner.docker_enabled}")
+        print(f"Docker manager state: {runner.docker_manager}")
+        
+        if not runner.docker_enabled and runner.docker_manager is None:
+            print("✅ SUCCESS: Docker properly bypassed - docker_enabled=False and docker_manager=None")
+            return True
+        elif runner.docker_enabled:
+            print(f"❌ FAILURE: docker_enabled should be False but is {runner.docker_enabled}")
+            return False
+        else:
+            print(f"❌ FAILURE: docker_manager should be None but is {runner.docker_manager}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ FAILURE: Exception during Docker initialization: {e}")
         return False
-    else:
-        print("✅ SUCCESS: Docker properly bypassed")
-        return True
 
 if __name__ == '__main__':
     print("🔍 Issue #548 Docker Bypass Debug Test")

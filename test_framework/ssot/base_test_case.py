@@ -1158,11 +1158,13 @@ class SSotBaseTestCase:
             )
 
 
-class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
+class SSotAsyncTestCase(SSotBaseTestCase):
     """
     SSOT Async Test Case - For async tests only.
     
     This extends the base SSOT test case with async-specific functionality.
+    Inherits unittest compatibility methods from SSotBaseTestCase without 
+    multiple inheritance issues.
     """
     
     @classmethod
