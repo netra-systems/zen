@@ -54,11 +54,38 @@ Multiple competing WebSocket message router implementations exist:
   - Validates legacy imports continue working via aliases
   - Ensures method signatures preserved for smooth transition
 
-### Remediation Plan
-- [ ] Consolidate to single CanonicalMessageRouter in canonical_message_router.py
-- [ ] Remove duplicate in handlers.py
-- [ ] Update all imports to use SSOT WebSocket manager factory
-- [ ] Ensure all 5 critical WebSocket events flow correctly
+### Remediation Plan (DETAILED)
+
+#### Phase 1: Remove Duplicate CanonicalMessageRouter (MINIMAL RISK)
+- [ ] Remove duplicate `CanonicalMessageRouter` class from `handlers.py:1351`
+- [ ] Update imports in handlers.py to import from canonical_message_router.py
+- [ ] Add backwards compatibility alias in handlers.py: `CanonicalMessageRouter = ExternalCanonicalMessageRouter`
+- [ ] Run mission critical tests to validate no breakage
+
+#### Phase 2: Consolidate Production Routers (MEDIUM RISK)
+- [ ] Identify production routers vs test routers in the 104 classes
+- [ ] Create aliases for legacy router names in canonical_message_router.py
+- [ ] Update `MessageRouter` in handlers.py to inherit from `CanonicalMessageRouter`
+- [ ] Remove `QualityMessageRouter` and related legacy routers
+- [ ] Validate WebSocket events still flow correctly
+
+#### Phase 3: Fix Import Patterns (LOW RISK)
+- [ ] Update all `get_websocket_manager` imports to canonical path
+- [ ] Remove fallback/backup import patterns
+- [ ] Ensure factory pattern consistency
+- [ ] Run integration tests
+
+#### Phase 4: Clean Test Routers (MINIMAL RISK)
+- [ ] Keep test mock routers separate (they're for testing)
+- [ ] Update test routers to inherit from CanonicalMessageRouter where appropriate
+- [ ] Remove duplicate test implementations
+- [ ] Run full test suite
+
+#### Validation After Each Phase:
+- Run `/tests/unit/ssot/test_canonical_message_router_single_implementation_validation.py`
+- Run `/tests/mission_critical/test_websocket_agent_events_suite.py`
+- Verify 5 critical events still sent
+- Check user isolation still works
 
 ### Progress Log
 - 2025-09-17: Issue discovered and documented
