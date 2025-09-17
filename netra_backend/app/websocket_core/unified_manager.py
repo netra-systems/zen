@@ -306,13 +306,6 @@ class _UnifiedWebSocketManagerImplementation:
         logger.debug(f"Removed connection {validated_connection_id} for user {connection.user_id}")
 
     async def send_to_user(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> None:
-<<<<<<< HEAD
-        """Send a message to all connections for a user with validation."""
-        # Validate message and prevent contamination
-        validation_result = self._message_validator.validate_message_for_user(user_id, message)
-        if not validation_result.is_valid:
-            logger.error(f"Message validation failed for user {validation_result.user_id}: {validation_result.error_message}")
-=======
         """Send a message to all connections for a user with thread safety and type validation."""
         # SSOT CONSOLIDATION: All modes use unified message handling
         # (Mode-specific behavior has been consolidated for SSOT compliance)
@@ -641,7 +634,6 @@ class _UnifiedWebSocketManagerImplementation:
         # If no exclusions, use the regular broadcast method
         if not exclude_users:
             await self.broadcast(message)
->>>>>>> c6fceaab560e7d27ca08adaa02ca7ad169b84d85
             return
 
         # Use sanitized message if contamination was detected
@@ -728,10 +720,6 @@ class _UnifiedWebSocketManagerImplementation:
     def get_stats(self) -> Dict[str, Any]:
         """Get connection statistics."""
         return {
-<<<<<<< HEAD
-            'total_connections': len(self._connections),
-            'active_users': len(self._user_connections),
-=======
             "total_connections": len(self._connections),
             "unique_users": len(self._user_connections),
             "connections_by_user": {
@@ -2800,7 +2788,6 @@ class _UnifiedWebSocketManagerImplementation:
         base_status = {
             'healthy': getattr(self, '_is_healthy', True),
             'manager_type': f'unified_{self.mode.value}',
->>>>>>> c6fceaab560e7d27ca08adaa02ca7ad169b84d85
             'mode': self.mode.value,
             'contamination_stats': self._message_validator.get_contamination_stats(),
             'recovery_queue_stats': self._message_validator.get_recovery_queue_stats(),
