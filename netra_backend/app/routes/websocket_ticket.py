@@ -61,11 +61,11 @@ class TicketGenerationResponse(BaseModel):
 class TicketValidationResponse(BaseModel):
     """Response model for ticket validation."""
     valid: bool = Field(description="Whether ticket is valid")
-    user_id: Optional[str] = Field(description="User ID if valid")
-    email: Optional[str] = Field(description="User email if valid")
-    permissions: Optional[list] = Field(description="User permissions if valid")
-    expires_at: Optional[float] = Field(description="Expiration timestamp if valid")
-    error: Optional[str] = Field(description="Error message if invalid")
+    user_id: Optional[str] = Field(default=None, description="User ID if valid")
+    email: Optional[str] = Field(default=None, description="User email if valid")
+    permissions: Optional[list] = Field(default=None, description="User permissions if valid")
+    expires_at: Optional[float] = Field(default=None, description="Expiration timestamp if valid")
+    error: Optional[str] = Field(default=None, description="Error message if invalid")
 
 
 @router.post("/ticket", response_model=TicketGenerationResponse)

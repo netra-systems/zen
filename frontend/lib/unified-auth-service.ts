@@ -28,10 +28,23 @@ export interface AuthValidationResult {
   error?: string;
 }
 
+export interface WebSocketTicket {
+  ticket: string;
+  expires_at: number;
+}
+
+export interface TicketRequestResult {
+  success: boolean;
+  ticket?: WebSocketTicket;
+  error?: string;
+}
+
 /**
  * Unified authentication service that integrates all auth functionality
  */
 class UnifiedAuthService {
+  private ticketCache = new Map<string, WebSocketTicket>();
+  private readonly TICKET_REFRESH_THRESHOLD = 30000; // Refresh tickets 30s before expiry
   
   /**
    * Initialize authentication and validate current session
@@ -149,6 +162,9 @@ class UnifiedAuthService {
    */
   async handleLogout(): Promise<void> {
     try {
+      // Clear ticket cache before logout
+      this.clearTicketCache();
+      
       const config = await authService.getAuthConfig();
       await authService.handleLogout(config);
       
@@ -160,6 +176,7 @@ class UnifiedAuthService {
       });
       
       // Fallback: clear local state even if server logout fails
+      this.clearTicketCache();
       authService.removeToken();
       authService.setDevLogoutFlag();
       
@@ -207,10 +224,139 @@ class UnifiedAuthService {
   }
 
   /**
-   * Set up authentication for WebSocket connections
+   * Request a WebSocket authentication ticket
    */
-  getWebSocketAuthConfig(): { token: string | null; refreshToken: () => Promise<string | null> } {
+  async requestWebSocketTicket(): Promise<TicketRequestResult> {
+    try {
+      const token = authService.getToken();
+      if (!token) {
+        return { 
+          success: false, 
+          error: 'No authentication token available' 
+        };
+      }
+
+      const response = await fetch('/api/auth/websocket-ticket', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        logger.warn('WebSocket ticket request failed', {
+          component: 'UnifiedAuthService',
+          action: 'requestWebSocketTicket',
+          metadata: {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorText
+          }
+        });
+        
+        return { 
+          success: false, 
+          error: `Ticket request failed: ${response.status} ${response.statusText}` 
+        };
+      }
+
+      const ticketData = await response.json();
+      
+      if (!ticketData.ticket) {
+        return { 
+          success: false, 
+          error: 'Invalid ticket response format' 
+        };
+      }
+
+      const ticket: WebSocketTicket = {
+        ticket: ticketData.ticket,
+        expires_at: ticketData.expires_at || (Date.now() + 300000) // Default 5min TTL
+      };
+
+      // Cache the ticket
+      this.ticketCache.set('default', ticket);
+
+      logger.debug('WebSocket ticket generated successfully', {
+        component: 'UnifiedAuthService',
+        action: 'requestWebSocketTicket',
+        metadata: {
+          ticketLength: ticket.ticket.length,
+          expiresAt: new Date(ticket.expires_at).toISOString()
+        }
+      });
+
+      return { success: true, ticket };
+
+    } catch (error) {
+      logger.error('WebSocket ticket request failed', error as Error, {
+        component: 'UnifiedAuthService',
+        action: 'requestWebSocketTicket'
+      });
+      
+      return { 
+        success: false, 
+        error: `Ticket request error: ${(error as Error).message}` 
+      };
+    }
+  }
+
+  /**
+   * Get cached WebSocket ticket or request a new one
+   */
+  async getWebSocketTicket(): Promise<TicketRequestResult> {
+    const cached = this.ticketCache.get('default');
+    
+    // Check if cached ticket is still valid with threshold buffer
+    if (cached && (cached.expires_at - Date.now()) > this.TICKET_REFRESH_THRESHOLD) {
+      logger.debug('Using cached WebSocket ticket', {
+        component: 'UnifiedAuthService',
+        action: 'getWebSocketTicket',
+        metadata: {
+          timeUntilExpiry: cached.expires_at - Date.now()
+        }
+      });
+      
+      return { success: true, ticket: cached };
+    }
+
+    // Request new ticket
+    logger.debug('Requesting fresh WebSocket ticket', {
+      component: 'UnifiedAuthService',
+      action: 'getWebSocketTicket',
+      metadata: {
+        hadCachedTicket: !!cached,
+        cacheExpired: cached ? (cached.expires_at - Date.now()) <= this.TICKET_REFRESH_THRESHOLD : false
+      }
+    });
+
+    return await this.requestWebSocketTicket();
+  }
+
+  /**
+   * Clear ticket cache (useful for logout/auth errors)
+   */
+  clearTicketCache(): void {
+    this.ticketCache.clear();
+    logger.debug('WebSocket ticket cache cleared', {
+      component: 'UnifiedAuthService',
+      action: 'clearTicketCache'
+    });
+  }
+
+  /**
+   * Set up authentication for WebSocket connections (updated for ticket support)
+   */
+  getWebSocketAuthConfig(): { 
+    token: string | null; 
+    refreshToken: () => Promise<string | null>;
+    getTicket: () => Promise<TicketRequestResult>;
+    useTicketAuth: boolean;
+  } {
     return {
+      // Maintain JWT token for backward compatibility
       token: authService.getToken(),
       refreshToken: async () => {
         try {
@@ -224,7 +370,10 @@ class UnifiedAuthService {
           logger.error('WebSocket token refresh failed', error as Error);
           return null;
         }
-      }
+      },
+      // Add ticket-based authentication
+      getTicket: () => this.getWebSocketTicket(),
+      useTicketAuth: true // Feature flag for ticket authentication
     };
   }
 
@@ -236,6 +385,9 @@ class UnifiedAuthService {
       component: 'UnifiedAuthService',
       action: 'handleAuthError'
     });
+
+    // Clear ticket cache on auth errors
+    this.clearTicketCache();
 
     // If it's a 401 error, trigger logout
     if (error?.status === 401 || error?.message?.includes('401')) {
