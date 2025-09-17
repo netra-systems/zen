@@ -725,17 +725,19 @@ class AuthEnvironment:
     def get_backend_url(self) -> str:
         """Get backend service URL with environment-specific defaults."""
         env = self.get_environment()
-        
+
         # Check for explicit override first
         url = self.env.get("BACKEND_URL")
         if url:
             return url
-        
+
         # Environment-specific defaults (no fallback pattern)
         if env == "production":
             return "https://api.netrasystems.ai"
         elif env == "staging":
-            return "https://api.staging.netrasystems.ai"
+            # ISSUE #958 FIX: Use correct staging domain (not *.staging.netrasystems.ai)
+            # Per CLAUDE.md Issue #1278: *.staging.netrasystems.ai causes SSL failures
+            return "https://staging.netrasystems.ai"
         elif env == "development":
             return "http://localhost:8000"
         elif env == "test":
@@ -746,17 +748,19 @@ class AuthEnvironment:
     def get_frontend_url(self) -> str:
         """Get frontend URL with environment-specific defaults."""
         env = self.get_environment()
-        
+
         # Check for explicit override first
         url = self.env.get("FRONTEND_URL")
         if url:
             return url
-        
+
         # Environment-specific defaults (no fallback pattern)
         if env == "production":
             return "https://app.netrasystems.ai"
         elif env == "staging":
-            return "https://app.staging.netrasystems.ai"
+            # ISSUE #958 FIX: Use correct staging domain (not *.staging.netrasystems.ai)
+            # Per CLAUDE.md Issue #1278: *.staging.netrasystems.ai causes SSL failures
+            return "https://staging.netrasystems.ai"
         elif env == "development":
             return "http://localhost:3000"
         elif env == "test":
