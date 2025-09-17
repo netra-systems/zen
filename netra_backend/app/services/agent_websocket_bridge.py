@@ -672,23 +672,48 @@ class AgentWebSocketBridge(MonitorableComponent):
                 )
     
     async def _initialize_websocket_manager(self) -> None:
-        """Initialize WebSocket manager with error handling and retry logic.
-        
-        CRITICAL: This now uses a placeholder manager that will be replaced
-        per-request via create_user_emitter() factory method for proper isolation.
+        """Initialize WebSocket manager with standardized factory interface - Issue #1176 Phase 1.
+
+        CRITICAL: Uses standardized factory validation to prevent coordination gaps.
+        The factory is validated for interface compliance and user isolation support.
+        Manager instances are still created per-request for proper user isolation.
         """
         import asyncio
-        
-        # SECURITY FIX: Don't use singleton - create placeholder that will be 
-        # replaced per-request through create_user_emitter() factory
-        
-        # For backward compatibility, we keep the manager reference but it will
-        # be overridden per-request to ensure user isolation
-        self._websocket_manager = None  # Will be set per-request
-        
+
+        # Issue #1176 Phase 1 Fix: Initialize standardized factory with validation
+        from netra_backend.app.websocket_core.standardized_factory_interface import (
+            get_standardized_websocket_manager_factory,
+            WebSocketManagerFactoryValidator
+        )
+
+        try:
+            # Create and validate standardized factory
+            self._websocket_manager_factory = get_standardized_websocket_manager_factory(
+                require_user_context=True
+            )
+
+            # Validate factory compliance - prevents Issue #1176 coordination gaps
+            WebSocketManagerFactoryValidator.require_factory_compliance(
+                self._websocket_manager_factory,
+                context="AgentWebSocketBridge WebSocket Factory"
+            )
+
+            logger.info(
+                "Issue #1176 Phase 1: Standardized WebSocket manager factory initialized "
+                "with interface validation and user isolation support"
+            )
+
+        except Exception as e:
+            logger.error(f"Issue #1176 Phase 1: Standardized factory initialization failed: {e}")
+            # Fallback for backward compatibility
+            self._websocket_manager_factory = None
+
+        # For backward compatibility, manager reference is still set per-request
+        self._websocket_manager = None  # Will be set per-request via factory
+
         logger.info(
-            "WebSocket manager initialization deferred - will use factory pattern "
-            "per-request via create_user_emitter() for proper user isolation"
+            "WebSocket manager factory configured for per-request creation "
+            "with standardized interface validation (Issue #1176 coordination gap prevention)"
         )
     
     async def _initialize_registry(self) -> None:
