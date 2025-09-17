@@ -32,6 +32,10 @@ from auth_service.auth_core.database.repository import AuthUserRepository
 class AuthServiceBusinessLogicTests(SSotBaseTestCase):
     """Test auth service core business logic for golden path scenarios."""
 
+    def setup_method(self, method):
+        """Set up each test method with SSOT base test case."""
+        super().setup_method(method)
+
     def test_user_registration_business_rules(self):
         """Test user registration follows business validation rules."""
         # Business Rule: User registration must validate business requirements
@@ -391,6 +395,10 @@ class AuthServiceBusinessLogicTests(SSotBaseTestCase):
 @pytest.mark.unit  
 class AuthServiceErrorHandlingBusinessContinuityTests(SSotBaseTestCase):
     """Test auth service error handling maintains business continuity."""
+
+    def setup_method(self, method):
+        """Set up each test method with SSOT base test case."""
+        super().setup_method(method)
 
     def test_database_unavailable_business_fallback(self):
         """Test auth service handles database unavailability with business continuity."""

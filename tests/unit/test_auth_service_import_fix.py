@@ -49,6 +49,7 @@ class TestAuthServiceImportFix:
         try:
             from netra_backend.app.auth_integration.auth import (
                 AuthService,
+                AuthUser,
                 BackendAuthIntegration,
                 AuthIntegrationService,
                 auth_client,
@@ -58,6 +59,7 @@ class TestAuthServiceImportFix:
             
             # All imports should succeed
             assert AuthService is not None
+            assert AuthUser is not None
             assert BackendAuthIntegration is not None
             assert AuthIntegrationService is not None
             assert auth_client is not None
@@ -66,6 +68,14 @@ class TestAuthServiceImportFix:
             
         except ImportError as e:
             pytest.fail(f"Backward compatibility import failed: {e}")
+    
+    def test_auth_user_is_user_alias(self):
+        """Test that AuthUser is properly aliased to User."""
+        from netra_backend.app.auth_integration.auth import AuthUser
+        from netra_backend.app.db.models_postgres import User
+        
+        # AuthUser should be an alias for User
+        assert AuthUser is User
     
     def test_auth_service_methods_available(self):
         """Test that AuthService has expected methods for auth integration."""
@@ -102,6 +112,9 @@ if __name__ == "__main__":
         
         test_instance.test_backward_compatibility_imports()
         print("✅ Backward compatibility imports test passed")
+        
+        test_instance.test_auth_user_is_user_alias()
+        print("✅ AuthUser alias test passed")
         
         test_instance.test_auth_service_methods_available()
         print("✅ AuthService methods test passed")

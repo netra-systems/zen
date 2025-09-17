@@ -68,11 +68,12 @@ async def backend():
 @router.get("/infrastructure")
 @router.head("/infrastructure")
 async def infrastructure():
-    """Infrastructure health check - includes circuit breaker and resilience status."""
+    """Infrastructure health check - includes circuit breaker, resilience, and authentication status."""
     try:
         # Get infrastructure resilience status
         from netra_backend.app.services.infrastructure_resilience import get_infrastructure_health_summary
         from netra_backend.app.resilience.circuit_breaker import get_circuit_breaker_manager
+        from netra_backend.app.websocket_core.auth_health_provider import get_auth_health_for_endpoint
 
         # Get overall infrastructure health
         infrastructure_health = get_infrastructure_health_summary()
@@ -81,7 +82,10 @@ async def infrastructure():
         circuit_breaker_manager = get_circuit_breaker_manager()
         circuit_breaker_health = circuit_breaker_manager.get_health_summary()
 
-        # Determine overall status
+        # Get authentication health status
+        auth_health = await get_auth_health_for_endpoint()
+
+        # Determine overall status including authentication
         overall_status = "ok"
         if infrastructure_health.get("overall_status") == "critical":
             overall_status = "critical"
@@ -89,12 +93,20 @@ async def infrastructure():
             overall_status = "degraded"
         elif circuit_breaker_health.get("overall_health") == "critical":
             overall_status = "critical"
+        elif auth_health.get("overall_status") == "critical":
+            overall_status = "critical"
+        elif auth_health.get("overall_status") == "degraded" and overall_status == "ok":
+            overall_status = "degraded"
 
         return {
             "status": overall_status,
             "infrastructure": infrastructure_health,
             "circuit_breakers": circuit_breaker_health,
-            "chat_functionality_impact": infrastructure_health.get("chat_functionality_impacted", False)
+            "authentication": auth_health,
+            "chat_functionality_impact": (
+                infrastructure_health.get("chat_functionality_impacted", False) or
+                auth_health.get("golden_path_assessment", {}).get("chat_functionality_impacted", False)
+            )
         }
     except Exception as e:
         # Return basic status if resilience components not available yet
@@ -125,3 +137,37 @@ async def resilience():
         return get_infrastructure_health_summary()
     except Exception as e:
         return {"error": f"Resilience status unavailable: {e}"}
+
+
+@router.get("/authentication")
+async def authentication():
+    """Authentication health status endpoint."""
+    try:
+        from netra_backend.app.websocket_core.auth_health_provider import get_auth_health_for_endpoint
+
+        return await get_auth_health_for_endpoint()
+    except Exception as e:
+        return {"error": f"Authentication health status unavailable: {e}"}
+
+
+@router.get("/authentication/metrics")
+async def authentication_metrics():
+    """Authentication metrics endpoint."""
+    try:
+        from netra_backend.app.websocket_core.auth_health_provider import get_auth_metrics_for_endpoint
+
+        return await get_auth_metrics_for_endpoint()
+    except Exception as e:
+        return {"error": f"Authentication metrics unavailable: {e}"}
+
+
+@router.get("/authentication/websocket")
+async def authentication_websocket():
+    """WebSocket authentication health status endpoint."""
+    try:
+        from netra_backend.app.websocket_core.auth_health_provider import get_auth_health_provider
+
+        health_provider = get_auth_health_provider()
+        return await health_provider.get_websocket_authentication_health()
+    except Exception as e:
+        return {"error": f"WebSocket authentication health unavailable: {e}"}

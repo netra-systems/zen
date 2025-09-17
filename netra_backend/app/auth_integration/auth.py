@@ -1017,6 +1017,7 @@ AuthIntegrationService = BackendAuthIntegration  # Tests expect this name
 
 # Issue #1176 Phase 3: AuthService alias for import compatibility
 AuthService = BackendAuthIntegration  # Alias for expected AuthService import
+AuthUser = User  # Alias for expected AuthUser import
 
 # Export auth_manager for Issue #485 compatibility
 __all__ = [
@@ -1028,6 +1029,7 @@ __all__ = [
     "generate_access_token",
     "BackendAuthIntegration",
     "AuthService",  # Issue #1176 Phase 3: Add AuthService to exports
+    "AuthUser",  # Issue #1176 Phase 3: Add AuthUser to exports
     "AuthValidationResult",
     "TokenRefreshResult",
     "auth_manager",  # Issue #485 fix: Missing import

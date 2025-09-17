@@ -70,7 +70,7 @@ class AuthenticatedUser:
 @dataclass
 class E2EAuthConfig:
     """Configuration for E2E authentication."""
-    auth_service_url: str = "http://localhost:8083"  # Default test auth service
+    auth_service_url: str = "http://localhost:8081"  # Default test auth service - Fixed to correct port
     backend_url: str = "http://localhost:8002"       # Default test backend
     websocket_url: str = "ws://localhost:8002/ws"    # Default test WebSocket
     test_user_email: str = "e2e_test@example.com"
