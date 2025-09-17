@@ -17,7 +17,8 @@ from enum import Enum
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-# SSOT: Removed SessionManager import - it's just a stub, real DB access via context.db_session
+# SSOT: Import SessionManager for type hints and parameter compatibility
+from netra_backend.app.services.database.session_manager import SessionManager
 from netra_backend.app.core.serialization.unified_json_handler import (
     LLMResponseParser,
     JSONErrorFixer,
@@ -572,6 +573,7 @@ class GoalsTriageSubAgent(BaseAgent):
         
         # SSOT: SessionManager is a stub - no actual database operations needed
         # Real database access should use context.db_session or DatabaseManager
+        session_manager = SessionManager()  # Create stub instance for backward compatibility
         
         try:
             # Validate preconditions

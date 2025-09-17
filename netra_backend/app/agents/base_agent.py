@@ -29,7 +29,7 @@ from netra_backend.app.agents.interfaces import BaseAgentProtocol
 # Migration Guide: reports/archived/USER_CONTEXT_ARCHITECTURE.md
 # =============================================================================
 import warnings
-from netra_backend.app.core.config import get_config
+from netra_backend.app.config import get_config  # SSOT UnifiedConfigManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.llm.observability import generate_llm_correlation_id
 from netra_backend.app.logging_config import central_logger
