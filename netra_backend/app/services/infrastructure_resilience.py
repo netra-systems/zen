@@ -119,7 +119,7 @@ class InfrastructureResilienceManager:
 
     def __init__(self, environment: Optional[str] = None):
         """Initialize the infrastructure resilience manager."""
-        self.environment = environment or get_env("ENVIRONMENT", "development")
+        self.environment = environment or get_env().get("ENVIRONMENT", "development")
         self.config = get_config()
 
         # Service monitoring infrastructure
