@@ -1167,7 +1167,7 @@ class ClaudeInstanceOrchestrator:
             if 'type' in json_data:
                 logger.debug(f"🔍 TOOL DETECTION: Found type='{json_data['type']}', checking for tool usage...")
 
-                if json_data['type'] in ['tool_use', 'tool_call', 'tool_execution', 'tool_result']:
+                if json_data['type'] in ['tool_use', 'tool_call', 'tool_execution']:
                     # Extract tool name for detailed tracking (ALWAYS track, even without message_id)
                     tool_name = json_data.get('name', json_data.get('tool_name', 'unknown_tool'))
                     status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
@@ -1225,20 +1225,11 @@ class ClaudeInstanceOrchestrator:
                         content = message['content']
                         if isinstance(content, list):
                             for item in content:
-                                logger.debug(f"🔍 NESTED ITEM: {item.get('type')} in content")
-                                if isinstance(item, dict) and item.get('type') in ['tool_use', 'tool_result']:
-                                    # For tool_result, we need to infer the tool name from the tool_use_id or context
-                                    if item.get('type') == 'tool_result':
-                                        tool_name = 'Bash'  # Most tool results are from Bash tool in Claude Code
-                                        if 'tool_use_id' in item:
-                                            # Could parse tool name from ID if pattern exists
-                                            tool_name = 'Bash'  # Default for now
-                                    else:
-                                        tool_name = item.get('name', 'unknown_tool')
-
+                                if isinstance(item, dict) and item.get('type') == 'tool_use':
+                                    tool_name = item.get('name', 'unknown_tool')
                                     status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
                                     status.tool_calls += 1
-                                    logger.debug(f"🔧 TOOL FROM MESSAGE CONTENT: {tool_name} (type={item.get('type')})")
+                                    logger.debug(f"🔧 TOOL FROM ASSISTANT CONTENT: {tool_name}")
                             return True
 
             # Handle direct token fields at root level (without message ID - always accumulate)
