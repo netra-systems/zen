@@ -1,16 +1,16 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-17 03:13:00
+**Generated:** 2025-09-17 03:31:10
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 2
+- **Total Tests:** 1
 - **Passed:** 0 (0.0%)
-- **Failed:** 2 (100.0%)
+- **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 5.32 seconds
+- **Duration:** 0.42 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,44 +19,30 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_staging_golden_path_complete_infrastructure | FAIL failed | 4.816s | test_golden_path_staging.py |
-| test_staging_ssl_security_validation | FAIL failed | 0.004s | test_golden_path_staging.py |
+| test_staging_ssl_security_validation | FAIL failed | 0.008s | test_golden_path_staging.py |
 
 ## Failed Tests Details
 
-### FAILED: test_staging_golden_path_complete_infrastructure
+### FAILED: test_staging_ssl_security_validation
 - **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_golden_path_staging.py
-- **Duration:** 4.816s
-- **Error:** tests/e2e/staging/test_golden_path_staging.py:303: in test_staging_golden_path_complete_infrastructure
-    assert health_results['all_healthy'], \
-E   AssertionError: Not all staging services healthy: ['backend_api:503']
+- **Duration:** 0.008s
+- **Error:** tests/e2e/staging/test_golden_path_staging.py:494: in test_staging_ssl_security_validation
+    assert wss_connection, 'WebSocket SSL connection failed'
+E   AssertionError: WebSocket SSL connection failed
 E   assert False
 
 During handling of the above exception, another exception occurred:
-tests/e2e/staging/test_golden_path_staging.py:414: in test_staging_golden_path_complete_infrastructure
-    pytest.fail(
-E   Failed: STAGING INFRASTRUCTURE FAILURE: Not all staging services heal...
-
-### FAILED: test_staging_ssl_security_validation
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_golden_path_staging.py
-- **Duration:** 0.004s
-- **Error:** tests/e2e/staging/test_golden_path_staging.py:467: in test_staging_ssl_security_validation
-    response = await client.get(f"{url}/health")
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/opt/homebrew/lib/python3.13/site-packages/httpx/_client.py:1768: in get
-    return await self.request(
-/opt/homebrew/lib/python3.13/site-packages/httpx/_client.py:1540: in request
-    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+tests/e2e/staging/test_golden_path_staging.py:501: in test_staging_ssl_security_validation
+    pytest.fail(f'SSL security validation failed after {ssl_duration:.1f}s: {e}')
+E   Failed: SSL security validation f...
 
 ## Pytest Output Format
 
 ```
-test_golden_path_staging.py::test_staging_golden_path_complete_infrastructure FAILED
 test_golden_path_staging.py::test_staging_ssl_security_validation FAILED
 
 ==================================================
-0 passed, 2 failed in 5.32s
+0 passed, 1 failed in 0.42s
 ```
 
 ## Test Coverage Matrix

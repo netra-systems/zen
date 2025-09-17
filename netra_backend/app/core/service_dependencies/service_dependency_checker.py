@@ -16,7 +16,7 @@ from netra_backend.app.core.environment_context import (
     EnvironmentContextService,
     get_environment_context_service
 )
-from .models import (
+from netra_backend.app.core.service_dependencies.models import (
     DEFAULT_SERVICE_DEPENDENCIES,
     DependencyPhase,
     DependencyValidationResult,
@@ -26,10 +26,10 @@ from .models import (
     ServiceType,
     ServiceValidationResult,
 )
-from .health_check_validator import HealthCheckValidator
-from .retry_mechanism import RetryMechanism
-from .dependency_graph_resolver import DependencyGraphResolver
-from .golden_path_validator import GoldenPathValidator
+from netra_backend.app.core.service_dependencies.health_check_validator import HealthCheckValidator
+from netra_backend.app.core.service_dependencies.retry_mechanism import RetryMechanism
+from netra_backend.app.core.service_dependencies.dependency_graph_resolver import DependencyGraphResolver
+from netra_backend.app.core.service_dependencies.golden_path_validator import GoldenPathValidator
 
 
 class ServiceDependencyChecker:

@@ -1852,8 +1852,7 @@ class BaseAgent(ABC):
         # Apply agent-specific configuration
         if agent_config:
             for key, value in agent_config.items():
-                if hasattr(agent, key):
-                    setattr(agent, key, value)
+                setattr(agent, key, value)
         
         # Validate agent implements modern pattern - only modern pattern allowed now
         if not hasattr(agent, '_execute_with_user_context'):
