@@ -24,9 +24,6 @@ from netra_backend.app.agents.data_sub_agent.models import (
 # Import SSOT DataAnalysisResponse from shared_types
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse
 
-# Import DataAnalysisResponse from SSOT location
-from netra_backend.app.schemas.shared_types import DataAnalysisResponse
-
 
 class DataSubAgent(BaseAgent):
     """
