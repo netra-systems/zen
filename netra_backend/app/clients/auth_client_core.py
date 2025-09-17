@@ -328,7 +328,7 @@ class AuthServiceClient:
             logger.debug(f"Circuit breaker alignment validated - "
                         f"Call timeout ({circuit_call_timeout}s) > Health timeout ({configured_health_timeout}s)")
         # Load service authentication credentials
-        from netra_backend.app.core.configuration import get_configuration
+        from netra_backend.app.config import get_config as get_configuration  # SSOT UnifiedConfigManager
         config = get_configuration()
         self.service_id = config.service_id or "netra-backend"
         self.service_secret = config.service_secret
@@ -1105,7 +1105,7 @@ class AuthServiceClient:
     async def _attempt_login_with_resilience(self, email: str, password: str, provider: str) -> Optional[Dict]:
         """Attempt login with enhanced resilience for staging environments."""
         import asyncio
-        from netra_backend.app.core.config import get_config
+        from netra_backend.app.config import get_config  # SSOT UnifiedConfigManager
         
         config = get_config()
         max_retries = 3 if config.environment == "staging" else 1

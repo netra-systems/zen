@@ -9,7 +9,7 @@ import asyncio
 import json
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
@@ -71,8 +71,8 @@ class CorpusMetadata(BaseModel):
     corpus_id: str
     name: str
     type: CorpusType
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     owner_id: str
     size_bytes: int = 0
     document_count: int = 0
@@ -359,7 +359,7 @@ class UnifiedCorpusAdmin(CorpusAdminBase):
         Main entry point for all corpus operations.
         Ensures thread-safe execution and proper error handling.
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         
         try:
             # Validate request
@@ -392,7 +392,7 @@ class UnifiedCorpusAdmin(CorpusAdminBase):
                 result = await self._execute_operation(request)
             
             # Calculate execution time
-            execution_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+            execution_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
             result.execution_time_ms = execution_time
             
             # Store result in metadata
@@ -419,7 +419,7 @@ class UnifiedCorpusAdmin(CorpusAdminBase):
                 corpus_id=request.corpus_id,
                 message=str(e),
                 errors=[str(e)],
-                execution_time_ms=(datetime.utcnow() - start_time).total_seconds() * 1000
+                execution_time_ms=(datetime.now(timezone.utc) - start_time).total_seconds() * 1000
             )
     
     async def _validate_request(self, request: CorpusOperationRequest):
@@ -459,7 +459,7 @@ class UnifiedCorpusAdmin(CorpusAdminBase):
     
     async def _handle_create(self, request: CorpusOperationRequest) -> CorpusOperationResult:
         """Handle corpus creation"""
-        corpus_id = f"corpus_{self.context.user_id}_{datetime.utcnow().timestamp()}"
+        corpus_id = f"corpus_{self.context.user_id}_{datetime.now(timezone.utc).timestamp()}"
         corpus_path = self.user_corpus_path / corpus_id
         corpus_path.mkdir(exist_ok=True)
         
@@ -507,7 +507,7 @@ class UnifiedCorpusAdmin(CorpusAdminBase):
         # Apply updates
         updates = request.params.get('updates', {})
         metadata.update(updates)
-        metadata['updated_at'] = datetime.utcnow().isoformat()
+        metadata['updated_at'] = datetime.now(timezone.utc).isoformat()
         
         # Save updated metadata
         with open(metadata_path, 'w') as f:
@@ -584,7 +584,7 @@ class UnifiedCorpusAdmin(CorpusAdminBase):
             )
         
         document = request.params.get('document', {})
-        doc_id = f"doc_{datetime.utcnow().timestamp()}"
+        doc_id = f"doc_{datetime.now(timezone.utc).timestamp()}"
         
         # Create document file
         doc_path = corpus_path / 'documents' / f"{doc_id}.json"
@@ -599,7 +599,7 @@ class UnifiedCorpusAdmin(CorpusAdminBase):
             metadata = json.load(f)
         
         metadata['document_count'] = metadata.get('document_count', 0) + 1
-        metadata['updated_at'] = datetime.utcnow().isoformat()
+        metadata['updated_at'] = datetime.now(timezone.utc).isoformat()
         
         with open(metadata_path, 'w') as f:
             json.dump(metadata, f, indent=2, default=str)
@@ -731,7 +731,7 @@ class UnifiedCorpusAdmin(CorpusAdminBase):
         export_data = {
             'metadata': metadata,
             'documents': documents,
-            'export_timestamp': datetime.utcnow().isoformat()
+            'export_timestamp': datetime.now(timezone.utc).isoformat()
         }
         
         return CorpusOperationResult(
@@ -779,7 +779,7 @@ class UnifiedCorpusAdmin(CorpusAdminBase):
         
         generated_ids = []
         for i in range(count):
-            doc_id = f"synthetic_{i}_{datetime.utcnow().timestamp()}"
+            doc_id = f"synthetic_{i}_{datetime.now(timezone.utc).timestamp()}"
             generated_ids.append(doc_id)
         
         return CorpusOperationResult(
@@ -843,7 +843,7 @@ class UnifiedCorpusAdmin(CorpusAdminBase):
                 'corpus_id': request.corpus_id,
                 'document': request.params.get('document'),
                 'error': str(error),
-                'retry_after': datetime.utcnow().isoformat()
+                'retry_after': datetime.now(timezone.utc).isoformat()
             }
         )
         

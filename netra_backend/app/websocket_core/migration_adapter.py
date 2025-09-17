@@ -58,7 +58,7 @@ logger = central_logger.get_logger(__name__)
 # DEPRECATED: Use UnifiedWebSocketManager with appropriate mode instead
 
 # Keep the migration functions for backward compatibility
-class _LegacyWebSocketManagerAdapter:
+class _LegacyWSAdapter:
     """
     DEPRECATED: Migration adapter that delegates to get_websocket_manager().
 

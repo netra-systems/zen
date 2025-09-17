@@ -253,7 +253,7 @@ class ZombieDetectionEngine:
         return False
 
 
-class EnhancedWebSocketManagerFactory:
+class EnhancedWSFactory:
     """
     Enhanced WebSocket Manager Factory with comprehensive emergency cleanup
 

@@ -23,7 +23,7 @@ import logging
 import weakref
 from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, TypeVar, Generic
 from uuid import uuid4
 
@@ -181,8 +181,8 @@ class DataAccessFactory(ABC, Generic[ContextType]):
                 "request_id": user_context.request_id,
                 "thread_id": user_context.thread_id,
                 "run_id": user_context.run_id,
-                "created_at": datetime.utcnow(),
-                "last_accessed": datetime.utcnow(),
+                "created_at": datetime.now(timezone.utc),
+                "last_accessed": datetime.now(timezone.utc),
                 "access_count": 0
             }
             
@@ -207,7 +207,7 @@ class DataAccessFactory(ABC, Generic[ContextType]):
         users_with_contexts = len(self._user_context_counts)
         
         # Calculate age distribution
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         age_buckets = {"0-5min": 0, "5-30min": 0, "30min-2h": 0, "2h+": 0}
         
         for metadata in self._context_metadata.values():
@@ -303,7 +303,7 @@ class DataAccessFactory(ABC, Generic[ContextType]):
     
     async def _cleanup_expired_contexts(self):
         """Clean up expired contexts based on TTL."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         expired_contexts = []
         
         for context_id, metadata in self._context_metadata.items():
