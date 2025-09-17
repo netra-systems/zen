@@ -47,7 +47,7 @@ from shared.types.execution_types import (
 )
 
 # Agent request/response/validation types - SSOT for agent execution flows
-from .agent_types import (
+from shared.types.agent_types import (
     # Core agent execution types
     AgentExecutionRequest, AgentExecutionResult, AgentValidationResult,
     # Enhanced typed result for better validation

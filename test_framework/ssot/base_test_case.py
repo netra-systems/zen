@@ -268,22 +268,9 @@ class SSotBaseTestCase:
     CRITICAL: This replaces ALL existing BaseTestCase implementations.
     """
     
-    def __init__(self, **kwargs):
-        """
-        Initialize SSotBaseTestCase.
-        
-        Args:
-            **kwargs: Arbitrary keyword arguments that pytest or other frameworks might pass.
-                     These are ignored to maintain compatibility with pytest's test class instantiation.
-                     Common parameters include 'xfailed', 'xpassed', etc.
-        
-        This method ensures compatibility with pytest's test discovery and instantiation process,
-        which may pass additional parameters to test class constructors.
-        """
-        # Explicitly ignore all parameters - we don't store them as attributes
-        # This prevents issues with pytest markers like @pytest.mark.xfail that 
-        # may try to pass parameters during test class instantiation
-        pass
+    # NOTE: Removed __init__ method as it prevents pytest from collecting test classes
+    # Pytest requires test classes to not have __init__ constructors
+    # Any initialization should be done in setup_method or setup_class instead
     
     # === CLASS-LEVEL PYTEST COMPATIBILITY ===
     # These methods provide compatibility with pytest class-level fixtures

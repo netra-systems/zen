@@ -67,7 +67,7 @@ import logging
 from typing import List, Type
 
 # Import all SSOT base test classes
-from .base import (
+from test_framework.ssot.base import (
     BaseTestCase,
     AsyncBaseTestCase,
     DatabaseTestCase,
@@ -79,7 +79,7 @@ from .base import (
 )
 
 # Import all SSOT mock utilities
-from .mocks import (
+from test_framework.ssot.mocks import (
     MockFactory,
     MockRegistry,
     DatabaseMockFactory,
@@ -90,7 +90,7 @@ from .mocks import (
 )
 
 # Import all SSOT database utilities
-from .database import (
+from test_framework.ssot.database import (
     DatabaseTestUtility,
     PostgreSQLTestUtility,
     ClickHouseTestUtility,
@@ -101,7 +101,7 @@ from .database import (
 )
 
 # Import all SSOT WebSocket utilities
-from .websocket import (
+from test_framework.ssot.websocket import (
     WebSocketTestUtility,
     WebSocketTestClient,
     WebSocketMessage,
@@ -112,26 +112,26 @@ from .websocket import (
 )
 
 # Import SSOT WebSocket infrastructure factory and components
-from .websocket_test_infrastructure_factory import (
+from test_framework.ssot.websocket_test_infrastructure_factory import (
     WebSocketTestInfrastructureFactory,
     InfrastructureConfig,
     TestInfrastructure
 )
 
-from .websocket_auth_helper import (
+from test_framework.ssot.websocket_auth_helper import (
     WebSocketAuthHelper,
     TestUserContext,
     WebSocketAuthConfig
 )
 
-from .websocket_bridge_test_helper import (
+from test_framework.ssot.websocket_bridge_test_helper import (
     WebSocketBridgeTestHelper,
     AgentExecutionContext,
     AgentEventSimulator,
     BridgeTestConfig
 )
 
-from .communication_metrics_collector import (
+from test_framework.ssot.communication_metrics_collector import (
     CommunicationMetricsCollector,
     MetricType,
     MetricDataPoint,
@@ -140,7 +140,7 @@ from .communication_metrics_collector import (
 )
 
 # Import all SSOT Docker utilities
-from .docker import (
+from test_framework.ssot.docker import (
     DockerTestUtility,
     PostgreSQLDockerUtility,
     RedisDockerUtility,

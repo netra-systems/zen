@@ -549,7 +549,8 @@ class DatabaseManager:
                 'utilization_percent': round((self._pool_stats['active_sessions_count'] / total_capacity) * 100, 2),
                 'sessions_remaining': total_capacity - self._pool_stats['active_sessions_count']
             },
-            'active_sessions_by_user': self._get_sessions_by_user()
+            'active_sessions_by_user': self._get_sessions_by_user(),
+            'health_status': self._assess_pool_health()
         }
 
     def _get_sessions_by_user(self) -> Dict[str, int]:
@@ -559,6 +560,258 @@ class DatabaseManager:
             user_id = metadata.get('user_id', 'unknown')
             user_counts[user_id] = user_counts.get(user_id, 0) + 1
         return user_counts
+
+    def _assess_pool_health(self) -> Dict[str, Any]:
+        """Assess current pool health status."""
+        pool_size = getattr(self.config, 'database_pool_size', 25)
+        max_overflow = getattr(self.config, 'database_max_overflow', 25)
+        total_capacity = pool_size + max_overflow
+        
+        current_active = self._pool_stats['active_sessions_count']
+        utilization_percent = (current_active / total_capacity) * 100
+        
+        # Assess health based on utilization and error rates
+        if utilization_percent > 90:
+            health_status = "critical"
+            health_message = f"Pool utilization critical: {utilization_percent:.1f}%"
+        elif utilization_percent > 75:
+            health_status = "warning"
+            health_message = f"Pool utilization high: {utilization_percent:.1f}%"
+        elif self._pool_stats['pool_exhaustion_warnings'] > 0:
+            health_status = "warning"
+            health_message = f"Pool exhaustion warnings: {self._pool_stats['pool_exhaustion_warnings']}"
+        elif self._pool_stats['context_isolation_violations'] > 0:
+            health_status = "warning"
+            health_message = f"Context isolation violations: {self._pool_stats['context_isolation_violations']}"
+        else:
+            health_status = "healthy"
+            health_message = f"Pool operating normally: {utilization_percent:.1f}% utilization"
+        
+        return {
+            "status": health_status,
+            "message": health_message,
+            "utilization_percent": utilization_percent,
+            "requires_attention": health_status != "healthy"
+        }
+
+    def log_pool_metrics(self, detailed: bool = False) -> None:
+        """Log current pool metrics for monitoring and debugging."""
+        stats = self.get_pool_stats()
+        health = stats['health_status']
+        
+        # Always log basic health status
+        logger.info(
+            f"[📊] Database Pool Status: {health['status'].upper()} - {health['message']}"
+        )
+        
+        if detailed or health['requires_attention']:
+            # Log detailed metrics when requested or when attention is needed
+            pool_config = stats['pool_configuration']
+            utilization = stats['pool_utilization']
+            
+            logger.info(
+                f"[📊] Pool Configuration: size={pool_config['pool_size']}, "
+                f"overflow={pool_config['max_overflow']}, total={pool_config['total_capacity']}"
+            )
+            logger.info(
+                f"[📊] Pool Utilization: {utilization['utilization_percent']}% "
+                f"({self._pool_stats['active_sessions_count']}/{pool_config['total_capacity']} sessions), "
+                f"{utilization['sessions_remaining']} remaining"
+            )
+            logger.info(
+                f"[📊] Pool Lifetime Stats: created={self._pool_stats['total_sessions_created']}, "
+                f"cleaned={self._pool_stats['sessions_cleaned_up']}, "
+                f"warnings={self._pool_stats['pool_exhaustion_warnings']}"
+            )
+            
+            # Log per-user session counts if there are active sessions
+            user_sessions = stats['active_sessions_by_user']
+            if user_sessions:
+                user_breakdown = ", ".join([f"{user}:{count}" for user, count in user_sessions.items()])
+                logger.info(f"[📊] Active Sessions by User: {user_breakdown}")
+
+    async def handle_connection_failure(self, operation_type: str, error: Exception, user_context: Optional[Any] = None) -> bool:
+        """Handle connection failures with graceful degradation strategies.
+        
+        Args:
+            operation_type: Type of operation that failed
+            error: The connection error that occurred
+            user_context: User context for the failed operation
+            
+        Returns:
+            bool: True if graceful degradation is possible, False if critical failure
+        """
+        user_id = getattr(user_context, 'user_id', 'system') if user_context else 'system'
+        
+        logger.error(f"[💥] Database connection failure for {operation_type} (user: {user_id}): {error}")
+        
+        # Determine if this is a recoverable failure
+        error_str = str(error).lower()
+        is_timeout = any(keyword in error_str for keyword in ['timeout', 'timed out'])
+        is_connection_limit = any(keyword in error_str for keyword in ['connection', 'pool', 'exhausted'])
+        is_network_issue = any(keyword in error_str for keyword in ['network', 'unreachable', 'refused'])
+        
+        graceful_degradation_possible = False
+        degradation_strategy = None
+        
+        if is_timeout:
+            # Timeout errors - can often retry with increased timeout
+            degradation_strategy = "timeout_retry"
+            graceful_degradation_possible = True
+            logger.warning(f"[🔄] Timeout failure for {operation_type} - retry with extended timeout recommended")
+            
+        elif is_connection_limit:
+            # Connection pool exhaustion - can implement queuing or delay
+            degradation_strategy = "pool_backoff"
+            graceful_degradation_possible = True
+            logger.warning(f"[⏳] Pool exhaustion for {operation_type} - implementing backoff strategy")
+            
+        elif is_network_issue:
+            # Network issues - might be temporary, can retry
+            degradation_strategy = "network_retry"
+            graceful_degradation_possible = True
+            logger.warning(f"[🌐] Network issue for {operation_type} - network retry recommended")
+            
+        else:
+            # Unknown or critical errors
+            degradation_strategy = "critical_failure"
+            graceful_degradation_possible = False
+            logger.critical(f"[🚨] Critical database failure for {operation_type} - no graceful degradation available")
+        
+        # Update circuit breaker if available
+        try:
+            from netra_backend.app.core.resilience.circuit_breaker import get_circuit_breaker
+            database_circuit_breaker = get_circuit_breaker("database")
+            if database_circuit_breaker:
+                # Record the failure for circuit breaker tracking
+                database_circuit_breaker.record_failure(f"{operation_type}_{degradation_strategy}")
+        except Exception:
+            pass  # Don't fail on circuit breaker recording errors
+        
+        # Log degradation decision
+        if graceful_degradation_possible:
+            logger.info(f"[🛡️] Graceful degradation available for {operation_type}: {degradation_strategy}")
+        else:
+            logger.error(f"[💥] No graceful degradation possible for {operation_type} - service impact expected")
+        
+        return graceful_degradation_possible
+
+    async def warmup_connection_pool(self, engine_name: str = 'primary', warmup_connections: Optional[int] = None) -> Dict[str, Any]:
+        """Warmup connection pool by pre-establishing connections to reduce cold start delays.
+        
+        This helps avoid the initial connection setup delays when the first requests come in,
+        especially important for staging/production environments with VPC connectors.
+        
+        Args:
+            engine_name: Name of the engine to warmup
+            warmup_connections: Number of connections to pre-establish (defaults to pool_size/2)
+            
+        Returns:
+            Dictionary with warmup statistics
+        """
+        warmup_start = time.time()
+        logger.info(f"[🔥] Starting connection pool warmup for engine: {engine_name}")
+        
+        try:
+            # Ensure initialization before warmup
+            if not self._initialized:
+                logger.info(f"[🔧] Initializing DatabaseManager for pool warmup (engine: {engine_name})")
+                await self.initialize()
+            
+            engine = self.get_engine(engine_name)
+            
+            # Determine number of connections to warmup
+            pool_size = getattr(self.config, 'database_pool_size', 25)
+            if warmup_connections is None:
+                warmup_connections = max(1, pool_size // 2)  # Warmup half the pool by default
+            
+            logger.info(f"[🔥] Warming up {warmup_connections} connections (pool size: {pool_size})")
+            
+            warmup_stats = {
+                "target_connections": warmup_connections,
+                "successful_connections": 0,
+                "failed_connections": 0,
+                "total_warmup_time": 0.0,
+                "average_connection_time": 0.0,
+                "min_connection_time": float('inf'),
+                "max_connection_time": 0.0
+            }
+            
+            # Create and test connections
+            connection_times = []
+            successful_sessions = []
+            
+            for i in range(warmup_connections):
+                connection_start = time.time()
+                try:
+                    # Create a brief test session to establish the connection
+                    async with AsyncSession(engine) as session:
+                        # Simple query to ensure connection is fully established
+                        result = await session.execute(text("SELECT 1 as warmup_test"))
+                        test_result = result.fetchone()
+                        
+                        if test_result and test_result[0] == 1:
+                            connection_time = time.time() - connection_start
+                            connection_times.append(connection_time)
+                            warmup_stats["successful_connections"] += 1
+                            
+                            # Update timing statistics
+                            if connection_time < warmup_stats["min_connection_time"]:
+                                warmup_stats["min_connection_time"] = connection_time
+                            if connection_time > warmup_stats["max_connection_time"]:
+                                warmup_stats["max_connection_time"] = connection_time
+                            
+                            logger.debug(f"[🔥] Warmup connection {i+1}/{warmup_connections} established in {connection_time:.3f}s")
+                        else:
+                            warmup_stats["failed_connections"] += 1
+                            logger.warning(f"[🔥] Warmup connection {i+1}/{warmup_connections} test query failed")
+                            
+                except Exception as e:
+                    connection_time = time.time() - connection_start
+                    warmup_stats["failed_connections"] += 1
+                    logger.warning(f"[🔥] Warmup connection {i+1}/{warmup_connections} failed after {connection_time:.3f}s: {e}")
+            
+            # Calculate final statistics
+            total_warmup_time = time.time() - warmup_start
+            warmup_stats["total_warmup_time"] = total_warmup_time
+            
+            if connection_times:
+                warmup_stats["average_connection_time"] = sum(connection_times) / len(connection_times)
+            else:
+                warmup_stats["min_connection_time"] = 0.0
+            
+            success_rate = (warmup_stats["successful_connections"] / warmup_connections) * 100
+            
+            if warmup_stats["successful_connections"] > 0:
+                logger.info(
+                    f"✅ Connection pool warmup completed for {engine_name} - "
+                    f"{warmup_stats['successful_connections']}/{warmup_connections} connections "
+                    f"({success_rate:.1f}% success rate) in {total_warmup_time:.3f}s"
+                )
+                logger.info(
+                    f"[📊] Warmup timing: avg={warmup_stats['average_connection_time']:.3f}s, "
+                    f"min={warmup_stats['min_connection_time']:.3f}s, "
+                    f"max={warmup_stats['max_connection_time']:.3f}s"
+                )
+            else:
+                logger.error(
+                    f"❌ Connection pool warmup failed for {engine_name} - "
+                    f"0/{warmup_connections} connections established"
+                )
+            
+            return warmup_stats
+            
+        except Exception as e:
+            total_warmup_time = time.time() - warmup_start
+            logger.error(f"❌ Connection pool warmup failed for {engine_name} after {total_warmup_time:.3f}s: {e}")
+            
+            return {
+                "target_connections": warmup_connections or 0,
+                "successful_connections": 0,
+                "failed_connections": warmup_connections or 0,
+                "total_warmup_time": total_warmup_time,
+                "error": str(e)
+            }
 
     async def close_all(self):
         """Close all database engines with comprehensive logging."""
