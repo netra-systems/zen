@@ -647,10 +647,18 @@ class ConfigurationValidator:
             ),
             
             ValidationRule(
+                name="JWT_SECRET_KEY",
+                config_type=ConfigType.SECRET,
+                required=False,
+                description="JWT signing secret key",
+                example="jwt-secret-key-32-chars-minimum"
+            ),
+            
+            ValidationRule(
                 name="JWT_SECRET",
                 config_type=ConfigType.SECRET,
                 required=False,
-                description="JWT signing secret",
+                description="JWT signing secret (DEPRECATED - use JWT_SECRET_KEY)",
                 example="jwt-secret-key"
             ),
             
