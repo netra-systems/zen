@@ -1412,13 +1412,19 @@ class UnifiedTestRunner:
     
     def _initialize_docker_environment(self, args, running_e2e: bool):
         """Initialize Docker environment - automatically starts services if needed."""
+        # Skip Docker if explicitly disabled via command line (highest priority)
+        if hasattr(args, 'no_docker') and args.no_docker:
+            self.docker_enabled = False
+            print("[INFO] Docker explicitly disabled via --no-docker flag")
+            return
+        
         # Skip Docker for staging (uses remote services)
         if self._detect_staging_environment(args):
             self.docker_enabled = False
             print("[INFO] Docker disabled for staging environment - using remote services")
             return
         
-        # Skip Docker if explicitly disabled
+        # Skip Docker if explicitly disabled via environment variable
         env = get_env()
         if env.get('TEST_NO_DOCKER', 'false').lower() == 'true':
             self.docker_enabled = False
