@@ -708,7 +708,7 @@ async def create_manager_with_enhanced_cleanup(user_context: Any, mode: WebSocke
 
 # Export key components
 __all__ = [
-    'EnhancedWebSocketManagerFactory',
+    'EnhancedWSFactory',
     'ZombieDetectionEngine',
     'CleanupLevel',
     'ManagerHealthStatus',

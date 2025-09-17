@@ -448,11 +448,11 @@ class _LegacyWSAdapter:
 
 
 # Global adapter instance (singleton for backward compatibility)
-_adapter_instance: Optional[_LegacyWebSocketManagerAdapter] = None
+_adapter_instance: Optional[_LegacyWSAdapter] = None
 _adapter_lock = threading.RLock()
 
 
-def get_legacy_websocket_manager() -> _LegacyWebSocketManagerAdapter:
+def get_legacy_websocket_manager() -> _LegacyWSAdapter:
     """
     Get the legacy WebSocket manager adapter.
     
@@ -465,7 +465,7 @@ def get_legacy_websocket_manager() -> _LegacyWebSocketManagerAdapter:
     global _adapter_instance
     with _adapter_lock:
         if _adapter_instance is None:
-            _adapter_instance = _LegacyWebSocketManagerAdapter()
+            _adapter_instance = _LegacyWSAdapter()
         return _adapter_instance
 
 
@@ -500,7 +500,7 @@ def migrate_singleton_usage(user_context: UserExecutionContext) -> UnifiedWebSoc
 # ===== BACKWARD COMPATIBILITY ALIASES =====
 
 # Create alias for backward compatibility
-WebSocketManagerAdapter = _LegacyWebSocketManagerAdapter
+WebSocketManagerAdapter = _LegacyWSAdapter
 
 __all__ = [
     "get_legacy_websocket_manager",
@@ -508,5 +508,5 @@ __all__ = [
     "WebSocketManagerAdapter"  # Backward compatibility
 ]
 
-# DEPRECATED: WebSocketManagerAdapter is now an alias for _LegacyWebSocketManagerAdapter
+# DEPRECATED: WebSocketManagerAdapter is now an alias for _LegacyWSAdapter
 # Use get_websocket_manager() directly from canonical_import_patterns module
