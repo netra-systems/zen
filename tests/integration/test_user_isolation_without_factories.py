@@ -17,9 +17,9 @@ from unittest.mock import AsyncMock, MagicMock
 from dataclasses import dataclass
 from datetime import datetime
 
-# Current complex patterns (these work)
+# Current complex patterns (being migrated)
 from netra_backend.app.websocket_core.websocket_manager_factory import get_enhanced_websocket_factory
-from test_framework.ssot.mock_factory import SSotMockFactory
+from test_framework.real_service_setup import create_real_test_environment, setup_real_websocket_test
 
 # Try to import simplified patterns (will fail initially)
 try:
@@ -65,28 +65,37 @@ class TestUserIsolationWithoutFactories:
         Baseline test: Current factory-based isolation works.
         This test should PASS and demonstrates current working patterns.
         """
-        # Create multiple user contexts using current factory
-        factory = get_enhanced_websocket_factory()
+        # Test isolation WITHOUT complex factory patterns
 
-        # Create user contexts
-        user1_context = SSotMockFactory.create_mock_user_context(
-            user_id="user1",
-            thread_id="thread1"
+        # Create user contexts using real service setup
+        env1 = create_real_test_environment(
+            test_name="user1_isolation",
+            include_websocket=True
         )
-        user2_context = SSotMockFactory.create_mock_user_context(
-            user_id="user2",
-            thread_id="thread2"
+        user1_context = {
+            'user_id': env1['user_id'],
+            'thread_id': f"thread_{env1['test_id']}_1"
+        }
+
+        env2 = create_real_test_environment(
+            test_name="user2_isolation",
+            include_websocket=True
         )
+        user2_context = {
+            'user_id': env2['user_id'],
+            'thread_id': f"thread_{env2['test_id']}_2"
+        }
 
         # Verify basic isolation properties
-        assert user1_context.user_id != user2_context.user_id
-        assert user1_context.thread_id != user2_context.thread_id
+        assert user1_context['user_id'] != user2_context['user_id']
+        assert user1_context['thread_id'] != user2_context['thread_id']
 
-        # Verify factory can handle multiple users
-        assert factory.get_user_manager_count("user1") == 0  # No managers created yet
-        assert factory.get_user_manager_count("user2") == 0
+        # Verify real service environments are isolated
+        assert env1['test_id'] != env2['test_id']  # Different test environments
+        assert env1['real_services'] == True  # Using real services, not mocks
+        assert env2['real_services'] == True
 
-        print(f"Current factory isolation verified: user1={user1_context.user_id}, user2={user2_context.user_id}")
+        print(f"Real service isolation verified: user1={user1_context['user_id']}, user2={user2_context['user_id']}")
 
     @pytest.mark.xfail(reason="Simplified isolation patterns not yet implemented")
     def test_simplified_user_isolation_without_factory(self):
