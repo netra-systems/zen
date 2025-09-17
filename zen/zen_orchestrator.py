@@ -2432,7 +2432,7 @@ async def main():
     print("For comprehensive token usage analytics, historical data,")
     print("and advanced reporting features, upgrade to Netra Apex.")
     print("")
-    print("📧 Contact us: hello@netrasystems.ai")
+    print("📧 Contact us: anthony.chaudhary@netrasystems.ai")
     print("🌐 Learn more: https://netrasystems.ai/")
     print("="*80)
 
