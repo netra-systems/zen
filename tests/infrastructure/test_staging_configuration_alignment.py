@@ -39,7 +39,7 @@ class TestStagingConfigurationAlignment(SSotBaseTestCase):
         Based on CLAUDE.md Issue #1278 remediation, the current staging domains are:
         - Backend/Auth: https://staging.netrasystems.ai
         - Frontend: https://staging.netrasystems.ai  
-        - WebSocket: wss://api-staging.netrasystems.ai
+        - WebSocket: wss://api.staging.netrasystems.ai
         
         DEPRECATED (DO NOT USE): *.staging.netrasystems.ai URLs
         """
@@ -47,7 +47,7 @@ class TestStagingConfigurationAlignment(SSotBaseTestCase):
             "backend": "https://staging.netrasystems.ai",
             "auth": "https://staging.netrasystems.ai",
             "frontend": "https://staging.netrasystems.ai",
-            "websocket": "wss://api-staging.netrasystems.ai",
+            "websocket": "wss://api.staging.netrasystems.ai",
         }
         
         # Validate URL configuration in staging environment
@@ -217,17 +217,17 @@ class TestStagingConfigurationAlignment(SSotBaseTestCase):
         Test that staging WebSocket endpoint is reachable.
         
         This validates the WebSocket URL configuration per Issue #1278 remediation.
-        WebSocket endpoint should be: wss://api-staging.netrasystems.ai
+        WebSocket endpoint should be: wss://api.staging.netrasystems.ai
         """
-        websocket_url = staging_env.get("WEBSOCKET_URL", "wss://api-staging.netrasystems.ai")
+        websocket_url = staging_env.get("WEBSOCKET_URL", "wss://api.staging.netrasystems.ai")
         
         # Validate WebSocket URL format
         if not websocket_url.startswith("wss://"):
             pytest.fail(f"WebSocket URL should use wss:// scheme, got: {websocket_url}")
         
-        if "api-staging.netrasystems.ai" not in websocket_url:
+        if "api.staging.netrasystems.ai" not in websocket_url:
             pytest.fail(
-                f"WebSocket URL should use api-staging.netrasystems.ai domain "
+                f"WebSocket URL should use api.staging.netrasystems.ai domain "
                 f"per Issue #1278 remediation, got: {websocket_url}"
             )
         

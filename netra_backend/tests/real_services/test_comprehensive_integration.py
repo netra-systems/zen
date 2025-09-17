@@ -28,6 +28,7 @@ from typing import Dict, List, Optional, Any
 from contextlib import asynccontextmanager
 import psutil
 import uuid
+from sqlalchemy import text
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from shared.isolated_environment import IsolatedEnvironment
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -194,7 +195,7 @@ class ComprehensiveIntegrationTestServer:
             start_time = time.time()
             try:
                 async with self.database_manager.get_session() as session:
-                    await session.execute('SELECT 1')
+                    await session.execute(text('SELECT 1'))
                     self.performance_metrics['database_operations'] += 1
                 execution_time = time.time() - start_time
                 return {'type': 'performance_result', 'test_type': test_type, 'success': True, 'execution_time': execution_time, 'operations_count': self.performance_metrics['database_operations']}

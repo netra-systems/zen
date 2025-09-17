@@ -21,6 +21,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
+from sqlalchemy import text
 
 from netra_backend.app.core.network_constants import (
     DatabaseConstants,
@@ -501,7 +502,7 @@ class DatabaseConnector:
     
     async def _validate_postgres_health(self, conn) -> None:
         """Validate PostgreSQL connection health."""
-        await conn.execute("SELECT 1")
+        await conn.execute(text("SELECT 1"))
     
     async def _test_postgresql_basic(self, connection: DatabaseConnection) -> bool:
         """Test PostgreSQL connection without asyncpg."""
@@ -514,7 +515,7 @@ class DatabaseConnector:
             
             conn = psycopg2.connect(url)
             cursor = conn.cursor()
-            cursor.execute("SELECT 1")
+            cursor.execute(text("SELECT 1"))
             cursor.close()
             conn.close()
             return True

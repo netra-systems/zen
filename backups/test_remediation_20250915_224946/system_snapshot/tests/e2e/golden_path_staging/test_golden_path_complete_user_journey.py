@@ -31,7 +31,7 @@ from enum import Enum
 class StagingTestConfig:
     """Configuration for staging environment tests."""
     base_url: str = "https://staging.netrasystems.ai"
-    websocket_url: str = "wss://api-staging.netrasystems.ai"
+    websocket_url: str = "wss://api.staging.netrasystems.ai"
     api_timeout: int = 30
     websocket_timeout: int = 60
     max_retries: int = 3

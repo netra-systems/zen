@@ -56,7 +56,7 @@ class Issue347GoldenPathE2EStagingValidationTests(SSotAsyncTestCase):
         # Validate staging environment configuration
         staging_config = {
             "backend_url": cls.env.get("STAGING_BACKEND_URL", "https://staging.netrasystems.ai"),
-            "websocket_url": cls.env.get("STAGING_WEBSOCKET_URL", "wss://api-staging.netrasystems.ai"),
+            "websocket_url": cls.env.get("STAGING_WEBSOCKET_URL", "wss://api.staging.netrasystems.ai"),
             "auth_required": True,
             "real_llm_required": True
         }

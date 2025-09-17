@@ -15,7 +15,7 @@ from datetime import datetime
 MOCK_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0X3VzZXIiLCJleHAiOjk5OTk5OTk5OTksImlhdCI6MTYzMDAwMDAwMH0.test"
 
 async def test_websocket_with_auth():
-    uri = "wss://api-staging.netrasystems.ai/ws"
+    uri = "wss://api.staging.netrasystems.ai/ws"
     
     print(f"[{datetime.now()}] Testing WebSocket with auth token...")
     print(f"[{datetime.now()}] Connecting to staging WebSocket: {uri}")
@@ -82,7 +82,7 @@ async def test_websocket_with_auth():
 
 async def test_basic_connection():
     """Test basic connection without auth first"""
-    uri = "wss://api-staging.netrasystems.ai/ws"
+    uri = "wss://api.staging.netrasystems.ai/ws"
     
     print(f"[{datetime.now()}] Testing basic WebSocket connection...")
     print(f"[{datetime.now()}] Connecting to: {uri}")

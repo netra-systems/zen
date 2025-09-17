@@ -36,7 +36,7 @@ class InfrastructureFixValidator:
             "backend": "https://staging.netrasystems.ai",
             "auth": "https://staging.netrasystems.ai", 
             "frontend": "https://staging.netrasystems.ai",
-            "websocket": "wss://api-staging.netrasystems.ai"
+            "websocket": "wss://api.staging.netrasystems.ai"
         }
         
         # Comprehensive validation paths

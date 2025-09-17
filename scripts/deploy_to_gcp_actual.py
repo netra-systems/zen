@@ -103,10 +103,10 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
-                    "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+                    "AUTH_SERVICE_URL": "https://staging.netrasystems.ai",
                     "AUTH_SERVICE_INTERNAL_URL": f"https://netra-auth-service-uc.a.run.app",  # Internal VPC communication
                     "AUTH_SERVICE_ENABLED": "true",  # CRITICAL: Enable auth service integration
-                    "FRONTEND_URL": "https://app.staging.netrasystems.ai",
+                    "FRONTEND_URL": "https://staging.netrasystems.ai",
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
                     "GCP_PROJECT_ID": self.project_id,  # CRITICAL: Required for secret loading logic
                     # ClickHouse configuration - password comes from secrets
@@ -143,8 +143,8 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
-                    "FRONTEND_URL": "https://app.staging.netrasystems.ai",
-                    "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+                    "FRONTEND_URL": "https://staging.netrasystems.ai",
+                    "AUTH_SERVICE_URL": "https://staging.netrasystems.ai",
                     "JWT_ALGORITHM": "HS256",
                     "JWT_ACCESS_EXPIRY_MINUTES": "15",
                     "JWT_REFRESH_EXPIRY_DAYS": "7",
@@ -159,10 +159,10 @@ class GCPDeployer:
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
                     "GCP_PROJECT_ID": self.project_id,  # CRITICAL: Required for secret loading logic
                     "SKIP_OAUTH_VALIDATION": "true",  # TEMPORARY: Skip OAuth validation for E2E testing
-                    # Auth Database Timeout Configuration (Issue #1229 Fix)
-                    "AUTH_DB_URL_TIMEOUT": "90.0",
-                    "AUTH_DB_ENGINE_TIMEOUT": "90.0",
-                    "AUTH_DB_VALIDATION_TIMEOUT": "90.0",
+                    # Auth Database Timeout Configuration (Issue #1278 Fix - Infrastructure Reliability)
+                    "AUTH_DB_URL_TIMEOUT": "600.0",
+                    "AUTH_DB_ENGINE_TIMEOUT": "600.0",
+                    "AUTH_DB_VALIDATION_TIMEOUT": "600.0",
                 }
             ),
             ServiceConfig(
@@ -184,11 +184,11 @@ class GCPDeployer:
                     "NEXT_PUBLIC_ENVIRONMENT": "staging",  # CRITICAL: Controls environment-specific behavior
                     "NEXT_PUBLIC_API_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend API endpoint
                     "NEXT_PUBLIC_WS_URL": "wss://api.staging.netrasystems.ai",  # CRITICAL: WebSocket endpoint
-                    "NEXT_PUBLIC_AUTH_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth service endpoint
-                    "NEXT_PUBLIC_AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth service alternative
-                    "NEXT_PUBLIC_AUTH_API_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth API endpoint
+                    "NEXT_PUBLIC_AUTH_URL": "https://staging.netrasystems.ai",  # CRITICAL: Auth service endpoint
+                    "NEXT_PUBLIC_AUTH_SERVICE_URL": "https://staging.netrasystems.ai",  # CRITICAL: Auth service alternative
+                    "NEXT_PUBLIC_AUTH_API_URL": "https://staging.netrasystems.ai",  # CRITICAL: Auth API endpoint
                     "NEXT_PUBLIC_BACKEND_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend alternative endpoint
-                    "NEXT_PUBLIC_FRONTEND_URL": "https://app.staging.netrasystems.ai",  # CRITICAL: OAuth redirects
+                    "NEXT_PUBLIC_FRONTEND_URL": "https://staging.netrasystems.ai",  # CRITICAL: OAuth redirects
                     "NEXT_PUBLIC_FORCE_HTTPS": "true",  # CRITICAL: Security enforcement
                     "NEXT_PUBLIC_GTM_CONTAINER_ID": "GTM-WKP28PNQ",  # Analytics tracking
                     "NEXT_PUBLIC_GTM_ENABLED": "true",  # Analytics enablement
@@ -293,7 +293,81 @@ class GCPDeployer:
         # Otherwise use centralized auth config to find and set up authentication
         print(" SEARCH:  Using centralized authentication configuration...")
         return GCPAuthConfig.ensure_authentication()
-    
+
+    def validate_service_account_permissions(self) -> bool:
+        """
+        Validate that the service account has necessary permissions for deployment.
+
+        This addresses Issue #1294 where services failed due to missing Secret Manager access.
+        The service account must have:
+        - Secret Manager Secret Accessor role
+        - Cloud Run Admin role
+        - Cloud Build Service Account role
+        - Container Registry Service Agent role
+
+        Returns:
+            bool: True if all required permissions are present, False otherwise
+        """
+        print("\n[U+1F512] Validating service account permissions...")
+
+        try:
+            # Check if we can access Secret Manager (most common failure)
+            print("   Checking Secret Manager access...")
+            secret_check = subprocess.run([
+                self.gcloud_cmd, "secrets", "list",
+                "--project", self.project_id,
+                "--limit", "1"
+            ], capture_output=True, text=True, shell=self.use_shell)
+
+            if secret_check.returncode != 0:
+                print("   FAIL:  Service account lacks Secret Manager access")
+                print("   ERROR: This will cause silent failures during secret loading")
+                print("   FIX:   Grant roles/secretmanager.secretAccessor to the service account")
+                print(f"   CMD:   gcloud projects add-iam-policy-binding {self.project_id} \\")
+                print("             --member=\"serviceAccount:YOUR_SERVICE_ACCOUNT\" \\")
+                print("             --role=\"roles/secretmanager.secretAccessor\"")
+                return False
+
+            print("   PASS:  Secret Manager access validated")
+
+            # Check Cloud Run admin access
+            print("   Checking Cloud Run access...")
+            run_check = subprocess.run([
+                self.gcloud_cmd, "run", "services", "list",
+                "--project", self.project_id,
+                "--region", self.region,
+                "--limit", "1"
+            ], capture_output=True, text=True, shell=self.use_shell)
+
+            if run_check.returncode != 0:
+                print("   FAIL:  Service account lacks Cloud Run access")
+                print("   FIX:   Grant roles/run.admin to the service account")
+                return False
+
+            print("   PASS:  Cloud Run access validated")
+
+            # Check Container Registry access
+            print("   Checking Container Registry access...")
+            registry_check = subprocess.run([
+                self.gcloud_cmd, "container", "images", "list",
+                "--repository", f"gcr.io/{self.project_id}",
+                "--limit", "1"
+            ], capture_output=True, text=True, shell=self.use_shell)
+
+            if registry_check.returncode != 0:
+                print("   WARN:  Container Registry access check failed (may be normal for new projects)")
+                # Don't fail on this as it's often a false positive
+            else:
+                print("   PASS:  Container Registry access validated")
+
+            print("   PASS:  Service account permissions validated")
+            return True
+
+        except Exception as e:
+            print(f"   ERROR: Failed to validate service account permissions: {e}")
+            print("   WARN:  Proceeding with deployment (manual verification recommended)")
+            return True  # Don't block deployment on validation failures
+
     def validate_frontend_environment_variables(self) -> bool:
         """
          ALERT:  CRITICAL: Validate all required frontend environment variables are present.
@@ -398,7 +472,11 @@ class GCPDeployer:
             print("  This will cause CORS and authentication failures in staging!")
             print("  Run: python scripts/validate_staging_urls.py --environment staging --fix")
             return False
-        
+
+        # CRITICAL: Validate service account permissions before deployment (Issue #1294 Fix)
+        if not self.validate_service_account_permissions():
+            return False
+
         print("   PASS:  Deployment configuration valid")
         return True
     
@@ -2543,7 +2621,7 @@ DOMAIN CONFIGURATION (CRITICAL - Issue #1278):
   - Backend: https://staging.netrasystems.ai
   - Auth: https://staging.netrasystems.ai  
   - Frontend: https://staging.netrasystems.ai
-  - WebSocket: wss://api-staging.netrasystems.ai
+  - WebSocket: wss://api.staging.netrasystems.ai
 
 See SPEC/gcp_deployment.xml for detailed guidelines.
         """

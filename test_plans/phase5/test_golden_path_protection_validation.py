@@ -52,7 +52,7 @@ class TestGoldenPathProtectionValidation:
     @pytest.fixture
     def staging_environment_config(self):
         """Staging environment configuration for Golden Path testing."""
-        return {'auth_url': 'https://staging.netrasystems.ai', 'api_url': 'https://staging.netrasystems.ai', 'websocket_url': 'wss://api-staging.netrasystems.ai', 'frontend_url': 'https://staging.netrasystems.ai', 'environment': 'staging'}
+        return {'auth_url': 'https://staging.netrasystems.ai', 'api_url': 'https://staging.netrasystems.ai', 'websocket_url': 'wss://api.staging.netrasystems.ai', 'frontend_url': 'https://staging.netrasystems.ai', 'environment': 'staging'}
 
     @pytest.fixture
     def test_user_credentials(self):

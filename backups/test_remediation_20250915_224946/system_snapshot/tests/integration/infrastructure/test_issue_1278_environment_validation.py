@@ -26,7 +26,7 @@ Business Value Justification (BVJ):
 
 **CRITICAL DOMAIN MIGRATION (Issue #1278):**
 FROM (DEPRECATED): *.staging.netrasystems.ai
-TO (CURRENT): staging.netrasystems.ai, api-staging.netrasystems.ai
+TO (CURRENT): staging.netrasystems.ai, api.staging.netrasystems.ai
 
 Test Plan:
 1. Domain configuration validation across services
@@ -77,7 +77,7 @@ class Issue1278EnvironmentValidationTests(SSotAsyncTestCase):
             'current_domains': {
                 'FRONTEND_URL': 'https://staging.netrasystems.ai',
                 'BACKEND_URL': 'https://staging.netrasystems.ai',
-                'WEBSOCKET_URL': 'wss://api-staging.netrasystems.ai',
+                'WEBSOCKET_URL': 'wss://api.staging.netrasystems.ai',
                 'API_BASE_URL': 'https://staging.netrasystems.ai/api',
                 'HEALTH_CHECK_URL': 'https://staging.netrasystems.ai/health'
             },
@@ -189,7 +189,7 @@ class Issue1278EnvironmentValidationTests(SSotAsyncTestCase):
                             await asyncio.sleep(ssl_validation_time)
 
                             # Current domains work (staging.netrasystems.ai pattern)
-                            ssl_valid = domain in ['staging.netrasystems.ai', 'api-staging.netrasystems.ai']
+                            ssl_valid = domain in ['staging.netrasystems.ai', 'api.staging.netrasystems.ai']
 
                         else:  # deprecated_domains
                             # Deprecated domains have SSL certificate issues
@@ -257,7 +257,7 @@ class Issue1278EnvironmentValidationTests(SSotAsyncTestCase):
             f"CURRENT DOMAIN SSL VALIDATION FAILURE: Success rate {current_success_rate:.1f}% for current domains. "
             f"Current domain results: {current_domain_results}. "
             f"Issue #1278: Current domain configuration (*.netrasystems.ai) should have valid SSL certificates. "
-            f"Expected ≥80% success rate for staging.netrasystems.ai and api-staging.netrasystems.ai domains."
+            f"Expected ≥80% success rate for staging.netrasystems.ai and api.staging.netrasystems.ai domains."
         )
 
         assert deprecated_failure_rate >= 90.0, (
@@ -275,7 +275,7 @@ class Issue1278EnvironmentValidationTests(SSotAsyncTestCase):
 
         # Verify specific working domains
         staging_main_result = next((r for r in current_domain_results if 'staging.netrasystems.ai' in r['domain']), None)
-        api_staging_result = next((r for r in current_domain_results if 'api-staging.netrasystems.ai' in r['domain']), None)
+        api_staging_result = next((r for r in current_domain_results if 'api.staging.netrasystems.ai' in r['domain']), None)
 
         assert staging_main_result and staging_main_result['ssl_valid'], (
             f"CRITICAL DOMAIN FAILURE: staging.netrasystems.ai SSL validation failed. "
@@ -284,7 +284,7 @@ class Issue1278EnvironmentValidationTests(SSotAsyncTestCase):
         )
 
         assert api_staging_result and api_staging_result['ssl_valid'], (
-            f"CRITICAL WEBSOCKET DOMAIN FAILURE: api-staging.netrasystems.ai SSL validation failed. "
+            f"CRITICAL WEBSOCKET DOMAIN FAILURE: api.staging.netrasystems.ai SSL validation failed. "
             f"Result: {api_staging_result}. "
             f"Issue #1278: WebSocket domain must have valid SSL certificate for real-time functionality."
         )
@@ -350,7 +350,7 @@ class Issue1278EnvironmentValidationTests(SSotAsyncTestCase):
                     config_score -= 30.0
 
             # Check for current working domain patterns
-            current_patterns = ['staging.netrasystems.ai', 'api-staging.netrasystems.ai']
+            current_patterns = ['staging.netrasystems.ai', 'api.staging.netrasystems.ai']
             current_pattern_found = any(
                 pattern in url for pattern in current_patterns
                 for url in [frontend_url, backend_url, websocket_url]
@@ -610,7 +610,7 @@ class Issue1278EnvironmentValidationTests(SSotAsyncTestCase):
             },
             {
                 'service': 'websocket_api',
-                'current_endpoint': 'wss://api-staging.netrasystems.ai/ws',
+                'current_endpoint': 'wss://api.staging.netrasystems.ai/ws',
                 'deprecated_endpoint': 'wss://ws.staging.netrasystems.ai/ws',
                 'endpoint_type': 'websocket'
             },
@@ -719,7 +719,7 @@ class Issue1278EnvironmentValidationTests(SSotAsyncTestCase):
         assert websocket_result['current_accessible'], (
             f"CRITICAL WEBSOCKET ENDPOINT FAILURE: WebSocket endpoint not accessible. "
             f"WebSocket result: {websocket_result}. "
-            f"Issue #1278: api-staging.netrasystems.ai WebSocket endpoint critical for real-time functionality."
+            f"Issue #1278: api.staging.netrasystems.ai WebSocket endpoint critical for real-time functionality."
         )
 
         assert api_result['current_accessible'], (

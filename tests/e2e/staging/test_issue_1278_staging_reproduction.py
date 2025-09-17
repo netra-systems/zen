@@ -21,7 +21,7 @@ class TestIssue1278StagingReproduction(BaseE2ETest):
     # Staging environment URLs (must use *.netrasystems.ai domains)
     STAGING_BACKEND_URL = "https://staging.netrasystems.ai"
     STAGING_FRONTEND_URL = "https://staging.netrasystems.ai"
-    STAGING_WEBSOCKET_URL = "wss://api-staging.netrasystems.ai"
+    STAGING_WEBSOCKET_URL = "wss://api.staging.netrasystems.ai"
 
     @pytest.mark.e2e
     @pytest.mark.staging

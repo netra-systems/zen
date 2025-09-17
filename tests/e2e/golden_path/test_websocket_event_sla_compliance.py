@@ -76,7 +76,7 @@ class WebSocketEventSLAComplianceTests(BaseE2ETest):
         # GCP staging endpoints
         self.staging_websocket_url = "wss://staging.netrasystems.ai/ws"
         self.staging_auth_url = "https://auth.netrasystems.ai"
-        self.staging_api_url = "https://api-staging.netrasystems.ai"
+        self.staging_api_url = "https://api.staging.netrasystems.ai"
         
         # Required critical events for business value
         self.critical_events = [

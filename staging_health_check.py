@@ -15,7 +15,7 @@ STAGING_SERVICES = {
     'backend': 'https://staging.netrasystems.ai',  # Load balanced backend
     'auth': 'https://staging.netrasystems.ai',     # Same load balancer, different routes
     'frontend': 'https://staging.netrasystems.ai', # Same load balancer
-    'websocket': 'https://api-staging.netrasystems.ai'  # WebSocket endpoint
+    'websocket': 'https://api.staging.netrasystems.ai'  # WebSocket endpoint
 }
 
 async def check_service_health(service_name, base_url, session):

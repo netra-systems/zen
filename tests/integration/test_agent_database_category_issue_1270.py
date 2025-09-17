@@ -32,7 +32,7 @@ from unittest.mock import Mock, AsyncMock, patch
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from test_framework.base_integration_test import BaseIntegrationTest
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.real_services_test_fixtures import real_postgres_connection
 from test_framework.environment_fixtures import isolated_test_env
 from shared.isolated_environment import get_env
@@ -67,7 +67,7 @@ class MockAgentForIssue1270:
         return {"status": "success", "database_used": True}
 
 
-class TestAgentDatabaseCategoryIssue1270(BaseIntegrationTest):
+class TestAgentDatabaseCategoryIssue1270(SSotBaseTestCase):
     """Integration tests reproducing Issue #1270 database category failures."""
 
     @pytest.mark.integration

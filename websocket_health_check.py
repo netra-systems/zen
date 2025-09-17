@@ -42,7 +42,7 @@ async def main():
     print("=== WEBSOCKET ENDPOINT HEALTH CHECK ===")
 
     # Test WebSocket endpoint based on current configuration
-    websocket_url = "wss://api-staging.netrasystems.ai/ws"
+    websocket_url = "wss://api.staging.netrasystems.ai/ws"
 
     print(f"Testing WebSocket: {websocket_url}")
 

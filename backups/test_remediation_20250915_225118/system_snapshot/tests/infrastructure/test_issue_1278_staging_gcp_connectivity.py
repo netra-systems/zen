@@ -46,7 +46,7 @@ class TestIssue1278StagingGCPConnectivity(SSotAsyncTestCase):
         cls.staging_domains = {
             'backend': 'https://staging.netrasystems.ai',
             'frontend': 'https://staging.netrasystems.ai', 
-            'websocket': 'wss://api-staging.netrasystems.ai'
+            'websocket': 'wss://api.staging.netrasystems.ai'
         }
         
     async def test_staging_backend_health_endpoint(self):
@@ -215,7 +215,7 @@ class TestIssue1278StagingGCPConnectivity(SSotAsyncTestCase):
             
             domains_to_test = [
                 'staging.netrasystems.ai',
-                'api-staging.netrasystems.ai'
+                'api.staging.netrasystems.ai'
             ]
             
             for domain in domains_to_test:
@@ -314,7 +314,7 @@ class TestIssue1278StagingGCPConnectivity(SSotAsyncTestCase):
             # Test DNS resolution for staging domains
             domains_to_resolve = [
                 'staging.netrasystems.ai',
-                'api-staging.netrasystems.ai'
+                'api.staging.netrasystems.ai'
             ]
             
             resolved_ips = {}

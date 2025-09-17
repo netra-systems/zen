@@ -46,7 +46,7 @@ class TestDomainConfiguration1278(SSotAsyncTestCase):
         correct_staging_domains = [
             "staging.netrasystems.ai",      # Backend/Auth
             "staging.netrasystems.ai",      # Frontend
-            "api-staging.netrasystems.ai"   # WebSocket
+            "api.staging.netrasystems.ai"   # WebSocket
         ]
 
         # Deprecated domains that cause SSL failures
@@ -140,7 +140,7 @@ class TestDomainConfiguration1278(SSotAsyncTestCase):
         # Test DNS resolution for staging domains
         staging_domains = [
             "staging.netrasystems.ai",
-            "api-staging.netrasystems.ai"
+            "api.staging.netrasystems.ai"
         ]
 
         dns_results = {}
@@ -205,7 +205,7 @@ class TestDomainConfiguration1278(SSotAsyncTestCase):
         # Test HTTP connectivity to staging endpoints
         staging_endpoints = {
             "backend": "https://staging.netrasystems.ai/health",
-            "api": "https://api-staging.netrasystems.ai/health",
+            "api": "https://api.staging.netrasystems.ai/health",
             "frontend": "https://staging.netrasystems.ai/"
         }
 
@@ -309,11 +309,11 @@ class TestDomainConfiguration1278(SSotAsyncTestCase):
                     f"FRONTEND_URL: Should use staging.netrasystems.ai domain: {frontend_url}"
                 )
 
-        # WebSocket should use api-staging.netrasystems.ai
+        # WebSocket should use api.staging.netrasystems.ai
         websocket_url = current_config.get("WEBSOCKET_URL", "")
-        if websocket_url and "api-staging.netrasystems.ai" not in websocket_url:
+        if websocket_url and "api.staging.netrasystems.ai" not in websocket_url:
             domain_validation_issues.append(
-                f"WEBSOCKET_URL: Should use api-staging.netrasystems.ai domain: {websocket_url}"
+                f"WEBSOCKET_URL: Should use api.staging.netrasystems.ai domain: {websocket_url}"
             )
 
         if domain_validation_issues:

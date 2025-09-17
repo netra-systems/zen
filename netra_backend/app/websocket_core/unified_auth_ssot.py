@@ -666,27 +666,40 @@ class UnifiedWebSocketAuthenticator:
             return await self._fallback_via_legacy_jwt_decoding(token, auth_method)
 
     async def _fallback_via_legacy_jwt_decoding(self, token: str, auth_method: str) -> WebSocketAuthResult:
-        """Legacy JWT decoding fallback (Phase 2 compatibility)."""
+        """
+        SSOT COMPLIANCE: Use auth service for all JWT validation.
+
+        This method now routes all JWT validation through the auth service,
+        ensuring single source of truth for authentication.
+        """
         try:
-            import jwt
-            from shared.jwt_secret_manager import get_unified_jwt_secret
+            # SSOT: Always use auth service, never decode JWT directly
+            from netra_backend.app.clients.auth_client_core import auth_client
 
-            secret = get_unified_jwt_secret()
-            decoded = jwt.decode(token, secret, algorithms=['HS256'])
+            logger.info(f"SSOT: Routing JWT validation through auth service for {auth_method}")
+            validation_result = await auth_client.validate_token_jwt(token)
 
-            return WebSocketAuthResult(
-                success=True,
-                user_id=decoded.get('sub'),
-                email=decoded.get('email'),
-                permissions=decoded.get('permissions', []),
-                auth_method=f"{auth_method}-legacy-fallback"
-            )
+            if validation_result and validation_result.get('valid'):
+                return WebSocketAuthResult(
+                    success=True,
+                    user_id=validation_result.get('user_id'),
+                    email=validation_result.get('email'),
+                    permissions=validation_result.get('permissions', []),
+                    auth_method=f"{auth_method}-ssot-auth-service"
+                )
+            else:
+                logger.error(f"❌ Auth service JWT validation failed for {auth_method}")
+                return WebSocketAuthResult(
+                    success=False,
+                    error_message="Auth service JWT validation failed",
+                    auth_method=auth_method
+                )
 
         except Exception as e:
-            logger.error(f"❌ Legacy JWT validation failed: {str(e)}")
+            logger.error(f"❌ SSOT auth service validation failed: {str(e)}")
             return WebSocketAuthResult(
                 success=False,
-                error_message=f"Legacy JWT validation failed: {str(e)}",
+                error_message=f"SSOT auth service validation failed: {str(e)}",
                 auth_method=auth_method
             )
     
@@ -794,6 +807,26 @@ class UnifiedWebSocketAuthenticator:
                 error_message=f"Authentication error: {str(e)}",
                 auth_method="manual-error"
             )
+
+    def _should_allow_bypass(self) -> bool:
+        """
+        SSOT COMPLIANCE: Control when authentication bypass is allowed.
+
+        Returns True only in controlled test environments.
+        """
+        try:
+            from shared.isolated_environment import get_env
+
+            env = get_env()
+            environment = env.get('ENVIRONMENT', '').lower()
+
+            # Only allow bypass in specific test environments
+            allowed_envs = ['test', 'development', 'local']
+            return environment in allowed_envs
+
+        except Exception as e:
+            logger.debug(f"Environment check failed: {e}")
+            return False
 
 # SSOT EXPORT: Single authenticator instance
 websocket_authenticator = UnifiedWebSocketAuthenticator()

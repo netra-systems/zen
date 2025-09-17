@@ -12,6 +12,7 @@ import logging
 from typing import Dict, Any, Optional
 from datetime import datetime, UTC
 import asyncio
+from sqlalchemy import text
 
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.database.connection import auth_db
@@ -99,7 +100,7 @@ class DatabaseHealthService:
             # Simple connectivity test
             if hasattr(db, 'execute') and callable(db.execute):
                 # Try a simple query if database supports it
-                await db.execute("SELECT 1")
+                await db.execute(text("SELECT 1"))
                 return {
                     "status": "healthy",
                     "message": "Database connectivity confirmed"

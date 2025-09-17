@@ -31,7 +31,7 @@ class InfrastructureHealthValidator:
         self.staging_domains = {
             "backend": "https://staging.netrasystems.ai",
             "auth": "https://auth.staging.netrasystems.ai",
-            "api": "https://api-staging.netrasystems.ai"
+            "api": "https://api.staging.netrasystems.ai"
         }
         self.timeout_settings = {
             "connection_timeout": 10.0,

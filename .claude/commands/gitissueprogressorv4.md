@@ -13,7 +13,14 @@ Context:
         - ALWAYS stay on Branch = develop-long-lived
         - **All work performed on**: develop-long-lived
         - No PR, issue creation is the log and all work is done directly on the dev branch.
-    7.  Issue Exclusion List (IEL): generally do not create issues for the following cases: merge conflicts, local env specific issues
+    7.  Issue Exclusion List (IEL): generally do not work on or create issues in the following cases:
+        7.1 merge conflicts
+        7.2 local env specific issues
+        7.3 P3 low priority issues
+        7.4 issues that obviously have "excluded" language, such as "do not start until system is stable!!"
+        7.5 feature freeze! for now ignore all issues like "enhancment"
+        IEL can be overriden if expressly prompted with the keyword "override" in the name of the issue.
+
     8. AGENT_SESSION_ID = agent-session-{datetime}
     9. RESEARCH_NEEDED = True : (Defaults to true, step 0 checks it)
     10. PLANNING_NEEDED = True : (Defaults to true, step 0 checks it)
