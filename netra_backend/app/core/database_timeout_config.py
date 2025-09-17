@@ -658,3 +658,237 @@ def log_connection_performance_summary(environment: str) -> None:
             logger.warning(f"  VPC Performance Issues: {'; '.join(vpc_performance['performance_issues'])}")
         if vpc_performance.get('recommendations'):
             logger.info(f"  Recommendations: {'; '.join(vpc_performance['recommendations'])}")
+
+
+def calculate_adaptive_timeout(environment: str, operation_type: str,
+                             base_timeout: Optional[float] = None) -> float:
+    """Calculate adaptive timeout based on historical performance data.
+
+    This function implements Issue #1005 Master Plan Phase 1: Enhanced timeout
+    configuration with adaptive calculation based on observed connection patterns.
+
+    Args:
+        environment: Environment name (development, test, staging, production)
+        operation_type: Type of operation (connection, initialization, table_setup, etc.)
+        base_timeout: Optional base timeout to adjust, defaults to config value
+
+    Returns:
+        Adaptive timeout value in seconds that accounts for historical performance
+
+    Business Value Justification (BVJ):
+    - Segment: Platform/Internal
+    - Business Goal: Staging Environment Stability & Golden Path Reliability
+    - Value Impact: Prevents false timeout failures while maintaining responsiveness
+    - Strategic Impact: Enables reliable CI/CD and customer confidence
+    """
+    timeout_config = get_database_timeout_config(environment)
+
+    # Get base timeout from config if not provided
+    if base_timeout is None:
+        base_timeout = timeout_config.get(f"{operation_type}_timeout", 30.0)
+
+    # Get historical performance metrics
+    metrics = _connection_monitor.get_environment_metrics(environment)
+
+    if not metrics or metrics.connection_attempts < 5:
+        # Insufficient data - use base timeout with small safety margin
+        safety_factor = 1.2 if is_cloud_sql_environment(environment) else 1.1
+        adaptive_timeout = base_timeout * safety_factor
+        logger.debug(f"Adaptive timeout for {environment}/{operation_type}: {adaptive_timeout:.2f}s "
+                    f"(insufficient data, base: {base_timeout:.2f}s, factor: {safety_factor})")
+        return adaptive_timeout
+
+    # Calculate performance-based adjustments
+    avg_time = metrics.get_average_connection_time()
+    recent_avg = metrics.get_recent_average_connection_time(window_size=10)
+    success_rate = metrics.get_success_rate()
+
+    # Base multiplier starts at 1.0
+    multiplier = 1.0
+
+    # Adjust based on recent performance trends
+    if recent_avg > avg_time * 1.3:
+        # Recent performance is degrading - increase timeout
+        multiplier += 0.3
+        logger.debug(f"Performance degradation detected: recent {recent_avg:.2f}s vs avg {avg_time:.2f}s")
+    elif recent_avg < avg_time * 0.7:
+        # Recent performance is improving - can reduce timeout slightly
+        multiplier -= 0.1
+        logger.debug(f"Performance improvement detected: recent {recent_avg:.2f}s vs avg {avg_time:.2f}s")
+
+    # Adjust based on success rate
+    if success_rate < 90.0:
+        # Low success rate - increase timeout significantly
+        multiplier += 0.4
+        logger.debug(f"Low success rate detected: {success_rate:.1f}%")
+    elif success_rate > 98.0:
+        # High success rate - can reduce timeout slightly
+        multiplier -= 0.05
+
+    # Adjust based on timeout violations
+    violation_rate = metrics.get_timeout_violation_rate()
+    if violation_rate > 15.0:
+        # High violation rate - increase timeout
+        multiplier += 0.5
+        logger.debug(f"High timeout violation rate: {violation_rate:.1f}%")
+
+    # Apply environment-specific constraints
+    if is_cloud_sql_environment(environment):
+        # Cloud SQL environments need more conservative timeouts
+        multiplier = max(multiplier, 1.1)  # Minimum 10% increase
+        multiplier = min(multiplier, 2.5)  # Maximum 150% increase
+    else:
+        # Local environments can be more aggressive
+        multiplier = max(multiplier, 0.8)  # Minimum 20% decrease
+        multiplier = min(multiplier, 2.0)  # Maximum 100% increase
+
+    # Calculate final adaptive timeout
+    adaptive_timeout = base_timeout * multiplier
+
+    # Apply VPC connector capacity awareness if needed
+    if is_cloud_sql_environment(environment):
+        adaptive_timeout = calculate_capacity_aware_timeout(environment, adaptive_timeout)
+
+    logger.debug(f"Adaptive timeout for {environment}/{operation_type}: {adaptive_timeout:.2f}s "
+                f"(base: {base_timeout:.2f}s, multiplier: {multiplier:.2f}, "
+                f"success_rate: {success_rate:.1f}%, violation_rate: {violation_rate:.1f}%)")
+
+    return adaptive_timeout
+
+
+def get_adaptive_timeout_config(environment: str) -> Dict[str, float]:
+    """Get adaptive timeout configuration for all operation types.
+
+    This function provides the main interface for Issue #1005 Master Plan Phase 1
+    enhanced timeout configuration with adaptive calculation.
+
+    Args:
+        environment: Environment name
+
+    Returns:
+        Dictionary with adaptive timeout values for all operation types
+    """
+    base_config = get_database_timeout_config(environment)
+    adaptive_config = {}
+
+    # Calculate adaptive timeouts for each operation type
+    for operation_type in ["initialization", "table_setup", "connection", "pool", "health_check"]:
+        adaptive_config[f"{operation_type}_timeout"] = calculate_adaptive_timeout(
+            environment, operation_type
+        )
+
+    # Log the adaptive configuration
+    logger.info(f"Adaptive timeout configuration for {environment}:")
+    for key, value in adaptive_config.items():
+        base_value = base_config.get(key, 0.0)
+        change = ((value - base_value) / base_value * 100) if base_value > 0 else 0
+        logger.info(f"  {key}: {value:.1f}s (base: {base_value:.1f}s, change: {change:+.1f}%)")
+
+    return adaptive_config
+
+
+def should_use_adaptive_timeouts(environment: str) -> bool:
+    """Determine if adaptive timeouts should be used for the environment.
+
+    Args:
+        environment: Environment name
+
+    Returns:
+        True if adaptive timeouts should be used, False for fallback to base config
+    """
+    # Always use adaptive timeouts for Cloud SQL environments
+    if is_cloud_sql_environment(environment):
+        return True
+
+    # For local environments, use adaptive if we have sufficient data
+    metrics = _connection_monitor.get_environment_metrics(environment)
+    return metrics is not None and metrics.connection_attempts >= 10
+
+
+def get_failure_type_analysis(environment: str) -> Dict[str, Any]:
+    """Analyze failure types and patterns for SMD bypass logic enhancement.
+
+    This function implements Issue #1005 Master Plan Phase 1: Enhanced SMD bypass
+    logic with intelligent failure type analysis.
+
+    Args:
+        environment: Environment name
+
+    Returns:
+        Dictionary with failure analysis data for SMD bypass decisions
+    """
+    metrics = _connection_monitor.get_environment_metrics(environment)
+
+    if not metrics:
+        return {
+            'environment': environment,
+            'has_data': False,
+            'bypass_recommendation': 'conservative',
+            'reason': 'No historical data available'
+        }
+
+    # Analyze failure patterns
+    success_rate = metrics.get_success_rate()
+    violation_rate = metrics.get_timeout_violation_rate()
+    recent_avg = metrics.get_recent_average_connection_time(window_size=5)
+    overall_avg = metrics.get_average_connection_time()
+
+    # Determine failure characteristics
+    failure_analysis = {
+        'environment': environment,
+        'has_data': True,
+        'connection_attempts': metrics.connection_attempts,
+        'success_rate': success_rate,
+        'timeout_violation_rate': violation_rate,
+        'recent_performance_trend': 'stable',
+        'failure_type': 'none',
+        'severity': 'low',
+        'bypass_recommendation': 'strict',
+        'confidence': 'high'
+    }
+
+    # Analyze performance trends
+    if recent_avg > overall_avg * 1.2:
+        failure_analysis['recent_performance_trend'] = 'degrading'
+        failure_analysis['confidence'] = 'medium'
+    elif recent_avg < overall_avg * 0.8:
+        failure_analysis['recent_performance_trend'] = 'improving'
+
+    # Classify failure types and severity
+    if success_rate < 80.0:
+        failure_analysis['failure_type'] = 'connection_failure'
+        failure_analysis['severity'] = 'critical'
+        failure_analysis['bypass_recommendation'] = 'conditional'
+        failure_analysis['reason'] = f'Critical connection failure rate: {success_rate:.1f}%'
+    elif success_rate < 90.0:
+        failure_analysis['failure_type'] = 'intermittent_failure'
+        failure_analysis['severity'] = 'medium'
+        failure_analysis['bypass_recommendation'] = 'conditional'
+        failure_analysis['reason'] = f'Moderate connection failure rate: {success_rate:.1f}%'
+    elif violation_rate > 25.0:
+        failure_analysis['failure_type'] = 'timeout_failure'
+        failure_analysis['severity'] = 'medium'
+        failure_analysis['bypass_recommendation'] = 'permissive'
+        failure_analysis['reason'] = f'High timeout violation rate: {violation_rate:.1f}% (infrastructure issue)'
+    elif violation_rate > 15.0:
+        failure_analysis['failure_type'] = 'performance_degradation'
+        failure_analysis['severity'] = 'low'
+        failure_analysis['bypass_recommendation'] = 'permissive'
+        failure_analysis['reason'] = f'Moderate timeout violations: {violation_rate:.1f}% (likely infrastructure)'
+    else:
+        failure_analysis['failure_type'] = 'none'
+        failure_analysis['severity'] = 'low'
+        failure_analysis['bypass_recommendation'] = 'strict'
+        failure_analysis['reason'] = 'Performance within acceptable bounds'
+
+    # Adjust recommendations for Cloud SQL environments
+    if is_cloud_sql_environment(environment):
+        if failure_analysis['failure_type'] in ['timeout_failure', 'performance_degradation']:
+            # Cloud SQL timeout issues are often infrastructure-related
+            failure_analysis['bypass_recommendation'] = 'permissive'
+            failure_analysis['reason'] += ' (Cloud SQL infrastructure considerations)'
+
+    logger.debug(f"Failure analysis for {environment}: {failure_analysis['failure_type']} "
+                f"(severity: {failure_analysis['severity']}, recommendation: {failure_analysis['bypass_recommendation']})")
+
+    return failure_analysis
