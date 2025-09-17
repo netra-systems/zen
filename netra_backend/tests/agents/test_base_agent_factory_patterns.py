@@ -242,8 +242,9 @@ class BaseAgentFactoryPatternsTests(SSotAsyncTestCase):
 
         # Verify: Legacy agent fails validation
         assert legacy_validation["compliant"] is False
-        assert legacy_validation["pattern"] == "none"
-        assert len(legacy_validation["errors"]) > 0
+        assert legacy_validation["pattern"] == "legacy_bridge"
+        assert len(legacy_validation["errors"]) == 0  # legacy_bridge pattern has warnings, not errors
+        assert len(legacy_validation["warnings"]) > 0
 
     def test_agent_assert_user_execution_context_pattern(self):
         """Test agent UserExecutionContext pattern assertions."""

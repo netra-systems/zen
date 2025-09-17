@@ -32,8 +32,8 @@ async def demo_golden_path_validation():
         env = IsolatedEnvironment()
 
         # Test environment access
-        test_env = env.get_env('PATH', 'default_value')
-        emergency_mode = env.get_env('EMERGENCY_ALLOW_NO_DATABASE', 'false') == 'true'
+        test_env = env.get('PATH', 'default_value')
+        emergency_mode = env.get('EMERGENCY_ALLOW_NO_DATABASE', 'false') == 'true'
 
         print(f"  ✅ IsolatedEnvironment: Working correctly")
         print(f"  📊 Emergency mode status: {emergency_mode}")
